@@ -1,0 +1,61 @@
+::ng-deep .p-fieldset-legend {
+    width: 20% !important;
+    background: white !important;
+    font-size: medium !important;
+    border-top: inherit;
+    border-right: inherit;
+    border-bottom: inherit;
+    border-left: inherit;
+    float: none;
+}
+
+::ng-deep .p-fieldset-legend>a {
+    justify-content: left !important;
+    height: 7vh;
+    padding-left: 2vh;
+}
+
+::ng-deep .p-fieldset.p-fieldset-toggleable .p-fieldset-legend {
+    padding: 0;
+    transition: background-color .2s,color .2s,box-shadow .2s;
+}
+
+::ng-deep .p-fieldset .p-fieldset-legend {
+    padding: .857rem 1rem;
+    background: #f4f4f4;
+    font-weight: 700;
+}
+
+::ng-deep .p-fieldset, .p-fieldset .p-fieldset-legend {
+    border: 1px solid #c8c8c8;
+    color: #333;
+    border-radius: 3px;
+}
+
+::ng-deep .p-component, .p-component * {
+    box-sizing: border-box;
+}
+
+::ng-deep .p-fieldset, .p-fieldset .p-fieldset-legend {
+     border: 1px solid #c8c8c8; 
+    color: #333;
+    border-radius: 3px;
+    padding-left: 2vh;
+}
+
+::ng-deep .p-component, .p-component * {
+    box-sizing: border-box;
+}
+
+.p-fieldset.p-fieldset-toggleable .p-fieldset-legend a {
+    padding: .857rem 1rem;
+    color: #333;
+    border-radius: 3px;
+    transition: background-color .2s,box-shadow .2s;
+}
+
+::ng-deep .mdc-menu-surface.mat-mdc-select-panel{
+
+    max-height: 200px !important;
+    background-color: whitesmoke;
+}

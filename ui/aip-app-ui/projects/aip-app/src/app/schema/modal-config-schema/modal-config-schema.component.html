@@ -1,0 +1,425 @@
+<!--
+
+     @ 2018 Infosys Limited, Bangalore, India. All Rights Reserved.
+     Version: 1.0
+     Except for any free or open source software components embedded in this Infosys proprietary software program (Program),
+     this Program is protected by copyright laws, international treaties and  other pending or existing intellectual property
+     rights in India, the United States, and other countries. Except as expressly permitted, any unauthorized reproduction, storage,
+     transmission in any form or by any means(including without limitation electronic, mechanical, printing, photocopying,
+     recording, or otherwise), or any distribution of this program, or any portion of it, may result in severe civil and
+     criminal penalties, and will be prosecuted to the maximum extent possible under the law.
+
+-->
+<div class="clearfix le-l-bodywrapper aip-tranparent-backgroud">
+    <div class="container-fluid">
+        <div class="le-l-middle-col le-u-no-mar-l__mb">
+            <div class="le-l-level1-wrapper">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="le-l-level1-middle-col le-l-base-layout-center">
+                            <div class="d-flex le-u-mar-8">
+                                <leds-tooltip [tooltip]="'Back'" [position]="'above'">
+                                    <span class="mx-2 aip-cursor d-flex" style="height: max-content;">
+                                        <i class="aip-led-icons icon x-32 back-icon" (click)="navigateBack()"></i>
+                                    </span>
+                                </leds-tooltip>
+                                <h1 class="le-u-header-xxl">
+                                    SchemaRegistry Details
+                                </h1>
+                            </div>
+                            <div class="col-md-12 selector-691-13">
+                                <!-- <span class="col-md-10 selector-691-19" *ngIf="tabValue!='Schema Form'"></span> -->
+                                <div class="d-flex justify-content-end le-u-mar-8 align-items-center">
+                                    <!-- <button class="btn-color" mat-raised-button="" (click)=" navigateToSchema()"
+                                        style="width: 105px;border-radius: 3px;">Graph View</button> -->
+
+                                        <div>
+                                            <div class="le-u-pad-lr-16" style="width: 70%">
+                                                <leds-select [options]="types" label="" [(ngModel)]="selectedtype"  [required]="false" [disabled]="false" (selectChange)="onSelectionType($event)" [isMultiple]="false"></leds-select>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div class="le-u-pad-lr-16" style="width: 70%">
+                                                <leds-select [options]="capabilities" label=""  [(ngModel)]="selectedCapability"  [required]="false" [disabled]="false"  [isMultiple]="false"></leds-select>
+                                            </div>
+                                        </div>
+                                    
+                                    <div title="Graph View" (click)="navigateToSchema()" designType='icon' class="le-u-mar-lr-24">
+                                        <span class="le-c-btn--icon__icon">
+                                            <i class="aip-led-icons icon x-24 icon_TalentDashboard"></i>
+                                        </span>
+                                    </div>
+
+                                    <div *ngIf="tabValue!='Schema Form' || !formListView" class="le-u-mar-8"
+                                        [ngClass]="isRawData?'':'le-u-header-lg'">Table View
+                                    </div><mat-slide-toggle id="schm-modal-toggle"
+                                        *ngIf="tabValue!='Schema Form' || !formListView"
+                                        class="example-margin selector-691-21" [checked]="isRawData"
+                                        (change)="toggleView()">
+                                        <div class="le-u-mar-8" [ngClass]="isRawData?'le-u-header-lg':''">JSON View
+                                        </div>
+                                    </mat-slide-toggle>
+                                    <div class="selector-691-17" *ngIf="tabValue=='Schema Form'">
+                                        <i class="fa fa-wpforms selector-691-18" id="schm-modal-viewform"
+                                            *ngIf="!viewForm && formListView == false" style="font-size: 25px;"
+                                            title="View Form" (click)="openFormView(xlgContent1)"
+                                            aria-hidden="true"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="le-l-level2-middle-ctr">
+                                <div class="le-l-level2-middle-col le-u-mar-b-24__mb">
+                                    <leds-panel>
+                                        <div class="le-c-panel__content">
+                                            <div ledsTabGroup [type]="'secondary'" [headerBg]="'white'">
+                                                <mat-tab-group disableRipple
+                                                    (selectedIndexChange)="basicReqTabChange($event)">
+                                                    <mat-tab>
+                                                        <ng-template mat-tab-label>Configure</ng-template>
+                                                        <div class="le-u-pad-32">
+                                                            <div class="row">
+                                                                <div class="col-md-11 selector-690-2-name"
+                                                                    id="schmNameform">
+                                                                    <!-- NAME -->
+                                                                    <div *ngIf="isInEdit"
+                                                                        class="d-flex align-items-center">
+                                                                        <div class="le-u-header-lg">Name</div>
+                                                                        <div class="le-u-body-xl le-u-mar-lr-16">
+                                                                            {{schemaName}}</div>
+                                                                    </div>
+                                                                    <!-- ALIAS -->
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div class="le-u-body-xl">Alias*</div>
+                                                                        <div class="le-u-mar-lr-16 w-100">
+                                                                            <leds-input-field inputType="text"
+                                                                                id="schm-modal-alias"
+                                                                                [disabled]="isInView"
+                                                                                [(ngModel)]="schemaAlias"
+                                                                                required="true"
+                                                                                placeholder="Alias length should be greater than 4"
+                                                                                #name="ngModel"></leds-input-field>
+                                                                        </div>
+                                                                    </div>
+                                                                    <!-- DESCRIPTION -->
+                                                                    <div class="le-u-mar-tb-32">
+                                                                        <leds-textarea placeholder="Description"
+                                                                            label="Description" designType="default"
+                                                                            inputType="text" [disabled]="isAuth"
+                                                                            [required]="false" id="schm-modal-desc"
+                                                                            name="description" #name="ngModel"
+                                                                            [(ngModel)]="schemaDescription"
+                                                                            rows="3"></leds-textarea>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </mat-tab>
+                                                    <mat-tab *ngIf="schemaAlias.length>3">
+                                                        <ng-template mat-tab-label>Schema Columns</ng-template>
+                                                        <div class="le-u-pad-32">
+                                                            <div *ngIf="isRawData === true" class="selector-691-25"
+                                                                style="height:55vh; overflow-y: auto; margin: 2vh;">
+                                                                <div style="width:100%; margin-top: 8px;"
+                                                                    class="selector-691-26">
+                                                                    <json-editor id="json-editor-schema"
+                                                                        [options]="editorOptions" [data]="schemaValue"
+                                                                        #columnJsonEditor=""
+                                                                        class="cipJSONEditor selector-691-27"></json-editor>
+                                                                </div> 
+                                                            </div>
+                                                            <div class="row form-group selector-691-28"
+                                                                style="width: 100%;" *ngIf="isRawData === false">
+                                                                <div class="col-md-12 selector-691-29"
+                                                                    style="padding: 0px;">
+                                                                    <div class="selector-691-30" style="width: 100%;">
+                                                                        <div style="float: right; margin: 2vh 3vh;"
+                                                                            *ngIf="!isInView" class="selector-691-31">
+                                                                            <i id="schm-modal-addrow"
+                                                                                class="fa fa-plus selector-691-32 aip-cursor"
+                                                                                style="font-size: 22px;" *ngIf="!isAuth"
+                                                                                title="Add Row" aria-hidden="true"
+                                                                                (click)="openDialog('Add',{})"></i>
+                                                                        </div>
+                                                                        <div *ngIf="dataSource?.length > 0 ;else noDatasource"
+                                                                            class="col-md-12 selector-691-34">
+                                                                            <leds-data-grid>
+                                                                                <table class="table">
+                                                                                    <thead>
+                                                                                        <tr
+                                                                                            style="text-align:center;text-transform: capitalize;">
+                                                                                            <th class="le-u-header-xl"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                scope="col-1">Column
+                                                                                                order
+                                                                                            </th>
+                                                                                            <th class="le-u-header-xl"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                scope="col-1">Column
+                                                                                                type
+                                                                                            </th>
+                                                                                            <th class="le-u-header-xl"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                scope="col-1">
+                                                                                                Record Column Name
+                                                                                            </th>
+                                                                                            <th class="le-u-header-xl"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                scope="col-2">
+                                                                                                Record Column
+                                                                                                Display-Name
+                                                                                            </th>
+                                                                                            <th class="le-u-header-xl"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                scope="col-1"> Unique
+                                                                                                Key
+                                                                                            </th>
+                                                                                            <th class="le-u-header-xl"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                scope="col-1"> Required
+                                                                                            </th>
+                                                                                            <th class="le-u-header-xl"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                scope="col-1"> Primary
+                                                                                                Key
+                                                                                            </th>
+                                                                                            <th class="le-u-header-xl"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                scope="col-1"> Encrypted
+                                                                                            </th>
+                                                                                            <th class="le-u-header-xl"
+                                                                                                style="padding: 1rem 1rem;"
+                                                                                                scope="col-1">Visible
+                                                                                            </th>
+                                                                                            <th class="le-u-header-xl"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                scope="col-3"
+                                                                                                *ngIf="!isInView">Action
+                                                                                            </th>
+                                                                                        </tr>
+                                                                                    </thead>
+                                                                                    <tbody>
+                                                                                        <tr style="text-align:center; "
+                                                                                            *ngFor="let element of dataSource">
+                                                                                            <td id="schm-modal-{{element.columnorder}}"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                class="le-u-body-md selector-691-41">
+                                                                                                {{element.columnorder}}
+                                                                                            </td>
+                                                                                            <td id="schm-modal-ctype-{{element.columntype}}"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                class="le-u-body-md selector-691-38">
+                                                                                                {{element.columntype}}
+                                                                                            </td>
+                                                                                            <td id="schm-modal-rcname-{{element.recordcolumnname}}"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                class="le-u-body-md selector-691-44">
+                                                                                                {{element.recordcolumnname}}
+                                                                                            </td>
+                                                                                            <td id="schm-modal-rcdname-{{element.recordcolumndisplayname}}"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                class="le-u-body-md selector-691-47">
+                                                                                                {{element.recordcolumndisplayname}}
+                                                                                            </td>
+                                                                                            <td id="schm-modal-req-{{element.isunique}}"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                class="le-u-body-md selector-691-50">
+                                                                                                {{element.isunique?element.isunique:false}}
+                                                                                            </td>
+                                                                                            <td id="schm-modal-req-{{element.isrequired}}"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                class="le-u-body-md selector-691-114">
+                                                                                                {{element.isrequired?element.isrequired:false}}
+                                                                                            </td>
+                                                                                            <td id="schm-modal-req-{{element.isprimarykey}}"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                class="le-u-body-md selector-691-114">
+                                                                                                {{element.isprimarykey?element.isprimarykey:false}}
+                                                                                            </td>
+                                                                                            <td id="schm-modal-req-{{element.isencrypted}}"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                class="le-u-body-md selector-691-163">
+                                                                                                {{element.isencrypted?element.isencrypted:false}}
+                                                                                            </td>
+                                                                                            <td id="schm-modal-req-{{element.isvisible}}"
+                                                                                                style="padding: 1rem 0;"
+                                                                                                class="le-u-body-md selector-691-163">
+                                                                                                {{element.isvisible?element.isvisible:false}}
+                                                                                            </td>
+                                                                                            <td *ngIf="!isInView">
+                                                                                                <div class="d-flex">
+                                                                                                    <leds-tooltip
+                                                                                                        [tooltip]="'Update'"
+                                                                                                        [position]="'above'">
+                                                                                                        <leds-button
+                                                                                                            id="schm-modal-openupdate"
+                                                                                                            nameText="iconButton"
+                                                                                                            idText="iconButton"
+                                                                                                            [disabled]="false"
+                                                                                                            buttonType="button"
+                                                                                                            (click)="openDialog('Update',element)"
+                                                                                                            designType="icon"><i
+                                                                                                                class="icon x-24 aip-cursor edit-icon"></i></leds-button></leds-tooltip>
+                                                                                                    <leds-tooltip
+                                                                                                        [tooltip]="'Delete'"
+                                                                                                        [position]="'above'">
+                                                                                                        <leds-button
+                                                                                                            id="schm-modal-del"
+                                                                                                            nameText="iconButton"
+                                                                                                            idText="iconButton"
+                                                                                                            [disabled]="false"
+                                                                                                            buttonType="button"
+                                                                                                            (click)="openDialog('Delete',element)"
+                                                                                                            designType="icon"><i
+                                                                                                                class="icon x-24 delete-sm-icon"></i></leds-button></leds-tooltip>
+                                                                                                </div>
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    </tbody>
+                                                                                </table>
+                                                                            </leds-data-grid>
+                                                                        </div>
+                                                                        <ng-template #noDatasource>
+                                                                            <div
+                                                                                class="le-u-header-xl d-flex  justify-content-center ">
+                                                                                Schema Columns not available
+                                                                            </div>
+                                                                        </ng-template>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="d-flex justify-content-end" *ngIf="!isInView">
+                                                                <button leds-button
+                                                                    class="le-u-bg-primary-80 DSA_wb_Btn_normal"
+                                                                    name="textButton" id="textButton" designType="text"
+                                                                    (click)="onCancel()"
+                                                                    id="schm-modal-form-table-cancel"
+                                                                    style="border-radius: 1rem;">Cancel</button>
+                                                                <button leds-button
+                                                                    class="le-u-mar-lr-16 le-u-text-status-success DSA_wb_Btn_normal"
+                                                                    name="textButton" id="textButton" designType="text"
+                                                                    id="schm-modal-form-table-save" *ngIf="!isAuth"
+                                                                    (click)="onSave()"
+                                                                    style="border-radius: 1rem;">Save</button>
+                                                            </div>
+                                                        </div>
+                                                    </mat-tab>
+                                                    <mat-tab
+                                                        *ngIf="schemaName.trim() != '' && schemaName != 'new' && isInEdit">
+                                                        <ng-template mat-tab-label>Schema
+                                                            Form</ng-template>
+                                                        <div class="le-u-pad-16">
+                                                            <div *ngIf="formListView "
+                                                                class="grid-view selector-698-221">
+                                                                <span *ngIf="formListView && !isAuth && !isInView"
+                                                                    style="cursor: pointer; float: right;"
+                                                                    (click)="createForm()" class="selector-547-151">
+                                                                    <i
+                                                                        class="fa fa-plus-square-o create-icon-color selector-547-14"></i>
+                                                                    Create Form</span>
+                                                                <div class=" row selector-698-231"
+                                                                    style="display: grid;grid-template-columns: repeat(4, 1fr);">
+                                                                    <div class="selector-698-241"
+                                                                        *ngFor="let group of formTemplateList">
+                                                                        <leds-card>
+                                                                            <mat-card-header>
+                                                                                <mat-card-title>
+                                                                                    <div class="d-flex justify-content-between"
+                                                                                        [ngStyle]="{'pointer-events': (isInView) ? 'none' : 'auto'}">
+                                                                                        <h2 class="le-u-header-xl le-u-ellipsis aip-cursor"
+                                                                                            (click)="getFormTemplate(group)">
+                                                                                            {{group.alias}}</h2>
+                                                                                        <span *ngIf="!isAuth"
+                                                                                            class="selector-698-491 mb-1"
+                                                                                            style="float: right;"
+                                                                                            matTooltip="Delete"
+                                                                                            (click)="delete(group)">
+                                                                                            <i
+                                                                                                class="fa fa-times"></i></span>
+                                                                                    </div>
+                                                                                </mat-card-title>
+                                                                                <mat-card-subtitle
+                                                                                    class="le-u-body-sm le-u-text-neutral-80 le-u-no-mar-b le-u-ellipsis">
+                                                                                    {{group.name}}
+                                                                                </mat-card-subtitle>
+                                                                            </mat-card-header>
+                                                                        </leds-card>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div *ngIf="formListView == false && isRawData === true &amp;&amp; !viewForm"
+                                                                class="selector-691-61">
+                                                                <div id="schm-modal-view" class="selector-691-62">
+                                                                    <json-editor [options]="editorOptions"
+                                                                        [data]="schemaFormCpy"
+                                                                        style="max-height: 365px;" #formJsonEditor=""
+                                                                        class="cipJSONEditor selector-691-63"></json-editor>
+                                                                </div>
+                                                            </div>
+                                                            <div class="selector-691-64"
+                                                                *ngIf="formListView == false && isRawData === false &amp;&amp; !viewForm">
+                                                                <div class="le-u-pad-16 selector-691-69">
+                                                                    <div class="le-u-header-md">
+                                                                        Form Name
+                                                                    </div>
+                                                                    <leds-input-field inputType="text"
+                                                                        id="schm-modal-name" [disabled]="isAuth"
+                                                                        [(ngModel)]="selectedFormTemplate.alias"
+                                                                        name="formname"
+                                                                        [required]="true"></leds-input-field>
+                                                                </div>
+                                                                <div class="le-u-pad-8">
+                                                                    <form-builder [form]="form"
+                                                                        (change)="onChange($event)"
+                                                                        class="selector-691-115"></form-builder>
+                                                                </div>
+                                                            </div>
+                                                            <div *ngIf="!formListView"
+                                                                class="selector-691-96 d-flex justify-content-end">
+                                                                <div *ngIf="!isInView">
+                                                                    <button leds-button
+                                                                        class="le-u-bg-primary-80 DSA_wb_Btn_normal"
+                                                                        name="textButton" id="textButton"
+                                                                        designType="text" (click)="onCancel('form')"
+                                                                        id="schm-modal-form-table-cancel"
+                                                                        style="border-radius: 1rem;">Cancel</button>
+                                                                    <button leds-button
+                                                                        class="le-u-mar-lr-16 le-u-text-status-success DSA_wb_Btn_normal"
+                                                                        name="textButton" id="textButton"
+                                                                        designType="text"
+                                                                        id="schm-modal-form-table-save" *ngIf="!isAuth"
+                                                                        (click)="saveFormTemplateChanges()"
+                                                                        style="border-radius: 1rem;">Save</button>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                    </mat-tab>
+                                                </mat-tab-group>
+                                            </div>
+                                        </div>
+                                    </leds-panel>
+                                </div>
+                                <!-- right hand container -->
+                                <!-- <div class="le-l-level2-right-col">
+                                </div> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <ng-template #xlgContent1 let-modal>
+        <div class="le-u-pad-16">
+            <div *ngIf="viewForm" class="d-flex justify-content-between le-u-pad-tb-8">
+                <div class="le-u-header-xl">Form View</div>
+                <div class="" (click)="closeFormView()"><i class="icon x-16 close-icon"></i></div>
+            </div>
+            <div id="schm-modal-form-table-viewform" class="row selector-691-105" *ngIf="viewForm">
+                <formio [form]="schemaForm" class="selector-691-106"></formio>
+            </div>
+        </div>
+    </ng-template>

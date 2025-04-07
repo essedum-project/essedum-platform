@@ -1,0 +1,23 @@
+img{
+    border: 1px solid #000;
+    max-width:30%;
+    margin-left: 10%;
+}
+
+.upload-docs{
+    display: grid;
+    grid-template-columns: 33% 33% 33%;
+    column-gap: 20px;
+}
+
+.label-icon{
+    justify-content: space-between;
+    display: flex;
+}
+
+::ng-deep{
+    .le-c-progressbar-ctr {
+        width: 90% !important;
+        padding: 5px;
+    }
+}

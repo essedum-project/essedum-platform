@@ -1,0 +1,1014 @@
+<div style="margin-top: -24px;">
+    <mat-grid-list cols="12" rowHeight="65px" >
+        <mat-grid-tile *ngIf="!isEdit" [colspan]="8" [rowspan]="1">
+            <h1 class="DSA_wb_h1Header" style="display: inline; position:absolute; left: 0;">Add New Organization</h1>
+        </mat-grid-tile>
+        <mat-grid-tile *ngIf="isEdit" [colspan]="8" [rowspan]="1">
+            <h1 class="DSA_wb_h1Header" style="display: inline; position:absolute; left: 0;">Modify-{{orgNameToEdit}}</h1>
+        </mat-grid-tile>
+        <!-- <mat-grid-tile *ngIf="!isEdit" [colspan]="1" [rowspan]="1">
+        </mat-grid-tile> -->
+
+        <mat-grid-tile [colspan]="4" [rowspan]="1">
+            <div style="position: absolute; right: 0px;">
+                <button *ngIf="!isEdit && !(orgSavedShowModule ||showAllModules)" mat-flat-button class="DSA_wb_primary-btn  marR16"
+                (click)="saveOrg(org)"
+                [disabled]="savedDomains.length==0||org.name=='' || org.name==undefined  ">Next</button>
+    
+                <button *ngIf="isEdit &&!(orgSavedShowModule ||showAllModules)" mat-flat-button class="DSA_wb_primary-btn marR16"
+                    (click)="updateOrg(org)"
+                    [disabled]="savedDomains.length==0||org.name=='' || org.name==undefined">Next</button>
+    
+                <button *ngIf="!(orgSavedShowModule ||showAllModules)" mat-flat-button class="DSA_wb_secondary-btn"
+                    (click)="cancelEdit()">Cancel</button>
+            </div>
+           
+
+        </mat-grid-tile>
+    </mat-grid-list>
+</div>
+
+
+<div *ngIf="!(orgSavedShowModule ||showAllModules)">
+    <p class="DSA_wb_mainBodyTxtSM" style="font-weight: bold;">Organization Details</p>
+    <mat-grid-list cols="17" rowHeight="70px">
+        <mat-grid-tile [colspan]="3">
+            <mat-form-field class="DSA_Wb_custom-form-field">
+                <input matInput placeholder="Organization Name" pattern=".*\S.*" minlength="1" maxlength="30" id="orgName"
+                    [(ngModel)]="org.name" name="orgName" #orgName="ngModel" required>
+            </mat-form-field>
+        </mat-grid-tile>
+
+<!-- 
+        <mat-grid-tile [colspan]="3">
+            <mat-form-field class="DSA_Wb_custom-form-field" style="position: absolute; left: 20px; width: 90%;">
+                <input matInput placeholder="Azure OrgId" pattern=".*\S.*" minlength="1" maxlength="100" id="azureOrgId"
+                    [(ngModel)]="org.azureOrgId" name="azureOrgId" #azureOrgId="ngModel">
+            </mat-form-field>
+        </mat-grid-tile>
+ -->
+
+        <mat-grid-tile [colspan]="3">
+            <mat-form-field class="DSA_Wb_custom-form-field" style="position: absolute; left: 20px; width: 90%;">
+                <input matInput placeholder="Whitelisted Domains *" maxlength="50" id="domainName"
+                    [(ngModel)]="tempDomain" name="domainName" #domainName="ngModel" >
+                <span matSuffix> <i class="icon x-24 icon-add dark-purple web-GreywhiteBg web-raisedShadow"
+                        style="font-size: 20px; cursor: pointer; border-radius: 2px; " (click)="addDomains(tempDomain)"> </i></span>
+            </mat-form-field>
+        </mat-grid-tile>
+
+        <mat-grid-tile [colspan]="11">
+            <div class="text-inside-grid">
+            <mat-chip-list>
+                <mat-chip style="background-color: white; font-size: 14px; "
+                    *ngFor="let eachDomain of savedDomains;let k=index"
+                    class="DSA_wb_chipStyle-Normal DSA_wb_chip-input marR16  web-GreywhiteBg " disableRipple="true">
+                    <a class="icon x-16 icon-close-mini DSA_wb_chipIconRight" (click)="removeDomain(k)"></a>
+                    <span> {{eachDomain}}</span>
+                </mat-chip>
+            </mat-chip-list>
+            </div>
+
+        </mat-grid-tile>
+    </mat-grid-list>
+
+
+</div>
+
+
+
+
+
+
+<div *ngIf="orgSavedShowModule || showAllModules">
+    <p class="DSA_wb_mainBodyTxtSM" style="font-weight: bold;">Organization Details</p>
+    <mat-grid-list cols="12" rowheight="70px">
+        <mat-grid-tile [colspan]="2">
+            <mat-form-field class="DSA_Wb_custom-form-field">
+                <input matInput placeholder="Organization Name" pattern=".*\S.*" minlength="1" maxlength="15" id="orgName"
+                    [(ngModel)]="savedOrganisation.name" name="orgName" #orgName="ngModel" disabled>
+            </mat-form-field>
+        </mat-grid-tile>
+
+        <mat-grid-tile [colspan]="2">
+            <span style="position: absolute; left: 10px;" class="marR8" style="color:#7E7E7E">Whitelisted Domains</span>
+        </mat-grid-tile>
+        <mat-grid-tile [colspan]="8">
+            <mat-chip-list style="position: absolute; left: 10px;">
+                <mat-chip *ngFor="let domains of savedDomains"
+                    class="DSA_wb_chipStyle-Normal DSA_wb_chip-input marR16 web-GreywhiteBg"
+                    style="font-size: 14px; background-color: white;" disableRipple="true">
+                    <!-- <a  class="icon x-16 icon-close-mini DSA_wb_chipIconRight" ></a> -->
+                    {{domains}}
+                </mat-chip>
+            </mat-chip-list>
+        </mat-grid-tile>
+        <!-- <mat-grid-tile [colspan]="2">
+
+        </mat-grid-tile> -->
+        <!-- <mat-grid-tile [colspan]="2">
+            <button *ngIf="!modulesAddedShowRoles" mat-flat-button class="DSA_wb_primary-btn" (click)="cancelAddition()">Finish</button>
+        </mat-grid-tile> -->
+    </mat-grid-list>
+</div>
+
+
+
+
+
+
+<!-- 
+<div *ngIf="false" class="DSA_panel">
+    <div class="DSA_panelBody padTB16 padLR24">
+        <h5 class="ds_h5Inner">
+            Add Modules for {{savedOrganisation.name}}
+        </h5>
+
+        <mat-grid-list cols="17">
+            <mat-grid-tile [colspan]="2">
+                <mat-form-field class="DSA_Wb_custom-form-field">
+                    <mat-label>Module</mat-label>
+                    <mat-select [(ngModel)]="newModuleOrganisation.module" disableOptionCentering
+                        panelClass="DSA_wb-custom-select">
+                        <mat-option *ngFor="let module of moduleObjectArray" [value]="module">{{module.name}}
+                        </mat-option>
+                    </mat-select>
+
+                </mat-form-field>
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="1">
+
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="2">
+                <mat-form-field class="DSA_Wb_custom-form-field">
+                    <input matInput [matDatepicker]="picker1" placeholder="Start Date" [min]="minDate"
+                        [(ngModel)]="newModuleOrganisation.startdate" (click)="picker1.open()">
+                    <mat-datepicker-toggle matSuffix [for]="picker1">
+                        <i class="icon x-24 calendar-icon" matDatepickerToggleIcon></i>
+                    </mat-datepicker-toggle>
+                    <mat-datepicker panelClass="DSA_wb_dateClass" #picker1></mat-datepicker>
+
+                </mat-form-field>
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="1">
+
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="2">
+                <mat-form-field class="DSA_Wb_custom-form-field">
+                    <input matInput [matDatepicker]="picker2" placeholder="End Date"
+                        [min]="newModuleOrganisation.startdate" [(ngModel)]="newModuleOrganisation.enddate"
+                        (click)="picker2.open()">
+                    <mat-datepicker-toggle matSuffix [for]="picker2">
+                        <i class="icon x-24 calendar-icon" matDatepickerToggleIcon></i>
+                    </mat-datepicker-toggle>
+                    <mat-datepicker panelClass="DSA_wb_dateClass" #picker2></mat-datepicker>
+
+                </mat-form-field>
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="1">
+
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="2">
+                <mat-form-field class="DSA_Wb_custom-form-field">
+                    <mat-label>Subscription Details</mat-label>
+                    <mat-select [(ngModel)]="newModuleOrganisation.subscription" disableOptionCentering
+                        panelClass="DSA_wb-custom-select" required>
+                        <mat-option *ngFor="let status of statusList " [value]="status">{{status}}
+                        </mat-option>
+                    </mat-select>
+
+                </mat-form-field>
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="1">
+
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="2">
+
+                <button mat-flat-button class="DSA_wb_primary-btn" (click)="saveModuleOrg(newModuleOrganisation)"
+                    [disabled]="newModuleOrganisation.subscription==undefined  || newModuleOrganisation.enddate==undefined  || newModuleOrganisation.module==undefined ">Save</button>
+
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="1">
+
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="2">
+                <button mat-flat-button class="DSA_wb_secondary-btn" (click)="cancelModuleSave()"
+                    [disabled]="moduleListforOrg.length==0">Next</button>
+            </mat-grid-tile>
+        </mat-grid-list>
+
+    </div>
+</div> -->
+
+<p class="DSA_wb_mainBodyTxtSM " *ngIf="moduleListforOrg.length>0" style="font-weight: bold; margin-top: -20px;">Module Subscription Details</p>
+<div *ngIf="moduleListforOrg.length>0" class="row">
+    <ng-container *ngFor="let module of moduleListforOrg" >
+        
+    <div class="col-md-6 col-lg-5 col-xl-4" style="margin-top: 10px;"  *ngIf="module.module.name!='cip' && module.module.name!='Dashboard'"  >
+        <mat-card class="DSA_wb_card-widget"  style="min-height: 146px;">
+            <mat-card-header>
+                <mat-card-title class="DSA_wb_flex clearfix">
+                    <div class="DSA_wb_flex80">
+                        <img *ngIf="getImageLink(module.module.name)"[src]="getImageLink(module.module.name)" style="margin: -13px;">
+                        <h2 class="DSA_wb_h2Header DSA_wb_text-1line" style="display: inline;">{{module.module.name}}</h2>
+                    </div>
+                    <div class="DSA_wb_flex20">
+                        <span *ngIf="getProgress(module.startdate ,module.enddate )>=0">
+                            <span *ngIf="module.subscription!='Evaluation'">
+                                <span *ngIf="module.subscription"
+                                    class="DSA_wb_chipStyle DSA_closedchip float-right">Subscribed</span>
+                            </span>
+                            <span *ngIf="module.subscription=='Evaluation'">
+                                <span
+                                    class="DSA_wb_chipStyle DSA_inprogresschip float-right">Evaluation</span>
+                            </span>
+                        </span>
+                        <span *ngIf="getProgress(module.startdate ,module.enddate )<0">
+                            <span *ngIf="module.subscription"
+                                class="DSA_wb_chipStyle  DSA_openchip float-right">Expired</span>
+
+                        </span>
+
+
+
+                    </div>
+                </mat-card-title>
+
+            </mat-card-header>
+            <span *ngIf="!modulesAddedShowRoles">
+                <i class="icon x-24 v-menu-icon"
+                    style="float: right;position: absolute; top: 10px; right: 10px; cursor: pointer; z-index: 2;"> </i>
+                <!-- <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="deleteModuleForOrg(module.id)">Delete</button>
+            </mat-menu> -->
+            </span>
+
+            <mat-card-content>
+                <div *ngIf="module.startdate && module.enddate">
+
+                    <p class="web-GreyLight "  *ngIf="getProgress(module.startdate ,module.enddate )>=0" style="display: inline; font-size: 12px; ">Expires in
+                        <!-- {{getExpireValue(getProgress(module.startdate ,module.enddate ))}}</p> -->
+                        {{getProgress(module.startdate ,module.enddate )+' days'}}</p>
+
+                    <p class="web-GreyLight " style="display: inline; font-size: 12px;  color: #B71C1C; "
+                        *ngIf="getProgress(module.startdate ,module.enddate )<0">Expired</p>
+
+                    <mat-progress-bar mode="determinate"
+                        [value]="( getTotalDays(module.startdate ,module.enddate )-getProgress(module.startdate ,module.enddate ))/getTotalDays(module.startdate ,module.enddate )*100">
+                    </mat-progress-bar>
+
+                </div>
+
+                <div class="marT16">
+                    <p class="web-GreyLight" style=" display: inline; font-size: 12px; ">
+                        Start Date:{{module.startdate| date : 'mediumDate'}} </p>
+                    <p class="web-GreyLight" style="  float: right; font-size: 12px; ">
+                        End Date:{{module.enddate| date : 'mediumDate'}}</p>
+                </div>
+                
+            </mat-card-content>
+        </mat-card>
+    </div>
+    
+    </ng-container>
+</div>
+
+<p class="DSA_wb_mainBodyTxtSM" *ngIf="!(orgSavedShowModule ||showAllModules)" style="font-weight: bold; ">Module
+    Subscription Details</p>
+<div *ngIf="!(orgSavedShowModule ||showAllModules)" class="row" style="margin-top: 5px;">
+    <ng-container *ngFor="let module of noOfModules;let i=index">
+    <div class="col-md-6 col-lg-5 col-xl-4" style="margin-top: 10px;"  *ngIf="module.module.name!='cip' && module.module.name!='Dashboard'" >
+        <mat-card class="DSA_wb_card-widget padTB16">
+            <mat-card-header>
+                <mat-card-title class="DSA_wb_flex clearfix">
+                    <mat-grid-list cols="12" rowHeight="75px">
+                        <mat-grid-tile [colspan]="6" style="height: 35px !important;">
+                            <div style="position: absolute; left: 0px; top:10px">
+                                <img  *ngIf=" getImageLink(module.module.name)"  [src]="getImageLink(module.module.name)" style="margin: -13px;">
+                                <h2 class="DSA_wb_h2Header DSA_wb_text-1line"  style="display: inline;">{{module.module.name}}</h2>
+                            </div>
+                        </mat-grid-tile>
+
+                        <mat-grid-tile [colspan]="6">
+                            <div style="position: absolute; left: 0px;">
+                                <mat-form-field class="DSA_Wb_custom-form-field" style="font-size: 16px;">
+                                    <mat-label>Subscription Details</mat-label>
+                                   
+                                    <mat-select [(ngModel)]="module.subscription" disableOptionCentering
+                                        panelClass="DSA_wb-custom-select" >
+                                        <mat-option *ngFor="let status of statusList " [value]="status">{{status}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </mat-grid-tile>
+                    </mat-grid-list>
+
+
+                </mat-card-title>
+
+            </mat-card-header>
+
+
+            <mat-card-content>
+                <div *ngIf="module.startdate && module.enddate" style="margin-top: -24px;">
+
+                    <p class="web-GreyLight " *ngIf="getProgress(module.startdate ,module.enddate )>=0"style="display: inline; font-size: 12px; ">Expires in
+                        {{getProgress(module.startdate ,module.enddate )+' days'}} </p>
+                    
+                        <p class="web-GreyLight " style="display: inline; font-size: 12px;  color: #B71C1C; "
+                        *ngIf="getProgress(module.startdate ,module.enddate )<0">Expired</p>
+                    <mat-progress-bar mode="determinate"
+                        [value]="( getTotalDays(module.startdate ,module.enddate )-getProgress(module.startdate ,module.enddate ))/getTotalDays(module.startdate ,module.enddate )*100">
+                    </mat-progress-bar>
+
+                </div>
+
+                <mat-progress-bar mode="determinate" *ngIf="!(module.startdate && module.enddate)" [value]="0">
+                </mat-progress-bar>
+
+                <mat-grid-list cols="12" rowHeight="65px" style="margin-top: 10px;">
+                    <mat-grid-tile [colspan]="6">
+                        <div style="position: absolute; left: 0px;">
+
+                            <mat-form-field class="DSA_Wb_custom-form-field" style="width: 80%;">
+                                <input matInput [matDatepicker]="picker1" placeholder="Start Date"
+                                    [(ngModel)]="module.startdate" (click)="picker1.open()">
+                                <mat-datepicker-toggle matSuffix [for]="picker1">
+                                    <i class="icon x-24 calendar-icon" matDatepickerToggleIcon></i>
+                                </mat-datepicker-toggle>
+                                <mat-datepicker panelClass="DSA_wb_dateClass" #picker1></mat-datepicker>
+
+                            </mat-form-field>
+
+                        </div>
+                    </mat-grid-tile>
+
+                    <mat-grid-tile [colspan]="6">
+                        <div style="position: absolute; left: 5px;">
+                            <mat-form-field class="DSA_Wb_custom-form-field" style="width: 80%;">
+                                <input matInput [matDatepicker]="picker2" placeholder="End Date"
+                                    [min]="module.startdate" [(ngModel)]="module.enddate" (click)="picker2.open()">
+                                <mat-datepicker-toggle matSuffix [for]="picker2">
+                                    <i class="icon x-24 calendar-icon" matDatepickerToggleIcon></i>
+                                </mat-datepicker-toggle>
+                                <mat-datepicker panelClass="DSA_wb_dateClass" #picker2></mat-datepicker>
+
+                            </mat-form-field>
+                        </div>
+                    </mat-grid-tile>
+                </mat-grid-list>
+
+            </mat-card-content>
+        </mat-card>
+    </div>
+    </ng-container>
+
+</div>
+
+
+<div *ngIf="!(orgSavedShowModule ||showAllModules)" class="DSA_panel" style="margin-top: 10px;">
+    <div class="DSA_panelBody marT24  padTB16 padLR24">
+        <h5 class="ds_h5Inner" style="color: black;">
+            Product Access Details
+        </h5>
+        <mat-grid-list cols="21" rowHeight="70px">
+            <mat-grid-tile [colspan]="2">
+                <mat-form-field class="DSA_Wb_custom-form-field">
+                    <mat-label>Product</mat-label>
+                    <mat-select disableOptionCentering panelClass="DSA_wb-custom-select" id="property"
+                        [(ngModel)]="tempProperty.Property" name="property" #property="ngModel" >
+                        <mat-option *ngFor="let property of propertyList" [value]="property">{{property}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </mat-grid-tile>
+            <!-- URL -->
+
+            <mat-grid-tile [colspan]="1">
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="2">
+                <mat-form-field class="DSA_Wb_custom-form-field">
+                    <input matInput placeholder="URL" minlength="1" maxlength="200" id="value"
+                        [(ngModel)]="tempProperty.URL" name="URL" #URL="ngModel">
+                </mat-form-field>
+            </mat-grid-tile>
+
+            <!-- AUTHORIZATION(DEMISTO) -->
+
+            <mat-grid-tile *ngIf="tempProperty.Property!='QRadar'" [colspan]="1">
+            </mat-grid-tile>
+            <mat-grid-tile *ngIf="tempProperty.Property!='QRadar'" [colspan]="2">
+                <mat-form-field class="DSA_Wb_custom-form-field">
+                    <input matInput placeholder="Authorization" minlength="1" maxlength="200" id="value"
+                        [(ngModel)]="tempProperty.Authorization" name="value" #value="ngModel">
+                </mat-form-field>
+            </mat-grid-tile>
+
+            <mat-grid-tile *ngIf="tempProperty.Property!='QRadar' " [colspan]="7">
+            </mat-grid-tile>
+            <!-- User(Qradar) -->
+            <mat-grid-tile *ngIf="tempProperty.Property!='Demisto'&& tempProperty.Property!=''" [colspan]="1">
+            </mat-grid-tile>
+            <mat-grid-tile *ngIf="tempProperty.Property!='Demisto' && tempProperty.Property!=''" [colspan]="2">
+                <mat-form-field class="DSA_Wb_custom-form-field">
+                    <input matInput placeholder="User" minlength="1" maxlength="200" id="value"
+                        [(ngModel)]="tempProperty.User" name="User" #User="ngModel">
+                </mat-form-field>
+            </mat-grid-tile>
+            <mat-grid-tile *ngIf="tempProperty.Property!='Demisto' && tempProperty.Property!=''" [colspan]="1">
+            </mat-grid-tile>
+
+            <!-- SEC(Qradar) -->
+            <mat-grid-tile *ngIf="tempProperty.Property!='Demisto' && tempProperty.Property!=''" [colspan]="1">
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="2" *ngIf="tempProperty.Property && tempProperty.Property=='QRadar'">
+                <mat-form-field class="DSA_Wb_custom-form-field">
+                    <input matInput placeholder="SEC Key" minlength="1" maxlength="200" id="value"
+                        [(ngModel)]="tempProperty.APIKey" name="APIKey" #APIKey="ngModel">
+                </mat-form-field>
+            </mat-grid-tile>
+
+            <!-- Operations -->
+            <mat-grid-tile [colspan]="1">
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="2">
+                <!-- <button mat-flat-button class="DSA_wb_miniSecondary-btn" (click)="testDatasource(tempProperty)"
+                    [disabled]="org.name=='' || org.name==undefined || tempProperty.Property==''">Test</button> -->
+            </mat-grid-tile>
+            
+            <mat-grid-tile [colspan]="3">
+                <!-- <button mat-flat-button class="DSA_wb_miniPrimary-btn" (click)="addDatasource(tempProperty)"
+                    [disabled]="!isDataSourceTested">Add Product</button> -->
+            </mat-grid-tile>
+        </mat-grid-list>
+        <table class="DSA_wb_custom-table usm_table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>URL</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let property of noOfProperties;let i=index;">
+                    <td>
+                        <a href="javascript:void(0);" style="cursor: initial;"
+                            class="DSA_wb_hyperLink-btn td_nonEditable">{{noOfProperties[i].Property}}</a>
+
+                    </td>
+                    <td>
+                        <div class="td_nonEditable">{{noOfProperties[i].URL}}</div>
+
+                    </td>
+
+
+                    <td>
+                        <div class="td_nonEditable">
+                            <!-- <i class="icon x-24 edit-icon" (click)="editDataSource(i)"> </i>
+                            <i class="icon x-24 delete-sm-icon" (click)="deleteDataSource(noOfProperties[i],i)"> </i> -->
+                        </div>
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div *ngIf="false" class="DSA_panel" style="margin-top: 10px;">
+    <div class="DSA_panelBody marT24  padTB16 padLR24">
+
+        <!--         
+            <mat-grid-list cols="12" >
+                <mat-grid-tile  [colspan]="3">
+                    <mat-form-field class="DSA_Wb_custom-form-field">
+                        <input matInput placeholder="Organization"  pattern=".*\S.*" minlength="1" maxlength="30"
+                        id="orgName"  [(ngModel)]="org.name" name="orgName" #orgName="ngModel" required >
+                    </mat-form-field>
+                </mat-grid-tile>
+                <mat-grid-tile  [colspan]="1">
+                </mat-grid-tile>
+                <mat-grid-tile  [colspan]="2">
+                    <mat-form-field class="DSA_Wb_custom-form-field">
+                        <input matInput placeholder="Whitelisted Domains" maxlength="20"
+                        id="domainName"  [(ngModel)]="tempDomain" name="domainName" #domainName="ngModel" required >
+                        <span matSuffix> <i class="icon x-24 icon-add dark-purple" style="font-size: 20px; cursor: pointer;" (click)="addDomains(tempDomain)" > </i></span>
+                    </mat-form-field>
+                   
+                </mat-grid-tile>
+                 <mat-grid-tile  [colspan]="6">
+                    <mat-chip-list>                                    
+                        <mat-chip *ngFor="let eachDomain of savedDomains;let k=index" class="DSA_wb_chipStyle-Normal DSA_wb_chip-input marR16 " disableRipple="true">
+                            <a  class="icon x-16 icon-close-mini DSA_wb_chipIconRight" (click)="removeDomain(k)" ></a>
+                           <span> {{eachDomain}}</span> 
+                            </mat-chip>
+                    </mat-chip-list>
+                </mat-grid-tile>
+             
+            <mat-grid-tile [colspan]="7">
+               
+                <mat-form-field class="DSA_Wb_custom-form-field">
+                    <input matInput placeholder="Azure OrgId" pattern=".*\S.*"  minlength="1" maxlength="100"
+                    id="azureOrgId"  [(ngModel)]="org.azureOrgId" name="azureOrgId" #azureOrgId="ngModel" >
+                </mat-form-field>
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="5">
+
+            </mat-grid-tile>
+
+        </mat-grid-list> -->
+
+        <h5 class="ds_h5Inner">
+            Product Details
+        </h5>
+        <div>
+            <div *ngFor="let property of noOfProperties;let i=index;">
+                <mat-grid-list cols="12">
+
+                    <mat-grid-tile [colspan]="3">
+                        <mat-form-field class="DSA_Wb_custom-form-field">
+                            <mat-label>Product</mat-label>
+                            <mat-select disableOptionCentering panelClass="DSA_wb-custom-select" id="property"
+                                [(ngModel)]="noOfProperties[i].Property" name="property" #property="ngModel" required>
+                                <mat-option *ngFor="let property of propertyList" [value]="property">{{property}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </mat-grid-tile>
+                    <mat-grid-tile [colspan]="9">
+
+                    </mat-grid-tile>
+
+                    <!-- ................ -->
+                    <mat-grid-tile *ngIf="noOfProperties[i].Property!='QRadar'" [colspan]="2">
+                        <mat-form-field class="DSA_Wb_custom-form-field">
+                            <input matInput placeholder="Authorization" minlength="1" maxlength="200" id="value"
+                                [(ngModel)]="noOfProperties[i].Authorization" name="value" #value="ngModel" required>
+                        </mat-form-field>
+                    </mat-grid-tile>
+                    <mat-grid-tile *ngIf="noOfProperties[i].Property!='QRadar'" [colspan]="1">
+
+                    </mat-grid-tile>
+                    <mat-grid-tile *ngIf="noOfProperties[i].Property!='Demisto'" [colspan]="2">
+                        <mat-form-field class="DSA_Wb_custom-form-field">
+                            <input matInput placeholder="User" minlength="1" maxlength="200" id="value"
+                                [(ngModel)]="noOfProperties[i].User" name="User" #User="ngModel" required>
+                        </mat-form-field>
+                    </mat-grid-tile>
+                    <mat-grid-tile *ngIf="noOfProperties[i].Property!='Demisto'" [colspan]="1">
+
+                    </mat-grid-tile>
+                    
+                    <mat-grid-tile [colspan]="1">
+
+                    </mat-grid-tile>
+                    <mat-grid-tile [colspan]="2">
+                        <mat-form-field class="DSA_Wb_custom-form-field">
+                            <input matInput placeholder="URL" minlength="1" maxlength="200" id="value"
+                                [(ngModel)]="noOfProperties[i].URL" name="URL" #URL="ngModel" required>
+                        </mat-form-field>
+                    </mat-grid-tile>
+                </mat-grid-list>
+                <!-- ................ -->
+                <mat-grid-list cols="12">
+                    <mat-grid-tile [colspan]="2" *ngIf="noOfProperties[i].Property=='QRadar'">
+                        <mat-form-field class="DSA_Wb_custom-form-field">
+                            <input matInput placeholder="SEC" minlength="1" maxlength="200" id="value"
+                                [(ngModel)]="noOfProperties[i].APIKey" name="APIKey" #APIKey="ngModel" required>
+                        </mat-form-field>
+                    </mat-grid-tile>
+                    <mat-grid-tile [colspan]="2" *ngIf="noOfProperties[i].Property!='QRadar'">
+
+                    </mat-grid-tile>
+                    <mat-grid-tile [colspan]="2">
+                        <!-- <button mat-flat-button class="DSA_wb_miniPrimary-btn" (click)="saveDatasource(noOfProperties[i])"  [disabled]=" org.name==undefined  || org.name==''  || noOfProperties[i].Property!='--Select--'">Save</button>  -->
+                    </mat-grid-tile>
+                    <mat-grid-tile [colspan]="2">
+                        <!-- <button mat-flat-button class="DSA_wb_miniSecondary-btn"
+                            (click)="testDatasource(noOfProperties[i])"
+                            [disabled]="org.name=='' || org.name==undefined || noOfProperties[i].Property=='--Select--'">Test</button> -->
+                    </mat-grid-tile>
+
+                    <mat-grid-tile
+                        *ngIf="(noOfProperties.length==i+1 && noOfProperties[i].Property!='--Select--' ) ||(noOfProperties.length==i+1 && noOfProperties.length>1)"
+                        [colspan]="3">
+
+                    </mat-grid-tile>
+                    <mat-grid-tile
+                        *ngIf="(noOfProperties.length==i+1 && noOfProperties[i].Property!='--Select--' ) ||(noOfProperties.length==i+1 && noOfProperties.length>1)"
+                        [colspan]="1">
+
+                        <button *ngIf="noOfProperties.length==i+1 && noOfProperties[i].Property!='--Select--' "
+                            mat-flat-button class="DSA_wb_Icon-btn" (click)="inc()">
+                            <span class="icon_btnCont"><i class="icon purple x-16 icon-add"></i></span> <span
+                                class="icon-btn-txt"> Add </span>
+                        </button>
+
+                        <!-- <i *ngIf="noOfProperties.length==i+1 && noOfProperties[i].Property!='--Select--' " class="icon x-24 icon-add" (click)="inc()"> </i> -->
+                    </mat-grid-tile>
+                    <mat-grid-tile
+                        *ngIf="(noOfProperties.length==i+1 && noOfProperties[i].Property!='--Select--' ) ||(noOfProperties.length==i+1 && noOfProperties.length>1)"
+                        [colspan]="2">
+                        <button *ngIf="noOfProperties.length==i+1 && noOfProperties.length>1 " (click)="dec(i)"
+                            mat-flat-button class="DSA_wb_Icon-btn">
+                            <span class="icon_btnCont"><i class="icon purple x-16 close-icon"></i></span> <span
+                                class="icon-btn-txt"> Remove </span>
+                        </button>
+                        <!-- <i *ngIf="noOfProperties.length==i+1 && noOfProperties.length>1" class="icon x-24 icon-add" (click)="dec(i)" class="icon x-24 close-icon" > </i> -->
+                    </mat-grid-tile>
+
+                </mat-grid-list>
+            </div>
+        </div>
+        <!-- ................ -->
+        <mat-grid-list cols="12">
+            <mat-grid-tile [colspan]="2">
+                <button *ngIf="false" mat-flat-button class="DSA_wb_secondary-btn"><label for="file"
+                        style="cursor: pointer;">Choose a Logo</label></button>
+                <input id="file" name="file" #file="ngModel" type="file" accept="image/x-png,image/jpeg"
+                    [(ngModel)]="orgLogo" (change)="setFileData($event,'image', false)" style="display: none;" />
+
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="2">
+                <label>{{orgLogoName}}</label>
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="1">
+                <i *ngIf="orgLogo!=undefined" class="icon x-24 icon-add" (click)="cancelFile()"
+                    class="icon x-24 close-icon"> </i>
+            </mat-grid-tile>
+            <mat-grid-tile *ngIf="!isEdit" [colspan]="5" [rowspan]="1">
+
+                <button mat-flat-button class="DSA_wb_primary-btn" (click)="saveOrg(org)"
+                    [disabled]="savedDomains.length==0||org.name=='' || org.name==undefined">Save</button>
+
+            </mat-grid-tile>
+            <mat-grid-tile *ngIf="isEdit" [colspan]="3" [rowspan]="1">
+
+                <button mat-flat-button class="DSA_wb_primary-btn" (click)="updateOrg(org)"
+                    [disabled]="savedDomains.length==0||org.name=='' || org.name==undefined">Update</button>
+
+            </mat-grid-tile>
+            <mat-grid-tile *ngIf="isEdit" [colspan]="2" [rowspan]="1">
+
+                <button mat-flat-button class="DSA_wb_primary-btn" (click)="cancelEdit()">Cancel</button>
+
+            </mat-grid-tile>
+
+        </mat-grid-list>
+
+
+    </div>
+</div>
+
+
+
+
+<div *ngIf="false" style="margin-top: 20px;">
+    <div class="DSA_panel">
+        <div class="DSA_panelBody padTB16 padLR24">
+            <h5 class="ds_h5Inner">
+                Create Role
+            </h5>
+            <!-- <h5 *ngIf="isEdit" class="ds_h5Inner">
+                Update Role
+            </h5> -->
+
+            <mat-grid-list cols="12">
+                <mat-grid-tile [colspan]="3">
+                    <mat-form-field class="DSA_Wb_custom-form-field">
+                        <input matInput placeholder="Role" pattern=".*\S.*" minlength="1" maxlength="15" id="roleName"
+                            [(ngModel)]="newRole.name" name="roleName" #roleName="ngModel" required>
+                    </mat-form-field>
+                </mat-grid-tile>
+                <mat-grid-tile [colspan]="1">
+
+                </mat-grid-tile>
+                <mat-grid-tile [colspan]="3">
+                    <mat-form-field class="DSA_Wb_custom-form-field">
+                        <textarea matInput placeholder="Description" pattern=".*\S.*" minlength="1" maxlength="50"
+                            id="roleDesc" [(ngModel)]="newRole.description" name="roleDesc"
+                            #roleDesc="ngModel"></textarea>
+                    </mat-form-field>
+                </mat-grid-tile>
+
+
+                <mat-grid-tile [colspan]="2">
+                    <button mat-flat-button class="DSA_wb_primary-btn" (click)="saveRole(newRole)"
+                        [disabled]=" newRole.name==undefined||newRole.name==''">Save</button>
+                    <!-- <button *ngIf="isEdit"mat-flat-button class="DSA_wb_primary-btn" (click)="updateRole(newRole)"
+                     [disabled]=" newRole.name==undefined||newRole.name==''">Update</button>  -->
+                </mat-grid-tile>
+                <mat-grid-tile [colspan]="2">
+                    <button *ngIf="!isEdit" mat-flat-button class="DSA_wb_secondary-btn"
+                        (click)="cancelRoleAddition()">Next</button>
+                </mat-grid-tile>
+
+            </mat-grid-list>
+
+        </div>
+    </div>
+
+</div>
+
+
+<!-- <div *ngIf=" roleList.length>0" class="DSA_panel" style="margin-top: 10px;"> -->
+<div *ngIf="false" class="DSA_panel" style="margin-top: 10px;">
+    <div [ngBusy]="{busy:busy,backdrop:true}" class="DSA_panelBody padTB16 padLR24">
+        <h5 class="ds_h5Inner">
+            Roles
+        </h5>
+        <table class="DSA_wb_custom-table usm_table">
+            <thead>
+                <tr>
+                    <th>Organization</th>
+
+                    <th>Roles</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let role of roleList">
+                    <td>
+                        <a href="javascript:void(0);"
+                            class="DSA_wb_hyperLink-btn td_nonEditable">{{savedOrganisation.name}}</a>
+                    </td>
+                    <td>
+                        {{role.name}}
+                    </td>
+                    <td>
+                        <i class="icon x-24 delete-sm-icon" (click)="deleteRole(role)"> </i>
+                    </td>
+
+                </tr>
+
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div *ngIf="roleAddedShowModules" class="DSA_panel" style="margin-top: 20px;">
+    <div class="DSA_panelBody padTB16 padLR24">
+        <h5 class="ds_h5Inner">
+            Module Access
+        </h5>
+        <mat-grid-list cols="12" *ngFor="let module of noOfModule;let i=index; ">
+            <mat-grid-list cols="12">
+                <mat-grid-tile [colspan]="2">
+                    <mat-form-field class="DSA_Wb_custom-form-field">
+                        <mat-label>Role*</mat-label>
+                        <mat-select disableOptionCentering panelClass="DSA_wb-custom-select" id="keys"
+                            [(ngModel)]="noOfModule[i].Role" name="role" #keys="ngModel" required>
+                            <mat-option *ngFor="let role of roleList"
+                                (onSelectionChange)="filterModuleListByRoles(role,i)" [value]="role.name">{{role.name}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </mat-grid-tile>
+                <mat-grid-tile [colspan]="1">
+
+                </mat-grid-tile>
+                <mat-grid-tile [colspan]="2">
+                    <mat-form-field class="DSA_Wb_custom-form-field">
+                        <mat-label>Module*</mat-label>
+                        <mat-select disableOptionCentering panelClass="DSA_wb-custom-select" id="role"
+                            [(ngModel)]="noOfModule[i].module" name="selectedModule" #module="ngModel" required>
+                            <mat-option *ngFor="let module of tempModuleList" [value]="module"
+                                (onSelectionChange)="fetchAllPermissions(i,module,noOfModule[i].Role)">{{module}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </mat-grid-tile>
+                <mat-grid-tile [colspan]="1">
+
+                </mat-grid-tile>
+                <mat-grid-tile [colspan]="2">
+                    <mat-form-field class="DSA_Wb_custom-form-field">
+
+                        <input matInput placeholder="Navigate To" minlength="1" maxlength="50" id="selectedUrl"
+                            [(ngModel)]="noOfModule[i].navigateTo" name="Url" #Url="ngModel">
+                    </mat-form-field>
+                </mat-grid-tile>
+                <mat-grid-tile [colspan]="1">
+
+                    <!-- {{module.Role}}         -->
+                </mat-grid-tile>
+                <mat-grid-tile
+                    *ngIf="(noOfModule.length==i+1 && (noOfModule[i].Role!=''||noOfModule[i].Role!=undefined) && (noOfModule[i].module!='' ||noOfModule[i].module!=undefined) ) ||(noOfModule.length==i+1 && noOfModule.length>1)"
+                    [colspan]="1">
+
+                    <button
+                        *ngIf="noOfModule.length==i+1  && (noOfModule[i].Role!=''||noOfModule[i].Role!=undefined) && (noOfModule[i].module!='' ||noOfModule[i].module!=undefined) "
+                        mat-flat-button class="DSA_wb_Icon-btn" (click)="incModule()">
+                        <span class="icon_btnCont"><i class="icon purple x-16 icon-add"></i></span> <span
+                            class="icon-btn-txt"> Add </span>
+                    </button>
+
+                    <!-- <i *ngIf="noOfProperties.length==i+1 && noOfProperties[i].Property!='--Select--' " class="icon x-24 icon-add" (click)="inc()"> </i> -->
+                </mat-grid-tile>
+                <mat-grid-tile
+                    *ngIf="(noOfModule.length==i+1  && noOfModule[i].Role!='' && noOfModule[i].module!=''  ) ||(noOfModule.length==i+1 && noOfModule.length>1)"
+                    [colspan]="2">
+                    <button *ngIf="noOfModule.length==i+1 && noOfModule.length>1 " (click)="decModule(i)"
+                        mat-flat-button class="DSA_wb_Icon-btn">
+                        <span class="icon_btnCont"><i class="icon purple x-16 close-icon"></i></span> <span
+                            class="icon-btn-txt"> Remove </span>
+                    </button>
+                    <!-- <i *ngIf="noOfProperties.length==i+1 && noOfProperties.length>1" class="icon x-24 icon-add" (click)="dec(i)" class="icon x-24 close-icon" > </i> -->
+                </mat-grid-tile>
+            </mat-grid-list>
+            <mat-grid-list cols="12">
+                <mat-grid-tile [colspan]="2">
+                    <mat-form-field class="DSA_Wb_custom-form-field">
+                        <mat-label>Permission*</mat-label>
+                        <mat-select disableOptionCentering panelClass="DSA_wb-custom-select" id="permission"
+                            [(ngModel)]="noOfModule[i].permission" name="permission" #permission="ngModel" required>
+                            <mat-option *ngFor="let permission of permissionsList[i]" [value]="permission">
+                                {{permission.permission}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </mat-grid-tile>
+            </mat-grid-list>
+        </mat-grid-list>
+        <mat-grid-list cols="12">
+            <mat-grid-tile [colspan]="8">
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="2">
+
+                <button mat-flat-button class="DSA_wb_primary-btn" (click)="saveModule(noOfModule)"
+                    [disabled]=" noOfModule[noOfModule.length-1] && (noOfModule[noOfModule.length-1].Role=='' ||noOfModule[noOfModule.length-1].module=='') ">Save</button>
+
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="2">
+
+                <button mat-flat-button class="DSA_wb_primary-btn" (click)="cancelAddeModule()">Done</button>
+
+            </mat-grid-tile>
+        </mat-grid-list>
+    </div>
+</div>
+
+
+<div>
+
+</div>
+
+
+<div *ngIf="modulesAddedShowRoles">
+
+    <div class="DSA_panel" style="margin-top: 10px;">
+        <div [ngBusy]="{busy:busy,backdrop:true}" class="DSA_panelBody padTB16 padLR24">
+            <h5 class="ds_h5Inner" style="color: black;">
+                Group Details
+            </h5>
+
+            <mat-form-field *ngIf="!isDbLogin" class="DSA_Wb_custom-form-field " style=" width: auto; ">
+
+
+                <mat-label>Select Group</mat-label>
+                <mat-select disableOptionCentering panelClass="DSA_wb-custom-select" id="newrole"
+                    [(ngModel)]="selectedRole" name="newRole" #newrole="ngModel" >
+                    <mat-option *ngFor="let role of azureRoleList" [value]="role">
+                        {{role}}</mat-option>
+                </mat-select>
+
+            </mat-form-field>
+            <mat-form-field *ngIf="isDbLogin" class="DSA_Wb_custom-form-field " style=" width: auto; ">
+                <input matInput placeholder="New Group" pattern=".*\S.*" minlength="1" maxlength="30" id="role"
+                    [(ngModel)]="selectedRole" name="newRole" #role="ngModel">
+
+            </mat-form-field>
+            <button mat-flat-button class="DSA_wb_Icon-btn marL16 web-raisedShadow"
+                [disabled]="selectedRole=='' || selectedRole==undefined" (click)="incRole(selectedRole)">
+                <span class="icon_btnCont"><i class="icon purple x-16 icon-add"></i></span> <span class="icon-btn-txt">
+                    Add </span>
+            </button>
+            <button mat-flat-button class="DSA_wb_secondary-btn float-right marL24"
+            (click)="cancelAddition()">Cancel</button>
+            <button mat-flat-button class="DSA_wb_primary-btn float-right"
+                (click)="saveRoleModulePermission()">{{!isEdit?'Save':'Update'}}</button>
+            
+            <table class="DSA_wb_custom-table usm_table">
+                <thead>
+                    <tr>
+                        <th>Group</th>
+                        <th>Module</th>
+                        <!-- <th>Permission</th> -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let roleModuleList of noOfRoleModule;let i=index">
+                        <tr *ngFor="let roleModule of roleModuleList;let j=index">
+                            <td [attr.rowspan]="roleModuleList.length" *ngIf="j==0">
+                               <span class="groupName"> {{roleModule.Role.name}}</span>
+                                <i class="icon x-24 delete-sm-icon dark-purple web-raisedShadow" *ngIf="currentRole!=roleModule.Role.name" title="Delete Role"
+                                    style=" cursor: pointer; border-radius: 4px; display: block; " (click)="deleteRoleModule(roleModule.Role,i)"> </i>
+                            </td>
+                            <td>
+                                <div class="td_nonEditable">{{roleModule.module.name}}</div>
+
+                            </td>
+
+                            <td>
+                                <mat-chip-list>
+                                    <!-- <mat-chip *ngFor="let perm of roleModule.permission" class="DSA_wb_chipStyle-Normal DSA_wb_chip-input marR16" disableRipple="true">
+                                    {{perm.permission.permission}}
+                                </mat-chip> -->
+                                    <mat-chip *ngFor="let perm of roleModule.permission;let k=index"
+                                        class="DSA_wb_chipStyle-Normal DSA_wb_chip-input marR16" disableRipple="true">
+                                        <a  class="icon x-16 icon-close-mini DSA_wb_chipIconRight"
+                                            (click)="deleteRolePermission(perm,i,j,k)"></a>
+                                        {{perm.permission.permission}}
+                                    </mat-chip>
+                                </mat-chip-list>
+                            </td>
+                            <td>
+                                <button [disabled]="currentRole==roleModule.Role.name" mat-flat-button class="DSA_wb_Icon-btn web-raisedShadow" [matMenuTriggerFor]="menu">
+                                    <span class="icon_btnCont"><i class="icon purple x-16 icon-add" style="visibility: visible;"></i></span> 
+                                    <span
+                                        class="icon-btn-txt">Add Permission</span>
+                                </button>
+                                
+                                <mat-menu #menu="matMenu">
+                                    <button *ngFor="let perm of addedPermissionList[j]" mat-menu-item
+                                        (click)="saveRolePerm(i,j,perm,roleModule.Role)">{{perm.permission}}</button>
+                                </mat-menu>
+                            </td>
+
+                        </tr>
+                    </ng-container>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<div *ngIf="false">
+    <!-- <mat-form-field class="DSA_Wb_custom-form-field" style=" width: auto; ">
+        <input matInput [(ngModel)]="orgFilter" placeholder="Organization Search" (input)="search(orgFilter)">
+        <span matSuffix><i class="icon x-24 search-icon" (click)="search(orgFilter)"> </i></span>
+    </mat-form-field> -->
+    <div class="DSA_panel" style="margin-top: 10px;">
+        <div [ngBusy]="{busy:busy,backdrop:true}" class="DSA_panelBody padTB16 padLR24">
+            <table class="DSA_wb_custom-table usm_table">
+                <thead>
+                    <tr>
+                        <th>Organization</th>
+                        <th>Organisation Display Name </th>
+                        <!-- <th>Organisation Discription</th> -->
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let org of filteredOrganisationList">
+                        <td>
+                            <a href="javascript:void(0);" class="DSA_wb_hyperLink-btn td_nonEditable">{{org.name}}</a>
+                            <!-- <mat-form-field class="DSA_Wb_custom-form-field td_editable">                                    
+                                <input matInput value="Ayansh R"> 
+                            </mat-form-field> -->
+                        </td>
+                        <td>
+                            <div class="td_nonEditable">{{org.projectdisplayname}}</div>
+                            <!-- <mat-form-field class="DSA_Wb_custom-form-field td_editable">                                    
+                                <mat-select disableOptionCentering  panelClass="DSA_wb-custom-select" [(ngModel)]="selectedTraveler_row1">
+                                    <mat-option *ngFor="let traveler of travelers" [value]="traveler.value">
+                                        {{org.projectdisplayname}}
+                                    </mat-option>
+                                </mat-select>                                     
+                            </mat-form-field> -->
+                        </td>
+                        <!-- <td>
+                            <div class="td_nonEditable">{{org.description}}</div>
+                            <mat-form-field class="DSA_Wb_custom-form-field td_editable">                                    
+                                <mat-select disableOptionCentering  panelClass="DSA_wb-custom-select" [(ngModel)]="selectedNationality_row1">
+                                    <mat-option *ngFor="let nationality of nationalities" [value]="nationality.value">
+                                        {{org.description}}
+                                    </mat-option>
+                                </mat-select>                                     
+                            </mat-form-field>
+                        </td> -->
+
+                        <td>
+                            <div class="td_nonEditable">
+                                <i class="icon x-24 edit-icon" (click)="showEdit(org)"> </i>
+                                <i class="icon x-24 delete-sm-icon" (click)="deleteOrg(org.id)"> </i>
+                            </div>
+                            <!-- <div class="td_editable">
+                                <i class="icon x-24 green icon-tick-dark"> </i>
+                                <i class="icon x-16 red close-icon" (click)="hideEditableRow($event)"> </i>  
+                            </div> -->
+                        </td>
+                    </tr>
+
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

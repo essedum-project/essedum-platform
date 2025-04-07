@@ -1,0 +1,89 @@
+<div class="le-u-mar-24 d-flex justify-content-between align-items-center row">
+    <leds-multi-col-container>
+        <div panel panelRounded panelBorder class="le-u-mar-tb-16">
+            <div panelBody class="clearfix">
+
+                <div panelThreeCol>
+                    <div firstColPanel class="aip-ivm-scroll" style="overflow:auto">
+                        <div class="le-l-leftcol-scroll DSA_htdummy le-u-mar-t-32">
+                            <leds-navigation-list position="left" [selectOnClick]="true">
+                                <li ledsNavigationListItem *ngFor="let role of roleUserList" (click)="render(role)"
+                                    [ngStyle]="{'border-left': (role.roleName==selectedRole.roleName)?'2px solid #8626C3':'2px solid #0000ff00'}">
+                                    <span firstNavigationSpan class="le-u-header-md"
+                                        [ngStyle]="{'color': (role.roleName==selectedRole.roleName)?'#8626C3':'#737373', 'font-weight': (role.roleName==role)?'800':'300'}">
+                                        {{role.roleName| titlecase}}</span>
+                                </li>
+                            </leds-navigation-list>
+                        </div>
+                    </div>
+                    <div thirdColPanel class="aip-ivm-scroll" style="min-height: 20rem;height: 38rem;overflow: auto;">
+                        <div>
+                            <div class="d-flex justify-content-between le-u-mar-8 le-u-mar-lr-16 align-items-center">
+                                <div class="le-u-header-xl"><strong>{{role.roleName | titlecase}}</strong></div>
+                                <leds-input-field designType="search" inputType="text" [disabled]="false"
+                                    [required]="false" styleClass=""
+                                    (keyup.enter)="changesOccur($event)"></leds-input-field>
+                            </div>
+                            <div class="le-l-multicolumn__header aip-link-card-height" style="border: none;">
+                                <div class="aip_workGroup_user_grid le-u-mar-24">
+                                    <ng-container *ngFor="let user of role['users'];  index as i">
+                                        <leds-card designType="simple" (click)="linked(user,role,i)">
+                                            <mat-card-header>
+                                                <mat-card-title>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <h2 class="le-u-header-md le-u-ellipsis aip-fullname-card">
+                                                            {{user.user_f_name}}
+                                                            {{user.user_l_name}}</h2>
+                                                        <span> <i *ngIf="user.user_status"
+                                                                class="icon x-16 icon-process-complete purple"></i>
+                                                            <i *ngIf="!user.user_status" style="color: #EDCFFF;"
+                                                                class=" icon x-16 success-big-icon"></i></span>
+                                                    </div>
+                                                </mat-card-title>
+                                                <mat-card-subtitle
+                                                    class="le-u-body-sm le-u-text-neutral-80 le-u-no-mar-b le-u-ellipsis aip-fullname-card">
+                                                    {{user.user_email}}
+                                                </mat-card-subtitle>
+                                            </mat-card-header>
+                                        </leds-card>
+                                    </ng-container>
+                                    <div class=""></div>
+                                    <div *ngIf="!selectedRole.noMoreData"
+                                    class="d-flex justify-content-end le-u-mar-8 le-u-body-xl aip_workgroup_loadMore aip-cursor"
+                                    (click)='loadMoreUser()' style="color: #8626C3;">Load More</div>
+                                    <div *ngIf="selectedRole.noMoreData"
+                                        class="d-flex justify-content-center le-u-mar-8 le-u-header-xl aip-cursor"
+                                        style="color: #723c94;">
+                                        <strong>No More Data</strong>
+                                    </div>
+                                    <!-- <div class="" *ngFor="let item of filteredData; let isLast=last">
+                                        loop
+                                        <div *ngIf="user.portfolio_name==role;else none">
+                                            {{item|json}}</div>
+                                        <div *ngIf="isLast">
+                                            islast
+                                            <div *ngIf="item.user_f_name!=null && item.user_email!=null"
+                                                class="d-flex justify-content-end le-u-mar-8 le-u-body-xl  aip-cursor"
+                                                (click)='loadMoreUser()' style="color: #8626C3;">
+                                                <strong>Load More</strong>
+                                            </div>
+                                            <div *ngIf="item==undefined"
+                                                class="d-flex justify-content-center le-u-mar-8 le-u-header-xl aip-cursor"
+                                                style="color: #723c94;">
+                                                <strong>No More Data</strong>
+                                            </div>
+                                        </div>
+                                    </div> -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </leds-multi-col-container>
+    <div class="aip-cursor d-flex justify-content-end le-u-pad-24" (click)="addworkgroup()">
+        <div class="le-u-header-md workgroup_add_button  le-u-pad-lr-16 le-u-pad-tb-8">
+            Add Workgourp</div>
+    </div>
+</div>

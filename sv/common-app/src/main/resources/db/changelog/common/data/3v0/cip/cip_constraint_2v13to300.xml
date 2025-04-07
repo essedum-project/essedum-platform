@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+	<changeSet author="Leap (generated)" id="3v0-cipc-1">
+		<createIndex indexName="FKdtewgpnbm35bc67mlsearchtopicskey"
+			tableName="mlsearchtopics">
+			<column name="topicname" />
+			<column name="organization" />
+		</createIndex>
+		<addUniqueConstraint
+			columnNames="datasetid,organization,topicname"
+			constraintName="FKjno2o24l8i80keh0c3mldatasettopicskey" tableName="mldatasettopics" />
+		<addUniqueConstraint
+			columnNames="topicname,organization"
+			constraintName="FKjno2o24l8i80kehms0c3mldatasettopickey" tableName="mlsearchtopics" />
+		<addForeignKeyConstraint
+			baseColumnNames="topicname,organization" baseTableName="mldatasettopics"
+			constraintName="FKdtewgpnbm35bc67mlsearchtopicskey" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="topicname,organization"
+			referencedTableName="mlsearchtopics" />
+		<createIndex indexName="FK1n5fe2ibbjsblv6vuafa74h8ouserid"
+			tableName="usm_access_tokens">
+			<column name="user_id" />
+		</createIndex>
+		<createIndex indexName="FK1n5fe2ibbjsblv6vuafa74h8oaccesstoken"
+			tableName="usm_access_tokens">
+			<column name="access_token" />
+		</createIndex>
+		<addForeignKeyConstraint
+			baseColumnNames="user_id" baseTableName="usm_access_tokens"
+			constraintName="FK1n5fe2ibbjsblv6vuafa74h8ouserid" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id"
+			referencedTableName="usm_users" />
+	</changeSet>
+</databaseChangeLog>	

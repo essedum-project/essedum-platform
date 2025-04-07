@@ -1,0 +1,20 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div *ngFor="let question of questions">
+      <label>{{ question.question_content }}</label>
+      <div [ngSwitch]="question.response_type">
+        <input *ngSwitchCase="'text'" type="text" [formControlName]="question.question_id.toString()">
+        <input *ngSwitchCase="'email'" type="email" [formControlName]="question.question_id.toString()">
+        <select *ngSwitchCase="'dropdown'" [formControlName]="question.question_id.toString()">
+          <option *ngFor="let option of question.options">{{ option }}</option>
+        </select>
+        <input *ngSwitchCase="'number'" type="number" [formControlName]="question.question_id.toString()">
+        <div *ngSwitchCase="'checkbox'">
+          <div *ngFor="let option of question.options">
+            <input type="checkbox" [formControlName]="question.question_id.toString()" [value]="option">{{ option }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <button type="submit">Submit</button>
+  </form>
+  

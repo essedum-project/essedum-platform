@@ -1,0 +1,15 @@
+.aip-checklist-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 174px);
+    grid-row-gap: 24px;
+    grid-column-gap: 24px;
+}
+.rai-checklist-delete{
+    position: absolute;
+    top: -1rem;
+    right: -6rem;
+    cursor: pointer;
+    color: #f00;
+    font-size: 20px;
+    z-index: 1;
+}

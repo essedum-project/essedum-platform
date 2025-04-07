@@ -1,0 +1,73 @@
+<div class="aip-grid-container aip-home-bg-image">
+    <div class="aip-grid-vh-center">
+        <div class="aip-grid-vh-center le-u-text-white">
+            <h1>Welcome back User!</h1>
+        </div>
+        <leds-input-field class="aip-home-search" designType="search" inputType="text"
+            placeholder="Search for models, datasets, endpoints, pipelines and more..." />
+    </div>
+    <div class="le-u-mar-lr-32">
+        <div class="le-u-text-white le-u-mar-b-4">Recent releases</div>
+        <leds-chip-list [selectable]="true">
+            <leds-chip *ngFor="let rel of recentReleases" [selected]="rel.selected">{{rel.name}}</leds-chip>
+        </leds-chip-list>
+        <div class="le-u-mar-t-16 aip-card-container">
+            <div *ngFor="let item of itemList">
+                <div class="row">
+                    <div class="col-md-12 col-lg-12 col-xl-12">
+                        <leds-card designType='simple' [actionsOnHover]='true'>
+                            <mat-card-header>
+                                <mat-card-title class="le-c-card__container clearfix">
+                                    <div class="le-c-card__container-left">
+                                        <span
+                                            class="le-u-header-sm le-u-ellipsis le-u-mar-b-8 le-u-text-primary-70">{{item.category
+                                            | uppercase}}</span>
+                                    </div>
+                                    <div class="le-c-card__container-left">
+                                        <span class="le-u-header-xl le-u-ellipsis le-u-mar-b-8">{{item.title}}</span>
+                                    </div>
+                                    <div class="le-c-card__container-right">
+                                        <span class="le-c-badge le-c-badge--active float-end">{{item.status |
+                                            uppercase}}</span>
+                                    </div>
+                                </mat-card-title>
+                                <mat-card-subtitle class="le-u-body-sm le-u-text-neutral-80 le-u-ellipsis">
+                                    {{item.lastUpdatedDate}}
+                                </mat-card-subtitle>
+                            </mat-card-header>
+                            <mat-card-content class="le-u-no-mar-b">
+                                <p class="le-u-body-md le-u-text-neutral-80 le-u-line-3">{{item.description}}
+                                </p>
+                            </mat-card-content>
+                            <mat-card-footer class="le-u-mar-t-8">
+                                <div class="d-flex">
+                                    <span
+                                        class="le-c-avatar le-c-avatar--xs le-u-mar-8 le-u-mar-l-16">{{item.lastUpdatedByThumbnail}}</span>
+                                    <span
+                                        class="le-u-footer-xs le-u-text-black le-u-ellipsis le-u-mar-8 le-u-pad-t-4">{{item.lastUpdatedBy}}</span>
+                                </div>
+                            </mat-card-footer>
+                            <mat-card-actions class="le-c-card__action-hover">
+                                <leds-button buttonType="button" designType="text">Action 1</leds-button>
+                                <leds-button buttonType="button" designType="text">Action 2</leds-button>
+                                <ul class="float-end le-c-card__action-ul">
+                                    <li><a href="javascript:void(0);" aria-label="star icon"><i aria-hidden="true"
+                                                class="icon x-24 star-icon"> </i></a></li>
+                                    <li><a href="javascript:void(0);" aria-label="star icon"><i aria-hidden="true"
+                                                class="icon x-24 star-icon"> </i></a></li>
+                                    <li><a href="javascript:void(0);" aria-label="star icon"><i aria-hidden="true"
+                                                class="icon x-24 star-icon"> </i></a></li>
+                                    <li><a href="javascript:void(0);" aria-label="menu icon"><i aria-hidden="true"
+                                                class="icon x-24 v-menu-icon"> </i></a></li>
+                                </ul>
+                            </mat-card-actions>
+                        </leds-card>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="aip-grid-vh-center le-u-mar-t-16">
+            <leds-button designType='miniPrimary'>View More</leds-button>
+        </div>
+    </div>
+</div>

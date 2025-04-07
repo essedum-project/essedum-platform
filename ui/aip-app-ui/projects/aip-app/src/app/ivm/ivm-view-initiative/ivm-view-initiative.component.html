@@ -1,0 +1,226 @@
+<div class="clearfix le-l-bodywrapper aip-tranparent-backgroud le-u-no-pad-tb le-u-no-pad-lr" id="mainCtr">
+    <div class="container-fluid le-u-no-pad-l le-l-containerPad">
+        <nav id="mainleftNav" class="le-c-nav-fixed le-c-nav-is-hidden aip-scroll-hover" style="min-height: 543px; ">
+            <!-- left fixed side for nav -->
+            <div class="le-u-mar-t-4">
+                <span style="height: 40vh; display: block;">
+                    <leds-navigation-list class="le-u-mar-t-24" [selectOnClick]="false">
+                        <li ledsNavigationListItem level="first" (click)="initiativeDetails()">
+                            <span firstNavigationSpan>
+                                <span class="d-flex le-c-nav-list__first-mar" style="color: var(--header-color) !important;">Workspace
+                                    <i style="color: var(--header-color) !important;" class="icon le-u-mar-lr-8 x-24 icon-form"></i>
+                                </span>
+                                <!-- <span class="d-block le-c-nav-list__first-mar">{{initiativeName |titlecase}}</span> -->
+                            </span>
+                        </li>
+                    </leds-navigation-list>
+                    <div *ngIf="initiativeMenu.length!=0" style="overflow: auto;height: 80%;">
+                        <leds-navigation-list position="left" [selectOnClick]="true">
+                            <li ledsNavigationListItem *ngFor="let valuez of initiativeMenu">
+                                <div class="d-flex justify-content-between" (click)="questionare(valuez)">
+                                    <span firstNavigationSpan class="le-u-header-md">{{valuez.taskName}}</span>
+                                    <span>
+                                        <leds-tooltip [tooltip]="valuez.status" *ngIf="valuez.approvalStatus==null"
+                                            [position]="'above'">
+                                            <a [ngClass]="stepperClass(valuez.status)"
+                                                class="le-u-header-md aip-cursor d-flex align-items-center">
+                                                <span></span>
+                                                <p></p>
+                                            </a>
+                                        </leds-tooltip>
+                                        <span class="" *ngIf="valuez.approvalStatus!=null">
+                                            <span *ngIf="valuez.approvalStatus=='PENDING'">
+                                                <leds-tooltip [tooltip]="'Approval Pending'" [position]="'above'">
+                                                    <a [ngClass]="stepperClass('APENDING')"
+                                                        class="le-u-header-md aip-cursor d-flex align-items-center">
+                                                        <span></span>
+                                                        <p></p>
+                                                    </a>
+                                                </leds-tooltip>
+                                            </span>
+                                            <span *ngIf="valuez.approvalStatus!='PENDING'">
+                                                <leds-tooltip [tooltip]="valuez.approvalStatus" [position]="'above'">
+                                                    <a [ngClass]="stepperClass(valuez.approvalStatus)"
+                                                        class="le-u-header-md aip-cursor d-flex align-items-center">
+                                                        <span></span>
+                                                        <p></p>
+                                                    </a>
+                                                </leds-tooltip>
+                                            </span>
+                                        </span>
+                                    </span>
+                                </div>
+                            </li>
+                        </leds-navigation-list>
+                    </div>
+                    <div *ngIf="initiativeMenu.length==0">
+                        <div class="d-flex justify-content-center align-items-center flex-column">
+                            <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive"
+                                alt="aip_empty_state_leds" style="width:15rem" />
+                            No Task Found.
+                        </div>
+                    </div>
+                </span>
+                <span class="le-u-mar-t-16 le-u-pad-lr-8" style="height: 50vh; display: block;">
+                    <div class="d-flex justify-content-between align-items-center le-u-mar-b-16">
+                        <span class="le-u-header-lg ">Artifacts</span>
+                        <span>
+                            <app-common-create (reloads)="reloads($event)"
+                                [initiativeId]="initiativeId"></app-common-create>
+                        </span>
+                        <!-- <leds-overflow>
+                            <div ngbDropdown class="d-inline-block" container="body">
+                                <a id="OverflowMenu_dd" ngbDropdownToggle title="Manage Artifact">
+                                    <span class="d-flex align-items-center aip-cursor">
+                                        <i aria-hidden="true" class="icon x-24 v-menu-icon"></i>
+                                    </span>
+                                </a>
+                                <div ngbDropdownMenu aria-labelledby="OverflowMenu_dd">
+                                    <ul overflowList>
+                                        <li overflowListItem>
+                                            <div class="le-u-pad-4" *ngIf="raiLinkArtifacts">
+                                                <div class="aip-cursor" (click)="openModal(linker)">
+                                                    <div class="le-u-header-md d-flex align-items-center justify-content-center le-u-pad-lr-16"
+                                                        style="color: #737373"><i class="icon x-24 icon_link"></i>
+                                                        &nbsp; Link
+                                                        Artifacts
+                                                    </div>
+                                                </div>
+                                                <ng-template #linker let-modal>
+                                                    <app-create-linked [data]=initiativeId [type]="'INITIATIVE'"
+                                                        (refeshrelated)="refeshrelated($event)"
+                                                        [component]=component></app-create-linked>
+                                                </ng-template>
+                                            </div>
+                                        </li>
+                                        <li overflowListItem>
+                                            <div class="le-u-pad-4">
+                                                <div class="">
+                                                    <app-common-create (reloads)="reloads($event)"
+                                                        [initiativeId]="initiativeId"></app-common-create>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </leds-overflow> -->
+                    </div>
+                    <div class="" style="overflow: auto;height: 60%;">
+                        <div class="aip-linkedArtifact-side" *ngFor="let comp of component">
+                            <div class="d-flex justify-content-between" (click)="selectedArtifact(comp)">
+                                <div class="w-50" style="overflow-wrap: break-word;">
+                                    {{comp.alias |titlecase}}
+                                </div>
+                                <span class="w-50 d-flex justify-content-end align-items-center">
+                                    <leds-badge badgeType="active"> {{comp.type}}</leds-badge>
+                                    <!-- <span (click)="unlink(comp)">
+                                        <leds-tooltip [tooltip]="'Delete'" [position]="'above'">
+                                            <i class="icon le-c-u-lr-8 x-24 delete-sm-icon"></i>
+                                        </leds-tooltip>
+                                    </span> -->
+                                    <leds-overflow>
+                                        <div ngbDropdown class="d-inline-block" container="body">
+                                            <a id="OverflowMenu_dd" ngbDropdownToggle title=" menu">
+                                                <i aria-hidden="true" class="icon x-24 v-menu-icon"></i>
+                                            </a>
+                                            <div ngbDropdownMenu aria-labelledby="OverflowMenu_dd">
+                                                <ul overflowList>
+                                                    <li overflowListItem (click)="edit(comp);openModal(comp.type,commonEdit)">
+                                                        <a href="javascript:void(0);">
+                                                            <div class="float-start">
+                                                                <i aria-hidden="true" class="icon x-24 edit-icon"></i>
+                                                            </div>
+                                                            <span overflowSpan style="margin-left: 3.5rem;">Edit</span>
+                                                        </a>
+                                                        <ng-template #commonEdit let-modal>
+                                                            <app-common-edit [data]="selectedComp"></app-common-edit>
+                                                        </ng-template>
+                                                    </li>
+                                                    <li overflowListItem (click)="unlink(comp)">
+                                                        <a href="javascript:void(0);">
+                                                            <div class="float-start">
+                                                                <i aria-hidden="true"
+                                                                    class="icon x-24 delete-sm-icon"></i>
+                                                            </div>
+                                                            <span style="margin-left: 3.5rem;"
+                                                                overflowSpan>Delete</span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </leds-overflow>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </span>
+            </div>
+            <!-- <div class="le-u-mar-t-8  le-u-mar-lr-8" *ngIf="modeSwitch">
+                <div class="le-u-header-lg le-u-mar-b-16">
+                    Linked Artifacts
+                </div>
+                <div class="" style="height: 90vh;">
+                    <div class="aip-linkedArtifact-side" *ngFor="let comp of component">
+                        <div class="d-flex justify-content-between" (click)="selectedArtifact(comp)">
+                            <div class="w-50" style="overflow-wrap: break-word;">
+                                {{comp.alias |titlecase}}
+                            </div>
+                            <span class="w-50 d-flex justify-content-end align-items-center">
+                                <leds-badge badgeType="blue"> {{comp.type}}</leds-badge>
+                                <span (click)="unlink(comp)">
+                                    <leds-tooltip [tooltip]="'Unlink'" [position]="'above'">
+                                        <i class="icon le-c-u-lr-8 x-24 delete-sm-icon"></i>
+                                    </leds-tooltip>
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+        </nav>
+        <div id="mainrightCnt" class="le-l-middle-col le-l-middle-col--2-col" style="min-height: 543px; height:100%">
+            <div class="" *ngIf="!modeSwitch">
+                <router-outlet></router-outlet>
+            </div>
+            <!-- <div class="le-l-level1-wrapper">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="le-l-level1-middle-col le-u-pad-t-16 le-l-base-layout-center">
+
+                            <div class="d-flex justify-content-end">
+                                <leds-slide-toggle [checked]="false" [disabled]="false"
+                                    (toggleChange)="setValue($event)" [labelPosition]="'after'" [disableRipple]="true">
+                                    View Artifacts
+                                </leds-slide-toggle>
+                            </div> -->
+            <!-- <div class="" *ngIf="!modeSwitch">
+                <router-outlet></router-outlet>
+            </div> -->
+            <div *ngIf="modeSwitch">
+                <span *ngIf="refresh">
+                    <app-initiative-actifact-details [initiativeId]="initiativeId" [selectArtifact]="selectArtifact"
+                        [dataType]="dataType"></app-initiative-actifact-details>
+                </span>
+                <span class="" *ngIf="!selectArtifact">
+                    <div class="aip-ivm-slectedArtifact aip-cursor">
+                        <leds-card>
+                            <div class="d-flex justify-content-center align-items-center flex-column">
+                                <img src="assets/images/aip_loader_image_leds.svg" alt="Loading"
+                                    style="margin-bottom: 8px; height:35vh" />
+                                <b class="m-2">Select The Artifact To View</b>
+                                <br>
+                            </div>
+                        </leds-card>
+                    </div>
+                </span>
+            </div>
+        </div>
+        <!-- </div>
+                </div>
+
+            </div>
+        </div> -->
+    </div>
+</div>

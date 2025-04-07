@@ -1,0 +1,4 @@
+"user_id","project_id","node_name","node_color","node_size","node_icon","node_shape","label_position","label_property","border_size","border_color","createdAt","updatedAt"
+"-1","2","ConfigItem","#32ea13","2.0","account-box-outline","dot","below","Name,Type,Status","1.0","0","2021-06-28T09:36:57","2021-06-28T09:36:57"
+"-1","2","ConfigItemRelation","#3abbbd","1.0","","dot","below","RelationName","1.0","0","2021-06-29T09:36:57","2021-06-29T09:36:57"
+"-1","2","Tickets","#e66ed0","2.0","alert-octagram","dot","below","Number","1.0","0","2021-06-29T09:36:57","2021-06-29T09:36:57"

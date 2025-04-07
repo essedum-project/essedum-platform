@@ -1,0 +1,218 @@
+"user_id","project_id","query_name","query_description","gql_query","query_filter","is_private","createdAt","updatedAt"
+"1","2","CancelledJobInstances","Job Instances which are cancelled","query ($r3: String = cancelled) {
+    JobInstance(filter: {
+        status_contains: $r3
+    }) {
+        instance_id
+        start_time
+        description
+        job_name
+        status
+        group_name
+        uniqueId
+        project_id
+        Job_JobInstance {
+            name
+            description
+            uniqueId
+            project_id
+        }
+
+        JobInstance_Group {
+            name
+            description
+            uniqueId
+            project_id
+        }
+
+    }
+}","{\"r3\":\"cancelled\"}","false","2021-12-20T12:26:22","NULL"
+"1","2","GroupRelationship","Relationship between Group to Instance and then to Job","query ($r2: String = Group1) {
+    Group(filter: {
+        name_contains: $r2
+    }, first: 25, offset: 0) {
+        name
+        description
+        uniqueId
+        project_id
+        JobInstance_Group {
+            instance_id
+            start_time
+            description
+            job_name
+            status
+            group_name
+            uniqueId
+            project_id
+            Job_JobInstance {
+                name
+                description
+                uniqueId
+                project_id
+            }
+
+        }
+
+    }
+}","{\"r2\":\"Group1\"}","false","2021-12-20T11:58:14","NULL"
+"1","2","InstanceRelationship","Relationship of JbY4_9 with Job and Group","query ($r1: String = JbY4_9) {
+    JobInstance(filter: {
+        instance_id_contains: $r1
+    }, first: 25, offset: 0) {
+        instance_id
+        start_time
+        description
+        job_name
+        status
+        group_name
+        uniqueId
+        project_id
+        Job_JobInstance {
+            name
+            description
+            uniqueId
+            project_id
+        }
+
+        JobInstance_Group {
+            name
+            description
+            uniqueId
+            project_id
+        }
+
+    }
+}","{\"r1\":\"JbY4_9\"}","false","2021-12-20T11:48:26","NULL"
+"1","2","RelationshipBetweenJobInstnces","All Job Instances Relationship between Job and Group","{
+    JobInstance {
+        instance_id
+        start_time
+        description
+        job_name
+        status
+        group_name
+        uniqueId
+        project_id
+        JobInstance_Group {
+            name
+            description
+            uniqueId
+            project_id
+        }
+
+        Job_JobInstance {
+            name
+            description
+            uniqueId
+            project_id
+        }
+
+    }
+}","{}","false","2021-12-20T13:03:33","NULL"
+"1","2","StatusWiseJobInstances","Status Wise get Job Instances","query ($r4: String = Completed) {
+    JobInstance(filter: {
+        status_contains: $r4
+    }) {
+        instance_id
+        start_time
+        description
+        job_name
+        status
+        group_name
+        uniqueId
+        project_id
+        JobInstance_Group {
+            name
+            description
+            uniqueId
+            project_id
+        }
+
+        Job_JobInstance {
+            name
+            description
+            uniqueId
+            project_id
+        }
+
+    }
+}","{\"r4\":\"Completed\"}","false","2021-12-20T12:39:23","NULL"
+"1","2","ApplicationIssue","Application Issue ","query ($issueName: String = Cheetah) {
+    Application_Issue(filter: {
+        ci_name_contains: $issueName
+    }, first: 25, offset: 0) {
+        uniqueId
+        ci_name
+        id
+        CI_AppIssue {
+            ci_item1
+            ci_item2
+            ci_item1_name
+            ci_item2_name
+            uniqueId
+            Infra_CI {
+                uniqueId
+                ci_name
+                id
+                CI_Infra {
+                    ci_item1
+                    ci_item2
+                    ci_item1_name
+                    ci_item2_name
+                    uniqueId
+                    Batch_CI {
+                        ci_name
+                        id
+                        uniqueId
+                        CI_Batch {
+                            ci_item1
+                            ci_item2
+                            ci_item1_name
+                            ci_item2_name
+                            uniqueId
+                            Data_CI {
+                                ci_name
+                                id
+                                uniqueId
+                                CI_Data {
+                                    ci_item1
+                                    ci_item2
+                                    ci_item1_name
+                                    ci_item2_name
+                                    uniqueId
+                                    AM_CI {
+                                        ci_name
+                                        id
+                                        uniqueId
+                                        CI_AM {
+                                            ci_item1
+                                            ci_item2
+                                            ci_item1_name
+                                            ci_item2_name
+                                            uniqueId
+                                            BP_CI {
+                                                ci_name
+                                                id
+                                                uniqueId
+                                            }
+
+                                        }
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+}","{\"issueName\":\"Cheetah\"}","false","2021-12-22T10:12:41","NULL"

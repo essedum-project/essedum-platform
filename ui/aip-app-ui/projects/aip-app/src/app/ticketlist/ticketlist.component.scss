@@ -1,0 +1,130 @@
+// :host ::ng-deep .icm-icon,
+// :host ::ng-deep .cip-icon {
+//     cursor: pointer;
+//     background-color: transparent;
+//     color: var(--base-color);
+//     margin-left: 1%;
+//     line-height: 32px;
+//     padding: 0 16px;
+//     border-radius: 4px;
+//     border: 0.2px solid gray;
+// }
+
+// :host ::ng-deep .icm-icon:disabled,
+// :host ::ng-deep .cip-icon:disabled {
+//     cursor: default;
+//     background-color: transparent;
+//     color: black;
+//     margin-left: 1%;
+//     line-height: 32px;
+//     padding: 0 16px;
+//     border-radius: 4px;
+//     border: 0.2px solid gray;
+// }
+.card-header{
+    float: right;
+    display: flex;
+    column-gap: 24px;
+    align-items: center;
+    height: 28px;
+    margin-top: 12px;
+}
+
+.config-background {
+    background-color: white !important;
+    border-radius: 1rem;
+  }
+  
+.x-24{
+    width: unset;
+}
+
+.icon{
+    cursor: pointer;
+}
+
+// ::ng-deep{
+//     .mat-mdc-card{
+//         width: 100% !important;
+//         height: 100% !important;
+//     }
+//     .le-c-form-field.mat-mdc-form-field .mat-mdc-form-field-infix {
+//         padding: unset !important;
+//         border-top: none !important;
+//     }
+//     .mat-mdc-form-field-subscript-wrapper{
+//         height: 0px !important;
+//     }
+//     .le-c-card.mat-mdc-card{
+//         padding: 10px;
+//     }
+// }
+
+.flex-display{
+    display: flex;
+}
+
+.data-count{
+    margin: 1%;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    width: 206px;
+}
+.container{
+    width: 100%;
+    height: 48px;
+}
+
+.error_status_tile{
+    border-radius: 22px;
+    background: #FDE7E9;
+    color: #CC2900;
+    box-sizing: content-box;
+}
+.running_status_tile{
+    border-radius: 22px;
+    background: #FFF4CE;
+    color: #FF8800;
+    box-sizing: content-box;
+}
+.completed_status_tile{
+    border-radius: 22px;
+    background: #DFF6DD;
+    color: #007A52;
+    box-sizing: content-box;
+}
+::ng-deep .highlight-color {
+    color: black !important;
+    background-color: #FF8800 !important;
+    padding: 2px !important;
+    border-radius: 2px !important;
+}
+.job_synced_title{
+    border-radius: 22px;
+    background: #ededed;;
+    color: #080b0a;
+    box-sizing: content-box;
+}
+.itsm-separte-rows {
+    border-collapse: separate !important; 
+    border-spacing: 0 10px !important; 
+    padding: 8px !important; 
+}
+.itsm-custom-table {
+    width: 100% !important;
+  }
+  
+  .itsm-custom-table th, .itsm-custom-table td {
+    padding: 10px !important;
+    text-align: left !important;
+    border: 1px solid transparent !important;
+  }
+  
+  .itsm-custom-table tbody tr {
+    background-color: #fff !important;
+    border: 2px solid #cccccc !important; 
+    border-radius: 15px !important;
+    // box-shadow: inset 0px 0px 0px 2px var(--base-color) !important;
+    box-shadow: inset 0px 0px 0px 1px #cec7c7 !important;
+  }

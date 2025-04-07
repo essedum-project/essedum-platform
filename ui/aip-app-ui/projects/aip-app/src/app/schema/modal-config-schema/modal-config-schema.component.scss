@@ -1,0 +1,98 @@
+// /**
+//  *  @ 2018 Infosys Limited, Bangalore, India. All Rights Reserved.
+//  *  Version: 1.0
+//  *  Except for any free or open source software components embedded in this Infosys proprietary software program (Program),
+//  *  this Program is protected by copyright laws, international treaties and  other pending or existing intellectual property
+//  *  rights in India, the United States, and other countries. Except as expressly permitted, any unauthorized reproduction, storage,
+//  *  transmission in any form or by any means(including without limitation electronic, mechanical, printing, photocopying,
+//  *  recording, or otherwise), or any distribution of this program, or any portion of it, may result in severe civil and
+//  *  criminal penalties, and will be prosecuted to the maximum extent possible under the law.
+//  */
+
+// //  @import "~bootswatch/dist/cosmo/_variables";
+// //  @import "~bootstrap/scss/bootstrap";
+// //  @import "~bootswatch/dist/cosmo/_bootswatch";
+// //  $fa-font-path: '~font-awesome/fonts';
+// //  @import '~font-awesome/scss/font-awesome';
+// //  @import '~prism-themes/themes/prism-vs';
+// //  @import "../../sharedModule/styles/formio-custom-styles";
+
+// ::ng-deep .file .alert.alert-danger.bg-error {
+//     display: none;
+// }
+
+// .example-full-width {
+//     width: 100%;
+//     margin-top: 4vh;
+// }
+
+// .textStyle {
+//     height: 30vh;
+// }
+
+// .button-row button,
+// .button-row a {
+//     margin-right: 1vw;
+// }
+
+// .padd {
+//     padding-right: 1vw;
+//     padding-top: 1vw;
+//     padding-left: 1vw;
+// }
+
+// .horitag {
+//     padding-right: 1vw;
+//     padding-left: 1vw;
+//     padding-top: 1vh;
+// }
+
+// mat-form-field {
+//     width: 100%
+// }
+
+// mat-header-cell {
+//     font-weight: bold;
+// }
+
+// :host ::ng-deep .cipJSONEditor div.jsoneditor.jsoneditor-mode-tree {
+//     border: thin solid var(--base-color) !important;
+// }
+
+// :host ::ng-deep .cipJSONEditor div.jsoneditor-menu {
+//     background-color: var(--base-color) !important;
+//     border-bottom: 1px solid var(--base-color) !important;
+// }
+
+// :host ::ng-deep .cipJSONEditor div.jsoneditor-frame {
+//     color: black !important;
+// }
+
+// .cip-padding-zero {
+//     padding: 0px;
+// }
+
+// /*TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
+//  */
+// ::ng-deep .mat-mdc-tab-body.mat-tab-body-active .mat-tab-body-content {
+//     overflow: hidden !important;
+// }
+
+// .flex-container {
+//     display: flex;
+//     flex-direction: row;
+//     justify-content: flex-end;
+//     column-gap: 35px;
+// }
+
+// ::-webkit-scrollbar {
+//     width: 10px;
+// }
+
+// ::ng-deep .cdk-overlay-pane {
+//     max-width: 35vw !important;
+// }
+
+::ng-deep .my-select .mat-option-text {
+    font-size: 20px; /* Replace with the font size you want */
+}

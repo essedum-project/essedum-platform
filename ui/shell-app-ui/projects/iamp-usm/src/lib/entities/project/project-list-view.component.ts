@@ -1,0 +1,986 @@
+//
+// Copyright © 2016-2017 Infosys Limited, Bangalore, India. All Rights Reserved.
+// * Except for any open source software components embedded in this
+// * Infosys proprietary software program (Program), this Program is protected
+// * by copyright laws, international treaties and other pending or existing
+// * intellectual property rights in India, the United States and other countries.
+// * Except as expressly permitted, any unauthorized reproduction, storage,
+// * transmission in any form or by any means (including without limitation
+// * electronic, mechanical, printing, photocopying, recording or otherwise),
+// * or any distribution of this Program, or any portion of it,
+// * may result in severe civil and criminal penalties, and
+// * will be prosecuted to the maximum extent possible under the law.
+// Template pack-angular:web/src/app/base-entities/entity-list.component.ts.e.vm
+//
+import {
+  Component,
+  Input,
+  Output,
+  OnChanges,
+  EventEmitter,
+  SimpleChanges,
+  OnInit,
+  ViewChild,
+  ElementRef,
+} from "@angular/core";
+import { Router, ActivatedRoute } from "@angular/router";
+import { PageResponse } from "../../support/paging";
+import { MessageService } from "../../services/message.service";
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { ConfirmDeleteDialogComponent } from "../../support/confirm-delete-dialog.component";
+import { ConfirmProjectDeleteDialogComponent } from "../../support/confirm-project-delete-dialog.component ";
+import { Project } from "../../models/project";
+import { ProjectService } from "../../services/project.service";
+import { HelperService } from "../../services/helper.service";
+import { MatPaginator } from "@angular/material/paginator";
+import { MatSort } from "@angular/material/sort";
+import { MatTableDataSource } from "@angular/material/table";
+import { FormControl } from "@angular/forms";
+import { Subscription } from "rxjs";
+import { UsmPortfolio } from "../../models/usm-portfolio";
+import { UsersService } from "../../services/users.service";
+import { UsmPortfolioService } from "../../services/usm-portfolio.service";
+import { LeapTelemetryService } from "../../telemetry-util/telemetry.service";
+import { DeleteComponent } from "../../shared-modules/confirm-delete/delete.component";
+import { IampUsmService } from "../../iamp-usm.service";
+import * as momentTz from "moment-timezone";
+import { RoleService } from "../../services/role.service";
+import { Role } from "../../models/role";
+import { AppTheme, BCCTheme, DashboardTheme, Theme, WidgetTheme } from "../../models/theme";
+import { DashConstant } from "../../models/dash-constant";
+import { DashConstantService } from "projects/com-lib-util/src/public-api";
+@Component({
+  //moduleId: module.id,
+  templateUrl: "project-list-view.component.html",
+  selector: "project-list-view",
+  styleUrls: ["project-list-view.component.css"],
+})
+export class ProjectListViewComponent implements OnInit {
+  @Input() header = "Projects...";
+  @Output() changeView: EventEmitter<boolean> = new EventEmitter();
+  // When 'sub' is true, it means this list is used as a one-to-many list.
+  // It belongs to a parent entity, as a result the addNew operation
+  // must prefill the parent entity. The prefill is not done here, instead we
+  // emit an event.
+  // When 'sub' is false, we display basic search criterias
+  @Input() sub: boolean;
+  pageSize = 6;
+  filterFlag = false;
+  clickedcopyblueprint: boolean = false;
+  @Output() onAddNewClicked = new EventEmitter();
+  p: number;
+  showCreateUserRole: boolean = false;
+  showBluePrint: boolean;
+  @ViewChild("myInput", { static: false }) myInputReference: ElementRef;
+  @ViewChild("myInput1", { static: false }) myInputReference1: ElementRef;
+  projectToDelete: Project;
+  displayedColumns: string[] = ["id", "name", "Project Display Name", "portfolio Name", "description", "actions"];
+  ProjectList: MatTableDataSource<any>;
+  private sort: MatSort;
+  fromProject: string = "";
+  busy: Subscription;
+  busy1: Subscription;
+  role: any;
+  auth: string = "";
+  isAuth: boolean = true;
+  editFlag: boolean = false;
+  viewFlag: boolean = true;
+  deleteFlag: boolean = false;
+  createFlag: boolean = false;
+  permissionList: any[];
+  pageIndex: number = 0;
+  selectedPermissionList: any[];
+  private paginator: MatPaginator;
+  coreProjectFlag: boolean = false;
+  copyblueprintProjects: Project[];
+  extension: string = "";
+  extensionArray=[];
+  allowedTypes:string;
+  themeoriginalcolor:string;
+  @ViewChild(MatSort, { static: false }) set matSort(ms: MatSort) {
+    this.sort = ms;
+  }
+
+  //foreign key dependencies
+  // basic search criterias (visible if not in 'sub' mode)
+  example: Project = new Project();
+
+  // list is paginated
+  currentPage: PageResponse<Project> = new PageResponse<Project>(0, 0, []);
+  usm_portfolio_idArray: UsmPortfolio[] = [];
+  usm_portfolio_idObject: UsmPortfolio = new UsmPortfolio();
+  private _id: UsmPortfolio;
+
+  pointerevent: string = "auto";
+  opacity: number = 1;
+  projectSearched: any;
+  rolesArray = []
+  constructor(
+    public router: Router,
+    public projectService: ProjectService,
+    public roleService: RoleService,
+    public messageService: MessageService,
+    public confirmDeleteDialog: MatDialog,
+    public confirmDialog: MatDialog,
+    public helperService: HelperService,
+    private route: ActivatedRoute,
+    private usersService: UsersService,
+    private usm_portfolio: UsmPortfolioService,
+    private telemetryService: LeapTelemetryService,
+    public dashConstantService: DashConstantService,
+    private usmService: IampUsmService,
+  ) {}
+
+  //code related to make it consistent with wave UI
+  filterProject: any;
+  filterProjectName: any;
+  showCreate: boolean = false;
+  projects = new Array<Project>();
+  projectsCopy = new Array<Project>();
+  showList: boolean = false;
+  view: boolean = false;
+  buttonFlag: boolean = false;
+  viewProject: boolean = false;
+  edit: boolean = false;
+  selectedPortfolio = new UsmPortfolio();
+  lazyload = { first: 0, rows: 1000, sortField: null, sortOrder: null };
+  project = new Project();
+  currentProject = new Project();
+  selected = new FormControl(0);
+  tab = "User-Role-Mapping";
+  url;
+  wavesLength: number;
+  filterFlag1: boolean = false;
+  lengthNameErrorMessage: String = "Maximum Character Limit Reached";
+  showNameLengthErrorMessage: Boolean = false;
+  showDisplayNameLengthErrorMessage: Boolean = false;
+  showDescLengthErrorMessage: Boolean = false;
+  timeZone: string;
+  disableExcel: boolean;
+  public tzNames: string[];
+
+  listView() {
+    if (this.edit || this.view) this.router.navigate(["../../"], { relativeTo: this.route });
+    else {
+      // this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
+      // this.router.navigate(["../"], { relativeTo: this.route });
+      this.fetchWave(null);
+    }
+    this.showCreate = false;
+    this.changeView.emit(true);
+    this.view = false;
+    this.edit = false;
+    this.viewProject = false;
+    this.showCreateUserRole = false;
+    this.showBluePrint = false;
+    this.showNameLengthErrorMessage = false;
+    this.showDisplayNameLengthErrorMessage = false;
+    this.showDescLengthErrorMessage = false;
+  }
+
+  showProjectList() {}
+
+  getProjects(id) {
+    this.projectService.getProject(id).subscribe((res) => {
+      this.currentProject = res;
+      this.project = res;
+      if (this.project.theme == null) {
+        this.project.theme = sessionStorage.getItem("defaultTheme");
+      }
+      this.themeoriginalcolor = this.project.theme
+      if (this.project.logo) {
+        this.url = "data:image/png;base64," + this.project.logo;
+      } else {
+        this.url = null;
+      }
+      if(this.project.name=="Core"){
+        this.coreProjectFlag=true
+        if(this.edit && this.coreProjectFlag){
+          window.location.href='/unauthorized.html'; 
+        }
+      }
+    });
+  }
+
+  editProject(project) {
+    this.changeView.emit(false);
+    this.view = false;
+    this.edit = true;
+    this.showCreate = true;
+    this.project = project;
+    this.buttonFlag = false;
+    this.clickedcopyblueprint = false;
+    this.router.navigate(["./" +window.btoa(project.id) + "/" + false], { relativeTo: this.route });
+    // if (window.location.href.includes('project')) {
+    //     this.router.navigate(["projectlist/" + project.id + "/" + false]);
+
+    // }
+  }
+
+  view_Project(project) {
+    this.view = true;
+    this.edit = true;
+    this.viewProject = true;
+    this.changeView.emit(false);
+    this.showCreate = true;
+    this.buttonFlag = true;
+    this.currentProject = project;
+    this.project = project;
+    // if (window.location.href.includes('projectlist')) {
+    //     this.router.navigate(["projectlist/" + project.id + "/" + true]);
+
+    // }
+    this.router.navigate(["./" + window.btoa(project.id)+ "/" + true], { relativeTo: this.route });
+  }
+
+  createView() {
+    this.showCreate = true;
+    this.edit = false;
+    this.project = new Project();
+    this.changeView.emit(false);
+    this.getid();
+    this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
+    // this.view_Cluster = false;
+  }
+  check(tool) {
+    if (this.project && this.project.name) {
+      this.project.name = this.project.name.trim();
+    }
+    let portfolio: UsmPortfolio;
+    try {
+      portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
+    } catch (e) {
+      portfolio = null;
+      console.error("JSON.parse error - ", e.message);
+    }
+
+    if (this.role.roleadmin) tool.portfolioId = portfolio;
+    if (tool.name == undefined || tool.name == null || tool.name.trim().length == 0) {
+      this.messageService.info("Project name can't be empty", "IAMP");
+    } else if (tool.name.length > 255)
+      this.messageService.info("Project name cannot be more than 255 characters", "IAMP");
+    else if (!/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(tool.name)) {
+      this.messageService.info("Project name format is incorrect", "IAMP");
+    } else if (tool.description && (!/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(tool.description))) {
+      this.messageService.info("Project description format is incorrect", "IAMP");
+    } 
+    else if (tool.portfolioId == undefined || tool.portfolioId == null) {
+      this.messageService.info("Portfolio can't be empty", "IAMP");
+    } else if (
+      this.edit &&
+      (tool.projectdisplayname == undefined ||
+        tool.projectdisplayname == null ||
+        tool.projectdisplayname.trim().length == 0)
+    ) {
+      this.messageService.info("Project Display Name can't be empty", "IAMP");
+    } else if (this.edit && tool.projectdisplayname > 255) {
+      this.messageService.info("Project Display name cannot be more than 255 characters", "IAMP");
+    } else if (this.edit &&  !/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(tool.projectdisplayname)) {
+      this.messageService.info("Project Display Name format is incorrect", "IAMP");
+    } 
+     else {
+      if (tool.defaultrole == undefined || tool.defaultrole == null)
+        /**To check -  If checkbox is not selected initially it will be undefined */
+        this.project.defaultrole = false;
+      if (this.role.roleadmin) this.project.portfolioId = portfolio;
+
+      if (tool.disableExcel == undefined || tool.disableExcel == null) this.project.disableExcel = false;
+
+      this.onSave();
+    }
+  }
+  onSave() {
+    if (this.project.timeZone == null || this.project.timeZone == undefined) {
+      this.project.timeZone = "Asia/Calcutta";
+
+      if (this.project.disableExcel == null || this.project.disableExcel == undefined) {
+        this.project.disableExcel = false;
+      }
+    }
+    if (this.edit) this.updateWave();
+    else {
+      let arr1 = this.projects.filter((item) => item.name != undefined);
+      let arr = arr1.filter((item) => item.name.toLowerCase() == this.project.name.toLowerCase());
+      if (arr.length > 0) {
+        this.messageService.error("Project Name already exists", "IAMP");
+        return;
+      } else {
+        this.project.projectdisplayname = this.project.name;
+        if (sessionStorage.getItem("telemetry") == "true") {
+        this.telemetryService.audit(this.project,"CREATE");
+        }
+        this.busy = this.projectService.create(this.project).subscribe(
+          (response) => {
+            this.getDashConstant(this.project.theme,response)
+            this.messageService.info("Project Saved Successfully", "IAMP");
+            // this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
+            this.fetchWave(null);
+            this.clearWave();
+            this.showCreate = false;
+          },
+          (error) => this.messageService.error("Could not create project", "IAMP")
+        );
+      }
+    }
+  }
+  getid() {
+    this.usm_portfolio_idObject = null;
+    this.usm_portfolio
+      .findAll(this.usm_portfolio_idObject, {
+        first: 0,
+        rows: 1000,
+        sortField: null,
+        sortOrder: null,
+      })
+      .subscribe(
+        (pageResponse) => {
+          this.usm_portfolio_idArray = pageResponse.content;
+          this.usm_portfolio_idArray = this.usm_portfolio_idArray.sort((a, b) =>
+            a.portfolioName.toLowerCase() > b.portfolioName.toLowerCase() ? 1 : -1
+          );
+        },
+        (error) => this.messageService.error("Could not get the results", error)
+      );
+  }
+  compareTodiff(curr:any,prev:any){
+    let temparr=[];
+    Object.keys(prev).forEach(key => {
+    if(prev[key]!=curr[key])
+    temparr.push(key)
+   });
+   return temparr;
+  }
+
+  updateWave() {
+    if(this.project && this.project.name=="Core"){
+      this.messageService.error("Unauthorized Operation!!","ERROR");
+      return;
+    }
+    let arr1 = this.projects.filter((item) => item.projectdisplayname != undefined);
+    let arr = arr1.filter(
+      (item) =>
+        item.id != this.project.id &&
+        item.projectdisplayname.toLowerCase() == this.project.projectdisplayname.toLowerCase()
+    );
+    if (arr.length > 0) {
+      this.messageService.error("Project Display Name already exists", "IAMP");
+      return;
+    } else {
+      if (sessionStorage.getItem("telemetry") == "true") {
+      let arr = this.projects.filter(
+        (item) =>
+          item.id == this.project.id 
+      );
+      let diff=this.compareTodiff(this.project,arr1[0])
+      this.telemetryService.audit(this.project,arr[0],diff);
+      }
+      this.busy = this.projectService.update(this.project).subscribe(
+        (rs) => {
+          
+          let project: Project;
+          try {
+            project = JSON.parse(sessionStorage.getItem("project"));
+          } catch (e) {
+            project = null;
+            console.error("JSON.parse error - ", e.message);
+          }
+          this.messageService.info("Project updated successfully", "IAMP");
+          if (sessionStorage.getItem("project")) {
+            let currentproject = project;
+            if (rs.id == currentproject.id) {
+              try {
+                sessionStorage.setItem("project", JSON.stringify(rs));
+              } catch (e) {
+                console.error("JSON.stringify error - ", e.message);
+              }
+            }
+          }
+          sessionStorage.setItem("UpdatedUser", "true");
+          this.getDashConstant(this.project.theme)
+          //this.initUserSettings()
+          this.clearWave();
+          this.showCreate = false;
+          //this.listView();
+        },
+        (error) => this.messageService.error("Could not update", "IAMP")
+      );
+    }
+  }
+  compareObjects(o1: any, o2: any): boolean {
+    return o1 && o2 && o1.id == o2.id;
+  }
+
+  delete(projectToDelete: Project) {
+    let id = projectToDelete.id;
+    this.projectService.delete(id).subscribe(
+      (response) => {
+        sessionStorage.setItem("UpdatedUser", "true");
+        if (sessionStorage.getItem("telemetry") == "true") {
+        this.telemetryService.audit(projectToDelete,"DELETE");
+        }
+        this.currentPage.remove(projectToDelete);
+        // this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
+        this.Clear();
+        //this.initUserSettings();
+        this.messageService.info("Project deleted successfully", "IAMP!");
+      },
+      (error) => this.messageService.error("Could not delete!", "IAMP")
+    );
+  }
+  clearWave() {
+    if (this.edit || this.view) {
+      this.project.defaultrole = null;
+      this.project.description = null;
+      this.project.logo = null;
+      this.project.projectdisplayname = null;
+      this.project.portfolioId = null;
+      this.project.theme = null;
+      this.url = null;
+      this.project.logoName = null;
+      this.project.timeZone = null;
+      this.project.disableExcel = null;
+      // this.myInputReference1.nativeElement.value = null;
+      this.showNameLengthErrorMessage = false;
+      this.showDescLengthErrorMessage = false;
+    } else {
+      this.showNameLengthErrorMessage = false;
+      this.showDescLengthErrorMessage = false;
+      this.project = new Project();
+      this.url = null;
+      // this.myInputReference1.nativeElement.value = null;
+    }
+  }
+
+  /**
+   * When used as a 'sub' component (to display one-to-many list), refreshes the table
+   * content when the input changes.
+   */
+
+  ngOnInit() {
+    this.telemetryImpression();
+    this.tzNames = momentTz.tz.names();
+    if (sessionStorage.getItem("usmAuthority")) {
+      sessionStorage.removeItem("usmAuthority");
+      this.auth = "";
+    }
+    this.usmService.getPermission("usm").subscribe(
+      (resp) => {
+        this.permissionList = JSON.parse(resp);
+        let temp = "";
+        if (this.permissionList.length >= 1) {
+          this.permissionList.forEach((ele) => {
+            temp += "" + ele.permission + ",";
+          });
+          temp = temp.substring(0, temp.length - 1);
+          sessionStorage.setItem("usmAuthority", temp);
+        } else {
+          sessionStorage.setItem("usmAuthority", "");
+        }
+      },
+      (error) => {},
+      () => {
+        this.auth = sessionStorage.getItem("usmAuthority");
+        this.selectedPermissionList = this.auth.split(",");
+        this.selectedPermissionList.forEach((ele) => {
+          if (ele === "edit") {
+            this.editFlag = true;
+          }
+          if (ele === "view") {
+            this.viewFlag = true;
+          }
+          if (ele === "delete") {
+            this.deleteFlag = true;
+          }
+          if (ele === "create") {
+            this.createFlag = true;
+          }
+        });
+      }
+    );
+
+    try {
+      this.role = JSON.parse(sessionStorage.getItem("role"));
+    } catch (e) {
+      this.role = null;
+      console.error("JSON.parse error - ", e.message);
+    }
+    if (window.location.href.includes("project") && window.location.href.includes("true")) {
+      this.showCreate = true;
+      this.edit = false;
+      this.view = true;
+      this.viewProject = true;
+      this.buttonFlag = true;
+      this.route.params.subscribe((res) => {
+        if (res && res.projectid) {
+          this.getProjects(Number(window.atob(res.projectid)));
+        }
+        this.getid();
+        this.loadPage({ first: 0, rows: 3000, sortField: null, sortOrder: null });
+      });
+    } else if (window.location.href.includes("project") && window.location.href.includes("false")) {
+      this.showCreate = true;
+      this.edit = true;
+      this.view = false;
+      this.buttonFlag = false;
+      this.route.params.subscribe((res) => {
+        //res.id
+        if (res && res.projectid) {
+        this.getProjects(Number(window.atob(res.projectid)));
+        }
+        this.getid();
+        this.loadPage({ first: 0, rows: 3000, sortField: null, sortOrder: null });
+      });
+    } else {
+      // this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
+      this.fetchWave(null);
+    }
+    this.dashConstantService.getExtensionKey("FileUpload.AllowedExtension.USM.AddImage").subscribe(
+      (res)=>{
+      this.extension = res["allowedFileTypes"];
+      if(this.extension) this.extensionArray = this.extension.split(",");
+      this.allowedTypes = res["allowedFileExtension"];  
+      });
+
+  }
+
+  telemetryImpression() {
+    this.telemetryService.impression("iamp-usm", "detail", "ProjectListViewComponent");
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
+  }
+
+  /**
+   * Invoked when user presses the search button.
+   */
+  search() {
+    if (!this.sub) {
+      this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
+    }
+  }
+
+  loadPage(event) {
+    if (this.role.roleadmin) {
+      let portfolio: UsmPortfolio;
+      try {
+        portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
+      } catch (e) {
+        portfolio = null;
+        console.error("JSON.parse error - ", e.message);
+      }
+      this.example.portfolioId = portfolio;
+    }
+
+    this.projectService.findAll(this.example, event).subscribe(
+      (pageResponse) => {
+        (this.currentPage = pageResponse),
+          (this.projects = this.currentPage.content.sort((a, b) =>
+            a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+          ));
+        this.projects = this.currentPage.content;
+        this.copyblueprintProjects= this.currentPage.content.filter((project) => project.name.toLowerCase()!="core")
+        this.projectsCopy = this.projects;
+        //this.ProjectList = new MatTableDataSource(this.currentPage.content);
+        //this.ProjectList.paginator = this.paginator;
+        //this.ProjectList.sort = this.sort;
+      },
+      (error) => this.messageService.error("Could not get the results", "IAMP")
+    );
+    
+    let allRole = new Role(); /** To fetch all roles */
+    allRole.projectId = null;
+    this.roleService.findAll(allRole,  { first: 0, rows: 1000, sortField: null, sortOrder: null }).subscribe(res=>{
+      let rolesArr = []
+      res.content.forEach((item) => {
+        if (item.id != 6) rolesArr.push(item)    /** Array of all roles */
+      })
+      this.rolesArray = rolesArr.filter(r => r.projectId == this.project.id) /** Project specific roles */
+      if(this.rolesArray.length == 0 && this.project.defaultrole) /** If project specific roles not exist and defaultrole is true */
+      {
+        rolesArr = rolesArr.filter(r => r.projectId == null)
+        this.rolesArray = rolesArr
+      }
+      this.rolesArray.sort((a,b) => a.name.localeCompare(b.name))
+    })
+  }
+  fetchWave(pageEvent) {
+    if (this.role.roleadmin) {
+      let portfolio: UsmPortfolio;
+      try {
+        portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
+      } catch (e) {
+        portfolio = null;
+        console.error("JSON.parse error - ", e.message);
+      }
+      this.example.portfolioId = portfolio;
+    }
+    if (pageEvent == null || !pageEvent) {
+      pageEvent = { page: 0, size: this.pageSize };
+    }
+    this.projectService.FindAll(this.example, pageEvent).subscribe(
+      (pageResponse) => {
+        (this.currentPage = pageResponse),
+          (this.projects = this.currentPage.content.sort((a, b) =>
+            a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+          ));
+        this.projects = this.currentPage.content;
+        this.projectsCopy = this.projects;
+        this.wavesLength = this.currentPage.totalElements;
+        this.ProjectList = new MatTableDataSource(this.currentPage.content);
+        this.ProjectList.paginator = this.paginator;
+        this.ProjectList.sort = this.sort;
+      },
+      (error) => this.messageService.error("Could not get the results", "IAMP")
+    );
+  }
+
+  onRowSelect(event: any) {
+    let id = event.id;
+    this.router.navigate(["/project", id]);
+  }
+
+  showDeleteDialog(rowData: any) {
+    let projectToDelete: Project = <Project>rowData;
+
+    let dialogRef = this.confirmDeleteDialog.open(DeleteComponent, {
+      disableClose: true,
+      data: { title: "Delete Project", message: "Are you sure you want to delete?" },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === "yes") {
+        this.delete(projectToDelete);
+      }
+    });
+  }
+
+  // private delete(projectToDelete: Project) {
+  //     let id = projectToDelete.id;
+
+  //     this.projectService.delete(id).
+  //         subscribe(
+  //             response => {
+  //                 this.currentPage.remove(projectToDelete);
+  //                 this.messageService.info('Deleted OK', 'IAMP!');
+  //             },
+  //             error => this.messageService.error('Could not delete!', "IAMP")
+  //         );
+  // }
+  rowSelected(item: Project) {
+    this.router.navigate(["/project-view", item.id]);
+  }
+  setSelectedEntities(event) {}
+  // Search() {
+  //   let newtasks = new Array<Project>();
+
+  //   if (this.filterProjectName == "All" || this.filterProjectName == "") {
+  //     this.projects = this.projectsCopy;
+  //   } else {
+  //     this.projects = Object.assign([], this.projectsCopy).filter((item1) =>
+  //       item1.name == null ? "" : item1.name.toLowerCase().indexOf(this.filterProjectName.toLowerCase()) > -1
+  //     );
+  //   }
+  //   if (this.filterProject == "All" || this.filterProject == "") {
+  //     this.projects = this.projects;
+  //   } else {
+  //     this.projects = Object.assign([], this.projects).filter(
+  //       // item1 => item1.description.toLowerCase().indexOf(this.filterProject.toLowerCase()) > -1)
+  //       (item1) =>
+  //         item1.description == null ? "" : item1.description.toLowerCase().indexOf(this.filterProject.toLowerCase())
+  //> -1
+  //     );
+  //     // newtasks = this.projectsCopy.filter(element => element.description == this.filterProject)
+  //   }
+
+  //   this.ProjectList = new MatTableDataSource(this.projects);
+  //   this.ProjectList.sort = this.sort;
+  //   this.ProjectList.paginator = this.paginator;
+  // }
+  Search(pageEvent) {
+    let newtasks = new Array<Project>();
+    if (pageEvent == null || !pageEvent) {
+      pageEvent = { page: 0, size: this.pageSize };
+    }
+    let params;
+    if (
+      (this.filterProjectName == undefined || this.filterProjectName == "") &&
+      (this.filterProject == undefined || this.filterProject == "")
+    ) {
+      this.Clear();
+      this.filterFlag = false;
+    }
+    //  else if (this.filterProjectName == "" || this.filterProject == "") {
+    //   this.Clear();
+    //   this.filterFlag = false;
+    // }
+    else if (
+      this.filterProjectName != undefined &&
+      (this.filterProject == undefined || this.filterProject == "")
+    ) {
+      params = {
+        name: this.filterProjectName,
+      };
+      this.filterFlag = true;
+    } else if (
+      (this.filterProjectName == undefined || this.filterProjectName == "") &&
+      this.filterProject != undefined
+    ) {
+      params = {
+        portfolioId: this.filterProject,
+      };
+      this.filterFlag = true;
+    } else {
+      params = {
+        name: this.filterProjectName,
+        portfolioId: this.filterProject,
+      };
+      this.filterFlag = true;
+    }
+    if (this.role.roleadmin) {
+      let portfolio: UsmPortfolio;
+      try {
+        portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
+      } catch (e) {
+        portfolio = null;
+        console.error("JSON.parse error - ", e.message);
+      }
+      params.portfolioId = portfolio;
+    }
+
+    if (this.filterFlag) {
+      this.projectService.search(params, pageEvent).subscribe((res) => {
+        this.projects = res.content;
+        this.projectsCopy = this.projects;
+        this.wavesLength = res.totalElements;
+        this.ProjectList = new MatTableDataSource(res.content);
+        this.ProjectList.sort = this.sort;
+        this.ProjectList.paginator = this.paginator;
+      });
+    }
+  }
+
+  Clear() {
+    this.filterProject = undefined;
+    this.filterProjectName = undefined;
+    this.projectSearched = undefined;
+    this.filterFlag1 = false;
+    this.myInputReference.nativeElement.value = null;
+    this.fetchWave(null);
+    this.filterFlag = false;
+  }
+  assignCopy() {
+    this.projects = Object.assign([], this.projectsCopy);
+  }
+  filterItem(value, pageEvent) {
+    if (!value) {
+      this.assignCopy();
+    }
+    if (this.projectSearched == "" || this.projectSearched == undefined) {
+      this.Clear();
+    } else {
+      let params;
+      params = {
+        name: this.projectSearched,
+      };
+      if (this.role.roleadmin) {
+        let portfolio: UsmPortfolio;
+        try {
+          portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
+        } catch (e) {
+          portfolio = null;
+          console.error("JSON.parse error - ", e.message);
+        }
+        params.portfolioId = portfolio;
+      }
+      this.filterFlag1 = true;
+      if (pageEvent == null || !pageEvent) {
+        pageEvent = { page: 0, size: this.pageSize };
+      }
+      if (this.filterFlag1) {
+        this.projectService.search(params, pageEvent).subscribe((res) => {
+          this.projects = res.content;
+          this.projectsCopy = this.projects;
+          this.wavesLength = res.totalElements;
+          this.pageIndex = 0;
+          this.ProjectList = new MatTableDataSource(res.content);
+          this.ProjectList.sort = this.sort;
+          this.ProjectList.paginator = this.paginator;
+        });
+      }
+    }
+  }
+  copyblueprint() {
+    this.clickedcopyblueprint = true;
+    if (this.fromProject == "" || this.fromProject == null || this.fromProject == undefined) {
+      this.messageService.info("Project Should be Selected", "IAMP");
+      this.clickedcopyblueprint = false;
+    } 
+    else if (this.fromProject == this.project.name) {
+      this.messageService.info("Source Project and Destination Project cannot be same", "IAMP");
+      this.clickedcopyblueprint = false;
+    }
+    else {
+        this.busy1 = this.projectService
+        .copyBluePrint(this.fromProject, this.project.name, this.project.id)
+        .subscribe(
+          (res) => {
+            this.messageService.info("Copy Blue Print Pipeline has started. Please check the Job Status", "IAMP");
+          },
+          (error) => {
+            if (error instanceof TypeError)
+              this.messageService.error("Copy Blueprint has already been done for this project", "IAMP");
+            else this.messageService.error("Copy blueprint failed", "IAMP");
+          }
+        );
+    }
+  }
+
+  profileImageAdded(event) {
+    if (event && event.target.files && event.target.files[0]) {
+      if (event.target.files[0].size > 5 * 1000000) {
+        this.messageService.error("Image file size exceeds 5 MB", "IAMP");
+        return;
+      } else if (event.target.files[0].name.length > 100) {
+        this.messageService.error("Image Name  cannot be more than 100 characters", "IAMP");
+        return;
+      } else if (!this.extensionArray?.includes(event.target.files[0].type )){
+        this.messageService.error("File type should be "+this.allowedTypes+" ", "IAMP");
+        return;
+      } 
+      else {
+        this.helperService.toBase64(event.target.files[0], (base64Data) => {
+          this.project.logo = base64Data;
+          this.project.logoName = event.target.files[0].name;
+          this.url = "data:image/png;base64," + this.project.logo;
+        });
+      }
+    } else this.url = null;
+  }
+  removelogo() {
+    this.url = null;
+    // this.myInputReference1.nativeElement.value = null;
+    this.project.logo = null;
+    this.project.logoName = null;
+  }
+
+  // checkEnterPressed(event: any, val: any, pageEvent: any) {
+  //   if (event.keyCode === 13) {
+  //     this.projectSearched=event.srcElement.value;
+  //     this.filterItem(event.srcElement.value, null);
+  //   }
+  // }
+  callProjects() {
+    this.loadPage({ first: 0, rows: 3000, sortField: null, sortOrder: null });
+    // this.router.navigate(["../"], { relativeTo: this.route });
+  }
+  trackByMethod(index, item) {}
+
+  onPageFired(event) {
+    if (this.filterFlag == false && this.filterFlag1 == false){
+      this.fetchWave({ page: event.pageIndex, size: this.pageSize });
+      this.pageIndex = event.pageIndex;
+    }
+    else if (this.filterFlag == true) this.Search({ page: event.pageIndex, size: this.pageSize });
+    else if (this.filterFlag1 == true)
+      this.filterItem(this.projectSearched, { page: event.pageIndex, size: this.pageSize });
+  }
+
+  checkProjectNameMaxLength() {
+    if (this.project.name.length >= 255) {
+      this.showNameLengthErrorMessage = true;
+    } else {
+      this.showNameLengthErrorMessage = false;
+    }
+  }
+
+  checkDescriptionMaxLength() {
+    if (this.project.description.length >= 255) {
+      this.showDescLengthErrorMessage = true;
+    } else {
+      this.showDescLengthErrorMessage = false;
+    }
+  }
+
+  checkProjectDisplayNameMaxLength() {
+    if (this.project.projectdisplayname.length >= 255) {
+      this.showDisplayNameLengthErrorMessage = true;
+    } else {
+      this.showDisplayNameLengthErrorMessage = false;
+    }
+  }
+  callApi() {
+    // this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
+    if (!this.role.roleadmin) this.getid();
+  }
+
+  timeZoneChanged(timeZone: string): void {
+    this.timeZone = timeZone;
+  }
+
+  excelValueChanged(disableExcel: boolean): void {
+    this.disableExcel = disableExcel;
+  }
+  deleteSpecialChars(event) {
+    var i = event.charCode
+    return this.isValidLetter(i);
+  }
+
+  isValidLetter(i) {
+    return ((i >= 65 && i <= 90) || (i >= 97 && i <= 122) || (i >= 48 && i <= 57) || [8, 13, 16, 17, 20, 95].indexOf(i) > -1)
+  }
+  theme = new Theme();
+  response;
+  saveTheme(theme,project?) {
+    let projectTheme = this.response.content.filter((item) => (item.keys == "Project Theme")
+      && item.project_id.id == this.project.id && item.project_name == this.project.name)[0];
+    let themeId;
+    if (projectTheme && projectTheme.value) {
+      themeId = projectTheme.id
+      this.theme = JSON.parse(projectTheme.value)
+      this.theme.apptheme.themecolor = theme
+      this.theme.widgettheme.tilebackgroundcolor = theme
+      this.theme.widgettheme.proritizeThemeColor = true
+      this.theme.widgettheme.colorpalette = [theme];
+      this.theme.widgettheme.proritizeThemeColorArr = ["tilebackground"]
+    } else {
+      this.theme.apptheme = new AppTheme()
+      this.theme.bcctheme = new BCCTheme()
+      this.theme.dashboardtheme = new DashboardTheme()
+      this.theme.widgettheme = new WidgetTheme()
+      this.theme.apptheme.themecolor = theme
+      this.theme.widgettheme.colorpalette = [theme];
+      this.theme.widgettheme.proritizeThemeColorArr = ["tilebackground"]
+      this.theme.widgettheme.proritizeThemeColor = true
+      this.theme.widgettheme.tilebackgroundcolor = theme
+    }
+      let dashconstant = new DashConstant()
+      dashconstant.keys = "Project Theme"
+      dashconstant.project_id = new Project({ id: project?project.id:this.project.id })
+      dashconstant.project_name = project?project.name:this.project.name
+      dashconstant.value = JSON.stringify(this.theme)
+      dashconstant.id = themeId
+    if(this.themeoriginalcolor != this.theme.apptheme.themecolor){
+      this.dashConstantService.saveTheme(dashconstant).subscribe(
+        response => {
+          sessionStorage.setItem("AppCacheDashConstant", "true");
+          sessionStorage.setItem("CacheDashConstant", "true");
+          sessionStorage.setItem("UpdatedUser", "true");
+      })
+    }
+    this.listView();
+  }
+  getDashConstant(theme,project?) {
+    if (theme) {
+      let dashconstant = new DashConstant()
+      dashconstant.keys = "Project Theme"
+      dashconstant.project_id = new Project({ id: project?project.id:this.project.id })
+      dashconstant.project_name = project?project.name:this.project.name
+      this.dashConstantService.findAll(dashconstant, this.lazyload).subscribe((res) => {
+        this.response = res
+      }, error => { this.listView() }, () => {
+        this.saveTheme(theme,project)
+      })
+    }
+  }
+
+}

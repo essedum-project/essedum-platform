@@ -1,0 +1,23 @@
+<div mat-button [matMenuTriggerFor]="main_menu"
+    class="aip-cursor le-u-header-md d-flex align-items-center le-u-pad-lr-16" style="color: #737373">
+    <i class="icon x-24 icon-add"></i>&nbsp;
+    <!-- <i class="icon x-24 icon-add"></i>&nbsp;Create Artifact -->
+</div>
+<mat-menu #main_menu="matMenu">
+    <ng-container *ngFor="let mainItem of my_menu">
+        <div *ngIf="isObject(mainItem)">
+            <ng-container *ngFor="let mainItems of objectKeys(mainItem)">
+                <div mat-menu-item [matMenuTriggerFor]="sub_menu">{{ mainItems }}</div>
+                <mat-menu #sub_menu="matMenu">
+                    <div *ngFor="let subItem of mainItem[mainItems]" class="le-u-header-md" mat-menu-item
+                        (click)="alertObject(subItem,mainItems)" (click)="open(mainItems)">
+                        {{subItem.alias}}</div>
+                </mat-menu>
+            </ng-container>
+        </div>
+        <div *ngIf="!isObject(mainItem)">
+            <div mat-menu-item (click)="alertString(mainItem)" (click)="open(mainItem)">{{ mainItem }}</div>
+        </div>
+    </ng-container>
+</mat-menu>
+

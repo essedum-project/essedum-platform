@@ -1,0 +1,49 @@
+.pdf{
+    height: 290px;
+}
+
+.pagination{
+    width: fit-content;
+    margin: auto;
+}
+
+.ng2-pdf-viewer-container{
+    overflow-x: unset ;
+    position: unset ;
+}
+.msg-banner{
+    padding: 10px;
+    border-radius: 5px;
+    background-color: rgb(255, 255, 255);
+    // width: 730px;
+    text-align: justify;
+    overflow-wrap: break-word !important;
+    // display: block;
+    line-height: 1.2;
+    word-wrap: break-word;
+}
+
+.text-preview{
+    font: normal normal normal 14px/20px Roboto;
+    text-align: center;
+    padding: 21% 0;
+    justify-content: center;
+}
+
+.cont{
+    height: 540px;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.spinner-preview{
+    font: normal normal normal 14px/20px Roboto;
+    text-align: center;
+    padding: 21% 0;
+    justify-content: center;
+    opacity: 1;
+}
+::ng-deep pre {
+    overflow: unset;
+    line-height: 1.2;
+}

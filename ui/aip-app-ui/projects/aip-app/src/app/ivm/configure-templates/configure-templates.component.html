@@ -1,0 +1,159 @@
+<div class="clearfix " id="mainCtr">
+    <div class="container-fluid">
+        <div class="le-l-middle-col le-u-no-mar-l__mb" id="mainrightCnt">
+            <div class="le-l-level1-wrapper">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="le-l-level1-middle-col le-l-base-layout-center">
+                            <h1 class="le-u-header-xxl le-u-mar-b-32">Manage Template</h1>
+                            <div class="le-l-level2-middle-ctr">
+                                <div class="le-l-level2-middle-col le-u-mar-b-24__mb">
+                                    <leds-panel>
+                                        <div class="le-u-pad-lr-16 le-u-pad-tb-24">
+                                            <div class="row le-u-pad-lr-16 align-items-center">
+                                                <div class="col-md-9">
+                                                    <div class="le-u-header-md">Select type</div>
+                                                    <leds-select [options]="types" label="" [required]="false"
+                                                        [disabled]="false" designType="default" [isMultiple]="false"
+                                                        (selectChange)="selectType($event)" [(ngModel)]="selectedType"></leds-select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <leds-button nameText="secondaryButton" idText="secondaryButton"
+                                                        [disabled]="false" buttonType="button"
+                                                        (click)="open(createTemplate)" designType="secondary">
+                                                        Create Template
+                                                    </leds-button>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="selectedType">
+                                                <div class="col-md-6">
+                                                    <div class="le-u-header-md">Select Template</div>
+                                                    <leds-select [options]="template" label="" [required]="false"
+                                                        [disabled]="false" designType="default" [isMultiple]="false" [(ngModel)]="slectedTemplate"
+                                                        (selectChange)="selectTemplate($event)"></leds-select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </leds-panel>
+                                    <div class="le-u-mar-t-32" *ngIf="slectedTemplate" style="position: relative;">
+                                        <leds-panel>
+                                            <div class="le-u-pad-lr-16 le-u-pad-tb-24">
+                                                <div
+                                                    class="le-u-mar-b-16 d-flex justify-content-end align-items-center">
+                                                    <!-- In your HTML file -->
+                                                    <input type="file" #csvFileInput (change)="uploadAndReadCSV($event)"
+                                                        style="display:none" accept=".csv" />
+                                                    <leds-tooltip [tooltip]="'Upload Data'" [position]="'above'">
+                                                        <span class="le-u-mar-lr-8 aip-cursor"
+                                                            (click)="openFileInput()">
+                                                            <i
+                                                                class="icon x-24 upload-icon aip-led-icons"></i></span></leds-tooltip>
+                                                    <div class="le-u-mar-8"></div>
+                                                    <leds-tooltip [tooltip]="'Download Template'" [position]="'above'">
+                                                        <span (click)="downloadCsvTemplate()"
+                                                            class="le-u-mar-lr-16 aip-cursor"><i
+                                                                class="icon x-24 download-icon aip-led-icons"></i></span>
+                                                    </leds-tooltip>
+                                                </div>
+                                                <leds-data-grid>
+                                                    <table dataGridTable>
+                                                        <thead>
+                                                            <tr>
+                                                                <th scope="col">Question Id</th>
+                                                                <th scope="col">Question Content</th>
+                                                                <th scope="col">Response Type</th>
+                                                                <th scope="col">Options</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr *ngFor="let template of templateData">
+                                                                <td>{{template.question_id}}</td>
+                                                                <td>{{template.question_content}}</td>
+                                                                <td>{{template.response_type}}</td>
+                                                                <td>{{template?.options}}</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    <leds-button nameText="addButton" idText="addButton"
+                                                        buttonType="button" designType="icon"
+                                                        (click)="open(addTemplate)">
+                                                        <span class="le-c-btn--icon__icon">
+                                                            <i class="icon purple x-16 icon-add"></i>
+                                                        </span>
+                                                        <span class="le-c-btn--icon__text">Add Template Data</span>
+                                                    </leds-button>
+                                                </leds-data-grid>
+                                            </div>
+                                        </leds-panel>
+                                        <leds-spinner bdColor="rgba(51,60,60,0.8)" [size]="'default'"
+                                            [color]="'#8626c3'" [type]="'ball-spin'" [fullScreen]="false"
+                                            [showSpinner]="showSpinner">
+                                            <p loadingText> CSV is being Uploaded</p>
+                                        </leds-spinner>
+                                    </div>
+
+
+                                </div>
+
+                                <div class="le-l-level2-right-col">
+                                    <leds-panel>
+                                        <div class="le-u-pad-24 le-u-header-md">
+                                            <div class="d-flex justify-content-center align-items-center flex-column">
+                                                <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive"
+                                                    alt="aip_empty_state_leds" style="width:15rem" />
+                                                Arriving soon
+                                            </div>
+                                        </div>
+                                    </leds-panel>
+                                </div>
+                            </div>
+
+                            <div class="row le-u-mar-b-32" *ngIf="slectedTemplate &&selectedType">
+                                <div class="col-lg-12">
+                                    <div class="">
+                                        <hr class="le-u-mar-b-24 le-u-mar-t-24 le-u-hor-line" />
+                                        <div>
+                                            <leds-button (click)="saveTemplate()">Submit</leds-button>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Template Creation -->
+<ng-template #createTemplate let-modal>
+    <div class="le-u-pad-24">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="le-u-header-xxl">Create Template</div>
+            <div class="" (click)="close()"><i class="icon x-16 aip-icons close-icon"></i></div>
+        </div>
+        <div class="le-u-mar-t-24">
+            <div class="">
+                <div class="le-u-header-md">Select type</div>
+                <leds-select [options]="types" label="" [required]="false" [disabled]="false" designType="default"
+                    [isMultiple]="false" (selectChange)="selectTypeNew($event)"></leds-select>
+            </div>
+            <div class="">
+                <div class="le-u-header-md">Template Name</div>
+                <leds-input-field placeholder="" label="" designType="default" inputType="text" [disabled]="false"
+                    [required]="false" styleClass="" [(ngModel)]="templateName"></leds-input-field>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end">
+            <leds-button nameText="miniPrimaryButton" idText="miniPrimaryButton" [disabled]="false" buttonType="button"
+                designType="miniPrimary" (click)="addSingleTemplate()">
+                Create Template
+            </leds-button>
+        </div>
+    </div>
+</ng-template>
+<!-- Adding single Data to Template -->
+<ng-template #addTemplate let-modal>
+    <app-add-template [templateId]="tempId" (newTemplate)="newTemplate($event)"></app-add-template>
+</ng-template>

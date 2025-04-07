@@ -1,0 +1,120 @@
+<form [formGroup]="dynamicInputDataGroup">
+  <div class="dynamic-controls-wrapper" formArrayName="dynamicValues">
+    <div class="detailer" [ngStyle]="check.value.class" *ngFor="let check of getFormArray(); let i = index"
+      [formGroupName]="i">
+      <p-orderList [header]="check.value.label" id="list-box" [value]="tableColumnsActualOrder" controlsPosition="right"
+        *ngIf="check.value.type === 'ListBox'" [(selection)]="columnsSelected" (onReorder)="getColumnNewOrder()">
+        <ng-template let-column pTemplate="item">
+          <div class="sort-list-label">
+            <span>{{ column }}</span>
+          </div>
+        </ng-template>
+      </p-orderList>
+
+      <span class="p-float-label" *ngIf="
+          check.value.type === 'KeyFilter' &&
+          check.value.label === 'New Column Name'
+        ">
+        <input id="key-filter-{{ check.value.id }}" formControlName="inputValue" type="text" pInputText
+          pKeyFilter="alphanum" />
+        <label for="key-filter-{{ check.value.id }}">{{
+          check.value.label
+          }}</label>
+        <span class="ai-form-error" *ngIf="getErrors(i)">{{
+          getErrorMessage(i, 'KeyFilter')
+          }}</span>
+      </span>
+      <span class="p-float-label" *ngIf="
+          check.value.type === 'KeyFilter' &&
+          check.value.label !== 'New Column Name'
+        ">
+        <input id="key-filter-{{ check.value.id }}" formControlName="inputValue" type="text" pInputText />
+        <label for="key-filter-{{ check.value.id }}">{{
+          check.value.label
+          }}</label>
+        <span class="ai-form-error" *ngIf="getErrors(i)">{{
+          getErrorMessage(i, 'KeyFilter')
+          }}</span>
+      </span>
+      <span class="p-float-label"
+        *ngIf="check.value.type === 'Dropdown' && check.value.label !== 'Scale' && check.value.label !== 'Method' && check.value.label !== 'Interpolation Method'
+          && check.value.label !== 'Sampling Technique' && (check.value.label !== 'Method' || this.selectedWranglingAction.function !== 'Resampling') && check.value.label !== 'Drop NaN'">
+        <!-- <p-dropdown id="drop-down-{{ check.value.id }}" appendTo="body" formControlName="inputValue" optionLabel="label"
+            [autoDisplayFirst]="false" [options]="dropDownOptions" (onChange)="getDropdownValue($event.value, check)">
+        </p-dropdown> -->
+        <div>
+        <leds-select [options]=dropDownOptions [label]=check.value.label [designType]="'default'"
+          (selectChange)="getDropdownValue($event, check)"></leds-select></div>
+        <!-- <label for="drop-down-{{ check.value.id }}">{{
+            check.value.label
+            }}</label> -->
+      </span>
+      <span class="p-float-label"
+        *ngIf="(check.value.type === 'Dropdown' && check.value.label === 'Scale'||check.value.label === 'Method'|| check.value.label === 'Sampling Technique' || check.value.label === 'Drop NaN' && check.value.inputValue.value !=='tf_idf' && check.value.inputValue.value !=='bag_of_words') ">
+        <!-- <p-dropdown id="drop-down-{{ check.value.id }}" appendTo="body" formControlName="inputValue" optionLabel="label"
+          [autoDisplayFirst]="false" [options]="check.value.options"
+          (onChange)="getBinningDropdownValue($event.value, check)"></p-dropdown>
+        <label for="drop-down-{{ check.value.id }}">{{
+          check.value.label
+          }}</label> -->
+        <leds-select [options]=[{viewValue:check.value.options,value:check.value.options}] [label]=check.value.label
+          [designType]="'default'" (selectChange)="getBinningDropdownValue($event, check)"></leds-select>
+      </span>
+      <span class="p-float-label" *ngIf="displayThirdDropdown(check,i)">
+        <!-- <p-dropdown id="drop-down-{{ check.value.id }}" appendTo="body" formControlName="inputValue" optionLabel="label"
+          [autoDisplayFirst]="false" [options]="check.value.thirdLevelDropdownOptions"
+          (onChange)="getBinningDropdownValue($event.value, check)"></p-dropdown>
+        <label for="drop-down-{{ check.value.id }}">{{
+          check.value.label
+          }}</label> -->
+        <leds-select
+          [options]=[{viewValue:check.value.thirdLevelDropdownOption,value:check.value.thirdLevelDropdownOption}]
+          [label]=check.value.label [designType]="'default'"
+          (selectChange)="getBinningDropdownValue($event, check)"></leds-select>
+      </span>
+      <span class="p-float-label" *ngIf="check.value.type === 'MultiSelect'">
+        <!-- <p-multiSelect id="multi-{{ check.value.id }}" appendTo="body" emptyFilterMessage="No data available"
+          [options]="columnListValue" formControlName="inputValue"></p-multiSelect>
+        <label for="multi-{{ check.value.id }}">{{ check.value.label }}</label> -->
+        <leds-select
+          [options]="[{viewValue: columnListValue, value: columnListValue}]"
+          [label]=check.value.label [designType]="'default'" [isMultiple]="true"
+          ></leds-select>
+      </span>
+      <span class="ai-form-error" *ngIf="getErrors(i)">{{
+        getErrorMessage(i, 'MultiSelect')
+        }}</span>
+      <span class="p-radio-label" *ngIf="check.value.type === 'RadioButton'">
+        <!-- <p-radioButton name="groupname" value="{{ check.value.label }}" label="{{ check.value.label }}"
+          formControlName="inputValue"></p-radioButton> -->
+          <div style="margin-top: 8px;">
+          <leds-radio-group>
+            <leds-radio-button
+              [checked]="false"
+              [value]=check.value.label
+              [disabled]="false"
+            >
+            {{ check.value.label }}
+            </leds-radio-button>
+          </leds-radio-group>
+        </div>
+      </span>
+      <span class="p-float-label" *ngIf="displaySpinner(check,i)">
+        <!-- <p-inputNumber [step]=" check.value.steps" [min]="0" formControlName="inputValue"
+          placeholder="{{ check.value.label}}" (onkeypress)="keyPress($event)" pTooltip="{{ check.value.toolTip }}"
+          tooltipPosition="top" [precision]="2" [showButtons]="true">
+        </p-inputNumber> -->
+        <div style="margin-top: 8px;">
+          <leds-input-field [placeholder]="check.value.label" [designType]="'default'" [inputType]="'number'"
+             [min]="0" [step]="check.value.steps" (changesOccur)="keyPress($event)"
+            ></leds-input-field>
+        </div>
+        <div class="ai-form-error" *ngIf="getErrors(i)">
+          {{ getErrorMessage(i, 'Spinner') }}
+        </div>
+      </span>
+
+    </div>
+  </div>
+
+</form>

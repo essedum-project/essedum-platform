@@ -1,0 +1,53 @@
+<div class="col-md-12 centerStyle">
+    <div class="clearfix">
+        <div class="paddTop20">
+            <div class="ams_h2 h2Mar">Stage Configuration</div>
+            <span *ngIf="editScreen" class="ams_back pull-right linkMar">Back to Stages</span>
+            <i *ngIf="editScreen" class="fa fa-caret-square-o-left create-icon-color pull-right linkMar" aria-hidden="true"></i>
+        </div>
+    </div>
+    <div #waveForm="ngForm" ngForm="">
+        <div class="noPad">
+            <div class="padTop20" style="width: 98%; padding-left: 20px">
+                <div class="row rwMAr">
+                    <div class="col-md-6">
+                        <label class="formLabel">Workflow Process*</label>
+                        <mat-select class="txtInput" style="width: 85%" [(ngModel)]="stage &amp;&amp; stage.process_id" name="process" id="process" [ngModelOptions]="{ standalone: true }" placeholder="SELECT" required [compareWith]="compareObjects">
+                            <mat-option *ngFor="let item of processList; trackBy: trackByMethod" [value]="item">
+                                {{ item.process_name }}
+                            </mat-option>
+                        </mat-select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="formLabel">User*</label>
+                        <mat-select class="txtInput" style="width: 85%" [(ngModel)]="stage &amp;&amp; stage.user_id" name="user" id="user" [ngModelOptions]="{ standalone: true }" placeholder="SELECT" required [compareWith]="compareObjects">
+                            <mat-option *ngFor="let item of usersList; trackBy: trackByMethod" [value]="item">
+                                {{ item.user_f_name }}
+                            </mat-option>
+                        </mat-select>
+                    </div>
+                </div>
+                <div class="row rwMAr">
+                    <div class="col-md-6">
+                        <label class="formLabel">Stage*</label>
+                        <input type="text" id="displayName" name="displayName" class="txtInput" 
+                        [(ngModel)]="stage &amp;&amp; stage.stage_id" 
+                        [ngModelOptions]="{ standalone: true }" required 
+                        placeholder="Enter stage workflow at">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="btnMargin">
+            <button *ngIf="!editScreen" type="button" [ngBusy]="{ busy: busy, message: 'Saving User...' }" class="genBtn marRght30">
+                Create
+            </button>
+            <button *ngIf="editScreen" type="button" [ngBusy]="{ busy: busy, message: 'Saving User...' }" class="genBtn marRght30">
+                Update
+            </button>
+            <button type="button" [ngBusy]="{ busy: busy, message: 'Saving User...' }" class="genBtn marRght30">
+                Reset
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,43 @@
+.view-container {
+    height: 90%;
+    margin-left: 20px;
+
+    .radio-button-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        // margin-top: 20px;
+        margin-top: 10px;
+
+        // ::ng-deep {
+        //   .p-radiobutton-icon {
+        //     top: 45%;
+        //   }
+        // }  
+    }
+
+    // .selection-container {
+    //     // width: 30%;
+    //     // margin-top: 25px;
+    //     padding: 10px 0px 5px 0px;
+    //     margin-top: 10px;
+    // }
+
+    .image-text-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        margin-top: 10px;
+        grid-gap: 10px;
+
+        img {
+            width: 400px;
+            height: 300px;
+            border: 1px solid gray;
+        }
+    }
+
+    .panel-footer {
+        float: left;
+        padding: 12px;
+    }
+
+}

@@ -1,0 +1,468 @@
+id,metric_name,metric_definition,dimension_id,priority,nature,category,direction,digital,unit_of_measurement,weightage,last_updated_date,last_updated_by,type,min_value,max_value
+684,"SLO violation duration graph, response time and load for your critical API calls","SLO violation duration graph, response time and load for your critical API calls",207,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+685,Tracing Error Rate for running applications,Tracing Error Rate for running applications,207,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+686,Database response time,Database response time,207,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+687,End-user response time,End-user response time,207,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+688,Requests per minute,Requests per minute,207,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+689,Availability,Availability,207,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+690,Session duration,Session duration,207,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+691,Tracking latency across the entire system,Tracking latency across the entire system,207,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+692,Traffic based on demand on the system,Traffic based on demand on the system,207,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+693,Level of saturation ensuring service performance for customers,Level of saturation ensuring service performance for customers,207,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+694,"SLO violation duration graph, response time and load for your critical API calls","SLO violation duration graph, response time and load for your critical API calls",208,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+695,Tracing Error Rate for running applications,Tracing Error Rate for running applications,208,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+696,Database response time,Database response time,208,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+697,End-user response time,End-user response time,208,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+698,Requests per minute,Requests per minute,208,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+699,Availability,Availability,208,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+700,Session duration,Session duration,208,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+701,Tracking latency across the entire system,Tracking latency across the entire system,208,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+702,Traffic based on demand on the system,Traffic based on demand on the system,208,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+703,Level of saturation ensuring service performance for customers,Level of saturation ensuring service performance for customers,208,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+704,"SLO violation duration graph, response time and load for your critical API calls","SLO violation duration graph, response time and load for your critical API calls",209,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+705,Tracing Error Rate for running applications,Tracing Error Rate for running applications,209,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+706,Database response time,Database response time,209,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+707,End-user response time,End-user response time,209,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+708,Requests per minute,Requests per minute,209,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+709,Availability,Availability,209,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+710,Session duration,Session duration,209,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+711,Tracking latency across the entire system,Tracking latency across the entire system,209,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+712,Traffic based on demand on the system,Traffic based on demand on the system,209,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+713,Level of saturation ensuring service performance for customers,Level of saturation ensuring service performance for customers,209,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+714,"SLO violation duration graph, response time and load for your critical API calls","SLO violation duration graph, response time and load for your critical API calls",210,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+715,Tracing Error Rate for running applications,Tracing Error Rate for running applications,210,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+716,Database response time,Database response time,210,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+717,End-user response time,End-user response time,210,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+718,Requests per minute,Requests per minute,210,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+719,Availability,Availability,210,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+720,Session duration,Session duration,210,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+721,Tracking latency across the entire system,Tracking latency across the entire system,210,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+722,Traffic based on demand on the system,Traffic based on demand on the system,210,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+723,Level of saturation ensuring service performance for customers,Level of saturation ensuring service performance for customers,210,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+724,"SLO violation duration graph, response time and load for your critical API calls","SLO violation duration graph, response time and load for your critical API calls",211,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+725,Tracing Error Rate for running applications,Tracing Error Rate for running applications,211,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+726,Database response time,Database response time,211,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+727,End-user response time,End-user response time,211,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+728,Requests per minute,Requests per minute,211,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+729,Availability,Availability,211,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+730,Session duration,Session duration,211,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+731,"SLO violation duration graph, response time and load for your critical API calls","SLO violation duration graph, response time and load for your critical API calls",212,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+732,Tracing Error Rate for running applications,Tracing Error Rate for running applications,212,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+733,Database response time,Database response time,212,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+734,End-user response time,End-user response time,212,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+735,Requests per minute,Requests per minute,212,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+736,Availability,Availability,212,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+737,Session duration,Session duration,212,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+738,Tracking latency across the entire system,Tracking latency across the entire system,212,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+739,Traffic based on demand on the system,Traffic based on demand on the system,212,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+740,Level of saturation ensuring service performance for customers,Level of saturation ensuring service performance for customers,212,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+741,"SLO violation duration graph, response time and load for your critical API calls","SLO violation duration graph, response time and load for your critical API calls",214,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+742,Tracing Error Rate for running applications,Tracing Error Rate for running applications,214,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+743,Database response time,Database response time,214,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+744,End-user response time,End-user response time,214,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+745,Requests per minute,Requests per minute,214,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+746,Availability,Availability,214,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+747,Session duration,Session duration,214,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+748,Tracking latency across the entire system,Tracking latency across the entire system,214,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+749,Traffic based on demand on the system,Traffic based on demand on the system,214,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+750,Level of saturation ensuring service performance for customers,Level of saturation ensuring service performance for customers,214,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+751,"SLO violation duration graph, response time and load for your critical API calls","SLO violation duration graph, response time and load for your critical API calls",216,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+752,Tracing Error Rate for running applications,Tracing Error Rate for running applications,216,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+753,Database response time,Database response time,216,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+754,End-user response time,End-user response time,216,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+755,Requests per minute,Requests per minute,216,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+756,Availability,Availability,216,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+757,Session duration,Session duration,216,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+758,Tracking latency across the entire system,Tracking latency across the entire system,216,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+759,Traffic based on demand on the system,Traffic based on demand on the system,216,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+760,Level of saturation ensuring service performance for customers,Level of saturation ensuring service performance for customers,216,NULL,NULL,AMS Effectiveness,Up,NULL,%,100,NULL,NULL,NULL,0,5
+886,Agile maturity,Agile maturity,329,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+887,% of Applications/Products that have adopted DevSecOps model,% of Applications/Products that have adopted DevSecOps model,332,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+888,% of tickets addressed through manual SOPs,NULL,336,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+889,% of Ticket Reduction (due to self-service),% of Ticket Reduction (due to self-service),336,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+890,% of applications enabled for capturing performance data,% of applications enabled for capturing performance data,338,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+891,% of alerts with intelligent machine driven processing,NULL,339,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+892,% of app impact correlated with business KPIs,% of app impact correlated with business KPIs,340,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+893,% of Ticket Reduction (Due to Elimination),NULL,341,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+894,Zero Touch Ticket Automation %,NULL,342,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+895,Zero Touch Ticket Automation %,NULL,343,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+896,% of Tickets partially automated,% of Tickets partially automated,336,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+897,% of Ticket Reduction (due to self-serviced),NULL,343,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+898,% of alerts suppressed,NULL,345,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+899,SLA Adherence Improvement %,NULL,347,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+900,% of Application Availability Improvement,NULL,348,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+901,% Coverage of applications in KM central repository,% Coverage of applications in KM central repository,349,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,4
+902,"% of alerts, anomalies in the system proactively self healed through automation","% of alerts, anomalies in the system proactively self healed through automation",350,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+903,% of code delivered through LCNC,NULL,352,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+904,Business KPIs monitored and optimized,Business KPIs monitored and optimized,353,NULL,NULL,AMS Effectiveness,Up,NULL,#,NULL,NULL,NULL,NULL,0,5
+905,Bot to Human Ratio %,NULL,354,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+906,Improvement in TAT %,NULL,355,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+907,% of value stream activities mapped and monitored through command center,NULL,356,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+908,% of processes mined through AI/ML driven process analytics,NULL,353,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+909,Improvement in MTTR %,NULL,354,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1010,% of platform usage in automation plan,NULL,3318,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1011,Service line alignment for productivity improvement plan,NULL,3318,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1012,Ratio of skilled automation FTE identified/skilled automation FTE required,NULL,3318,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1013,% of infra provisioning requests processed through on-demand infra provisioning tools,NULL,3320,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1014,% of apps having automated data refresh from prod to lower environments,NULL,3320,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1015,% of automated deployments from package repository,NULL,3320,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1016,% of DB objects with automated data archival,NULL,3321,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1017,% of data objects with profiling and cleaning managed through data management tools,NULL,3321,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1018,% of configuration/low code driven data migration,NULL,3321,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1019,"% of SLAs auto calculated, real-time",NULL,3322,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1020,% of compliance reports auto generated,NULL,3322,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1021,% of status reports auto generated,NULL,3322,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1023,% applications and infra using observability tools,NULL,3323,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1024,% of automated capacity planning,NULL,3325,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1025,% of DB objects monitored in automated manner,NULL,3325,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1026,% of apps havings APM configured for monitoring,NULL,3325,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,100
+1027,% of apps leveraging AI based recommendations in operations,NULL,3326,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1028,% of apps with automated monitoring and reporting of app health,NULL,3327,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1029,% of alerts generated alerts that are self-healed,NULL,3327,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1030,% of business disruptions identified and self-healed,NULL,3327,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1031,% of business processed monitored through the integrated command centers,NULL,3327,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1032,% of synthetic alerts generated based on log analytics,NULL,3328,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1033,ratio of benefits realized to the benefits planned,NULL,3330,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,100
+1034,% applications and infra using observability tools,NULL,3330,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1035,Number of feedbacks per established channels,NULL,3331,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1036,% of App/Infra provisioned on demand,NULL,3332,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1037,% of reusable artefacts accessible to the entire org,NULL,3333,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1038,% of applications/portfolios having defined team structure,NULL,3334,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1039,% of Applications/Products that have adopted DevSecOps model,NULL,3335,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1040,% of reports generated through self-service,NULL,3336,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1041,% of data update requests automated,NULL,3336,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1042,% of simple queries automated and addressed through the chatbot,NULL,3336,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1043,% of batch job failures predicted by ML,NULL,3336,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1044,% of incidents auto routed and responded,NULL,3336,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1045,% of user request exceptions for security policy deviation,NULL,3336,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1046,% of server and DB failures predicted by ML,NULL,3336,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1047,% of auto resolved incidents based on ML prediction,NULL,3336,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1048,% of service requests auto resolved,NULL,3336,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1049,% of simple queries automated,NULL,3336,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1050,% of tickets auto enriched with additional relevant data,NULL,3336,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1051,% of UAM requests automated,NULL,3336,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1052,% of Shift Mangement process automation,NULL,3336,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1053,% of Applications and teams following defined processes and tools,NULL,3336,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,50
+1054,% of change tickets automatically generated,NULL,3337,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1055,% of regression test cases automated,NULL,3337,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1056,% of performance test cases automated,NULL,3337,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1057,% of deployments supporting automated rollback and rollforward,NULL,3337,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1058,% of code gated through code quality tools,NULL,3337,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1059,% of applications having end to end traceability between code and other SDLC artefacts,NULL,3337,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1060,% of model based CR estimates,NULL,3337,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1061,% of apps following trunk based release approach,NULL,3337,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1062,% of code generated,NULL,3337,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1063,% of DB change and rollback requests handled with automation,NULL,3337,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1064,% of unit testing automated,NULL,3337,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1065,% of apps following gated checkin for code quality,NULL,3337,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1066,% of LoBs following automated progressive testing,NULL,3337,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1067,% of processes having SOPs and SOPs are automated,NULL,3338,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1068,% of team members that can build automation independently,NULL,3338,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1069,average year on year ticket reduction through different intervention plans in last 3 years,NULL,3339,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,500
+1070,% of improvement suggestions through proactive introspection,NULL,3339,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1071,% of Applications and teams following defined tools,NULL,3340,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,60
+1155,% of problem tickets processed through PMA tool,% of problem tickets processed through PMA tool,3432,Yes,Controllable,AMS Effectiveness,Up,Yes,%,NULL,NULL,NULL,Engineering Metric,0,5
+1217,% of tickets are handled through standard operating procedures,NULL,3336,NULL,NULL,AMS Effectiveness,Up,NULL,%,NULL,NULL,NULL,NULL,0,80
+1218,% of incidents auto resolved,NULL,3336,NULL,NULL,AMS Effectiveness,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+1264,Cycle time reduction,Cycle time reduction,329,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1265,Time savings,Time savings,329,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1266,Reduction in decision-making time,Reduction in decision-making time,329,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1267,Reduction in processing time,Reduction in processing time,329,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1268,"Time to market, Number of successful releases, Customer satisfaction","Time to market, Number of successful releases, Customer satisfaction",332,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1269,"Deployment frequency, Time to market, Mean time to recovery","Deployment frequency, Time to market, Mean time to recovery",332,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1270,"Time to market, Number of successful releases, Employee satisfaction","Time to market, Number of successful releases, Employee satisfaction",332,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1272,"Reduction in incident resolution time, Increase in user satisfaction score","Reduction in incident resolution time, Increase in user satisfaction score",336,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1273,"Reduction in manual effort and time, Increase in accuracy of categorization and prioritization","Reduction in manual effort and time, Increase in accuracy of categorization and prioritization",336,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1274,"Reduction in number of incidents, Increase in system availability","Reduction in number of incidents, Increase in system availability",336,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1275,"Reduction in manual effort and time, Increase in productivity of IT support team","Reduction in manual effort and time, Increase in productivity of IT support team",336,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1276,Reduction in manual categorization by 50%,Reduction in manual categorization by 50%,336,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1277,Reduction in mean time to resolve incidents by 30%,Reduction in mean time to resolve incidents by 30%,336,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1278,Reduction in mean time to fulfill service requests by 40%,Reduction in mean time to fulfill service requests by 40%,336,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1279,Increase in user satisfaction rating by 20%,Increase in user satisfaction rating by 20%,336,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1280,"Increase in user adoption rate, reduction in call volume to service desk, increase in successful ticket resolution rate, reduction in average ticket resolution time.","Increase in user adoption rate, reduction in call volume to service desk, increase in successful ticket resolution rate, reduction in average ticket resolution time.",336,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1281,"Reduction in call volume to service desk, increase in successful ticket resolution rate, reduction in average ticket resolution time, increase in user satisfaction rate.","Reduction in call volume to service desk, increase in successful ticket resolution rate, reduction in average ticket resolution time, increase in user satisfaction rate.",336,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1282,"Reduction in average time to resolve incidents, increase in successful incident resolution rate, reduction in number of incidents requiring manual intervention, increase in user satisfaction rate.","Reduction in average time to resolve incidents, increase in successful incident resolution rate, reduction in number of incidents requiring manual intervention, increase in user satisfaction rate.",336,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1283,"Reduction in number of incidents, reduction in average time to identify and resolve incidents, increase in system uptime, increase in user satisfaction rate.","Reduction in number of incidents, reduction in average time to identify and resolve incidents, increase in system uptime, increase in user satisfaction rate.",336,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1284,"Cost Savings, Time Reduction, Accuracy Improvement","Cost Savings, Time Reduction, Accuracy Improvement",338,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1285,"Efficiency Improvement, Error Reduction, Time Savings","Efficiency Improvement, Error Reduction, Time Savings",338,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1286,"Employee Productivity, Efficiency Improvement, Error Reduction","Employee Productivity, Efficiency Improvement, Error Reduction",338,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1287,"Downtime Reduction, Disaster Recovery Time, System Availability","Downtime Reduction, Disaster Recovery Time, System Availability",338,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1288,"Mean time to resolve (MTTR), Number of incidents resolved by automation","Mean time to resolve (MTTR), Number of incidents resolved by automation",339,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1289,"Number of incidents detected before user impact, Reduction in mean time to detect (MTTD)","Number of incidents detected before user impact, Reduction in mean time to detect (MTTD)",339,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1290,"Recovery time objective (RTO), Recovery point objective (RPO)","Recovery time objective (RTO), Recovery point objective (RPO)",339,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1291,"Reduction in false positives, Improvement in accuracy of anomaly detection","Reduction in false positives, Improvement in accuracy of anomaly detection",339,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1292,Mean Time to Recovery (MTTR),Mean Time to Recovery (MTTR),340,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1293,Number of incidents,Number of incidents,340,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1294,Availability percentage,Availability percentage,340,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1295,Number of alerts,Number of alerts,340,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1296,Time to resolve incidents,Time to resolve incidents,340,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1297,Mean Time Between Failures (MTBF),Mean Time Between Failures (MTBF),340,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1298,Number of unplanned outages,Number of unplanned outages,340,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1299,Number of planned outages,Number of planned outages,340,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1300,Response time,Response time,340,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1301,Security incidents,Security incidents,340,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1302,Reduction in manual requests by 50%,Reduction in manual requests by 50%,341,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1303,Increase in customer satisfaction by 20%,Increase in customer satisfaction by 20%,341,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1304,Reduction in resolution time by 30%,Reduction in resolution time by 30%,341,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1305,Increase in first call resolution by 25%,Increase in first call resolution by 25%,341,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1306,Reduction in the number of manual service requests,Reduction in the number of manual service requests,342,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1307,Reduction in the number of incidents,Reduction in the number of incidents,342,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1308,Reduction in the number of organizational silos,Reduction in the number of organizational silos,342,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1309,Reduction in product development time,Reduction in product development time,342,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1310,,,343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1311,Number of tickets resolved through self-service portal,Number of tickets resolved through self-service portal,343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1312,Time saved on routine tasks,Time saved on routine tasks,343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1313,Customer satisfaction score (CSAT) and first response time,Customer satisfaction score (CSAT) and first response time,343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1314,Downtime reduction and maintenance cost savings,Downtime reduction and maintenance cost savings,343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1316,Number of identified process improvements implemented,Number of identified process improvements implemented,343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1317,Number of suggested improvements implemented,Number of suggested improvements implemented,343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1318,Employee engagement and retention rates,Employee engagement and retention rates,343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1319,Time to market and product quality improvement,Time to market and product quality improvement,343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1321,Employee satisfaction and productivity improvement,Employee satisfaction and productivity improvement,343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1322,Reduction in role confusion and increased accountability,Reduction in role confusion and increased accountability,343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1323,Improved decision-making and risk management,Improved decision-making and risk management,343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1324,Improved employee performance and productivity,Improved employee performance and productivity,343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1326,Reduction in product complexity and cost savings,Reduction in product complexity and cost savings,343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1327,Improved product quality and time to market,Improved product quality and time to market,343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1328,Improved product innovation and customer satisfaction,Improved product innovation and customer satisfaction,343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1329,Alignment of product strategy with business objectives and improved resource allocation.,Alignment of product strategy with business objectives and improved resource allocation.,343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1330,"Number of tickets resolved through self-service vs. agent-assisted, customer satisfaction rating of self-service options","Number of tickets resolved through self-service vs. agent-assisted, customer satisfaction rating of self-service options",343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1331,"Time saved per ticket, reduction in error rates, customer satisfaction rating of automated processes","Time saved per ticket, reduction in error rates, customer satisfaction rating of automated processes",343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1332,"Number of tickets resolved using knowledge base, reduction in ticket resolution time, customer satisfaction rating of knowledge base","Number of tickets resolved using knowledge base, reduction in ticket resolution time, customer satisfaction rating of knowledge base",343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1333,"Reduction in downtime, reduction in number of incidents, customer satisfaction rating of proactive monitoring and alerting","Reduction in downtime, reduction in number of incidents, customer satisfaction rating of proactive monitoring and alerting",343,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1334,Number of successful self-service transactions,Number of successful self-service transactions,347,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1335,Number of successful chatbot interactions,Number of successful chatbot interactions,347,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1336,Completion rate of training courses,Completion rate of training courses,347,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1337,Reduction in time to implement changes,Reduction in time to implement changes,347,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1338,"Recovery Time Objective (RTO), Recovery Point Objective (RPO), Mean Time to Recovery (MTTR)","Recovery Time Objective (RTO), Recovery Point Objective (RPO), Mean Time to Recovery (MTTR)",348,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1339,"Time Saved, Error Reduction, Increased Efficiency","Time Saved, Error Reduction, Increased Efficiency",348,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1340,"Mean Time Between Failures (MTBF), Mean Time to Repair (MTTR), Availability Percentage","Mean Time Between Failures (MTBF), Mean Time to Repair (MTTR), Availability Percentage",348,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1341,"Reduction in Downtime, Reduction in Maintenance Costs, Increase in Asset Lifespan","Reduction in Downtime, Reduction in Maintenance Costs, Increase in Asset Lifespan",348,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1342,Reduced time to market by 30%,Reduced time to market by 30%,349,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1343,Reduced time to resolve customer issues by 25%,Reduced time to resolve customer issues by 25%,349,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1344,Increased employee retention rate by 10%,Increased employee retention rate by 10%,349,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1345,Increased number of innovative ideas generated by employees by 25%,Increased number of innovative ideas generated by employees by 25%,349,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1346,Reduction in unplanned downtime,Reduction in unplanned downtime,350,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1347,Increase in accuracy of data,Increase in accuracy of data,350,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1348,Reduction in number of cyber attacks,Reduction in number of cyber attacks,350,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1349,Increase in efficiency of processes,Increase in efficiency of processes,350,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1350,User satisfaction ratings,User satisfaction ratings,352,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1351,User adoption rates,User adoption rates,352,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1352,Page/application load time,Page/application load time,352,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1353,User task completion time,User task completion time,352,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1354,"Time to market, percentage increase in product launches","Time to market, percentage increase in product launches",353,NULL,NULL,Innovation,Up,NULL,#,NULL,NULL,NULL,NULL,0,5
+1355,"Usage rate of tool, decrease in project cycle time","Usage rate of tool, decrease in project cycle time",353,NULL,NULL,Innovation,Up,NULL,#,NULL,NULL,NULL,NULL,0,5
+1356,"Increase in adoption rate of new tools, improvement in productivity metrics","Increase in adoption rate of new tools, improvement in productivity metrics",353,NULL,NULL,Innovation,Up,NULL,#,NULL,NULL,NULL,NULL,0,5
+1357,"Alignment score, improvement in revenue and profit metrics","Alignment score, improvement in revenue and profit metrics",353,NULL,NULL,Innovation,Up,NULL,#,NULL,NULL,NULL,NULL,0,5
+1358,Time to market for new products,Time to market for new products,353,NULL,NULL,Innovation,Up,NULL,#,NULL,NULL,NULL,NULL,0,5
+1362,"Reduction in time to resolve incidents, Increase in first call resolution rate","Reduction in time to resolve incidents, Increase in first call resolution rate",354,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1363,"Reduction in time to escalate incidents, Increase in overall incident resolution rate","Reduction in time to escalate incidents, Increase in overall incident resolution rate",354,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1364,"Reduction in time to detect and resolve events, Increase in proactive resolutions at early stages","Reduction in time to detect and resolve events, Increase in proactive resolutions at early stages",354,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1365,"Reduction in time to identify and resolve service issues, Increase in service availability and uptime","Reduction in time to identify and resolve service issues, Increase in service availability and uptime",354,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1366,Decrease in manual service requests by 50% within 6 months,Decrease in manual service requests by 50% within 6 months,354,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1367,Increase in successful automated event responses by 30% within 3 months,Increase in successful automated event responses by 30% within 3 months,354,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1368,Increase in accuracy of AI/ML predictions by 20% within 6 months,Increase in accuracy of AI/ML predictions by 20% within 6 months,354,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1369,Decrease in manual processes by 40% within 3 months,Decrease in manual processes by 40% within 3 months,354,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1370,Number of processes automated,Number of processes automated,355,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1372,Reduction in response time,Reduction in response time,355,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1373,Reduction in HR inquiries,Reduction in HR inquiries,355,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1374,Increase in user satisfaction ratings,Increase in user satisfaction ratings,356,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1375,Decrease in time-to-market for new features and products,Decrease in time-to-market for new features and products,356,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1376,Increase in successful project delivery and completion rates,Increase in successful project delivery and completion rates,356,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1377,Decrease in process cycle times,Decrease in process cycle times,356,NULL,NULL,Innovation,Up,NULL,%,NULL,NULL,NULL,NULL,0,5
+1507,Female management headcount in percentage,Female management headcount in percentage,3711,High,NULL,Process Efficiency,Up,NULL,%,10,NULL,NULL,NULL,0,70
+1508,Time to hire external workforce in days,Time to hire external workforce in days,3712,High,NULL,Process Efficiency,Down,NULL,%,50,NULL,NULL,NULL,0,30
+1509,New hire retention rate in percentage in a year,New hire retention rate in percentage in a year,3712,High,NULL,Process Efficiency,Up,NULL,%,50,NULL,NULL,NULL,0,90
+1510,External workforce in percentage,External workforce in percentage,3713,High,NULL,Process Efficiency,Up,NULL,Days,25,NULL,NULL,NULL,0,20
+1511,External workforce trained on compliance and security in percentage,External workforce trained on compliance and security in percentage,3713,High,NULL,Training and development,Up,NULL,%,25,NULL,NULL,NULL,0,100
+1512,HR FTEs per 100 employees,HR FTEs per 100 employees,3715,High,NULL,FTE Efficiency,Down,NULL,#,10,NULL,NULL,NULL,0,10
+1513,Cost per hire in dollars,Cost per hire in dollars,3715,High,NULL,Cost Effectiveness,Down,NULL,$,10,NULL,NULL,NULL,0,10000
+1514,Time to hire in days,Time to hire in days,3715,High,NULL,Process Efficency,Down,NULL,Days,10,NULL,NULL,NULL,0,50
+1515,Bad hires as a percentage of total hires,Bad hires as a percentage of total hires,3715,High,NULL,Process Efficiency,Down,NULL,%,10,NULL,NULL,NULL,0,20
+1516,Employee referral rate in percentage,Employee referral rate in percentage,3715,High,NULL,Process Efficiency,Up,NULL,%,10,NULL,NULL,NULL,0,10
+1517,Average time to draft and review JD in hours,Average time to draft and review JD in hours,3716,High,NULL,Process Efficiency,Down,NULL,Days,25,NULL,NULL,NULL,0,10
+1518,Average time for JD alignment and approval,Average time for JD alignment and approval,3716,High,NULL,Process Efficiency,Down,NULL,Days,25,NULL,NULL,NULL,0,30
+1519,Average time to screen 10 profiles for a role in days,Average time to screen 10 profiles for a role in days,3717,High,NULL,Process Efficiency,Down,NULL,Days,25,NULL,NULL,NULL,0,10
+1520,Cost to source 100 profiles for a role in dollars,Cost to source 100 profiles for a role in dollars,3717,High,NULL,Cost Effectiveness,Down,NULL,$,25,NULL,NULL,NULL,0,10000
+1521,Interview conversion rate of screened candidates in percentage,Interview conversion rate of screened candidates in percentage,3717,High,NULL,Candidate conversion,Up,NULL,%,10,NULL,NULL,NULL,0,30
+1522,HR FTEs to source & screen 10 profiles,HR FTEs to source and screen 10 profiles,3717,High,NULL,FTE Efficiency,Down,NULL,#,10,NULL,NULL,NULL,0,10
+1523,Average time taken to schedule the first round of interviews in days,Average time taken to schedule the first round of interviews in days,3718,High,NULL,Process Efficiency,Down,NULL,Days,10,NULL,NULL,NULL,0,10
+1524,Average time taken to schedule subsequent round of interviews in days,Average time taken to schedule subsequent round of interviews in days,3718,High,NULL,Process Efficiency,Down,NULL,Days,10,NULL,NULL,NULL,0,10
+1525,Average time taken to interview a candidate and provide feedback in hours,Average time taken to interview a candidate and provide feedback in hours,3718,High,NULL,Process Efficiency,Down,NULL,Days,10,NULL,NULL,NULL,0,10
+1526,Percentage of candidates clearing round 1,Percentage of candidates clearing round 1,3718,High,NULL,Candidate Conversion,Up,NULL,%,10,NULL,NULL,NULL,0,50
+1527,Percentage of candidates clearing subsequent rounds,Percentage of candidates clearing subsequent rounds,3718,High,NULL,Candidate Conversion,Up,NULL,%,10,NULL,NULL,NULL,0,70
+1528,Average time to complete a background check in days,Average time to complete a background check in days,3718,High,NULL,Process Efficiency,Down,NULL,Days,5,NULL,NULL,NULL,0,10
+1529,Average time to roll out the offer in days,Average time to roll out the offer in days,3718,High,NULL,Process Efficiency,Down,NULL,Days,5,NULL,NULL,NULL,0,10
+1530,Average time taken by a candidate to accept the offer in days,Average time taken by a candidate to accept the offer in days,3718,High,NULL,Process Efficency,Down,NULL,Days,5,NULL,NULL,NULL,0,10
+1531,Percentage of candidates rejecting the offer,Percentage of candidates rejecting the offer,3718,High,NULL,Candidate Conversion,Down,NULL,%,5,NULL,NULL,NULL,0,20
+1532,Percentage of candidates(out of the total offer rolled out) who have been successfully onboarded,Percentage of candidates out of the total offer rolled out who have been successfully onboarded,3719,High,NULL,Candidate Conversion,Up,NULL,%,15,NULL,NULL,NULL,0,90
+1533,New hires receiving basic training in first 3 months in percentage,New hires receiving basic training in first 3 months in percentage,3719,High,NULL,Training and development,Up,NULL,%,10,NULL,NULL,NULL,0,100
+1534,Cost to onboard per hire in dollars,Cost to onboard per hire in dollars,3719,High,NULL,Cost Effectiveness,Down,NULL,$,10,NULL,NULL,NULL,0,2000
+1535,HR FTEs to onboard 100 candidates,HR FTEs to onboard 100 candidates,3719,High,NULL,FTE Efficiency,Down,NULL,#,15,NULL,NULL,NULL,0,10
+1536,Top performing employee turnover rate,Top performing employee turnover rate,3721,High,NULL,Employee performance,Down,NULL,#,10,NULL,NULL,NULL,0,20
+1537,Employee promotions in percentage,Employee promotions in percentage,3721,High,NULL,Employee performance,Up,NULL,%,10,NULL,NULL,NULL,0,20
+1538,Employees with developmental goals in percentage,Employees with developmental goals in percentage,3721,High,NULL,Employee performance,Up,NULL,%,10,NULL,NULL,NULL,0,50
+1539,Employees with goals aligned to org strategy in percentage,Employees with goals aligned to org strategy in percentage,3721,High,NULL,Employee performance,Up,NULL,%,5,NULL,NULL,NULL,0,100
+1540,High performer as a percentage of total employees,High performer as a percentage of total employees,3722,High,NULL,Employee Performance,Up,NULL,%,33,NULL,NULL,NULL,0,30
+1541,Employees with on-time complete performance review in percentage,Employees with on-time complete performance review in percentage,3722,High,NULL,Process Efficiency,Up,NULL,%,33,NULL,NULL,NULL,0,100
+1542,Time to full productivity of new hires in days,Time to full productivity of new hires in days,3722,High,NULL,Process Efficiency,Down,NULL,Days,5,NULL,NULL,NULL,0,90
+1543,Percentage of employees who attended e-learning training,Percentage of employees who attended e-learning training,3723,High,NULL,Training and development,Up,NULL,%,5,NULL,NULL,NULL,0,90
+1544,Average time in days to close an identified skill or capability gap through training,Average time in days to close an identified skill or capability gap through training,3723,High,NULL,Process Efficiency,Down,NULL,Days,10,NULL,NULL,NULL,0,40
+1545,Training hours /employee,Training hours per employee,3723,High,NULL,Training and development,Up,NULL,#,10,NULL,NULL,NULL,0,20
+1546,Percentage of senior level executives undergoing training/month,Percentage of senior level executives undergoing training or month,3723,High,NULL,Training and development,Up,NULL,%,10,NULL,NULL,NULL,0,30
+1547,Learning & development FTE / 100 employees,Learning and Development FTE per 100 employees,3723,High,NULL,FTE Efficiency,Down,NULL,#,10,NULL,NULL,NULL,0,10
+1548,Development goals linked to learning activities in percentage,Development goals linked to learning activities in percentage,3723,High,NULL,Training and development,Up,NULL,%,5,NULL,NULL,NULL,0,80
+1549,Succession pipeline depth,Succession pipeline depth,3724,High,NULL,Employee Performance,Up,NULL,%,100,NULL,NULL,NULL,0,10
+1550,Paycheck errors in percentage,Paycheck errors in percentage,3727,High,NULL,Process Efficiency,Down,NULL,%,100,NULL,NULL,NULL,0,100
+1551,HR headcount cost as percentage of total HR cost,HR headcount cost as percentage of total HR cost,3728,High,NULL,Cost Effectiveness,Down,NULL,%,NULL,NULL,NULL,NULL,0,100
+1552,HR data accuracy in percentage,HR data accuracy in percentage,3726,High,NULL,Process Efficiency,Up,NULL,%,100,NULL,NULL,NULL,0,10
+1553,HR data completeness in percentage,HR data completeness in percentage,3728,High,NULL,Process Efficiency,Up,NULL,%,50,NULL,NULL,NULL,0,100
+1554,HR shared services FTEs per 100 EEs,HR shared services FTEs per 100 EEs,3729,High,NULL,FTE Efficiency,Down,NULL,#,100,NULL,NULL,NULL,0,100
+1555,Requirements clarity index (percentage of requirements that are clearly understood by the development team).,NULL,3733,NULL,NULL,Software Engineering,Up,NULL,NULL,33,NULL,NULL,NULL,0,5
+1556,"Requirements gathering efficiency (e.g., time taken to gather and analyze requirements per project).",NULL,3733,NULL,NULL,Software Engineering,Up,NULL,NULL,33,NULL,NULL,NULL,0,5
+1557,Stakeholder satisfaction with requirements alignment (measured through surveys or feedback).,NULL,3733,NULL,NULL,Software Engineering,Up,NULL,NULL,33,NULL,NULL,NULL,0,5
+1558,Design reusability index (percentage of design components that can be reused across projects).,NULL,3734,NULL,NULL,Software Engineering,Up,NULL,NULL,33,NULL,NULL,NULL,0,5
+1559,"Design adherence to quality standards (e.g., percentage of design violations identified during code reviews).",NULL,3734,NULL,NULL,Software Engineering,Up,NULL,NULL,33,NULL,NULL,NULL,0,5
+1560,"Design review effectiveness (e.g., percentage of identified design issues that are resolved or addressed).",NULL,3734,NULL,NULL,Software Engineering,Up,NULL,NULL,33,NULL,NULL,NULL,0,5
+1561,Average lines of code authored by each developer per specified time period.,NULL,3735,NULL,NULL,Software Engineering,Up,NULL,NULL,33,NULL,NULL,NULL,0,5
+1562,"Code style compliance rate (e.g., percentage of code lines adhering to coding standards).",NULL,3735,NULL,NULL,Software Engineering,Up,NULL,NULL,33,NULL,NULL,NULL,0,5
+1563,"Code quality metrics (e.g., cyclomatic complexity, code duplication) and adherence to best practices.",NULL,3735,NULL,NULL,Software Engineering,Up,NULL,NULL,33,NULL,NULL,NULL,0,5
+1564,"Test coverage (e.g., percentage of requirements covered by test cases).",NULL,3736,NULL,NULL,Software Engineering,Up,NULL,NULL,33,NULL,NULL,NULL,0,5
+1565,"Test execution efficiency (e.g., average time to execute a test case) and defect detection rate.",NULL,3736,NULL,NULL,Software Engineering,Up,NULL,NULL,33,NULL,NULL,NULL,0,5
+1566,Defect resolution time (average time taken to resolve defects) and defect closure rate.,NULL,3736,NULL,NULL,Software Engineering,Up,NULL,NULL,33,NULL,NULL,NULL,0,5
+1567,Deployment time (average time taken to deploy an application) and deployment success rate.,NULL,3737,NULL,NULL,Software Engineering,Up,NULL,NULL,33,NULL,NULL,NULL,0,5
+1568,Mean time to detect (MTTD) and mean time to resolve (MTTR) operational issues.,NULL,3737,NULL,NULL,Software Engineering,Up,NULL,NULL,33,NULL,NULL,NULL,0,5
+1569,Incident resolution time and customer satisfaction with incident handling.,NULL,3737,NULL,NULL,Software Engineering,Up,NULL,NULL,33,NULL,NULL,NULL,0,5
+2631,Cycle time reduction,Cycle time reduction,3334,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2632,Time savings,Time savings,3334,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2633,Reduction in decision-making time,Reduction in decision-making time,3334,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2634,Reduction in processing time,Reduction in processing time,3334,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2635,"Time to market, Number of successful releases, Customer satisfaction","Time to market, Number of successful releases, Customer satisfaction",3335,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2636,"Deployment frequency, Time to market, Mean time to recovery","Deployment frequency, Time to market, Mean time to recovery",3335,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2637,"Time to market, Number of successful releases, Employee satisfaction","Time to market, Number of successful releases, Employee satisfaction",3335,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2639,"Reduction in incident resolution time, Increase in user satisfaction score","Reduction in incident resolution time, Increase in user satisfaction score",3336,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2640,"Reduction in manual effort and time, Increase in accuracy of categorization and prioritization","Reduction in manual effort and time, Increase in accuracy of categorization and prioritization",3336,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2641,"Reduction in number of incidents, Increase in system availability","Reduction in number of incidents, Increase in system availability",3336,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2642,"Reduction in manual effort and time, Increase in productivity of IT support team","Reduction in manual effort and time, Increase in productivity of IT support team",3336,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2643,Reduction in manual categorization by 50%,Reduction in manual categorization by 50%,3336,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2644,Reduction in mean time to resolve incidents by 30%,Reduction in mean time to resolve incidents by 30%,3336,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2645,Reduction in mean time to fulfill service requests by 40%,Reduction in mean time to fulfill service requests by 40%,3336,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2646,Increase in user satisfaction rating by 20%,Increase in user satisfaction rating by 20%,3336,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2647,"Increase in user adoption rate, reduction in call volume to service desk, increase in successful ticket resolution rate, reduction in average ticket resolution time.","Increase in user adoption rate, reduction in call volume to service desk, increase in successful ticket resolution rate, reduction in average ticket resolution time.",3336,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2648,"Reduction in call volume to service desk, increase in successful ticket resolution rate, reduction in average ticket resolution time, increase in user satisfaction rate.","Reduction in call volume to service desk, increase in successful ticket resolution rate, reduction in average ticket resolution time, increase in user satisfaction rate.",3336,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2649,"Reduction in average time to resolve incidents, increase in successful incident resolution rate, reduction in number of incidents requiring manual intervention, increase in user satisfaction rate.","Reduction in average time to resolve incidents, increase in successful incident resolution rate, reduction in number of incidents requiring manual intervention, increase in user satisfaction rate.",3336,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2650,"Reduction in number of incidents, reduction in average time to identify and resolve incidents, increase in system uptime, increase in user satisfaction rate.","Reduction in number of incidents, reduction in average time to identify and resolve incidents, increase in system uptime, increase in user satisfaction rate.",3336,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2651,"Cost Savings, Time Reduction, Accuracy Improvement","Cost Savings, Time Reduction, Accuracy Improvement",3325,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2652,"Efficiency Improvement, Error Reduction, Time Savings","Efficiency Improvement, Error Reduction, Time Savings",3325,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2653,"Employee Productivity, Efficiency Improvement, Error Reduction","Employee Productivity, Efficiency Improvement, Error Reduction",3325,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2654,"Downtime Reduction, Disaster Recovery Time, System Availability","Downtime Reduction, Disaster Recovery Time, System Availability",3325,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2655,"Mean time to resolve (MTTR), Number of incidents resolved by automation","Mean time to resolve (MTTR), Number of incidents resolved by automation",3326,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2656,"Number of incidents detected before user impact, Reduction in mean time to detect (MTTD)","Number of incidents detected before user impact, Reduction in mean time to detect (MTTD)",3326,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2657,"Recovery time objective (RTO), Recovery point objective (RPO)","Recovery time objective (RTO), Recovery point objective (RPO)",3326,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2658,"Reduction in false positives, Improvement in accuracy of anomaly detection","Reduction in false positives, Improvement in accuracy of anomaly detection",3326,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2659,Mean Time to Recovery (MTTR),Mean Time to Recovery (MTTR),3327,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2660,Number of incidents,Number of incidents,3327,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2661,Availability percentage,Availability percentage,3327,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2662,Mean Time to Detect (MTTD),Mean Time to Detect (MTTD),3327,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2663,Number of alerts,Number of alerts,3327,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2664,Time to resolve incidents,Time to resolve incidents,3327,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2665,Mean Time Between Failures (MTBF),Mean Time Between Failures (MTBF),3327,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2666,Number of unplanned outages,Number of unplanned outages,3327,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2667,Number of planned outages,Number of planned outages,3327,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2668,Response time,Response time,3327,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2669,Throughput,Throughput,3327,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2670,Error rate,Error rate,3327,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2671,Security incidents,Security incidents,3327,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2672,Reduction in manual requests by 50%,Reduction in manual requests by 50%,3336,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2673,Increase in customer satisfaction by 20%,Increase in customer satisfaction by 20%,3336,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2674,Reduction in resolution time by 30%,Reduction in resolution time by 30%,3336,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2675,Increase in first call resolution by 25%,Increase in first call resolution by 25%,3336,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2676,Reduction in the number of manual service requests,Reduction in the number of manual service requests,3432,Yes,Controllable,Innovation,Up,Yes,%,NULL,NULL,NULL,Engineering Metric,0,5
+2677,Reduction in the number of incidents,Reduction in the number of incidents,3432,Yes,Controllable,Innovation,Up,Yes,%,NULL,NULL,NULL,Engineering Metric,0,5
+2678,Reduction in the number of organizational silos,Reduction in the number of organizational silos,3432,Yes,Controllable,Innovation,Up,Yes,%,NULL,NULL,NULL,Engineering Metric,0,5
+2679,Reduction in product development time,Reduction in product development time,3432,Yes,Controllable,Innovation,Up,Yes,%,NULL,NULL,NULL,Engineering Metric,0,5
+2680,,,3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2681,Number of tickets resolved through self-service portal,Number of tickets resolved through self-service portal,3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2682,Time saved on routine tasks,Time saved on routine tasks,3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2683,Customer satisfaction score (CSAT) and first response time,Customer satisfaction score (CSAT) and first response time,3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2684,Downtime reduction and maintenance cost savings,Downtime reduction and maintenance cost savings,3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2686,Number of identified process improvements implemented,Number of identified process improvements implemented,3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2687,Number of suggested improvements implemented,Number of suggested improvements implemented,3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2688,Employee engagement and retention rates,Employee engagement and retention rates,3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2689,Time to market and product quality improvement,Time to market and product quality improvement,3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2691,Employee satisfaction and productivity improvement,Employee satisfaction and productivity improvement,3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2692,Reduction in role confusion and increased accountability,Reduction in role confusion and increased accountability,3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2693,Improved decision-making and risk management,Improved decision-making and risk management,3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2694,Improved employee performance and productivity,Improved employee performance and productivity,3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2696,Reduction in product complexity and cost savings,Reduction in product complexity and cost savings,3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2697,Improved product quality and time to market,Improved product quality and time to market,3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2698,Improved product innovation and customer satisfaction,Improved product innovation and customer satisfaction,3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2699,Alignment of product strategy with business objectives and improved resource allocation.,Alignment of product strategy with business objectives and improved resource allocation.,3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2700,"Number of tickets resolved through self-service vs. agent-assisted, customer satisfaction rating of self-service options","Number of tickets resolved through self-service vs. agent-assisted, customer satisfaction rating of self-service options",3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2701,"Time saved per ticket, reduction in error rates, customer satisfaction rating of automated processes","Time saved per ticket, reduction in error rates, customer satisfaction rating of automated processes",3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2702,"Number of tickets resolved using knowledge base, reduction in ticket resolution time, customer satisfaction rating of knowledge base","Number of tickets resolved using knowledge base, reduction in ticket resolution time, customer satisfaction rating of knowledge base",3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2703,"Reduction in downtime, reduction in number of incidents, customer satisfaction rating of proactive monitoring and alerting","Reduction in downtime, reduction in number of incidents, customer satisfaction rating of proactive monitoring and alerting",3339,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2704,Number of successful self-service transactions,Number of successful self-service transactions,3337,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2705,Number of successful chatbot interactions,Number of successful chatbot interactions,3337,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2706,Completion rate of training courses,Completion rate of training courses,3337,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2707,Reduction in time to implement changes,Reduction in time to implement changes,3337,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2708,"Recovery Time Objective (RTO), Recovery Point Objective (RPO), Mean Time to Recovery (MTTR)","Recovery Time Objective (RTO), Recovery Point Objective (RPO), Mean Time to Recovery (MTTR)",3328,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2709,"Time Saved, Error Reduction, Increased Efficiency","Time Saved, Error Reduction, Increased Efficiency",3328,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2710,"Mean Time Between Failures (MTBF), Mean Time to Repair (MTTR), Availability Percentage","Mean Time Between Failures (MTBF), Mean Time to Repair (MTTR), Availability Percentage",3328,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2711,"Reduction in Downtime, Reduction in Maintenance Costs, Increase in Asset Lifespan","Reduction in Downtime, Reduction in Maintenance Costs, Increase in Asset Lifespan",3328,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2712,Reduced time to market by 30%,Reduced time to market by 30%,3333,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2713,Reduced time to resolve customer issues by 25%,Reduced time to resolve customer issues by 25%,3333,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2714,Increased employee retention rate by 10%,Increased employee retention rate by 10%,3333,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2715,Increased number of innovative ideas generated by employees by 25%,Increased number of innovative ideas generated by employees by 25%,3333,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2720,User satisfaction ratings,User satisfaction ratings,3331,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2721,User adoption rates,User adoption rates,3331,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2722,Page/application load time,Page/application load time,3331,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2723,User task completion time,User task completion time,3331,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2724,"Time to market, percentage increase in product launches","Time to market, percentage increase in product launches",3330,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2725,"Usage rate of tool, decrease in project cycle time","Usage rate of tool, decrease in project cycle time",3330,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2726,"Increase in adoption rate of new tools, improvement in productivity metrics","Increase in adoption rate of new tools, improvement in productivity metrics",3330,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2727,"Alignment score, improvement in revenue and profit metrics","Alignment score, improvement in revenue and profit metrics",3330,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2728,Time to market for new products,Time to market for new products,3330,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2732,"Reduction in time to resolve incidents, Increase in first call resolution rate","Reduction in time to resolve incidents, Increase in first call resolution rate",3340,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2733,"Reduction in time to escalate incidents, Increase in overall incident resolution rate","Reduction in time to escalate incidents, Increase in overall incident resolution rate",3340,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2734,"Reduction in time to detect and resolve events, Increase in proactive resolutions at early stages","Reduction in time to detect and resolve events, Increase in proactive resolutions at early stages",3340,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2735,"Reduction in time to identify and resolve service issues, Increase in service availability and uptime","Reduction in time to identify and resolve service issues, Increase in service availability and uptime",3340,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2736,Decrease in manual service requests by 50% within 6 months,Decrease in manual service requests by 50% within 6 months,3340,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2737,Increase in successful automated event responses by 30% within 3 months,Increase in successful automated event responses by 30% within 3 months,3340,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2738,Increase in accuracy of AI/ML predictions by 20% within 6 months,Increase in accuracy of AI/ML predictions by 20% within 6 months,3340,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2739,Decrease in manual processes by 40% within 3 months,Decrease in manual processes by 40% within 3 months,3340,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2740,Number of processes automated,Number of processes automated,3338,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2741,Reduction in unplanned downtime,Reduction in unplanned downtime,3338,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2742,Reduction in response time,Reduction in response time,3338,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2743,Reduction in HR inquiries,Reduction in HR inquiries,3338,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2744,Increase in user satisfaction ratings,Increase in user satisfaction ratings,3332,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2745,Decrease in time-to-market for new features and products,Decrease in time-to-market for new features and products,3332,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2746,Increase in successful project delivery and completion rates,Increase in successful project delivery and completion rates,3332,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+2747,Decrease in process cycle times,Decrease in process cycle times,3332,NULL,NULL,Innovation,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3736,Average leads generated per quarter,NULL,3845,NULL,NULL,Customer Relationship,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3737,Deal conversion rate,NULL,3846,NULL,NULL,Customer Relationship,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3738,Customer Satisfaction,NULL,3846,NULL,NULL,Customer Relationship,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3739,Quota success rate,NULL,3848,NULL,NULL,Customer Relationship,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3740,First Response Time,NULL,3848,NULL,NULL,Customer Relationship,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3741,On Time Delivery,NULL,3850,NULL,NULL,Service And Product Lifecycle,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3742,Cycle Time,NULL,3851,NULL,NULL,Supply chain Management,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3743,Revenue growth,NULL,3853,NULL,NULL,Corporate Functions,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3744,Procurement ROI and benefits,NULL,3854,NULL,NULL,Corporate Functions,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3745,Legal spend as % of Revenue,NULL,3855,NULL,NULL,Corporate Functions,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3746,Time to hire,NULL,3856,NULL,NULL,Corporate Functions,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3747,Training Efficiency,NULL,3857,NULL,NULL,Corporate Functions,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3748,cost per unit produced,NULL,3859,NULL,NULL,R&D,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3749,Sales cycle length,NULL,3860,NULL,NULL,R&D,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3750,Design,NULL,3860,NULL,NULL,R&D,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3751,Throughput rate,NULL,3860,NULL,NULL,R&D,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3753,Sales cost (% of revenue),NULL,3845,NULL,NULL,Customer Relationship,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3754,Days sales outstanding,NULL,3845,NULL,NULL,Customer Relationship,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3755,Time to market for new products,NULL,3845,NULL,NULL,Customer Relationship,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,5
+3756,Compliance Rate ,Compliance Rate ,3854,High,NULL,Corporate Functions,Up,NULL,Days,100,NULL,NULL,NULL,0,5
+3757,Supplier defect rate,Supplier defect rate,3854,High,NULL,Corporate Functions,Up,NULL,Days,0,NULL,NULL,NULL,0,5
+3758,PO and invoice accuracy.,PO and invoice accuracy,3854,High,NULL,Corporate Functions,Up,NULL,Days,0,NULL,NULL,NULL,0,5
+3759,Rate of emergency purchases,Rate of emergency purchases,3854,High,NULL,Corporate Functions,Down,NULL,Days,0,NULL,NULL,NULL,0,5
+3760,Supplier lead time,Supplier lead time,3854,High,NULL,Corporate Functions,Up,NULL,Days,0,NULL,NULL,NULL,0,5
+3761,PO cycle time,PO cycle time,3854,High,NULL,Corporate Functions,Down,NULL,Days,0,NULL,NULL,NULL,0,5
+3762,Vendor availability,Vendor availability,3854,High,NULL,Corporate Functions,Up,NULL,Days,0,NULL,NULL,NULL,0,5
+3763,Cost per invoice and PO,Cost per invoice and PO,3854,High,NULL,Corporate Functions,Down,NULL,Days,0,NULL,NULL,NULL,0,5

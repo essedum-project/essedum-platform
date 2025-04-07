@@ -1,0 +1,53 @@
+<div class="le-l-mainwrapper le-l-mainwrapper--login" id="loginCnt">
+    <div class="le-l-pageoverlay" id="DSA_pageoverlay">
+        <div class="le-l-login-mid clearfix">
+            <div id="DSA_logoMid" class="DSA_logoMid clearfix le-u-mar-b-24">
+                <div class="le-u-text-white logo-common">{{title}}</div>
+            </div>
+            <div class="le-l-login-ctr" id="DSA_pageMidpanel">
+                <h1 class="le-u-body-xxl le-l-login-mar">
+                    Log In
+                    <a href="javascript:void(0)" class="icon iconinline x-16 close-icon float-end le-u-mar-t-16"
+                        aria-label="close panel"> </a>
+                </h1>
+            <mat-tab-group animationDuration="0ms" class="tabHead">
+                    <mat-tab label="Login with Credentials"  >
+                <leds-input-field placeholder="Username" [(ngModel)]="username"></leds-input-field>
+                <leds-input-field placeholder="Password" inputType="password" styleClass="le-u-mar-t-16"
+                    [(ngModel)]="psd"></leds-input-field>
+                <div class="selector-6-18">
+                    <leds-message-banner designType="error" [section]="true" *ngIf="errorAlert">
+                        <div sectionMessageBody>
+                            {{ alertMsg }}
+                        </div>
+                    </leds-message-banner>
+                </div>
+                <div class="selector-6-18">
+                    <leds-message-banner designType="error" [section]="true" *ngIf="userUnauthorizedAlert">
+                        <div sectionMessageBody>
+                            {{ userUnauthorizedMsg }}
+                        </div>
+                    </leds-message-banner>
+                </div>
+                <leds-button (click)="dbAuthenticate()" [block]="true" styleClass="le-u-mar-t-16">Log In</leds-button>
+
+                <div class="clearfix le-u-mar-t-24 le-u-mar-b-8">
+                    <a  class="float-start le-u-body-md DSA_purpleLink le-c-btn--hyperlink" (click)="showResetPopup()" style="cursor: pointer;">Forgot
+                        Password?</a>
+                        
+                    <span class="float-end le-u-body-md le-u-text-black">
+                        New User?
+                        <a class="DSA_purpleLink le-c-btn--hyperlink" (click)="goToRegUser()" style="cursor: pointer;">Register</a></span>
+                </div>
+                </mat-tab>
+                <mat-tab label="Login As Demo User" >
+                 <leds-button mat-raised-button="" type="submit" (click)="loginAsDemo()" styleClass="le-u-mar-t-16"  class="demoButton">
+                   Login as Demo User</leds-button>
+                </mat-tab>
+           </mat-tab-group> 
+            
+                <div class="le-u-body-sm le-u-mar-t-32 le-u-text-neutral-80">Copyright © 2024 Infosys Limited</div>
+            </div>
+        </div>
+    </div>
+</div>

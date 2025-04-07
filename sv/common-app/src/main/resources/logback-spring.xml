@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+ <configuration scan="true">
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+       <conversionRule conversionWord="applicationName" converterClass="org.springframework.boot.logging.logback.ApplicationNameConverter" />
+<conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
+<conversionRule conversionWord="correlationId" converterClass="org.springframework.boot.logging.logback.CorrelationIdConverter" />
+<conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
+<conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" /> 
+
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_PATH}/spring.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+        <fileNamePattern>${LOG_PATH}/spring.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+        <maxFileSize>25MB</maxFileSize>
+        <maxHistory>90</maxHistory>
+    </rollingPolicy>
+		<encoder name="enc"
+			class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+			<layout
+				class="com.infosys.icets.ai.comm.lib.util.logger.PatternLayoutWithUserContext">
+				<param name="Pattern"
+					value="%d{HH:mm:ss.SSS} %-5level %logger{10} [%user %session] - %msg%n" />
+			</layout>
+		</encoder>
+	</appender>
+	
+
+	<appender name="FILE2"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_PATH:-.}/connection.%d{yyyy-MM-dd}.log
+			</fileNamePattern>
+			<maxHistory>90</maxHistory>
+		</rollingPolicy>
+		<encoder name="enc"
+			class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+			<layout
+				class="com.infosys.icets.ai.comm.lib.util.logger.PatternLayoutWithUserContext">
+				<param name="Pattern"
+					value="%d{HH:mm:ss.SSS} %-5level %logger{10} [%user %session] - %msg%n" />
+			</layout>
+		</encoder>
+	</appender>
+
+	<appender name="SIFT"
+		class="ch.qos.logback.classic.sift.SiftingAppender">
+		<discriminator
+			class="com.infosys.icets.ai.comm.lib.util.logger.JobContextDiscriminator">
+			<defaultValue>unknown</defaultValue>
+		</discriminator>
+		<sift>
+			<appender name="FILE-${marker}"
+				class="ch.qos.logback.core.FileAppender">
+				<file>${LOG_PATH}/${marker}_internal_job.log</file>
+				<encoder>
+					<pattern>%d{HH:mm:ss.SSS} %-5level - %msg%n
+					</pattern>
+				</encoder>
+			</appender>
+		</sift>
+	</appender>
+
+	<appender name="AUDITSIFT"
+		class="ch.qos.logback.classic.sift.SiftingAppender">
+		<discriminator
+			class="com.infosys.icets.ai.comm.lib.util.logger.JobContextDiscriminator">
+			<defaultValue>unknown</defaultValue>
+		</discriminator>
+		<sift>
+			<appender name="FILE-${auditmarker}"
+				class="ch.qos.logback.core.FileAppender">
+				<file>${LOG_PATH}/audit_${auditmarker}.log</file>
+				<encoder>
+					<pattern>%d{HH:mm:ss.SSS} %-5level [%user %session] - %msg%n
+					</pattern>
+				</encoder>
+			</appender>
+		</sift>
+	</appender>	
+	<appender name="ASYNC"
+		class="ch.qos.logback.classic.AsyncAppender">
+		<queueSize>512</queueSize>
+		<appender-ref ref="FILE" />
+	</appender>
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+		<appender-ref ref="FILE" />
+    </root>
+	<logger
+		name="org.hibernate.engine.internal.StatisticalLoggingSessionEventListener"
+		level="OFF" />
+	<logger name="com.infosys" level="INFO" />
+	<logger name="com.infosys.impact.botfactory" level="ERROR" />
+	<logger name="org.springframework" level="ERROR" />
+	<logger
+		name="com.infosys.icets.ai.comm.lib.util.logger.JobLogger"
+		level="INFO">
+		<appender-ref ref="SIFT" />
+	</logger>
+	<logger
+		name="com.infosys.icets.ai.comm.lib.util.RegularExpressionUtil"
+		level="INFO">
+		<appender-ref ref="SIFT" />
+	</logger>
+	<logger
+		name="com.infosys.icets.ai.comm.lib.util.logger.AuditLogger"
+		level="INFO">
+		<appender-ref ref="AUDITSIFT" />
+	</logger>
+
+	<contextListener
+		class="ch.qos.logback.classic.jul.LevelChangePropagator">
+		<resetJUL>true</resetJUL>
+	</contextListener>
+
+	<root level="INFO">
+		<appender-ref ref="FILE" />		
+	</root>
+</configuration>

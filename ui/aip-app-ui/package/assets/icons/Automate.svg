@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="24" width = "24" viewBox="0 0 20 20" class="svg-automate-icon">
+  <defs>
+    <style>
+    .svg-automate-icon {
+        height: inherit;
+        width: inherit;
+       }
+	<!-- @media screen and (min-width: 5000px) {
+       .svg-automate-icon {
+        height: 4vmin !important;
+        width: 4vmin !important;
+      }
+       }
+       @media screen and (min-width: 1300px) and (max-width: 3000px) {
+       .svg-automate-icon {
+        height: 4vmin !important;
+        width: 4vmin !important;
+       }
+	  }
+	  @media screen and (max-width: 600px) {
+       .svg-automate-icon {
+        height: 4vmin !important;
+        width: 4vmin !important;
+       }
+	  } -->
+    </style>
+     <!-- <script>
+    function sizing(){
+      var resizedWidth = document.getElementById("projectparent").offsetWidth
+      var resizedHeight = document.getElementById("projectparent").offsetHeight
+      var widthPercentage = (resizedWidth / 1366);
+      var heightPercentage = (resizedHeight / 625);
+      var minOf = Math.min(widthPercentage, heightPercentage);
+      Height = "25px"
+      Height = Height ? Number.parseInt(Height.replace("px", "")) * minOf + "px" : null;
+      var element = document.getElementsByClassName("svg-automate-icon")[0];
+      element.setAttribute("height",Height);
+      element.setAttribute("width",Height);
+    };
+    $(document).ready(sizing);
+    $(window).resize(sizing);
+    </script> -->
+  </defs>
+  <g id="Automate" transform="translate(-1 1)">
+    <rect id="Rectangle_4" data-name="Rectangle 4" fill="none" width="2rem" height="2rem" transform="translate(1 -1)"/>
+    <g id="Group_1" data-name="Group 1" stroke="none" stroke-width="0px" transform="translate(2 2)">
+      <ellipse id="Ellipse_1" data-name="Ellipse 1" cx="1.507" cy="1.477" rx="1.507" ry="1.477" transform="translate(7.492 4.447)"/>
+      <path id="Path_1" data-name="Path 1" fill="currentColor" stroke="currentColor"  d="M16,14.47V5.59H4v8.88ZM6.25,9.288h.84a2.64,2.64,0,0,1,.322-.75l-.6-.585L7.87,6.9l.6.593a2.932,2.932,0,0,1,.75-.315V6.325h1.5v.84a2.933,2.933,0,0,1,.75.315l.6-.592,1.058,1.05-.6.585a2.64,2.64,0,0,1,.323.75h.9v1.5h-.84a2.64,2.64,0,0,1-.323.75l.6.592L12.13,13.157l-.63-.585a2.955,2.955,0,0,1-.75.323v.833H9.25v-.833a2.955,2.955,0,0,1-.75-.323l-.6.593L6.813,12.123l.6-.593a2.64,2.64,0,0,1-.323-.75H6.25Z" transform="translate(-1 -4.097)"/>
+      <path id="Path_2" data-name="Path 2" stroke = "none" stroke-width = "1px" fill="currentColor" d="M2.75,4.35h13.5v9.622H17V4.35a.75.75,0,0,0-.75-.75H2.75A.75.75,0,0,0,2,4.35v9.622h.75Z" transform="translate(-0.5 -3.6)"/>
+      <path id="Path_3" data-name="Path 3" fill="currentColor" stroke="currentColor"  d="M0,18.41H18v.75a.75.75,0,0,1-.75.75H.75A.75.75,0,0,1,0,19.16Z" transform="translate(0 -7.302)"/>
+    </g>
+  </g>
+</svg>

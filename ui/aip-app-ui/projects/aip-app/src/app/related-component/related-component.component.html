@@ -1,0 +1,39 @@
+<div class="aip-related-list">
+    <div class="le-u-pad-8 aip-cursor">
+        <div class="le-u-header-md" style="color: #8626C3;">
+            {{component.type |uppercase}}
+        </div>
+        <div class="d-flex align-items-center">
+            <div class="aip-related-ellipsis"><span class="le-u-header-lg">{{component.alias}}</span></div>
+            <div class="aip-related-list" (click)="open(lgContent1)">
+                <leds-tooltip [tooltip]="'View as Table'" [position]="'above'">
+                    <i class="icon x-24 aip-cursor aip-led-icons  show-icon"></i>
+                </leds-tooltip>
+                <ng-template #lgContent1 let-modal>
+                    <div class="le-u-pad-16">
+                        <div class=""><json-tree [value]="component.data"></json-tree></div>
+                    </div>
+                </ng-template>
+            </div>
+            <div class="aip-related-list  le-u-mar-lr-8 aip-cursor" (click)="related(component)">
+                <leds-tooltip [tooltip]="'Navigate to Component'" [position]="'above'">
+                        <i class="fa fa-external-link aip-led-icons" aria-hidden="true"></i>
+                </leds-tooltip>
+            </div>
+            <leds-overflow *ngIf="unlinkComponent" >
+                <div ngbDropdown class="d-inline-block" container="body">
+                    <a id="OverflowMenu_dd" ngbDropdownToggle title="Unlink Component">
+                        <i aria-hidden="true" class="icon x-24 v-menu-icon"></i>
+                    </a>
+                    <div ngbDropdownMenu aria-labelledby="OverflowMenu_dd" class="aip-cursor">
+                        <ul overflowList>
+                            <li overflowListItem (click)="unlink(component)">
+                                <span overflowSpan>Unlink Component</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </leds-overflow>
+        </div>
+    </div>
+</div>

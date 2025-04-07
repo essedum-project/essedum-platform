@@ -1,0 +1,39 @@
+.section {
+    margin: 1%;
+}
+
+::ng-deep .p-fieldset-legend {
+    width: 20% !important;
+    background: white !important;
+    font-size: medium !important;
+}
+
+::ng-deep .p-fieldset-legend>a {
+    justify-content: left !important;
+}
+
+input[type=color] {
+    width: 20%;
+}
+
+.paletteDiv {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid lightgray;
+    padding: 1%;
+    margin-left: 1%;
+}
+
+h4 {
+    margin: 2% 0% 2% 0%;
+}
+
+.marginTop {
+    margin-top: 1%;
+}
+
+.mat-primary .mat-pseudo-checkbox-checked,
+.mat-primary .mat-pseudo-checkbox-indeterminate,
+.mat-pseudo-checkbox-checked {
+    background-color: var(--base-color);
+}

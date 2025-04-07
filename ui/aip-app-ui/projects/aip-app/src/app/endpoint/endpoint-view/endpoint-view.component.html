@@ -1,0 +1,13 @@
+    <div class="le-l-level1-wrapper  h-100">
+        <div class="le-l-base-layout-center  h-100">
+            <div class="le-u-mar-8 row justify-content-center h-100  aip-tryout-iframe">
+                <div class="d-flex  aip-tryout-back" (click)="endpointback()">
+                    <leds-tooltip [tooltip]="back" [position]="tooltipPoition"> <i
+                            class="aip-led-icons icon x-24 back-icon"></i></leds-tooltip>
+                </div>
+                <iframe *ngIf="tryoutAvailable" [src]="tryoutUrl"
+                    class="selector-784-178 w-100"></iframe>
+                <div id="nourl" *ngIf="!tryoutAvailable">Try out url not Available</div>
+            </div>
+        </div>
+    </div>

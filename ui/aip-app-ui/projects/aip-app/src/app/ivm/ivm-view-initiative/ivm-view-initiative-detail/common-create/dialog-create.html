@@ -1,0 +1,48 @@
+<div class="container-fluid">
+  <div class="" *ngIf="data?.mainItems=='Model'">
+    <app-model-create (responseLink)="responseLink($event)" [customCreateName]="customCreateName"></app-model-create>
+  </div>
+  <div class="" *ngIf="data?.mainItems=='Endpoint'">
+    <app-create-endpoint id="ele" [customCreateName]="customCreateName"
+      (responseLink)="responseLink($event)"></app-create-endpoint>
+  </div>
+  <div class="" *ngIf="data?.mainItems=='Pipeline'">
+    <app-pipeline-create [interfaceType]="'pipeline'" (responseLink)="responseLink($event)"></app-pipeline-create>
+  </div>
+  <div *ngIf="data?.mainItems=='Connection'">
+    <!-- <app-datasource-config [ConnectionEdit]="editConnection" [view]="'false'"></app-datasource-config> -->
+    <app-datasource-config (responseLink)="responseLink($event)"> </app-datasource-config>
+  </div>
+  <div *ngIf="data?.mainItems=='Dataset'">
+    <app-modal-config-dataset (responseLink)="responseLink($event)"
+      [initiativeCreate]="true"></app-modal-config-dataset>
+  </div>
+  <div *ngIf="data?.mainItems=='App'">
+    <app-create-app (responseLink)="responseLink($event)"></app-create-app>
+  </div>
+  <!-- <div *ngIf="data?.mainItems=='Upload'">
+    <div class="file-upload-container">
+      <div class="file-upload-header">
+        <h3>File Upload</h3>
+        <input type="file" (change)="onFileSelected($event)" multiple />
+      </div>
+
+      <div *ngIf="files.length">
+        <div *ngFor="let file of files; let i = index" class="file-upload-progress">
+          <div class="file-info">
+            <div class="file-icon"><i class="icon x-24 document-icon"></i></div>
+            <p class="file-name">{{ file.file.name }}</p>
+            <p class="file-progress">{{ file.progress }}%</p>
+            <button class="delete-btn" (click)=deleteFile(i)><i class="icon x-24 delete-sm-icon"></i></button>
+          </div>
+
+          <div class="progress-bar">
+            <div class="progress" [style.width.%]="file.progress"></div>
+          </div>
+
+          <p *ngIf="file.uploaded" class="success-text">Uploaded</p>
+        </div>
+      </div>
+    </div>
+  </div> -->
+</div>

@@ -1,0 +1,7 @@
+"body","description","eventname","organization","jobdetails","interfacetype"
+"{}","To Trigger Code Summarization Pipeline","CodeSummarization","leo1311","[{""name"":""LEOCDSMR12593"",""type"":""pipeline"",""runtime"":{""dsAlias"":""LocalCluster"",""dsName"":""LEALCLCL12132"",""type"":""REMOTE""}}]",NULL
+"{}",\N,"Transcribe","leo1311","[{""name"":""LEOTST_T65351"",""type"":""pipeline"",""runtime"":{""dsAlias"":""VM55"",""dsName"":""LEOVM5VW51222"",""type"":""REMOTE""}}]",NULL
+"{}",\N,"Translation","leo1311","[{""name"":""LEOTST_T22967"",""type"":""pipeline"",""runtime"":{""dsAlias"":""VM55"",""dsName"":""LEOVM5VW51222"",""type"":""REMOTE""},""last_refresh_event"":""0097b23fc8bd4da29a52aa2a7373fe2520240924T061445368Z"",""last_refresh_status"":""RUNNING""}]",NULL
+"{}",\N,"Summary","leo1311","[{""name"":""LEOSMRYJ63447"",""type"":""pipeline"",""runtime"":{""dsAlias"":""VM55"",""dsName"":""LEOVM5VW51222"",""type"":""REMOTE""},""last_refresh_event"":""7cee46a777774736aadb2eea8c329f0420240924T061928692Z"",""last_refresh_status"":""RUNNING""}]",NULL
+"{}",\N,"Questions","leo1311","[{""name"":""LEOQSTNS74133"",""type"":""pipeline"",""runtime"":{""dsAlias"":""VM55"",""dsName"":""LEOVM5VW51222"",""type"":""REMOTE""},""last_refresh_event"":""a27593307da847939ea03a00f7f4742320240924T062727716Z"",""last_refresh_status"":""RUNNING""}]",NULL
+"{}","To generate document","GenerateDocument","leo1311","[{""name"":""LEODCMNT16459"",""type"":""pipeline"",""runtime"":{""dsAlias"":""LocalCluster"",""dsName"":""LEALCLCL12132"",""type"":""REMOTE""}}]",NULL

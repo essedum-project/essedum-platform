@@ -1,0 +1,26 @@
+<div *ngIf="!dsetName" class="grid-container">
+      <mat-card   appearance="outlined"> 
+        <mat-card-content *ngIf="!ResponseList && !datasetData">
+                <leds-spinner [bdColor]="'#ffffff'" [size]="'default'" [color]="'#8626c3'" [type]="'ball-spin'"
+                    [fullScreen]="false" [showSpinner]="true">
+                </leds-spinner>
+        </mat-card-content>
+          <mat-card-content *ngIf="ResponseList || datasetData">
+              <img mat-card-image [src]="image" alt="This image Url is not working" >
+          </mat-card-content>
+      </mat-card>    
+</div>
+<div *ngIf="dsetName" style="height: 70vh;">
+    <mat-card appearance="outlined" *ngIf="!datasetData">
+        <mat-card-content *ngIf="!ResponseList && !datasetData">
+            <leds-spinner [bdColor]="'#ffffff'" [size]="'default'" [color]="'#8626c3'" [type]="'ball-spin'"
+                [fullScreen]="false" [showSpinner]="true">
+            </leds-spinner>
+        </mat-card-content>
+    </mat-card>
+    <div *ngIf="datasetData">
+        <img [src]="image" alt="This image Url is not working">
+    </div>
+</div>
+
+

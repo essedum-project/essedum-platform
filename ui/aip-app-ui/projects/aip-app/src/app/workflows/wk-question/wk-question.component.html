@@ -1,0 +1,140 @@
+<div class="question-card">
+    <!-- <div class="pipeline-header">
+        <span class="txt-pipeline" style="width: 100%">
+            Instructions
+        </span>
+    </div> -->
+    <div class="quest-desc">
+        <div *ngFor="let json of questionList;let i=index">
+            <div *ngIf="json.Question" class="wk-quest-border">
+                <mat-expansion-panel> 
+                    <mat-expansion-panel-header [collapsedHeight]="'60px'" [expandedHeight]="'40px'">
+                        <mat-panel-title>
+                            <span class="pointer" (click)="showWorkarea(i)">{{json.Question}}</span>&nbsp;&nbsp;
+                            <i class="fa fa-check-circle checkcircle" *ngIf="i<this.wkJson.length-1"></i>
+                            <span *ngIf="i>=this.wkJson.length-1" class="circle">{{i+1}}</span>
+                        </mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <!-- <i class="fa fa-info-circle checkcircle" style="position:relative; left:-4px" [attr.title]=json.Description></i><br /> -->
+                    <div class="le-u-mar-16">
+                    <div>
+                        <div *ngIf="json.QuestionComponent=='ChooseDatasetComponent'">
+                            {{json.output.alias}}
+                        </div>
+                        <div *ngIf="json.QuestionComponent=='TextComponent'">
+                            <leds-button [hidden]="i>wkJson.length-1"
+                                (click)="fieldChosen(wkData.jsondata['stage'+add(i)]['output'],i==wkJson.length-1?'Next':'Update',i)">{{i==wkJson.length-1?'Next':'Update'}}</leds-button>
+                            <leds-button *ngIf="wkData.jsondata['stage'+add(i)]['mandatory']=='false'"
+                                [hidden]="i>wkJson.length-1" (click)="fieldChosen()">Skip</leds-button>
+                        </div>
+                        <div *ngIf="json.QuestionComponent=='InputComponent'">
+                            <leds-input-field [disabled]="i>wkJson.length-1"
+                                [(ngModel)]="wkData.jsondata['stage'+add(i)]['output']" ></leds-input-field>
+                            <leds-button [hidden]="i>wkJson.length-1"
+                                (click)="fieldChosen(wkData.jsondata['stage'+add(i)]?wkData.jsondata['stage'+add(i)]['output']:json['output']?json['output']:out,i==wkJson.length-1?'Next':'Update',i)">{{i==wkJson.length-1?'Next':'Update'}}</leds-button>
+                            <leds-button *ngIf="wkData.jsondata['stage'+add(i)]['mandatory']=='false'"
+                                [hidden]="i>wkJson.length-1" (click)="fieldChosen()">Skip</leds-button>
+                        </div>
+                        <div *ngIf="json.QuestionComponent=='SingleselectComponent' && i<=wkJson.length-1">
+                            <!-- <mat-select 
+                            [(value)]="wkData.jsondata['stage'+add(i)]['output']" placeholder="Select">
+                            <mat-option *ngFor="let col of colList" [value]="col">{{col}}</mat-option>
+                        </mat-select><br /><br /> -->
+                            <mat-form-field>
+                                <mat-select [(ngModel)]="wkData.jsondata['stage'+add(i)]['output']" placeholder="Select"
+                                    #dataSourceSelect="">
+                                    <mat-option>
+                                        <ngx-mat-select-search [formControl]="searchTerm" [placeholderLabel]="'Find...'"
+                                            [noEntriesFoundLabel]="'No matching Value found'"></ngx-mat-select-search>
+                                    </mat-option>
+                                    <mat-option *ngFor="let col of filteredCols | async"
+                                        [value]="col">{{col}}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <leds-button
+                                (click)="fieldChosen(wkData.jsondata['stage'+add(i)]['output'],i==wkJson.length-1?'Next':'Update',i)">{{i==wkJson.length-1?'Next':'Update'}}</leds-button>
+                            <leds-button *ngIf="wkData.jsondata['stage'+add(i)]['mandatory']=='false'"
+                                [hidden]="i>wkJson.length-1" (click)="fieldChosen()">Skip</leds-button>
+                        </div>
+                        <div *ngIf="json.QuestionComponent=='MultiselectComponent' && i<=wkJson.length-1">
+                            <mat-select [(value)]="wkData.jsondata['stage'+add(i)]['output']" placeholder="Select"
+                                multiple>
+                                <mat-option *ngFor="let col of colList" [value]="col">{{col}}</mat-option>
+                            </mat-select><br /><br />
+                            <leds-button
+                                (click)="fieldChosen(wkData.jsondata['stage'+add(i)]['output'],i==wkJson.length-1?'Next':'Update',i)">{{i==wkJson.length-1?'Next':'Update'}}</leds-button>
+                            <leds-button *ngIf="wkData.jsondata['stage'+add(i)]['mandatory']=='false'"
+                                [hidden]="i>wkJson.length-1" (click)="fieldChosen()">Skip</leds-button>
+                        </div>
+                        <div
+                            *ngIf="(json.QuestionComponent=='MultiselectComponent' || json.QuestionComponent=='SingleselectComponent') && i>wkJson.length-1">
+                            {{wkData.jsondata['stage'+add(i)]['output']}}
+                        </div>
+                        <div *ngIf="json.QuestionComponent=='EmptyComponent' && i!=wkJson.length-1">
+                            <leds-button
+                                *ngIf="wkData.jsondata['stage'+add(i)]['mandatory'].toLowerCase()=='false'"
+                                [hidden]="i>wkJson.length-1" (click)="fieldChosen()">Skip</leds-button>
+                        </div>
+                        <div *ngIf="json.QuestionComponent=='ExecuteComponent'" class="">
+                            <app-wk-execute [wkJson]="wkJson" [wkData]="wkData" [hide]="i!=wkJson.length-1"
+                                (next)="goNext($event)"></app-wk-execute>
+                            <leds-button style="margin-left: 15px; width: max-content;"
+                                *ngIf="wkData.jsondata['stage'+add(i)]['mandatory'].toLowerCase()=='false'"
+                                [hidden]="i>wkJson.length-1" (click)="fieldChosen()">Skip</leds-button>
+                        </div>
+                        <div *ngIf="json.QuestionComponent=='ScheduleComponent'" class="">
+                            <leds-button style="margin-left: 15px; width: max-content;"
+                                *ngIf="wkData.jsondata['stage'+add(i)]['mandatory'].toLowerCase()=='false'"
+                                [hidden]="i>wkJson.length-1" (click)="fieldChosen()">Skip</leds-button>
+                        </div>
+                        <div *ngIf="json.QuestionComponent=='PublishComponent'" class="row">
+                            <app-wk-publish [wkJson]="wkJson" [wkData]="wkData" [hide]="i!=wkJson.length-1"
+                                (next)="goNext($event)"></app-wk-publish>
+                            <leds-button *ngIf="wkData.jsondata['stage'+add(i)]['mandatory']=='false'"
+                                [hidden]="i>wkJson.length-1" (click)="fieldChosen()">Skip</leds-button>
+                        </div>
+
+                        <div *ngIf="json.QuestionComponent=='RadioComponent'">
+                            <div *ngFor="let opt of json.input.options">
+                                <input type="radio" id="wk-{{opt}}" (change)="radioChange()" [(ngModel)]="selectedRadio"
+                                    value="{{opt}}" />&nbsp;&nbsp;
+                                <label>{{opt}}</label><br />
+                            </div>
+                            <!-- <input type="radio" id="wk-keywrd" (change)="radioChange()"
+                            [(ngModel)]="selectedRadio" value="keyword" />&nbsp;&nbsp;
+                        <label>Keyword</label><br />
+                        <input type="radio" id="wk-keyphrse" (change)="radioChange()"
+                            [(ngModel)]="selectedRadio" value="keyphrase" />&nbsp;&nbsp;
+                        <label>Keyphrase</label><br />
+                        <input type="radio" id="wk-stpwrds" (change)="radioChange()"
+                            [(ngModel)]="selectedRadio" value="stopword" />&nbsp;&nbsp;
+                        <label>Stopwords</label><br /> -->
+
+                        </div>
+                        <div class ="d-flex justify-content-start" *ngIf="json.QuestionComponent=='NextComponent'">
+                            <button   mat-flat-button leds-button designType="miniPrimary" [hidden]="i>wkJson.length-1"
+                                (click)="fieldChosen(wkData.jsondata['stage'+add(i)]?wkData.jsondata['stage'+add(i)]['output']:json['output']?json['output']:out)">Next</button>
+                            <button *ngIf="wkData.jsondata['stage'+add(i)]['mandatory']=='false'"
+                            mat-flat-button leds-button designType="miniPrimary"  [hidden]="i>wkJson.length-1" (click)="fieldChosen()">Skip</button>
+                        </div>
+                        <!-- <div *ngIf="json.QuestionComponent=='NextComponent'" class="row">
+                        <wk-execute [wkJson]="wkJson" [wkData]="wkData" [hide]="i!=wkJson.length-1"
+                            (next)="goNext($event)"></wk-execute>
+                        <button class="nxtBtn " *ngIf="wkData.jsondata['stage'+add(i)]['mandatory']=='false'" [hidden]="i!=wkJson.length-1"
+                            (click)="fieldChosen()">Next</button>
+                    </div> -->
+                        <div *ngIf="json.QuestionComponent=='DashboardFilterComponent'">
+                            <leds-input-field [disabled]="i>wkJson.length-1"
+                                [(ngModel)]="wkData.jsondata['stage'+add(i)]['output']"></leds-input-field>
+                            <leds-button [hidden]="i>wkJson.length-1"
+                                (click)="fieldChosen(wkData.jsondata['stage'+add(i)]?wkData.jsondata['stage'+add(i)]['output']:json['output']?json['output']:out,i==wkJson.length-1?'Next':'Update',i)">{{i==wkJson.length-1?'Next':'Update'}}</leds-button>
+                            <leds-button *ngIf="wkData.jsondata['stage'+add(i)]['mandatory']=='false'"
+                                [hidden]="i>wkJson.length-1" (click)="fieldChosen()">Skip</leds-button>
+                        </div>
+                    </div>
+                </div>
+                </mat-expansion-panel>
+            </div>
+        </div>
+    </div>
+</div>

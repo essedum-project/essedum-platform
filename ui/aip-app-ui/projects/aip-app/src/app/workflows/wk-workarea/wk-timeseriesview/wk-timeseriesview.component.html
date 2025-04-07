@@ -1,0 +1,7 @@
+<div style="width: 100%;">
+    <app-time-series *ngIf="xAxis && yAxis && inpChartData.length>0 && outChartData.length>0" [inpData]="inpChartData"
+        [outData]="outChartData" [inpDataset]="inpDataset" [outDataset]="outDataset" [xAxis]="xAxis" [yAxis]="yAxis">
+    </app-time-series>
+</div>
+
+<!-- <nvd3 *ngIf="chartOptions && datasetDetails" [options]="chartOptions" [data]="datasetDetails"></nvd3> -->

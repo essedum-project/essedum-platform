@@ -1,0 +1,55 @@
+
+.js-node-outer {
+    border-radius: 0.5em;
+    width: 130px;
+    height: 80px;
+    display: inline-block;
+    -webkit-box-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    align-items: center;
+    cursor: pointer;
+    text-align: center;
+    align-content: center;
+    z-index: 20;
+    position: absolute;
+    color: black;
+    font-family: var(--font-type) !important;
+    padding: 0.5em;
+    font-size: 0.9em;
+    transition: box-shadow 0.15s ease-in;
+    word-wrap: inherit;
+}
+
+.js-node-imageWrapper {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    border-radius: 0.5em;
+    margin-left: 8px;
+    margin-top: 3px;
+    background: lightgrey;
+    height: 50px;
+    width: 100px;
+    border: 1px solid #aaa;
+    font-size: 18px;
+    padding-left: 9px;
+    padding-top: 6px;
+    padding:1px;
+    word-wrap: inherit;
+}
+
+.js-node-image {
+    margin-top: 3px;
+    width: 30px;
+    height: 30px;
+    background-image: url(/cipui/assets/mlstudio/DelimiterExtractorConfig.png);
+    background-color: transparent;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.js-node-name {
+    font-family: var(--font-type) !important;
+    font-size: 12px;
+    font-weight: 200;
+}
+

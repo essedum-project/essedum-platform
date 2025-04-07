@@ -1,0 +1,199 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+  <changeSet author="Leap (generated)" id="3v0-dbs-1022">
+    	<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0"> SELECT COUNT(*) FROM dbs_dashboard_configuration WHERE (app_name = 'IIA' AND project=2) OR (app_name = 'Cognitive Micro Service' AND project=2) OR id = 31345 OR id = 31346;</sqlCheck>
+     	</preConditions>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_dashboard_configuration ON;
+		</sql>	
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/acme/3v0/dbs/dbs_dashboard_configuration.csv" quotchar="&quot;" separator="," tableName="dbs_dashboard_configuration">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="app_name" name="app_name" type="STRING"/>
+            <column header="bg_image" name="bg_image" type="skip"/>
+            <column header="category" name="category" type="STRING"/>
+            <column header="created_by" name="created_by" type="STRING"/>
+            <column header="created_on" name="created_on" type="skip"/>
+            <column header="dash_array" name="dash_array" type="skip"/>
+            <column header="dashboard_access" name="dashboard_access" type="STRING"/>
+            <column header="dash_floating_modal" name="dash_floating_modal" type="STRING"/>
+            <column header="dash_json" name="dash_json" type="STRING"/>
+            <column header="dependent_filter" name="dependent_filter" type="skip"/>
+            <column header="description" name="description" type="STRING"/>
+            <column header="icon" name="icon" type="STRING"/>
+            <column header="image" name="image" type="skip"/>
+            <column header="is_deleted" name="is_deleted" type="BOOLEAN"/>
+            <column header="landing_dash" name="landing_dash" type="BOOLEAN"/>
+            <column header="layout" name="layout" type="NUMERIC"/>
+            <column header="show_date" name="show_date" type="BOOLEAN"/>
+            <column header="context" name="context" type="skip"/>
+            <column header="project" name="project" type="NUMERIC"/>
+            <column header="apply_theme" name="apply_theme" type="BOOLEAN"/>
+        </loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_dashboard_configuration OFF;
+		</sql>
+  </changeSet>
+
+  <changeSet author="Leap (generated)" id="3v0-dbs-1027">
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_widget_configuration ON;
+		</sql>	
+      <sql dbms="h2, mysql, mssql">
+        insert into dbs_widget_configuration (id,project_id, add_to_summary, apply_on_category, auto_refresh, categorize_on, category, colour, count_category, count_category_column, count_column, data_label, description, drilldown, dual_axis, filters, from_date, img_src, is_cache_enabled, is_deleted, legend, legend_name, limit1, operation, refresh_time, remarks, sub_x_axis, sub_x_axis_alias, subtitle_alias, summary_subtitle_alias, summary_name, to_date, url, widget_json, widget_name, x_axis_alias, x_axis_label, x_param, x_param_value, y2_axis, y_axis_alias, y_axis_label, y_param, y_param_value, chart_type, context, dashboard, navigate_to, details, wizard_data_limit, apply_theme) values('443860','2',NULL,NULL,'',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'FALSE',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'500',NULL,NULL,NULL,'[{\"personaSetup\":{\"backgroundcolor\":null,\"colorChanged\":false,\"bordercolor\":null,\"bordercolorChanged\":false,\"headerColor\":null,\"headerColorChanged\":false,\"parameterColor\":null,\"parameterColorChanged\":false,\"parameterColumnNameColor\":null,\"parameterColumnNameColorChanged\":false,\"bottomStickedParameterColor\":null,\"bottomStickedParameterColorChanged\":false,\"headerTextColor\":null,\"headerTextColorChanged\":false,\"parameterTextColor\":null,\"parameterTextColorrChanged\":false,\"fontfamily\":\"UniversLTStd,Arial\",\"fontsize\":null,\"countfontsize\":null,\"titlefontfamily\":\"UniversLTStd,Arial\",\"titlesize\":null,\"parameterFontSize\":null,\"tabHeaderFontSize\":null,\"tabDataFontSize\":null,\"borderRadius\":0,\"textcolor\":null,\"txtColorChanged\":false,\"hideborder\":false}},{\"layoutSetup\":{\"showFullTitleLength\":true,\"showFullinfoLength\":false,\"alignInformation\":\"center\",\"alignTitle\":\"left\",\"showFooter\":false,\"footer\":null,\"footerAlign\":\"center\",\"enableHtmlFormat\":false}},{\"drilldownSetup\":{\"paramvalues\":[{\"param\":null,\"operator\":null,\"value\":null}]}},{\"gqlGraphSetup\":{\"selectedQuery\":{\"project_id\":2,\"user_id\":\"1\",\"query_name\":\"InstanceGraph\",\"query_description\":\"Query for InstanceGraph inside Batch Dependency Dashboard\",\"query\":\"query ($running_job_instance_id: String = JbY4_9) {\\n    JobInstance(filter: {\\n        instance_id_contains: $running_job_instance_id\\n    }, first: 25, offset: 0) {\\n        instance_id\\n        start_time\\n        description\\n        job_name\\n        status\\n        group_name\\n        uniqueId\\n        project_id\\n        Job_JobInstance {\\n            name\\n            description\\n            uniqueId\\n            project_id\\n        }\\n\\n        JobInstance_Group {\\n            name\\n            description\\n            uniqueId\\n            project_id\\n        }\\n\\n    }\\n}\",\"is_private\":false,\"created_at\":\"2023-10-06T18:12:44+05:30\",\"updated_at\":null,\"query_filter\":\"{\\\"running_job_instance_id\\\":\\\"JbY4_9\\\"}\"}}}]','Instance Graph',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'53',NULL,NULL,NULL,NULL);
+        
+        insert into dbs_widget_configuration (id,project_id, add_to_summary, apply_on_category, auto_refresh, categorize_on, category, colour, count_category, count_category_column, count_column, data_label, description, drilldown, dual_axis, filters, from_date, img_src, is_cache_enabled, is_deleted, legend, legend_name, limit1, operation, refresh_time, remarks, sub_x_axis, sub_x_axis_alias, subtitle_alias, summary_subtitle_alias, summary_name, to_date, url, widget_json, widget_name, x_axis_alias, x_axis_label, x_param, x_param_value, y2_axis, y_axis_alias, y_axis_label, y_param, y_param_value, chart_type, context, dashboard, navigate_to, details, wizard_data_limit, apply_theme) values('443861','2',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'FALSE',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'500',NULL,NULL,NULL,'[{\"sqlGraphSetup\":{\"edgeLabel\":false,\"nodeLabel\":true,\"hierarchicalView\":\"\",\"arrows\":true,\"canvasBackgroundColor\":\"white\"}},{\"tableConfig\":{\"rowCheckboxView\":false,\"rowCheckboxTitleColor\":null,\"rowCheckboxRecommendationColumn\":null,\"rowCheckboxSubTitleColorColumn\":null,\"rowCheckboxTitleColumn\":null,\"rowCheckboxSubTitleColumn\":null,\"rowCheckboxSubTitleCountColumn\":null,\"rowCheckboxSubTitleIconColumn\":null,\"rowCheckboxSubTitlePrevCountColumn\":null}},{\"personaSetup\":{\"backgroundcolor\":null,\"colorChanged\":false,\"bordercolor\":null,\"bordercolorChanged\":false,\"headerColor\":null,\"headerColorChanged\":false,\"parameterColor\":null,\"parameterColorChanged\":false,\"parameterColumnNameColor\":null,\"parameterColumnNameColorChanged\":false,\"bottomStickedParameterColor\":null,\"bottomStickedParameterColorChanged\":false,\"headerTextColor\":null,\"headerTextColorChanged\":false,\"parameterTextColor\":null,\"parameterTextColorrChanged\":false,\"fontfamily\":\"UniversLTStd,Arial\",\"fontsize\":null,\"countfontsize\":null,\"titlefontfamily\":\"UniversLTStd,Arial\",\"titlesize\":null,\"parameterFontSize\":null,\"tabHeaderFontSize\":null,\"tabDataFontSize\":null,\"borderRadius\":0,\"textcolor\":null,\"txtColorChanged\":false,\"tilecolor\":null,\"tilecolorChanged\":false,\"countcolor\":null,\"countcolorChanged\":false,\"tileTextColor\":null,\"tileTextColorChanged\":false,\"countTextColor\":null,\"countTextColorChanged\":false,\"hideborder\":false}},{\"layoutSetup\":{\"showFullTitleLength\":true,\"showFullinfoLength\":false,\"alignInformation\":\"center\",\"alignTitle\":\"left\",\"showFooter\":false,\"footer\":null,\"footerAlign\":\"center\",\"enableHtmlFormat\":false}},{\"drilldownSetup\":{\"paramvalues\":[{\"param\":null,\"operator\":null,\"value\":null}]}},{\"urlSetup\":{\"urlParams\":false,\"drillUrlParams\":null}},{}]','Instance Dependency Graph',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'53',NULL,NULL,NULL,NULL);
+      </sql>
+      <sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_widget_configuration OFF;
+		</sql>	
+  </changeSet>
+
+  <changeSet author="Leap (generated)" id="3v0-dbs-1028">
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_sequence_widget ON;
+		</sql>	
+      <sql dbms="h2, mysql, mssql">
+        insert into dbs_sequence_widget (id,project_id, color_type, colour, dataset_name, datasource_name, y_axis, chart_type, widget_id, isThreshold, referenceConfigurations) values('464773','2','dynamic','','','',NULL,NULL,'443860',NULL,NULL);
+        insert into dbs_sequence_widget (id,project_id, color_type, colour, dataset_name, datasource_name, y_axis, chart_type, widget_id, isThreshold, referenceConfigurations) values('464774','2','dynamic','','LEOSQL-W77285','leapmaster',NULL,NULL,'443861',NULL,NULL);
+      </sql>
+      <sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_sequence_widget OFF;
+		</sql>	
+  </changeSet>
+
+  <changeSet author="Leap (generated)" id="3v0-dbs-1034">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_widget_configuration ON;
+		</sql>	
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/acme/3v0/dbs/dbs_widget_configuration.csv" quotchar="&quot;" separator="," tableName="dbs_widget_configuration">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="project_id" name="project_id" type="NUMERIC"/>
+            <column header="add_to_summary" name="add_to_summary" type="STRING"/>
+            <column header="apply_on_category" name="apply_on_category" type="boolean"/>
+            <column header="auto_refresh" name="auto_refresh" type="boolean"/>
+            <column header="categorize_on" name="categorize_on" type="STRING"/>
+            <column header="category" name="category" type="STRING"/>
+            <column header="colour" name="colour" type="STRING"/>
+            <column header="count_category" name="count_category" type="STRING"/>
+            <column header="count_category_column" name="count_category_column" type="STRING"/>
+            <column header="count_column" name="count_column" type="STRING"/>
+            <column header="data_label" name="data_label" type="BOOLEAN"/>
+            <column header="description" name="description" type="STRING"/>
+            <column header="drilldown" name="drilldown" type="BOOLEAN"/>
+            <column header="dual_axis" name="dual_axis" type="BOOLEAN"/>
+            <column header="filters" name="filters" type="STRING"/>
+            <column header="from_date" name="from_date" type="DATE"/>
+            <column header="img_src" name="img_src" type="STRING"/>
+            <column header="is_cache_enabled" name="is_cache_enabled" type="BOOLEAN"/>
+            <column header="is_deleted" name="is_deleted" type="STRING"/>
+            <column header="legend" name="legend" type="boolean"/>
+            <column header="legend_name" name="legend_name" type="STRING"/>
+            <column header="limit1" name="limit1" type="NUMERIC"/>
+            <column header="operation" name="operation" type="STRING"/>
+            <column header="refresh_time" name="refresh_time" type="NUMERIC"/>
+            <column header="remarks" name="remarks" type="STRING"/>
+            <column header="sub_x_axis" name="sub_x_axis" type="STRING"/>
+            <column header="sub_x_axis_alas" name="sub_x_axis_alas" type="STRING"/>
+            <column header="subtitle_alias" name="subtitle_alias" type="STRING"/>
+            <column header="summary_name" name="summary_name" type="STRING"/>
+            <column header="to_date" name="to_date" type="DATE"/>
+            <column header="url" name="url" type="STRING"/>
+            <column header="widget_json" name="widget_json" type="STRING"/>
+            <column header="widget_name" name="widget_name" type="STRING"/>
+            <column header="x_axis_alias" name="x_axis_alias" type="STRING"/>
+            <column header="x_axis_label" name="x_axis_label" type="BOOLEAN"/>
+            <column header="x_param" name="x_param" type="STRING"/>
+            <column header="x_param_value" name="x_param_value" type="STRING"/>
+            <column header="y2_axis" name="y2_axis" type="STRING"/>
+            <column header="y_axis_alias" name="y_axis_alias" type="STRING"/>
+            <column header="y_axis_label" name="y_axis_label" type="BOOLEAN"/>
+            <column header="y_param" name="y_param" type="STRING"/>
+            <column header="y_param_value" name="y_param_value" type="STRING"/>
+            <column header="chart_type" name="chart_type" type="STRING"/>
+            <column header="context" name="context" type="NUMERIC"/>
+            <column header="dashboard" name="dashboard" type="NUMERIC"/>
+            <column header="navigate_to" name="navigate_to" type="NUMERIC"/>
+            <column header="details" name="details" type="STRING"/>
+            <column header="wizard_data_limit" name="wizard_data_limit" type="NUMERIC"/>
+            <column header="apply_theme" name="apply_theme" type="BOOLEAN"/>
+        </loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_widget_configuration OFF;
+		</sql>
+  </changeSet>
+
+  <changeSet author="Leap (generated)" id="3v0-dbs-1035">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_sequence_widget ON;
+		</sql>	
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/acme/3v0/dbs/dbs_sequence_widget.csv" quotchar="&quot;" separator="," tableName="dbs_sequence_widget">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="project_id" name="project_id" type="NUMERIC"/>
+            <column header="color_type" name="color_type" type="STRING"/>
+            <column header="colour" name="colour" type="STRING"/>
+            <column header="dataset_name" name="dataset_name" type="STRING"/>
+            <column header="datasource_name" name="datasource_name" type="STRING"/>
+            <column header="y_axis" name="y_axis" type="NUMERIC"/>
+            <column header="chart_type" name="chart_type" type="NUMERIC"/>
+            <column header="widget_id" name="widget_id" type="NUMERIC"/>
+            <column header="isThreshold" name="isThreshold" type="boolean"/>
+            <column header="referenceConfigurations" name="referenceConfigurations" type="STRING"/>
+        </loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_sequence_widget OFF;
+		</sql>
+  </changeSet>
+  <changeSet author="Leap (generated)" id="3v0-dbs-1036">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_filter ON;
+		</sql>	
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/acme/3v0/dbs/dbs_filter.csv" quotchar="&quot;" separator="," tableName="dbs_filter">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="project_id" name="project_id" type="NUMERIC"/>
+            <column header="actual_value" name="actual_value" type="STRING"/>
+            <column header="column_name" name="column_name" type="STRING"/>
+            <column header="column_to_value" name="column_to_value" type="STRING"/>
+            <column header="column_value" name="column_value" type="STRING"/>
+            <column header="default_value" name="default_value" type="STRING"/>
+            <column header="display_value" name="display_value" type="STRING"/>
+            <column header="selection_type" name="selection_type" type="NUMERIC"/>
+            <column header="show_value" name="show_value" type="boolean"/>
+            <column header="context" name="context" type="NUMERIC"/>
+            <column header="dashboard" name="dashboard" type="NUMERIC"/>
+            <column header="widget" name="widget" type="NUMERIC"/>
+            <column header="widget_names" name="widget_names" type="STRING"/>
+            <column header="filter_json" name="filter_json" type="STRING"/>
+            <column header="neo_date_format" name="neo_date_format" type="boolean"/>
+        </loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_filter OFF;
+		</sql>
+  </changeSet>
+  <changeSet dbms="mysql, h2, postgresql" author="Leap (generated)" id="3v0-dbs-1023">
+		<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0"> SELECT COUNT(*) FROM dbs_dashboard_configuration WHERE (app_name = 'Infosys Chatbot Studio Dashboard' AND project=2) OR (app_name = 'Infosys Chatbot Application Dashboard' AND project=2) OR id = 31360 OR id = 31361;</sqlCheck>
+     	</preConditions>
+		<sql>
+			INSERT INTO dbs_dashboard_configuration (id,app_name,bg_image,category,created_by,created_on,dash_array,dashboard_access,dash_floating_modal,dash_json,dependent_filter,description,icon,image,is_deleted,landing_dash,layout,show_date,context,project)
+			VALUES(31361,'Infosys Chatbot Studio Dashboard',NULL,'board-category','admin',NULL,NULL,'Public',NULL,'{"title":"Chatbot Studio","structure":"6-6","boardInstanceId":5,"rows":[{"columns":[{"styleClass":"six wide","gadgets":[{"componentType":"DashboardComponent","selector":"app-dashboard-component","name":"Tile Gadget","description":"Provides paragraph with navigation","icon":"assets/images/dashboardwithpara.png","instanceId":1658732331167,"tags":[{"facet":"Widget","name":"tile"}],"config":{"propertyPages":[{"displayName":"General Details","groupId":"run","position":11,"properties":[{"value":"Click here to open Chatbot Studio","key":"title","label":"Title","required":false,"order":1,"controlType":"textbox"},{"value":"center","key":"titlealign","label":"Align Title(Horizontal)","required":true,"order":2,"controlType":"dropdown"},{"value":"center","key":"titlealignvertical","label":"Align Title(Vertical)","required":true,"order":3,"controlType":"dropdown"},{"value":"#7b39b1","key":"color","label":"Text Color","required":false,"order":5,"controlType":"textbox"},{"value":"100","key":"height","label":"","required":true,"order":15,"controlType":"hidden"},{"value":"","key":"navigateto","label":"Navigate To","required":true,"order":3,"controlType":"dynamicdropdown"},{"value":"http://10.85.12.143:31752","key":"url","label":"Url","required":true,"order":4,"controlType":"textbox"},{"value":"#fffafa","key":"backgroundcolor","label":"Background Color","required":true,"order":6,"controlType":"textbox"},{"value":"18","key":"fontsize","label":"Font Size (in px)","required":true,"order":7,"controlType":"number"},{"value":"UniversLTStd,Arial","key":"fontfamily","label":"Font Family","required":true,"order":8,"controlType":"textbox"},{"value":1658732331167,"key":"instanceId","label":"","required":true,"order":-1,"controlType":"hidden"},{"value":"#ffffff","key":"bordercolor","label":"Widget Border Color","required":true,"order":9,"controlType":"textbox"},{"value":false,"key":"enableHtmlFormat","label":"Format Details as HTML","required":true,"order":10,"controlType":"checkbox"},{"value":"","key":"widgetDetails","label":"Widget Details","required":true,"order":11,"controlType":"textbox"},{"value":2,"key":"borderRadius","label":"Border Radius","required":true,"order":12,"controlType":"number"},{"value":0,"key":"widgetheight","label":"Height","required":true,"order":13,"controlType":"number"},{"value":0,"key":"widgetwidth","label":"Width","required":true,"order":14,"controlType":"number"}]}]},"actions":[{"name":"Add"}]}]},{"styleClass":"six wide","gadgets":[]}]}],"id":5,"parentfiltershow":true,"filterfullwidth":false,"responsivefiltercheck":false,"isDashBgColor":false,"overridestartenddatefiltercheck":false,"showwidgetsizeintooltip":false,"dashNameAlign":"left","hideTimeFilter":false,"enableHtmlFormat":false}',NULL,'chatbot studio','[{"gadgetid":"1658732331167","gadgetposition":{"cols":190,"rows":18,"x":2,"y":0,"dragEnabled":true,"resizeEnabled":true},"gadgetlock":"unlock","color":"rgb(123, 57, 177)","open":true}]',NULL,b'0',NULL,0,NULL,NULL,(SELECT id FROM usm_project WHERE NAME='leo1311')),
+			(31360,'Infosys Chatbot Application Dashboard',NULL,'board-category','admin',NULL,NULL,'Public',NULL,'{"title":"Chatbot Application","structure":"6-6","boardInstanceId":5,"rows":[{"columns":[{"styleClass":"six wide","gadgets":[{"componentType":"DashboardComponent","selector":"app-dashboard-component","name":"Tile Gadget","description":"Provides paragraph with navigation","icon":"assets/images/dashboardwithpara.png","instanceId":1658731391511,"tags":[{"facet":"Widget","name":"tile"}],"config":{"propertyPages":[{"displayName":"General Details","groupId":"run","position":11,"properties":[{"value":"Click here to open Chatbot Application","key":"title","label":"Title","required":false,"order":1,"controlType":"textbox"},{"value":"center","key":"titlealign","label":"Align Title(Horizontal)","required":true,"order":2,"controlType":"dropdown"},{"value":"center","key":"titlealignvertical","label":"Align Title(Vertical)","required":true,"order":3,"controlType":"dropdown"},{"value":"#7b39b1","key":"color","label":"Text Color","required":false,"order":5,"controlType":"textbox"},{"value":"88","key":"height","label":"","required":true,"order":15,"controlType":"hidden"},{"value":"","key":"navigateto","label":"Navigate To","required":true,"order":3,"controlType":"dynamicdropdown"},{"value":"http://10.85.12.143:31788/#/bot=","key":"url","label":"Url","required":true,"order":4,"controlType":"textbox"},{"value":"#ffffff","key":"backgroundcolor","label":"Background Color","required":true,"order":6,"controlType":"textbox"},{"value":"18","key":"fontsize","label":"Font Size (in px)","required":true,"order":7,"controlType":"number"},{"value":"UniversLTStd,Arial","key":"fontfamily","label":"Font Family","required":true,"order":8,"controlType":"textbox"},{"value":1658731391511,"key":"instanceId","label":"","required":true,"order":-1,"controlType":"hidden"},{"value":"#ffffff","key":"bordercolor","label":"Widget Border Color","required":true,"order":9,"controlType":"textbox"},{"value":true,"key":"enableHtmlFormat","label":"Format Details as HTML","required":true,"order":10,"controlType":"checkbox"},{"value":"","key":"widgetDetails","label":"Widget Details","required":true,"order":11,"controlType":"textbox"},{"value":"0","key":"borderRadius","label":"Border Radius","required":true,"order":12,"controlType":"number"},{"value":0,"key":"widgetheight","label":"Height","required":true,"order":13,"controlType":"number"},{"value":0,"key":"widgetwidth","label":"Width","required":true,"order":14,"controlType":"number"}]}]},"actions":[{"name":"Add"}]}]},{"styleClass":"six wide","gadgets":[]}]}],"id":5,"parentfiltershow":true,"filterfullwidth":false,"responsivefiltercheck":false,"isDashBgColor":false,"overridestartenddatefiltercheck":false,"showwidgetsizeintooltip":true,"dashNameAlign":"left","hideTimeFilter":false,"enableHtmlFormat":false,"dashBgColorValue":null,"bgImageName":"No File Chosen"}',NULL,'chatbot application','[{"gadgetid":"1658731391511","gadgetposition":{"cols":191,"rows":16,"x":0,"y":1,"dragEnabled":true,"resizeEnabled":true},"gadgetlock":"unlock","color":"rgb(123, 57, 177)","open":true}]',NULL,b'0',NULL,0,NULL,NULL,(SELECT id FROM usm_project WHERE NAME='leo1311'));
+		</sql>
+  </changeSet>
+  <changeSet dbms="mssql" author="Leap (generated)" id="3v0-dbs-241025-1">
+		<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0"> SELECT COUNT(*) FROM dbs_dashboard_configuration WHERE (app_name = 'Infosys Chatbot Studio Dashboard' AND project=2) OR (app_name = 'Infosys Chatbot Application Dashboard' AND project=2) OR id = 31360 OR id = 31361;</sqlCheck>
+     	</preConditions>
+	    <sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_dashboard_configuration ON;
+		</sql>
+		<sql>
+			INSERT INTO dbs_dashboard_configuration (id,app_name,bg_image,category,created_by,created_on,dash_array,dashboard_access,dash_floating_modal,dash_json,dependent_filter,description,icon,image,is_deleted,landing_dash,layout,show_date,context,project)
+			VALUES(31361,'Infosys Chatbot Studio Dashboard',NULL,'board-category','admin',NULL,NULL,'Public',NULL,'{"title":"Chatbot Studio","structure":"6-6","boardInstanceId":5,"rows":[{"columns":[{"styleClass":"six wide","gadgets":[{"componentType":"DashboardComponent","selector":"app-dashboard-component","name":"Tile Gadget","description":"Provides paragraph with navigation","icon":"assets/images/dashboardwithpara.png","instanceId":1658732331167,"tags":[{"facet":"Widget","name":"tile"}],"config":{"propertyPages":[{"displayName":"General Details","groupId":"run","position":11,"properties":[{"value":"Click here to open Chatbot Studio","key":"title","label":"Title","required":false,"order":1,"controlType":"textbox"},{"value":"center","key":"titlealign","label":"Align Title(Horizontal)","required":true,"order":2,"controlType":"dropdown"},{"value":"center","key":"titlealignvertical","label":"Align Title(Vertical)","required":true,"order":3,"controlType":"dropdown"},{"value":"#7b39b1","key":"color","label":"Text Color","required":false,"order":5,"controlType":"textbox"},{"value":"100","key":"height","label":"","required":true,"order":15,"controlType":"hidden"},{"value":"","key":"navigateto","label":"Navigate To","required":true,"order":3,"controlType":"dynamicdropdown"},{"value":"http://10.85.12.143:31752","key":"url","label":"Url","required":true,"order":4,"controlType":"textbox"},{"value":"#fffafa","key":"backgroundcolor","label":"Background Color","required":true,"order":6,"controlType":"textbox"},{"value":"18","key":"fontsize","label":"Font Size (in px)","required":true,"order":7,"controlType":"number"},{"value":"UniversLTStd,Arial","key":"fontfamily","label":"Font Family","required":true,"order":8,"controlType":"textbox"},{"value":1658732331167,"key":"instanceId","label":"","required":true,"order":-1,"controlType":"hidden"},{"value":"#ffffff","key":"bordercolor","label":"Widget Border Color","required":true,"order":9,"controlType":"textbox"},{"value":false,"key":"enableHtmlFormat","label":"Format Details as HTML","required":true,"order":10,"controlType":"checkbox"},{"value":"","key":"widgetDetails","label":"Widget Details","required":true,"order":11,"controlType":"textbox"},{"value":2,"key":"borderRadius","label":"Border Radius","required":true,"order":12,"controlType":"number"},{"value":0,"key":"widgetheight","label":"Height","required":true,"order":13,"controlType":"number"},{"value":0,"key":"widgetwidth","label":"Width","required":true,"order":14,"controlType":"number"}]}]},"actions":[{"name":"Add"}]}]},{"styleClass":"six wide","gadgets":[]}]}],"id":5,"parentfiltershow":true,"filterfullwidth":false,"responsivefiltercheck":false,"isDashBgColor":false,"overridestartenddatefiltercheck":false,"showwidgetsizeintooltip":false,"dashNameAlign":"left","hideTimeFilter":false,"enableHtmlFormat":false}',NULL,'chatbot studio','[{"gadgetid":"1658732331167","gadgetposition":{"cols":190,"rows":18,"x":2,"y":0,"dragEnabled":true,"resizeEnabled":true},"gadgetlock":"unlock","color":"rgb(123, 57, 177)","open":true}]',NULL,0,NULL,0,NULL,NULL,(SELECT id FROM usm_project WHERE NAME='leo1311')),
+			(31360,'Infosys Chatbot Application Dashboard',NULL,'board-category','admin',NULL,NULL,'Public',NULL,'{"title":"Chatbot Application","structure":"6-6","boardInstanceId":5,"rows":[{"columns":[{"styleClass":"six wide","gadgets":[{"componentType":"DashboardComponent","selector":"app-dashboard-component","name":"Tile Gadget","description":"Provides paragraph with navigation","icon":"assets/images/dashboardwithpara.png","instanceId":1658731391511,"tags":[{"facet":"Widget","name":"tile"}],"config":{"propertyPages":[{"displayName":"General Details","groupId":"run","position":11,"properties":[{"value":"Click here to open Chatbot Application","key":"title","label":"Title","required":false,"order":1,"controlType":"textbox"},{"value":"center","key":"titlealign","label":"Align Title(Horizontal)","required":true,"order":2,"controlType":"dropdown"},{"value":"center","key":"titlealignvertical","label":"Align Title(Vertical)","required":true,"order":3,"controlType":"dropdown"},{"value":"#7b39b1","key":"color","label":"Text Color","required":false,"order":5,"controlType":"textbox"},{"value":"88","key":"height","label":"","required":true,"order":15,"controlType":"hidden"},{"value":"","key":"navigateto","label":"Navigate To","required":true,"order":3,"controlType":"dynamicdropdown"},{"value":"http://10.85.12.143:31788/#/bot=","key":"url","label":"Url","required":true,"order":4,"controlType":"textbox"},{"value":"#ffffff","key":"backgroundcolor","label":"Background Color","required":true,"order":6,"controlType":"textbox"},{"value":"18","key":"fontsize","label":"Font Size (in px)","required":true,"order":7,"controlType":"number"},{"value":"UniversLTStd,Arial","key":"fontfamily","label":"Font Family","required":true,"order":8,"controlType":"textbox"},{"value":1658731391511,"key":"instanceId","label":"","required":true,"order":-1,"controlType":"hidden"},{"value":"#ffffff","key":"bordercolor","label":"Widget Border Color","required":true,"order":9,"controlType":"textbox"},{"value":true,"key":"enableHtmlFormat","label":"Format Details as HTML","required":true,"order":10,"controlType":"checkbox"},{"value":"","key":"widgetDetails","label":"Widget Details","required":true,"order":11,"controlType":"textbox"},{"value":"0","key":"borderRadius","label":"Border Radius","required":true,"order":12,"controlType":"number"},{"value":0,"key":"widgetheight","label":"Height","required":true,"order":13,"controlType":"number"},{"value":0,"key":"widgetwidth","label":"Width","required":true,"order":14,"controlType":"number"}]}]},"actions":[{"name":"Add"}]}]},{"styleClass":"six wide","gadgets":[]}]}],"id":5,"parentfiltershow":true,"filterfullwidth":false,"responsivefiltercheck":false,"isDashBgColor":false,"overridestartenddatefiltercheck":false,"showwidgetsizeintooltip":true,"dashNameAlign":"left","hideTimeFilter":false,"enableHtmlFormat":false,"dashBgColorValue":null,"bgImageName":"No File Chosen"}',NULL,'chatbot application','[{"gadgetid":"1658731391511","gadgetposition":{"cols":191,"rows":16,"x":0,"y":1,"dragEnabled":true,"resizeEnabled":true},"gadgetlock":"unlock","color":"rgb(123, 57, 177)","open":true}]',NULL,0,NULL,0,NULL,NULL,(SELECT id FROM usm_project WHERE NAME='leo1311'));
+		</sql>
+	        <sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_dashboard_configuration OFF;
+		</sql>
+  </changeSet>
+</databaseChangeLog>

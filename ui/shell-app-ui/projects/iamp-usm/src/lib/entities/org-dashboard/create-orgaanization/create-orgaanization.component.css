@@ -1,0 +1,47 @@
+i.icon{
+   font-size: 24px; 
+}
+
+.usm_table th {
+    background-color: inherit ;
+    text-align: left;
+
+}
+
+.usm_table td {
+    background-color: inherit ;
+    text-align: left;
+}
+/* 
+textarea:focus, 
+textarea.form-control:focus, 
+input.form-control:focus, 
+input[type=text]:focus, 
+input[type=password]:focus, 
+input[type=email]:focus, 
+input[type=number]:focus, 
+[type=text].form-control:focus, 
+[type=password].form-control:focus, 
+[type=email].form-control:focus, 
+[type=tel].form-control:focus, 
+[contenteditable].form-control:focus {
+    border-bottom: 1px solid var(--form-control-border-color) ;
+         outline:none ; 
+
+} */
+.DSA_wb_custom-table tbody tr:hover {
+    background: initial !important;
+}
+.text-inside-grid {
+    position: absolute;
+    left: 5px;
+  }
+.web-hoverShadow, .DSA_wb_customSlider .ng5-slider .ng5-slider-pointer:hover, .DSA_wb_custom-dropdown.dropdown-menu, .DSA_wb_custom-pagination .page-link:hover, .option_ul li a:hover, .DSA_wb_card-widget.mat-card:hover, .DSA_wb_custom-table tbody tr.active, .DSA_wb_custom-table tbody tr:hover, .mat-chip.mat-standard-chip.DSA_wb_chipStyle-Normal:hover, .mat-chip.mat-standard-chip.DSA_wb_chipStyle-Big:hover, .DSA_wb_miniPrimary-btn:hover, .DSA_wb_Icon-btn:hover, .DSA_wb_innerSecondary-btn:hover, .DSA_wb_innerPrimary-btn:hover, .DSA_wb_secondary-btn:hover, .DSA_wb_primary-btn:hover {
+    box-shadow: none!important;
+}
+
+
+
+.DSA_wb_custom-table tbody tr:hover td .groupName {
+    color: #8626C3;
+}

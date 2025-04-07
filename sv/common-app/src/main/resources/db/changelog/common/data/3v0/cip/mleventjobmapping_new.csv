@@ -1,0 +1,8 @@
+"body","description","eventname","organization","jobdetails"
+"{}",\N,"CleanTickets","leo1311","[{""name"":""LEACLNTC62252"",""type"":""pipeline"",""runtime"":{""dsAlias"":""LocalCluster"",""dsName"":""LEALCLCL12132"",""type"":""REMOTE""}}]"
+"{}",\N,"VolumeForecasting","leo1311","[{""name"":""LEOL131_21262"",""type"":""pipeline"",""runtime"":{""dsAlias"":""LocalCluster"",""dsName"":""LEALCLCL12132"",""type"":""REMOTE""}}]"
+"{}",\N,"PhraseExtraction","leo1311","[{""name"":""LEOPHRSX53223"",""type"":""pipeline"",""runtime"":{""dsAlias"":""LocalCluster"",""dsName"":""LEALCLCL12132"",""type"":""REMOTE""}}]"
+"{}",\N,"Keyphrase","leo1311","[{""name"":""LEOKYPHR67439"",""type"":""pipeline"",""runtime"":{""dsAlias"":""LocalCluster"",""dsName"":""LEALCLCL12132"",""type"":""REMOTE""}}]"
+"{}",\N,"ExtractWords","leo1311","[{""name"":""LEACLNTC74662"",""type"":""pipeline"",""runtime"":{""dsAlias"":""LocalCluster"",""dsName"":""LEALCLCL12132"",""type"":""REMOTE""}}]"
+"{}",\N,"StopWords","leo1311","[{""name"":""LEOSTPWR74805"",""type"":""pipeline"",""runtime"":{""dsAlias"":""LocalCluster"",""dsName"":""LEALCLCL12132"",""type"":""REMOTE""}}]"
+"{}","generateScript for chatbot","generateScript_Chatbot","leo1311","[{""name"":""CHACDGNR87605"",""type"":""pipeline"",""runtime"":{""dsAlias"":"""",""dsName"":"""",""type"":""Local""}}]"

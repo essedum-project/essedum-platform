@@ -1,0 +1,62 @@
+<div class="tabsBox1 childsidebarText selector-3-180" style="width: 100%;display: flex;height: 25px;"
+    [ngClass]="{'sidebarbgcolor':sidebarbgcolor== true, 'sidebarbgcolordefault':sidebarbgcolor!=true,'sidebartextcolor':sidebartextcolor== true,'sidebartextcolordefault':sidebartextcolor!= true}">
+    <div class="selector-3-53" style="margin-right:5px;">
+        <!-- <button >Left</button> -->
+        <i *ngIf="!hideTabLeftBtn1" [ngClass]="sidebartextcolor?'sidebartextcolor':'sidebartextdefault'"
+            style="padding-top: 10px;padding-left: 10px;display: block !important;" (click)="clickOnLeftBtn1()"
+            class="fa fa-angle-double-left selector-3-54" aria-hidden="true"></i>
+
+    </div>
+    <div id="tabsBox1" class="" style="width: 98%;display: flex;overflow: hidden;scroll-behavior: smooth;">
+        <span *ngFor="let item of items" class="selector-3-181" style="height: 25px"
+            [ngClass]="{'sidebarbgcolor':sidebarbgcolor== true, 'sidebarbgcolordefault':sidebarbgcolor!=true,'sidebartextcolor':sidebartextcolor== true,'sidebartextcolordefault':sidebartextcolor!= true}">
+            <div class="testt selector-3-182">
+                <!-- Handle branch node buttons here -->
+                <span *ngIf="item.children &amp;&amp; item.children.length > 0"
+                    style="display: flex;height: 17px;margin-top: 5px;" class="childsidebarText selector-3-183">
+                    <button style="font-size: 0.9vw;" mat-button="" color="primary" class="selector-3-184"
+                        (mouseover)="createSubHeader(item.children)" (click)="createSubHeader(item.children)" [ngClass]="{'sidebarbgcolor':sidebarbgcolor== true, 'sidebarbgcolordefault':sidebarbgcolor!=true,'sidebartexticonhovercolor':sidebartexticonhovercolor,'sidebartextcolor':sidebartextcolor== true,'sidebartextcolordefault':sidebartextcolor!= true,
+          'sidebarhovercolor':sidebarhovercolor== true,'sidebarhovercolordefault':sidebarhovercolor!= true}">
+                        <span style="align-items: center;display: flex;height: 17px;"
+                            class="sidebarTextFont selector-3-185">
+                            {{item.label}}
+                        </span>
+                    </button>
+                </span>
+                <!-- Leaf node buttons here -->
+                <span *ngIf="!item.children || item.children.length === 0"
+                    style="display: flex;height: 17px;margin-top: 5px;;" class="childsidebarText selector-3-186">
+                    <button (click)="Highlight(item)" (mouseover)="resetvalues()"
+                        style="font-size: 0.9vw; padding: 0 26px;" mat-button="" color="primary" [routerLink]="item.url"
+                        class="selector-3-187" [ngClass]="{'sidebarbgcolor':sidebarbgcolor== true, 'sidebarbgcolordefault':sidebarbgcolor!=true,'sidebartexticonhovercolor':sidebartexticonhovercolor==true,'sidebartextcolor':sidebartextcolor== true,'sidebartextcolordefault':sidebartextcolor!= true,
+          'sidebarhovercolor':sidebarhovercolor== true,'sidebarhovercolordefault':sidebarhovercolor!= true}">
+                        <span style="align-items: center;display: flex;height: 17px;"
+                            class="sidebarTextFont selector-3-188">
+                            {{item.label}}
+                        </span>
+                    </button>
+                </span>
+                <span *ngIf="item.type === 'external' && (!item.children || item.children.length === 0)"
+                    class="childsidebarText selector-3-61" style="display: flex;height: 17px;margin-top: 5px;">
+                    <button (mouseover)="createSubHeader(null)" (click)="Highlight(item);checkAndOpenExtLink(item.url)"
+                        style="font-size: 1vw;" mat-button="" color="primary" class="selector-3-62"
+                        [ngClass]="{'sidebartextcolor':sidebartextcolor== true,'sidebartextcolordefault':sidebartextcolor!= true}">
+                        <span style="align-items: center;display: flex;height: 17px;"
+                            class="childsidebarText sidebarTextFont"
+                            [class.sidebar-background]="item.label == seclevelhighlighted && sidebarhighlightcolor!=true"
+                            [class.sidebar-backgroundconfig]="item.label == seclevelhighlighted && sidebarhighlightcolor==true">
+                            {{item.label}}
+                        </span>
+                    </button>
+                </span>
+            </div>
+        </span>
+    </div>
+    <div class="selector-3-63" style="margin-left:5px">
+        <!-- <button   >Right</button> -->
+        <i *ngIf="!hideTabRightBtn1" [ngClass]="sidebartextcolor?'sidebartextcolor':'sidebartextdefault'"
+            style="padding-top: 10px;padding-right: 10px;display: block !important;"
+            class="fa fa-angle-double-right selector-3-64" (click)="clickOnRightBtn1()" aria-hidden="true"></i>
+    </div>
+</div>
+<app-menu-item *ngIf="showSubHeader" [items]="subHeaderItems" class="selector-3-189"></app-menu-item>

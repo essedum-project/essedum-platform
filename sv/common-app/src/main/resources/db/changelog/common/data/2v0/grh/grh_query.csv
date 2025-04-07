@@ -1,0 +1,285 @@
+"user_id","project_id","query_name","query_description","gql_query","query_filter","is_private","createdAt","updatedAt"
+"1","2","FlowOfOrder","order","query ($orderno: String = 258161) {
+    Order(filter: {
+        OrderNumber_contains: $orderno
+    }) {
+        uniqueId
+        OrderNumber
+        Season
+        planningmarketcode
+        OrderPlacedDate
+        OrderVariantMapping(filter: {
+            OrderNumber_contains: $orderno
+        }) {
+            uniqueId
+            VariantId
+            OrderNumber
+            MappingOrderVariant {
+                uniqueId
+                VariantId
+                OrderNumber
+                VariantProductMapping(filter: {
+                    OrderNumber_contains: $orderno
+                }) {
+                    uniqueId
+                    VariantId
+                    ProductID
+                    OrderNumber
+                    MappingVariantProduct {
+                        uniqueId
+                        article_name
+                        ProductID
+                        ProductDepartmentMapping(filter: {
+                            OrderNumber_contains: $orderno
+                        }) {
+                            uniqueId
+                            ProductID
+                            department_name
+                            OrderNumber
+                            MappingProductDepartment {
+                                uniqueId
+                                department_name
+                                index_name
+                                garment_group_name
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        OrderSupplierMapping(filter: {
+            OrderNumber_contains: $orderno
+        }) {
+            uniqueId
+            OrderNumber
+            SupplierID
+            mappingOrderSupplier {
+                SupplierID
+                uniqueId
+                SupplierName
+                SupplierOriginMapping(filter: {
+                    OrderNumber_contains: $orderno
+                }) {
+                    uniqueId
+                    OrderNumber
+                    OriginPort
+                    SupplierID
+                    MappingSupplierOrigin {
+                        uniqueId
+                        OriginPort
+                        DeliveryCountry
+                        OriginDestinationMapping(filter: {
+                            OrderNumber_contains: $orderno
+                        }) {
+                            uniqueId
+                            OriginPort
+                            ArrivalPort
+                            FeederVesselEstimatedtimeofArrival
+                            FeederVesselActualTimeOfArrivalDate
+                            OrderNumber
+                            MappingOriginDestination {
+                                uniqueId
+                                ArrivalPort
+                                DestinationCountry
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        OrderWarehouseMapping(filter: {
+            OrderNumber_contains: $orderno
+        }) {
+            uniqueId
+            OrderNumber
+            WH_Address
+            MappingOrderWarehouse {
+                uniqueId
+                WH_Address
+            }
+
+        }
+
+        OrderContainerMapping(filter: {
+            OrderNumber_contains: $orderno
+        }) {
+            uniqueId
+            ContainerId
+            OrderNumber
+            MappingOrderContainer {
+                uniqueId
+                ContainerId
+            }
+
+        }
+
+        OrderCarrierMapping(filter: {
+            OrderNumber_contains: $orderno
+        }) {
+            uniqueId
+            OrderNumber
+            CarrierName
+            MappingOrderCarrier {
+                uniqueId
+                CarrierName
+            }
+
+        }
+
+    }
+}","{""orderno"":""258161""}","true","2022-07-20T05:04:57","NULL"
+"1","2","orderflow","of","query ($orderno: String = 258161) {
+    Order(filter: {
+        OrderNumber_contains: $orderno
+    }, first: 25, offset: 0) {
+        uniqueId
+        OrderNumber
+        Season
+        planningmarketcode
+        OrderPlacedDate
+        OrderCarrierMapping(first: 25, offset: 0) {
+            uniqueId
+            OrderNumber
+            CarrierName
+            MappingOrderCarrier(first: 25, offset: 0) {
+                uniqueId
+                CarrierName
+                MappingContainerCarrier(first: 25, offset: 0) {
+                    uniqueId
+                    OrderNumber
+                    ContainerId
+                    CarrierName
+                }
+
+            }
+
+        }
+
+        OrderContainerMapping(first: 25, offset: 0) {
+            uniqueId
+            ContainerId
+            OrderNumber
+            MappingOrderContainer(first: 25, offset: 0) {
+                uniqueId
+                ContainerId
+                ContainerCarrierMapping(first: 25, offset: 0) {
+                    uniqueId
+                    OrderNumber
+                    ContainerId
+                    CarrierName
+                    MappingContainerCarrier(first: 25, offset: 0) {
+                        uniqueId
+                        CarrierName
+                    }
+
+                }
+
+            }
+
+        }
+
+        OrderWarehouseMapping(first: 25, offset: 0) {
+            uniqueId
+            OrderNumber
+            WH_Address
+            MappingOrderWarehouse(first: 25, offset: 0) {
+                uniqueId
+                WH_Address
+            }
+
+        }
+
+        OrderSupplierMapping(first: 25, offset: 0) {
+            uniqueId
+            OrderNumber
+            SupplierID
+            mappingOrderSupplier(first: 25, offset: 0) {
+                SupplierID
+                uniqueId
+                SupplierName
+                SupplierOriginMapping(first: 25, offset: 0) {
+                    uniqueId
+                    OrderNumber
+                    OriginPort
+                    SupplierID
+                    MappingSupplierOrigin(first: 25, offset: 0) {
+                        uniqueId
+                        OriginPort
+                        DeliveryCountry
+                        OriginDestinationMapping(first: 25, offset: 0) {
+                            uniqueId
+                            OriginPort
+                            ArrivalPort
+                            FeederVesselEstimatedtimeofArrival
+                            FeederVesselActualTimeOfArrivalDate
+                            OrderNumber
+                            MappingOriginDestination(first: 25, offset: 0) {
+                                uniqueId
+                                ArrivalPort
+                                DestinationCountry
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        OrderVariantMapping(first: 25, offset: 0) {
+            uniqueId
+            VariantId
+            OrderNumber
+            MappingOrderVariant(first: 25, offset: 0) {
+                uniqueId
+                VariantId
+                OrderNumber
+                VariantProductMapping(first: 25, offset: 0) {
+                    uniqueId
+                    VariantId
+                    ProductID
+                    OrderNumber
+                    MappingVariantProduct(first: 25, offset: 0) {
+                        uniqueId
+                        article_name
+                        ProductID
+                        ProductDepartmentMapping(first: 25, offset: 0) {
+                            uniqueId
+                            ProductID
+                            department_name
+                            OrderNumber
+                            MappingProductDepartment(first: 25, offset: 0) {
+                                uniqueId
+                                department_name
+                                subindex_name
+                                index_name
+                                garment_group_name
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+}","{""orderno"":""258161""}","true","2022-07-14T09:00:54","NULL"

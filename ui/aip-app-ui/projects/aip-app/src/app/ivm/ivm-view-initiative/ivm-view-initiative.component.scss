@@ -1,0 +1,92 @@
+::ng-deep .le-c-listitem:has(.aip-ivm-task-grid) {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  grid-column-gap: 2.4rem;
+  grid-row-gap: 0px;
+}
+.initiative__approvede span,
+.initiative__compeleted span,
+.initiative__yet-to-start span {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.initiative__approved span,
+.initiative__compeleted span,
+.initiative__approval_pending span,
+.initiative__yet-to-start span,
+.initiative__approved span::after,
+.initiative__compeleted span::after,
+.initiative__yet-to-start span::after,
+.initiative__approval_pending::after,
+.initiative__rejected span,
+.initiative__rejected span::after
+ {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  font-family: "DS-iconfont", Helvetica, Arial, Verdana, Tahoma, sans-serif !important;
+  font-style: normal;
+  font-weight: normal !important;
+  display: inline-block;
+}
+// .initiative__rejected span,
+// .initiative__rejected span::after{
+//   width: 18px;
+//   height: 20px;
+//   font-size: 18px;
+//   font-family: "DS-iconfont", Helvetica, Arial, Verdana, Tahoma, sans-serif !important;
+//   font-style: normal;
+//   font-weight: normal !important;
+//   display: inline-block;
+// }
+.initiative__approved span::after {
+  content: "\e0e2";
+  color: #8626c3;
+}
+.initiative__compeleted span::after {
+  content: "\25C9";
+  color: rgb(56 133 9);
+}
+.initiative__approval_pending span::after {
+  content: "\25C9";
+  color: rgb(128, 6, 133);
+}
+.initiative__yet-to-start span::after {
+  content: "\229A";
+  color: #8626c3;
+}
+.initiative__rejected span::after {
+  content: "\229A";
+  color: #f70505;
+}
+// .initiative__rejected span::after {
+//   content: "x";
+//   background-color: red;
+//   font-size: medium;
+//   border-radius: 100%;
+//   color: #fff;
+//   padding-left: 5px;
+// }
+::ng-deep .le-c-nav-list li > a {
+  padding: 13px 5px !important;
+}
+.aip-linkedArtifact-side{
+  text-decoration: none;
+  color: #737373;
+  padding: 10px 0px;
+}
+.aip-linkedArtifact-side:hover{
+  background-color: #EFEFEF;
+  border-radius: 8px;
+  padding: 10px 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.aip-ivm-slectedArtifact{
+  position: absolute;
+  top: 50%;
+  left: 35%;
+  transform: translate(50%,-50%);
+}

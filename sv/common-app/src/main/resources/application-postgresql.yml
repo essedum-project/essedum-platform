@@ -1,0 +1,45 @@
+config: 
+  driverClassName: org.postgresql.Driver
+  datasourceurl: jdbc:postgresql://10.212.115.206:30469/t1
+  datasourceuser: postgres
+  datasourcepass: Infy_postgres
+  service-auth:
+    token-header: access-token
+    token: aec127c2-c984-33f6-9a3a-355xd1dof097
+  leap-db-url: ${config.datasourceurl}?currentSchema=core
+  leap-db-username: ${config.datasourceuser}
+  leap-db-password: ${config.datasourcepass}
+spring:
+  quartz:
+        job-store-type: jdbc
+        enabled: true
+        properties: 
+            org.quartz.threadPool.threadCount: 5
+            org.quartz.jobStore.class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+            org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            org.quartz.jobStore.isClustered: true
+            org.quartz.jobStore.clusterCheckinInterval: 5000
+            org.quartz.scheduler.instanceId: AUTO
+  jpa:
+        open-in-view: false
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+        generate-ddl: false
+        database: POSTGRESQL
+        show-sql: false
+        properties:
+            hibernate.id.new_generator_mappings: true
+            hibernate.cache.use_second_level_cache: false
+            hibernate.cache.use_query_cache: false
+            hibernate.region.factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory            
+            hibernate.generate_statistics: true
+            hibernate.jdbc.batch_size: 500
+            hibernate.order_inserts: true
+            hibernate.order_updates: true
+            hibernate.jdbc.batch_versioned_data: true
+            hibernate.jdbc.time_zone: UTC
+            hibernate.auto_quote_keyword: true
+            hibernate:
+                ddl-auto: none
+                physical_naming_strategy : org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+                implicit_naming_strategy : org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
+            hibernate.enable_lazy_load_no_trans: true

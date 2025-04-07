@@ -1,0 +1,80 @@
+<div id="chatContainer" class="aipChat le-u-pad-lr-8"
+    style="background: url(assets/images/chatBGtop.png) top right no-repeat;">
+    <!-- <div ledsChatbotHeader class="chatHeader le-u-pad-b-24 "> -->
+    <!-- <div style="padding-right: 10px;display: flex;">
+                    <div style="padding-right: 10px;display: flex;align-items: center;cursor: pointer;"
+                        (click)="openFeedbackPopup(ratefeedback)">
+                        <label style="font-size: 14px; font-weight: 100;">Rate me</label>
+                        <i class="icon x-20 star-icon"></i>
+                    </div>
+                    <div style="padding-right: 10px;display: flex;align-items: center;" hidden>
+                        <div>
+                            <i class="icon x-20 icon_setting" style="cursor: pointer;"
+                                (click)="showSettingDropdown = !showSettingDropdown"></i>
+                        </div>
+                        <div *ngIf="showSettingDropdown">
+                            <leds-select [options]="options" label="Label" [required]="false" [disabled]="false"
+                                designType="withBg" [isMultiple]="false" [selected]="defaultSelected"
+                                (selectChange)="selectChange($event)" (openChange)="openChange($event)"></leds-select>
+                        </div>
+                    </div>
+                    <div style="padding-right: 10px;display: flex;align-items: center;">
+                        <i class="icon x-20 download-icon" style="cursor: pointer;" (click)="saveChatHistory()"></i>
+                    </div>
+                </div> -->
+    <!-- </div> -->
+    <div class="childChatDiv container-fluid aip-chatContainer aip-scroll-hover
+        le-u-pad-tb-16 le-u-mar-b-8" style="height: calc(100vh - 200px);background: none;">
+        <div id="chatDiv">
+        </div>
+    </div>
+    <div class="d-flex justify-content-center le-u-pad-tb-8" *ngIf="showSpinner">
+        <!-- <mat-progress-bar mode="indeterminate" value="40" color="accent"></mat-progress-bar> -->
+        <leds-spinner class="aip-spinner" [size]="'small'" [color]="'#8626c3'" [type]="'ball-pulse-sync'"
+            [fullScreen]="false" [showSpinner]="showSpinner">
+        </leds-spinner>
+    </div>
+    <br>
+    <div class="d-flex align-items-center justify-content-center">
+        <leds-chatbot-default-footer-actions class="childFoot" ledsChatbotFooterActions
+            style="position: relative;top: -3vh;" [ngClass]="isFooterDetails ? 'footerFull': 'footerwithDetails'"
+            (onSend)="sendInput($event)" (keyup)="enterPress($event)">
+        </leds-chatbot-default-footer-actions>
+        <span [hidden]="!isFooterDetails" class="logoFoot d-flex align-items-center justify-content-end"
+            style="width: 15%;">
+            <span *ngIf="footerText.length>0" style="font-size: 0.8vw;">{{footerText}}</span>
+            <img *ngIf="footerLogo.length>0" [src]="footerLogo" alt="img">
+        </span>
+    </div>
+    <!-- </leds-panel> -->
+</div>
+<ng-template #ratefeedback>
+    <div style="padding: 4px;">
+        <div style="padding: 8px;">
+            <leds-rating [disabled]="false" [maxRating]="5" [rating]="0" icon="star-icon"
+                iconSelected="icon-star_filled" styleClass="" (ratingChange)="ratingChange($event)"></leds-rating>
+        </div>
+        <div style="padding: 8px;">
+            <textarea style="width: 100%;min-height: 80px;" [(ngModel)]="feedbackText"></textarea>
+        </div>
+        <div style="padding: 8px;float: right;">
+            <leds-button nameText="miniPrimaryButton" idText="miniPrimaryButton" [disabled]="false" buttonType="button"
+                designType="miniPrimary" (click)="submitRating(successPopup)">
+                Submit
+            </leds-button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #successPopup>
+    <leds-message-banner designType="success" [section]="true">
+        <div sectionMessageBody>{{successText}}</div>
+    </leds-message-banner>
+</ng-template>
+
+<div *ngFor="let c of array; let i= index" id="ChatbotformDisplay" [hidden]="hide">
+    <div [id]="'chatbot-form' + i" class="le-u-pad-16 le-u-mar-t-16 chatbot-form-panel">
+        <formio id="count" [form]="resval" (submit)="onSubmit($event)" [submission]="preData"></formio>
+    </div>
+</div>
+
+<!-- (onMicPress)="h()" -->

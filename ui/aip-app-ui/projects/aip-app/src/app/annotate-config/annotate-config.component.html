@@ -1,0 +1,83 @@
+<div fxFlex="100" fxLayout="column" fxLayoutWrap style="position: relative;">
+    <div class="d-flex justify-content-between align-items-center px-4">
+        <div class="justify-content-start align-items-center d-flex">
+            <h2 style="color:var(--base-color)">Configuration</h2>
+        </div>
+        <div class="d-flex justify-content-end">
+            <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()">
+                <i class="icon x-16 close-icon"></i>
+            </button>
+        </div>
+    </div>
+    <div *ngIf="loadingPageForSpinner" class="relative-spin" >
+        <leds-spinner [bdColor]="'#ffffff'" [size]="'default'" [color]="'#8626c3'"
+            [type]="'ball-spin'" [fullScreen]="false" [showSpinner]="loadingPageForSpinner">
+        </leds-spinner>  
+    </div>
+    
+        <div fxLayout="column" style="margin: 2%;">
+            <label for="Tokenizer">Select Tokenizer</label>
+            <leds-select [options]="TokenizerList" errorMessage="{
+                                        required: 'This field is required',
+                                    }" [required]="true" idText="Tokenizer" [disabled]="false"
+                [(ngModel)]="tokenizer" designType="editable" [isMultiple]="false"
+                (selectChange)="selectToken($event)"></leds-select>
+        </div>
+        <div fxLayout="column" style="margin: 2%;">
+            <label for="OCR">Choose a OCR Method</label>
+            <leds-select [options]="OCRMethodList" errorMessage="{
+                                                                required: 'This field is required',
+                                                            }" [required]="true" [disabled]="false"
+                [(ngModel)]="ocrMethod" designType="editable" [isMultiple]="false"
+                (selectChange)="selectOCRChange($event)"></leds-select>
+        </div>
+        <div fxLayout="column" style="margin: 2%;">
+            <label for="Language">Choose a Language</label>
+            <leds-select [options]="LanguageList" errorMessage="{
+                                                            required: 'This field is required',
+                                                        }" [required]="true" [disabled]="false"
+                [(ngModel)]="language" designType="editable" [isMultiple]="false"
+                (selectChange)="selectChanges($event)"></leds-select>
+        </div>
+        <div fxLayout="column" style="margin: 2%;">
+            <label for="Tags">Tags</label>
+            <leds-input-field idText="Tags" inputType="text" (keyup.enter)="add($event)"
+                placeholder="Add Tags"></leds-input-field>
+            <leds-chip-list [label]="'label'" [selectable]="selectable" [multiSelect]="multi">
+                <leds-chip *ngFor="let chip of tagsList; let i=index">{{chip}} <span
+                        (click)="remove(chip)">X</span></leds-chip>
+            </leds-chip-list>
+        </div>
+        <div class="padding1em mtopbottom4p" fxLayoutAlign="start center" fxFlex="100" fxLayout="row" fxLayoutWrap>
+
+            <leds-slide-toggle [checked]="sorting" [disabled]="false" fxFlex="25"
+                (toggleChange)="onChange($event,true)" [labelPosition]="'after'" [disableRipple]="true">
+                Sorting
+            </leds-slide-toggle>
+
+            <leds-slide-toggle [checked]="processasImage" [disabled]="false" fxFlex="25"
+                (toggleChange)="onChange($event,undefined,true)" [labelPosition]="'after'" [disableRipple]="true">
+                Process PDF as Image
+            </leds-slide-toggle>
+
+            <leds-slide-toggle [checked]="process_as_pdf" [disabled]="false" fxFlex="25"
+                (toggleChange)="onChange($event,undefined,true)" [labelPosition]="'after'" [disableRipple]="true">
+                Process Word doc as PDF
+            </leds-slide-toggle>
+
+            <leds-slide-toggle [checked]="deleteExisting" [disabled]="false" fxFlex="25"
+                (toggleChange)="onChange($event,undefined,undefined,undefined,true)" [labelPosition]="'after'"
+                [disableRipple]="true">
+                Delete Existing
+            </leds-slide-toggle>
+            <br>
+        </div>
+    <br>
+        <div fxLayout="column" fxFlex="100" fxLayoutAlign="end end" style="margin-right: 1%;">
+            <leds-button matStepperNext buttonType="button" designType="primary" style="display: flex; "
+                class="le-u-mar-t-16" (click)="createContentMiningDataset()">
+                Tokenize
+            </leds-button>
+        </div>
+    
+</div>

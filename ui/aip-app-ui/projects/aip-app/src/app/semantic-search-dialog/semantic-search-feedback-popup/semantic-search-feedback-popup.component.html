@@ -1,0 +1,40 @@
+<div class="le-u-pad-16" style="position:relative">
+    <div class="le-l-level1-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="d-flex justify-content-end ng-star-inserted le-u-pad-t-8">
+                    <button type="button" class="btn-close" aria-label="Close" (click)="close()">
+                        <i class="icon x-16 close-icon"></i>
+                    </button>
+                </div>
+                <div>
+                    <div class="align-items-center d-flex le-u-pad-l-16">
+                        <div class="justify-content-start align-items-center d-flex">
+                            <h2 style="color:var(--base-color)">Feedback</h2>
+                        </div>
+                    </div>
+                    <div class=" le-u-pad-tb-32 le-u-pad-lr-16">
+                        <div class="table-responsive selector-693-2"
+                            style="height: 100%; margin: 0rem 0rem 1rem 1.5rem;">
+                            <leds-input-field placeholder="Query" label="Query*" [(ngModel)]="query"
+                                designType="readOnly" inputType="text" [disabled]="false" [required]="true"
+                                styleClass="le-u-pad-b-4"></leds-input-field>
+                            <leds-textarea placeholder="Suggestion" label="Feedback" [(ngModel)]="feedback"
+                                designType="default" inputType="text" [disabled]="false"
+                                [required]="true"></leds-textarea>
+                        </div>
+                        <div class="">
+                            <leds-button *ngIf="feedback" nameText="secondaryButton" idText="secondaryButton"
+                                [disabled]="false" buttonType="button" designType="primary" (click)="submit()">
+                                Submit
+                            </leds-button>
+                            <leds-button *ngIf="!feedback" nameText="secondaryButton" idText="secondaryButton"
+                                [disabled]="true" buttonType="button" designType="primary">
+                                Submit
+                            </leds-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

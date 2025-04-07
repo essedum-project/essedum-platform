@@ -1,0 +1,44 @@
+{
+  "settings": {
+    "version": "v1.8.0.0",
+    "environmentType": "DESIGN",
+    "backendUrl": "https://icortex2-dev2.ad.infosys.com/services/csi/",
+    "botApplicationConfig": {
+      "backgroundImage": "content/images/chat-window-bg.png",
+      "botIcon": "content/images/bot-cortex.png",
+      "botName": "Cortex",
+      "brandHeading": "Virtual Assistant",
+      "brandLogo": "assets/icons/virtualAssistant.svg",
+      "locale": "en",
+      "serverlessInfo": {
+        "serviceId": 50851,
+        "sources": [{ "name": "payment", "id": 50901 }]
+      },
+      "timeout": 300,
+      "browserRecognitionEnabled": false,
+      "channel": "",
+      "highlightEntityEnabled": true,
+      "autoSuggestion": true,
+      "initialSuggestionCount": "5",
+      "suggestionInterval": 100,
+      "showIntentTitleInSuggestion": true,
+      "maintenanceImage": "content/images/maintenance.png",
+      "maintenanceInfo": "Virtual Assistant is under maintenance",
+      "maintenanceMode": false,
+      "toastNotification": false,
+      "reqSource": "",
+      "userIcon": "content/images/you-cortex.png",
+      "userIdType": "autogenerate",
+      "userId": "john",
+      "userLocation": "India",
+      "textToSpeechEnabled": false,
+      "speechToTextEnabled": true,
+      "spellCheck": false,
+      "showConfigurationButton": true,
+      "showDeveloperOptions": false,
+      "floatingIcon": "assets/icons/icon-chatbot.svg",
+      "suggestionBackendUrl": "https://icortex2-dev2.ad.infosys.com/services/auto-suggestion"
+
+    }
+  }
+}

@@ -1,0 +1,336 @@
+<div class="container-fluid">
+    <div class="col-md-12 col-lg-12 col-xl-12"
+        style="display: inline-flex; align-items: self-start; padding-top: 1em; padding-bottom: 1em; padding-left: 0; padding-right: 0;justify-content: space-between;">
+        <div class="col-8" style="padding: 0; display:flex;">
+            <i class="aip-led-icons icon x-24 back-icon" *ngIf="initiativeView" style="margin: 0;"
+                (click)="toggler()"></i>
+            <h2 style="margin: 0%;">App : {{streamItem?.alias}}</h2>
+
+        </div>
+        <div class="icons-group" style="padding: 0;">
+
+            <!-- <leds-tooltip><i class="icon x-24 info-big-icon" (click)="switchToOverview()"></i></leds-tooltip>
+            <leds-tooltip style="padding-right: 5px; padding-left: 5px;"><i class="icon x-24 icon-Hamburger" (click)="switchToAppView()"></i></leds-tooltip>
+            <leds-tooltip *ngIf="isVideo"><i class="icon x-24  video-icon" (click)="switchToVideoView()"></i></leds-tooltip> -->
+            <mat-icon *ngIf="editAuth &&!isrunApp &&!isVideo && appData?.scope=='internal'" class="icons"
+                style="padding-right: 1.5em;" matTooltip="Configure" (click)="openWdModal(content2)">settings</mat-icon>
+            <!-- <mat-icon *ngIf="editAuth && !(appData?.scope==='video')" class="icons" style="padding-right: 1.5em;"
+                matTooltip="Try out link" (click)="open(content3)">launch</mat-icon> -->
+            <span (click)="open(content3)" *ngIf="editAuth && !(appData?.scope==='video')"
+                style="padding-right: 1.5em;"> <i class="icon aip-led-icons icon_link"></i></span>
+            <span *ngIf="isOverview" (click)="openModal(content4)">
+
+                <leds-tooltip [tooltip]="addTags" [position]="tooltipPoition" class="aip-led-icons">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-tag"
+                        viewBox="0 0 16 16">
+                        <path d="M6 4.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm-1 0a.5.5 0 1 0-1 0 .5.5 0 0 0 1 0z" />
+                        <path
+                            d="M2 1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 1 6.586V2a1 1 0 0 1 1-1zm0 5.586 7 7L13.586 9l-7-7H2v4.586z" />
+                    </svg>
+                </leds-tooltip> <ng-template #content4 let-modal>
+                    <app-tags [data]="appData" [entityType]="'apps'" [componentType]="'apps'"></app-tags>
+                </ng-template>
+            </span>
+            <!-- <leds-tooltip *ngIf="appData.scope==='chain'" [tooltip]="redirectChain" [position]="tooltipPoition"><i
+                    class="icon x-24 icon_Explore" (click)="redirectToChain()"></i></leds-tooltip>
+            <leds-tooltip *ngIf="appData.scope==='pipeline'" [tooltip]="redirectPipeline" [position]="tooltipPoition"><i
+                    class="icon x-24 icon_Explore" (click)="redirectToPipeline()"></i></leds-tooltip>
+            <leds-tooltip *ngIf="appData.scope==='video'" [tooltip]="redirectDataset" [position]="tooltipPoition"><i
+                    class="icon x-24 icon_Explore" (click)="redirectToDataset(dataset)"></i></leds-tooltip> -->
+        </div>
+
+    </div>
+    <div *ngIf="isrunApp">
+        <leds-spinner class="loading" id="loading" style="position: relative;" bdColor="rgba(51,60,60,0.8)"
+            fullScreen="true" [showSpinner]="showSpinner && !isVideo">
+            <div spinnerImg>
+                <img alt="Loading" src="https://surveys.infosysapps.com/assets/gifs/loading.svg" />
+                <span loadingText>Loading ...</span>
+            </div>
+        </leds-spinner>
+        <!-- <div class="loading" id="loading" style="position: relative;">Loading</div> -->
+        <iframe id="iframe" *ngIf="!isVideo" width="100%" height="100%" style="height: 80vh;" frameBorder="0"
+            [src]="urlSafe"></iframe>
+
+
+        <div *ngIf="isVideo">
+            <app-viewer-video [VideoResponse]="datasetData" [videoViewDetails]="fileName"></app-viewer-video>
+        </div>
+    </div>
+    <leds-panel *ngIf="isMfe" class="le-u-pad-16" type="default">
+        <!-- <iframe  width="100%" height="100%" style="height: 80vh;" frameBorder="0"
+            [src]="safeMfeUrl"></iframe> -->
+        <ng-container #loadAppContainer></ng-container>
+        <ng-container *ngComponentOutlet="componentMfe"></ng-container>
+    </leds-panel>
+    <div *ngIf="switchtoVideoView">
+        <app-viewer-video *ngIf="videoUrl" [VideoResponse]="videoUrl"></app-viewer-video>
+    </div>
+
+</div>
+<div *ngIf="isOverview">
+
+    <div class="le-l-level1-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+
+                <div class="le-l-level1-middle-col le-l-base-layout-center" style="padding-top: 0px;">
+                    <div class="le-l-level2-middle-ctr">
+                        <div class="le-l-level2-middle-col le-u-mar-b-24__mb">
+                            <div
+                                class="col-md-12 col-lg-12 aip-desc le-u-pad-b-8 le-u-mar-t-24 le-u-pad-tb-16 aip-panel-shadow">
+                                <!-- <ul class="d-flex justify-content-between align-items-center py-2 px-4">
+                                    <li (click)="expandCollapse()" *ngIf="!isExpand">
+                                        <leds-tooltip [tooltip]="'Maximize'" [position]="tooltipPoition"><i
+                                                class="le-u-mar-r-16 icon x-24 icon_maximise aip-led-icons"></i></leds-tooltip>
+                                    </li>
+                                    <li (click)="expandCollapse()" *ngIf="isExpand">
+                                        <leds-tooltip [tooltip]="'Minimize'" [position]="tooltipPoition"><i
+                                                class="le-u-mar-r-16 icon x-24 icon_minimise aip-led-icons"></i></leds-tooltip>
+                                    </li>
+                                </ul> -->
+                                <div class="col-8" style="padding: 0; display:flex;">
+                                    <h3 style="margin: 0%;">Overview</h3>
+
+                                </div>
+
+                                <div class="ml-2 row col-md-12">
+
+                                    <div class="le-u-body-sm mt-3 aip-label-color">
+                                        Description
+                                    </div>
+                                    <div class="le-u-body-md mt-3" style="min-height: 4rem;">
+                                        <p class="le-u-body-md le-u-text-neutral-80 le-u-line-2">
+
+                                            {{appDescription}}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="ml-2 row col-md-12">
+                                    <div class="le-u-body-sm mt-3 aip-label-color">
+                                        App Tryout Link
+                                    </div>
+                                    <div class="le-u-body-md mt-3 d-flex" style="min-height: 4rem;">
+                                        <p class="le-u-body-md le-u-text-neutral-80 le-u-line-2 w-75">
+                                            {{apptryoutlink}}
+                                        </p>
+                                        <!-- <span class="le-u-mar-l-32 aip-cursor" (click)="openLgModal(tryOutLink)">
+                                            <i class="icon aip-led-icons icon_link"></i>
+                                        </span> -->
+                                        <mat-icon class="icons le-u-mar-l-32 aip-cursor" matTooltip="Try out link"
+                                            (click)="openInNewTab()">launch</mat-icon>
+                                    </div>
+                                </div>
+
+                                <div class="ml-2 row col-md-12">
+
+                                    <div class="le-u-body-sm mt-3 aip-label-color">
+                                        App Type
+                                    </div>
+                                    <div class="le-u-body-md mt-3" style="min-height: 4rem;">
+                                        <p class="le-u-body-md le-u-text-neutral-80 le-u-line-2">
+
+                                            {{appType}}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div *ngIf="appType === 'pipeline' || appType === 'chain' || appType === 'video'"
+                                    class="ml-2 row col-md-12">
+                                    <div *ngIf="!(appType === 'video')" class="le-u-body-sm mt-3 aip-label-color">
+                                        Job Name
+                                    </div>
+                                    <div *ngIf="appType === 'video'" class="le-u-body-sm mt-3 aip-label-color">
+                                        Dataset Name
+                                    </div>
+                                    <div *ngIf="!(appType === 'video')" class="le-u-body-md mt-3"
+                                        style="min-height: 4rem;">
+                                        <p class="le-u-body-md le-u-text-neutral-80 le-u-line-2">
+
+                                            {{jobName}}
+                                        </p>
+                                    </div>
+                                    <div *ngIf="appType === 'video'" class="le-u-body-md mt-3"
+                                        style="min-height: 4rem;">
+                                        <p class="le-u-body-md le-u-text-neutral-80 le-u-line-2">
+
+                                            {{dataset.alias}}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="mt-5 le-u-mar-l-8">
+                                    <hr class="aip-line" />
+                                    <div class="row">
+                                        <div class="aip-createdBy col-md-6">
+                                            <div class="le-u-body-sm aip-label-color">Created By</div>
+                                            <div class="d-flex mt-2 align-items-center " *ngIf="createdBy">
+                                                <div class="le-c-avatar  le-c-avatar--sm" style="margin: 0 2rem 0 0;">
+                                                    {{getShortName(createdBy)}}</div>
+                                                <div class="le-u-body-md">{{createdBy}}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="le-u-body-sm aip-label-color">Created On</div>
+                                            <div class="le-u-body-md  mt-3">{{createdDate}}</div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <hr class="aip-line" />
+                                <!-- <pdf-viewer *ngIf="pdfUrl" [src]="pdfUrl" [render-text]="true"
+                                    style="display: block; height: 80vh;"></pdf-viewer> -->
+                                <iframe #pdfIframe width="100%" height="500px"></iframe>
+                            </div>
+
+                        </div>
+                        <div class="le-l-level2-right-col le-u-pad-t-32" *ngIf="initiativeView">
+                            <leds-panel type="default" styleClass="" contentClass="">
+                                <div class="le-c-panel__content">
+                                    <div class="le-u-pad-16">
+                                        <div class="le-u-header-lg le-u-mar-b-16">Connected Artifacts</div>
+                                        <div class="" *ngIf="component.length > 0; else noRelatedComponent">
+
+                                            <leds-navigation-list position="left" [selectOnClick]="true">
+                                                <li class="aip-daa " *ngFor="let component of component ">
+                                                    <app-related-component [component]=component [childId]="this.appId"
+                                                        [parentType]="'APP'"
+                                                        (reload)="reload($event)"></app-related-component>
+                                                </li>
+                                            </leds-navigation-list>
+                                        </div>
+                                        <ng-template #noRelatedComponent>
+                                            <div
+                                                class="le-u-body-md le-u-text-neutral-80 le-u-line-2 aip-desc-ellipsis">
+                                                <div
+                                                    class="d-flex justify-content-center align-items-center flex-column">
+                                                    <img src="assets/images/aip_empty_state_leds.svg"
+                                                        class="img-responsive" alt="aip_empty_state_leds"
+                                                        style="width:15rem" />
+                                                    No connected artifacts for now!
+                                                </div>
+                                            </div>
+                                        </ng-template>
+                                    </div>
+                                </div>
+                                <div ledsPanelFooter class="le-u-mar-t-8">
+                                    <li *ngIf="linkAuth">
+                                        <div *ngIf="relatedloaded">
+                                            <div class="lds-ring">
+                                                <div></div>
+                                                <div></div>
+                                                <div></div>
+                                                <div></div>
+                                            </div>
+                                        </div>
+                                        <div class="aip-cursor le-u-pad-l-8 le-u-pad-b-8 " *ngIf="!relatedloaded"
+                                            (click)="openModal(linker)">
+                                            <div class="d-flex aip-daa le-u-mar-8 le-u-pad-8  align-items-center"
+                                                style="width: max-content;">
+                                                <div class="le-u-mar-lr-8"><i class=" icon x-16 icon_link"
+                                                        style="color: #8626C3;"></i>
+                                                </div>
+                                                <div class="le-u-body-md">Link Artifacts</div>
+                                            </div>
+                                        </div>
+                                        <ng-template #linker let-modal>
+                                            <app-create-linked [data]=this.streamItem.cid [type]="'APP'"
+                                                (refeshrelated)="refeshrelated($event)"
+                                                [component]=component></app-create-linked>
+                                        </ng-template>
+                                    </li>
+                                </div>
+                            </leds-panel>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- </div> -->
+    </div>
+
+</div>
+
+
+<ng-template #content3 let-modal>
+    <div style="padding: 1em;">
+        <div ledsModalHeader>
+            <h4 class="le-u-header-xl float-start" id="modal-basic-title">Try out link</h4>
+            <button style="float: right;" type="button" class="btn-close" aria-label="Close"
+                (click)="modal.dismiss('Cross click')">
+                <i class="icon x-16 close-icon"></i>
+            </button>
+        </div>
+        <div ledsModalBody>
+            <leds-input-field placeholder="Link" value="appData.tryoutlink"
+                [(ngModel)]="appData.tryoutlink"></leds-input-field>
+        </div>
+        <div ledsModalFooter>
+            <leds-button designType="miniPrimary" class="le-u-mar-r-8" buttonType="button" [disabled]="!editAuth"
+                (click)="updateUrl(); modal.dismiss('Cross click');">
+                Update
+            </leds-button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #content2 let-modal>
+    <div style="padding: 1em; height: 80vh; overflow: auto;">
+        <div ledsModalHeader>
+            <button style="float: right;" type="button" class="btn-close" aria-label="Close"
+                (click)="modal.dismiss('Cross click'); basicReqTab='overviewTab';">
+                <i class="icon x-16 close-icon"></i>
+            </button>
+        </div>
+        <div ledsModalBody>
+            <div ledsTabGroup class="row  mt-4">
+                <mat-tab-group (selectedIndexChange)="basicReqTabChange($event)">
+                    <!-- <mat-tab class="apptab" label="overview">
+                        <ng-template mat-tab-label>Overview</ng-template>
+                    </mat-tab> -->
+                    <mat-tab class="apptab" label="configuration">
+                        <ng-template mat-tab-label>Configuration</ng-template>
+                    </mat-tab>
+                    <mat-tab class="apptab" label="script">
+                        <ng-template mat-tab-label>Script</ng-template>
+                    </mat-tab>
+                    <mat-tab class="apptab" label="jobs">
+                        <ng-template mat-tab-label>Jobs</ng-template>
+                    </mat-tab>
+                </mat-tab-group>
+                <!-- <div *ngIf="basicReqTab=='overviewTab'" style="display: flex; margin-top: 2%;" class="tab_content row"
+                    id="tabContent_0">
+                    <pdf-viewer *ngIf="pdfUrl" [src]="pdfUrl" [render-text]="true"
+                        style="display: block; height: 80vh;"></pdf-viewer>
+                    <app-viewer-video *ngIf="videoUrl" [VideoResponse]="videoUrl"></app-viewer-video>
+                </div> -->
+                <div *ngIf="basicReqTab=='configTab'" class="tab_content row" id="tabContent_1">
+                    <app-app-config [configData]="configData"></app-app-config>
+                </div>
+                <div *ngIf="basicReqTab=='scriptTab'" class="tab_content row" id="tabContent_2">
+                    <div class="d-flex ">
+                        <div class="controls selector-764-44" style="margin-top: 5px">
+                            <select [(ngModel)]="selectedRunType" name="RunTypes" class="selector-773-13"
+                                style="color:black;">
+                                <option *ngFor="let j of runTypes" [ngValue]="j" class="selector-773-14">
+                                    {{j.type}}-{{j.dsAlias}}
+                                </option>
+                            </select>
+
+                            <i class="icon x-32 scriptIcon video-icon" matTooltip="Start" (click)="runPipeline()"></i>
+                            <i class="icon x-32 scriptIcon icon_save" matTooltip="Save" (click)="saveScript()"></i>
+                        </div>
+                    </div>
+                    <enl-code-editor [lang]="'python'" [script]="script" (scriptChange)="onScriptChange($event)"
+                        style="height:80vh;">
+                    </enl-code-editor>
+                </div>
+                <div *ngIf="basicReqTab=='jobsTab'" class="tab_content row" id="tabContent_3">
+                    <div style="position: relative" class="selector-773-34">
+                        <app-jobs [cname]="appname" style="height: 80vh;"></app-jobs>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>

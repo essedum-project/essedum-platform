@@ -1,0 +1,353 @@
+<div style="min-height: 70vh;">
+    <div class="le-l-level1-middle-col">
+        <div class="le-l-level2-middle-ctr">
+            <div
+                class="le-l-level2-middle-col le-u-mar-b-24__mb le-u-pad-lr-32 le-u-pad-t-4 le-u-mar-lr-32">
+                <div>
+                    <div>
+                        <div class="data-container">
+
+                            <div *ngIf="!isUpstreamAPIsDown" class="row le-u-pad-lr-4 le-c-panel__content">
+                                <div class="le-u-pad-lr-4 le-u-pad-b-4 d-flex">
+                                    <!-- <leds-chip-list [selectable]="selectable" [multiSelect]="multiSelect">
+                                        <leds-chip *ngFor="let index of semanticSearchResult" [selected]="selectedIndexId==index.index"
+                                            (click)="selectedIndexName(index.index)">{{index.index}}</leds-chip>
+                                    </leds-chip-list> -->
+                                    <leds-button nameText='iconButton' idText='iconButton' [disabled]='false' buttonType='button' designType='icon'>
+                                        <span *ngIf="backButton" class="le-c-btn--icon__icon">
+                                            <i class="aip-led-icons icon x-24 back-icon" (click)="clearSemanticSearch()"></i>
+                                        </span>
+                                    </leds-button>
+                                    <div  *ngIf="semanticSearchResult && semanticSearchCompleted" ledsTabGroup class=" aip-height-tab">
+                                        <mat-tab-group disableRipple
+                                            (selectedIndexChange)="tabChangeForIndexes($event)">
+                                            <mat-tab *ngIf="!isOneSemanticSearchResultOnly">
+                                                <ng-template
+                                                    mat-tab-label>Summary</ng-template>
+                                            </mat-tab>
+                                            <mat-tab *ngFor="let index of semanticSearchResult">
+                                                <ng-template
+                                                    mat-tab-label>{{index.index}}</ng-template>
+                                            </mat-tab>
+                                        </mat-tab-group>
+                                    </div>
+                                </div>
+                                <div class="le-u-pad-lr-8 le-u-pad-b-4">
+                                    <leds-card designType="simple" style="width: 100% !important;">
+                                        <div *ngIf="summaryTab">
+                                            <div *ngIf="semanticSearchResult && !checkAllIndexes()">
+                                            <div *ngFor="let index of semanticSearchResult">
+                                                <mat-card-header *ngIf="index.index && !index.summary.includes('I don\'t have enough information')" class="le-u-no-mar-b le-u-pad-b-4">
+                                                    <mat-card-title class="le-c-card__container">
+                                                        <div class="le-c-card__container-left w-100">
+                                                            <h2 style="color: var(--base-color);" class="le-u-header-md le-u-ellipsis">{{index.index}}
+                                                            </h2>
+                                                        </div>
+                                                    </mat-card-title>
+                                                </mat-card-header>
+                                                <mat-card-content *ngIf="index.summary && !index.summary.includes('I don\'t have enough information')" class="le-u-no-mar-b le-u-pad-b-8">
+                                                    <div style="width: 100%; overflow: auto;">
+                                                    <div *ngIf="index.summary && !index.tickets" markdown [data]="index.summary"></div>
+                                                    <app-dataset-table-view *ngIf="index.tickets" [datasetname]="index.dataset_id" [tickets]="index.tickets"></app-dataset-table-view>
+                                                </div>
+                                                </mat-card-content>
+                                            </div>
+                                            </div>
+                                            <div *ngIf="semanticSearchResult && checkAllIndexes()">
+                                                <h4> The Knowledge Base does not have enough information for your query. </h4>
+                                            </div>
+                                        </div>
+                                        <div *ngIf="!summaryTab">
+                                        <mat-card-header>
+                                            <mat-card-title class="le-c-card__container clearfix">
+                                                <div class="le-c-card__container-left w-100">
+                                                    <h2 class="le-u-header-md le-u-ellipsis">Results
+                                                    </h2>
+                                                </div>
+                                            </mat-card-title>
+                                        </mat-card-header>
+                                        <mat-card-content *ngIf="answer" class="le-u-no-mar-b">
+                                            <div style="width: 100%; overflow: auto;">
+                                            <div *ngIf="answer && !tickets" markdown [data]="answer"></div>
+                                            <app-dataset-table-view *ngIf="tickets" [datasetname]="selectedResult.dataset_id" [tickets]="selectedResult.tickets"></app-dataset-table-view>
+                                            </div>
+                                            <div class="d-flex justify-content-center le-u-pad-t-4">
+                                                <span class="le-u-pad-t-4" style="margin: 0 12px;color: #454444;"> Do you like the result ?</span>
+                                                <span style="margin: 0 8px;">
+                                                    <i style="background-color: #8c8985;border-radius: 50%; padding:2px;height: 20px;width: 20px;color: white;"
+                                                        class="aip-cursor icon x-16 icon-like_filled" (click)="feedbackPositive()"></i>
+                                                </span>
+                                                <span style="margin: 0 8px;">
+                                                    <i style=" transform: rotate(180deg) !important;background-color: #8c8985;border-radius: 50%;padding:1px 2px;height: 20px;width: 20px;color: white;"
+                                                        class="aip-cursor icon x-16 icon-like_filled" (click)="feedbackPopup(feedback)"></i>
+                                                </span>
+                                                <ng-template #feedback>
+                                                    <app-semantic-search-feedback-popup [indexname]=selectedIndexId [query]=query
+                                                        [topicAdaperInstance]=topicAdaperInstance></app-semantic-search-feedback-popup>
+                                                </ng-template>
+                                            </div>
+                                        </mat-card-content>
+                                        <mat-card-content *ngIf="loading">
+                                            <leds-spinner [bdColor]="'#ffffff'" [size]="'default'" [color]="'#8626c3'" [type]="'ball-beat'" [fullScreen]="false"
+                                                [showSpinner]="loading" [zIndex]="99">
+                                            </leds-spinner>
+                                        </mat-card-content>
+                                        <mat-card-header *ngIf="figure">
+                                            <mat-card-title class="le-c-card__container clearfix">
+                                                <div class="le-c-card__container-left w-100">
+                                                    <h2 class="le-u-pad-t-8 le-u-header-md le-u-ellipsis">Chart Visualization
+                                                    </h2>
+                                                </div>
+                                            </mat-card-title>
+                                        </mat-card-header>
+                                        <mat-card-content *ngIf="figure" class="le-u-no-mar-b">
+                                            <plotly-plot [data]="figure.data" [layout]="figure.layout"></plotly-plot>
+                                        </mat-card-content>
+                                    </div>
+                                    </leds-card>
+                                </div>
+                                <div class="le-u-pad-lr-8" *ngIf="!summaryTab && !loading">
+                                    <!-- <leds-card designType="simple" style="width: 100% !important;">
+                                        <mat-card-header>
+                                            <mat-card-title class="le-c-card__container clearfix">
+                                                <div class="le-c-card__container-left w-100">
+                                                    <h2 class="le-u-header-md le-u-ellipsis">
+                                                        References
+                                                    </h2>
+                                                </div>
+                                            </mat-card-title>
+                                        </mat-card-header>
+                                        <mat-card-content
+                                            *ngIf="semanticSearchContextList && semanticSearchContextList.length>0"
+                                            class="le-u-no-mar-b">
+                                            <div>
+                                                <leds-chip-list [selectable]="selectable"
+                                                    [multiSelect]="multiSelect">
+                                                    <leds-chip
+                                                        *ngFor="let data of semanticSearchContextList"
+                                                        [selected]="selectedReferenceId==data.referenceId"
+                                                        (click)="selectedReference(data)">Reference:{{data.referenceId}}</leds-chip>
+                                                </leds-chip-list>
+                                                <div *ngIf="selectedReferenceObject"
+                                                    class="le-u-pad-t-8">
+                                                    <mat-card-header>
+                                                        <mat-card-title
+                                                            class="le-c-card__container clearfix">
+                                                            <div class="le-c-card__container-left w-100"
+                                                                style="display: grid;">
+                                                                <div><leds-tooltip
+                                                                        [tooltip]="'Preview'"
+                                                                        [position]="'above'"
+                                                                        style="float: left;">
+                                                                        <h2 class="aip-cursor le-u-pad-b-8"
+                                                                        (click)="openDatasetPreview(selectedReferenceObject.datasetId,selectedReferenceObject.organization,selectedReferenceObject.datasetView,selectedReferenceObject.object,selectedReferenceObject.datasetName,selectedReferenceObject.actualObject,selectedReferenceObject.path,selectedReferenceObject)"
+                                                                            style="color: var(--base-color);">
+                                                                            {{selectedReferenceObject.datasetName}}
+                                                                        </h2>
+                                                                    </leds-tooltip>
+                                                                </div>
+                                                                <h3
+                                                                    class="le-u-header-md le-u-ellipsis">
+                                                                    {{selectedReferenceObject.object}}
+                                                                </h3>
+                                                                <div class="d-flex le-u-header-md le-u-ellipsis"
+                                                                    *ngIf="selectedReferenceObject.startTime && selectedReferenceObject.endTime">
+                                                                    <p>Start Time :</p>
+                                                                    <p class="le-u-pad-lr-4" style="opacity: 75%;">{{selectedReferenceObject.startTime | secondsToTime}}</p> ,
+                                                                    <p class="le-u-pad-l-4">End
+                                                                        Time :</p>
+                                                                    <p class="le-u-pad-l-4" style="opacity: 75%;">{{selectedReferenceObject.endTime | secondsToTime}}</p>
+                                                                </div>
+                                                                <div class="d-flex le-u-header-md le-u-ellipsis" *ngIf="selectedReferenceObject.page">
+                                                                    <p>Page :</p>
+                                                                    <p class="le-u-pad-lr-4" style="opacity: 75%;">{{selectedReferenceObject.page}}</p>
+                                                                </div>
+                                                            </div>
+                                                        </mat-card-title>
+                                                    </mat-card-header>
+                                                    <mat-card-content class="aip-scroll-hover" style="height: 20vh;">
+                                                        <div style="width: 100%; overflow: auto;">
+                                                        <div *ngIf="!pageContentObject" markdown [data]="selectedReferenceObject.pageContent"></div>
+                                                        </div>
+                                                        <table *ngIf="pageContentObject && columns && rows">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th *ngFor="let column of columns">{{ column }}</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr *ngFor="let row of rows">
+                                                                    <td *ngFor="let column of columns">{{ row[column] }}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </mat-card-content>
+                                                </div>
+                                            </div>
+                                        </mat-card-content>
+                                        <mat-card-content *ngIf="loading">
+                                            <div>
+                                                <leds-spinner [bdColor]="'#ffffff'"
+                                                    [size]="'default'" [color]="'#8626c3'"
+                                                    [type]="'ball-beat'" [fullScreen]="false"
+                                                    [showSpinner]="loading">
+                                                </leds-spinner>
+                                            </div>
+                                        </mat-card-content>
+                                    </leds-card> -->
+                                    <leds-card designType="simple" style="width: 100% !important;">
+                                        <mat-card-header>
+                                            <mat-card-title class="le-c-card__container clearfix">
+                                                <div class="le-c-card__container-left w-100">
+                                                    <h2 class="le-u-header-md le-u-ellipsis">
+                                                        References
+                                                    </h2>
+                                                </div>
+                                            </mat-card-title>
+                                        </mat-card-header>
+                                        <mat-card-content *ngIf="semanticSearchContextList && semanticSearchContextList.length>0" class="le-u-no-mar-b">
+                                            <div class="le-c-card__action-ul" style="position:relative">
+                                                <div *ngIf="hasClickedRight" (click)="scrollLeftForRefCards()"
+                                                    class="aip-cursor aip-ivm-scroll-left le-u-circle-icon-grey"> <i class="icon x-24 previous-icon "> </i></div>
+                                                <div *ngIf="!isScrollAtEnd" (click)="scrollRightForRefCards()"
+                                                    class="aip-cursor aip-ivm-scroll-right le-u-circle-icon-grey"> <i class="icon x-24 next-icon "> </i></div>
+                                                <div #scrollableDivForRefCards (scroll)="checkScroll()" class="aip-ivm-intiative-grid">
+                                                    <div class="aip-cursor" *ngFor="let card of semanticSearchContextList;  index as i"
+                                                        style="border-radius: 1.8rem;">
+                                                        <leds-card designType='simple' [actionsOnHover]='true'
+                                                            style="padding:0px !important; height: 210px; display: grid; width:33rem">
+                                                            <div class="" style="display: inline-block;">
+                                                                <!-- <leds-tooltip class="" [tooltip]="'Preview'" [position]="'above'"> -->
+                                                                    <span class="aip-cursor">
+                                                                        <!-- <i class="icon x-24 icon_pdf"></i> -->
+                                                                        <i style="color:var(--base-color)" class="icon x-20" [ngClass]="getIconClass(card.object)"></i>
+                                                                    </span>
+                                                                <!-- </leds-tooltip> -->
+                                                            </div>
+                                                            <div class="float-end">
+                                                                <ul class="d-flex justify-content-between align-items-center">
+                                                                    <leds-tooltip class="le-u-pad-r-8 le-u-mar-b-16" [tooltip]="'Preview'"
+                                                                        [position]="'above'">
+                                                                        <span class="aip-cursor" (click)="openDatasetPreview(card.datasetId,card.organization,card.datasetView,card.object,card.datasetName,card.actualObject,card.path,card)">
+                                                                            <i class="icon x-24 show-icon"></i>
+                                                                        </span>
+                                                                    </leds-tooltip>
+                                                                    <leds-tooltip class="le-u-mar-b-16" [tooltip]="'Summary'"
+                                                                        [position]="'above'">
+                                                                        <span class="aip-cursor" (click)="openDatasetSummary(card)">
+                                                                            <i class="icon x-24 icon_Litmus"></i>
+                                                                        </span>
+                                                                    </leds-tooltip>
+                                                                    <leds-tooltip class="le-u-pad-l-8 le-u-mar-b-16" [tooltip]="'Download'"
+                                                                        [position]="'above'">
+                                                                        <span class="aip-cursor" (click)="downloadSelectedFile(card)">
+                                                                            <i class="icon x-24 download-icon"></i>
+                                                                        </span>
+                                                                    </leds-tooltip>
+                                                                </ul>
+                                                            </div>
+                                                            <!-- <div class="le-c-card__container-right"> -->
+                                                                <!-- <span class="le-c-badge float-end le-c-badge--blue">left</span> -->
+                                                                <!-- <leds-tooltip class="" [tooltip]="'Summary'" [position]="'above'">
+                                                                    <span class="aip-cursor" style="font-size: large;" >
+                                                                        <i class="le-u-mar-r-16 icon x-24 icon_Litmus aip-led-icons"></i>
+                                                                    </span>
+                                                                </leds-tooltip>
+                                                                <leds-tooltip class="" [tooltip]="'Preview'" [position]="'above'">
+                                                                    <span class="aip-cursor" style="font-size: large;" >
+                                                                        <i class="le-u-mar-r-16 icon x-24 show-icon aip-led-icons"></i>
+                                                                    </span>
+                                                                </leds-tooltip> -->
+                                                                <!-- <span class="le-c-badge float-end le-c-badge--blue">View</span> -->
+                                                            <!-- </div> -->
+                                                            <!-- <div class="le-c-card__container-right">
+                                                                <span class="le-c-badge float-end"
+                                                                    [ngClass]="[card.data.status=='Registered'?'le-c-badge--blue ':'le-c-badge--active',card.data.status=='Undeployed'?'le-c-badge--warning ':'le-c-badge--active']">{{card.data.status}}</span>
+                                                            </div> -->
+                                                            <!-- <div class="">
+                                                                                                                                                <div *ngIf="card.data.type=='r'" class="le-u-header-sm le-u-text-primary-80 le-u-mar-b-8">
+                                                                                                                                                    Read</div>
+                                                                                                                                                <div *ngIf="card.data.type=='rw'" class="le-u-header-sm le-u-text-primary-80 le-u-mar-b-8">
+                                                                                                                                                    Read & Write</div>
+                                                                                                                                                <div *ngIf="card.data.type!='rw' && card.data.type!='r'"
+                                                                                                                                                    class="le-u-header-sm le-u-text-primary-80 le-u-mar-b-8">
+                                                                                                                                                    {{card.data.type}}</div>
+                                                                                                                                            </div> -->
+                                                            <mat-card-header>
+                                                                <mat-card-title class="le-c-card__container clearfix">
+                                                                    <div *ngIf="card.datasetName && card.datasetName!=''" class="le-u-header-sm le-u-text-primary-80 le-u-mar-b-8">{{card.datasetName}}</div>
+                                                                    <div class="le-c-card__container-left w-100">
+                                                                        <!-- <h2 class="le-u-header-xl le-u-ellipsis aip-fullname-card"
+                                                                            *ngIf="card.datasetName && card.datasetName!=''" style="line-height: 2rem;">
+                                                                            {{card.datasetName}}</h2> -->
+                                                                        <h2 *ngIf="card.object && card.object!=''"
+                                                                            class="le-u-header-xl le-u-ellipsis aip-fullname-card" style="line-height: 2rem;">
+                                                                            {{card.object}}</h2>
+                                                                    </div>
+                                        
+                                                                </mat-card-title>
+                                                                <mat-card-subtitle
+                                                                    >
+                                                                    <p class="le-u-body-sm le-u-text-neutral-80 aip-ref-ellipsis">{{fetchSummaryByDsetNameAndObject(card.datasetId,card.object)}}</p>
+                                                                    <p class="le-u-body-sm">Reference:</p>
+                                                                    <p class="aip-ref-ellipsis le-u-body-sm le-u-text-neutral-80"
+                                                                        [ngClass]="card.pageContent==''||card.pageContent==null||card.pageContent=='null'?'noDisplay':'showDesc'">
+                                                                        {{card.pageContent}}
+                                                                    </p>
+                                                                </mat-card-subtitle>
+                                                            </mat-card-header>
+                                                            <!-- <mat-card-content class="" style="color: #737373;">
+                                                                <p class="le-u-body-sm">Reference:</p>
+                                                                <p class="aip-ref-ellipsis le-u-body-sm le-u-text-neutral-80"
+                                                                    [ngClass]="card.pageContent==''||card.pageContent==null||card.pageContent=='null'?'noDisplay':'showDesc'">
+                                                                    {{card.pageContent}}
+                                                                </p>
+                                                            </mat-card-content> -->
+                                                            <!-- <mat-card-actions class="le-c-card__action-hover d-flex justify-content-between">
+                                                                <leds-button nameText="textButton" idText="textButton" [disabled]="false" buttonType="button"
+                                                                    designType="text" styleClass=" DSA_wb_Btn_small"
+                                                                    (click)="redirection(card,'preview')"><span>View
+                                                                        Details</span></leds-button>
+                                                                <leds-overflow *ngIf="unlinkinitiative">
+                                                                    <div ngbDropdown
+                                                                        class="aip-led-icons d-inline-block le-u-mar-r-8 le-u-v-mid float-end le-c-card__action-ul">
+                                                                        <a href="javascript:void(0);" id="OverflowMenu_dd" ngbDropdownToggle
+                                                                            (click)="clickactive($event);" aria-label="menu icon">
+                                                                            <i aria-hidden="true" class="icon x-24 v-menu-icon"></i>
+                                                                        </a>
+                                                                        <div ngbDropdownMenu aria-labelledby="OverflowMenu_dd"
+                                                                            style="display: grid;justify-content: center;">
+                                                                            <ul overflowList class="float-end le-u-mar-t-8  le-c-card__action-ul"
+                                                                                style="display: flex;flex-direction: column;">
+                                                                                <li overflowListItem (click)="unlink(card)">
+                                                                                    <span overflowSpan>Unlink Component</span>
+                                                                                </li>
+                                                                            </ul>
+                                                                        </div>
+                                                                    </div>
+                                                                </leds-overflow>
+                                                            </mat-card-actions> -->
+                                                        </leds-card>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </mat-card-content>
+                                    </leds-card>
+                                </div>
+                            </div>
+                            <div *ngIf="isUpstreamAPIsDown" class="row le-u-pad-lr-4 le-c-panel__content">
+                                <div class="le-u-pad-lr-4 le-u-pad-b-4 d-flex">
+                                    <leds-card designType="simple" style="width: 100% !important;">
+                                        <div>
+                                            <h4> Unable to process your search at this time. Please try again later.</h4>
+                                        </div>
+                                    </leds-card>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

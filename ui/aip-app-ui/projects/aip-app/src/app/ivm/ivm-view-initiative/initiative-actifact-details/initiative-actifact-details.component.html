@@ -1,0 +1,34 @@
+<!-- <div class="aip-back-parent"> -->
+<!-- <span class="d-flex"> -->
+    <leds-breadcrumb [breadcrumbs]="breadcrumbs" styleClass=""></leds-breadcrumb>
+    <!-- <span (click)="back();" style="width: 2.2%;display: block;margin: 1rem 1rem 0 0;" class="aip-back-child">
+        <i class="icon x-24 back-icon"></i> </span> -->
+    <span style="width: 95%; display: block;" *ngIf="data && dataType=='ENDPOINT'">
+        <app-endpoint-description [initiativeData]="data"></app-endpoint-description>
+    </span>
+    <span style="width: 95%; display: block;" *ngIf="data && dataType=='DATASET'">
+        <app-dataset-description [initiativeData]="data"></app-dataset-description>
+    </span>
+    <span style="width: 95%; display: block;" *ngIf="data && dataType=='MODEL'">
+        <app-model-description [initiativeData]="data"></app-model-description>
+    </span>
+    <span style="width: 95%; display: block;" *ngIf="data && dataType=='CONNECTION'">
+        <app-connection-view [initiativeData]="data"></app-connection-view>
+    </span>
+    <span style="width: 95%; display: block;" *ngIf="data && dataType=='APP'">
+        <app-view-app [initiativeData]="data"></app-view-app>
+    </span>
+    <span style="width: 95%; display: block;" *ngIf="data && dataType=='PIPELINE' && data.type!='NativeScript'">
+        <app-pipeline-description [initiativeData]="data"></app-pipeline-description>
+    </span>
+    <span style="width: 95%; display: block;" *ngIf="data && dataType=='PIPELINE' && data.type=='NativeScript'">
+        <app-native-script [initiativeData]="data"></app-native-script>
+    </span>
+    <span style="width: 95%; display: block;" *ngIf="data && dataType=='FEATURESTORE'">
+        <app-feature-store-description [card]="data"></app-feature-store-description>
+    </span>
+    <span style="width: 95%; display: block;" *ngIf="data && dataType=='INITIATIVE'">
+        <app-ivm-view-initiative-detail [initiativeDetails]="data"></app-ivm-view-initiative-detail>
+    </span>
+<!-- </span> -->
+<!-- </div> -->

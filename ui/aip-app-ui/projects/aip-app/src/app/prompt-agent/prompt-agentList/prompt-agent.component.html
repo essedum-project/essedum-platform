@@ -1,0 +1,106 @@
+<div class="le-l-mainwrapper">
+    <div class="clearfix aip-tranparent-backgroud aip-tranparent-backgroud">
+        <div class="">
+            <div class="col-sm-12 col-md-12 col-lg-12" [ngStyle]="toggler(isExpanded)" id="mainrightCnt">
+                <div class="le-l-level1-wrapper">
+                    <div class="aip-header le-u-pad-lr-32 le-u-pad-t-16">
+                        <div class="col-sm-12 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-center">
+                            <!-- <div style="padding: 20px 0px 0px 0px;">
+                                <leds-tooltip [tooltip]="isExpanded?'Collapse Filters':'Expand Filters'"
+                                    [position]="'above'">
+                                    <i class="icon x-24 filter-icon" (click)="toggleExpand()"></i>
+                                </leds-tooltip>
+                            </div> -->
+                            <div class="le-u-pad-24">
+                                <h3 class="le-u-header-xl">{{cardTitle}}</h3>
+                            </div>
+                        </div>
+                        <div
+                            class="col-10 offset-1 offset-xs-1 offset-sm-1 offset-md-0 col-sm-6 col-md-6 col-lg-7 col-xl-6 aip-panel aip-panel-shadow d-flex align-items-center">
+                            <input type="text" name="" id="" placeholder="Search by Name" class="aip-panel-input"
+                                [(ngModel)]="filter" (keyup)="filterz()">
+                            <i class="aip-led-icons icon x-24 search-icon"></i>
+                        </div>
+                        <div class="d-flex justify-content-center col-sm-5 col-lg-5 col-xl-4 aip-header-icon">
+                            <div *ngIf="createEditConfig" class="">
+                                <div class="le-u-mar-r-24 aip-cursor" (click)="addNewWorker()">
+                                    <span class="le-c-btn--icon__icon">
+                                        <i class="aip-led-icons icon x-24 icon-add"></i>
+                                    </span>
+                                    <span class="le-c-btn--icon__text"></span>
+                                </div>
+                            </div>
+                            <div class="aip-cursor">
+                                <leds-tooltip [tooltip]="'Refresh'" [position]="'above'">
+                                    <span class="le-c-btn--icon__icon">
+                                        <i class="aip-led-icons icon x-24 icon_Refresh" (click)="refresh()"></i>
+                                    </span>
+                                </leds-tooltip>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="!noRecords" class="le-c-card__action-ul aip-doc-container le-u-pad-16">
+                    <div class="col-md-8 col-lg-6 col-xl-5" style='min-width: -webkit-fill-available;padding: 0px;'
+                        *ngFor="let work of aiWorkerList">
+                        <leds-card designType='simple' [actionsOnHover]='true'
+                            style="padding-top: 0 !important;padding-bottom: 0 !important;">
+                            <div class="le-c-card__container-right">
+                                <span class="le-u-overline le-u-text-primary-80 le-u-mar-b-8 float-end"></span>
+                            </div>
+                            <div class="le-u-overline le-u-mar-b-8">
+                            </div>
+                            <mat-card-header>
+                                <mat-card-title class="le-c-card__container clearfix">
+                                    <div class="le-c-card__container-left w-100">
+                                        <h2 class="le-u-header-md le-u-ellipsis" style="line-height: 2rem;">
+                                            {{work.alias}}</h2>
+                                    </div>
+                                </mat-card-title>
+                                <mat-card-subtitle
+                                    class="le-u-body-sm le-u-text-neutral-80 le-u-ellipsis">{{work.lastmodifiedon}}</mat-card-subtitle>
+                            </mat-card-header>
+                            <mat-card-content class="le-u-no-mar-b">
+                                <p class="le-u-body-md le-u-text-neutral-80 le-u-line-2 aip-desc-ellipsis">
+                                    {{work.description}}
+                                </p>
+                            </mat-card-content>
+                            <mat-card-actions class="le-c-card__action-hover d-flex justify-content-between">
+                                <leds-button buttonType="button" designType="text"
+                                    (click)="navigateToConfigure(work.name)">Configure</leds-button>
+                                <leds-button buttonType="button" designType="text"
+                                    (click)="navigateToTasks(work.name)">View Tasks</leds-button>
+                                <leds-button buttonType="button" designType="text"
+                                    (click)="deleteWorker(work.id)">Delete</leds-button>
+                                <!-- <leds-button buttonType="button" designType="text"
+                                    (click)="navigateToPrepare(work.name)">Prepare</leds-button>
+                                <leds-button buttonType="button" designType="text"
+                                    (click)="navigateToExecute(work)">Execute</leds-button> -->
+                                <div class="aip-cursor">
+                                    <div class="le-c-avatar  le-c-avatar--sm aip-hover-avatar">
+                                        {{(work.lastmodifiedby?work.lastmodifiedby:'Name Not
+                                        Available')|firstCharacter}}</div>
+                                    <div class="aip-hover-detail">
+                                        <div class="le-u-header-md le-u-mar-8">
+                                            {{work.lastmodifiedby?work.lastmodifiedby:'Name Not Available'}}</div>
+                                    </div>
+                                </div>
+                            </mat-card-actions>
+                        </leds-card>
+                    </div>
+                </div>
+                <div *ngIf="noRecords" class="le-c-card__action-ul aip-doc-container le-u-pad-16">
+                    <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive"
+                        alt="aip_empty_state_leds" style="width:15rem" />
+                    <div class="le-u-body-md">No Records Found</div>
+                </div>
+                <app-pagination #pagination [noOfItems]="noOfItems" (pageAndSizeChanged)="handlePageAndSizeChange($event)">
+                </app-pagination>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #rate let-modal>
+    <app-aip-rating [rateData]="rateData" (refresh)="clearSemanticSearch()"></app-aip-rating>
+</ng-template>

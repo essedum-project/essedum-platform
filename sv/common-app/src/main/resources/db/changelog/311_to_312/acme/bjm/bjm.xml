@@ -1,0 +1,42 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+ 
+  <changeSet author="Leap-BJM" id="312_bjm_01">
+      <sql >
+        UPDATE bjm_master_data SET NAME='precededBy' WHERE NAME='preceededBy';
+	UPDATE bjm_ji_jig_mapping SET relation_name='precededBy' WHERE relation_name='preceededBy';
+	UPDATE bjm_ji_ji_mapping SET relation_name='precededBy' WHERE relation_name='preceededBy';
+      </sql>
+      	
+  </changeSet>
+
+<changeSet author="Leap-BJM" id="312_bjm_02">
+  <sql dbms="mssql">
+    UPDATE mldataset SET attributes =N'{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME, running_job_instance_id JOB_INSTANCE_ID, status Status, convert(varchar,start_time,120) AS Start_Time, convert(varchar,end_time,120) AS End_Time, datepart(MINUTE,CAST(end_time - start_time as Time)) Duration FROM bjm_job_instance WHERE  status IN (''Cancelled'',''failed'',''Failed'') AND project_id = ({projectId}) AND start_time BETWEEN ({startDate}) AND ({endDate})","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{''projectId'':''project_id'',''startDate'':''\\''2018-04-01\\'''' , ''endDate'':''(SELECT CURRENT_TIMESTAMP)''}","tableName":"","uniqueIdentifier":""}' WHERE ALIAS = 'Acme_bjm2_Failed_Job_Instances_Name' ;
+
+
+  UPDATE mldataset SET attributes = N'{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME, running_job_instance_id JOB_INSTANCE_ID, ISNULL(incident_no,''NA'') TICKET, convert(varchar,start_time,120) AS Start_Time, convert(varchar,end_time,120) AS End_Time, status Status, convert(varchar,last_status_update,120) AS Last_Status_Update FROM bjm_job_instance WHERE project_id=({projectId})  AND start_time BETWEEN ({startDate}) AND ({endDate}) AND running_job_instance_id IN (SELECT DISTINCT running_instance1_id FROM bjm_ji_ji_mapping WHERE project_id=({projectId}) and relation_name = ''precededBy'') ORDER BY last_status_update DESC  OFFSET 0 ROWS;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{''projectId'':''project_id'',''startDate'':''\\''2018-04-01\\'''' , ''endDate'':''(SELECT CURRENT_TIMESTAMP)''}","tableName":"","uniqueIdentifier":""}'WHERE ALIAS = 'Acme_bjm2_dependent_running_instances_detail' ;
+
+
+  UPDATE mldataset SET attributes =N'{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME, running_job_instance_id JOB_INSTANCE_ID, ISNULL(incident_no,''NA'') TICKET, status Status, convert(varchar,start_time,120) AS Start_Time, convert(varchar,end_time,120) AS End_Time  FROM bjm_job_instance WHERE project_id = ({projectId}) and running_job_instance_id=({running_job_instance_id});","Cacheable":"false","isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"running_job_instance_id\":\"running_job_instance_id\",\"projectId\":\"project_id\"}","tableName":"","uniqueIdentifier":""}'WHERE ALIAS = 'Acme_bjm3_ticket_details' ;
+
+
+  UPDATE mldataset SET attributes =N'{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME , running_job_instance_id JOB_INSTANCE_ID,  ISNULL(incident_no,''NA'') TICKET,convert(varchar,start_time,120) AS Start_Time, convert(varchar,end_time,120) AS End_Time, datepart(MINUTE,CAST(end_time - start_time as Time)) DURATION_SEC, STATUS Status, CASE WHEN STATUS = ''Closed'' THEN ''lightGrey'' WHEN STATUS = ''Completed'' THEN ''LawnGreen'' WHEN STATUS = ''Cancelled'' THEN ''tomato'' WHEN STATUS = ''Yet to Start'' THEN ''PaleGoldenRod'' WHEN STATUS = ''Running'' THEN ''Yellow'' WHEN STATUS = ''succeeded'' THEN ''LawnGreen'' WHEN STATUS = ''failed'' THEN ''tomato'' WHEN STATUS = ''Failed'' THEN ''tomato'' WHEN STATUS IS NULL THEN ''tomato'' END AS \"Color\"  FROM bjm_job_instance WHERE project_id = ({projectId}) AND start_time BETWEEN ({startDate}) AND ({endDate});","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"endDate\":\"(SELECT CURRENT_TIMESTAMP)\",\"projectId\":\"project_id\",\"startDate\":\"''2018-04-01''\"}","tableName":"","uniqueIdentifier":""}'WHERE ALIAS = 'Acme_bjm1_Table_data' ;
+
+
+  UPDATE mldataset SET attributes =N'{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME, running_job_instance_id JOB_INSTANCE_ID,   datepart(MINUTE,CAST(end_time - start_time as Time)) DURATION_SEC, STATUS , convert(varchar,start_time,120) AS Start_Time,  convert(varchar,end_time,120) AS End_Time    FROM bjm_job_instance jiParent   WHERE jiParent.job_name IN  ( SELECT job_name           FROM  bjm_job_instance  jiChild                            WHERE  jiChild.running_job_instance_id = ({running_job_instance_id})          AND jiChild.project_id = ({projectId}) ) AND jiParent.start_time &lt;  (SELECT start_time       FROM  bjm_job_instance  jiChild                        WHERE  jiChild.running_job_instance_id = ({running_job_instance_id})      AND jiChild.project_id = ({projectId}))  ORDER BY start_time DESC OFFSET 0 ROWS;","Cacheable":"false","isStreaming":"false","defaultValues":"","writeMode":"append","params":"{''running_job_instance_id'':''jiChild.running_job_instance_id'',''projectId'':''jiChild.project_id''}","tableName":"","uniqueIdentifier":""}'WHERE ALIAS = 'Acme_L3_PastJobInstance_Details' ;
+
+
+  UPDATE mldataset SET attributes =N'{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME, running_job_instance_id JOB_INSTANCE_ID,   datepart(MINUTE,CAST(end_time - start_time as Time)) DURATION_SEC, STATUS , convert(varchar,start_time,120) AS Start_Time,  convert(varchar,end_time,120) AS End_Time  FROM bjm_job_instance jiParent   WHERE jiParent.job_name IN (SELECT job_name      FROM  bjm_job_instance  jiChild     WHERE jiChild.running_job_instance_id = ({running_job_instance_id})      AND jiChild.project_id = ({projectId}) ) AND jiParent.start_time > ( SELECT start_time      FROM  bjm_job_instance  jiChild      WHERE  jiChild.running_job_instance_id = ({running_job_instance_id})      AND jiChild.project_id = ({projectId}) ) ORDER BY start_time ASC OFFSET 0 ROWS;","Cacheable":"false","isStreaming":"false","defaultValues":"","writeMode":"append","params":"{''running_job_instance_id'':''jiChild.running_job_instance_id'',''project_id'':''jiChild.project_id''}","tableName":"","uniqueIdentifier":""}'WHERE ALIAS = 'Acme_L3_FutureJobInstance_Details' ;
+
+
+  UPDATE mldataset SET attributes =N'{"filter":"","mode":"query","Query":"SELECT convert(varchar,start_time,120) AS Start_Time FROM bjm_job_instance WHERE running_job_instance_id = ({running_job_instance_id}) AND project_id = ({projectId});\n","Cacheable":"false","isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"running_job_instance_id\":\"running_job_instance_id\",\"projectId\":\"project_id\"}","tableName":"","uniqueIdentifier":""}'WHERE ALIAS = 'Acme_L3_JobInstanceStartTime' ;
+
+  UPDATE mldataset SET attributes =N'{"filter":"","mode":"query","Query":"SELECT running_job_instance_id JOB_INSTANCE_ID, job_name JOB_NAME, convert(varchar,DATEADD(HOUR,5,DATEADD(MINUTE,30,start_time)),120) AS Start_Time, convert(varchar,DATEADD(HOUR,5,DATEADD(MINUTE,30,end_time)),120) AS End_Time FROM bjm_job_instance WHERE job_name = ({job_name}) and project_id = ({projectId});","Cacheable":"false","isStreaming":"false","defaultValues":"","writeMode":"append","params":"{''job_name'':''job_name'', ''projectId'':''project_id''}","tableName":"","uniqueIdentifier":""}' WHERE ALIAS = 'Acme_bjm2_Job_Instance_table_data' ;
+
+  UPDATE mldataset SET attributes ='{"filter":"","mode":"query","Query":"SELECT convert(varchar,end_time,120) AS END_TIME FROM bjm_job_instance WHERE running_job_instance_id = ({running_job_instance_id}) AND project_id = ({projectId});","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{''running_job_instance_id'':''running_job_instance_id'',''projectId'':''project_id''}","tableName":"","uniqueIdentifier":""}' WHERE ALIAS = 'Acme_L3_JobInstance_EndTime' ;
+
+</sql>
+      	
+</changeSet>
+</databaseChangeLog>

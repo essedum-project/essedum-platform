@@ -1,0 +1,890 @@
+<head class="selector-679-1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" class="selector-679-2" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" class="selector-679-3" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" class="selector-679-4" />
+</head>
+<mat-sidenav-container>
+    <mat-sidenav #sidenav="" autoFocus="true" mode="push" [(opened)]="isMenuOpen" class="sidenav"
+        (click)="onSidenavClick()" class="le-u-pad-t-8">
+        <div *ngFor="let t of taskList" class="le-u-mar-4 le-u-body-lg" style="display: flex;">
+            <a mat-button="" (click)="taskChange(t)">{{t}}</a>
+        </div>
+    </mat-sidenav>
+    <mat-sidenav-content>
+        <div class="row col-md-12">
+            <div *ngIf="!clustering" class="le-u-mar-4">
+                <leds-button nameText="Tasks" idText="Tasks" buttonType="button" (click)="sidenav.toggle()"
+                    designType="icon" title="Tasks">
+                    <i aria-hidden="true" class="icon x-24 menu-icon" style="visibility: visible;"></i>
+                </leds-button>
+            </div>
+
+            <div [ngBusy]="busy" *ngIf="task=='Load from File' || task=='Create Table' || clustering" id="dset-load-task"
+                class="cip-dtst-tsk-mrgns selector-679-5">
+                <a *ngIf="!clustering" class="le-u-mar-16">Load Dataset</a>
+
+
+                <leds-panel type="default" styleClass="" contentClass="">
+                    <leds-stepper>
+                        <mat-horizontal-stepper #taskStepper ledsStepper #stepper [disableRipple]="true"
+                            *ngIf="(attributes && attributes.tableName) || clustering">
+                            <ng-template matStepperIcon="done">
+                                <i aria-hidden="true" class="icon x-24 icon-process-complete green"></i>
+                            </ng-template>
+                            <ng-template matStepperIcon="edit"></ng-template>
+
+
+
+                            <mat-step [stepControl]="firstFormGroup" *ngIf="task=='Load from File' || clustering"
+                                id="dset-step-upload" class="selector-679-7" style="padding-left: 2%;">
+                                <form [formGroup]="firstFormGroup" class="le-u-mar-t-16">
+                                    <div>
+                                        <ng-template matStepLabel="" class="selector-679-8">File </ng-template>
+                                        <div class="row">
+                                            <leds-radio-group [value]="filechoose" class="DSA_wb_Btn_normal"
+                                                (change)="toggleFileUpload($event)">
+                                                <leds-radio-button value="newfile">Upload File</leds-radio-button>
+                                                <leds-radio-button value="existingfile">Choose from Existing
+                                                    Files</leds-radio-button>
+
+                                            </leds-radio-group>
+                                        </div>
+                                        <br>
+                                        <div class="row">
+                                            <div>
+                                                <div *ngIf="filechoose=='newfile'">
+                                                    <div class="label-icon-container">
+                                                        <label class="ds_label">Instructions</label>
+                                                        <!-- <i class="fa fa-question-circle" title="Instructions"
+                                                            (click)="open(instructions)"
+                                                            style="cursor: pointer; font-size: 22px; margin-right: 4%; color: var(--base-color);"></i> -->
+                                                        <!-- <i class="icon x24 icon_color_info blue"></i> -->
+                                                        <i class="icon x24 info-big-icon ds_icon ds_icon-item"
+                                                            title="Instructions" (click)="open(instructions)"></i>
+                                                    </div>
+
+                                                    <br>
+                                                    <label *ngIf="dataset.schema">Download
+                                                        template</label>&nbsp;&nbsp;
+                                                    <i class="fa fa-solid fa-download selector-678-49"
+                                                        title="Download template" *ngIf="dataset.schema"
+                                                        style="cursor: pointer; font-size: 22px; margin-right: 4%; color: var(--base-color);"
+                                                        (click)="downloadCsvTemplate()"></i>
+
+                                                    <!-- <input #fileInput id="dset-load-fileinp"
+                                                            style="margin-top: 10%;" (change)="addfile($event)"
+                                                            accept=".csv, .xlsx" name="dtstldNm" type="file"
+                                                            placeholder="Upload file" [disabled]="isAuth"
+                                                            class="selector-679-12" /> -->
+
+                                                    <input id="mdledtcnvsttlId" (change)="onFileChanged($event)"
+                                                        style="display: none;" accept=".json" name="mdledtcnvsttlNm"
+                                                        type="file" #fileInput="" placeholder="file"
+                                                        class="selector-779-35" />
+
+                                                    <div class="col-4">
+                                                        <leds-chip style="text-overflow: ellipsis; overflow: hidden;"
+                                                            *ngIf="docName">{{docName}}</leds-chip>
+                                                        <br>
+
+                                                        <div class="label-icon-container le-u-mar-4">
+                                                            <mat-label class="ds_label">Upload file</mat-label>
+                                                            <label>
+                                                                <input (change)="addfile($event)" style="display: none;"
+                                                                    ng2FileSelect="" name="adOrgUpldNm" type="file"
+                                                                    [uploader]="docUploader" placeholder="file" />
+                                                                <p class="DSA_wb_Btn_normal ds_icon ds_icon-item">
+                                                                    <i style="margin-left: 2vh;"
+                                                                        class="icon x-24 upload-icon"
+                                                                        aria-hidden="true"></i>
+                                                                </p>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row selector-679-21" *ngIf="filechoose=='existingfile'"
+                                                    style=" padding-left: 5vh; padding-right: 5vh">
+                                                    <leds-select *ngIf="uploadedFiles" [options]="uploadedFilesOptions"
+                                                        label="Uploaded Files" [required]="true" [disabled]="false"
+                                                        designType="default" [isMultiple]="false"
+                                                        (selectChange)="selectChange($event)"></leds-select>
+
+                                                </div> <br><br>
+
+                                                <leds-checkbox name="dset-load-overwrite" [value]="Overwrite"
+                                                    (change)="overwrite=!overwrite" inputId="dset-load-overwrite">
+                                                    Overwrite
+                                                </leds-checkbox><br>
+
+                                                <mat-error class="DSA_wb_Btn_small le-u-text-primary-70 ">
+                                                    *Overwrite deletes all the existing records and inserts
+                                                    the
+                                                    uploaded
+                                                    records
+                                                </mat-error>
+
+                                            </div>
+                                            <div class="le-u-mar-8 chunk-panel" id="chunkkpanel"></div>
+                                        </div>
+
+                                        <div class="selector-679-17">
+                                            <!-- <button id="dset-load-nxt" mat-button="" style="margin-left: 70vh" matStepperNext=""
+                                    (click)="refresh()"
+                                    class="genBtn marRght30 downloadBtn icm-submit-btn">Next</button> -->
+
+                                            <leds-button buttonType="button" matStepperNext designType="primary"
+                                                style="display: flex; justify-content: flex-end;" class="le-u-mar-t-16"
+                                                (click)="refresh();moveToNextStep()">
+                                                Next
+                                            </leds-button>
+                                        </div>
+                                    </div>
+                                </form>
+
+                            </mat-step>
+
+                            <mat-step *ngIf="showPreprocess" id="dset-step-preprocess" style="padding-left: 2%;">
+                                <form [formGroup]="secondFormGroup" class="le-u-mar-t-16">
+                                    <div>
+                                        <ng-template matStepLabel="" class="selector-679-8">Pre
+                                            Processing</ng-template>
+                                        <div [ngBusy]="busy">
+                                            <!-- <lib-code-editor [isRestDataset]="isRestDataset" [script]="preprocessScript"
+                              [isRestDataset]="'true'" (scriptChange)="onScriptChange($event)">
+                          </lib-code-editor> -->
+                                        </div>
+                                        <div class="selector-679-17">
+                                            <button id="dset-load-nxt" mat-button="" style="margin-left: 70vh"></button>
+                                        </div>
+                                        <leds-button buttonType="button" matStepperPrevious designType="secondary">
+                                            Back
+                                        </leds-button>
+                                        <leds-button buttonType="button" matStepperNext designType="primary">
+                                            Next
+                                        </leds-button>
+                                    </div>
+                                </form>
+
+                            </mat-step>
+                            <mat-step id="dset-step-map" class="selector-679-19">
+                                <!-- <span *ngIf="task !='Create Table'" class="fa fa-refresh selector-683-14"
+                                (click)="refresh()"
+                                style="font-size:16px; color: blue; margin-right: 4%; display: flex; justify-content: flex-end; z-index: 10; margin-top: 4px;"
+                                title="Reset" id="dsrc-Refresh">
+                            </span> -->
+                                <div *ngIf="task !='Create Table'" (click)="refresh()" title="Reset"
+                                    style="display: flex; justify-content: flex-end;">
+                                    <span class="le-c-btn--icon__icon">
+                                        <i class="aip-led-icons icon x-24 icon_Refresh"></i>
+                                    </span>
+                                </div>
+                                <ng-template *ngIf="task=='Load from File'" matStepLabel=""
+                                    class="selector-679-20">Schema
+                                </ng-template>
+                                <ng-template *ngIf="task=='Create Table'" matStepLabel="" class="selector-679-20">Table
+                                    Name:
+                                    {{tableName}}
+                                </ng-template>
+                                <div class="row form-group" style="overflow-y: hidden;overflow-x: auto;">
+                                    <div class="col-md-12">
+                                        <div class="container">
+                                            <div *ngIf="tableDataSource.length > 0">
+                                                <!-- style="overflow-y: scroll; height: 43vh;"> -->
+
+
+
+                                                <!-- <table class="col-md-12">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Table Column</th>
+                                                            <th>Schema Column</th>
+                                                            <th>File Column</th>
+                                                            <th>{{ isTableExists ? 'Table Type' : 'Schema Type' }}
+                                                            </th>
+                                                            <th>Unique</th>
+                                                            <th>Required</th>
+                                                            <th>File Columns</th>
+                                                            <th>Date Formats</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr *ngFor="let element of tableDataSource">
+                                                            <td>{{ element.field }}</td>
+                                                            <td>{{ element.field }}</td>
+                                                            <td>
+                                                                    <input style="width: 40%"
+                                                                        (keyup)="changeMapping(element, modified.value)"
+                                                                        #modified (keypress)="omit_special_char($event)"
+                                                                        [(ngModel)]="element.field" />
+                                                                </td>
+                                                            <td>
+                                                                <span *ngIf="isTableExists || dataset.schema">{{
+                                                                    element.type }}</span>
+                                                                <select [disabled]="element.autoincrement"
+                                                                    [(ngModel)]="element.AutoInc ? 'int' : element.type"
+                                                                    *ngIf="!isTableExists && !dataset.schema"
+                                                                    (change)="columnChange(element, 'type')">
+                                                                    <option *ngFor="let type of datatypes"
+                                                                        [value]="type">{{ type }}</option>
+                                                                </select>
+                                                            </td>
+                                                            <td>
+                                                                <mat-checkbox #checkbox="" [(ngModel)]="element.unique"
+                                                                    [disabled]="isTableExists || element.unique || dataset.schema"
+                                                                    (click)="checkChange(element, checkbox.checked, 'unique')"
+                                                                    class="checklist-leaf-node"
+                                                                    [checked]="element.unique">
+                                                                </mat-checkbox>
+                                                            </td>
+                                                            <td>
+                                                                <mat-checkbox #checkbox=""
+                                                                    [(ngModel)]="element.required"
+                                                                    [disabled]="isTableExists || element.primary || element.unique || dataset.schema"
+                                                                    (change)="checkChange(element, checkbox.checked, 'required')"
+                                                                    class="checklist-leaf-node"
+                                                                    [checked]="element.required">
+                                                                </mat-checkbox>
+                                                            </td>
+                                                            <td>
+                                                                <select *ngIf="!element.autoincrement"
+                                                                    (change)="mapColumn(element, modified.value)"
+                                                                    #modified="">
+                                                                    <option selected="">{{
+                                                                        mappingJson[element.field] }}
+                                                                    </option>
+                                                                    <option *ngFor="let col of formattedExcelCols"
+                                                                        [value]="col.col">{{ col.formattedCol }}
+                                                                    </option>
+                                                                </select>
+                                                            </td>
+                                                            <td>
+                                                                <select
+                                                                    *ngIf="element.type=='datetime' || element.type=='timestamp'"
+                                                                    (change)="changeDateFormat(element, modified.value)"
+                                                                    #modified="">
+                                                                    <option selected="">{{ element.format }}</option>
+                                                                    <option *ngFor="let format of dateformats"
+                                                                        [value]="format">{{ format }}</option>
+                                                                </select>
+                                                                <select *ngIf="element.type=='date'"
+                                                                    (change)="changeDateFormat(element, modified.value)"
+                                                                    #modified="">
+                                                                    <option selected="">{{ element.format }}
+                                                                    </option>
+                                                                    <option *ngFor="let format of dateformats1"
+                                                                        [value]="format">{{ format }}</option>
+                                                                </select>
+                                                                <select *ngIf="element.type=='time'"
+                                                                    (change)="changeDateFormat(element, modified.value)"
+                                                                    #modified="">
+                                                                    <option selected="">{{ element.format }}
+                                                                    </option>
+                                                                    <option *ngFor="let format of timeformats"
+                                                                        [value]="format">{{ format }}</option>
+                                                                </select>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table> -->
+
+
+                                                <leds-data-grid>
+                                                <table dataGridTable [dataSource]="tableDataSource">
+                                                    <thead>
+                                                        <tr>
+                                                            <!-- <th scope="col">Name</th>
+                                                            <th scope="col">Traveler</th>
+                                                            <th scope="col">Nationality</th>
+                                                            <th scope="col">No. of Days</th>
+                                                            <th scope="col">Guest Id</th>
+                                                            <th scope="col">Action</th> -->
+                                                            
+                                                            <th>Table Column</th>
+                                                            <th>Schema Column</th>
+                                                            <!-- <th>File Column</th> -->
+                                                            <th>{{ isTableExists ? 'Table Type' : 'Schema Type' }}
+                                                            </th>
+                                                            <th>Unique</th>
+                                                            <th>Required</th>
+                                                            <th>File Columns</th>
+                                                            <th>Date Formats</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <!-- <tr>
+                                                            <td><a href="javascript:void(0);"
+                                                                    dataGridHyperlink>Ayansh R</a></td>
+                                                            <td>Visitors</td>
+                                                            <td>Indian</td>
+                                                            <td>01</td>
+                                                            <td>AyanshR@infosys.com</td>
+                                                            <td>
+                                                                <i aria-hidden="true"
+                                                                    class="icon x-24 edit-icon"></i>
+                                                                <i aria-hidden="true"
+                                                                    class="icon x-24 delete-sm-icon"></i>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><a href="javascript:void(0);"
+                                                                    dataGridHyperlink>Rakesh S</a></td>
+                                                            <td>Employee</td>
+                                                            <td>Indian</td>
+                                                            <td>04</td>
+                                                            <td>RakeshS@infosys.com</td>
+                                                            <td>
+                                                                <i aria-hidden="true"
+                                                                    class="icon x-24 edit-icon"></i>
+                                                                <i aria-hidden="true"
+                                                                    class="icon x-24 delete-sm-icon"></i>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <a href="javascript:void(0);"
+                                                                    dataGridHyperlink>Manoj Neelakanthan</a>
+                                                            </td>
+                                                            <td>Client</td>
+                                                            <td>Indian</td>
+                                                            <td>27</td>
+                                                            <td>ManojNeelakanthan@infosys.com</td>
+                                                            <td>
+                                                                <i aria-hidden="true"
+                                                                    class="icon x-24 edit-icon"></i>
+                                                                <i aria-hidden="true"
+                                                                    class="icon x-24 delete-sm-icon"></i>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><a href="javascript:void(0);"
+                                                                    dataGridHyperlink>Sandhya RK</a></td>
+                                                            <td>Visitors</td>
+                                                            <td>Indian</td>
+                                                            <td>32</td>
+                                                            <td>SandhyaRK@infosys.com</td>
+                                                            <td>
+                                                                <i aria-hidden="true"
+                                                                    class="icon x-24 edit-icon"></i>
+                                                                <i aria-hidden="true"
+                                                                    class="icon x-24 delete-sm-icon"></i>
+                                                            </td>
+                                                        </tr> -->
+                                                        <tr *ngFor="let element of tableDataSource">
+                                                            <td>{{ element.field }}</td>
+                                                            <td>{{ element.field }}</td>
+                                                            <!-- <td>
+                                                                    <input style="width: 40%"
+                                                                        (keyup)="changeMapping(element, modified.value)"
+                                                                        #modified (keypress)="omit_special_char($event)"
+                                                                        [(ngModel)]="element.field" />
+                                                                </td> -->
+                                                            <td>
+                                                                <span *ngIf="isTableExists || dataset.schema">{{
+                                                                    element.type }}</span>
+                                                                    <mat-select [disabled]="element.autoincrement" 
+                                                                    *ngIf="!isTableExists && !dataset.schema"
+                                                                    (selectionChange)="columnChange(element,'type');
+                                                                    dataTypeChange(element, 'type', $event.value)"
+                                                                    placeholder="Select DataType"
+                                                                    [(ngModel)]="element.type">
+                                                                    <mat-option *ngFor="let type of datatypes" [value]="type">
+                                                                        {{type}}
+                                                                    </mat-option>
+                                                                </mat-select>
+                                                            </td>
+                                                            <td>
+                                                                <mat-checkbox #checkbox="" [(ngModel)]="element.unique"
+                                                                    [disabled]="isTableExists || element.unique || dataset.schema"
+                                                                    (click)="checkChange(element, checkbox.checked, 'unique')"
+                                                                    class="checklist-leaf-node"
+                                                                    [checked]="element.unique">
+                                                                </mat-checkbox>
+                                                            </td>
+                                                            <td>
+                                                                <mat-checkbox #checkbox=""
+                                                                    [(ngModel)]="element.required"
+                                                                    [disabled]="isTableExists || element.primary || element.unique || dataset.schema"
+                                                                    (change)="checkChange(element, checkbox.checked, 'required')"
+                                                                    class="checklist-leaf-node"
+                                                                    [checked]="element.required">
+                                                                </mat-checkbox>
+                                                            </td>
+                                                            <td>
+                                                                <select *ngIf="!element.autoincrement"
+                                                                    (change)="mapColumn(element, modified.value)"
+                                                                    #modified="">
+                                                                    <option selected="">{{
+                                                                        mappingJson[element.field] }}
+                                                                    </option>
+                                                                    <option *ngFor="let col of formattedExcelCols"
+                                                                        [value]="col.col">{{ col.formattedCol }}
+                                                                    </option>
+                                                                </select>
+                                                            </td>
+                                                            <td>
+                                                                <select
+                                                                    *ngIf="element.type=='datetime' || element.type=='timestamp'"
+                                                                    (change)="changeDateFormat(element, modified.value)"
+                                                                    #modified="">
+                                                                    <!-- <option selected="">MM/dd/yyyy HH:mm:ss</option> -->
+                                                                    <option selected="">{{ element.format }}</option>
+                                                                    <option *ngFor="let format of dateformats"
+                                                                        [value]="format">{{ format }}</option>
+                                                                </select>
+                                                                <select *ngIf="element.type=='date'"
+                                                                    (change)="changeDateFormat(element, modified.value)"
+                                                                    #modified="">
+                                                                    <option selected="">{{ element.format }}
+                                                                    </option>
+                                                                    <option *ngFor="let format of dateformats1"
+                                                                        [value]="format">{{ format }}</option>
+                                                                </select>
+                                                                <select *ngIf="element.type=='time'"
+                                                                    (change)="changeDateFormat(element, modified.value)"
+                                                                    #modified="">
+                                                                    <option selected="">{{ element.format }}
+                                                                    </option>
+                                                                    <option *ngFor="let format of timeformats"
+                                                                        [value]="format">{{ format }}</option>
+                                                                </select>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <!-- <leds-button nameText="addButton" idText="addButton"
+                                                    buttonType="button" designType="icon">
+                                                    <span class="le-c-btn--icon__icon">
+                                                        <i class="icon purple x-16 icon-add"></i>
+                                                    </span>
+                                                    <span class="le-c-btn--icon__text">Add Traveller</span>
+                                                </leds-button> -->
+                                            </leds-data-grid>
+
+                                                <table mat-table [dataSource]="tableDataSource" #mytable
+                                                    class="col-md-12">
+
+                                                    <ng-container matColumnDef="tablecolumn">
+                                                        <th mat-header-cell *matHeaderCellDef>Table Column </th>
+                                                        <td mat-cell *matCellDef="let element"> {{element.field}}
+                                                        </td>
+                                                    </ng-container>
+                                                    <ng-container matColumnDef="schemacolumn">
+                                                        <th mat-header-cell *matHeaderCellDef>Schema Column </th>
+                                                        <td mat-cell *matCellDef="let element"> {{element.field}}
+                                                        </td>
+                                                    </ng-container>
+                                                    <ng-container matColumnDef="csvcolumn">
+                                                        <th mat-header-cell *matHeaderCellDef>File Column </th>
+                                                        <td mat-cell *matCellDef="let element;let i=index">
+                                                            <input style="width: 40%"
+                                                                (keyup)="changeMapping(i,modified.value)" #modified
+                                                                (keypress)="omit_special_char($event)" matInput
+                                                                [(value)]="element.field" />
+
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <ng-container matColumnDef="columntype">
+                                                        <th mat-header-cell *matHeaderCellDef>
+                                                            {{isTableExists?'Table
+                                                            Type':'Schema Type'}} </th>
+                                                        <td mat-cell *matCellDef="let element">
+                                                            <span *ngIf="isTableExists || dataset.schema">
+                                                                {{element.type}}
+                                                            </span>
+                                                            <mat-select [disabled]="element.autoincrement"
+                                                                *ngIf="!isTableExists && !dataset.schema"
+                                                                (selectionChange)="columnChange(element,'type')"
+                                                                placeholder="Select DataType">
+                                                                <mat-option *ngFor="let type of datatypes"
+                                                                    [value]="type">
+                                                                    {{type}}
+                                                                </mat-option>
+                                                            </mat-select>
+                                                        </td>
+                                                    </ng-container>
+
+
+
+                                                    <!-- Name Column -->
+                                                    <ng-container matColumnDef="unique">
+                                                        <th mat-header-cell *matHeaderCellDef> Unique </th>
+                                                        <td mat-cell *matCellDef="let element">
+                                                            <mat-checkbox #checkbox="" [(ngModel)]="element.unique"
+                                                                [disabled]="isTableExists || element.unique || dataset.schema"
+                                                                (click)="checkChange(element,checkbox.checked,'unique')"
+                                                                class="checklist-leaf-node" [checked]="element.unique">
+                                                            </mat-checkbox>
+                                                        </td>
+                                                    </ng-container>
+                                                    <ng-container matColumnDef="required">
+                                                        <th mat-header-cell *matHeaderCellDef> Required </th>
+                                                        <td mat-cell *matCellDef="let element">
+                                                            <mat-checkbox #checkbox="" [(ngModel)]="element.required"
+                                                                [disabled]="isTableExists || element.primary || element.unique || dataset.schema"
+                                                                (change)="checkChange(element,checkbox.checked,'required')"
+                                                                class="checklist-leaf-node"
+                                                                [checked]="element.required">
+                                                            </mat-checkbox>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <ng-container matColumnDef="excelcols">
+                                                        <th mat-header-cell *matHeaderCellDef> File Columns </th>
+                                                        <td mat-cell *matCellDef="let element">
+                                                            <select *ngIf="!element.autoincrement"
+                                                                (change)="mapColumn(element,modified.value)"
+                                                                #modified="">
+                                                                <option selected="">{{mappingJson[element.field]}}
+                                                                </option>
+                                                                <option *ngFor="let col of formattedExcelCols"
+                                                                    [value]="col.col">
+                                                                    {{col.formattedCol}}
+                                                                </option>
+                                                            </select>
+                                                        </td>
+                                                    </ng-container>
+                                                    <ng-container matColumnDef="dateformat">
+                                                        <th mat-header-cell *matHeaderCellDef> Date Formats </th>
+                                                        <td mat-cell *matCellDef="let element">
+                                                            <select
+                                                                *ngIf="element.type=='datetime' || element.type=='timestamp'"
+                                                                (change)="changeDateFormat(element,modified.value)"
+                                                                #modified="">
+
+                                                                <option selected="">MM/dd/yyyy HH:mm:ss</option>
+                                                                <option *ngFor="let format of dateformats"
+                                                                    [value]="format">
+                                                                    {{format}}
+                                                                </option>
+                                                            </select>
+                                                            <select *ngIf="element.type=='date'"
+                                                                (change)="changeDateFormat(element,modified.value)"
+                                                                #modified="">
+                                                                <option selected="">{{element.format}}</option>
+                                                                <option *ngFor="let format of dateformats1"
+                                                                    [value]="format">
+                                                                    {{format}}
+                                                                </option>
+                                                            </select>
+                                                            <select *ngIf="element.type=='time'"
+                                                                (change)="changeDateFormat(element,modified.value)"
+                                                                #modified="">
+                                                                <option selected="">{{element.format}}</option>
+                                                                <option *ngFor="let format of timeformats"
+                                                                    [value]="format">
+                                                                    {{format}}
+                                                                </option>
+                                                            </select>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <tr mat-header-row *matHeaderRowDef="displayedColumns3"></tr>
+                                                    <tr mat-row *matRowDef="let row; columns: displayedColumns3;">
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            <div *ngIf="extraColumns.length > 0 && dataset?.datasource?.type=='BIGQUERYREST'"
+                                                style="overflow-y: scroll; height: 43vh;margin-top: 3%;">
+                                                <h3>Add Below Columns to Table</h3>
+                                                <table mat-table [dataSource]="extraColumns" #mytable class="col-md-12">
+
+                                                    <ng-container matColumnDef="columntype">
+                                                        <th mat-header-cell *matHeaderCellDef>Column Type</th>
+                                                        <td mat-cell *matCellDef="let element">
+                                                            <mat-select [(value)]="element.type"
+                                                                placeholder="Select DataType">
+                                                                <mat-option *ngFor="let type of datatypes"
+                                                                    [value]="type">
+                                                                    {{type}}
+                                                                    '' </mat-option>
+                                                            </mat-select>
+                                                        </td>
+                                                    </ng-container>
+                                                    <ng-container matColumnDef="columnname">
+                                                        <th mat-header-cell *matHeaderCellDef>File Column </th>
+                                                        <td mat-cell *matCellDef="let element;let i=index">
+                                                            <input style="width: 40%" #modified
+                                                                (keypress)="omit_special_char($event)" matInput
+                                                                [(value)]="element.field" />
+                                                        </td>
+                                                    </ng-container>
+                                                    <ng-container matColumnDef="action">
+                                                        <th mat-header-cell *matHeaderCellDef>Action</th>
+                                                        <td mat-cell *matCellDef="let element;let i=index">
+                                                            <span class="fa fa-check-square-o" title="Add Column"
+                                                                (click)="addColumn(element,i)"></span>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <tr mat-header-row *matHeaderRowDef="displayedColumns4"></tr>
+                                                    <tr mat-row *matRowDef="let row; columns: displayedColumns4;">
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            <div *ngIf="(!selectedFile || tableDataSource.length == 0) && task !='Create Table'"
+                                                style="margin-top: 10px; margin-bottom: 10px;">
+                                                <mat-error>Please Upload a file.</mat-error>
+                                            </div>
+                                            <div *ngIf="error">{{error}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div *ngIf="tableDataSource.length == 0" style="margin-top: 10px; margin-bottom: 10px;">
+                                </div>
+
+                                <button id="dset-load-btn" *ngIf="(!isAuth && !error) && tableDataSource.length > 0"
+                                    type="submit" class="genBtn marRght30 downloadBtn icm-submit-btn selector-679-42"
+                                    style="margin-left: 130px;margin-top: 10px!important"
+                                    (click)="loadDataset(validate)">
+                                    {{task=='Create Table'?'Create Table':'Load'}}
+                                </button>
+
+                            </mat-step>
+
+                        </mat-horizontal-stepper>
+                    </leds-stepper>
+                </leds-panel>
+
+                <!-- <p-dialog header="" (visibleChange)="onDialogClose()" [(visible)]="dialogOpen" [style]="{width: '40%'}"
+                    [baseZIndex]="10000" [resizable]="true">
+                    <div>
+                        <leds-tooltip [tooltip]="'close'" [position]="'above'">
+                            <i class="le-u-mar-r-16 aip-led-icons icon x-24 close-icon" (click)="onDialogClose()"></i>
+                        </leds-tooltip>
+                    </div>
+                    <div *ngIf="instructions">
+                        <ol>
+                            <li>Primary key should be string or int</li>
+                            <li>Date columns should be formatted</li>
+                            <li *ngIf="specificInstructions">'Type' column should have one of the following values
+                                <ul>Incident</ul>
+                                <ul>Task</ul>
+                                <ul>ChangeRequest-Normal</ul>
+                                <ul>ServiceRequest</ul>
+                            </li>
+                            <li>Please ensure columns with headers with * in template have data</li>
+                            <li>Please ensure there are no empty rows at the end of sheet</li>
+                        </ol>
+
+                    </div>
+                    <div *ngIf="validate">
+                        <ul>
+                            <li>Please verify the mapping</li>
+                            <li style="overflow-wrap: break-word;" *ngIf="errorList.length>0"> Following columns not
+                                mapped : <br> {{errorList}}
+                            </li>
+                        </ul>
+                        Do you want to continue?
+                        <div style="margin-top:2%">
+                            <button mat-button="" class="genBtn marRght30 downloadBtn icm-submit-btn"
+                                style="margin-top: 10px!important" (click)="load()">Continue</button>
+                        </div>
+                    </div>
+                </p-dialog> -->
+                <mat-error *ngIf="attributes && !attributes.tableName" class="cip-dataset-load-errmsg"> Please specify
+                    table name in Configuration</mat-error>
+
+                <ng-template #instructions let-modal>
+                    <div ledsModalBody class="le-u-mar-4">
+                        <button type="button" class="btn-close" aria-label="Close"
+                            (click)="modal.dismiss('Cross click')">
+                            <i class="icon x-16 close-icon"></i>
+                        </button>
+                        <ol class="le-u-mar-8">
+                            <li class="le-u-pad-4">Primary key should be string or int</li>
+                            <li class="le-u-pad-4">Date columns should be formatted</li>
+                            <li class="le-u-pad-4" *ngIf="specificInstructions">'Type' column should have one of the
+                                following values
+                                <ul class="le-u-pad-4">Incident</ul>
+                                <ul class="le-u-pad-4">Task</ul>
+                                <ul class="le-u-pad-4">ChangeRequest-Normal</ul>
+                                <ul class="le-u-pad-4">ServiceRequest</ul>
+                            </li>
+                            <li class="le-u-pad-4">Please ensure columns with headers with * in template have data</li>
+                            <li class="le-u-pad-4">Please ensure there are no empty rows at the end of sheet</li>
+                        </ol>
+                    </div>
+                </ng-template>
+
+                <ng-template #validate let-modal>
+                    <div ledsModalBody class="le-u-mar-4">
+                        <leds-tooltip [tooltip]="'Close'" [position]="'above'">
+                            <i class="le-u-mar-r-16 icon close-icon x-16" (click)="modal.dismiss('Cross click')"></i>
+                        </leds-tooltip>
+                        <ul class="le-u-mar-8">
+                            <li class="le-u-pad-4">Please verify the mapping</li>
+                            <li class="le-u-pad-4" style="overflow-wrap: break-word;" *ngIf="errorList.length>0">
+                                Following columns not
+                                mapped : <br> {{errorList}}
+                            </li>
+                        </ul>
+                        <div class="le-u-mar-8 le-u-pad-4">Do you want to continue?</div>
+                        <leds-button class="d-flex justify-content-end le-u-mar-r-8 le-u-mar-b-8" nameText="primaryButton" idText="primaryButton" [disabled]="false"
+                            buttonType="button" designType="primary" (click)="load();modal.dismiss('Cross click')">Continue</leds-button>
+                        </div>
+                </ng-template>
+            </div>
+            <div *ngIf="task=='Extract Schema'" id="dset-load-extrct" class="selector-679-43"
+                style="margin-top: -1.5%; margin-left: 5%; width: 100%;">
+                <div class="selector-679-44" [ngBusy]="busy">
+                    <div class="row selector-679-45">
+                        <h2 class="col-md-11 selector-679-46" style="color:var(--base-color)" mat-dialog-title="">
+                            SchemaRegistry Details
+                        </h2>
+                    </div>
+                    <div class="selector-679-48">
+                        <div class="row form-group selector-679-49">
+                            <div class="col-md-6 selector-679-50" style="margin-top: 6px;">
+                                <mat-form-field class="col-md-12 selector-679-51">
+                                    <input id="dset-load-schm-name" (keypress)="omit_special_char($event)" matInput=""
+                                        type="text" placeholder="Alias" [(ngModel)]="schemaAlias" name="name"
+                                        class="selector-679-52">
+                                </mat-form-field>
+                            </div>
+                            <div class="col-md-6 selector-679-54">
+                                <div class="col-md-12 selector-679-55" *ngIf="groups">
+                                    <mat-form-field class="col-md-12">
+                                        <mat-select id="dset-load-schm-grp" placeholder="Select Schema Groups"
+                                            multiple="" class="selector-679-56">
+                                            <mat-option id="dset-load-grp-{{group.name}}" *ngFor="let group of groups"
+                                                (onSelectionChange)="groupChange(group)" [value]="selectedz(group)"
+                                                name="group" class="selector-679-57">{{group.alias}}</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row form-group selector-679-64" *ngIf="isRawData === false">
+                            <div class="col-md-12 selector-679-65">
+                                <div class="container selector-679-66">
+
+                                    <div *ngIf="dataSource.length > 0" class="selector-679-67">
+                                        <table id="dset-schm-table" mat-table="" [dataSource]="dataSource" #mytable=""
+                                            class="col-md-12 selector-679-68">
+
+                                            <!-- Id Column -->
+                                            <!-- Name Column -->
+                                            <ng-container matColumnDef="columntype" class="selector-679-69">
+                                                <th id="dset-load-schm-typ" mat-header-cell="" *matHeaderCellDef=""
+                                                    class="selector-679-70">
+                                                    Column type </th>
+                                                <td id="dset-schm-table-{{element.columntype}}" mat-cell=""
+                                                    *matCellDef="let element" class="selector-679-71">
+                                                    {{element.columntype}} </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="columnorder" class="selector-679-72">
+                                                <th id="dset-load-schm-ord" mat-header-cell="" *matHeaderCellDef=""
+                                                    class="selector-679-73">
+                                                    Column order </th>
+                                                <td id="dset-schm-table-{{element.columnorder}}" mat-cell=""
+                                                    *matCellDef="let element" class="selector-679-74">
+                                                    {{element.columnorder}} </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="recordcolumnname" class="selector-679-75">
+                                                <th id="dset-load-schm-rcname" mat-header-cell="" *matHeaderCellDef=""
+                                                    class="selector-679-76">
+                                                    RecordColumnName </th>
+                                                <td id="dset-schm-table-{{element.recordcolumnname}}" mat-cell=""
+                                                    *matCellDef="let element" class="selector-679-77">
+                                                    {{element.recordcolumnname}} </td>
+                                            </ng-container>
+
+                                            <!-- Name Column -->
+                                            <ng-container matColumnDef="recordcolumndisplayname"
+                                                class="selector-679-78">
+                                                <th id="dset-load-schm-rcdnam" mat-header-cell="" *matHeaderCellDef=""
+                                                    class="selector-679-79">
+                                                    RecordColumnDisplayName </th>
+                                                <td id="dset-schm-table-{{element.recordcolumndisplayname}}" mat-cell=""
+                                                    *matCellDef="let element" class="selector-679-80">
+                                                    {{element.recordcolumndisplayname}} </td>
+                                            </ng-container>
+                                            <tr mat-header-row="" *matHeaderRowDef="displayedColumns2"
+                                                class="selector-679-81"></tr>
+                                            <tr mat-row="" *matRowDef="let row; columns: displayedColumns2;"
+                                                class="selector-679-82"></tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="selector-679-83">
+                        <button id="dset-load-schm-save" mat-raised-button="" (click)="save()"
+                            class="selector-679-84 base-btn">Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- <div *ngIf="task=='Explore Outliers'" id="dset-Explore-Outlires" class="cip-dtst-tsk-mrgns">
+                <lib-dataset-macrobase [dataset]='data'></lib-dataset-macrobase>
+            </div> -->
+            <div *ngIf="task=='Generate Form'" id="dset-frm-tmplt-crtn" class="cip-dtst-tsk-mrgns">
+                <div *ngIf="crtFrmTmpltErr && crtFrmTmpltErr.trim().length>0; else formFields"
+                    class="cip-dataset-load-errmsg">{{crtFrmTmpltErr}}</div>
+                <ng-template #formFields>
+                    <div *ngIf="!showFormTemplate" class="container">
+                        <div class="row ml-4 mb-3 selector-679-69">
+                            <div class="col-3 selector-679-19">
+                                <div style="margin-left: 11%;">
+                                    <label class="formLabel selector-679-65"
+                                        style="display: block; margin-bottom: 0px !important;">
+                                        Name<span style="color: red" class="selector-679-230">*</span>
+                                    </label>
+                                    <input type="text" placeholder="Template Name" [(ngModel)]="templateName"
+                                        class="txtInput selector-679-11" (input)="validateTemplateName()">
+                                </div>
+                            </div>
+                            <div class="col-6 offset-3 selector-679-64">
+                                <div>
+                                    <label class="formLabel selector-679-65"
+                                        style="display: block; margin-bottom: 0px !important;">Tags</label>
+                                    <p-chips [(ngModel)]="templateTags" class="cip-round-chips selector-679-66"
+                                        name="cip-mdlcnfgschm-pchips-tmpltgs"></p-chips>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="height: 40vh; overflow-y: overlay;">
+                            <p-pickList [source]="fieldTitles" [target]="selectedFieldTitles"
+                                sourceHeader="Available Fields" targetHeader="Selected Fields" [dragdrop]="true"
+                                [responsive]="true" [sourceStyle]="{'height':'32vh'}" [targetStyle]="{'height':'32vh'}">
+                                <ng-template let-fieldProp pTemplate="item">
+                                    <div>{{fieldProp.title}}</div>
+                                </ng-template>
+                            </p-pickList>
+                        </div>
+                        <div style="display: flex; height: 11vh;">
+                            <button id="dset-frmgnrt-btn" *ngIf="!isAuth" type="submit"
+                                [disabled]="selectedFieldTitles?.length<1 || !tmpltNmVld"
+                                class="genBtn marRght30 downloadBtn icm-submit-btn selector-679-42"
+                                style="position: absolute; bottom: 2vw; left: 75vw;" (click)="generateForm()">
+                                Generate Form
+                            </button>
+                        </div>
+                    </div>
+                    <div *ngIf="showFormTemplate" class="container">
+                        <div style="height: 64vh;">
+                            <div class="row">
+                                <div class="col-11" style="font-size: 1.5rem; margin-bottom: 3vh;">Form Template</div>
+                                <div class="col-1">
+                                    <i class="fa fa-file" title="Generate new template"
+                                        style="cursor: pointer; color: var(--base-color); font-size: 1.5vw; float: right;"
+                                        (click)="clearTemplateDetails()"></i>
+                                </div>
+                            </div>
+                            <formio [form]="formTemplate" class="selector-679-86"></formio>
+                        </div>
+                    </div>
+                </ng-template>
+            </div>
+            <div *ngIf="task=='ETL'" id="etl-job" class="cip-dtst-tsk-mrgns">
+                <!-- <lib-etl-job-rest [dataset]="dataset"></lib-etl-job-rest> -->
+            </div>
+        </div>
+    </mat-sidenav-content>
+</mat-sidenav-container>

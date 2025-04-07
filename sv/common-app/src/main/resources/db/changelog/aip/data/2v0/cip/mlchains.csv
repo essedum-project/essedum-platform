@@ -1,0 +1,2 @@
+"description","job_name","json_content","organization","parallelchain"
+"Ease Analytics pipelines","EASEAnalytics","{\"runNow\":false,\"element\":{\"elements\":[{\"name\":\"ACMCLNTC99308\",\"runtime\":\"DragAndDrop\",\"alias\":\"Clean Tickets\",\"index\":\"1\"},{\"name\":\"ACMPHRSX57460\",\"runtime\":\"DragNDropLite\",\"alias\":\"Phrase Extraction Lite\",\"index\":\"2\"},{\"name\":\"ACMKYPHR40814\",\"runtime\":\"NativeScript\",\"alias\":\"Key Phrase Mapping\",\"index\":\"3\"}]}}","leo1311","0"

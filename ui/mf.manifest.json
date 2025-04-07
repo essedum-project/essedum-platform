@@ -1,0 +1,20 @@
+{
+	"icip_app": {
+		"remoteEntry": "http://localhost:8080/cipui/remoteEntry.js",
+		"exposedModule": "./Component",
+		"routePath": "aibrain",
+		"ngModuleName": "MlstudioModule"
+	},
+	"adp_app": {
+		"remoteEntry": "http://localhost:8080/cipui/remoteEntry2.js",
+		"exposedModule": "./Component",
+		"routePath": "adapters",
+		"ngModuleName": "DatasetsModule"
+	},
+	"cipwflw_app": {
+		"remoteEntry": "http://localhost:8080/cipui/remoteEntry-cipwflw.js",
+		"exposedModule": "./Component",
+		"routePath": "workflows",
+		"ngModuleName": "IcipWorkflowModule"
+	}
+}

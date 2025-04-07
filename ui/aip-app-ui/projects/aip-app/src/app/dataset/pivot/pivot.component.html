@@ -1,0 +1,192 @@
+<div class="dataname-wrapper mb-2 pb-2 le-u-pad-l-16">
+    <div class="d-flex justify-content-between align-items-center " style="border-bottom: 2px solid #f5f1f1;">
+
+        <span class="text-box"> DATASET NAME: {{alias}}</span>
+        <div style="display: flex;">
+            <leds-tooltip [tooltip]="'Export Excel'" [position]="'above'">
+                <leds-button nameText="logButton" idText="logButton" buttonType="button" designType="icon" [disabled]="displayPivotSpinner || !sampleData">
+                    <i class="icon x-24 icon_xls" style="visibility: visible;" (click)="exportAsExcelFile()"></i>
+                </leds-button>
+            </leds-tooltip>
+            <leds-tooltip [tooltip]="isExpanded?'Maximize':'Minimize'" [position]="'above'">
+                <leds-button nameText="logButton" idText="logButton" buttonType="button" *ngIf="isExpanded"
+                    designType="icon">
+                    <i class="icon x-24 icon_maximise" style="visibility: visible;" (click)="toggleExpand()"></i>
+                </leds-button>
+                <leds-button nameText="logButton" idText="logButton" buttonType="button" *ngIf="!isExpanded"
+                    designType="icon">
+                    <i class="icon x-24 icon_minimise" style="visibility: visible;" (click)="toggleExpand()"></i>
+                </leds-button>
+            </leds-tooltip>
+            <leds-tooltip [tooltip]="'Refresh'" [position]="'above'">
+                <leds-button nameText="logButton" idText="logButton" buttonType="button" designType="icon" (click)="clearPivot()" >
+                    <i class="icon x-24 icon_Refresh" style="visibility: visible;"></i>
+                </leds-button>
+            </leds-tooltip>
+            <!-- <leds-tooltip [tooltip]="'Save to story'" [position]="'above'">
+                <leds-button nameText="logButton" idText="logButton" buttonType="button" designType="icon">
+                    <i class="icon x-24 icon_save" style="visibility: visible;"></i>
+                </leds-button>
+            </leds-tooltip> -->
+        </div>
+    </div>
+</div>
+<app-message-bar [data]="Message" [duration]="5000" horizontalPosition="right" verticalPosition="top"></app-message-bar>
+
+<div *ngIf="!allAttributes">
+    <leds-loader></leds-loader>
+</div>
+<div *ngIf="allAttributes" class="pivot-container">
+    <div class="drag-container">
+        <div #app class="side-bar-items">
+            <div class="att-container">
+
+                <leds-accordion designType="3D" [hideToggle]="false" [multi]="true"
+                    (click)="preventAccordionTabClose($event)">
+                    <mat-expansion-panel expanded="true" *ngFor="let attr of allAttributes; let i = index">
+                        <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+                            <mat-panel-title>
+                                <div class="header-item-container">
+                                    <h4 class="le-u-header-md">{{ attr.attributeType }}</h4>
+                                </div>
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="le-u-mar-16">
+
+                            <div class="drag-wrapper" *ngFor="let item of attr.attributes; let j = index">
+                                <div *ngIf="attr.attributeType !== 'Categorical Attributes'" dragEffect="copy"
+                                    pDraggable="attri" (onDragStart)="attributeDragEnd(item, attr.attributeType)"
+                                    class="attribute-list-drag">
+                                    {{ item.attributeName }}
+                                </div>
+                                <div *ngIf="attr.attributeType === 'Categorical Attributes'" dragEffect="copy"
+                                    pDraggable="attri" (onDrop)="changeToCategoricalType(item)"
+                                    (onDragStart)="attributeDragEnd(item, attr.attributeType)"
+                                    class="attribute-list-drag">
+                                    {{ item.attributeName }}
+                                </div>
+                            </div>
+                            <div class="no-attributes-list" *ngIf="attr.attributes.length === 0">
+                                {{pivotLbls.noAttributes}}
+                            </div>
+                        </div>
+                    </mat-expansion-panel>
+                </leds-accordion>
+            </div>
+        </div>
+        <form class="pivot-drop-area" autocomplete="off">
+            <div class="analytics-pivot-loading-indicator" *ngIf="displayPivotSpinner && !displaySpinner">
+                <leds-loader></leds-loader>
+            </div>
+            <div *ngIf="toggleMaxBtn" class="">
+                <div class="aip-panel-shadow panel-height" designType="simple" pDroppable="attri"
+                    (onDrop)="itemDropped('filter')" dropEffect="copy" pTooltip="Filter" tooltipPosition="top"
+                    [tooltipDisabled]="draggedFilterFields?.length === 0">
+                    <div *ngIf="draggedFilterFields.length === 0" class="placeholder-area no-records-placeholder">
+                        {{pivotLbls.dragMsg}}</div>
+                    <div class="filter-attribute-container" *ngIf="draggedFilterFields.length > 0">
+                        <div class="filter-attribute-item" *ngFor="let filter of draggedFilterFields; let i=index">
+                            <div (contextmenu)="displayContextMenu(filterCM,$event, filter,'filter', i)"
+                                (click)="showFilterOverlay(filter, $event, i)">{{filter.attributeName}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div [formGroup]="pivotParameterFormGroup"
+                [ngClass]="{'pivot-drop-area-below':toggleMaxBtn === true,'pivot-max-area':toggleMaxBtn === false}">
+
+                <div class="aip-panel-shadow" *ngIf="toggleMaxBtn" pDroppable="attri" formArrayName="valueAttArray"
+                    (onDrop)="itemDropped('value')" dropEffect="copy" pTooltip="Value" tooltipPosition="top"
+                    [tooltipDisabled]="draggedValueFields?.length === 0" style="overflow-y: auto;overflow-x: auto;">
+                    <div *ngIf="draggedValueFields.length === 0" class="placeholder-area no-records-placeholder">
+                        {{pivotLbls.dragValMsg}}</div>
+                    <div class="value-field" *ngIf="draggedValueFields?.length >0">
+                        <div
+                            *ngFor="let colValue of pivotParameterFormGroup.controls.valueAttArray.controls; let i = index">
+                            <div [formGroupName]="i">
+                                <leds-select *ngIf="colValue.value.options?.length > 0"
+                                    (contextmenu)="displayContextMenu(filterCM,$event, colValue, 'value',i)"
+                                    appendTo="body" dropEffect="copy" [options]="colValue.value.options"
+                                    [selected]=colValue.value.options[0].value formControlName="attributeValue"
+                                    (selectChange)="onSelectChange(colValue, $event)" [designType]="'withBg'">
+                                </leds-select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="aip-panel-shadow" designType="simple" *ngIf="toggleMaxBtn" pDroppable="attri"
+                    formArrayName="columnAttArray" (onDrop)="itemDropped('column')" dropEffect="copy" pTooltip="Column"
+                    tooltipPosition="top" [tooltipDisabled]="draggedColumnFields?.length === 0">
+                    <div *ngIf="draggedColumnFields?.length === 0" class="placeholder-area no-records-placeholder">
+                        {{pivotLbls.dragColMsg}}
+                    </div>
+                    <div class="column-field" *ngIf="draggedColumnFields?.length >0">
+                        <div class="vertical-items" *ngFor="let colValue of draggedColumnFields; let i = index">
+                            <div class="filter-attribute-item"
+                                (contextmenu)="displayContextMenu(filterCM,$event, colValue, 'column',i)">
+                                {{colValue}}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="aip-panel-shadow" *ngIf="toggleMaxBtn" pDroppable="attri" formArrayName="rowAttArray"
+                    (onDrop)="itemDropped('rows')" dropEffect="copy" pTooltip="Row" tooltipPosition="top"
+                    [tooltipDisabled]="draggedRowFields?.length === 0">
+                    <div *ngIf="draggedRowFields.length === 0" class="placeholder-area no-records-placeholder">
+                        {{pivotLbls.dragRowMsg}}
+                    </div>
+                    <div class="row-field" *ngIf="draggedRowFields?.length >0">
+                        <div class="vertical-items" *ngFor="let colValue of draggedRowFields; let i = index">
+                            <div class="filter-attribute-item"
+                                (contextmenu)="displayContextMenu(filterCM,$event, colValue, 'row',i)">{{colValue}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="aip-panel-shadow" designType="simple" class="table-field">
+                    <div *ngIf="!sampleData" class="placeholder-area no-records-placeholder">
+                        {{pivotLbls.noData}}
+                    </div>
+                    <div *ngIf="sampleData">
+                        <!-- {{sampleData}} -->
+                        <app-pivot-table [sampleValue]="sampleData" [columnsSelected]="columnsSelected"
+                            [noOfRowsSelected]="noOfRowsSelected" [maximize]="toggleMaxBtn">
+                        </app-pivot-table>
+                    </div>
+
+                </div>
+                <!-- <div class="col-md-12"> 
+                    <leds-card designType="simple" class="table-field">
+                        <div *ngIf="!sampleData" class="placeholder-area no-records-placeholder">
+                            {{pivotLbls.noData}}
+                        </div>
+                        <div *ngIf="sampleData" >
+                            <app-pivot-table [sampleValue]="sampleData" [columnsSelected]="columnsSelected" 
+                                [noOfRowsSelected]="noOfRowsSelected" [maximize]="toggleMaxBtn">
+                            </app-pivot-table>
+                        </div>
+                    </leds-card>
+                 </div> -->
+              <!-- <div class="row">
+                    <div class="col-md-8 col-lg-6 col-xl-5" style="min-width: 384px">
+                        <leds-card designType="simple" [rounded]="true">
+                            <div *ngIf="!sampleData" class="placeholder-area no-records-placeholder">
+                                {{pivotLbls.noData}}
+                            </div>
+                            <div *ngIf="sampleData" >
+                                <app-pivot-table [sampleValue]="sampleData" [columnsSelected]="columnsSelected" 
+                                    [noOfRowsSelected]="noOfRowsSelected" [maximize]="toggleMaxBtn">
+                                </app-pivot-table>
+                            </div>
+                        </leds-card>
+                    </div>
+                </div> -->
+
+            </div> 
+        </form>
+    </div>
+</div>
+<app-pivot-filter [toggleOverlay]="toggleOverlay" [statsClickEvent]="statsClickEvent" [baseUrl]="baseUrl"
+    [filterSelection]="currentFilterValue" (selectedValue)="getFilterSelection($event)"></app-pivot-filter>

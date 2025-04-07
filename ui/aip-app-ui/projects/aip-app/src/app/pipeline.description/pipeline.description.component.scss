@@ -1,0 +1,1311 @@
+::ng-deep {
+  .mat-tab-labels {
+    justify-content: space-evenly;
+  }
+
+  .mat-expansion-indicator:after {
+    color: #434343;
+  }
+
+  .mat-tab-body-wrapper {
+    height: 80vh;
+  }
+
+  // table, th, td, tr{
+  // border: 1px solid darkgrey;
+  // text-align: center;
+  // }
+  // .th, .td, .tr {
+  //   text-align: center;
+  // }
+
+  .leds-button {
+    padding: 5px;
+    margin: 5px;
+  }
+
+  .button-panel {
+    background: whitesmoke;
+    border-radius: 0px;
+    min-height: 20px;
+    max-height: 30px;
+    width: fit-content;
+    margin-left: 4%;
+    margin-top: 1.5%;
+  }
+
+  .runtype-panel {
+    background: white;
+    border-radius: 10px;
+    min-height: 70px;
+    max-height: 150px;
+    width: fit-content;
+    margin-left: 2.5%;
+    margin-top: 1.5%;
+  }
+
+  // .table{
+  //   table-layout: unset;
+  // }
+}
+
+.file-button {
+  width: 100% !important;
+  justify-content: start;
+}
+
+
+.example-container {
+  border: none;
+  height: 100%;
+}
+
+.example-sidenav-content {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.example-sidenav {
+  padding: 20px;
+}
+
+.editor-container {
+  width: 100%
+}
+
+.config-container {
+  width: 90%;
+  margin-left: 5%;
+  margin-top: 2%;
+}
+
+
+.no-script {
+  margin: 5%;
+}
+
+
+.code-editor {
+  float: right;
+  width: 100%;
+  height: auto;
+}
+
+
+.code-content {
+  margin: 0% 5% 5% 0%;
+  min-height: 250px;
+  background-color: #282a36;
+  font: 12px/normal 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'Source Code Pro', 'source-code-pro', monospace;
+}
+
+
+
+.code-color {
+  color: white;
+}
+
+
+
+@import "../../../../../node_modules/jsplumb/css/jsplumbtoolkit-defaults.css";
+
+#diagramContainer {
+  padding: 21px;
+  width: 80%;
+  height: 200px;
+  /* border: 1px solid gray; */
+}
+
+.mlCanvas {
+  /*background-image: url(/cipui/assets/mlstudio/dot_bg.png);
+  background-repeat: repeat; */
+  display: inline-block;
+  width: 100%;
+  height: 75vh;
+  /* overflow: hidden !important; */
+}
+
+.item {
+  position: absolute;
+  height: 80px;
+  width: 80px;
+  border: 1px solid blue;
+  float: left;
+  box-sizing: border-box;
+}
+
+.demo {
+  touch-action: none;
+}
+
+.flowchart-demo .window {
+  border: 1px solid #346789;
+  box-shadow: 2px 2px 19px #aaa;
+  -o-box-shadow: 2px 2px 19px #aaa;
+  -webkit-box-shadow: 2px 2px 19px #aaa;
+  -moz-box-shadow: 2px 2px 19px #aaa;
+  -moz-border-radius: 0.5em;
+  border-radius: 0.5em;
+  /* opacity: 0.8; */
+  /* width: 80px;
+  height: 80px; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  z-index: 20;
+  position: absolute;
+  background-color: #eeeeef;
+  color: black;
+  font-family: var(--font-type) !important;
+  padding: 0.5em;
+  font-size: 0.9em;
+  -webkit-transition: -webkit-box-shadow 0.15s ease-in;
+  -moz-transition: -moz-box-shadow 0.15s ease-in;
+  -o-transition: -o-box-shadow 0.15s ease-in;
+  transition: box-shadow 0.15s ease-in;
+}
+
+.flowchart-demo .window:hover {
+  box-shadow: 2px 2px 19px #444;
+  -o-box-shadow: 2px 2px 19px #444;
+  -webkit-box-shadow: 2px 2px 19px #444;
+  -moz-box-shadow: 2px 2px 19px #444;
+  /* opacity: 0.6; */
+}
+
+.flowchart-demo .active {
+  border: 1px dotted green;
+}
+
+.flowchart-demo .hover {
+  border: 1px dotted red;
+}
+
+.canvas_component_entity {
+  top: 15em;
+  left: 22em;
+  /* width: 150px; */
+  background-image: url(/cipui/assets/mlstudio/Server.png);
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 55px;
+  border: 0px;
+  background-color: transparent;
+}
+
+.flowchart-demo .jtk-connector {
+  z-index: 4;
+}
+
+.flowchart-demo .jtk-endpoint,
+.endpointTargetLabel,
+.endpointSourceLabel {
+  z-index: 21;
+  cursor: pointer;
+}
+
+.flowchart-demo .aLabel {
+  background-color: white;
+  padding: 0.4em;
+  font: 12px sans-serif;
+  color: #444;
+  z-index: 21;
+  border: 1px dotted gray;
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+.flowchart-demo .aLabel.jtk-hover {
+  background-color: #5C96BC;
+  color: white;
+  border: 1px solid white;
+}
+
+.window.jtk-connected {
+  border: 1px solid green;
+}
+
+.jtk-drag {
+  outline: 4px solid pink !important;
+}
+
+path,
+.jtk-endpoint {
+  cursor: pointer;
+}
+
+.jtk-overlay {
+  background-color: transparent;
+}
+
+svg path {
+  stroke: aqua;
+  stroke-width: 1.5;
+}
+
+path {
+  stroke: aqua;
+  stroke-width: 1.5;
+}
+
+
+/**
+* card setting
+*/
+
+::ng-deep .card-header {
+  background-color: rgb(236, 236, 236) !important;
+  height: 35px;
+  /* border-bottom: 1.2px solid #346789; */
+  padding: 5px;
+}
+
+::ng-deep .card-header a {
+  color: dimgray;
+}
+
+::ng-deep .card {
+  border: 0.15em solid rgb(216, 216, 216);
+}
+
+.element-icon {
+  background: lightgrey;
+  border-radius: 35px;
+  height: 50px;
+  width: 50px;
+  border: 1px solid #aaa;
+  font-size: 18px;
+  padding-left: 5px;
+  padding-top: 6px;
+}
+
+.toolbar-menu-items-container-title {
+  font-family: var(--font-type) !important;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.toolbar-menu {
+  border-radius: 15px;
+  display: inline-block;
+  vertical-align: top;
+  margin-top: 10px;
+  margin-left: 10px;
+  margin-bottom: 10px;
+  margin-right: 3px;
+  padding: 10px;
+  border: 1px solid #346789;
+  /* width: 90px; */
+  /* height: 500px; */
+  overflow-y: scroll;
+  overflow-x: hidden;
+  /* height: 55%; */
+  /* max-height: 500px; */
+}
+
+.toolbar-menu-title {
+  margin: 5px;
+  color: #444;
+}
+
+.properties-menu {
+  display: inline-block;
+  vertical-align: top;
+  margin-bottom: 10px;
+  width: 100%;
+  border-left: 0.15em solid rgb(216, 216, 216);
+  border-right: 0.15em solid rgb(216, 216, 216);
+  border-bottom: 0.15em solid rgb(216, 216, 216);
+  max-height: 200px;
+  height: 100%;
+}
+
+.properties-menu-title {
+  background-color: rgb(236, 236, 236);
+  height: 35px;
+  padding: 5px;
+  color: dimgray;
+  font-family: var(--font-type) !important;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.properties-menu-item-element-type {
+  display: inline-block;
+}
+
+.properties-menu-item-element-txt {
+  margin-top: 10px;
+  width: 110px;
+}
+
+.properties-menu-item {
+  margin-top: 5px;
+  margin-left: 5px;
+}
+
+.properties-menu-item-label {
+  font-family: var(--font-type) !important;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgb(82, 84, 82);
+}
+
+.modelling-container-title {
+  color: #444;
+  margin-bottom: 7px;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-top: 7px;
+}
+
+.toolbar-menu-items-txt {
+  font-family: var(--font-type) !important;
+  font-size: 9px;
+}
+
+.toolbar-menu-items-container {
+  margin: 10px;
+}
+
+#static-2-header {
+  background-color: lightgray !important;
+  border: 2px solid darkgrey !important;
+  height: 30px !important;
+  border-radius: 2px !important;
+}
+
+.toolbar-menu-panel-content {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.toolbar-menu-sub-title {
+  margin: 50px 5px 5px 5px;
+}
+
+.toolbar-menu-sub-title-txt {
+  font-family: var(--font-type) !important;
+  font-size: 12px;
+  font-weight: 900;
+  color: #444;
+}
+
+.toolbar-menu-items {
+  border-radius: 0.5em;
+  width: 23px;
+  height: 30px;
+  display: flex;
+  -webkit-box-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  align-items: center;
+  cursor: pointer;
+  text-align: center;
+  z-index: 20;
+  position: relative;
+  color: black;
+  font-family: var(--font-type) !important;
+  padding: 2px;
+  font-size: 0.9em;
+  transition: box-shadow 0.15s ease-in;
+  background-color: transparent;
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-left: 8px;
+  margin-top: 5px;
+}
+
+.draggable {
+  border: 1px solid #ccc;
+  margin: 10px;
+  padding: 10px;
+  cursor: move;
+}
+
+.drop-target {
+  display: flex;
+}
+
+.dnd_container {
+  display: block;
+  border: 1px dashed #ccc;
+  margin: 10px;
+  padding: 10px;
+}
+
+.dnd_panel {
+  display: inline-block;
+  height: 65vh;
+}
+
+.example-form {
+  min-width: 150px;
+  max-width: 500px;
+  width: 100%;
+}
+
+.example-full-width {
+  width: 100%;
+}
+
+.accordScroll {
+  max-height: 46vh;
+  overflow: scroll;
+  overflow-x: hidden;
+}
+
+.no-padd {
+  padding: 0px;
+}
+
+span.ng-star-inserted {
+  font-family: var(--font-type) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+
+
+/*default.css content */
+
+
+/* 
+  Default styles for jsPlumb Toolkit
+
+  Copyright 2018 https://jsplumbtoolkit.com
+*/
+
+
+/* --------------------------------------------------------------------------------------------- */
+
+
+/* --- SURFACE WIDGET -------------------------------------------------------------------------- */
+
+
+/* --------------------------------------------------------------------------------------------- */
+
+
+/*
+  Assigned to every Node managed by an instance of the Toolkit. They are required to be positioned absolute, to
+  enable dragging to work properly.
+*/
+
+.jtk-node {
+  position: absolute;
+}
+
+
+/*
+  Assigned to every Group managed by an instance of the Toolkit. They are required to be positioned absolute, to
+  enable dragging to work properly. We set overflow:visible on Group elements too, as a drag outside of the bounds
+  is automatically reverted anyway, and without overflow:visible you cannot drag a node to some other element. You can
+  also drag a node out of the element's viewport and if you drop it you can never get it back.
+*/
+
+.jtk-group {
+  position: absolute;
+  overflow: visible;
+}
+
+
+/*
+
+  This is the attribute used to mark which part of a Group DOM element should contain the child Nodes. We mark it
+  as having `position:relative` so that the absolute positioned Nodes are drawn correctly.
+*/
+
+[jtk-group-content] {
+  position: relative;
+}
+
+
+/*
+  This style was created in response to this Chrome bug:
+  http://stackoverflow.com/questions/13758215/artifacts-when-css-scaled-in-chrome
+
+  Basically it's about how sometimes there can be artefacts left on screen when the user drags an element. It seems
+  the issue has been fixed in more recent versions of Chrome, but the style is left here in case you come across
+  the problem.
+*/
+
+.jtk-node.jtk-drag {
+  -webkit-backface-visibility: hidden;
+}
+
+
+/*
+  Suppresses the pointer events on an element that was created by Katavorio in response to a drag in which the element
+  should first be cloned. Having this clone ignore pointer events means there is less chance that any other
+  mouse activity (such as click) on the original element will not be consumed by katavorio.
+*/
+
+.katavorio-clone-drag {
+  pointer-events: none;
+}
+
+.jtk-surface {
+  position: relative;
+  cursor: move;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+  touch-action: none;
+  transform: translateZ(0) scale(1.0, 1.0);
+}
+
+.jtk-surface-canvas1 {
+  height: 80vh;
+  /* width: 100%; */
+  position: relative;
+  left: 3.98874px;
+  overflow: hidden;
+}
+
+.jtk-surface-panning {
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.jtk-surface-droppable-node {
+  touch-action: none;
+}
+
+.jtk-surface-tile {
+  border: none;
+  outline: none;
+  margin: 0;
+  -webkit-transition: opacity .3s ease .15s;
+  -moz-transition: opacity .3s ease .15s;
+  -o-transition: opacity .3s ease .15s;
+  -ms-transition: opacity .3s ease .15s;
+  transition: opacity .3s ease .15s;
+}
+
+.jtk-lasso {
+  border: 2px solid rgb(49, 119, 184);
+  background-color: WhiteSmoke;
+  display: none;
+  z-index: 20000;
+  position: absolute;
+}
+
+.jtk-lasso-select-defeat * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.jtk-lasso-mask {
+  position: fixed;
+  z-index: 20000;
+  display: none;
+  opacity: 0.5;
+  background-color: #07234E;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.jtk-surface-selected-element {
+  border: 2px dotted #c7726c !important;
+}
+
+.jtk-surface-pan {
+  background-color: Azure;
+  /* opacity: 0.4; */
+  text-align: center;
+  /* cursor: pointer; */
+  z-index: 2;
+  -webkit-transition: background-color 0.15s ease-in;
+  -moz-transition: background-color 0.15s ease-in;
+  -o-transition: background-color 0.15s ease-in;
+  transition: background-color 0.15s ease-in;
+}
+
+.jtk-surface-pan-top,
+.jtk-surface-pan-bottom {
+  width: 100%;
+  height: 20px;
+}
+
+.jtk-surface-pan-top:hover,
+.jtk-surface-pan-bottom:hover,
+.jtk-surface-pan-left:hover,
+.jtk-surface-pan-right:hover {
+  background-color: rgb(49, 119, 184);
+  color: white;
+  font-weight: bold;
+}
+
+.jtk-surface-pan-left,
+.jtk-surface-pan-right {
+  width: 20px;
+  height: 100%;
+  line-height: 40;
+}
+
+.jtk-surface-pan-active,
+.jtk-surface-pan-active:hover {
+  background-color: #f76258;
+}
+
+
+/* -------------------------------------------------------------------------------------------- */
+
+
+/* --- DRAWING TOOLS -------------------------------------------------------------------------- */
+
+
+/* -------------------------------------------------------------------------------------------- */
+
+
+/*
+  Assigned to the element that is drawn around some other element when a drawing operation is taking place.
+*/
+
+.jtk-draw-skeleton {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  outline: 2px solid #84acb3;
+  opacity: 0.8;
+}
+
+
+/*
+  Assigned to every handle (top left, top right, bottom left, bottom right, center) in a draw skeleton.
+*/
+
+.jtk-draw-handle {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background-color: #84acb3;
+}
+
+
+/*
+  Assigned to the top left handle in a draw skeleton
+*/
+
+.jtk-draw-handle-tl {
+  left: 0;
+  top: 0;
+  cursor: nw-resize;
+}
+
+
+/*
+  Assigned to the top right handle in a draw skeleton
+*/
+
+.jtk-draw-handle-tr {
+  right: 0;
+  top: 0;
+  cursor: ne-resize;
+}
+
+
+/*
+  Assigned to the bottom left handle in a draw skeleton
+*/
+
+.jtk-draw-handle-bl {
+  left: 0;
+  bottom: 0;
+  cursor: sw-resize;
+}
+
+
+/*
+  Assigned to the bottom right handle in a draw skeleton
+*/
+
+.jtk-draw-handle-br {
+  bottom: 0;
+  right: 0;
+  cursor: se-resize;
+}
+
+
+/*
+  Assigned to the center handle in a draw skeleton (the handle by which the element may be dragged). This is
+  not visible by defaut; enable if you need it.
+*/
+
+.jtk-draw-drag {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -10px;
+  margin-top: -10px;
+  width: 20px;
+  height: 20px;
+  background-color: #84acb3;
+  cursor: move;
+}
+
+
+/*
+  This class is added to the document body on drag resize start and removed at the end of resizing. Its purpose
+  is to switch off text selection on all elements while the user is resizing an element.
+*/
+
+.jtk-drag-select-defeat * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.jtk-flowchart-handle {
+  width: 20px;
+  height: 20px;
+  font-size: 15px;
+  border-radius: 50%;
+  background-color: #f7f6f6;
+  cursor: move;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: black;
+  box-shadow: 0 0 10px;
+}
+
+.jtk-flowchart-segment-drag {
+  cursor: move;
+  cursor: grab;
+}
+
+.jtk-flowchart-segment-drag:before {
+  content: "\2725";
+}
+
+.jtk-flowchart-segment-drag:hover {
+  background-color: white;
+}
+
+.jtk-flowchart-segment-delete {
+  background-color: #FF5C45;
+  cursor: pointer;
+}
+
+.jtk-flowchart-segment-delete:before {
+  content: "\00d7";
+}
+
+.jtk-flowchart-segment-delete:hover {
+  background-color: red;
+}
+
+.jtk-bezier-handle {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: darkcyan;
+  cursor: move;
+  z-index: 10;
+}
+
+.jtk-bezier-handle-secondary {
+  cursor: default;
+  background-color: lightgreen;
+}
+
+.jtk-bezier-handle-secondary-source {
+  background-color: lavenderblush;
+}
+
+.jtk-bezier-guideline {
+  position: absolute;
+}
+
+.jtk-bezier-guideline path {
+  stroke: darkcyan;
+  stroke-linewidth: 3;
+}
+
+
+/**
+added to the element placed at the location of an anchor for a connection that is being edited.
+*/
+
+.jtk-anchor-placeholder {
+  width: 20px;
+  height: 20px;
+  cursor: move;
+  cursor: grab;
+  border-radius: 50%;
+  background-color: #f7f6f6;
+  box-shadow: 0 0 10px;
+}
+
+
+/**
+added to the elements drawn to show where a certain anchor may be relocated to (for fixed and dynamic anchors)
+*/
+
+.jtk-anchor-candidate {
+  background-color: mediumseagreen;
+}
+
+
+/* ---------------------------------------------------------------------------------------------------- */
+
+
+/* --- page structure --------------------------------------------------------------------------------- */
+
+
+/* ---------------------------------------------------------------------------------------------------- */
+
+body {
+  background-color: #FFF;
+  color: #434343;
+  // font-family: var(--font-type) !important;
+  // font-size: 14px;
+  // font-weight: 400;
+  height: 100%;
+  padding: 0;
+}
+
+.jtk-bootstrap {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.jtk-bootstrap .jtk-page-container {
+  display: flex;
+  width: 100vw;
+  justify-content: center;
+  flex: 1;
+}
+
+.jtk-bootstrap .jtk-container {
+  width: 60%;
+  max-width: 800px;
+}
+
+.jtk-bootstrap-wide .jtk-container {
+  width: 80%;
+  max-width: 1187px;
+}
+
+.jtk-demo-main {
+  position: relative;
+  margin-top: 98px;
+  display: flex;
+  flex-direction: column;
+}
+
+.jtk-demo-main .description {
+  font-size: 13px;
+  margin-top: 25px;
+  padding: 13px;
+  margin-bottom: 22px;
+  background-color: #f4f5ef;
+}
+
+.jtk-demo-main .description li {
+  list-style-type: disc !important;
+}
+
+.jtk-demo-canvas {
+  height: 80vh;
+  max-height: 100vh;
+  /* border:1px solid #CCC; */
+  /* background-color:white; */
+  /* display: flex; */
+  flex-grow: 1;
+}
+
+.canvas-wide {
+  margin-left: 0;
+}
+
+.miniview {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  z-index: 100;
+}
+
+.jtk-demo-dataset {
+  text-align: left;
+  max-height: 600px;
+  overflow: auto;
+}
+
+.demo-title {
+  float: left;
+  font-size: 18px;
+}
+
+.controls {
+  /* top: 25px; */
+  color: #FFF;
+  margin-left: 10px;
+  position: relative;
+  /* left: 25px; */
+  z-index: 1;
+  display: flex;
+  margin-bottom: 15px;
+  justify-content: flex-start;
+}
+
+.controls i {
+  background-color: #045d97;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 4px;
+  padding: 4px;
+  justify-content: flex-start;
+}
+
+li {
+  list-style-type: none;
+}
+
+@media (max-width: 600px) {
+  .sidebar {
+    float: none;
+    height: 55px;
+    width: 100%;
+    padding-top: 0;
+  }
+
+  .sidebar ul li {
+    display: inline-block;
+    margin-top: 7px;
+    width: 67px;
+  }
+
+  .jtk-demo-canvas {
+    margin-left: 0;
+    margin-top: 10px;
+    height: 364px;
+  }
+}
+
+
+/* ---------------------------------------------------------------------------------------------------- */
+
+
+/* --- jsPlumb setup ---------------------------------------------------------------------------------- */
+
+
+/* ---------------------------------------------------------------------------------------------------- */
+
+.jtk-connector {
+  z-index: 9;
+}
+
+.jtk-connector:hover,
+.jtk-connector.jtk-hover {
+  z-index: 10;
+}
+
+.jtk-endpoint {
+  z-index: 12;
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+.jtk-overlay {
+  background-color: white;
+  color: #434343;
+  font-weight: 400;
+  padding: 4px;
+  z-index: 10;
+}
+
+.jtk-overlay.jtk-hover {
+  color: #434343;
+}
+
+path {
+  cursor: pointer;
+}
+
+.delete {
+  padding: 2px;
+  cursor: pointer;
+  float: left;
+  font-size: 10px;
+  line-height: 20px;
+}
+
+.add,
+.edit {
+  cursor: pointer;
+  float: right;
+  font-size: 10px;
+  line-height: 20px;
+  margin-right: 2px;
+  padding: 2px;
+}
+
+.edit:hover {
+  color: #ff8000;
+}
+
+.selected-mode {
+  color: #E4F013;
+}
+
+.connect {
+  width: 10px;
+  height: 10px;
+  background-color: #f76258;
+  position: absolute;
+  bottom: 13px;
+  right: 5px;
+}
+
+.jtk-node {
+  background-color: #5184a0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  position: absolute;
+  z-index: 11;
+  overflow: hidden;
+  min-width: 80px;
+  min-height: 30px;
+  width: auto;
+}
+
+.jtk-node .name {
+  color: white;
+  cursor: move;
+  font-size: 13px;
+  line-height: 24px;
+  padding: 6px;
+  text-align: center;
+}
+
+.jtk-node .name span {
+  cursor: pointer;
+}
+
+[undo],
+[redo] {
+  background-color: darkgray !important;
+}
+
+[can-undo='true'] [undo],
+[can-redo='true'] [redo] {
+  background-color: #3E7E9C !important;
+}
+
+
+/* app.css content */
+
+.drop-hover {
+  background-color: #FCCCCC !important;
+}
+
+.flowchart-object {
+  position: absolute;
+  text-align: center;
+  font-size: 12px;
+  z-index: 10;
+  background: none;
+  box-shadow: none;
+  border: none;
+  border-radius: 0;
+  min-width: 0;
+  min-height: 0;
+}
+
+.jtk-node svg {
+  position: absolute;
+  stroke: none;
+  fill: #5184a0;
+  left: 0;
+  top: 0;
+}
+
+.flowchart-object text {
+  stroke: none;
+  fill: white;
+  font-family: var(--font-type) !important;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.flowchart-object .node-action {
+  display: none;
+  position: absolute;
+  top: 24px;
+  cursor: pointer;
+  color: white;
+  z-index: 10000;
+}
+
+.flowchart-object .drag-start {
+  cursor: pointer;
+}
+
+.flowchart-object .node-action:hover {
+  color: #ff8000;
+}
+
+.flowchart-object .node-edit {
+  left: 50%;
+  margin-left: -20px;
+}
+
+.flowchart-object .node-delete {
+  left: 50%;
+  margin-left: 10px;
+}
+
+.flowchart-object.jtk-surface-selected-element .node-action {
+  display: block;
+}
+
+.outer {
+  fill: gray;
+  opacity: 0.3;
+  cursor: pointer;
+}
+
+.flowchart-object:hover .outer {
+  opacity: 0.7;
+}
+
+.inner {
+  cursor: move !important;
+}
+
+.connection-drop svg {
+  fill: #CCC;
+}
+
+.connection-drop text {
+  fill: black;
+}
+
+.tab-content {
+  width: 100%;
+  background-color: white;
+  border: 1px solid;
+  min-height: 50vh;
+  overflow: hidden;
+}
+
+.fa-play:before {
+  content: none !important;
+}
+
+.fa-play:after {
+  content: "\f04b";
+  margin-left: 5px
+}
+
+// ::ng-deep .mat-mdc-tab .mdc-tab__text-label {
+// font-size: 1.4rem;
+// }
+// }
+.pipeline-filters::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+  // background: #000;
+}
+
+.pipeline-filters::-webkit-scrollbar-thumb {
+  background: #777;
+  -webkit-border-radius: 1ex;
+  // -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.75);
+}
+
+.Nodes1 {
+  /* Layout Properties */
+  top: 238px;
+  left: 687px;
+  width: 81px;
+  height: 19px;
+  /* UI Properties */
+  color: var(---000000);
+  text-align: left;
+  // font-family: bold;
+  font-size: large;
+  font-weight: 700;
+  // font: normal 600 14px/18px Myriad Pro;
+  // font-weight: 40px;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+}
+
+.input-group-append {
+  top: 276px;
+  left: 851px;
+  width: 17px;
+  height: 17px;
+  background: var(---737373) 0% 0% no-repeat padding-box;
+  background: #737373 0% 0% no-repeat padding-box;
+  opacity: 1;
+}
+
+.pipeline-input {
+  position: relative;
+}
+
+.pipeline-search {
+  position: absolute;
+  top: 50%;
+  right: 10%;
+  cursor: pointer;
+  transform: translate(50%, -50%);
+  z-index: 10;
+}
+
+.pipeline-search:hover {
+  color: purple;
+}
+
+.copy-icon:active{
+  background-color: pink;
+}
+
+.icon{
+  cursor: pointer;
+}
+.aip-led-icon-black svg {
+  fill: black;
+}
+
+// .ng-star-inserted::ng-deep {
+
+//   overflow: hidden;
+//   text-overflow: ellipsis;
+//   white-space: nowrap;
+//   width: 9rem;
+//   display: block;
+// }
+// .ng-star-inserted::ng-deep:hover{
+//   white-space: unset;
+//   overflow-wrap: break-word;
+//   word-break: break-word;
+//   cursor: pointer;
+// }

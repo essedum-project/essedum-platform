@@ -1,0 +1,341 @@
+<!-- creation and view of plugins -->
+<div class="container-fluid backgroud-color" *ngIf="createFlag || view">
+    <div class="le-l-level1-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="le-l-level1-middle-col le-l-base-layout-center">
+                    <div class="align-items-center justify-content-between d-flex">
+                        <div class="selector-model-title-head d-flex  align-items-center">
+                            <span class="" style="cursor: pointer;">
+                                <i class="aip-led-icons icon x-24 back-icon" (click)="backTolist()"></i>
+                            </span>
+                            <span *ngIf="!view && !editplug" class="le-u-mar-l-8 le-u-header-xxl">Create Plugin</span>
+                            <span *ngIf="editplug" class="le-u-mar-l-8 le-u-header-xxl">Edit Plugin</span>
+                            <span *ngIf="view && !auth" class="le-u-mar-l-8 le-u-header-xxl">View Details:
+                                {{selectedModel.name}}</span>
+                            <span *ngIf="view && auth" class="le-u-mar-l-8 le-u-header-xxl">Edit Details:
+                                {{selectedModel.name}}</span>
+                        </div>
+                        <div *ngIf="view" class="selector-model-title-tail">
+                            <ul class="d-flex justify-content-between align-items-center py-2 px-4">
+                                <li *ngIf="basicReqTab == 'executionTab' || basicReqTab == 'environmentTab'">
+                                    <leds-tooltip *ngIf="authUpdate && auth" [tooltip]="'Save Config'"
+                                        [position]="tooltipPoition">
+                                        <i class="le-u-mar-r-16 aip-led-icons icon icon_save x-24"
+                                            (click)="updateConfig()"></i>
+                                    </leds-tooltip>
+                                </li>
+                                <li *ngIf="basicReqTab == 'nodesTab'">
+                                    <leds-tooltip *ngIf="auth && authAddNew" [tooltip]="newNode?'':'Add New Node'"
+                                        [position]="tooltipPoition">
+                                        <i class="le-u-mar-r-16 aip-led-icons icon x-24 "
+                                            [ngClass]="newNode?'':'icon-form'" (click)="addNewNode()"></i>
+                                    </leds-tooltip>
+                                </li>
+                                <!-- <li>
+                                    <leds-tooltip *ngIf="auth" [tooltip]="'Navigate to codeGeneration'"
+                                        [position]="tooltipPoition">
+                                        <i class="le-u-mar-r-16 aip-led-icons icon x-24 icon_Technology"
+                                            (click)="navigateToPipeline()"></i>
+                                    </leds-tooltip>
+                                </li> -->
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="le-l-level2-middle-ctr">
+                        <div class="le-l-level2-middle-col le-u-mar-b-24__mb">
+                            <leds-panel type="default" styleClass="" contentClass="">
+                                <div *ngIf="!view" class="le-u-mar-tb-16 le-u-pad-16">
+                                    <div class="row le-c-panel__content">
+                                        <div class="le-l-level2-middle-col le-u-mar-b-24__mb">
+                                            <div class="d-flex justify-content-between align-items-center px-4">
+                                                <div class="align-items-center d-flex">
+                                                    <h2 style="color:var(--base-color)">Details
+                                                    </h2>
+                                                </div>
+                                            </div>
+                                            <div class="le-u-pad-t-32 le-u-pad-lr-24">
+                                                <div class="row">
+                                                    <div class="col-lg-12 col-md-12 le-u-mar-b-16">
+                                                        <leds-input-field label="Plugin Name*"
+                                                            placeholder="Enter Name..."
+                                                            errorMessage="{required: 'This field is required',}"
+                                                            inputType="text" [disabled]="false" [required]="true"
+                                                            [(ngModel)]="plugin.name"></leds-input-field>
+                                                    </div>
+                                                    <!-- <div class="col-lg-12 col-md-12 le-u-mar-b-16">
+                                                        <leds-input-field label="Plugin Type*"
+                                                            placeholder="Enter Type..."
+                                                            errorMessage="{required: 'This field is required',}"
+                                                            inputType="text" [disabled]="false" [required]="true"
+                                                            [(ngModel)]="plugin.type"></leds-input-field>
+                                                    </div> -->
+                                                    <!-- <div class="col-lg-12 col-md-12 le-u-mar-b-16">
+                                                        <leds-select label="Editortype" hint="Select Editor type"
+                                                            [options]="editorlist" [disabled]="false"
+                                                            [(ngModel)]="plugin.editortype"></leds-select>
+                                                    </div> -->
+                                                    <div class="d-flex justify-content-end align-items-center">
+                                                        <leds-button *ngIf="authCreate && !editplug"
+                                                            nameText="primaryButton" idText="primaryButton"
+                                                            [disabled]="false" buttonType="button" designType="primary"
+                                                            (click)="savePlugin()">Save</leds-button>
+                                                        <leds-button *ngIf="authCreate && editplug"
+                                                            nameText="primaryButton" idText="primaryButton"
+                                                            [disabled]="false" buttonType="button" designType="primary"
+                                                            (click)="updatePlugin()">Update</leds-button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div *ngIf="view" ledsTabGroup class="le-u-mar-t-8 mx-4 px-2 my-4 mt-0"
+                                    style="background-color: white;">
+                                    <mat-tab-group disableRipple (selectedIndexChange)="basicReqTabChange($event)">
+                                        <mat-tab class="le-u-header-xl" label="Node View">
+                                            <ng-template mat-tab-label>Node View</ng-template>
+                                        </mat-tab>
+                                        <mat-tab class="le-u-header-xl" label="Execution">
+                                            <ng-template mat-tab-label>Execution</ng-template>
+                                        </mat-tab>
+                                        <mat-tab class="le-u-header-xl" label="Enviroment">
+                                            <ng-template mat-tab-label>Enviroment</ng-template>
+                                        </mat-tab>
+                                    </mat-tab-group>
+                                    <div *ngIf="basicReqTab == 'nodesTab'"
+                                        style="display: flex !important;padding: 0.5rem;">
+                                        <div class="col-2 no-padd pipeline-filters aip-scroll-hover"
+                                            style="height:65vh; padding: 0.25rem; border:2px groove; box-shadow:5px #888888; border-radius: 10px;">
+                                            <div class="search-node le-u-pad-8" style="width:100%">
+                                                <div class="input-group">
+                                                    <input id="filter"
+                                                        class="form-control selector-773-28 plugin-input" #filter=""
+                                                        (keyup)="tree.treeModel.filterNodes(filter.value)"
+                                                        placeholder="Search Nodes" />
+                                                    <div class="plugin-search">
+                                                        <i class="fa fa-search"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <leds-tree>
+                                                <tree-root #tree="" [focused]="true" [options]="optionsNewView"
+                                                    [nodes]="nodes">
+                                                </tree-root>
+                                            </leds-tree>
+                                            <!-- <leds-tree>
+                                                <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" ledsTree>
+                                                    <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle treeMenu>
+                                                        <a treeNode href="javascript:void(0);" (click)="selectedTreeitem($event)">
+                                                            <button mat-icon-button disabled treeButton></button>
+                                                            {{node.name}}
+                                                        </a>
+                                                    </mat-tree-node>
+                                            
+                                                    <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+                                                        <ul class="le-u-no-pad-l">
+                                                            <li class="{{treeControl.isExpanded(node) ? 'dsa_Treeexpanded' : 'dsa_Treecollapsed'}}">
+                                                                <div treeNode>
+                                                                    <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'toggle ' + node.name">
+                                                                        <i aria-hidden="true"
+                                                                            class="icon iconinline x-24  {{treeControl.isExpanded(node) ? 'down-arw-icon' : 'next-icon'}}"></i>
+                                                                    </button>
+                                                                    {{node.name}}
+                                                                </div>
+                                                                <ul [class.le-c-tree--invisible]="!treeControl.isExpanded(node)" class="le-c-tree__inner-item">
+                                                                    <ng-container matTreeNodeOutlet></ng-container>
+                                                                </ul>
+                                                            </li>
+                                                        </ul>
+                                                    </mat-nested-tree-node>
+                                                </mat-tree>
+                                            </leds-tree> -->
+                                        </div>
+                                        <div class="col-10" *ngIf="showView">
+                                            <app-plugin-view [data]="passData" [createNew]="newNode" [auth]="auth"
+                                                (plug)="onPluginView($event)"></app-plugin-view>
+                                        </div>
+                                    </div>
+                                    <div *ngIf="basicReqTab == 'executionTab'" class="config-container">
+                                        <app-enl-code-editor [script]="script" id="ele" [lang]="lang"
+                                            [langList]="langList" [langEnable]="langEnable"
+                                            (scriptChange)="onScriptChange($event)">
+                                        </app-enl-code-editor>
+                                    </div>
+                                    <div *ngIf="basicReqTab == 'environmentTab'" class="config-container">
+                                        <app-app-config [configData]="dynamicParamsArray"
+                                            (configDataChange)="onConfigDataChange($event)"></app-app-config>
+                                    </div>
+                                </div>
+                            </leds-panel>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Plugin list view page -->
+<div class="le-l-mainwrapper aip-top" *ngIf="!createFlag">
+    <div class="clearfix le-l-bodywrapper aip-tranparent-backgroud js-bodywrapper" id="mainCtr">
+        <div class="">
+            <div class="col-sm-12 col-md-12 col-lg-12 aip-container-body" style="margin-left: 150px;" id="mainrightCnt">
+                <div class="le-l-level1-wrapper">
+                    <!-- Header -->
+                    <div class="aip-header le-u-pad-lr-32 le-u-pad-t-8">
+                        <div class=" col-sm-12 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-center">
+                            <div class="le-u-pad-24">
+                                <h3 class="le-u-header-xl">Plugins</h3>
+                            </div>
+                        </div>
+                        <div
+                            class="col-10 offset-1 offset-xs-1 offset-sm-1 offset-md-0 col-sm-6 col-md-6 col-lg-7 col-xl-6 aip-panel aip-panel-shadow d-flex align-items-center">
+                            <input type="text" name="" id="" name="search" class="aip-panel-input" autocomplete="off"
+                                placeholder="Start searching" [(ngModel)]="filter" (keyup)="filterz()">
+                            <i class="aip-led-icons icon x-24 search-icon"></i>
+                        </div>
+                        <div class="d-flex justify-content-center col-sm-5 col-md-6 col-lg-5 col-xl-4 aip-header-icon">
+                            <div class="">
+                                <leds-slide-toggle [checked]="orgToggle" (change)="onChange($event)"
+                                    [labelPosition]="'before'" [disableRipple]="'true'">
+                                    Organisation plugin only
+                                </leds-slide-toggle>
+                            </div>
+                            <div class="">
+                                <div class="le-u-pad-24 aip-icon_text">
+                                    <leds-button *ngIf="authCreate" nameText='iconButton' idText='iconButton'
+                                        [disabled]='false' buttonType='button' designType='icon'>
+                                        <span class="le-c-btn--icon__icon">
+                                            <i class="aip-led-icons icon purple x-16 icon-add"
+                                                (click)="createPlugin()"></i>
+                                        </span>
+                                    </leds-button>
+                                </div>
+                            </div>
+                            <div class="">
+                                <leds-button nameText='iconButton' idText='iconButton' [disabled]='false'
+                                    buttonType='button' designType='icon'>
+                                    <span class="le-c-btn--icon__icon">
+                                        <i class="aip-led-icons icon x-24 icon_Refresh" (click)="ngOnInit()"></i>
+                                    </span>
+                                </leds-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="le-c-card__action-ul aip-card-container">
+                    <!-- CARD -->
+                    <div class="col-md-8 col-lg-6 col-xl-5" style='min-width: -webkit-fill-available;padding: 0px;'
+                        *ngFor="let model of filteredPlugin| slice: (pageNumber-1) * pageSize : (pageNumber-1) * pageSize + pageSize">
+                        <leds-card designType='simple' [actionsOnHover]='true'
+                            style="padding:0px !important; height: 163px; display: grid;">
+                            <div class="le-u-header-sm le-u-text-primary-80 le-u-mar-b-8" style="font-size:10px;">
+                                {{model.editortype | uppercase}}</div>
+                            <mat-card-header>
+                                <mat-card-title class="le-c-card__container clearfix">
+                                    <div class="le-c-card__container-left w-100">
+                                        <h2 class="le-u-header-xl aip-fullname-card le-u-ellipsis"
+                                            style="line-height: 2rem;">{{model.name
+                                            | titlecase}}</h2>
+                                    </div>
+
+                                </mat-card-title>
+                            </mat-card-header>
+                            <mat-card-content class="le-u-no-mar-b" style="color: #737373;">
+                                <p class="le-u-body-md le-u-text-neutral-80 le-u-line-2 aip-desc-ellipsis">
+                                    {{model.type}}
+                                </p>
+                            </mat-card-content>
+                            <mat-card-actions class="le-c-card__action-hover d-flex justify-content-between">
+                                <leds-button nameText="textButton" idText="textButton" [disabled]="false"
+                                    buttonType="button" designType="text" styleClass=" DSA_wb_Btn_small"
+                                    (click)="openPlugin(model,false)"><span>View
+                                        Details</span></leds-button>
+                                <leds-overflow *ngIf="authUpdate || authDelete">
+                                    <div ngbDropdown
+                                        class="aip-led-icons d-inline-block le-u-mar-r-8 le-u-v-mid float-end le-c-card__action-ul">
+                                        <a href="javascript:void(0);" id="OverflowMenu_dd" ngbDropdownToggle
+                                            (click)="clickactive($event);" aria-label="menu icon">
+                                            <i aria-hidden="true" class="icon x-24 v-menu-icon"></i>
+                                        </a>
+                                        <div ngbDropdownMenu aria-labelledby="OverflowMenu_dd"
+                                            style="display: grid;justify-content: center;">
+                                            <ul overflowList class="float-end le-u-mar-t-8  le-c-card__action-ul"
+                                                style="display: flex;flex-direction: column;">
+                                                <li overflowListItem>
+                                                    <span class="le-u-body-md aip-cursor" *ngIf="authUpdate"
+                                                        (click)="editPlugin(model)">Edit Plugin</span>
+                                                </li>
+                                                <li overflowListItem>
+                                                    <span class="le-u-body-md  aip-cursor" *ngIf="authUpdate"
+                                                        (click)="openPlugin(model,true)">Edit Nodes</span>
+                                                </li>
+                                                <li overflowListItem>
+                                                    <span class="le-u-body-md aip-cursor" *ngIf="authDelete"
+                                                        (click)="delete(model)">Delete Plugin</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </leds-overflow>
+                            </mat-card-actions>
+                        </leds-card>
+                    </div>
+                </div>
+                <div *ngIf="filteredPlugin?.length<=0" class="d-flex justify-content-center le-u-pad-32">
+                    <p>No Records Found</p>
+                </div>
+                <div
+                    class="inbox-table-footer table-paginator flex-row flex-space-between standard-margin bottom-padding-20">
+                    <!-- Pagination  -->
+                    <div class="showing-entries d-flex justify-content-end my-3">
+                        <span class="grey-color font-size-12">Showing </span>
+                        &nbsp;&nbsp;
+                        <span class="black-color font-weight-600">
+                            {{ ((pageNumber - 1) * pageSize) + 1 }} -
+                            {{ (((pageNumber - 1) * pageSize) + pageSize) < noOfItems ? ((pageNumber - 1) * pageSize) +
+                                pageSize : noOfItems }} of {{noOfItems}} </span>
+                                &nbsp;&nbsp;
+                                <span class="grey-color font-size-12">entries </span>
+                    </div>
+                    <div class="paginator-buttons d-flex w-60  flex-row" style="justify-content:flex-end">
+                        <div class="page-input go-to-input box-shadow standard-padding">
+                            <span class="grey-color">Go to: </span>
+                            <input class="right-margin" type="number" min="1" [max]="noOfPages"
+                                (change)="changePage(pageNumberInput)" [(ngModel)]="pageNumberInput" />
+                        </div>
+                        <div class="mx-4">
+                            <span class="">Items per page</span>
+                            <select type="number" [(ngModel)]="pageSize" (change)="optionChange($event)">
+                                <option *ngFor="let p of itemsPerPage" [ngValue]="p">{{p}}</option>
+                            </select>
+
+                        </div>
+                        <div class="pages-details d-flex">
+                            <div class="previous-page">
+                                <button class="standard-padding table-button font-weight-600"
+                                    [disabled]="pageNumber == 1" (click)="pageNumberInput=null;prevPage()">&lt;</button>
+                            </div>
+                            <div class="pages">
+                                <button class="standard-padding table-button font-weight-600"
+                                    *ngFor="let i of pageArr | slice:startIndex:endIndex"
+                                    (click)="pageNumberInput=null;changePage(i+1)"
+                                    [class.selected-page]="(i + 1) == pageNumber" [ngStyle]="selectedButton(i+1)">
+                                    {{i + 1}}
+                                </button>
+                            </div>
+                            <div class="next-page">
+                                <button class="standard-padding table-button font-weight-600"
+                                    [disabled]="pageNumber == noOfPages"
+                                    (click)="pageNumberInput=null;nextPage()">&gt;</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

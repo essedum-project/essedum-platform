@@ -1,0 +1,284 @@
+<div class="le-u-pad-16">
+
+
+<div ledsTabGroup [type]="type" [headerBg]="headerBg">
+    <mat-tab-group disableRipple>
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <h2>Copy Pipelines</h2>
+            </ng-template>
+            <div class="k1">
+                <!-- <leds-panel type="default" styleClass="min-width: 20px;" contentClass="">
+                            <div class="k2" style="overflow: hidden; ">
+                                <span class="selector-758-5 " style="font-size: 17px;font-weight: 600;">Copy
+                                    Pipelines</span>
+                                <span style="float:right" class="selector-758-6">
+                                    <leds-button class="" nameText="primaryButton" idText="primaryButton" [disabled]="false"
+                                        buttonType="button" designType="primary" (click)="createCopyPipelines()">
+                                        Create Copy Pipelines </leds-button>
+                                </span>
+                            </div>
+                        </leds-panel> -->
+                <div class="row">
+                    <div class="col-md-8 col-lg-6 col-xl-5" style="min-width: 100%">
+                        <leds-card designType="simple">
+                            <mat-card-header>
+                                <mat-card-title>
+                                    <h2 class="le-u-header-xl le-u-ellipsis" style="display: inline;">Copy
+                                        Pipelines
+                                    </h2>
+                                    <span style="float:right" class="selector-758-6">
+                                        <leds-button class="" nameText="primaryButton" idText="primaryButton"
+                                            [disabled]="false" *ngIf="!create" buttonType="button" designType="primary"
+                                            (click)="create=true">
+                                            Create Copy Pipelines </leds-button>
+                                    </span>
+
+                                </mat-card-title>
+
+                            </mat-card-header>
+                        </leds-card>
+
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="create==false">
+                <app-jobs [internalJob]="'CopyPipeliens'"></app-jobs>
+            </div>
+            <div class="k1" style="margin-top: 35px;">
+                <div class="row" *ngIf="create">
+                    <div class="col-md-8 col-lg-6 col-xl-5" style="min-width: 100%">
+                        <leds-card designType="mediaGreyBgGallery">
+                            <mat-card-header>
+                                <mat-card-title class="k3" style="margin-top: 20px;">
+                                    <h2 class="le-u-header-xxl le-u-ellipsis">Create Copy Pipelines</h2>
+                                </mat-card-title>
+
+                            </mat-card-header>
+                            <mat-card-content class="selector-758-15">
+                                <div class="row selector-758-16">
+
+                                    <!-- <leds-select label="Select the Project" [options]="pp" [value]="project"
+                                        (selectChange)="OnProjectChange($event)" [disabled]="false"></leds-select> -->
+                                    <leds-autocomplete [options]="ppp" (panelOptionSelected)="OnProjectChange($event)"
+                                        label="Select the Project" [value]="project" errorMessage="{
+                                              required: 'This field is required',
+                                            }" [disabled]="false" [required]="false" [autoActiveFirstOption]="false"
+                                        [disableRipple]="false"></leds-autocomplete>
+
+                                    <leds-chip-input [options]="pipelineAlias" placeholder="Select multiple Pipelines"
+                                        label="Select Pipelines" *ngIf="!check" [value]="selectedPipelines10"
+                                        [disabled]="false" [required]="false" [removable]="true" [addOnBlur]="true"
+                                        [hideIcon]="true"></leds-chip-input>
+
+                                    <!-- <leds-select [options]="pipelineAlias2" label="Select Pipelines" *ngIf="!check"
+                                        [formControl]="selectedPipelines"
+                                        errorMessage="{ required: 'This field is required', }"
+                                        hint="Select multiple Pipelines" [required]="false" [disabled]="false"
+                                        designType="default" [isMultiple]="true" [selected]="selected"
+                                        [value]="pipeline"></leds-select> -->
+
+                                    <leds-checkbox [checked]="checked" (change)="editPipelines()"
+                                        style="margin-top:19px;">
+                                        Select All Pipelines
+                                    </leds-checkbox>
+                                </div>
+
+                            </mat-card-content>
+
+                            <mat-card-actions style="float: right" class="selector-758-29">
+                                <!-- <button mat-raised-button="" style="background-color:white;" type="submit" (click)="create=false" class="selector-758-30">Cancel</button> -->
+                                <leds-button nameText="primaryButton" idText="primaryButton" [disabled]="false"
+                                    buttonType="button" designType="primary" (click)="cancel()">
+                                    Cancel</leds-button>
+
+                                <!-- <button mat-raised-button="" style="background-color: darkblue;color: white; position: relative; left: 1em;" type="submit" (click)="onSave()" class="selector-758-31">Save</button> -->
+                                <leds-button nameText="primaryButton" idText="primaryButton" [disabled]="false"
+                                    buttonType="button" designType="primary" (click)="onSave()">
+                                    Save</leds-button>
+                            </mat-card-actions>
+
+
+
+
+                        </leds-card>
+                    </div>
+                </div>
+            </div>
+
+
+        </mat-tab>
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <h2>Export Pipelines</h2>
+            </ng-template>
+            <div class="k1">
+                <div class="le-l-level2-middle-ctr">
+                    <div class="le-l-level2-middle-col le-u-mar-b-24__mb">
+                        <leds-panel type="default" styleClass="" contentClass="">
+                            <div class="le-c-panel__content le-u-mar-tb-16 le-u-pad-8"
+                                style="margin-bottom: -74px !important;">
+                                <h2 class="le-u-header-xxl">Export Pipelines</h2>
+                            </div>
+                            <div class="tab_content le-u-pad-tb-16" id="tabContent_0">
+                                <div class="le-c-panel__content  le-u-pad-16 le-u-pad-b-32">
+                                    <!-- <leds-select label="Select the Project" [options]="pp1"
+                                        (selectChange)="OnProjectChange1($event)" [disabled]="false"></leds-select> -->
+                                    <leds-autocomplete [options]="ppp1" (panelOptionSelected)="OnProjectChange1($event)"
+                                        label="Select the Project" [value]="project" errorMessage="{
+                                              required: 'This field is required',
+                                            }" [disabled]="false" [required]="false" [autoActiveFirstOption]="false"
+                                        [disableRipple]="false"></leds-autocomplete>
+                                        <leds-chip-input [options]="pipelineAlias1" placeholder="Select multiple Pipelines"
+                                        label="Select Pipelines" *ngIf="!check1" [value]="selectedPipelines20"
+                                        [disabled]="false" [required]="false" [removable]="true" [addOnBlur]="true"
+                                        [hideIcon]="true"></leds-chip-input>
+
+
+                                    <!-- <leds-select [options]="pipelineAlias3" label="Select Pipelines" *ngIf="!check1"
+                                        [formControl]="selectedPipelines1"
+                                        errorMessage="{ required: 'This field is required', }"
+                                        hint="Select multiple Pipelines" [required]="false" [disabled]="false"
+                                        designType="default" [isMultiple]="true"></leds-select> -->
+
+
+                                    <div class="le-u-pad-t-16">
+                                        <leds-checkbox (change)="editPipelines1()" style="margin-top:19px;">
+                                            Select All Pipelines
+                                        </leds-checkbox>
+                                    </div>
+                                    <div class="d-flex m-2  le-u-pad-lr-24" style="float: right;">
+                                        <leds-button nameText="secondaryButton" idText="secondaryButton"
+                                            [disabled]="false" buttonType="button" designType="primary"
+                                            (click)="onExport()">
+                                            EXPORT
+                                        </leds-button>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </leds-panel>
+
+                    </div>
+                </div>
+            </div>
+        </mat-tab>
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <h2>Import Pipelines</h2>
+            </ng-template>
+            <div>
+                <div class="k1">
+                    <div class="row">
+                        <div class="col-md-8 col-lg-6 col-xl-5" style="min-width: 100%">
+                            <leds-card designType="simple" *ngIf="!import">
+                                <mat-card-header>
+                                    <mat-card-title>
+
+                                        <span style="float:right" class="selector-758-6">
+                                            <leds-button class="" nameText="primaryButton" idText="primaryButton"
+                                                (click)="import=true" [disabled]="false" buttonType="button"
+                                                designType="primary">Import Pipelines </leds-button>
+                                        </span>
+
+                                    </mat-card-title>
+
+                                </mat-card-header>
+                            </leds-card>
+
+                        </div>
+                    </div>
+
+
+
+                </div>
+                <div *ngIf="import==false">
+                    <!-- <app-jobs-log [componentType]="'copy'"></app-jobs-log> -->
+                    <app-jobs [internalJob]="'ImportPipelines'"></app-jobs>
+                </div>
+                <div *ngIf="import" class="le-u-mar-32 le-u-no-mar-t le-u-pad-b-32">
+                    <!-- <div style="margin: 2%; float: center;">
+                        Upload File : <input type="file" id='file' accept=".json" (change)="addfile($event)" placeholder="Upload file" />
+                    </div> -->
+                    <div class="le-u-header-lg d-flex align-items-center">
+                        <mat-label>Upload File</mat-label>
+                        <label class="exp-projlabel ">
+                            <input id="file" (change)="addfile($event)" style="display: none;" accept=".json"
+                                ng2FileSelect="" name="adOrgUpldNm" type="file" [uploader]="uploader"
+                                placeholder="file" />
+                            <p class="DSA_wb_Btn_normal">
+                                <i style="margin-left: 2vh;" class="icon x-24 upload-icon" aria-hidden="true"></i>
+                                <!-- <span style="color: gray;" class="selector-724-200" style="margin: 1.5vh;">Browse</span> -->
+                            </p>
+                        </label>
+                    </div>
+                    <div *ngIf="tableData.length > 0">
+                        <mat-card style="width: 100%;margin: 24px 0px 0px 0px;">
+                            <leds-data-grid>
+                                <table dataGridTable clearfix class=" le-u-mar-t-16">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-md-4" scope="col">Pipeline ALias</th>
+                                            <th class="col-md-3" scope="col">Type</th>
+                                            <th class="col-md-5" scope="col">Configure Datasources</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let tag of tableData">
+                                            <td>{{tag.name}}</td>
+                                            <td>{{tag.type}}</td>
+                                            <td class="configure-datasources">
+                                                <span *ngFor="let i of tag.datasource" class="d-flex">
+
+                                                    <!-- <button mat-raised-button="" style="margin: 0.5em;" color="gray"
+                                                        type="submit" (click)="saveDatasource(i)">{{i.alias}}</button> -->
+
+                                                    <!-- <leds-button nameText="miniSecondary" idText="miniSecondary" 
+                                                            [disabled]="false" buttonType="button" (click)="saveDatasource(i)"
+                                                            designType="miniSecondary">
+                                                            {{i.alias}}
+                                                        </leds-button>  -->
+                                                    <!-- <leds-button nameText="editButton"
+                                                            idText="editButton"
+                                                            buttonType="button" designType="icon" 
+                                                            (click)="saveDatasource(i)">
+                                                            
+                                                            <i aria-hidden="true" class="icon x-24 icon-form"
+                                                                style="visibility: visible;">{{i.alias}} </i>
+                                                            
+                                                            </leds-button> -->
+
+
+
+                                                    <div class="le-u-pad-8 d-flex le-u-bg-neutral-50 DSA_wb_Btn_normal aip-cursor"
+                                                        (click)="saveDatasource(i)" style="border-radius: 1rem;">
+                                                        {{i.alias}} </div>
+                                                    &nbsp;
+                                                </span>
+                                            </td>
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </leds-data-grid>
+                        </mat-card>
+                        <div class="d-flex justify-content-end le-u-mar-16">
+                            <!-- <button mat-raised-button="" type="submit" (click)="save()" class="selector-758-56">Import</button> -->
+                            <leds-button class="" nameText="primaryButton" idText="primaryButton" [disabled]="false"
+                                (click)="save()" buttonType="submit" designType="primary">Import </leds-button>
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+            </div>
+        </mat-tab>
+    </mat-tab-group>
+</div>
+
+</div>

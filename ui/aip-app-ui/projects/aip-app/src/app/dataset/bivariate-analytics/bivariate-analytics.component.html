@@ -1,0 +1,113 @@
+<div class="dataname-wrapper mb-2 pb-2 le-u-pad-l-16">
+    <div class="d-flex justify-content-between align-items-center" style="border-bottom: 2px solid #f5f1f1;">
+        <span class="text-box">DATASET NAME: {{alias}}</span>
+        <div style="display: flex;">
+            <leds-tooltip [tooltip]="'Refresh'" [position]="'above'">
+                <leds-button nameText="logButton" idText="logButton" buttonType="button" designType="icon">
+                    <i class="icon x-24 icon_Refresh" style="visibility: visible;" (click)="refresh()"></i>
+                </leds-button>
+            </leds-tooltip>
+        </div>
+    </div>
+</div>
+<div *ngIf="!allAttributes">
+    <p-progressSpinner></p-progressSpinner>
+</div>
+<div class="container">
+    <div class="sidebar">
+        <div>
+            <div #app class="side-bar-items" style="margin-top: -16px;max-height: 80vh;overflow: auto;">
+                <leds-accordion designType="3D" [hideToggle]="false" [multi]="false">
+                    <mat-expansion-panel [expanded]="false" *ngFor="let attr of allAttributes; let i = index">
+                        <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+                            <mat-panel-title>
+                                <h4 class="le-u-header-md">{{ attr.attributeType }}</h4>
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="le-u-mar-16"
+                            [ngStyle]="{'height':(attr.attributes.length>0)?'max-content':'0rem','overflow':(attr.attributes.length>0)?'auto':'visible'}">
+                            <div class="drag-wrapper" *ngFor="let item of attr.attributes; let j = index">
+                                <div class="attribute-list-drag" pDraggable="attri"
+                                    (onDragStart)="attributeDragEnd(item, attr.attributeType)" dragEffect="copy">
+                                    {{ item.attributeName }}
+                                </div>
+                            </div>
+                        </div>
+                    </mat-expansion-panel>
+                </leds-accordion>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="mega-menu" *ngIf="totalAttributes === 2">
+            <p-menubar [model]="plotsMenuItems"></p-menubar>
+        </div>
+        <div class="mega-menu" *ngIf="totalAttributes >= 3">
+            <p-menubar [model]="plotMenuItems"></p-menubar>
+        </div>
+        <!--<div *ngIf="nodeTextBox" class="p-inputgroup">
+            <span class="p-float-label">
+                <input type="text" pInputText [(ngModel)]="threshold" pKeyFilter="pnum" id="open-threshold"
+                    (keyup)="thresholdValidation()">
+                <label for="open-threshold">{{biVarLbls.threshold}}</label>
+            </span>
+            <button pButton type="button" icon="pi pi-check" (click)="addThreshold()"
+                [disabled]="invalidThreshold" class="p-button-warn"></button>
+            <span class="threshold-error"
+                *ngIf="threshold && invalidThreshold === true">{{thresholdInvalidErrMsg}}</span>
+        </div>-->
+        <div ledsTabGroup class="aip-height-tab le-c-tab le-c-tab--secondary le-c-tab--white aip-desc le-u-mar-tb-24 aip-panel-shadow">
+            <mat-tab-group disableRipple (selectedIndexChange)="basicReqTabChange($event)">
+                <mat-tab class="le-u-header-xl" label="Plots">
+                    <ng-template mat-tab-label>Plots</ng-template>
+                </mat-tab>
+                <mat-tab class="le-u-header-xl" label="Details">
+                    <ng-template mat-tab-label>Details</ng-template>
+                </mat-tab>
+            </mat-tab-group>
+            <div *ngIf="basicReqTab == 'plotsTab'">
+                <div class="tab_content" id="tabContent_0">
+                    <div class="row" style="margin-left: -7px;">
+                        <div class="col-md-12" [ngStyle]="toggler(isExpanded)" (onDrop)="attributeDrop()" pDroppable="attri"
+                            *ngIf="allColumnsSelected.length > 0">
+                            <leds-card class="chart-area">
+                                <iframe name="chart-frame" #iframe class="chart-frame" width="100%" height="98%"
+                                    [src]="sanitizedHtml | safe:'resourceUrl'" (load)="frameLoaded()"></iframe>
+                            </leds-card>
+                        </div>
+                        <div class="col-md-12" [ngStyle]="toggler(isExpanded)" (onDrop)="attributeDrop()" pDroppable="attri"
+                            *ngIf="allColumnsSelected.length === 0">
+                            {{chartPlaceholder}}
+                            <leds-card class="chart-area"></leds-card>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="basicReqTab == 'detailsTab'">
+                <div class="table-div metrics-card" (onDrop)="attributeDrop()" pDroppable="attri" dropEffect="copy">
+                    <div *ngIf="displayTableSpinner">
+                        <p-progressSpinner></p-progressSpinner>
+                    </div>
+                    <p-table id="table-data" [scrollable]="true" scrollHeight="calc(100vh - 295px)"
+                             [style]="{'width':'100%','overflow':'auto'}" [responsive]="true" [value]="bivariateTableData"
+                             *ngIf="bivariateTableData.length > 0 && displayTabularView">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th class="attr-col">{{biVarLbls.attributeCombination}}</th>
+                                <th class="value-col">{{biVarLbls.correlationValue}}</th>
+                                <th class="value-col">{{biVarLbls.correlationStatus}}</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-detail>
+                            <tr>
+                                <td class="attr-col">{{ detail.attribute }}</td>
+                                <td class="value-col">{{ detail.value }}</td>
+                                <td class="status-col">{{ detail.status }}</td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

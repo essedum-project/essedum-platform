@@ -1,0 +1,29 @@
+.custom-hint {
+  color: black;
+  font-size: 12px;
+  padding-bottom: 5px;
+}
+
+.custom-hint-or-error {
+  font-size: 12px;
+  padding-bottom: 5px;
+}
+::ng-deep .jsoneditor{
+
+    border: thin solid #8626C3;
+  
+  }
+  
+  ::ng-deep .jsoneditor-menu {
+  
+    background: #8626C3;
+   border-bottom: 1px solid #8626C3;
+  }
+
+  ::ng-deep .mat-mdc-floating-label {
+    line-height: 2.5rem !important;
+}
+
+::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+}

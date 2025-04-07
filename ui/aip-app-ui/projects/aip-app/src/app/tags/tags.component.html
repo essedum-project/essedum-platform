@@ -1,0 +1,38 @@
+<div class="mx-3 my-4" style="height: 50vh;">
+    <div class="d-flex justify-content-end">
+    <button
+    type="button"
+    class="btn-close"
+    aria-label="Close"
+    (click)="closeModal()"
+  >
+    <i class="icon x-16 close-icon"></i>
+  </button>
+</div>
+    <div style="overflow-y:overlay;height:80%;">
+        <div class="mb-4" *ngFor="let cat of category">
+            <div class="flex items-baseline mx-5 mb-3">
+                <h5 class="font-medium le-u-header-xl"><b>{{cat | titlecase}}</b></h5>
+            </div>
+            <div class="flex flex-wrap">
+                <a class="tagbrdr" style="height: fit-content;"
+                    [ngStyle]="{'background-color': (inc==selectedTag || tagStatus[inc.category+' - '+inc.label]) ? 'lightgrey' : 'white'}"
+                    *ngFor="let inc of tags[cat]">
+                    <span style="font-size:14px;cursor:pointer" (click)="filterByTag(inc)">{{inc.label}}
+                    </span> </a>&nbsp;&nbsp;
+                <a style="margin-top:5% " *ngIf="tagsBackup[cat]?.length>10" (click)="showMore(cat)"
+                    href="javascript:void(0)">
+                    <!-- <h6 style="font: size 8px;">{{clickedCat==cat? (expand ?'Show Less': 'Show More'):'Show More'}}</h6> -->
+                    <!-- <span [ngClass]="clickedCat==cat? (expand ?'fa fa-minus-square': 'fa fa-plus-square'):'fa fa-plus-square' "></span> -->
+                    <span [ngClass]="!catStatus[cat]?'fa fa-plus-square': 'fa fa-minus-square'"></span>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-end">
+        <leds-button designType="miniPrimary" class="le-u-mar-r-8" buttonType="button" (click)=" dismiss()" (click)="updateTag()">
+            Add Tags to {{ componentType =='pipelines' ? 'Pipeline' : (componentType =='model' ? 'Model' : 'App')}}
+        </leds-button>
+    </div>
+
+</div>

@@ -1,0 +1,17 @@
+i.icon{
+    font-size: 24px; 
+ }
+ .usm_table th {
+    background-color: inherit ;
+    text-align: left;
+
+}
+
+.usm_table td {
+    background-color: inherit ;
+    text-align: left;
+}
+
+.mat-progress-bar.mat-accent .mat-progress-bar-buffer {
+    background-color: #B71C1C !important;
+}

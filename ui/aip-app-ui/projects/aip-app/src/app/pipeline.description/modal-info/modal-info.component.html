@@ -1,0 +1,39 @@
+<div style="width: 100%;height: 100%;" class="selector-781-1">
+        <div class="d-flex justify-content-between align-items-center px-4 le-u-pad-t-16">
+            <div class="align-items-center d-flex">
+                <h2 style="color:var(--base-color)">Details</h2>
+            </div>
+            <div class="d-flex justify-content-end">
+                <button type="button" class="btn-close" aria-label="Close" (click)="close()">
+                    <i class="icon x-16 close-icon"></i>
+                </button>
+            </div>
+        </div>  
+        <br class="selector-781-5">
+        <div class="data-container">
+            <div *ngIf="dataset.views">
+                <div *ngIf="datasetData">
+                    <app-viewer-pdf *ngIf="views=='Pdf View'" [pdfFile]="datasetData"></app-viewer-pdf>
+                    <app-viewer-image *ngIf="views == 'Image View'" [ResponseList]="datasetData"></app-viewer-image>
+                    <lib-viewer-audio *ngIf="views == 'Audio View'" [ResponseList]="datasetData"></lib-viewer-audio>
+                    <lib-viewer-zip *ngIf="views == 'Zip View'" [ResponseList]="datasetData"></lib-viewer-zip>
+                    <app-dataset-view [data]="selectedDataset" *ngIf="views=='Json View'"></app-dataset-view>
+                    <app-dataset-table-view [datasetname]="selectedDatasetName" [pipelineData]="pipelineData"
+                        *ngIf="views=='Table View'"></app-dataset-table-view>
+                    <leds-card *ngIf="views == 'Text View'" designType="simple">
+                        <pre class="table-view"> {{ datasetData }} </pre>
+                    </leds-card>
+                </div>
+            </div>
+            <div *ngIf="!dataset.views">
+                <ng-container *ngIf="tableviews !== ''">
+                    <app-dataset-view [data]="selectedDataset" *ngIf="tableviews === 'no'"></app-dataset-view>
+                    <app-dataset-table-view [datasetname]="selectedDatasetName"
+                        *ngIf="tableviews === 'yes' "></app-dataset-table-view>
+                </ng-container>
+            </div>
+        </div>
+    <!-- <lib-viewer-zip *ngIf="flag" [ResponseList]="dataList"></lib-viewer-zip> -->
+
+    <!-- </div> -->
+</div>

@@ -1,0 +1,234 @@
+.padd {
+    padding-right: 1vw !important;
+    padding-top: 1vw !important;
+    padding-left: 1vw !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+::ng-deep .mdc-snackbar__surface{
+  text-align: center !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  border-radius: 2rem !important;
+  background-color: rgb(177, 177, 177) !important;
+}
+
+.horitag {
+    padding-right: 1vw;
+    padding-left: 1vw;
+    padding-top: 1vh;
+}
+
+
+/* .rowheight{
+    height: 4vh;
+  } */
+
+.custompaginator {
+    text-align: center;
+    padding-bottom: 1rem;
+}
+
+.search-hero {
+    max-width: 500px;
+    /* padding-bottom: 50px; */
+    margin: auto;
+    margin-right: 0px;
+}
+
+.form-control {
+    /* box-shadow: 0 10px 40px 0 #B0C1D9; */
+    height: 50%;
+    padding: 2px;
+}
+
+.form-control::placeholder {
+    font-family: var(--font-type) !important;
+}
+.button {
+    transition-duration: 0.4s;
+  }
+  
+  .button:hover {
+    background-color: purple;
+    color: white;
+    border-radius: 50%;
+  }
+
+  .overlay {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0, 0.9);
+    overflow-x: hidden;
+    transition: 0.5s;
+  }
+  
+  .overlay-content {
+    position: relative;
+    top: 25%;
+    width: 100%;
+    text-align: center;
+    margin-top: 30px;
+  }
+  
+  .overlay a {
+    padding: 8px;
+    text-decoration: none;
+    font-size: 36px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+  }
+  
+  .overlay a:hover, .overlay a:focus {
+    color: #f1f1f1;
+  }
+  
+  .overlay .closebtn {
+    position: absolute;
+    top: 20px;
+    right: 45px;
+    font-size: 60px;
+  }
+
+  @media screen and (max-height: 450px) {
+    .overlay a {font-size: 20px}
+    .overlay .closebtn {
+    font-size: 40px;
+    top: 15px;
+    right: 35px;
+    }
+  }.scene {
+    width: 200px;
+    height: 260px;
+    perspective: 600px;
+  }
+  .card {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transition: transform 1s;
+    transform-style: preserve-3d;
+  }
+  .tp-wrapper {
+    -webkit-perspective: 800px;
+            perspective: 800px;
+  }
+  
+  .tp-box {
+    position: relative;
+    width: 200px;
+    height: 100px;
+    margin: 3rem auto;
+    -webkit-transform-style: preserve-3d;
+            transform-style: preserve-3d;
+    -webkit-transform         : transform 1s;
+        -ms-transform         : transform 1s;
+            transform         : transform 1s;
+  }
+  .tp-box__side {
+     width: 100%;
+    height: 100%;
+    position: absolute;
+
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+
+    color: #fff;
+    text-align: center;
+    line-height: 100px;
+    font-size: 24px;
+    font-weight: 700;
+    cursor: pointer;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+  }
+  .tp-box__front {
+    background: green;
+    -webkit-transform : rotateY(0deg);
+    -ms-transform     : rotateY(0deg);
+    transform         : rotateY(0deg);
+  }
+  .tp-box__back {
+    background: #23262d;
+    -webkit-transform : rotateY(-180deg);
+    -ms-transform     : rotateY(-180deg);
+    transform         : rotateY(-180deg);
+  }
+  .mlstudio .pipeline-desc-doc {
+    color: #666;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 0px;
+    display: block;
+    width: auto;
+    line-height: 16px;
+    text-overflow: ellipsis;
+    word-break: break-all;
+    overflow: hidden;
+}
+.jumbotron {
+  background-color: white;
+  font-family: var(--font-type) !important;
+}
+p:not(.text6) {
+  /* color: #e2e5ea; */
+  color: rgb(0, 0, 0);
+  text-align: left;
+}
+
+.borderCard{
+  box-shadow: 1px 1px 1px 1px #0000004a;
+  background-color: white;
+  margin-bottom: 0.35em;
+  transition: background 300ms ease-in 200ms !important;
+}
+
+.borderCardHead th {
+  color: #100f11e3!important;
+  font-weight: 500;
+  font-size: medium;
+}
+
+.borderCardHead{
+  box-shadow: 1px 1px 1px 1px #0000004a;
+  background-color: white;
+  margin-bottom: 0.35em;
+  transition: background 300ms ease-in 200ms !important;
+}
+
+.TFtable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.lineHeight2{
+  line-height: 2.5;
+}
+
+.thClass th{
+  color: #430280e3!important;
+}
+.buttoncolor {
+  background-color: var(--base-color);
+}
+.borderCardHead:last-of-type{
+  margin-bottom: 0px !important;
+}
+.TFtable tr:nth-child(odd) {
+  background: #7b38b108;
+}
+
+.container{
+  /* position: relative;
+  width: 100%; */
+  width: 1235px;
+  max-width: 100%!important; 
+}

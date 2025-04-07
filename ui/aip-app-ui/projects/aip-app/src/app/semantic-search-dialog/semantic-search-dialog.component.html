@@ -1,0 +1,208 @@
+<div class="le-u-pad-16" style="position:relative">
+    <div class="d-flex justify-content-between align-items-center px-4">
+        <div class="justify-content-start align-items-center d-flex">
+            <h2 style="color:var(--base-color)">Generate Embeddings</h2>
+        </div>
+        <div class="d-flex justify-content-end">
+            <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()">
+                <i class="icon x-16 close-icon"></i>
+            </button>
+        </div>
+    </div>
+    <leds-multi-col-container>
+        <div panel panelRounded panelBorder class="le-u-mar-tb-16 le-u-pad-8">
+            <div *ngIf="isIngestionTriggered" class="le-u-pad-t-32">
+                <leds-spinner [bdColor]="'#ffffff'" [size]="'default'" [color]="'#8626c3'" [type]="'ball-spin'" [fullScreen]="false"
+                    [showSpinner]="isIngestionTriggered">
+                    <span style="font-size: larger;font-weight: 500;">Initiating Knowledge Base Ingestion
+                        ..</span>
+                </leds-spinner>
+            </div>
+            <div *ngIf="!isIngestionTriggered">
+                <div *ngIf="loadingPageForSpinner && !createNewKBScreen">
+                    <div thirdColPanel>
+                        <div>
+                            <div
+                                class="container d-flex justify-content-between le-u-mar-8 le-u-mar-lr-16 align-items-center">
+                                <div>
+                                    <h2 class="le-u-header-xl le-u-ellipsis" style="line-height: 2rem;">Linked Knowledge
+                                        Bases</h2>
+                                </div>
+                                <div class="d-flex">
+                                    <leds-tooltip class="le-u-pad-16" [tooltip]="'Link to Knowledge Base'"
+                                        [position]="'above'">
+                                        <span class="aip-cursor" style="font-size: large;" (click)="createNewKB()">
+                                            <i class="aip-led-icons icon purple x-24 icon x-16 icon_link"></i>
+                                        </span>
+                                    </leds-tooltip>
+                                    <leds-tooltip class="le-u-pad-16" [tooltip]="'Refresh'" [position]="'above'">
+                                        <span class="aip-cursor" style="font-size: large;" (click)="ngOnInit()">
+                                            <i class="aip-led-icons icon purple x-24 icon x-16 icon_Refresh"></i>
+                                        </span>
+                                    </leds-tooltip>
+                                    <leds-input-field designType="search" inputType="text" [disabled]="false"
+                                        [required]="false" styleClass="" (changesOccur)="searchfilteredTopics($event)"
+                                        [(ngModel)]="searchInp"></leds-input-field>
+                                </div>
+                            </div>
+                            <div class="le-l-multicolumn__header aip-link-card-height d-flex justify-content-center">
+                                <div [ngClass]="showLog ? 'aip-link-card-mini' : 'aip-link-card'"
+                                    *ngIf="(filteredTopics && filteredTopics.length >0)">
+                                    <div class="aip-cursor" *ngFor="let result of filteredTopics;  index as i"
+                                        [ngStyle]="{'border': (result.topicname.topicname==selectedTopic)?'2px solid #8626C3':'2px solid #0000ff00','pointer-events':(result.linked)?'none':'auto'}"
+                                        style="border-radius: 1.8rem;" (click)="linked(result,indexName,i)">
+                                        <leds-card designType="simple"
+                                            *ngIf="result.id!=null || result.datasetid!=null">
+                                            <mat-card-header>
+                                                <mat-card-title>
+                                                    <div class="d-flex justify-content-between">
+                                                        <h2 class="le-u-header-md aip-lnk-ellipsis">
+                                                            {{result.topicname.topicname}}</h2>
+                                                        <span>
+                                                            <leds-tooltip *ngIf="result.status=='COMPLETED'"
+                                                                [tooltip]="'Completed'" [position]="'above'">
+                                                                <i class="icon x-16 icon-process-complete green"></i>
+                                                            </leds-tooltip>
+                                                            <leds-tooltip *ngIf="result.status=='IN-PROGRESS'"
+                                                                [tooltip]="'In-Progress'" [position]="'above'">
+                                                                <i class="icon x-16 icon-inprogressBlue yellow"></i>
+                                                            </leds-tooltip>
+                                                            <leds-tooltip *ngIf="result.status=='ERROR'"
+                                                                [tooltip]="'Failed'" [position]="'above'">
+                                                                <i class="icon x-16 icon-rejected red"></i>
+                                                            </leds-tooltip>
+                                                        </span>
+                                                    </div>
+                                                </mat-card-title>
+                                                <mat-card-subtitle
+                                                    class="le-u-body-sm le-u-text-neutral-80 le-u-no-mar-b le-u-ellipsis aip-fullname-card">
+                                                    {{result.description}}
+                                                </mat-card-subtitle>
+                                            </mat-card-header>
+                                            <mat-card-content class="le-u-no-mar-b">
+                                                <p class="le-u-body-sm le-u-text-neutral-80 le-u-line-2 aip-desc-ellipsis aip-fullname-card">
+                                                    {{result.topicname.adapterinstance}}
+                                                </p>
+                                            </mat-card-content>
+                                        </leds-card>
+                                    </div>
+                                </div>
+                                <div *ngIf="!(filteredTopics && filteredTopics.length >0)"
+                                    class="d-flex justify-content-center align-items-center flex-column">
+                                    <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive"
+                                        alt="aip_empty_state_leds" style="width:15rem" />
+                                    No records found.
+                                </div>
+                                <div style="width: 50%;" *ngIf="showLog">
+                                    <div class="le-u-pad-lr-16">
+                                        <div class="d-flex le-u-pad-l-8 le-u-body-sm">
+                                            <p style="color:var(--base-color)">Logs - </p>
+                                            &nbsp;
+                                            <p>{{selectedTopicObj.topicname.topicname}}</p>
+                                        </div>
+                                        <div class="le-u-pad-l-16 le-u-body-md mt-3 le-u-pad-l-4"
+                                            style="white-space: pre-line; height: 19rem; overflow: auto;">
+                                            {{selectedTopicObj.log || json }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div *ngIf="selectedTopicId">
+                                <hr>
+                                <div class="le-u-pad-lr-16">
+                                    <div class="">
+                                        <leds-button *ngIf="!showLog && selectedTopicObj.log" nameText="secondaryButton"
+                                            idText="secondaryButton" [disabled]="false" buttonType="button"
+                                            designType="miniPrimary" (click)="showOrHideLog()">
+                                            Show Logs
+                                        </leds-button>
+                                        <leds-button *ngIf="showLog && selectedTopicObj.log" nameText="secondaryButton"
+                                            idText="secondaryButton" [disabled]="false" buttonType="button"
+                                            designType="miniPrimary" (click)="showOrHideLog()">
+                                            Hide Logs
+                                        </leds-button>
+                                        <leds-button *ngIf="selectedTopicObj.status=='ERROR'" nameText="secondaryButton"
+                                            idText="secondaryButton" [disabled]="false" buttonType="button"
+                                            designType="miniPrimary" (click)="retryLinkKB()">
+                                            Retry
+                                        </leds-button>
+                                        <leds-button *ngIf="selectedTopicObj.id=='ERROR'" nameText="secondaryButton"
+                                            idText="secondaryButton" [disabled]="false" buttonType="button"
+                                            designType="miniPrimary" (click)="deleteTopicById()">
+                                            Delete
+                                        </leds-button>
+                                    </div>
+                                    <div class="d-flex justify-content-between le-u-pad-t-8 le-u-pad-b-4">
+                                        <div class="le-u-pad-l-8" *ngIf="startTime">
+                                            <div class="le-u-body-sm aip-label-color">Triggered on:</div>
+                                            <div class="le-u-body-md mt-3">
+                                                {{startTime}}</div>
+                                        </div>
+                                        <div class="le-u-pad-l-8" *ngIf="endTime">
+                                            <div class="le-u-body-sm aip-label-color">Finished on:</div>
+                                            <div class="le-u-body-md mt-3">
+                                                {{endTime}}</div>
+                                        </div>
+                                        <div class="le-u-pad-l-8" *ngIf="selectedTopicObj.duration">
+                                            <div class="le-u-body-sm aip-label-color">Duration:</div>
+                                            <div class="le-u-body-md mt-3">
+                                                {{selectedTopicObj.duration}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="!loadingPageForSpinner && createNewKBScreen">
+                    <!-- <div class="justify-content-start align-items-center d-flex le-u-pad-l-32 le-u-pad-t-16">
+                        <h2 class="le-u-header-xl le-u-ellipsis" style="line-height: 2rem;">Create or Link to Knowledge
+                            Base</h2>
+                    </div> -->
+                    <div class="row le-u-mar-32">
+                        <div class="table-responsive selector-693-2">
+                            <leds-autocomplete [options]="knowledgeBaseOptionsList" placeholder="Enter Knowledge Base Name"
+                                label="Knowledge Base Name" [validators]="nameValidator" [required]="true"
+                                [autoActiveFirstOption]="false" [(ngModel)]="indexName"
+                                (panelOptionSelected)="indexNameChangesOccur($event.option.value)"
+                                (inputChanges)="indexNameChangesOccur($event)"></leds-autocomplete>
+                            <mat-error *ngIf="!errMsgFlag" class="custom-hint">Please enter Name in
+                                Alphanumeric
+                                value,accepted
+                                special characters are _ and -</mat-error>
+                            <mat-error *ngIf="errMsgFlag" class="custom-hint-or-error">{{errMsg}}</mat-error>
+                            <leds-select *ngIf="!adapterInstanceNameExist" [options]="adaptersOptions"
+                                (selectChange)="adapterNameChangesOccur($event)" label="Select Adapter Instance"
+                                [(ngModel)]="adapterInstanceName" [required]="true" [disabled]="false"
+                                designType="default" [isMultiple]="false"></leds-select>
+                            <leds-select *ngIf="adapterInstanceNameExist" [options]="adaptersOptions"
+                                (selectChange)="adapterNameChangesOccur($event)" label="Select Adapter Instance"
+                                [(ngModel)]="adapterInstanceName" [required]="true" [disabled]="true"
+                                designType="default" [isMultiple]="false"></leds-select>
+                            <mat-hint class="custom-hint-or-error"></mat-hint>
+                            <leds-textarea placeholder="Description" label="Description" [(ngModel)]="description"
+                                designType="default" inputType="text" [disabled]="false"
+                                [required]="false"></leds-textarea>
+                            <mat-hint class="custom-hint-or-error"></mat-hint>
+                        </div>
+                        <div class="">
+                            <leds-button nameText="secondaryButton" idText="secondaryButton" [disabled]="false"
+                                buttonType="button" designType="primary" (click)="cancelLinkKB()">
+                                Cancel
+                            </leds-button>
+                            <leds-button *ngIf="!adapterInstanceName || !indexName || errMsgFlag"
+                                nameText="secondaryButton" idText="secondaryButton" [disabled]="true"
+                                buttonType="button" designType="primary">
+                                Create and Ingest
+                            </leds-button>
+                            <leds-button *ngIf="adapterInstanceName && indexName && !errMsgFlag"
+                                nameText="secondaryButton" idText="secondaryButton" [disabled]="false"
+                                buttonType="button" designType="primary" (click)="createAndLinkToKB();">
+                                Create and Ingest
+                            </leds-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </leds-multi-col-container>
+</div>

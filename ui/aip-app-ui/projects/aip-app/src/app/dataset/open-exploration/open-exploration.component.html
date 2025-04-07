@@ -1,0 +1,626 @@
+<div class="dataname-wrapper mb-2 pb-2 le-u-pad-l-16">
+    <div class="d-flex justify-content-between align-items-center le-u-pad-tb-8"
+        style="border-bottom: 2px solid #f5f1f1;">
+        <span class="text-box"> DATASET NAME: {{alias}}</span>
+        <span *ngIf="isNewStory" class="text-box">New Story : {{name}}</span>
+        <div style="display: flex;">
+            <!-- <div *ngIf="onRefresh"> -->
+            <leds-select [options]="savedStories" [label]="'Show By'" [designType]="'showBy'" [selected]="selectedStory" [(ngModel)]="storySelected"
+                (selectChange)="selectStory($event)" (openChange)="openChange($event)">
+            </leds-select>
+        <!-- </div> -->
+            <leds-tooltip [tooltip]="'Create'" [position]="'above'">
+                <leds-button nameText="logButton" idText="logButton" buttonType="button" designType="icon">
+                    <i class="icon x-24 icon-add" style="visibility: visible;"
+                       (click)="createStory('create')" ></i>
+                </leds-button>
+            </leds-tooltip>
+            <!-- <leds-tooltip [tooltip]="'Edit'" [position]="'above'">
+                <leds-button nameText="logButton" idText="logButton" buttonType="button" designType="icon" [disabled]="enableEditIcon">
+                    <i class="icon x-24 edit-icon" style="visibility: visible;"
+                      (click)="editStory()"  ></i>
+                </leds-button>
+            </leds-tooltip> -->
+            <!-- <leds-tooltip [tooltip]="'Description'" [position]="'above'">
+                <leds-button nameText="logButton" idText="logButton" buttonType="button" designType="icon">
+                    <i class="icon x-24 comment-icon" style="visibility: visible;"
+                        (click)="opneDescription(content)"></i>
+                </leds-button>
+            </leds-tooltip> -->
+            <leds-tooltip [tooltip]="'Save to story'" [position]="'above'">
+                <leds-button nameText="logButton" idText="logButton" buttonType="button" designType="icon" [disabled]="enableSaveButton">
+                    <i class="icon x-24 icon_save" style="visibility: visible;" (click)="saveStory()"></i>
+                </leds-button>
+            </leds-tooltip>
+            <leds-tooltip [tooltip]="isExpanded?'Maximise':'Minimise'" [position]="'above'">
+                <leds-button nameText="logButton" idText="logButton" buttonType="button" *ngIf="isExpanded"
+                    designType="icon">
+                    <i class="icon x-24 icon_maximise" style="visibility: visible;" (click)="toggleExpand()"></i>
+                </leds-button>
+                <leds-button nameText="logButton" idText="logButton" buttonType="button" *ngIf="!isExpanded"
+                    designType="icon">
+                    <i class="icon x-24 icon_minimise" style="visibility: visible;" (click)="toggleExpand()"></i>
+                </leds-button>
+            </leds-tooltip>
+            <leds-tooltip [tooltip]="'Refresh'" [position]="'above'">
+                <leds-button nameText="logButton" idText="logButton" buttonType="button" designType="icon">
+                    <i class="icon x-24 icon_Refresh" style="visibility: visible;" (click)="refresh()"></i>
+                </leds-button>
+            </leds-tooltip>
+
+        </div>
+    </div>
+</div>
+
+<div *ngIf="!allAttributes">
+    <p-progressSpinner></p-progressSpinner>
+</div>
+
+
+
+<div class="exploration-container" style="overflow-x:hidden">
+    <div class="drag-drop-container">
+        <div #app class="side-bar-items" style="margin-top: -16px;max-height: 80vh;overflow: auto;">
+            <leds-accordion designType="3D" [hideToggle]="false" [multi]="false">
+                <mat-expansion-panel [expanded]="false" *ngFor="let attr of allAttributes; let i = index">
+                    <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+                        <mat-panel-title>
+                            <h4 class="le-u-header-md">{{ attr.attributeType }}</h4>
+                        </mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <!-- [ngStyle]="{'border-left': (key==renderKey)?'2px solid #8626C3':'2px solid #0000ff00'}" -->
+                    <div class="le-u-mar-16"
+                        [ngStyle]="{'height':(attr.attributes.length>0)?'max-content':'0rem','overflow':(attr.attributes.length>0)?'auto':'visible'}">
+                        <div class="drag-wrapper" *ngFor="let item of attr.attributes; let j = index">
+                            <!-- <div *ngIf="attr.attributeType !== 'Categorical Attributes'" dragEffect="copy"
+                                pDraggable="attri" (onDragStart)="attributeDragEnd(item, attr.attributeType)"
+                                class="attribute-list-drag">
+                                {{ item.attributeName }}
+                            </div> -->
+                            <div class="attribute-list-drag" pDraggable="attri"
+                                (onDragStart)="attributeDragEnd(item, attr.attributeType)" dragEffect="copy">
+                                {{ item.attributeName }}
+                            </div>
+                            <!-- <div *ngIf="attr.attributeType === 'Categorical Attributes'" dragEffect="copy"
+                                pDroppable="attri" pDraggable="attri" (onDrop)="changeToCategoricalType(item)"
+                                (onDragStart)="attributeDragEnd(item, attr.attributeType)" class="attribute-list-drag">
+                                {{ item.attributeName }}
+                            </div> -->
+                        </div>
+                    </div>
+                    <div class="no-attributes-list" *ngIf="attr.attributes.length === 0">
+                        {{openExpLbls.noAttributes}}
+                    </div>
+                </mat-expansion-panel>
+
+            </leds-accordion>
+        </div>
+        <div>
+            <div *ngIf="showInputField" class="row" style="padding-left: 12px;">
+            <div  class="col-md-5" style="padding-top: 16px;">
+                <leds-input-field [placeholder]="'Story Name'" [label]="'Story Name'" [designType]="'default'" [inputType]="'text'"
+                [(ngModel)]="storyName" [disabled]="showStoryName" [required]="true"></leds-input-field>
+            </div>
+            <div class="col-md-5">
+                <!-- <leds-input-field [placeholder]="'Description'" [designType]="'default'" [inputType]="'text'"
+                [(ngModel)]="storyName"></leds-input-field> -->
+                <leds-textarea [placeholder]="'Description'" [label]="'Description'" [designType]="'default'" [inputType]="'text'"
+                [(ngModel)]="storyDescription" [required]="true" ></leds-textarea>
+            </div>
+            <div class="col-md-2" style="display: flex; align-items: center;">
+                <leds-tooltip [tooltip]="' Show Description'" [position]="'above'">
+                    <leds-button nameText="logButton" idText="logButton" buttonType="button" designType="icon">
+                        <i class="icon x-24 comment-icon" style="visibility: visible;"
+                            (click)="opneDescription(content)"></i>
+                    </leds-button>
+                </leds-tooltip>
+            </div>
+        </div>
+            <div class="row " style="margin-left: -7px;">
+                <div class="col-md-3" *ngIf="isExpanded">
+                    <leds-card designType="simple" class="chart-properties">
+                        <div class="metrics-card-properties">
+                            <div >
+                                <leds-select [options]="chartTypes1" label="{{openExpLbls.chartLbl}}"
+                                    [selected]="selectedChartType" [(ngModel)]="chartControls" [required]="false"
+                                    [disabled]="false" designType="default" [isMultiple]="false"
+                                    (selectChange)="chartSelection($event)"></leds-select>
+                            </div>
+                            <div class="axis-container" style="height: 122px;" *ngIf="toggle">
+                                <form [formGroup]="dynamicInputDataGroup" autocomplete="off">
+                                    <div class="axis-matrix-wrapper" formArrayName="dynamicValues">
+                                        <div class="chart-axis-wrapper"
+                                            *ngFor="let item of getFormArray(); let i = index" [formGroupName]="i">
+                                            <span class="placeholder-label" *ngIf="item.value.type === 'dropDown'">                                           
+                                                <leds-select [options]="itemsDropped1[i]" formControlName="inputValue"
+                                                    id="chart-xaxis-{{ item.value.id }}" [required]="true"
+                                                    [disabled]="dropped" designType="default" [isMultiple]="false"
+                                                    (onDrop)="attributeDrop(i, item.value.label)" pDroppable="attri"
+                                                    dropEffect="copy" label="{{item.value.label}}" 
+                                                    (selectChange)="getSelectedChart(item.value.label,$event)"></leds-select>
+                                            </span>
+                                            <span class="placeholder-label"
+                                                *ngIf="item.value.type === 'timeSeriesDropDown'">
+                                                <leds-select [options]="timeSeriesOptions1" formControlName="inputValue"
+                                                    id="chart-xaxis-{{ item.value.id }}" [required]="true"
+                                                    designType="default" [isMultiple]="false"
+                                                    (onDrop)="attributeDrop(i, item.value.label)" pDroppable="attri"
+                                                    dropEffect="copy" label="{{item.value.label}}"
+                                                    (selectChange)="getSelectedChartPlot()"></leds-select>
+                                            </span>
+                                            <span class="placeholder-label valuechart"
+                                                *ngIf="item.value.type === 'inputValue'">
+                                                <label class="chart-header-dynamic">{{
+                                                    item.value.label
+                                                    }}</label>
+                                                <div class="period-input">
+                                                    <p-inputNumber formControlName="inputValue" appendTo="body"
+                                                        type="number" id="chart-xaxis-{{ item.value.id }}"
+                                                        (onInput)="periodValueCheck($event,item.value)"></p-inputNumber>
+                                                </div>
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                </form>
+                                <!-- <div class="no-records-placeholder" >
+                                                                {{openExpLbls.noAxisReq}}
+                                                            </div> -->
+                            </div>
+                            <div class="divider" *ngIf="toggle && !heapmap &&chartTypeSelected && displayLegends()">
+                                <label class="chart-header" style="margin-bottom: 5px;color: #90898d;">
+                                    {{openExpLbls.legends}}</label>
+                                <div class="legend-wrapper cardd">
+                                    <div class="drag-wrapper" pDroppable="attri" (onDrop)="colorAttrdrop()"
+                                        *ngIf="availableAttrLegend('color')"
+                                        [disabled]="!colorLengends || colorLengends?.length === 0"
+                                        [(ngModel)]="colorLengends" (onRemove)="getSelectedChartPlot()">
+                                        <div class="attribute-list-drag2"
+                                            *ngIf="!colorLengends || colorLengends?.length == 0">
+                                            {{ lblColorVariation }}
+                                        </div>
+                                        <mat-chip-set class="example-chip" cdkDropList
+                                            cdkDropListOrientation="horizontal">
+                                            <div *ngFor="let color of colorLengends">
+                                                <leds-chip designType="big" [selectable]="false"
+                                                    style="max-width: 100%;">
+                                                    <span class="le-c-chip__icon js-chip-icon le-c-chip__icon-left">
+                                                        <i class="fa fa-paint-brush"></i>
+                                                    </span>
+                                                    <span class="chip-text">{{color}}</span>
+                                                    <span class="le-c-chip__icon js-chip-icon le-c-chip__icon-right">
+                                                        <i class="icon x-16 close-icon" (click)="removechip('colour')"
+                                                            style="padding-bottom:4px; font-size: 12px!important;"></i>
+                                                    </span>
+                                                </leds-chip>
+                                            </div>
+                                        </mat-chip-set>
+                                    </div>
+                                    <div class="drag-wrapper" pDroppable="attri" (onDrop)="shapeAttrdrop()"
+                                        *ngIf="availableAttrLegend('shape')"
+                                        [disabled]="!shapeLengends || shapeLengends?.length === 0"
+                                        [(ngModel)]="shapeLengends" (onRemove)="getSelectedChartPlot()">
+                                        <div class="attribute-list-drag2"
+                                            *ngIf="!shapeLengends || shapeLengends?.length === 0">
+                                            {{ lblShapeVariation }}
+                                        </div>
+                                        <mat-chip-set class="example-chip" cdkDropList
+                                            cdkDropListOrientation="horizontal">
+                                            <div *ngFor="let shape of shapeLengends">
+                                                <leds-chip designType="big" [selectable]="false"
+                                                    style="max-width: 100%;">
+                                                    <span class="le-c-chip__icon js-chip-icon le-c-chip__icon-left">
+                                                        <i class="fa fa-cubes"></i>
+                                                    </span>
+                                                    <span class="chip-text">{{shape}}</span>
+                                                    <span class="le-c-chip__icon js-chip-icon le-c-chip__icon-right">
+                                                        <i class="icon x-16 close-icon" (click)="removechip('shape')"
+                                                            style="padding-bottom:4px; font-size: 12px!important;"></i>
+                                                    </span>
+                                                </leds-chip>
+                                            </div>
+                                        </mat-chip-set>
+                                    </div>
+
+
+                                    <div class="drag-wrapper" pDroppable="attri" (onDrop)="sizeAttrdrop()"
+                                        *ngIf="availableAttrLegend('size')"
+                                        [disabled]="!sizeLengends || sizeLengends?.length === 0"
+                                        [(ngModel)]="sizeLengends" (onRemove)="getSelectedChartPlot()">
+                                        <div class="attribute-list-drag2"
+                                            *ngIf="!sizeLengends || sizeLengends?.length === 0">
+                                            {{ lblSizeVariation }}
+                                        </div>
+                                        <mat-chip-set class="example-chip" cdkDropList
+                                            cdkDropListOrientation="horizontal">
+                                            <div *ngFor="let size of sizeLengends">
+                                                <leds-chip designType="big" [selectable]="false"
+                                                    style="max-width: 100%;">
+                                                    <span class="le-c-chip__icon js-chip-icon le-c-chip__icon-left">
+                                                        <i class="fa fa-object-ungroup"></i>
+                                                    </span>
+                                                    <span class="chip-text">{{size}}</span>
+                                                    <span class="le-c-chip__icon js-chip-icon le-c-chip__icon-right">
+                                                        <i class="icon x-16 close-icon" (click)="removechip('size')"
+                                                            style="padding-bottom:4px; font-size: 12px!important;"></i>
+                                                    </span>
+                                                </leds-chip>
+                                            </div>
+                                        </mat-chip-set>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="divider" *ngIf="toggle" [ngClass]="heapmap ? 'MT': 'MT2'">
+                                <label class="chart-header" style="margin-bottom: 5px;color: #90898d;">
+                                    {{openExpLbls.filters}}</label>
+                                <div class="filterwrapper">
+
+                                    <leds-overflow>
+                                        <div ngbDropdown class="" container="body" placement="top" autoClose="outside">
+                                            <leds-tooltip tooltip="Drop attribute to filter"
+                                                label="Drop attribute to filter" position="above">
+                                                <a id="OverflowMenu_dd" ngbDropdownToggle>
+                                                    <leds-button class="filter-btn" nameText="iconButton"
+                                                        idText="iconButton" buttonType="button" designType="icon"
+                                                        [disabled]="!attributeFilterVariable" pDroppable="attri"
+                                                        (onDrop)="filterSelectedAttribute()" (click)="showFilter()">
+
+                                                        <span class="le-c-btn--icon__text chip-text ">
+                                                            <span class="le-c-btn--icon__icon">
+                                                                <i aria-hidden="true" class="icon x-16 filter-icon"></i>
+                                                            </span>
+                                                            <span class="le-u-pad-t-4">
+                                                                {{filterBtnLabel}}</span>
+                                                        </span>
+                                                    </leds-button>
+                                                </a>
+                                            </leds-tooltip>
+
+                                            <div *ngIf="attributeFilterVariable && hide" ngbDropdownMenu
+                                                aria-labelledby="OverflowMenu_dd"
+                                                style="padding-left: 0.5rem; padding-right: 1.5rem;">
+                                                <ul overflowList>
+                                                    <li overflowListItem>
+                                                        <div class="filter-overlay-quant"
+                                                            *ngIf="filterAttributeType !== 'Categorical'">
+                                                            <div>
+                                                                <div class="padding-fieldset">
+                                                                    <leds-panel type="color" styleClass=""
+                                                                        contentClass="">
+                                                                        <div class="attribute-list-drag1">
+                                                                            <h2 class="le-u-header-xl le-u-ellipsis">
+                                                                                Range Filter</h2>
+                                                                        </div>
+                                                                        <div class="row"
+                                                                            style="margin:0px -11px -13px -8px;">
+                                                                            <div class="col-md-6">
+                                                                                <leds-input-field
+                                                                                    placeholder="{{openExpLbls.low}}"
+                                                                                    designType="default"
+                                                                                    inputType="text"
+                                                                                    [(ngModel)]="lowerRangeValue"
+                                                                                    (changesOccur)="resetValueFilter($event)"></leds-input-field>
+                                                                            </div>
+                                                                            <div class="col-md-6">
+                                                                                <leds-input-field
+                                                                                    placeholder="{{openExpLbls.up}}"
+                                                                                    designType="default"
+                                                                                    inputType="text"
+                                                                                    [(ngModel)]="upperRangeValue"
+                                                                                    (changesOccur)="changesOccur($event)"></leds-input-field>
+                                                                            </div>
+
+                                                                        </div>
+                                                                        <div class="d-flex m-2"
+                                                                            style="    margin-bottom: 3px;
+                                                                                                                                                                padding: 0px 0px 5px 8px;">
+                                                                            <leds-button nameText="miniSecondary"
+                                                                                idText="miniSecondary"
+                                                                                buttonType="button"
+                                                                                designType="miniSecondary"
+                                                                                [disabled]="!upperRangeValue || !lowerRangeValue"
+                                                                                (click)="upperRangeValue && lowerRangeValue && rangeFilter()">
+                                                                                {{openExpLbls.filter}}
+                                                                            </leds-button>
+
+
+                                                                            <leds-button nameText="miniSecondary"
+                                                                                idText="miniSecondary"
+                                                                                buttonType="button"
+                                                                                designType="miniSecondary"
+                                                                                [disabled]="!upperRangeValue || !lowerRangeValue"
+                                                                                (click)="upperRangeValue && lowerRangeValue && resetRangeFilter()">
+                                                                                {{openExpLbls.reset}}
+                                                                            </leds-button>
+
+                                                                        </div>
+
+
+                                                                    </leds-panel>
+
+                                                                </div>
+                                                                <div class="padding-fieldset">
+                                                                    <leds-panel type="color" styleClass=""
+                                                                        contentClass="">
+                                                                        <div class="attribute-list-drag1">
+                                                                            <h2 class="le-u-header-xl le-u-ellipsis">
+                                                                                Value Filter</h2>
+                                                                        </div>
+                                                                        <div class="row"
+                                                                            style="margin:0px 0px -13px -8px;">
+                                                                            <div class="col-md-6">
+                                                                                <leds-input-field
+                                                                                    placeholder="{{openExpLbls.enterVal}}"
+                                                                                    designType="default"
+                                                                                    inputType="text"
+                                                                                    [(ngModel)]="smartFilterValue"
+                                                                                    (changesOccur)="resetRangeFilter($event)"></leds-input-field>
+
+
+                                                                            </div>
+                                                                            <div class="col-md-6"
+                                                                                style="margin-top: 16px;">
+                                                                                <leds-button
+                                                                                    nameText="miniPrimaryButton"
+                                                                                    idText="miniPrimaryButton"
+                                                                                    buttonType="button"
+                                                                                    designType="miniPrimary"
+                                                                                    [disabled]="!smartFilterOpr"
+                                                                                    (click)="smartFilterOpr && resetValueFilter()">
+                                                                                    {{openExpLbls.reset}}
+                                                                                </leds-button>
+                                                                            </div>
+
+                                                                        </div>
+                                                                        <div class="radio-grp"
+                                                                            style="margin:1px 0px 3px 6px;">
+                                                                            <leds-radio-group>
+
+                                                                                <!-- <leds-radio-button [disabled]="!smartFilterValue" value=">" (change)="smartFilter($event)">
+                                                                                                                                                                                                                                                        >
+                                                                                                                                                                                                                                                    </leds-radio-button>
+                                                                                                                                                                                                                                                    <leds-radio-button [disabled]="!smartFilterValue" value=">=" (change)="smartFilter($event)">
+                                                                                                                                                                                                                                                        >=
+                                                                                                                                                                                                                                                    </leds-radio-button>
+                                                                                                                                                                                                                                                    <leds-radio-button [disabled]="!smartFilterValue" value="<" (change)="smartFilter($event)">
+                                                                                                                                                                                                                                                        < </leds-radio-button>
+                                                                                                                                                                                                                                                            <leds-radio-button [disabled]="!smartFilterValue" value="<=" (change)="smartFilter($event)">
+                                                                                                                                                                                                                                                                <= </leds-radio-button> -->
+                                                                                <leds-radio-button
+                                                                                    *ngFor="let val of compareValue"
+                                                                                    [disabled]="!smartFilterValue"
+                                                                                    [value]="val"
+                                                                                    (change)="smartFilter($event)">
+                                                                                    {{val}}
+                                                                                </leds-radio-button>
+                                                                            </leds-radio-group>
+                                                                        </div>
+                                                                    </leds-panel>
+                                                                    <div class="d-flex "
+                                                                        style="margin: 8px 0px 1px 2px; justify-content: space-around;gap: 90px;">
+                                                                        <leds-button class="filter-cancel-btn"
+                                                                            nameText="miniSecondary"
+                                                                            idText="miniSecondary" buttonType="button"
+                                                                            designType="miniSecondary"
+                                                                            (click)="cancelOverLay(filterAttributes)">
+                                                                            {{openExpLbls.cancel}}
+                                                                        </leds-button>
+                                                                        <leds-button class="filter-apply-btn"
+                                                                            [disabled]="filterResponse?.length === filterResponseBackup?.length"
+                                                                            nameText="miniSecondary"
+                                                                            idText="miniSecondary" buttonType="button"
+                                                                            designType="miniSecondary"
+                                                                            (click)="getFilterResult(filterAttributes) && filterResponse?.length != filterResponseBackup?.length">
+                                                                            {{openExpLbls.apply}}
+                                                                        </leds-button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div *ngIf="filterResponse.length <= 1000"
+                                                                    class="selector1"
+                                                                    style="max-height: 42.3vh; overflow: auto; border: 0.5px solid">
+                                                                    <h4 class="header">{{ attributeFilterVariable }}
+                                                                    </h4>
+                                                                    <div class="drag-wrapper"
+                                                                        *ngFor="let item of filterResponse; let j = index">
+                                                                        <div class="attribute-list-drag2">
+                                                                            {{ item.label }}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div *ngIf="filterResponse.length > 1000"
+                                                                    class="selector2"
+                                                                    style="max-height: 42.3vh; overflow: auto; border: 0.5px solid">
+                                                                    <h4 class="header">{{ attributeFilterVariable }}
+                                                                    </h4>
+                                                                    <div class="drag-wrapper"
+                                                                        *ngFor="let item of filterListboxMessage; let j = index">
+                                                                        <div class="attribute-list-drag2">
+                                                                            {{ item.label }}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="filter-overlay-categ"
+                                                            *ngIf="filterAttributeType !== 'Quantitative'">
+
+                                                            <div
+                                                                style="max-height: 300px; overflow: auto;border: 0.5px solid">
+                                                                <h4 class="header">{{ attributeFilterVariable }}</h4>
+                                                                <div class="col-10 offset-1 offset-xs-1 offset-sm-1 offset-md-0 col-sm-6 col-md-6 col-lg-7 col-xl-6 aip-panel aip-panel-shadow d-flex align-items-center"
+                                                                    style="width: 100%;height: 31px;">
+                                                                    <input type="text" name="" id="" name="search"
+                                                                        style="font-size: 15px;" class="aip-panel-input"
+                                                                        autocomplete="off" placeholder="Start searching"
+                                                                        (input)="filterResults()"
+                                                                        [(ngModel)]="searchTerm">
+                                                                    <i class="aip-led-icons icon x-24 search-icon"></i>
+                                                                </div>
+                                                                <div class="drag-wrapper" style="word-wrap: break-word;"
+                                                                    *ngFor="let item of filterResponse; let j = index">
+                                                                    <div class="attribute-list-drag2"
+                                                                        style="word-wrap: break-word;cursor: pointer;"
+                                                                        (click)="onselecting(item)"
+                                                                        [ngModel]="filterResponse"
+                                                                        [class.selected]="filtersSelected.includes(item)">
+                                                                        {{ item.label }}
+                                                                    </div>
+
+                                                                </div>
+                                                                <div *ngIf="filterResponse.length === 0"
+                                                                    class="noresult">No results found</div>
+                                                            </div>
+                                                            <div class="filter-btn">
+
+                                                                <leds-button class="filter-cancel-btn"
+                                                                    nameText="miniSecondary" idText="miniSecondary"
+                                                                    buttonType="button" designType="miniSecondary"
+                                                                    (click)="cancelOverLay(filterAttributes)">
+                                                                    {{openExpLbls.cancel}}
+                                                                </leds-button>
+                                                                <leds-button class="filter-apply-btn"
+                                                                    nameText="miniSecondary" idText="miniSecondary"
+                                                                    buttonType="button" designType="miniSecondary"
+                                                                    (click)="getFilterResult(filterAttributes)">
+                                                                    {{openExpLbls.apply}}
+                                                                </leds-button>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </leds-overflow>
+                                    <!-- </div>
+                                </a> -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="footer-reset-button row" *ngIf="toggle">
+                            <!-- <button *ngIf="chartTypeSelected" type="button" pButton label="{{openExpLbls.reset}}"
+                            (click)="clearAllControls()"></button> -->
+                            <div class="col-md-6 ">
+
+                                <leds-button *ngIf="chartTypeSelected" class="filter-apply-btn" nameText="miniSecondary"
+                                    idText="miniSecondary" buttonType="button" designType="miniSecondary"
+                                    (click)="clearAllControls()">
+                                    {{openExpLbls.reset}}
+                                </leds-button>
+                            </div>
+                            <div class="col-md-6">
+
+                            </div>
+                        </div>
+
+
+                    </leds-card>
+
+                </div>
+                <div class="col-md-9 " [ngStyle]="toggler(isExpanded)">
+
+                    <leds-card class="chart-area">
+                        <!-- <div class="chart-loading-indicator" *ngIf="displaySpinner">
+                        <p-progressSpinner></p-progressSpinner>
+                    </div> -->
+                        <leds-spinner [bdColor]="'rgb(151 141 141 / 27%)'" [size]="'medium'" [color]="'#8626c3'"
+                            [type]="'ball-fall'" [fullScreen]="false" [zIndex]="9999" [showSpinner]="displaySpinner">
+                            <span style="color: #8626c3;font-size: larger;font-weight: 500;">Loading ...</span>
+                        </leds-spinner>
+                        <!-- <div [innerHTML]="urlSafe"></div>
+                <div [innerHTML]="sanitizedHtml"></div>
+                <div [innerHTML]="kkk"></div> -->
+                        <!-- <iframe name="chart-frame" #iframe class="chart-frame" width="100%" height="98%"
+                        [srcdoc]="urlSafe" (load)="frameLoaded()"></iframe> -->
+                        <iframe name="chart-frame" #iframe class="chart-frame" width="100%" height="98%"
+                            [src]="sanitizedHtml | safe:'resourceUrl'" (load)="frameLoaded()"></iframe>
+                        <!-- <iframe name="chart-frame" #iframe class="chart-frame" width="100%" height="98%"
+                        [srcdoc]="kkk" (load)="frameLoaded()"></iframe> -->
+                    </leds-card>
+                </div>
+                <!-- <div>
+                <leds-button nameText="miniPrimaryButton" idText="miniPrimaryButton" [disabled]="false" buttonType="button"
+                    designType="miniPrimary">
+                    Create Story
+                </leds-button>
+            </div> -->
+            </div>
+            <!-- <div *ngIf="showCreateButton" style="display: flex; padding: 12px; float: right;">
+                <leds-button nameText="miniPrimaryButton" idText="miniPrimaryButton" [disabled]="false" buttonType="button"
+                    designType="miniPrimary" (click)="saveStoryDetails()">
+                    Save Story
+                </leds-button>
+            </div>
+            <div *ngIf="showUpdateButton" style="display: flex; padding: 12px; float: right;">
+                <leds-button nameText="miniPrimaryButton" idText="miniPrimaryButton" [disabled]="false" buttonType="button"
+                    designType="miniPrimary" (click)="updateStoryDetails()">
+                    Save Story
+                </leds-button>
+            </div> -->
+        </div>
+    </div>
+</div>
+<ng-template #content let-modal>
+    <div class = "create-background">
+        <div class="le-u-pad-lr-16" style="padding-top: 12px;">
+            <span class="aip-desc-title le-u-header-xxl float-start"><span
+                    style=" color: rgb(123, 57, 177);">Description Board
+                </span></span>
+            <button type="button" class="btn-close" style="float: right;" aria-label="Close"
+                (click)="modal.dismiss('Cross click')">
+                <i class="icon x-16 close-icon"></i>
+            </button>
+        </div>
+
+        <div class="input-container">
+            <!-- <leds-input-field [placeholder]="'Name'" [designType]="'default'" [inputType]="'text'" [label]="'Story Name'"
+                [(ngModel)]="storyName" [disabled]="true"></leds-input-field> -->
+            <span class=" aip-desc-title le-u-header-xxl"><span style=" color: #737373;;">Story Name:
+                </span>{{sName | titlecase}} </span>
+            <!-- </span>Stroy 1</span> -->
+            <div style="padding-top: 12px;">
+                <span><label for="desc-text">Story Description</label></span>
+                <span class="p-float-label">
+                    <textarea id="desc-text" [rows]="15" [cols]="100" pInputTextarea
+                        [(ngModel)]="storyDescription"></textarea>
+
+                </span>
+            </div>
+        </div>
+        <!-- <div style="padding: 12px; float: left;">
+            <leds-button nameText="miniPrimaryButton" idText="miniPrimaryButton" [disabled]="false" buttonType="button"
+                designType="miniPrimary" (click)="createStroy()">
+                Save Story
+            </leds-button>
+        </div> -->
+    </div>
+</ng-template>
+<ng-template #content3 let modal>
+    <div>
+        <div class="le-u-pad-lr-16" style="padding-top: 12px;">
+            <div>
+                <span class="aip-desc-title le-u-header-xxl float-start"><span style=" color: #737373;;">Create/Update
+                        Story
+                    </span></span>
+            </div>
+            <div>
+                <button type="button" class="btn-close" style="float: right;" aria-label="Close" (click)="closeModal()">
+                    <i class="icon x-16 close-icon"></i>
+                </button>
+            </div>
+        </div>
+        <!-- <div style="padding-top: 24px;">
+            <app-save-story [chartUrl]="sanitizedHtml" [chartDetails]="chartDetails" [storyName]="selectedStoryName"
+                [storyDescription]="storyDescription" (storySaved)="getSavedStory($event)"></app-save-story>
+        </div> -->
+        <!-- <div style="padding: 12px; float: left;">
+            <leds-button nameText="miniPrimaryButton" idText="miniPrimaryButton" [disabled]="false" buttonType="button"
+                designType="miniPrimary" (click)="saveStory()">
+                Create Story
+            </leds-button>
+        </div> -->
+    </div>
+</ng-template>

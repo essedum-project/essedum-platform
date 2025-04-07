@@ -1,0 +1,141 @@
+<div class="col-md-12 centerStyle">
+    <div class="clearfix">
+        <div class="paddTop20">
+            <div class="ams_h2 h2Mar">Process Configuration</div>
+            <span *ngIf="editScreen" class="ams_back pull-right linkMar" (click)="back()">Back to Processes</span>
+            <i *ngIf="editScreen" class="fa fa-caret-square-o-left create-icon-color pull-right linkMar" 
+            (click)="back()" aria-hidden="true"></i>
+        </div>
+    </div>
+    <div #waveForm="ngForm" ngForm="">
+        <div class="noPad">
+            <div class="padTop20" style="width: 98%; padding-left: 20px">
+                <div class="row rwMAr">
+                    <div class="col-md-6">
+                        <label class="formLabel">Process Name*</label>
+                        <input type="text" id="name" name="name" class="txtInput" [(ngModel)]="process &amp;&amp; process.process_name" [ngModelOptions]="{ standalone: true }" required placeholder="Enter process name">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="formLabel">Process Display Name*</label>
+                        <input type="text" id="displayName" name="displayName" class="txtInput" 
+                        [(ngModel)]="process &amp;&amp; process.process_display_name" 
+                        [ngModelOptions]="{ standalone: true }" required 
+                        placeholder="Enter process display name">
+                    </div>
+                </div>
+                <div class="row rwMAr">
+                    <div class="col-md-6">
+                        <label class="formLabel">Process Description*</label>
+                        <input type="text" id="description" name="description" class="txtInput" [(ngModel)]="process &amp;&amp; process.process_description" [ngModelOptions]="{ standalone: true }" required placeholder="Enter process description">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="formLabel">Workflow*</label>
+                        <mat-select class="txtInput" style="width: 85%" [(ngModel)]="process &amp;&amp; process.workflow_id" name="workflow" id="workflow" [ngModelOptions]="{ standalone: true }" placeholder="SELECT" required 
+                        [compareWith]="compareObjects">
+                            <mat-option *ngFor="let item of workflowList; trackBy: trackByMethod" [value]="item">
+                                {{ item }}
+                            </mat-option>
+                        </mat-select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="btnMargin">
+            <button *ngIf="!editScreen" type="button" [ngBusy]="{ busy: busy, message: 'Saving User...' }" class="genBtn marRght30" (click)="saveProcessDetails()">
+                Create
+            </button>
+            <button *ngIf="editScreen" type="button" [ngBusy]="{ busy: busy, message: 'Saving User...' }" class="genBtn marRght30" (click)="saveProcessDetails()">
+                Update
+            </button>
+            <button type="button" [ngBusy]="{ busy: busy, message: 'Saving User...' }" class="genBtn marRght30" (click)="reset()">
+                Reset
+            </button>
+        </div>
+        <br>
+        <div class="noPad" *ngIf="!editScreen &amp;&amp; processes?.length > 0">
+            <h5>Processes</h5>
+            <div class="table-responsive">
+                <table mat-table="" [dataSource]="processList" class="table-hover list-table" matSort="" matSortActive="fromDate" matSortDirection="asc">
+                    <ng-container matColumnDef="process_name">
+                        <th mat-header-cell="" *matHeaderCellDef="">
+                            <strong> Process Name </strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task" class="td-ellipsis">
+                            <div class="td-span td-ellipsis pull-left" 
+                            matTooltipClass="crud-tooltip">
+                              {{ task.process_name }}
+                            </div>
+                          </td>
+                    </ng-container>
+                    <ng-container matColumnDef="process_display_name">
+                        <th mat-header-cell="" *matHeaderCellDef="">
+                            <strong> Process Display Name </strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task" class="td-ellipsis">
+                            <div class="td-span td-ellipsis pull-left" 
+                            matTooltipClass="crud-tooltip">
+                              {{ task.process_display_name }}
+                            </div>
+                          </td>
+                    </ng-container>
+                    <ng-container matColumnDef="process_description">
+                        <th mat-header-cell="" *matHeaderCellDef="">
+                            <strong> Process Description </strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task" class="td-ellipsis">
+                            <div class="td-span td-ellipsis pull-left" 
+                            matTooltipClass="crud-tooltip">
+                              {{ task.process_description }}
+                            </div>
+                          </td>
+                    </ng-container>
+                    <ng-container matColumnDef="workflow_id">
+                        <th mat-header-cell="" *matHeaderCellDef="">
+                            <strong> Workflow </strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task" class="td-ellipsis">
+                            <div class="td-span td-ellipsis pull-left" 
+                            matTooltipClass="crud-tooltip">
+                              {{ task.workflow_id }}
+                            </div>
+                          </td>
+                    </ng-container>
+                    <ng-container matColumnDef="edit">
+                        <th mat-header-cell="" *matHeaderCellDef="">
+                            <strong> Edit </strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task" class="td-ellipsis">
+                            <div class="td-span td-ellipsis pull-left" 
+                            matTooltipClass="crud-tooltip">
+                              <i class="fa fa-pencil fa-lg create-icon-color" aria-hidden="true" title="edit" (click)="editProcess(task.process_id)"></i>
+                            </div>
+                          </td>
+                    </ng-container>
+                    <ng-container matColumnDef="mapRoles">
+                        <th mat-header-cell="" *matHeaderCellDef="">
+                            <strong> Map Roles </strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task" class="td-ellipsis">
+                            <div class="td-span td-ellipsis pull-left" 
+                            matTooltipClass="crud-tooltip">
+                              <i class="fa fa-plus fa-lg create-icon-color" aria-hidden="true" title="mapRoles" (click)="mapRoles(task.process_id)"></i>
+                            </div>
+                          </td>
+                    </ng-container>
+                    <ng-container matColumnDef="is_active">
+                        <th mat-header-cell="" *matHeaderCellDef="">
+                            <strong> Active </strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task" class="td-ellipsis">
+                            <div class="td-span td-ellipsis pull-left" 
+                            matTooltipClass="crud-tooltip" >
+                                <mat-checkbox color="primary" [checked]="task.is_active" name="is_active" (change)="changeStatus(task, $event)"></mat-checkbox>
+                            </div>
+                          </td>
+                    </ng-container>
+                    <tr style="background-color: rgb(230,230,230,1);" mat-header-row="" *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row="" *matRowDef="let row; columns: displayedColumns"></tr>
+                </table>
+            </div>
+        </div>
+    </div>

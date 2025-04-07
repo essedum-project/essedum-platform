@@ -1,0 +1,7 @@
+"body","description","eventname","organization","jobdetails"
+"{}",NULL,"generateScript_AWS","Demo","[{\"name\":\"DEMCDGNR39993\",\"type\":\"pipeline\"}]"
+"{}",NULL,"generateScript_Azure","Demo","[{\"name\":\"DEMCDGNR10855\",\"type\":\"pipeline\"}]"
+"{}",NULL,"generateScript_DragAndDrop","Demo","[{\"name\":\"DEMCDGNR69853\",\"type\":\"pipeline\"}]"
+"{}",NULL,"generateScript_DragNDropLite","Demo","[{\"name\":\"DEMCDGNR11729\",\"type\":\"pipeline\"}]"
+"{}",".","generateScript_MLflow","Demo","[{\"name\":\"DEMCDGNR63616\",\"type\":\"pipeline\"}]"
+"{}",NULL,"generateScript_Vertex","Demo","[{\"name\":\"DEMCDGNR89237\",\"type\":\"pipeline\"}]"

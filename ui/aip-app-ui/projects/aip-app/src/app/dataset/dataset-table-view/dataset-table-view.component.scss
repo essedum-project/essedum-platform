@@ -1,0 +1,83 @@
+.card-header{
+    float: right;
+    display: flex;
+    column-gap: 24px;
+    align-items: center;
+    height: 28px;
+    margin-top: 12px;
+}
+
+.x-24{
+    width: unset;
+}
+
+.icon{
+    cursor: pointer;
+}
+
+::ng-deep{
+    .mat-mdc-card{
+        width: 100% !important;
+        height: 100% !important;
+    }
+    // .le-c-form-field.mat-mdc-form-field .mat-mdc-form-field-infix {
+    //     padding: unset !important;
+    //     border-top: none !important;
+    // }
+    // .mat-mdc-form-field-subscript-wrapper{
+    //     height: 0px !important;
+    // }
+    .le-c-card.mat-mdc-card{
+        padding: 10px;
+    }
+}
+
+.flex-display{
+    display: flex;
+}
+
+.data-count{
+    margin: 1%;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    width: 206px;
+}
+.container{
+    width: 100%;
+    height: 48px;
+}
+.aip-dataset-table-view-input{
+    
+    border: 0;
+    outline: 0;
+    color: rgb(60, 66, 87);
+    background-color: rgb(255, 255, 255);
+    box-shadow: rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(60 66 87 / 16%) 0px 0px 0px 1px, rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(0 0 0 / 0%) 0px 0px 0px 0px;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 400;
+    padding: 4px 8px;
+    min-height: 28px;
+    vertical-align: middle;
+    transition: background-color .24s,box-shadow .24s;
+    transition-property: background-color, box-shadow;
+    transition-duration: 0.24s, 0.24s;
+    transition-timing-function: ease, ease;
+    transition-delay: 0s, 0s;
+    :focus{
+        box-shadow: rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(58 151 212 / 36%) 0px 0px 0px 4px, rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(60 66 87 / 16%) 0px 0px 0px 1px, rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(0 0 0 / 0%) 0px 0px 0px 0px;
+    }
+
+}
+::ng-deep .highlight-color {
+    color: black !important;
+    background-color: #FF8800 !important;
+    padding: 2px !important;
+    border-radius: 2px !important;
+}
+.create-background {
+    background-color: white !important;
+    border-radius: 1rem;
+}

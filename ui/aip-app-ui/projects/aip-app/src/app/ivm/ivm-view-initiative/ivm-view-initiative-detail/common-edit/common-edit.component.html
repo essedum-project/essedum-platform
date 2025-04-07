@@ -1,0 +1,8 @@
+<div >
+    <div  *ngIf="data.type=='APP'">
+        <app-create-app [edit]="true" [appcid]="data.id" [appName]="data.data.name"></app-create-app>
+    </div>
+    <div  *ngIf="data.type=='MODEL'">
+        <app-model-edit [componentData]="data"></app-model-edit>
+    </div>
+</div>

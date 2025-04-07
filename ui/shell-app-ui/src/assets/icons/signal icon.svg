@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="25" height="22.441" viewBox="0 0 25 22.441">
+  <g id="signal_icon" data-name="signal icon" transform="translate(-91.3 -90.534)">
+    <g id="Group_33" data-name="Group 33" transform="translate(99.736 101.534)">
+      <path id="Path_52" data-name="Path 52" d="M204.973,300.8h-2.285a2.888,2.888,0,0,0-2.888,2.888v2.8h8.061v-2.8A2.888,2.888,0,0,0,204.973,300.8Z" transform="translate(-199.8 -295.546)" stroke="currentColor" stroke-miterlimit="10" stroke-width="1"/>
+      <path id="Path_53" data-name="Path 53" d="M232.607,231.2a1.9,1.9,0,1,1-1.9-1.9A1.9,1.9,0,0,1,232.607,231.2Z" transform="translate(-226.669 -229.3)" stroke="currentColor" stroke-miterlimit="10" stroke-width="1"/>
+    </g>
+    <path id="Path_54" data-name="Path 54" d="M216.63,95.015l-3.13-1.808,3.13-1.808Z" transform="translate(-112.757)" stroke="currentColor" stroke-miterlimit="10" stroke-width="1"/>
+    <path id="Path_55" data-name="Path 55" d="M228.7,116h10.185v9.6h-6.474" transform="translate(-126.84 -22.792)" fill="rgba(0,0,0,0)" stroke="currentColor" stroke-miterlimit="10" stroke-width="1"/>
+    <path id="Path_56" data-name="Path 56" d="M148.481,125.6H142V116h2.587" transform="translate(-46.511 -22.792)" fill="rgba(0,0,0,0)" stroke="currentColor" stroke-miterlimit="10" stroke-width="1"/>
+    <path id="Path_57" data-name="Path 57" d="M114.746,283.009H108V276.8h7.753v2.462" transform="translate(-15.01 -171.776)" fill="rgba(0,0,0,0)" stroke="currentColor" stroke-miterlimit="10" stroke-width="1"/>
+    <path id="Path_58" data-name="Path 58" d="M296.6,279.35V276.8h7.76v6.209h-6.812" transform="translate(-189.75 -171.776)" fill="rgba(0,0,0,0)" stroke="currentColor" stroke-miterlimit="10" stroke-width="1"/>
+    <path id="Path_59" data-name="Path 59" d="M91.8,304.09a1.19,1.19,0,1,1,1.19,1.19A1.19,1.19,0,0,1,91.8,304.09Z" transform="translate(0 -195.958)" stroke="currentColor" stroke-miterlimit="10" stroke-width="1"/>
+    <path id="Path_60" data-name="Path 60" d="M386,304.09a1.19,1.19,0,1,1,1.19,1.19A1.19,1.19,0,0,1,386,304.09Z" transform="translate(-272.581 -195.958)" stroke="currentColor" stroke-miterlimit="10" stroke-width="1"/>
+  </g>
+</svg>

@@ -1,0 +1,247 @@
+<div class="le-l-mainwrapper aip-top ">
+
+    <!-- <div *ngIf="cardToggled; else elseBlock" class="clearfix le-l-bodywrapper js-bodywrapper" id="mainCtr"> -->
+    <div class="clearfix le-l-bodywrapper aip-tranparent-backgroud js-bodywrapper" id="mainCtr">
+        <div class="">
+            <div *ngIf="isExpanded" class="row aip-filter aip-filter-position aip-scroll-hover">
+                <app-tagging-component [servicev1]="'pipeline'" (tagSelected)="tagSelectedEvent($event)"
+                    [tagrefresh]="tagrefresh"
+                    [selectedPipelineTypeList]="{ 
+                        selectedAdapterType: selectedAdapterType
+                      }"></app-tagging-component>
+            </div>
+            <div class="col-sm-12 col-md-12 col-lg-12" id="mainrightCnt" [ngStyle]="toggler(isExpanded)">
+                <div class="le-l-level1-wrapper">
+                    <!-- Header -->
+                    <div class="aip-header le-u-pad-lr-32 le-u-pad-t-16">
+                        <div class=" col-sm-12 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-center">
+                            <div style="padding: 20px 0px 0px 0px;">
+                                <leds-tooltip [tooltip]="isExpanded?'Collapse Filters':'Expand Filters'"
+                                    [position]="tooltip">
+                                    <i class="icon x-24 filter-icon" (click)="toggleExpand()"></i>
+                                </leds-tooltip>
+                            </div>
+                            <div class="le-u-pad-24">
+                                <h3 class="le-u-header-xl">{{cardTitle}}</h3>
+
+
+                            </div>
+                        </div>
+                        <div
+                            class="col-10 offset-1 offset-xs-1 offset-sm-1 offset-md-0 col-sm-6 col-md-6 col-lg-7 col-xl-6 aip-panel aip-panel-shadow d-flex align-items-center">
+                            <!-- <leds-input-field designType="search" inputType="text" styleClass=""
+                                [disabled]="false" [required]="false"></leds-input-field> -->
+                            <input type="text" name="" id="" placeholder="Search by Name" class="aip-panel-input"
+                                [(ngModel)]="filter" (keyup)="filterz()">
+                            <i class="aip-led-icons icon x-24 search-icon"></i>
+                        </div>
+                        <div class="d-flex justify-content-center col-sm-5 col-md-6 col-lg-5 col-xl-4 aip-header-icon">
+
+                            <div class="">
+                                <div *ngIf="createAuth" class="le-u-mar-r-24 aip-cursor" (click)="open(content1)">
+                                    <span class="le-c-btn--icon__icon">
+                                        <i class="aip-led-icons icon x-24 icon-add"></i>
+                                    </span>
+                                    <!-- <span class="le-c-btn--icon__text">
+                                            Add Pipeline
+                                        </span> -->
+                                    <!-- MODAL -->
+
+                                    <ng-template #content1 let-modal>
+                                        <div class="config-background">
+                                            <app-pipeline-create [interfaceType]="'pipeline'" (modalClosed)="refreshComplete()">
+
+                                            </app-pipeline-create>
+                                        </div>
+                                    </ng-template>
+                                </div>
+                            </div>
+                            <div class="">
+                                <span class="le-c-btn--icon__icon">
+                                    <i class="aip-led-icons icon x-24 icon_Refresh" (click)="refreshComplete()"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="le-c-card__action-ul aip-card-container">
+                    <!-- CARD -->
+                    <div class="col-md-8 col-lg-6 col-xl-5" style='min-width: -webkit-fill-available;padding: 0px;'
+                        *ngFor="let card of cards">
+                        <leds-card designType='simple' [actionsOnHover]='true'
+                            style="padding:0px !important; height: 163px; display: grid;">
+                            <!-- <div class="le-c-card__container-right">
+                                <span class="le-c-badge float-end le-c-badge--blue">Submitted</span>
+                            </div> -->
+                            <div class="le-u-header-sm le-u-text-primary-80 le-u-mar-b-8" style="font-size:10px;">
+                                {{card.type | uppercase}}</div>
+                            <mat-card-header>
+                                <mat-card-title class="le-c-card__container clearfix">
+                                    <div class="le-c-card__container-left w-100">
+                                        <h2 class="le-u-header-xl aip-fullname-card le-u-ellipsis"
+                                            style="line-height: 2rem;">{{card.alias}}</h2>
+                                    </div>
+
+                                </mat-card-title>
+                                <mat-card-subtitle
+                                    class="le-u-body-sm le-u-text-neutral-80 le-u-ellipsis">{{card.createdDate}}</mat-card-subtitle>
+                            </mat-card-header>
+                            <mat-card-content class="le-u-no-mar-b" style="color: #737373;">
+                                <p class="le-u-body-md le-u-text-neutral-80 le-u-line-2 aip-desc-ellipsis">
+                                    {{card.description}}
+                                </p>
+                            </mat-card-content>
+                            <mat-card-actions class="le-c-card__action-hover d-flex justify-content-between">
+                                <leds-button nameText="textButton" idText="textButton" [disabled]="false"
+                                    buttonType="button" designType="text" styleClass=" DSA_wb_Btn_small"
+                                    (click)="redirection(card)"><span>View
+                                        Details</span></leds-button>
+                                <!-- CreatedBy -->
+                                <div class="aip-cursor">
+                                    <div class="le-c-avatar  le-c-avatar--sm aip-hover-avatar">
+                                        {{(card.target.lastmodifiedby?card.target.lastmodifiedby:'Name Not
+                                        Available')|firstCharacter}}
+                                    </div>
+                                    <div class="aip-hover-detail">
+                                        <div class="le-u-header-md le-u-mar-8">
+                                            {{card.target.lastmodifiedby?card.target.lastmodifiedby:'Name Not
+                                            Available'}}</div>
+                                    </div>
+                                </div>
+                                <leds-overflow>
+                                    <div ngbDropdown *ngIf="deleteAuth"
+                                        class="aip-led-icons d-inline-block le-u-mar-r-8 le-u-v-mid float-end le-c-card__action-ul">
+                                        <a href="javascript:void(0);" id="OverflowMenu_dd" ngbDropdownToggle
+                                            (click)="clickactive($event);" aria-label="menu icon">
+                                            <i aria-hidden="true" class="icon x-24 v-menu-icon"></i>
+                                        </a>
+                                        <div ngbDropdownMenu aria-labelledby="OverflowMenu_dd">
+                                            <ul overflowList class="float-end  le-c-card__action-ul"
+                                                style="display: flex;flex-direction: column;">
+                                                <!-- <li overflowListItem> -->
+                                                <!-- <li><span *ngIf="editAuth" class="le-u-body-lg  aip-cursor"
+                                                        (click)="openedit(content3)">Edit</span>
+                                                    <ng-template #content3 let-modal>
+                                                        <app-model-edit [data]=card></app-model-edit>
+                                                    </ng-template>
+                                                </li>
+                                                <li *ngIf="card.status=='Registered'" overflowListItem><span
+                                                        *ngIf="deployAuth" aria-placeholder="Deploy"
+                                                        class=" aip-cursor le-u-body-lg"
+                                                        (click)="openedit(content4)">Deploy</span>
+                                                    <ng-template #content4 let-modal>
+                                                        <app-model-deploy [data]=card></app-model-deploy>
+                                                    </ng-template>
+                                                </li> -->
+                                                <li overflowListItem>
+                                                    <span *ngIf="editAuth" class="le-u-body-lg aip-cursor"
+                                                        (click)="editPipeline(card.cid)">Edit</span>
+                                                </li>
+                                                <li overflowListItem>
+                                                    <span *ngIf="deleteAuth" class="le-u-body-lg aip-cursor"
+                                                        (click)="deletePipeline(card.cid)">Delete</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </leds-overflow>
+                                <!-- <ul class="float-end le-c-card__action-ul">
+                                   
+                                    <li><i class="icon x-32 delete-sm-icon"></i></li>
+                                </ul> -->
+                            </mat-card-actions>
+                        </leds-card>
+                    </div>
+                </div>
+                <div *ngIf="records">
+                    <div class="d-flex justify-content-center align-items-center flex-column">
+                        <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive"
+                            alt="aip_empty_state_leds" style="width:15rem" />
+                        No records found.
+                    </div>
+                </div>
+                <!-- <div
+                    class="inbox-table-footer table-paginator flex-row flex-space-between standard-margin bottom-padding-20">
+                    <div class="showing-entries d-flex justify-content-end my-3">
+                        <span class="grey-color font-size-12">Showing </span>
+                        &nbsp;&nbsp;
+                        <span class="black-color font-weight-600">
+                            {{ ((pageNumber - 1) * pageSize) + 1 }} -
+                            {{ (((pageNumber - 1) * pageSize) + pageSize) < noOfItems ? ((pageNumber - 1) * pageSize) +
+                                pageSize : noOfItems }} of {{noOfItems}} </span>
+                                &nbsp;&nbsp;
+                                <span class="grey-color font-size-12">entries </span>
+                    </div>
+                    <div class="paginator-buttons d-flex w-60  flex-row" style="justify-content:flex-end">
+                        <div class="page-input go-to-input box-shadow standard-padding">
+                            <span class="grey-color">Go to: </span>
+                            <input class="right-margin" type="number" min="1" [max]="noOfPages"
+                                (change)="changePage(pageNumberInput)" [(ngModel)]="pageNumberInput" />
+                        </div>
+                        <div class="mx-4">
+                            <span class="">Items per page</span>
+                            <select type="number" [(ngModel)]="pageSize" (change)="optionChange($event)">
+                                <option *ngFor="let p of itemsPerPage" [ngValue]="p">{{p}}</option>
+                            </select>
+
+                        </div>
+                        <div class="pages-details d-flex">
+
+                            <div class="previous-page">
+                                <button class="standard-padding table-button font-weight-600"
+                                    [disabled]="pageNumber == 1" (click)="pageNumberInput=null;prevPage()">&lt;</button>
+                            </div>
+                            <div class="pages">
+                                <button class="standard-padding table-button font-weight-600"
+                                    *ngFor="let i of pageArr | slice:startIndex:endIndex"
+                                    (click)="pageNumberInput=null;changePage(i+1)"
+                                    [class.selected-page]="(i + 1) == pageNumber" [ngStyle]="selectedButton(i+1)">
+                                    {{i + 1}}
+                                </button>
+                            </div>
+                            <div class="next-page">
+                                <button class="standard-padding table-button font-weight-600"
+                                    [disabled]="pageNumber == noOfPages"
+                                    (click)="pageNumberInput=null;nextPage()">&gt;</button>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+                <div *ngIf="!records">
+                    <app-pagination #pagination [noOfItems]="noOfItems"
+                        (pageAndSizeChanged)="handlePageAndSizeChange($event)">
+                    </app-pagination>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- <ng-template #elseBlock>
+       <div *ngIf="streamItem.type === 'DragAndDrop'; else: binaryTemplate" class="selector-788-282">
+            <app-pipeline-description [card]="selectedCard" (newItemEvent)="changedToogle($event)"
+                [cardToggled]="cardToggled" [pipelineAlias]="selectedCard.alias"
+                [streamItem]="streamItem"></app-pipeline-description>
+        </div>
+        <ng-template #binaryTemplate="">
+            <div *ngIf="streamItem.type === 'Binary'; else: nativeTemplate" class="selector-788-286">
+            </div>
+        </ng-template>
+        <ng-template #nativeTemplate="">
+            <div *ngIf="streamItem.type === 'NativeScript'; else: rScriptTemplate" class="selector-788-288">
+                <app-native-script [card]="selectedCard" (newItemEvent)="changedToogle($event)"
+                [cardToggled]="cardToggled" [pipelineAlias]="selectedCard.alias"
+                [streamItem]="streamItem"></app-native-script>
+            </div>
+        </ng-template>
+        <ng-template #rScriptTemplate="">
+            <div *ngIf="streamItem.type === 'RScript'; else: others" class="selector-788-288">
+            </div>
+        </ng-template>
+        <ng-template #others="">
+            <app-pipeline-description [card]="selectedCard" (newItemEvent)="changedToogle($event)"
+                [cardToggled]="cardToggled" [pipelineAlias]="selectedCard.alias"
+                [streamItem]="streamItem"></app-pipeline-description>
+        </ng-template>
+    </ng-template> -->
+</div>

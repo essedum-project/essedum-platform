@@ -1,0 +1,6 @@
+"User_Portfolio_Application_Role_ID","Portfolio_ID","Application_ID","Rel_Act_Ind","Last_Updated_Dts","Role_ID","User_ID"
+"1","NULL","NULL","true","2019-04-14T17:56:20","1","1"
+"2","NULL","NULL","true","2019-04-14T17:56:20","1","2"
+"3","1","1","true","2020-04-14T21:06:55","1","1"
+"4","1","1","true","2020-04-14T21:07:01","3","3"
+"5","2","2","true","2020-04-14T21:07:01","1","1"

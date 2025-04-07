@@ -1,0 +1,955 @@
+<!--
+
+     @ 2018 Infosys Limited, Bangalore, India. All Rights Reserved.
+     Version: 1.0
+     Except for any free or open source software components embedded in this Infosys proprietary software program (Program),
+     this Program is protected by copyright laws, international treaties and  other pending or existing intellectual property
+     rights in India, the United States, and other countries. Except as expressly permitted, any unauthorized reproduction, storage,
+     transmission in any form or by any means(including without limitation electronic, mechanical, printing, photocopying,
+     recording, or otherwise), or any distribution of this program, or any portion of it, may result in severe civil and
+     criminal penalties, and will be prosecuted to the maximum extent possible under the law.
+
+-->
+
+<!-- <div class="row selector-783-1">
+    <h2 class="col-md-11 selector-783-2" style="color:var(--base-color)" mat-dialog-title="">Element Properties</h2>
+    <i class="fa fa-close col-md-1 d-flex my-4 selector-783-3" style="right: top; cursor:pointer" (click)="onCloseEditProperties()"></i>
+</div> -->
+<div style="height: 80vh;">
+    <div class="le-l-level2-middle-col le-u-mar-b-24__mb" style="display: grid;">
+
+        <div class="d-flex justify-content-between align-items-center px-4 le-u-pad-t-16">
+            <div class="align-items-center d-flex">
+                <h2 style="color:var(--base-color)">Element Properties</h2>
+            </div>
+            <div class="d-flex justify-content-end">
+                <button type="button" class="btn-close" aria-label="Close" (click)="onCloseEditProperties()">
+                    <i class="icon x-16 close-icon"></i>
+                </button>
+            </div>
+        </div>
+        <mat-dialog-content class="selector-783-4">
+            <div class="selector-783-5">
+                <!-- <label class="selector-783-6">Type : </label> {{data.element.name}} -->
+                <span class="le-u-header-xl selector-783-6">Type : </span> {{data.element.name}}
+            </div>
+            <br class="selector-783-7">
+            <div class="form-inline selector-783-8">
+                <!-- <label class="selector-783-9">Alias : </label> -->
+                <!-- <input [disabled]="isAuth" class="form-control cip-pipeline-modal selector-783-10"
+                    [(ngModel)]="data.element.alias"> -->
+                <leds-input-field label="Alias :" placeholder="Enter Alias..." inputType="text" [disabled]="isAuth"
+                    [required]="true" [(ngModel)]="data.element.alias"></leds-input-field>
+            </div>
+            <br class="selector-783-11">
+            <div class="row selector-783-12">
+                <div class="custom-control custom-checkbox selector-783-13"
+                    *ngIf="data.element.name=='Dataset  Loader'">
+                    <input type="checkbox" [ngModel]="isStreaming" class="custom-control-input selector-783-14"
+                        id="defaultIndeterminate2" (change)="onChangeStreaming()">
+                    <label class="custom-control-label selector-783-15" for="defaultIndeterminate2">isStreaming</label>
+                </div>
+
+            </div>
+            <br class="selector-783-16">
+            <!-- <div class="table-responsive selector-783-17">
+                <table class="table table-bordred table-striped selector-783-18"> -->
+            <leds-data-grid>
+                <div class="le-c-datagrid__title-area clearfix">
+                </div>
+                <table dataGridTable>
+                    <thead class="selector-783-19">
+                        <tr class="selector-783-20">
+                            <th class="col-1 selector-783-21">#</th>
+                            <th class="col-3 selector-783-22">Name</th>
+                            <th class="col-8 selector-783-23">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody class="selector-783-24">
+                        <tr *ngFor="let key of keys; let i = index" class="selector-783-25">
+                            <td class="le-u-pad-t-16 col-1 selector-783-26">{{i+1}}</td>
+                            <td class="col-3 selector-783-27">
+                                <label class="le-u-pad-t-16 selector-783-28">{{key}}</label>
+                            </td>
+
+
+                            <td class="col-8 selector-783-29">
+
+
+                                <div *ngIf="key !== 'inputCols'; else othersNew_content" class="selector-783-30">
+                                    <!-- <div *ngIf="key !== 'inputCol'; else otherNew_content" class="selector-783-31"> -->
+                                    <div *ngIf="key === 'schema'; else other_content" class="selector-783-32">
+                                        <mat-form-field class="selector-783-33">
+                                            <mat-select [disabled]="isAuth" [formControl]="schemaCtrl"
+                                                placeholder="Select Schema" [(ngModel)]="data.element.attributes[key]"
+                                                #schemaSelect="" class="selector-783-34">
+                                                <mat-option class="selector-783-35">
+                                                    <ngx-mat-select-search [formControl]="schemaFilterCtrl"
+                                                        [placeholderLabel]="'Find schema...'"
+                                                        [noEntriesFoundLabel]="'No matching schema found'"
+                                                        class="selector-783-36"></ngx-mat-select-search>
+                                                </mat-option>
+                                                <mat-option *ngFor="let schema of filteredSchemas | async"
+                                                    [value]="schema" class="selector-783-37">
+                                                    {{schema}}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                        <i *ngIf="selected != ''" class="fa fa-info selector-783-38"
+                                            style="margin-left: 1vh; visibility: visible;"
+                                            (click)="showSchema(data.element.attributes[key])"></i>
+                                    </div>
+                                    <ng-template #other_content="" class="selector-783-39">
+
+                                        <div *ngIf="key === 'dataset' || key === 'adaptermethod' || key == 'Select Lookup Dictionary'|| key == 'Select Train Set'||key == 'Enter tag' || key==='azuredataset' ||  key==='vertexdataset'  || key ==='connections'|| data.element.formats[key] =='restdataset' || data.element.formats[key] ==='restdataset1' || data.element.formats[key] ==='restdataset2'|| data.element.formats[key] =='tree'|| data.element.formats[key] =='question'||data.element.formats[key] === 'Taglist'; else nondataset_content"
+                                            class="selector-783-40">
+
+                                            <div *ngIf="data.element.formats[key] =='tree'">
+                                                <div style="display: flex !important;">
+                                                    <span class="fa fa-plus-square" (click)="rootCounter=!rootCounter"
+                                                        style="font-size:16px;color: grey; padding-left: 3vh;padding-top: 3px;"
+                                                        title="Create">
+                                                    </span>
+                                                    <div *ngIf="rootCounter" style="display: flex !important;">
+                                                        <input matInput="" type="text" [(ngModel)]="inputFilter"
+                                                            placeholder="Enter the Filter Name...">
+                                                        <span class="fa fa-plus-square" (click)="addToRoot(key)"
+                                                            style="font-size:16px;color: grey; padding-left: 3vh;padding-top: 3px;"
+                                                            title="Create">
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <mat-tree [dataSource]="dataSource1" [treeControl]="treeControl1"
+                                                    class="example-tree">
+                                                    <!-- This is the tree node template for leaf nodes -->
+                                                    <!-- There is inline padding applied to this node using styles.
+                                                        This padding value depends on the mat-icon-button width. -->
+                                                    <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
+                                                        {{node.name}}
+                                                        <span class="fa fa-plus-square"
+                                                            (click)="node.addCounter=!node.addCounter"
+                                                            style="font-size:16px;color: grey; padding-left: 3vh;padding-top: 3px;"
+                                                            title="Create">
+                                                        </span>
+                                                        <div *ngIf="node.addCounter" style="display: flex !important;">
+                                                            <input matInput="" type="text" [(ngModel)]="inputFilter"
+                                                                placeholder="Enter the Filter Name...">
+                                                            <span class="fa fa-plus-square" (click)="addNode(node,key)"
+                                                                style="font-size:16px;color: grey; padding-left: 3vh;padding-top: 3px;"
+                                                                title="Create">
+                                                            </span>
+                                                        </div>
+                                                    </mat-tree-node>
+                                                    <!-- This is the tree node template for expandable nodes -->
+                                                    <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+                                                        <div class="mat-tree-node">
+                                                            <button mat-icon-button matTreeNodeToggle
+                                                                [attr.aria-label]="'Toggle ' + node.name">
+                                                                <mat-icon class="mat-icon-rtl-mirror">
+                                                                    {{treeControl1.isExpanded(node) ? 'expand_more' :
+                                                                    'chevron_right'}}
+                                                                </mat-icon>
+                                                            </button>
+                                                            {{node.name}}
+                                                            <span class="fa fa-plus-square"
+                                                                (click)="node.addCounter=!node.addCounter"
+                                                                style="font-size:16px;color: grey; padding-left: 3vh;padding-top: 3px;"
+                                                                title="Create">
+                                                            </span>
+                                                            <div *ngIf="node.addCounter"
+                                                                style="display: flex !important;">
+                                                                <input matInput="" type="text" [(ngModel)]="inputFilter"
+                                                                    placeholder="Enter the Filter Name...">
+                                                                <span class="fa fa-plus-square"
+                                                                    (click)="addNode(node,key)"
+                                                                    style="font-size:16px;color: grey; padding-left: 3vh;padding-top: 3px;"
+                                                                    title="Create">
+                                                                </span>
+                                                            </div>
+
+                                                        </div>
+                                                        <!-- There is inline padding applied to this div using styles.
+                                                                This padding value depends on the mat-icon-button width.  -->
+                                                        <div [class.example-tree-invisible]="!treeControl1.isExpanded(node)"
+                                                            role="group">
+                                                            <ng-container matTreeNodeOutlet></ng-container>
+                                                        </div>
+                                                    </mat-nested-tree-node>
+                                                </mat-tree>
+                                            </div>
+                                            <div *ngIf="data.element.formats[key] =='question'">
+                                                <!-- <mat-form-field class="selector-783-33"> -->
+                                                <!--                         
+                                                        <input matInput="" type="text" 
+                                                                                    [(ngModel)]="data.element.attributes[key]"
+                                                                                    class="selector-783-72" /> -->
+                                                <div *ngIf="isOneQuestion(key)">
+                                                    <input matInput="" type="text"
+                                                        [(ngModel)]="data.element.attributes[key]" class="questionText">
+                                                    <br>
+                                                </div>
+                                                <div *ngIf="!isOneQuestion(key)">
+                                                    <div
+                                                        *ngFor="let question of data.element.attributes[key];let i=index">
+                                                        <input matInput="" type="text"
+                                                            [(ngModel)]="data.element.attributes[key][i]"
+                                                            class="questionText">
+                                                        <br>
+                                                    </div>
+                                                </div>
+                                                <br>
+                                                <span class="fa fa-plus-square" (click)="invert()"
+                                                    style="font-size:16px;color: grey; padding-left: 3vh;padding-top: 3px; float:right;"
+                                                    title="Create">
+                                                </span>
+                                                <div *ngIf="addQues">
+                                                    <input type="text" placeholder="Enter Your Question"
+                                                        [(ngModel)]="question_input">
+
+                                                    <span class="fa fa-plus-square" (click)="addQuestion(key)"
+                                                        style="font-size:16px;color: grey; padding-left: 3vh;padding-top: 3px;"
+                                                        title="Create">
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="data.element.formats[key] === 'Taglist'">
+                                                <mat-chip-grid #chipList class="mat-select" class="mtop1p">
+                                                    <mat-chip-row *ngFor="let tag of tagsList" [selectable]="selectable"
+                                                        [removable]="removable" (removed)="remove(tag)">
+                                                        {{tag}}
+                                                        <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+                                                    </mat-chip-row>
+                                                    <input placeholder="Enter Tag Name" class="select"
+                                                        [matChipInputFor]="chipList"
+                                                        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                                                        [matChipInputAddOnBlur]="addOnBlur"
+                                                        (matChipInputTokenEnd)="add($event)" name="nameForTag" />
+                                                </mat-chip-grid>
+                                            </div>
+                                            <div *ngIf="key == 'Select Lookup Dictionary'">
+                                                <mat-form-field class="paddingRight1em">
+                                                    <mat-label>Select Lookup dictionary</mat-label>
+                                                    <input type="text" placeholder="Select Lookup dictionary"
+                                                        aria-label="Select Lookup dictionary" matInput
+                                                        [(ngModel)]="rule" [ngModelOptions]="{standalone: true}"
+                                                        [matAutocomplete]="auto__lookUpTechnique">
+                                                    <mat-autocomplete #auto__lookUpTechnique="matAutocomplete"
+                                                        [displayWith]="displayAutoComplete"
+                                                        (optionSelected)='dropChange(key,rule,NERTypeTrainSet)'>
+                                                        <mat-option
+                                                            *ngFor="let option of autoCompleteSearch(rule,NERTypeTrainSet,'displayName')"
+                                                            [value]="option">
+                                                            {{option.displayName }}
+                                                        </mat-option>
+                                                    </mat-autocomplete>
+                                                </mat-form-field>
+                                            </div>
+                                            <div *ngIf="key == 'Select Train Set'">
+                                                <mat-form-field class="paddingRight1em">
+                                                    <mat-label>Select Train Set</mat-label>
+                                                    <input type="text" placeholder="Select Train Set"
+                                                        aria-label="Select Lookup dictionary" matInput
+                                                        [(ngModel)]="rulep" [ngModelOptions]="{standalone: true}"
+                                                        [matAutocomplete]="auto__lookUpTechnique">
+                                                    <mat-autocomplete #auto__lookUpTechnique="matAutocomplete"
+                                                        [displayWith]="displayAutoComplete"
+                                                        (optionSelected)='dropChange(key,rulep,PClassifierDataSet)'>
+                                                        <mat-option
+                                                            *ngFor="let option of autoCompleteSearch(rulep,PClassifierDataSet,'displayName')"
+                                                            [value]="option">
+                                                            {{option.displayName }}
+                                                        </mat-option>
+                                                    </mat-autocomplete>
+                                                </mat-form-field>
+                                            </div>
+
+                                            <div *ngIf="key == 'Enter tag'">
+                                                <mat-form-field class="paddingRight1em">
+                                                    <mat-label>Select Tag</mat-label>
+                                                    <input type="text" placeholder="Select Tag" aria-label="Select Tag"
+                                                        matInput [(ngModel)]="rules"
+                                                        [ngModelOptions]="{standalone: true}"
+                                                        [matAutocomplete]="auto__DocumentLayoutAnalysisTrainSet">
+                                                    <mat-autocomplete
+                                                        #auto__DocumentLayoutAnalysisTrainSet="matAutocomplete"
+                                                        [displayWith]="displayAutoComplete"
+                                                        (optionSelected)='dropChange(key,rules,customTags)'>
+
+                                                        <mat-option
+                                                            *ngFor="let option of autoCompleteSearch(rules,customTags,'displayName')"
+                                                            [value]="option">
+                                                            {{option.displayName }}
+                                                        </mat-option>
+                                                    </mat-autocomplete>
+                                                </mat-form-field>
+                                            </div>
+
+                                            <div *ngIf="key==='dataset'">
+                                                <div *ngIf="this.data.element.attributes.dataset &amp;&amp; this.data.element.attributes.dataset!='' &amp;&amp; datasetchoosetype=='create'; else create"
+                                                    class="le-u-pad-t-16 selector-783-41">
+                                                    <span
+                                                        *ngIf="this.data.element.attributes.dataset.alias!=undefined &amp;&amp; this.data.element.attributes.dataset.alias!=null"
+                                                        class="selector-783-42">{{this.data.element.attributes.dataset.alias}}</span>
+                                                    <span
+                                                        *ngIf="!(this.data.element.attributes.dataset.alias!=undefined &amp;&amp; this.data.element.attributes.dataset.alias!=null)"
+                                                        class="selector-783-43">{{this.data.element.attributes.dataset.name}}</span>
+                                                    &nbsp;&nbsp;
+                                                    <i *ngIf="this.data.element.attributes.dataset"
+                                                        class="icon x-24 info-big-icon"
+                                                        style="margin-left: 1vh; visibility: visible;"
+                                                        (click)="showInfo()"></i> &nbsp;&nbsp;
+                                                    <i *ngIf="this.data.element.attributes.dataset"
+                                                        class="icon x-24 edit-icon"
+                                                        style="margin-left: 1vh; visibility: visible;"
+                                                        (click)="showDatasets()"></i>
+                                                    <!-- <i style="margin-left: 1vh;" class="fa fa-upload " title="Upload"
+                                                                                                *ngIf="this.data.element.attributes.dataset && this.data.element.attributes.dataset.type=='rw'" (click)="uploadDataset()"></i> -->
+                                                </div>
+                                            </div>
+                                            <div *ngIf="key==='connections'">
+                                                <div *ngIf="connectionAvaibale" class="le-u-pad-t-16">
+                                                    <span
+                                                        *ngIf="!(this.data.element.attributes.connections.alias!=undefined &amp;&amp; this.data.element.attributes.connections.alias!=null)"
+                                                        class="selector-783-43">{{this.data.element.attributes.connections.name}}</span>
+                                                    <span
+                                                        *ngIf="(this.data.element.attributes.connections.alias!=undefined &amp;&amp; this.data.element.attributes.connections.alias!=null)"
+                                                        class="selector-783-43">{{this.data.element.attributes.connections.alias}}</span>
+                                                </div>
+                                                <div *ngIf="!connectionAvaibale">
+                                                    <mat-form-field>
+                                                        <mat-select [disabled]="isAuth" placeholder="Select Connections"
+                                                            [(ngModel)]="selectedConnection"
+                                                            (selectionChange)="onConnectionChange($event.value)">
+                                                            <!-- <mat-option>
+                                                                <ngx-mat-select-search [formControl]="connectionFilterCtrl" [placeholderLabel]="'Find...'"
+                                                                    [noEntriesFoundLabel]="'No matching Value found'">
+                                                                </ngx-mat-select-search>
+                                                            </mat-option> -->
+                                                            <mat-option *ngFor="let connect of connectionList"
+                                                                [value]="connect">
+                                                                {{connect.alias}}</mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="key==='adaptermethod'">
+                                                <div *ngIf="!adaptermethodAvaibale">
+                                                    <mat-form-field>
+                                                        <mat-select [disabled]="isAuth" placeholder="Select Adapter"
+                                                            (selectionChange)="onAdapterChange($event.value)">
+                                                            <!-- <mat-option>
+                                                        <ngx-mat-select-search [formControl]="adapterFilterCtrl" [placeholderLabel]="'Find...'"
+                                                            [noEntriesFoundLabel]="'No matching Value found'">
+                                                        </ngx-mat-select-search>
+                                                    </mat-option> -->
+                                                            <mat-option *ngFor="let adapter of filteredAdapters | async"
+                                                                [value]="adapter">
+                                                                {{adapter}}</mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                    <mat-form-field *ngIf="selectedAdapter">
+                                                        <mat-select [disabled]="isAuth" placeholder="Select Method"
+                                                            (selectionChange)="onAdapterMethodChange($event.value)">
+                                                            <!-- <mat-option>
+                                                    <ngx-mat-select-search [formControl]="methodFilterCtrl" [placeholderLabel]="'Find...'"
+                                                        [noEntriesFoundLabel]="'No matching Value found'">
+                                                    </ngx-mat-select-search>
+                                                    </mat-option> -->
+                                                            <mat-option
+                                                                *ngFor="let dsetForAdapter of filteredMethods | async"
+                                                                [value]="dsetForAdapter">
+                                                                {{dsetForAdapter.alias}}</mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                </div>
+                                                <div *ngIf="adaptermethodAvaibale">
+                                                    <span
+                                                        *ngIf="this.data.element.attributes.adaptermethod.alias!=undefined &amp;&amp; this.data.element.attributes.adaptermethod.alias!=null"
+                                                        class="selector-783-42">{{this.data.element.attributes.adaptermethod.adaptername}}
+                                                        : {{this.data.element.attributes.adaptermethod.alias}}</span>
+                                                    <span
+                                                        *ngIf="!(this.data.element.attributes.adaptermethod.alias!=undefined &amp;&amp; this.data.element.attributes.adaptermethod.alias!=null)"
+                                                        class="selector-783-43">{{this.data.element.attributes.adaptermethod.name}}</span>
+                                                    &nbsp;&nbsp;
+                                                    <!-- <i *ngIf="this.data.element.attributes.adaptermethod" class="fa fa-info selector-783-44" style="margin-left: 1vh; visibility: visible;"
+                                                    (click)="showAdapterMethodInfo()"></i> &nbsp;&nbsp;
+                                                <i *ngIf="this.data.element.attributes.adaptermethod" class="fa fa-edit selector-783-45" style="margin-left: 1vh; visibility: visible;"
+                                                    (click)="showAdapterMethod()"></i> -->
+                                                </div>
+                                            </div>
+
+                                            <!-- <div *ngIf="key==='azuredataset'">
+                                                    <mat-form-field class="selector-783-76">
+                                                        <mat-select [disabled]="isAuth" placeholder="Select Azure Dataset" [formControl]="azuredataset"
+                                                            (selectionChange)="dropChange('azuredataset')">
+                                                            <mat-option *ngFor="let dset of azuredatasets" [value]="dset">
+                                                                {{dset}}</mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                    <button mat-mini-fab color="primary" aria-label="Config" class="overlay btnColor right smaller"
+                                                        (click)="reload(key)">
+                                                        <mat-icon class="material-icons cus" matTooltip="Refresh">
+                                                            autorenew
+                                                        </mat-icon>
+                                                    </button>
+                                                </div> -->
+
+                                            <div *ngIf="data.element.formats[key] === 'restdataset'">
+
+                                                <div *ngIf="key == 'Dataset'">
+                                                    <mat-form-field class="selector-783-76">
+                                                        <mat-select [disabled]="isAuth" [(ngModel)]="Bucket_list"
+                                                            (selectionChange)="dropChanges(key ,Bucket_list,data.element.formats[key])">
+                                                            <mat-option *ngFor="let dset of apiValue" [value]="dset">
+                                                                {{dset}}</mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                    <button mat-mini-fab color="primary" aria-label="Config"
+                                                        class="overlay btnColor right smaller" (click)="reload(key)">
+                                                        <mat-icon class="material-icons cus" matTooltip="Refresh">
+                                                            autorenew
+                                                        </mat-icon>
+                                                    </button>
+                                                </div>
+                                                <div *ngIf="key == 'Mlflowdataset'">
+                                                    <mat-form-field class="selector-783-76">
+                                                        <mat-select [disabled]="isAuth" [(ngModel)]="Bucket_list"
+                                                            (selectionChange)="dropChanges(key ,Bucket_list,data.element.formats[key])">
+                                                            <mat-option *ngFor="let dset of apiValue" [value]="dset">
+                                                                {{dset}}</mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                    <button mat-mini-fab color="primary" aria-label="Config"
+                                                        class="overlay btnColor right smaller" (click)="reload(key)">
+                                                        <mat-icon class="material-icons cus" matTooltip="Refresh">
+                                                            autorenew
+                                                        </mat-icon>
+                                                    </button>
+                                                </div>
+                                                <div *ngIf="key != 'Mlflowdataset' && key != 'Dataset'">
+                                                    <mat-form-field class="selector-783-76">
+                                                        <mat-select [disabled]="isAuth"
+                                                            [(ngModel)]="data.element.attributes[key]">
+                                                            <mat-option *ngFor="let dset of apiValue" [value]="dset">
+                                                                {{dset}}</mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                    <button mat-mini-fab color="primary" aria-label="Config"
+                                                        class="overlay btnColor right smaller"
+                                                        (click)="reload(key , data.element.formats[key])">
+                                                        <mat-icon class="material-icons cus" matTooltip="Refresh">
+                                                            autorenew
+                                                        </mat-icon>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div *ngIf="data.element.formats[key] === 'restdataset1'">
+
+                                                <mat-form-field class="selector-783-76">
+                                                    <mat-select [disabled]="isAuth"
+                                                        [(ngModel)]="data.element.attributes[key]">
+                                                        <mat-option *ngFor="let dset of apiValue1" [value]="dset">
+                                                            {{dset}}</mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                                <button mat-mini-fab color="primary" aria-label="Config"
+                                                    class="overlay btnColor right smaller" (click)="reload(key)">
+                                                    <mat-icon class="material-icons cus" matTooltip="Refresh">
+                                                        autorenew
+                                                    </mat-icon>
+                                                </button>
+
+
+
+                                            </div>
+                                            <div *ngIf="data.element.formats[key] === 'restdataset2'">
+                                                <mat-form-field class="selector-783-76">
+                                                    <mat-select [disabled]="isAuth"
+                                                        [(ngModel)]="data.element.attributes[key]">
+                                                        <mat-option *ngFor="let dset of apiValue2" [value]="dset">
+                                                            {{dset}}</mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                                <button mat-mini-fab color="primary" aria-label="Config"
+                                                    class="overlay btnColor right smaller" (click)="reload(key)">
+                                                    <mat-icon class="material-icons cus" matTooltip="Refresh">
+                                                        autorenew
+                                                    </mat-icon>
+                                                </button>
+                                            </div>
+
+
+                                            <div *ngIf="key==='vertexdataset'">
+                                                <mat-form-field class="selector-783-76">
+                                                    <mat-select [disabled]="isAuth" placeholder="Select Vertex Dataset"
+                                                        [formControl]="vertexdataset"
+                                                        (selectionChange)="dropChange('vertexdataset')">
+                                                        <mat-option *ngFor="let dset of vertexdatasets" [value]="dset">
+                                                            {{dset}}</mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                                <button mat-mini-fab color="primary" aria-label="Config"
+                                                    class="overlay btnColor right smaller" (click)="reload(key)">
+                                                    <mat-icon class="material-icons cus" matTooltip="Refresh">
+                                                        autorenew
+                                                    </mat-icon>
+                                                </button>
+                                            </div>
+                                            <!-- <div *ngIf="key==='model'">
+                                                    <mat-form-field class="selector-783-76">
+                                                        <mat-select [disabled]="isAuth" placeholder="Select Model" [formControl]="model"
+                                                            (selectionChange)="dropChange('model')">
+                                                            <mat-option *ngFor="let dset of models" [value]="dset">
+                                                                {{dset}}</mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                    <button mat-mini-fab color="primary" aria-label="Config" class="overlay btnColor right smaller"
+                                                        (click)="reload(key)">
+                                                        <mat-icon class="material-icons cus" matTooltip="Refresh">
+                                                            autorenew
+                                                        </mat-icon>
+                                                    </button>
+                                                </div> -->
+                                            <!-- <div *ngIf="key==='mlflowdataset'">
+                                                                                        <mat-form-field class="selector-783-76">
+                                                                                            <mat-select [disabled]="isAuth" placeholder="Select ICMM Dataset"
+                                                                                                [formControl]="mlflowdataset"
+                                                                                                (selectionChange)="dropChange('mlflowdataset')">
+                                                                                                <mat-option *ngFor="let dset of mlflowdatasets" [value]="dset">
+                                                                                                    {{dset}}</mat-option>
+                                                                                            </mat-select>
+                                                                                        </mat-form-field>
+                                                                                    </div> -->
+                                            <!-- <div *ngIf="key==='label'">
+                                                                                        <mat-form-field class="selector-783-76">
+                                                                                            <mat-select [disabled]="isAuth" placeholder="Select"
+                                                                                                [formControl]="label"
+                                                                                                (selectionChange)="dropChange('label')">
+                                                                                                <mat-option *ngFor="let dset of labels" [value]="dset">
+                                                                                                    {{dset}}</mat-option>
+                                                                                            </mat-select>
+                                                                                        </mat-form-field>
+                                                                                    </div> -->
+                                            <ng-template #create="" class="selector-783-46">
+                                                <!-- <button [disabled]="isAuth" (click)="showDatasets()"
+                                                                                            class="selector-783-47">Create Dataset</button> -->
+                                                <mat-form-field>
+                                                    <mat-select [disabled]="isAuth" placeholder="Select"
+                                                        (selectionChange)="datasetChooseType($event.value)">
+                                                        <mat-option value="create">Create Dataset</mat-option>
+                                                        <mat-option value="chooseexisting">Choose Existing Dataset
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>&nbsp;&nbsp;
+                                                <mat-form-field *ngIf="datasetchoosetype == 'chooseexisting'">
+                                                    <mat-select [disabled]="isAuth" placeholder="Select Dataset"
+                                                        (selectionChange)="onDatasetChange($event.value)">
+                                                        <mat-option>
+                                                            <ngx-mat-select-search [formControl]="datasetFilterCtrl"
+                                                                placeholderLabel="Search"
+                                                                noEntriesFoundLabel="No entries found">
+                                                            </ngx-mat-select-search>
+                                                        </mat-option>
+                                                        <mat-option *ngFor="let dset of filteredDatasets | async"
+                                                            [value]="dset">
+                                                            {{dset.alias}}</mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </ng-template>
+                                            <p-dialog header="Upload Dataset" [(visible)]="showupload"
+                                                [style]="{'height':'75vh','width':'75vw'}" [resizable]="true">
+                                                <lib-dataset-load *ngIf="createdDataset" [dataset]="createdDataset.name"
+                                                    class="selector-680-105">
+                                                </lib-dataset-load>
+                                            </p-dialog>
+                                            <!-- <button *ngIf="(data.element.name=='Dataset  Loader' || data.element.name=='Dataset  Extractor') 
+                                                                    && this.data.element.attributes.dataset" (click)="showDatasets()" style="margin-left: 20px; cursor: pointer">View</button>
+                                                                <button *ngIf="(data.element.name=='Dataset  Loader' || data.element.name=='Dataset  Extractor') 
+                                                                    && !this.data.element.attributes.dataset" (click)="showDatasets()" style="margin-left: 20px; cursor: pointer">Create</button> -->
+
+                                        </div>
+                                        <ng-template #nondataset_content="" class="selector-783-48">
+                                            <div *ngIf="key !== 'script'" class="selector-783-49">
+                                                <mat-form-field style="width:100%" class="selector-783-50">
+                                                    <div *ngIf="data.element.formats[key] !== undefined ;else defaultFormat"
+                                                        class="selector-783-51">
+                                                        <textarea rows="2" cols="40" [disabled]="isAuth" matInput=""
+                                                            matAutosizeMinRows="4"
+                                                            *ngIf="data.element.formats[key] === 'textarea'"
+                                                            [(ngModel)]="data.element.attributes[key]"
+                                                            class="le-u-pad-t-16 selector-783-52"
+                                                            style="line-height: normal;"></textarea>
+
+
+                                                        <input matInput type="number"
+                                                            *ngIf="data.element.formats[key] === 'Integer'"
+                                                            [(ngModel)]="data.element.attributes[key]">
+
+                                                        <mat-select [disabled]="isAuth"
+                                                            *ngIf="data.element.formats[key] === 'dropdown'"
+                                                            [(ngModel)]="data.element.attributes[key]"
+                                                            class="selector-783-53">
+                                                            <mat-option value="Saved Search" selected=""
+                                                                class="selector-783-54">Saved Search</mat-option>
+                                                            <mat-option *ngFor="let k of data.element.attributes[key]"
+                                                                value="{{k}}" class="selector-783-55">{{k}}</mat-option>
+                                                        </mat-select>
+                                                        <mat-select [disabled]="isAuth"
+                                                            *ngIf="data.element.formats[key] === 'dropdownDataset'"
+                                                            [(ngModel)]="data.element.attributes[key]"
+                                                            class="selector-783-53">
+                                                            <mat-option value="Saved Search" selected=""
+                                                                class="selector-783-54">Saved Search</mat-option>
+                                                        </mat-select>
+                                                        <mat-select [disabled]="isAuth"
+                                                            *ngIf="data.element.formats[key] === 'pipelineArgdropdown'"
+                                                            [(ngModel)]="data.element.attributes[key]">
+                                                            <mat-option value="Saved Search" selected="">Saved
+                                                                Search</mat-option>
+                                                            <mat-option *ngFor="let parg of data.pipelineArg"
+                                                                [value]="parg.value">
+                                                                {{parg.key}}</mat-option>
+                                                        </mat-select>
+                                                        <mat-select [disabled]="isAuth"
+                                                            *ngIf="data.element.formats[key] === 'Customdropdown'"
+                                                            [(ngModel)]="data.element.attributes[key]"
+                                                            (selectionChange)="usermap($event,data.element.formats)">
+                                                            <mat-option
+                                                                *ngFor="let value of data.element.formats['Customdropdown']"
+                                                                value="{{value.variable}}">{{value.variable}}</mat-option>
+                                                        </mat-select>
+                                                        <mat-select [disabled]="isAuth"
+                                                            *ngIf="data.element.formats[key] === 'Customdropdown2'"
+                                                            [(ngModel)]="data.element.attributes[key]"
+                                                            (selectionChange)="usermap($event,data.element.formats)">
+                                                            <mat-option
+                                                                *ngFor="let value of data.element.formats['Customdropdown2']"
+                                                                value="{{value.variable}}">{{value.variable}}</mat-option>
+                                                        </mat-select>
+                                                        <mat-select [disabled]="isAuth"
+                                                            *ngIf="data.element.formats[key] === 'dropValues'"
+                                                            [(ngModel)]="data.element.attributes[key]"
+                                                            (selectionChange)="usermapping($event,data.element.formats)">
+                                                            <mat-option
+                                                                *ngFor="let value of data.element.formats['dropValues']"
+                                                                value="{{value}}">{{value}}</mat-option>
+                                                        </mat-select>
+                                                        <mat-select [disabled]="isAuth"
+                                                            *ngIf="data.element.formats[key] === 'dropValues1'"
+                                                            [(ngModel)]="data.element.attributes[key]">
+                                                            <mat-option
+                                                                *ngFor="let value of data.element.formats['dropValues1']"
+                                                                value="{{value}}">{{value}}</mat-option>
+                                                        </mat-select>
+                                                        <mat-select [disabled]="isAuth"
+                                                            *ngIf="data.element.formats[key] === 'dropValues2'"
+                                                            [(ngModel)]="data.element.attributes[key]">
+                                                            <mat-option
+                                                                *ngFor="let value of data.element.formats['dropValues2']"
+                                                                value="{{value}}">{{value}}</mat-option>
+                                                        </mat-select>
+                                                        <mat-select [disabled]="isAuth"
+                                                            *ngIf="data.element.formats[key] === 'dropValues3'"
+                                                            [(ngModel)]="data.element.attributes[key]">
+                                                            <mat-option
+                                                                *ngFor="let value of data.element.formats['dropValues3']"
+                                                                value="{{value}}">{{value}}</mat-option>
+                                                        </mat-select>
+                                                        <mat-select [disabled]="isAuth"
+                                                            *ngIf="data.element.formats[key] === 'dropValues4'"
+                                                            [(ngModel)]="data.element.attributes[key]">
+                                                            <mat-option
+                                                                *ngFor="let value of data.element.formats['dropValues4']"
+                                                                value="{{value}}">{{value}}</mat-option>
+                                                        </mat-select>
+                                                        <mat-select [disabled]="isAuth"
+                                                            *ngIf="data.element.formats[key] === 'datasetdropdown'"
+                                                            [(ngModel)]="data.element.attributes[key]">
+                                                            <!-- <mat-option *ngFor="let value of columnList" value="{{value}}">
+                                                                    {{value}}</mat-option> -->
+                                                            <mat-option value="1">
+                                                                1</mat-option>
+                                                        </mat-select>
+                                                        <mat-select [disabled]="isAuth"
+                                                            *ngIf="data.element.formats[key] === 'api'"
+                                                            [(ngModel)]="data.element.attributes[key]"
+                                                            (selectionChange)="usermapping($event,data.element.formats)">
+                                                            <mat-option *ngFor="let value of apiValues"
+                                                                value="{{value}}">
+                                                                {{value}}</mat-option>
+                                                        </mat-select>
+                                                        <mat-select [disabled]="isAuth"
+                                                            *ngIf="data.element.formats[key] === 'api1'"
+                                                            [(ngModel)]="data.element.attributes[key]">
+                                                            <mat-option *ngFor="let value of apiValues1"
+                                                                value="{{value}}">
+                                                                {{value}}</mat-option>
+                                                        </mat-select>
+                                                        <!-- <mat-select [disabled]="isAuth"
+                                                                *ngIf="data.element.formats[key] === 'userapi'"
+                                                                [(ngModel)]="data.element.attributes[key]">
+                                                                <mat-option
+                                                                    *ngFor="let value of apiValues1"
+                                                                    value="{{data.element.formats['response']?value[data.element.formats['response']]:value}}">{{data.element.formats['response']?value[data.element.formats['response']]:value}}</mat-option>
+                                                            </mat-select> -->
+                                                        <mat-select [disabled]="isAuth"
+                                                            *ngIf="data.element.formats[key] === 'taskdropdown'"
+                                                            [(ngModel)]="data.element.attributes[key]">
+                                                            <mat-option value="classification">Classification
+                                                            </mat-option>
+                                                            <mat-option value="regression">Regression</mat-option>
+                                                            <mat-option value="text-classification">Text-Classification
+                                                            </mat-option>
+                                                            <mat-option value="text-classification-multilabel">
+                                                                Text-Classification-Multilabel</mat-option>
+                                                            <mat-option value="text-ner">text-ner</mat-option>
+                                                            <mat-option value="image-classification-multiclass">
+                                                                Image-Classification-Multiclass</mat-option>
+                                                            <mat-option value="image-classification-multilabel">
+                                                                Image-Classification-Multilabel</mat-option>
+                                                            <mat-option value="image-object-detection">
+                                                                Image-Object-Detection</mat-option>
+                                                        </mat-select>
+                                                        <div *ngIf="data.element.formats[key] !== 'textarea' &amp;&amp;data.element.formats[key] !== 'Integer' &amp;&amp;  data.element.formats[key] !== 'dropValues' &amp;&amp; data.element.formats[key] !== 'datasetdropdown' &amp;&amp; data.element.formats[key] !== 'dropdown' &amp;&amp; data.element.formats[key] !== 'pipelineArgdropdown'&amp;&amp; data.element.formats[key] !== 'dropdownDataset' &amp;&amp; data.element.formats[key] !== 'dropValues1' &amp;&amp; data.element.formats[key] !== 'dropValues2' &amp;&amp; data.element.formats[key] !== 'dropValues3' &amp;&amp;data.element.formats[key] !== 'dropValues4' &amp;&amp;data.element.formats[key] !== 'api' &amp;&amp; data.element.formats[key] !== 'api1' &amp;&amp; data.element.formats[key] !== 'taskdropdown'  &amp;&amp; data.element.formats[key] !== 'list' &amp;&amp;
+                                                            data.element.formats[key] !== 'Customdropdown'&amp;&amp; data.element.formats[key] !== 'Customdropdown2' "
+                                                            class="le-u-pad-t-16 selector-783-60" style="
+                                                            display: grid;">
+                                                            <input [disabled]="isAuth" matInput=""
+                                                                *ngIf="key !== 'password'" type="text"
+                                                                [(ngModel)]="data.element.attributes[key]" size="40"
+                                                                class="selector-783-61" />
+                                                            <input [disabled]="isAuth" matInput=""
+                                                                *ngIf="key === 'password'" type="password"
+                                                                [(ngModel)]="data.element.attributes[key]" size="40"
+                                                                class="selector-783-62" />
+                                                        </div>
+                                                        <div *ngIf="data.element.formats[key] === 'checkbox'"
+                                                            class="selector-783-63">
+                                                            <mat-checkbox [disabled]="isAuth"
+                                                                [(ngModel)]="data.element.attributes[key]"
+                                                                class="selector-783-64">
+                                                            </mat-checkbox>
+                                                        </div>
+                                                        <div *ngIf="data.element.formats[key] === 'file'"
+                                                            class="selector-783-65">
+                                                            <input [disabled]="isAuth" id="files" type="file"
+                                                                multiple="" ng2FileSelect="" [uploader]="uploader"
+                                                                (change)="choosenFileChanged()" accept=".jar"
+                                                                class="selector-783-66" />
+                                                            <label for="files"
+                                                                class="selector-783-67">{{choosenFile}}</label>
+                                                            <span *ngIf="uploader.queue.length > 0"
+                                                                class="selector-783-68">
+                                                                <button [disabled]="isAuth" type="button"
+                                                                    class="mat-raised-button selector-783-69"
+                                                                    (click)="uploads()">
+                                                                    <span class="fa fa-upload selector-783-70"></span>
+                                                                    Upload
+                                                                </button>
+                                                            </span>
+                                                        </div>
+                                                        <div *ngIf="data.element.formats[key] === 'file1'"
+                                                            class="selector-783-65">
+                                                            <input [disabled]="isAuth" id="files" type="file"
+                                                                multiple="" ng2FileSelect="" [uploader]="uploader"
+                                                                (change)="choosenFileChanged()" accept=".zip"
+                                                                class="selector-783-66" />
+                                                            <label for="files"
+                                                                class="selector-783-67">{{choosenFile}}</label>
+                                                            <span *ngIf="uploader.queue.length > 0"
+                                                                class="selector-783-68">
+                                                                <button [disabled]="isAuth" type="button"
+                                                                    class="mat-raised-button selector-783-69"
+                                                                    (click)="uploads()">
+                                                                    <span class="fa fa-upload selector-783-70"></span>
+                                                                    Upload
+                                                                </button>
+                                                            </span>
+                                                        </div>
+                                                        <div *ngIf="data.element.formats[key] === 'list'">
+                                                            <input [disabled]="true" hidden="true" matInput=""
+                                                                type="text" />
+                                                        </div>
+                                                    </div>
+                                                    <ng-template #defaultFormat="" class="selector-783-71">
+
+                                                        <input matInput="" type="text"
+                                                            [(ngModel)]="data.element.attributes[key]"
+                                                            class="selector-783-72" />
+                                                    </ng-template>
+                                                    <!-- <button 
+                                                            *ngIf="data.element.attributes[key] &amp;&amp; data.element.formats[key] !== 'dropdown' && data.element.formats[key] !== 'dropdownDataset' && data.element.formats[key] !== 'list'"
+                                                            matSuffix="" mat-icon-button="" aria-label="Clear"
+                                                            (click)="data.element.attributes[key]=''" class="selector-783-73"> -->
+                                                    <!-- <mat-icon class="selector-783-74">close</mat-icon> -->
+                                                    <i *ngIf="data.element.attributes[key] &amp;&amp; data.element.formats[key] !== 'dropdown' && data.element.formats[key] !== 'dropdownDataset' && data.element.formats[key] !== 'list'"
+                                                        aria-label="Clear" style="visibility: visible;"
+                                                        (click)="data.element.attributes[key]=''"
+                                                        class="icon x-16 close-icon"></i>
+                                                    <!-- </button> -->
+
+                                                </mat-form-field>
+                                                <div *ngIf="data.element.formats[key] === 'list'">
+                                                    <a *ngIf="!isAuth" class="fa fa-plus" href="javascript:void(0);"
+                                                        matTooltip="Add Step Method"
+                                                        (click)="displayDialog('ADD', '', '', 'Text', 0, '',key)"></a>&nbsp;&nbsp;
+                                                    <mat-tree [dataSource]="getDatasource(key)"
+                                                        [treeControl]="treeControl" class="example-tree col-10">
+                                                        <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle="">
+                                                            <li class="mat-tree-node">
+                                                                <button mat-icon-button="" disabled=""></button>
+                                                                <span
+                                                                    style="max-width: -webkit-fill-available">{{node.name+'
+                                                                    : '+getAlias(node)}}&nbsp;&nbsp;
+                                                                    <a *ngIf="!isAuth" class="fa fa-pencil"
+                                                                        href="javascript:void(0);" matTooltip="Edit"
+                                                                        (click)="displayDialog('MODIFY', node.name, node.value, node.type, node.index, node.alias,key)"></a>&nbsp;&nbsp;
+                                                                    <a *ngIf="!isAuth" class="fa fa-minus"
+                                                                        href="javascript:void(0);" matTooltip="Delete"
+                                                                        (click)="deleteNode(node.index)"></a>
+                                                                </span>
+                                                            </li>
+                                                        </mat-tree-node>
+                                                    </mat-tree>
+                                                </div>
+                                            </div>
+
+                                        </ng-template>
+                                    </ng-template>
+                                    <!-- </div>
+                                    <ng-template #otherNew_content="" class="selector-783-75">
+                                        <mat-form-field class="selector-783-76">
+                                            <mat-select [disabled]="isAuth" placeholder="Select Input Column"
+                                                [formControl]="inputColumn" (selectionChange)="dropChange('inputCol')"
+                                                class="selector-783-77">
+                                                <mat-option *ngFor="let col of colList" [value]="col" class="selector-783-78">
+                                                    {{col}}</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </ng-template> -->
+                                </div>
+                                <ng-template #othersNew_content="" class="selector-783-79">
+                                    <mat-form-field class="selector-783-80">
+                                        <mat-select [disabled]="isAuth" placeholder="Select Input Columns"
+                                            [formControl]="inputColumns" (selectionChange)="dropChange('inputCols')"
+                                            multiple="" class="selector-783-81">
+                                            <mat-option *ngFor="let col of colList" [value]="col"
+                                                class="selector-783-82">
+                                                {{col}}</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </ng-template>
+                            </td>
+                        </tr>
+                        <tr class="d-flex selector-783-25" *ngIf="gotselected">
+                            <td>4</td>
+                            <td>Section</td>
+                            <td class="col-8 selector-783-29">
+                                <div>
+                                    <mat-chip-grid #chipList class="mat-select" class="mtop1p">
+                                        <mat-chip-row *ngFor="let tag of tagsList" [selectable]="selectable"
+                                            [removable]="removable" (removed)="remove(tag)">
+                                            {{tag}}
+                                            <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+                                        </mat-chip-row>
+                                        <input placeholder="Enter Tag Name" class="select" [matChipInputFor]="chipList"
+                                            [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                                            [matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="add($event)"
+                                            name="nameForTag" />
+                                    </mat-chip-grid>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="d-flex selector-783-25" *ngIf="gotselecteds">
+                            <td>4</td>
+                            <td>Label</td>
+                            <td class="col-8 selector-783-29">
+
+                                <mat-form-field class="paddingRight1em">
+                                    <mat-select [(ngModel)]="Bucket_list"
+                                        (selectionChange)="dropChange('Label',Bucket_list)">
+                                        <mat-option *ngFor="let food of labels_icmm" [value]="food">
+                                            {{food}}
+                                        </mat-option>
+                                    </mat-select>
+
+                                </mat-form-field>
+                            </td>
+                        </tr>
+
+                        <tr *ngFor="let key of class_key; let i = index" class="d-flex selector-783-25 d-height">
+
+                            <td class="le-u-pad-t-16 col-1 selector-783-26">{{i+2}}</td>
+                            <td class="col-3 selector-783-27">
+                                <label class="le-u-pad-t-16 selector-783-28">{{key}}</label>
+                            </td>
+                            <td class="col-8 selector-783-29">
+                                <input [disabled]="isAuth" matInput="" type="text"
+                                    [(ngModel)]="data.element.attributes[key]" class="selector-783-61" />
+                            </td>
+
+                        </tr>
+                        <tr *ngFor="let key of class_key2; let i = index" class="d-flex selector-783-25 d-height">
+
+                            <td class="le-u-pad-t-16 col-1 selector-783-26">{{i+2}}</td>
+                            <td class="col-3 selector-783-27">
+                                <label class="le-u-pad-t-16 selector-783-28">{{key}}</label>
+                            </td>
+                            <td class="col-8 selector-783-29">
+                                <input [disabled]="isAuth" matInput="" type="text"
+                                    [(ngModel)]="data.element.attributes[key]" class="selector-783-61" />
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+                    <tfoot class="selector-783-83">
+                    </tfoot>
+                </table>
+            </leds-data-grid>
+            <!-- </div> -->
+            <div *ngIf="scriptShow" class="selector-783-84">
+                <div class="selector-783-85">
+                    <label class="selector-783-86">Script : </label>
+                </div>
+                <br class="selector-783-87">
+                <div class="row mb-4 selector-783-88">
+                    <div class="col-12 selector-783-89">
+                        <div class="code-editor selector-783-90" #editor=""></div>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="scriptShows" class="selector-783-84">
+                <div class="selector-783-85">
+                    <label class="selector-783-86">env_yaml : </label>
+                </div>
+                <br class="selector-783-87">
+                <div class="row mb-4 selector-783-88">
+                    <div class="col-12 selector-783-89">
+                        <div class="code-editor selector-783-95" #editors=""></div>
+                    </div>
+                </div>
+            </div>
+        </mat-dialog-content>
+
+        <!-- <mat-dialog-actions class="selector-783-91">
+            <button *ngIf="!isAuth" mat-button="" (click)="saveProperties()" class="selector-783-92">SAVE</button>
+            <button *ngIf="!isAuth" mat-button="" (click)="deleteElement()" class="selector-783-93">DELETE</button>
+            <button *ngIf="!isAuth &amp;&amp; data.element.alias=='Python  Script  Transformer'" mat-button=""
+                (click)="publish()" class="selector-783-94">PUBLISH</button>
+        </mat-dialog-actions> -->
+
+        <div class="col-lg-12 col-md-12 le-u-mar-b-16">
+            <leds-button *ngIf="!isAuth" class="le-u-pad-lr-32 d-flex justify-content-end"
+                style="color:var(--base-color); position: absolute;right: 12rem;" nameText="primaryButton"
+                idText="primaryButton" [disabled]="false" buttonType="button" designType="primary"
+                (click)="saveProperties()">SAVE</leds-button>
+            <leds-button *ngIf="!isAuth" class="d-flex justify-content-end" nameText="primaryButton"
+                idText="primaryButton" [disabled]="false" buttonType="button" designType="primary"
+                (click)="deleteElement()">DELETE</leds-button>
+            <leds-button *ngIf="!isAuth &amp;&amp; data.element.alias=='Python  Script  Transformer'"
+                class="d-flex justify-content-end" nameText="primaryButton" idText="primaryButton" [disabled]="false"
+                buttonType="button" designType="primary" (click)="publish()">PUBLISH</leds-button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,17 @@
+id,name,industry_id,last_updated_date,last_updated_by
+1,Wireless Service Provider,4,NULL,NULL
+2,Downstream Refining and Manufacturing,6,NULL,NULL
+3,"Supply, Transmission and Trading",6,NULL,NULL
+4,General Merchandise or Specialty,9,NULL,NULL
+5,Freight Providers,2,NULL,NULL
+6,Retail Banking,8,NULL,NULL
+7,Finance,2,NULL,NULL
+8,Corporate IT,8,NULL,NULL
+9,Wireline Service Provider,4,NULL,NULL
+10,IT,3,NULL,NULL
+11,"Engines, Power generation, Fuel systems",1,NULL,NULL
+12,Energy,7,NULL,NULL
+13,General Insurance,14,NULL,NULL
+14,IT Services,17,NULL,NULL
+15,Public sector,16,NULL,NULL
+16,Medical Technologies,18,NULL,NULL

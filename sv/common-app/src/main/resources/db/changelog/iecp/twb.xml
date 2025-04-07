@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<changeSet author="Leap (generated)" id="1614785155891-123">
+		<createTable tableName="twb_question">
+			<column autoIncrement="true" name="id" type="SMALLINT(6)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_by" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="question_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="question_decision_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="question_mandatory_ind" type="TINYINT(1)" />
+			<column name="question_text" type="VARCHAR(250)">
+				<constraints nullable="false" />
+			</column>
+			<column name="document_id" type="INT" />
+			<column name="question_type_id" type="SMALLINT(6)" />
+			<column name="questionnaire_id" type="SMALLINT(6)" />
+		</createTable>
+	</changeSet>
+	
+</databaseChangeLog>	

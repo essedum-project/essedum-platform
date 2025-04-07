@@ -1,0 +1,118 @@
+<!-- <div class="le-u-mar-t-24 le-u-header-lg">
+    Recent Artifacts
+</div> -->
+<div class="" *ngIf="groupkey.length>0;else emptyState">
+    <div class="le-u-mar-t-16">
+        <div class="d-flex w-100" style="flex-wrap: wrap;">
+            <div class="" *ngFor="let grp of groupkey">
+                <span (click)="selectionChange(grp)"
+                    [ngStyle]="{'backgroundColor': (selectedGroup==grp) ? '#EDCFFF':  'white'}"
+                    class="aip-cursor le-u-mar-lr-8 aip-panel-shadow aip-ivm-artifact-clip">{{grp}}</span>
+            </div>
+        </div>
+    </div>
+    <!-- Recent Artifacts Body -->
+    <div class="le-u-mar-t-16">
+        <div class="" style="position:relative">
+            <div (click)="scrollLeft1()" class="aip-ivm-scroll-left le-u-circle-icon-grey"> <i
+                    class="icon x-24 previous-icon "> </i></div>
+            <div (click)="scrollRight1()" class="aip-ivm-scroll-right le-u-circle-icon-grey"> <i
+                    class="icon x-24 next-icon "> </i></div>
+            <div #scrollableDiv1 class="aip-ivm-intiative-grid">
+                <div class="aip-cursor" *ngFor="let card of groupData[selectedGroup];  index as i"
+                    style="border-radius: 1.8rem;">
+                    <leds-card designType='simple' [actionsOnHover]='true'
+                        style="padding:0px !important; height: 150px; display: grid; width:25rem">
+                        <div class="le-c-card__container-right">
+                            <span class="le-c-badge float-end"
+                                [ngClass]="[card.data.status=='Registered'?'le-c-badge--blue ':'le-c-badge--active',card.data.status=='Undeployed'?'le-c-badge--warning ':'le-c-badge--active']">{{card.data.status}}</span>
+                        </div>
+                        <div class="">
+                            <div *ngIf="card.data.type=='r'" class="le-u-header-sm le-u-text-primary-80 le-u-mar-b-8">
+                                Read</div>
+                            <div *ngIf="card.data.type=='rw'" class="le-u-header-sm le-u-text-primary-80 le-u-mar-b-8">
+                                Read & Write</div>
+                            <div *ngIf="card.data.type!='rw' && card.data.type!='r'"
+                                class="le-u-header-sm le-u-text-primary-80 le-u-mar-b-8">
+                                {{card.data.type}}</div>
+                        </div>
+                        <mat-card-header>
+                            <mat-card-title class="le-c-card__container clearfix">
+                                <div class="le-c-card__container-left w-100">
+                                    <h2 class="le-u-header-xl le-u-ellipsis aip-fullname-card"
+                                        *ngIf="card.data.name && card.data.name!=''" style="line-height: 2rem;">
+                                        {{card.data.name | titlecase}}</h2>
+                                    <h2 *ngIf="!card.data.name && card.data.name==''"
+                                        class="le-u-header-xl le-u-ellipsis aip-fullname-card"
+                                        style="line-height: 2rem;">
+                                        {{card.data.sourceName | titlecase}}</h2>
+                                </div>
+
+                            </mat-card-title>
+                            <mat-card-subtitle
+                                class="le-u-body-sm le-u-text-neutral-80 le-u-ellipsis">{{card.data.lastmodifieddate}}</mat-card-subtitle>
+                        </mat-card-header>
+                        <mat-card-content class="le-u-no-mar-b" style="color: #737373;">
+                            <p class="le-u-body-md le-u-text-neutral-80 le-u-line-2 aip-desc-ellipsis"
+                                [ngClass]="card.data.description==''||card.data.description==null||card.data.description=='null'?'noDisplay':'showDesc'">
+                                {{card.data.description}}
+                            </p>
+                        </mat-card-content>
+                        <mat-card-actions class="le-c-card__action-hover d-flex justify-content-between">
+                            <leds-button nameText="textButton" idText="textButton" [disabled]="false"
+                                buttonType="button" designType="text" styleClass=" DSA_wb_Btn_small"
+                                (click)="redirection(card,'preview')"><span>View
+                                    Details</span></leds-button>
+                            <leds-overflow *ngIf="unlinkinitiative">
+                                <div ngbDropdown
+                                    class="aip-led-icons d-inline-block le-u-mar-r-8 le-u-v-mid float-end le-c-card__action-ul">
+                                    <a href="javascript:void(0);" id="OverflowMenu_dd" ngbDropdownToggle
+                                        (click)="clickactive($event);" aria-label="menu icon">
+                                        <i aria-hidden="true" class="icon x-24 v-menu-icon"></i>
+                                    </a>
+                                    <div ngbDropdownMenu aria-labelledby="OverflowMenu_dd"
+                                        style="display: grid;justify-content: center;">
+                                        <ul overflowList class="float-end le-u-mar-t-8  le-c-card__action-ul"
+                                            style="display: flex;flex-direction: column;">
+                                            <li overflowListItem (click)="unlink(card)">
+                                                <span overflowSpan>Unlink Component</span>
+                                            </li>
+                                        </ul>
+
+                                            <!-- <li><span *ngIf="editAuth" class="le-u-body-md  aip-cursor"
+                                                    (click)="redirection(card,'edit')">Edit</span>
+                                            </li>
+                                            <li *ngIf="card.data.status=='Registered' || card.data.status=='Undeployed'"
+                                                overflowListItem><span *ngIf="deployAuth" aria-placeholder="Deploy"
+                                                    class=" aip-cursor le-u-body-md"
+                                                    (click)="redirection(card,'deploy')">Deploy</span>
+                                            </li>
+                                            <li overflowListItem *ngIf="card.data.status=='Deployed'">
+                                                <span *ngIf="deleteAuth" class="le-u-body-md aip-cursor"
+                                                    (click)="deleteDeployment(card)">Delete
+                                                    Deployment</span>
+                                            </li>
+                                            <li overflowListItem>
+                                                <span *ngIf="deleteAuth" class="le-u-body-md aip-cursor"
+                                                    (click)="deleteModels(card)">Delete</span>
+                                            </li> -->
+                                        <!-- </ul> -->
+                                    </div>
+                                </div>
+                            </leds-overflow>
+                        </mat-card-actions>
+                    </leds-card>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<ng-template #emptyState>
+    <div class="le-u-body-md le-u-text-neutral-80 le-u-line-2 aip-desc-ellipsis">
+        <div class="d-flex justify-content-center align-items-center flex-column">
+            <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive" alt="aip_empty_state_leds"
+                style="width:15rem" />
+            No connected artifacts for now!
+        </div>
+    </div>
+</ng-template>

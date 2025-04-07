@@ -1,0 +1,333 @@
+<div class="container-fluid backgroud-color">
+    <div class="le-l-level1-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="le-l-level1-middle-col le-l-base-layout-center">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <span style="cursor: pointer;">
+                                <i class="aip-led-icons icon x-24 back-icon" (click)="navigate()"></i>
+                            </span>
+                            <span class="le-u-mar-l-8 le-u-header-xxl">Clustering</span>
+                        </div>
+                        <div class="align-items-center">
+                            <i class="icon x-24 icon_save" style="cursor: pointer;" (click)="save()"></i>
+                        </div>
+                    </div>
+
+                    <div class="le-l-level2-middle-ctr">
+                        <div class="le-l-level2-middle-col le-u-mar-b-24__mb d-flex main-container">
+                            <div class="le-u-mar-lr-8 col-md-3 pannel-shadow" type="default" styleClass=""
+                                contentClass="">
+                                <div class="main-container">
+                                    <div class="sub-main-container pannel-shadow"
+                                        (click)="selectChangeHandler('data_setup')"
+                                        [ngStyle]="selectedStep('data_setup')">
+                                        <span class="le-u-header-l aiworker-head-style">Data setup</span>
+                                    </div>
+                                    <div class="sub-main-container pannel-shadow"
+                                        (click)="selectChangeHandler('data_preview')"
+                                        [ngStyle]="selectedStep('data_preview')">
+                                        <span class="le-u-header-l aiworker-head-style">Data Preview</span>
+                                    </div>
+                                    <leds-button class="sub-main-container pannel-shadow"
+                                        (click)="selectChangeHandler('detect_language'); anotherFunction('LanguageDetection')"
+                                        [ngStyle]="selectedStep('detect_language')">
+                                        <span class="le-u-header-l aiworker-head-style">Detect Language</span>
+                                    </leds-button>
+                                    <div class="sub-main-container pannel-shadow"
+                                        (click)="selectChangeHandler('select_clusters')"
+                                        [ngStyle]="selectedStep('select_clusters')">
+                                        <span class="le-u-header-l aiworker-head-style">Select Clusters</span>
+                                    </div>
+                                    <div class="sub-main-container pannel-shadow"
+                                        (click)="selectChangeHandler('dashboard')"
+                                        [ngStyle]="selectedStep('dashboard')">
+                                        <span class="le-u-header-l aiworker-head-style">Dashboard</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="le-u-mar-lr-8 col-md-9 pannel-shadow" type="default" styleClass=""
+                                contentClass="">
+                                <div *ngIf="steps.data_setup" class="main-container">
+                                    <div style="margin: 1em">
+                                        <div ledsTabGroup [type]="type" [headerBg]="headerBg">
+                                            <mat-tab-group (selectedIndexChange)="basicReqTabChange($event)">
+                                                <mat-tab>
+                                                    <ng-template mat-tab-label>Select Dataset</ng-template>
+                                                </mat-tab>
+                                                <mat-tab>
+                                                    <ng-template mat-tab-label>Upload Data</ng-template>
+                                                </mat-tab>
+                                            </mat-tab-group>
+                                        </div>
+                                    </div>
+                                    <div *ngIf="basicReqTab == 'selectDatasetTab'">
+                                        <div>
+
+                                            <span class="search-hero d-flex align-items-end col-md-12">
+                                                <!-- <span class="fa fa-plus-square selector-680-13" (click)="addDataset()" id="dset-reg-add" style="font-size:16px;
+                                            color: grey; padding-right: 3vh;padding-top: 3px;float: right; margin-top: 2vmin;" title="Add Dataset">
+                                              </span> &nbsp;&nbsp; -->
+                                                <leds-input-field
+                                                    style="width: 35%; margin-left: 59%; margin-top: 2vmin !important;"
+                                                    type="text" class="aip-panel-input" name="search"
+                                                    [(ngModel)]="search" (ngModelChange)="searching()"
+                                                    autocomplete="off" placeholder="Start searching" designType="search"
+                                                    [disabled]="false" [required]="false"></leds-input-field>
+                                            </span>
+
+                                            <div class="col-12 row no-mar pipeline-left-section no-gutter-left"
+                                                style="margin:15px !important;">
+                                                <div class="col-12 col-md-4" style="padding-bottom: 2%;"
+                                                    *ngFor="let dataset of allDatasets">
+                                                    <leds-card designType="mini">
+                                                        <div classs="select-99999">
+                                                            <mat-card-content>
+                                                                <div
+                                                                    class="pipeline-header d-flex justify-content-between align-items-center le-u-mar-b-16">
+                                                                    <div (click)="changeStage(dataset.name)"
+                                                                        class="le-u-body-md aip-related-ellipsis aip-cursor">
+                                                                        {{ dataset.alias | titlecase}}</div>
+                                                                </div>
+                                                                <i style="float: right;margin-top: 1%;"
+                                                                    class="fa fa-info-circle" title="View"
+                                                                    (click)="showview=true;selecteddataset=dataset"></i>
+
+                                                                <i style="float: right;margin-top: 1%;margin-right:5%; "
+                                                                    class="fa fa-upload " title="Upload"
+                                                                    *ngIf="dataset?.type == 'rw'"
+                                                                    (click)="upload=true;selecteddataset=dataset">
+                                                                </i>
+                                                                <div class="">
+                                                                    <div
+                                                                        class="le-u-header-sm le-u-text-neutral-80 d-block le-u-mar-b-4 aip-cursor">
+                                                                        {{ dataset.description}}
+                                                                    </div>
+                                                                </div>
+                                                            </mat-card-content>
+                                                        </div>
+                                                    </leds-card>
+                                                </div>
+                                            </div>
+                                            <div class="le-u-pad-b-16 d-flex justify-content-center">
+                                                <leds-button nameText="textButton" idText="textButton" designType="text"
+                                                    buttonType="button" [disabled]="page==0" id="disp-lst-First"
+                                                    (click)="getDatasets('First')">First</leds-button>
+                                                <leds-button nameText="textButton" idText="textButton" designType="text"
+                                                    buttonType="button" [disabled]="page==0"
+                                                    (click)="getDatasets('Prev')"
+                                                    id="disp-lst-Prev">&lt;&lt;&nbsp;Prev</leds-button>
+                                                <leds-button nameText="textButton" idText="textButton" designType="text"
+                                                    buttonType="button" [disabled]="page==lastPage"
+                                                    (click)="getDatasets('Next')"
+                                                    id="disp-lst-Next">Next&nbsp;&gt;&gt;</leds-button>
+                                                <leds-button nameText="textButton" idText="textButton" designType="text"
+                                                    buttonType="button" [disabled]="page==lastPage" id="disp-lst-Last"
+                                                    (click)="getDatasets('Last')">Last</leds-button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div *ngIf="basicReqTab == 'uploadDataTab'">
+                                        <app-dataset-load [clustering]="true"
+                                            [selectedDataset]="selectedDataset"></app-dataset-load>
+                                    </div>
+                                </div>
+                                <div *ngIf="steps.data_preview" class="main-container">
+                                    <app-dataset-table-view [datasetname]="selectedDataset"></app-dataset-table-view>
+                                </div>
+                                <div *ngIf="steps.detect_language" class="main-container">
+                                    <div *ngIf="isLoading">
+                                        <leds-card>
+                                            <div class="d-flex justify-content-center align-items-center flex-column">
+                                                <img src="assets/images/aip_loader_image_leds.svg" alt="Loading"
+                                                    style="margin-bottom: 8px;" />
+                                                <b class="m-2">Patience is a virtue!</b>
+                                                <b>Hang tight while we load the results...</b>
+                                                <br>
+                                                <leds-spinner bdColor="#EFEFEF" [size]="'default'" [zIndex]="0"
+                                                    [color]="'#8626c3'" [type]="'ball-pulse-sync'" [fullScreen]="false"
+                                                    [showSpinner]="true">
+                                                </leds-spinner>
+                                            </div>
+                                        </leds-card>
+                                    </div>
+                                    <leds-panel *ngIf="!isLoading" [type]="'default'">
+                                        <div style="margin: 1em">
+                                            <div ledsTabGroup [type]="type" [headerBg]="headerBg">
+                                                <mat-tab-group (selectedIndexChange)="basicReqTabChange1($event)">
+                                                    <mat-tab>
+                                                        <ng-template mat-tab-label>Logs</ng-template>
+                                                    </mat-tab>
+                                                    <mat-tab>
+                                                        <ng-template mat-tab-label>Language Detection</ng-template>
+                                                    </mat-tab>
+                                                    <mat-tab>
+                                                        <ng-template mat-tab-label>Logs</ng-template>
+                                                    </mat-tab>
+                                                    <mat-tab>
+                                                        <ng-template mat-tab-label>Translated Data</ng-template>
+                                                    </mat-tab>
+                                                </mat-tab-group>
+                                            </div>
+                                        </div>
+                                        <div *ngIf="basicReqTab1 =='logsTab1'">
+                                            <app-jobs [cname]="detectedLangPipeline" [status]="jobStatus"
+                                                (status)="onStatusChange($event)"></app-jobs>
+                                            <div class="d-flex justify-content-end le-u-pad-32">
+                                                <leds-button nameText="primaryButton" idText="primaryButton"
+                                                    labelText="primary-button" [disabled]="false" [block]="false"
+                                                    buttonType="button" designType="primary"
+                                                    (click)="basicReqTabChange1(1)">
+                                                    Next
+                                                </leds-button>
+                                            </div>
+                                        </div>
+                                        <div *ngIf="basicReqTab1 == 'detectLangTab'">
+                                            <div *ngIf="!detectedLang">
+                                                <leds-card>
+                                                    <div
+                                                        class="d-flex justify-content-center align-items-center flex-column">
+                                                        <img src="assets/images/aip_loader_image_leds.svg" alt="Loading"
+                                                            style="margin-bottom: 8px;" />
+                                                        <b class="m-2">Patience is a virtue!</b>
+                                                        <b>Hang tight while we load the results...</b>
+                                                        <br>
+                                                        <leds-spinner bdColor="#EFEFEF" [size]="'default'" [zIndex]="0"
+                                                            [color]="'#8626c3'" [type]="'ball-pulse-sync'"
+                                                            [fullScreen]="false" [showSpinner]="true">
+                                                        </leds-spinner>
+                                                    </div>
+                                                </leds-card>
+                                            </div>
+                                            <div class="text-start le-u-pad-32" id="main1">
+                                                <h2
+                                                    class="le-u-header-xxl le-u-text-neutral-80 le-u-pad-t-32 le-u-pad-b-16">
+                                                    Detected Language is {{detectedLang}}
+                                                </h2>
+                                            </div>
+                                            <div class="le-c-guidedflow--center">
+                                                <ul
+                                                    class="le-c-card--choice js-card-choice le-c-guidedflow__list clearfix">
+                                                    <div class="d-flex flex-row">
+                                                        <div class="p-2 bold-text" style="align-content: center">
+                                                            Translate
+                                                            Language : </div>
+                                                        <div class="p-2">
+                                                            <leds-select [options]="languages"
+                                                                [selected]="selectedLanguage" [designType]="'withBg'"
+                                                                (selectChange)="selectChange($event)"></leds-select>
+                                                        </div>
+                                                    </div>
+                                                </ul>
+                                            </div>
+                                            <div class="d-flex justify-content-end le-u-pad-32">
+                                                <leds-button nameText="primaryButton" idText="primaryButton"
+                                                    labelText="primary-button" [disabled]="false" [block]="false"
+                                                    buttonType="button" designType="primary"
+                                                    (click)=" basicReqTabChange1(3)">
+                                                    Skip
+                                                </leds-button>
+                                                <leds-button nameText="primaryButton" idText="primaryButton"
+                                                    labelText="primary-button" [disabled]="false" [block]="false"
+                                                    buttonType="button" designType="primary"
+                                                    (click)="anotherFunction('languageTranslation'); basicReqTabChange1(2)">
+                                                    Translate
+                                                </leds-button>
+                                            </div>
+                                        </div>
+                                        <div *ngIf="basicReqTab1 =='logsTab2'">
+                                            <app-jobs [cname]="translatedLangPipeline"></app-jobs>
+                                            <div class="d-flex justify-content-end le-u-pad-32">
+                                                <leds-button nameText="primaryButton" idText="primaryButton"
+                                                    labelText="primary-button" [disabled]="false" [block]="false"
+                                                    buttonType="button" designType="primary"
+                                                    (click)="basicReqTabChange1(3)">
+                                                    Next
+                                                </leds-button>
+                                            </div>
+                                        </div>
+                                        <div *ngIf="basicReqTab1 == 'translatedDataTab'">
+                                            <div *ngIf="isLoading">
+                                                <leds-card>
+                                                    <div
+                                                        class="d-flex justify-content-center align-items-center flex-column">
+                                                        <img src="assets/images/aip_loader_image_leds.svg" alt="Loading"
+                                                            style="margin-bottom: 8px;" />
+                                                        <b class="m-2">Patience is a virtue!</b>
+                                                        <b>Hang tight while we load the results...</b>
+                                                        <br>
+                                                        <leds-spinner bdColor="#EFEFEF" [size]="'default'" [zIndex]="0"
+                                                            [color]="'#8626c3'" [type]="'ball-pulse-sync'"
+                                                            [fullScreen]="false" [showSpinner]="true">
+                                                        </leds-spinner>
+                                                    </div>
+                                                </leds-card>
+                                            </div>
+                                            <app-dataset-table-view
+                                                [datasetname]="translatedLang"></app-dataset-table-view>
+                                        </div>
+                                    </leds-panel>
+                                </div>
+                                <div *ngIf="steps.select_clusters" class="main-container">
+                                    <leds-panel [type]="'default'">
+                                        <div style="margin: 1em">
+                                            <div ledsTabGroup [type]="type" [headerBg]="headerBg">
+                                                <mat-tab-group (selectedIndexChange)="basicReqTabChange2($event)">
+                                                    <mat-tab>
+                                                        <ng-template mat-tab-label>Clusters</ng-template>
+                                                    </mat-tab>
+                                                    <mat-tab>
+                                                        <ng-template mat-tab-label>Logs</ng-template>
+                                                    </mat-tab>
+                                                </mat-tab-group>
+                                            </div>
+                                        </div>
+                                        <div *ngIf="basicReqTab2 == 'clustersTab'">
+                                            <div class="row le-u-pad-32" style="margin: 1em">
+                                                <leds-choice-card-list [orientation]="horizontal" [multiSelect]="true">
+                                                    <li ledsChoiceCard *ngFor="let card of cards; let i = index"
+                                                        class="le-u-mar-l-8" (click)="toggleSelection(i)">
+                                                        <div class="le-u-body-lg le-u-no-mar-l">
+                                                            {{ card.name }}
+                                                        </div>
+                                                    </li>
+                                                </leds-choice-card-list>
+                                            </div>
+                                            <div class="d-flex justify-content-end le-u-pad-32">
+                                                <leds-button nameText="primaryButton" idText="primaryButton"
+                                                    labelText="primary-button" [disabled]="false" [block]="false"
+                                                    buttonType="button" designType="primary"
+                                                    (click)="anotherFunction('multi_threading_clustering');basicReqTabChange2(1)">
+                                                    Generate Clusters
+                                                </leds-button>
+                                            </div>
+                                        </div>
+                                        <div *ngIf="basicReqTab2 == 'logsTab'">
+                                            <app-jobs [cname]="multiThreadingClustering"></app-jobs>
+                                            <div class="d-flex justify-content-end le-u-pad-32">
+                                                <leds-button nameText="primaryButton" idText="primaryButton"
+                                                    labelText="primary-button" [disabled]="false" [block]="false"
+                                                    buttonType="button" designType="primary"
+                                                    (click)="selectChangeHandler('dashboard')">
+                                                    Next
+                                                </leds-button>
+                                            </div>
+                                        </div>
+                                    </leds-panel>
+                                </div>
+                                <div *ngIf="steps.dashboard" class="main-container">
+                                    <!-- <app-cluster-workflow></app-cluster-workflow> -->
+                                    <leds-button (click)="navigateToDashboard()"
+                                    nameText='textButton' idText='textButton' [disabled]='false' buttonType='button' designType='text'>
+                                        Click Here for Dashboard
+                                    </leds-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

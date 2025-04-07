@@ -1,0 +1,16 @@
+id,name,last_updated_date,last_updated_by
+"1","Manufacturing",NULL,NULL
+"2","Transport",NULL,NULL
+"3","E-commerce",NULL,NULL
+"4","Telecommunication",NULL,NULL
+"5","Aerospace",NULL,NULL
+"6","Oil & Gas",NULL,NULL
+"7","Utility",NULL,NULL
+"8","Banking",NULL,NULL
+"9","Retail",NULL,NULL
+"10","Smart City",NULL,NULL
+"14","Insurance",NULL,NULL
+"15","Interactive Media",NULL,NULL
+"16","Public sector","NULL","NULL"
+"17","IT Services","NULL","NULL"
+"18","Medical Technologies","NULL","NULL"

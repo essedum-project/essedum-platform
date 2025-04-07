@@ -1,0 +1,231 @@
+<div class="le-l-mainwrapper aip-top">
+
+    <!-- <div *ngIf="cardToggled;else elseBlock" class="clearfix le-l-bodywrapper js-bodywrapper" id="mainCtr"> -->
+        <div class="clearfix le-l-bodywrapper aip-tranparent-backgroud js-bodywrapper" id="mainCtr">
+    <div class="">
+        <div class="row aip-filter aip-filter-position aip-scroll-hover">
+            <app-tagging-component [servicev1]="servicev1" (tagSelected)="tagSelectedEvent($event)"
+                [tagrefresh]="tagrefresh"></app-tagging-component>
+        </div>
+        <div class="col-sm-12 col-md-12 col-lg-12 aip-container-body" id="mainrightCnt">
+            <div class="le-l-level1-wrapper">
+                <!-- Header -->
+                <div class="aip-header le-u-pad-lr-32 le-u-pad-t-16">
+                    <div class=" col-sm-12 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-center">
+                        <div class="le-u-pad-24">
+                            <h3 class="le-u-header-xl">{{cardTitle}}</h3>
+
+
+                        </div>
+                    </div>
+                    <div
+                        class="col-10 offset-1 offset-xs-1 offset-sm-1 offset-md-0 col-sm-6 col-md-6 col-lg-7 col-xl-6 aip-panel aip-panel-shadow d-flex align-items-center">
+                        <!-- <leds-input-field designType="search" inputType="text" styleClass=""
+                                [disabled]="false" [required]="false"></leds-input-field> -->
+                        <input type="text" name="" id="" placeholder="Search by Name" class="aip-panel-input"
+                            [(ngModel)]="filter" (keyup)="filterz()">
+                        <i class="aip-led-icons icon x-24 search-icon"></i>
+                    </div>
+                    <div class="d-flex justify-content-end col-sm-5 col-md-6 col-lg-3 col-xl-4 aip-header-icon">
+                        <div class="">
+                            <leds-button nameText='iconButton' idText='iconButton' [disabled]='false'
+                                buttonType='button' designType='icon'>
+                                <span class="le-c-btn--icon__icon" title="Assign DgApp">
+                                    <!-- <i class="aip-led-icons icon x-24 icon_link" ng-click="[getAllDgAppList(), openModal(content4)]"></i> -->
+                                    <i class="aip-led-icons icon x-24 icon_link" (click)="redirectToAssignScreen('assign')" ></i>
+                                </span>
+                            </leds-button>
+                        </div>
+                        <div class="" *ngIf="createAuth">
+                            <leds-overflow>
+                                <div ngbDropdown class="d-inline-block" container="body">
+                                    <a id="OverflowMenu_dd" ngbDropdownToggle title="overflow menu">
+                                        <i class="icon x-24 icon-add"></i>
+                                    </a>
+                                    <div ngbDropdownMenu aria-labelledby="OverflowMenu_dd">
+                                        <ul overflowList>
+                                            <li overflowListItem *ngFor="let opt of alias" (click)="selectChange(opt)">
+                                                <a href="javascript:void(0);">
+                                                    <span overflowSpan class="le-u-mar-l-8">{{opt}}</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </leds-overflow>
+                        </div>
+                        <div class="">
+                            <leds-button nameText='iconButton' idText='iconButton' [disabled]='false'
+                                buttonType='button' designType='icon'>
+                                <span class="le-c-btn--icon__icon">
+                                    <i class="aip-led-icons icon x-24 icon_Refresh" (click)="refreshComplete()"></i>
+                                </span>
+                            </leds-button>
+                        </div>
+
+                    </div>
+                    <!-- <ng-template #content4 let-modal>
+                        <div class="mx-3 my-4" style="height: 50vh;">
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()">
+                                    <i class="icon x-16 close-icon"></i>
+                                </button>
+                            </div>
+                            <div style="overflow-y:overlay;height:80%;">
+                                <div class="col-left">
+                                    <div class="flex items-baseline mx-5 mb-3 ">
+                                        <h5 class="font-medium le-u-header-xl"><b>DGApp Name</b></h5>
+                                    </div>
+                                    <div class="flex flex-wrap ">
+                                        <a class="tagbrdr le-u-body-md"
+                                        [ngClass]="(inc==selectedApp || tagStatus[inc.appName]) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                                        *ngFor="let inc of items">
+                                        
+                                            <span style="font-size:14px;cursor:pointer"
+                                                (click)="filterByTag(inc)">{{inc.appName}}
+                                            </span> </a>&nbsp;&nbsp;
+
+                                    </div>
+                                </div>
+                                <div class="col-right">
+                                    <div class="flex items-baseline mx-5 mb-3">
+                                        <h5 class="font-medium le-u-header-xl"><b>User Group</b></h5>
+                                    </div>
+                                    <div class="flex flex-wrap " style="padding-top: 1rem;padding-left: 3rem">
+                                        <leds-select [options]="userName" label="Select User Group" 
+                                        [required]="false"
+                                        [disabled]="false" designType="showBy" [isMultiple]="true" (selectChange)="onSelect($event)"
+                                        >
+                                      </leds-select>
+                                    </div>
+                                </div>                               
+                            </div>
+
+                            <div class="d-flex justify-content-end le-u-pad-t-8">
+                                <leds-button designType="miniPrimary" class="le-u-mar-r-32" buttonType="button"
+                                    (click)=" dismiss()" (click)="updateTag()">
+                                    Assign
+                                </leds-button>
+                            </div>
+                        </div>
+                        
+                    </ng-template> -->
+                </div>
+            </div>
+            <div class="le-c-card__action-ul aip-card-container">
+                <!-- CARD -->
+                <div class="col-md-8 col-lg-6 col-xl-5" style='min-width: -webkit-fill-available;padding: 0px;'
+                    *ngFor="let card of cards">
+                    <leds-card designType='simple' [actionsOnHover]='true'
+                        style="padding:0px !important; height: 163px; display: grid;">
+                        <div class="le-u-header-sm le-u-text-primary-80 le-u-mar-b-8">
+                            {{card.type}}</div>
+                        <mat-card-header>
+                            <mat-card-title class="le-c-card__container clearfix">
+                                <div class="le-c-card__container-left w-100">
+                                    <h2 class="le-u-header-xl le-u-ellipsis" style="line-height: 2rem;">
+                                        {{card.appName | titlecase}}</h2>
+                                </div>
+
+                            </mat-card-title>
+                            <mat-card-subtitle class="le-u-body-sm le-u-text-neutral-80 le-u-ellipsis">
+                                {{card.createdOn}}</mat-card-subtitle>
+                        </mat-card-header>
+                        <mat-card-actions class="le-c-card__action-hover d-flex justify-content-between">
+                            <leds-button nameText="textButton" idText="textButton" [disabled]="false"
+                                buttonType="button" designType="text" styleClass=" DSA_wb_Btn_small"
+                                (click)="redirection(card,'preview')"><span>View
+                                    Details</span></leds-button>
+                            <div class="d-flex align-items-center">
+                                <div class="aip-cursor le-u-mar-r-16">
+                                    <div class="le-c-avatar  le-c-avatar--sm aip-hover-avatar">
+                                        {{(card.createdBy?card.createdBy:'Name Not Available')|firstCharacter}}
+                                    </div>
+                                    <div class="aip-hover-detail">
+                                        <div class="le-u-header-md le-u-mar-8">{{card.createdBy?card.createdBy:'Name
+                                            Not Available'}}</div>
+                                    </div>
+                                </div>
+                                <leds-overflow>
+                                    <div ngbDropdown *ngIf="editAuth||deleteAuth"
+                                        class="aip-led-icons d-inline-block le-u-mar-r-8 le-u-v-mid float-end le-c-card__action-ul">
+                                        <a href="javascript:void(0);" id="OverflowMenu_dd" ngbDropdownToggle
+                                            (click)="clickactive($event);" aria-label="menu icon">
+                                            <i aria-hidden="true" class="icon x-24 v-menu-icon"></i>
+                                        </a>
+                                        <div ngbDropdownMenu aria-labelledby="OverflowMenu_dd"
+                                            style="display: grid;justify-content: center;">
+                                            <ul overflowList class="float-end le-u-mar-t-8  le-c-card__action-ul"
+                                                style="display: flex;flex-direction: column;">
+                                                <li overflowListItem>
+                                                <li><span *ngIf="editAuth" class="le-u-body-md  aip-cursor"
+                                                        (click)="redirection(card,'edit')">Edit</span>
+
+                                                </li>
+                                                <li overflowListItem>
+                                                    <span *ngIf="deleteAuth" class="le-u-body-md aip-cursor"
+                                                        (click)="deleteDGApp(card)">Delete</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </leds-overflow>
+                            </div>
+                        </mat-card-actions>
+                    </leds-card>
+                </div>
+            </div>
+            <!-- pagination -->
+            <app-pagination #pagination [noOfItems]="noOfItems" (pageAndSizeChanged)="handlePageAndSizeChange($event)">
+            </app-pagination>
+            <!-- <div
+                class="inbox-table-footer table-paginator flex-row flex-space-between standard-margin bottom-padding-20">
+                <div class="showing-entries d-flex justify-content-end my-3">
+                    <span class="grey-color font-size-12">Showing </span>
+                    &nbsp;&nbsp;
+                    <span class="black-color font-weight-600">
+                        {{ ((pageNumber - 1) * pageSize) + 1 }} -
+                        {{ (((pageNumber - 1) * pageSize) + pageSize) < noOfItems ? ((pageNumber - 1) * pageSize) +
+                            pageSize : noOfItems }} of {{noOfItems}} </span>
+                            &nbsp;&nbsp;
+                            <span class="grey-color font-size-12">entries </span>
+                </div>
+                <div class="paginator-buttons d-flex w-60  flex-row" style="justify-content:flex-end">
+                    <div class="page-input go-to-input box-shadow standard-padding">
+                        <span class="grey-color">Go to: </span>
+                        <input class="right-margin" type="number" min="1" [max]="noOfPages"
+                            (change)="changePage(pageNumberInput)" [(ngModel)]="pageNumberInput" />
+                    </div>
+                    <div class="mx-4">
+                        <span class="">Items per page</span>
+                        <select type="number" [(ngModel)]="pageSize" (change)="optionChange($event)">
+                            <option *ngFor="let p of itemsPerPage" [ngValue]="p">{{p}}</option>
+                        </select>
+
+                    </div>
+                    <div class="pages-details d-flex">
+
+                        <div class="previous-page">
+                            <button class="standard-padding table-button font-weight-600" [disabled]="pageNumber == 1"
+                                (click)="pageNumberInput=null;prevPage()">&lt;</button>
+                        </div>
+                        <div class="pages">
+                            <button class="standard-padding table-button font-weight-600"
+                                *ngFor="let i of pageArr | slice:startIndex:endIndex"
+                                (click)="pageNumberInput=null;changePage(i+1)"
+                                [class.selected-page]="(i + 1) == pageNumber" [ngStyle]="selectedButton(i+1)">
+                                {{i + 1}}
+                            </button>
+                        </div>
+                        <div class="next-page">
+                            <button class="standard-padding table-button font-weight-600"
+                                [disabled]="pageNumber == noOfPages"
+                                (click)="pageNumberInput=null;nextPage()">&gt;</button>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+    </div>
+</div>
+</div>

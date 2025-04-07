@@ -1,0 +1,92 @@
+.question-card {
+    background: #fff;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+  }
+  
+  .wk-quest-border {
+    /* border: 2px solid var(--base-color); */
+    border-radius: 10px;
+    margin: 10px;
+    padding: 5px;
+    float: left;
+    width: 100%;
+    line-height: 15px;
+  }
+  
+  .nxtBtn:hover {
+    -webkit-box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.2);
+  }
+  
+  .dots {
+    height: 15px;
+    width: 15px;
+    background-color: grey;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  
+  .blink_me {
+    animation: blinker 1s linear infinite;
+    margin-left: 10px;
+  }
+  
+  .nxtBtn {
+    height: 21px;
+    line-height: 5px;
+    border: 1px solid var(--base-color);
+    padding: 0 10px;
+    color: #fff;
+    background: var(--base-color);
+    border-radius: 4px;
+    text-decoration: none;
+    margin: 10px;
+    margin-left: 0px;
+  }
+  
+  .quest-desc {
+    color: #666;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 5px 15px;
+    display: block;
+    width: auto;
+    height: 100%;
+    min-height: 80vh;
+    line-height: 16px;
+    text-overflow: ellipsis;
+    overflow: auto;
+  }
+  
+  ::ng-deep .custom-frame {
+    /* TODO(mdc-migration): The following rule targets internal classes of checkbox that may no longer apply for the MDC version. */
+    & .mat-checkbox-background,
+    .mat-checkbox-frame {
+      border-radius: 70% !important;
+    }
+  }
+  
+  .checkcircle {
+    float: right;
+    font-size: 16px;
+    color: var(--base-color);
+  }
+  
+  .circle {
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid grey;
+    color: grey;
+    float: right;
+    height: 14px;
+    width: 14px;
+    text-align: center;
+    font-size: 11px;
+  }
+  
+  .pointer {
+    cursor: pointer;
+  }

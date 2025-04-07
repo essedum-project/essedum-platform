@@ -1,0 +1,59 @@
+
+// table {
+//     table-layout: fixed;
+// }
+// thead th {
+//     font-weight: bold; /* Make the text bold */
+//     text-align: center; /* Center-align the text */
+//     background-color: #f2f2f2; /* Light gray background color */
+//     border: 1px solid #ddd; /* Add a border to the header cells */
+//     padding: 10px; /* Add some padding for spacing */
+// }
+// tbody td {
+//     text-align: center;
+//     border: 1px solid #ddd;
+//     padding: 10px;
+// }
+.flex {
+    padding-right: 48px;
+    padding-left: 48px;
+}
+.t-flex {
+    padding-top: 12px;
+    padding-right: 48px;
+    padding-left: 48px;
+}
+
+.t-flex tr{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    border-bottom: 1px solid #ddd;
+    
+}
+.t-flex th{
+    text-align: center;
+    width: 200px;
+}
+.t-flex td{
+    width: 200px;
+    text-align: center;
+    border-top:0px;
+    border-bottom: 0px;
+}
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.table-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%; /* Adjust this value to your needs */
+}
+.scrollable {
+    max-height: 500px; /* Adjust this value to your needs */
+    overflow-y: auto;
+}

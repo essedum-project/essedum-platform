@@ -1,0 +1,94 @@
+<h1 mat-dialog-title="" class="selector-692-1">
+    <strong class="selector-692-2">{{action}}</strong>&nbsp;Row
+</h1>
+<div mat-dialog-content="" *ngIf="tabValue=='Schema Columns'" class="selector-692-3">
+    <div *ngIf="action != 'Delete'; else elseTemplate" class="selector-692-4">
+        <mat-form-field class="cip-width-100 selector-692-5">
+            <label class="le-u-header-lg  selector-692-121">Column_Type<span style="color: red;"
+                    class="selector-692-122">*</span></label>
+            <mat-select id="schm-conf-coltype" [(ngModel)]="local_data.columntype">
+                <mat-option *ngFor="let type of columnTypeArr" [value]="type" (click)="validateForm()"
+                    style="background-color: whitesmoke;">
+                    {{type}}
+                </mat-option>
+            </mat-select>
+
+        </mat-form-field>
+        <!-- Record_Column_Name -->
+        <div class="">
+            <label class="le-u-header-lg selector-692-123">Record_Column_Name<span style="color: red;"
+                    class="selector-692-124">*</span></label>
+            <leds-input-field designType="default" [(ngModel)]="local_data.recordcolumnname" inputType="text"
+                [disabled]="false" [required]="false" styleClass="" (changesOccur)="validateForm()"></leds-input-field>
+        </div>
+        <!-- Record_Column_Display_Name -->
+        <div class="">
+            <label class="le-u-header-lg selector-692-123">Record_Column_Display_Name<span style="color: red;"
+                    class="selector-692-124">*</span></label>
+            <leds-input-field designType="default" [(ngModel)]="local_data.recordcolumndisplayname" inputType="text"
+                [disabled]="false" [required]="false" styleClass="" (changesOccur)="validateForm()"></leds-input-field>
+        </div>
+        <!-- <mat-form-field class="cip-width-100 selector-692-7">
+            <label class="formLabel selector-692-123">Record_Column_Name<span style="color: red;"
+                    class="selector-692-124">*</span></label>
+            <input id="schm-conf-rcname" matInput="" [(ngModel)]="local_data.recordcolumnname" class="selector-692-8"
+                (input)="validateForm()">
+
+        </mat-form-field> 
+        <mat-form-field class="cip-width-100 selector-692-9">
+            <label class="formLabel selector-692-125">Record_Column_Display_Name<span style="color: red;"
+                    class="selector-692-126">*</span></label>
+            <input id="schm-conf-rcdname" matInput="" [(ngModel)]="local_data.recordcolumndisplayname"
+                class="selector-692-10" (input)="validateForm()">
+
+        </mat-form-field>-->
+        <mat-error>{{message}}</mat-error>
+        <div class="cip-width-100 selector-692-11">
+            <div>
+                <leds-checkbox [checked]="'false'" [disabled]="disabled" [(ngModel)]="local_data.isunique"
+                    inputId="field_unique" class="selector-692-116" (click)="validateForm()" [labelPosition]="'after'">
+                    Unique
+                </leds-checkbox>
+            </div>
+            <div>
+                <leds-checkbox [checked]="'false'" [disabled]="disabled" [(ngModel)]="local_data.isrequired"
+                    inputId="field_required" class="selector-692-118" (click)="validateForm()"
+                    [labelPosition]="'after'">
+                    Required
+                </leds-checkbox>
+            </div>
+            <div>
+                <leds-checkbox [checked]="'false'" [disabled]="disabled" [(ngModel)]="local_data.isprimarykey"
+                    inputId="field_primary" class="selector-692-222" (click)="validateForm()" [labelPosition]="'after'">
+                    PrimaryKey
+                </leds-checkbox>
+            </div>
+            <div>
+                <leds-checkbox [checked]="'false'" [disabled]="disabled" [(ngModel)]="local_data.isencrypted"
+                    inputId="field_encrypted" class="selector-692-118" (click)="validateForm()"
+                    [labelPosition]="'after'">
+                    Encrypted
+                </leds-checkbox>
+            </div>
+            <div>
+                <leds-checkbox [checked]="'false'" [disabled]="disabled" [(ngModel)]="local_data.isvisible"
+                    inputId="field_visible" (click)="validateForm()"
+                    [labelPosition]="'after'">
+                    Visible
+                </leds-checkbox>
+            </div>
+        </div>
+    </div>
+    <ng-template #elseTemplate="" class="selector-692-13">
+        Sure to delete
+        <b class="selector-692-14">{{local_data.recordcolumnname}}</b>?
+    </ng-template>
+</div>
+
+
+<div mat-dialog-actions="" class="col-md-12 selector-692-103" style="margin-top: 1rem;">
+    <button mat-raised-button="" id="schm-conf-doact" (click)="doAction()"
+        [disabled]="tabValue=='Schema Columns' &amp;&amp; disableSave" class="selector-692-104">{{action}}</button>
+    <button mat-raised-button="" id="schm-conf-clsdlg" (click)="closeDialog()" mat-flat-button="" color="warn"
+        class="selector-692-105">Cancel</button>
+</div>

@@ -1,0 +1,20 @@
+.aip-grid-container {
+    height: 100%;
+    display: grid;
+    grid-template-rows: 30% 70%;
+}
+
+.aip-home-bg-image {
+    background-image: url("../../assets/images/gemini_2024.png");
+    background-size: cover;
+}
+
+.aip-home-search {
+    width: 50vw;
+}
+
+.aip-card-container {
+    display: grid;
+    grid-template-columns: repeat(4, 23.5%);
+    grid-column-gap: 2%;
+}

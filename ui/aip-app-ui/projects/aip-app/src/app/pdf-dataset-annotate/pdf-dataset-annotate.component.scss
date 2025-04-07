@@ -1,0 +1,37 @@
+.mtopbottom1p {
+    margin: 4% 0%;
+  }
+.tag-container {
+    border-right: groove;
+    border-left: groove;
+    border-bottom: groove;
+  }
+.containers{
+  overflow: auto;
+}  
+.tit{
+  padding: 2em;
+  height: 10vh;
+  border-bottom: groove;
+}
+.spin-position{
+    position: absolute;
+    left: 50%;
+    transform: translatex(-50%);
+}
+.spinner-preview{
+  font: normal normal normal 14px/20px Roboto;
+  text-align: center;
+  padding: 21% 0;
+  justify-content: center;
+  opacity: 1;
+}
+.nocontent{
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  display: flex;
+  justify-content: center;
+}

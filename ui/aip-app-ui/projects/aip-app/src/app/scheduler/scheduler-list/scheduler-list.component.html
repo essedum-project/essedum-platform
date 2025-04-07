@@ -1,0 +1,238 @@
+<div class="le-l-mainwrapper aip-top ">
+    <div class="clearfix le-l-bodywrapper aip-tranparent-backgroud js-bodywrapper" id="mainCtr">
+        <div class="">
+            <div class="col-sm-12 col-md-12 col-lg-12 aip-container-body" id="mainrightCnt">
+                <div class="le-l-level1-wrapper">
+                    <!-- Header -->
+                    <div class="aip-header le-u-pad-lr-32 le-u-pad-t-16">
+                        <div class=" col-sm-12 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-center">
+                            <div class="le-u-pad-24">
+                                <h3 class="le-u-header-xl">Scheduled Jobs</h3>
+                            </div>
+                        </div>
+                        <div
+                            class="col-10 offset-1 offset-xs-1 offset-sm-1 offset-md-0 col-sm-6 col-md-6 col-lg-7 col-xl-6 aip-panel aip-panel-shadow d-flex align-items-center">
+                            <!-- <leds-input-field designType="search" inputType="text" styleClass=""
+                                [disabled]="false" [required]="false"></leds-input-field> -->
+                            <input type="text" name="" id="" name="search" [(ngModel)]="searchText"
+                                class="aip-panel-input" [(ngModel)]="searchText" (keyup)="onSearch()" autocomplete="off"
+                                placeholder="Search by Name">
+                            <i class="aip-led-icons icon x-24 search-icon"></i>
+                        </div>
+                        <div class="d-flex justify-content-center col-sm-5 col-md-6 col-lg-5 col-xl-4 aip-header-icon">
+
+                            <leds-overflow>
+                                <div ngbDropdown class="d-inline-block" container="body">
+                                    <a id="OverflowMenu_dd" ngbDropdownToggle title="Create New Schedule">
+                                        <i class="icon x-24 icon-add aip-cursor"></i>
+                                    </a>
+                                    <div ngbDropdownMenu aria-labelledby="OverflowMenu_dd">
+                                        <ul overflowList>
+                                            <li overflowListItem *ngFor="let opt of jobs" (click)="selectChange(opt)">
+                                                <a href="javascript:void(0);">
+                                                    <span overflowSpan class="le-u-mar-l-8">{{opt}}</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </leds-overflow>
+                            <!-- <leds-overflow>
+                                <div ngbDropdown class="d-inline-block" container="body">
+                                        <a *ngIf="!pausedJobs"
+                                                    class="" href="javascript:void(0);"
+                                                    style="color:grey;padding-right:1rem;" matTooltip="Pause All"
+                                                    (click)="pauseAll(organization, true);"><i class="icon x-24 icon-pause"></i></a>
+                                                <a *ngIf="pausedJobs"
+                                                    class="" href="javascript:void(0);"
+                                                    style="color:grey;padding-right:1rem;" matTooltip="Resume All"
+                                                    (click)="pauseAll(organization, false);"><i class="icon x-24 video-icon"></i></a>
+                                  </div>
+                             </leds-overflow> -->
+                            <div class="">
+                                <leds-button nameText='iconButton' idText='iconButton' [disabled]='false'
+                                    buttonType='button' designType='icon'>
+                                    <span class="le-c-btn--icon__icon">
+                                        <i title="Pause All" *ngIf="!pausedJobs"
+                                            class="aip-led-icons icon x-24 icon-pause" (click)="pauseAll(true);"></i>
+                                        <i title="Resume All" *ngIf="pausedJobs"
+                                            class="aip-led-icons icon x-24 video-icon" (click)="pauseAll(false);"></i>
+                                    </span>
+                                </leds-button>
+                            </div>
+                            <div class="">
+                                <leds-button nameText='iconButton' idText='iconButton' [disabled]='false'
+                                    buttonType='button' designType='icon'>
+                                    <span class="le-c-btn--icon__icon">
+                                        <i title="Refresh" class="aip-led-icons icon x-24 icon_Refresh"
+                                            (click)="onRefresh()"></i>
+                                    </span>
+                                </leds-button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="le-c-card__action-ul">
+                    <!-- CARD -->
+                    <div style="width: 100%" class="selector-771-40">
+                        <!-- <div *ngIf="!isScheduledView"> -->
+                        <!-- <div class="row padd selector-771-42" *ngIf="!viewRouter" -->
+                        <!-- style="padding-right: 0 !important;padding-top: 0 !important;padding-left: 0 !important;height:65vh;overflow-y:auto;"> -->
+                        <div class="tab-content selector-771-43" style="width:100%">
+                            <div class="tab-pane fade in show active selector-771-44"
+                                *ngIf="scheduledJobsList.length > 0; else noScheduledjobs">
+
+                                <div class="col-12 row selector-771-45  aip-card-container">
+                                    <div class="col-12 col-md-3 selector-771-46" *ngFor="let job of scheduledJobsList| slice: (pageNumber-1) * pageSize : (pageNumber-1) * pageSize + pageSize">
+                                        <div class="row">
+                                            <div class="col-md-8 col-lg-6 col-xl-5" style="min-width: max-content">
+                                                <leds-card designType="simple" style="padding:0px !important; height: 190px; display: grid;">
+                                                    <mat-card-header>
+                                                        <mat-card-title class="le-c-card__container clearfix">
+                                                            <div class="le-c-card__container-left w-100">
+                                                                <h2 class="le-u-header-lg le-u-ellipsis aip-cursor"
+                                                                    (click)="navigateToPipeline(job, job.runtime)">
+                                                                    {{getAlias(job)}}</h2>
+                                                            </div>
+                                                        </mat-card-title>
+                                                    </mat-card-header>
+                                                    <mat-card-subtitle class="content-height">
+                                                        <p class="le-u-body-md le-u-text-neutral-80">
+                                                        <div class="" (click)="navigateToPipeline(job, job.runtime)">
+                                                            <span class="selector-771-56">
+                                                                <p class="le-u-header-sm" style="text-align: left;">
+                                                                    {{'Next Run :
+                                                                    '+job.quartzProperties.nextexecution}}</p>
+                                                            </span>
+                                                            <span *ngIf="job.quartzProperties.lastexecution != null"
+                                                                class="selector-771-58">
+                                                                <p class="le-u-header-sm" style="text-align: left;">
+                                                                    {{'Last Run : ' +
+                                                                    job.quartzProperties.lastexecution}}</p>
+                                                            </span>
+                                                            <span
+                                                                *ngIf="job.repeattype != undefined && job.repeattype != null && job.repeattype.trim() != ''"
+                                                                class="selector-771-60">
+                                                                <p class="le-u-header-sm" style="text-align: left; width: 20rem">
+                                                                    {{'Repeat : ' +
+                                                                    job.repeattypestmt}}</p>
+                                                            </span>
+                                                        </div>
+                                                    </mat-card-subtitle>
+                                                    <mat-card-actions>
+                                                        <leds-tooltip [tooltip]="tooltip" [label]="'Edit'"
+                                                            [position]="'above'">
+                                                            <leds-button buttonType="button" designType="text"
+                                                                *ngIf="!isAuth"
+                                                                (click)="displayEditForm(job.cname.toString()+';'+job.runtime.toString(),job.quartzProperties.jobDetails.jobname.toString(),
+                                                      job.quartzProperties.jobDetails.jobgroup.toString(),job.quartzProperties.startexecution.toString(),job.repeattype,job.jobtimeout,job.remoteDatasourceName,job.scheduleType);">
+                                                                <i class="icon x-16 edit-icon"></i>
+                                                            </leds-button></leds-tooltip>
+                                                        <leds-tooltip [tooltip]="tooltip" [label]="'Pause'"
+                                                            [position]="'above'">
+                                                            <leds-button *ngIf="job.quartzProperties.status!='PAUSED'"
+                                                                buttonType="button" designType="text"
+                                                                (click)="pause(job.quartzProperties.jobDetails.jobname.toString(),job.quartzProperties.jobDetails.jobgroup.toString(), true);">
+                                                                <i class="icon x-16 icon-pause"></i>
+                                                            </leds-button></leds-tooltip>
+                                                        <leds-tooltip [tooltip]="tooltip" [label]="'Resume'"
+                                                            [position]="'above'">
+                                                            <leds-button *ngIf="job.quartzProperties.status=='PAUSED'"
+                                                                buttonType="button" designType="text"
+                                                                (click)="pause(job.quartzProperties.jobDetails.jobname.toString(),job.quartzProperties.jobDetails.jobgroup.toString(), false);">
+                                                                <i class="icon x-16 video-icon"></i>
+                                                            </leds-button></leds-tooltip>
+                                                        <leds-tooltip [tooltip]="tooltip" [label]="'Delete'"
+                                                            [position]="'above'">
+                                                            <leds-button buttonType="button" designType="text"
+                                                                (click)="delete(job.quartzProperties.jobDetails.jobname.toString(),job.quartzProperties.jobDetails.jobgroup.toString());">
+                                                                <i class="icon x-16 delete-sm-icon"></i>
+                                                            </leds-button></leds-tooltip>
+                                                    </mat-card-actions>
+                                                </leds-card>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <ng-template #noScheduledjobs="" class="selector-771-61">
+                                <span style="font-size: 16px" class="selector-771-62">No scheduled jobs.</span>
+                            </ng-template>
+                        </div>
+                        <!-- </div> -->
+                        <!-- <footer style="background-color: #fafafa;color:black;height:auto;">
+                            <div class="custompaginator col-12 selector-771-63"  style="position: absolute; bottom: 2rem;">
+                                <button mat-button="" [disabled]="scheduledpage==0" (click)="getScheduledJobs('First')"
+                                    title="First Page" class="selector-771-64">First</button>
+                                <button mat-button="" [disabled]="scheduledpage==0" (click)="getScheduledJobs('Prev')"
+                                    title="Prev Page" class="selector-771-65">&lt;&lt;&nbsp;Prev</button>
+                                <button mat-button="" [disabled]="scheduledpage==scheduledlastPage"
+                                    (click)="getScheduledJobs('Next')" title="Next Page"
+                                    class="selector-771-66">Next&nbsp;&gt;&gt;</button>
+                                <button mat-button="" [disabled]="scheduledpage==scheduledlastPage"
+                                    (click)="getScheduledJobs('Last')" title="Last Page" class="selector-771-67">Last</button>
+                            </div>
+                        </footer> -->
+
+                        <!-- </div> -->
+                        <!-- <div *ngIf="isScheduledView">
+                            <app-scheduler [(isView)]="isScheduledView" [isInEdit]="isInEdit" [jobname]="scheduleJobName"
+                                [jobtype]="scheduleJobType" [jobdatetime]="scheduleJobDateTime"
+                                [jobexpression]="scheduleJobExpression" [jobid]="scheduleJobDetails" [jobalias]="scheduledJobAlias"
+                                [joboption]="schedulejob" [jobtimeout]="scheduledjobtimeout">
+                             </app-scheduler>
+                        </div> -->
+                    </div>
+                </div>
+                <div
+                    class="inbox-table-footer table-paginator flex-row flex-space-between standard-margin bottom-padding-20">
+                    <!-- Pagination  -->
+                    <div class="showing-entries d-flex justify-content-end my-3">
+                        <span class="grey-color font-size-12">Showing </span>
+                        &nbsp;&nbsp;
+                        <span class="black-color font-weight-600">
+                            {{ ((pageNumber - 1) * pageSize) + 1 }} -
+                            {{ (((pageNumber - 1) * pageSize) + pageSize) < noOfItems ? ((pageNumber - 1) * pageSize) +
+                                pageSize : noOfItems }} of {{noOfItems}} </span>
+                                &nbsp;&nbsp;
+                                <span class="grey-color font-size-12">entries </span>
+                    </div>
+                    <div class="paginator-buttons d-flex w-60  flex-row" style="justify-content:flex-end">
+                        <div class="page-input go-to-input box-shadow standard-padding">
+                            <span class="grey-color">Go to: </span>
+                            <input class="right-margin" type="number" min="1" [max]="noOfPages"
+                                (change)="changePage(pageNumberInput)" [(ngModel)]="pageNumberInput" />
+                        </div>
+                        <div class="mx-4">
+                            <span class="">Items per page</span>
+                            <select type="number" [(ngModel)]="pageSize" (change)="optionChange($event)">
+                                <option *ngFor="let p of itemsPerPage" [ngValue]="p">{{p}}</option>
+                            </select>
+
+                        </div>
+                        <div class="pages-details d-flex">
+                            <div class="previous-page">
+                                <button class="standard-padding table-button font-weight-600"
+                                    [disabled]="pageNumber == 1" (click)="pageNumberInput=null;prevPage()">&lt;</button>
+                            </div>
+                            <div class="pages">
+                                <button class="standard-padding table-button font-weight-600"
+                                    *ngFor="let i of pageArr | slice:startIndex:endIndex"
+                                    (click)="pageNumberInput=null;changePage(i+1)"
+                                    [class.selected-page]="(i + 1) == pageNumber" [ngStyle]="selectedButton(i+1)">
+                                    {{i + 1}}
+                                </button>
+                            </div>
+                            <div class="next-page">
+                                <button class="standard-padding table-button font-weight-600"
+                                    [disabled]="pageNumber == noOfPages"
+                                    (click)="pageNumberInput=null;nextPage()">&gt;</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,78 @@
+<div class="align-items-center le-u-pad-16 d-flex">
+    <span class="" style="padding-left: 48px;">
+        <i class="aip-led-icons icon x-24 back-icon" (click)="routeBackToModelList()"></i>
+    </span>
+    <span class="le-u-pad-l-8 aip-desc-title le-u-header-xxl"> Edit {{alias}}</span>
+</div>
+<div class="flex" >
+    <leds-panel>
+        <!-- <div class="le-u-pad-t-32 le-u-pad-lr-24"> -->
+        <div class="col-sm-12 col-lg-12 le-u-pad-24">
+            <div class="row">
+                <!-- <div *ngIf="showCreateForm" class="col-sm-6 col-sm-6 " style="padding-left: 48px; margin-bottom: 16px;">
+                    <leds-input-field label="Create Group Name*" placeholder="Enter Name..." errorMessage="{
+                    required: 'This field is required',
+                  }" inputType="text" [disabled]="false" [required]="true" [(ngModel)]="alias"></leds-input-field>
+                </div> -->
+                <div  class="col-sm-6 col-sm-6 " style="padding-left: 48px; margin-bottom: 16px;">
+                    <leds-input-field label="Group Name"
+                  inputType="text" [disabled]="false"  [(ngModel)]="alias"></leds-input-field>
+                </div>
+                <!-- <div class="col-lg-12 col-md-12 le-u-mar-b-16">
+                <leds-input-field label="Description" placeholder="Enter Pipeline Description..." inputType="text"
+                [disabled]="false" [required]="false" [(ngModel)]="description"></leds-input-field>
+            </div> -->
+                <div class="d-flex justify-content-start col-lg-12 col-md-12 le-u-mar-b-16" style="padding-left: 42px;">
+                    <!-- <input type="text" [(ngModel)]="searchTerm" placeholder="Search User Names"> -->
+                    <leds-select [options]="userName" label="Select User" [required]="false" [disabled]="false"
+                        designType="showBy" [isMultiple]="true" (selectChange)="onSelect($event)">
+                    </leds-select>
+                    <leds-button style="padding-left: 24px;" nameText="iconButton" idText="iconButton"
+                        [disabled]=enableAddButton buttonType="button" designType="icon" (click)="onAddUser()" >
+                        <span class="le-c-btn--icon__icon">
+                            <i class="icon purple x-16 icon-add"></i>
+                          </span>
+                          <span class="le-c-btn--icon__text">Add</span>
+                    </leds-button>
+                    <!-- <leds-button style="padding-left: 24px;" nameText="primaryButton" idText="primaryButton"
+                        [disabled]="false" buttonType="button" designType="primary" (click)="close()">Close
+                    </leds-button> -->
+                    <!-- </div> -->
+                </div>
+
+            </div>
+        </div>
+        <div  class="col-sm-12 col-lg-12" style="padding-left: 48px; padding-right: 48px; padding-bottom: 24px;">
+            <div class="le-l-mainwrapper">
+                <leds-data-grid>
+                    <table dataGridTable>
+                        <thead style="height: 4rem;">
+                            <tr>                                
+                                <th scope="col">User Name</th>                                                                    
+                                <th scope="col-3">User Email</th>
+                                <th style="width: 10%;">Remove User </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let user of userDetails">
+                                <td>{{user.userFName}}</td>                                
+                                <td>{{user.userEmail}}</td>
+                                <td><i class="aip-led-icons icon x-32 delete-sm-icon aip-cursor mx-2"
+                                    style="visibility: visible;" (click)="deleteUser(user)" ></i></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </leds-data-grid>
+            </div>
+        </div>
+        <div class="le-c-panel__footer">
+            <div class="d-flex m-2 le-u-pad-tb-16 le-u-pad-lr-24" style="float: right;">
+                <leds-button nameText="secondaryButton" idText="secondaryButton"
+                    [disabled]="false" buttonType="button" designType="primary"
+                    (click)="UpdateGroup()">
+                    UPDATE
+                </leds-button>
+            </div>
+        </div>
+    </leds-panel>
+</div>

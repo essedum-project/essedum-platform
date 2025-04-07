@@ -1,0 +1,31 @@
+body,description,eventname,organization,jobdetails,interfacetype
+"{}",\N,"languagedetection","leo1311","[{""name"":""LEOLNGDT92586"",""type"":""pipeline"",""runtime"":{""dsAlias"":""LocalCluster"",""dsName"":""LEALCLCL12132"",""type"":""REMOTE""}}]",\N
+"{}",\N,"languageTranslation","leo1311","[{""name"":""LEOLNGTR30094"",""type"":""pipeline"",""runtime"":{""dsAlias"":""LocalCluster"",""dsName"":""LEALCLCL12132"",""type"":""REMOTE""}}]",\N
+"{
+    ""environment"": [
+        {
+            ""name"": ""NGRAM"",
+            ""value"": ""True""
+        },
+        {
+            ""name"": ""SOUNDEX"",
+            ""value"": ""True""
+        },
+        {
+            ""name"": ""EASE"",
+            ""value"": ""True""
+        },
+        {
+            ""name"": ""LDA"",
+            ""value"": ""False""
+        },
+        {
+            ""name"": ""dataset_id"",
+	    ""value"": ""LEOTRNSL80208"" 	
+        },
+        {
+            ""name"": ""org"",
+            ""value"": ""leo1311""
+        }
+    ]
+}",\N,"multi_threading_clustering","leo1311","[{""name"":""LEOCLSTR48373"",""type"":""pipeline"",""runtime"":{""dsAlias"":""LocalCluster"",""dsName"":""LEALCLCL12132"",""type"":""REMOTE""}}]",\N

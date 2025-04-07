@@ -1,0 +1,176 @@
+<div class="container-fluid h-100" style="background: #FAFAFA">
+    <div class="le-l-level1-wrapper">
+        <div class="row">
+            <div class="col-lg-12" style="background: #FAFAFA">
+                <div class="le-l-level1-middle-col le-l-base-layout-center">
+
+                    <div class="le-l-level2-middle-ctr">
+                        <div class="le-l-level2-middle-col le-u-mar-b-24__mb">
+                            <div class="align-items-center d-flex  justify-content-between d-flex">
+                                <div class=" selector-model-title-head d-flex  align-items-center">
+                                        <span class="mx-2 d-flex" style="height: max-content;">
+                                            <i class="aip-led-icons icon x-24 back-icon" (click)="back()"></i>
+                                        </span>
+                                    <span class="le-u-mar-l-8 aip-desc-title le-u-header-xxl"><span
+                                            style=" color: #737373;;">Grouped Job:
+                                        </span>{{chainname | titlecase}} </span>
+                                </div>
+                            </div>
+                            <div *ngIf="showNodes && (!nodes || nodes.length == 0)">
+                                <h2>There are no Pipelines to draw a Chain</h2>
+                            </div>
+                            <div ledsTabGroup class="le-u-mar-t-16 mx-4 px-5 my-4 mt-0 aip-panel-shadow" style="background-color: #FAFAFA;">
+                                <mat-tab-group disableRipple>
+                                    <mat-tab label="Chain" class="le-u-header-xl">
+                                        <div class="drawing-board">
+                                            <div class="wrapper">
+                                                <div *ngIf="showNodes" class="col">
+                                                    <!-- <ng-container *ngFor="let node of nodes">
+                                            <div class="drag-drawflow" draggable="true" (dragstart)="onDrawflowEvent($event)">
+                                                <a [ngClass]="node.icon"></a>
+                                                {{ node.name }}
+                                            </div>
+                                            </ng-container> -->
+                                                    <div style="height:70vh;overflow: auto;">
+                                                        <div class="search-node selector-773-27" style="width:100%;">
+                                                            <input id="filter" class="form-control selector-773-28" #filter=""
+                                                                (keyup)="filterNodes(filter.value)" placeholder="Filter Nodes" />
+                                                        </div>
+                                                        <div class="selector-773-29">
+                                                            <!-- <button (click)="open(content)">Add new pipeline</button> -->
+                                                            <tree-root #tree="" [focused]="true" [options]="options" [nodes]="nodes"
+                                                                (dragstart)="onDrawflowEvent($event)">
+                                                                <ng-template #treeNodeTemplate let-node let-index="index">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <a [ngClass]="node.data.icon"> </a>&nbsp;&nbsp;
+                                                                        <span>{{ node.data.alias }}</span>
+                                                                    </div>
+                                                                </ng-template>
+                                                            </tree-root>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                                <div class="col-right selector-12345 aip-panel-shadow" style="margin-left:1.5rem" [ngStyle]="{ width: showNodes ? '80%' : '100%' }">
+                                                    <div id="chain-drawflow">
+                                                        <div id="drawflow" (dragenter)="onDrawflowEvent($event)"
+                                                            (dragleave)="onDrawflowEvent($event)" (dragover)="onDrawflowEvent($event)"
+                                                            (dragend)="onDrawflowEvent($event)" (drop)="open(content,$event)">
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <div style="margin-right:5%" class="btn-clears" (click)="onSave()">Save</div>
+                                                        <div class="btn-clears" (click)="runChain()">Run</div>
+                                                        <!-- <div *ngIf="showlog ===1">
+                                                        <app-jobs></app-jobs>
+                                                    </div> -->
+                                                        <!-- <div class="btn-clear" (click)="onClear()">Clear</div> -->
+                                                    </div>
+                                                    <!-- <div *ngIf="showLock" class="btn-lock" [ngClass]="locked ? 'locked' : ''">
+                                            <i (click)="changeMode()" class="fas fa-lock-open" [ngStyle]="{ display: locked ? 'none' : 'block' }"></i>
+                                            <i (click)="changeMode()" class="fas fa-lock" [ngStyle]="{ display: locked ? 'block' : 'none' }"></i>
+                                            </div> -->
+                                                    <div class="bar-zoom">
+                                                        <i (click)="onZoomOut()" class="fa fa-search-minus"></i>
+                                                        <i (click)="onZoomReset()" class="fa fa-search"></i>
+                                                        <i (click)="onZoomIn()" class="fa fa-search-plus"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </mat-tab>
+                                    <mat-tab label="Logs" class="le-u-header-xl">
+                                        <app-chains-log></app-chains-log>
+                                        <!--/ng-template-->
+                                    </mat-tab>
+
+                                </mat-tab-group>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- <ng-template id="ele" pipelinenode></ng-template> -->
+<ng-template #content let-modal>
+    <div style="padding: 2vh;">
+    <div ledsModalHeader>
+        <h4 class="le-u-header-xl " id="modalTitle">Create Node</h4>
+        <button type="button" style="float:right;margin-right:1%" class="btn-close le-u-pad-8" aria-label="Close"
+            (click)="modal.dismiss('Cross click');"><i class="icon x-16 close-icon"></i>
+        </button>
+    </div>
+    <div ledsModalBody>
+        <label style="    position: relative;     top: 10px;">Inputs</label>
+        <leds-input-field placeholder="Inputs" inputType="number" value=""
+            [(ngModel)]="nodeObj.inputs"></leds-input-field>
+        <label>Outputs</label>
+        <leds-input-field placeholder="Outputs" inputType="number" value=""
+            [(ngModel)]="nodeObj.outputs"></leds-input-field>
+    </div>
+    <div ledsModalFooter>
+        <leds-button designType="miniPrimary" class="le-u-mar-r-8" buttonType="button"
+            (click)=" modal.dismiss('Cross click')" (click)="addPipeline()">
+            Create
+        </leds-button>
+    </div>
+</div>
+
+</ng-template>
+<ng-template #content3 let-modal>
+    <div style="padding: 2vh;">
+    <div ledsModalHeader>
+        <h4 class="le-u-header-xl " id="modalTitle">Edit Node</h4>
+        <button type="button" style="float:right;margin-right:1%" class="btn-close le-u-pad-8" aria-label="Close"
+            (click)="modal.dismiss('Cross click');"><i class="icon x-16 close-icon"></i>
+        </button>
+    </div>
+    <div ledsModalBody>
+        <label style="    position: relative;     top: 10px;">Inputs</label>
+        <leds-input-field placeholder="Inputs" inputType="number" value=""
+            [(ngModel)]="nodeObj.inputs"></leds-input-field>
+        <label>Outputs</label>
+        <leds-input-field placeholder="Outputs" inputType="number" value=""
+            [(ngModel)]="nodeObj.outputs"></leds-input-field>
+    </div>
+    <div ledsModalFooter>
+        <leds-button designType="miniPrimary" class="le-u-mar-r-8" buttonType="button"
+            (click)=" modal.dismiss('Cross click')" (click)="addPipelineAfterDelete()">
+            Create
+        </leds-button>
+    </div>
+</div>
+
+</ng-template>
+<ng-template #content1 let-modal>
+    <div class="selector-3332 le-u-pad-8"  style="box-shadow: 5px 10px 15px 3px">
+        <div class="clearfix d-flex justify-content-end le-u-pad-8">
+            <button type="button" class="btn-close " aria-label="Close"
+                (click)="modal.dismiss('Cross click');closeModal()">
+            </button>
+
+            <!-- <h4 class="le-u-header-xl float-start" id="modalTitle3">{{selectedNode.data.alias}}</h4> -->
+
+        </div>
+        <div>
+            <div class="selector-333">
+                <div *ngIf="!isNativescript" class="selector-33322" style="height: 70vh; overflow: auto;">
+                    <app-pipeline-description [pipelineAlias]="pipelineDetails.alias"
+                        [streamItem]="pipelineDetails"></app-pipeline-description>
+                </div>
+                <div *ngIf="isNativescript" class="selector-333221">
+                    <div style="height: 70vh; overflow: auto;">
+                        <app-native-script [pipelineAlias]="pipelineDetails.alias"
+                            [streamItem]="pipelineDetails"></app-native-script>
+                    </div>
+                </div>
+            </div>
+            <!-- <app-draw-flow [showNodes]="false" [pipelineDetails]="pipelineDetails"></app-draw-flow> -->
+
+
+        </div>
+    </div>
+</ng-template>

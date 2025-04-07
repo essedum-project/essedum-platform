@@ -1,0 +1,45 @@
+
+<div *ngIf="clusterDetailsFlag==true" class="icm-tag-overflow selector-540-1">
+    <div class="col-md-12 selector-540-2" style="padding: 10px 0px 0px 0px; display: flex;">
+        <h3 class="col-md-3 selector-540-3" style="font-weight: bold !important; color: black !important; margin: 0px 0px 24px 0px;">Add Tag</h3>
+        <span class="col-md-1 offset-md-8 selector-540-4">
+            <i class="fa fa-times selector-540-5" style="font-size: 20px;" mat-dialog-close=""></i>
+        </span>
+    </div>
+    <div class="col-lg-12 col-md-12 le-u-mar-b-16">
+        <leds-input-field
+            label="Enter The Name Of The Tag "
+            placeholder="Enter The Name Of The Tag "
+            errorMessage="{required: 'This field is required',}"
+            inputType="text" [disabled]="false" [required]="true"
+            [(ngModel)]="tag"></leds-input-field>
+    </div>
+    
+    <div class="col-md-12 selector-540-7" style="margin-top: 8px; font-size: 12px;">
+        <span class="selector-540-8" style="color: red;">* Adding new tag will OVERWRITE the existing tag, if any</span>
+    </div>
+    <div class="col-md-12 selector-540-21" style="margin-top: 20px;margin-bottom: 8px;">
+        <leds-button  nameText="primaryButton" class="DSA_wb_Btn_small"
+        idText="primaryButton" [disabled]="false" buttonType="button"
+        designType="primary" (click)="submitDetails()">
+       Apply</leds-button>
+       <leds-button  nameText="primaryButton"
+       idText="primaryButton" [disabled]="false" buttonType="button" class="DSA_wb_Btn_small"
+       designType="primary"  mat-dialog-close="">
+       Cancel</leds-button>
+        
+        
+    </div>
+</div>
+<div *ngIf="ticketLogFlag==true" class="selector-540-24">
+    <div class="col-md-12 selector-540-25">
+        <textarea type="text" class="textareatxtInput heightSet selector-540-26" disabled="" [(ngModel)]="ticketLogResult"></textarea>
+    </div>
+</div>
+
+<div *ngIf="clusterDetailsFlag==false &amp;&amp; ticketLogFlag==false" class="selector-540-27">
+    <p class="icm-black-color selector-540-28"><b style="color: red" class="selector-540-29">Error! Could not process data!</b></p>
+    <div class="col-md-12 buttonsDivStyle selector-540-30">
+        <input mat-dialog-close="" type="submit" class="btn downloadBtn cancelBtnLeftMargin selector-540-31" value="Close">
+    </div>
+</div>

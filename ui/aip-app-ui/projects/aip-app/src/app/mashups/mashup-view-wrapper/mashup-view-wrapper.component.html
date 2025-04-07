@@ -1,0 +1,60 @@
+<div class="list-view " style="height:calc(100% - 30px);overflow-y:auto;">
+  <div class="selector-795-134" *ngIf="mashup" style="height:95%">
+    <lib-dataset-power-mode-view [data]="data" (result)="checkPowerModeViewResult($event)"
+      *ngIf="viewType=='powerMode'">
+    </lib-dataset-power-mode-view>
+
+    <div *ngIf="viewType=='formView'" style="height: 100%;">
+      <div *ngIf="mashup.layout == 'tabs'" style="height: 100%;">
+        <mat-tab-group id="dset-reg-tab" [selectedIndex]="selectedTabIndex" (selectedTabChange)="onTabChange($event)"
+          style="height: 100%;">
+          <mat-tab *ngFor="let tab of mashup.contents" label="{{tab.label}}">
+            <ng-template matTabContent>
+              <gridster [options]="options" style="background:white;overflow:overlay">
+                <gridster-item [item]="content" class="gridster-item-mashup" *ngFor="let content of tab.contents">
+                  <app-dataset-form-view [datasetname]="content.dataset" [params]="jsonparse(content.params)" [id]="id"
+                    [formname]="content.templatename" [action]="action" (result)="checkFormViewResult($event)"
+                    *ngIf="content.type=='form'">
+                  </app-dataset-form-view>
+                  <app-dataset-table-view [datasetname]="content.dataset" (result)="checkTableViewResult($event)"
+                    [params]="jsonparse(content.params)" [id]="id" *ngIf="content.type=='table'">
+                  </app-dataset-table-view>
+                  <lib-aibrain-view style="height: 100%;" [mashupname]="mashupname" [url]="content.url"
+                    *ngIf="content.type=='iFrame'"></lib-aibrain-view>
+                  <!-- <app-chatbot-aip style="height: 90vh;" [instance]="mashupname" [title]="content.title"
+                    *ngIf="content.type=='chatbot'"></app-chatbot-aip> -->
+                  <app-viewer-image [dsetName]="content.dataset" *ngIf="content.type=='image'"></app-viewer-image>
+                  <app-viewer-video *ngIf="content.type=='video'" [dsetName]="content.dataset"></app-viewer-video>
+                </gridster-item>
+              </gridster>
+            </ng-template>
+          </mat-tab>
+        </mat-tab-group>
+      </div>
+
+      <div style="height:100%" *ngIf="mashup.layout == 'simple'">
+        <gridster [options]="options" style="background:white;overflow:overlay">
+          <gridster-item [item]="content" class="gridster-item-mashup" *ngFor="let content of mashup.contents">
+            <app-dataset-form-view [params]="jsonparse(content.params)" [formParam]="formParam" [id]="id"
+              [datasetname]="content.dataset" [formname]="content.templatename" [action]="action"
+              (result)="checkFormViewResult($event)" (selectedValueChanged)="changeForm($event)"
+              *ngIf="content.type=='form'"></app-dataset-form-view>
+            <app-dataset-table-view [params]="jsonparse(content.params)" [id]="id" [datasetname]="content.dataset"
+              (result)="checkTableViewResult($event)" [formParam]="formParam" [isRest]="isRest"
+              *ngIf="content.type=='table'"></app-dataset-table-view>
+            <lib-aibrain-view [mashupname]="mashupname" [datasetname]="content.dataset" [datasets]="content.datasets"
+              [displayedColumns]="content.displayColumns" (result)="checkTableViewResult($event)" [isRest]="isRest"
+              [createDialog]="content.createDialog" [permission]="content.permission"
+              *ngIf="content.type=='customTable'"></lib-aibrain-view>
+            <lib-aibrain-view style="height: 100%;" [mashupname]="mashupname" [url]="content.url"
+              *ngIf="content.type=='iFrame'"></lib-aibrain-view>
+            <!-- <app-chatbot-aip style="height: 90vh;" [instance]="mashupname" [title]="content.title"
+              *ngIf="content.type=='chatbot'"></app-chatbot-aip> -->
+            <app-viewer-image [dsetName]="content.dataset" *ngIf="content.type=='image'"></app-viewer-image>
+            <app-viewer-video *ngIf="content.type=='video'" [dsetName]="content.dataset"></app-viewer-video>
+          </gridster-item>
+        </gridster>
+      </div>
+    </div>
+  </div>
+</div>

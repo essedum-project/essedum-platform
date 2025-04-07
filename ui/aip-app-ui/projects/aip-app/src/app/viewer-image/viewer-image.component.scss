@@ -1,0 +1,45 @@
+
+.grid-container {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    margin: auto;
+  }
+/* TODO(mdc-migration): The following rule targets internal classes of card that may no longer apply for the MDC version. */
+mat-card {
+    width: 400px;
+    height: 340px;
+    margin: 20px;
+    color: black;
+  
+    align-items: center !important;
+    /* background: rgba(69, 7, 68, 0.645); */
+    border-radius: 0em 1em 0em 1em !important; 
+    box-shadow: 3px 3px 3px 3px gray ;
+    background: rgba(243, 243, 243, 0.213);
+    overflow: hidden;
+    backdrop-filter: blur(30px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+  
+
+   
+}
+div{
+    margin:20px;
+    display: flex !important;
+    justify-content: center !important ;
+}
+/* TODO(mdc-migration): The following rule targets internal classes of card that may no longer apply for the MDC version. */
+mat-card-content{
+    display: flex !important;
+    justify-content: center !important ;
+}
+/* TODO(mdc-migration): The following rule targets internal classes of card that may no longer apply for the MDC version. */
+mat-card img{
+    
+    width: 330px;
+    height: 300px;
+  
+}
+
+
+

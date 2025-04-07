@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="24" width = "24" viewBox="0 0 24 24" class="svg-automate-icon">
+  <defs>
+    <style>
+    .svg-automate-icon {
+        height: inherit;
+        width: inherit;
+       }
+	<!-- @media screen and (min-width: 5000px) {
+       .svg-automate-icon {
+        height: 4vmin !important;
+        width: 4vmin !important;
+      }
+       }
+        @media screen and (min-width: 1300px) and (max-width: 3000px) {
+       .svg-cognitive-icon {
+        height: 4vmin !important;
+        width: 4vmin !important;
+       }
+	  }
+	  @media screen and (max-width: 600px) {
+       .svg-cognitive-icon {
+        height: 4vmin !important;
+        width: 4vmin !important;
+       }
+	  } -->
+    </style>
+    <!-- <script>
+    function sizing(){
+      var resizedWidth = document.getElementById("projectparent").offsetWidth
+      var resizedHeight = document.getElementById("projectparent").offsetHeight
+      var widthPercentage = (resizedWidth / 1366);
+      var heightPercentage = (resizedHeight / 625);
+      var minOf = Math.min(widthPercentage, heightPercentage);
+      Height = "25px"
+      Height = Height ? Number.parseInt(Height.replace("px", "")) * minOf + "px" : null;
+      var element = document.getElementsByClassName("svg-cognitive-icon")[0];
+      element.setAttribute("height",Height);
+      element.setAttribute("width",Height);
+    };
+    $(document).ready(sizing);
+    $(window).resize(sizing);
+    </script> -->
+  </defs>
+  <g id="Cognitive" transform="translate(1.34 1)">
+    <rect id="Rectangle_5" data-name="Rectangle 5"  stroke-width= "0.5px" fill="none" stroke="currentColor" width="24" height="24" transform="translate(-1.34 -1)"/>
+    <path id="Path_4" data-name="Path 4" stroke-width= "0.5px" fill="none" stroke="currentColor" d="M4.252,12.482A2.846,2.846,0,0,0,3.013,12.2a2.9,2.9,0,1,0,0,5.795A2.841,2.841,0,0,0,5.387,16.7l2.7,1.372a2.689,2.689,0,0,0-.07.639,2.913,2.913,0,0,0,2.839,2.858A2.878,2.878,0,0,0,13.226,17.1L17,13.076A2.856,2.856,0,1,0,18.71,7.929a2.812,2.812,0,0,0-1.745.609l-3.841-3.91a2.913,2.913,0,0,0,.6-1.773A2.86,2.86,0,0,0,8,2.784a2.758,2.758,0,0,0,.07.639l-2.518.952A2.852,2.852,0,0,0,3.013,2.784,2.913,2.913,0,0,0,.166,5.642,2.913,2.913,0,0,0,3.012,8.5a2.683,2.683,0,0,0,1.141-.252L5.472,10.5ZM3.013,17.246a2.175,2.175,0,1,1,0-4.345,2.175,2.175,0,1,1,0,4.345Zm2.7-1.187a2.906,2.906,0,0,0-.853-3.184l.992-1.6L8.935,16.55a2.866,2.866,0,0,0-.634.839ZM10.867,5.68a2.733,2.733,0,0,0,1.782-.614l3.845,3.922a2.866,2.866,0,0,0-.5,1.029l-2.245-.309h0A2.913,2.913,0,0,0,10.9,6.843,2.84,2.84,0,0,0,8.485,8.05l-.432-.216L9.672,5.39a2.805,2.805,0,0,0,1.229.3Zm.36,10.169v-3.32A2.864,2.864,0,0,0,13.646,10.4l2.244.315h0a2.913,2.913,0,0,0,.634,1.82l-3.768,4.012a2.773,2.773,0,0,0-1.536-.7Zm-.36-8.361a2.24,2.24,0,0,1,1.54.661,2.07,2.07,0,0,1,.6,1.51,2.062,2.062,0,0,1-1.061,1.848,2.237,2.237,0,0,1-2.2,0,2.162,2.162,0,0,1-.45-3.37,2.243,2.243,0,0,1,1.559-.648ZM8.168,8.7a3.071,3.071,0,0,0-.158.952A2.893,2.893,0,0,0,10.5,12.511v3.312a2.638,2.638,0,0,0-.941.3L6.3,10.584,7.692,8.441Zm2.686,12.189a2.174,2.174,0,1,1,2.261-2.173,2.217,2.217,0,0,1-2.261,2.173ZM18.694,8.57a2.175,2.175,0,1,1-2.076,2.174A2.175,2.175,0,0,1,18.694,8.57ZM10.853.593A2.159,2.159,0,0,1,13,2.779a2.057,2.057,0,0,1-1.055,1.859,2.232,2.232,0,0,1-2.2,0A2.057,2.057,0,0,1,8.684,2.779,2.08,2.08,0,0,1,9.3,1.257,2.252,2.252,0,0,1,10.853.593ZM8.321,4.115a2.87,2.87,0,0,0,.693.9L7.424,7.507,5.709,6.631a2.758,2.758,0,0,0,.168-.953,2.83,2.83,0,0,0-.092-.61ZM.873,5.677a2.07,2.07,0,0,1,.6-1.51A2.24,2.24,0,0,1,3.012,3.5a2.24,2.24,0,0,1,1.546.66,2.07,2.07,0,0,1,.6,1.51A2.159,2.159,0,0,1,3.013,7.848,2.159,2.159,0,0,1,.873,5.677Zm3.9,2.25a3.073,3.073,0,0,0,.614-.667l1.645.829L5.9,9.887Z" transform="translate(-0.122 0.177)" fill="#010101"/>
+  </g>
+</svg>

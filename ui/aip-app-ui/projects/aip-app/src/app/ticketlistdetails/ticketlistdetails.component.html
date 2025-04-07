@@ -1,0 +1,88 @@
+<div class="le-u-pad-t-16" style="padding-left: 1.5vh;">
+
+    <div class="align-items-center d-flex justify-content-between itsm-header">
+        <div style="display: inline-flex;">
+            <span class="mx-2 aip-cursor">
+                <i class="aip-led-icons icon x-24 back-icon" (click)="navigateBack()"></i>
+            </span>
+            <h1 class="le-u-header-xl le-u-ellipsis">{{ticketId}}</h1>
+        </div>
+
+        <div class="align-items-center d-flex">
+            <div class="text-block">
+                <span class="text-content" (click)="updatesummary()">Update</span>
+            </div>
+            <div class="text-block">
+                <span class="text-content" (click)="raiseIncident()">Raise Incident</span>
+            </div>
+            <div class="text-block">
+                <span class="text-content"  (click)="callResolveTicket()">Resolve</span>
+            </div>
+
+        </div>
+
+
+    </div>
+
+    <!-- <div class="itsm-container"> -->
+    <div class="itsm-parent-container">
+        <div class="itsm-container">
+            <div class="left-part">
+                <app-itsm-summary [updatechild]="updatechild" [incident]="incident" [ticketId]="ticketId" (updateSuccess)="onemitSummary($event)"></app-itsm-summary>
+            </div>
+            <div class="middle-part">
+                <div class="top-middle">
+                    <app-itsm-recommendations *ngIf="ticketId" [ticketId]="ticketId" [callResolve]="callResolve"  (updateSuccessResolved)="onemitResolve($event)"></app-itsm-recommendations>
+                </div>
+                <div class="bottom-middle" *ngIf="enableRelatedTickets">
+                    <app-itsm-related-ticket [tickets]="tickets" [ticketId]="ticketId"></app-itsm-related-ticket>
+                </div>
+            </div>
+        </div>
+        <div>
+            <!-- <div class="right-part">
+                <div class="chatbot-container">
+                    <div class="chatbot-header">
+                        <span class="chatbot-logo">
+                            <img src="../../assets/images/mify_logo.png" alt="MIFY Bot">
+                        </span>
+                        <span class="aip-cursor">
+                            <leds-tooltip [tooltip]="'Create new chat session'">
+                                <i aria-hidden="true" class="icon x-24 icon-add" aria-label="add icon"
+                                    (click)="createNewChat()"></i>
+                            </leds-tooltip>
+                        </span>
+                    </div>
+                    <div class="chatbot-body">
+                        <div class="chat-window-scroll chat-window-wrapper">
+                            <div class="chat-window">
+                                <div *ngFor="let message of messages" class="message"
+                                    [ngClass]="{'user': message.user, 'bot': !message.user}">
+                                    <div class="le-u-body-md le-u-text-black chatbot-text"
+                                        *ngFor="let line of splitLines(message.text)">
+                                        <div [innerHTML]="line"></div>
+                                    </div>
+                                </div>
+                                <div *ngIf="loadingChatResp" class="loader">
+
+                                    <span class="dot"></span>
+                                    <span class="dot"></span>
+                                    <span class="dot"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-container">
+                            <input [(ngModel)]="userInput" (keyup.enter)="sendMessage()"
+                                placeholder="Type a message..." />
+                            <span class="aip-cursor input-send">
+                                <i class="send-Icon icon x-24" (click)="sendMessage()"></i>
+                            </span>
+
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+    </div>
+
+</div>

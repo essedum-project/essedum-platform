@@ -1,0 +1,487 @@
+id,project_id,color_type,colour,dataset_name,datasource_name,y_axis,chart_type,widget_id
+2,2,palette,#5cb6bc,TotalTickets,leo1311,NULL,NULL,2
+3,2,fixed,#7B39B1,CriticalPriorityTickets,leo1311,NULL,NULL,3
+4,2,fixed,#7B39B1,HighPriorityTickets,leo1311,NULL,NULL,4
+5,2,fixed,#7B39B1,MediumPriorityTickets,leo1311,NULL,NULL,5
+6,2,fixed,#7B39B1,LowPriorityTickets,leo1311,NULL,NULL,6
+10,2,palette,#8cb814,OpenTickets,leo1311,NULL,NULL,10
+11,2,palette,#7B39B1,OpenTickets,leo1311,NULL,NULL,11
+12,2,palette,#7B39B1,ClosedTickets,leo1311,NULL,NULL,12
+13,2,palette,NULL,Incident_Count_By_Cluster,leo1311,0,6,13
+14,2,palette,NULL,Incident_Count_By_Cluster,leo1311,0,6,14
+15,2,palette,NULL,Incident_Count_By_Cluster,leo1311,0,6,15
+16,2,fixed,#7b39b1,Cluster_Pareto,leo1311,0,3,16
+17,2,fixed,#7B39B1,Cluster_Count,leo1311,NULL,NULL,17
+18,2,dynamic,,Cluster_Details,leo1311,NULL,12,18
+19,2,dynamic,,Cluster_Incidents_By_Assignee,leo1311,0,19,19
+20,2,dynamic,,Incident_Arrival_by_Category,leo1311,0,1,20
+21,2,dynamic,,Cluster_incident_count_by_close_Code,leo1311,0,6,21
+22,2,dynamic,,Cluster_Incident_Details,leo1311,NULL,12,22
+23,2,palette,NULL,TicketMetResolutionSLA,leo1311,NULL,NULL,23
+25,2,fixed,#7b39b1,IncidentCountByApplication,leo1311,0,3,25
+26,2,fixed,#7b39b1,DistributionByCategory,leo1311,0,6,26
+27,2,fixed,#7B39B1,TotalTicketAvgDuration,leo1311,NULL,NULL,27
+28,2,fixed,#7B39B1,CriticalTicketsAvgDuration,leo1311,NULL,NULL,28
+29,2,fixed,#7B39B1,MediunTicketsAvgDuration,leo1311,NULL,NULL,29
+30,2,fixed,#7B39B1,HighTicketAvgDuration,leo1311,NULL,NULL,30
+31,2,fixed,#7B39B1,LowTicketsAvgDuration,leo1311,NULL,NULL,31
+32,2,fixed,#7b39b1,DistributionByAssignmentGroup,leo1311,0,10,32
+33,2,fixed,#7b39b1,DistributionByState,leo1311,0,6,33
+34,2,fixed,#1c9c3c,DistributionByPriority,leo1311,0,10,34
+35,2,palette,NULL,DistributionByPriority,leo1311,0,10,35
+36,2,fixed,#7B39B1,MonthlyTicketArrivalTrend,leo1311,0,1,36
+37,2,fixed,#7b39b1,DistributionByEASE,leo1311,0,10,37
+38,2,fixed,#7b39b1,Incident_Count_By_Cluster,leo1311,0,3,38
+39,2,fixed,#7b39b1,Cluster_Pareto,leo1311,0,3,39
+40,2,fixed,#7b39b1,Cluster_Pareto,leo1311,0,1,39
+41,2,fixed,#7B39B1,ease_TotalTickets,leo1311,NULL,NULL,40
+42,2,fixed,#7B39B1,ease_TotalTickets,leo1311,NULL,NULL,41
+43,2,dynamic,NULL,DistributionByEASE,leo1311,NULL,NULL,42
+44,2,fixed,#7B39B1,ease_TotalTickets,leo1311,NULL,NULL,43
+45,2,fixed,#7B39B1,ease_TotalTickets,leo1311,NULL,NULL,44
+46,2,dynamic,NULL,DistributionByEASE,leo1311,NULL,NULL,45
+47,2,fixed,#7b39b1,ease_wordcloud,leo1311,0,11,46
+48,2,fixed,#7b39b1,ease_distributionByKeyword,leo1311,0,6,47
+49,2,dynamic,,ease_tickets,leo1311,NULL,12,48
+50,2,fixd,#7b39b1,ease_tickets,leo1311,NULL,12,49
+51,2,fixed,#7b39b1,correlation_alerts,leo1311,0,16,50
+52,2,fixed,#7B39B1,servercount,AcmeBTF,NULL,NULL,51
+53,2,dynamic,,serverdetail,AcmeBTF,NULL,12,52
+54,2,fixed,#7B39B1,Total_bots,AcmeBTF,NULL,NULL,53
+55,2,palette,NULL,Active_Bots_,AcmeBTF,NULL,NULL,54
+56,2,palette,NULL,Avg_Time_,AcmeBTF,NULL,NULL,55
+57,2,dynamic,,Avg_per_bot_,AcmeBTF,NULL,12,56
+58,2,dynamic,,Executions_per_bot_,AcmeBTF,NULL,12,57
+59,2,fixed,#7B39B1,workflowcount,AcmeBTF,NULL,NULL,58
+60,2,fixed,#7B39B1,botType,AcmeBTF,0,3,59
+61,2,palette,NULL,botTechnology,AcmeBTF,0,1,60
+62,2,fixed,#7B39B1,botSpecificationCategory,AcmeBTF,0,9,61
+63,2,dynamic,,workFlowStatus,AcmeBTF,NULL,12,62
+64,2,dynamic,,botUsageStat,AcmeBTF,NULL,12,63
+65,2,fixed,#7B39B1,total_available_wf,AcmeBTF,NULL,NULL,64
+66,2,fixed,#7B39B1,Total_wf,leo1311,NULL,NULL,65
+67,2,palette,NULL,5_fastest_wf,leo1311,0,19,66
+68,2,palette,NULL,5_Slowest_wf,leo1311,0,19,67
+69,2,fixed,#a22525,TicketsBreachedResolutionSLA,leo1311,NULL,NULL,68
+70,2,palette,NULL,Top_5_executed_wf,leo1311,0,19,69
+71,2,palette,NULL,least_5_executed_wf,leo1311,0,19,70
+72,2,fixed,#7B39B1,btf_Deployed_count,AcmeBTF,NULL,NULL,71
+73,2,fixed,#7b39b1,TicketsBreachedResolutionSLA,leo1311,NULL,NULL,72
+74,2,palette,NULL,Total_processes,leo1311,NULL,NULL,73
+75,2,palette,NULL,wf_completed_count,leo1311,NULL,NULL,74
+76,2,fixed,#3e49a3,wf_in_progress_count,leo1311,NULL,NULL,75
+77,2,fixed,#e42121,wf_failed_count,leo1311,NULL,NULL,76
+78,2,palette,NULL,5fastest_processes,leo1311,0,19,77
+79,2,palette,NULL,5slowest_processes,leo1311,0,19,78
+80,2,palette,NULL,Top5_executed_processes,leo1311,0,19,79
+81,2,palette,#7B39B1,least5_executed_processes,leo1311,0,19,80
+82,2,dynamic,,wf_completed,leo1311,NULL,12,81
+83,2,dynamic,,wf_in_progress,leo1311,NULL,12,82
+84,2,dynamic,,wf_failed,leo1311,NULL,12,83
+85,2,dynamic,,TicketDetails,leo1311,NULL,12,84
+86,2,dynamic,,TicketDetails,leo1311,NULL,12,85
+87,2,palette,NULL,CriticalResolutionSLA_05,leo1311,NULL,NULL,86
+88,2,palette,NULL,CriticalResolutionSLA_1,leo1311,NULL,NULL,87
+89,2,palette,NULL,CriticalResolutionSLA_4hr,leo1311,NULL,NULL,88
+90,2,palette,NULL,CriticalResolutionSLA_6hr,leo1311,NULL,NULL,89
+91,2,palette,NULL,HighResolutionSLA_05,leo1311,NULL,NULL,90
+92,2,palette,NULL,HighResolutionSLA_4hr,leo1311,NULL,NULL,91
+93,2,palette,NULL,HighResolutionSLA_6hr,leo1311,NULL,NULL,92
+94,2,palette,NULL,HighResolutionSLA_05,leo1311,NULL,NULL,93
+95,2,fixed,#7B39B1,btf_Queue_Size,AcmeBTF,NULL,NULL,94
+96,2,fixed,#7b39b1,OpenTicketsbyAssignmentGroup,leo1311,0,19,95
+97,2,dynamic,,Queue_details,AcmeBTF,NULL,12,96
+98,2,fixed,#7b39b1,OpenTicketPriorityDistribution,leo1311,0,1,97
+99,2,palette,NULL,Bot_Execution_by_technology,leo1311,0,6,98
+100,2,fixed,#7b39b1,ResolutionPercentBreachedMonth_Priority,leo1311,0,1,99
+101,2,fixed,#7b39b1,ResolutionPercentMetMonth_prioritywise,leo1311,0,1,100
+102,2,palette,NULL,HA_Instance,leo1311,NULL,NULL,101
+103,2,palette,NULL,Node_Details,leo1311,NULL,NULL,102
+104,2,dynamic,,btf_Avg_execution_time,AcmeBTF,NULL,12,103
+105,2,palette,NULL,last_month_wf,leo1311,0,6,104
+106,2,fixed,#7B39B1,Overall_efficiency,leo1311,0,18,105
+107,2,palette,NULL,last_month_wf,leo1311,0,6,106
+108,2,fixed,#7B39B1,Overall_efficiency,leo1311,NULL,NULL,107
+109,2,palette,NULL,last_month_wf,leo1311,0,6,108
+110,2,palette,NULL,Workflow_wise_stats,leo1311,0,1,109
+111,2,palette,NULL,Execution_count_per_wf,leo1311,0,3,110
+112,2,palette,NULL,count_per_wf,leo1311,0,1,111
+114,2,dynamic,random,getConfigItemsFromIncidents,leo1311,NULL,12,113
+115,2,dynamic,,workflow_execution_details,leo1311,NULL,12,115
+116,2,dynamic,,Bot_per_wf,leo1311,NULL,12,116
+117,2,palette,NULL,Week_wise_wf,leo1311,0,7,117
+118,2,fixed,#7B39B1,Performance,leo1311,0,17,118
+119,2,fixed,#7B39B1,Online_Orders_Minute,leo1311,0,15,119
+120,2,dynamic,#7B39B1,heat_map_data,leo1311,0,16,120
+121,2,dynamic,,Top_5_affected_plants,leo1311,NULL,12,121
+122,2,palette,,Interface_Health,leo1311,0,13,122
+123,2,dynamic,random,getConfigItemsFromIncidents,leo1311,NULL,NULL,123
+124,2,fixed,#7B39B1,map_data,leo1311,0,14,124
+125,2,fixed,#7B39B1,map_data,leo1311,0,14,125
+126,2,palette,#00AD94,On_Time_Delivery,leo1311,0,1,126
+127,2,fixed,#7B39B1,Performance,leo1311,NULL,NULL,127
+128,2,fixed,#7B39B1,Overall_efficiency,leo1311,NULL,NULL,128
+129,2,palette,NULL,On_Time_Shipment,leo1311,0,1,129
+130,2,dynamic,#00b28f,heat_map_data,leo1311,0,16,130
+131,2,palette,NULL,Top_Segments,leo1311,0,3,131
+132,2,palette,#00AD94,Top_5_Suppliers,leo1311,0,19,132
+135,2,fixed,#7b39b1,MemoryPercent,leo1311,0,1,134
+136,2,fixed,#7b39b1,MemoryPercentAnomaly,leo1311,0,1,134
+137,2,fixed,#7b39b1,DiskSpace,leo1311,0,1,135
+138,2,fixed,#7b39b1,DiskSpaceAnamoly,leo1311,0,1,135
+141,2,fixed,#7B39B1,map_data,leo1311,0,14,137
+142,2,palette,NULL,Returns,leo1311,0,3,138
+143,2,fixed,#7B39B1,Overall_efficiency,leo1311,NULL,NULL,139
+144,2,palette,NULL,On_Time_Delivery,leo1311,0,1,140
+145,2,palette,#00AD94,Interface_Health,leo1311,0,13,141
+146,2,palette,#00AD94,Interface_Health,leo1311,0,13,142
+147,2,palette,NULL,On_Time_Allocation,leo1311,0,3,143
+148,2,dynamic,,CPU_Utilization,leo1311,NULL,12,144
+149,2,dynamic,,CPU_Utilization,leo1311,NULL,12,145
+150,2,fixed,#7b39b1,CPU_Percent,leo1311,0,1,133
+151,2,fixed,#7b39b1,CPU_percentAnamoly,leo1311,0,1,133
+152,2,palette,NULL,Water_Raising,leo1311,0,3,146
+153,2,palette,#00AD94,Out_Of_Stock,leo1311,0,6,147
+154,2,fixed,#7B39B1,Online_Orders_Minute,leo1311,0,17,148
+155,2,fixed,#7B39B1,Overall_efficiency,leo1311,NULL,NULL,149
+156,2,dynamic,,node_wise_wf_stats,leo1311,NULL,12,150
+157,2,dynamic,,Top_Segments,leo1311,NULL,12,151
+158,2,dynamic,#00AD94,Top_5_Suppliers,leo1311,NULL,12,152
+159,2,dynamic,,Online_TPS,leo1311,NULL,12,153
+160,2,dynamic,,CPU_Utilization,leo1311,NULL,12,154
+161,2,fixed,#7B39B1,map_data,leo1311,0,14,155
+162,2,dynamic,,Execution_per_node,leo1311,NULL,12,156
+167,2,palette,#7B39B1,TotalTickets,leo1311,NULL,NULL,161
+168,2,fixed,#7B39B1,LowPriorityTickets,leo1311,NULL,NULL,162
+173,2,dynamic,NULL,Cluster_Count,leo1311,NULL,NULL,167
+174,2,dynamic,NULL,Cluster_Count,leo1311,NULL,NULL,168
+194,2,dynamic,NULL,Cluster_Count,leo1311,NULL,NULL,188
+195,2,dynamic,NULL,Cluster_Count,leo1311,NULL,NULL,189
+283,2,fixed,#7B39B1,TotalTickets,leo1311,NULL,NULL,277
+305,2,dynamic,,Acme_bjm2_Failed_Job_Instances_Name,leapmaster,NULL,12,299
+306,2,fixed,#7B39B1,OpenTickets,leo1311,NULL,NULL,300
+307,2,fixed,#7B39B1,Acme_bjm1_Total_Groups,leapmaster,NULL,NULL,301
+308,2,fixed,#7B39B1,CriticalPriorityTickets,leo1311,NULL,NULL,302
+309,2,fixed,#7B39B1,HighPriorityTickets,leo1311,NULL,NULL,303
+310,2,fixed,#7B39B1,Acme_bjm1_Total_Jobs,leapmaster,NULL,NULL,304
+311,2,fixed,#7b39b1,SLAPercentage,leo1311,NULL,NULL,305
+312,2,fixed,#7b39b1,TicketsBreachedResolutionSLA,leo1311,NULL,NULL,306
+313,2,dynamic,,Acme_bjm2_dependent_running_instances_detail,leapmaster,NULL,12,307
+314,2,fixed,#7B39B1,map_data,leo1311,0,14,308
+315,2,fixed,#7B39B1,Acme_bjm1_Total_Jobs,leapmaster,NULL,NULL,309
+316,2,fixed,#7b39b1,active_application,leapmaster,NULL,NULL,310
+317,2,fixed,#7b39b1,failed_application,leapmaster,NULL,NULL,311
+318,2,fixed,#7b39b1,unsuccessful_count,leapmaster,NULL,NULL,313
+319,2,fixed,#7b39b1,Active_Bots_,AcmeBTF,NULL,NULL,314
+320,2,fixed,#7B39B1,ClaimCountFreq,leo1311,NULL,NULL,315
+321,2,fixed,#7B39B1,ClaimCountFreq,leo1311,NULL,NULL,316
+322,2,fixed,#7B39B1,Total_bots,AcmeBTF,NULL,NULL,317
+323,2,palette,NULL,Acme_bjm1_Total_Job_Instances,leapmaster,NULL,NULL,318
+324,2,fixed,#7B39B1,workflowcount,AcmeBTF,NULL,NULL,319
+325,2,palette,NULL,Acme_bjm1_Total_dependent_job_Instances,leapmaster,NULL,NULL,320
+326,2,fixed,#7b39b1,ClaimFreqVariation,leo1311,0,3,321
+327,2,palette,NULL,Acme_bjm1_TotalJobAvgPredictedDuration,leapmaster,NULL,NULL,322
+328,2,palette,NULL,Acme_bjm1_TotalJobAvgCompletionDuration,leapmaster,NULL,NULL,323
+329,2,dynamic,NULL,Acme_L3_JobInstance_Status,leapmaster,NULL,NULL,324
+330,2,palette,NULL,Acme_bjm1_scheduled_jobs,leapmaster,NULL,NULL,325
+331,2,fixed,#7b39b1,ClaimFreqPercent,leo1311,0,3,326
+332,2,fixed,#d71919,Acme_bjm1_TotalFailedJobInstances,leapmaster,NULL,NULL,327
+333,2,fixed,#7B39B1,Acme_bjm1_TotalFailedJobInstances,leapmaster,NULL,NULL,328
+334,2,dynamic,NULL,Acme_L3_FailedJobTicket,leapmaster,NULL,NULL,329
+335,2,fixed,#7b39b1,ClaimFreqDesk,leo1311,0,3,330
+336,2,fixed,#7B39B1,Performance,leo1311,0,15,331
+337,2,dynamic,NULL,Acme_bjm2_GroupsTotalJobs,leapmaster,NULL,NULL,332
+338,2,dynamic,NULL,Acme_L3_JobInstanceStartTime,leapmaster,NULL,NULL,333
+339,2,fixed,#7b39b1,ClaimVariantAvgDurBar,leo1311,0,3,334
+340,2,dynamic,NULL,Acme_bjm2_GroupsTotalJobInstances,leapmaster,NULL,NULL,335
+341,2,dynamic,NULL,Acme_L3_JobInstance_EndTime,leapmaster,NULL,NULL,336
+342,2,fixed,#7b39b1,ClaimAvgDurationDesk,leo1311,0,3,337
+343,2,dynamic,,ClaimGraphTbl,leo1311,NULL,12,338
+344,2,dynamic,,Acme_bjm3_ticket_details,leapmaster,NULL,12,339
+345,2,dynamic,,Acme_bjm2_GroupsTotalJobInstanceNames,leapmaster,0,3,340
+346,2,fixed,#7b39b1,probe_run_unsc,leapmaster,0,2,341
+347,2,fixed,#7B39B1,succesful_prob_run_by_app,leapmaster,0,2,341
+348,2,dynamic,,botUsageStat,AcmeBTF,0,3,342
+350,2,dynamic,,Acme_bjm2_StatuswiseJobInstancesCount,leapmaster,0,10,344
+351,2,dynamic,,Acme_bjm2_Statewise_Job_Instances_Count,leapmaster,0,10,345
+352,2,palette,NULL,Acme_bjm1_Groupwise_count_of_Job_Instances,leapmaster,0,3,346
+353,2,dynamic,,L2_Forecast_of_job,leapmaster,NULL,12,347
+354,2,palette,NULL,Acme_bjm1_Jobwise_count_of_Job_Instances,leapmaster,0,3,348
+356,2,dynamic,,Acme_bjm2_Job_Instance_table_data,leapmaster,NULL,12,350
+357,2,palette,NULL,Acme_bjm1_JobPredictedDuration,leapmaster,0,1,351
+358,2,fixed,#7B39B1,NGAcme_bjm1_JobActualDuration,leapmaster,0,1,351
+359,2,fixed,#7b39b1,On_Time_Delivery,leo1311,0,1,352
+360,2,dynamic,,Acme_bjm1_Table_data,leapmaster,NULL,12,353
+361,2,fixed,#7B39B1,Online_Orders_Minute,leo1311,0,17,354
+362,2,fixed,#7b39b1,On_Time_Shipment,leo1311,0,3,355
+363,2,dynamic,#7B39B1,heat_map_data,leo1311,0,16,356
+365,2,dynamic,NULL,Acme_bjm3_NetworkGraph,leapmaster,NULL,NULL,358
+366,2,fixed,#7B39B1,Overall_efficiency,leo1311,0,17,359
+367,2,fixed,#7b39b1,Water_Raising,leo1311,0,3,360
+371,2,dynamic,,Acme_L3_CountPredecessors,leapmaster,0,3,364
+374,2,dynamic,,Acme_L3_CountSuccessors,leapmaster,0,3,367
+375,2,dynamic,,Acme_L3_PastJobInstance_Details,leapmaster,NULL,12,368
+376,2,dynamic,,Acme_L3_FutureJobInstance_Details,leapmaster,NULL,12,369
+377,2,dynamic,NULL,Acme_L3_PredecessorNetworkGraph,leapmaster,NULL,NULL,370
+378,2,dynamic,NULL,Acme_L3_PredecessorNetworkGraph,leapmaster,NULL,NULL,371
+379,2,dynamic,NULL,Acme_L3_SuccessorNetworkGraph,leapmaster,NULL,NULL,372
+380,2,dynamic,NULL,Acme_L3_JobInstanceGroupName,leapmaster,NULL,NULL,373
+388,2,fixed,#7B39B1,TWBTransitionDuration,leapmaster,NULL,NULL,381
+389,2,fixed,#7B39B1,CurrentTransitionWeekInProgress,leapmaster,NULL,NULL,383
+390,2,fixed,#7B39B1,TWBTotSessions,leapmaster,NULL,NULL,384
+391,2,fixed,#7B39B1,TWBSessCompleted,leapmaster,NULL,NULL,385
+392,2,fixed,#7B39B1,TWBPercentComplete,leapmaster,NULL,NULL,386
+393,2,fixed,#7B39B1,TWBSessResch,leapmaster,NULL,NULL,387
+394,2,fixed,#7B39B1,TWBSessInProgress,leapmaster,NULL,NULL,388
+395,2,fixed,#7B39B1,TWBCancelledSess,leapmaster,NULL,NULL,389
+396,2,fixed,#7B39B1,TWBGrpBySess,leapmaster,0,3,394
+397,2,fixed,#7B39B1,TwbPlannedSession,leapmaster,NULL,NULL,393
+398,2,dynamic,,TWBTaskDetails,leapmaster,NULL,12,391
+399,2,fixed,#7B39B1,Application_Count,leapmaster,NULL,NULL,395
+400,2,fixed,#7B39B1,Application_group_running_count,leapmaster,NULL,NULL,398
+401,2,fixed,#7B39B1,Run_successful,leapmaster,NULL,NULL,399
+402,2,fixed,#7B39B1,Run_unsuccessful,leapmaster,NULL,NULL,400
+403,2,fixed,#7B39B1,Average_of_run_time,leapmaster,NULL,NULL,401
+404,2,fixed,#7B39B1,Failed_Applications,leapmaster,NULL,NULL,"396	"
+405,2,fixed,#7B39B1,UnsuccessfulProbeRunbyApplication,leapmaster,0,2,402
+406,2,palette,NULL,ApplicationCountByApplicationGroup,leapmaster,0,6,404
+407,2,fixed,#7B39B1,SuccesfulProbebyApplication,leapmaster,0,2,405
+408,2,palette,NULL,ApplicationGroup,leapmaster,0,3,408
+409,2,dynamic,,ApplicationTable,leapmaster,NULL,12,410
+411,2,dynamic,,testapplicationgroupwithactiveprobe,leapmaster,NULL,12,412
+413,2,dynamic,,testsuccessproberuns,leapmaster,NULL,12,414
+412,2,dynamic,,testfailedprobename,leapmaster,NULL,12,413
+410,2,dynamic,,Failed_Applications_Name,leapmaster,NULL,12,411
+415,2,dynamic,,TestApplicationGrpCount,leapmaster,NULL,12,416
+416,2,dynamic,,testfailedproberuns,leapmaster,NULL,12,417
+414,2,dynamic,,AllApplicationsPerc,leapmaster,NULL,12,415
+417,2,fixed,#7b39b1,ProbeLocationGraph,leapmaster,NULL,3,418
+418,2,fixed,#7B39B1,RunTestFailed,leapmaster,NULL,12,419
+419,2,dynamic,,ApplicationTable,leapmaster,NULL,12,420
+420,2,fixed,#7B39B1,ApplicationTable,leapmaster,0,3,421
+421,2,fixed,#7b39b1,ProbeRunTime,leapmaster,0,3,422
+422,2,fixed,#7b39b1,ProbeRunTime1,leapmaster,0,3,422
+423,2,fixed,#7b39b1,ProbeRunTime2,leapmaster,0,3,422
+424,2,fixed,#7B39B1,ApplicationDetails,leapmaster,NULL,NULL,423
+425,2,dynamic,,KtSession,leapmaster,NULL,12,424
+426,2,palette,#7B39B1,TE_Transition_count,leapmaster,NULL,NULL,425
+427,2,palette,,TE_KT_Chart,leapmaster,0,7,426
+428,2,dynamic,NULL,TE_Planned_line,leapmaster,0,3,427
+429,2,dynamic,NULL,TE_COmpleted_LIne,leapmaster,0,3,427
+430,2,palette,NULL,Total_kt_count,leapmaster,NULL,NULL,428
+431,2,dynamic,NULL,New_InProgress_wave_status,leapmaster,0,3,429
+432,2,dynamic,NULL,New_completed_wave_status,leapmaster,0,3,429
+433,2,dynamic,NULL,New_cancelled_wave_status,leapmaster,0,3,429
+434,2,dynamic,NULL,New_NotRequired_wave_status,leapmaster,0,3,429
+435,2,dynamic,NULL,New_Planned_wave_status,leapmaster,0,3,429
+436,2,palette,NULL,New_Action_Chart1,leapmaster,0,6,430
+437,2,palette,NULL,new_risk_chart1,leapmaster,0,6,431
+438,2,palette,NULL,New_Issue_chart1,leapmaster,0,6,432
+439,2,dynamic,,Rev_new_total_kt_Chart,leapmaster,0,7,433
+440,2,dynamic,,Rev_Total_Wave_chart,leapmaster,0,19,434
+441,2,dynamic,,New_Total_KT_CHart,leapmaster,0,7,435
+442,2,dynamic,,Total_Wave_chart,leapmaster,0,19,436
+443,2,dynamic,NULL,PlannedLine,leapmaster,0,3,437
+444,2,dynamic,NULL,CompletedLine,leapmaster,0,3,437
+445,2,dynamic,NULL,Scheduled_new_req,leapmaster,0,1,438
+446,2,dynamic,NULL,Completed_new_req,leapmaster,0,1,438
+447,2,dynamic,NULL,Rev_Scheduled_new_req,leapmaster,0,1,439
+448,2,dynamic,NULL,Rev_Completed_new_Req,leapmaster,0,1,439
+453,2,dynamic,NULL,WeeklyStatus,leapmaster,0,3,440
+454,2,dynamic,,Action_table1,leapmaster,NULL,12,441
+455,2,dynamic,,Risk_table1,leapmaster,NULL,12,442
+456,2,dynamic,,Issue_table1,leapmaster,NULL,12,443
+457,2,dynamic,,Rev_Feedback_Table,leapmaster,NULL,12,444
+458,2,dynamic,,Feedback_table,leapmaster,NULL,12,445
+459,2,dynamic,,Rev_Feedback_Based_Vendor_Chart,leapmaster,0,7,446
+460,2,dynamic,,Feedback_based_on_vendor_chart,leapmaster,0,7,447
+461,2,dynamic,,Rev_KT_table,leapmaster,NULL,12,448
+462,2,dynamic,,KT_Table,leapmaster,NULL,12,449
+463,2,palette,,Weekly_status_report_chart,leapmaster,NULL,7,450
+464,2,dynamic,,WeeklystatusReport_table,leapmaster,NULL,12,451
+465,2,dynamic,,TE_KT_Table1,leapmaster,NULL,12,452
+466,2,dynamic,NULL,ClaimEdgeAvgDur,leo1311,NULL,NULL,312
+467,2,fixed,#7B39B1,ACMND_TL37751,leo1311,0,19,453
+480,2,palette,#7B39B1,Out_Of_Stock,leo1311,0,3,464
+481,2,palette,#00AD94,Out_Of_Stock,leo1311,0,6,465
+482,2,palette,#00AD94,Interface_Health,leo1311,0,19,466
+483,2,fixed,#7B39B1,Overall_efficiency,leo1311,NULL,NULL,467
+485,2,dynamic,,Top_5_Suppliers,leo1311,NULL,12,469
+486,2,dynamic,#00AD94,Top_Segments,leo1311,NULL,12,470
+488,2,fixed,#7B39B1,map_data,leo1311,0,14,472
+489,2,palette,#00AD94,Interface_Health,leo1311,0,13,473
+170,2,palette,NULL,Monitor_bots_count,leapmaster,NULL,NULL,164
+172,2,palette,NULL,icap_resolved_tickets,leapmaster,NULL,NULL,166
+175,2,dynamic,,monitor_bot_table,leapmaster,NULL,12,169
+178,2,dynamic,,monitor_bot_table,leapmaster,NULL,12,172
+181,2,dynamic,,Resolved_Incident_dashboard,leapmaster,NULL,12,175
+364,2,palette,NULL,CAP_Nodes,leapmaster,NULL,NULL,357
+368,2,palette,NULL,CAP_BotCount,leapmaster,NULL,NULL,361
+369,2,palette,NULL,CAP_Total_Workflow,leapmaster,NULL,NULL,362
+372,2,palette,NULL,CAP_Tickets_Solved_By_Automation,leapmaster,NULL,NULL,365
+373,2,palette,NULL,CAP_average_time_to_Resolve_ticket,leapmaster,NULL,NULL,366
+381,2,palette,,CAP_Status_Wise_Ticket_Distribution,leapmaster,0,3,374
+382,2,palette,,CAP_Workflow_Status_Count,leapmaster,0,3,375
+383,2,palette,,CAP_Agent_Status_Wise,leapmaster,0,3,376
+384,2,palette,,CAP_Workflow_Execution_Trend,leapmaster,0,1,377
+385,2,palette,,CAP_Workflow_Executed_On_Each_Node,leapmaster,0,3,378
+386,2,palette,,CAP_Workflow_type_wise_distribution,leapmaster,0,6,379
+387,2,palette,,CAP_Average_Workflow_Execution_Time_For_last7days,leapmaster,0,1,380
+490,2,fixed,#7B39B1,botSpecificationCategory,AcmeBTF,0,9,474
+491,2,palette,NULL,CAP_Total_Incidents,leapmaster,NULL,NULL,363
+556,2,dynamic,,CAP_Bot_Details,leapmaster,NULL,12,524
+557,2,dynamic,,CAP_Workflow_Details,leapmaster,NULL,12,525
+558,2,dynamic,,CAP_Workflow_Details_By_Execution_Status,leapmaster,NULL,12,526
+559,2,dynamic,,CAP_Workflow_Details_By_Type,leapmaster,NULL,12,527
+560,2,dynamic,,Acme_bjm2_monthwise_failed_job_instances,leapmaster,0,1,528
+561,2,fixed,#7b39b1,ACMMNLCL47649,leo1311,0,6,529
+562,2,fixed,#7b39b1,ACMSNDXC88406,leo1311,0,6,530
+563,2,fixed,#7b39b1,ACMNGRMC77467,leo1311,0,6,531
+564,2,fixed,#7b39b1,ACMLDCLS41479,leo1311,0,6,532
+565,2,fixed,#7b39b1,ACMKYPHR29686,leo1311,0,6,533
+566,2,fixed,#7B39B1,CAP_Total_Bots_On_Node,leapmaster,NULL,NULL,534
+567,2,dynamic,,CAP_Details_Workflow_Executed_On_Node,leapmaster,NULL,12,535
+568,2,dynamic,,CAP_D2_BotwiseTicketDistribution,leapmaster,0,7,536
+569,2,dynamic,,CAP_D2_BotwiseUtilization,leapmaster,0,1,537
+570,2,dynamic,,CAP_D2_NodewiseUtilization,leapmaster,0,1,538
+572,2,dynamic,,CAP_D2_Statuswise_Bot_Distribution,leapmaster,0,7,540
+581,2,dynamic,NULL,Network_ProcessTemplate_Edge,leo1311,NULL,NULL,549
+582,2,dynamic,NULL,IC_ProcessTemplate_Graph,leo1311,NULL,NULL,550
+583,2,dynamic,,Variation_ProcessTemplate_Graph,leo1311,0,3,551
+584,2,dynamic,,VF_ProcessTemplate_Graph,leo1311,0,3,552
+585,2,dynamic,,VAverage_ProcessTemplate_Graph,leo1311,0,3,553
+586,2,dynamic,,ProcessTemplate_Graph,leo1311,NULL,12,554
+587,2,dynamic,,IC_ProcessTemplate_Graph,leo1311,NULL,NULL,541
+616,2,dynamic,,CAP_D2_WF_MinExecutionTime,leapmaster,0,3,581
+617,2,dynamic,,CAP_D2_WF_MaxExecutionTime,leapmaster,0,3,581
+618,2,dynamic,,CAP_D2_WF_AVGExecutionTime,leapmaster,0,3,581
+1022,2,fixed,#7b39b1,Actual VM Type,leo1311,NULL,1,958
+1021,2,fixed,#7b39b1,Predicted VM_Type,leo1311,NULL,1,958
+1020,2,fixed,#7b39b1,VM Type Count,leo1311,NULL,NULL,957
+1019,2,fixed,#7b39b1,Actual VM Type,leo1311,NULL,1,956
+1018,2,fixed,#7b39b1,Predicted VM_Type,leo1311,NULL,1,956
+1016,2,fixed,#7b39b1,Actual SLA Not Met,leo1311,NULL,1,954
+1015,2,fixed,#7b39b1,Predicted SLA Not Met,leo1311,NULL,1,954
+1014,2,fixed,#7b39b1,Actual SLA Not Met,leo1311,NULL,1,953
+1013,2,dynamic,NULL,Predicted SLA Not Met,leo1311,NULL,1,953
+1012,2,dynamic,NULL,Actual SLA Not Met,leo1311,NULL,1,952
+1011,2,dynamic,NULL,Predicted SLA Not Met,leo1311,NULL,1,952
+1010,2,fixed,#7b39b1,Duration Count,leo1311,NULL,NULL,951
+1009,2,fixed,#7b39b1,Status Count,leo1311,NULL,NULL,950
+1008,2,fixed,#7b39b1,Actual Status,leo1311,NULL,1,949
+1007,2,fixed,#7b39b1,PredictedStatus,leo1311,NULL,1,949
+1023,2,fixed,#7B39B1,support_total_inflow_count,leapmaster,NULL,NULL,959
+1024,2,fixed,#7B39B1,Support_asgn_to_infy_count,leapmaster,NULL,NULL,960
+1025,2,fixed,#7B39B1,Support_infosys_resolved_count,leapmaster,NULL,NULL,961
+1026,2,fixed,#7B39B1,support_infyIndResol_count,leapmaster,NULL,NULL,962
+1027,2,fixed,#7B39B1,support_RWHelp_count,leapmaster,NULL,NULL,963
+1028,2,palette,NULL,test_Sup_sec_asgn_to_infy,leapmaster,0,3,964
+1029,2,fixed,#7B39B1,test_Sup_sec_infy_Resolved,leapmaster,0,3,964
+1030,2,palette,NULL,test_Sup_pri_asgn_to_infy,leapmaster,0,3,965
+1031,2,fixed,#7B39B1,test_Sup_pri_infy_resolved,leapmaster,0,3,965
+1032,2,palette,NULL,test_Support_infy_asgn_target_per,leapmaster,0,1,966
+1033,2,fixed,#7B39B1,test_Support_asgn_to_infy_per,leapmaster,0,1,966
+1034,2,palette,NULL,test_Support_Indepen_target,leapmaster,0,1,967
+1035,2,fixed,#7B39B1,test_Support_Indepen_res_per,leapmaster,0,1,967
+1036,2,palette,NULL,test_Support_total_inflow,leapmaster,0,3,968
+1037,2,fixed,#7B39B1,test_Support_assigned_to_infosys,leapmaster,0,3,968
+1038,2,fixed,#7B39B1,supportSecClusterchart,leapmaster,0,3,969
+1039,2,fixed,#7B39B1,SecSupportClusterTable,leapmaster,NULL,12,970
+1040,2,fixed,#7B39B1,PriSupportClusterTable,leapmaster,NULL,12,971
+1041,2,fixed,#7B39B1,supportPriClusterchart,leapmaster,0,3,972
+1042,2,fixed,#7B39B1,Support_InflowTarget_dd_chart,leapmaster,0,3,973
+1043,2,fixed,#7B39B1,Support_InflowTarget_dd_table,leapmaster,0,12,974
+1044,2,fixed,#7B39B1,Support_IndepTarget_dd_chart,leapmaster,0,3,975
+1045,2,fixed,#7B39B1,Support_IndepTarget_dd_table,leapmaster,0,12,976
+
+1046,2,fixed,#7B39B1,workflow_count,leapmaster,NULL,NULL,977
+1047,2,fixed,#7B39B1,bots_count,leapmaster,NULL,NULL,978
+1048,2,fixed,#7B39B1,cases_count,leapmaster,NULL,NULL,979
+1049,2,fixed,#7B39B1,node_count,leapmaster,NULL,NULL,980
+1050,2,fixed,#7B39B1,bots_count,leapmaster,NULL,NULL,981
+1051,2,palette,NULL,cases by status,leapmaster,0,19,982
+1052,2,palette,NULL,cases by bots,leapmaster,0,19,983
+1057,2,fixed,#7B39B1,cases by source,leapmaster,NULL,NULL,985
+1058,2,palette,NULL,SLA overall,leapmaster,0,6,986
+1059,2,fixed,#7B39B1,SLA by priority,leapmaster,NULL,NULL,987
+1060,2,fixed,#7B39B1,SLA by category,leapmaster,NULL,NULL,988
+1061,2,fixed,#7B39B1,Least used bot,leapmaster,NULL,NULL,989
+1062,2,fixed,#7B39B1,Least used node,leapmaster,NULL,NULL,990
+1063,2,fixed,#7B39B1,Least used tool,leapmaster,NULL,NULL,991
+1064,2,fixed,#7B39B1,Least used workflow,leapmaster,NULL,NULL,992
+1065,2,palette,NULL,fastest workflows,leapmaster,0,19,993
+1066,2,palette,NULL,slowest workflows,leapmaster,0,19,994
+1067,2,palette,NULL,most executed workflows,leapmaster,0,19,995
+1068,2,palette,NULL,least executed workflows,leapmaster,0,19,996
+1069,2,palette,NULL,workflow_types,leapmaster,0,13,997
+1070,2,palette,NULL,incident_by_tool,leapmaster,0,1,998
+1071,2,palette,NULL,Day for AcmeBot,leapmaster,0,19,999
+1072,2,palette,NULL,Day for ICASbot,leapmaster,0,19,1000
+1073,2,palette,NULL,Day for TestBot,leapmaster,0,19,1001
+1074,2,palette,NULL,Day for TestBot2,leapmaster,0,19,1002
+1075,2,palette,NULL,Weekly for AcmeBot,leapmaster,0,19,1003
+1076,2,palette,NULL,Weekly for ICASBot,leapmaster,0,19,1004
+1077,2,palette,NULL,Weekly for ICASBot,leapmaster,0,19,1005
+1078,2,palette,NULL,Weekly for TestBot2,leapmaster,0,19,1006
+1079,2,palette,NULL,Monthly for AcmeBot,leapmaster,0,19,1007
+1080,2,palette,NULL,Monthly for ICASBot,leapmaster,0,19,1008
+1081,2,palette,NULL,Monthly for TestBot,leapmaster,0,19,1009
+1082,2,palette,NULL,Monthly for TestBot2,leapmaster,0,19,1010
+1083,2,palette,NULL,node_utilisation,leapmaster,0,3,1011
+1084,2,fixed,#7B39B1,Nodewise status,leapmaster,NULL,NULL,1012
+1085,2,fixed,#7B39B1,cases_count,leapmaster,NULL,NULL,1013
+1086,2,fixed,#7B39B1,Critical Cases,leapmaster,NULL,NULL,1014
+1087,2,fixed,#7B39B1,High Priority Cases,leapmaster,NULL,NULL,1015
+1088,2,fixed,#7B39B1,Low priority cases,leapmaster,NULL,NULL,1016
+1089,2,palette,NULL,cases by category,leapmaster,0,19,1017
+1090,2,palette,NULL,cases by state,leapmaster,0,19,1018
+1091,2,fixed,#7B39B1,P1 cases with SLA percentage,leapmaster,NULL,NULL,1019
+1092,2,dynamic,,Cluster_feeback_table,leapmaster,NULL,12,1020
+1093,2,dynamic,,Rev_Cluster_feeback_table,leapmaster,NULL,12,1021
+220307,2,"fixed","#7B39B1","LEONGRM_56554","leo1311","NULL","NULL",212859
+220308,2,"dynamic","","LEONGRM_30206","leo1311","NULL",12,212860
+220309,2,"dynamic","","LEONGRMC78819","leo1311",0,19,212861
+220310,2,"dynamic","","LEONGRMN94569","leo1311",0,1,212862
+220311,2,"dynamic","","LEONGRMC27160","leo1311",0,6,212863
+220312,2,"dynamic","","LEONGRMC18077","leo1311","NULL",12,212864
+220288,2,"fixed","#7B39B1","LEOSNDX_26164","leo1311","NULL","NULL",212840
+220289,2,"dynamic","","LEOSNDX_30522","leo1311","NULL",12,212841
+220290,2,"dynamic","","LEOSNDX_51588","leo1311",0,19,212842
+220291,2,"dynamic","","LEOSNDX_54139","leo1311",0,1,212843
+220292,2,"dynamic","","LEOSNDX_93782","leo1311",0,6,212844
+220293,2,"dynamic","","LEOSNDX_85988","leo1311","NULL",12,212845
+219612,2,"fixed","#7B39B1","LEOLD_CL91570","leo1311","NULL","NULL",212213
+219613,2,"dynamic","","LEOLD_CL50102","leo1311","NULL",12,212214
+219614,2,"dynamic","","LEOLD_CL91071","leo1311",0,19,212215
+219615,2,"dynamic","","LEOLD_NC54083","leo1311",0,1,212216
+219616,2,"dynamic","","LEOLD_CL24644","leo1311",0,6,212217
+219617,2,"dynamic","","LEOLD_CL88316","leo1311","NULL",12,212218
+219618,2,"fixed","#7B39B1","LEOKYPHR37150","leo1311","NULL","NULL",212219
+219619,2,"dynamic","","LEOKYPHR68110","leo1311","NULL",12,212220
+219620,2,"dynamic","","LEOKYPHR39553","leo1311",0,19,212221
+219621,2,"dynamic","","LEOKYPHR78217","leo1311",0,1,212222
+219622,2,"dynamic","","LEOKYPHR47337","leo1311",0,6,212223
+219623,2,"dynamic","","LEOKYPHR19703","leo1311","NULL",12,212224
+219627,2,"fixed","#7B39B1","LEOMNL_C35982","leo1311","NULL","NULL",212228
+219628,2,"dynamic","","LEOMNL_C96331","leo1311","NULL",12,212229
+219629,2,"dynamic","","LEOMNL_C97722","leo1311",0,19,212230
+219630,2,"dynamic","","LEOMNL_N19320","leo1311",0,1,212231
+219631,2,"dynamic","","LEOMNL_C47729","leo1311",0,6,212232
+219632,2,"dynamic","","LEOMNL_C63843","leo1311","NULL",12,212233
+220987,2,dynamic,NULL,emf_workflow,leapmaster,NULL,NULL,213492
+220989,2,dynamic,NULL,emf_workflow_state,leapmaster,NULL,NULL,213490
+220997,2,dynamic,"",worfkow_count,leapmaster,NULL,NULL,213500
+220998,2,fixed,#42b37,workflow_success,leapmaster,NULL,NULL,213501
+220999,2,fixed,#ea3434,workflow_failed,leapmaster,NULL,NULL,213502
+221000,2,fixed,#749bb4,workflow_start,leapmaster,NULL,NULL,213503
+221001,2,fixed,#dcee59,workfow_inprogress,leapmaster,NULL,NULL,213504
+221002,2,dynamic,"",event_count,leapmaster,NULL,NULL,213505
+221003,2,fixed,#dfd030,event_inprogress,leapmaster,NULL,NULL,213506
+221004,2,fixed,#2bca68,events_completed,leapmaster,NULL,NULL,213507
+221006,2,fixed,#db1414,events_failed,leapmaster,NULL,NULL,213509
+221016,2,dynamic,"",workflow_typeCount,leapmaster,NULL,NULL,213519
+221017,2,dynamic,#000000,event_typeCount,leapmaster,NULL,NULL,213520
+221018,2,dynamic,"",emf_workflow_type,leapmaster,NULL,NULL,213521
+221019,2,dynamic,"",emf_event_type,leapmaster,NULL,NULL,213522
+221023,2,dynamic,"",event_details,leapmaster,NULL,NULL,213526
+221024,2,dynamic,NULL,event_time,leapmaster,0,24,213527

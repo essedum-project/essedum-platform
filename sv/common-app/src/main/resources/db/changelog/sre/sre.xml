@@ -1,0 +1,839 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<changeSet dbms="mysql,h2,mssql,postgresql" author="Leap (generated)" id="1614785155891-82">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_app_availability" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_app_availability">
+			<column name="application_id" type="INT">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="availability_date" type="date">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="location_id" type="INT">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="probe_id" type="INT">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="application_grp_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="application_grp_name" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="application_name" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated" type="datetime(6)">
+				<constraints nullable="true" />
+			</column>
+			<column name="location_name" type="TEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="perc_availability" type="DOUBLE">
+				<constraints nullable="false" />
+			</column>
+			<column name="probe_name" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="success_runs" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="total_runs" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet dbms="mysql,h2,mssql" author="Leap (generated)" id="1614785155891-83">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_app_downtime" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_app_downtime">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="active" type="BIT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="end_day" type="VARCHAR(45)" />
+			<column name="end_time" type="datetime(6)" />
+			<column name="pattern" type="TEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="start_day" type="VARCHAR(45)" />
+			<column name="start_time" type="datetime(6)" />
+			<column name="probe_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet dbms="postgresql" author="vikas.gupta18" id="1614785155891-83-1">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_app_downtime" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_app_downtime">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="active" type="BOOLEAN"> 
+				<constraints nullable="false" />
+			</column>
+			<column name="end_day" type="VARCHAR(45)" />
+			<column name="end_time" type="datetime(6)" />
+			<column name="pattern" type="TEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="start_day" type="VARCHAR(45)" />
+			<column name="start_time" type="datetime(6)" />
+			<column name="probe_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet dbms="mysql,h2,mssql" author="Leap (generated)" id="1614785155891-84">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_app_txn_availability" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_app_txn_availability">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="isavailable" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="run_timestamp" type="TIMESTAMP(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="application_id" type="INT" />
+			<column name="transaction_id" type="INT" />
+		</createTable>
+	</changeSet>
+
+    <changeSet dbms="postgresql" author="vikas.gupta18" id="1614785155891-84-1">
+        <validCheckSum>any</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="sre_app_txn_availability" />
+            </not>
+        </preConditions>
+        <createTable tableName="sre_app_txn_availability">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="isAvailable" type="BOOLEAN">  
+                <constraints nullable="false" />
+            </column>
+            <column name="run_timestamp" type="TIMESTAMP(6)">
+                <constraints nullable="false" />
+            </column>
+            <column name="application_id" type="INT" />
+            <column name="transaction_id" type="INT" />
+        </createTable>
+    </changeSet>
+
+	<changeSet dbms="mysql,h2,mssql,postgresql" author="Leap (generated)" id="1614785155891-85">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_location" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_location">
+			<column autoIncrement="true" name="location_id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="location_name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="project_id" type="INT" />
+		</createTable>
+	</changeSet>
+
+	<changeSet dbms="mysql,h2,mssql" author="Leap (generated)" id="1614785155891-86">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_probe" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_probe">
+			<column autoIncrement="true" name="probe_id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="citrix" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="environment" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="execution_machine" type="VARCHAR(256)" />
+			<column name="failure_in_any_region" type="BIT(1)" />
+			<column name="failure_threshold" type="INT" />
+			<column name="is_enabled" type="TINYINT(4)" />
+			<column name="operating_sys" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="probe_frequency" type="INT" />
+			<column name="probe_name" type="VARCHAR(256)" />
+			<column name="probe_url" type="VARCHAR(256)" />
+			<column name="version" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="application_id" type="INT" />
+		</createTable>
+	</changeSet>
+
+    <changeSet dbms="postgresql" author="vikas.gupta18" id="1614785155891-86-1">
+        <validCheckSum>any</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="sre_probe" />
+            </not>
+        </preConditions>
+        <createTable tableName="sre_probe">
+            <column autoIncrement="true" name="probe_id" type="INT">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="citrix" type="BOOLEAN"> 
+                <constraints nullable="false" />
+            </column>
+            <column name="description" type="VARCHAR(256)">
+                <constraints nullable="false" />
+            </column>
+            <column name="environment" type="VARCHAR(256)">
+                <constraints nullable="false" />
+            </column>
+            <column name="execution_machine" type="VARCHAR(256)" />
+            <column name="failure_in_any_region" type="VARBIT(1)" />
+            <column name="failure_threshold" type="INT" />
+            <column name="is_enabled" type="SMALLINT(4)" />
+            <column name="operating_sys" type="VARCHAR(256)">
+                <constraints nullable="false" />
+            </column>
+            <column name="probe_frequency" type="INT" />
+            <column name="probe_name" type="VARCHAR(256)" />
+            <column name="probe_url" type="VARCHAR(256)" />
+            <column name="version" type="VARCHAR(256)">
+                <constraints nullable="false" />
+            </column>
+            <column name="application_id" type="INT" />
+        </createTable>
+    </changeSet>
+
+	<changeSet dbms="mysql,h2,mssql" author="Leap (generated)" id="1614785155891-87">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_probe_location" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_probe_location">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="is_enabled" type="TINYINT(4)" />
+			<column name="location_id" type="INT" />
+			<column name="probe_id" type="INT" />
+		</createTable>
+	</changeSet>
+
+    <changeSet dbms="postgresql" author="vikas.gupta18" id="1614785155891-87-1">
+        <validCheckSum>any</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="sre_probe_location" />
+            </not>
+        </preConditions>
+        <createTable tableName="sre_probe_location">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="is_enabled" type="SMALLINT(4)" />
+            <column name="location_id" type="INT" />
+            <column name="probe_id" type="INT" />
+        </createTable>
+    </changeSet>
+
+	<changeSet dbms="mysql,h2,mssql" author="Leap (generated)" id="1614785155891-88">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_probe_run_app" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_probe_run_app">
+			<column autoIncrement="true" name="probe_run_app_id"
+				type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="is_aborted" type="TINYINT(1)" />
+			<column name="is_available" type="TINYINT(1)" />
+			<column name="workflow_id" type="INT(11)" />
+			<column name="run_id" type="INT(11)" />
+			<column name="execution_id" type="INT(11)" />
+			<column name="probe_loc_run_id" type="INT(11)" />
+			<column name="mapping_id" type="INT(11)" />
+			<column name="error_data" type="LONGTEXT" />
+			<column name="run_date" type="date">
+				<constraints nullable="false" />
+			</column>
+			<column name="run_date_est" type="date">
+				<constraints nullable="false" />
+			</column>
+			<column name="run_description" type="LONGTEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="run_end_time" type="time">
+				<constraints nullable="false" />
+			</column>
+			<column name="run_result" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="run_start_time" type="time">
+				<constraints nullable="false" />
+			</column>
+			<column name="run_time" type="FLOAT(12)" />
+			<column name="sut" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="application_id" type="INT" />
+			<column name="location_id" type="INT" />
+			<column name="probe_id" type="INT" />
+		</createTable>
+	</changeSet>
+
+    <changeSet dbms="postgresql" author="vikas.gupta18" id="1614785155891-88-1">
+        <validCheckSum>any</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="sre_probe_run_app" />
+            </not>
+        </preConditions>
+        <createTable tableName="sre_probe_run_app">
+            <column autoIncrement="true" name="probe_run_app_id"
+                type="INT">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="is_aborted" type="SMALLINT(1)" />
+            <column name="is_available" type="BOOLEAN" />
+            <column name="workflow_id" type="INT(11)" />
+            <column name="run_id" type="INT(11)" />
+            <column name="execution_id" type="INT(11)" />
+            <column name="probe_loc_run_id" type="INT(11)" />
+            <column name="mapping_id" type="INT(11)" />
+            <column name="error_data" type="TEXT" />
+            <column name="run_date" type="date">
+                <constraints nullable="false" />
+            </column>
+            <column name="run_date_est" type="date">
+                <constraints nullable="false" />
+            </column>
+            <column name="run_description" type="TEXT">
+                <constraints nullable="false" />
+            </column>
+            <column name="run_end_time" type="time">
+                <constraints nullable="false" />
+            </column>
+            <column name="run_result" type="BOOLEAN">
+                <constraints nullable="false" />
+            </column>
+            <column name="run_start_time" type="time">
+                <constraints nullable="false" />
+            </column>
+            <column name="run_time" type="FLOAT(12)" />
+            <column name="sut" type="VARCHAR(256)">
+                <constraints nullable="false" />
+            </column>
+            <column name="application_id" type="INT" />
+            <column name="location_id" type="INT" />
+            <column name="probe_id" type="INT" />
+        </createTable>
+    </changeSet>
+
+	<changeSet dbms="mysql,h2,mssql" author="Leap (generated)" id="1614785155891-89">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_probe_run_app_txn" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_probe_run_app_txn">
+			<column autoIncrement="true" name="probe_run_app_txn_run_id"
+				type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="probe_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="run_date" type="TIMESTAMP">
+				<constraints nullable="false" />
+			</column>
+			<column name="run_date_est" type="TIMESTAMP">
+				<constraints nullable="false" />
+			</column>
+			<column name="run_description" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="run_end_time" type="TIMESTAMP">
+				<constraints nullable="false" />
+			</column>
+			<column name="run_result" type="BIT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="run_start_time" type="TIMESTAMP">
+				<constraints nullable="false" />
+			</column>
+			<column name="run_time" type="FLOAT(12)" />
+			<column name="application_id" type="INT" />
+			<column name="probe_run_app_id" type="INT" />
+			<column name="transaction_id" type="INT" />
+		</createTable>
+	</changeSet>
+
+    <changeSet dbms="postgresql" author="vikas.gupta18" id="1614785155891-89-1">
+        <validCheckSum>any</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="sre_probe_run_app_txn" />
+            </not>
+        </preConditions>
+        <createTable tableName="sre_probe_run_app_txn">
+            <column autoIncrement="true" name="probe_run_app_txn_run_id"
+                type="INT">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="probe_id" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="run_date" type="TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+            <column name="run_date_est" type="TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+            <column name="run_description" type="VARCHAR(256)">
+                <constraints nullable="false" />
+            </column>
+            <column name="run_end_time" type="TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+            <column name="run_result" type="BOOLEAN"> 
+                <constraints nullable="false" />
+            </column>
+            <column name="run_start_time" type="TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+            <column name="run_time" type="FLOAT(12)" />
+            <column name="application_id" type="INT" />
+            <column name="probe_run_app_id" type="INT" />
+            <column name="transaction_id" type="INT" />
+        </createTable>
+    </changeSet>
+
+	<changeSet dbms="mysql,h2,mssql,postgresql" author="Leap (generated)" id="1614785155891-90">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_probe_run_rundetails" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_probe_run_rundetails">
+			<column autoIncrement="true" name="probe_run_trans_details_Id"
+				type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="probe_run_eststependdate" type="datetime(6)" />
+			<column name="probe_run_eststepstartdate" type="datetime(6)" />
+			<column name="probe_run_step_status" type="CHAR(1)" />
+			<column name="probe_run_stepdiff" type="FLOAT(12)" />
+			<column name="probe_run_stependdate" type="datetime(6)" />
+			<column name="probe_run_stepName" type="VARCHAR(255)" />
+			<column name="probe_run_stepstartdate" type="datetime(6)" />
+			<column name="sequence_number" type="INT" />
+			<column name="probe_run_trans_Id" type="INT" />
+		</createTable>
+	</changeSet>
+
+	<changeSet dbms="mysql,h2,mssql" author="Leap (generated)" id="1614785155891-91">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_alerting_details" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_alerting_details">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="application_id" type="INT(11)">
+			</column>
+			<column name="probe_id" type="INT(11)">
+			</column>
+			<column name="snow_ci" type="VARCHAR(765)">
+			</column>
+			<column name="snow_queue" type="VARCHAR(765)">
+			</column>
+			<column name="snow_impact" type="VARCHAR(256)" />
+			<column name="snow_category" type="VARCHAR(256)" />
+			<column name="snow_subcategory" type="VARCHAR(256)" />
+			<column name="snow_incident_type" type="VARCHAR(256)" />
+			<column name="ticket_alert" type="TINYINT(1)" />
+			<column name="email_alert" type="TINYINT(1)" />
+			<column name="to_email_address" type="TEXT" />
+			<column name="from_email_address" type="VARCHAR(256)" />
+			<column name="short_description" type="VARCHAR(256)" />
+			<column name="description" type="VARCHAR(256)" />
+			<column name="contact_type" type="VARCHAR(256)" />
+			<column name="urgency" type="VARCHAR(256)" />
+			<column name="configuration_item" type="VARCHAR(256)" />
+			<column name="assignment_group" type="VARCHAR(256)" />
+			<column name="business_Service" type="VARCHAR(256)" />
+			<column name="service_offering" type="VARCHAR(256)" />
+			<column name="problem_type" type="VARCHAR(256)" />
+			<column name="location" type="VARCHAR(256)" />
+			<column name="caller" type="VARCHAR(256)" />
+			<column name="application_email_address" type="VARCHAR(256)" />
+		</createTable>
+	</changeSet>
+
+    <changeSet dbms="postgresql" author="vikas.gupta18" id="1614785155891-91-1">
+        <validCheckSum>any</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="sre_alerting_details" />
+            </not>
+        </preConditions>
+        <createTable tableName="sre_alerting_details">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="application_id" type="INT(11)">
+            </column>
+            <column name="probe_id" type="INT(11)">
+            </column>
+            <column name="snow_ci" type="VARCHAR(765)">
+            </column>
+            <column name="snow_queue" type="VARCHAR(765)">
+            </column>
+            <column name="snow_impact" type="VARCHAR(256)" />
+            <column name="snow_category" type="VARCHAR(256)" />
+            <column name="snow_subcategory" type="VARCHAR(256)" />
+            <column name="snow_incident_type" type="VARCHAR(256)" />
+            <column name="ticket_alert" type="SMALLINT(1)" />
+            <column name="email_alert" type="SMALLINT(1)" />
+            <column name="to_email_address" type="TEXT" />
+            <column name="from_email_address" type="VARCHAR(256)" />
+            <column name="short_description" type="VARCHAR(256)" />
+            <column name="description" type="VARCHAR(256)" />
+            <column name="contact_type" type="VARCHAR(256)" />
+            <column name="urgency" type="VARCHAR(256)" />
+            <column name="configuration_item" type="VARCHAR(256)" />
+            <column name="assignment_group" type="VARCHAR(256)" />
+            <column name="business_Service" type="VARCHAR(256)" />
+            <column name="service_offering" type="VARCHAR(256)" />
+            <column name="problem_type" type="VARCHAR(256)" />
+            <column name="location" type="VARCHAR(256)" />
+            <column name="caller" type="VARCHAR(256)" />
+            <column name="application_email_address" type="VARCHAR(256)" />
+        </createTable>
+    </changeSet>
+
+	<changeSet dbms="mysql,h2,mssql" author="Leap (generated)" id="1614785155891-92">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_alerting_exclusion" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_alerting_exclusion">
+			<column autoIncrement="true" name="sre_alerting_exclusion_id"
+				type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="sre_exclusion_level" type="VARCHAR(20)">
+				<constraints nullable="false" />
+			</column>
+			<column name="sre_exclusion_id" type="INT(11)">
+				<constraints nullable="false" />
+			</column>
+			<column name="sre_alerting_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="sre_alerting_last_updated_dts" type="DATETIME">
+			</column>
+			<column name="sre_last_updated_by" type="INT(11)">
+				<constraints nullable="false" />
+			</column>
+			<column name="sre_expiry_time" type="DATETIME">
+			</column>
+			<column name="sre_isprocessed" type="TINYINT(1)">
+			</column>
+		</createTable>
+	</changeSet>
+
+    <changeSet dbms="postgresql" author="vikas.gupta18" id="1614785155891-92-1">
+        <validCheckSum>any</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="sre_alerting_exclusion" />
+            </not>
+        </preConditions>
+        <createTable tableName="sre_alerting_exclusion">
+            <column autoIncrement="true" name="sre_alerting_exclusion_id"
+                type="INT">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="sre_exclusion_level" type="VARCHAR(20)">
+                <constraints nullable="false" />
+            </column>
+            <column name="sre_exclusion_id" type="INT(11)">
+                <constraints nullable="false" />
+            </column>
+            <column name="sre_alerting_act_ind" type="SMALLINT(1)">
+                <constraints nullable="false" />
+            </column>
+            <column name="sre_alerting_last_updated_dts" type="DATETIME">
+            </column>
+            <column name="sre_last_updated_by" type="INT(11)">
+                <constraints nullable="false" />
+            </column>
+            <column name="sre_expiry_time" type="DATETIME">
+            </column>
+            <column name="sre_isprocessed" type="SMALLINT(1)">
+            </column>
+        </createTable>
+    </changeSet>
+
+	<changeSet dbms="mysql,h2,mssql,postgresql" author="Leap (generated)" id="1614785155891-93">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_servers" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_servers">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="location_id" type="INT(11)">
+			</column>
+			<column name="server_name" type="VARCHAR(255)">
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet dbms="mysql,h2,mssql" author="Leap (generated)" id="1614785155891-94">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_probe_location_run_data" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_probe_location_run_data">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="probe_id" type="INT(11)">
+			</column>
+			<column name="location_id" type="INT(11)">
+			</column>
+			<column name="isAvailable" type="TINYINT(4)">
+			</column>
+			<column name="lastrun_timestamp" type="DATETIME">
+			</column>
+			<column name="workflow_name" type="VARCHAR(765)">
+			</column>
+			<column name="isMailSent" type="TINYINT(4)">
+			</column>
+			<column name="isTicketRaised" type="TINYINT(4)">
+			</column>
+			<column name="TicketId" type="VARCHAR(135)">
+			</column>
+		</createTable>
+	</changeSet>
+
+    <changeSet dbms="postgresql" author="vikas.gupta18" id="1614785155891-94-1">
+        <validCheckSum>any</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="sre_probe_location_run_data" />
+            </not>
+        </preConditions>
+        <createTable tableName="sre_probe_location_run_data">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="probe_id" type="INT(11)">
+            </column>
+            <column name="location_id" type="INT(11)">
+            </column>
+            <column name="isAvailable" type="SMALLINT(4)">
+            </column>
+            <column name="lastrun_timestamp" type="DATETIME">
+            </column>
+            <column name="workflow_name" type="VARCHAR(765)">
+            </column>
+            <column name="isMailSent" type="SMALLINT(4)">
+            </column>
+            <column name="isTicketRaised" type="SMALLINT(4)">
+            </column>
+            <column name="TicketId" type="VARCHAR(135)">
+            </column>
+        </createTable>
+    </changeSet>
+
+	<!-- 1.3.12 changes -->
+	<changeSet author="Leap" id="1312v0-sre-1">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_ci_metadata" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_ci_metadata">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="ci_id" type="VARCHAR(100)" />
+			<column name="ci_name" type="VARCHAR(100)">
+				<constraints unique="true" />
+			</column>
+			<column name="display_name" type="VARCHAR(100)" />
+			<column name="ci_type" type="VARCHAR(100)" />
+			<column name="apm_type" type="VARCHAR(100)" />
+			<column name="ci_status" type="VARCHAR(100)" />
+			<column name="os_type" type="VARCHAR(100)" />
+			<column name="cpu_cores" type="INT" />
+			<column name="ip_address" type="VARCHAR(100)" />
+			<column name="application_type" type="VARCHAR(100)" />
+			<column name="service_type" type="VARCHAR(100)" />
+			<column name="technology_type" type="VARCHAR(100)" />
+			<column name="ci_host_group" type="VARCHAR(100)" />
+			<column name="ci_last_updated" type="timestamp" />
+			<column name="project_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="1312v0-sre-2">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_correlation" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_correlation">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="issueId" type="VARCHAR(200)" />
+			<column name="eventId" type="VARCHAR(200)" />
+			<column name="rootCauseEntity" type="VARCHAR(200)" />
+			<column name="incidentId" type="VARCHAR(200)" />
+			<column name="apm_type" type="VARCHAR(100)" />
+			<column name="project_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="1312v0-sre-3">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_metrics" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_metrics">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="ci_name" type="VARCHAR(100)" />
+			<column name="ctype" type="VARCHAR(30)" />
+			<column name="startTime" type="VARCHAR(20)" />
+			<column name="endTime" type="VARCHAR(20)" />
+			<column name="occurrences" type="BIGINT" />
+			<column name="current" type="INT" />
+			<column name="min" type="INT" />
+			<column name="max" type="INT" />
+			<column name="count" type="BIGINT" />
+			<column name="standardDeviation" type="INT" />
+			<column name="sum" type="BIGINT" />
+			<column name="metricValueFinal" type="FLOAT(12)" />
+			<column name="metricValue" type="FLOAT(12)" />
+			<column name="metricType" type="VARCHAR(100)" />
+			<column name="project_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="metricPath" type="VARCHAR(100)" />
+			<column name="apiType" type="VARCHAR(50)" />
+			<column name="dashboardType" type="VARCHAR(30)" />
+			<column name="apmType" type="VARCHAR(10)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="VARCHAR(100)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="1312v0-sre-4">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="sre_event" />
+			</not>
+		</preConditions>
+		<createTable tableName="sre_event">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="eventId" type="VARCHAR(200)">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="displayId" type="VARCHAR(200)" />
+			<column name="title" type="VARCHAR(200)" />
+			<column name="eventType" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="impactLevel" type="VARCHAR(200)" />
+			<column name="severityLevel" type="VARCHAR(200)" />
+			<column name="status" type="VARCHAR(10)" />
+			<column name="rootCauseEntity" type="VARCHAR(100)" />
+			<column name="relatedEvents" type="VARCHAR(5000)" />
+			<column name="startTime" type="VARCHAR(100)" />
+			<column name="endTime" type="VARCHAR(100)" />
+			<column name="lastUpdated" type="timestamp" />
+			<column name="lastCreated" type="timestamp" />
+			<column name="apmType" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="deepLinkUrl" type="VARCHAR(200)" />
+			<column name="incidentId" type="VARCHAR(100)" />
+			<column name="project_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+</databaseChangeLog>	

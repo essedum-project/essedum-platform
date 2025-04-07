@@ -1,0 +1,8 @@
+"body","description","eventname","jobdetails","organization"
+NULL,NULL,"createIncident","[{\"name\":\"SNOW_Create_API\",\"type\":\"pipeline\"}]","leo1311"
+NULL,NULL,"updateIncident","[{\"name\":\"SNOW_Update_API\",\"type\":\"pipeline\"}]","leo1311"
+NULL,NULL,"refreshTickets","[{\"name\":\"SNOW_Get_API\",\"type\":\"pipeline\"}]","leo1311"
+NULL,NULL,"ticketAIO","[{\"name\":\"DataEnrichment\",\"type\":\"chain\"}]","leo1311"
+NULL,NULL,"VolumeForecasting","[{\"name\":\"Forecast\",\"type\":\"pipeline\"}]","leo1311"
+NULL,NULL,"GenericWorkflowResolver","[{\"name\":\"GenericWorkflowResolver\",\"type\":\"pipeline\"}]","leo1311"
+

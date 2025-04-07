@@ -1,0 +1,13 @@
+<div class="selector-11-1">
+    <h3 class="le-u-header-xxl le-u-mar-b-32">Forgot Password</h3>
+    <mat-dialog-content class="selector-11-3">
+        <div id="emailForm" class="selector-11-4">
+            <!-- <label for="email" class="formLabel selector-11-5">Email*</label> -->
+            <leds-input-field type="email" class="selector-11-6" id="email" name="email" #email="ngModel" [(ngModel)]="emailid" required=""></leds-input-field>
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions class="selector-11-7">
+        <leds-button designType="text" (click)="forgotpwd()">Send Email</leds-button>&nbsp;
+        <leds-button designType="text" (click)="dialogRef.close()">Cancel</leds-button>
+    </mat-dialog-actions>
+</div>

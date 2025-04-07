@@ -1,0 +1,107 @@
+<div class="le-l-mainwrapper" style="padding: 16px;">
+   
+    
+    <div style="height: 480px; overflow: auto;">
+        <div *ngIf="displaySpinner">
+            <leds-spinner bdColor="rgba(51,60,60,0.8)" [size]="'default'" [color]="'#8626c3'" [type]="'ball-spin'"
+                [fullScreen]="false" [showSpinner]="true">
+                <p loadingText> Loading...</p>
+            </leds-spinner>
+        </div>
+        
+        <div *ngIf="!displaySpinner">
+            <div class="message-text-container" *ngIf="displayFailure && !advisorySuggestions">
+                <label>{{ failureText }}</label>
+            </div>
+            <div class="message-text-container" *ngIf="displayPending && !advisorySuggestions">
+                <label>{{ pendingText }}</label>
+            </div>
+            <div *ngIf="tableData.length === 0" class="message-text-container">{{noAdvisory}}</div>
+            <div *ngIf="advisorySuggestions?.length === 0" class="message-text-container">{{noAdvisory}}</div>
+            <div *ngIf="tableData.length !== 0">
+            <leds-data-grid>
+                <table dataGridTable>
+                    <thead>
+                        <tr>
+                            <th>
+                                <leds-checkbox [checked]="checked" (click)="selectAll(checked)"></leds-checkbox>
+                            </th>
+                            <th scope="col" class="le-c-datagrid__th-sort">
+                                <h3>
+                                    Column:Observation</h3>
+                            </th>
+                            <th scope="col">
+                                <h3>Advised Action</h3>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let data of tableData">
+                            <td>
+                                <leds-checkbox [checked]="checkedData" *ngIf="checkRowAction(data)"
+                                    (click)="onSelectColumn(data)"></leds-checkbox>
+                            </td>
+                            <td>{{data.column}}
+                               
+                                <i class="aip-led-icons icon x-32 icon-notepad aip-cursor mx-2"
+                                    *ngIf="data.action === 'drop_outliers' " style="visibility: visible;"
+                                    (click)="displayOutliers(content3,data)"></i>
+                                <i class="aip-led-icons icon x-32 icon-notepad aip-cursor mx-2"
+                                    *ngIf="data.action === 'anomaly_detection' " style="visibility: visible;"
+                                    (click)="displayOutliersForAnomaly(outlierPanelForAnomaly,data)"></i>
+                               
+                            <td>{{data.function}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </leds-data-grid>
+        </div>
+        </div>
+</div>
+    <div>
+        <leds-button nameText="secondaryButton" idText="secondaryButton" [disabled]="disabledButton" buttonType="button"
+            designType="primary" (click)="addAdvisoryActions()">
+            Add Actions
+        </leds-button>
+    </div>
+</div>
+<ng-template #content3 let modal>
+    <leds-data-grid class="le-u-mar-12" style="height: 240px;overflow: auto;">
+        <table dataGridTable>
+            <thead>
+                <tr>
+                    <th scope="col">
+                        <h3>Value</h3>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let data of selectedOutliers">
+                    <td>{{data.label}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </leds-data-grid>
+</ng-template>
+<!-- <p-overlayPanel #outlierPanelForAnomaly [showCloseIcon]="true">
+        <div class="outlier-container">
+            <p-table [value]="outlierTableData" [columns]="outlierTableColumns" 
+            [scrollable]="tableData.length>7" [scrollHeight]="outlierTableScrollHeight"
+            [style]="{width: '500px', overflow: 'auto' }">
+                <ng-template pTemplate="header" let-columns>
+                    <tr>
+                        <th *ngFor="let col of columns" pTooltip="{{ col.field }}" tooltipPosition="top">
+                            {{col.header}}
+                        </th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-rowData let-columns="columns">
+                    <tr>
+                        <td *ngFor="let col of columns">
+                                {{rowData[col.field]}}
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>       
+</p-overlayPanel> -->

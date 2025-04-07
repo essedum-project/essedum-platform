@@ -1,0 +1,454 @@
+<div *ngIf="dataset" class="container-fluid backgroud-color">
+  <div class="le-l-level1-wrapper">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="d-flex justify-content-end ng-star-inserted le-u-pad-t-8">
+          <button type="button" class="btn-close" aria-label="Close" (click)="closePopup()">
+            <i class="icon x-16 close-icon"></i>
+          </button>
+        </div>
+        <div class="le-u-mar-b-32">
+          <div class="align-items-center d-flex">
+            <span *ngIf="action === 'create'" class="col-md-11 aip-desc-title le-u-header-xxl">{{cardTitle}} -
+              Create</span>
+            <span *ngIf="action === 'edit'" class="col-md-11 aip-desc-title le-u-header-xxl">{{cardTitle}} - Edit</span>
+            <span *ngIf="action === 'view'" class="col-md-11 aip-desc-title le-u-header-xxl">{{cardTitle}} - View</span>
+          </div>
+          <div class=" le-u-pad-tb-32 le-u-pad-lr-16">
+            <div *ngIf="!proceed" class="table-responsive selector-693-2"
+              style="height: 100%; margin: 0rem 0rem 1rem 1.5rem;">
+
+              <leds-input-field placeholder="Name" label="Name*" [(ngModel)]="dataset.alias" designType="readOnly"
+                inputType="text" [disabled]="false" [required]="true" styleClass=""></leds-input-field>
+              <mat-hint class="custom-hint-or-error"></mat-hint>
+
+              <leds-textarea placeholder="Description" label="Description" [(ngModel)]="dataset.description"
+                designType="default" inputType="text" [disabled]="false" [required]="false"></leds-textarea>
+              <mat-hint class="custom-hint-or-error"></mat-hint>
+
+              <leds-select [options]="adapterOptions" label="Select Implementation" [(ngModel)]="dataset.adaptername"
+                [required]="true" [disabled]="true" designType="default" [isMultiple]="false"></leds-select>
+              <mat-hint class="custom-hint-or-error"></mat-hint>
+
+              <div class="d-flex justify-content-end ng-star-inserted le-u-pad-t-8 le-u-pad-r-8">
+                <leds-button nameText="iconButton" idText="iconButton" [disabled]="false" buttonType="button"
+                  designType="icon" (click)="next()" style="float: right;">
+                  <span class="le-c-btn--icon__icon">
+                    <i class="icon purple x-16 link-arw-icon"></i>
+                  </span>
+                  <span class="le-c-btn--icon__text">NEXT</span>
+                </leds-button>
+              </div>
+
+            </div>
+            <div *ngIf="proceed" class="table-responsive selector-693-2">
+              <div style="width:100%" *ngIf="dataset" class="container-fluid">
+                <div *ngIf="formType=='API'">
+                  <div>
+                    <div style="margin: 1em 0 0 1em;">
+                      <div class="row">
+                        <div class="col-md-4">
+                          <leds-select [options]="requestMethodOptions" label="Request Method"
+                            [(ngModel)]="dataset['attributes']['RequestMethod']" [required]="true" [disabled]="true"
+                            designType="default" [isMultiple]="false"></leds-select>
+                          <mat-hint class="custom-hint-or-error"></mat-hint>
+                        </div>
+                        <div class="col-md-8">
+                          <leds-input-field placeholder="URL" label="URL" [(ngModel)]="dataset.attributes['Url']"
+                            designType="default" inputType="text" [disabled]="false" [required]="false"
+                            styleClass=""></leds-input-field>
+                          <mat-hint class="custom-hint-or-error"></mat-hint>
+                        </div>
+                      </div>
+                      <div ledsTabGroup>
+                        <mat-tab-group disableRipple (selectedIndexChange)="basicReqTabChange($event)">
+                          <mat-tab class="active le-u-header-xl" label="Query Parameters"></mat-tab>
+                          <mat-tab class="le-u-header-xl" label="Headers"></mat-tab>
+                          <mat-tab class="le-u-header-xl" label="Pre Transform Script"></mat-tab>
+                          <mat-tab class="le-u-header-xl" label="Post Transform Script"></mat-tab>
+                          <mat-tab class="le-u-header-xl" label="Path Variables"></mat-tab>
+                          <mat-tab class="le-u-header-xl" label="Config Variables"></mat-tab>
+                          <mat-tab class="le-u-header-xl"
+                            *ngIf="dataset['attributes']['RequestMethod'] && (((dataset['attributes']['RequestMethod']).toLowerCase()==='post') || ((dataset['attributes']['RequestMethod']).toLowerCase()==='put'))"
+                            label="Body"></mat-tab>
+                        </mat-tab-group>
+
+                        <div *ngIf="basicReqTab == 'queryParamsTab'">
+                          <div [ngClass]="{'container' : isInEdit}" style="margin-top: 3%; margin-left: 0%;">
+                            <table class="table table-striped table-bordered">
+                              <thead>
+                                <tr>
+                                  <th style="color: var(--base-color); width: 9%;">Action</th>
+                                  <th style="color: var(--base-color);">Key</th>
+                                  <th style="color: var(--base-color);">Value</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr *ngFor="let dynamic of dynamicParamsArray; let i = index;">
+                                  <td style="text-align: center;" (click)="deleteParamsRow(i)">
+                                    <i class="aip-led-icons icon purple delete-sm-icon"></i>
+                                  </td>
+                                  <td>
+                                    <input style="padding: 0.3em;" [(ngModel)]="dynamicParamsArray[i].key"
+                                      class="form-control" type="text" />
+                                  </td>
+                                  <td>
+                                    <input style="padding: 0.3em;" [(ngModel)]="dynamicParamsArray[i].value"
+                                      class="form-control" type="text" />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td style="text-align: center;" (click)="addParamsRow()">
+                                    <i class="aip-led-icons icon purple icon-add"></i>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        <div *ngIf="basicReqTab == 'headersTab'">
+                          <div [ngClass]="{'container' : isInEdit}" style="margin-top: 3%; margin-left: 0%;">
+                            <table class="table table-striped table-bordered">
+                              <thead>
+                                <tr>
+                                  <th style="color: var(--base-color); width: 9%">Action</th>
+                                  <th style="color: var(--base-color);">Key</th>
+                                  <th style="color: var(--base-color);">Value</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr *ngFor="let dynamic of dynamicHeadersArray; let i = index;">
+                                  <td style="text-align: center;" (click)="deleteHeadersRow(i)">
+                                    <i class="aip-led-icons icon purple delete-sm-icon"></i>
+                                  </td>
+                                  <td>
+                                    <input style="padding: 0.3em;" [(ngModel)]="dynamicHeadersArray[i].key"
+                                      class="form-control" type="text" />
+                                  </td>
+                                  <td>
+                                    <input style="padding: 0.3em;" [(ngModel)]="dynamicHeadersArray[i].value"
+                                      class="form-control" type="text" />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td style="text-align: center;" (click)="addHeadersRow()">
+                                    <i class="aip-led-icons icon purple icon-add"></i>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                        <div *ngIf="basicReqTab == 'preTransformScriptTab'">
+                          <div [ngClass]="{'container' : isInEdit}" style="margin-left: 0px; padding-left: 0px;">
+                            <mat-slide-toggle [(ngModel)]="pretransformData" (change)="presetValue($event)"
+                              style="margin-top: 1em;">
+                              Transform data</mat-slide-toggle><br />
+                            <textarea style="width: 100% !important; border-color: var(--base-color);" rows="5"
+                              cols="30" pInputTextarea autoResize="autoResize" [(ngModel)]="prescript"></textarea>
+                          </div>
+                        </div>
+
+                        <div *ngIf="basicReqTab == 'postTransformScriptTab'">
+                          <div [ngClass]="{'container' : isInEdit}" style="margin-left: 0px; padding-left: 0px;">
+                            <mat-slide-toggle [(ngModel)]="transformData" (change)="setValue($event)"
+                              style="margin-top: 1em;">
+                              Transform data</mat-slide-toggle><br />
+                            <textarea style="width: 100% !important; border-color: var(--base-color);" rows="5"
+                              cols="30" pInputTextarea autoResize="autoResize" [(ngModel)]="script"></textarea>
+                          </div>
+                        </div>
+
+                        <div *ngIf="basicReqTab == 'pathVariablesTab'">
+                          <div [ngClass]="{'container' : isInEdit}" style="margin-top: 3%; margin-left: 0%;">
+                            <table class="table table-striped table-bordered">
+                              <thead>
+                                <tr>
+                                  <th style="color: var(--base-color); width: 9%">Action</th>
+                                  <th style="color: var(--base-color);">Key</th>
+                                  <th style="color: var(--base-color);">Value</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr *ngFor="let dynamic of dynamicPathVariablesArray; let i = index;">
+                                  <td style="text-align: center;" (click)="deletePathVariablesRow(i)">
+                                    <i class="aip-led-icons icon purple delete-sm-icon"></i>
+                                  </td>
+                                  <td>
+                                    <input style="padding: 0.3em;" [(ngModel)]="dynamicPathVariablesArray[i].key"
+                                      class="form-control" type="text" />
+                                  </td>
+                                  <td>
+                                    <input style="padding: 0.3em;" [(ngModel)]="dynamicPathVariablesArray[i].value"
+                                      class="form-control" type="text" />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td style="text-align: center;" (click)="addPathVariablesRow()">
+                                    <i class="aip-led-icons icon purple icon-add"></i>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        <div *ngIf="basicReqTab == 'configVariablesTab'">
+                          <div [ngClass]="{'container' : isInEdit}" style="margin-top: 3%; margin-left: 0%;">
+                            <table class="table table-striped table-bordered">
+                              <thead>
+                                <tr>
+                                  <th style="color: var(--base-color); width: 9%">Action</th>
+                                  <th style="color: var(--base-color);">Key</th>
+                                  <th style="color: var(--base-color);">Value</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr *ngFor="let dynamic of dynamicConfigVariablesArray; let i = index;">
+                                  <td style="text-align: center;" (click)="deleteConfigVariablesRow(i)">
+                                    <i class="aip-led-icons icon purple delete-sm-icon"></i>
+                                  </td>
+                                  <td>
+                                    <input style="padding: 0.3em;" [(ngModel)]="dynamicConfigVariablesArray[i].key"
+                                      class="form-control" type="text" />
+                                  </td>
+                                  <td>
+                                    <input style="padding: 0.3em;" [(ngModel)]="dynamicConfigVariablesArray[i].value"
+                                      class="form-control" type="text" />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td style="text-align: center;" (click)="addConfigVariablesRow()">
+                                    <i class="aip-led-icons icon purple icon-add"></i>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        <div *ngIf="basicReqTab == 'bodyTab'">
+                          <div class="row" style="margin-left: -7px;margin-top: 7px;">
+                            <leds-select [options]="options" label="Label" [required]="false" [disabled]="false"
+                              designType="withBg" [isMultiple]="false" (selectChange)="optionChange($event)"
+                              [(ngModel)]="selectedOption"></leds-select>
+                          </div>
+
+
+                          <div *ngIf="bodyOption === 'x-www-form-urlencoded'">
+                            <table style="margin-top: 1em;" class="table table-striped table-bordered">
+                              <thead>
+                                <tr>
+                                  <th style="color: var(--base-color); width: 9%">Action</th>
+                                  <th style="color: var(--base-color);">Key</th>
+                                  <th style="color: var(--base-color);">Value</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr *ngFor="let dynamic of urlEncodedArray; let i = index;">
+                                  <td style="text-align: center;" (click)="deleteUrlEncodedRow(i)">
+                                    <i class="aip-led-icons icon purple delete-sm-icon"></i>
+                                  </td>
+                                  <td>
+                                    <input [(ngModel)]="urlEncodedArray[i].key" class="form-control" type="text" />
+                                  </td>
+                                  <td>
+                                    <input [(ngModel)]="urlEncodedArray[i].value" class="form-control" type="text" />
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td style="text-align: center;" (click)="addUrlEncodedRow()">
+                                    <i class="aip-led-icons icon purple icon-add"></i>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+
+                          </div>
+
+                          <div *ngIf="bodyOption === 'raw'">
+                            <div style="width:100%; margin-top: 8px;" *ngIf="selectedOption === 'JSON'">
+                              <json-editor [options]="editorOptions" [data]="schemaForm" style="max-height: 365px;"
+                                #formJsonEditor class="cipJSONEditor"></json-editor>
+                            </div>
+                            <div style="width:100%;" *ngIf="selectedOption === 'FILE'" class="le-u-pad-l-4 le-u-pad-t-4">
+                              <leds-input-field placeholder="File Param Name" label="File Param Name*"
+                                [(ngModel)]="dataset.attributes['fileParamName']" designType="default" inputType="text" [disabled]="false"
+                                [required]="true" styleClass=""></leds-input-field>
+                              <input type="file" class="file-input" style="display:none;" (change)="handleFileInput($event)" #fileUpload>
+                              <div class="file-upload le-u-pad-t-4 le-u-pad-b-8">
+                                <button mat-mini-fab color="primary" class="upload-btn" (click)="fileUpload.click()">
+                                  <mat-icon>attach_file</mat-icon>
+                                </button>
+                                {{fileName || "No file uploaded yet."}}
+                              </div>
+                            </div>
+                            <div style="margin-top: 8px;" *ngIf="selectedOption != 'JSON' && selectedOption != 'FILE'">
+                              <textarea style="width: 100% !important; border-color: var(--base-color);" rows="5"
+                                cols="30" pInputTextarea autoResize="autoResize" [(ngModel)]="body"></textarea>
+                            </div>
+
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+                  <leds-button *ngIf="action !== 'view'" nameText="iconButton" idText="iconButton" [disabled]="false" buttonType="button"
+                    designType="icon" (click)="testConnection()">
+                    <span class="le-c-btn--icon__text">TEST</span>
+                  </leds-button>
+                  <leds-button *ngIf="action !== 'view'" nameText="iconButton" idText="iconButton" [disabled]="false" buttonType="button"
+                    designType="icon" (click)="saveDataset()">
+                    <span class="le-c-btn--icon__text">SAVE</span>
+                  </leds-button>
+                </div>
+                <div *ngIf="formType=='Script'">
+                  <mat-card-content>
+                          <div class="container-fluid">
+                          <div class="row">
+                            <div class="col-md-4">
+                              <mat-form-field>
+                                <mat-label>Script Type</mat-label>
+                                <mat-select [(ngModel)]="dataset['attributes']['ScriptType']" required>
+                                  <mat-option *ngFor="let rm of scriptType" [selected]="selectedScipt === rm" [value]="rm">{{rm}}
+                                  </mat-option>
+                                </mat-select>
+                              </mat-form-field>
+                            </div>
+                            <div class="col-md-6">
+                              <mat-slide-toggle *ngIf="dataset['attributes']['ScriptType'] === 'Python'"  [(ngModel)]="isRemoteExecution"   (change)="remoteExecutorsetValue($event)" style="margin-top: 1em;">
+                                Use Remote Executor</mat-slide-toggle><br/>
+                            </div>
+                          </div>
+                          <div class="row" *ngIf="isRemoteExecution">
+                            <div class="col-md-4">
+                              <leds-select *ngIf="remotePromise|async" [options]="connectionOptions" label="Select Executor"
+                              [required]="true" [disabled]="false"
+                              designType="default" [isMultiple]="false" [(ngModel)]="selectedConnection.alias"
+                              (selectChange)="connectionNameSelectChange($event)"></leds-select>
+                        </div>
+                          </div>
+                          <div *ngIf="dataset['attributes']['ScriptType'] && (((dataset['attributes']['ScriptType']).toLowerCase()==='python'))">
+                            <div class="row"></div>
+                            <div class="row">
+                              <div class="col-md-6">
+                                <div [ngClass]="{'container' : isInEdit}" style="margin-top: 3%; margin-left: 0%;">
+                                  <table class="table table-striped table-bordered">
+                                    <thead>
+                                      <tr>
+                                        <th style="color: var(--base-color); width: 9%">Action</th>
+                                        <th style="color: var(--base-color);">Import package</th>
+                                        <!-- <th style="color: var(--base-color);">Value</th> -->
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr *ngFor="let dynamic of dynamicImportsArray; let i = index;">
+                                        <td style="text-align: center;" (click)="deleteImportsRow(i)">
+                                          <i class="fa fa-trash fa-2x" style="font-size: large;"></i>
+                                        </td>
+                                        <td>
+                                          <input style="padding: 0.3em;" [(ngModel)]="dynamicImportsArray[i].key" class="form-control"
+                                            type="text" />
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td style="text-align: center;" (click)="addImortsRow()">
+                                          <i class="fa fa-plus fa-2x" style="font-size: large;"></i>
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                              <div class="col-md-6" [hidden]="!isRemoteExecution" >
+                                <div [ngClass]="{'container' : isInEdit}" style="margin-top: 3%; margin-left: 0%;">
+                                  <table class="table table-striped table-bordered">
+                                    <thead>
+                                      <tr>
+                                        <th style="color: var(--base-color); width: 9%">Action</th>
+                                        <th style="color: var(--base-color);">Requirements</th>
+                                        <!-- <th style="color: var(--base-color);">Value</th> -->
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr *ngFor="let dynamic of dynamicRequirementsArray; let i = index;">
+                                        <td style="text-align: center;" (click)="deleteRequirementsRow(i)">
+                                          <i class="fa fa-trash fa-2x" style="font-size: large;"></i>
+                                        </td>
+                                        <td>
+                                          <input style="padding: 0.3em;" [(ngModel)]="dynamicRequirementsArray[i].key" class="form-control"
+                                            type="text" />
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td style="text-align: center;" (click)="addRequirementsRow()">
+                                          <i class="fa fa-plus fa-2x" style="font-size: large;"></i>
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                            <div [ngClass]="{'container' : isInEdit}" style="margin-left: 0px; padding-left: 0px;">
+                              <mat-slide-toggle [(ngModel)]="transformScriptData" (change)="transformScriptsetValue($event)" style="margin-top: 1em;">
+                                Transform data</mat-slide-toggle><br/>
+                                <textarea  style="width: 100% !important; border-color: var(--base-color);" rows="10" cols="30"
+                                pInputTextarea autoResize="autoResize" [(ngModel)]="transformScriptPython"></textarea>
+                            </div>
+                          </div>
+                          <div *ngIf="dataset['attributes']['ScriptType'] && (((dataset['attributes']['ScriptType']).toLowerCase()==='groovy'))">
+                            <div [ngClass]="{'container' : isInEdit}" style="margin-left: 0px; padding-left: 0px;">
+                              <mat-slide-toggle [(ngModel)]="transformScriptData" (change)="transformScriptsetValue($event)" style="margin-top: 1em;">
+                                Transform data</mat-slide-toggle><br/>
+                                <textarea  style="width: 100% !important; border-color: var(--base-color);" rows="10" cols="30"
+                                pInputTextarea autoResize="autoResize" [(ngModel)]="transformScript"></textarea>
+                            </div>
+                          </div>
+                          <div style="width:100%; margin-top: 8px;">
+                            <p class="le-u-header-xl"> Sample Request Body</p>
+                            <json-editor [options]="editorOptions" [data]="schemaForm" style="max-height: 365px;"
+                              #formJsonEditor class="cipJSONEditor"></json-editor>
+                          </div>
+                        </div>
+                      <!-- <div class="row">
+                        <div class="col-md-4">
+                          <mat-form-field>
+                            <mat-label>Script Type</mat-label>
+                            <mat-select [(ngModel)]="dataset['attributes']['ScriptType']" required>
+                              <mat-option *ngFor="let rm of scriptType" [value]="rm">{{rm}}
+                              </mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+                      </div> -->
+                    <div *ngIf="methodType"> 
+                    <leds-button *ngIf="action !== 'view' " nameText="iconButton" idText="iconButton" [disabled]="false" buttonType="button"
+                    designType="icon" (click)="testConnection()">
+                    <span class="le-c-btn--icon__text">TEST</span>
+                  </leds-button>
+                </div>
+                  <leds-button *ngIf="action !== 'view'" nameText="iconButton" idText="iconButton" [disabled]="false" buttonType="button"
+                    designType="icon" (click)="saveDataset()">
+                    <span class="le-c-btn--icon__text">SAVE</span>
+                  </leds-button>   </mat-card-content>
+                </div>
+              </div>
+              <div class="d-flex justify-content-start ng-star-inserted le-u-pad-t-8 le-u-pad-l-8">
+                <leds-button nameText="iconButton" idText="iconButton" [disabled]="false" buttonType="button"
+                  designType="icon" (click)="previous()" style="float: left;">
+                  <span class="le-c-btn--icon__icon">
+                    <i class="icon purple x-16 back-icon"></i>
+                  </span>
+                  <span class="le-c-btn--icon__text">PREV</span>
+                </leds-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

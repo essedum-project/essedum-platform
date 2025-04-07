@@ -1,0 +1,130 @@
+<div class="le-u-mar-16">
+    <div class="d-flex align-items-center justify-content-between">
+        <div class="le-u-header-xxl">Create Solution</div>
+        <div class="" (click)="close()"><i class="icon x-16 aip-icons close-icon"></i></div>
+    </div>
+    <div class="le-u-mar-t-24">
+        <!--  <div class="le-u-body-md le-u-mar-tb-8">
+            Select from the following options:
+        </div>
+        <leds-radio-group [value]="chooseOption" (change)="toggleFileUpload($event)">
+            <div class="d-flex flex-column">
+                <leds-radio-button class="le-u-mar-tb-8" value="new">Create this as a new initiative</leds-radio-button>
+                <leds-radio-button class="le-u-mar-b-8" value="existing">Link this to an existing initiative of Value
+                    Management system
+                    (IVM)</leds-radio-button>
+            </div>
+        </leds-radio-group> -->
+        <!-- *ngIf="chooseOption=='new'"/ -->
+        <div class="le-u-mar-t-24">
+            <div class="row" [formGroup]="createForm">
+                <div class="col-md-12 le-u-mar-tb-8">
+                    <leds-input-field formControlName="name" placeholder="Name" label="Solution Name*"
+                        designType="default" inputType="text"></leds-input-field>
+                    <span *ngIf="createForm.get('name').invalid && createForm.get('name').touched"
+                        style="width:max-content"
+                        class="le-c-msg-banner le-u-statusbar-error le-c-msg-banner--section le-u-no-pad">
+                        Name is required.
+                    </span>
+                </div>
+                <div class="col-md-12 le-u-mar-tb-8">
+                    <leds-input-field formControlName="description" placeholder="Description" label="Description*"
+                        designType="default" inputType="text"></leds-input-field>
+                    <span *ngIf="createForm.get('description').invalid && createForm.get('description').touched"
+                        style="width:max-content"
+                        class="le-c-msg-banner le-u-statusbar-error le-c-msg-banner--section le-u-no-pad">
+                        Description is required.
+                    </span>
+                </div>
+                <!-- <div class="d-flex align-items-center justify-content-center">
+                    <div class="col-md-6 le-u-mar-tb-8">
+                        <div class="le-u-header-md">Organization:</div>
+                        <div class="le-u-body-md le-u-mar-8 ">{{this.createForm.value.organization}}</div>
+                    </div>
+                    <div class="col-md-6 le-u-mar-tb-8">
+                        <div class="le-u-header-md">Created By:</div>
+                        <div class="le-u-body-md le-u-mar-8 ">{{this.createForm.value.createdBy}}</div>
+                    </div>
+                </div> -->
+                <div class="d-flex align-items-center justify-content-center">
+                    <div class="col-md-4 le-u-mar-tb-8">
+                        <div class="le-u-header-md">Select Role:</div>
+                        <div class="le-u-body-md">
+                            <leds-select [options]="roleUserList" [label]="''"
+                                (selectChange)="selectChangeRoleList($event)"></leds-select>
+                        </div>
+                    </div>
+                    <div class="col-md-6 le-u-mar-tb-8">
+                        <div class="le-u-header-md">Select User:</div>
+                        <div class="le-u-body-md">
+                            <leds-select [options]="userList" [label]="''" [isMultiple]="true"
+                                (selectChange)="selectChangeUserList($event)"></leds-select>
+                        </div>
+                    </div>
+                    <div class="col-md-2 le-u-mar-tb-8" (click)="addUserlist()">
+                        <div class="whiteIcon-Circle aip-cursor">
+                            <i aria-hidden="true" class="icon x-24 icon-add" aria-label="add icon"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="le-u-header-md container le-u-mar-lr-8 d-block">Team Members</div>
+                <div class="d-flex container align-items-center " style="overflow: auto;">
+                    <div class="le-u-lr-8 le-u-mar-tb-4">
+                        <leds-card designType="simple">
+                            <mat-card-header>
+                                <mat-card-title>
+                                    <h2 class="le-u-header-lg le-u-ellipsis">{{creator.userName}}</h2>
+                                </mat-card-title>
+                                <mat-card-subtitle
+                                    class="le-u-body-sm le-u-text-neutral-80 le-u-no-mar-b le-u-ellipsis">{{creator.roleName}}
+                                </mat-card-subtitle>
+                            </mat-card-header>
+                        </leds-card>
+                    </div>
+                    <div class="le-u-mar-lr-8 le-u-mar-tb-4 finaluserremove_parent" *ngFor="let user of finalUsers">
+                        <leds-card designType="simple">
+                            <mat-card-header>
+                                <mat-card-title>
+                                    <h2 class="le-u-header-lg le-u-ellipsis">{{user.userName}}</h2>
+                                </mat-card-title>
+                                <mat-card-subtitle
+                                    class="le-u-body-sm le-u-text-neutral-80 le-u-no-mar-b le-u-ellipsis">{{user.roleName}}
+                                </mat-card-subtitle>
+                            </mat-card-header>
+                        </leds-card>
+                        <div class="white-Circle aip-cursor finaluserremove_child" (click)="removeUser(user)">
+                            <i aria-hidden="true" class="icon x-16 close-icon" aria-label="close icon"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <div class="le-u-mar-t-8" (click)="createInitiative()">
+                        <button type="sumit" mat-flat-button leds-button name="miniPrimary" id="miniPrimary"
+                            designType="miniPrimary">
+                            Create
+                        </button>
+                    </div>
+                    <!-- {{createForm.value | json}} -->
+                </div>
+            </div>
+        </div>
+        <!-- <div class="le-u-mar-t-24" *ngIf="chooseOption=='existing'">
+            <div class="row">
+                <div class="d-flex align-items-center justify-content-center">
+                    <div class="col-md-6 le-u-mar-tb-8">
+                        <leds-input-field placeholder="IvmLinkid" label="IvmLinkid*" designType="default"
+                            inputType="number"></leds-input-field>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <div class="le-u-mar-t-8">
+                        <button type="sumit" mat-flat-button leds-button name="miniPrimary" id="miniPrimary"
+                            designType="miniPrimary" >
+                            Create
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+    </div>
+</div>

@@ -1,0 +1,401 @@
+//
+// Copyright © 2016-2017 Infosys Limited, Bangalore, India. All Rights Reserved.
+// * Except for any open source software components embedded in this
+// * Infosys proprietary software program (Program), this Program is protected
+// * by copyright laws, international treaties and other pending or existing
+// * intellectual property rights in India, the United States and other countries.
+// * Except as expressly permitted, any unauthorized reproduction, storage,
+// * transmission in any form or by any means (including without limitation
+// * electronic, mechanical, printing, photocopying, recording or otherwise),
+// * or any distribution of this Program, or any portion of it,
+// * may result in severe civil and criminal penalties, and
+// * will be prosecuted to the maximum extent possible under the law.
+// Template pack-angular:web/src/app/-entities/entity-list.component.ts.e.vm
+//
+import { Component, OnInit, ViewChild, Input, ElementRef } from "@angular/core";
+import { Router, ActivatedRoute } from "@angular/router";
+import { PageResponse } from "../../support/paging";
+import { MessageService } from "../../services/message.service";
+import { Msg } from "../../shared-modules/services/msg";
+import { ConfirmDeleteDialogComponent } from "../../support/confirm-delete-dialog.component";
+import { MatDialog } from "@angular/material/dialog";
+import { MatPaginator } from "@angular/material/paginator";
+import { MatSort } from "@angular/material/sort";
+import { MatTableDataSource } from "@angular/material/table";
+import { Role } from "../../models/role";
+import { RoleService } from "../../services/role.service";
+import { ProjectService } from "../../services/project.service";
+import { saveAs as importedSaveAs } from "file-saver";
+import { UserProjectRole } from "../../models/user-project-role";
+import { UserProjectRoleService } from "../../services/user-project-role.service";
+import { UsmPortfolio } from "../../models/usm-portfolio";
+import { Project } from "../../models/project";
+import { Users } from "../../models/users";
+import { LeapTelemetryService } from "../../telemetry-util/telemetry.service";
+import { DeleteComponent } from "../../shared-modules/confirm-delete/delete.component";
+import { IampUsmService } from "../../iamp-usm.service";
+@Component({
+  templateUrl: "role-list.component.html",
+  selector: "role-list",
+  styleUrls: ["./role-list.component.css"],
+})
+export class RoleListComponent implements OnInit {
+  lazyload = { first: 0, rows: 1000, sortField: null, sortOrder: null };
+  statusArray = [];
+  role: Role = new Role();
+  roles = new Array<Role>();
+  rolesFilter = new Array<Role>();
+  roleList: MatTableDataSource<any> = new MatTableDataSource();
+  rolesLength: number = 0;
+  associatedproject: any = [];
+  ProjectList: Project[] = [];
+  currentproject: any;
+  showList: boolean = false;
+  view_Role: boolean = false;
+  displayedColumns: string[] = ["id", "name", "AssociatedProject", "description", "actions"];
+  selectedDesc: string = "All";
+  rolesArraySorted = new Array<Role>(); /** To separate roles from other project(keep spcific), if defaultRoles
+  true then keep (specific + null projectId)  */
+  @ViewChild("myInput", { static: false }) myInputReference: ElementRef;
+  private paginator: MatPaginator;
+  private sort: MatSort;
+  p: number;
+
+  currentRole: Role = new Role();
+  popup: boolean = false;
+  searchedRole: string = "All";
+  auth: string = "";
+  isAuth: boolean = false;
+  permissionList: any[];
+  selectedPermissionList: any[];
+  editFlag: boolean = false;
+  viewFlag: boolean = true;
+  deleteFlag: boolean = false;
+  createFlag: boolean = false;
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private roleService: RoleService,
+    private userProjectRoleService: UserProjectRoleService,
+    public projectService: ProjectService,
+    public confirmDeleteDialog: MatDialog,
+    private messageService: MessageService,
+    private telemetryService: LeapTelemetryService,
+    private usmService: IampUsmService
+  ) {}
+
+  @ViewChild(MatSort, { static: false }) set matSort(ms: MatSort) {
+    this.sort = ms;
+    this.setDataSourceAttributes();
+  }
+
+  @ViewChild(MatPaginator, { static: false }) set matPaginator(mp: MatPaginator) {
+    this.paginator = mp;
+    this.setDataSourceAttributes();
+  }
+
+  ngOnInit() {
+    this.telemetryImpression();
+    if (sessionStorage.getItem("usmAuthority")) {
+      sessionStorage.removeItem("usmAuthority");
+    }
+    this.usmService.getPermission("usm").subscribe(
+      (resp) => {
+        this.permissionList = JSON.parse(resp);
+        this.permissionList;
+        let temp = "";
+        if (this.permissionList.length >= 1) {
+          this.permissionList.forEach((ele) => {
+            temp += "" + ele.permission + ",";
+          });
+          temp = temp.substring(0, temp.length - 1);
+          sessionStorage.setItem("usmAuthority", temp);
+        } else {
+          sessionStorage.setItem("usmAuthority", "");
+        }
+      },
+      (error) => {},
+      () => {
+        this.auth = sessionStorage.getItem("usmAuthority");
+        this.selectedPermissionList = this.auth.split(",");
+        this.selectedPermissionList.forEach((ele) => {
+          if (ele === "edit") {
+            this.editFlag = true;
+          }
+          if (ele === "view") {
+            this.viewFlag = true;
+          }
+          if (ele === "delete") {
+            this.deleteFlag = true;
+          }
+          if (ele === "create") {
+            this.createFlag = true;
+          }
+        });
+      }
+    );
+    this.fetchRole();
+  }
+
+  telemetryImpression() {
+    this.telemetryService.impression("iamp-usm", "list", "RoleListComponent");
+  }
+
+  setDataSourceAttributes() {
+    this.roleList.paginator = this.paginator;
+    this.roleList.sort = this.sort;
+  }
+
+  fetchRole() {
+    this.roles = [];
+
+    let allRole = new Role(); /** To check if the project has default roles or not */
+
+    allRole.projectId = null;
+
+    let role: Role;
+    try {
+      role = JSON.parse(sessionStorage.getItem("role"));
+    } catch (e) {
+      console.error("JSON.parse error - ", e.message);
+    }
+    let example: Project = new Project();
+    let event = { first: 0, rows: 1000, sortField: null, sortOrder: null };
+    this.projectService.findAll(example, event).subscribe(
+      (pageResponse) => {
+        this.ProjectList = pageResponse.content;
+      },
+      (error) => this.messageService.error("Could not get the results", "IAMP"),
+      () => {
+        if (role.roleadmin) {
+          let userprojectrole = new UserProjectRole();
+
+          let portfolio: UsmPortfolio;
+          let project: Project;
+          let user: Users;
+
+          try {
+            portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
+            project = JSON.parse(sessionStorage.getItem("project"));
+            user = JSON.parse(sessionStorage.getItem("user"));
+          } catch (e) {
+            portfolio = null;
+            project = null;
+            user = null;
+            console.error("JSON.parse error - ", e.message);
+          }
+
+          userprojectrole.portfolio_id = new UsmPortfolio({ id: portfolio.id });
+          userprojectrole.project_id = new Project({ id: project.id });
+          userprojectrole.user_id = new Users({ id: user.id });
+          this.roleService.findAll(allRole, this.lazyload).subscribe((res) => {
+            this.rolesArraySorted = [];
+            res.content.forEach((item) => {
+              if (item.id != 6) this.rolesArraySorted.push(item);
+            });
+            this.computeRole(false);
+          });
+        } else {
+          this.roleService.findAll(allRole, this.lazyload).subscribe(
+            (res) => {
+              this.rolesArraySorted = res.content;
+              this.computeRole(true);
+            },
+            (error) => this.messageService.error("could not fetch", "IAMP")
+          );
+        }
+      }
+    );
+  }
+
+  Search() {
+    let newApps = [];
+    if (this.searchedRole == "All" || this.searchedRole == "") {
+      newApps = this.rolesArraySorted;
+    } else {
+      newApps = Object.assign([], this.rolesArraySorted).filter((item1) =>
+        item1.name == null ? "" : item1.name.toLowerCase() == this.searchedRole.toLowerCase()
+      );
+    }
+    if (this.selectedDesc == "All" || this.selectedDesc == "") {
+      newApps = newApps;
+    } else {
+      newApps = newApps.filter(
+        // item1 => item1.description.toLowerCase().indexOf(this.selectedDesc.toLowerCase()) > -1)
+        (item1) =>
+          item1.description == null
+            ? ""
+            : item1.description.toLowerCase().indexOf(this.selectedDesc.toLowerCase()) > -1
+      );
+      // newApps = this.rolePage.content.filter(element => element.description == this.selectedDesc)
+    }
+    this.roles = newApps;
+    this.roleList = new MatTableDataSource(newApps);
+    this.roleList.sort = this.sort;
+    this.roleList.paginator = this.paginator;
+    this.rolesLength = newApps.length;
+  }
+
+  Refresh() {
+    this.fetchRole();
+  }
+
+  clearRole() {
+    this.selectedDesc = "All";
+    this.searchedRole = "All";
+    this.myInputReference.nativeElement.value = null;
+    let newapps = [];
+    newapps = this.rolesArraySorted;
+    this.roles = newapps;
+    this.roleList = new MatTableDataSource(newapps);
+    this.roleList.sort = this.sort;
+    this.roleList.paginator = this.paginator;
+    this.rolesLength = newapps.length;
+  }
+
+  assignCopy() {
+    this.roles = Object.assign([], this.rolesArraySorted);
+  }
+
+  filterItem(value) {
+    if (!value) {
+      this.assignCopy();
+    }
+    this.roles = Object.assign([], this.rolesArraySorted).filter(
+      (item1) => item1.name.toLowerCase().indexOf(value.toLowerCase()) > -1
+    );
+    this.roleList = new MatTableDataSource(this.roles);
+    this.roleList.sort = this.sort;
+    this.roleList.paginator = this.paginator;
+  }
+
+  updateRole() {
+    this.roleService.update(this.currentRole).subscribe(
+      (rs) => {
+        this.messageService.info("Role updated successfully", "IAMP");
+        this.clear();
+      },
+      (error) => this.messageService.error("Could not update", "IAMP")
+    );
+  }
+
+  createView() {
+    this.router.navigate(["../create"], { relativeTo: this.route });
+  }
+
+  editRole(role) {
+    this.router.navigate(["../edit", window.btoa(role.id)], { relativeTo: this.route });
+  }
+
+  viewRole(role) {
+    this.router.navigate(["../view", window.btoa(role.id)], { relativeTo: this.route });
+  }
+
+  clear() {
+    this.role = new Role();
+  }
+  deleteRole(role: any) {
+    let dialogRef = this.confirmDeleteDialog.open(DeleteComponent, {
+      disableClose: true,
+      data: {
+        title: "Delete Role",
+        message: "Are you sure you want to delete?",
+      },
+    });
+    dialogRef.afterClosed().subscribe(
+      (result) => {
+        if (result === "yes") {
+          this.delete(role);
+        }
+      },
+      (error) => this.messageService.error(error, Msg.APP)
+    );
+  }
+  delete(role: Role) {
+    this.roleService.delete(role.id).subscribe(
+      (Response) => {
+        if (sessionStorage.getItem("telemetry") == "true") {
+        this.telemetryService.audit(role,"DELETE");
+        }
+        sessionStorage.setItem("UpdatedUser", "true");
+        this.messageService.info("Role Deleted successfully", "IAMP");
+        this.fetchRole();
+        if (this.myInputReference.nativeElement) {
+          this.myInputReference.nativeElement.value = null;
+        }
+      },
+      (error) => this.messageService.error("Could not delete", "IAMP")
+    );
+  }
+  compareObjects(o1: any, o2: any): boolean {
+    return o1 && o2 && o1.id == o2.id;
+  }
+
+  download() {
+    let project: Project;
+    try {
+      project = JSON.parse(sessionStorage.getItem("project"));
+    } catch (e) {
+      project = null;
+      console.error("JSON.parse error - ", e.message);
+    }
+    var projectID = project.id;
+
+    this.roleService.download(projectID).subscribe((response) => {
+      let fileBlob = response as Blob;
+      importedSaveAs(fileBlob, "Roles.xlsx");
+    });
+  }
+  checkEnterPressed(event: any, val: any) {
+    if (event.keyCode === 13) {
+      this.filterItem(event.srcElement.value);
+    }
+  }
+  computeRole(superadmin) {
+    let project: Project;
+    try {
+      project = JSON.parse(sessionStorage.getItem("project"));
+    } catch (e) {
+      project = null;
+      console.error("JSON.parse error - ", e.message);
+    }
+    let pID: number = project.id;
+    let tempRolesArray = new Array<Role>();
+    this.associatedproject = [];
+    this.rolesArraySorted.forEach((element) => {
+      if (superadmin) tempRolesArray.push(element);
+      else if (element.projectId == pID || element.projectId == null) tempRolesArray.push(element);
+    });
+    this.rolesArraySorted = tempRolesArray;
+    this.rolesArraySorted = this.rolesArraySorted.sort((a, b) =>
+      a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+    );
+    this.roles = this.rolesArraySorted;
+    this.rolesArraySorted.forEach((element) => {
+      if (element.projectId == null) {
+        element["projectName"] = "Default Role";
+        this.associatedproject.push(element);
+      } else {
+        this.ProjectList.forEach((element1) => {
+          if (element1.id == element.projectId) {
+            element["projectName"] = element1.name;
+            this.associatedproject.push(element);
+          }
+        });
+      }
+    });
+    this.rolesArraySorted = this.associatedproject;
+    this.rolesLength = this.rolesArraySorted.length;
+    this.rolesArraySorted = this.rolesArraySorted.sort((a, b) =>
+      a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+    );
+    this.roleList = new MatTableDataSource(this.rolesArraySorted);
+    this.roleList.sort = this.sort;
+    this.roleList.paginator = this.paginator;
+    this.rolesFilter = Object.assign([], this.roles);
+  }
+  trackByMethod(index, item) {}
+  showUploadDialog() {
+    this.popup = !this.popup;
+  }
+}

@@ -1,0 +1,7 @@
+"id","configuration_name","project_id","purpose","tool","url","admin","admin_password","tool_user","user_password","proxy_host","proxy_port","last_updated","purpose_id","tool_id","filter","team","organization","region_name"
+"1",NULL,"1","icm","snow","http://hostname","xxxx","xxxx","xxxx","xxxx","xxxx","80",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"2",NULL,"1","temtest","iiatest","http://hostname","xxxx","xxxx","xxxx","xxxx",NULL,NULL,"2020-01-21 17:16:32",NULL,NULL,NULL,NULL,NULL,NULL
+"3",NULL,"1","aut","uipath","http://hostname","xxxx","xxxx","xxxx","xxxx","xxxx","80","2020-02-27 07:18:13",NULL,NULL,NULL,NULL,NULL,NULL
+"4",NULL,"1","aut","automation_anywhere","http://hostname","xxxx","xxxx","xxxx","xxxx","xxxx","80",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"5","Vault","1","aut","CAP","xxxx","xxxx","xxxx","xxxx","xxxx","xxxx","80",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"6","Vault","1","aut","Hashicorp","http://xxxx:8200","xxxx","xxxx","xxxx","xxxx","xxxx","80",NULL,NULL,NULL,NULL,NULL,NULL,NULL

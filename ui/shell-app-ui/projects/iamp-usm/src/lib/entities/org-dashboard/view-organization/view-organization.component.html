@@ -1,0 +1,333 @@
+<div class="DSA_wb_customTab DSA_navTabWhite DSA_wb_Primary user_tab">
+    <mat-tab-group disableRipple>
+        <!-- <mat-tab>
+            <ng-template mat-tab-label>
+                Details
+            </ng-template>
+            <div mat-tab-content style="overflow: hidden;">
+                <br>
+                <p class="DSA_wb_mainBodyTxt" style="font-weight: bold; display: inline; margin-top: 10px;">
+                    Subscriptions</p>
+                <div class="row" >
+                    <div class="col-md-6 col-lg-5 col-xl-4"
+                        *ngFor="let moduleOrg of selectedOrganization.ModulesOrg" style="margin-top: 5px;">
+                        <mat-card class="DSA_wb_card-widget">
+                            <mat-card-header>
+                                <mat-card-title class="DSA_wb_flex clearfix">
+                                    <div class="DSA_wb_flex80">
+                                        <h2 class="DSA_wb_h2Header DSA_wb_text-1line">{{moduleOrg.module.name}}</h2>
+                                    </div>
+                                    <div class="DSA_wb_flex20">
+                                        <span class="DSA_wb_chipStyle DSA_closedchip float-right"
+                                            *ngIf="moduleOrg.totalDays >=0 ">Subscribed</span>
+                                        <span class="DSA_wb_chipStyle DSA_openchip  float-right"
+                                            *ngIf="moduleOrg.totalDays <0 ">Expired</span>
+                                    </div>
+                                </mat-card-title>
+
+                            </mat-card-header>
+                            <mat-card-content>
+                                <p class="web-GreyLight marTB8" style="display: inline; font-size: 12px; "
+                                    *ngIf="moduleOrg.totalDays >=0 ">Expires in {{moduleOrg.totalDays}} </p>
+                                <p class="web-GreyLight marTB8" style="display: inline; font-size: 12px; "
+                                    *ngIf="moduleOrg.totalDays <0">Expired</p>
+
+                                <mat-progress-bar class="marB16" mode="determinate" [color]="moduleOrg.color"
+                                    [value]="moduleOrg.progressValue"></mat-progress-bar>
+
+                                <p class="web-GreyLight" style="display: inline; font-size: 14px; ">Start Date:
+                                    {{moduleOrg.startdate| date : 'mediumDate'}} </p>
+                                <p class="web-GreyLight" style="  float: right; font-size: 14px; ">End Date:
+                                    {{moduleOrg.enddate| date : 'mediumDate'}}</p>
+                            </mat-card-content>
+                        </mat-card>
+                    </div>
+                </div>
+
+                                   
+                                        <p class="DSA_wb_mainBodyTxt" style="font-weight: bold; display: inline; margin-top: 10px;">Users</p>
+                                        <div class="DSA_panel" style="margin-top: 10px;">
+                                            <div [ngBusy]="{busy:busy,backdrop:true}" class="DSA_panelBody padTB16 padLR24">
+                                                <table class="DSA_wb_custom-table usm_table">
+                                                    <thead>
+                                                        <tr>
+                                                          
+                                                            <th>User</th>
+                                                            <th>Role</th>
+                                                            
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr *ngFor="let org of selectedOrganization.User;let i=index">
+                        
+                                                            <td>
+                                                                <span *ngIf="selectedOrganization.User[i]">{{org.user_id.user_email}}</span>
+                                                            </td>
+                                                            <td>
+                                                                {{org.role_id.name}}
+                                                            </td>
+                                                           
+                        
+                                                        </tr>
+                        
+                        
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                        
+
+                                    
+               
+                              
+                            <p class="DSA_wb_mainBodyTxt" style="font-weight: bold; display: inline; margin-top: 10px;">Roles
+                                Summary</p>
+                            <div class="DSA_panel" style="margin-top: 10px;">
+                                <div [ngBusy]="{busy:busy,backdrop:true}" class="DSA_panelBody padTB16 padLR24">
+                                    <table class="DSA_wb_custom-table usm_table">
+                                        <thead>
+                                            <tr>
+                                                <th>Role</th>
+                                                <th>Module</th>
+                                                
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let roles of roleModuleList ;let i=index">
+
+                                                <td>
+                                                {{roles.role}}
+                                                </td>
+                                                <td>
+                                                    {{roles.module}}
+                                                </td>
+                                            
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+            </div>
+        
+        </mat-tab>
+        <mat-tab>
+            <ng-template mat-tab-label>
+                Subcription
+            </ng-template>
+            <div mat-tab-content>
+                <br>
+                <div class="DSA_panel">
+                    <div class="DSA_panelBody padTB16 padLR24">
+                        <h5 *ngIf="!isEdit" class="ds_h5Inner">
+                            {{selectedOrganization.name}}
+                        </h5>
+                        <h5 *ngIf="isEdit" class="ds_h5Inner">
+                            Update {{selectedOrganization.name}}
+                        </h5>
+                        <mat-grid-list cols="12">
+                            <mat-grid-tile [colspan]="2">
+                                <mat-form-field class="DSA_Wb_custom-form-field">
+                                    <mat-label>Module</mat-label>
+                                    <mat-select *ngIf="!isEdit " [(ngModel)]="newModuleOrganisation.module"
+                                        disableOptionCentering panelClass="DSA_wb-custom-select">
+                                        <mat-option *ngFor="let module of filteredModuleList" [value]="module">
+                                            {{module.name}}</mat-option>
+                                    </mat-select>
+                                    <mat-select *ngIf="isEdit" disabled="true"
+                                        [(ngModel)]="newModuleOrganisation.module" disableOptionCentering
+                                        panelClass="DSA_wb-custom-select">
+                                        <mat-option [value]="newModuleOrganisation.module">
+                                            {{newModuleOrganisation.module}}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </mat-grid-tile>
+                            <mat-grid-tile [colspan]="1">
+
+                            </mat-grid-tile>
+                            <mat-grid-tile [colspan]="2">
+                                <mat-form-field class="DSA_Wb_custom-form-field">
+                                    <input matInput [matDatepicker]="picker1" placeholder="Start Date" [min]="minDate"
+                                        [(ngModel)]="newModuleOrganisation.startdate" (click)="picker1.open()">
+                                    <mat-datepicker-toggle matSuffix [for]="picker1">
+                                        <i class="icon x-24 calendar-icon" matDatepickerToggleIcon></i>
+                                    </mat-datepicker-toggle>
+                                    <mat-datepicker panelClass="DSA_wb_dateClass" #picker1></mat-datepicker>
+
+                                </mat-form-field>
+                            </mat-grid-tile>
+                            <mat-grid-tile [colspan]="1">
+
+                            </mat-grid-tile>
+                            <mat-grid-tile [colspan]="2">
+                                <mat-form-field class="DSA_Wb_custom-form-field">
+                                    <input matInput [matDatepicker]="picker" placeholder="End Date" [min]="newModuleOrganisation.startdate"
+                                        [(ngModel)]="newModuleOrganisation.enddate" (click)="picker.open()">
+                                    <mat-datepicker-toggle matSuffix [for]="picker">
+                                        <i class="icon x-24 calendar-icon" matDatepickerToggleIcon></i>
+                                    </mat-datepicker-toggle>
+                                    <mat-datepicker panelClass="DSA_wb_dateClass" #picker></mat-datepicker>
+
+                                </mat-form-field>
+                            </mat-grid-tile>
+                            <mat-grid-tile [colspan]="1">
+
+                            </mat-grid-tile>
+                            <mat-grid-tile [colspan]="2">
+
+                                <button *ngIf="!isEdit" mat-flat-button class="DSA_wb_primary-btn"
+                                    (click)="save(newModuleOrganisation)"
+                                    [disabled]="newModuleOrganisation.enddate==undefined||newModuleOrganisation.enddate==''||newModuleOrganisation.module==undefined">Save</button>
+                                <button *ngIf="isEdit" mat-flat-button class="DSA_wb_primary-btn"
+                                    (click)="update(newModuleOrganisation)"
+                                    [disabled]="newModuleOrganisation.enddate==undefined||newModuleOrganisation.enddate==''||newModuleOrganisation.module==undefined">Update</button>
+                            </mat-grid-tile>
+                        </mat-grid-list>
+                        <mat-grid-tile [colspan]="1">
+                            <button *ngIf="isEdit" mat-flat-button class="DSA_wb_primary-btn"
+                                (click)="cancelEdit()">Cancel</button>
+                        </mat-grid-tile>
+                    </div>
+                </div>
+
+                <div class="DSA_panel" style="margin-top: 10px;">
+                    <div [ngBusy]="{busy:busy,backdrop:true}" class="DSA_panelBody padTB16 padLR24">
+                        <table class="DSA_wb_custom-table usm_table">
+                            <thead>
+                                <tr>
+                                    <th>Module</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let mod of selectedModuleOrganization">
+                                    <td>
+                                        <a href="javascript:void(0);"
+                                            class="DSA_wb_hyperLink-btn td_nonEditable">{{mod.module.name}}</a>
+                                      
+                                    </td>
+                                    <td>
+                                        <div class="td_nonEditable">{{mod.startdate| date : 'mediumDate'}}</div>
+                                      
+                                    </td>
+                                    <td>
+                                        <div class="td_nonEditable">{{mod.enddate| date : 'mediumDate'}}</div>
+                                       
+                                    </td>
+                                    <td>
+                                        <div *ngIf="!mod.subscriptionstatus" class="td_nonEditable">
+                                            <span class="DSA_wb_chipStyle DSA_openchip">Expired</span>
+                                        </div>
+                                        <div *ngIf="mod.subscriptionstatus" class="td_nonEditable">
+                                            <span class="DSA_wb_chipStyle DSA_closedchip">Active</span><br />
+                                        </div>
+                                      
+                                    </td>
+                                    <td>
+                                        <div class="td_nonEditable">
+                                            <i class="icon x-24 edit-icon" (click)="showEdit(mod)"> </i>
+                                            <i class="icon x-24 delete-sm-icon" (click)="delete(mod.id)"> </i>
+                                        </div>
+                                       
+                                    </td>
+                                </tr>
+
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+            </div>
+        </mat-tab> -->
+        <mat-tab>
+            <ng-template mat-tab-label>
+                Dashboard Setup
+            </ng-template>
+            <div mat-tab-content style="overflow: hidden;">
+                
+    <div class="DSA_panel" style="margin-top: 10px;">
+        <div class="DSA_panelBody padTB16 padLR24">
+            <h5 class="ds_h5Inner">
+            Landing Page
+        </h5>
+        <mat-grid-list cols="12">
+            <mat-grid-tile [colspan]="3">
+                <mat-form-field class="DSA_Wb_custom-form-field">
+                    <mat-label>Role*</mat-label>
+                    <mat-select disableOptionCentering panelClass="DSA_wb-custom-select" id="keys"
+                        [(ngModel)]="newRoleModule.keys" name="role" #keys="ngModel" required>
+                        <mat-option *ngFor="let role of roleList" [value]="role.name+' Land'">{{role.name}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="1">
+
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="3">
+                <mat-form-field class="DSA_Wb_custom-form-field">
+
+                    <input matInput placeholder="Landing Dashboard" minlength="1" maxlength="50" id="selectedUrl"
+                        [(ngModel)]="newRoleModule.value" name="Url" #Url="ngModel" required>
+                </mat-form-field>
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="1">
+
+            </mat-grid-tile>
+            <mat-grid-tile [colspan]="3">
+
+                <button mat-flat-button class="DSA_wb_primary-btn" (click)="saveLandingPage(newRoleModule)"
+                    [disabled]=" newRoleModule.keys==undefined||newRoleModule.keys==''||newRoleModule.value==undefined||newRoleModule.value==''">Save</button>
+
+            </mat-grid-tile>
+        </mat-grid-list>
+    </div>
+</div>
+
+
+<div class="DSA_panel" style="margin-top: 10px;">
+
+    <div [ngBusy]="{busy:busy,backdrop:true}" class="DSA_panelBody padTB16 padLR24">
+       
+        <table class="DSA_wb_custom-table usm_table">
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>Dashboard</th>
+                    
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let mapping of existingLandingPageList">
+                    <td>
+                            <div class="td_nonEditable">{{mapping.keys.split(" Land")[0]}}</div>
+
+                    </td>
+                    <td>
+                        <div class="td_nonEditable">{{mapping.value}}</div>
+
+                    </td>
+                  
+                    <td>
+                        <!-- <div class="td_nonEditable">
+
+                            <i class="icon x-24 delete-sm-icon" (click)="deleteModuleAccess(roleModule)"> </i>
+                        </div> -->
+
+                    </td>
+                </tr>
+
+
+            </tbody>
+        </table>
+    </div>
+</div>
+            </div>
+        </mat-tab>
+    </mat-tab-group>
+</div>

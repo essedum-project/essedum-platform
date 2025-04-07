@@ -1,0 +1,118 @@
+/**
+ *  @ 2018 Infosys Limited, Bangalore, India. All Rights Reserved.
+ *  Version: 1.0
+ *  Except for any free or open source software components embedded in this Infosys proprietary software program (Program),
+ *  this Program is protected by copyright laws, international treaties and  other pending or existing intellectual property
+ *  rights in India, the United States, and other countries. Except as expressly permitted, any unauthorized reproduction, storage,
+ *  transmission in any form or by any means(including without limitation electronic, mechanical, printing, photocopying,
+ *  recording, or otherwise), or any distribution of this program, or any portion of it, may result in severe civil and
+ *  criminal penalties, and will be prosecuted to the maximum extent possible under the law.
+ */
+ .example-form-field {
+    width: 200px;
+  }
+  .mtop1p {
+    margin-top: 1%;
+  }
+  input[type=file]{ 
+    color:transparent;
+  }
+  .d-height{
+    height: 73px;
+  }
+  .questionText{
+    width: 500px !important;
+    margin-bottom: 10px;
+  
+  }
+  .Button{
+    float: right;
+  }
+  
+  .example-tree-invisible {
+    display: none;
+  }
+  .example-tree{
+    background-color: inherit;
+  }
+  .example-tree ul,
+  .example-tree li {
+    margin-top: 0;
+    margin-bottom: 0;
+    list-style-type: none;
+  }
+  
+  /*
+   * This padding sets alignment of the nested nodes.
+   */
+  .example-tree .mat-nested-tree-node div[role=group] {
+    padding-left: 40px;
+   
+  }
+  
+  /*
+   * Padding for leaf nodes.
+   * Leaf nodes need to have padding so as to align with other non-leaf nodes
+   * under the same parent.
+   */
+  .example-tree div[role=group] > .mat-tree-node {
+    padding-left: 40px;
+  }
+  
+  .cip-pipeline-modal {
+  
+    font-size: medium;
+  
+    margin: 0.9rem 0;
+  
+    padding: 0 1.2rem;
+  
+    border: none;
+  
+    width:100%;
+  
+    border-bottom: 1px solid;
+  
+  }
+  
+  
+  
+  .cip-pipeline-modal:focus {
+  
+    box-shadow: 0 5px 1rem 0  #0d6efd40 !important;
+  
+    border-bottom: 2rem solid blue;
+  
+  }
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper{
+  
+    display:none;}
+  
+  ::ng-deep .mdc-text-field--no-label:not(.mdc-text-field--outlined):not(.mdc-text-field--textarea) .mat-mdc-form-field-infix{
+    display:flex;
+    padding-top: 5px;
+      padding-bottom: 0;
+    }
+  
+    .col-1 {
+      width: 8.33333333% !important;
+  }
+  
+  .col-3 {
+    width: 25% !important;
+  }
+  
+  .col-8 {
+    width: 66.66666667% !important;
+  }
+
+  ::ng-deep .mat-mdc-input-element {
+    border-bottom: 0px solid rgba(0,0,0,.42)!important;
+    border-bottom-width: 0px !important;
+    border-bottom-style: solid !important;
+    border-bottom-color: rgba(0, 0, 0, 0.42) !important;
+ }
+
+ ::ng-deep .mat-mdc-form-field, .mat-mdc-floating-label {
+  line-height : var(--mdc-typography-body1-line-height, 5px)
+}

@@ -1,0 +1,56 @@
+<div class="clearfix le-l-bodywrapper backgroud-color js-bodywrapper" id="mainCtr">
+    <div class="container-fluid">
+        <div class="le-l-middle-col le-u-no-mar-l__mb" id="mainrightCnt">
+            <div class="le-l-level1-wrapper">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="le-l-level1-middle-col le-l-base-layout-center">
+                            <h1 class="le-u-header-xxl le-u-mar-b-32">Solution Bot</h1>
+                            <div class="row  aip-bot-scroll aip-bot-chat_history">
+                                <div class="col-lg-12">
+                                    <div class="" *ngFor="let chat of history">
+                                        <div class="" [ngClass]="chat.user=='bot'?'aip-bot-dialog':'aip-user-dialog'">
+                                            <!-- for bot -->
+                                            <div *ngIf="chat.user=='bot'"
+                                                class="le-u-mar-16 d-flex justify-content-start">
+                                                <div class="le-c-avatar  le-c-avatar--sm aip-bot-avatar">
+                                                    {{chat.user|firstCharacter}}</div>
+                                                <div class="aip-bot-detail le-u-mar-l-8">
+                                                    <div class="le-u-header-md le-u-pad-8">{{chat.solution}}</div>
+                                                </div>
+                                            </div>
+                                            <!-- for user -->
+                                            <div *ngIf="chat.user!='bot'"
+                                                class="aip-cursor le-u-mar-16 d-flex justify-content-end">
+
+                                                <leds-tooltip [tooltip]="'Click To Ask Again'" [position]="'above'"
+                                                    [disabled]=false>
+                                                    <div class="aip-bot-detail le-u-mar-r-8">
+                                                        <div class="le-u-header-md le-u-pad-8"
+                                                            (click)="re_ask(chat.solution)">{{chat.solution}}</div>
+                                                    </div>
+                                                </leds-tooltip>
+                                                <div class="le-c-avatar  le-c-avatar--sm aip-bot-avatar">
+                                                    {{chat.user|firstCharacter}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="aip-bot-input">
+                                <div class="d-flex align-items-center">
+                                    <leds-input-field placeholder="Enter Your Ask !!!" label="" designType="default"
+                                        inputType="text" [disabled]="false" [required]="true" styleClass="" style="width: 100%;"
+                                        [(ngModel)]="userInput" (keydown.enter)="changesOccur()"></leds-input-field>
+                                    <div class="le-u-mar-l-8 aip-cursor le-u-circle-icon-grey" (click)="changesOccur()">
+                                        <i class="icon x-24 send-Icon"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,56 @@
+<div class="container-fluid backgroud-color">
+    <div class="le-l-level1-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="le-l-level1-middle-col le-l-base-layout-center">
+                    <div class="table-responsive selector-693-2 " style=" margin: 0rem 0rem 1rem 1.5rem;">
+                        <div class="align-items-center d-flex le-u-mar-b-16">
+                            <span class="">
+                                <i class="aip-led-icons icon x-24 back-icon purple aip-cursor" (click)="back()"></i>
+                            </span>
+                            <span class="le-u-pad-l-8 aip-desc-title le-u-header-xxl">Create Spec</span>
+                        </div>
+                            <div class="le-u-pad-lr-16">
+                                <leds-input-field placeholder="Name" label="Name*" [(ngModel)]="data.domainname"
+                                    designType="default" inputType="text" [disabled]="false" styleClass="le-u-pad-tb-8"
+                                    [validators]="nameValidator"
+                                    (changesOccur)="domainNameChanges($event)"></leds-input-field>
+                                    <mat-error *ngIf="!errMsgFlag" class="custom-hint">Please enter Name in
+                                        Alphanumeric
+                                        value,accepted
+                                        special characters are _ and -</mat-error>
+                                    <mat-error *ngIf="errMsgFlag"
+                                        class="custom-hint-or-error">{{errMsg}}</mat-error>
+        
+                                <leds-textarea placeholder="Description" label="Description" styleClass="le-u-pad-tb-8"
+                                    [(ngModel)]="data.description" designType="default" inputType="text"
+                                    [disabled]="false" [required]="false"></leds-textarea>
+                                <leds-select [options]="capabilityList" label="Capability" styleClass="le-u-pad-tb-8"
+                                    [validators]=""
+                                    [disabled]="false" designType="default" [isMultiple]="true"
+                                    (selectChange)="selectChange($event)"
+                                    (openChange)="openChange($event)"></leds-select>
+                                <json-editor [options]="editorOptions" [data]="data.apispectemplate"
+                                    style="height: 450px;" #formJsonEditor="" class="cipJSONEditor"></json-editor>
+
+                            </div>
+                        <div class="m-2 d-flex justify-content-end le-u-mar-b-32 le-u-pad-lr-16 le-u-pad-t-8">
+                            <leds-button
+                            *ngIf="!nameFlag"
+                            nameText="secondaryButton" idText="secondaryButton" [disabled]="true" buttonType="button"
+                            designType="primary">
+                            Create
+                        </leds-button>
+                        <leds-button
+                            *ngIf="nameFlag"
+                            nameText="secondaryButton" idText="secondaryButton" [disabled]="false" buttonType="button"
+                            designType="primary" (click)="createSpecTemplate()">
+                            Create
+                        </leds-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

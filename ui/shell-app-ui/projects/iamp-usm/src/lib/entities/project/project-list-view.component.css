@@ -1,0 +1,31 @@
+@media screen and (max-width:640px) {
+  .actionBtnProject {
+    float: unset !important;
+    margin-top: 5px !important;
+  }
+}
+
+.inputLabel {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  margin-bottom: -0.5rem;
+  width: 200px;
+}
+.chooseFileLabel{
+  margin-left: unset; 
+  display: -webkit-inline-box; 
+  width: 96px;
+}
+
+@media screen and (min-width:3000px) {
+  .inputLabel {
+    width: 14.5vmin !important;
+  }
+  .chooseFileLabel{
+    width: 19vmin !important;
+  }
+}
+
+.error {
+   color: red;
+}

@@ -1,0 +1,52 @@
+.logo-common{
+    font-size: 58px;
+}
+
+.DSA_logoMid{
+    top: 20px !important;
+    margin-top: 0px !important;
+    right: 0px !important;
+    margin-left: 1%;
+    text-align: left;
+    position: relative;
+}
+
+.le-l-mainwrapper--login{
+    background: url(/assets/images/bg.webp) no-repeat !important;
+    background-size: cover !important;
+}
+
+.le-l-login-ctr {
+    margin-top: auto !important;
+    position: relative;
+}
+.le-l-login-mid{
+    margin-left: unset !important;
+}
+.le-l-login-mar{
+    margin-bottom:unset !important;
+}
+.demoButton{
+    margin: 28% 20%;
+}
+
+::ng-deep .le-l-login-ctr .mat-mdc-unelevated-button {
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+// .le-u-body-xxl {
+//     font-size: 2.8rem;
+// }
+
+// .le-u-body-md {
+//     font-size: 1rem;
+// }
+
+// a.le-c-btn--hyperlink {
+//     font-size: 1rem;
+// }
+
+// .le-u-body-sm {
+//     font-size: 1rem;
+// }

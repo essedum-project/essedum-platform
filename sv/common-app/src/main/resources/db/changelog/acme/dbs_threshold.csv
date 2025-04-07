@@ -1,0 +1,6 @@
+"id","project_id","amber_lower_limit","amber_upper_limit","created_by","created_on","from_date","green_lower_limit","green_upper_limit","is_deleted","modified_by","modified_date","red_lower_limit","red_upper_limit","threshold_date","to_date","threshold_config"
+"1","2","10.0","20.0","NULL","NULL","2021-04-12","20.0","NULL","false","NULL","NULL","NULL","10.0","high","2022-06-30","1"
+"2","2","0.0","1.0","NULL","NULL","2021-04-12","1.0","NULL","false","NULL","NULL","NULL","0.0","critical","2024-05-31","2"
+"3","2","10.0","20.0","NULL","NULL","2023-08-25","20.0","NULL","false","NULL","NULL","NULL","10.0","high","2023-08-31","3"
+"4","2","0.0","1.0","NULL","NULL","2023-08-01","1.0","NULL","false","NULL","NULL","NULL","0.0","critical","2024-08-31","4"
+"5","2","-25.0","100.0","NULL","NULL","2023-07-27","100.0","NULL","false","NULL","NULL","NULL","-25.0","Custom","2023-09-27","5"

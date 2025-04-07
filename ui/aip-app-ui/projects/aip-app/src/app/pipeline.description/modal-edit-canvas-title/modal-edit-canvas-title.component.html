@@ -1,0 +1,130 @@
+<!--
+
+     @ 2018 Infosys Limited, Bangalore, India. All Rights Reserved.
+     Version: 1.0
+     Except for any free or open source software components embedded in this Infosys proprietary software program (Program),
+     this Program is protected by copyright laws, international treaties and  other pending or existing intellectual property
+     rights in India, the United States, and other countries. Except as expressly permitted, any unauthorized reproduction, storage,
+     transmission in any form or by any means(including without limitation electronic, mechanical, printing, photocopying,
+     recording, or otherwise), or any distribution of this program, or any portion of it, may result in severe civil and
+     criminal penalties, and will be prosecuted to the maximum extent possible under the law.
+
+-->
+<div style="width:100%;" class="selector-779-1">
+    <div class="row selector-779-2" style="width: inherit;">
+        <h2 class="col-md-11 selector-779-3" style="color:var(--base-color)" mat-dialog-title="">Pipeline Details</h2>
+        <div class="col-md-1 selector-779-4" style="text-align: right">
+            <i class="fa fa-close selector-779-5" style="right: top; cursor:pointer;margin: 2rem; font-size: 1.3rem;"
+                (click)="closeDialog()"></i>
+        </div>
+    </div>
+    <span class="col-md-12 selector-779-2-name">
+        <label *ngIf="data &amp;&amp; data.canvasData" class="selector-779-8-name">Name: </label>
+        <label *ngIf="data &amp;&amp; data.canvasData" class="selector-779-9-name">{{data.canvasData.name}}</label>
+    </span>
+    <mat-dialog-content class="selector-779-6" style="line-height: 1.8rem;">
+        <mat-form-field *ngIf="!data || !data.canvasData" class="selector-779-7">
+            <mat-label class="selector-779-6-1">Enter Pipeline Alias</mat-label>
+            <input matInput="" placeholder="Enter Pipeline Alias" [(ngModel)]="alias" class="selector-779-8">
+        </mat-form-field>
+        <mat-form-field *ngIf="data &amp;&amp; data.canvasData" class="selector-779-9">
+            <input matInput="" placeholder="Pipeline Alias" [(ngModel)]="data.canvasData.alias" class="selector-779-10">
+        </mat-form-field>
+        <br class="selector-779-11">
+        <mat-form-field *ngIf="!data || !data.canvasData" class="selector-779-12">
+            <mat-label class="selector-779-13">Description</mat-label>
+            <textarea matInput="" rows="2" placeholder="Enter Pipeline Description" [(ngModel)]="description"
+                class="selector-779-13"></textarea>
+        </mat-form-field>
+        <mat-form-field *ngIf="data &amp;&amp; data.canvasData" class="selector-779-14">
+            <textarea matInput="" rows="2" placeholder="Enter Pipeline Description"
+                [(ngModel)]="data.canvasData.description" class="selector-779-15"></textarea>
+        </mat-form-field>
+        <br class="selector-779-16">
+        <mat-form-field *ngIf="!data || !data.canvasData" class="selector-779-17">
+            <mat-select style="padding-top: 1.8rem;" placeholder="Select Pipeline Type" [(ngModel)]="type"
+                class="selector-779-18">
+                <mat-option style="background-color: white;" *ngFor="let item of plugins" [value]="item.type"
+                    class="selector-779-19">{{item.type}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field *ngIf="data &amp;&amp; data.canvasData" class="selector-779-20">
+            <mat-select style="padding-top: 1.8rem;" placeholder="Select Pipeline Type"
+                [(ngModel)]="data.canvasData.type" class="selector-779-21">
+                <mat-option style="background-color: white;" *ngFor="let item of plugins" [value]="item.type"
+                    class="selector-779-22">{{item.type}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <br class="selector-779-23">
+        <mat-form-field *ngIf="!data &amp;&amp; type=='Agents'" class="selector-779-24">
+            <mat-select style="padding-top: 1.8rem;" placeholder="Select Agent Type" [(ngModel)]="fileData.agenttype"
+                class="selector-779-25">
+                <mat-option style="background-color: white;" *ngFor="let item of agentTypes" [value]="item"
+                    class="selector-779-26">{{item}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field *ngIf="data &amp;&amp; data.canvas &amp;&amp; data.canvas.type=='Agents'"
+            class="selector-779-27">
+            <mat-select style="padding-top: 1.8rem;" [disabled]="true" placeholder="Select Agent Type"
+                [(ngModel)]="fileData.agenttype" class="selector-779-28">
+                <mat-option style="background-color: white;" *ngFor="let item of agentTypes" [value]="item"
+                    class="selector-779-29">{{item}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <br class="selector-779-30">
+        <mat-form-field class="selector-779-31">
+            <mat-select style="padding-top: 1.8rem;" placeholder="Select Pipeline Groups" [formControl]="inputColumns"
+                (selectionChange)="dropChange('inputCols')" multiple="" required="" class="selector-779-32">
+                <mat-option style="background-color: white;" *ngFor="let col of colList" [value]="selectedz(col)"
+                    class="selector-779-33">{{col.alias}}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="inputColumns.hasError('required')" class="selector-779-34">Pipeline Group
+                Required</mat-error>
+        </mat-form-field>
+        <mat-form-field *ngIf="!data || !data.canvasData" class="selector-779-44">
+            <mat-select style="padding-top: 1.8rem;" [disabled]="isAuth" [formControl]="tagsDisp"
+                placeholder="Select Tags" multiple="" class="selector-779-45">
+                <mat-option style="background-color: white;" *ngFor="let tg of tagsSelected" [value]="tg.label"
+                    class="selector-779-46">{{tg.label+':'+tg.category}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field *ngIf="data &amp;&amp; data.canvasData" class="selector-779-47">
+            <mat-select style="padding-top: 1.8rem;" [disabled]="isAuth" [formControl]="tagsDisp"
+                [(ngModel)]="data.canvasData.tags" placeholder="Select Tags" multiple="" class="selector-779-48">
+                <mat-option style="background-color: white;" *ngFor="let tg of tagsSelected" [value]="tg.label"
+                    class="selector-779-49">{{tg.label+':'+tg.category}}</mat-option>
+            </mat-select>
+            
+        </mat-form-field>
+        <div class="grid-container">
+        <mat-checkbox class="selector-779-33" (change)="alterTemplate($event,'template')" [checked]="isTemplate">
+            Is Template?
+        </mat-checkbox>
+        <mat-checkbox class="selector-779-33" (change)="alterTemplate($event,'legacy')"[checked]="isLegacy">
+            Is Legacy?
+        </mat-checkbox>
+    </div>
+        <br>
+
+        <input id="mdledtcnvsttlId" (change)="onFileChanged($event)" style="display: none;" accept=".json"
+            name="mdledtcnvsttlNm" type="file" #fileInput="" placeholder="file" class="selector-779-35" />
+        <i class="fa fa-upload selector-779-36" (click)="fileInput.click()"
+            style="font-size: 3rem; cursor: pointer; margin: 0 2rem; color: cornflowerblue;"></i>
+        <h5 style=" color: cornflowerblue; cursor: arrow;">Import Json</h5>&nbsp;&nbsp;
+        <span *ngIf="selectedFile" class="selector-779-37">{{ selectedFile.name}}</span>
+
+    </mat-dialog-content>
+    <br class="selector-779-38">
+
+    <mat-dialog-actions class="row selector-779-39" *ngIf="!isAuth" style="float: right;margin: 0 2rem;">
+        <div *ngIf="!inputColumns.hasError('required')" class="selector-779-40" style="width:auto;">
+            <button *ngIf="!data || !data.canvasData" mat-button="" (click)="saveDetails()"
+                class="selector-779-41 base-btn" style="margin-right: 4px;">Ok</button>
+            <button *ngIf="data &amp;&amp; data.canvasData" mat-button="" [mat-dialog-close]="name"
+                (click)="editDetails()" class="selector-779-42 base-btn" style="margin-right: 4px;">Ok</button>
+        </div>
+        <button mat-button="" (click)="closeDialog()" class="selector-779-43 base-red-btn"
+            style="width:auto;">Close</button>
+    </mat-dialog-actions>
+
+</div>

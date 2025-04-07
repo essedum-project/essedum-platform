@@ -1,0 +1,90 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+     
+     <changeSet author="Leap (generated)" id="3v0-aip-iegp-1">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/common/data/3v0/aip-iegp/mldatasource.csv" quotchar="&quot;" separator="," tableName="mldatasource">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="connectiondetails" name="connectiondetails" type="STRING"/>
+            <column header="description" name="description" type="STRING"/>
+            <column header="dshashcode" name="dshashcode" type="STRING"/>
+            <column header="name" name="name" type="STRING"/>
+            <column header="organization" name="organization" type="STRING"/>
+            <column header="salt" name="salt" type="STRING"/>
+            <column header="type" name="type" type="STRING"/>
+            <column header="category" name="category" type="STRING"/>
+            <column header="activetime" name="activetime" type="skip"/>
+            <column header="lastmodifiedby" name="lastmodifiedby" type="STRING"/>
+            <column header="lastmodifieddate" name="lastmodifieddate" type="DATE"/>
+            <column header="alias" name="alias" type="STRING"/>
+	        <column header="extras" name="extras" type="STRING"/>
+	        <column header="interfacetype" name="interfacetype" type="STRING"/>
+	        <column header="fordataset" name="fordataset" type="BOOLEAN"/>
+	        <column header="foradapter" name="foradapter" type="BOOLEAN"/>
+	        <column header="forruntime" name="forruntime" type="BOOLEAN"/>
+	        <column header="formodel" name="formodel" type="BOOLEAN"/>
+        </loadData>
+    </changeSet>
+    
+     <changeSet author="Leap (generated)" id="3v0-aip-iegp-2">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/common/data/3v0/aip-iegp/mldataset.csv" quotchar="&quot;" separator="," tableName="mldataset">
+            <column header="attributes" name="attributes" type="STRING"/>
+            <column header="dataset_type" name="dataset_type" type="STRING" />
+            <column header="description" name="description" type="STRING"/>
+            <column header="exp_status" name="exp_status" type="NUMERIC"/>
+            <column header="name" name="name" type="STRING"/>
+            <column header="organization" name="organization" type="STRING"/>
+            <column header="schemajson" name="schemajson" type="STRING"/>
+            <column header="type" name="type" type="STRING"/>
+            <column header="backing_dataset" name="backing_dataset" type="STRING"/>
+            <column header="dataset_schema" name="dataset_schema" type="STRING"/>
+            <column header="datasource" name="datasource" type="STRING"/>
+            <column header="lastmodifiedby" name="lastmodifiedby" type="STRING"/>
+            <column header="lastmodifieddate" name="lastmodifieddate" type="DATE"/>
+            <column header="alias" name="alias" type="STRING"/>
+            <column header="context" name="context" type="STRING" />
+            <column name="is_approval_required" defaultValueBoolean="false"
+				type="boolean" />
+			<column name="is_permission_managed" defaultValueBoolean="false"
+				type="boolean" />
+            <column name="is_inbox_required" defaultValueBoolean="false"
+				type="boolean" />
+	    <column name="is_audit_required" defaultValueBoolean="false"
+				type="boolean" />
+	    <column name="is_archival_enabled" defaultValueBoolean="false"
+				type="boolean" />
+	    <column header="archival_config" name="archival_config" type="STRING" />
+	    <column header="dashboard" name="dashboard" type="NUMERIC" />
+	    <column header="metadata" name="metadata" type="STRING" />
+	    <column header="modeltype" name="modeltype" type="STRING" />
+	    <column header="views" name="views" type="STRING" />
+	    <column header="taskdetails" name="taskdetails" type="STRING" />
+	    <column header="tags" name="tags" type="STRING" />
+	    <column header="interfacetype" name="interfacetype" type="STRING"/>
+	    <column header="adaptername" name="adaptername" type="STRING"/>
+	    <column header="isadapteractive" name="isadapteractive" type="STRING"/>
+        </loadData>
+    </changeSet> 
+    
+   <changeSet author="Leap (generated)" id="3v0-aip-iegp-3">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/common/data/3v0/aip-iegp/mlpipeline.csv" quotchar="&quot;" separator="," tableName="mlpipeline">
+            <column header="created_by" name="created_by" type="STRING"/>
+            <column header="created_date" name="created_date" type="datetime(6)"/>
+            <column header="deleted" name="deleted" type="BOOLEAN"/>
+            <column header="description" name="description" type="STRING"/>
+            <column header="job_id" name="job_id" type="skip"/>
+            <column header="json_content" name="json_content" type="STRING"/>
+            <column header="lastmodifiedby" name="lastmodifiedby" type="STRING"/>
+            <column header="alias" name="alias" type="STRING"/>
+            <column header="lastmodifieddate" name="lastmodifieddate" type="datetime"/>
+            <column header="name" name="name" type="STRING"/>
+            <column header="organization" name="organization" type="STRING"/>
+            <column header="type" name="type" type="STRING"/>
+            <column header="version" name="version" type="skip"/>
+            <column header="tags" name="tags" type="STRING"/>
+	    	<column header="interfacetype" name="interfacetype" type="STRING"/>
+	    	<column header="pipeline_metadata" name="pipeline_metadata" type="STRING"/>
+	    	<column header="is_template" name="is_template" type="boolean"/>
+        </loadData>
+    </changeSet>
+</databaseChangeLog>
+

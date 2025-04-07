@@ -1,0 +1,92 @@
+:host ::ng-deep.wk-card{
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    padding: 0px;
+}
+
+:host ::ng-deep.p-splitter-panel-nested {
+    display: initial;
+}
+.question-card {
+    background: #fff;
+    border: 1px solid var(--base-color) !important;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+}
+
+.wk-quest-border {
+    border: 1px solid var(--base-color);
+    margin: 10px;
+    padding: 10px;
+    float:left;
+    width: 95%;
+    line-height: 15px;
+}
+.nxtBtn:hover {
+    -webkit-box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.2);
+  }
+  
+  .nxtBtn {
+    height: 21px;
+    line-height: 5px;
+    border: 1px solid var(--base-color);
+    padding: 0 10px;
+    color: #fff;
+    background: var(--base-color);
+    border-radius: 4px;
+    text-decoration: none;
+    margin: 10px;
+  }
+
+  .drawer {
+    height: 100vh;
+    width: 25%;
+    border-right: 1px solid #ccc;
+  }
+  .drawer .header {
+    position: absolute;
+    right: 0;
+    justify-content: space-between;
+  }
+  
+  .main {
+    background-color: #fff;
+  }
+  
+  .main.header {
+    top: 0;
+    width: 100%;
+    z-index: 2;
+    border-bottom: 1px solid var(--base-color);
+    
+  }
+
+  .cursor {
+      cursor: pointer;
+  }
+  
+  .main.contents {
+    min-height: 100vh;
+    min-width: 100%;
+    /* padding: 16px; */
+  }
+
+  .header-drawer {
+    height: 6%;
+    background-color: var(--base-color);
+    border-bottom: 1px solid var(--base-color);
+  }
+
+  ::ng-deep mat-tab-group#wk-tab .mat-tab-body-content {
+      overflow: hidden !important;
+  }
+
+  ::ng-deep mat-drawer-container#wk-drawer .mat-drawer-content {
+      overflow: overlay !important;
+  }
+
+
+  
+  

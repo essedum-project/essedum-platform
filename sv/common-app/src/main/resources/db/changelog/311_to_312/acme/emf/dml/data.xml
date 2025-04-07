@@ -1,0 +1,202 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+	
+
+	
+	
+<changeSet id = "16832223644477-2-1-310-81" author = "nandakumar.r03">
+	<delete tableName = "emf_workflow_state">
+	<where>project_id is NULL </where>
+	</delete>
+</changeSet>
+
+<changeSet id = "16832223644477-2-1-310-91" author = "nandakumar.r03">
+	<delete tableName = "emf_event">
+	<where>project_id is NULL </where>
+	</delete>
+</changeSet>
+	
+<changeSet id = "16832223644477-2-1-310-101" author = "nandakumar.r03">
+<delete tableName = "emf_workflow">
+<where>project_id is NULL </where>
+</delete>
+</changeSet>			
+
+
+<changeSet id = "16832223644477-2-1-310-111" author = "nandakumar.r03">
+	<delete tableName = "emf_event_type">
+	<where>project_id is NULL </where>
+	</delete>
+</changeSet>
+
+<changeSet id = "16832223644477-2-1-310-121" author = "nandakumar.r03">
+	<delete tableName = "emf_workflow_type">
+	<where>project_id is NULL </where>
+	</delete>
+</changeSet>
+
+<changeSet id = "16832223644477-2-1-310-131" author = "nandakumar.r03">
+	<delete tableName = "emf_custom_actions">
+	<where>project_id is NULL </where>
+	</delete>
+</changeSet>
+
+	
+<changeSet author="nandakumar.r03"
+		id="1683222364377-2-1-310-3">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT emf_event_type ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/311_to_312/acme/emf/dml/emf_event_type.csv"
+			quotchar="&quot;" separator="," tableName="emf_event_type">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="name" name="name" type="STRING" />
+			<column header="selector_param_name" name="selector_param_name" type="STRING" />
+			<column header="str_params" name="str_params" type="STRING" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT emf_event_type OFF;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="nandakumar.r03"
+		id="1683222364377-2-1-310-7">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT emf_workflow_type ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/311_to_312/acme/emf/dml/emf_workflow_type.csv"
+			quotchar="&quot;" separator="," tableName="emf_workflow_type">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="name" name="name" type="STRING" />
+			<column header="str_eca_config" name="str_eca_config" type="STRING" />
+			<column header="selector_param_name" name="selector_param_name" type="STRING" />
+			<column header="str_params" name="str_params" type="STRING" />
+			<column header="cas_workflow_id" name="cas_workflow_id" type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT emf_workflow_type OFF;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="nandakumar.r03"
+		id="1683222364377-2-1-310-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT emf_event ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/311_to_312/acme/emf/dml/emf_event.csv"
+			quotchar="&quot;" separator="," tableName="emf_event">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="create_time" name="create_time" type="DATE AND TIME" />
+			<column header="end_time" name="end_time" type="DATE AND TIME" />
+			<column header="selector_param" name="selector_param" type="STRING" />
+			<column header="server_host_address" name="server_host_address" type="STRING" />
+			<column header="event_type_id" name="event_type_id" type="NUMERIC" />
+			<column header="str_params" name="str_params" type="STRING" />
+			<column header="response" name="response" type="STRING" />
+			<column header="source_event_id" name="source_event_id" type="STRING" />
+			<column header="event_retry_counter" name="event_retry_counter" type="NUMERIC" />
+			<column header="event_status" name="event_status" type="STRING" />
+			<column header="message_source" name="message_source" type="STRING" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT emf_event OFF;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="nandakumar.r03"
+		id="1683222364377-2-1-310-5">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT emf_workflow ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/311_to_312/acme/emf/dml/emf_workflow.csv"
+			quotchar="&quot;" separator="," tableName="emf_workflow">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="state" name="state" type="STRING" />
+			<column header="workflow_type_id" name="workflow_type_id" type="NUMERIC" />
+			<column header="selector_param" name="selector_param" type="STRING" />
+			<column header="str_params" name="str_params" type="STRING" />
+			<column header="status" name="status" type="STRING" />
+			<column header="create_time" name="create_time" type="DATE AND TIME" />
+			<column header="end_time" name="end_time" type="DATE AND TIME" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT emf_workflow OFF;
+		</sql>
+	</changeSet>
+	<changeSet author="nandakumar.r03"
+		id="1683222364377-2-1-310-6">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT emf_workflow_state ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/311_to_312/acme/emf/dml/emf_workflow_state.csv"
+			quotchar="&quot;" separator="," tableName="emf_workflow_state">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="selector_param" name="selector_param" type="STRING" />
+			<column header="workflow_state" name="workflow_state" type="STRING" />
+			<column header="workflow_status" name="workflow_status" type="STRING" />
+			<column header="time" name="time" type="DATE AND TIME" />
+			<column header="workflow_type_id" name="workflow_type_id" type="NUMERIC" />
+			<column header="workflow_id" name="workflow_id" type="NUMERIC" />
+			<column header="event_id" name="event_id" type="NUMERIC" />
+			<column header="event_type_id" name="event_type_id" type="NUMERIC" />
+			<column header="event_status" name="event_status" type="STRING" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT emf_workflow_state OFF;
+		</sql>
+	</changeSet>
+
+	<changeSet author="nandakumar.r03"
+		id="1683222364377-2-1-310-8">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT emf_custom_actions ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/311_to_312/acme/emf/dml/emf_custom_actions.csv"
+			quotchar="&quot;" separator="," tableName="emf_custom_actions">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="action_name" name="action_name" type="STRING" />
+			<column header="action_type" name="action_type" type="STRING" />
+			<column header="script_code" name="script_code" type="STRING" />
+			<column header="headers" name="headers" type="STRING" />
+			<column header="result_param" name="result_param" type="STRING" />
+			<column header="restapi_param_type" name="restapi_param_type" type="STRING" />
+			<column header="restapi_method" name="restapi_method" type="STRING" />
+			<column header="url" name="url" type="STRING" />
+			<column header="body" name="body" type="STRING" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT emf_custom_actions OFF;
+		</sql>
+	</changeSet>
+			<changeSet author="nandakumar.r03"
+		id="1683222364377-2-1-310-9">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT emf_custom_action_parameters ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/311_to_312/acme/emf/dml/emf_custom_action_parameters.csv"
+			quotchar="&quot;" separator="," tableName="emf_custom_action_parameters">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="param_name" name="param_name" type="STRING" />
+			<column header="param_datatype" name="param_datatype" type="STRING" />
+			<column header="custom_action_id" name="custom_action_id" type="NUMERIC" />
+			<column header="default_value" name="default_value" type="STRING" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT emf_custom_action_parameters OFF;
+		</sql>
+	</changeSet>
+
+
+</databaseChangeLog>	

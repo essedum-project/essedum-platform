@@ -1,0 +1,85 @@
+<div class="le-u-pad-16" style="position:relative">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="le-u-header-xxl">Link Artifacts</div>
+        <div (click)="dismiss()"> <i class="icon x-16 close-icon aip-cursor"></i> </div>
+    </div>
+    <leds-multi-col-container>
+        <div panel panelRounded panelBorder class="le-u-mar-tb-16">
+            <div panelBody class="clearfix">
+
+                <div panelThreeCol>
+                    <div firstColPanel>
+                        <div class="le-l-leftcol-scroll DSA_htdummy le-u-mar-t-32">
+                            <leds-navigation-list position="left" [selectOnClick]="true">
+                                <li ledsNavigationListItem *ngFor="let key of groupkey" (click)="render(key)"
+                                    [ngStyle]="{'border-left': (key==renderKey)?'2px solid #8626C3':'2px solid #0000ff00'}">
+                                    <span firstNavigationSpan class="le-u-header-md"
+                                        [ngStyle]="{'color': (key==renderKey)?'#8626C3':'#737373', 'font-weight': (key==renderKey)?'800':'300'}">{{key | titlecase}}</span>
+                                </li>
+                            </leds-navigation-list>
+                        </div>
+                    </div>
+                    <div thirdColPanel>
+                        <div>
+                            <div class="d-flex justify-content-between le-u-mar-8 le-u-mar-lr-16 align-items-center">
+                                <div class="le-u-header-xl"><strong>{{renderKey | titlecase}}</strong></div>
+                                <leds-input-field designType="search" inputType="text" [disabled]="false"
+                                    [required]="false" styleClass=""
+                                    (changesOccur)="changesOccur($event)"></leds-input-field>
+                            </div>
+                            <div class="le-l-multicolumn__header aip-link-card-height">
+                                <div class=" aip-link-card">
+                                    <div class="aip-cursor" *ngFor="let result of groupData[renderKey];  index as i"
+                                        [ngStyle]="{'border': (result.status)?'2px solid #8626C3':'2px solid #0000ff00','pointer-events':(result.linked)?'none':'auto'}"
+                                        style="border-radius: 1.8rem;" (click)="linked(result,renderKey,i)">
+                                        <leds-card designType="simple"
+                                            *ngIf="result.data.id!=null || result.data.alias!=null">
+                                            <mat-card-header>
+                                                <mat-card-title>
+                                                    <div class="d-flex justify-content-between">
+                                                        <h2 class="le-u-header-md aip-lnk-ellipsis">{{result.data.alias
+                                                            |
+                                                            titlecase}}</h2>
+                                                        <span> <i *ngIf="result.status"
+                                                                class="icon x-16 icon-process-complete purple"></i>
+                                                            <i *ngIf="!result.status" style="color: #EDCFFF;"
+                                                                class=" icon x-16 success-big-icon"></i></span>
+                                                    </div>
+                                                </mat-card-title>
+                                                <mat-card-subtitle
+                                                    class="le-u-body-sm le-u-text-neutral-80 le-u-no-mar-b le-u-ellipsis">
+                                                    {{result.data.data}}
+                                                </mat-card-subtitle>
+                                            </mat-card-header>
+                                        </leds-card>
+                                    </div>
+                                </div>
+                                <div class="" *ngFor="let item of groupData[renderKey]; let isLast=last">
+                                    <div *ngIf="isLast">
+                                        <div *ngIf="item.data.id!=null && item.data.alias!=null"
+                                            class="d-flex justify-content-end le-u-mar-8 le-u-body-xl  aip-cursor"
+                                            (click)='data_flux_type(renderKey)' style="color: #8626C3;">
+                                            <strong>Load More</strong>
+                                        </div>
+                                        <div *ngIf="item.data.id==null && item.data.alias==null"
+                                            class="d-flex justify-content-center le-u-mar-8 le-u-header-xl aip-cursor"
+                                            style="color: #723c94;">
+                                            <strong>No More Data</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </leds-multi-col-container>
+    <leds-button nameText="miniPrimaryButton" idText="miniPrimaryButton" (click)="createLinked()" [disabled]="linking"
+        buttonType="button" designType="miniPrimary">
+        Link Now
+    </leds-button>
+    <leds-spinner [bdColor]="'rgb(151 141 141 / 27%)'" [size]="'medium'" [color]="'#8626c3'" [type]="'ball-fall'"
+        [fullScreen]="false" [zIndex]="9999" [showSpinner]="showSpinner">
+    </leds-spinner>
+</div>

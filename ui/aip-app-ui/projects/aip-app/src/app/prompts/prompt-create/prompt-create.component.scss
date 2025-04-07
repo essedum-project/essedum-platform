@@ -1,0 +1,113 @@
+.main-container {
+    padding: 1%;
+    height: 100%;
+  }
+
+.pannel-shadow{
+    box-shadow: -2px 0 25px -20px rgba(0, 0, 0, 0.75) !important;
+    border: 0.5px solid rgba(0, 0, 0, 0.1215686275);
+    border-radius: 8px;
+    opacity: 1;
+}
+
+.sub-main-container {
+    background-color: white;
+    // border-radius: 20px;
+    // border: none;
+    margin: 32px;
+  }
+  .aip-led-icons {
+    font-size: 2.4rem !important;
+    color: #737373;
+  }
+
+  
+  .aip-scroll-hover {
+    overflow: hidden;
+  }
+
+  .aip-scroll-hover:hover {
+    overflow-y: auto;
+  }
+  .aip-scroll-hover::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+    //   background: #000;
+  }
+ 
+  .aip-scroll-hover::-webkit-scrollbar-thumb {
+    background: #dadada;
+    -webkit-border-radius: 5ex;
+    //   -webkit-box-shadow: 4px 2px 4px #DADADA;
+  }
+.aip-w-96 {
+    width:96%;
+}
+
+.aip-w-42 {
+    width: 2%;
+}
+.aip-w-4 {
+    width: 4%;
+}
+
+.aip-cursor {
+  cursor: pointer;
+}
+
+.aip-led-icons {
+  font-size: 2.4rem !important;
+  color: #737373;
+}
+
+// Modifying for table col-2 and col-10 to overcome the td=auto in shell app
+::ng-deep .mdc-snackbar__label {
+  padding: 0 !important;
+
+  height: 0 !important;
+}
+
+.contenteditable-div {
+  white-space: pre-wrap;
+}
+
+.input-text-style{
+  border: none;
+  text-align: left;
+  line-height: 2rem;
+  /* padding: 9px; */
+  max-height: 50vh;
+  overflow: auto;
+  min-height: fit-content;
+}
+
+.highlight-color {
+  color: #007ad9;
+}
+
+
+.temp-example-label{
+  background-color: #f2f2f2;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.temp-example-text{
+  word-wrap: break-word;
+  text-wrap: pretty;
+}
+
+.validator-error {
+  display: flex;
+  justify-content: end;
+  padding-right: 64px;
+  padding-bottom: 16px;
+  margin-top: -16px;
+}
+
+.transform-container{
+  background-color: white;
+  margin: 32px;
+  padding: 32px;
+  border-radius: 1rem;
+}

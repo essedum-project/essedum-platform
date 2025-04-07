@@ -1,0 +1,17 @@
+.editor img { 
+    width:10%; 
+    max-height: 250px !important;
+ 
+    object-fit:cover; 
+} 
+
+.fillheight {
+    max-height: 250px !important;
+}
+
+.sample-toolbar{
+    border:solid 1px #ddd;
+    background:#f4f4f4;
+    padding: 5px;
+    border-radius:3px;
+}

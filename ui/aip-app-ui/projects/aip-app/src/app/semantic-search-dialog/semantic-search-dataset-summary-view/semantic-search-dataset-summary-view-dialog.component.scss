@@ -1,0 +1,20 @@
+:host ::ng-deep thead,
+:host ::ng-deep tbody,
+:host ::ng-deep tfoot,
+:host ::ng-deep tr,
+:host ::ng-deep td,
+:host ::ng-deep th {
+    border-width: 2px;
+}
+
+::ng-deep .le-c-card.mat-mdc-card {
+    min-height: 30vh;
+}
+
+::ng-deep .mat-mdc-dialog-surface {
+    scrollbar-width: none;
+}
+
+:host ::ng-deep .mat-mdc-card-header {
+    padding: 0px !important;
+}

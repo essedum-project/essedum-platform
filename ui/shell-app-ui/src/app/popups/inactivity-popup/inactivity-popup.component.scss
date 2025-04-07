@@ -1,0 +1,26 @@
+@keyframes breathing {
+    0% {
+        font-size: 1em;
+    }
+
+    50% {
+        font-size: 1.2em;
+    }
+
+    100% {
+        font-size: 1em;
+    }
+}
+
+.breathing {
+    /* animation: breathing 2s ease-in-out infinite; */
+    line-height: 1em;
+    color: #ff0000;
+    /* width: 120%; */
+}
+
+.timerOver {
+    color: #ff0000;
+    font-size: 1em;
+    line-height: 1em;
+}

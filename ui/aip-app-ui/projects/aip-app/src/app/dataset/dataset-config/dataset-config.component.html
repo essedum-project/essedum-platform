@@ -1,0 +1,209 @@
+<!--
+
+     @ 2018 Infosys Limited, Bangalore, India. All Rights Reserved.
+     Version: 1.0
+     Except for any free or open source software components embedded in this Infosys proprietary software program (Program),
+     this Program is protected by copyright laws, international treaties and  other pending or existing intellectual property
+     rights in India, the United States, and other countries. Except as expressly permitted, any unauthorized reproduction, storage,
+     transmission in any form or by any means(including without limitation electronic, mechanical, printing, photocopying,
+     recording, or otherwise), or any distribution of this program, or any portion of it, may result in severe civil and
+     criminal penalties, and will be prosecuted to the maximum extent possible under the law.
+
+-->
+<div *ngIf="copyDataset" class="justify-content-between align-items-center d-flex">
+    <span class="le-u-mar-l-8 le-u-header-xxl">Copy Dataset</span>
+    <div class="le-u-pad-8">
+        <i class="icon x-24 close-icon d-flex" (click)="closeModal()"></i>
+    </div>
+</div>
+<div *ngIf="data" class="le-u-pad-tb-16 col-md-12 selector-678-1" style="position: relative;">
+    <div class="col-md-1 selector-678-3" *ngIf="proceed" style="text-align: center">
+        <i id="dset-conf-back" class="icon x-24 back-icon" style="cursor:pointer" (click)="proceed = false"></i>
+    </div>
+    <!-- <br /> -->
+    <form [formGroup]="firstForm" (ngSubmit)="onNext()" style="padding-left: 15px" *ngIf="!proceed"
+        class="col-md-12 selector-678-5">
+        <div *ngIf="!copyDataset" class="col-lg-6 col-md-12 le-u-mar-b-16 le-u-header-xxl">
+            <h4 *ngIf="data.name" class="selector-678-6-name">Name: {{data.name}}</h4>
+        </div>
+        <div class="row col-lg-12 col-md-12">
+            <!-- alias -->
+            <div *ngIf="!copyDataset" class="col-lg-6 col-md-6 le-u-mar-b-16">
+                <leds-input-field formControlName="alias" label="Alias" inputType="text" [required]="true"
+                    [(ngModel)]="data.alias"></leds-input-field>
+            </div>
+            <div *ngIf="copyDataset" class="col-lg-6 col-md-6 le-u-mar-b-16">
+                <leds-input-field formControlName="alias" label="Alias" inputType="text" [required]="true"
+                    [(ngModel)]="copyData.alias"></leds-input-field>
+            </div>
+            <!-- &nbsp;&nbsp; -->
+
+            <!-- description -->
+            <div class="col-lg-6 col-md-6 le-u-mar-b-16">
+                <leds-input-field formControlName="description" label="Description" inputType="text" [required]="false"
+                    [(ngModel)]="data.description"></leds-input-field>
+            </div>
+        </div><br class="selector-678-13" />
+
+
+        <div class="row col-lg-12 col-md-12"><!--style="overflow-y: scroll;" -->
+            <!-- dataset group -->
+            <!-- <div class="col-lg-6 col-md-6 le-u-mar-b-16">
+                <leds-select formControlName="groupsCtrl" label="Select Dataset Groups"
+                    [required]="true" [isMultiple]="true" [options]="groupsOptions"
+                    [(ngModel)]="SelectedGroup"></leds-select>
+                <mat-error *ngIf="firstForm.controls['groupsCtrl'].hasError('required')" class="selector-678-18">Please
+                    select group
+                </mat-error>
+            </div> -->
+            <!-- &nbsp;&nbsp; -->
+            <!-- select datasource -->
+            <div *ngIf="data.datasource" class="col-lg-6 col-md-6 le-u-mar-b-16">
+                <leds-autocomplete formControlName="datasourceAliasCtrl" [options]="datasourcesOpt"
+                    placeholder="Enter Datasource Name" label="Select datasource" errorMessage="{
+                    required: 'This field is required',
+                    }" [required]="true" [autoActiveFirstOption]="false"
+                    (panelOptionSelected)="onDatasourceChange($event.option.value)">
+                </leds-autocomplete>
+            </div>
+            <div *ngIf="!data.datasource" class="col-lg-6 col-md-6 le-u-mar-b-16">
+                <leds-select formControlName="datasourceCtrl" label="select datasource" [required]="true"
+                    [options]="filteredDataSourcesOpt" value="Datasource doesn't exist"
+                    (click)="onDatasourceChange($event.name)"></leds-select>
+            </div>
+            <!-- dataset usage type -->
+            <div class="col-lg-6 col-md-6 le-u-mar-b-16">
+                <leds-select formControlName="Usagetype" label="Select Dataset Usage Type" [(ngModel)]="data.type"
+                    [options]="rwOptions"></leds-select>
+            </div>
+            <div class="col-lg-6 col-md-6 le-u-mar-b-16">
+                <leds-select [disabled]="type === 'GIT'" formControlName="Viewertype" label="Choose View type" [(ngModel)]="data.views"
+                    [options]="viewType"></leds-select>
+                <mat-error *ngIf="firstForm.controls['Viewertype'].hasError('required')" class="selector-678-30">
+                    Please select viewType
+                </mat-error>
+            </div>
+            <div class="col-lg-6 col-md-6 le-u-mar-b-16">
+                <leds-select label="Select Tags" formControlName="tagsDisp" [selected]="data.tags" [required]="false"
+                    [isMultiple]="true" [options]="fetchedtagsOptions"></leds-select>
+            </div>
+
+        </div>
+        <br class="selector-678-23" />
+
+
+        <div class="row selector-678-24 ">
+            <!-- select datasource -->
+            <div class="col-md-6" style="padding-left: 1rem;">
+
+                <!-- select schema ticket schema input field -->
+                <div *ngIf="data.schema" class="col-lg-12 col-md-12 le-u-mar-b-16">
+                    <leds-autocomplete formControlName="schemaAliasCtrl" [options]="originalSchemasOpt"
+                        placeholder="Enter Schema Type" label="Select Schema Type" [required]="false"
+                        [autoActiveFirstOption]="false" (panelOptionSelected)="onSchemaChange($event.option.value)">
+                    </leds-autocomplete>
+                </div>
+                <div *ngIf="!data.schema" class="col-lg-12 col-md-12 le-u-mar-b-16">
+                    <leds-autocomplete [options]="originalSchemasOpt" label="select schema" [required]="false"
+                        placeholder="Choose Schema" [autoActiveFirstOption]="true" value = "None"
+                        (panelOptionSelected)="onSchemaChange($event.option.value)"></leds-autocomplete>
+                </div>
+
+                <!-- below span for download template icon -->
+                <!-- <button class="cip-icon selector-678-48 ticket-icon" *ngIf="scmValList?.length > 0" type="button"
+                    #cipDtstColsToDwnldTrgt (click)="cipDtstColsToDwnld.show($event,cipDtstColsToDwnldTrgt)"
+                    style="cursor: pointer; font-size: 22px; margin-top: 8px; margin-left: -16px;"
+                    [title]="(!scmValList || scmValList?.length<=0)?'No entries found to download':'Download Entries'">
+
+                    <i class="fa fa-download" aria-hidden="true"></i>
+                </button> -->
+                <p-overlayPanel #cipDtstColsToDwnld id="cipDtstColsToDownload" [dismissable]="true">
+                    <ng-template pTemplate>
+                        <div>
+                            <div style="display: flex; justify-content: space-evenly;">
+
+                                <button class="cip-btn" type="button" style="margin:5px;height:80%;"
+                                    (click)="downloadCsvTemplate('All');cipDtstColsToDwnld.hide()">All Columns</button>
+                                <button class="cip-btn" type="button" style="margin:5px;height:80%;"
+                                    (click)="downloadCsvTemplate('Required');cipDtstColsToDwnld.hide()">Required
+                                    Columns</button>
+                            </div>
+                        </div>
+                    </ng-template>
+                </p-overlayPanel>
+
+
+                <!-- select template form -->
+                <!-- <mat-form-field class="selector-689-411 " style="width: 100%;">
+                    <mat-select && !isSchema" multiple formControlName="schemaFormCtrl"
+                        placeholder="select form template" #schemaFormSelect=""
+                        id="icip-apd-modal-config-dataset-schemaform-select" class="selector-689-421">
+                        <mat-option class="selector-689-43">
+                            <ngx-mat-select-search [formControl]="schemaFormFilterCtrl"
+                                [placeholderLabel]="'Find Form template...'"
+                                [noEntriesFoundLabel]="'No matching Template found'"
+                                id="icip-apd-modal-config-dataset-schema-findSchemaForm" class="selector-689-441">
+                            </ngx-mat-select-search>
+                        </mat-option>
+                        <mat-option *ngFor="let template of filteredSchemaTemplates | async" [value]="template.name"
+                            id="icip-apd-modal-config-dataset-schema-select-{{template.name}}"
+                            (click)="onTemplateChange(template)" class="selector-689-451">{{template.alias}}</mat-option>
+                    </mat-select>
+                </mat-form-field> -->
+                <!-- edit schemas and forms icon -->
+                <!-- <span style="margin-top: 15px;">
+                    <i class="fa fa-info-circle fa-lg" style="color: var(--base-color);" [hidden]="!isSchema"
+                        (click)="openFormEditor()" aria-hidden="true" title="Edit Schema and Forms"></i>
+                </span> -->
+
+            </div>
+            <div class="col-md-6 d-flex flex-column" style="justify-content: space-evenly;">
+                <div class="d-flex justify-content-between">
+                    <leds-checkbox style="width: 16rem;" [checked]="isExperiment">
+                        For Experiments</leds-checkbox>
+                    <leds-checkbox *ngIf="!copyDataset" style="position: relative; right: 20rem;"
+                        (change)="alterInterfaceType($event)" [checked]="isTemplate">isTemplate?</leds-checkbox>
+                    <leds-checkbox *ngIf="copyDataset" style="position: relative; right: 5rem;"
+                        (change)="alterInterfaceType($event)" [checked]="isTemplate">isTemplate?</leds-checkbox>
+                </div>
+            </div>
+            <div *ngIf="schemajsonAlias" class="col-lg-6 col-md-6 le-u-mar-b-16">
+                <leds-autocomplete formControlName="schemajsonAliasCtrl" label="Select form template"
+                    [options]="originalSchemaTemplateAlias" [autoActiveFirstOption]="false"
+                    (panelOptionSelected)="onTemplateChange($event.option.value)"></leds-autocomplete>
+            </div>
+            <div *ngIf="!schemajsonAlias" class="col-lg-6 col-md-6 le-u-mar-b-16">
+                <leds-autocomplete label="Select form template" [options]="originalSchemaTemplateAlias"
+                    [autoActiveFirstOption]="false" (panelOptionSelected)="onTemplateChange($event.option.value)"
+                    placeholder="Choose Schema Form Template"></leds-autocomplete>
+            </div>
+        </div>
+
+        <div id="nxt-btn" class="d-flex justify-content-end">
+            <leds-button type="submit" id="dset-conf-nxt" class="selector-678-42 base-btn">NEXT</leds-button>
+        </div>
+
+    </form>
+
+    <div *ngIf="proceed" class="selector-678-43">
+
+        <div #restExp *ngIf="category.toLowerCase() === 'rest'; else others">
+            <app-rest-dataset-config [copyDataset]="copyDataset" [isInEdit]="isInEdit" [dataset]="data"
+                (action)="eventHandler($event)">
+            </app-rest-dataset-config>
+        </div>
+        <ng-template #others="" class="selector-678-46">
+
+            <app-default [copyDataset]="copyDataset" [dataset]="data" [testSuccessful]="testSuccessful"
+                (action)="eventHandler($event)" (testLoaderBoolean)="loader($event)" [edit]="contentVal"
+                [schemaVal]="schemaBol" (cache)="getCache($event)" class="selector-678-47"></app-default>
+
+        </ng-template>
+    </div>
+</div>
+<div class="" *ngIf="testLoaderBoolean">
+    <leds-spinner bdColor="rgba(51,60,60,0.8)" [size]="'default'" [color]="'#8626c3'" [type]="'ball-spin'"
+        [fullScreen]="false" [showSpinner]="true">
+        <p loadingText> Testing...</p>
+    </leds-spinner>
+</div>

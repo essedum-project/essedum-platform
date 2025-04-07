@@ -1,0 +1,329 @@
+<div class="le-l-mainwrapper">
+    <!-- <div style="float: right;">
+        <leds-tooltip [tooltip]="'Wrangling Advisory'" [position]="'above'">
+            <span style="padding-right: 12rem;">
+                <i class="icon x-32 purple icon-comment_filled aip-cursor" (click)="showAdvisory(lgContent3)"></i>
+            </span>
+        </leds-tooltip>
+    </div> -->
+    <div ledsTabGroup class="aip-height-tab le-c-tab le-c-tab--secondary le-c-tab--white  aip-desc le-u-pad-lr-48"
+        style="padding-top: 12px;">
+        <mat-tab-group disableRipple (selectedIndexChange)="basicReqTabChange($event)">
+            <mat-tab class="le-u-header-xl" label="Boston">
+                <ng-template mat-tab-label><span> {{alias}}</span>
+                </ng-template>
+            </mat-tab>
+            <!-- <mat-tab class="le-u-header-xl" label="Flows">
+            <ng-template mat-tab-label>Flows</ng-template>
+        </mat-tab> -->
+        </mat-tab-group>
+        <!-- <div class="le-u-pad-lr-24 le-u-pad-t-12">
+                                    <div *ngIf="basicReqTab == 'create'">
+                                        <leds-input-field placeholder="Name" value=""></leds-input-field>
+                                    </div>
+                                    <div *ngIf="basicReqTab == 'edit'">
+                                        <leds-select [options]="recipeList" label="Choose Recipe" [required]="true" [disabled]="false"
+                                            designType="default" [isMultiple]="false" (selectChange)="selectChange($event)"
+                                            (openChange)="openChange($event)"></leds-select>
+                                    </div>
+                                </div> -->
+
+    </div>
+    <!-- <div class="wrangling-container">
+        <p-tabView [controlClose]="true" (onChange)="handleChange($event)" (onClose)="handleClose($event)"
+        [style]="{ height: '100%' }">
+            <p-tabaPanel [closable]="item.close" [ngSwitch]="item.label" [header]="item.label" [leftIcon]="item.icon"
+            *ngFor="let item of wranglingArray; let i = index" [selected]="selectedTab(i)" tooltip="{{ item.tooltip }}"> -->
+    <!-- <div class="table-tab-container"> -->
+        <!-- <div class="advisory-btn">
+            <app-query-builder [recipeName]="recipeName" [columnDataTypes]="columnDataTypes" [datasetsCount]="datasetsCount"
+                (expressionSaved)="getQueryExpression($event)" [resetQuery]="resetExpressionBuilder"></app-query-builder>
+            <div class="recipe-name-wrapper">
+                <div class="text-recipe-container">
+                    <div>Recipe Name</div><span>:</span>
+                    <div class="recipe-text-wrapper">{{selectedRecipe?.recipe_name}}</div>
+                </div>
+                <div *ngIf="dimensionText" class="text-size-container">
+                    <div>Size</div>
+                    <span>:</span>
+                    <div class="recipe-text-wrapper">{{dimensionText}}</div>
+                </div>
+    
+            </div>
+        </div> -->
+        <!-- <div *ngIf="basicReqTab == 'flowsTab'">
+    <p>it is in Progress</p>
+
+</div> -->
+        <div *ngIf="basicReqTab == 'aliasTab'" class="le-u-pad-lr-8">
+            <div class="table-tab-container">
+            <div class="advisory-btn">
+                <app-query-builder [recipeName]="recipeName" [columnDataTypes]="columnDataTypes" [datasetsCount]="datasetsCount"
+                    (expressionSaved)="getQueryExpression($event)" [resetQuery]="resetExpressionBuilder"></app-query-builder>
+                <div class="recipe-name-wrapper">
+                    <div class="text-recipe-container">
+                        <div>Recipe Name</div><span>:</span>
+                        <div class="recipe-text-wrapper">{{selectedRecipe?.recipe_name}}</div>
+                    </div>
+                    <div *ngIf="dimensionText" class="text-size-container">
+                        <div>Size</div>
+                        <span>:</span>
+                        <div class="recipe-text-wrapper">{{dimensionText}}</div>
+                    </div>
+        
+                </div>
+            </div> 
+           
+            <div class="dynamic-container">
+                <div class="action-selection">
+                    <div>
+                        <leds-card designType="simple">
+                            <leds-accordion designType="3D" [hideToggle]="false" [multi]="false">
+                        <!-- Table Level         -->
+                                <mat-expansion-panel>
+                                    <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+                                        <mat-panel-title>Actions-Table Level</mat-panel-title>
+                                    </mat-expansion-panel-header>
+                                    <div  style="overflow: auto;height: 180px;padding: 12px;">
+                                        <!-- <h4 class="le-u-header-lg">Title</h4>
+                                <p class="le-u-body-sm le-u-text-neutral-80">Description text</p> -->
+                                        <div>
+                                            <leds-select [options]="tableActionsAvailable" label="Actions available"
+                                                [required]="false" [disabled]="false" designType="default"
+                                                [isMultiple]="false" (selectChange)="selectChange($event)" [(ngModel)]="selectedTableActions">
+                                            </leds-select>
+                                        </div>
+                                        <div *ngIf="showColAction" class="le-u-mar-t-12">
+                                            <leds-select [options]="colAction" label="Select column/row"
+                                                [required]="false" [disabled]="false" designType="default"
+                                                [isMultiple]="false" (selectChange)="selectColAction($event);resetColumnActions(); ">
+                                            </leds-select>
+                                        </div>
+                                        <div>
+                                        <app-dynamic-controls *ngIf="selectedTableActions"
+                                        [tableColumns]="selectedColumnsTableAction" (reset)="(resetTableForm)"
+                                        [selectedWranglingAction]="selectedTableActions" (dynamicValue)="getDynamicData($event)"
+                                        (wranglingForm)="getUpdatedTableActionForm($event)"></app-dynamic-controls></div>
+                                        <!-- <div style="display: flex;position: absolute; bottom: 16px;">
+                                            <div style="margin-left: 10px;">
+                                                <button mat-flat-button leds-button name="miniPrimary" id="miniPrimary"
+                                                    designType="miniPrimary" (click)="clearAllTableConfig()">
+                                                    Clear
+                                                </button>
+                                            </div>
+                                            <div style="margin-left: 12rem;">
+                                                <button mat-flat-button leds-button name="miniPrimary" id="miniPrimary"
+                                                    designType="miniPrimary">
+                                                    Add
+                                                </button>
+                                            </div>
+
+                                        </div> -->
+                                        
+                                    </div>
+                                    <p-footer class="footer-wrapper" *ngIf="selectedTableActions">
+                                        <button mat-flat-button leds-button name="miniPrimary" id="clear-btn"
+                                        designType="miniPrimary" (click)="clearAllTableConfig()">
+                                        Clear
+                                    </button>
+                                        <!-- <button id="save-btn" type="button" pButton label="Add" 
+                                          (click)="addActions('Table')"></button> -->
+                                          <!-- <button mat-flat-button leds-button name="miniPrimary" id="save-btn" [disabled]="tableSaveButtonState()" -->
+                                            <button mat-flat-button leds-button name="miniPrimary" id="save-btn" designType="miniPrimary" (click)="addActions('Table')">
+                                          Add
+                                      </button>
+                                      </p-footer>
+                                </mat-expansion-panel>
+                        <!-- Row/Column Level         -->
+                                <!-- <mat-expansion-panel>
+                                    <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+                                        <mat-panel-title>Actions-Row/Column Level</mat-panel-title>
+                                    </mat-expansion-panel-header>
+
+                                    <div style="overflow: auto;height: 180px;padding: 12px;">
+                                        <leds-select [options]="actionsAvailable" label="Actions available"  [required]="false" [disabled]="false" designType="default"
+                                            [isMultiple]="false" (selectChange)="selectChange($event);resetTableActions()" [(ngModel)]="selectedColumnActions"></leds-select>
+                                        
+                                            <app-dynamic-controls *ngIf="selectedColumnActions"  [columnsSelected]="selectedColumns"
+                                            [tableColumns]="selectedColumnsTableAction" (reset)="(resetTableForm)" [columnDataType]="selectedColumnDataType"
+                                            [selectedWranglingAction]="selectedColumnActions" (dynamicValue)="getDynamicData($event)"
+                                            (wranglingForm)="getUpdatedActionForm($event)"></app-dynamic-controls>
+
+                                    </div>-->
+                                    <!-- <leds-select [options]="tableAction" label="Label" [required]="false" [disabled]="false" designType="editable"
+                                [isMultiple]="false" (selectChange)="selectChange($event)"></leds-select> -->
+                                <!--<p-footer class="footer-wrapper" *ngIf="selectedTableActions">
+                                    <button mat-flat-button leds-button name="miniPrimary" id="clear-btn"
+                                    designType="miniPrimary" (click)="clearDynamicColumnForm()">
+                                    Clear
+                                </button>-->
+                                    <!-- <button id="save-btn" type="button" pButton label="Add" 
+                                      (click)="addActions('Table')"></button> -->
+                                      <!--<button mat-flat-button leds-button name="miniPrimary" id="save-btn" [disabled]="saveButtonState()"
+                                      designType="miniPrimary" (click)="addActions('Column/Row')">
+                                      Add
+                                  </button>
+                                  </p-footer>
+
+                                </mat-expansion-panel> -->
+   <!-- Added Actions-->                             
+                                <mat-expansion-panel>
+                                    <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+                                        <mat-panel-title>Actions added
+                                            <leds-badge badgeType="grey" style="margin-left: 8rem;">{{wranglingArray[0].selectedFunctions ?.length||'0'}}</leds-badge>
+                                        </mat-panel-title>
+                                    </mat-expansion-panel-header>
+                                    <div style="height: 240px;overflow: auto;">
+
+                                    <div class="le-u-mar-l-8 le-u-mar-r-8" >
+                                        <!-- <h4 class="le-u-header-lg">Title</h4>
+                                        <p class="le-u-body-sm le-u-text-neutral-80">Description text</p> -->
+                                        <leds-list >
+                                            <li ledsListItem [noActive]="true" *ngFor="let action of actionsPerformed; let i = index ">
+                                              <span class="le-u-vertical-right-center">
+                                                <i aria-hidden="true" class="icon x-16 close-icon le-u-mar-r-16" (click)="removeActions(action,i)"></i>
+                                              </span>
+                                              <h2 class="le-u-body-lg le-u-text-black le-u-ellipsis le-u-mar-tb-4">
+                                                {{action.actionLabel}}
+                                              </h2>
+                                            </li>
+                                          </leds-list>
+                                    </div>
+                                </div>
+                                </mat-expansion-panel>
+                            </leds-accordion>
+                            <div class="d-flex">
+                                <div class="le-u-pad-r-8">
+                                    <leds-button *ngIf="wranglingArray[0].saveBtnLabel === 'SAVE'" nameText="secondaryButton" idText="secondaryButton" [disabled]="getSaveDisabled(wranglingArray[0])"
+                                        buttonType="button" designType="primary" (click)="saveRecipe()">
+                                        Save Recipe
+                                    </leds-button>
+                                    <leds-button *ngIf="wranglingArray[0].saveBtnLabel === 'UPDATE'" nameText="secondaryButton" idText="secondaryButton" [disabled]="getUpdateDisabled(wranglingArray[0])"
+                                        buttonType="button" designType="primary" (click)="updateRecipe()">
+                                        Update Recipe
+                                    </leds-button>
+                                </div>
+                                <!-- <div>
+                                    <leds-button nameText="secondaryButton" idText="secondaryButton" [disabled]="getExecuteDisabled(wranglingArray[0])"
+                                        buttonType="button" designType="primary" (click)="executeRecipe()">
+                                        Execute
+                                    </leds-button>
+                                </div> -->
+                            </div>
+
+                        </leds-card>
+                    </div>
+                    <!-- </div> -->
+                </div>
+                <div class="recipe-container">
+                    <!-- 2/3 of the width -->
+                    <div class="px-5 my-4 mt-0 aip-panel-shadow le-u-pad-tb-16 le-u-pad-b-32"
+                    [ngStyle]="getLoader(showSpinner)">
+                        <div *ngIf="showSpinner">    
+                            <div class="loader"></div>
+                            <span>
+                                <p>Loading....</p>
+                            </span>
+                        </div>
+                        <div *ngIf="!showSpinner">
+                        <leds-data-grid>
+                            <table dataGridTable>
+                                <thead>
+                                    <tr>
+                                        <th *ngFor="let col of colsMetaData">
+                                            <div>
+                                                <span style="font-size: large;">{{col.header | titlecase}}</span>
+                                            </div>
+                                            <div class="type-container">
+                                                <div>Type</div>
+                                                <span>:</span>
+                                                <div>{{col.type}}</div>
+                                                <!-- <div>
+                                                    <i class=" aip-led-icons icon x-24 icon-notepad"
+                                                        (click)="openModal(content2);viewMetaData(col.header,$event)"></i>
+                                                </div> -->
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor=" let data of objDetails">
+                                        <td *ngFor="let col of colsMetaData">{{data[col.header]}} </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </leds-data-grid>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        
+        </div>
+        </div>
+    <!-- </div> -->
+        <!-- </p-tabaPanel>
+        </p-tabView>
+    </div> -->
+</div>
+<ng-template #lgContent3 let-modal>
+     <div class="le-u-pad-lr-16">
+        <div class="row">
+            <div class="col-10 aip-advisory">
+                <span style="padding-left: 16rem;">
+                    <h1>Wrangling Advisory</h1>
+                </span>
+            </div>
+            <div class="col-2">
+                <span class="le-u-pad-16" style="float: right;">
+                    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+                        <i class="aip-led-icons icon x-16 "></i>
+                    </button>
+                </span>
+            </div>
+        </div>
+    </div>
+    <app-wrangling-advisory [recipeObject]="selectedRecipe" [datasetName]="datasetId" [displayDialog]="showAdvisoryDialog" (dialogClosed)="advisoryDialogClosed($event)"></app-wrangling-advisory>
+</ng-template>
+
+<ng-template #content2 let modal2>
+    <div class="le-u-pad-lr-16">
+        <div class="row">
+            <div class="col-10" style="padding-top: 12px;">
+                <span class=" aip-desc-title le-u-header-xxl"><span style=" color: #737373;;">Column Name:
+                    </span>{{columnName | titlecase}} </span>
+            </div>
+            <div class="col-2">
+                <span class="le-u-pad-16" style="float: right;">
+                    <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()">
+                        <i class="aip-led-icons icon x-16 "></i>
+                    </button>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <leds-data-grid>
+            <table dataGridTable>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th></th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let metaData of columnData">
+                        <td>
+                            <div class="table-container">
+                                <div>{{metaData.key}}</div>
+                                <span>:</span>
+                                <div>{{metaData.value}}</div>
+                            </div>
+                        </td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </leds-data-grid>
+    </div>
+</ng-template>

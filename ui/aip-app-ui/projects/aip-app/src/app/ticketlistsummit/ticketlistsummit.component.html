@@ -1,0 +1,96 @@
+<div class="k1">
+    <leds-panel type="default" styleClass="" contentClass="">
+        <div class="tab_content le-u-pad-tb-16 le-u-pad-lr-8" id="tabContent_0">
+            <div class=" d-flex align-items-center row le-u-pad-lr-16">
+                <div class="le-u-pad-8 col-md-4">
+                    <leds-autocomplete [options]="caller" placeholder="Choose One" label="Caller"
+                        errorMessage="{required: 'This field is required', }" [disabled]="false"
+                        [(ngModel)]="incident.caller" [required]="false" [autoActiveFirstOption]="true"
+                        [disableRipple]="false"></leds-autocomplete>
+                </div>
+                <div class="le-u-pad-8 col-md-4">
+                    <leds-autocomplete [options]="state1" placeholder="Choose One" label="Status"
+                        [(ngModel)]="incident.state" errorMessage="{required: 'This field is required', }"
+                        [disabled]="false" [required]="false" [autoActiveFirstOption]="true"
+                        [disableRipple]="false"></leds-autocomplete>
+
+                </div>
+                <div class="le-u-pad-8 col-md-4">
+                    <leds-autocomplete [options]="category" placeholder="Choose One" label="Category"
+                        [(ngModel)]="incident.category" errorMessage="{required: 'This field is required', }"
+                        [disabled]="false" [required]="false" [autoActiveFirstOption]="true"
+                        [disableRipple]="false"></leds-autocomplete>
+
+                </div>
+            </div>
+            <div class=" d-flex align-items-center row le-u-pad-lr-16">
+                <div class="le-u-pad-8 col-md-4">
+                    <leds-autocomplete [options]="assignmentGroup" placeholder="Choose One"
+                        [(ngModel)]="incident.assignmentgroup" label="Assignment Group"
+                        errorMessage="{required: 'This field is required', }" [disabled]="false" [required]="false"
+                        [autoActiveFirstOption]="true" [disableRipple]="false"></leds-autocomplete>
+
+                </div>
+                <div class="le-u-pad-8 col-md-4">
+                    <leds-autocomplete [options]="assignee" placeholder="Choose One" label="Assigned To"
+                        errorMessage="{required: 'This field is required', }" [disabled]="false"
+                        [(ngModel)]="incident.assignedto" [required]="false" [autoActiveFirstOption]="true"
+                        [disableRipple]="false"></leds-autocomplete>
+
+                </div>
+                <div class="le-u-pad-8 col-md-4">
+                    <leds-autocomplete [options]="configurationItem" placeholder="Choose One"
+                        [(ngModel)]="incident.configurationItem" label="Configuration Item"
+                        errorMessage="{required: 'This field is required', }" [disabled]="false" [required]="false"
+                        [autoActiveFirstOption]="true" [disableRipple]="false"></leds-autocomplete>
+
+                </div>
+            </div>
+            <div class=" d-flex align-items-center row le-u-pad-lr-16">
+                <div class="le-u-pad-8 col-md-4">
+                    <leds-autocomplete [options]="priorityy" placeholder="Choose One" label="Priority"
+                        [(ngModel)]="incident.priority" errorMessage="{required: 'This field is required', }"
+                        [disabled]="false" [required]="false" [autoActiveFirstOption]="true"
+                        [disableRipple]="false"></leds-autocomplete>
+                </div>
+                <div class="le-u-pad-8 col-md-4">
+                    <leds-autocomplete [options]="impact" placeholder="Choose One" label="Impact"
+                        [(ngModel)]="incident.impact" errorMessage="{required: 'This field is required', }"
+                        [disabled]="false" [required]="false" [autoActiveFirstOption]="true"
+                        [disableRipple]="false"></leds-autocomplete>
+                </div>
+                <div class="le-u-pad-8 col-md-4">
+                    <leds-autocomplete [options]="urgency" placeholder="Choose One" label="Urgency"
+                        [(ngModel)]="incident.urgency" errorMessage="{required: 'This field is required', }"
+                        [disabled]="false" [required]="false" [autoActiveFirstOption]="true"
+                        [disableRipple]="false"></leds-autocomplete>
+
+                </div>
+            </div>
+            <div class="le-u-mar-lr-8">
+                <leds-textarea placeholder="Enter Short Description Details" label="Short Description" designType="default"
+                    [(ngModel)]="incident.shortdescription" inputType="text"
+                    errorMessage="{required: 'This field is required',  }" [disabled]="false"
+                    [required]="false"></leds-textarea>
+                <leds-textarea placeholder=" Enter Description Details" label="Description" designType="default"
+                    [(ngModel)]="incident.description" inputType="text"
+                    errorMessage="{required: 'This field is required',  }" [disabled]="false"
+                    [required]="false"></leds-textarea>
+
+
+            </div>
+            <div class="d-flex justify-content-end le-u-mar-lr-16">
+                <leds-button nameText="primaryButton" idText="primaryButton" [disabled]="false" (click)="createTicket()"
+                    buttonType="button" designType="primary">
+                    Submit</leds-button>
+                <leds-button nameText="primaryButton" idText="primaryButton" [disabled]="false" (click)="navigateBack()"
+                    buttonType="button" designType="primary">
+                    Cancel</leds-button>
+            </div>
+
+        </div>
+
+
+
+    </leds-panel>
+</div>

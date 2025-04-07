@@ -1,0 +1,108 @@
+{
+    "dynamic": [
+      {
+        "function": "Remove Duplicate Columns",
+        "functionName": "drop_duplicate_columns",
+        "functionParameters": ["dup_parameter"],
+        "type": "table",
+        "dataTypes": "string,int64,float64",
+        "datasetTypes":"machine_learning,text_analytics,timeseries",
+        "availability": "multi",
+        "controls": [
+          {
+            "id": 1,
+            "controltype": "NA",
+            "value": "T",
+            "label": "Remove Duplicate",
+            "errorMessage": "Required",
+            "location": [1, 5, 1, 2]
+          }
+        ],
+        "preUserAct": "duplicateCol.js",
+        "postUserAct": "duplicateColValidate.js",
+        "addSaveBtn": ""
+      },
+      {
+        "function": "Remove Duplicate Rows",
+        "functionName": "drop_duplicate_rows",
+        "functionParameters": ["dup_parameter"],
+        "type": "table",
+        "dataTypes": "string,int64,float64",
+        "datasetTypes":"machine_learning,text_analytics,timeseries",
+        "availability": "multi",
+        "controls": [
+          {
+            "id": 1,
+            "controltype": "NA",
+            "value": "T",
+            "label": "Remove Duplicate",
+            "errorMessage": "Required",
+            "location": [1, 5, 1, 2]
+          }
+        ],
+        "preUserAct": "duplicateRow.js",
+        "postUserAct": "duplicateRowValidate.js",
+        "addSaveBtn": ""
+      },
+      {
+        "function": "Remove missing values",
+        "functionName": "drop_missing_values",
+        "columnsRequired": "N",
+        "functionParameters": ["axis_value"],
+        "controlValues": [
+          { "value": 0, "label": "Row Level" },
+          { "value": 1, "label": "Column Level" }
+        ],
+        "type": "table",
+        "dataTypes": "string,int64,float64",
+        "datasetTypes":"machine_learning,text_analytics",
+        "availability": "single,multi",
+        "controls": [
+          {
+            "id": 1,
+            "controltype": "Dropdown",
+            "label": "Select Column/Row",
+            "location": [1, 6, 1, 2]
+          }
+        ],
+        "preUserAct": "missingValues.js",
+        "postUserAct": "missingValuesValidate.js",
+        "addSaveBtn": ""
+      },
+      {
+        "function": "Remove missing values by Threshold",
+        "functionName": "drop_missing_data_by_threshold_value",
+        "columnsRequired": "N",
+        "functionParameters": ["axis_value", "threshold_value"],
+        "controlValues": [
+          { "value": 0, "label": "Row Level" },
+          { "value": 1, "label": "Column Level" }
+        ],
+        "type": "table",
+        "dataTypes": "string,int64,float64",
+        "datasetTypes":"machine_learning,text_analytics",
+        "availability": "single,multi",
+        "controls": [
+          {
+            "id": 1,
+            "controltype": "Dropdown",
+            "label": "Select Column/Row",
+            "location": [1, 6, 1, 2]
+          },
+          {
+            "id": 2,
+            "controltype": "Spinner",
+            "label": "Threshold",
+            "steps":5,
+            "errorMessage": "Threshold required",
+            "toolTip": "Threshold is for NA/Missing values",
+            "location": [1, 6, 2, 3]
+          }
+        ],
+        "preUserAct": "missingValuesTh.js",
+        "postUserAct": "missingValuesThValidate.js",
+        "addSaveBtn": ""
+      }
+    ]
+  }
+  

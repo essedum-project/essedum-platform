@@ -1,0 +1,255 @@
+<div *ngIf="card" class="container-fluid backgroud-color">
+    <div class="le-l-level1-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="le-l-level1-middle-col le-l-base-layout-center">
+                    <div class="le-l-level2-middle-ctr">
+                        <div class="le-l-level2-middle-col le-u-mar-b-24__mb">
+                            <div class="align-items-center d-flex  justify-content-between d-flex">
+                                <div class=" selector-model-title-head d-flex  align-items-center">
+                                    <leds-tooltip [tooltip]="back" [position]="tooltipPoition">
+                                        <span class="mx-2 aip-cursor">
+                                            <i class="aip-led-icons icon le-u-pad-r-8 back-icon"
+                                                (click)="toggler()"></i>
+                                        </span>
+                                    </leds-tooltip>
+                                    <span class=" aip-desc-title le-u-header-xxl"><span
+                                            style=" color: #737373;;">Implementation:
+                                        </span>{{card.name}} </span>
+                                    <span
+                                        class="mx-5  le-c-badge float-end le-c-badge le-c-badge--active float-end">{{card.category}}</span>
+                                </div>
+                                <div class=" selector-model-title-tail">
+                                    <ul class="d-flex justify-content-between align-items-center">
+                                        <li><leds-tooltip *ngIf="editAuth" [tooltip]="edit"
+                                                [position]="tooltipPoition"><i
+                                                    class="aip-led-icons icon x-32 edit-icon aip-cursor mx-2"
+                                                    (click)="openModal(content3)"></i></leds-tooltip>
+                                            <ng-template #content3 let-modal>
+                                                <app-adapter-create-edit [data]=card
+                                                    [action]="editAction"></app-adapter-create-edit>
+                                            </ng-template>
+                                        </li>
+                                        <li><leds-tooltip *ngIf="deleteAuth" [tooltip]="delete"
+                                                [position]="tooltipPoition">
+                                                <i class="aip-led-icons icon x-32 delete-sm-icon aip-cursor mx-2"
+                                                    (click)="deleteAdapter(card.name)"></i></leds-tooltip>
+                                        </li>
+                                        <li *ngIf="showRelatedInstances"> <leds-tooltip [tooltip]="'Hide Related Components'"
+                                                [position]="tooltipPoition">
+                                                <i class="aip-led-icons icon x-32  icon_maximise aip-cursor mx-2"
+                                                    (click)="listToggle()"></i></leds-tooltip>
+                                        </li>
+                                        <li *ngIf="!showRelatedInstances"><leds-tooltip [tooltip]="'Show Related Components'"
+                                                [position]="tooltipPoition">
+                                                <i class="aip-led-icons icon x-32 icon_minimise aip-cursor mx-2"
+                                                    (click)="listToggle()"></i></leds-tooltip>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-12 col-lg-12 aip-desc le-u-mar-tb-16 le-u-pad-tb-16 aip-panel-shadow">
+                                <div ledsTabGroup>
+                                    <mat-tab-group disableRipple (selectedIndexChange)="basicReqTabChange($event)">
+                                        <mat-tab class="le-u-header-xl" label="Details">
+                                            <ng-template mat-tab-label>Details</ng-template>
+                                        </mat-tab>
+                                        <mat-tab class="le-u-header-xl" label="API Spec">
+                                            <ng-template mat-tab-label>API Spec</ng-template>
+                                        </mat-tab>
+                                    </mat-tab-group>
+                                    <div *ngIf="basicReqTab == 'detailsTab'">
+                                        <div class="ml-2 row col-md-12">
+                                            <div>
+                                                <div class="le-u-body-sm mt-3 aip-label-color le-u-pad-t-16">
+                                                    Description
+                                                </div>
+                                                <div class="le-u-body-md mt-3" style="min-height: 4rem;">
+                                                    <p
+                                                        class="le-u-body-md le-u-text-neutral-80 le-u-line-2 aip-desc-ellipsis">
+
+                                                        {{card.description}}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-4">
+                                                <div class="aip-model-type col-md-4">
+                                                    <div class="le-u-body-sm aip-label-color">Connection Name</div>
+                                                    <div class="le-u-body-md mt-3">
+                                                        {{card.executiontype}}-{{card.connectionname}}</div>
+                                                </div>
+                                                <div class="aip-model-type col-md-4">
+                                                    <div class="le-u-body-sm aip-label-color">Spec Name</div>
+                                                    <div class="le-u-body-md mt-3">{{card.spectemplatedomainname}}</div>
+                                                </div>
+                                                <div class="aip-model-type col-md-4">
+                                                    <div class="le-u-body-sm aip-label-color">App Organisation</div>
+                                                    <div class="le-u-body-md mt-3">{{card.organization}}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-5 le-u-mar-l-8">
+                                            <hr class="aip-line" />
+                                            <div class="row">
+                                                <div class="aip-createdBy col-md-6">
+                                                    <div class="le-u-body-sm aip-label-color">Created By</div>
+                                                    <div class="d-flex mt-2 align-items-center ">
+                                                        <div class="le-c-avatar  le-c-avatar--sm"
+                                                            style="margin: 0 2rem 0 0;">
+                                                            {{getShortName(card.createdby)}}</div>
+                                                        <div class="le-u-body-md">{{card.createdby}}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="le-u-body-sm aip-label-color">Created On</div>
+                                                    <div class="le-u-body-md  mt-3">{{card.createdon}}</div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div *ngIf="basicReqTab == 'swaggerTab'">
+                                        <div class="mt-5 le-u-mar-l-8">
+                                            <lib-swagger-custom [adapterName]="card.name"
+                                                [isAdapter]="isAdapter"></lib-swagger-custom>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div *ngIf="showRelatedInstances" class="le-l-level2-right-col  le-u-pad-t-32">
+                            <leds-panel  class=""
+                                *ngIf="relatedInstances.length > 0 || relatedSpecs.length > 0; else noRelatedInstances">
+                                <div class="le-u-header-lg le-u-pad-tb-16 le-u-pad-l-32 customHeader">Related Components
+                                </div>
+                                <div class="aip-filter aip-scroll-hover">
+                                    <div type="default" styleClass="" contentClass="">
+                                        <div class="le-c-panel__content">
+                                            <div class="le-u-pad-16">
+                                                <leds-navigation-list position="left" [selectOnClick]="true">
+                                                    <li class="aip-daa" *ngFor="let component of relatedInstances">
+                                                        <div class="aip-related-list"
+                                                            (click)="redirectToSelectedComponent(component)">
+                                                            <div class="le-u-pad-8 aip-cursor">
+                                                                <div class="aip-related-component-ellipsis">
+                                                                    <span
+                                                                        class="le-c-nav__nomar le-u-header-xl le-u-text-neutral-80">{{component.value}}</span>
+                                                                </div>
+                                                                <div
+                                                                    class="le-c-badge float-end le-c-badge--warning aip-related-badge">
+                                                                    <leds-tooltip [tooltip]="'Related Instance'"
+                                                                        [position]="tooltipPoition">
+                                                                        {{component.viewValue}}
+                                                                    </leds-tooltip>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                    <li class="aip-daa" *ngFor="let component of nonrelatedInstances">
+                                                        <div class="aip-related-list"
+                                                            (click)="redirectToSelectedComponent(component)">
+                                                            <div class="le-u-pad-8 aip-cursor">
+                                                                <div class="aip-related-component-ellipsis">
+                                                                    <span
+                                                                        class="le-c-nav__nomar le-u-header-xl le-u-text-neutral-80">{{component.value}}</span>
+                                                                </div>
+                                                                <div
+                                                                    class="le-c-badge float-end le-c-badge--warning aip-related-badge">
+                                                                    <leds-tooltip [tooltip]="'Instance'"
+                                                                        [position]="tooltipPoition">
+                                                                        {{component.viewValue}}
+                                                                    </leds-tooltip>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                    <!-- <li class="aip-daa" *ngFor="let component of relatedAdapters">
+                                                        <div class="aip-related-list"
+                                                            (click)="redirectToSelectedComponent(component)">
+                                                            <div class="le-u-pad-8 aip-cursor">
+                                                                <div class="aip-related-component-ellipsis">
+                                                                    <span
+                                                                        class="le-c-nav__nomar le-u-header-xl le-u-text-neutral-80">{{component.value}}</span>
+                                                                </div>
+                                                                <div
+                                                                    class="le-c-badge float-end le-c-badge--active aip-related-badge">
+                                                                    <leds-tooltip [tooltip]="'Adapter'"
+                                                                        [position]="tooltipPoition">
+                                                                        {{component.viewValue}}
+                                                                    </leds-tooltip>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </li> -->
+                                                    <li class="aip-daa" *ngFor="let component of relatedSpecs">
+                                                        <div class="aip-related-list"
+                                                            (click)="redirectToSelectedComponent(component)">
+                                                            <div class="le-u-pad-8 aip-cursor">
+                                                                <div class="aip-related-component-ellipsis">
+                                                                    <span
+                                                                        class="le-c-nav__nomar le-u-header-xl le-u-text-neutral-80">{{component.value}}</span>
+                                                                </div>
+                                                                <div
+                                                                    class="le-c-badge float-end le-c-badge--info aip-related-badge">
+                                                                    <leds-tooltip [tooltip]="'Spec'"
+                                                                        [position]="tooltipPoition">
+                                                                        {{component.viewValue}}
+                                                                    </leds-tooltip>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                    <li class="aip-daa" *ngFor="let component of relatedChains">
+                                                        <div class="aip-related-list"
+                                                            (click)="redirectToSelectedComponent(component)">
+                                                            <div class="le-u-pad-8 aip-cursor">
+                                                                <div class="aip-related-component-ellipsis">
+                                                                    <span
+                                                                        class="le-c-nav__nomar le-u-header-xl le-u-text-neutral-80">{{component.value}}</span>
+                                                                </div>
+                                                                <div
+                                                                    class="le-c-badge float-end le-c-badge--info aip-related-badge">
+                                                                    <leds-tooltip [tooltip]="'Spec'"
+                                                                        [position]="tooltipPoition">
+                                                                        {{component.viewValue}}
+                                                                    </leds-tooltip>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                    <li class="aip-daa" *ngFor="let component of relatedConnections">
+                                                        <div class="aip-related-list"
+                                                            (click)="redirectToSelectedComponent(component)">
+                                                            <div class="le-u-pad-8 aip-cursor">
+                                                                <div class="aip-related-component-ellipsis">
+                                                                    <span
+                                                                        class="le-c-nav__nomar le-u-header-xl le-u-text-neutral-80">{{component.value}}</span>
+                                                                </div>
+                                                                <div
+                                                                    class="le-c-badge float-end le-c-badge--warning aip-related-badge">
+                                                                    <leds-tooltip [tooltip]="'Related Instance'"
+                                                                        [position]="tooltipPoition">
+                                                                        {{component.viewValue}}
+                                                                    </leds-tooltip>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                </leds-navigation-list>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </leds-panel>
+                            <ng-template #noRelatedInstances>
+                                <div class="le-u-body-md le-u-text-neutral-80 le-u-line-2 aip-desc-ellipsis">
+                                    No Related Components
+                                </div>
+                            </ng-template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

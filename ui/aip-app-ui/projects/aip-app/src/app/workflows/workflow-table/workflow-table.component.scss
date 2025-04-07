@@ -1,0 +1,18 @@
+.wk-btn{
+    cursor: pointer;
+    background-color: black;
+    color: white;
+    border-radius: 5px;
+    line-height: 24px;
+}
+.edit-button{
+    background-color:var(--base-color);
+    color: white;
+    border-color: var(--base-color);
+}
+.aip-checklist-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 174px);
+    grid-row-gap: 24px;
+    grid-column-gap: 24px;
+}

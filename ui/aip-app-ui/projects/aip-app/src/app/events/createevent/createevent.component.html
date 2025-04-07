@@ -1,0 +1,150 @@
+<div style="width:100%;">
+    <div class="d-flex justify-content-between align-items-center px-4 le-u-mar-t-16">
+        <div class="align-items-center d-flex">
+            <h2 style="color:var(--base-color)">Event Details</h2>
+        </div>
+        <div class="d-flex justify-content-end">
+            <button type="button" class="btn-close" aria-label="Close" (click)="closeDialog()">
+                <i class="icon x-16 close-icon"></i>
+            </button>
+        </div>
+    </div>
+    <leds-panel>
+        <div class="le-u-pad-t-32 le-u-pad-lr-24">
+            <div class="row">
+                <div *ngIf="!data || !data.canvasData" class="col-lg-12 col-md-12 le-u-mar-b-16">
+                    <leds-input-field 
+                    (keypress)="omit_special_char($event)"
+                    [required]="true" 
+                    label="Display Name *" 
+                    placeholder="Enter Name..."
+                    errorMessage="{
+                        required: 'This field is required',
+                      }" 
+                    inputType="text" 
+                    [disabled]="!isEdit"
+                    [(ngModel)]="eventname">
+                    </leds-input-field>
+                </div>
+                <div *ngIf="!data || !data.canvasData" class="col-lg-12 col-md-12 le-u-mar-b-16">
+                    <leds-input-field label="Description" placeholder="Enter Event Description..." inputType="text"
+                    [disabled]="!isEdit" [required]="false" [(ngModel)]="jobDescription"></leds-input-field>
+                </div>
+                <div class="d-flex">
+                    <div class="col-lg-6 col-md-6 le-u-mar-b-16 d-flex justify-content-between">
+                        <leds-select label="Type" [options]="eventtypes" [(ngModel)]="isType" (selectChange)="changeTypeParam($event)" [required]="true" [disabled]="!isEdit" designType="default" [isMultiple]="false"></leds-select>
+                    </div>
+                    <div class="col-lg-6 col-md-6 le-u-mar-b-16 d-flex justify-content-between">
+                        <leds-select class="le-u-mar-lr-8" [options]="runTypes" label="Choose Runtime" [(ngModel)]="selectedRunType" [required]="true" [disabled]="!isEdit" designType="default" [isMultiple]="false"></leds-select>
+                    </div>
+                </div>
+                <div class="row le-u-pad-lr-24" *ngIf="isType=='pipeline' && plist_available">
+                    <leds-autocomplete
+                    [options]="pipelines_alias"
+                    placeholder="Search Pipeline"
+                    label="Pipeline"
+                    errorMessage="{
+                        required: 'This field is required',
+                    }"
+                    [disabled]="!isEdit"
+                    [required]="true"
+                    [autoActiveFirstOption]="true"
+                    [disableRipple]="false"
+                    [(ngModel)]="typeValue"
+                    (panelOptionSelected)="panelOptionSelected($event)"
+                    ></leds-autocomplete>   
+                </div>
+                <div class="row le-u-pad-lr-24" *ngIf="isType==='chain'">
+                    <leds-autocomplete
+                    [options]="chain_list"
+                    placeholder="Search Chain"
+                    label="Chain"
+                    errorMessage="{
+                        required: 'This field is required',
+                    }"
+                    [disabled]="!isEdit"
+                    [required]="true"
+                    [autoActiveFirstOption]="true"
+                    [disableRipple]="false"
+                    [(ngModel)]="typeValue"
+                    (panelOptionSelected)="panelOptionSelected($event)"
+                    ></leds-autocomplete>
+                    <!-- <input [disabled]="isAuth" matInput placeholder="Type" [(ngModel)]="jobtype"> -->
+                </div>
+        
+                <div class="row le-u-pad-lr-24" *ngIf="isType==='internal'">
+                    <leds-autocomplete
+                    [options]="internal_name_list"
+                    placeholder="Search Internal Job"
+                    label="Internal Job"
+                    errorMessage="{
+                        required: 'This field is required',
+                    }"
+                    [disabled]="!isEdit"
+                    [required]="true"
+                    [autoActiveFirstOption]="true"
+                    [disableRipple]="false"
+                    [(ngModel)]="typeValue"
+                    (panelOptionSelected)="panelOptionSelected($event)"
+                    ></leds-autocomplete>
+                </div>
+
+                <div class="row le-u-pad-lr-24" *ngIf="isType==='api'">
+                    <leds-autocomplete
+                    [options]="api_list"
+                    placeholder="Search API Events"
+                    label="API Events"
+                    errorMessage="{
+                        required: 'This field is required',
+                    }"
+                    [disabled]="!isEdit"
+                    [required]="true"
+                    [autoActiveFirstOption]="true"
+                    [disableRipple]="false"
+                    [(ngModel)]="typeValue"
+                    (panelOptionSelected)="panelOptionSelected($event)"
+                    ></leds-autocomplete>
+                </div>
+
+                <div class="row-md-2 le-u-pad-lr-16">
+                    <leds-textarea
+                    placeholder="{}"
+                    label="Request Body"
+                    designType="default"
+                    inputType="text"
+                    errorMessage="{
+                        required: 'This field is required',
+                    }"
+                    [required]="false"
+                    rows="5"
+                    style="height:100%;"
+                    [disabled]="!isAuth && !isEdit"
+                    [(ngModel)]="sampleRequestBody"
+                    ></leds-textarea>
+                </div>
+                <!-- <div class="row-md-2 le-u-pad-lr-24" style="background:rgba(145, 140, 140, 0.1)">
+                    <p style="color:#878787">Request Body</p><br>
+                    <mat-form-field appearance="fill" class="selector-759-31">
+                        <textarea [disabled]="isAuth" rows="5" style="height:100%;" matInput="" [(ngModel)]="sampleRequestBody" class="selector-759-34"></textarea>
+                    </mat-form-field>
+                </div> -->
+                <div class="">
+
+                    <mat-error *ngIf="errFlag">Please provide the required field(s).</mat-error>
+        
+                </div>
+                <div class="col-lg-12 col-md-12 le-u-mar-b-16">
+                    <leds-button *ngIf="!isAuthRun" class="le-u-pad-r-16 d-flex justify-content-end"
+                        style="color:var(--base-color); position: absolute;right: 12rem;" nameText="primaryButton"
+                        idText="primaryButton" [disabled]="false" buttonType="button" designType="primary"
+                        (click)="runfunction()">Run</leds-button>
+                    <leds-button *ngIf="isEdit"class="d-flex justify-content-end" nameText="primaryButton" idText="primaryButton"
+                        [disabled]="!isEdit" buttonType="button" designType="primary"
+                        (click)="updatetrue?updateDetails():saveDetails()">Save</leds-button>
+                    <leds-button *ngIf="!isEdit" class="d-flex justify-content-end" nameText="primaryButton" idText="primaryButton"
+                    [disabled]="!isEdit" buttonType="button" designType="primary">Save</leds-button>
+                </div>
+            </div>
+        </div>
+    </leds-panel>
+</div>

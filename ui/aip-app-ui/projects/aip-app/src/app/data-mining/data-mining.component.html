@@ -1,0 +1,220 @@
+<head class="selector-502-1">
+    <meta charset="utf-8" class="selector-502-2" />
+    <!-- <link href="//cdn.syncfusion.com/ej2/material.css" rel="stylesheet" /> -->
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/20.1.8/css/dx.common.css"
+        class="selector-502-3" />
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/20.1.8/css/dx.light.css"
+        class="selector-502-4" />
+    <base href="/" class="selector-502-5" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" class="selector-502-6" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" class="selector-502-7" />
+</head>
+<div class="col-md-12 selector-502-8" [ngBusy]="busy">
+    <h2 class="ams_h2 h2Mar selector-502-9">Process Mining</h2>
+    <div class="col-md-12 cleaboth selector-502-10">
+        <leds-panel id="dataSourceCard" type="default" styleClass="" contentClass="">
+            <div class="row rwMAr selector-502-12">
+                <!-- ****************** datasource dropdown ****************** -->
+                <div class="col-md-3 offset-1 selector-502-13">
+                    <mat-label for="dataSourceInput" class="formlabel selector-502-14">DataSource*</mat-label>
+                    <mat-form-field style="padding-top: 1.5vh; margin-left: 1rem" class="selector-502-15">
+                        <mat-select id="dataSourceInput" #datasourceSelect="" [(ngModel)]="selectedDataSource"
+                            (selectionChange)="fetchAllDataSets(selectedDataSource)" class="selector-502-16">
+                            <mat-option class="selector-502-17">
+                                <ngx-mat-select-search [formControl]="dataSourceFilterCtrl"
+                                    [placeholderLabel]="'Find DataSource...'"
+                                    [noEntriesFoundLabel]="'No matching DataSource found'" class="selector-502-18">
+                                </ngx-mat-select-search>
+                            </mat-option>
+                            <mat-option *ngFor="let item of filteredDataSource | async; trackBy: trackByMethod"
+                                [value]="item.name" class="selector-502-19">{{ item.alias }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <!-- ****************** dataset dropdown ****************** -->
+                <div class="col-md-3 offset-1 selector-502-20">
+                    <mat-label for="dataSetInput" class="formlabel selector-502-21">Dataset*</mat-label>
+                    <mat-form-field style="padding-top: 1.5vh; margin-left: 1rem" class="selector-502-22">
+                        <mat-select id="dataSetInput" #datasetSelect="" [(ngModel)]="selectedDataSet"
+                            (selectionChange)="fetchDataSetData(selectedDataSet)" class="selector-502-23">
+                            <mat-option class="selector-502-24">
+                                <ngx-mat-select-search [formControl]="dataSetFilterCtrl"
+                                    [placeholderLabel]="'Find DataSet...'"
+                                    [noEntriesFoundLabel]="'No matching DataSet found'" class="selector-502-25">
+                                </ngx-mat-select-search>
+                            </mat-option>
+                            <mat-option *ngFor="let item of filteredDataSet | async; trackBy: trackByMethod"
+                                [value]="item.name" class="selector-502-26">{{ item.alias }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <!-- ****************** event dropdown ****************** -->
+                <div class="col-md-3 offset-1 selector-502-27">
+                    <mat-label for="eventInput" class="formlabel selector-502-28">Event Name*</mat-label>
+                    <mat-form-field style="padding-top: 1.5vh; margin-left: 1rem" class="selector-502-29">
+                        <mat-select id="eventInput" #eventSelect="" [(ngModel)]="selectedEvent"
+                            (selectionChange)="fetchPipelineLogs()" class="selector-502-30">
+                            <mat-option class="selector-502-31">
+                                <ngx-mat-select-search [formControl]="eventFilterCtrl"
+                                    [placeholderLabel]="'Find Event...'"
+                                    [noEntriesFoundLabel]="'No matching Event found'" class="selector-502-32">
+                                </ngx-mat-select-search>
+                            </mat-option>
+                            <mat-option *ngFor="let item of filteredEvent | async; trackBy: trackByMethod"
+                                [value]="item.eventname" class="selector-502-33">{{ item.eventname }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+        </leds-panel>
+
+        <!-- ****************** data mining tabs ****************** -->
+        <div id="pipeline-tabs" style="margin-top: 5vh" class="selector-502-34">
+            <mat-tab-group (selectedTabChange)="tabChange($event)" class="selector-502-35">
+                <!-- ****************** data mining file upload tab ****************** -->
+                <mat-tab label="Upload" class="selector-502-36">
+                    <div *ngIf="!view" class="pipelineView selector-502-37">Please select a Dataset to Upload Files.
+                    </div>
+                    <div *ngIf="view &amp;&amp; refreshFile" class="selector-502-38">
+                        <app-dataset-load #datasetload="" (reload)="refresh($event)" [showdateformat]="true"
+                            [dataset]="selectedDataSet" task="Load from File"
+                            class="selector-502-39"></app-dataset-load>
+                    </div>
+                </mat-tab>
+
+                <!-- ****************** data mining dataset schema view ****************** -->
+                <mat-tab label="Table Schema" class="selector-502-40">
+                    <div *ngIf="!view" class="pipelineView selector-502-41">Please select a Dataset to view Schema.
+                    </div>
+                    <div *ngIf="view" class="selector-502-42">
+                        <app-dataset-load #tableschema="" [dataset]="selectedDataSet" task="Extract Schema"
+                            class="selector-502-43"></app-dataset-load>
+                    </div>
+                </mat-tab>
+                <!-- ****************** data mining dataset logs tab ****************** -->
+                <mat-tab label="Uploaded Logs" class="selector-502-44">
+                    <div *ngIf="!selectedDataSet" class="pipelineView selector-502-45">
+                        Please select a Dataset to view Pipeline Logs.
+                    </div>
+                    <div *ngIf="selectedDataSet" class="selector-502-46">
+                        <app-log-console #loader="" [dataset]="selectedDataSet"
+                            class="selector-502-47"></app-log-console>
+                    </div>
+                </mat-tab>
+
+                <!-- ****************** data mining pipeline trigger tab ****************** -->
+                <mat-tab label="Trigger Pipeline" class="selector-502-48">
+                    <div *ngIf="!view" class="pipelineView selector-502-49">Please select a Dataset to Trigger Pipeline
+                        Logs.</div>
+                    <div *ngIf="view" style="background: white; width: 99%" class="selector-502-50">
+                        <div class="row rwMAr selector-502-51">
+                            <div class="col-md-3 selector-502-52">
+                                <mat-label for="processType" class="formlabel selector-502-53">Process Type*</mat-label>
+                                <mat-form-field style="padding-top: 1.5vh; margin-left: 1rem" class="selector-502-54">
+                                    <input required matInput="" id="processType" class="txtInput selector-502-55"
+                                        style="width: 100% !important" [(ngModel)]="processType" name="processType"
+                                        autocomplete="off" placeholder="e.g. claims" />
+                                </mat-form-field>
+                            </div>
+                            <div class="col-md-3 selector-502-521">
+                                <mat-label for="processType" class="formlabel selector-502-531">Edge Table
+                                    Name*</mat-label>
+                                <mat-form-field style="padding-top: 1.5vh; margin-left: 1rem" class="selector-502-541">
+                                    <input required matInput="" id="edgeTableName" class="txtInput selector-502-551"
+                                        style="width: 100% !important" [(ngModel)]="edgeTableName" name="edgeTableName"
+                                        autocomplete="off" placeholder="e.g. edge_table" />
+                                </mat-form-field>
+                            </div>
+                            <div class="col-md-3 selector-502-512">
+                                <mat-label for="processType" class="formlabel selector-502-513">Graph Table
+                                    Name*</mat-label>
+                                <mat-form-field style="padding-top: 1.5vh; margin-left: 1rem" class="selector-502-514">
+                                    <input required matInput="" id="graphTableName" class="txtInput selector-502-55"
+                                        style="width: 100% !important" [(ngModel)]="graphTableName"
+                                        name="graphTableName" autocomplete="off" placeholder="e.g. graph_table" />
+                                </mat-form-field>
+                            </div>
+                            <div class="col-md-3 selector-502-5211">
+                                <mat-label for="processType" class="formlabel selector-502-5311">Dashboard
+                                    Name*</mat-label>
+                                <mat-form-field style="padding-top: 1.5vh; margin-left: 1rem" class="selector-502-5411">
+                                    <input required matInput="" id="dashboardName" class="txtInput selector-502-5511"
+                                        style="width: 100% !important" [(ngModel)]="dashboardName" name="dashboardName"
+                                        autocomplete="off" placeholder="e.g. dashboard_name" />
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="selector-502-56">
+                            <table mat-table="" [dataSource]="mappingData" class="table-hover selector-502-57">
+                                <ng-container matColumnDef="map" class="selector-502-58">
+                                    <th mat-header-cell="" *matHeaderCellDef="" class="selector-502-59">
+                                        <strong class="selector-502-60"> Destination </strong>
+                                    </th>
+                                    <td mat-cell="" *matCellDef="let mapdata" class="selector-502-61">
+                                        {{ mapdata.name }}
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="column" class="selector-502-62">
+                                    <th mat-header-cell="" *matHeaderCellDef="" class="selector-502-63">
+                                        <strong class="selector-502-64"> Source </strong>
+                                    </th>
+                                    <td mat-cell="" *matCellDef="let column" style="width: 50%" class="selector-502-65">
+                                        <mat-select class="multiselectcol selector-502-66"
+                                            [compareWith]="compareObjects1" *ngIf="column.name != 'Additional Columns'"
+                                            [(ngModel)]="column.model"
+                                            (selectionChange)="mapColumn(column.name, modified.value)" #modified="">
+                                            <mat-option *ngFor="let col of schemaValue; trackBy: trackByMethod"
+                                                [value]="col.recordcolumnname" class="selector-502-67">{{
+                                                col.recordcolumnname
+                                                }}</mat-option>
+                                        </mat-select>
+                                        <mat-select class="multiselectcol selector-502-68"
+                                            *ngIf="column.name == 'Additional Columns'"
+                                            (selectionChange)="mapColumn(column.name, multimodified.value)"
+                                            #multimodified="" multiple="">
+                                            <mat-option *ngFor="let col of schemaValue; trackBy: trackByMethod"
+                                                [value]="col.recordcolumnname" class="selector-502-69">{{
+                                                col.recordcolumnname
+                                                }}</mat-option>
+                                        </mat-select>
+                                    </td>
+                                </ng-container>
+                                <tr mat-header-row="" *matHeaderRowDef="displayedColumns" class="selector-502-70"></tr>
+                                <tr mat-row="" *matRowDef="let row; columns: displayedColumns" class="selector-502-71">
+                                </tr>
+                            </table>
+                            <div style="margin-top: 5vh; text-align: end; margin-right: 10px; padding-bottom: 5vh"
+                                class="selector-502-72">
+                                <button class="pipelineButton selector-502-73" mat-button=""
+                                    (click)="triggerPipeline()">
+                                    Trigger Pipeline
+                                </button>
+                                <button style="margin-left: 3px;" class="pipelineButton selector-502-73" mat-button=""
+                                    (click)="gotoDashboard()">
+                                    Go to Dashboard
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </mat-tab>
+
+                <!-- ****************** data mining pipeline logs tab ****************** -->
+                <mat-tab label="Pipeline Logs" class="selector-502-74">
+                    <div *ngIf="!viewPipeLineLogs" class="pipelineView selector-502-75">
+                        Please select an Event to view Pipeline Logs.
+                    </div>
+                    <div *ngIf="viewPipeLineLogs" class="selector-502-76">
+                        <app-log-console #console="" [jobname]="dataitem.name"
+                            class="selector-502-77"></app-log-console>
+                    </div>
+                </mat-tab>
+            </mat-tab-group>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,6 @@
+"id","created_by","created_on","is_deleted","modified_by","modified_date","threshold_name","project"
+"1","system","2021-04-11T00:00:00","false","NULL","NULL","high","2"
+"2","system","2021-04-11T00:00:00","false","NULL","NULL","critical","2"
+"3","system","2023-08-24T00:00:00","false","system","2023-08-24T00:00","high","2"
+"4","system","2023-08-24T00:00:00","false","system","2023-08-24T00:00","critical","2"
+"5","system","2023-08-24T00:00:00","false","NULL","NULL","Custom","2"

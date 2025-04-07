@@ -1,0 +1,53 @@
+<div style="position: relative;height: 540px">
+    <div *ngIf="!config_flag" class="spin-position spinner-preview">
+        <leds-spinner [bdColor]="'#ffffff'" [size]="'default'" [color]="'#8626c3'" [type]="'ball-pulse-sync'"
+            [fullScreen]="false" [showSpinner]="true">
+        </leds-spinner>
+    </div>
+    <div *ngIf="config_flag">
+        <mat-card fxFlex="100" class="containers" *ngIf="!nocontent">
+            <mat-card-title-group class="tit" fxLayout="row" fxLayoutAlign="center center">
+                <div fxFlex="90" class="f18 padding1em padding1emnoLeft">
+                    <h3 style="color: #7B39B1;">{{selectedFile.datasetName | titlecase}}</h3>
+                </div>
+                <div fxFlex="5" fxLayout="row" fxLayoutAlign="center center">
+                    <leds-button nameText="miniSecondary" idText="miniSecondary" [disabled]="false" buttonType="button"
+                        designType="icon" (click)="upload_tagged_data(selectedFile)">
+                        <i class="icon x-32 purple icon_save"></i>
+                    </leds-button>
+                </div>
+                
+            </mat-card-title-group>
+            <mat-card-content>
+                <div fxFlex="100" fxLayout="column" style="overflow: auto;">
+                    <div fxFlex="100" fxLayout="column" class="tag-container"
+                        *ngFor="let tagEl of AnnotateList;index as index ">
+                        <mat-card class="tagCard" fxLayout="row" fxFlex="100">
+    
+                            <div fxFlex="75" fxLayoutAlign="center center">
+                                <p class="padding1em f14" id="taggingData_{{index}}">{{tagEl[0]}}
+                                </p>
+                            </div>
+                            <div fxFlex="25" fxLayoutAlign="center start" style="border-left: groove;">
+                                <mat-form-field class="f14">
+                                    <mat-label>Select Label</mat-label>
+                                    <mat-select placeholder="{{tagEl[1]}}" [(value)]="tagEl[1]" name="{{tagEl[1]}}"
+                                        id="{{tagEl[1]}}" (selectionChange)="ChangeGroupTag($event,$event)">
+                                        <mat-option *ngFor="let tag of listOfTags" [value]="tag">
+                                            {{tag}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </mat-card>
+                    </div>
+                </div>
+            </mat-card-content>
+            
+        </mat-card>
+        <div *ngIf="nocontent" class="nocontent">
+            Please complete the annotation settings for the dataset
+        </div>
+    </div>
+</div>
+

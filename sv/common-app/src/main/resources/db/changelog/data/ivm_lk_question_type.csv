@@ -1,0 +1,6 @@
+id,question_type_name
+7,multiple-choice
+8,quant-numeric
+9,single
+10,quant-integer
+11,multiple

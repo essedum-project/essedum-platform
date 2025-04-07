@@ -1,0 +1,92 @@
+<div class="le-u-mar-b-24__mb">
+    <div class="d-flex justify-content-between align-items-center px-4">
+        <div class="align-items-center d-flex le-u-pad-t-16">
+            <h2 style="color:var(--base-color)">{{selectedReferenceObject.datasetName}}
+            </h2>
+        </div>
+        <div class="d-flex justify-content-end">
+            <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()">
+                <i class="icon x-16 close-icon"></i>
+            </button>
+        </div>
+    </div>
+    <div class="d-flex le-u-header-md le-u-ellipsis le-u-pad-l-16"
+        *ngIf="selectedReferenceObject.object">
+        <p>{{selectedReferenceObject.object}}</p>
+    </div>
+    <div class="le-u-pad-t-8 le-u-pad-lr-24">
+        <div *ngIf="loadingPageForSpinner">
+            <leds-card>
+                <leds-spinner [bdColor]="'#ffffff'" [size]="'default'" [color]="'#8626c3'" [type]="'ball-spin'"
+                    [fullScreen]="false" [showSpinner]="loadingPageForSpinner">
+                    <p> Loading..</p>
+                </leds-spinner>
+            </leds-card>
+        </div>
+        <div *ngIf="!loadingPageForSpinner">
+            <div class="le-u-pad-lr-8 le-u-pad-b-4" *ngIf="data.summary">
+                <leds-card designType="simple" style="width: 100% !important;">
+                    <mat-card-header *ngIf="data.summary">
+                        <mat-card-title class="le-c-card__container clearfix">
+                            <div class="le-c-card__container-left w-100">
+                                <h2 class="le-u-header-md le-u-ellipsis">Document Summary
+                                </h2>
+                            </div>
+                        </mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content class="aip-scroll-hover" style="height: 20vh;">
+                        <p style="white-space: pre-line" class="le-u-body-md le-u-text-neutral-80 le-u-line-2">
+                            {{data.summary}}
+                        </p>
+                    </mat-card-content>
+                </leds-card>
+            </div>
+            <div class="le-u-pad-lr-8 le-u-pad-b-4">
+                <leds-card designType="simple" style="width: 100% !important;">
+                    <mat-card-header *ngIf="selectedReferenceObject.pageContent">
+                        <mat-card-title class="le-c-card__container clearfix">
+                            <div class="le-c-card__container-left w-100">
+                                <h2 class="le-u-pad-t-8 le-u-header-md le-u-ellipsis">Reference
+                                </h2>
+                            </div>
+                        </mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content *ngIf="selectedReferenceObject.pageContent" class="le-u-no-mar-b"
+                        style="height: 21vh;">
+                        <div class="d-flex le-u-header-md le-u-ellipsis"
+                            *ngIf="selectedReferenceObject.object && selectedReferenceObject.startTime && selectedReferenceObject.endTime">
+                            <p>{{selectedReferenceObject.object}} -</p>
+                            <p class="le-u-pad-l-4">Start Time :</p>
+                            <p class="le-u-pad-lr-4" style="opacity: 75%;">{{selectedReferenceObject.startTime | secondsToTime}}</p> ,
+                            <p class="le-u-pad-l-4">End
+                                Time :</p>
+                            <p class="le-u-pad-l-4" style="opacity: 75%;">{{selectedReferenceObject.endTime | secondsToTime}}</p>
+                        </div>
+                        <div class="d-flex le-u-header-md le-u-ellipsis"
+                            *ngIf="selectedReferenceObject.object && selectedReferenceObject.page">
+                            <p>{{selectedReferenceObject.object}} -</p>
+                            <p class="le-u-pad-l-4">Page :</p>
+                            <p class="le-u-pad-lr-4" style="opacity: 75%;">{{selectedReferenceObject.page}}</p>
+                        </div>
+                        <div style="width: 100%;height: 20vh;" class="le-u-no-mar-b aip-scroll-hover">
+                            <div *ngIf="!pageContentObject" markdown [data]="selectedReferenceObject.pageContent"></div>
+
+                            <table *ngIf="pageContentObject && columns && rows">
+                                <thead>
+                                    <tr>
+                                        <th *ngFor="let column of columns">{{ column }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let row of rows">
+                                        <td *ngFor="let column of columns">{{ row[column] }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </mat-card-content>
+                </leds-card>
+            </div>
+        </div>
+    </div>
+</div>

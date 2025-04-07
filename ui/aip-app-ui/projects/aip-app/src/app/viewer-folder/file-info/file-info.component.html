@@ -1,0 +1,13 @@
+<!-- <div class="totheright fixeddiv">
+    <i class="fa fa-times" title="close" (click)="onClose()"></i>
+</div> -->
+<div class="d-flex justify-content-end">
+    <i class="icon x-16 close-icon totheright" (click)="onClose()"></i>
+</div>
+<div class="content">
+    <p>{{data.filename}}</p>
+</div><br>
+<div class="info">
+    File Size: <b>{{ data.filesize}}</b><br><br>
+    Last Modified: <b>{{ data.lastmodifydate}}</b>
+</div>

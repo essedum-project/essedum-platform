@@ -1,0 +1,36 @@
+/*card.component.css*/
+.more-button {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+ }
+ 
+ .dashboard-card {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    bottom: 15px;
+ }
+
+ .vl1 {
+    border-left: 6px solid #005780;
+    height: 90px;
+    top: 0;
+    bottom: 0;
+    position: absolute;
+  }
+  .vl2 {
+    border-left: 6px solid red;
+    height: 90px;
+    top: 0;
+    bottom: 0;
+    position: absolute;
+  }
+
+ .example-card {
+    max-width: 30%;
+    margin: 4px;
+    display:inline-block;
+    max-height: 80%;
+  }

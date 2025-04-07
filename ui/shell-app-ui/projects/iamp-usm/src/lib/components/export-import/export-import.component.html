@@ -1,0 +1,99 @@
+<mat-tab-group>
+  <span>
+    <mat-tab label="Export Data">
+      <mat-card-content [ngBusy]="{ busy: busy, message: busyMessage, backdrop: true }">
+        <mat-grid-list [cols]="cols12" rowHeight="5:1" (window:resize)="onResize($event)">
+          <mat-grid-tile [colspan]="colspan2" class="fontSize">
+            <mat-label >Project Name</mat-label>
+          </mat-grid-tile>
+          <mat-grid-tile [colspan]="colspan2">
+            <mat-select id="projects" class="matSelectHeight form-control  fontSize" name="projects">
+              <mat-option>
+                <ngx-mat-select-search [formControl]="projectFilterCtrl" [placeholderLabel]="'Find Project...'"
+                  [noEntriesFoundLabel]="'No matching Project found'">
+                </ngx-mat-select-search>
+              </mat-option>
+              <mat-option *ngFor="let project of filteredProjectList | async; trackBy: trackByMethod" [value]="project"
+                (click)="getDashboard(project.name, project.id)" [title]="project.name">{{
+                project.name
+                }}</mat-option>
+            </mat-select>
+          </mat-grid-tile>
+
+          <mat-grid-tile [colspan]="colspan2" class="fontSize">
+            <mat-label>Dashboards</mat-label>
+          </mat-grid-tile>
+          <mat-grid-tile [colspan]="colspan2">
+            <mat-select [multiple]="true" #multiSelect class="matSelectHeight form-control  fontSize" [formControl]="dashCtrl"
+              (selectionChange)="exportFile = null">
+
+              <mat-option *ngIf="dashLength > 0">
+                <ngx-mat-select-search [formControl]="dashFilterCtrl" [placeholderLabel]="'Find Dashboard...'"
+                  [noEntriesFoundLabel]="'No matching Dashboard found'" [showToggleAllCheckbox]="true"
+                  [toggleAllCheckboxIndeterminate]="dashCtrl?.value.length > 0 && dashCtrl.value.length < dashLength"
+                  [toggleAllCheckboxChecked]="dashCtrl.value.length === dashLength"
+                  (toggleAll)="toggleSelectAll($event)">
+                </ngx-mat-select-search>
+              </mat-option>
+              <mat-option *ngFor="let item of filteredDashList | async;trackBy: trackByMethod" [value]="item"
+                [title]="item.name">
+                {{ item.name }}
+              </mat-option>
+            </mat-select>
+          </mat-grid-tile>
+
+          <mat-grid-tile [colspan]="colspan2">
+            <div class="minimunHeightForButtonSection">
+            <button id="btnPosition" [ngClass]="{ 'ex-im-dt-curs': dashCtrl?.value.length == 0 }"
+              [disabled]="dashCtrl?.value.length == 0"
+              *ngIf="(exportFile == null || exportFile == undefined) && !exportStarted" class="button fontSize"
+              (click)="export()">
+              Export
+            </button>
+            <button *ngIf="exportStarted" class="button" id="btnPosition">
+              <mat-progress-spinner *ngIf="exportFile == null || exportFile == undefined" color="warn"
+                mode="indeterminate" diameter="20">
+              </mat-progress-spinner>
+            </button>
+            <a *ngIf="(exportFile != null || exportFile != undefined) && !exportStarted" (click)="download()">
+              <button id="btnPosition" class="button fontSize" title="Download Exported JSON">Download</button>
+            </a>
+          </div>
+          </mat-grid-tile>
+        </mat-grid-list>
+        <div class="error erNo fontSize" *ngIf="showErrorMsg">
+          No dashboards available for selected project
+        </div>
+      </mat-card-content>
+    </mat-tab>
+  </span>
+  <span>
+    <mat-tab label="Import Data">
+      <mat-card-content [ngBusy]="{ busy: importbusy, message: 'Importing...', backdrop: true }">
+        <!--Upload the file-->
+        <div id="input-box" class="minimunHeightForButtonSection">
+          <mat-label class="fontSize" id="uploadtext">Upload File</mat-label>
+          <div>
+            <div class="input-file-container">
+              <input #inputFile type="file" id="uploadJSON" name="uploadJSON" [accept]="extension" [disabled]="!extension || !allowedTypes" (change)="onFileChanged($event)"
+                class="input-file" [(ngModel)]="jsonFile" />
+              <label id="fileLabel" tabindex="0" for="my-file" class="input-file-trigger"> Select file... </label>
+            </div>
+          </div>
+          <button *ngIf="!importStarted" [ngClass]="{ 'ex-im-dt-curs': fileSelected == false}"
+            [disabled]="!fileSelected" id="btnPosImp" class="button fontSize" (click)="save()">
+            Import
+          </button>
+          <button *ngIf="importStarted" class="button" id="btnPosImp">
+            <mat-progress-spinner color="warn" mode="indeterminate" diameter="20">
+            </mat-progress-spinner>
+          </button>
+          <button *ngIf="showLogs" id="btnPosImp" class="button fontSize" (click)="routeLogs()">
+            Logs
+          </button>
+        </div>
+        <div class="error erNo fontSize">Note* Please update datasource connection details after successful import!</div>
+      </mat-card-content>
+    </mat-tab>
+  </span>
+</mat-tab-group>

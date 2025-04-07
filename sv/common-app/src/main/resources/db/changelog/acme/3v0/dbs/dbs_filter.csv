@@ -1,0 +1,2 @@
+"id","project_id","actual_value","column_name","column_to_value","column_value","default_value","display_value","selection_type","show_value","context","dashboard","widget","widget_names","filter_json","neo_date_format"
+"221","2",NULL," Process Name","ProcessName","INFGTLPR50242",NULL,NULL,"1","",NULL,"42623",NULL,NULL,"{\"hideAll\":null,\"convertToLocal\":null,\"defaultDataset\":null,\"showfiltername\":false}",""

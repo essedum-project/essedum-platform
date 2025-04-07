@@ -1,0 +1,214 @@
+<div class="container-fluid backgroud-color">
+    <div class="le-l-level1-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="le-l-level1-middle-col le-l-base-layout-center">
+                    <div class="align-items-center d-flex justify-content-between">
+                        <div class="selector-model-title-head d-flex align-items-center">
+                            <span class="" style="cursor: pointer;">
+                                <i class="aip-led-icons icon x-24 back-icon" (click)="backToAgent()"></i>
+                            </span>
+                            <span class="le-u-mar-l-8 le-u-header-xxl">{{pageAgentTitle}}</span>
+                        </div>
+                        <div class="selector-model-title-tail" style="float: right;">
+                            <ul class="d-flex justify-content-between align-items-center py-2 px-4">
+                                <li *ngIf="workerName && toEdit && createEditConfig">
+                                    <leds-tooltip [tooltip]="'edit'" [position]="'above'">
+                                        <i class="le-u-mar-r-16 aip-led-icons icon edit-icon x-24"
+                                            (click)="navigateToEditConfigure(workerName)"></i>
+                                    </leds-tooltip>
+                                    <!-- <leds-tooltip [tooltip]="'delete'" [position]="'above'">
+                                        <i class="le-u-mar-r-16 aip-led-icons icon icon_save x-24"
+                                            (click)=""></i>
+                                    </leds-tooltip> -->
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="le-l-level2-middle-ctr">
+                        <div class="le-l-level2-middle-col le-u-mar-b-24__mb">
+                            <leds-panel type="default" styleClass="" contentClass="">
+                                <div class="le-u-mar-tb-16 le-u-pad-16">
+                                    <div class="row le-c-panel__content">
+                                        <div class="le-l-level2-middle-col le-u-mar-b-24__mb">
+                                            <div class="d-flex justify-content-between align-items-center px-4">
+                                                <div class="align-items-center d-flex">
+                                                    <h2 style="color:var(--base-color)">Worker Properties</h2>
+                                                </div>
+                                            </div>
+                                            <div class="le-u-pad-t-32 le-u-pad-lr-24">
+                                                <div class="row">
+                                                    <!-- Alias -->
+                                                    <div class="col-lg-12 col-md-12 le-u-mar-b-16">
+                                                        <leds-input-field label="Agent Alias*" placeholder="Enter Alias..." errorMessage="{
+                                                          required: 'This field is required', }" inputType="text" [required]="true"
+                                                          [(ngModel)]="aiWorker.alias"></leds-input-field>
+                                                    </div>
+                                                    <!-- Description -->
+                                                    <div class="col-lg-12 col-md-12 le-u-mar-b-16">
+                                                        <leds-input-field label="Description" placeholder="Enter Description..." errorMessage="{
+                                                          required: 'This field is required', }" inputType="text" [required]="true"
+                                                          [(ngModel)]="aiWorker.description"></leds-input-field>
+                                                    </div>
+                                                    <!-- Configure LLM -->
+                                                    <div *ngIf="llmList.length>0" class="col-lg-6 col-md-6 le-u-mar-b-16">
+                                                        <leds-autocomplete label="Configure LLM" [options]="llmList" [required]="false"
+                                                            (panelOptionSelected)="onLLMChange($event.option.value)" [(ngModel)]="selectedLlm"
+                                                            [autoActiveFirstOption]="false" >
+                                                        </leds-autocomplete>
+                                                    </div>
+                                                    <!-- Knowledge Base -->
+                                                    <div *ngIf="kbList.length>0" class="col-lg-6 col-md-6 le-u-mar-b-16">
+                                                        <leds-autocomplete label="Select Knowledge Base" [options]="kbList" [required]="false"
+                                                            (panelOptionSelected)="onKbChange($event.option.value)" [(ngModel)]="aiWorker.knowledgeBase"
+                                                            [autoActiveFirstOption]="false">
+                                                        </leds-autocomplete>
+                                                    </div>
+                                                    <!-- Planner -->
+                                                    <div *ngIf="promptList.length>0" class="col-lg-6 col-md-6 le-u-mar-b-16">
+                                                        <leds-autocomplete label="Select Planner Prompt" [options]="promptList" [required]="false"
+                                                            (panelOptionSelected)="onPlannerChange($event.option.value)" [(ngModel)]="aiWorker.planner"
+                                                            [autoActiveFirstOption]="false">
+                                                        </leds-autocomplete>
+                                                    </div>
+                                                    <!-- Plan Validator -->
+                                                    <div *ngIf="promptList.length>0" class="col-lg-6 col-md-6 le-u-mar-b-16">
+                                                        <leds-autocomplete label="Select Plan Validator Prompt" [options]="promptList" [required]="false"
+                                                            (panelOptionSelected)="onValidatorChange($event.option.value)" [(ngModel)]="aiWorker.validator"
+                                                            [autoActiveFirstOption]="false">
+                                                        </leds-autocomplete>
+                                                    </div>
+                                                    <!-- Workflow generator -->
+                                                    <div *ngIf="promptList.length>0" class="col-lg-6 col-md-6 le-u-mar-b-16">
+                                                        <leds-autocomplete label="Select Workflow Generator Prompt" [options]="promptList" [required]="false"
+                                                            (panelOptionSelected)="onGeneratorChange($event.option.value)" [(ngModel)]="aiWorker.generator"
+                                                            [autoActiveFirstOption]="false">
+                                                        </leds-autocomplete>
+                                                    </div>
+                                                    <!-- Workflow execution type -->
+                                                    <div class="col-lg-6 col-md-6 le-u-mar-b-16">
+                                                        <leds-select [options]="executionTypeList" label="Select  Workflow Execution Type"
+                                                            [(ngModel)]="executionType" [required]="true" designType="default" [isMultiple]="false"
+                                                            (selectChange)="onExecutionTypeSelection($event)"></leds-select>
+                                                    </div>
+                                                    <!-- Workflow executor pipeline-->
+                                                    <div *ngIf="executionType=='pipeline' && pipelineList.length>0" class="col-lg-6 col-md-6 le-u-mar-b-16">
+                                                        <leds-autocomplete label="Select Workflow Executor Pipeline" [options]="pipelineList" [required]="true"
+                                                            (panelOptionSelected)="onExecutorPipelineChange($event.option.value)" [(ngModel)]="selectedPipeline"
+                                                            [autoActiveFirstOption]="false" ></leds-autocomplete>
+                                                    </div>
+                                                    <!-- User Task Groups -->
+                                                    <div class="d-flex">
+                                                        <mat-label class="le-u-mar-b-8 le-u-pad-b-8 labelColour">Tasks Configuration</mat-label>
+                                                        <span>
+                                                            <i aria-hidden="true" class="le-u-pad-l-8 fa fa-plus-circle " 
+                                                                title="Add Task" (click)="addTaskAtIndex()"></i>
+                                                        </span>
+                                                    </div>
+                                                    <leds-accordion designType="3D" [hideToggle]="true" [multi]="false">
+                                                        <div *ngFor="let taskItem of taskGroup; let j = index;" class="d-flex justify-content-between align-items-center">
+                                                            <div style="width:4%">
+                                                                <mat-label class="le-u-mar-b-8 le-u-pad-b-8 labelColour">Task {{j+1}}</mat-label>
+                                                                <!-- <span><i aria-hidden="true" class="le-u-pad-l-8 fa fa-minus-circle " title="Remove Task" (click)="removeTask(j)">
+                                                                    </i></span>&nbsp;&nbsp;
+                                                                <span><i aria-hidden="true" class="fa fa-plus-circle " title="Add Task" (click)="addTaskAtIndex(j)">
+                                                                    </i></span> -->
+                                                            </div>
+                                                            <div style="width:90%">
+                                                                <mat-expansion-panel>
+                                                                    <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+                                                                        <mat-panel-title>
+                                                                            {{taskItem.taskName}}
+                                                                        </mat-panel-title>
+                                                                    </mat-expansion-panel-header>
+                                                                    <div class="le-u-mar-16">
+                                                                        <!-- User Task -->
+                                                                        <div class="col-lg-12 col-md-12 le-u-mar-b-16">
+                                                                            <mat-label class="le-u-mar-b-8 le-u-pad-b-8 labelColour">Enter User Task</mat-label>
+                                                                            <textarea rows="3" cols="" placeholder="User Tasks" class="pannel-shadow"
+                                                                                [(ngModel)]="taskItem.taskName"></textarea>
+                                                                        </div>
+                                                                        <div class="col-lg-12 col-md-12 le-u-mar-b-16">
+                                                                            <leds-input-field label="Description" placeholder="Enter Task Description..." errorMessage="{
+                                                                              required: 'This field is required', }" inputType="text" [required]="true"
+                                                                              [(ngModel)]="taskItem.description"></leds-input-field>
+                                                                        </div>
+                                                                        <!-- Tools -->
+                                                                        <div class="col-lg-12 col-md-12 d-flex">
+                                                                            <!-- <div *ngIf="taskItem.toolType=='Bot'" class="col-lg-6 col-md-6">
+                                                                                <leds-autocomplete label="Select Bot Category" [options]="botCategoryList"
+                                                                                    (panelOptionSelected)="onBotCategoryChange($event.option.value,j)" [(ngModel)]="taskItem.botCategory"
+                                                                                    [autoActiveFirstOption]="false">
+                                                                                </leds-autocomplete>
+                                                                            </div> -->
+                                                                            <div class="col-lg-6 col-md-6">
+                                                                                <leds-autocomplete label="Select Tool Tag" [options]="toolCategoryList"
+                                                                                    (panelOptionSelected)="onToolCategoryChange($event.option.value,j)" [(ngModel)]="taskItem.botCategory"
+                                                                                    [autoActiveFirstOption]="false">
+                                                                                </leds-autocomplete>
+                                                                            </div>
+                                                                            <div *ngIf="taskItem.botCategory" class="col-lg-6 col-md-6">
+                                                                                <leds-select
+                                                                                    [options]="toolOptions" [label]="'Select Tool'" [designType]="'default'" 
+                                                                                    [isMultiple]="true" (selectChange)="onToolChange($event,j)" [selected]="selectedBots">
+                                                                                </leds-select>
+                                                                            </div>
+                                                                        </div>
+                                                                        <!-- Bots -->
+                                                                        <!-- <div *ngIf="taskItem.toolType=='Bot'" class="col-lg-12 col-md-12 d-flex">
+                                                                            <div *ngIf="taskItem.botCategory" class="col-lg-6 col-md-6">
+                                                                                <leds-select
+                                                                                    [options]="botOptions" [label]="'Select Bot'" [designType]="'default'" 
+                                                                                    [isMultiple]="true" (selectChange)="onBotChange($event,j)" [selected]="taskItem.bots">
+                                                                                </leds-select>
+                                                                            </div>
+                                                                        </div> -->
+                                                                        <div class="col-lg-12 col-md-12 le-u-mar-b-16">
+                                                                            <leds-chip-list [label]="'Selected Bots'" [designType]="'normal'" [selectable]="true" 
+                                                                                [disableRipple]="true" class="col-md-8" *ngIf="taskItem.bots.length>0">
+                                                                                <leds-chip *ngFor="let bot of taskItem.bots; let index=index" [selected]="true">
+                                                                                    <span>{{bot.name}}</span>
+                                                                                    <span (click)="removeBot(j,index)" class="le-c-chip__icon js-chip-icon le-c-chip__icon-left">
+                                                                                        <i class="icon x-16 error-big-icon"></i>
+                                                                                    </span>
+                                                                                </leds-chip>
+                                                                            </leds-chip-list>
+                                                                        </div>
+                                                                        <!-- User Inputs -->
+                                                                        <div class="col-lg-12 col-md-12">
+                                                                            <mat-label class="le-u-mar-b-8 labelColour">Input Parameters</mat-label>
+                                                                            <app-app-config [configData]="userInputParamsArray[j]"
+                                                                                (configDataChange)="onUserInputChange($event,j)"></app-app-config>
+                                                                        </div>
+                                                                    </div>
+                                                                </mat-expansion-panel>
+                                                            </div>
+                                                            <div style="width: 4%;">
+                                                                <span><i aria-hidden="true" class="le-u-pad-l-8 fa fa-minus-circle " title="Remove Task" (click)="removeTask(j)">
+                                                                </i></span>
+                                                            </div>
+                                                        </div>
+                                                    </leds-accordion>
+                                                </div>
+                                                <!-- <leds-spinner [bdColor]="'#ffffff'" [size]="'default'" [color]="'#8626c3'" [zIndex]="0" 
+                                                    [type]="'ball-spin'" [fullScreen]="false" [showSpinner]="loadingWorkerData">
+                                                </leds-spinner> -->
+                                            </div>
+                                            <mat-error *ngIf="errMsgFlag" class="le-u-pad-l-16">Please fill the required(*) fields.</mat-error>
+                                            <div class="col-lg-12 col-md-12 le-u-mar-b-16" *ngIf="createEditConfig">
+                                                <leds-button class="d-flex justify-content-end" nameText="primaryButton" idText="primaryButton"
+                                                    *ngIf="isCreate" buttonType="button" designType="primary" (click)="save()">Save</leds-button>
+                                                <leds-button class="d-flex justify-content-end" nameText="primaryButton" idText="primaryButton"
+                                                    *ngIf="isEdit" buttonType="button" designType="primary" (click)="update()">Update</leds-button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </leds-panel>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

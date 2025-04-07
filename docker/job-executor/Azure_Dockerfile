@@ -1,0 +1,20 @@
+FROM infyartifactory.jfrog.io/docker-local/python:3.10-bookworm 
+WORKDIR /
+USER root
+ENV HTTP_PROXY=http://blrproxy.ad.infosys.com:80
+ENV HTTPS_PROXY=http://blrproxy.ad.infosys.com:80
+ENV http_proxy=http://blrproxy.ad.infosys.com:80
+ENV https_proxy=http://blrproxy.ad.infosys.com:80
+RUN apt-get -y install git
+#RUN wget --user rajesh.itagi@ad.infosys.com --password cmVmdGtuOjAxOjE3NDkyOTc4MDY6M0xPQ1d5U2MzN1FpYmZHblVrcVFzbE93UWE0 https://infyartifactory.jfrog.io/artifactory/icets-ai_python/leaputils/2.0.0/leaputils-2.0.0-py3-none-any.whl
+#RUN python -m pip install leaputils-2.0.0-py3-none-any.whl -i https://shreya_bansal@ad.infosys.com:cmVmdGtuOjAxOjE3MjI5Mzk1MjA6b25Yc3ZVRUYxV2tYR1VDS1p3elNFMkxQOHpM@infyartifactory.jfrog.io/artifactory/api/pypi/pypi-remote/simple --trusted-host infyartifactory.jfrog.io
+RUN git config --global http.sslVerify false
+#ENV MAVEN_REPO_USER=nusum.l
+#ENV GIT_TOKEN=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
+RUN git clone https://${MAVEN_REPO_USER}:${GIT_TOKEN}@github.com/Infosys-icets-leap/py-job-azure-executer.git
+RUN apt-get -y remove git
+RUN mkdir data /temp /temp/Jobs
+RUN chmod -R 777 /py-job-azure-executer/ /data/ /temp/ 
+ENV EXTRA_PLUGINS_PATH=/py-job-azure-executer/plugins
+RUN python -m pip install -r /py-job-azure-executer/requirements.txt -i https://shreya_bansal@ad.infosys.com:cmVmdGtuOjAxOjE3MjI5Mzk1MjA6b25Yc3ZVRUYxV2tYR1VDS1p3elNFMkxQOHpM@infyartifactory.jfrog.io/artifactory/api/pypi/pypi-remote/simple --trusted-host infyartifactory.jfrog.io
+EXPOSE 8080

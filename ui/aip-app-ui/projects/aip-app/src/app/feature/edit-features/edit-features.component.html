@@ -1,0 +1,47 @@
+<div class="container-fluid backgroud-color">
+    <div class="le-l-level1-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <!-- <div class="le-l-level1-middle-col le-l-base-layout-center"> -->
+                    <!-- <div class="">
+                        <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()">
+                            <i class="icon x-16 close-icon"></i>
+                        </button>
+                    </div> -->
+                    <div class="d-flex justify-content-end">
+                        <span class="">
+                            <i class="aip-led-icons icon x-16 close-icon" (click)="closeModal()"></i>
+                        </span>
+                    </div>
+                    <span class="le-u-pad-l-8 aip-desc-title le-u-header-xxl">{{cardTitle}}</span>
+                    <div class="le-l-level2-middle-ctr">
+                        <div class="le-l-level2-middle-col le-u-mar-b-24__mb">
+                            <leds-panel type="default" styleClass="" contentClass="">
+                                <div class="le-c-panel__content le-u-mar-tb-16 le-u-pad-16">
+                                    <div class="" *ngFor="let key of keys; let i = index">
+                                        <div class="row col-md-12 col-lg-12" *ngIf="key!='id'">
+                                            <div class="le-u-body-md" style="text-transform: capitalize;">
+                                                {{capKeys[i]}}</div>
+                                            <leds-input-field label="" [(ngModel)]=data[key]
+                                                [disabled]="key =='description'||key=='name'||key=='projection_name'? false:true"
+                                                inputType="text" [required]="false"></leds-input-field>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="le-c-panel__footer">
+                                    <div class="le-u-pad-tb-16" style="float: left; padding-top: 15px;">
+                                        <leds-button nameText="secondaryButton" idText="secondaryButton"
+                                            [disabled]="false" buttonType="button" designType="primary"
+                                            (click)="updateModel()">
+                                            UPDATE
+                                        </leds-button>
+                                    </div>
+                                </div>
+                            </leds-panel>
+                        </div>
+                    </div>
+                <!-- </div> -->
+            </div>
+        </div>
+    </div>
+</div>

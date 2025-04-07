@@ -1,0 +1,33 @@
+<div class="row selector-756-1">
+  <!-- languages select -->
+  <div class="col-3 selector-756-2" [hidden]="pyViewer">
+    <div class="input-group input-group-sm selector-756-3">
+      <div class="input-group-prepend selector-756-4" style="display: flex;" *ngIf="lang">
+        <label class="input-group-text selector-756-5">Languages</label>&nbsp;
+      <select *ngIf="langEnable" [(ngModel)]="lang" value="lang" (ngModelChange)="langChange($event)" name="language" class="selector-756-6">
+        <option *ngFor="let lang of langList" [value]="lang">
+          {{lang}}
+        </option>
+        <!-- <option *ngIf="!langList" value="python" class="selector-756-7">Python</option> -->
+        <!-- <option value="java">Java</option> -->
+        <!-- <option *ngIf="!langList" value="javascript" class="selector-756-8">JavaScript</option> -->
+      </select>
+      <select *ngIf="!langEnable" [(ngModel)]="lang" value="lang" (ngModelChange)="langChange($event)" name="language" class="selector-756-6">
+        
+        <option *ngIf="!langList" value="python" class="selector-756-7">Python</option>
+        <!-- <option value="java">Java</option> -->
+        <option *ngIf="!langList" value="javascript" class="selector-756-8">JavaScript</option>
+        <option *ngIf="!langList" value="r" class="selector-756-8">R</option>
+      </select>
+    </div>
+      
+    </div>
+  </div>
+</div>
+<br class="selector-756-9">
+<!-- the code editor -->
+<div class="row selector-756-10">
+  <div class="col selector-756-11">
+    <div class="code-editor selector-756-12" #editor=""></div>
+  </div>
+</div>

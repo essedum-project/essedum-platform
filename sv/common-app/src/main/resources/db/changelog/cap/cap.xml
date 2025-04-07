@@ -1,0 +1,2290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+<changeSet author="Leap (generated)" id="1617626474889-56">
+         <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_agent_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_agent_detail">
+			<column autoIncrement="true" name="Agent_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Agent_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Agent_Published_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Agent_Status" type="VARCHAR(20)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Agent_Feature" type="VARCHAR(255)" />
+			<column name="Agent_Version" type="VARCHAR(45)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_By" type="INT" />
+            <column name="UserID" type="INT" />
+			<column name="RoleID" type="INT" />
+			<column name="portfolioId" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-57">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_agent_log"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_agent_log">
+			<column autoIncrement="true" name="Log_ID" type="BIGINT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Timestamp" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Level" type="CHAR(18)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Thread" type="VARCHAR(10)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Logger" type="VARCHAR(20)">
+				<constraints nullable="false" />
+			</column>
+			<column name="UserAlias" type="VARCHAR(200)" />
+			<column name="MachineName" type="VARCHAR(100)" />
+			<column name="PID" type="BIGINT" />
+			<column name="Event_ID" type="BIGINT" />
+			<column name="Severity" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Message" type="VARCHAR(500)" />
+			<column name="Agent_ID" type="INT" />
+			<column name="Workflow_ID" type="INT" />
+			<column name="Run_ID" type="INT" />
+			<column name="Execution_ID" type="INT" />
+			<column name="Incident_ID" type="VARCHAR(100)" />
+			<column name="Application_Id" type="INT" />
+			<column name="script_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-58">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_agent_screenshot"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_agent_screenshot">
+			<column autoIncrement="true" name="agent_screenshot_id"
+				type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="Agent_Mapping_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Node_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Agent_Screenshot" type="MEDIUMBLOB">
+				<constraints nullable="false" />
+			</column>
+			<column name="workflow_id" type="INT" />
+			<column name="run_id" type="INT" />
+			<column name="execution_id" type="INT" />
+			<column name="type" type="VARCHAR(20)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-59">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_analytics_field_mapping"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_analytics_field_mapping">
+			<column name="Application_ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="User_ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="Clustering_Fields" type="MEDIUMTEXT" />
+			<column name="Priority_Sequence" type="MEDIUMTEXT" />
+			<column name="Rec_Act_Ind" type="BOOLEAN" />
+			<column name="Last_Updated_Dts" type="datetime" />
+			<column name="Number_Of_Grams" type="SMALLINT" />
+			<column name="Stop_Words" type="MEDIUMTEXT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-60">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_api_log"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_api_log">
+			<column autoIncrement="true" name="API_Log_ID" type="BIGINT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Application_Name" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Message" type="VARCHAR(500)" />
+			<column name="Timestamp" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Class_Name" type="VARCHAR(100)" />
+			<column name="Method_Name" type="VARCHAR(100)" />
+			<column name="Machine_Name" type="VARCHAR(100)" />
+			<column name="Message_Type" type="CHAR(20)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Application_Id" type="INT" />
+			<column name="Run_ID" type="INT" />
+			<column name="Execution_ID" type="INT" />
+			<column name="Workflow_ID" type="INT" />
+			<column name="Agent_ID" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-61">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_application_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_application_detail">
+			<column autoIncrement="true" name="Application_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Application_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_By" type="INT" />
+			<column name="TicketSeedValue" type="INT" />
+			<column name="IsClustered" type="BOOLEAN" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-62">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_category_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_category_detail">
+			<column autoIncrement="true" name="Category_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Category_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Auto_Verification_Pass_Percentage" type="DOUBLE">
+				<constraints nullable="false" />
+			</column>
+			<column name="Verification_Required_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_By" type="INT" />
+			<column name="Workflow_ID" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-63">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_category_status"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_category_status">
+			<column autoIncrement="true" name="Category_Status_ID"
+				type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="Status" type="VARCHAR(45)" />
+			<column name="Category_ID" type="INT" />
+			<column name="Agent_Node_Mapping_ID" type="INT" />
+			<column name="Workflow_ID" type="INT" />
+			<column name="Retry_Count" type="INT" />
+			<column name="Last_Updated_Dts" type="datetime" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-64">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_cluster_keywords_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_cluster_keywords_detail">
+			<column autoIncrement="true" name="Cluster_Keywords_ID"
+				type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="Cluster_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Sub_Cluster_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Application_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Incident_App_Name" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Keywords" type="LONGTEXT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-65">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_cluster_name_mapping"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_cluster_name_mapping">
+			<column autoIncrement="true" name="Cluster_Name_Mapping_ID"
+				type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="Cluster_Name" type="VARCHAR(50)" />
+			<column name="Incident_App_Name" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Cluster_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Application_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-66">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_event_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_event_detail">
+			<column autoIncrement="true" name="Event_ID" type="BIGINT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Event_Name" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Event_Description" type="VARCHAR(520)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Event_Target_Entity_ID" type="VARCHAR(520)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Event_Target_Entity_Name" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Event_Created_By" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-67">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_event_notification_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_event_notification_detail">
+			<column autoIncrement="true"
+				name="Event_Notification_Detail_ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="Application_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Event_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Target_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Description" type="VARCHAR(45)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_Dts" type="datetime" />
+			<column name="Mail_Sent_Ind" type="BOOLEAN" />
+			<column name="Rec_Act_Ind" type="BOOLEAN" />
+			<column name="Last_Updated_Dts" type="VARCHAR(45)" />
+			<column name="Agent_Node_Mapping_ID" type="INT" />
+			<column name="Rec_Created_By" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Recipient_ID" type="INT" />
+			<column name="Seen_UI_Notification_By" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-68">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_file_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_file_detail">
+			<column autoIncrement="true" name="File_ID" type="BIGINT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="ReleaseID" type="INT" />
+			<column name="Part_ID" type="INT" />
+			<column name="File_Name" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="File_Content" type="LONGTEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="File_Content2" type="LONGTEXT" />
+			<column name="File_Content3" type="LONGTEXT" />
+			<column name="File_Content4" type="LONGTEXT" />
+			<column name="File_Type_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_By" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-69">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_heartbeat"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_heartbeat">
+			<column name="event_generator_id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="event_generator_name" type="VARCHAR(45)" />
+			<column name="event_generator_type" type="VARCHAR(45)" />
+			<column defaultValueComputed="CURRENT_TIMESTAMP"
+				name="last_updated_dts" type="datetime" />
+			<column name="rel_act_ind" type="BOOLEAN" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-70">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_incident_cluster_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_incident_cluster_detail">
+			<column autoIncrement="true" name="Incident_Cluster_Id"
+				type="BIGINT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="Application_Id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Incident_Id" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Incident_App_Name" type="VARCHAR(200)" />
+			<column name="Cluster_Id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Sub_Cluster_Id" type="INT" />
+			<column name="Is_Cluster" type="BOOLEAN" />
+			<column name="Is_Auto_Generated" type="BOOLEAN" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-71">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_license_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_license_detail">
+			<column autoIncrement="true" name="License_Allocation_Id"
+				type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="ApplicationType" type="VARCHAR(45)">
+				<constraints nullable="false" />
+			</column>
+			<column name="License_Type_ID" type="INT" />
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="FromDate" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="ToDate" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Createt_Dts" type="datetime" />
+			<column name="Last_Updated_Dts" type="datetime" />
+			<column name="Node_Id" type="INT" />
+			<column name="Rec_Created_By" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Agent_Node_Mapping_ID" type="INT" />
+			<column name="AllocatedTo" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-72">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_lk_file_type"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_lk_file_type">
+			<column autoIncrement="true" name="File_Type_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="File_Type_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Active_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="File_Type_Description" type="LONGTEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_By" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-73">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_lk_license_type"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_lk_license_type">
+			<column autoIncrement="true" name="License_Type_ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="License_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_By" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-74">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_lk_os_architecture"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_lk_os_architecture">
+			<column autoIncrement="true" name="OS_Architecture_ID"
+				type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="OS_Architecture_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_By" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-75">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_lk_os_type"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_lk_os_type">
+			<column autoIncrement="true" name="OS_Type_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="OS_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Active_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_By" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-76">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_lk_role"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_lk_role">
+			<column autoIncrement="true" name="Role_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Role_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_By" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-77">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_lk_script_type"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_lk_script_type">
+			<column autoIncrement="true" name="Script_Type_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Script_Type_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Active_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Script_Extension" type="VARCHAR(20)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_By" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-78">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_lk_workflow_type"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_lk_workflow_type">
+			<column autoIncrement="true" name="Workflow_Type_ID"
+				type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Workflow_Type_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_By" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-79">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_module_test"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_module_test">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="execution_dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="module_name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="test_name" type="VARCHAR(255)" />
+			<column name="test_status" type="VARCHAR(255)" />
+			<column name="test_comments" type="VARCHAR(512)" />
+			<column name="test_result_text" type="MEDIUMBLOB" />
+			<column name="workflow_id" type="INT" />
+			<column name="run_id" type="INT" />
+			<column name="execution_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-80">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_node_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_node_detail">
+			<column autoIncrement="true" name="Node_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Node_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Node_IP" type="VARCHAR(30)" />
+			<column name="Last_Updated_By" type="INT" />
+            <column name="UserID" type="INT" />
+			<column name="RoleID" type="INT" />
+			<column name="portfolioId" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-81">
+	 <validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_portfolio_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_portfolio_detail">
+			<column autoIncrement="true" name="Portfolio_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Portfolio_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_By" type="INT" />
+			<column name="Enable_Email_Notification" type="BOOLEAN" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-82">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_release"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_release">
+			<column autoIncrement="true" name="Release_Id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="Release_content_id" type="INT" />
+			<column name="Release_type" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Release_num" type="INT" />
+			<column name="Release_created_dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Release_wem_template" type="MEDIUMTEXT" />
+			<column name="Release_bot_template" type="MEDIUMTEXT" />
+			<column name="Release_wem_config_keys" type="MEDIUMTEXT" />
+			<column name="Release_bot_config_keys" type="MEDIUMTEXT" />
+			<column name="Release_act_ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-83">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_release_content"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_release_content">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="release_content" type="LONGBLOB" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-84">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_schedule_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_schedule_detail">
+			<column autoIncrement="true" name="Schedule_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Schedule_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Schedule_Start_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Schedule_End_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Schedule_Pattern" type="VARCHAR(20)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Schedule_Recurrence_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Schedule_On_Every" type="VARCHAR(50)" />
+			<column name="Schedule_Instance" type="VARCHAR(50)" />
+			<column name="Schedule_Time" type="time">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_By" type="INT" />
+			<column name="Weekly_Data" type="VARCHAR(100)" />
+			<column name="Recur_Every" type="SMALLINT" />
+			<column defaultValueBoolean="false" name="On_Weekend"
+				type="BOOLEAN" />
+			<column name="Monthly_Schedule_Date" type="datetime" />
+			<column name="Yearly_Schedule_Date" type="datetime" />
+            <column name="UserID" type="INT" />
+			<column name="RoleID" type="INT" />
+			<column name="portfolioId" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-85">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_script_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_script_detail">
+			<column autoIncrement="true" name="Script_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Script_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Script_URL" type="VARCHAR(300)" />
+			<column name="Script_Description" type="VARCHAR(1000)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Script_Source" type="VARCHAR(20)">
+				<constraints nullable="false" />
+			</column>
+			<column name="File_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Script_Local_Path" type="VARCHAR(20)" />
+			<column name="Script_File_Name" type="VARCHAR(100)" />
+			<column name="Last_Updated_By" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-86">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_script_execution_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_script_execution_detail">
+			<column autoIncrement="true" name="Script_Execution_Detail_ID"
+				type="BIGINT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Script_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Script_Location" type="VARCHAR(200)" />
+			<column name="Vault_Name" type="VARCHAR(520)" />
+			<column name="Application_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Same_Network_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Encrypted_Params" type="VARCHAR(1000)" />
+			<column name="Positional_Param_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Remote_User_Name" type="VARCHAR(200)" />
+			<column name="Remote_User_Password" type="VARCHAR(550)" />
+			<column name="Credential_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Remote_Server_Name" type="VARCHAR(200)" />
+			<column name="Execution_Status" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Script_Input_Json" type="LONGTEXT" />
+			<column name="Credential_User_Name_Field" type="VARCHAR(100)" />
+			<column name="Credential_User_Password_Field"
+				type="VARCHAR(550)" />
+			<column name="Start_Dts" type="datetime" />
+			<column name="End_Dts" type="datetime" />
+			<column name="Execution_Result" type="LONGTEXT" />
+			<column name="Timeout" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-87">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_temp_id"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_temp_id">
+			<column name="id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-88">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_ticket_notification_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_ticket_notification_detail">
+			<column autoIncrement="true" name="Id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="Application_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="To_Email" type="VARCHAR(160)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Send_Notification" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Aggregated_Notification" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-89">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_ticket_upload_data"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_ticket_upload_data">
+			<column name="Application_id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="User_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="Upload_Status" type="VARCHAR(200)" />
+			<column name="ClusterStatus" type="BOOLEAN" />
+			<column name="TimeStamp" type="datetime" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-90">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_user_detai"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_user_detail">
+			<column autoIncrement="true" name="User_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="User_Name" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="User_Super_Admin_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="User_Password_Encr" type="VARCHAR(520)">
+				<constraints nullable="false" />
+			</column>
+			<column name="User_Email_ID" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Is_First_Login" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-91">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_vault_manager"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_vault_manager">
+			<column autoIncrement="true" name="Vault_Notification_ID"
+				type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="Vault_Name" type="VARCHAR(50)">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="Rec_Active_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Application_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Work_Flow_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Node_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Key" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_By" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Is_Storage_Type_In_Memory" type="BOOLEAN" />
+			<column name="API" type="VARCHAR(45)" />
+			<column name="Is_Credential_Type" type="BOOLEAN" />
+			<column name="Value" type="VARCHAR(50)" />
+			<column name="Portfolio_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-92">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_vault_manager_botfactory"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_vault_manager_botfactory">
+			<column autoIncrement="true" name="vault_ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="Vault_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Node_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Key" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Value" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Is_Credential_Type" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Is_Storage_Type_In_Memory" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="API" type="VARCHAR(45)" />
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Active_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="User_Id" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-93">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_vault_notification_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_vault_notification_detail">
+			<column autoIncrement="true" name="Vault_Notification_Detail"
+				type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="Vault_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Active_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Application_Id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Work_Flow_Id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Node_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Key" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_By" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-94">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_vb_script_class"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_vb_script_class">
+			<column autoIncrement="true" name="VB_Script_Class_ID"
+				type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN" />
+			<column name="Code" type="LONGTEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Name" type="VARCHAR(45)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-95">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_workflow_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_workflow_detail">
+			<column autoIncrement="true" name="Workflow_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Workflow_Name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Workflow_Type_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Estimated_Execution_Minute" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Static_Input_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Workflow_Partial_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Workflow_Input_Json" type="LONGTEXT" />
+			<column name="Last_Updated_By" type="INT" />
+			<column name="Resolved_Multiple_Input" type="BOOLEAN" />
+			<column name="FileID" type="BIGINT" />
+			<column name="LastSuccessExecutionTime" type="datetime" />
+            <column name="UserID" type="INT" />
+			<column name="RoleID" type="INT" />
+			<column name="portfolioId" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-96">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_workflow_input"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_workflow_input">
+			<column autoIncrement="true" name="Workflow_Input_ID"
+				type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Task_ID" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Task_type" type="VARCHAR(50)" />
+			<column name="Input_Json" type="LONGTEXT" />
+			<column name="Category_ID" type="INT" />
+			<column name="Node_ID" type="INT" />
+			<column name="Estimated_Execution_Minute" type="INT" />
+			<column name="Schedule_ID" type="INT" />
+			<column name="Latest_Workflow_Execution_Status"
+				type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Workflow_Input_Processed_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Input_Generated_By_Schedule_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Workflow_Logical_Error_Status" type="CHAR(18)" />
+			<column name="Workflow_Logical_Error_Description"
+				type="CHAR(18)" />
+			<column name="Executing_Agent_ID" type="INT" />
+			<column name="Workflow_Input_By" type="INT" />
+			<column name="Latest_Executed_WorkflowID" type="INT" />
+			<column name="Latest_Agent_Node_Mapping_ID" type="INT" />
+			<column name="Application_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Task_status" type="VARCHAR(50)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-97">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_workflow_output"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_workflow_output">
+			<column autoIncrement="true" name="Workflow_Output_ID"
+				type="BIGINT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Workflow_Run_Execution_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Created_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Node_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Activity_Name" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Activity_Status" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Activity_Variables" type="VARCHAR(1500)" />
+			<column name="Activity_Sequence_Number" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Activity_Instance_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Activity_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Activity_Parent_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Activity_Message" type="VARCHAR(500)" />
+			<column name="Executing_Agent_ID" type="INT" />
+			<column name="Time_Taken" type="DOUBLE" />
+			<column name="Agent_Node_Mapping_ID" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-98">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_agent_application_os_arch"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_agent_application_os_arch">
+			<column autoIncrement="true"
+				name="Agent_Application_OS_Arch_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Agent_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Application_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rel_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="OS_Architecture_ID" type="INT" />
+			<column name="OS_Type_ID" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-99">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_agent_node"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_agent_node">
+			<column autoIncrement="true" name="Agent_Node_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Agent_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Node_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rel_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Mapping_Name" type="VARCHAR(30)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Agent_Status" type="VARCHAR(20)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Agent_Base_Directory" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Agent_Binary_Download_Status" type="VARCHAR(20)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-100">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_agent_release"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_agent_release">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="Agent_mappingId" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Current_Release_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Planned_release_id" type="INT" />
+			<column name="Release_Config_WEM" type="MEDIUMTEXT" />
+			<column name="Release_Config_Bot" type="MEDIUMTEXT" />
+			<column name="Release_Status" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Release_Updated_Dt" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Release_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="IsConfigUpdate" type="BOOLEAN" />
+			<column name="IsReleaseUpdate" type="BOOLEAN" />
+			<column defaultValueNumeric="0" name="Retry_Attempts"
+				type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValueNumeric="0" name="Retry_Threshold"
+				type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-101">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_app_incident_field_mapping"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_app_incident_field_mapping">
+			<column autoIncrement="true"
+				name="App_Incident_Field_Mapping_ID" type="BIGINT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Application_ID" type="INT" />
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Mapping_Created_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Field_Name" type="MEDIUMTEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Mapping_Field_Value" type="MEDIUMTEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_By" type="INT" />
+			<column name="Priority" type="VARCHAR(15)" />
+			<column name="Opened_Date" type="VARCHAR(45)" />
+			<column name="Closed_Date" type="VARCHAR(45)" />
+			<column name="Geographical_Area" type="VARCHAR(45)" />
+			<column name="Incident_Id" type="VARCHAR(45)" />
+			<column name="Description" type="MEDIUMTEXT" />
+			<column name="Category_Name" type="VARCHAR(45)" />
+			<column name="Rec_Created_By" type="VARCHAR(45)" />
+			<column name="Service_Request" type="LONGTEXT" />
+			<column name="Incident_App_Name" type="VARCHAR(45)" />
+			<column name="Incident_Group" type="MEDIUMTEXT" />
+			<column name="Time_In_Minutes_To_Met_SLA" type="BIGINT" />
+			<column name="Resolved_By" type="VARCHAR(45)" />
+			<column name="Met_SLA" type="MEDIUMTEXT" />
+			<column name="Clustring_Fields" type="LONGTEXT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-102">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_category_app_regex"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_category_app_regex">
+			<column autoIncrement="true" name="Category_App_Regex_ID"
+				type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Category_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Application_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rel_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Incident_Field" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Category_Regex" type="VARCHAR(300)" />
+			<column name="Pattern" type="VARCHAR(300)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-103">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_incident_status_field_mapping"/>
+               </not>
+           </preConditions>
+		<createTable
+			tableName="cap_xw_incident_status_field_mapping">
+			<column autoIncrement="true"
+				name="Incident_Status_Field_Mapping_ID" type="BIGINT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="App_Incident_Field_Mapping_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rec_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Status_Field_Name" type="MEDIUMTEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Status_Field_Value" type="MEDIUMTEXT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-104">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_node_app_os_architecture"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_node_app_os_architecture">
+			<column autoIncrement="true"
+				name="Node_App_OS_Architecture_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Node_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Application_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rel_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="OS_Architecture_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="OS_Type_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-105">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_portfolio_application"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_portfolio_application">
+			<column autoIncrement="true" name="Portfolio_Application_ID"
+				type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Portfolio_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Application_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rel_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValueNumeric="0" name="External_ProjectID"
+				type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-106">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_schedule_application"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_schedule_application">
+			<column autoIncrement="true" name="Schedule_Application_ID"
+				type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Schedule_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Application_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rel_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-107">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_script_execution_mapping"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_script_execution_mapping">
+			<column autoIncrement="true"
+				name="Script_Execution_Mapping_ID" type="BIGINT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Script_Execution_Detail_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Node_ID" type="INT" />
+			<column name="Rel_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Run_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Execution_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Incident_ID" type="VARCHAR(100)" />
+			<column name="Agent_ID" type="INT" />
+			<column name="Agent_Node_Mapping_ID" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-108">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_script_portfolio"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_script_portfolio">
+			<column autoIncrement="true" name="Script_Portfolio_ID"
+				type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Script_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Portfolio_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rel_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Script_Type_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-109">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_user_portfolio_application_role"/>
+               </not>
+           </preConditions>
+		<createTable
+			tableName="cap_xw_user_portfolio_application_role">
+			<column autoIncrement="true"
+				name="User_Portfolio_Application_Role_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Portfolio_ID" type="INT" />
+			<column name="Application_ID" type="INT" />
+			<column name="Rel_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Role_ID" type="INT" />
+			<column name="User_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-110">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_workflow_application"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_workflow_application">
+			<column autoIncrement="true" name="Workflow_Application_ID"
+				type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Workflow_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Application_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rel_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-111">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_workflow_execution_image"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_workflow_execution_image">
+			<column autoIncrement="true"
+				name="Workflow_Execution_Image_ID" type="BIGINT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Workflow_Run_Execution_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rel_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Activity_Instance_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Activity_Name" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Activity_Logical_Error_Status"
+				type="VARCHAR(50)" />
+			<column name="Activity_Logical_Error_Desc" type="VARCHAR(500)" />
+			<column name="File_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-112">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_workflow_history"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_workflow_history">
+			<column autoIncrement="true" name="Workflow_History_ID"
+				type="BIGINT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="Workflow_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Updated_Field_Name" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Field_Old_Value" type="LONGTEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Field_New_Value" type="LONGTEXT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-113">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_workflow_input_agent"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_workflow_input_agent">
+			<column autoIncrement="true" name="Workflow_Input_Agent_ID"
+				type="BIGINT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Workflow_Input_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValueNumeric="1"
+				name="Workflow_Run_Execution_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rel_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Selected_Agent_ID" type="INT" />
+			<column name="Agent_Node_Mapping_ID" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-114">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_workflow_input_trigger"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_workflow_input_trigger">
+			<column autoIncrement="true" name="Workflow_Input_Trigger_ID"
+				type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="Trigger_Recieved_From" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime" />
+			<column name="Rel_Act_Ind" type="BOOLEAN" />
+			<column name="Workflow_Input_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-115">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_workflow_node_agent_schedule"/>
+               </not>
+           </preConditions>
+		<createTable
+			tableName="cap_xw_workflow_node_agent_schedule">
+			<column autoIncrement="true"
+				name="Workflow_Node_Agent_Schedule_ID" type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Workflow_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Node_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rel_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Agent_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Schedule_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Agent_Workflow_Download_Status"
+				type="VARCHAR(20)" />
+			<column name="Last_Updated_By" type="INT" />
+			<column name="Agent_Node_Mapping_Id" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-116">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_workflow_parent"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_workflow_parent">
+			<column autoIncrement="true" name="Workflow_Parent_Mapping_ID"
+				type="INT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Workflow_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rel_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Parent_Workflow_ID" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-117">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_workflow_parent_execution"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_workflow_parent_execution">
+			<column autoIncrement="true"
+				name="Workflow_Parent_Execution_ID" type="BIGINT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column name="Workflow_Parent_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Parent_Run_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rel_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Run_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Execution_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Parent_Execution_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Execution_Status" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Parent_Processed_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-118">
+	<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_workflow_run_execution"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_xw_workflow_run_execution">
+			<column autoIncrement="true" name="Workflow_Run_Execution_ID"
+				type="BIGINT">
+				<constraints nullable="false" primaryKey="true"
+					unique="true" />
+			</column>
+			<column defaultValueNumeric="1" name="Workflow_Input_ID"
+				type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Workflow_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Rel_Act_Ind" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="Last_Updated_Dts" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="Workflow_Input_Json" type="LONGTEXT" />
+			<column name="Run_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Execution_ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="Status" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Agent_Mapping_ID" type="INT" />
+		</createTable>
+	</changeSet>
+		<changeSet author="Leap (generated)" id="1617626474889-119">
+		<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_config"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_config">
+			<column autoIncrement="true" name="ConfigId" type="INT">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="AppName" type="VARCHAR(45)">
+							</column>
+			<column name="ConfigName" type="VARCHAR(100)">
+							</column>
+			<column name="ConfigVal" type="VARCHAR(2000)">
+							</column>
+			<column name="ProjectId" type="INT" />
+			<column name="IsEncrypt" type="BOOLEAN">
+						</column>	
+			<column name="InstanceName" type="VARCHAR(45)">
+					</column>
+            <column name="ConfigDescription" type="LONGTEXT">
+					</column>
+		</createTable>
+	</changeSet>
+	
+		<changeSet author="Leap (generated)" id="1617626474889-120">
+		<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_config_transaction"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cap_config_transaction">
+			<column autoIncrement="true" name="Id" type="INT">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			
+			<column name="ConfigId" type="int">
+							</column>
+			<column name="ConfigVal" type="VARCHAR(100)">
+							</column>
+			<column name="InstanceId" type="INT" />
+			<column name="ProjectId" type="INT" />
+			<column name="IsEncrypt" type="BOOLEAN">
+						</column>	
+			
+		</createTable>
+	</changeSet>
+<changeSet author="Leap (generated)" id="1617626474889-1147"
+		runInTransaction="true"  dbms="mysql">
+		<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_application_view"/>
+               </not>
+           </preConditions>
+ <sqlFile relativeToChangelogFile="false" splitStatements="true" stripComments="true" path="db/changelog/cap/sql/cap_application_view.sql" />   
+			</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-1148"
+		runInTransaction="true"  dbms="mysql">
+		<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_portfolio_view"/>
+               </not>
+           </preConditions>
+ <sqlFile relativeToChangelogFile="false" splitStatements="true" stripComments="true" path="db/changelog/cap/sql/cap_portfolio_view.sql" />  
+			</changeSet>
+<changeSet author="Leap (generated)" id="1617626474889-1149"
+		runInTransaction="true"  dbms="mysql">
+		<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_user_view"/>
+               </not>
+           </preConditions>
+	 <sqlFile relativeToChangelogFile="false" splitStatements="true" stripComments="true" path="db/changelog/cap/sql/cap_user_view.sql" />   
+	</changeSet>
+<changeSet author="Leap (generated)" id="1617626474889-1150"
+		runInTransaction="true"  dbms="mysql">
+		<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_portfolio_app_view"/>
+               </not>
+           </preConditions>
+ <sqlFile relativeToChangelogFile="false" splitStatements="true" stripComments="true" path="db/changelog/cap/sql/cap_xw_portfolio_app_view.sql" />  
+			</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-1151"
+		runInTransaction="true"  dbms="mysql">
+		<validCheckSum>any</validCheckSum>
+          <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cap_xw_user_portfolio_app_view"/>
+               </not>
+           </preConditions>
+ <sqlFile relativeToChangelogFile="false" splitStatements="true" stripComments="true" path="db/changelog/cap/sql/cap_xw_user_portfolio_app_view.sql" />  
+			</changeSet>
+<changeSet author="leap (generated)" id="1617626474889-1152"
+		runOnChange="true" runInTransaction="true"  dbms="mysql">
+		<createProcedure
+			procedureName="cap_cleanup_agent_logs"
+			path="db/changelog/cap/sql/cap_cleanup_agent_logs_SP.sql" />
+	</changeSet> 
+ 	<changeSet author="leap (generated)" id="1617626474889-1153"
+		runOnChange="true" runInTransaction="true"  dbms="mysql">
+		<createProcedure
+			procedureName="cap_cleanup_api_logs"
+			path="db/changelog/cap/sql/cap_cleanup_api_logs_SP.sql" />
+	</changeSet>
+	<changeSet author="leap (generated)" id="1617626474889-1154"
+		runOnChange="true" runInTransaction="true"  dbms="mysql">
+		<createProcedure
+			procedureName="cap_cleanup_probe_run_app"
+			path="db/changelog/cap/sql/cap_cleanup_probe_run_app_SP.sql" />
+	</changeSet>
+	<changeSet author="leap (generated)" id="1617626474889-1155"
+		runOnChange="true" runInTransaction="true"  dbms="mysql">
+		<createProcedure
+			procedureName="cap_cleanup_probe_run_loc"
+			path="db/changelog/cap/sql/cap_cleanup_probe_run_loc_SP.sql" />
+	</changeSet>
+	<changeSet author="leap (generated)" id="1617626474889-1156"
+		runOnChange="true" runInTransaction="true"  dbms="mysql">
+		<createProcedure
+			procedureName="cap_cleanup_probe_run_run"
+			path="db/changelog/cap/sql/cap_cleanup_probe_run_run_SP.sql" />
+	</changeSet>
+	<changeSet author="leap (generated)" id="1617626474889-1157"
+		runOnChange="true" runInTransaction="true"  dbms="mysql">
+		<createProcedure
+			procedureName="cap_cleanup_workflow_run_exe"
+			path="db/changelog/cap/sql/cap_cleanup_workflow_run_exe_SP.sql" />
+	</changeSet>
+	<changeSet author="leap (generated)" id="1617626474889-1158"
+		runOnChange="true" runInTransaction="true"  dbms="mysql">
+		<createProcedure
+			procedureName="cap_cleanup_workflow_agent"
+			path="db/changelog/cap/sql/cap_cleanup_workflow_agent_SP.sql" />
+	</changeSet>
+	<changeSet author="leap (generated)" id="1617626474889-1159"
+		runOnChange="true" runInTransaction="true"  dbms="mysql">
+		<createProcedure
+			procedureName="cap_cleanup_workflow_input"
+			path="db/changelog/cap/sql/cap_cleanup_workflow_input_SP.sql" />
+	</changeSet>
+	<changeSet author="leap (generated)" id="1617626474889-1160"
+		runOnChange="true" runInTransaction="true"  dbms="mysql">
+		<createProcedure
+			procedureName="cap_cleanup_worklfow_input_trigger"
+			path="db/changelog/cap/sql/cap_cleanup_workflow_input_trigger_SP.sql"/>
+	</changeSet>
+	<changeSet author="leap (generated)" id="1617626474889-1161"
+		runOnChange="true" runInTransaction="true"  dbms="mysql">
+		<createProcedure
+			procedureName="cap_cleanup_worklfow_output_logs"
+			path="db/changelog/cap/sql/cap_cleanup_workflow_output_logs_SP.sql" />
+	</changeSet> 
+    <changeSet id="1617626474889-1162" author="leap (generated)" runOnChange="true" runInTransaction="true"  dbms="mysql"> 
+      <sqlFile relativeToChangelogFile="false" splitStatements="true" stripComments="true" path="db/changelog/cap/sql/cap_config_data.sql" /> 
+ </changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-1163"
+		runInTransaction="true"  dbms="mssql">
+ <sqlFile relativeToChangelogFile="false" splitStatements="true" stripComments="true" path="db/changelog/cap/sql/cap_application_view_mssql.sql" />   
+			</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-1164"
+		runInTransaction="true"  dbms="mssql">
+ <sqlFile relativeToChangelogFile="false" splitStatements="true" stripComments="true" path="db/changelog/cap/sql/cap_portfolio_view_mssql.sql" />  
+			</changeSet>
+<changeSet author="Leap (generated)" id="1617626474889-1165"
+		runInTransaction="true"  dbms="mssql">
+	 <sqlFile relativeToChangelogFile="false" splitStatements="true" stripComments="true" path="db/changelog/cap/sql/cap_user_view_mssql.sql" />   
+	</changeSet>
+<changeSet author="Leap (generated)" id="1617626474889-1166"
+		runInTransaction="true"  dbms="mssql">
+ <sqlFile relativeToChangelogFile="false" splitStatements="true" stripComments="true" path="db/changelog/cap/sql/cap_xw_portfolio_app_view_mssql.sql" />  
+			</changeSet>
+	<changeSet author="Leap (generated)" id="1617626474889-1167"
+		runInTransaction="true"  dbms="mssql">
+ <sqlFile relativeToChangelogFile="false" splitStatements="true" stripComments="true" path="db/changelog/cap/sql/cap_xw_user_portfolio_app_role_view_mssql.sql" />  
+			</changeSet>
+	<changeSet author="leap (generated)" id="1617626474889-1168"
+		runOnChange="true" runInTransaction="true"  dbms="mssql">
+		<createProcedure
+			procedureName="cap_cleanup_agent_logs"
+			path="db/changelog/cap/sql/cap_cleanup_agent_logs_SP_SQL.sql" />
+	</changeSet> 
+ 	<changeSet author="leap (generated)" id="1617626474889-1169"
+		runOnChange="true" runInTransaction="true"  dbms="mssql">
+		<createProcedure
+			procedureName="cap_cleanup_probe_run_app"
+			path="db/changelog/cap/sql/cap_cleanup_api_logs_SP_SQL.sql" />
+	</changeSet>
+	<changeSet author="leap (generated)" id="1617626474889-1170"
+		runOnChange="true" runInTransaction="true"  dbms="mssql">
+		<createProcedure
+			procedureName="cap_cleanup_probe_run_loc"
+			path="db/changelog/cap/sql/cap_cleanup_probe_run_loc_SP_SQL.sql" />
+	</changeSet>
+	<changeSet author="leap (generated)" id="1617626474889-1171"
+		runOnChange="true" runInTransaction="true"  dbms="mssql">
+		<createProcedure
+			procedureName="cap_cleanup_probe_run_run"
+			path="db/changelog/cap/sql/cap_cleanup_probe_run_run_SP_SQL.sql" />
+	</changeSet>
+	<changeSet author="leap (generated)" id="1617626474889-1172"
+		runOnChange="true" runInTransaction="true"  dbms="mssql">
+		<createProcedure
+			procedureName="cap_cleanup_workflow_run_exe"
+			path="db/changelog/cap/sql/cap_cleanup_workflow_run_exe_SP_SQL.sql" />
+	</changeSet>
+	<changeSet author="leap (generated)" id="1617626474889-1173"
+		runOnChange="true" runInTransaction="true"  dbms="mssql">
+		<createProcedure
+			procedureName="cap_cleanup_workflow_agent"
+			path="db/changelog/cap/sql/cap_cleanup_workflow_agent_SP_SQL.sql" />
+	</changeSet>
+	<changeSet author="leap (generated)" id="1617626474889-1174"
+		runOnChange="true" runInTransaction="true"  dbms="mssql">
+		<createProcedure
+			procedureName="cap_cleanup_workflow_input"
+			path="db/changelog/cap/sql/cap_cleanup_workflow_input_SP_SQL.sql" />
+	</changeSet>
+	<changeSet author="leap (generated)" id="1617626474889-1175"
+		runOnChange="true" runInTransaction="true"  dbms="mssql">
+		<createProcedure
+			procedureName="cap_cleanup_workflow_input"
+			path="db/changelog/cap/sql/cap_cleanup_workflow_output_logs_SP_SQL.sql" />
+	</changeSet>
+	    <changeSet id="1617626474889-1176" author="leap (generated)" runOnChange="true" runInTransaction="true"  dbms="mssql"> 
+      <sqlFile relativeToChangelogFile="false" splitStatements="true" stripComments="true" path="db/changelog/cap/sql/cap_config_data_mssql.sql" /> 
+   </changeSet>
+  
+  <changeSet id="1617626474889-1177" author="leap (generated)" runOnChange="true" runInTransaction="true"  dbms="mysql"> 
+      <sqlFile relativeToChangelogFile="false" splitStatements="true" stripComments="true" path="db/changelog/cap/sql/cap_config_transaction_data.sql" /> 
+   </changeSet>
+ <changeSet id="1617626474889-1178" author="leap (generated)" runOnChange="true" runInTransaction="true"  dbms="mssql"> 
+      <sqlFile relativeToChangelogFile="false" splitStatements="true" stripComments="true" path="db/changelog/cap/sql/cap_config_transaction_data_mssql.sql" />
+ </changeSet>
+        <changeSet author="Leap (generated)" id="1617626474889-1179" dbms="mysql">
+        <sqlFile encoding="utf8"
+        path="db/changelog/cap/sql/dbdatediff.sql"
+        relativeToChangelogFile="false"
+        splitStatements="true"
+        endDelimiter="\nGO"
+        />
+     </changeSet>
+     
+     <changeSet author="Leap (generated)" id="2v0-cap-1" >
+<sql dbms="mysql" splitStatements="true" stripComments="true"> 
+ALTER TABLE cap_vault_manager_botfactory MODIFY COLUMN Value VARCHAR(200) NOT NULL
+</sql>
+</changeSet>
+<changeSet author="Leap (generated)" id="2v0-cap-2" >
+<sql dbms="mssql" splitStatements="true" stripComments="true"> 
+ALTER TABLE cap_vault_manager_botfactory ALTER COLUMN Value VARCHAR(200) NOT NULL
+</sql>
+</changeSet>
+</databaseChangeLog>

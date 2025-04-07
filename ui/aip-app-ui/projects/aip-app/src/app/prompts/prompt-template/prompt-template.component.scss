@@ -1,0 +1,31 @@
+.pannel-shadow{
+    box-shadow: -2px 0 25px -20px rgba(0, 0, 0, 0.75) !important;
+    border: 0.5px solid rgba(0, 0, 0, 0.1215686275);
+    // border-radius: 16px;
+    opacity: 1;
+}
+
+.sub-main-container {
+    background-color: white;
+    border-radius: 8px;
+    // border: none;
+    margin: 16px;
+  }
+
+  .icon-size {
+    width: 24px;
+    height: 24px;
+    font-size: 21px;
+}
+
+[contenteditable]:focus {
+  outline: 0px solid transparent;
+}
+
+.contenteditable-div {
+  white-space: pre-wrap;
+}
+
+::ng-deep .highlight-color {
+  color: #007ad9 !important;
+}

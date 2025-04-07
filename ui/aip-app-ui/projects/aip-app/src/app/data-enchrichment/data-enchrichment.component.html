@@ -1,0 +1,57 @@
+<div ledsModalHeader>
+    <div class="clearfix float-end le-u-pad-r-8 le-u-pad-t-8">
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()">
+            <i class="icon x-16 close-ico"></i>
+        </button>
+    </div>
+</div>
+<div ledsModalBody class="le-u-pad-16">
+    <span>
+        <i class="icon x-56 tick-green-lg-icon"></i>
+    </span>
+    <p *ngIf="status == 'COMPLETED'" class="text-center le-u-mar-t-24">
+        {{selectedEvent}}
+        has already been generated.
+        Do you want to retrigger?
+    </p>
+    <p *ngIf="status != 'COMPLETED'" class="text-center le-u-mar-t-24">
+        Click on Generate to trigger {{selectedEvent}}.
+    </p>
+</div>
+<div ledsModalFooter class="d-flex justify-content-center">
+    <leds-button buttonType="button" designType="text" (click)="generate(selectedEvent);">Generate</leds-button>
+    <leds-button *ngIf="selectedEvent != 'Embeddings' && status == 'COMPLETED'" buttonType="button" designType="text" (click)="open(selectedEvent);closeModal()">Open</leds-button>
+</div>
+
+<ng-template #ingest let-modal>
+    <app-semantic-search-dialog [data]=docName></app-semantic-search-dialog>
+</ng-template>
+
+<ng-template #translate let-modal>
+    <div ledsModalHeader>
+        <div class="clearfix float-end le-u-pad-r-8 le-u-pad-t-8">
+            <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+                <i class="icon x-16 close-ico"></i>
+            </button>
+        </div>
+    </div>
+    <div ledsModalBody class="le-u-pad-16">
+        <div class="table-responsive selector-693-2">
+            <leds-autocomplete [options]="languageOpt" [(ngModel)]="language" placeholder="Select Language"
+                label="Language to translate" errorMessage="{required: 'This field is required',}" [required]="true"
+                [autoActiveFirstOption]="false" (panelOptionSelected)="translate($event.option.value)">
+            </leds-autocomplete>
+            <mat-hint class="custom-hint-or-error"></mat-hint>
+        </div>
+    </div>
+    <div ledsModalFooter class="d-flex justify-content-center le-u-pad-b-16">
+        <leds-button nameText="secondaryButton" idText="secondaryButton" [disabled]="false" buttonType="button"
+            designType="primary" (click)="modal.dismiss('Cross click')">
+            Cancel
+        </leds-button>
+        <leds-button nameText="secondaryButton" idText="secondaryButton" [disabled]="errMsgFlag" buttonType="button"
+            designType="primary" (click)="translation()">
+            Translate
+        </leds-button>
+    </div>
+</ng-template>

@@ -1,0 +1,168 @@
+<div class="col-md-12" [ngBusy]="{ busy: busy, message: 'Loading...' }">
+    <div class="clearfix">
+        <div *ngIf="process" class="paddTop20">
+            <h3>Role Mapping - {{ process.process_name }}</h3>
+        </div>
+        <i class="fa fa-times fa-lg selector-411-3" id="close-icon" (click)="close()" aria-hidden="true"></i>
+    </div>
+
+    <div #waveForm="ngForm" ngForm="" [ngBusy]="{ busy: busy, message: 'Loading...' }">
+        <!-- <div class="noPad">
+            <div class="padTop20" style="width: 98%; padding-left: 20px">
+                <div class="row rwMAr" *ngIf="rolesToMap != undefined || rolesToMap != null">
+                    <div class="col-md-6">
+                        <label class="formLabel">Roles to be Mapped*</label>
+                        <mat-select multiple class="txtInput" [(ngModel)]="rolesToMap" 
+                        style="width: 85%" name="mappedRoles" id="mappedRoles1" placeholder="SELECT" required [compareWith]="compareObjects" 
+                        (selectionChange)="removeMapping($event)">
+                            <mat-option *ngFor="let item of filteredRoles; trackBy: trackByMethod" [value]="item">
+                                {{ item.name }}
+                            </mat-option>
+                        </mat-select>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <button type="button" [ngBusy]="{ busy: busy, message: 'Saving User...' }" class="genBtn marRght30" (click)="mapRoles();" 
+                        [disabled]="rolesToMap.length &lt; 1 ">
+                            Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+        <div class="noPad" *ngIf="roleProcesses.length > 0">
+            <div class="table-responsive" style="max-height: 66vh; border: 1px solid grey;">
+                <table mat-table="" [dataSource]="roleProcessList" class="table-hover list-table" matSort="" matSortActive="fromDate" matSortDirection="asc">
+                    <ng-container matColumnDef="is_active">
+                        <th mat-header-cell="" *matHeaderCellDef="">
+                            <strong> Select </strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task; let idx = index;" class="td-ellipsis">
+                            <div class="td-span td-ellipsis pull-left" 
+                            matTooltipClass="crud-tooltip" >
+                                <mat-checkbox color="primary" [checked]="selection.isSelected(task)" name="is_active" (change)="selectHandler(task)"></mat-checkbox>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="role">
+                        <th mat-header-cell="" *matHeaderCellDef="">
+                            <strong> Role Name </strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task; let idx = index;" class="td-ellipsis">
+                            <div class="td-span td-ellipsis pull-left" [title]="task.role_id.name"
+                            matTooltipClass="crud-tooltip">
+                              {{ task.role_id.name }}
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="role_hierarchy">
+                        <th mat-header-cell="" *matHeaderCellDef="">
+                            <strong> Role Hierarchy </strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task; let idx = index;" class="td-ellipsis">
+                            <mat-select color="primary" [name]="'roleHierarchy' + idx" class="txtInput" [id]="'roleHierarchy' + idx"
+                            [(ngModel)]="task.role_hierarchy"
+                            >
+                                <mat-option *ngFor="let level of accessLevels" 
+                                [value]="level">
+                                    {{ level }}
+                                </mat-option>
+                            </mat-select>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="is_role_based_search_access">
+                        <th mat-header-cell="" *matHeaderCellDef="">
+                            <strong> Search Access </strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task; let idx = index;" class="td-ellipsis">
+                            <div class="td-span td-ellipsis pull-left" 
+                            matTooltipClass="crud-tooltip" >
+                                <mat-checkbox color="primary" 
+                                [(ngModel)]="task.is_role_based_search_access" 
+                                [id]="'is_role_based_search_access' + idx"
+                                [name]="'is_role_based_search_access' + idx"
+                                ></mat-checkbox>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="is_role_based_reassign_access">
+                        <th mat-header-cell="" *matHeaderCellDef="">
+                            <strong> Reassign Access </strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task; let idx = index;" class="td-ellipsis">
+                            <div class="td-span td-ellipsis pull-left" 
+                            matTooltipClass="crud-tooltip" >
+                                <mat-checkbox color="primary" 
+                                [(ngModel)]="task.is_role_based_reassign_access" 
+                                [name]="'is_role_based_reassign_access' + idx"
+                                ></mat-checkbox>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="is_role_based_assign_access">
+                        <th mat-header-cell="" *matHeaderCellDef="">
+                            <strong> Assign Access </strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task; let idx = index;" class="td-ellipsis">
+                            <div class="td-span td-ellipsis pull-left" 
+                            matTooltipClass="crud-tooltip" >
+                                <mat-checkbox color="primary" 
+                                [(ngModel)]="task.is_role_based_assign_access" 
+                                [name]="'is_role_based_assign_access' + idx"
+                                ></mat-checkbox>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="is_role_based_transfer_access">
+                        <th mat-header-cell="" *matHeaderCellDef="">
+                            <strong> Transfer Access </strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task; let idx = index;" class="td-ellipsis">
+                            <div class="td-span td-ellipsis pull-left" 
+                            matTooltipClass="crud-tooltip" >
+                                <mat-checkbox color="primary" 
+                                [(ngModel)]="task.is_role_based_transfer_access" 
+                                [name]="'is_role_based_transfer_access' + idx"
+                                ></mat-checkbox>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="is_role_based_bulkPage_access">
+                        <th mat-header-cell="" *matHeaderCellDef="">
+                            <strong> Bulk Page Access </strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task; let idx = index;" class="td-ellipsis">
+                            <div class="td-span td-ellipsis pull-left" 
+                            matTooltipClass="crud-tooltip" >
+                                <mat-checkbox color="primary" 
+                                [(ngModel)]="task.is_role_based_bulkPage_access" 
+                                [name]="'is_role_based_bulkPage_access' + idx"
+                                ></mat-checkbox>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="delete">
+                        <th mat-header-cell="" *matHeaderCellDef="">
+                            <strong> Delete </strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task; let idx = index;" class="td-ellipsis">
+                            <div class="td-span td-ellipsis pull-left" 
+                            matTooltipClass="crud-tooltip">
+                                <!-- <mat-checkbox color="primary" [name]="'delete' + idx"
+                                (change)="deleteEntry(task, $event)"></mat-checkbox> -->
+                                <i class="fa fa-trash fa-lg create-icon-color" aria-hidden="true"  title="delete" (click)="deleteEntry(task)"></i>
+                            </div>
+                        </td>
+                    </ng-container>
+                    <tr style="background-color: rgb(230,230,230,1);" mat-header-row="" *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                    <tr mat-row="" *matRowDef="let row; columns: displayedColumns"></tr>
+                </table>
+            </div>
+        </div>
+        <div id="btnMargin" *ngIf="roleProcesses.length > 0">
+            <button type="button" [ngBusy]="{ busy: busy, message: 'Saving User...' }" class="genBtn marRght30" (click)="saveRoleProcesses()">
+                Save
+            </button>
+        </div>
+    </div>
+</div>

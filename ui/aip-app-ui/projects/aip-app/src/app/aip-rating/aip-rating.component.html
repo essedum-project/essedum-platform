@@ -1,0 +1,36 @@
+<div class="le-u-pad-tb-16 le-u-pad-lr-8">
+    <div ledsModalHeader class="d-flex justify-content-between">
+        <div class="clearfix le-u-text-black le-u-pad-t-8 le-u-pad-l-16">
+            <h3 class="le-u-header-xl">Feedback : {{selectedElementAlias}}</h3>
+        </div>
+        <div class="clearfix float-end le-u-pad-r-8 le-u-pad-t-8 align-items-center">
+            <button type="button" class="detailIcon" aria-label="Detail" (click)="navigateToDetailedRating();closeModal()">
+                <i class="icon x-16 graph-icon"></i>
+            </button>
+            <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()">
+                <i class="icon x-16 close-icon"></i>
+            </button>
+        </div>
+    </div>
+    <hr />
+    <div ledsModalBody class="le-u-pad-16">
+        <i class="icon x-32 yellow icon-star_filled"></i>
+        <p class="text-center le-u-mar-t-24">
+            Please Rate and provide Feedback
+        </p>
+        <br />
+        <div class="d-flex justify-content-center">
+            <leds-rating [disabled]="false" [maxRating]="5" [rating]="rating"
+                (ratingChange)="ratingChange($event)"></leds-rating>
+        </div>
+        <br />
+        <div style="border:thin dotted;">
+            <leds-textarea [placeholder]="'Feedback'" [label]="'Feedback'" [designType]="'default'" [inputType]="'text'"
+                [(ngModel)]="feedback" (keyupChanges)="keyupChanges($event)"></leds-textarea>
+        </div>
+    </div>
+    <div ledsModalFooter class="d-flex justify-content-center">
+        <leds-button class="le-u-text-status-warning" buttonType="button" designType="primary"
+            (click)="submit()">Submit</leds-button>
+    </div>
+</div>

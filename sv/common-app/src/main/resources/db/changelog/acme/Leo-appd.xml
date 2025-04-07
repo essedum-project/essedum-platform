@@ -1,0 +1,351 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">      
+     <changeSet author="Leap (generated)" id="1618294190695-312">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/data/1312v0/appd/mldataset1.csv" quotchar="&quot;" separator="," tableName="mldataset">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="name" name="name" type="STRING"/>
+            <column header="alias" name="alias" type="STRING"/>
+            <column header="description" name="description" type="STRING"/>
+            <column header="attributes" name="attributes" type="STRING"/>
+            <column header="exp_status" name="exp_status" type="NUMERIC"/>
+            <column header="organization" name="organization" type="STRING"/>
+            <column header="schemajson" name="schemajson" type="STRING"/>
+            <column header="type" name="type" type="STRING"/>
+            <column header="backing_dataset" name="backing_dataset" type="skip"/>
+            <column header="dataset_schema" name="dataset_schema" type="STRING"/>
+            <column header="datasource" name="datasource" type="STRING"/>
+            <column header="lastmodifiedby" name="lastmodifiedby" type="STRING"/>
+            <column header="lastmodifieddate" name="lastmodifieddate" type="DATE"/>
+        </loadData>
+    </changeSet>
+    
+    <changeSet dbms="mysql,h2" author="Leap (generated)" id="1618294190695-313">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/data/1312v0/appd/mldataset1-mysql.csv" quotchar="&quot;" separator="," tableName="mldataset">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="name" name="name" type="STRING"/>
+            <column header="alias" name="alias" type="STRING"/>
+            <column header="description" name="description" type="STRING"/>
+            <column header="attributes" name="attributes" type="STRING"/>
+            <column header="exp_status" name="exp_status" type="NUMERIC"/>
+            <column header="organization" name="organization" type="STRING"/>
+            <column header="schemajson" name="schemajson" type="STRING"/>
+            <column header="type" name="type" type="STRING"/>
+            <column header="backing_dataset" name="backing_dataset" type="skip"/>
+            <column header="dataset_schema" name="dataset_schema" type="STRING"/>
+            <column header="datasource" name="datasource" type="STRING"/>
+            <column header="lastmodifiedby" name="lastmodifiedby" type="STRING"/>
+            <column header="lastmodifieddate" name="lastmodifieddate" type="DATE"/>
+        </loadData>
+    </changeSet>
+    
+    <changeSet dbms="mssql" author="Leap (generated)" id="1618294190695-316">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/data/1312v0/appd/mldataset1-mssql.csv" quotchar="&quot;" separator="," tableName="mldataset">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="name" name="name" type="STRING"/>
+            <column header="alias" name="alias" type="STRING"/>
+            <column header="description" name="description" type="STRING"/>
+            <column header="attributes" name="attributes" type="STRING"/>
+            <column header="exp_status" name="exp_status" type="NUMERIC"/>
+            <column header="organization" name="organization" type="STRING"/>
+            <column header="schemajson" name="schemajson" type="STRING"/>
+            <column header="type" name="type" type="STRING"/>
+            <column header="backing_dataset" name="backing_dataset" type="skip"/>
+            <column header="dataset_schema" name="dataset_schema" type="STRING"/>
+            <column header="datasource" name="datasource" type="STRING"/>
+            <column header="lastmodifiedby" name="lastmodifiedby" type="STRING"/>
+            <column header="lastmodifieddate" name="lastmodifieddate" type="DATE"/>
+        </loadData>
+    </changeSet>
+    
+      <changeSet author="Leap (generated)" id="1618294190695-314">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/data/1312v0/appd/mldatasource1.csv" quotchar="&quot;" separator="," tableName="mldatasource">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="connectiondetails" name="connectiondetails" type="STRING"/>
+            <column header="description" name="description" type="STRING"/>
+            <column header="dshashcode" name="dshashcode" type="STRING"/>
+            <column header="name" name="name" type="STRING"/>
+            <column header="organization" name="organization" type="STRING"/>
+            <column header="salt" name="salt" type="STRING"/>
+            <column header="type" name="type" type="STRING"/>
+            <column header="category" name="category" type="STRING"/>
+            <column header="activetime" name="activetime" type="skip"/>
+            <column header="lastmodifiedby" name="lastmodifiedby" type="STRING"/>
+            <column header="lastmodifieddate" name="lastmodifieddate" type="DATE"/>
+            <column header="alias" name="alias" type="STRING"/>
+        </loadData>
+    </changeSet>
+    
+    <changeSet dbms="mysql,h2" author="Leap (generated)" id="1618294190695-315">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/data/1312v0/appd/mldatasource1-mysql.csv" quotchar="&quot;" separator="," tableName="mldatasource">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="connectiondetails" name="connectiondetails" type="STRING"/>
+            <column header="description" name="description" type="STRING"/>
+            <column header="dshashcode" name="dshashcode" type="STRING"/>
+            <column header="name" name="name" type="STRING"/>
+            <column header="organization" name="organization" type="STRING"/>
+            <column header="salt" name="salt" type="STRING"/>
+            <column header="type" name="type" type="STRING"/>
+            <column header="category" name="category" type="STRING"/>
+            <column header="activetime" name="activetime" type="skip"/>
+            <column header="lastmodifiedby" name="lastmodifiedby" type="STRING"/>
+            <column header="lastmodifieddate" name="lastmodifieddate" type="DATE"/>
+            <column header="alias" name="alias" type="STRING"/>
+        </loadData>
+    </changeSet>
+    
+    <changeSet dbms="mssql" author="Leap (generated)" id="1618294190695-318">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/data/1312v0/appd/mldatasource1-mssql.csv" quotchar="&quot;" separator="," tableName="mldatasource">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="connectiondetails" name="connectiondetails" type="STRING"/>
+            <column header="description" name="description" type="STRING"/>
+            <column header="dshashcode" name="dshashcode" type="STRING"/>
+            <column header="name" name="name" type="STRING"/>
+            <column header="organization" name="organization" type="STRING"/>
+            <column header="salt" name="salt" type="STRING"/>
+            <column header="type" name="type" type="STRING"/>
+            <column header="category" name="category" type="STRING"/>
+            <column header="activetime" name="activetime" type="skip"/>
+            <column header="lastmodifiedby" name="lastmodifiedby" type="STRING"/>
+            <column header="lastmodifieddate" name="lastmodifieddate" type="DATE"/>
+            <column header="alias" name="alias" type="STRING"/>
+        </loadData>
+    </changeSet>
+   
+   <changeSet author="Leap (generated)" id="1618294190695-301">
+    	<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_dashboard_configuration ON;
+		</sql>
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/data/1312v0/appd/dbs_dashboard_configuration.csv" quotchar="&quot;" separator="," tableName="dbs_dashboard_configuration">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="app_name" name="app_name" type="STRING"/>
+            <column header="bg_image" name="bg_image" type="skip"/>
+            <column header="category" name="category" type="STRING"/>
+            <column header="created_by" name="created_by" type="STRING"/>
+            <column header="created_on" name="created_on" type="skip"/>
+            <column header="dash_array" name="dash_array" type="skip"/>
+            <column header="dashboard_access" name="dashboard_access" type="STRING"/>
+            <column header="dash_floating_modal" name="dash_floating_modal" type="STRING"/>
+            <column header="dash_json" name="dash_json" type="STRING"/>
+            <column header="dependent_filter" name="dependent_filter" type="skip"/>
+            <column header="description" name="description" type="STRING"/>
+            <column header="icon" name="icon" type="STRING"/>
+            <column header="image" name="image" type="skip"/>
+            <column header="is_deleted" name="is_deleted" type="BOOLEAN"/>
+            <column header="landing_dash" name="landing_dash" type="BOOLEAN"/>
+            <column header="layout" name="layout" type="NUMERIC"/>
+            <column header="show_date" name="show_date" type="BOOLEAN"/>
+            <column header="context" name="context" type="skip"/>
+            <column header="project" name="project" type="NUMERIC"/>
+        </loadData>
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_dashboard_configuration OFF;
+		</sql>
+    </changeSet>
+    
+    <changeSet dbms= "mysql,h2,postgresql" author="Leap (generated)" id="1618294190695-307">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/data/1312v0/appd/dbs_sequence_widget.csv" quotchar="&quot;" separator="," tableName="dbs_sequence_widget">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="project_id" name="project_id" type="NUMERIC"/>
+            <column header="color_type" name="color_type" type="STRING"/>
+            <column header="colour" name="colour" type="STRING"/>
+            <column header="dataset_name" name="dataset_name" type="STRING"/>
+            <column header="datasource_name" name="datasource_name" type="STRING"/>
+            <column header="y_axis" name="y_axis" type="NUMERIC"/>
+            <column header="chart_type" name="chart_type" type="NUMERIC"/>
+            <column header="widget_id" name="widget_id" type="NUMERIC"/>
+        </loadData>
+    </changeSet>
+	
+	<changeSet dbms= "mssql" author="Leap (generated)" id="1618294190695-321">
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_sequence_widget ON;
+		</sql>
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/data/1312v0/appd/dbs_sequence_widget-mssql.csv" quotchar="&quot;" separator="," tableName="dbs_sequence_widget">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="project_id" name="project_id" type="NUMERIC"/>
+            <column header="color_type" name="color_type" type="STRING"/>
+            <column header="colour" name="colour" type="STRING"/>
+            <column header="dataset_name" name="dataset_name" type="STRING"/>
+            <column header="datasource_name" name="datasource_name" type="STRING"/>
+            <column header="y_axis" name="y_axis" type="NUMERIC"/>
+            <column header="chart_type" name="chart_type" type="NUMERIC"/>
+            <column header="widget_id" name="widget_id" type="NUMERIC"/>
+        </loadData>
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_sequence_widget OFF;
+		</sql>
+    </changeSet>
+   
+    
+    <changeSet dbms="mysql,h2,postgresql" author="Leap (generated)" id="1618294190695-320">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/data/1312v0/appd/dbs_widget_configuration.csv" quotchar="&quot;" separator="," tableName="dbs_widget_configuration">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="project_id" name="project_id" type="NUMERIC"/>
+            <column header="add_to_summary" name="add_to_summary" type="STRING"/>
+            <column header="apply_on_category" name="apply_on_category" type="BOOLEAN"/>
+            <column header="auto_refresh" name="auto_refresh" type="BOOLEAN"/>
+            <column header="categorize_on" name="categorize_on" type="STRING"/>
+            <column header="category" name="category" type="STRING"/>
+            <column header="colour" name="colour" type="STRING"/>
+            <column header="count_category" name="count_category" type="STRING"/>
+            <column header="count_category_column" name="count_category_column" type="STRING"/>
+            <column header="count_column" name="count_column" type="STRING"/>
+            <column header="data_label" name="data_label" type="BOOLEAN"/>
+            <column header="description" name="description" type="skip"/>
+            <column header="drilldown" name="drilldown" type="BOOLEAN"/>
+            <column header="dual_axis" name="dual_axis" type="skip"/>
+            <column header="filters" name="filters" type="STRING"/>
+            <column header="from_date" name="from_date" type="skip"/>
+            <column header="img_src" name="img_src" type="STRING"/>
+            <column header="is_cache_enabled" name="is_cache_enabled" type="skip"/>
+            <column header="is_deleted" name="is_deleted" type="STRING"/>
+            <column header="legend" name="legend" type="BOOLEAN"/>
+            <column header="legend_name" name="legend_name" type="STRING"/>
+            <column header="limit1" name="limit1" type="NUMERIC"/>
+            <column header="operation" name="operation" type="STRING"/>
+            <column header="refresh_time" name="refresh_time" type="NUMERIC"/>
+            <column header="remarks" name="remarks" type="skip"/>
+            <column header="sub_x_axis" name="sub_x_axis" type="STRING"/>
+            <column header="sub_x_axis_alias" name="sub_x_axis_alias" type="STRING"/>
+            <column header="subtitle_alias" name="subtitle_alias" type="STRING"/>
+            <column header="summary_subtitle_alias" name="summary_subtitle_alias" type="STRING"/>
+            <column header="summary_name" name="summary_name" type="STRING"/>
+            <column header="to_date" name="to_date" type="skip"/>
+            <column header="url" name="url" type="STRING"/>
+            <column header="widget_json" name="widget_json" type="STRING"/>
+            <column header="widget_name" name="widget_name" type="STRING"/>
+            <column header="x_axis_alias" name="x_axis_alias" type="STRING"/>
+            <column header="x_axis_label" name="x_axis_label" type="BOOLEAN"/>
+            <column header="x_param" name="x_param" type="STRING"/>
+            <column header="x_param_value" name="x_param_value" type="skip"/>
+            <column header="y2_axis" name="y2_axis" type="skip"/>
+            <column header="y_axis_alias" name="y_axis_alias" type="STRING"/>
+            <column header="y_axis_label" name="y_axis_label" type="BOOLEAN"/>
+            <column header="y_param" name="y_param" type="STRING"/>
+            <column header="y_param_value" name="y_param_value" type="skip"/>
+            <column header="chart_type" name="chart_type" type="STRING"/>
+            <column header="context" name="context" type="skip"/>
+            <column header="dashboard" name="dashboard" type="NUMERIC"/>
+            <column header="navigate_to" name="navigate_to" type="NUMERIC"/>
+            <column header="details" name="details" type="STRING"/>
+        </loadData>
+    </changeSet>
+	
+	<changeSet dbms= "mssql" author="Leap (generated)" id="1618294190695-319">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_widget_configuration ON;
+		</sql>
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/data/1312v0/appd/dbs_widget_configuration-mssql.csv" quotchar="&quot;" separator="," tableName="dbs_widget_configuration">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="project_id" name="project_id" type="NUMERIC"/>
+            <column header="add_to_summary" name="add_to_summary" type="STRING"/>
+            <column header="apply_on_category" name="apply_on_category" type="BOOLEAN"/>
+            <column header="auto_refresh" name="auto_refresh" type="BOOLEAN"/>
+            <column header="categorize_on" name="categorize_on" type="STRING"/>
+            <column header="category" name="category" type="STRING"/>
+            <column header="colour" name="colour" type="STRING"/>
+            <column header="count_category" name="count_category" type="STRING"/>
+            <column header="count_category_column" name="count_category_column" type="STRING"/>
+            <column header="count_column" name="count_column" type="STRING"/>
+            <column header="data_label" name="data_label" type="BOOLEAN"/>
+            <column header="description" name="description" type="skip"/>
+            <column header="drilldown" name="drilldown" type="BOOLEAN"/>
+            <column header="dual_axis" name="dual_axis" type="skip"/>
+            <column header="filters" name="filters" type="STRING"/>
+            <column header="from_date" name="from_date" type="skip"/>
+            <column header="img_src" name="img_src" type="STRING"/>
+            <column header="is_cache_enabled" name="is_cache_enabled" type="skip"/>
+            <column header="is_deleted" name="is_deleted" type="STRING"/>
+            <column header="legend" name="legend" type="BOOLEAN"/>
+            <column header="legend_name" name="legend_name" type="STRING"/>
+            <column header="limit1" name="limit1" type="NUMERIC"/>
+            <column header="operation" name="operation" type="STRING"/>
+            <column header="refresh_time" name="refresh_time" type="NUMERIC"/>
+            <column header="remarks" name="remarks" type="skip"/>
+            <column header="sub_x_axis" name="sub_x_axis" type="STRING"/>
+            <column header="sub_x_axis_alias" name="sub_x_axis_alias" type="STRING"/>
+            <column header="subtitle_alias" name="subtitle_alias" type="STRING"/>
+            <column header="summary_subtitle_alias" name="summary_subtitle_alias" type="STRING"/>
+            <column header="summary_name" name="summary_name" type="STRING"/>
+            <column header="to_date" name="to_date" type="skip"/>
+            <column header="url" name="url" type="STRING"/>
+            <column header="widget_json" name="widget_json" type="STRING"/>
+            <column header="widget_name" name="widget_name" type="STRING"/>
+            <column header="x_axis_alias" name="x_axis_alias" type="STRING"/>
+            <column header="x_axis_label" name="x_axis_label" type="BOOLEAN"/>
+            <column header="x_param" name="x_param" type="STRING"/>
+            <column header="x_param_value" name="x_param_value" type="skip"/>
+            <column header="y2_axis" name="y2_axis" type="skip"/>
+            <column header="y_axis_alias" name="y_axis_alias" type="STRING"/>
+            <column header="y_axis_label" name="y_axis_label" type="BOOLEAN"/>
+            <column header="y_param" name="y_param" type="STRING"/>
+            <column header="y_param_value" name="y_param_value" type="skip"/>
+            <column header="chart_type" name="chart_type" type="STRING"/>
+            <column header="context" name="context" type="skip"/>
+            <column header="dashboard" name="dashboard" type="NUMERIC"/>
+            <column header="navigate_to" name="navigate_to" type="NUMERIC"/>
+            <column header="details" name="details" type="STRING"/>
+        </loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_widget_configuration OFF;
+		</sql>
+    </changeSet>
+    
+    <changeSet author="Leap (generated)" id="1618294190695-303">
+    	<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_palette ON;
+		</sql>
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/data/1312v0/appd/dbs_palette.csv" quotchar="&quot;" separator="," tableName="dbs_palette">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="project_id" name="project_id" type="NUMERIC"/>
+            <column header="color" name="color" type="STRING"/>
+            <column header="created_by" name="created_by" type="skip"/>
+            <column header="created_on" name="created_on" type="skip"/>
+            <column header="is_deleted" name="is_deleted" type="BOOLEAN"/>
+            <column header="modified_by" name="modified_by" type="skip"/>
+            <column header="modified_on" name="modified_on" type="skip"/>
+            <column header="series_name" name="series_name" type="STRING"/>
+            <column header="palette_config" name="palette_config" type="NUMERIC"/>
+        </loadData>
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_palette OFF;
+		</sql>
+    </changeSet>
+    
+    <changeSet author="Leap (generated)" id="1618294190695-304">
+    	<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_palette_config ON;
+		</sql>
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/data/1312v0/appd/dbs_palette_config.csv" quotchar="&quot;" separator="," tableName="dbs_palette_config">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="project_id" name="project_id" type="NUMERIC"/>
+            <column header="created_by" name="created_by" type="STRING"/>
+            <column header="created_on" name="created_on" type="DATE"/>
+            <column header="is_deleted" name="is_deleted" type="BOOLEAN"/>
+            <column header="modified_by" name="modified_by" type="STRING"/>
+            <column header="modified_on" name="modified_on" type="DATE"/>
+            <column header="palette_name" name="palette_name" type="STRING"/>
+            <column header="organisation" name="organisation" type="skip"/>
+        </loadData>
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_palette_config OFF;
+		</sql>
+    </changeSet>
+    
+    <changeSet author="Leap (generated)" id="1618294190695-305">
+    	<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_palette_widget_sequence ON;
+		</sql>
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/data/1312v0/appd/dbs_palette_widget_sequence.csv" quotchar="&quot;" separator="," tableName="dbs_palette_widget_sequence">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="project_id" name="project_id" type="NUMERIC"/>
+            <column header="palette_id" name="palette_id" type="skip"/>
+            <column header="palette_config" name="palette_config" type="NUMERIC"/>
+            <column header="widget_sequence_id" name="widget_sequence_id" type="NUMERIC"/>
+        </loadData>
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_palette_widget_sequence OFF;
+		</sql>
+    </changeSet>
+    
+	</databaseChangeLog>

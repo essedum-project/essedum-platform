@@ -1,0 +1,82 @@
+<div class="clearfix le-l-bodywrapper aip-tranparent-backgroud" id="mainCtr">
+    <div id="mainrightCnt" class="container-fluid le-l-middle-col le-u-no-mar-l__mb">
+        <div class="le-l-level1-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="le-l-level1-middle-col le-l-base-layout-center">
+                        <div class="">
+                            <div class=" selector-model-title-head d-flex  align-items-center">
+                                <div class=""> <leds-tooltip [tooltip]="'back'" [position]="'above'">
+                                        <i class="aip-led-icons aip-cursor icon x-32 back-icon"
+                                            (click)="navigateBack()"></i>
+                                    </leds-tooltip></div>
+                                <span class="le-u-mar-l-8  aip-desc-title le-u-header-xxl" style=" color: #737373;;">My
+                                    Inbox</span>
+                            </div>
+
+                            <leds-panel type="default" styleClass="" contentClass="">
+                                <div ledsTabGroup [type]="'secondary'" [headerBg]="'white'">
+                                    <mat-tab-group disableRipple>
+                                        <mat-tab>
+                                            <ng-template mat-tab-label>For My Approval</ng-template>
+                                            <div class="le-u-mar-t-24">
+                                                <leds-data-grid>
+                                                    <table dataGridTable>
+                                                        <thead>
+                                                            <tr>
+                                                                <td class="le-u-header-md">Request No.</td>
+                                                                <th class="le-c-datagrid__th-sort" scope="col">
+                                                                    Initiative
+                                                                </th>
+                                                                <th scope="col">Description</th>
+                                                                <th scope="col">Requested Date</th>
+                                                                <th scope="col">Requester</th>
+                                                                <th scope="col" class="le-c-datagrid__th-sort">
+                                                                    Status
+                                                                </th>
+                                                                <th scope="col">Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr *ngFor="let inbox of inboxData">
+                                                                <td>{{inbox['Request No']}}</td>
+                                                                <td>
+                                                                    {{inbox['Initiative']}}
+                                                                </td>
+                                                                <td>{{inbox['Description']}}</td>
+                                                                <td>{{inbox['Requested Date']}}</td>
+                                                                <td>{{inbox['Requester']}}</td>
+                                                                <td><span
+                                                                        class="le-c-badge le-c-badge--active">{{inbox['Status']}}</span>
+                                                                </td>
+                                                                <td>
+                                                                    <!-- <leds-button nameText="miniPrimaryButton" style="visibility: visible;"
+                                                                        idText="miniPrimaryButton" [disabled]="false"
+                                                                        buttonType="button" designType="miniPrimary">
+                                                                    </leds-button> -->
+                                                                    <div class="initiative-inbox-button">
+                                                                        <div  class="le-u-header-md" style="padding: 8px 12px">
+                                                                            {{inbox['Action']}}
+                                                                        </div>
+                                                                      
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </leds-data-grid>
+                                            </div>
+                                        </mat-tab>
+                                        <mat-tab>
+                                            <ng-template mat-tab-label>My Requests</ng-template>
+                                        </mat-tab>
+                                    </mat-tab-group>
+                                </div>
+                            </leds-panel>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

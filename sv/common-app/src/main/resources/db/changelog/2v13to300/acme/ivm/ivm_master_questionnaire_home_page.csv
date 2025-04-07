@@ -1,0 +1,2156 @@
+id,route,page,questionnaire_id,summary_report,default,usm_project_id,title,sub_title,description,is_pre_defined_page,is_active
+"1","ams","<!doctype html>
+<html lang=\"en\">
+
+<head>
+	<meta charset=\"utf-8\">
+	<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />
+	<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge,chrome=1\" />
+	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+	<style>
+		.page {
+            background-color: #EDEDED;
+            height: 75vh;
+            overflow: auto;
+        }
+
+        .banner {
+            background: transparent no-repeat padding-box;
+            height: 373px;
+        }
+
+        .banner-content {
+            background: transparent no-repeat padding-box;
+            height: 277px;
+            top: 62px;
+            margin-left: 783px;
+            position: relative;
+        }
+
+        @keyframes hover {
+            from {
+                box-shadow: inset 0 0 0 0.01px #000000;
+            }
+
+            to {
+                box-shadow: inset 200px 0 0 0.01px #000000;
+                color: #fff;
+            }
+        }
+
+        #intro {
+            padding: 2%;
+            color: #8f8787;
+            border-radius: 4px;
+            background-color: white;
+            margin: 1% 8% 0% 8%;
+            font-family: Roboto, Arial, Sans-serif;
+        }
+
+        .section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        @media screen and (max-width: 1023px) {
+            .section {
+                align-items: center;
+            }
+        }
+
+        .scrolling-section {
+            max-height: 100%;
+            width: 100%;
+        }
+
+        .cards-container {
+            margin-top: 2%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .cardFlex {
+            width: 100%;
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+			justify-content: center;
+			padding-left: 20px;
+        }
+
+        .card {
+            width: 100%;
+            padding: 0px;
+            margin-bottom: 21px;
+            margin-right: 21px;
+            opacity: 100%;
+            flex: 1 1 25%;
+            position: relative;
+            border-radius: 0 !important;
+            max-width: 360px;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: left;
+            background-color: #ffffff;
+        }
+
+        .card:hover {
+            animation-duration: 0.3s;
+            animation-timing-function: ease-out;
+            box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        .card:hover {
+            background-color: #ffffff;
+        }
+
+        .card-header {
+            padding: 0px;
+            font-size: 18px;
+            font-family: Roboto, Arial, Sans-serif;
+            font-weight: bold;
+            line-height: 40px;
+            letter-spacing: 0.62px;
+            text-align: left;
+            color: #ffffff;
+            opacity: 100%;
+        }
+
+        .card-footer {
+            margin: 5%;
+            color: #8f8787;
+            font-size: 2vmin;
+            font-family: Roboto, Arial, Sans-serif;
+            height: 100px;
+        }
+
+        .card-header {
+            background-position: 0 -297px;
+            height: 110px;
+            align-items: center;
+            display: flex;
+        }
+
+        .btn-class {
+            width: 200px;
+            opacity: 1;
+            border: 1px solid;
+            font-size: 18px;
+            font-family: Roboto, Arial, Sans-serif;
+            letter-spacing: 1.8px;
+            background-color: white;
+            padding: 14px;
+            color: #000000;
+            text-decoration: none;
+        }
+
+        .btn-class:hover {
+            animation: hover 0.2s forwards;
+        }
+
+        @media screen and (max-width: 481px) {
+            .btn-class {
+                font-size: 10px;
+            }
+
+            .banner {
+                height: 50vw;
+            }
+        }
+
+        @media screen and (max-width: 736px) and (min-width: 482px) {
+            .btn-class {
+                font-size: 12px;
+            }
+
+            .banner {
+                height: 40vw;
+            }
+        }
+
+        @media screen and (max-width: 1023px) and (min-width: 737px) {
+            .btn-class {
+                font-size: 12px;
+            }
+        }
+
+        @media screen and (max-width: 1322px) and (min-width: 1024px) {
+            .btn-class {
+                font-size: 12px;
+            }
+        }
+
+        @media screen and (max-width: 1384px) and (min-width: 1323px) {
+            .btn-class {
+                font-size: 12px;
+            }
+        }
+
+        @media screen and (max-width: 1650px) and (min-width: 1385px) {
+            .btn-class {
+                font-size: 12px;
+            }
+        }
+
+        @media screen and (max-width: 1919px) and (min-width: 1651px) {
+            .btn-class {
+                font-size: 12px;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 9px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(155, 155, 155, 0.5);
+            border-radius: 20px;
+            border: transparent;
+        }
+	</style>
+</head>
+
+<body>
+	<div class=\"page\">
+		<div class=\"banner\" style=\"background-image: url('https://leap7/ivmui/assets/images/sre-banner.png');
+background-color: #8626c3;
+    background-blend-mode: screen;
+}\">
+			<div class=\"banner-content\" style=\"background-image: url('https://leap7/ivmui/assets/images/geometry.png');\">
+			</div>
+		</div>
+		<div id=\"intro\">
+			Expectations from Application Management have changed significantly in the few years as more and more
+			enterprises
+			are embarking on cloud and digital transformation journeys while dealing with unprecedented business
+			disruptions and
+			talent crunch. Cost savings is no longer the only driver. NextGen application management is expected to
+			improve
+			resiliency, agility and speed while delivering business outcomes without ripping and replacing everything
+			and
+			starting over. 
+			This survey provides a quick view of where your organization stands in terms of SRE maturity compared to the best in class using a few curated engineering metrics across 3 core dimensions including Design & Build, Service Management and Monitoring and Alerting. We can use insights from this survey to identify areas of improvement, set goals, identify initiatives, create a roadmap and execute systematically to achieve the
+			vision of Next Gen SRE for your application portfolio.
+		</div>
+		<div class=\"section\">
+			<div class=\"scrolling-section\" id=\"startSurvey\" #startSurvey>
+				<div class=\"container section\">
+					<div class=\"cards-container\">
+						<div class=\"cardFlex\">
+							<div class=\"card\">
+								<div class=\"card-header\"
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/operatingmodel.png');\">
+									<div style=\"margin: 0 16px;\">Design & Build</div>
+								</div>
+								<div class=\"card-footer\">
+									<div>
+										Enterprises should adopt right design practices and build processes to ensure that the apps being built adhere to the
+										quality standards set for the enterprise. These include engineering tools, assessments, planning checklists and so on.
+									</div>
+								</div>
+							</div>
+							<div class=\"card\">
+								<div class=\"card-header\"
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Automation.png');\">
+									<div style=\"margin: 0 16px;\">Service Management</div>
+								</div>
+								<div class=\"card-footer\">
+									<div>
+										It is necessary for enterprises to enhance their processes to better respond to the agile changes and disruptions identified through the continuous monitoring tools.
+									</div>
+								</div>
+							</div>
+							<div class=\"card\">
+								<div class=\"card-header\"
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Resilience.png');\">
+									<div style=\"margin: 0 16px;\">Monitoring and Alerting</div>
+								</div>
+								<div class=\"card-footer\">
+									<div>
+										Ensuring availability, security and performance through predictive analytics is
+										critical for resilience and reliability of your enterprise application
+										landscape.
+									</div>
+								</div>
+							</div>
+						</div>
+						<div></div>
+					</div>
+					<div style=\"text-align: center;margin-bottom: 30px;\">
+						<button class=\"btn-class\" type=\"button\" onclick=\"window.location.replace(window.location.href + '/survey')\">###btnText###</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>","133","NULL","NULL","2","NULL","NULL","NULL","NULL","NULL"
+2,NULL,"<!doctype html>\
+<html lang=""en"">\
+\
+<head>\
+	<meta charset=""utf-8"">\
+	<meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8"" />\
+	<meta http-equiv=""X-UA-Compatible"" content=""IE=edge,chrome=1"" />\
+	<meta name=""viewport"" content=""width=device-width, initial-scale=1"">\
+	<style>\
+		.page {\
+			background-color: #EDEDED;\
+			height: 75vh;\
+			overflow: auto;\
+		}\
+\
+		.banner {\
+			background: transparent no-repeat padding-box;\
+			height: 373px;\
+		}\
+\
+		.banner-content {\
+			background: transparent no-repeat padding-box;\
+			height: 277px;\
+			top: 62px;\
+			margin-left: 783px;\
+			position: relative;\
+		}\
+\
+		@keyframes hover {\
+			from {\
+				box-shadow: inset 0 0 0 0.01px #000000;\
+			}\
+\
+			to {\
+				box-shadow: inset 200px 0 0 0.01px #000000;\
+				color: #fff;\
+			}\
+		}\
+\
+		#intro {\
+			padding: 1.5% 0% 1% 2%;\
+			color: #8f8787;\
+			border-radius: 4px;\
+			background-color: white;\
+			margin: 1% 8% 0% 8%;\
+			font-family: Roboto, Arial, Sans-serif;\
+		}\
+\
+		.section {\
+			display: flex;\
+			flex-direction: column;\
+			justify-content: center;\
+		}\
+\
+		@media screen and (max-width: 1023px) {\
+			.section {\
+				align-items: center;\
+			}\
+		}\
+\
+		.scrolling-section {\
+			max-height: 100%;\
+			width: 100%;\
+		}\
+\
+		.cards-container {\
+			margin-top: 2%;\
+			display: flex;\
+			flex-wrap: wrap;\
+			justify-content: flex-start;\
+			align-items: center;\
+		}\
+\
+		.cardFlex {\
+			width: 100%;\
+			display: flex;\
+			flex-direction: row;\
+			//flex-wrap: wrap;\
+			justify-content: center;\
+			padding-left: 20px;\
+		}\
+\
+		.card {\
+			width: 100%;\
+			padding: 0px;\
+			margin-bottom: 21px;\
+			margin-right: 21px;\
+			opacity: 100%;\
+			flex: 1 1 25%;\
+			position: relative;\
+			border-radius: 0 !important;\
+			max-width: 360px;\
+			background-repeat: no-repeat;\
+			background-size: cover;\
+			background-position: left;\
+			background-color: #ffffff;\
+		}\
+\
+		.card:hover {\
+			animation-duration: 0.3s;\
+			animation-timing-function: ease-out;\
+			box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.4);\
+		}\
+\
+		.card:hover {\
+			background-color: #ffffff;\
+		}\
+\
+		.card-header {\
+			padding: 0px;\
+			font-size: 18px;\
+			font-family: Roboto, Arial, Sans-serif;\
+			font-weight: bold;\
+			line-height: 40px;\
+			letter-spacing: 0.62px;\
+			text-align: left;\
+			color: #ffffff;\
+			opacity: 100%;\
+		}\
+\
+		.card-footer {\
+			margin: 5%;\
+			color: #8f8787;\
+			font-size: 2vmin;\
+			font-family: Roboto, Arial, Sans-serif;\
+			height: 125px;\
+		}\
+\
+		.card-header {\
+			background-position: 0 -297px;\
+			    height: 140px;\
+    align-items: center;\
+    display: flex;\
+		}\
+\
+		.btn-class {\
+			width: 200px;\
+			opacity: 1;\
+			border: 1px solid;\
+			font-size: 18px;\
+			font-family: Roboto, Arial, Sans-serif;\
+			letter-spacing: 1.8px;\
+			background-color: white;\
+			padding: 14px;\
+			color: #000000;\
+			text-decoration: none;\
+		}\
+\
+		.btn-class:hover {\
+			animation: hover 0.2s forwards;\
+		}\
+\
+		@media screen and (max-width: 481px) {\
+			.btn-class {\
+				font-size: 10px;\
+			}\
+\
+			.banner {\
+				height: 50vw;\
+			}\
+		}\
+\
+		@media screen and (max-width: 736px) and (min-width: 482px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+\
+			.banner {\
+				height: 40vw;\
+			}\
+		}\
+\
+		@media screen and (max-width: 1023px) and (min-width: 737px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+		}\
+\
+		@media screen and (max-width: 1322px) and (min-width: 1024px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+		}\
+\
+		@media screen and (max-width: 1384px) and (min-width: 1323px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+		}\
+\
+		@media screen and (max-width: 1650px) and (min-width: 1385px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+		}\
+\
+		@media screen and (max-width: 1919px) and (min-width: 1651px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+		}\
+		\
+		::-webkit-scrollbar {\
+			width: 9px;\
+		}\
+\
+		::-webkit-scrollbar-track {\
+			background: transparent;\
+		}\
+\
+		::-webkit-scrollbar-thumb {\
+			background-color: rgba(155, 155, 155, 0.5);\
+			border-radius: 20px;\
+			border: transparent;\
+		}\
+	</style>\
+</head>\
+\
+<body>\
+	<div class=""page"">\
+		<div class=""banner"" style=""background-image: url('#url#assets/images/banner_ri.png');\
+background-color: #8626c3;\
+    background-blend-mode: screen;\
+}"">\
+			<div class=""banner-content"" style=""background-image: url('#url#assets/images/geometry.png');"">\
+			</div>\
+		</div>\
+		<div id=""intro"">\
+			Expectations from Responsible AI have changed significantly in the few years as more and more\
+			enterprises\
+			are embarking on cloud and digital transformation journeys while dealing with unprecedented business\
+			disruptions and\
+			talent crunch. Cost savings is no longer the only driver. NextGen Responsible AI is expected to\
+			improve\
+			resiliency, agility and speed while delivering business outcomes without ripping and replacing everything\
+			and\
+			starting over. This survey provides a quick view of where your organization stands in terms of application\
+			management maturity compared to the best in class using a few curated engineering metrics across 3 core\
+			dimensions\
+			including Transparency, Technical Robustness and Safety, Human Centric Value, Sustainability and Well being, and Governance and Risk Management. We can use insights from this survey to identify areas\
+			of\
+			improvement, set goals, identify initiatives, create a roadmap and execute systematically to achieve the\
+			vision of\
+			Next Gen Responsible AI.\
+		</div>\
+		<div class=""section"">\
+			<div class=""scrolling-section"" id=""startSurvey"" #startSurvey>\
+				<div class=""container section"">\
+					<div class=""cards-container"">\
+						<div class=""cardFlex"">\
+						<div class=""card"">\
+								<div class=""card-header""\
+									style=""background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('#url#assets/image/Resilience.png');"">\
+									<div style=""margin: 0 16px;"">People and Planet</div>\
+								</div>\
+								<div class=""card-footer"">\
+									<div>\
+										As the use of AI becomes more widespread, it is crucial to ensure that it is developed and used responsibly, taking into account its impact on both people and the planet.AI systems should be designed to be transparent and accountable. This means that the decision-making process of the AI should be explainable and understandable to humans\
+									</div>\
+								</div>\
+							</div>\
+							<div class=""card"">\
+								<div class=""card-header""\
+									style=""background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('#url#assets/image/operatingmodel.png');"">\
+									<div style=""margin: 0 16px;"">Economic Context</div>\
+								</div>\
+								<div class=""card-footer"">\
+									<div>\
+										It is essential to consider the economic implications of AI development and deployment. While AI has the potential to create new opportunities and drive economic growth, it also raises significant economic concerns.One of the most significant economic concerns associated with the use of AI is job displacement.\
+									</div>\
+								</div>\
+							</div>\
+							<div class=""card"">\
+								<div class=""card-header""\
+									style=""background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('#url#assets/image/Automation.png');"">\
+									<div style=""margin: 0 16px;"">Data and Input</div>\
+								</div>\
+								<div class=""card-footer"">\
+									<div>\
+										Data privacy is a critical consideration in responsible AI development and deployment. AI systems rely on vast amounts of data to learn and make decisions, and it is essential to ensure that this data is handled with care and respect for individuals' privacy rights.AI systems should be designed with data protection in mind.\
+									</div>\
+								</div>\
+							</div>\
+							<div class=""card"">\
+								<div class=""card-header""\
+									style=""background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('#url#/assets/image/Resilience.png');"">\
+									<div style=""margin: 0 16px;"">AI Model</div>\
+								</div>\
+								<div class=""card-footer"">\
+									<div>\
+										AI models should be monitored and updated regularly to ensure that they continue to align with ethical and social considerations and that they are performing as expected. This includes monitoring for unintended consequences and making updates as necessary.\
+									</div>\
+								</div>\
+							</div>\
+						</div>\
+						<div></div>\
+					</div>\
+					<div style=""text-align: center;margin-bottom: 30px;"">\
+						<button class=""btn-class"" type=""button"" onclick=""window.location.replace(window.location.href + '/survey')"">###btnText###</button>\
+					</div>\
+				</div>\
+			</div>\
+		</div>\
+	</div>\
+</body>\
+\
+</html>",144,NULL,NULL,2,Responsible AI,Responsible AI questionnaire,Please take this survey,NULL,0
+3,NULL,"<!doctype html>\
+<html lang=""en"">\
+\
+<head>\
+	<meta charset=""utf-8"">\
+	<meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8"" />\
+	<meta http-equiv=""X-UA-Compatible"" content=""IE=edge,chrome=1"" />\
+	<meta name=""viewport"" content=""width=device-width, initial-scale=1"">\
+	<style>\
+		.page {\
+			background-color: #EDEDED;\
+			height: 75vh;\
+			overflow: auto;\
+		}\
+\
+		.banner {\
+			background: transparent no-repeat padding-box;\
+			height: 373px;\
+		}\
+\
+		.banner-content {\
+			background: transparent no-repeat padding-box;\
+			height: 277px;\
+			top: 62px;\
+			margin-left: 783px;\
+			position: relative;\
+		}\
+\
+		@keyframes hover {\
+			from {\
+				box-shadow: inset 0 0 0 0.01px #000000;\
+			}\
+\
+			to {\
+				box-shadow: inset 200px 0 0 0.01px #000000;\
+				color: #fff;\
+			}\
+		}\
+\
+		#intro {\
+			padding: 1.5% 0% 1% 2%;\
+			color: #8f8787;\
+			border-radius: 4px;\
+			background-color: white;\
+			margin: 1% 8% 0% 8%;\
+			font-family: Roboto, Arial, Sans-serif;\
+		}\
+\
+		.section {\
+			display: flex;\
+			flex-direction: column;\
+			justify-content: center;\
+		}\
+\
+		@media screen and (max-width: 1023px) {\
+			.section {\
+				align-items: center;\
+			}\
+		}\
+\
+		.scrolling-section {\
+			max-height: 100%;\
+			width: 100%;\
+		}\
+\
+		.cards-container {\
+			margin-top: 2%;\
+			display: flex;\
+			flex-wrap: wrap;\
+			justify-content: flex-start;\
+			align-items: center;\
+		}\
+\
+		.cardFlex {\
+			width: 100%;\
+			display: flex;\
+			flex-direction: row;\
+			//flex-wrap: wrap;\
+			justify-content: center;\
+			padding-left: 20px;\
+		}\
+\
+		.card {\
+			width: 100%;\
+			padding: 0px;\
+			margin-bottom: 21px;\
+			margin-right: 21px;\
+			opacity: 100%;\
+			flex: 1 1 25%;\
+			position: relative;\
+			border-radius: 0 !important;\
+			max-width: 360px;\
+			background-repeat: no-repeat;\
+			background-size: cover;\
+			background-position: left;\
+			background-color: #ffffff;\
+		}\
+\
+		.card:hover {\
+			animation-duration: 0.3s;\
+			animation-timing-function: ease-out;\
+			box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.4);\
+		}\
+\
+		.card:hover {\
+			background-color: #ffffff;\
+		}\
+\
+		.card-header {\
+			padding: 0px;\
+			font-size: 18px;\
+			font-family: Roboto, Arial, Sans-serif;\
+			font-weight: bold;\
+			line-height: 67px;\
+			letter-spacing: 0.62px;\
+			text-align: left;\
+			color: #ffffff;\
+			opacity: 100%;\
+		}\
+\
+		.card-footer {\
+			margin: 5%;\
+			color: #8f8787;\
+			font-size: 2vmin;\
+			font-family: Roboto, Arial, Sans-serif;\
+		}\
+\
+		.card-header {\
+			background-position: 0 -297px;\
+		}\
+\
+		.btn-class {\
+			width: 200px;\
+			opacity: 1;\
+			border: 1px solid;\
+			font-size: 18px;\
+			font-family: Roboto, Arial, Sans-serif;\
+			letter-spacing: 1.8px;\
+			background-color: white;\
+			padding: 14px;\
+			color: #000000;\
+			text-decoration: none;\
+		}\
+\
+		.btn-class:hover {\
+			animation: hover 0.2s forwards;\
+		}\
+\
+		@media screen and (max-width: 481px) {\
+			.btn-class {\
+				font-size: 10px;\
+			}\
+\
+			.banner {\
+				height: 50vw;\
+			}\
+		}\
+\
+		@media screen and (max-width: 736px) and (min-width: 482px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+\
+			.banner {\
+				height: 40vw;\
+			}\
+		}\
+\
+		@media screen and (max-width: 1023px) and (min-width: 737px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+		}\
+\
+		@media screen and (max-width: 1322px) and (min-width: 1024px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+		}\
+\
+		@media screen and (max-width: 1384px) and (min-width: 1323px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+		}\
+\
+		@media screen and (max-width: 1650px) and (min-width: 1385px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+		}\
+\
+		@media screen and (max-width: 1919px) and (min-width: 1651px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+		}\
+		\
+		::-webkit-scrollbar {\
+			width: 9px;\
+		}\
+\
+		::-webkit-scrollbar-track {\
+			background: transparent;\
+		}\
+\
+		::-webkit-scrollbar-thumb {\
+			background-color: rgba(155, 155, 155, 0.5);\
+			border-radius: 20px;\
+			border: transparent;\
+		}\
+	</style>\
+</head>\
+\
+<body>\
+	<div class=""page"">\
+		<div class=""banner"" style=""background-image: url('#url#assets/images/banner-logodesign.png');\
+background-color: #8626c3;\
+    background-blend-mode: screen;\
+}"">\
+			<div class=""banner-content"" style=""background-image: url('#url#assets/images/geometry.png');"">\
+			</div>\
+		</div>\
+		<div id=""intro"">\
+			Expectations from Application Management have changed significantly in the few years as more and more\
+			enterprises\
+			are embarking on cloud and digital transformation journeys while dealing with unprecedented business\
+			disruptions and\
+			talent crunch. Cost savings is no longer the only driver. NextGen application management is expected to\
+			improve\
+			resiliency, agility and speed while delivering business outcomes without ripping and replacing everything\
+			and\
+			starting over. This survey provides a quick view of where your organization stands in terms of application\
+			management maturity compared to the best in class using a few curated engineering metrics across 3 core\
+			dimensions\
+			including Automation, Resiliency and Operating model. We can use insights from this survey to identify areas\
+			of\
+			improvement, set goals, identify initiatives, create a roadmap and execute systematically to achieve the\
+			vision of\
+			Next Gen Application Management.\
+		</div>\
+		<div class=""section"">\
+			<div class=""scrolling-section"" id=""startSurvey"" #startSurvey>\
+				<div class=""container section"">\
+					<div class=""cards-container"">\
+						<div class=""cardFlex"">\
+							<div class=""card"">\
+								<div class=""card-header""\
+									style=""background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('#url#assets/image/operatingmodel.png');"">\
+									<div style=""margin: 0 16px;"">Operating Model</div>\
+								</div>\
+								<div class=""card-footer"">\
+									<div>\
+										Enterprises should adopt modern operating models like product centric delivery\
+										models powered by agile processes, devsecops and site reliability engineering\
+										principles integrating the build, run and transform functions for business\
+										agility and faster innovation.\
+									</div>\
+								</div>\
+							</div>\
+							<div class=""card"">\
+								<div class=""card-header""\
+									style=""background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('#url#assets/image/Automation.png');"">\
+									<div style=""margin: 0 16px;"">Service Automation</div>\
+								</div>\
+								<div class=""card-footer"">\
+									<div>\
+										Cognitive Automation through Digital Workers and Intelligent bots helps improve\
+										operational efficiencies and reduce costs.\
+									</div>\
+								</div>\
+							</div>\
+							<div class=""card"">\
+								<div class=""card-header""\
+									style=""background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('#url#assets/image/Resilience.png');"">\
+									<div style=""margin: 0 16px;"">Resilience</div>\
+								</div>\
+								<div class=""card-footer"">\
+									<div>\
+										Ensuring availability, security and performance through predictive analytics is\
+										critical for resilience and reliability of your enterprise application\
+										landscape.\
+									</div>\
+								</div>\
+							</div>\
+							<div class=""card"">\
+								<div class=""card-header""\
+									style=""background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('#url#assets/image/Automation.png');"">\
+									<div style=""margin: 0 16px;"">Business Alignment</div>\
+								</div>\
+								<div class=""card-footer"">\
+									<div>\
+										Enterprises should bring in sharper focus to the customer journey mapping and\
+										business value analytics across the entire IT srack than merely focusing on IT\
+										centric metrics.\
+									</div>\
+								</div>\
+							</div>\
+						</div>\
+						<div></div>\
+					</div>\
+					<div style=""text-align: center;margin-bottom: 30px;"">\
+						<button class=""btn-class"" type=""button"" onclick=""window.location.replace(window.location.href + '/survey')"">###btnText###</button>\
+					</div>\
+				</div>\
+			</div>\
+		</div>\
+	</div>\
+</body>\
+\
+</html>",150,NULL,NULL,2,AMS Questionnaire,NULL,NULL,0,0
+4,NULL,"<!doctype html>\
+<html lang=""en"">\
+\
+<head>\
+	<meta charset=""utf-8"">\
+	<meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8"" />\
+	<meta http-equiv=""X-UA-Compatible"" content=""IE=edge,chrome=1"" />\
+	<meta name=""viewport"" content=""width=device-width, initial-scale=1"">\
+	<style>\
+		.page {\
+			background-color: #EDEDED;\
+			height: 75vh;\
+			overflow: auto;\
+		}\
+\
+		.banner {\
+			background: transparent no-repeat padding-box;\
+			height: 373px;\
+		}\
+\
+		.banner-content {\
+			background: transparent no-repeat padding-box;\
+			height: 277px;\
+			top: 62px;\
+			margin-left: 783px;\
+			position: relative;\
+		}\
+\
+		@keyframes hover {\
+			from {\
+				box-shadow: inset 0 0 0 0.01px #000000;\
+			}\
+\
+			to {\
+				box-shadow: inset 200px 0 0 0.01px #000000;\
+				color: #fff;\
+			}\
+		}\
+\
+		#intro {\
+			padding: 1.5% 0% 1% 2%;\
+			color: #8f8787;\
+			border-radius: 4px;\
+			background-color: white;\
+			margin: 1% 8% 0% 8%;\
+			font-family: Roboto, Arial, Sans-serif;\
+		}\
+\
+		.section {\
+			display: flex;\
+			flex-direction: column;\
+			justify-content: center;\
+		}\
+\
+		@media screen and (max-width: 1023px) {\
+			.section {\
+				align-items: center;\
+			}\
+		}\
+\
+		.scrolling-section {\
+			max-height: 100%;\
+			width: 100%;\
+		}\
+\
+		.cards-container {\
+			margin-top: 2%;\
+			display: flex;\
+			flex-wrap: wrap;\
+			justify-content: flex-start;\
+			align-items: center;\
+		}\
+\
+		.cardFlex {\
+			width: 100%;\
+			display: flex;\
+			flex-direction: row;\
+			//flex-wrap: wrap;\
+			justify-content: center;\
+			padding-left: 20px;\
+		}\
+\
+		.card {\
+			width: 100%;\
+			padding: 0px;\
+			margin-bottom: 21px;\
+			margin-right: 21px;\
+			opacity: 100%;\
+			flex: 1 1 25%;\
+			position: relative;\
+			border-radius: 0 !important;\
+			max-width: 360px;\
+			background-repeat: no-repeat;\
+			background-size: cover;\
+			background-position: left;\
+			background-color: #ffffff;\
+		}\
+\
+		.card:hover {\
+			animation-duration: 0.3s;\
+			animation-timing-function: ease-out;\
+			box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.4);\
+		}\
+\
+		.card:hover {\
+			background-color: #ffffff;\
+		}\
+\
+		.card-header {\
+			padding: 0px;\
+			font-size: 18px;\
+			font-family: Roboto, Arial, Sans-serif;\
+			font-weight: bold;\
+			line-height: 67px;\
+			letter-spacing: 0.62px;\
+			text-align: left;\
+			color: #ffffff;\
+			opacity: 100%;\
+		}\
+\
+		.card-footer {\
+			margin: 5%;\
+			color: #8f8787;\
+			font-size: 2vmin;\
+			font-family: Roboto, Arial, Sans-serif;\
+		}\
+\
+		.card-header {\
+			background-position: 0 -297px;\
+		}\
+\
+		.btn-class {\
+			width: 200px;\
+			opacity: 1;\
+			border: 1px solid;\
+			font-size: 18px;\
+			font-family: Roboto, Arial, Sans-serif;\
+			letter-spacing: 1.8px;\
+			background-color: white;\
+			padding: 14px;\
+			color: #000000;\
+			text-decoration: none;\
+		}\
+\
+		.btn-class:hover {\
+			animation: hover 0.2s forwards;\
+		}\
+\
+		@media screen and (max-width: 481px) {\
+			.btn-class {\
+				font-size: 10px;\
+			}\
+\
+			.banner {\
+				height: 50vw;\
+			}\
+		}\
+\
+		@media screen and (max-width: 736px) and (min-width: 482px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+\
+			.banner {\
+				height: 40vw;\
+			}\
+		}\
+\
+		@media screen and (max-width: 1023px) and (min-width: 737px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+		}\
+\
+		@media screen and (max-width: 1322px) and (min-width: 1024px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+		}\
+\
+		@media screen and (max-width: 1384px) and (min-width: 1323px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+		}\
+\
+		@media screen and (max-width: 1650px) and (min-width: 1385px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+		}\
+\
+		@media screen and (max-width: 1919px) and (min-width: 1651px) {\
+			.btn-class {\
+				font-size: 12px;\
+			}\
+		}\
+		\
+		::-webkit-scrollbar {\
+			width: 9px;\
+		}\
+\
+		::-webkit-scrollbar-track {\
+			background: transparent;\
+		}\
+\
+		::-webkit-scrollbar-thumb {\
+			background-color: rgba(155, 155, 155, 0.5);\
+			border-radius: 20px;\
+			border: transparent;\
+		}\
+	</style>\
+</head>\
+\
+<body>\
+	<div class=""page"">\
+		<div class=""banner"" style=""background-image: url('#url#assets/images/banner-logodesign.png');\
+background-color: #8626c3;\
+    background-blend-mode: screen;\
+}"">\
+			<div class=""banner-content"" style=""background-image: url('#url#assets/images/geometry.png');"">\
+			</div>\
+		</div>\
+		<div id=""intro"">\
+			Expectations from Application Management have changed significantly in the few years as more and more\
+			enterprises\
+			are embarking on cloud and digital transformation journeys while dealing with unprecedented business\
+			disruptions and\
+			talent crunch. Cost savings is no longer the only driver. NextGen application management is expected to\
+			improve\
+			resiliency, agility and speed while delivering business outcomes without ripping and replacing everything\
+			and\
+			starting over. This survey provides a quick view of where your organization stands in terms of application\
+			management maturity compared to the best in class using a few curated engineering metrics across 3 core\
+			dimensions\
+			including Automation, Resiliency and Operating model. We can use insights from this survey to identify areas\
+			of\
+			improvement, set goals, identify initiatives, create a roadmap and execute systematically to achieve the\
+			vision of\
+			Next Gen Application Management.\
+		</div>\
+		<div class=""section"">\
+			<div class=""scrolling-section"" id=""startSurvey"" #startSurvey>\
+				<div class=""container section"">\
+					<div class=""cards-container"">\
+						<div class=""cardFlex"">\
+							<div class=""card"">\
+								<div class=""card-header""\
+									style=""background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('#url#assets/image/operatingmodel.png');"">\
+									<div style=""margin: 0 16px;"">Operating Model</div>\
+								</div>\
+								<div class=""card-footer"">\
+									<div>\
+										Enterprises should adopt modern operating models like product centric delivery\
+										models powered by agile processes, devsecops and site reliability engineering\
+										principles integrating the build, run and transform functions for business\
+										agility and faster innovation.\
+									</div>\
+								</div>\
+							</div>\
+							<div class=""card"">\
+								<div class=""card-header""\
+									style=""background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('#url#assets/image/Automation.png');"">\
+									<div style=""margin: 0 16px;"">Service Automation</div>\
+								</div>\
+								<div class=""card-footer"">\
+									<div>\
+										Cognitive Automation through Digital Workers and Intelligent bots helps improve\
+										operational efficiencies and reduce costs.\
+									</div>\
+								</div>\
+							</div>\
+							<div class=""card"">\
+								<div class=""card-header""\
+									style=""background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('#url#assets/image/Resilience.png');"">\
+									<div style=""margin: 0 16px;"">Resilience</div>\
+								</div>\
+								<div class=""card-footer"">\
+									<div>\
+										Ensuring availability, security and performance through predictive analytics is\
+										critical for resilience and reliability of your enterprise application\
+										landscape.\
+									</div>\
+								</div>\
+							</div>\
+							<div class=""card"">\
+								<div class=""card-header""\
+									style=""background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('#url#assets/image/Automation.png');"">\
+									<div style=""margin: 0 16px;"">Business Alignment</div>\
+								</div>\
+								<div class=""card-footer"">\
+									<div>\
+										Enterprises should bring in sharper focus to the customer journey mapping and\
+										business value analytics across the entire IT srack than merely focusing on IT\
+										centric metrics.\
+									</div>\
+								</div>\
+							</div>\
+						</div>\
+						<div></div>\
+					</div>\
+					<div style=""text-align: center;margin-bottom: 30px;"">\
+						<button class=""btn-class"" type=""button"" onclick=""window.location.replace(window.location.href + '/survey')"">###btnText###</button>\
+					</div>\
+				</div>\
+			</div>\
+		</div>\
+	</div>\
+</body>\
+\
+</html>",143,NULL,NULL,2,NULL,NULL,NULL,NULL,0
+"54","NULL","	<!doctype html>
+<html lang=\"en\">
+
+<head>
+	<meta charset=\"utf-8\">
+	<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />
+	<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge,chrome=1\" />
+	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+	<style>
+		.page {
+			background-color: #EDEDED;
+			height: 75vh;
+			overflow: auto;
+		}
+
+		.banner {
+			background: transparent no-repeat padding-box;
+			height: 373px;
+		}
+
+		.banner-content {
+			background: transparent no-repeat padding-box;
+			height: 277px;
+			top: 62px;
+			margin-left: 783px;
+			position: relative;
+		}
+
+		@keyframes hover {
+			from {
+				box-shadow: inset 0 0 0 0.01px #000000;
+			}
+
+			to {
+				box-shadow: inset 200px 0 0 0.01px #000000;
+				color: #fff;
+			}
+		}
+
+		#intro {
+			padding: 1.5% 0% 1% 2%;
+			color: #8f8787;
+			border-radius: 4px;
+			background-color: white;
+			margin: 1% 8% 0% 8%;
+			font-family: Roboto, Arial, Sans-serif;
+		}
+
+		.section {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+		}
+
+		@media screen and (max-width: 1023px) {
+			.section {
+				align-items: center;
+			}
+		}
+
+		.scrolling-section {
+			max-height: 100%;
+			width: 100%;
+		}
+
+		.cards-container {
+			margin-top: 2%;
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: flex-start;
+			align-items: center;
+		}
+
+		.cardFlex {
+			width: 100%;
+			display: flex;
+			flex-direction: row;
+			//flex-wrap: wrap;
+			justify-content: center;
+			padding-left: 20px;
+		}
+
+		.card {
+			width: 100%;
+			padding: 0px;
+			margin-bottom: 21px;
+			margin-right: 21px;
+			opacity: 100%;
+			flex: 1 1 25%;
+			position: relative;
+			border-radius: 0 !important;
+			max-width: 360px;
+			background-repeat: no-repeat;
+			background-size: cover;
+			background-position: left;
+			background-color: #ffffff;
+		}
+
+		.card:hover {
+			animation-duration: 0.3s;
+			animation-timing-function: ease-out;
+			box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.4);
+		}
+
+		.card:hover {
+			background-color: #ffffff;
+		}
+
+		.card-header {
+			padding: 0px;
+			font-size: 18px;
+			font-family: Roboto, Arial, Sans-serif;
+			font-weight: bold;
+			line-height: 67px;
+			letter-spacing: 0.62px;
+			text-align: left;
+			color: #ffffff;
+			opacity: 100%;
+		}
+
+		.card-footer {
+			margin: 5%;
+			color: #8f8787;
+			font-size: 2vmin;
+			font-family: Roboto, Arial, Sans-serif;
+		}
+
+		.card-header {
+			background-position: 0 -297px;
+		}
+
+		.btn-class {
+			width: 200px;
+			opacity: 1;
+			border: 1px solid;
+			font-size: 18px;
+			font-family: Roboto, Arial, Sans-serif;
+			letter-spacing: 1.8px;
+			background-color: white;
+			padding: 14px;
+			color: #000000;
+			text-decoration: none;
+		}
+
+		.btn-class:hover {
+			animation: hover 0.2s forwards;
+		}
+
+		@media screen and (max-width: 481px) {
+			.btn-class {
+				font-size: 10px;
+			}
+
+			.banner {
+				height: 50vw;
+			}
+		}
+
+		@media screen and (max-width: 736px) and (min-width: 482px) {
+			.btn-class {
+				font-size: 12px;
+			}
+
+			.banner {
+				height: 40vw;
+			}
+		}
+
+		@media screen and (max-width: 1023px) and (min-width: 737px) {
+			.btn-class {
+				font-size: 12px;
+			}
+		}
+
+		@media screen and (max-width: 1322px) and (min-width: 1024px) {
+			.btn-class {
+				font-size: 12px;
+			}
+		}
+
+		@media screen and (max-width: 1384px) and (min-width: 1323px) {
+			.btn-class {
+				font-size: 12px;
+			}
+		}
+
+		@media screen and (max-width: 1650px) and (min-width: 1385px) {
+			.btn-class {
+				font-size: 12px;
+			}
+		}
+
+		@media screen and (max-width: 1919px) and (min-width: 1651px) {
+			.btn-class {
+				font-size: 12px;
+			}
+		}
+		
+		::-webkit-scrollbar {
+			width: 9px;
+		}
+
+		::-webkit-scrollbar-track {
+			background: transparent;
+		}
+
+		::-webkit-scrollbar-thumb {
+			background-color: rgba(155, 155, 155, 0.5);
+			border-radius: 20px;
+			border: transparent;
+		}
+	</style>
+</head>
+
+<body>
+	<div class=\"page\">
+		<div class=\"banner\" style=\"background-image: url('https://leap7/ivmui/assets/images/banner-logodesign.png');
+background-color: #8626c3;
+    background-blend-mode: screen;
+}\">
+			<div class=\"banner-content\" style=\"background-image: url('https://leap7/ivmui/assets/images/geometry.png');\">
+			</div>
+		</div>
+		<div id=\"intro\">
+			Expectations from Application Management have changed significantly in the few years as more and more
+			enterprises
+			are embarking on cloud and digital transformation journeys while dealing with unprecedented business
+			disruptions and
+			talent crunch. Cost savings is no longer the only driver. NextGen application management is expected to
+			improve
+			resiliency, agility and speed while delivering business outcomes without ripping and replacing everything
+			and
+			starting over. This survey provides a quick view of where your organization stands in terms of application
+			management maturity compared to the best in class using a few curated engineering metrics across 3 core
+			dimensions
+			including Automation, Resiliency and Operating model. We can use insights from this survey to identify areas
+			of
+			improvement, set goals, identify initiatives, create a roadmap and execute systematically to achieve the
+			vision of
+			Next Gen Application Management.
+		</div>
+		<div class=\"section\">
+			<div class=\"scrolling-section\" id=\"startSurvey\" #startSurvey>
+				<div class=\"container section\">
+					<div class=\"cards-container\">
+						<div class=\"cardFlex\">
+							<div class=\"card\">
+								<div class=\"card-header\"
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/operatingmodel.png');\">
+									<div style=\"margin: 0 16px;\">Operating Model</div>
+								</div>
+								<div class=\"card-footer\">
+									<div>
+										Enterprises should adopt modern operating models like product centric delivery
+										models powered by agile processes, devsecops and site reliability engineering
+										principles integrating the build, run and transform functions for business
+										agility and faster innovation.
+									</div>
+								</div>
+							</div>
+							<div class=\"card\">
+								<div class=\"card-header\"
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Automation.png');\">
+									<div style=\"margin: 0 16px;\">Service Automation</div>
+								</div>
+								<div class=\"card-footer\">
+									<div>
+										Cognitive Automation through Digital Workers and Intelligent bots helps improve
+										operational efficiencies and reduce costs.
+									</div>
+								</div>
+							</div>
+							<div class=\"card\">
+								<div class=\"card-header\"
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Resilience.png');\">
+									<div style=\"margin: 0 16px;\">Resilience</div>
+								</div>
+								<div class=\"card-footer\">
+									<div>
+										Ensuring availability, security and performance through predictive analytics is
+										critical for resilience and reliability of your enterprise application
+										landscape.
+									</div>
+								</div>
+							</div>
+							<div class=\"card\">
+								<div class=\"card-header\"
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Automation.png');\">
+									<div style=\"margin: 0 16px;\">Business Alignment</div>
+								</div>
+								<div class=\"card-footer\">
+									<div>
+										Enterprises should bring in sharper focus to the customer journey mapping and
+										business value analytics across the entire IT srack than merely focusing on IT
+										centric metrics.
+									</div>
+								</div>
+							</div>
+						</div>
+						<div></div>
+					</div>
+					<div style=\"text-align: center;margin-bottom: 30px;\">
+						<button class=\"btn-class\" type=\"button\" onclick=\"window.location.replace(window.location.href + '/survey')\">###btnText###</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>","168","NULL","NULL","2","Software Engineering","","Software engineering is an engineering-based approach to software development. Engineering techniques are used to inform the software development process, which involves the definition, implementation, assessment, measurement, management, change, and improvement of the software life cycle process itself. Fine-tuning of the engineering process is the key aspect of creation and maintenance of the applications.","false","0"
+"53","NULL","<!doctype html>
+<html lang=\"en\">
+
+<head>
+	<meta charset=\"utf-8\">
+	<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />
+	<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge,chrome=1\" />
+	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+	<style>
+		.page {
+			background-color: #EDEDED;
+			height: 75vh;
+			overflow: auto;
+		}
+
+		.banner {
+			background: transparent no-repeat padding-box;
+			height: 373px;
+		}
+
+		.banner-content {
+			background: transparent no-repeat padding-box;
+			height: 277px;
+			top: 62px;
+			margin-left: 783px;
+			position: relative;
+		}
+
+		@keyframes hover {
+			from {
+				box-shadow: inset 0 0 0 0.01px #000000;
+			}
+
+			to {
+				box-shadow: inset 200px 0 0 0.01px #000000;
+				color: #fff;
+			}
+		}
+
+		#intro {
+			padding: 1.5% 0% 1% 2%;
+			color: #8f8787;
+			border-radius: 4px;
+			background-color: white;
+			margin: 1% 8% 0% 8%;
+			font-family: Roboto, Arial, Sans-serif;
+		}
+
+		.section {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+		}
+
+		@media screen and (max-width: 1023px) {
+			.section {
+				align-items: center;
+			}
+		}
+
+		.scrolling-section {
+			max-height: 100%;
+			width: 100%;
+		}
+
+		.cards-container {
+			margin-top: 2%;
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: flex-start;
+			align-items: center;
+		}
+
+		.cardFlex {
+			width: 100%;
+			display: flex;
+			flex-direction: row;
+			//flex-wrap: wrap;
+			justify-content: center;
+			padding-left: 20px;
+		}
+
+		.card {
+			width: 100%;
+			padding: 0px;
+			margin-bottom: 21px;
+			margin-right: 21px;
+			opacity: 100%;
+			flex: 1 1 25%;
+			position: relative;
+			border-radius: 0 !important;
+			max-width: 360px;
+			background-repeat: no-repeat;
+			background-size: cover;
+			background-position: left;
+			background-color: #ffffff;
+		}
+
+		.card:hover {
+			animation-duration: 0.3s;
+			animation-timing-function: ease-out;
+			box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.4);
+		}
+
+		.card:hover {
+			background-color: #ffffff;
+		}
+
+		.card-header {
+			padding: 0px;
+			font-size: 18px;
+			font-family: Roboto, Arial, Sans-serif;
+			font-weight: bold;
+			line-height: 67px;
+			letter-spacing: 0.62px;
+			text-align: left;
+			color: #ffffff;
+			opacity: 100%;
+		}
+
+		.card-footer {
+			margin: 5%;
+			color: #8f8787;
+			font-size: 2vmin;
+			font-family: Roboto, Arial, Sans-serif;
+		}
+
+		.card-header {
+			background-position: 0 -297px;
+		}
+
+		.btn-class {
+			width: 200px;
+			opacity: 1;
+			border: 1px solid;
+			font-size: 18px;
+			font-family: Roboto, Arial, Sans-serif;
+			letter-spacing: 1.8px;
+			background-color: white;
+			padding: 14px;
+			color: #000000;
+			text-decoration: none;
+		}
+
+		.btn-class:hover {
+			animation: hover 0.2s forwards;
+		}
+
+		@media screen and (max-width: 481px) {
+			.btn-class {
+				font-size: 10px;
+			}
+
+			.banner {
+				height: 50vw;
+			}
+		}
+
+		@media screen and (max-width: 736px) and (min-width: 482px) {
+			.btn-class {
+				font-size: 12px;
+			}
+
+			.banner {
+				height: 40vw;
+			}
+		}
+
+		@media screen and (max-width: 1023px) and (min-width: 737px) {
+			.btn-class {
+				font-size: 12px;
+			}
+		}
+
+		@media screen and (max-width: 1322px) and (min-width: 1024px) {
+			.btn-class {
+				font-size: 12px;
+			}
+		}
+
+		@media screen and (max-width: 1384px) and (min-width: 1323px) {
+			.btn-class {
+				font-size: 12px;
+			}
+		}
+
+		@media screen and (max-width: 1650px) and (min-width: 1385px) {
+			.btn-class {
+				font-size: 12px;
+			}
+		}
+
+		@media screen and (max-width: 1919px) and (min-width: 1651px) {
+			.btn-class {
+				font-size: 12px;
+			}
+		}
+		
+		::-webkit-scrollbar {
+			width: 9px;
+		}
+
+		::-webkit-scrollbar-track {
+			background: transparent;
+		}
+
+		::-webkit-scrollbar-thumb {
+			background-color: rgba(155, 155, 155, 0.5);
+			border-radius: 20px;
+			border: transparent;
+		}
+	</style>
+</head>
+
+<body>
+	<div class=\"page\">
+		<div class=\"banner\" style=\"background-image: url('https://leap7/ivmui/assets/images/banner-logodesign.png');
+background-color: #8626c3;
+    background-blend-mode: screen;
+}\">
+			<div class=\"banner-content\" style=\"background-image: url('https://leap7/ivmui/assets/images/geometry.png');\">
+			</div>
+		</div>
+		<div id=\"intro\">
+			Expectations from Application Management have changed significantly in the few years as more and more
+			enterprises
+			are embarking on cloud and digital transformation journeys while dealing with unprecedented business
+			disruptions and
+			talent crunch. Cost savings is no longer the only driver. NextGen application management is expected to
+			improve
+			resiliency, agility and speed while delivering business outcomes without ripping and replacing everything
+			and
+			starting over. This survey provides a quick view of where your organization stands in terms of application
+			management maturity compared to the best in class using a few curated engineering metrics across 3 core
+			dimensions
+			including Automation, Resiliency and Operating model. We can use insights from this survey to identify areas
+			of
+			improvement, set goals, identify initiatives, create a roadmap and execute systematically to achieve the
+			vision of
+			Next Gen Application Management.
+		</div>
+		<div class=\"section\">
+			<div class=\"scrolling-section\" id=\"startSurvey\" #startSurvey>
+				<div class=\"container section\">
+					<div class=\"cards-container\">
+						<div class=\"cardFlex\">
+							<div class=\"card\">
+								<div class=\"card-header\"
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/operatingmodel.png');\">
+									<div style=\"margin: 0 16px;\">Operating Model</div>
+								</div>
+								<div class=\"card-footer\">
+									<div>
+										Enterprises should adopt modern operating models like product centric delivery
+										models powered by agile processes, devsecops and site reliability engineering
+										principles integrating the build, run and transform functions for business
+										agility and faster innovation.
+									</div>
+								</div>
+							</div>
+							<div class=\"card\">
+								<div class=\"card-header\"
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Automation.png');\">
+									<div style=\"margin: 0 16px;\">Service Automation</div>
+								</div>
+								<div class=\"card-footer\">
+									<div>
+										Cognitive Automation through Digital Workers and Intelligent bots helps improve
+										operational efficiencies and reduce costs.
+									</div>
+								</div>
+							</div>
+							<div class=\"card\">
+								<div class=\"card-header\"
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Resilience.png');\">
+									<div style=\"margin: 0 16px;\">Resilience</div>
+								</div>
+								<div class=\"card-footer\">
+									<div>
+										Ensuring availability, security and performance through predictive analytics is
+										critical for resilience and reliability of your enterprise application
+										landscape.
+									</div>
+								</div>
+							</div>
+							<div class=\"card\">
+								<div class=\"card-header\"
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Automation.png');\">
+									<div style=\"margin: 0 16px;\">Business Alignment</div>
+								</div>
+								<div class=\"card-footer\">
+									<div>
+										Enterprises should bring in sharper focus to the customer journey mapping and
+										business value analytics across the entire IT srack than merely focusing on IT
+										centric metrics.
+									</div>
+								</div>
+							</div>
+						</div>
+						<div></div>
+					</div>
+					<div style=\"text-align: center;margin-bottom: 30px;\">
+						<button class=\"btn-class\" type=\"button\" onclick=\"window.location.replace(window.location.href + '/survey')\">###btnText###</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>","167","NULL","NULL","2","Infosys Value Management","Identify your potential for transformation through tailored maturity and benchmarking","An organization’s capability to transform is critical for long-term performance. However, many organizations fail short of realizing the potential value of transformational programs. Business leaders lack a straightforward way to measure and improve performance. Our Maturity score assessment applies analytical rigor to help organizations provide a diagnostic & benchmarking toolkit to understand the current state of transformation & enable organization flip the odds to realize value from their transformational programs. Take the assessment to understand the current state of maturity in your organization.","false","0"
+"71","NULL","<!doctype html>
+<html lang=\"en\">
+
+<head>
+	<meta charset=\"utf-8\">
+	<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />
+	<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge,chrome=1\" />
+	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+	<style>
+		.page {
+			background-color: #EDEDED;
+			height: 75vh;
+			overflow: auto;
+		}
+
+		.banner {
+			background: transparent no-repeat padding-box;
+			height: 373px;
+		}
+
+		.banner-content {
+			background: transparent no-repeat padding-box;
+			height: 277px;
+			top: 62px;
+			margin-left: 783px;
+			position: relative;
+		}
+
+		@keyframes hover {
+			from {
+				box-shadow: inset 0 0 0 0.01px #000000;
+			}
+
+			to {
+				box-shadow: inset 200px 0 0 0.01px #000000;
+				color: #fff;
+			}
+		}
+
+		#intro {
+			padding: 1.5% 0% 1% 2%;
+			color: #8f8787;
+			border-radius: 4px;
+			background-color: white;
+			margin: 1% 8% 0% 8%;
+			font-family: Roboto, Arial, Sans-serif;
+		}
+
+		.section {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+		}
+
+		@media screen and (max-width: 1023px) {
+			.section {
+				align-items: center;
+			}
+		}
+
+		.scrolling-section {
+			max-height: 100%;
+			width: 100%;
+		}
+
+		.cards-container {
+			margin-top: 2%;
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: flex-start;
+			align-items: center;
+		}
+
+		.cardFlex {
+			width: 100%;
+			display: flex;
+			flex-direction: row;
+			//flex-wrap: wrap;
+			justify-content: center;
+			padding-left: 20px;
+		}
+
+		.card {
+			width: 100%;
+			padding: 0px;
+			margin-bottom: 21px;
+			margin-right: 21px;
+			opacity: 100%;
+			flex: 1 1 25%;
+			position: relative;
+			border-radius: 0 !important;
+			max-width: 360px;
+			background-repeat: no-repeat;
+			background-size: cover;
+			background-position: left;
+			background-color: #ffffff;
+		}
+
+		.card:hover {
+			animation-duration: 0.3s;
+			animation-timing-function: ease-out;
+			box-shadow: 0 8px 8px 0 rgba(0, 0, 0, 0.4);
+		}
+
+		.card:hover {
+			background-color: #ffffff;
+		}
+
+		.card-header {
+			padding: 0px;
+			font-size: 18px;
+			font-family: Roboto, Arial, Sans-serif;
+			font-weight: bold;
+			line-height: 67px;
+			letter-spacing: 0.62px;
+			text-align: left;
+			color: #ffffff;
+			opacity: 100%;
+		}
+
+		.card-footer {
+			margin: 5%;
+			color: #8f8787;
+			font-size: 2vmin;
+			font-family: Roboto, Arial, Sans-serif;
+		}
+
+		.card-header {
+			background-position: 0 -297px;
+		}
+
+		.btn-class {
+			width: 200px;
+			opacity: 1;
+			border: 1px solid;
+			font-size: 18px;
+			font-family: Roboto, Arial, Sans-serif;
+			letter-spacing: 1.8px;
+			background-color: white;
+			padding: 14px;
+			color: #000000;
+			text-decoration: none;
+		}
+
+		.btn-class:hover {
+			animation: hover 0.2s forwards;
+		}
+
+		@media screen and (max-width: 481px) {
+			.btn-class {
+				font-size: 10px;
+			}
+
+			.banner {
+				height: 50vw;
+			}
+		}
+
+		@media screen and (max-width: 736px) and (min-width: 482px) {
+			.btn-class {
+				font-size: 12px;
+			}
+
+			.banner {
+				height: 40vw;
+			}
+		}
+
+		@media screen and (max-width: 1023px) and (min-width: 737px) {
+			.btn-class {
+				font-size: 12px;
+			}
+		}
+
+		@media screen and (max-width: 1322px) and (min-width: 1024px) {
+			.btn-class {
+				font-size: 12px;
+			}
+		}
+
+		@media screen and (max-width: 1384px) and (min-width: 1323px) {
+			.btn-class {
+				font-size: 12px;
+			}
+		}
+
+		@media screen and (max-width: 1650px) and (min-width: 1385px) {
+			.btn-class {
+				font-size: 12px;
+			}
+		}
+
+		@media screen and (max-width: 1919px) and (min-width: 1651px) {
+			.btn-class {
+				font-size: 12px;
+			}
+		}
+		
+		::-webkit-scrollbar {
+			width: 9px;
+		}
+
+		::-webkit-scrollbar-track {
+			background: transparent;
+		}
+
+		::-webkit-scrollbar-thumb {
+			background-color: rgba(155, 155, 155, 0.5);
+			border-radius: 20px;
+			border: transparent;
+		}
+	</style>
+</head>
+
+<body>
+	<div class=\"page\">
+		<div class=\"banner\" style=\"background-image: url('https://leap7/ivmui/assets/images/banner-logodesign.png');
+background-color: #8626c3;
+    background-blend-mode: screen;
+}\">
+			<div class=\"banner-content\" style=\"background-image: url('https://leap7/ivmui/assets/images/geometry.png');\">
+			</div>
+		</div>
+		<div id=\"intro\">
+			Expectations from Application Management have changed significantly in the few years as more and more
+			enterprises
+			are embarking on cloud and digital transformation journeys while dealing with unprecedented business
+			disruptions and
+			talent crunch. Cost savings is no longer the only driver. NextGen application management is expected to
+			improve
+			resiliency, agility and speed while delivering business outcomes without ripping and replacing everything
+			and
+			starting over. This survey provides a quick view of where your organization stands in terms of application
+			management maturity compared to the best in class using a few curated engineering metrics across 3 core
+			dimensions
+			including Automation, Resiliency and Operating model. We can use insights from this survey to identify areas
+			of
+			improvement, set goals, identify initiatives, create a roadmap and execute systematically to achieve the
+			vision of
+			Next Gen Application Management.
+		</div>
+		<div class=\"section\">
+			<div class=\"scrolling-section\" id=\"startSurvey\" #startSurvey>
+				<div class=\"container section\">
+					<div class=\"cards-container\">
+						<div class=\"cardFlex\">
+							<div class=\"card\">
+								<div class=\"card-header\"
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/operatingmodel.png');\">
+									<div style=\"margin: 0 16px;\">Operating Model</div>
+								</div>
+								<div class=\"card-footer\">
+									<div>
+										Enterprises should adopt modern operating models like product centric delivery
+										models powered by agile processes, devsecops and site reliability engineering
+										principles integrating the build, run and transform functions for business
+										agility and faster innovation.
+									</div>
+								</div>
+							</div>
+							<div class=\"card\">
+								<div class=\"card-header\"
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Automation.png');\">
+									<div style=\"margin: 0 16px;\">Service Automation</div>
+								</div>
+								<div class=\"card-footer\">
+									<div>
+										Cognitive Automation through Digital Workers and Intelligent bots helps improve
+										operational efficiencies and reduce costs.
+									</div>
+								</div>
+							</div>
+							<div class=\"card\">
+								<div class=\"card-header\"
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Resilience.png');\">
+									<div style=\"margin: 0 16px;\">Resilience</div>
+								</div>
+								<div class=\"card-footer\">
+									<div>
+										Ensuring availability, security and performance through predictive analytics is
+										critical for resilience and reliability of your enterprise application
+										landscape.
+									</div>
+								</div>
+							</div>
+							<div class=\"card\">
+								<div class=\"card-header\"
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Automation.png');\">
+									<div style=\"margin: 0 16px;\">Business Alignment</div>
+								</div>
+								<div class=\"card-footer\">
+									<div>
+										Enterprises should bring in sharper focus to the customer journey mapping and
+										business value analytics across the entire IT srack than merely focusing on IT
+										centric metrics.
+									</div>
+								</div>
+							</div>
+						</div>
+						<div></div>
+					</div>
+					<div style=\"text-align: center;margin-bottom: 30px;\">
+						<button class=\"btn-class\" type=\"button\" onclick=\"window.location.replace(window.location.href + '/survey')\">###btnText###</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>","175","NULL","NULL","2","Medical Devices and Technology","OPQ","MedTech is a field that accounts for technologies i.e. devices to the healthcare systems for diagnosis, patient care, treatment and improvement of a person’s health.This sector in the healthcare industry is used to connect patient care with technology. MedTech provides all the equipment, tools, and devices which are employed to diagnose and treat a patient.","false","false"

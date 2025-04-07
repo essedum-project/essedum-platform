@@ -1,0 +1,1020 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+	<!-- 1.3.11 changes -->
+	<changeSet author="Leap (generated)" id="1311v0-cip-58">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlagents" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlagents">
+			<column autoIncrement="true" name="cid" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="created_by" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="created_date" type="datetime(6)" />
+			<column name="deleted" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="TEXT" />
+			<column name="job_id" type="VARCHAR(255)" />
+			<column name="json_content" type="LONGTEXT" />
+			<column name="lastmodifiedby" type="VARCHAR(50)" />
+			<column name="lastmodifieddate" type="datetime(6)" />
+			<column name="name" type="VARCHAR(255)" />
+			<column name="alias" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="type" type="VARCHAR(255)" />
+			<column name="version" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-61">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlchainjobs" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlchainjobs">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="job_id" type="VARCHAR(255)" />
+			<column name="job_name" type="VARCHAR(255)" />
+			<column name="job_status" type="VARCHAR(255)" />
+			<column name="log" type="LONGTEXT" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="submitted_by" type="VARCHAR(255)" />
+			<column name="submitted_on" type="TIMESTAMP" />
+			<column name="hashparams" type="VARCHAR(255)" />
+			<column name="correlationid" type="varchar(255)" />
+			<column name="finishtime" type="TIMESTAMP" />
+			<column name="jobmetadata" type="TEXT" />
+			<column name="jobhide" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-62">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlchains" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlchains">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="description" type="VARCHAR(500)" />
+			<column name="job_name" type="VARCHAR(255)" />
+			<column name="json_content" type="TEXT" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="parallelchain" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-63">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mldataset" />
+			</not>
+		</preConditions>
+		<createTable tableName="mldataset">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="attributes" type="TEXT" />
+			<column name="dataset_type" type="VARCHAR(255)" />
+			<column name="description" type="VARCHAR(1000)" />
+			<column name="exp_status" type="INT" />
+			<column name="name" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="schemajson" type="TEXT" />
+			<column name="type" type="VARCHAR(255)" />
+			<column name="backing_dataset" type="VARCHAR(255)" />
+			<column name="dataset_schema" type="VARCHAR(255)" />
+			<column name="datasource" type="VARCHAR(255)" />
+			<column name="lastmodifiedby" type="VARCHAR(255)" />
+			<column name="lastmodifieddate" type="datetime(6)" />
+			<column name="alias" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-64">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mldatasetfiles" />
+			</not>
+		</preConditions>
+		<createTable tableName="mldatasetfiles">
+			<column name="id" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="datasetname" type="VARCHAR(255)" />
+			<column name="filename" type="VARCHAR(255)" />
+			<column name="filepath" type="TEXT" />
+			<column name="headers" type="TEXT" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="timestamp" type="TIMESTAMP" />
+			<column name="metadata" type="TEXT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-65">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mldatasource" />
+			</not>
+		</preConditions>
+		<createTable tableName="mldatasource">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="connectiondetails" type="TEXT" />
+			<column name="description" type="TEXT" />
+			<column name="dshashcode" type="VARCHAR(255)" />
+			<column name="name" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="salt" type="VARCHAR(255)" />
+			<column name="type" type="VARCHAR(255)" />
+			<column name="category" type="VARCHAR(255)" />
+			<column name="activetime" type="datetime(6)" />
+			<column name="lastmodifiedby" type="VARCHAR(255)" />
+			<column name="lastmodifieddate" type="TIMESTAMP" />
+			<column name="alias" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-66">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mleventjobmapping" />
+			</not>
+		</preConditions>
+		<createTable tableName="mleventjobmapping">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="body" type="TEXT" />
+			<column name="description" type="TEXT" />
+			<column name="eventname" type="VARCHAR(255)" />
+			<column name="jobname" type="VARCHAR(255)" />
+			<column name="jobtype" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-67">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlgroupmodel" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlgroupmodel">
+			<column autoIncrement="true" name="id" type="INT" startWith="3">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="entity" type="VARCHAR(255)" />
+			<column name="entity_type" type="VARCHAR(100)" />
+			<column name="model_group" type="VARCHAR(100)" />
+			<column name="organization" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-68">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlgroups" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlgroups">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="description" type="TEXT" />
+			<column name="name" type="VARCHAR(100)" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="lastmodifiedby" type="VARCHAR(255)" />
+			<column name="lastmodifieddate" type="datetime(6)" />
+			<column name="alias" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-69">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlinternaljobs" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlinternaljobs">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="dataset" type="VARCHAR(255)" />
+			<column name="jobid" type="VARCHAR(255)" />
+			<column name="jobname" type="VARCHAR(255)" />
+			<column name="jobstatus" type="VARCHAR(255)" />
+			<column name="log" type="LONGTEXT" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="submittedby" type="VARCHAR(255)" />
+			<column name="submittedon" type="TIMESTAMP" />
+			<column name="correlationid" type="varchar(255)" />
+			<column name="finishtime" type="TIMESTAMP" />
+			<column name="hashparams" type="VARCHAR(255)" />
+			<column name="jobmetadata" type="TEXT" />
+			<column name="jobhide" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-70">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mljobs" />
+			</not>
+		</preConditions>
+		<createTable tableName="mljobs">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="hashparams" type="VARCHAR(255)" />
+			<column name="job_id" type="VARCHAR(255)" />
+			<column name="job_status" type="VARCHAR(255)" />
+			<column name="log" type="LONGTEXT" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="runtime" type="VARCHAR(255)" />
+			<column name="streaming_service" type="VARCHAR(255)" />
+			<column name="submitted_by" type="VARCHAR(255)" />
+			<column name="submitted_on" type="TIMESTAMP" />
+			<column name="type" type="VARCHAR(255)" />
+			<column name="validation" type="VARCHAR(255)" />
+			<column name="version" type="INT" />
+			<column name="correlationid" type="varchar(255)" />
+			<column name="finishtime" type="TIMESTAMP" />
+			<column name="jobmetadata" type="TEXT" />
+			<column name="jobhide" type="INT" />
+			<column name="jobparam" type="TEXT" />
+			<column name="jobmetric" type="TEXT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-71">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlmodels" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlmodels">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="apispec" type="TEXT" />
+			<column name="error" type="INT" />
+			<column name="executionscript" type="${blob_type}" />
+			<column name="explanation" type="TEXT" />
+			<column name="fileid" type="VARCHAR(255)" />
+			<column name="loadscript" type="${blob_type}" />
+			<column name="localupload" type="INT" />
+			<column name="metadata" type="VARCHAR(4000)" />
+			<column name="mleapmodel" type="${blob_type}" />
+			<column name="modelname" type="VARCHAR(255)" />
+			<column name="modelpath" type="TEXT" />
+			<column name="modelserver" type="INT" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="serverupload" type="INT" />
+			<column name="status" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-72">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlmodelservers" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlmodelservers">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="lastcall" type="TIMESTAMP" />
+			<column name="serverload" type="INT" />
+			<column name="url" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-73">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlpipeline" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlpipeline">
+			<column autoIncrement="true" name="cid" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="created_by" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="created_date" type="datetime(6)" />
+			<column name="deleted" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="TEXT" />
+			<column name="job_id" type="VARCHAR(255)" />
+			<column name="json_content" type="LONGTEXT" />
+			<column name="lastmodifiedby" type="VARCHAR(250)" />
+			<column name="alias" type="VARCHAR(255)" />
+			<column name="lastmodifieddate" type="datetime" />
+			<column name="name" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="type" type="VARCHAR(255)" />
+			<column name="version" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-74">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlpipelinebinaryentity" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlpipelinebinaryentity">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="cname" type="VARCHAR(255)" />
+			<column name="filename" type="VARCHAR(255)" />
+			<column name="filescript" type="${blob_type}" />
+			<column name="organization" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-75">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlpipelinedraganddropentity" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlpipelinedraganddropentity">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="cname" type="VARCHAR(255)" />
+			<column name="filename" type="VARCHAR(255)" />
+			<column name="filescript" type="${blob_type}" />
+			<column name="organization" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-76">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlpipelinenativescriptentity" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlpipelinenativescriptentity">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="cname" type="VARCHAR(255)" />
+			<column name="filename" type="VARCHAR(255)" />
+			<column name="filescript" type="${blob_type}" />
+			<column name="organization" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-77">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlpipelinepid" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlpipelinepid">
+			<column autoIncrement="true" name="sno" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="jobid" type="VARCHAR(255)" />
+			<column name="instanceid" type="VARCHAR(255)" />
+			<column name="pid" type="VARCHAR(255)" />
+			<column name="status" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-78">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlpipelinescriptentity" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlpipelinescriptentity">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="cname" type="VARCHAR(255)" />
+			<column name="filename" type="VARCHAR(255)" />
+			<column name="filescript" type="${blob_type}" />
+			<column name="organization" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="1311v0-cip-79">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlplugin" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlplugin">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)" />
+			<column name="plugin" type="LONGTEXT" />
+			<column name="type" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-80">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlpluginscript" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlpluginscript">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)" />
+			<column name="script" type="${blob_type}" />
+			<column name="type" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-81">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlschemaregistry" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlschemaregistry">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="formtemplate" type="TEXT" />
+			<column name="name" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="description" type="TEXT" />
+			<column name="schemavalue" type="TEXT" />
+			<column name="lastmodifiedby" type="VARCHAR(50)" />
+			<column name="alias" type="VARCHAR(255)" />
+			<column name="lastmodifieddate" type="datetime(6)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="chaya" id="1311v0-cip-82">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlworkflow" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlworkflow">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="wkname" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="description" type="TEXT" />
+			<column name="wkspec" type="INT" />
+			<column name="wk_data" type="TEXT" />
+			<column name="current_stage" type="VARCHAR(255)" />
+			<column name="corelid" type="VARCHAR(255)" />
+			<column name="updated_by" type="VARCHAR(255)" />
+			<column name="updated_on" type="TIMESTAMP" />
+		</createTable>
+	</changeSet>
+	<changeSet author="chaya" id="1311v0-cip-83">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlworkflowspec" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlworkflowspec">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="wkname" type="VARCHAR(255)" />
+			<column name="wkspec" type="TEXT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="animesh.aashu" id="1311v0-cip-1004">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlagentjobs" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlagentjobs">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="hashparams" type="VARCHAR(255)" />
+			<column name="job_id" type="VARCHAR(255)" />
+			<column name="job_status" type="VARCHAR(255)" />
+			<column name="log" type="LONGTEXT" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="runtime" type="VARCHAR(255)" />
+			<column name="cname" type="VARCHAR(255)" />
+			<column name="submitted_by" type="VARCHAR(255)" />
+			<column name="submitted_on" type="TIMESTAMP" />
+			<column name="type" type="VARCHAR(255)" />
+			<column name="validation" type="VARCHAR(255)" />
+			<column name="version" type="INT" />
+			<column name="correlationid" type="varchar(255)" />
+			<column name="finishtime" type="TIMESTAMP" />
+			<column name="jobmetadata" type="TEXT" />
+			<column name="jobhide" type="INT" />
+		</createTable>
+	</changeSet>
+	<!-- 1.3.12 changes -->
+	<changeSet author="Leap" id="1312v0-cip-1005">
+		<addColumn tableName="mldataset">
+			<column name="context" type="TEXT" />
+			<column name="is_approval_required"
+				defaultValueBoolean="false" type="boolean" />
+			<column name="is_permission_managed"
+				defaultValueBoolean="false" type="boolean" />
+			<column name="is_inbox_required" defaultValueBoolean="false"
+				type="boolean" />
+			<column name="is_audit_required" defaultValueBoolean="false"
+				type="boolean" />
+			<column name="is_archival_enabled" defaultValueBoolean="false"
+				type="boolean" />
+			<column name="archival_config" type="TEXT" />
+			<column name="dashboard" type="INT" />
+			<column name="metadata" type="TEXT" />
+			<column name="modeltype" type="VARCHAR(255)" />
+			<column name="views" type="TEXT" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1312v0-cip-1014">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlrelationship" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlrelationship">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)" />
+			<column name="schemaA" type="VARCHAR(255)" />
+			<column name="schemaB" type="VARCHAR(255)" />
+			<column name="schema_relation" type="LONGTEXT" />
+			<column name="relationship_template" type="LONGTEXT" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="lastmodifiedby" type="VARCHAR(50)" />
+			<column name="alias" type="VARCHAR(255)" />
+			<column name="lastmodifieddate" type="datetime(6)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="1312v0-cip-1006">
+		<addColumn tableName="mleventjobmapping">
+			<column name="jobdetails" type="TEXT" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="1312v0-cip-1007">
+		<sql dbms="mysql" splitStatements="true" stripComments="true">
+			UPDATE
+			mleventjobmapping t1, (SELECT id, CONCAT('[{"name":"', jobname,
+			'","type":"', jobtype, '"}]') AS jobdetails FROM mleventjobmapping)
+			t2 SET t1.jobdetails = t2.jobdetails WHERE t1.id = t2.id;
+		</sql>
+	</changeSet>
+	<changeSet dbms="mssql" author="Leap"
+		id="1312v0-cip-1007-mssql">
+		<sql splitStatements="true" stripComments="true">
+			UPDATE mleventjobmapping
+			SET mleventjobmapping.jobdetails = t2.jobdetails FROM
+			mleventjobmapping t1 INNER JOIN (SELECT id, CONCAT('[{"name":"',
+			jobname, '","type":"', jobtype, '"}]') AS jobdetails FROM
+			mleventjobmapping) t2 ON t1.id = t2.id;
+		</sql>
+	</changeSet>
+	<changeSet author="Leap" id="1312v0-cip-1008">
+		<dropColumn tableName="mleventjobmapping"
+			columnName="jobtype" />
+	</changeSet>
+	<changeSet author="Leap" id="1312v0-cip-1009">
+		<modifyDataType columnName="description"
+			newDataType="VARCHAR(5000)" tableName="mlpipeline" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-1010">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="icm_audit" />
+			</not>
+		</preConditions>
+		<createTable tableName="icm_audit">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="comments" type="VARCHAR(250)">
+			</column>
+			<column name="event" type="VARCHAR(250)">
+			</column>
+			<column name="businesskeyId" type="VARCHAR(250)">
+			</column>
+			<column name="event_time" type="datetime" />
+			<column name="user" type="VARCHAR(250)">
+			</column>
+		</createTable>
+	</changeSet>
+	<!-- 1.3.12 changes -->
+	<changeSet author="Leap (generated)" id="1311v0-cip-1011">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="icm_delegate" />
+			</not>
+		</preConditions>
+		<createTable tableName="icm_delegate">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="login_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="process_id" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="is_delegate" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="alternate_user" type="VARCHAR(400)">
+				<constraints nullable="false" />
+			</column>
+			<column name="start_time" type="datetime" />
+			<column name="end_time" type="datetime" />
+			<column name="reason" type="VARCHAR(400)">
+				<constraints nullable="false" />
+			</column>
+			<column name="comments" type="VARCHAR(400)">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_user" type="VARCHAR(400)">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_date" type="datetime">
+				<constraints nullable="false" />
+			</column>
+			<column name="is_active" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="role_id" type="INT" />
+			<column name="project_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1311v0-cip-1012">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="icm_holiday_configuration" />
+			</not>
+		</preConditions>
+		<createTable tableName="icm_holiday_configuration">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="year" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="process" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="country" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="holiday_data" type="text">
+				<constraints nullable="false" />
+			</column>
+			<column name="organization" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Supriya" id="1312v0-cip-1010">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="icm_shiftmng" />
+			</not>
+		</preConditions>
+		<createTable tableName="icm_shiftmng">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="process" type="TEXT">
+			</column>
+			<column name="display_name" type="TEXT">
+			</column>
+			<column name="description" type="TEXT">
+			</column>
+			<column name="time_zone" type="TEXT">
+			</column>
+			<column name="country" type="TEXT">
+			</column>
+			<column name="grace_period" type="TEXT">
+			</column>
+			<column name="shift_name" type="TEXT">
+			</column>
+			<column name="active" type="BOOLEAN">
+			</column>
+			<column name="start_time" type="time">
+			</column>
+			<column name="end_time" type="time" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="1312v0-cip-1013">
+		<dropColumn tableName="mleventjobmapping"
+			columnName="jobname" />
+	</changeSet>
+
+	<!-- 2.0 changes -->
+	<changeSet author="Leap" id="2v0-cip-1">
+		<addColumn tableName="mldataset">
+			<column name="taskdetails" type="TEXT" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="2v0-cip-2">
+		<addColumn tableName="mlgroups">
+			<column name="type" type="VARCHAR(255)" />
+		</addColumn>
+	</changeSet>
+	<!-- 2.1 changes -->
+	<changeSet author="dileap" id="2v1-cip-1">
+		<addColumn tableName="mlworkflow">
+			<column name="alias" type="VARCHAR(255)" />
+		</addColumn>
+		<renameColumn columnDataType="VARCHAR(255)"
+			tableName="mlworkflow" oldColumnName="wkname" newColumnName="name" />
+	</changeSet>
+	<changeSet author="Leap" id="2v1-cip-2">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlschemaformtemplates" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlschemaformtemplates">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)">
+			</column>
+			<column name="schemaname" type="VARCHAR(255)">
+			</column>
+			<column name="formtemplate" type="TEXT">
+			</column>
+			<column name="organization" type="VARCHAR(255)">
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-cip-3">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mldatasetformmapping" />
+			</not>
+		</preConditions>
+		<createTable tableName="mldatasetformmapping">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="dataset" type="VARCHAR(255)">
+			</column>
+			<column name="formtemplate" type="VARCHAR(255)">
+			</column>
+			<column name="organization" type="VARCHAR(255)">
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-cip-4">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlmashups" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlmashups">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)">
+			</column>
+			<column name="template" type="TEXT">
+			</column>
+			<column name="organization" type="VARCHAR(255)">
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-cip-5">
+		<addColumn tableName="mldatasetfiles">
+			<column name="fileType" type="VARCHAR(50)" />
+			<column name="fileSize" type="INT" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-cip-6">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlocr" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlocr">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="fileName" type="varchar(100)">
+			</column>
+			<column name="pageNo" type="INT">
+			</column>
+			<column name="fileUploadId" type="varchar(255)">
+			</column>
+			<column name="postResponseId" type="varchar(255)">
+			</column>
+			<column name="analysisResults" type="TEXT">
+			</column>
+			<column name="org" type="varchar(50)">
+			</column>
+			<column name="lastUpdatedDate" type="timestamp">
+			</column>
+			<column name="modifiedBy" type="varchar(100)">
+			</column>
+			<column name="consumingEntity" type="varchar(255)">
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-cip-7">
+		<sql dbms="mysql" splitStatements="true" stripComments="true">
+			SET
+			FOREIGN_KEY_CHECKS=0;
+		</sql>
+		<sql dbms="mysql" splitStatements="true" stripComments="true">
+			ALTER TABLE
+			mlgroupmodel CONVERT TO CHARACTER SET utf8mb4 COLLATE
+			utf8mb4_0900_ai_ci;
+		</sql>
+		<sql dbms="mysql" splitStatements="true" stripComments="true">
+			ALTER TABLE
+			mlgroups CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+		</sql>
+		<sql dbms="mysql" splitStatements="true" stripComments="true">
+			ALTER TABLE
+			mldataset CONVERT TO CHARACTER SET utf8mb4 COLLATE
+			utf8mb4_0900_ai_ci;
+		</sql>
+		<sql dbms="mysql" splitStatements="true" stripComments="true">
+			ALTER TABLE
+			mldatasource CONVERT TO CHARACTER SET utf8mb4 COLLATE
+			utf8mb4_0900_ai_ci;
+		</sql>
+		<sql dbms="mysql" splitStatements="true" stripComments="true">
+			ALTER TABLE
+			mlschemaregistry CONVERT TO CHARACTER SET utf8mb4 COLLATE
+			utf8mb4_0900_ai_ci;
+		</sql>
+		<sql dbms="mysql" splitStatements="true" stripComments="true">
+			ALTER TABLE
+			mljobs CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+		</sql>
+		<sql dbms="mysql" splitStatements="true" stripComments="true">
+			ALTER TABLE
+			mlpipeline CONVERT TO CHARACTER SET utf8mb4 COLLATE
+			utf8mb4_0900_ai_ci;
+		</sql>
+		<sql dbms="mysql" splitStatements="true" stripComments="true">
+			ALTER TABLE
+			mldatasetformmapping CONVERT TO CHARACTER SET utf8mb4 COLLATE
+			utf8mb4_0900_ai_ci;
+		</sql>
+		<sql dbms="mysql" splitStatements="true" stripComments="true">
+			ALTER TABLE
+			mlschemaformtemplates CONVERT TO CHARACTER SET utf8mb4 COLLATE
+			utf8mb4_0900_ai_ci;
+		</sql>
+		<sql dbms="mysql" splitStatements="true" stripComments="true">
+			SET
+			FOREIGN_KEY_CHECKS=1;
+		</sql>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-cip-8">
+		<sql dbms="mysql,h2,postgresql" splitStatements="true"
+			stripComments="true">
+			UPDATE core.mldatasetfiles SET "fileSize"=0 where
+			"fileSize" IS NULL
+		</sql>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-cip-9">
+		<sql dbms="mysql,h2,postgresql" splitStatements="true"
+			stripComments="true">
+			UPDATE mlworkflow SET alias=name where alias IS NULL
+		</sql>
+	</changeSet>
+	<changeSet id="2v1-cip-10" author="Leap">
+		<sql dbms="mysql,h2" splitStatements="true" stripComments="true">
+			ALTER
+			TABLE mlocr MODIFY COLUMN analysisResults LONGTEXT;
+		</sql>
+	</changeSet>
+
+	<changeSet author="Leap" id="2v1-cip-11">
+		<addColumn tableName="mljobs">
+			<column name="image" type="TEXT" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-cip-12">
+		<addColumn tableName="mljobs">
+			<column name="output" type="TEXT" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-cip-13">
+		<addColumn tableName="mlocr">
+			<column name="taggedOn" type="timestamp" />
+			<column name="retrainedOn" type="timestamp" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-cip-14">
+		<addColumn tableName="mlplugin">
+			<column name="config" type="TEXT" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-cip-15">
+		<addColumn tableName="mldatasource">
+			<column name="extras" type="TEXT" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-cip-16">
+		<addColumn tableName="mlschemaformtemplates">
+			<column name="alias" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+	<!-- 3.0 changes -->
+	<changeSet author="Leap" id="3v0-cip-1">
+		<addColumn tableName="mldataset">
+			<column name="tags" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="3v0-cip-2">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mltags" />
+			</not>
+		</preConditions>
+		<createTable tableName="mltags">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="label" type="VARCHAR(255)">
+			</column>
+			<column name="category" type="VARCHAR(255)">
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v0-cip-3">
+		<sql splitStatements="true" stripComments="true">
+			UPDATE mlpipeline SET
+			"version"=1 WHERE "organization"='leo1311'
+		</sql>
+	</changeSet>
+	<changeSet author="Leap" id="3v0-cip-4">
+		<addColumn tableName="mldatasource">
+			<column name="interfacetype" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="3v0-cip-5">
+		<addColumn tableName="mldataset">
+			<column name="interfacetype" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="3v0-cip-6">
+		<addColumn tableName="mlplugin">
+			<column name="org" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="3v0-cip-7">
+		<addColumn tableName="mlpipeline">
+			<column name="tags" type="varchar(255)" />
+			<column name="interfacetype" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+</databaseChangeLog>	

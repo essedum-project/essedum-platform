@@ -1,0 +1,98 @@
+<div *ngIf="showview==false">
+    <div *ngIf="upload==false">
+      <div *ngIf="logs==false" style="overflow:hidden">
+  
+        <span class="search-hero">
+          <span class="fa fa-plus-square selector-680-13" (click)="addDataset()" id="dset-reg-add" style="font-size:16px;
+  color: grey; padding-right: 3vh;padding-top: 3px;float: right; margin-top: 2vmin;" title="Add Dataset">
+          </span> &nbsp;&nbsp;
+          <input style="width: 35%; margin-left: 59%; margin-top: 2vmin !important;" type="text" class="aip-panel-input" name="search"
+            [(ngModel)]="search" (ngModelChange)="searching()" autocomplete="off" placeholder="Start searching">
+        </span>
+  
+        <div class="col-12 row no-mar pipeline-left-section no-gutter-left" style="margin:15px !important;">
+          <div class="col-12 col-md-4" style="padding-bottom: 2%;" *ngFor="let dataset of allDatasets">
+            <leds-card designType="mini">
+              <div  classs="select-99999">
+              <mat-card-content>
+                  <div
+                      class="pipeline-header d-flex justify-content-between align-items-center le-u-mar-b-16">
+                      <div class="le-u-body-md aip-related-ellipsis aip-cursor"
+                          (click)="changeStage(dataset)">
+                          {{ dataset.alias | titlecase}}</div>
+                      <!-- <span class="le-c-card__container-right" (click)="delete(model.id)"
+                          class="le-u-body-sm aip-cursor"><i
+                              class="icon x-24 ip-leds-icon delete-sm-icon"></i></span> -->
+                  </div>
+                  <i style="float: right;margin-top: 1%;" class="fa fa-info-circle" title="View"
+                  (click)="showview=true;selecteddataset=dataset"></i>
+
+                  <i style="float: right;margin-top: 1%;margin-right:5%; " class="fa fa-upload " title="Upload"
+                  *ngIf="dataset?.type == 'rw'" (click)="upload=true;selecteddataset=dataset">
+                </i>
+                  <div class="">
+                      <div class="le-u-header-sm le-u-text-neutral-80 d-block le-u-mar-b-4 aip-cursor"
+                          >
+                          {{ dataset.description}}
+                      </div>
+                      <!-- <div *ngIf="!spec" class="txt-publish" style="font-size: 12px;">
+                          Current Stage :
+                          {{model.currentStage}}</div>-->
+                  </div> 
+              </mat-card-content>
+            </div>
+          </leds-card>
+          <!-- ---------
+            <div class="pipeline-card">
+              <div class="pipeline-header selector-677-21">
+                <span class="txt-pipeline" (click)="changeStage(dataset)">{{ dataset.alias | titlecase}}</span>
+                <i style="float: right;margin-top: 1%;" class="fa fa-info-circle" title="View"
+                  (click)="showview=true;selecteddataset=dataset"></i>
+  
+                <i style="float: right;margin-top: 1%;margin-right:5%; " class="fa fa-upload " title="Upload"
+                  *ngIf="dataset?.type == 'rw'" (click)="upload=true;selecteddataset=dataset">
+                </i>
+  
+              </div>
+              <div class="pipeline-desc " style=" height: 87px;">
+                {{ dataset.description}}
+              </div>
+            </div> -->
+          </div>
+        </div>
+        <div class="custompaginator col-12">
+          <button mat-button [disabled]="page==0" id="disp-lst-First" (click)="getDatasets('First')"
+            title="First Page">First</button>
+          <button mat-button [disabled]="page==0" (click)="getDatasets('Prev')" id="disp-lst-Prev"
+            title="Prev Page">&lt;&lt;&nbsp;Prev</button>
+          <button mat-button [disabled]="page==lastPage" (click)="getDatasets('Next')" id="disp-lst-Next"
+            title="Next Page">Next&nbsp;&gt;&gt;</button>
+          <button mat-button [disabled]="page==lastPage" id="disp-lst-Last" (click)="getDatasets('Last')"
+            title="Last Page">Last</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div *ngIf="upload">
+    <div style="margin-left : 4% ; margin-top : 2%"><a href="javascript:void(0);" style="font-weight:700; color: grey;"
+        id="Datasets" class="selector-788-3" (click)="upload=false">Datasets </a><span>> {{selecteddataset.alias}}</span>
+  
+  
+      <button mat-raised-button="" style="float: right;" id="Logs"
+        class="selector-788-3" (click)="logs=true;upload=false">Logs</button>
+      <app-dataset-load *ngIf="upload" [dataset]="selecteddataset.name"></app-dataset-load>
+    </div>
+  </div>
+  <div *ngIf="showview==true">
+    <div style="margin-left : 4% ; margin-top : 2%"><a href="javascript:void(0);" style="font-weight:700; color: grey;"
+        id="Datasets" class="selector-788-3" (click)="showview=false">Datasets </a><span>>
+        {{selecteddataset.alias}}</span></div>
+    <app-dataset-fullscreen-view *ngIf="selecteddataset" [data]="selecteddataset"></app-dataset-fullscreen-view>
+  </div>
+  <div *ngIf="logs">
+    <button mat-raised-button="" style="margin-top : 2%;margin-left: 90%;" id="Uploads" class="selector-788-3"
+      (click)="logs=false;upload=true">Uploads </button>
+    <app-log-console [dataset]="selecteddataset.name">
+    </app-log-console>
+  </div>

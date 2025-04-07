@@ -1,0 +1,41 @@
+<div class="container-fluid backgroud-color">
+    <div class="le-l-level1-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="d-flex justify-content-end ng-star-inserted le-u-pad-t-8">
+                    <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()">
+                        <i class="icon x-16 close-icon"></i>
+                    </button>
+                </div>
+                <div class="le-u-mar-b-32">
+                    <div class="align-items-center d-flex">
+                        <span class="le-u-mar-l-8 le-u-header-xxl">Mashups - Create</span>
+                    </div>
+
+                    <div class="row le-u-mar-8 le-u-pad-t-16">
+                        <div class="table-responsive selector-693-2">
+                            <div class="col-lg-12 col-md-12 le-u-mar-b-16">
+                                <leds-input-field label="Display Name" placeholder="Enter Name..." errorMessage="{
+                                  required: 'This field is required',
+                                }" inputType="text" [disabled]="false" [required]="true"
+                                    [(ngModel)]="alias"></leds-input-field>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end ng-star-inserted le-u-pad-t-8 le-u-pad-r-8">
+                        <leds-button class="d-flex justify-content-end"
+                            style="color:var(--base-color); position: absolute;right: 20rem;" nameText="primaryButton"
+                            idText="primaryButton" [disabled]="false" buttonType="button" designType="primary"
+                            (click)="closeModal()">Cancel</leds-button>
+                        <leds-button *ngIf="alias" class="d-flex justify-content-end" nameText="primaryButton"
+                            idText="primaryButton" [disabled]="false" buttonType="button" designType="primary"
+                            (click)="saveDetails()">Save</leds-button>
+                        <leds-button *ngIf="!alias" class="d-flex justify-content-end" nameText="primaryButton"
+                            idText="primaryButton" [disabled]="true" buttonType="button"
+                            designType="primary">Save</leds-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

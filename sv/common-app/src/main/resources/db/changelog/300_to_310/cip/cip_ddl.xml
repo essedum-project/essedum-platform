@@ -1,0 +1,139 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="Leap" id="3v0-usm-310-240704-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="mlschemaregistry" columnName="type" />
+            </not>
+        </preConditions>
+        <addColumn tableName="mlschemaregistry">
+            <column name="type" type="VARCHAR(100)" />
+        </addColumn>
+    </changeSet>
+    <changeSet author="Leap" id="3v0-usm-310-240704-2">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="mlschemaregistry" columnName="capability" />
+            </not>
+        </preConditions>
+        <addColumn tableName="mlschemaregistry">
+            <column name="capability" type="VARCHAR(100)" />
+        </addColumn>
+    </changeSet>  
+
+	<changeSet author="Leap (generated)" id="3v0-usm-310-240704-3">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mldatasetidsml" />
+			</not>
+		</preConditions>
+		<createTable tableName="mldatasetidsml">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="dataset" type="VARCHAR(255)" />
+			<column name="org" type="VARCHAR(255)" />
+			<column name="is_recipe" type="TINYINT(1)" />
+			<column name="is_chart" type="TINYINT(1)" />
+			<column name="chart_name" type="VARCHAR(255)" />
+			<column name="chart_details" type="TEXT" />
+			<column name="recipe_name" type="VARCHAR(255)" />
+			<column name="recipe_details" type="TEXT" />
+			<column name="description" type="TEXT" />
+		</createTable>
+
+		<addUniqueConstraint columnNames="dataset,is_chart,chart_name" constraintName="UNIQUE-Chart" tableName="mldatasetidsml" />
+
+		<addUniqueConstraint columnNames="dataset,is_recipe,recipe_name" constraintName="UNIQUE-Recipe" tableName="mldatasetidsml" />
+	</changeSet>
+	<changeSet author="Leap" id="3v1-cip-1">
+		<addColumn tableName="mldatasource">
+			<column name="forpromptprovider" defaultValue="0" type="TINYINT(1)" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="3v1-cip-2">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlprompts" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlprompts">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)">
+			</column>
+			<column name="alias" type="VARCHAR(255)">
+			</column>
+			<column name="json_content" type="TEXT">
+			</column>
+			<column name="organization" type="VARCHAR(255)">
+			</column>
+			<column name="createdby" type="VARCHAR(255)">
+			</column>
+			<column name="createdon" type="TIMESTAMP">
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="3v1-cip-3">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlrating" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlrating">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="module" type="VARCHAR(255)">
+			</column>
+			<column name="element" type="VARCHAR(255)">
+			</column>
+			<column name="elementAlias" type="VARCHAR(255)">
+			</column>
+			<column name="organization" type="VARCHAR(255)">
+			</column>
+			<column name="user" type="INT">
+			</column>
+			<column name="rating" defaultValue="0" type="INT">
+			</column>
+			<column name="feedback" type="TEXT">
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="3v1-cip-4">
+		<addColumn tableName="mlsearchtopics">
+			<column name="suggested_queries" type="TEXT" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="3v1-cip-5">
+		<addColumn tableName="mlpipeline">
+			<column name="is_app" defaultValue="0" type="TINYINT(1)" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-cip-55" >
+                <addColumn tableName="mldataset">
+                        <column name="event_details" type="TEXT" />
+                </addColumn>
+        </changeSet>
+	<changeSet  author="Leap"  id="3v00To3v10-cip-001-1">
+		<preConditions onFail="MARK_RAN">
+		<not>
+				<columnExists tableName="mlintstance" columnName="orderpriority" />
+				</not>	
+		</preConditions>
+		<sql dbms="postgres" splitStatements="true" stripComments="true">
+	     	ALTER TABLE core.mlintstance ADD COLUMN IF NOT EXISTS orderpriority INTEGER;
+    	</sql>
+    	<sql dbms="mysql" splitStatements="true" stripComments="true">
+      		ALTER TABLE mlintstance ADD COLUMN orderpriority INT;
+      	</sql>
+      	<sql dbms="mssql" splitStatements="true" stripComments="true">
+      		ALTER TABLE mlintstance ADD orderpriority INT;
+      	</sql>
+     </changeSet>
+</databaseChangeLog>

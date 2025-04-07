@@ -1,0 +1,52 @@
+.summary-heading {
+    font: normal normal normal 24px/30px Myriad Pro;
+    letter-spacing: 0px;
+    color: #121012;
+    opacity: 1;
+    padding-left: 6vh;
+    padding-top: 3.5vh;
+}
+
+.itsm-scroll {
+    overflow-x: hidden;
+    scrollbar-width: none;
+}
+
+.itsm-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.itsm-scroll:hover {
+    scrollbar-width: thin;
+    -ms-overflow-style: auto;
+}
+
+.container {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+
+}
+
+.item {
+
+    background-color: #f0f0f0;
+
+    padding: 20px;
+
+    text-align: center;
+
+}
+
+@media (max-width: 1286px) {
+
+    .container {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}

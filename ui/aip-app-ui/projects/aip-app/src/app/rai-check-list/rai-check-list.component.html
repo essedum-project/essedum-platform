@@ -1,0 +1,183 @@
+<div class="clearfix" id="mainCtr">
+    <div class="container-fluid">
+        <div class="le-l-middle-col le-u-no-mar-l__mb" id="mainrightCnt">
+            <div class="le-l-level1-wrapper">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="le-l-level1-middle-col le-l-base-layout-center">
+                            <h1 class="le-u-header-xxl"> Configure Activities </h1>
+                            <div class="">
+                                <!-- <div class="aip-content_panel">
+                                    <leds-radio-button [labelPosition]="'after'" (click)="CreateConfig('Create')">Create
+                                        New
+                                        Configuration</leds-radio-button>
+                                    <leds-radio-button [labelPosition]="'after'" (click)="CreateConfig('Edit')">Edit
+                                        Existing
+                                        Configuration</leds-radio-button>
+                                </div> -->
+                                <div class="row">
+                                    <div class="col-lg-12 le-u-mar-b-24">
+                                        <div class="le-u-mar-t-24">
+                                            <leds-panel *ngIf="checklisted.length>0">
+                                                <div class="le-u-pad-16">
+                                                    <div class="le-u-header-md">Tasks List</div>
+                                                    <div class="">
+                                                        <div class="aip-checklist-grid">
+                                                            <div class=" le-u-mar-t-16"
+                                                                *ngFor="let data of checklisted; index as i">
+                                                                <leds-card designType="mini" style="position:relative">
+                                                                    <mat-card-content>
+                                                                        <div class="d-flex justify-conteny">
+                                                                            <span (click)="removeItem(i)"
+                                                                                class="le-u-body-sm aip-cursor rai-checklist-delete a le-u-text-neutral-80 d-block"><i
+                                                                                    class="icon x-16 ip-leds-icon delete-sm-icon"></i></span>
+                                                                        </div>
+                                                                        <div
+                                                                            class="le-u-header-md le-u-mar-b-16 aip-related-ellipsis aip-cursor">
+                                                                            {{data.name |titlecase}}</div>
+                                                                        <div class="">
+                                                                            <div class="le-u-mar-tb-8">
+                                                                                <span class="le-u-header-sm">Type:&nbsp;
+                                                                                </span>
+                                                                                <span
+                                                                                    class="le-u-body-sm aip-related-ellipsis aip-cursor">
+                                                                                    {{data.type}} </span>
+                                                                            </div>
+                                                                            <div class="le-u-mar-tb-8">
+                                                                                <span class="le-u-header-sm">Mandatory:
+                                                                                    &nbsp; </span>
+                                                                                <span
+                                                                                    class="le-u-body-sm aip-related-ellipsis aip-cursor">
+                                                                                    {{data.mandatory}} </span>
+                                                                            </div>
+                                                                            <div class="le-u-mar-tb-8">
+                                                                                <span class="le-u-header-sm">
+                                                                                    ApproverFlow: &nbsp;</span>
+                                                                                <span
+                                                                                    class="le-u-body-sm aip-related-ellipsis aip-cursor">
+                                                                                    {{data.approver_flow}}
+                                                                                    &nbsp;</span>
+                                                                            </div>
+                                                                            <div class="le-u-mar-tb-8"
+                                                                                *ngIf="data.approver_flow==true">
+                                                                                <span class="le-u-header-sm"> Approver
+                                                                                    Role:&nbsp;</span>
+                                                                                <span
+                                                                                    class="le-u-body-sm aip-related-ellipsis aip-cursor">
+                                                                                    {{data.approver_role}} </span>
+                                                                            </div>
+
+                                                                        </div>
+                                                                    </mat-card-content>
+                                                                </leds-card>
+                                                            </div>
+                                                        </div>
+                                                        <div class="d-flex justify-content-end le-u-mar-tb-8">
+                                                            <span><button mat-flat-button leds-button
+                                                                    name="miniSecondaryButton" id="miniSecondaryButton"
+                                                                    designType="miniSecondary" (click)="saveConfig()">
+                                                                    Save Config
+                                                                </button></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </leds-panel>
+                                            <div class="le-u-mar-t-24">
+                                                <leds-panel>
+                                                    <div class="container-fluid row le-u-pad-tb-24 row">
+                                                        <div class="le-u-header-lg">
+                                                            <div class="le-u-header-md">Activity Type</div>
+                                                            <leds-select [options]="workflowTypes" label="" [required]="false"
+                                                                [disabled]="false" designType="default"
+                                                                [isMultiple]="false"
+                                                                (selectChange)="selectWorkflowType($event)"></leds-select>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="le-u-header-md">Select Template type</div>
+                                                            <leds-select [options]="types" label="" [required]="false"
+                                                                [disabled]="false" designType="default"
+                                                                [isMultiple]="false"
+                                                                (selectChange)="selectType($event)"></leds-select>
+                                                        </div>
+                                                        <div class="col-md-6" *ngIf="selectedType">
+                                                            <div class="le-u-header-md">Select Template</div>
+                                                            <leds-select [options]="template" label=""
+                                                                [required]="false" [disabled]="false"
+                                                                designType="default" [isMultiple]="false"
+                                                                (selectChange)="selectTemplate($event)"></leds-select>
+                                                        </div>
+                                                        <span *ngIf="slectedTemplate">
+                                                            <div class="col-md-6">
+                                                                <leds-checkbox [checked]="mandatory"
+                                                                    (change)="mandate($event)" [disabled]="false">
+                                                                    Is Mandatory
+                                                                </leds-checkbox>
+                                                            </div>
+                                                            <div
+                                                                class="row justify-content-between align-items-center le-u-pad-l-16 le-u-pad-t-16">
+                                                                <div class="col-md-4">
+                                                                    <leds-checkbox [checked]="isApprovalFlow"
+                                                                        (change)="isApproval($event)"
+                                                                        [disabled]="false">
+                                                                        Is Approval Flow
+                                                                    </leds-checkbox>
+                                                                </div>
+                                                                <div class="col-md-8" *ngIf="isApprovalFlow">
+                                                                    <leds-select [options]="approver_role"
+                                                                        label="Select Approver Role"
+                                                                        designType="default" [isMultiple]="false"
+                                                                        (selectChange)="selectApproverRole($event)"></leds-select>
+                                                                </div>
+                                                            </div>
+                                                        </span>
+                                                        <div class="col-md-6 le-u-mar-t-16 d-flex float-end" *ngIf="slectedTemplate">
+                                                            <button mat-flat-button leds-button
+                                                                name="miniSecondaryButton" id="miniSecondaryButton"
+                                                                designType="miniSecondary" (click)="selectconfig()">
+                                                                Add to List
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </leds-panel>
+                                            </div>
+                                            <div class="le-u-mar-t-24" *ngIf="slectedTemplate">
+                                                <leds-panel>
+                                                    <div class="le-u-pad-16">
+                                                        <leds-data-grid>
+                                                            <table dataGridTable>
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th scope="col">Question Id</th>
+                                                                        <th scope="col">Question Content</th>
+                                                                        <th scope="col">Response Type</th>
+                                                                        <th scope="col">Options</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr *ngFor="let template of slectedTemplateView">
+                                                                        <td>{{template.question_id}}</td>
+                                                                        <td>{{template.question_content}}</td>
+                                                                        <td>{{template.response_type}}</td>
+                                                                        <td>{{template?.options}}</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </leds-data-grid>
+                                                        <!-- <json-tree [value]="slectedTemplateView"></json-tree> -->
+                                                    </div>
+                                                </leds-panel>
+                                                <!-- <leds-panel *ngIf="selectedType == 'Questionare'">
+                                                    <div class="le-u-pad-16" [innerHTML]="slectedTemplateView"></div>
+                                                </leds-panel> -->
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

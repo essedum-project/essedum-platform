@@ -1,0 +1,88 @@
+"user_id","project_id","query_name","query_description","gql_query","query_filter","is_private","createdAt","updatedAt"
+"1","2","AlertAndIncident","AlertAndIncident","query ($Id: String! = 00059) {
+    AlertAndIncident(filter: {
+        sysId_contains: $Id
+    }, first: 25, offset: 0) {
+        uniqueId
+        sysId
+        type
+        number
+        location
+        Description
+        state
+        openedDate
+        priority
+    }
+}","{""Id"":""00059""}","false","2024-08-27T12:08:30","NULL"
+"1","2","InstanceGraph","InstanceGraph","query($running_job_instance_id:String=JobX3_3) {
+    JobInstance(filter: {
+        instance_id: $running_job_instance_id
+    }, first:25, offset:0) {
+        instance_id
+        start_time
+        description
+        job_name
+        status
+        group_name
+        uniqueId
+        project_id
+        Jobinstancemappingtojobinstance(first:25, offset:0) {
+            uniqueId
+            jobId
+            jobInstanceId
+            JobtoinstanceMapping(first:25, offset:0) {
+                name
+                description
+                uniqueId
+                project_id
+            }
+        }
+        groupjobinstancemappingtojobinstance(first:25, offset:0) {
+            uniqueId
+            groupId
+            jobInstanceId
+            grouptogroupjobinstancemapping(first:25, offset:0) {
+                name
+                description
+                uniqueId
+                project_id
+            }
+        }
+    }
+}","{""running_job_instance_id"":""JobX3_3""}","false","2024-08-27T12:08:30","NULL"
+"1","2","InstanceRelationship","InstanceRelationship","query($r1:String=JobX3_3) {
+    JobInstance(filter: {
+        instance_id: $r1
+    }, first:25, offset:0) {
+        instance_id
+        start_time
+        description
+        job_name
+        status
+        group_name
+        uniqueId
+        project_id
+        Jobinstancemappingtojobinstance(first:25, offset:0) {
+            uniqueId
+            jobId
+            jobInstanceId
+            JobtoinstanceMapping(first:25, offset:0) {
+                name
+                description
+                uniqueId
+                project_id
+            }
+        }
+        groupjobinstancemappingtojobinstance(first:25, offset:0) {
+            uniqueId
+            groupId
+            jobInstanceId
+            grouptogroupjobinstancemapping(first:25, offset:0) {
+                name
+                description
+                uniqueId
+                project_id
+            }
+        }
+    }
+}","{""r1"":""JobX3_3""}","false","2024-08-27T12:08:30","NULL"

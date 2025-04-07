@@ -1,0 +1,31 @@
+table{
+    border-collapse: collapse;
+    font-size: 0.9em;
+    font-family: var(--font-type) !important;
+  }
+  
+  table, th, td {
+    
+    padding: 12px 15px;
+  }
+  td{
+    word-break: break-all;
+  
+  }
+  th{
+  text-transform: capitalize;
+  background-color: #8813e7e8;
+      color: #ffffff;
+      text-align: left;
+  }
+  tr{
+    border-bottom: 1px solid #dddddd;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  }
+  tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+  }
+  .mat-tree{
+    display: contents;
+  }

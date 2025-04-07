@@ -1,0 +1,281 @@
+<div class="main-container">
+    <div class="align-items-center d-flex">
+        <span class="" style="cursor: pointer;">
+            <i class="aip-led-icons icon x-24 back-icon" (click)="routeBackToPromptList()"></i>
+        </span>
+        <span *ngIf="!isEdit" class="le-u-mar-l-8 le-u-header-xxl">Create Prompt</span>
+        <span *ngIf="isEdit" class="le-u-mar-l-8 le-u-header-xxl">Edit Prompt</span>
+
+    </div>
+    <div class="le-u-pad-lr-32 le-u-pad-tb-8">
+        <leds-panel type="default" styleClass="" contentClass="">
+            <div class="d-flex le-u-pad-lr-16">
+                <span class="le-u-body-lg le-u-pad-t-24 le-u-pad-lr-16" style="color: #555555;font-weight: bold;">Prompt
+                    Name*</span>
+                <!-- <leds-input-field class="col-md-10" [(ngModel)]="alias" inputType="text" placeholder="name"
+                    [disabled]="false" [required]="false" (changesOccur)="changesOccurAlias($event)"
+                placeholder="Enter display name"></leds-input-field> -->
+                <leds-input-field *ngIf="isEdit" class="col-md-10" placeholder="Enter display name" label=""
+                    [(ngModel)]="alias" designType="default" inputType="text" [disabled]="false" styleClass=""
+                    [validators]="nameValidator" designType="readOnly"
+                    (changesOccur)="changesOccurAlias($event)"></leds-input-field>
+                <leds-input-field *ngIf="!isEdit" class="col-md-10" placeholder="Enter display name" label=""
+                    [(ngModel)]="alias" designType="default" inputType="text" [disabled]="false" styleClass=""
+                    [validators]="nameValidator" designType="default"
+                    (changesOccur)="changesOccurAlias($event)"></leds-input-field>
+            </div>
+            <mat-error *ngIf="errMsgFlag" class="custom-hint validator-error">Please enter Name in
+                Alphanumeric
+                value, space is not allowed,accepted
+                special characters are _ and -.</mat-error>
+            <!-- <mat-error *ngIf="errMsgFlag"
+                class="custom-hint-or-error">{{errMsg}}</mat-error> -->
+            <div id="tempDiv" class="le-u-pad-lr-32" style="margin-top: -32px;">
+                <leds-accordion designType="3D" [hideToggle]="false" [multi]="false" class="aip-w-96 le-u-pad-l-16">
+                    <mat-expansion-panel [(expanded)]="isExpanded" (opened)="isExpanded = true"
+                        (closed)="isExpanded = false">
+                        <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+                            <mat-panel-title>Templates</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="aip-scroll-hover">
+                            <p class="le-u-pad-16" style="color: brown;">{{comment}}</p>
+                            <div #targetContainer>
+                            </div>
+                        </div>
+                        <div class="le-u-pad-16">
+                            <leds-button nameText="miniSecondaryButton" idText="miniSecondaryButton" [disabled]="false"
+                                buttonType="button" designType="miniSecondary" (click)="addTemplate()">
+                                + Add Message
+                            </leds-button>
+                        </div>
+                    </mat-expansion-panel>
+                </leds-accordion>
+            </div>
+            <div class="le-u-pad-lr-32" style="margin-top: -32px;">
+                <div class="aip-scroll-hover">
+                    <form [formGroup]="pluginForm" class="">
+                        <div formArrayName="inputs">
+                            <div *ngFor="let k of formKeys; let i = index">
+                                <leds-accordion *ngIf="k=='inputs'" designType="3D" [hideToggle]="false" [multi]="false"
+                                    class="aip-w-96 le-u-pad-l-16">
+                                    <mat-expansion-panel (opened)="refreshInput()">
+                                        <mat-expansion-panel-header [collapsedHeight]="'40px'"
+                                            [expandedHeight]="'40px'">
+                                            <mat-panel-title>Inputs*</mat-panel-title>
+                                        </mat-expansion-panel-header>
+                                        <leds-tooltip [tooltip]="'Refresh'" [position]="'below'" style="float:right;">
+                                            <i class="le-u-pad-r-32 le-u-pad-t-8 aip-led-icons icon x-24 icon_Refresh"
+                                                (click)="refreshInput()"></i>
+                                        </leds-tooltip>
+                                        <div class="table-responsive d-flex" style="flex-wrap: wrap;">
+                                            <div class="le-u-body-md d-inline-block sub-main-container"
+                                                *ngFor="let att of pluginForm.controls[k].controls; let l=index"
+                                                [formGroupName]="l">
+
+                                                <div class="align-items-center le-u-pad-t-16 le-u-pad-b-8">
+                                                    <div class="pannel-shadow">
+                                                        <div class="d-flex le-u-pad-l-2"
+                                                            style="justify-content: space-between; margin-bottom: -8px;height: 47px;">
+                                                            <leds-input-field class="col-md-10" formControlName="name"
+                                                                inputType="text" placeholder="name" [disabled]="false"
+                                                                [required]="false"></leds-input-field>
+                                                            <leds-tooltip class="le-u-pad-lr-8 le-u-pad-tb-24 col-md-2"
+                                                                [tooltip]="'Remove'" [position]="'above'">
+                                                                <i class="le-u-mar-r-8 icon delete-sm-icon x-20"
+                                                                    (click)="remove(k,l)"></i>
+                                                            </leds-tooltip>
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <textarea [placeholder]="'Enter default value'"
+                                                                formControlName="name_value"
+                                                                class="aip-scroll-hover le-u-pad-8 le-u-mar-t-16 contenteditable-div input-text-style"
+                                                                rows="4" cols="26"
+                                                                (input)="adjustTextareaHeight($event)"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="le-u-pad-16">
+                                            <leds-button nameText="miniSecondaryButton" idText="miniSecondaryButton"
+                                                [disabled]="false" buttonType="button" designType="miniSecondary"
+                                                (click)="add('inputs',pluginForm)">
+                                                + Add Input
+                                            </leds-button>
+                                        </div>
+                                    </mat-expansion-panel>
+                                </leds-accordion>
+
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="le-u-pad-lr-32" style="margin-top: -32px;">
+                <div class="aip-scroll-hover">
+                    <!-- <form [formGroup]="pluginForm" class=""> -->
+                    <!-- <div formArrayName="inputs"> -->
+                    <!-- <div *ngFor="let k of formKeys; let i = index"> -->
+                    <leds-accordion designType="3D" [hideToggle]="false" [multi]="false" class="aip-w-96 le-u-pad-l-16">
+                        <mat-expansion-panel>
+                            <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+                                <mat-panel-title>Providers*</mat-panel-title>
+                            </mat-expansion-panel-header>
+                            <!-- runtimes -->
+                            <h3 class="le-u-pad-16" style="color: black">Choose default provider(s)</h3>
+                            <!-- <div *ngFor="let k of finalProviderList; let i = index">
+                                <div class="d-flex">
+                                    <leds-checkbox [checked]="k.checked"
+                                        (click)="addRemoveProvider(k.type,k.alias,k.name)"
+                                        class="le-u-pad-lr-16 le-u-pad-t-16 selector-690-41"
+                                        style="text-wrap: nowrap;">{{k.type}}-{{k.alias}}</leds-checkbox>
+                                    <leds-input-field class="col-md-10" placeholder="Enter friendly name" label=""
+                                        [(ngModel)]="k.friendly_name" designType="default" inputType="text"
+                                        [disabled]="false" styleClass="" [validators]="nameValidator"
+                                        designType="default" (changesOccur)="setProvidersFriendlyName($event,k.name)"
+                                        style="margin-top: -8px;"></leds-input-field>
+                                </div>
+                            </div> -->
+                            <!-- dummy -->
+                            <leds-radio-group [disabled]="false" [labelPosition]="'after'"
+                                [(ngModel)]="defaultProvider">
+                                <div *ngFor="let k of finalProviderList; let i = index">
+                                    <div class="d-flex">
+                                        <leds-radio-button class="col-md-2" value="{{k.name}}"
+                                            style="display: list-item; line-height: 4rem;"
+                                            (click)="defaultProviderChange(k.name)">{{k.type}}-{{k.alias}}</leds-radio-button>
+                                        <leds-input-field class="col-md-6" placeholder="Enter friendly name" label=""
+                                            [(ngModel)]="k.friendly_name" designType="default" inputType="text"
+                                            [disabled]="false" styleClass="" [validators]="nameValidator"
+                                            designType="default"
+                                            (changesOccur)="setProvidersFriendlyName($event,k.name)"
+                                            style="margin-top: -8px;"></leds-input-field>
+                                        <div [ngClass]="{'container' : isInEdit}"
+                                            style="margin-left: 0px; padding-left: 0px;">
+                                            <mat-slide-toggle [(ngModel)]="k.transform" style="margin-top: 1em;">
+                                                Transform response</mat-slide-toggle><br />
+                                        </div>
+                                        <leds-tooltip *ngIf="k.transform" class="le-u-pad-8 le-u-mar-t-4"
+                                            [tooltip]="'Transform Script'" [position]="'right'" style="float:right;">
+                                            <i class="le-u-pad-r-32  aip-led-icons icon x-16 icon_setting"
+                                                style="font-size: 16px;" (click)="open1(TransformConfig)"></i>
+                                        </leds-tooltip>
+                                    </div>
+                                    <ng-template #TransformConfig let-modal>
+                                        <div class="transform-container">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="le-u-mar-b-16 le-u-header-xl"
+                                                    style="color: black;font-weight: bold;">Transform Script</span>
+                                                <button type="button" class="le-u-mar-b-16 btn-close" aria-label="Close"
+                                                    (click)="modal.dismiss('Cross click')">
+                                                    <i class="icon x-16 close-icon"></i>
+                                                </button>
+                                            </div>
+                                            <textarea class="le-u-pad-8 le-u-mar-b-16" style="width: 100% !important; border-color: var(--base-color);"
+                                                rows="15" cols="30" pInputTextarea autoResize="autoResize"
+                                                [(ngModel)]="k.transformScript"></textarea>
+                                            <leds-button designType="miniPrimary" class="le-u-mar-r-8"
+                                                buttonType="button"
+                                                (click)="modal.dismiss('Cross click'); setTransformScript(i,k.transformScript)">
+                                                Save
+                                            </leds-button>
+                                        </div>
+                                    </ng-template>
+                                </div>
+                            </leds-radio-group>
+                        </mat-expansion-panel>
+                    </leds-accordion>
+
+                    <!-- </div> -->
+                    <!-- </div> -->
+                    <!-- </form> -->
+                </div>
+            </div>
+            <div *ngIf="isEdit && json_content?.examples.length > 0" class="le-u-pad-lr-32" style="margin-top: -32px;">
+                <div class="aip-scroll-hover">
+                    <form [formGroup]="examplesForm">
+                        <div formArrayName="examples">
+                            <div class="le-u-body-md">
+                                <leds-accordion designType="3D" [hideToggle]="false" [multi]="false"
+                                    class="aip-w-96 le-u-pad-l-16">
+                                    <mat-expansion-panel>
+                                        <mat-expansion-panel-header [collapsedHeight]="'40px'"
+                                            [expandedHeight]="'40px'">
+                                            <mat-panel-title>Examples</mat-panel-title>
+                                        </mat-expansion-panel-header>
+                                        <div class="table-responsive  d-flex" style="flex-wrap: wrap;"
+                                            *ngIf="examplesForm.controls.examples.value.length > 0">
+                                            <div *ngFor="let example of examplesForm.controls.examples.controls; let i = index"
+                                                [formGroupName]="i">
+                                                <div class="tile d-flex le-u-pad-16"
+                                                    style="justify-content: space-between;">
+                                                    <span class="le-u-pad-tb-8 le-u-pad-l-8 le-u-body-lg"
+                                                        style="white-space: nowrap; color: #73738c;font-weight: bold;">Example:{{i+1}}</span>
+                                                    <leds-tooltip *ngIf="isEdit" class="aip-w-2" [tooltip]="'Remove'"
+                                                        [position]="'above'" style="padding-top: 5px;">
+                                                        <i class="le-u-mar-r-8 icon delete-sm-icon x-20"
+                                                            (click)="removeExample(i)"></i>
+                                                    </leds-tooltip>
+                                                </div>
+                                                <div formArrayName="inputs">
+                                                    <div *ngFor="let input of example.get('inputs').controls; let j = index"
+                                                        [formGroupName]="j">
+                                                        <div
+                                                            class="tile align-items-center pannel-shadow le-u-mar-lr-32 le-u-mar-b-8">
+                                                            <h3
+                                                                class="le-u-body-md le-u-pad-8 temp-example-label temp-example-text">
+                                                                {{input.controls.name.value}}</h3>
+                                                            <p
+                                                                class="le-u-body-md le-u-pad-8 temp-example-text contenteditable-div">
+                                                                {{input.controls.name_value.value}}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div formArrayName="outputs">
+                                                    <div *ngIf="example.get('outputs').controls"
+                                                        class="tile align-items-center pannel-shadow le-u-mar-lr-32 le-u-mar-tb-16">
+                                                        <h3
+                                                            class="le-u-body-md le-u-pad-8 temp-example-label temp-example-text">
+                                                            Output</h3>
+                                                        <p class="le-u-body-md le-u-pad-8 temp-example-text contenteditable-div"
+                                                            style="background-color: aliceblue;">
+                                                            {{example.get('outputs').controls.output.value}}</p>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </mat-expansion-panel>
+                                </leds-accordion>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="le-u-pad-l-32">
+                <mat-error *ngIf="errFlag">Please provide the required fields (*).</mat-error>
+            </div>
+            <div *ngIf="!isEdit" class="le-u-pad-lr-32 le-u-pad-tb-16" style="height: 100px;">
+                <div *ngIf="nameFlag">
+                    <leds-button nameText="miniPrimaryButton" idText="miniPrimaryButton" [disabled]="false"
+                        buttonType="button" designType="miniPrimary" (click)="save()">
+                        SAVE
+                    </leds-button>
+                </div>
+                <div *ngIf="!nameFlag">
+                    <leds-button nameText="miniPrimaryButton" idText="miniPrimaryButton" [disabled]="true"
+                        buttonType="button" designType="miniPrimary">
+                        SAVE
+                    </leds-button>
+                </div>
+            </div>
+            <div *ngIf="isEdit" class="le-u-pad-lr-32 le-u-pad-tb-16" style="height: 100px;">
+                <leds-button nameText="miniPrimaryButton" idText="miniPrimaryButton" [disabled]="false"
+                    buttonType="button" designType="miniPrimary" (click)="update()">
+                    Update
+                </leds-button>
+            </div>
+        </leds-panel>
+    </div>
+</div>

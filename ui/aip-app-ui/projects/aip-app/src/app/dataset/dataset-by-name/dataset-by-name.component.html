@@ -1,0 +1,235 @@
+<div class="le-l-mainwrapper aip-top">
+    <div class="clearfix le-l-bodywrapper aip-tranparent-backgroud aip-tranparent-backgroud js-bodywrapper"
+        id="mainCtr">
+        <div class="">
+            <div *ngIf="isExpanded" class="row aip-filter aip-filter-position aip-scroll-hover" style="
+            background-color: #FAFAFA; ">
+                <app-tagging-component [servicev1]="'Datasets'" (tagSelected)="tagSelectedEvent($event)"
+                    [tagrefresh]="tagrefresh"
+                    [selectedDatasetTypeList]="{ 
+                        selectedAdapterType: selectedAdapterType
+                      }"></app-tagging-component>
+            </div>
+            <div class="col-sm-12 col-md-12 col-lg-12" id="mainrightCnt" [ngStyle]="toggler(isExpanded)">
+                <div class="le-l-level1-wrapper">
+                    <div class="aip-header le-u-pad-lr-32 le-u-pad-t-16">
+                        <div *ngIf="type" class="align-items-center d-flex">
+                            <leds-tooltip [tooltip]="'Back To Connections'" [position]="'above'">
+                                <span class="">
+                                    <i class="aip-led-icons icon x-24 back-icon" (click)="routeBackToConnections()"></i>
+                                </span>
+                            </leds-tooltip>
+                        </div>
+                        <div class=" col-sm-12 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-center">
+                            <div style="padding: 20px 0px 0px 0px;">
+                                <leds-tooltip [tooltip]="isExpanded?'Collapse Filters':'Expand Filters'"
+                                    [position]="tooltip">
+                                    <i class="icon x-24 filter-icon" (click)="toggleExpand()"></i>
+                                </leds-tooltip>
+                            </div>
+                            <div class="le-u-pad-24">
+                                <h3 class="le-u-header-xl">{{cardTitle}}</h3>
+                            </div>
+                        </div>
+                        <div
+                            class="col-10 offset-1 offset-xs-1 offset-sm-1 offset-md-0 col-sm-6 col-md-12 col-lg-7 col-xl-6 aip-panel aip-panel-shadow d-flex align-items-center">
+                            <input type="text" name="" id="" placeholder="Search by Name" class="aip-panel-input"
+                                [(ngModel)]="filt" (keyup)="filterz()">
+                            <i class="aip-led-icons icon x-24 search-icon"></i>
+                        </div>
+                        <div class="d-flex justify-content-center col-sm-5 col-md-6 col-lg-5 col-xl-4 aip-header-icon">
+                            <div class="">
+                                <div *ngIf="createAuth" class="le-u-mar-r-24 aip-cursor" (click)="open()">
+                                    <span class="le-c-btn--icon__icon">
+                                        <i class="aip-led-icons icon x-24 icon-add"></i>
+                                    </span>
+                                    <span class="le-c-btn--icon__text"></span>
+                                </div>
+                            </div>
+                            <div class="aip-cursor">
+                                <span class="le-c-btn--icon__icon">
+                                    <i class="aip-led-icons icon x-24 icon_Refresh" (click)="refreshData()"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="le-c-card__action-ul aip-doc-container le-u-pad-lr-16">
+                    <div class="" style='min-width: 350px;padding: 0px;'
+                        *ngFor="let card of filteredCards">
+                        <leds-card designType='simple' class="le-u-pad-8"
+                            style="padding-top: 0 !important;padding-bottom: 0 !important;">
+                            <mat-card-header>
+                                <mat-card-title class="le-c-card__container clearfix">
+                                    <div class="le-c-card__container-left">
+                                        <table class="le-c-card__container-left w-50">
+                                            <tr>
+                                                <th rowspan="2">
+                                                    <span class="aip-cursor" (click)="desc(card)">
+                                                        <i style="color:var(--base-color);" class="icon x-32"
+                                                            [ngClass]="getIconClass(card.views)"></i>
+                                                    </span>
+                                                </th>
+                                                <td class="le-u-overline le-u-mar-b-8">
+                                                    {{card.datasource?.category}} - {{card.datasource?.alias}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="le-u-header-md le-u-ellipsis aip-cursor" (click)="desc(card)">
+                                                    {{card.alias | titlecase}}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="le-c-card__container-right">
+                                        <ul>
+                                            <li>
+                                                <leds-tooltip class="le-u-pad-r-8 le-u-mar-b-16"
+                                                    [tooltip]="'View Details'" [position]="'above'">
+                                                    <span class="aip-cursor" (click)="desc(card)">
+                                                        <i class="icon x-18 show-icon aip-hover-icon"></i>
+                                                    </span>
+                                                </leds-tooltip>
+                                            </li>
+                                            <li>
+                                                <leds-tooltip class="le-u-pad-r-8 le-u-mar-b-16 " [tooltip]="'Download'"
+                                                    [position]="'above'">
+                                                    <span class="aip-cursor" (click)="downloadSelectedFile(card)">
+                                                        <i class="icon x-18 download-icon aip-hover-icon"></i>
+                                                    </span>
+                                                </leds-tooltip>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </mat-card-title>
+                                <mat-card-subtitle class="le-u-body-sm le-u-text-neutral-80 le-u-ellipsis">
+                                    {{card.lastmodifieddate}}
+                                </mat-card-subtitle>
+                            </mat-card-header>
+                            <mat-card-content class="le-u-no-mar-b">
+                                <p class="le-u-body-md le-u-text-neutral-80 le-u-line-2 aip-desc-ellipsis">
+                                    {{card.description}}
+                                </p>
+                            </mat-card-content>
+                            <mat-card-actions class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <ul>
+                                        <li>
+                                            <leds-tooltip class="le-u-pad-r-4 le-u-mar-b-16" [tooltip]="'Copy Dataset'"
+                                                [position]="'above'">
+                                                <span class="aip-cursor" (click)="navigate(content1)">
+                                                    <i class="icon x-16 copy-icon aip-hover-icon"></i>
+                                                </span>
+                                            </leds-tooltip>
+                                        </li>
+                                        <li>
+                                            <leds-tooltip *ngIf="editAuth" class="le-u-pad-r-4 le-u-mar-b-16"
+                                                [tooltip]="'Edit Dataset'" [position]="'above'">
+                                                <span class="aip-cursor" (click)="navigateTo(card)">
+                                                    <i class="icon x-16 edit-icon aip-hover-icon"></i>
+                                                </span>
+                                            </leds-tooltip>
+                                        </li>
+                                        <li>
+                                            <leds-tooltip *ngIf="deleteAuth" class="le-u-pad-r-4 le-u-mar-b-16"
+                                                [tooltip]="'Delete Dataset'" [position]="'above'">
+                                                <span class="aip-cursor" (click)="deleteAdapter(card.name)">
+                                                    <i class="icon x-16 delete-sm-icon aip-hover-icon"></i>
+                                                </span>
+                                            </leds-tooltip>
+                                        </li>
+                                        <li *ngIf="card.datasource?.type == 'S3' || card.datasource?.type == 'MYSQL'">
+                                            <leds-tooltip class="le-u-pad-r-4 le-u-mar-b-16"
+                                                [tooltip]="'Generate Embeddings'" [position]="'above'">
+                                                <span class="aip-cursor"
+                                                    (click)="openDialog(retrigger,'Embeddings',getEmbedDocStatus(card.name),card)">
+                                                    <i class="icon x-16 icon_setting"
+                                                        [ngStyle]="getEmbedStatus(card.name)"></i>
+                                                </span>
+                                            </leds-tooltip>
+                                        </li>
+                                        <li *ngIf="card.datasource?.type == 'S3'">
+                                            <leds-tooltip class="le-u-pad-r-4 le-u-mar-b-16" [tooltip]="'Translate'"
+                                                [position]="'above'">
+                                                <span class="aip-cursor"
+                                                    (click)="openDialog(retrigger,'Translation',getTranslationDocStatus(card.name),card)">
+                                                    <i class="icon x-16 icon_languages"
+                                                        [ngStyle]="getTranslationStatus(card.name)"></i>
+                                                </span>
+                                            </leds-tooltip>
+                                        </li>
+                                        <li *ngIf="card.datasource?.type == 'S3'">
+                                            <leds-tooltip class="le-u-pad-r-4 le-u-mar-b-16" [tooltip]="'Summary'"
+                                                [position]="'above'">
+                                                <span class="aip-cursor"
+                                                    (click)="openDialog(retrigger,'Summary',getSummaryDocStatus(card.name),card)">
+                                                    <i class="icon x-16 icon_Litmus"
+                                                        [ngStyle]="getSummaryStatus(card.name)"></i>
+                                                </span>
+                                            </leds-tooltip>
+                                        </li>
+                                        <li *ngIf="card.datasource?.type == 'S3'">
+                                            <leds-tooltip class="le-u-pad-r-4 le-u-mar-b-16" [tooltip]="'Transcribe'"
+                                                [position]="'above'">
+                                                <span class="aip-cursor"
+                                                    (click)="openDialog(retrigger,'Transcribe',getTranscribeDocStatus(card.name),card)">
+                                                    <i class="icon x-16 icon_support_helpdesk"
+                                                        [ngStyle]="getTranscribeStatus(card.name)"></i>
+                                                </span>
+                                            </leds-tooltip>
+                                        </li>
+                                        <li *ngIf="card.datasource?.type == 'S3'">
+                                            <leds-tooltip class="le-u-pad-r-4 le-u-mar-b-16" [tooltip]="'Questions'"
+                                                [position]="'above'">
+                                                <span class="aip-cursor"
+                                                    (click)="openDialog(retrigger,'FAQ',getQuestionsDocStatus(card.name),card)">
+                                                    <i class="icon x-16 icon_FAQ"
+                                                        [ngStyle]="getQuestionsStatus(card.name)"></i>
+                                                </span>
+                                            </leds-tooltip>
+                                        </li>
+                                        <ng-template #content1 let-modal>
+                                            <app-dataset-config [dataset]=card [copyDataset]="copyDataset"
+                                                (refreshcards)="refreshcards($event)"></app-dataset-config>
+                                        </ng-template>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <ul class="float-end">
+                                        <li *ngFor="let i of iconIterations,let index=index" style="margin:0px">
+                                            <leds-tooltip class="le-u-pad-r-8 le-u-mar-b-16" [tooltip]="'Rate '+ (index+1) +' star'"
+                                                [position]="'above'">
+                                                <span class="aip-cursor" (click)="openRatingModule(rate,card,index)">
+                                                    <i *ngIf="index+1>card.rate" class="icon x-16 star-icon"></i>
+                                                    <i *ngIf="index+1<card.rate || index+1 ==card.rate" class="icon x-16 icon-star_filled yellow"></i>
+                                                </span>
+                                            </leds-tooltip>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </mat-card-actions>
+                        </leds-card>
+                    </div>
+                </div>
+                <div *ngIf="records && (!filteredCards || filteredCards.length == 0)"
+                    class="d-flex justify-content-center align-items-center flex-column">
+                    <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive" alt="aip_empty_state_leds"
+                        style="width:15rem" />
+                    No records found.
+                </div>
+                <app-pagination #pagination [noOfItems]="noOfItems"
+                    (pageAndSizeChanged)="handlePageAndSizeChange($event)">
+                </app-pagination>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Retrigger dialog box -->
+<ng-template #retrigger let-modal>
+    <app-data-enchrichment [selectedEvent]="selectedEvent" [selectedCard]="selectedCard" [status]="status"></app-data-enchrichment>
+</ng-template>
+
+<!-- Rating dialog box -->
+<ng-template #rate let-modal>
+    <app-aip-rating [rateData]="rateData" (refresh)="refreshData()"></app-aip-rating>
+</ng-template>

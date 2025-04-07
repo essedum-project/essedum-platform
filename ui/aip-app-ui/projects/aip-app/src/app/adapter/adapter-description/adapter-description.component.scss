@@ -1,0 +1,16 @@
+::ng-deep .aip-filter {
+    height: 65vh;
+}
+.customHeader {
+    background: var(---8626c3) 0% 0% no-repeat padding-box;
+    background: #8626C3 0% 0% no-repeat padding-box;
+    color: #FFFFFF;
+    border-radius: 8px 8px 0px 0px;
+    opacity: 1;
+}
+
+@media (max-width: 1279px) {
+    ::ng-deep .le-l-level2-right-col {
+        width:350px;
+    }
+}

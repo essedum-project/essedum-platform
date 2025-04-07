@@ -1,0 +1,264 @@
+<!-- <div class="le-l-level1-middle-col le-l-base-layout-center"> -->
+<!-- <div *ngIf="!modeSwitch"> -->
+<span *ngIf="initiativeView">
+    <leds-breadcrumb [breadcrumbs]="breadcrumb" styleClass=""></leds-breadcrumb></span>
+<div class="d-flex le-u-mar-t-24 justify-content-between align-items-center">
+    <div class="le-u-header-xxl d-flex align-items-center">
+        <span style="color:#737373">Solution:&nbsp; &nbsp;</span>{{initiativeName | titlecase}}&nbsp; &nbsp;
+        <leds-badge badgeType="active">DISCOVER</leds-badge>
+    </div>
+    <div class="" *ngIf="initiativeView">
+
+
+    </div>
+</div>
+<div class="le-l-level2-middle-ctr">
+    <div class="le-l-level2-middle-col le-u-mar-b-24__mb">
+        <div class="le-u-mar-t-16">
+            <leds-panel type="default" styleClass="" contentClass="">
+                <div class="le-u-pad-24">
+                    <div class="le-u-header-lg">Overview</div>
+                    <div class="le-u-body-md le-u-mar-t-16 aip-initiative-desc" style="line-height:1.7rem">
+                        {{initiativeData?.description}}
+                    </div>
+                </div>
+            </leds-panel>
+            <div class="le-u-mar-t-24">
+                <div *ngIf="tasks.length!=0">
+                    <leds-panel type="default" styleClass="" contentClass="">
+                        <div class="le-u-pad-24 d-flex justify-content-between align-items-center">
+                            <div class=" d-flex flex-column">
+                                <div class="le-u-header-lg">Tasks {{numberOfTasks}}</div>
+                                <div class="le-u-body-md le-u-mar-t-8" style="color:#737373">
+                                    {{completedTask}} of
+                                    {{numberOfTasks}} tasks are Compeleted</div>
+                            </div>
+                        </div>
+                        <div class="le-u-pad-8">
+                            <leds-list class="">
+                                <li ledsListItem [noActive]="true" class="aip-ivm-task-grid aip-initiative-task-grid"
+                                    *ngFor="let task of tasks">
+                                    <div class="d-flex justify-content-between">
+                                        <span style="width:80%">
+                                            <div class="d-flex">
+                                                <h2 class="le-u-body-md le-u-text-black le-u-ellipsis le-u-mar-r-8">
+                                                    {{task.taskName}}</h2>
+                                                <!-- [ngClass]="taskClass(task.approvalStatus)" -->
+                                                <span *ngIf="task.approvalStatus=='PENDING'"
+                                                    class="le-c-badge le-c-badge--new float-end">APPROVAL
+                                                    {{task.approvalStatus}}</span>
+                                                <span
+                                                    *ngIf="task.approvalStatus=='REJECTED' || task.approvalStatus=='APPROVED'"
+                                                    class="le-c-badge float-end"
+                                                    [ngClass]="taskClass(task.approvalStatus)">{{task.approvalStatus}}</span>
+                                                <span class="le-c-badge float-end" *ngIf="task.approvalStatus==null"
+                                                    [ngClass]="taskClass(task.status)">{{task.status}}</span>
+                                            </div>
+                                            <span *ngIf="task.approvalStatus ==null"
+                                                class="le-u-body-sm  le-u-text-neutral-80 le-u-ellipsis d-block le-u-mar-t-4">
+                                                {{task.taskType}}
+                                            </span>
+                                            <span *ngIf="task.approvalStatus !=null"
+                                                class="le-u-body-xs  le-u-text-neutral-80 le-u-ellipsis le-u-mar-t-4 d-flex align-items-center">
+                                                <span
+                                                    *ngIf="task.approvalStatus =='REJECTED' ||task.approvalStatus =='APPROVED'">{{task.approvalStatus
+                                                    |titlecase}} on {{task.approvedOn |
+                                                    date:'longDate'}}</span>
+                                                <span *ngIf="task.approvalStatus =='PENDING'"
+                                                    class="le-u-body-sm  le-u-text-neutral-80 le-u-ellipsis d-block le-u-mar-t-4">
+                                                    Sumitted on &nbsp;{{task.submittedOn |date:'longDate'}}
+                                                </span>
+                                            </span>
+                                        </span>
+                                        <!-- <span *ngIf="initiativeView"> -->
+                                        <div class="initiative-view-button"
+                                            *ngIf="(task.status!='COMPLETED' ||task.approvalStatus=='REJECTED') && initiativeView">
+                                            <div (click)="questionare(task)" style="color: #ffffff;"
+                                                class="le-u-header-md le-u-pad-lr-16 my-2">
+                                                Proceed</div>
+                                        </div>
+                                        <div class="aip-base-color aip-cursor le-u-mar-r-8"
+                                            *ngIf="(task.status=='COMPLETED' && task.approvalStatus!='REJECTED') && initiativeView"
+                                            (click)="questionare(task)">View
+                                            All</div>
+                                        <!-- </span> -->
+                                    </div>
+                                </li>
+                            </leds-list>
+                        </div>
+                    </leds-panel>
+                </div>
+                <div *ngIf="tasks.length==0">
+                    <leds-panel>
+                        <div class="d-flex justify-content-center align-items-center flex-column">
+                            <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive"
+                                alt="aip_empty_state_leds" style="width:15rem" />
+                            No Task Found.
+                        </div>
+                    </leds-panel>
+                </div>
+            </div>
+            <div class="le-u-mar-t-24 le-u-pad-lr-8">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="le-u-header-lg">
+                        Linked Artifacts
+                    </div>
+
+                </div>
+                <div class="" *ngIf="refreshed">
+                    <app-ivm-recent-artifacts [initiativeId]=initiativeId [parentType]="'INITIATIVE'"
+                        (reloads)="reloads($event)"></app-ivm-recent-artifacts>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="le-l-level2-right-col  le-u-pad-t-16 aip-ivm-right-col">
+        <div class="" *ngIf="steppers.length!=0">
+            <leds-panel type="default" styleClass="" contentClass="">
+                <div class="le-u-pad-tb-24 le-u-pad-lr-16">
+                    <div class="le-u-header-lg">Task Status</div>
+                    <div class="le-u-mar-t-8 aip-ivm-scroll" style="height:max-content;max-height:20rem; overflow:auto">
+                        <div class="" *ngFor="let steps of steppers;let i=index;" (click)="questionare(steps)">
+                            <div class="" [ngClass]="afterClass(i)">
+                                <a *ngIf="steps.approvalStatus==null" [ngClass]="stepperClass(steps)"
+                                    class="le-u-header-md aip-cursor d-flex align-items-center">
+                                    <leds-tooltip [tooltip]="steps.status" [position]="'above'">
+                                        <a [ngClass]="stepperClass(steps.status)"
+                                            class="le-u-header-md aip-cursor d-flex align-items-center">
+                                            <span></span>
+                                        </a>
+                                    </leds-tooltip>
+                                    <p class="le-u-mar-l-16 ">{{steps.taskName}}</p>
+                                </a>
+                                <a [ngClass]="stepperClass(steps)" *ngIf="steps.approvalStatus!=null"
+                                    class="le-u-header-md aip-cursor d-flex align-items-center">
+                                    <leds-tooltip *ngIf="steps.approvalStatus=='PENDING'" [tooltip]="'Approval Pending'"
+                                        [position]="'above'">
+                                        <a [ngClass]="stepperClass('APENDING')"
+                                            class="le-u-header-md aip-cursor d-flex align-items-center">
+                                            <span></span>
+                                        </a>
+                                    </leds-tooltip>
+                                    <leds-tooltip *ngIf="steps.approvalStatus!='PENDING'"
+                                        [tooltip]="steps.approvalStatus" [position]="'above'">
+                                        <a [ngClass]="stepperClass(steps.approvalStatus)"
+                                            class="le-u-header-md aip-cursor d-flex align-items-center">
+                                            <span></span>
+                                        </a>
+                                    </leds-tooltip>
+                                    <p class="le-u-mar-l-16 ">{{steps.taskName}}</p>
+                                </a>
+                            </div>
+                        </div>
+                        <div *ngIf="steppers.length==0">
+                            <div class="d-flex justify-content-center align-items-center flex-column">
+                                <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive"
+                                    alt="aip_empty_state_leds" style="width:15rem" />
+                                No Task Found.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </leds-panel>
+        </div>
+        <leds-panel *ngIf="workGroup.length>0" type="default" styleClass="" contentClass="">
+            <div class="le-u-pad-24 le-u-mar-t-16" *ngIf="workGroup.length>0;else emptyState">
+                <div class="le-u-header-lg le-u-mar-b-8">Teams ({{workGroup.length}})
+                </div>
+                <leds-list>
+                    <ul class="aip-ivm-scroll" style="min-height: 5rem;max-height: 25rem; overflow: auto;">
+                        <li *ngFor="let wg of workGroup" class="le-u-mar-tb-8">
+                            <span class="le-c-avatar le-c-avatar--sm">
+                                {{wg.userName |initials}}
+                            </span>
+                            <span popoverHeader class="le-c-listitem__mar-icon-sm">
+                                <h2 class="le-u-header-md">
+                                    {{wg.userName}}</h2>
+                            </span>
+                        </li>
+                    </ul>
+                </leds-list>
+            </div>
+            <div class="d-flex justify-content-center le-u-pad-b-8" ledsPanelFooter>
+            </div>
+        </leds-panel>
+        <leds-panel *ngIf="teamMembersObj.length>0" type="default" styleClass="" contentClass="">
+            <div class="le-u-pad-24 le-u-mar-t-16" *ngIf="teamMembersObj.length>0;else emptyState">
+                <div class="le-u-header-lg le-u-mar-b-8">Teams ({{teamMembersObj.length}})
+                </div>
+                <leds-list>
+                    <ul class="aip-ivm-scroll" style="min-height: 5rem;max-height: 25rem; overflow: auto;">
+                        <li *ngFor="let wg of teamMembersObj" class="le-u-mar-tb-8">
+                            <span class="le-c-avatar le-c-avatar--sm">
+                                {{wg.userName |initials}}
+                            </span>
+                            <span popoverHeader class="le-c-listitem__mar-icon-sm">
+                                <h2 class="le-u-header-md">
+                                    {{wg.userName}}</h2>
+                            </span>
+                        </li>
+
+                    </ul>
+                </leds-list>
+            </div>
+            <div class="d-flex justify-content-center le-u-pad-b-8" ledsPanelFooter>
+            </div>
+        </leds-panel>
+    </div>
+</div>
+
+<!-- </div> -->
+
+<ng-template #configuration let-modal>
+    <div class="le-u-mar-16">
+        <div class="d-flex justify-content-between">
+            <div class="le-u-header-xxl">Configurations</div>
+            <div class="" (click)="close()"><i class="icon x-16 aip-icons close-icon"></i></div>
+        </div>
+        <div class="le-u-body-lg le-u-mar-tb-16 ">
+            <!-- <div class="le-u-pad-tb-8 d-flex" *ngFor="let conf of Configurations"><span style="width:40%">{{conf.name |formatString}}</span><leds-slide-toggle
+                [checked]="conf.checked" [disabled]="false" [labelPosition]="'before'" (change)="confToggle(conf)"
+                [disableRipple]="false">
+            </leds-slide-toggle></div> -->
+            <div class="le-u-pad-tb-8 d-flex"><span style="width:40%">AI Canvas</span><leds-slide-toggle
+                    [checked]="aiCanvas" [disabled]="false" [labelPosition]="'before'" (change)="confToggle('aiCanvas')"
+                    [disableRipple]="false">
+                </leds-slide-toggle></div>
+            <div class="le-u-pad-tb-8 d-flex"> <span style="width:40%">RAI Canvas</span><leds-slide-toggle
+                    [checked]="raiCanvas" [disabled]="false" [labelPosition]="'before'"
+                    (change)="confToggle('raiCanvas')" [disableRipple]="false">
+                </leds-slide-toggle></div>
+            <div class="le-u-pad-tb-8 d-flex"> <span style="width:40%">Risk assessment</span><leds-slide-toggle
+                    [checked]="riskAssessment" (change)="confToggle('riskAssessment')" [disabled]="false"
+                    [labelPosition]="'before'" [disableRipple]="false">
+                </leds-slide-toggle></div>
+            <div class="le-u-pad-tb-8 d-flex"><span style="width:40%">Lean Canvas</span><leds-slide-toggle
+                    [checked]="leanCanvas" [disabled]="false" (change)="confToggle('leanCanvas')"
+                    [labelPosition]="'before'" [disableRipple]="false">
+                </leds-slide-toggle></div>
+        </div>
+    </div>
+    <div class="le-u-mar-8 le-u-header-md " (click)="close()" ledsPanelFooter>
+        <button mat-flat-button leds-button name="textButton" id="textButton" designType="text">
+            Done
+        </button>
+    </div>
+</ng-template>
+
+<ng-template #workGroupModal let-modal>
+    <!-- <app-work-group-modal [initiativeId]=initiativeId (modalClose)="modalClose($event)"></app-work-group-modal> -->
+    <app-add-work-group [initiativeId]=initiativeId (modalClose)="modalClose($event)"></app-add-work-group>
+</ng-template>
+<ng-template #emptyState>
+    <div class="le-u-body-md le-u-text-neutral-80 le-u-line-2 aip-desc-ellipsis le-u-mar-tb-24">
+        <div class="d-flex justify-content-center align-items-center flex-column">
+            <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive" alt="aip_empty_state_leds"
+                style="width:15rem" />
+            No member in team!
+        </div>
+    </div>
+</ng-template>
+<!-- </div> -->
+<!-- <div class="" *ngIf="modeSwitch">
+    <app-initiative-actifact-details [initiativeId]="initiativeId"></app-initiative-actifact-details>
+</div> -->

@@ -1,0 +1,35 @@
+::ng-deep {
+    .le-c-form-field.mat-mdc-form-field .mat-mdc-text-field-wrapper textarea.mat-mdc-form-field-textarea-control {
+        min-height: 250px;
+        border-bottom: none;
+    }
+
+    .toggle-size {
+        .mat-mdc-slide-toggle {
+            transform: scale(0.7);
+        }
+    }
+}
+
+.aip-w-4 {
+    width: 4%;
+}
+
+.aip-w-96 {
+    width:96%;
+}
+
+.aip-w-10 {
+    width:10%;
+}
+
+@media (max-width: 800px) {
+    .form-inline input {
+        margin: 10px 0;
+    }
+
+    .form-inline {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

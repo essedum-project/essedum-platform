@@ -1,0 +1,330 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+   <changeSet author="Leap (generated)" id="3v0-usm-20241106-1">
+	    <validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="usm_role" />
+			</not>
+		</preConditions>
+		<createTable tableName="usm_role">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="description" type="TEXT" />
+			<column name="name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="permission" type="BIT(1)" />
+			<column name="project_admin" type="BIT(1)" />
+			<column name="role_admin" type="BIT(1)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-10">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_role WHERE id=128 OR name ='Core Portfolio Admin';
+            </sqlCheck>                
+        </preConditions>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql>
+        <sql >
+            INSERT INTO usm_role(id, project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (128, NULL, 'Core Portfolio Admin', 'Core Portfolio Admin', 0, NULL,NULL)
+        </sql>		
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-11">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM usm_role WHERE id=128 AND name !='Core Portfolio Admin' ;
+            </sqlCheck>                
+        </preConditions>
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql> -->
+        <sql >
+            INSERT INTO usm_role(project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (NULL, 'Core Portfolio Admin', 'Core Portfolio Admin', 0, NULL,NULL)
+        </sql>		
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql> -->
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-12">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_role WHERE id=127 OR name ='Core Project Admin';
+            </sqlCheck>                
+        </preConditions>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql>
+        <sql >
+            INSERT INTO usm_role(id, project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (127, NULL, 'Core Project Admin', 'Core Project Admin', 0, NULL,NULL)
+        </sql>		
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-13">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM usm_role WHERE id=127 AND name !='Core Project Admin';
+            </sqlCheck>                
+        </preConditions>
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql> -->
+        <sql >
+            INSERT INTO usm_role(project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (NULL, 'Core Project Admin', 'Core Project Admin', 0, NULL,NULL)
+        </sql>		
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql> -->
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-14">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_role WHERE id=125 OR name ='Portfolio Client';
+            </sqlCheck>                
+        </preConditions>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql>
+        <sql >
+            INSERT INTO usm_role(id, project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (125, NULL, 'Portfolio Client', 'Portfolio Client', 0, NULL,NULL)
+        </sql>		
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-15">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM usm_role WHERE id=125 AND name !='Portfolio Client';
+            </sqlCheck>                
+        </preConditions>
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql> -->
+        <sql >
+            INSERT INTO usm_role(project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (NULL, 'Portfolio Client', 'Portfolio Client', 0, NULL,NULL)
+        </sql>		
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql> -->
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-16">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_role WHERE id=124 OR name ='Portfolio Admin';
+            </sqlCheck>                
+        </preConditions>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql>
+        <sql >
+            INSERT INTO usm_role(id, project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (124, NULL, 'Portfolio Admin', 'Portfolio Admin', 0, NULL,NULL)
+        </sql>		
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-17">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM usm_role WHERE id=124 AND name !='Portfolio Admin';
+            </sqlCheck>                
+        </preConditions>
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql> -->
+        <sql >
+            INSERT INTO usm_role(project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (NULL, 'Portfolio Admin', 'Portfolio Admin', 0, NULL,NULL)
+        </sql>		
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql> -->
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-18">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_role WHERE id=123 OR name ='Project Client';
+            </sqlCheck>                
+        </preConditions>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql>
+        <sql >
+            INSERT INTO usm_role(id, project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (123, NULL, 'Project Client', 'Project Client', 0, NULL,NULL)
+        </sql>		
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-19">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM usm_role WHERE id=123 AND name !='Project Client';
+            </sqlCheck>                
+        </preConditions>
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql> -->
+        <sql >
+            INSERT INTO usm_role(project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (NULL, 'Project Client', 'Project Client', 0, NULL,NULL)
+        </sql>		
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql> -->
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-20">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_role WHERE id=11 OR name ='Project Admin';
+            </sqlCheck>                
+        </preConditions>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql>
+        <sql >
+            INSERT INTO usm_role(id, project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (11, NULL, 'Project Admin', 'Project Admin', 0, NULL,NULL)
+        </sql>		
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-21">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM usm_role WHERE id=11 AND name !='Project Admin';
+            </sqlCheck>                
+        </preConditions>
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql> -->
+        <sql >
+            INSERT INTO usm_role(project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (NULL, 'Project Admin', 'Project Admin', 0, NULL,NULL)
+        </sql>		
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql> -->
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-22">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_role WHERE id=6 OR name ='Admin';
+            </sqlCheck>                
+        </preConditions>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql>
+        <sql >
+            INSERT INTO usm_role(id, project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (6, NULL, 'Project Admin', 'Admin', 0, NULL,NULL)
+        </sql>		
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-23">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM usm_role WHERE id=6  AND name !='Admin';
+            </sqlCheck>                
+        </preConditions>
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql> -->
+        <sql >
+            INSERT INTO usm_role(project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (NULL, 'Admin', 'Admin', 0, NULL,NULL)
+        </sql>		
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql> -->
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-24">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_role WHERE id=1 OR name ='IT Portfolio Manager';
+            </sqlCheck>                
+        </preConditions>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql>
+        <sql >
+            INSERT INTO usm_role(id, project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (1, NULL, 'IT Portfolio Manager', 'IT Portfolio Manager', 0, NULL,NULL)
+        </sql>		
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-25">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM usm_role WHERE id=1 AND name !='IT Portfolio Manager';
+            </sqlCheck>                
+        </preConditions>
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql> -->
+        <sql >
+            INSERT INTO usm_role(project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (NULL, 'IT Portfolio Manager', 'IT Portfolio Manager', 0, NULL,NULL)
+        </sql>		
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql> -->
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-26">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_role WHERE id=126 OR name ='Portfolio Manager';
+            </sqlCheck>                
+        </preConditions>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql>
+        <sql >
+            INSERT INTO usm_role(id, project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (126, NULL, 'Portfolio Manager', 'Portfolio Manager', 0, NULL,NULL)
+        </sql>		
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241104-27">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM usm_role WHERE id=126 AND name !='Portfolio Manager';
+            </sqlCheck>                
+        </preConditions>
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql> -->
+        <sql >
+            INSERT INTO usm_role(project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (NULL, 'Portfolio Manager', 'Portfolio Manager', 0, NULL,NULL)
+        </sql>		
+		<!-- <sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql> -->
+	</changeSet>
+</databaseChangeLog>

@@ -1,0 +1,70 @@
+{
+    "header":[
+        {
+            "name": "Home",
+            "behaviour": "static",
+            "type": "nav",
+            "toolTip": "Home",
+            "icon": "",
+            "more": []
+        },
+        {
+            "name": "Environments",
+            "behaviour": "static",
+            "type": "dropdown",
+            "toolTip": "Environments",
+            "icon": "",
+            "more": [{
+                "name": "Environment Management",
+                "behaviour": "static",
+                "type": "nav",
+                "toolTip": "Environment Management",
+                "icon": "",
+                "more": []
+            },{
+                "name": "Home",
+                "behaviour": "static",
+                "type": "nav",
+                "toolTip": "Home",
+                "icon": "",
+                "more": []
+            }]
+        },{
+            "name": "Bot Comparison",
+            "behaviour": "static",
+            "type": "nav",
+            "toolTip": "Bot Comparison",
+            "icon": "",
+            "more": []
+        },{
+            "name": "Bots",
+            "behaviour": "static",
+            "type": "nav",
+            "toolTip": "Bots",
+            "icon": "",
+            "more": []
+        },{
+            "name": "Administration",
+            "behaviour": "static",
+            "type": "dropdown",
+            "toolTip": "Administration",
+            "icon": "",
+            "more": []
+        },{
+            "name": "",
+            "behaviour": "dynamic",
+            "type": "dropdown",
+            "toolTip": "",
+            "icon": "",
+            "more": []
+        },{
+            "name": "",
+            "behaviour": "static",
+            "type": "nav",
+            "toolTip": "Notification",
+            "icon": "",
+            "more": []
+        }
+    ]
+
+}

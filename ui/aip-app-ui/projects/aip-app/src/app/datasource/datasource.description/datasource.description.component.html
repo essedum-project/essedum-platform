@@ -1,0 +1,70 @@
+<div class="mt-5 mx-4">
+    <div class="align-items-center d-flex">
+        <span class="mx-5">
+            <i class="icon x-24 back-icon" (click)="toggler()"></i>
+        </span>
+        <!-- <span class="col-md-11 aip-desc-title le-u-header-xxl">{{cardTitle}}</span> -->
+        <span class=" aip-desc-title le-u-header-xxl"><span style=" color: #737373;;">Datasource:
+        </span>{{datasourceAlias | titlecase}} </span>
+    </div>
+    <div class=" row mt-5 mx-4 col-md-5 col-lg-5 col-xl-5 aip-desc aip-panel-shadow">
+        <div class="le-u-header-xl mt-3">
+            DESCRIPTION
+        </div>
+        <div class="le-u-body-lg my-4">
+            A design is a plan or specification for the construction of an object or system or for the implementation of
+            an activity or process, or the result of that plan or specification in the form of a prototype, product or
+            process. The verb to design expresses the process of developing a design.
+        </div>
+        <div class="aip-models">
+            <div class="aip-model-type" *ngFor="let n of numSequence(4)">
+                <div class="le-u-body-sm">Model Type</div>
+                <div class="le-u-body-lg">3D</div>
+            </div>
+        </div>
+    </div>
+    <div class=" row mt-5 mx-4 col-md-7 col-lg-7 col-xl-7 le-u-header-xl">
+        Related components used
+    </div>
+    <div class="aip-realted-card">
+        <div class="row mt-3 pb-5 aip-realted-card-container">
+            <!-- CARD -->
+            <div class="col-md-8 col-lg-6 col-xl-5" style='min-width: -webkit-fill-available'
+                *ngFor="let n of numSequence(6)">
+                <leds-card designType='simple' [actionsOnHover]='true'>
+                    <div class="le-u-overline le-u-text-primary-80 le-u-mar-b-8">Overline</div>
+                    <mat-card-header>
+                        <mat-card-title class="le-c-card__container clearfix">
+                            <div class="le-c-card__container-left">
+                                <h2 class="le-u-header-xl le-u-ellipsis">{{cardTitle}}</h2>
+                            </div>
+                            <div class="le-c-card__container-right">
+                                <span class="le-c-badge le-c-badge--active float-end">Submitted</span>
+                            </div>
+                        </mat-card-title>
+                        <mat-card-subtitle class="le-u-body-sm le-u-text-neutral-80 le-u-ellipsis">Secondary
+                            text</mat-card-subtitle>
+                    </mat-card-header>
+                    <mat-card-content class="le-u-no-mar-b">
+                        <p class="le-u-body-md le-u-text-neutral-80 le-u-line-3">
+                            The card container is the only required element in a card. All other elements
+                            shown here are optional.
+                        </p>
+                        <div class="le-u-body-avatar aip-realted-avatar">
+                            <span class="le-c-avatar le-c-avatar--xs">JG</span>
+                            <h3 class="le-u-header-xs le-u-text-black le-u-ellipsis">Jane Goodall</h3>
+                        </div>
+                    </mat-card-content>
+                    <mat-card-actions class="le-c-card__action-hover">
+                        <leds-button buttonType="button" designType="text">View Details</leds-button>
+                        <ul class="float-end le-c-card__action-ul">
+                            <li><i class="icon x-32 edit-icon"></i></li>
+                            <li><i class="icon x-32 delete-sm-icon"></i></li>
+                        </ul>
+                    </mat-card-actions>
+                </leds-card>
+            </div>
+        </div>
+
+    </div>
+</div>

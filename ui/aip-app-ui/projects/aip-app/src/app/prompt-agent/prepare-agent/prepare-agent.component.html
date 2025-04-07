@@ -1,0 +1,732 @@
+<div class="container-fluid backgroud-color">
+    <div class="le-l-level1-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="le-l-level1-middle-col le-l-base-layout-center">
+                    <div class="d-flex" style="justify-content: space-between;">
+                        <div class="align-items-center d-flex">
+                            <span class="" style="cursor: pointer;">
+                                <i class="aip-led-icons icon x-24 back-icon" (click)="backToAgent()"></i>
+                            </span>
+                            <span class="le-u-mar-l-8 le-u-header-xxl">Prepare Task</span>
+                        </div>
+                    </div>
+                    <div class="d-flex" style="justify-content: space-between;">
+                        <span class="le-u-pad-t-16 le-u-pad-l-32" style="font-weight: bold;">Task: {{task}}</span>
+
+                        <leds-overflow>
+                            <div ngbDropdown #dropdown="ngbDropdown" class="d-inline-block" container="body">
+                                <!-- <a id="OverflowMenu_dd" ngbDropdownToggle title="overflow menu">
+                                    <i aria-hidden="true" class="icon x-24 v-menu-icon"></i>
+                                </a> -->
+                                <div id="OverflowMenu_dd" ngbDropdownToggle aria-hidden="true"
+                                    *ngIf="versions.length > 0"
+                                    class="d-xl-inline-block version-button pannel-shadow le-u-pad-8"
+                                    style="cursor: pointer;">
+                                    {{versions[current_index]?.versionname}}
+                                </div>
+                                <div *ngIf="versions.length > 0" ngbDropdownMenu aria-labelledby="OverflowMenu_dd"
+                                    style="transform: translateX(-13vh)">
+                                    <div class="search-container">
+                                        <leds-input-field type="text" [(ngModel)]="searchQuery"
+                                            placeholder="Search version" (input)="filterVersions()"></leds-input-field>
+                                    </div>
+                                    <ul class="aip-scroll-hover vlist-mheight" overflowList>
+                                        <li *ngFor="let version of filteredVersions; let index=index"
+                                            class="le-u-pad-tb-8 le-u-pad-lr-16 aip-scroll-hover"
+                                            [ngStyle]="selectedVersion(version.versionname)" overflowListItem>
+                                            <a href="javascript:void(0);">
+                                                <div class="float-start">
+                                                    <i aria-hidden="true" class="icon x-24 show-icon relative"
+                                                        (click)="viewVersion(version.versionname)">
+                                                    </i>
+                                                </div>
+                                                <span overflowSpan>
+                                                    {{version.versionname}}</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <div class="le-u-pad-16 view-link-font view-all-versions"
+                                        (click)="showPanel=true;closeDropDown(dropdown);">
+                                        View all versions
+                                    </div>
+                                </div>
+                            </div>
+                        </leds-overflow>
+
+                        <!-- <div *ngIf="versions.length > 0"
+                            class="d-xl-inline-block version-button pannel-shadow le-u-pad-8"
+                            (click)="showPanel = !showPanel;" style="cursor: pointer;">
+                            {{versions[current_index].versionname}}
+                        </div> -->
+                    </div>
+                    <div class="le-l-level2-middle-ctr">
+                        <div class="le-l-level2-middle-col le-u-mar-b-24__mb le-u-mar-r-32 d-flex main-container">
+                            <div class="le-u-mar-lr-8 col-md-3 pannel-shadow aip-scroll-hover" style="height: 85vh;"
+                                type="default" styleClass="" contentClass="">
+                                <div class="main-container">
+                                    <div class="sub-main-container pannel-shadow"
+                                        (click)="selectChangeHandler('action_group')"
+                                        [ngStyle]="selectedStep('action_group')">
+                                        <span class="le-u-header-l aiworker-head-style">Task</span>
+                                    </div>
+                                    <div class="sub-main-container pannel-shadow" (click)="selectChangeHandler('SOP')"
+                                        [ngStyle]="selectedStep('SOP')">
+                                        <span class="le-u-header-l aiworker-head-style">Instructions</span>
+                                    </div>
+                                    <div class="sub-main-container pannel-shadow" (click)="selectChangeHandler('plan')"
+                                        [ngStyle]="selectedStep('plan')">
+                                        <span class="le-u-header-l aiworker-head-style">Plan</span>
+                                    </div>
+                                    <div class="sub-main-container pannel-shadow"
+                                        (click)="selectChangeHandler('validation_results')"
+                                        [ngStyle]="selectedStep('validation_results')">
+                                        <span class="le-u-header-l aiworker-head-style">Validation Results </span>
+                                    </div>
+                                    <div class="sub-main-container pannel-shadow"
+                                        (click)="selectChangeHandler('workflow')" [ngStyle]="selectedStep('workflow')">
+                                        <span class="le-u-header-l aiworker-head-style">Workflow</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="le-u-mar-lr-8 col-md-9 pannel-shadow aip-scroll-hover" style="height: 85vh;"
+                                type="default" styleClass="" contentClass="">
+                                <!-- Task -->
+                                <div *ngIf="steps.action_group" class="main-container">
+                                    <h2 class="le-u-pad-8" style="color:var(--base-color)">Task</h2>
+                                    <div class="le-u-pad-tb-8">
+                                        <span class="le-u-header-l le-u-pad-lr-8 aiworker-head-style">User Task</span>
+                                        <div class="col-md-12 le-u-pad-t-4 le-u-pad-b-16">
+                                            <textarea [(ngModel)]="task" [placeholder]="'Enter default value'"
+                                                class="agent-textarea aip-scroll-hover pannel-shadow le-u-mar-t-16 le-u-pad-8 contenteditable-div input-text-style"
+                                                rows="4" (input)="adjustTextareaHeight($event)"
+                                                style="width: -webkit-fill-available;" readonly></textarea>
+                                        </div>
+                                        <span class="le-u-header-l le-u-pad-lr-8 aiworker-head-style">User Inputs</span>
+                                        <app-app-config [configData]="userInputParamsArray"
+                                            (configDataChange)="onUserInputChange($event)"></app-app-config>
+                                    </div>
+                                    <leds-button class="le-u-pad-r-16 le-u-pad-b-16" nameText="miniPrimaryButton"
+                                        idText="miniPrimaryButton" [disabled]="false" buttonType="button"
+                                        designType="miniPrimary"
+                                        (click)="SOP_response?selectChangeHandler('SOP'):generate_SOP()"
+                                        style="float: right;">
+                                        Next
+                                    </leds-button>
+                                </div>
+                                <!-- SOP -->
+                                <div *ngIf="steps.SOP" class="main-container">
+                                    <div class="d-flex" style="justify-content: space-between;">
+                                        <div class="d-flex">
+                                            <h2 class="le-u-pad-8" style="color:var(--base-color)">Instructions</h2>
+                                            <div *ngIf="sop_status_flag" class="le-u-pad-t-8">
+                                                <span
+                                                    class="le-u-header-l le-u-pad-4 pannel-shadow aiworker-head-style aiworker-status-style">{{sop_status_msg}}</span>
+                                            </div>
+                                        </div>
+                                        <leds-tooltip *ngIf="isAuth" [tooltip]="'Regenerate'" [position]="'right'"
+                                            style="float:right;">
+                                            <i class="le-u-pad-r-32 le-u-pad-t-8 aiworker-aip-led-icons icon x-16 icon_Refresh"
+                                                (click)="generate_SOP()"></i>
+                                        </leds-tooltip>
+                                    </div>
+                                    <div *ngIf="create_sop" class="le-u-pad-16" style="font-style: italic;">
+                                        <p>* Write Instructions in the following format: <br>Step 1:...<br>Step
+                                            2:...<br>Step 3:...<br></p>
+                                    </div>
+                                    <div class="col-md-12 le-u-pad-t-4 le-u-pad-b-16">
+                                        <textarea [(ngModel)]="SOP_response"
+                                            class="agent-textarea aip-scroll-hover pannel-shadow le-u-pad-8 contenteditable-div input-text-style"
+                                            rows="18" (input)="adjustTextareaHeight($event)"
+                                            style="width: -webkit-fill-available;"></textarea>
+                                    </div>
+                                    <div class="d-flex" style="float: right;">
+                                        <leds-button class="le-u-pad-r-16 le-u-pad-b-16" nameText="miniPrimaryButton"
+                                            idText="miniPrimaryButton" [disabled]="false" buttonType="button"
+                                            designType="miniPrimary" (click)="selectChangeHandler('action_group')">
+                                            Back
+                                        </leds-button>
+                                        <leds-button class="le-u-pad-r-16 le-u-pad-b-16" nameText="miniPrimaryButton"
+                                            idText="miniPrimaryButton" [disabled]="disable_sop_next" buttonType="button"
+                                            designType="miniPrimary"
+                                            (click)="plan?selectChangeHandler('plan'):generate_plan()"
+                                            style="float: right;">
+                                            Next
+                                        </leds-button>
+                                    </div>
+
+                                </div>
+                                <!-- Plan -->
+                                <div *ngIf="steps.plan" class="main-container">
+                                    <div class="d-flex" style="justify-content: space-between;">
+                                        <div class="d-flex">
+                                            <h2 class="le-u-pad-8" style="color:var(--base-color)">Plan</h2>
+                                            <div *ngIf="plan_status_flag" class="le-u-pad-t-8">
+                                                <span
+                                                    class="le-u-header-l le-u-pad-4 pannel-shadow aiworker-head-style aiworker-status-style">{{plan_status_msg}}</span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex">
+                                            <leds-tooltip *ngIf="isAuth" [tooltip]="'Regenerate'" [position]="'right'"
+                                                style="float:right;">
+                                                <i class="le-u-mar-lr-8 le-u-pad-t-8 aiworker-aip-led-icons icon x-16 icon_Refresh"
+                                                    (click)="generate_plan()"></i>
+                                            </leds-tooltip>
+                                            <leds-tooltip [tooltip]="'Configuration'" [position]="'right'"
+                                                style="float:right;">
+                                                <i class="le-u-pad-r-32 le-u-pad-t-8 aiworker-aip-led-icons icon x-16 icon_setting"
+                                                    (click)="open(planConfig)"></i>
+                                            </leds-tooltip>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 le-u-pad-t-4 le-u-pad-b-16">
+                                        <textarea [(ngModel)]="plan"
+                                            class="agent-textarea aip-scroll-hover pannel-shadow le-u-pad-8 contenteditable-div input-text-style"
+                                            rows="18" (input)="adjustTextareaHeight($event)"
+                                            style="width: -webkit-fill-available;"></textarea>
+                                    </div>
+                                    <div class="d-flex" style="float: right;">
+                                        <leds-button class="le-u-pad-r-16 le-u-pad-b-16" nameText="miniPrimaryButton"
+                                            idText="miniPrimaryButton" [disabled]="false" buttonType="button"
+                                            designType="miniPrimary" (click)="selectChangeHandler('SOP')">
+                                            Back
+                                        </leds-button>
+                                        <leds-button class="le-u-pad-r-16 le-u-pad-b-16" nameText="miniPrimaryButton"
+                                            idText="miniPrimaryButton" [disabled]="disable_plan_next"
+                                            buttonType="button" designType="miniPrimary"
+                                            (click)="validation_results?selectChangeHandler('validation_results'):generate_validation()"
+                                            style="float: right;">
+                                            Next
+                                        </leds-button>
+                                    </div>
+
+                                </div>
+                                <!-- Validation_results -->
+                                <div *ngIf="steps.validation_results" class="main-container">
+                                    <div class="d-flex" style="justify-content: space-between;">
+                                        <div class="d-flex">
+                                            <h2 class="le-u-pad-8" style="color:var(--base-color)">Validation Results
+                                            </h2>
+                                            <div *ngIf="valid_status_flag" class="le-u-pad-t-8">
+                                                <span
+                                                    class="le-u-header-l le-u-pad-4 pannel-shadow aiworker-head-style aiworker-status-style">{{valid_status_msg}}</span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex">
+                                            <leds-tooltip *ngIf="isAuth" [tooltip]="'Regenerate'" [position]="'right'"
+                                                style="float:right;">
+                                                <i class="le-u-mar-lr-8 le-u-pad-t-8 aiworker-aip-led-icons icon x-16 icon_Refresh"
+                                                    (click)="generate_validation()"></i>
+                                            </leds-tooltip>
+                                            <leds-tooltip [tooltip]="'Configuration'" [position]="'right'"
+                                                style="float:right;">
+                                                <i class="le-u-pad-r-32 le-u-pad-t-8 aiworker-aip-led-icons icon x-16 icon_setting"
+                                                    (click)="open(validConfig)"></i>
+                                            </leds-tooltip>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 le-u-pad-t-4 le-u-pad-b-16">
+                                        <textarea [(ngModel)]="validation_results"
+                                            class="agent-textarea aip-scroll-hover pannel-shadow le-u-pad-8 contenteditable-div input-text-style"
+                                            rows="18" (input)="adjustTextareaHeight($event)"
+                                            style="width: -webkit-fill-available;"></textarea>
+                                    </div>
+                                    <div class="d-flex" style="float: right;">
+                                        <leds-button class="le-u-pad-r-16 le-u-pad-b-16" nameText="miniPrimaryButton"
+                                            idText="miniPrimaryButton" [disabled]="false" buttonType="button"
+                                            designType="miniPrimary" (click)="selectChangeHandler('plan')">
+                                            Back
+                                        </leds-button>
+                                        <leds-button class="le-u-pad-r-16 le-u-pad-b-16" nameText="miniPrimaryButton"
+                                            idText="miniPrimaryButton" [disabled]="disable_valid_next"
+                                            buttonType="button" designType="miniPrimary"
+                                            (click)="isEmptyObject(workflow)?generate_workflow():selectChangeHandler('workflow')"
+                                            style="float: right;">
+                                            Next
+                                        </leds-button>
+                                    </div>
+                                </div>
+                                <!-- Workflow -->
+                                <div *ngIf="steps.workflow" class="main-container">
+                                    <div class="d-flex" style="justify-content: space-between;">
+                                        <div class="d-flex">
+                                            <h2 class="le-u-pad-8" style="color:var(--base-color)">Workflow</h2>
+                                            <div *ngIf="wkfl_status_flag && json_view" class="le-u-pad-t-8">
+                                                <span
+                                                    class="le-u-header-l le-u-pad-4 pannel-shadow aiworker-head-style aiworker-status-style">{{wkfl_status_msg}}</span>
+                                            </div>
+                                            <div *ngIf="lang_status_flag && langgraph_view" class="le-u-pad-t-8">
+                                                <span
+                                                    class="le-u-header-l le-u-pad-4 pannel-shadow aiworker-head-style aiworker-status-style">{{lang_status_msg}}</span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex">
+                                            <leds-radio-group class="le-u-pad-8" style="float: right;" [value]="value"
+                                                [disabled]="disabled" [labelPosition]="labelPosition"
+                                                [(ngModel)]="wk_viewer_value">
+                                                <leds-radio-button value="json"
+                                                    (click)="bpm_view=false;langgraph_view=false;selectWkflowViewer('json_view')">json</leds-radio-button>
+                                                <leds-radio-button value="langgraph"
+                                                    (click)="bpm_view=false;json_view=false;selectWkflowViewer('langgraph_view')">langgraph</leds-radio-button>
+                                                <!-- <leds-radio-button value="bpmn"
+                                                    (click)="json_view=false;selectWkflowViewer('bpm_view')">bpmn</leds-radio-button> -->
+                                            </leds-radio-group>
+                                            <leds-tooltip *ngIf="isAuth && !langgraph_view" [tooltip]="'Regenerate'" [position]="'right'"
+                                                style="float:right;">
+                                                <i class="le-u-mar-lr-8 le-u-pad-t-8 aiworker-aip-led-icons icon x-16 icon_Refresh"
+                                                    (click)="generate_workflow()"></i>
+                                            </leds-tooltip>
+                                            <leds-tooltip *ngIf="isAuth && langgraph_view && langGraph_json" [tooltip]="'Regenerate'" [position]="'right'"
+                                                style="float:right;">
+                                                <i class="le-u-mar-lr-8 le-u-pad-t-8 aiworker-aip-led-icons icon x-16 icon_Refresh"
+                                                    (click)="generate_langgraph()"></i>
+                                            </leds-tooltip>
+                                            <leds-tooltip *ngIf="!langgraph_view" [tooltip]="'Configuration'" [position]="'right'"
+                                                style="float:right;">
+                                                <i class="le-u-pad-r-32 le-u-pad-t-8 aiworker-aip-led-icons icon x-16 icon_setting"
+                                                    (click)="open(wkflConfig)"></i>
+                                            </leds-tooltip>
+                                        </div>
+                                    </div>
+                                    <div *ngIf="bpm_view" class="col-md-12 le-u-pad-t-4 le-u-pad-b-16">
+                                        <textarea [(ngModel)]="bpm"
+                                            class="agent-textarea aip-scroll-hover pannel-shadow le-u-pad-8 contenteditable-div input-text-style"
+                                            rows="18" (input)="adjustTextareaHeight($event)"
+                                            style="width: -webkit-fill-available;"></textarea>
+                                        <!-- <app-xml-viewer [script]="bpm">
+                                        </app-xml-viewer> -->
+                                    </div>
+                                    <div *ngIf="json_view" id="dset-view-json" class="otherclass selector-682-18"
+                                        style="background-color: white;">
+                                        <div class="le-u-pad-16" style="width:100%; margin-top: 8px;">
+                                            <json-editor [options]="editorOptions" [data]="workflow"
+                                                [(ngModel)]="workflow" #formJsonEditor class="cipJSONEditor agent-json"
+                                                (change)="onJsonEditorChange($event)"></json-editor>
+                                        </div>
+                                    </div>
+                                    <div *ngIf="langgraph_view" class="le-u-pad-16" style="width:100%; height:80%; margin-top: 8px;">
+                                        <div style="height:98%">
+                                            <app-enl-code-editor *ngIf="!langgraph_loading" id="ele" class="selector-764-48" lang="python"
+                                                [script]="langScript" (scriptChange)="onScriptChange($event)">
+                                            </app-enl-code-editor>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex" style="float: right;">
+                                        <leds-button class="le-u-pad-r-16 le-u-pad-b-16" nameText="miniPrimaryButton"
+                                            idText="miniPrimaryButton" [disabled]="false" buttonType="button"
+                                            designType="miniPrimary"
+                                            (click)="selectChangeHandler('validation_results')">
+                                            Back
+                                        </leds-button>
+                                        <leds-button *ngIf="isAuth" class="le-u-pad-r-16 le-u-pad-b-16"
+                                            nameText="miniPrimaryButton" idText="miniPrimaryButton"
+                                            [disabled]="disable_wkfl_save" buttonType="button" designType="miniPrimary"
+                                            (click)="version_name='';open(versionConfig)" style="float: right;">
+                                            Save
+                                        </leds-button>
+                                        <leds-button class="le-u-pad-r-16 le-u-pad-b-16" nameText="miniPrimaryButton"
+                                            idText="miniPrimaryButton" [disabled]="disable_wkfl_save"
+                                            buttonType="button" designType="miniPrimary" (click)="publish()"
+                                            style="float: right;">
+                                            Publish
+                                        </leds-button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div *ngIf="showPanel"
+                            class="le-l-level2-middle-col le-u-mar-lr-8 col-md-3 px-md-0 pannel-shadow version-panel">
+                            <div class="aip-scroll-hover" style="height: 85vh;">
+                                <div class="d-flex" style="justify-content: space-between;">
+                                    <h2 class="le-u-pad-t-16 le-u-pad-l-16" style="color:var(--base-color)">Versions
+                                    </h2>
+                                    <button type="button" class="le-u-pad-16 btn-close" aria-label="Close"
+                                        (click)="showPanel=false">
+                                        <i class="icon x-16 close-icon"></i>
+                                    </button>
+                                </div>
+                                <div *ngIf="versions.length == 0">
+                                    <span class="le-u-header-l le-u-pad-lr-32 le-u-pad-tb-8"
+                                        style="font-size: 1.5rem;">No Version Available</span>
+                                </div>
+                                <div *ngIf="versions.length > 0" class="search-container">
+                                    <leds-input-field type="text" [(ngModel)]="searchQuery" placeholder="Search version"
+                                        (input)="filterVersions()"></leds-input-field>
+                                </div>
+                                <div *ngIf="versions.length > 0">
+                                    <div *ngFor="let version of filteredVersions; let index=index"
+                                        class="le-u-pad-tb-8 le-u-pad-lr-16 aip-scroll-hover"
+                                        [ngStyle]="selectedVersion(version.versionname)">
+                                        <div>
+                                            <div class="d-flex" style="justify-content: space-between;">
+                                                <div class="d-flex">
+                                                    <leds-tooltip [tooltip]="'View'" [position]="'right'"
+                                                        style="float:right;">
+                                                        <i class="le-u-pad-t-4 version-aip-led-icons icon x-16 show-icon"
+                                                            (click)="viewVersion(version.versionname)"></i>
+                                                    </leds-tooltip>
+                                                    <span *ngIf="!version.isEditing"
+                                                        class="le-u-header-l le-u-pad-l-16 le-u-pad-8 aip-fullname-card le-u-ellipsis aiworker-head-style"
+                                                        style="max-width: 44vh;">
+                                                        {{version.versionname}}</span>
+                                                    <leds-input-field *ngIf="version.isEditing" class="col-md-8"
+                                                        placeholder="Enter version name" label=""
+                                                        [(ngModel)]="version.versionname" designType="default"
+                                                        inputType="text" [disabled]="false" [validators]="nameValidator"
+                                                        (changesOccur)="editVersionName($event,index)"></leds-input-field>
+                                                    <leds-tooltip *ngIf="version.isEditing" [tooltip]="'Save'"
+                                                        [position]="'right'" style="float:right;">
+                                                        <i class="le-u-pad-r-32 le-u-pad-t-32 le-u-pad-t-8 aiworker-aip-led-icons icon x-16 icon-tick-dark"
+                                                            (click)="version_name = version.versionname;version_oldName=version.old_name;version_isDefault = version.isdefault;version.isEditing=false;saveAiWorker(index)"></i>
+                                                    </leds-tooltip>
+                                                </div>
+                                                <leds-overflow>
+                                                    <div ngbDropdown #drpdwn="ngbDropdown" class="d-inline-block"
+                                                        container="body">
+                                                        <a id="OverflowMenu_dd" ngbDropdownToggle title="overflow menu">
+                                                            <i aria-hidden="true" class="icon x-24 inprogress-icon"></i>
+                                                        </a>
+                                                        <div ngbDropdownMenu aria-labelledby="OverflowMenu_dd">
+                                                            <ul overflowList>
+                                                                <li overflowListItem
+                                                                    (click)="version.isEditing = true; closeDropDown(drpdwn)">
+                                                                    <a href="javascript:void(0);">
+                                                                        <div class="float-start">
+                                                                            <i aria-hidden="true"
+                                                                                class="icon x-24 edit-icon relative"
+                                                                                (click)="version.isEditing = true">
+                                                                            </i>
+                                                                        </div>
+                                                                        <span overflowSpan>Rename</span>
+                                                                    </a>
+                                                                </li>
+                                                                <li overflowListItem
+                                                                    (click)="deleteVersion(index); closeDropDown(drpdwn)">
+                                                                    <a href="javascript:void(0);">
+                                                                        <div class="float-start">
+                                                                            <i aria-hidden="true"
+                                                                                class="icon x-24 delete-sm-icon"
+                                                                                (click)="deleteVersion(index)"></i>
+                                                                        </div>
+                                                                        <span overflowSpan>Delete</span>
+                                                                    </a>
+                                                                </li>
+                                                                <li overflowListItem
+                                                                    (click)="setDefault(version.versionname); closeDropDown(drpdwn)">
+                                                                    <a href="javascript:void(0);">
+                                                                        <div class="float-start">
+                                                                            <leds-radio-group>
+                                                                                <leds-radio-button aria-hidden="true"
+                                                                                    class="version-radio"
+                                                                                    [checked]="version.isdefault"
+                                                                                    [value]="version.isdefault"
+                                                                                    [disabled]="false"
+                                                                                    (click)="setDefault(version.versionname)">
+                                                                                </leds-radio-button>
+                                                                            </leds-radio-group>
+                                                                        </div>
+                                                                        <span overflowSpan>Default</span>
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </leds-overflow>
+                                            </div>
+                                            <!-- <leds-radio-group>
+                                                <leds-radio-button class="le-u-pad-l-32 version-radio"
+                                                    [checked]="version.isdefault" [value]="version.isdefault"
+                                                    [disabled]="false" (click)="setDefault(version.versionname)">
+                                                    <span style="font-size: small;">Set as Default</span>
+                                                </leds-radio-button>
+                                            </leds-radio-group> -->
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div *ngIf="versions.length > 0 && filteredVersions.length == 0">
+                                    <span class="le-u-header-l le-u-pad-lr-32 le-u-pad-tb-8"
+                                        style="font-size: 1.5rem;">No match found.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #planConfig let-modal>
+    <div class="config-background">
+        <div ledsModalHeader class="custom-modal-header">
+            <div class="d-flex" style="justify-content: space-between;">
+                <h4 class="le-u-header-xl float-start" id="modalTitle2">Plan Configuration</h4>
+                <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+                    <i class="icon x-16 close-icon"></i>
+                </button>
+            </div>
+        </div>
+        <div ledsModalBody class="custom-modal-body aip-scroll-hover">
+            <div class="le-u-pad-lr-16">
+                <div class="d-flex config-value-position le-u-pad-t-24 le-u-pad-r-16">
+                    <span class="le-u-body-md" style="color: #73738c;font-weight: bold;">Maximum Length</span>
+                    <!-- <div class="le-u-body-md le-u-pad-4 pannel-shadow">{{plan_max_tokens}}</div> -->
+                    <div class="le-u-body-md le-u-pad-4 pannel-shadow">{{configValues.plan.max_tokens}}</div>
+
+                </div>
+                <ngx-slider class="le-u-pad-b-32 config-slider-margin" [value]="configValues.plan.max_tokens"
+                    (valueChange)="changesOccurTokens($event,'plan')" [options]="loptions"></ngx-slider>
+            </div>
+            <div class="le-u-pad-lr-16 le-u-pad-t-16">
+                <div class="d-flex config-value-position le-u-pad-t-24 le-u-pad-r-16">
+                    <span class="le-u-body-md le-u-pad-t-24 le-u-pad-r-16"
+                        style="color: #73738c;font-weight: bold;">Temperature</span>
+                    <div class="le-u-body-md le-u-mar-t-16 le-u-pad-4 pannel-shadow">{{configValues.plan.temperature}}
+                    </div>
+                </div>
+                <ngx-slider class="le-u-pad-b-32 config-slider-margin" [value]="configValues.plan.temperature"
+                    (valueChange)="changesOccurTemperature($event,'plan')" [options]="toptions"></ngx-slider>
+            </div>
+            <div class="le-u-pad-lr-16 le-u-pad-t-16">
+                <div class="d-flex config-value-position le-u-pad-t-24 le-u-pad-r-16">
+                    <span class="le-u-body-md le-u-pad-t-24 le-u-pad-r-16" style="color: #73738c;font-weight: bold;">Top
+                        P</span>
+                    <div class="le-u-body-md le-u-mar-t-16 le-u-pad-4 pannel-shadow">{{configValues.plan.top_p}}</div>
+                </div>
+                <ngx-slider class="le-u-pad-b-32 config-slider-margin" [value]="configValues.plan.top_p"
+                    (valueChange)="changesOccurTopP($event,'plan')" [options]="tpoptions"></ngx-slider>
+
+            </div>
+            <div class="le-u-pad-lr-16 le-u-pad-t-16">
+                <div class="d-flex config-value-position le-u-pad-t-24 le-u-pad-r-16">
+                    <span class="le-u-body-md le-u-pad-t-24 le-u-pad-r-16"
+                        style="color: #73738c;font-weight: bold;">Presence Penalty</span>
+                    <div class="le-u-body-md le-u-mar-t-16 le-u-pad-4 pannel-shadow">
+                        {{configValues.plan.presence_penalty}}
+                    </div>
+                </div>
+                <ngx-slider class="le-u-pad-b-32 config-slider-margin" [value]="configValues.plan.presence_penalty"
+                    (valueChange)="changesOccurPresencePenalty($event,'plan')" [options]="ppoptions"></ngx-slider>
+
+            </div>
+            <div class="le-u-pad-lr-16 le-u-pad-t-16">
+                <div class="d-flex config-value-position le-u-pad-t-24 le-u-pad-r-16">
+                    <span class="le-u-body-md le-u-pad-t-24 le-u-pad-r-16"
+                        style="color: #73738c;font-weight: bold;">Frequency Penalty</span>
+                    <div class="le-u-body-md le-u-mar-t-16 le-u-pad-4 pannel-shadow">
+                        {{configValues.plan.frequency_penalty}}
+                    </div>
+                </div>
+                <ngx-slider class="le-u-pad-b-32" [value]="configValues.plan.frequency_penalty"
+                    (valueChange)="changesOccurFrequencyPenalty($event,'plan')" [options]="fpoptions"></ngx-slider>
+            </div>
+        </div>
+        <div ledsModalFooter class="le-u-pad-16">
+            <leds-button *ngIf="isAuth" designType="miniPrimary" class="le-u-mar-r-8 le-u-pad-b-8" buttonType="button"
+                style="float: right;" (click)="modal.dismiss('Cross click')">
+                Save
+            </leds-button>
+            <leds-button *ngIf="!isAuth" designType="miniPrimary" class="le-u-mar-r-8 le-u-pad-b-8" buttonType="button"
+                style="float: right;" (click)="modal.dismiss('Cross click')" disabled="true">
+                Save
+            </leds-button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #validConfig let-modal>
+    <div class="config-background">
+        <div ledsModalHeader class="custom-modal-header">
+            <div class="d-flex" style="justify-content: space-between;">
+                <h4 class="le-u-header-xl float-start" id="modalTitle2">Validation Configuration</h4>
+                <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+                    <i class="icon x-16 close-icon"></i>
+                </button>
+            </div>
+        </div>
+        <div ledsModalBody class="custom-modal-body aip-scroll-hover">
+            <div class="le-u-pad-lr-16">
+                <div class="d-flex config-value-position le-u-pad-t-24 le-u-pad-r-16">
+                    <span class="le-u-body-md" style="color: #73738c;font-weight: bold;">Maximum Length</span>
+                    <div class="le-u-body-md le-u-pad-4 pannel-shadow">{{configValues.validation.max_tokens}}</div>
+                </div>
+                <ngx-slider class="le-u-pad-b-32 config-slider-margin" [value]="configValues.validation.max_tokens"
+                    (valueChange)="changesOccurTokens($event,'validation')" [options]="loptions"></ngx-slider>
+            </div>
+            <div class="le-u-pad-lr-16 le-u-pad-t-16">
+                <div class="d-flex config-value-position le-u-pad-t-24 le-u-pad-r-16">
+                    <span class="le-u-body-md le-u-pad-t-24 le-u-pad-r-16"
+                        style="color: #73738c;font-weight: bold;">Temperature</span>
+                    <div class="le-u-body-md le-u-mar-t-16 le-u-pad-4 pannel-shadow">
+                        {{configValues.validation.temperature}}
+                    </div>
+                </div>
+                <ngx-slider class="le-u-pad-b-32 config-slider-margin" [value]="configValues.validation.temperature"
+                    (valueChange)="changesOccurTemperature($event,'validation')" [options]="toptions"></ngx-slider>
+            </div>
+            <div class="le-u-pad-lr-16 le-u-pad-t-16">
+                <div class="d-flex config-value-position le-u-pad-t-24 le-u-pad-r-16">
+                    <span class="le-u-body-md le-u-pad-t-24 le-u-pad-r-16" style="color: #73738c;font-weight: bold;">Top
+                        P</span>
+                    <div class="le-u-body-md le-u-mar-t-16 le-u-pad-4 pannel-shadow">{{configValues.validation.top_p}}
+                    </div>
+                </div>
+                <ngx-slider class="le-u-pad-b-32 config-slider-margin" [value]="configValues.validation.top_p"
+                    (valueChange)="changesOccurTopP($event,'validation')" [options]="tpoptions"></ngx-slider>
+
+            </div>
+            <div class="le-u-pad-lr-16 le-u-pad-t-16">
+                <div class="d-flex config-value-position le-u-pad-t-24 le-u-pad-r-16">
+                    <span class="le-u-body-md le-u-pad-t-24 le-u-pad-r-16"
+                        style="color: #73738c;font-weight: bold;">Presence Penalty</span>
+                    <div class="le-u-body-md le-u-mar-t-16 le-u-pad-4 pannel-shadow">
+                        {{configValues.validation.presence_penalty}}</div>
+                </div>
+                <ngx-slider class="le-u-pad-b-32 config-slider-margin"
+                    [value]="configValues.validation.presence_penalty"
+                    (valueChange)="changesOccurPresencePenalty($event,'validation')" [options]="ppoptions"></ngx-slider>
+
+            </div>
+            <div class="le-u-pad-lr-16 le-u-pad-t-16">
+                <div class="d-flex config-value-position le-u-pad-t-24 le-u-pad-r-16">
+                    <span class="le-u-body-md le-u-pad-t-24 le-u-pad-r-16"
+                        style="color: #73738c;font-weight: bold;">Frequency Penalty</span>
+                    <div class="le-u-body-md le-u-mar-t-16 le-u-pad-4 pannel-shadow">
+                        {{configValues.validation.frequency_penalty}}</div>
+                </div>
+                <ngx-slider class="le-u-pad-b-32" [value]="configValues.validation.frequency_penalty"
+                    (valueChange)="changesOccurFrequencyPenalty($event,'validation')"
+                    [options]="fpoptions"></ngx-slider>
+            </div>
+        </div>
+        <div ledsModalFooter class="le-u-pad-16">
+            <leds-button *ngIf="isAuth" designType="miniPrimary" class="le-u-mar-r-8 le-u-pad-b-8" buttonType="button"
+                style="float: right;" (click)="modal.dismiss('Cross click')">
+                Save
+            </leds-button>
+            <leds-button *ngIf="!isAuth" designType="miniPrimary" class="le-u-mar-r-8 le-u-pad-b-8" buttonType="button"
+                style="float: right;" (click)="modal.dismiss('Cross click')" disabled="true">
+                Save
+            </leds-button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #wkflConfig let-modal>
+    <div class="config-background">
+        <div ledsModalHeader class="custom-modal-header">
+            <div class="d-flex" style="justify-content: space-between;">
+                <h4 class="le-u-header-xl float-start" id="modalTitle2">Workflow Configuration</h4>
+                <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+                    <i class="icon x-16 close-icon"></i>
+                </button>
+            </div>
+        </div>
+        <div ledsModalBody class="custom-modal-body aip-scroll-hover">
+            <div class="le-u-pad-lr-16">
+                <div class="d-flex config-value-position le-u-pad-t-24 le-u-pad-r-16">
+                    <span class="le-u-body-md" style="color: #73738c;font-weight: bold;">Maximum Length</span>
+                    <div class="le-u-body-md le-u-pad-4 pannel-shadow">{{configValues.workflow.max_tokens}}</div>
+                </div>
+                <ngx-slider class="le-u-pad-b-32 config-slider-margin" [value]="configValues.workflow.max_tokens"
+                    (valueChange)="changesOccurTokens($event,'workflow')" [options]="loptions"></ngx-slider>
+            </div>
+            <div class="le-u-pad-lr-16 le-u-pad-t-16">
+                <div class="d-flex config-value-position le-u-pad-t-24 le-u-pad-r-16">
+                    <span class="le-u-body-md le-u-pad-t-24 le-u-pad-r-16"
+                        style="color: #73738c;font-weight: bold;">Temperature</span>
+                    <div class="le-u-body-md le-u-mar-t-16 le-u-pad-4 pannel-shadow">
+                        {{configValues.workflow.temperature}}
+                    </div>
+                </div>
+                <ngx-slider class="le-u-pad-b-32 config-slider-margin" [value]="configValues.workflow.temperature"
+                    (valueChange)="changesOccurTemperature($event,'workflow')" [options]="toptions"></ngx-slider>
+            </div>
+            <div class="le-u-pad-lr-16 le-u-pad-t-16">
+                <div class="d-flex config-value-position le-u-pad-t-24 le-u-pad-r-16">
+                    <span class="le-u-body-md le-u-pad-t-24 le-u-pad-r-16" style="color: #73738c;font-weight: bold;">Top
+                        P</span>
+                    <div class="le-u-body-md le-u-mar-t-16 le-u-pad-4 pannel-shadow">{{configValues.workflow.top_p}}
+                    </div>
+                </div>
+                <ngx-slider class="le-u-pad-b-32 config-slider-margin" [value]="configValues.workflow.top_p"
+                    (valueChange)="changesOccurTopP($event,'workflow')" [options]="tpoptions"></ngx-slider>
+
+            </div>
+            <div class="le-u-pad-lr-16 le-u-pad-t-16">
+                <div class="d-flex config-value-position le-u-pad-t-24 le-u-pad-r-16">
+                    <span class="le-u-body-md le-u-pad-t-24 le-u-pad-r-16"
+                        style="color: #73738c;font-weight: bold;">Presence Penalty</span>
+                    <div class="le-u-body-md le-u-mar-t-16 le-u-pad-4 pannel-shadow">
+                        {{configValues.workflow.presence_penalty}}</div>
+                </div>
+                <ngx-slider class="le-u-pad-b-32 config-slider-margin" [value]="configValues.workflow.presence_penalty"
+                    (valueChange)="changesOccurPresencePenalty($event,'workflow')" [options]="ppoptions"></ngx-slider>
+
+            </div>
+            <div class="le-u-pad-lr-16 le-u-pad-t-16">
+                <div class="d-flex config-value-position le-u-pad-t-24 le-u-pad-r-16">
+                    <span class="le-u-body-md le-u-pad-t-24 le-u-pad-r-16"
+                        style="color: #73738c;font-weight: bold;">Frequency Penalty</span>
+                    <div class="le-u-body-md le-u-mar-t-16 le-u-pad-4 pannel-shadow">
+                        {{configValues.workflow.frequency_penalty}}</div>
+                </div>
+                <ngx-slider class="le-u-pad-b-32" [value]="configValues.workflow.frequency_penalty"
+                    (valueChange)="changesOccurFrequencyPenalty($event,'workflow')" [options]="fpoptions"></ngx-slider>
+            </div>
+        </div>
+        <div ledsModalFooter class="le-u-pad-16">
+            <leds-button *ngIf="isAuth" designType="miniPrimary" class="le-u-mar-r-8 le-u-pad-b-8" buttonType="button"
+                style="float: right;" (click)="modal.dismiss('Cross click')">
+                Save
+            </leds-button>
+            <leds-button *ngIf="!isAuth" designType="miniPrimary" class="le-u-mar-r-8 le-u-pad-b-8" buttonType="button"
+                style="float: right;" (click)="modal.dismiss('Cross click')" disabled="true">
+                Save
+            </leds-button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #versionConfig let-modal>
+    <div class="config-background">
+        <div ledsModalHeader class="custom-modal-header">
+            <div class="d-flex" style="justify-content: space-between;">
+                <h4 class="le-u-header-xl float-start" id="modalTitle2">Version Details</h4>
+                <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+                    <i class="icon x-16 close-icon"></i>
+                </button>
+            </div>
+        </div>
+        <div ledsModalBody class="custom-modal-body aip-scroll-hover">
+            <div class="le-u-pad-lr-16">
+                <div class="config-value-position le-u-pad-t-24 le-u-pad-r-16">
+                    <h2 class="le-u-body-md" style="color: #73738c;font-weight: bold;">Id:v{{versions.length+1}}</h2>
+                </div>
+                <div class="d-flex">
+                    <span class="le-u-body-md le-u-pad-t-32 le-u-pad-r-4"
+                        style="color: #73738c;font-weight: bold;">Version
+                        Name:</span>
+                    <leds-input-field class="col-md-8" placeholder="Enter version name" label=""
+                        [(ngModel)]="version_name" designType="default" inputType="text" [disabled]="false"
+                        [validators]="nameValidator"
+                        (changesOccur)="changesOccurVersionName($event)"></leds-input-field>
+                </div>
+                <leds-radio-group>
+                    <leds-radio-button [checked]="false" [value]="version_isDefault" [disabled]="false"
+                        (click)="version_isDefault = true;">
+                        Set as Default
+                    </leds-radio-button>
+                </leds-radio-group>
+                <mat-error class="le-u-pad-t-16" *ngIf="errMsgFlag" style="font-size: smaller;">{{errMsg}}</mat-error>
+            </div>
+        </div>
+        <div ledsModalFooter class="le-u-pad-16">
+            <leds-button designType="miniPrimary" class="le-u-mar-r-8 le-u-pad-b-8" buttonType="button"
+                style="float: right;" (click)="saveNewVersion();modal.dismiss('Cross click')" [disabled]="errMsgFlag">
+                Save
+            </leds-button>
+        </div>
+    </div>
+</ng-template>

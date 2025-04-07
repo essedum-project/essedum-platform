@@ -1,0 +1,5 @@
+"id","action_area","action_title","action_detailed_information","raised_by","start_date","assigned_to","due_date","action_status","remarks","wave_id","wave_name","cluster_id","cluster_name","application_id","application_name","transition_id","transition_manager_id","project_id","enablement","is_default","is_unique"
+"111","CCD","Acquire Server","Acquire Server for DEV","Allan","2021-02-24","Ella","2021-02-26","Yet to start","NULL","NULL","NULL","NULL","NULL","NULL","NULL","2","NULL","2","Governance","false","true"
+"112","CCD","Acquire QA M/C","Acquire Server for QA","Allan","2021-02-24","Ella","2021-02-26","Completed","NULL","NULL","NULL","NULL","NULL","NULL","NULL","2","NULL","2","Default","true","false"
+"113","Action1 AM","Action ITW","dep.","sac","2021-02-25","rish","2021-02-27","Yet to start","NULL","4","Wave2","7","Cluster2","2","application1","2","NULL","2","NULL","false","false"
+"114","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","2","NULL","NULL","NULL"

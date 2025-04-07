@@ -1,0 +1,24 @@
+.pannel-shadow{
+    box-shadow: -2px 0 25px -20px rgba(0, 0, 0, 0.75) !important;
+    border: 0.5px solid rgba(0, 0, 0, 0.1215686275);
+    border-radius: 8px;
+    opacity: 1;
+}
+
+.sub-main-container {
+    background-color: white;
+    // border-radius: 20px;
+    // border: none;
+    padding: 16px;
+    margin: 32px;
+    cursor: pointer;
+  }
+  
+.main-container {
+    padding: 1%;
+    height: 100%;
+}
+
+.bold-text {
+    font-weight: bold;
+}

@@ -1,0 +1,178 @@
+<div class="clearfix " id="mainCtr">
+    <div class="container-fluid">
+        <div class="le-l-middle-col le-u-no-mar-l__mb" id="mainrightCnt">
+            <div class="le-l-level1-wrapper">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="le-l-level1-middle-col le-l-base-layout-center">
+                            <h1 class="le-u-header-xxl le-u-mar-b-8">{{response.initiativeName|titlecase}}</h1>
+                            <h1 class="le-u-header-xl le-u-mar-b-24 le-u-mar-l-32">{{response.taskName|titlecase}}</h1>
+                            <div class="le-l-level2-middle-ctr">
+                                <div class="le-l-level2-middle-col le-u-pad-b-24">
+                                    <form [formGroup]="form">
+                                        <div>
+                                            <div class="le-u-mar-b-16">
+                                                <div ledsTabGroup [headerBg]="'none'">
+                                                    <mat-tab-group disableRipple>
+                                                        <mat-tab *ngFor="let cData of childData">
+                                                            <ng-template
+                                                                mat-tab-label>{{cData.parentName}}</ng-template>
+                                                            <div class="le-u-mar-16">
+                                                                <leds-panel>
+                                                                    <div class="le-u-pad-16"
+                                                                        *ngFor="let question of cData.child">
+                                                                        <div class="le-u-header-md le-u-pad-lr-24">
+                                                                            {{ question.question_content }}
+                                                                        </div>
+                                                                        <div class="le-u-body-md le-u-pad-lr-24"
+                                                                            [ngSwitch]="question.response_type"
+                                                                            style="color: #737373;">
+                                                                            <leds-input-field placeholder="" label=""
+                                                                                *ngSwitchCase="'text'"
+                                                                                [formControlName]="question.question_id.toString()"
+                                                                                designType="default"
+                                                                                inputType="text"></leds-input-field>
+                                                                            <leds-input-field placeholder="" label=""
+                                                                                designType="email" inputType="email"
+                                                                                emailDomain="" *ngSwitchCase="'email'"
+                                                                                [validators]="mailValidator"
+                                                                                errorMessage="{
+                                                      required: 'This field is required',
+                                                    }" [formControlName]="question.question_id.toString()"
+                                                                                [disabled]="false" [required]="true"
+                                                                                styleClass=""
+                                                                                (changesOccur)="changesOccur($event)"></leds-input-field>
+                                                                            <leds-input-field placeholder="" label=""
+                                                                                *ngSwitchCase="'number'"
+                                                                                [formControlName]="question.question_id.toString()"
+                                                                                designType="default"
+                                                                                inputType="number"></leds-input-field>
+                                                                            <div *ngSwitchCase="'checkbox'">
+                                                                                <div class="le-u-pad-16">
+                                                                                    <leds-checkbox
+                                                                                        [labelPosition]="'after'"
+                                                                                        [formControlName]="question.question_id.toString()">
+                                                                                        I agree
+                                                                                    </leds-checkbox>
+                                                                                </div>
+                                                                            </div>
+                                                                            <leds-select *ngSwitchCase="'dropdown'"
+                                                                                [formControlName]="question.question_id.toString()"
+                                                                                [options]="question.options" label=""
+                                                                                [required]="false" [disabled]="false"
+                                                                                designType="default"
+                                                                                [isMultiple]="false"></leds-select>
+                                                                        </div>
+                                                                    </div>
+                                                                </leds-panel>
+                                                            </div>
+                                                        </mat-tab>
+                                                    </mat-tab-group>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <leds-message-banner designType="error" [section]="true" *ngIf="form.invalid">
+                                            <div sectionMessageBody>
+                                                Please fill out the form correctly.
+                                                {{ form.errors | json }}
+                                            </div>
+                                        </leds-message-banner>
+                                        <span *ngIf="isCompeleted==false">
+                                            <leds-button *ngIf="!form.invalid" buttonType="text"
+                                                (click)="onApprove()">Approve</leds-button>
+                                            <leds-button buttonType="submit" (click)="open(rejectTemplate)"
+                                                name="secondaryButton" id="secondaryButton"
+                                                designType="secondary">Reject</leds-button>
+                                        </span>
+                                    </form>
+                                </div>
+                                <div class="le-l-level2-right-col">
+                                    <leds-panel>
+                                        <div class="le-c-panel__content">
+                                            <div class="le-u-pad-16">
+                                                <div class="le-u-header-lg le-u-mar-b-16">Useful Links</div>
+                                                <leds-navigation-list position="left" [selectOnClick]="true">
+                                                    <li class="aip-daa ">
+                                                        <div class="aip-related-list">
+                                                            <div class="le-u-pad-8 aip-cursor">
+                                                                <div class="le-u-header-md" style="color: #8626C3;">
+                                                                    <!-- {{response.initiativeName |uppercase}} -->
+                                                                    {{'view related solution' |uppercase}}
+                                                                </div>
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="aip-related-ellipsis"><span
+                                                                            class="le-u-header-lg">{{response.initiativeName
+                                                                            |titlecase}}</span>
+                                                                    </div>
+                                                                    <!-- <div class="aip-related-list"
+                                                                        (click)="openlarge(lgContent1)">
+                                                                        <leds-tooltip [tooltip]="'View as Table'"
+                                                                            [position]="'above'">
+                                                                            <i
+                                                                                class="icon x-24 aip-cursor aip-led-icons  show-icon"></i>
+                                                                        </leds-tooltip>
+                                                                        <ng-template #lgContent1 let-modal>
+                                                                            <div class="le-u-pad-16">
+                                                                                <div class=""><json-tree
+                                                                                        [value]="response"></json-tree>
+                                                                                </div>
+                                                                            </div>
+                                                                        </ng-template>
+                                                                    </div> -->
+                                                                    <div class="aip-related-list  le-u-mar-lr-8 aip-cursor"
+                                                                        (click)="redirect()">
+                                                                        <leds-tooltip
+                                                                            [tooltip]="'Navigate to Component'"
+                                                                            [position]="'above'">
+                                                                            <i class="fa fa-external-link aip-led-icons"
+                                                                                aria-hidden="true"></i>
+                                                                        </leds-tooltip>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                </leds-navigation-list>
+                                                <!-- <div
+                                                    class="d-flex justify-content-center align-items-center flex-column">
+                                                    <img src="assets/images/aip_empty_state_leds.svg"
+                                                        class="img-responsive" alt="aip_empty_state_leds"
+                                                        style="width:15rem" />
+                                                    Arriving soon
+                                                </div> -->
+                                            </div>
+                                        </div>
+                                    </leds-panel>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Template Creation -->
+<ng-template #rejectTemplate let-modal>
+    <div class="le-u-pad-24">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="le-u-header-xxl">Create Template</div>
+            <div class="" (click)="close()"><i class="icon x-16 aip-icons close-icon"></i></div>
+        </div>
+        <div class="le-u-mar-t-16">
+            <div class="le-u-header-md">Reason for rejection.</div>
+            <leds-textarea placeholder="" label="" [(ngModel)]="rejectReason" designType="default" inputType="text"
+                [disabled]="false" [required]="false"></leds-textarea>
+        </div>
+        <div class="d-flex justify-content-end le-u-mar-t-16" *ngIf="rejectReason.length>0">
+            <leds-button buttonType="submit" name="secondaryButton" id="secondaryButton" designType="secondary"
+                (click)="onReject()">
+                Reject
+            </leds-button>
+        </div>
+    </div>
+</ng-template>
+<leds-spinner bdColor="rgba(51,60,60,0.5)" [size]="'default'" [color]="'#8626c3'" [type]="'ball-spin'"
+    [fullScreen]="true" [showSpinner]="showSpinner">
+    <p loadingText> Action is being prossed</p>
+</leds-spinner>

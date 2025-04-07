@@ -1,0 +1,20 @@
+.fullScreen{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100%;
+  }
+  .aip-dgTool-boilerPlate{
+    overflow-y: overlay;
+    position: inherit;
+    top: 0;
+    left: 0;
+    height: 40rem;
+    width: 100%;
+  }
+  .col-align{
+    display: flex;
+  //  align-items: center;
+    height: 4rem;
+  }

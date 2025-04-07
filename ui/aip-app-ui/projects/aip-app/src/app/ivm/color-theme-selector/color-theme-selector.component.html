@@ -1,0 +1,22 @@
+<p>color-theme-selector works!</p>
+
+<leds-navigation-list position="left" [selectOnClick]="true">
+    
+    <li
+    ledsNavigationListItem
+    leftPin="true"
+    level="second"
+    navInfoMargin="first"
+  >
+    <span firstNavigationSpan>
+      <span class="d-block le-c-nav-list__first-mar">Candidates</span>
+    </span>
+
+    <leds-navigation-list secondList level="second">
+      <li ledsNavigationListItem level="inner" navInfoMargin="second" *ngFor="let menu of menus">
+        <span secondNavigationSpan>Menu</span>
+      </li>
+    </leds-navigation-list>
+  </li>
+    
+  </leds-navigation-list>

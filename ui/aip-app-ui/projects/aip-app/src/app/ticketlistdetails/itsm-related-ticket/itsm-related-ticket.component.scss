@@ -1,0 +1,62 @@
+.related-heading {
+    font: normal normal normal 24px/30px Myriad Pro;
+    letter-spacing: 0px;
+    color: #121012;
+    opacity: 1;
+    padding-left: 6vh;
+    padding-top: 1.5vh;
+}
+
+.itsm-scroll {
+    overflow-x: hidden;
+}
+
+.itsm-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.itsm-scroll::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 10px;
+}
+
+.loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px auto; 
+}
+
+.dot {
+    width: 6px;
+    height: 6px;
+    margin: 0 4px;
+    background-color: #8626c3;
+    border-radius: 50%;
+    display: inline-block;
+    animation: wave 1.2s infinite ease-in-out;
+}
+
+.dot:nth-child(1) {
+    animation-delay: -0.24s;
+}
+
+.dot:nth-child(2) {
+    animation-delay: -0.12s;
+}
+
+@keyframes wave {
+    0%, 60%, 100% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-10px);
+    }
+}
+
+.loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 30dvh;
+}

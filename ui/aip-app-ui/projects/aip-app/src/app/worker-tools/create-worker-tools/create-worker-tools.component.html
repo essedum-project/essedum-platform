@@ -1,0 +1,93 @@
+<div class="container-fluid backgroud-color">
+    <div class="le-l-level1-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="le-l-level1-middle-col le-l-base-layout-center">
+                    <div class="align-items-center d-flex justify-content-between">
+                        <div class="selector-model-title-head d-flex align-items-center">
+                            <span class="" style="cursor: pointer;">
+                                <i class="aip-led-icons icon x-24 back-icon" (click)="backToTools()"></i>
+                            </span>
+                            <span class="le-u-mar-l-8 le-u-header-xxl">{{toolPageTitle}}</span>
+                        </div>
+                        <div class="selector-model-title-tail" style="float: right;">
+                            <ul class="d-flex justify-content-between align-items-center py-2 px-4">
+                                <li *ngIf="toolName && !isEdit">
+                                    <leds-tooltip [tooltip]="'edit'" [position]="'above'">
+                                        <i class="le-u-mar-r-16 aip-led-icons icon edit-icon x-24"
+                                            (click)="navigateToEditTool(toolName)"></i>
+                                    </leds-tooltip>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="le-l-level2-middle-ctr">
+                        <div class="le-l-level2-middle-col le-u-mar-b-24__mb">
+                            <leds-panel type="default" styleClass="" contentClass="">
+                                <div class="le-u-mar-tb-16 le-u-pad-16">
+                                    <div class="row le-c-panel__content">
+                                        <div class="le-l-level2-middle-col le-u-mar-b-24__mb">
+                                            <div class="d-flex justify-content-between align-items-center px-4">
+                                                <div class="align-items-center d-flex">
+                                                    <h2 style="color:var(--base-color)">Tool Properties</h2>
+                                                </div>
+                                            </div>
+                                            <div class="le-u-pad-t-32 le-u-pad-lr-24">
+                                                <form [formGroup]="toolsForm">
+                                                    <div class="col-lg-12 col-md-12">
+                                                        <leds-input-field label="Tool Name" placeholder="Enter Tool Name..." errorMessage="{
+                                                                required: 'This field is required',}" inputType="text" [required]="true"
+                                                            formControlName="alias"></leds-input-field>
+                                                    </div>
+                                                    <div class="col-lg-12 col-md-12">
+                                                        <leds-input-field label="Description" placeholder="Enter Tool Description..." inputType="text"
+                                                            [required]="false" formControlName="description"></leds-input-field>
+                                                    </div>
+                                                    <div class="row d-flex justify-content-between le-u-pad-l-16">
+                                                        <leds-autocomplete class="col-md-6" label="Select Tags" [options]="fetchTagsList" 
+                                                            [(ngModel)]="selectedCategory" [autoActiveFirstOption]="false" formControlName="category" 
+                                                            (panelOptionSelected)="onTagChange($event.option.value)" [isMultiple]="true"
+                                                            [required]="true" *ngIf="fetchTagsList.length>0">
+                                                        </leds-autocomplete>
+                                                        <leds-select class="col-md-6" label="ToolType" [options]="toolTypeOption" [required]="true" [isMultiple]="false"
+                                                            formControlName="toolType" (selectChange)="toolTypeChange($event)">
+                                                        </leds-select>
+                                                        <leds-select *ngIf="type=='Pipeline'" class="col-md-6" label="Choose one option*" [options]="options" 
+                                                            (selectChange)="optionChange($event)" [selected]="option">
+                                                        </leds-select>
+                                                        <leds-select *ngIf="option=='list'" class="col-md-6" label="Choose pipeline tool*" [options]="toolListPipeline" 
+                                                            (selectChange)="onPipelineToolChange($event)" [selected]="selectedPipelineName">
+                                                        </leds-select>
+                                                    </div>
+                                                    <div class="col-lg-12 col-md-12 le-u-mar-b-8">
+                                                        <mat-label class="le-u-mar-b-8 labelColour">Input Parameters</mat-label>
+                                                        <app-app-config [configData]="inputParamsArray" 
+                                                            (configDataChange)="onInputChange($event)"></app-app-config>
+                                                    </div>
+                                                    <div class="col-lg-12 col-md-12 le-u-mar-tb-8">
+                                                        <mat-label class="le-u-mar-b-8 labelColour">Output Parameters</mat-label>
+                                                        <app-app-config [configData]="outputParamsArray" 
+                                                            (configDataChange)="onOutputChange($event)"></app-app-config>
+                                                    </div>
+                                    
+                                                    <div class="d-flex justify-content-end le-u-mar-b-4">
+                                                        <leds-button class="le-u-pad-r-16 " style="color:var(--base-color); " nameText="primaryButton"
+                                                            idText="primaryButton" buttonType="button" designType="primary" *ngIf="isCreateTool"
+                                                            (click)="saveTool()">Save</leds-button>
+                                                        <leds-button class="le-u-pad-r-16 " style="color:var(--base-color); " nameText="primaryButton"
+                                                            idText="primaryButton" buttonType="button" designType="primary" *ngIf="isEdit && !isCreateTool"
+                                                            (click)="editTool()">Update</leds-button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </leds-panel>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

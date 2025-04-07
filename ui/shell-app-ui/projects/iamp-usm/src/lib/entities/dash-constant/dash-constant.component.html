@@ -1,0 +1,629 @@
+<div class="col-md-12 centerStyle selector-374-1" style="border: none">
+  <!-- search and filter constants -->
+  <div *ngIf="!showCreate && !configureTheme" class="selector-374-2">
+    <div class="clearfix selector-374-3">
+      <div class="padTop20 selector-374-4">
+        <h2 class="ams_h2 h2Mar selector-374-5" *ngIf="!heading">Configuration List</h2>
+        <div class="ams_toptoolbar selector-374-6">
+          <i class="fa fa-plus-square-o create-icon-color selector-374-7" (click)="createView()" aria-hidden="true"></i>
+          <span style="cursor: pointer" (click)="createView()" class="selector-374-8">Create Configuration</span>
+        </div>
+        <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-374-9">
+          <h3 class="clearfix selector-374-10">
+            <div class="search-container ams_cusSrch pull-left selector-374-11">
+              <input #myInput="" style="color: black;" type="text" placeholder="Search by Key/Value"
+                (keypress)="checkEnterPressed($event, myInput.value)" class="selector-374-12" />
+              <button type="button" (click)="filterItem(myInput.value)" class="selector-374-13">
+                <i class="searchIcon selector-374-14"></i>
+              </button>
+            </div>
+          </h3>
+        </div>
+        <div class="selector-374-15">
+          <div class="ams_panelCnt formRow relative selector-374-16">
+            <div style="float: right; cursor: pointer" class="selector-374-17">
+              <i class="fa fa-list-ul fa-lg icon1 selector-374-18" aria-hidden="true" title="Table View"
+                (click)="showList = true"></i>
+              <i class="fa fa-th-large fa-lg icon1 selector-374-19" aria-hidden="true" title="Card View"
+                (click)="showList = false"></i>
+            </div>
+            <br class="selector-374-20" />
+            <br class="selector-374-21" />
+            <!-- card view -->
+            <div class="row selector-374-22" *ngIf="dashConstantLength >= 0 &amp;&amp; !showList">
+              <div class="col-md-6 selector-374-23" *ngFor="
+                  let constants of dashConstants | paginate: { itemsPerPage: 6, currentPage: p };
+                  trackBy: trackByMethod
+                ">
+                <div class="ams_cardCtr ams_cardfooterCtr selector-374-24">
+                  <div class="ams_cardBorder clearfix selector-374-25" (click)="ViewDashConstants(constants)">
+                    <h4 class="td-ellipsis selector-374-26" matTooltipClass="crud-tooltip"
+                      [matTooltip]="constants.keys">
+                      {{ constants.keys }}
+                    </h4>
+                    <div class="ams_cardCnt selector-374-27">
+                      <div class="row rwMAr selector-374-28">
+                        <div class="col-md-6 selector-374-29" matTooltipClass="crud-tooltip"
+                          [matTooltip]="constants.id">
+                          <label class="formLabel selector-374-30">Id</label>
+                          <span class="formSpan selector-374-31">{{ constants.id }}</span>
+                        </div>
+                        <div class="col-md-6 selector-374-32" matTooltipClass="crud-tooltip"
+                          [matTooltip]="constants.val_alias">
+                          <label class="formLabel selector-374-33">Value</label>
+                          <span class="formSpan selector-374-34"> {{ constants.val_alias }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="selector-374-35">
+                    <div class="selector-374-36">
+                      <div class="ams_cardfooter text-center selector-374-37">
+                        <i class="fa fa-info-circle fa-lg create-icon-color selector-374-38" aria-hidden="true"
+                          title="View Configuration" (click)="ViewDashConstants(constants)"></i>
+                        <i class="fa fa-pencil fa-lg create-icon-color selector-374-39" aria-hidden="true"
+                          title="Edit Configuration" (click)="editDashConstants(constants)"
+                          style="padding-left: 5px"></i>
+                        <i class="fa fa-trash fa-lg create-icon-color selector-374-40" aria-hidden="true"
+                          style="padding-left: 5px" title="Delete Configuration"
+                          (click)="deleteDashConstants(constants)"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-12 selector-374-41" id="noRecordsMsg">
+                <pagination-controls (pageChange)="p = $event" class="selector-374-42"></pagination-controls>
+              </div>
+            </div>
+            <!-- list view -->
+            <div *ngIf="dashConstantLength >= 0 &amp;&amp; showList" class="table-responsive selector-374-43">
+              <table mat-table="" [dataSource]="dashConstantList" class="table-hover list-table selector-374-44"
+                matSort="" matSortActive="scheduled_from" matSortDirection="asc">
+                <ng-container matColumnDef="id" class="selector-374-45">
+                  <th mat-header-cell="" *matHeaderCellDef="" class="number-col selector-374-46">
+                    <strong class="selector-374-47"> Id </strong>
+                  </th>
+                  <td mat-cell="" (click)="ViewDashConstants(constants)" *matCellDef="let constants"
+                    class="td-ellipsis number-col selector-374-48">
+                    <div class="td-span td-ellipsis pull-right selector-374-49" matTooltipClass="crud-tooltip"
+                      [matTooltip]="constants.id">
+                      {{ constants.id }}
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="keys" class="selector-374-50">
+                  <th mat-header-cell="" *matHeaderCellDef="" class="selector-374-51">
+                    <strong class="selector-374-52"> Key </strong>
+                  </th>
+                  <td mat-cell="" (click)="ViewDashConstants(constants)" class="td-ellipsis selector-374-53"
+                    *matCellDef="let constants">
+                    <div class="td-span td-ellipsis pull-left selector-374-54" matTooltipClass="crud-tooltip"
+                      [matTooltip]="constants.keys">
+                      {{ constants.keys }}
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="value" class="selector-374-55">
+                  <th mat-header-cell="" *matHeaderCellDef="" class="selector-374-56">
+                    <strong class="selector-374-57"> Value </strong>
+                  </th>
+                  <td mat-cell="" (click)="ViewDashConstants(constants)" class="td-ellipsis selector-374-58"
+                    *matCellDef="let constants">
+                    <div class="td-span td-ellipsis pull-left selector-374-59" matTooltipClass="crud-tooltip"
+                      [matTooltip]="constants.val_alias">
+                      {{ constants.val_alias }}
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions" class="selector-374-60">
+                  <th mat-header-cell="" *matHeaderCellDef="" class="actions-col selector-374-61">
+                    <strong class="selector-374-62"> Actions </strong>
+                  </th>
+                  <td mat-cell="" *matCellDef="let constants" class="actions-col selector-374-63">
+                    <i class="fa fa-info-circle fa-lg create-icon-color selector-374-64" aria-hidden="true"
+                      (click)="ViewDashConstants(constants)" title="View Configuration"></i>
+                    <i class="fa fa-pencil fa-lg create-icon-color selector-374-65" aria-hidden="true"
+                      (click)="editDashConstants(constants)" title="Edit Configuration" style="padding-left: 5px"></i>
+                    <i class="fa fa-trash fa-lg create-icon-color selector-374-66" aria-hidden="true"
+                      style="padding-left: 5px" (click)="deleteDashConstants(constants)"
+                      title="Delete Configuration"></i>
+                  </td>
+                </ng-container>
+                <tr mat-header-row="" *matHeaderRowDef="displayedColumns" class="selector-374-67"></tr>
+                <tr mat-row="" *matRowDef="let row; columns: displayedColumns" class="selector-374-68"></tr>
+              </table>
+              <mat-paginator [pageSize]="6" showFirstLastButtons="" class="selector-374-69"></mat-paginator>
+            </div>
+            <div *ngIf="dashConstantLength == 0" id="noRecordsMsg" class="selector-374-70">No Records Found</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- create-constants -->
+  <div *ngIf="showCreate && !configureTheme" #dashConstantForm="ngForm" class="selector-374-71" ngForm=""
+    [ngBusy]="{ busy: busy, message: 'Saving Configuration...', backdrop: true }">
+    <div class="padTop20 selector-374-72">
+      <div>
+        <div class="backIconcrud">
+          <span class="ams_back pull-right linkMar selector-374-73" (click)="listView()">Back to Configuration</span>
+          <i class="fa fa-caret-square-o-left create-icon-color pull-right linkMar selector-374-74" (click)="listView()"
+            aria-hidden="true"></i>
+        </div>
+        <div class="selector-374-75">
+          <span class="am_-back pull-right linkMar selector-374-76"
+            *ngIf="edit &amp;&amp; !view &amp;&amp; view_dashConstant" (click)="view = true; buttonFlag = true">View
+            Configuration</span>
+          <i class="fa fa-eye create-icon-color pull-right linkMar selector-374-77"
+            *ngIf="edit &amp;&amp; !view &amp;&amp; view_dashConstant" (click)="view = true; buttonFlag = true"
+            aria-hidden="true"></i>
+          <span class="ams_back pull-right linkMar selector-374-78" *ngIf="edit &amp;&amp; view"
+            (click)="view = false; buttonFlag = false">Edit Configuration</span>
+          <i class="fa fa-pencil-square-o create-icon-color pull-right linkMar selector-374-79"
+            *ngIf="edit &amp;&amp; view" (click)="view = false; buttonFlag = false" aria-hidden="true"></i>
+        </div>
+      </div>
+      <h4 class="ams_h2 h2Mar crud-header selector-374-80" style="padding-left: 4%" *ngIf="!edit">Create Configuration
+      </h4>
+      <h4 class="ams_h2 h2Mar crud-header selector-374-81"
+        [ngStyle]="{ 'padding-left': edit &amp;&amp; !view &amp;&amp; view_dashConstant ? '14%' : '4%' }"
+        *ngIf="edit &amp;&amp; !view">
+        Edit Configuration
+      </h4>
+      <h4 class="ams_h2 h2Mar crud-header selector-374-82" style="padding-left: 14%" *ngIf="edit &amp;&amp; view">
+        View Configuration
+        <i *ngIf="!view_dashConstant" class="fa fa-pencil fa-lg create-icon-color selector-374-83"
+          title="Edit Configuration" (click)="view = false"></i>
+      </h4>
+      <div class="noPad selector-374-84">
+        <div *ngIf="sideCheck == false || sideCheck == undefined" class="selector-374-85">
+          <div class="row rwMAr selector-374-86"
+            *ngIf="!defaultCheck &amp;&amp; !defaultsidebar &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload">
+            <div class="col-md-6 selector-374-87" *ngIf="!configureUserLand">
+              <label class="formLabel selector-374-88">Key*</label>
+              <input [disabled]="view" type="text" maxlength="250" [ngModelOptions]="{ standalone: true }"
+                [(ngModel)]="dashConstant &amp;&amp; dashConstant.keys" class="txtInput selector-374-89"
+                (keydown)="checkMaxlengthForKey()" required="" />
+              <span class="error selector-374-90" style="font-size: 1.6vmin">
+                Note: Value should start with alpha numeric characters and can contain special characters
+                @%!#*-_&amp;$()=+/.?\ </span><br class="selector-374-91" />
+              <span class="error selector-374-92" style="font-size: 1.6vmin" *ngIf="showKeyLengthErrorMessage">{{
+                lengthNameErrorMessage
+                }}</span>
+            </div>
+            
+
+            <mat-form-field style="width: 41%;margin-left:1%;" *ngIf="configureUserLand" class="selector-374-93">
+
+              <label class="formLabel  selector-374-94" style="width: 85%">User*</label>
+              <br class="selector-374-95">
+              <mat-select [disabled]="view" [(ngModel)]="configureuserlandusers" name="configureuserlandusers" single=""
+                class="selector-374-96">
+                <mat-option *ngFor="let u of userList; trackBy: trackByMethod" [value]="u.user_login" required=""
+                  class="selector-374-97">
+                  {{ u.user_login }}
+                </mat-option>
+              </mat-select>
+
+            </mat-form-field>
+            <mat-form-field style="width: 41%;margin-left:15%;" *ngIf="configureUserLand" class="selector-374-93">
+              <label class="formLabel selector-374-94">Role*</label>
+              <br class="selector-374-95">
+              <mat-select [disabled]="view" [(ngModel)]="configureuserlandrole" name="configureuserlandrole" single=""
+                class="selector-374-96">
+                <mat-option *ngFor="let role of roles; trackBy: trackByMethod" [value]="role.name"
+                  class="selector-374-97">
+                  {{ role.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <div class="col-md-6 selector-374-98" [ngStyle]="{'margin-top':configureUserLand?'19px':''}">
+              <label class="formLabel selector-374-99">Value*</label>
+              <input [disabled]="view" type="text" [ngModelOptions]="{ standalone: true }"
+                [(ngModel)]="dashConstant &amp;&amp; dashConstant.value" class="txtInput selector-374-100"
+                required="" />
+            </div>
+          </div>
+        </div>
+        <div *ngIf="sideCheck == true &amp;&amp; !defaultsidebar" class="selector-374-101">
+          <div class="row rwMAr selector-374-102">
+            <div class="col-md-6 selector-374-103">
+              <div class="selector-374-104">
+                <mat-form-field style="width: 85%" class="selector-374-105">
+                  <label class="formLabel selector-374-106">Role*</label>
+                  <mat-select [disabled]="view" [(ngModel)]="sideRole" name="sideRole" required=""
+                    class="selector-374-107">
+                    <mat-option *ngFor="let role of roles; trackBy: trackByMethod" [value]="role.name"
+                      class="selector-374-108">
+                      {{ role.name }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="selector-374-109">
+                <div ngForm #myForm="ngForm"
+                  *ngIf="(displayAddChildFormFlag || displayEditDataFormFlag) &amp;&amp; sideCheck"
+                  [formGroup]="dataForm" class="selector-374-110">
+
+                  <label class="formLabel selector-374-111">
+                    Title*
+                    <input type="text" (keyup)="checkMaxlengthForTitle()" maxlength="50"
+                      class="txtInput selector-374-112" formControlName="label">
+                  </label>
+                  <span class="error selector-374-113" style="font-size: 1.6vmin" *ngIf="showTitleLengthErrorMessage">{{
+                    TitleLengthErrorMessage
+                    }}</span>
+                  <br class="selector-374-114">
+
+                  <div *ngIf="!uploadImage">
+                    <label class="formLabel selector-374-115">
+                      Logo
+                      <input type="text" class="txtInput selector-374-116" formControlName="logo"
+                        (keyup)="setLogoText()">
+                    </label>
+                    <div *ngIf="logoText">
+                      <button (click)="removeImageText()" class="genBtn marRght30 selector-374-122" type="button">Clear
+                        Logo</button>
+                    </div>
+                  </div>
+                  <br class="selector-374-117">
+                  <div *ngIf="uploadImage">
+                    <label class="formLabel selector-411-57">Logo
+                      <input (change)="setFileImage($event, 'image', true)" id="img" type="file" name="file"
+                        placeholder="file" style="display: none;" accept="image/jpg,image/jpeg,image/png,image/svg+xml"
+                        class="selector-411-59" formControlName="logo" />
+                      <button style="margin-left: 150px;" class="genBtn marRght30 selector-374-122" type="button">
+                        <label for="img">
+                          <div>Choose File</div>
+                        </label>
+                      </button>
+                    </label>
+                    <br class="selector-374-120">
+                    <img [src]="imageDataDetails" class="selector-411-5908 uploadImage"
+                      style="max-width: 200px; max-height: 200px;">
+                    <div *ngIf="imageDataDetails">
+                      <button (click)="removeImage()" style="margin-left: 150px;"
+                        class="genBtn marRght30 selector-374-122" type="button">Remove Image / SVG</button>
+                    </div>
+                    <br class="selector-374-120">
+                  </div>
+
+                  <label class="formLabel selector-374-118" *ngIf="!hideURL">
+                    URL
+                    <input type="text" class="txtInput selector-374-119" formControlName="url">
+                  </label>
+                  <br class="selector-374-120">
+                  <div id="btnMargin" class="selector-374-121">
+                    <button *ngIf="displayAddChildFormFlag" type="button" style="margin-left: 150px;"
+                      class="genBtn marRght30 selector-374-122" (click)="addChildToTree()">
+                      Submit
+                    </button>
+                    <button *ngIf="displayEditDataFormFlag" type="button" style="margin-left: 150px;"
+                      class="genBtn marRght30 selector-374-123" (click)="editDataToTree()">
+                      Update
+                    </button>
+                    <button type="button" class="secBtn selector-374-124" (click)="hideform()">
+                      Cancel</button>
+                  </div>
+
+                </div>
+                <div *ngIf="(displayAddChildFormFlag || displayEditDataFormFlag) &amp;&amp; sideCheck">
+                  <mat-checkbox [(ngModel)]="uploadImage" [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="imageCheck()"> Upload Image/SVG</mat-checkbox>
+                </div>
+              </div>
+            </div>
+            <div cdkDropListGroup class="col-md-6 selector-374-125">
+              <i style="margin-left: 25px;" class="fa fa-plus icon1 pad-betw-icon selector-374-131"
+                (click)="displayAddSiblingForm()"
+                *ngIf="!view && addsiblings && dataSource && dataSource.data && dataSource.data.length>0"
+                title="Add Sibling"></i>
+              <mat-tree cdkDropList (cdkDropListDropped)="drop($event)" *ngIf="sideCheck" [dataSource]="dataSource"
+                [treeControl]="treeControl" class="example-tree treeBox selector-374-126">
+                <!-- This is the tree node template for leaf nodes -->
+                <mat-tree-node matTreeNodePadding cdkDrag [cdkDragData]="node" class="resetOverflow selector-374-127"
+                  *matTreeNodeDef="let node" matTreeNodeToggle="">
+                  <li class="mat-tree-node resetOverflow selector-374-128" style="cursor: all-scroll;">
+                    <!-- use a disabled button to provide padding for tree leaf -->
+                    <button mat-icon-button="" disabled="" class="selector-374-129"></button>
+                    <span style="white-space: nowrap;" class="selector-374-130">{{node.label}}</span>
+                    <i style="margin-left: 25px;" class="fa fa-plus icon1 pad-betw-icon selector-374-131"
+                      (click)="displayAddChildForm(node)" *ngIf="!view" title="Add Child"></i>
+                    <i class="fa fa-pencil icon1 pad-betw-icon selector-374-132" title="Edit" *ngIf="!view"
+                      (click)="displayEditForm(node)"></i>
+                    <i class="fa fa-trash icon1 pad-betw-icon selector-374-133" title="Delete Child" *ngIf="!view"
+                      (click)="deleteChildFromTree(node)"></i>
+                  </li>
+                </mat-tree-node>
+                <!-- This is the tree node template for expandable nodes -->
+                <mat-tree-node matTreeNodePadding cdkDrag [cdkDragData]="node"
+                  *matTreeNodeDef="let node; when: hasChild" class="selector-374-134">
+                  <li class="selector-374-135">
+                    <div class="mat-tree-node resetOverflow selector-374-136" style="cursor: all-scroll;">
+                      <button (click)="expansionModel.toggle(node._id)" mat-icon-button="" matTreeNodeToggle=""
+                        [attr.aria-label]="'Toggle ' + node.label" class="selector-374-137">
+                        <mat-icon class="mat-icon-rtl-mirror selector-374-138">
+                          {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                        </mat-icon>
+                      </button>
+                      <span style="white-space: nowrap;" class="selector-374-139">{{node.label}}</span>
+                      <i style="margin-left: 25px;" class="fa fa-plus icon1 pad-betw-icon selector-374-140"
+                        (click)="displayAddChildForm(node)" *ngIf="!view" title="Add Child"></i>
+                      <i class="fa fa-pencil icon1 pad-betw-icon selector-374-141" title="Edit" *ngIf="!view"
+                        (click)="displayEditForm(node)"></i>
+                      <i class="fa fa-trash icon1 pad-betw-icon selector-374-142" title="Delete Child" *ngIf="!view"
+                        (click)="deleteChildFromTree(node)"></i>
+                    </div>
+                    <ul [class.example-tree-invisible]="!treeControl.isExpanded(node)" class="selector-374-143">
+                      <ng-container matTreeNodeOutlet="" class="selector-374-144"></ng-container>
+                    </ul>
+                  </li>
+                </mat-tree-node>
+              </mat-tree>
+            </div>
+          </div>
+        </div>
+        <br class="selector-374-145">
+        <mat-checkbox color="primary" [disabled]="view"
+          *ngIf="!defaultCheck &amp;&amp; !defaultsidebar &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload"
+          [(ngModel)]="sideCheck" name="sideCheck" (change)="sideCheckChange($event)" class="selector-374-146">
+          <label class="formLabel selector-374-147">Configure Sidebar</label>
+        </mat-checkbox>
+        <mat-checkbox style="padding-left: 1%" color="primary"
+          *ngIf="!defaultsidebar &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload"
+          [disabled]="view" [(ngModel)]="defaultCheck" name="defaultCheck" (change)="defaultCheckChange($event)"
+          class="selector-374-148">
+          <label class="formLabel selector-374-149">Default Project/Role in Landing</label>
+        </mat-checkbox>
+        <mat-checkbox style="padding-left: 2%" color="primary" [disabled]="view" [(ngModel)]="defaultsidebar"
+          *ngIf="!defaultCheck &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload"
+          name="defaultsidebar" (change)="defaultsidebarroles($event)" class="selector-374-150">
+          <label class="formLabel selector-374-151">Default Sidebar</label>
+        </mat-checkbox>
+        <mat-checkbox style="padding-left: 3%" color="primary" [disabled]="view" [(ngModel)]="configureUserLand"
+          *ngIf="!defaultCheck &amp;&amp; !sideCheck &amp;&amp; !defaultsidebar &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload"
+          name="configureUserLand" (change)="configureUserLandRole($event)" class="selector-374-152">
+          <label class="formLabel selector-374-153">Configure User Landing</label>
+        </mat-checkbox>
+        <mat-checkbox style="padding-left: 3%" color="primary" [disabled]="view" [(ngModel)]="rearrangesidebar"
+          *ngIf="!defaultCheck &amp;&amp; !sideCheck &amp;&amp; !defaultsidebar &amp;&amp; !configureUserLand &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload"
+          name="rearrangesidebar" (change)="rearrangesidebarfun($event)" class="selector-374-252">
+          <label class="formLabel selector-374-253">Rearrange Sidebar</label>
+        </mat-checkbox>
+        <mat-checkbox style="padding-left: 3%" color="primary" [disabled]="view" [(ngModel)]="configureTheme"
+          *ngIf="!defaultCheck &amp;&amp; !sideCheck &amp;&amp; !defaultsidebar &amp;&amp; !configureUserLand &amp;&amp;!rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload"
+          name="configureTheme" class="selector-374-1152">
+          <label class="formLabel selector-374-153">Configure Theme for Project</label>
+        </mat-checkbox>
+        <mat-checkbox style="padding-left: 2%" color="primary" [disabled]="view" [(ngModel)]="iconsidebar"
+          *ngIf="!defaultCheck &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !defaultsidebar  &amp;&amp; !configureFileUpload"
+          name="defaultsidebar" (change)="iconsidebarroles($event)" class="selector-374-150">
+          <label class="formLabel selector-374-151">Icon Sidebar</label>
+        </mat-checkbox>
+        <mat-checkbox style="padding-left: 2%" color="primary" [disabled]="view" [(ngModel)]="configureFileUpload"
+          *ngIf="!defaultCheck &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !defaultsidebar  &amp;&amp; !iconsidebar"
+          name="defaultsidebar" (change)="iconsidebarroles($event)" class="selector-374-150">
+          <label class="formLabel selector-374-151">Configure File Upload</label>
+        </mat-checkbox>
+        <div *ngIf="defaultCheck" class="selector-374-154">
+          <div class="row rwMAr selector-374-155">
+            <div class="col-md-4 selector-374-156">
+              <mat-form-field style="width: 100%" class="selector-374-157">
+                <label class="formLabel selector-374-158">Default Project</label>
+                <mat-select [disabled]="view" [(ngModel)]="defaultproject" name="defaultproject" required=""
+                  class="selector-374-159">
+                  <mat-option *ngFor="let project of projects; trackBy: trackByMethod" [value]="project.id"
+                    class="selector-374-160">
+                    {{ project.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="row rwMAr selector-374-161">
+            <div class="col-md-4 selector-374-162">
+              <label class="formLabel selector-374-163">Map Default Role to Project for landing</label>
+            </div>
+          </div>
+          <div class="row rwMAr selector-374-164"
+            *ngFor="let child of defaultArray; trackBy: trackByMethod; let i = index; let j = index">
+            <div class="col-md-4 selector-374-165">
+              <mat-form-field style="width: 100%" class="selector-374-166">
+                <label class="formLabel selector-374-167">Project</label>
+                <mat-select [disabled]="view" [(ngModel)]="child.project" name="projectRole{{ i }}"
+                  (selectionChange)="selectedProject(child, i)" class="selector-374-168">
+                  <mat-option [value]="null" class="selector-374-169">-------</mat-option>
+                  <mat-option *ngFor="let project of projects; trackBy: trackByMethod" [value]="project.id"
+                    class="selector-374-170">
+                    {{ project.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="col-md-4 selector-374-171">
+              <mat-form-field style="width: 100%" class="selector-374-172">
+                <label class="formLabel selector-374-173">Role</label>
+                <mat-select [disabled]="view" [(ngModel)]="child.role" name="sideRole{{ i }}" class="selector-374-174">
+                  <mat-option [value]="null" class="selector-374-175">-------</mat-option>
+                  <mat-option *ngFor="let role of roles; trackBy: trackByMethod" [value]="role.id"
+                    class="selector-374-176">
+                    {{ role.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="defaultsidebar" class="selector-374-177">
+          <div class="row rwMAr selector-374-178">
+            <div class="col-md-4 selector-374-179">
+              <mat-form-field style="width: 100%" class="selector-374-180">
+                <label class="formLabel selector-374-181">Role*</label>
+                <mat-select [disabled]="view" [(ngModel)]="defaultsidebarrole" name="defaultsidebarrole" multiple=""
+                  class="selector-374-182">
+                  <mat-option *ngFor="let role of roles; trackBy: trackByMethod" [value]="role.name"
+                    class="selector-374-183">
+                    {{ role.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="iconsidebar" class="selector-374-177">
+          <div class="row rwMAr selector-374-178">
+            <div class="col-md-4 selector-374-179">
+              <mat-form-field style="width: 100%" class="selector-374-180">
+                <label class="formLabel selector-374-181">Role*</label>
+                <mat-select [disabled]="view" [(ngModel)]="iconsidebarrole" name="iconsidebarrole" multiple=""
+                  class="selector-374-182">
+                  <mat-option *ngFor="let role of roles; trackBy: trackByMethod" [value]="role.name"
+                    class="selector-374-183">
+                    {{ role.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="configureFileUpload" class="selector-374-177">
+          <div class="row rwMAr selector-374-178">
+            <div class="col-md-4 selector-374-179">
+
+              <label class="formLabel selector-374-181">Key*</label>
+              <input [disabled]="view" type="text" maxlength="250" [ngModelOptions]="{ standalone: true }"
+                [(ngModel)]="dashConstant &amp;&amp; dashConstant.keys" class="txtInput selector-374-89"
+                (keydown)="checkMaxlengthForKey()" required="" />
+              <span class="error selector-374-90" style="font-size: 1.6vmin">
+                Note: Value should start with alpha numeric characters and can contain special characters
+                @%!#*-_&amp;$()=+/.?\ </span><br class="selector-374-91" />
+              <span class="error selector-374-92" style="font-size: 1.6vmin" *ngIf="showKeyLengthErrorMessage">{{
+                lengthNameErrorMessage
+                }}</span>
+            </div>
+          </div>
+          <div class="row rwMAr selector-374-178">
+            <div class="col-md-4 selector-374-179">
+              <label class="formLabel selector-374-181">Allowed File Extensions*</label>
+              <input [disabled]="view" type="text" #extension [value]="allowedFileExtensionValue"
+                (keyup)="setFileExtension($event,extension.value)" class="txtInput selector-374-100" required="" />
+            </div>
+            <div class="col-md-4 selector-374-179">
+              <label class="formLabel selector-374-181">Allowed Mime Type</label>
+              <input [disabled]="view" type="text" #mimeTypes [value]="allowedFileTypeValue"
+                (keyup)="setFileMimeTypes($event,mimeTypes.value)" class="txtInput selector-374-100" required="" />
+            </div>
+            <div class="col-md-4 selector-374-179">
+              <label class="formLabel selector-374-181">Depth*</label>
+              <input [disabled]="view" type="number" #depth [value]="allowedDepthValue"
+                (keyup)="setDepth($event,depth.value)" class="txtInput selector-374-100" required="" />
+              <span class="selector-374-90" style="font-size: 1.6vmin">
+                Note: Depth means the amounted of Nested Files Can be valid For e.g. Depth = 0 means nested files are
+                not allowed , Depth = 1 means File within a File is supported. </span>
+            </div>
+            <div class="col-md-4 selector-374-179">
+              <label class="formLabel selector-374-181">Mandatory File Extension</label>
+              <input [disabled]="view" type="text" #mandatoryFileExtension [value]="allowedMandatoryFileExtensionValue"
+                (keyup)="setMandatoryExtension($event,mandatoryFileExtension.value)" class="txtInput selector-374-100"
+                [(ngModel)]="allowedMandatoryFileExtensionValue" name="ruleMandatoryFile" />
+              <span class="error selector-374-92" style="font-size: 1.6vmin;color: red;"
+                *ngIf="checkMandatoryFileNameValidation(allowedMandatoryFileExtensionValue)">
+                Mandatory File Extension should not begin with space,special character.</span>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+      <div *ngIf="rearrangesidebar" class="selector-374-277">
+        <div class="row rwMAr selector-374-278">
+          <div class="col-md-4 selector-374-279">
+            <mat-form-field style="width: 100%" class="selector-374-280">
+              <label class="formLabel selector-374-281">Role*</label>
+              <mat-select [disabled]="view" [(ngModel)]="rearrangesidebarrole" name="rearrangesidebarrole"
+                class="selector-374-282">
+                <mat-option *ngFor="let role of roles; trackBy: trackByMethod" [value]="role.name"
+                  class="selector-374-283">
+                  {{ role.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <!-- <div cdkDropListGroup *ngIf="rearrangesidebar && rearrangedatas.length>0" style="margin-left: 115px;">      
+            <div class="example-container">
+               <div
+                 cdkDropList
+                 [cdkDropListData]="rearrangedatas"
+                 class="example-list"
+                 (cdkDropListDropped)="drop($event)">
+                 <div class="example-box" [cdkDragDisabled]="view" style="display: block;" *ngFor="let item of rearrangedatas" cdkDrag>{{item.name}}<i style="margin-left: 20px;" *ngIf="item.secondlevel && item.secondlevel.length>0" class="fa fa-arrow-down selector-3-18" (click)="fetchsecondlevelrearrange(item.name)"></i>
+                  <div cdkDropListGroup style="margin-top: 30px;" *ngIf="finalrearrangedvalueseclevel && finalrearrangedvalueseclevel.length>0 && seclevelname==item.name">      
+                    <div class="example-container">
+                       <div
+                         cdkDropList
+                         [cdkDropListData]="finalrearrangedvalueseclevel"
+                         class="example-list"
+                         (cdkDropListDropped)="dropsec($event)">
+                         <div class="example-box" [cdkDragDisabled]="view" style="display: block;" *ngFor="let secitem of finalrearrangedvalueseclevel" cdkDrag>{{secitem.name}}<i style="margin-left: 20px;" *ngIf="secitem.thirdlevel && secitem.thirdlevel.length>0" class="fa fa-arrow-down selector-3-18" (click)="fetchthirdlevelrearrange(secitem.name)"></i>
+                          <div cdkDropListGroup style="margin-top: 30px;" *ngIf="finalrearrangedvaluethirdlevel && finalrearrangedvaluethirdlevel.length>0 && thirdlevelname==secitem.name">      
+                            <div class="example-container">
+                               <div
+                                 cdkDropList
+                                 [cdkDropListData]="finalrearrangedvaluethirdlevel"
+                                 class="example-list"
+                                 (cdkDropListDropped)="dropthird($event)">
+                                 <div class="example-box" [cdkDragDisabled]="view" *ngFor="let thirditem of finalrearrangedvaluethirdlevel" cdkDrag>{{thirditem.name}}
+                                </div>
+                               </div>
+                             </div>
+                           </div>
+                        </div>
+                       </div>
+                     </div>
+                   </div>
+                </div>
+               </div>
+             </div>
+           </div>  -->
+        </div>
+      </div>
+      <div id="btnMargin" class="selector-374-184">
+        <button *ngIf="!edit &amp;&amp; !buttonFlag &amp;&amp; !rearrangesidebar" type="button"
+          class="genBtn marRght30 selector-374-185" (click)="onSave()"
+          [class.disabled-button]="mandatoryFileValidationCheck"
+          [disabled]="!dashConstantForm.form.valid || mandatoryFileValidationCheck">
+          Save
+        </button>
+        <button *ngIf="edit &amp;&amp; !buttonFlag &amp;&amp; !rearrangesidebar" type="button"
+          class="genBtn marRght30 selector-374-186" (click)="onSave()"
+          [class.disabled-button]="mandatoryFileValidationCheck"
+          [disabled]="!dashConstantForm.form.valid || mandatoryFileValidationCheck">
+          Update
+        </button>
+        <button *ngIf="rearrangesidebar" type="button" class="genBtn marRght30 selector-374-186"
+          (click)="convertmappings()" [disabled]="!rearrangesidebarrole">
+          Convert
+        </button>
+        <button *ngIf="!buttonFlag &amp;&amp; !view" type="button" class="secBtn selector-374-187"
+          (click)="clear()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="configureTheme">
+    <div class="padTop20 selector-374-1721">
+      <span class="ams_back pull-right linkMar selector-374-1731" (click)="configureTheme=false;listView()">Back to
+        Configuration</span>
+      <i class="fa fa-caret-square-o-left create-icon-color pull-right linkMar selector-374-1741"
+        (click)="configureTheme=false;listView()" aria-hidden="true"></i>
+    </div>
+    <div class="padTop20">
+      <lib-theme-mgmt></lib-theme-mgmt>
+    </div>
+  </div>
+</div>

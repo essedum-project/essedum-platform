@@ -1,0 +1,44 @@
+::ng-deep .timepicker-overlay {
+    z-index: 10000000 !important;
+}
+
+::ng-deep .timepicker-backdrop-overlay {
+    z-index: 10000000 !important;
+}
+
+::ng-deep .le-c-form-field.mat-mdc-form-field .mat-mdc-text-field-wrapper .mat-mdc-form-field-input-control {
+    height: 25px;
+    padding: 8px;
+    border-radius: 4px 4px 0 0;
+}
+
+::ng-deep .le-c-form-field.mat-mdc-form-field .mdc-text-field--no-label:not(.mdc-text-field--textarea) .mat-mdc-form-field-input-control.mdc-text-field__input,
+.le-c-form-field.mat-mdc-form-field .mat-mdc-text-field-wrapper .mat-mdc-form-field-input-control {
+    height: 25px;
+    padding: 8px;
+    border-radius: 4px 4px 0 0;
+}
+
+::ng-deep .timepicker-overlay{
+   transform: scale(0.7) !important;
+}
+::ng-deep .mat-datepicker-content {
+    transform: scale(0.7) !important;
+}
+
+::ng-deep .timepicker__header {
+    background-color: var(--base-color) !important;
+}
+
+::ng-deep .timepicker-button {
+    color: var(--header-color) !important;
+}
+
+::ng-deep ngx-material-timepicker-content {
+    --clock-hand-color: var(--header-color) !important;
+}
+
+.ngx-absolute-clock {
+    position: absolute;
+    right: 5px;
+}

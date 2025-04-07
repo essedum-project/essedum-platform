@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<property name="uuid_type" value="uuid" dbms="postgresql" />
+	<property name="uuid_type" value="uniqueidentifier" dbms="mssql" />		
+	<property name="uuid_type" value="RAW(16)" dbms="oracle" />
+	<property name="uuid_type" value="VARCHAR(200)" />
+	<property name="uuid_type" value="uuid" dbms="h2" />
+
+	<property name="uuid-property" value="UUID_TO_BIN(UUID())"
+		dbms="mysql" />
+	<property name="uuid-property" value="uid.uuid_generate_v4()"
+		dbms="postgresql" />
+	<property name="uuid-property" value="NEWID()" dbms="mssql" />
+	<property name="uuid-property" value="sys_guid()"
+		dbms="oracle" />
+	<property name="uuid-property" value="uuid()" dbms="h2" />
+
+	<property name="timestamp-type"
+		value="TIMESTAMP WITHOUT TIME ZONE" dbms="postgresql" />
+	<property name="timestamp-type" value="[datetime]"
+		dbms="mssql" />
+	<property name="timestamp-type" value="TIMESTAMP"
+		dbms="oracle" />
+	<property name="timestamp-type" value="timestamp" dbms="mysql" />
+	<property name="timestamp-type" value="TIMESTAMP" dbms="h2" />
+
+	<changeSet author="Leap (generated)" id="1310v0-bjm-9">
+		<validCheckSum>any</validCheckSum>
+                <preConditions onFail="MARK_RAN">
+                   <not>
+           		<tableExists tableName="bjm_ji_ji_mapping"/>
+                   </not>
+                </preConditions>
+
+		<createTable tableName="bjm_ji_ji_mapping">
+			<column name="project_id" type="INT">
+				<constraints nullable="false"  primaryKey="true"/>
+			</column>
+			<column name="running_instance1_id" type="VARCHAR(255)">
+				<constraints nullable="false"  primaryKey="true"/>
+			</column>
+			<column name="running_instance2_id" type="VARCHAR(255)">
+				<constraints nullable="false"  primaryKey="true"/>
+			</column>
+			<column name="description" type="TEXT" />
+			<column name="job1_name" type="TEXT" />
+			<column name="job2_name" type="TEXT" />
+			<column name="relation_name" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="tag1" type="VARCHAR(45)" />
+			<column name="tag2" type="INT" />
+			<column name="tag3" type="VARCHAR(200)" />
+			<column name="uid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1310v0-bjm-10">
+		<validCheckSum>any</validCheckSum>
+                <preConditions onFail="MARK_RAN">
+                   <not>
+           		<tableExists tableName="bjm_ji_jig_mapping"/>
+                   </not>
+                </preConditions>
+		<createTable tableName="bjm_ji_jig_mapping">
+			<column name="job_instance_group_name" type="VARCHAR(255)">
+				<constraints nullable="false"  primaryKey="true"/>
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="false"  primaryKey="true" />
+			</column>
+			<column name="running_instance_id" type="VARCHAR(255)">
+				<constraints nullable="false"  primaryKey="true"/>
+			</column>
+			<column name="description" type="TEXT" />
+			<column name="job_name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="job_sequence" type="VARCHAR(45)" />
+			<column name="relation_name" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="tag2" type="INT" />
+			<column name="tag3" type="VARCHAR(45)" />
+			<column name="uid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1310v0-bjm-11">
+		<validCheckSum>any</validCheckSum>
+                <preConditions onFail="MARK_RAN">
+                   <not>
+           		<tableExists tableName="bjm_job"/>
+                   </not>
+                </preConditions>
+		<createTable tableName="bjm_job">
+			<column name="job_name" type="VARCHAR(255)">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="avg_start_time" type="${timestamp-type}" />
+			<column name="caption" type="VARCHAR(200)" />
+			<column name="color_class" type="VARCHAR(50)" />
+			<column name="description" type="TEXT" />
+			<column name="failure_threshold" type="INT" />
+			<column name="job_extra1" type="VARCHAR(50)" />
+			<column name="job_extra10" type="VARCHAR(200)" />
+			<column name="job_extra2" type="TEXT" />
+			<column name="job_extra3" type="TEXT" />
+			<column name="job_extra4" type="TEXT" />
+			<column name="job_extra5" type="TEXT" />
+			<column name="job_extra6" type="TEXT" />
+			<column name="job_extra7" type="VARCHAR(200)" />
+			<column name="job_extra8" type="VARCHAR(200)" />
+			<column name="job_extra9" type="VARCHAR(200)" />
+			<column name="order_id" type="INT" />
+			<column name="predicted_duration" type="INT" />
+			<column name="predicted_duration_unit" type="VARCHAR(11)" />
+			<column name="source_job_id" type="TEXT" />
+			<column name="source_job_name" type="TEXT" />
+			<column name="source_name" type="VARCHAR(200)" />
+			<column name="tag3" type="VARCHAR(45)" />
+			<column name="time_zone" type="VARCHAR(45)" />
+			<column name="uid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1310v0-bjm-12">
+		<validCheckSum>any</validCheckSum>
+                <preConditions onFail="MARK_RAN">
+                   <not>
+           		<tableExists tableName="bjm_job_instance"/>
+                   </not>
+                </preConditions>
+		<createTable tableName="bjm_job_instance">
+			<column name="project_id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="running_job_instance_id" type="VARCHAR(255)">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="break_count" type="INT" />
+			<column name="complete_percent" type="INT" />
+			<column name="description" type="TEXT" />
+			<column name="end_time" type="${timestamp-type}" />
+			<column name="failure_reason" type="VARCHAR(255)" />
+			<column name="group_name" type="VARCHAR(300)" />
+			<column name="incident_no" type="VARCHAR(45)" />
+			<column name="instance_extra1" type="VARCHAR(50)" />
+			<column name="instance_extra10" type="TEXT" />
+			<column name="instance_extra11" type="TEXT" />
+			<column name="instance_extra12" type="TEXT" />
+			<column name="instance_extra13" type="TEXT" />
+			<column name="instance_extra14" type="TEXT" />
+			<column name="instance_extra15" type="TEXT" />
+			<column name="instance_extra16" type="VARCHAR(100)" />
+			<column name="instance_extra17" type="VARCHAR(100)" />
+			<column name="instance_extra18" type="VARCHAR(255)" />
+			<column name="instance_extra19" type="VARCHAR(100)" />
+			<column name="instance_extra2" type="VARCHAR(50)" />
+			<column name="instance_extra20" type="VARCHAR(100)" />
+			<column name="instance_extra21" type="VARCHAR(100)" />
+			<column name="instance_extra22" type="VARCHAR(100)" />
+			<column name="instance_extra23" type="VARCHAR(100)" />
+			<column name="instance_extra24" type="VARCHAR(100)" />
+			<column name="instance_extra25" type="VARCHAR(100)" />
+			<column name="instance_extra26" type="VARCHAR(100)" />
+			<column name="instance_extra27" type="VARCHAR(100)" />
+			<column name="instance_extra28" type="VARCHAR(100)" />
+			<column name="instance_extra29" type="VARCHAR(100)" />
+			<column name="instance_extra3" type="TEXT" />
+			<column name="instance_extra30" type="VARCHAR(100)" />
+			<column name="instance_extra4" type="TEXT" />
+			<column name="instance_extra5" type="TEXT" />
+			<column name="instance_extra6" type="TEXT" />
+			<column name="instance_extra7" type="TEXT" />
+			<column name="instance_extra8" type="TEXT" />
+			<column name="instance_extra9" type="TEXT" />
+			<column name="is_break" type="VARCHAR(5)" />
+			<column name="is_running" type="VARCHAR(5)" />
+			<column name="job_name" type="TEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_status_update" type="${timestamp-type}" />
+			<column name="latest" type="VARCHAR(5)" />
+			<column name="link" type="VARCHAR(200)" />
+			<column name="mile" type="INT" />
+			<column name="predicted_end_time" type="${timestamp-type}" />
+			<column name="predicted_start_time" type="${timestamp-type}" />
+			<column name="start_time" type="${timestamp-type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="status" type="VARCHAR(45)" />
+			<column name="tag2" type="INT" />
+			<column name="uid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1310v0-bjm-13">
+		<validCheckSum>any</validCheckSum>
+                <preConditions onFail="MARK_RAN">
+                   <not>
+           		<tableExists tableName="bjm_job_instance_group"/>
+                   </not>
+                </preConditions>
+		<createTable tableName="bjm_job_instance_group">
+			<column name="job_instance_group_name" type="VARCHAR(255)">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="complete_percent" type="INT" />
+			<column name="description" type="TEXT" />
+			<column name="duration" type="INT" />
+			<column name="end_time" type="${timestamp-type}" />
+			<column name="graph_display_format" type="VARCHAR(255)" />
+			<column name="group_extra1" type="TEXT" />
+			<column name="group_extra2" type="TEXT" />
+			<column name="job_instance_group_id" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_status_update" type="${timestamp-type}" />
+			<column name="start_time" type="${timestamp-type}" />
+			<column name="tag1" type="VARCHAR(45)" />
+			<column name="tag2" type="INT" />
+			<column name="tag3" type="VARCHAR(45)" />
+			<column name="uid" type="${uuid_type}">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1310v0-bjm-14" dbms="!postgresql">
+		<validCheckSum>any</validCheckSum>
+                <preConditions onFail="MARK_RAN">
+                   <not>
+           		<tableExists tableName="bjm_master_data"/>
+                   </not>
+                </preConditions>
+		<createTable tableName="bjm_master_data">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="category" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="TEXT" />
+			<column name="name" type="VARCHAR(200)">
+				<!-- <constraints nullable="false" unique="true" uniqueConstraintName="unique_name"/> -->
+			</column>
+			<column name="remarks" type="VARCHAR(200)" />
+			<column name="tag1" type="VARCHAR(45)" />
+			<column name="tag2" type="INT" />
+			<column name="tag3" type="VARCHAR(45)" />
+		</createTable>
+	</changeSet>
+	<!-- for postgres database -->
+	<changeSet author="Leap (generated)" id="1310v0-bjm-14" dbms="postgresql">
+		<validCheckSum>any</validCheckSum>
+                <preConditions onFail="MARK_RAN">
+                   <not>
+           		<tableExists tableName="bjm_master_data"/>
+                   </not>
+                </preConditions>
+		<createTable tableName="bjm_master_data">
+			<column autoIncrement="true" name="id" type="INT" incrementBy="1" startWith="1">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="category" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="TEXT" />
+			<column name="name" type="VARCHAR(200)">
+				<!-- <constraints nullable="false" unique="true" uniqueConstraintName="unique_name"/> -->
+			</column>
+			<column name="remarks" type="VARCHAR(200)" />
+			<column name="tag1" type="VARCHAR(45)" />
+			<column name="tag2" type="INT" />
+			<column name="tag3" type="VARCHAR(45)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1310v0-bjm-15">
+		<validCheckSum>any</validCheckSum>
+                <preConditions onFail="MARK_RAN">
+                   <not>
+           		<tableExists tableName="bjm_summary"/>
+                   </not>
+                </preConditions>
+		<createTable tableName="bjm_summary">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="description" type="VARCHAR(255)" />
+			<column name="execution_date" type="${timestamp-type}" />
+			<column name="filter" type="VARCHAR(255)" />
+			<column name="project_id" type="INT" />
+			<column name="status" type="VARCHAR(255)" />
+			<column name="sub_type" type="VARCHAR(255)" />
+			<column name="extra1" type="VARCHAR(255)" />
+			<column name="extra10" type="VARCHAR(255)" />
+			<column name="extra2" type="VARCHAR(255)" />
+			<column name="extra3" type="VARCHAR(255)" />
+			<column name="extra4" type="VARCHAR(255)" />
+			<column name="extra5" type="VARCHAR(255)" />
+			<column name="extra6" type="VARCHAR(255)" />
+			<column name="extra7" type="VARCHAR(255)" />
+			<column name="extra8" type="VARCHAR(255)" />
+			<column name="extra9" type="VARCHAR(255)" />
+			<column name="type" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1310v0-bjm-16">
+		<validCheckSum>any</validCheckSum>
+                <preConditions onFail="MARK_RAN">
+                   <not>
+           		<tableExists tableName="bjm_upload"/>
+                   </not>
+                </preConditions>
+		<createTable tableName="bjm_upload">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="ChildJobInstance" type="VARCHAR(255)" />
+			<column name="Description" type="VARCHAR(255)" />
+			<column name="EndTime" type="${timestamp-type}" />
+			<column name="GroupEndTime" type="${timestamp-type}" />
+			<column name="GroupExtra1" type="VARCHAR(255)" />
+			<column name="GroupExtra2" type="VARCHAR(255)" />
+			<column name="GroupId" type="VARCHAR(255)" />
+			<column name="GroupName" type="VARCHAR(255)" />
+			<column name="GroupStartTime" type="${timestamp-type}" />
+			<column name="InstanceExtra1" type="VARCHAR(255)" />
+			<column name="InstanceExtra10" type="VARCHAR(255)" />
+			<column name="InstanceExtra11" type="VARCHAR(255)" />
+			<column name="InstanceExtra12" type="VARCHAR(255)" />
+			<column name="InstanceExtra13" type="VARCHAR(255)" />
+			<column name="InstanceExtra14" type="VARCHAR(255)" />
+			<column name="InstanceExtra15" type="VARCHAR(255)" />
+			<column name="InstanceExtra16" type="VARCHAR(255)" />
+			<column name="InstanceExtra17" type="VARCHAR(255)" />
+			<column name="InstanceExtra18" type="VARCHAR(255)" />
+			<column name="InstanceExtra19" type="VARCHAR(255)" />
+			<column name="InstanceExtra2" type="VARCHAR(255)" />
+			<column name="InstanceExtra20" type="VARCHAR(255)" />
+			<column name="InstanceExtra21" type="VARCHAR(255)" />
+			<column name="InstanceExtra22" type="VARCHAR(255)" />
+			<column name="InstanceExtra23" type="VARCHAR(255)" />
+			<column name="InstanceExtra24" type="VARCHAR(255)" />
+			<column name="InstanceExtra25" type="VARCHAR(255)" />
+			<column name="InstanceExtra26" type="VARCHAR(255)" />
+			<column name="InstanceExtra27" type="VARCHAR(255)" />
+			<column name="InstanceExtra28" type="VARCHAR(255)" />
+			<column name="InstanceExtra29" type="VARCHAR(255)" />
+			<column name="InstanceExtra3" type="VARCHAR(255)" />
+			<column name="InstanceExtra30" type="VARCHAR(255)" />
+			<column name="InstanceExtra4" type="VARCHAR(255)" />
+			<column name="InstanceExtra5" type="VARCHAR(255)" />
+			<column name="InstanceExtra6" type="VARCHAR(255)" />
+			<column name="InstanceExtra7" type="VARCHAR(255)" />
+			<column name="InstanceExtra8" type="VARCHAR(255)" />
+			<column name="InstanceExtra9" type="VARCHAR(255)" />
+			<column name="InstanceId" type="VARCHAR(255)" />
+			<column name="JobExtra1" type="VARCHAR(255)" />
+			<column name="JobExtra10" type="VARCHAR(255)" />
+			<column name="JobExtra2" type="VARCHAR(255)" />
+			<column name="JobExtra3" type="VARCHAR(255)" />
+			<column name="JobExtra4" type="VARCHAR(255)" />
+			<column name="JobExtra5" type="VARCHAR(255)" />
+			<column name="JobExtra6" type="VARCHAR(255)" />
+			<column name="JobExtra7" type="VARCHAR(255)" />
+			<column name="JobExtra8" type="VARCHAR(255)" />
+			<column name="JobExtra9" type="VARCHAR(255)" />
+			<column name="JobId" type="VARCHAR(255)" />
+			<column name="JobName" type="VARCHAR(255)" />
+			<column name="ParentJobInstance" type="VARCHAR(255)" />
+			<column name="ProjectId" type="INT" />
+			<column name="Source" type="VARCHAR(255)" />
+			<column name="SourceJobName" type="VARCHAR(255)" />
+			<column name="StartTime" type="${timestamp-type}" />
+			<column name="Status" type="VARCHAR(255)" />
+			<column name="TimeZone" type="VARCHAR(255)" />
+			<column name="uploadId" type="${uuid_type}" />
+			<column name="uploadTime" type="${timestamp-type}" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="1310v0-bjm-17">
+		<validCheckSum>any</validCheckSum>
+                <preConditions onFail="MARK_RAN">
+                   <not>
+           		<tableExists tableName="bjm_job_classified"/>
+                   </not>
+                </preConditions>
+		<createTable tableName="bjm_job_classified">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="job_name" type="TEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="source" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="order_id" type="INT" />
+			<column name="failure_threshold" type="INT" />
+			<column name="type" type="INT" />
+			<column name="color_class" type="varchar(50)" />
+			<column name="caption" type="varchar(200)" />
+			<column name="description" type="TEXT" />
+			<column name="time_zone" type="VARCHAR(255)" />
+			<column name="predicted_duration" type="INT" />
+			<column name="predicted_duration_unit" type="varchar(11)" />
+			<column name="avg_start_time" type="${timestamp-type}" />
+			<column name="source_job_id" type="TEXT" />
+			<column name="source_job_name" type="TEXT" />
+			<column name="tag3" type="varchar(45)" />
+			<column name="job_extra1" type="varchar(50)" />
+			<column name="job_extra2" type="TEXT" />
+			<column name="job_extra3" type="TEXT" />
+			<column name="job_extra4" type="TEXT" />
+			<column name="job_extra5" type="TEXT" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="1310v0-bjm-18">
+		<validCheckSum>any</validCheckSum>
+                <preConditions onFail="MARK_RAN">
+                   <not>
+           		<tableExists tableName="bjm_classified_jobinstance"/>
+                   </not>
+                </preConditions>
+		<createTable tableName="bjm_classified_jobinstance">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="job_name" type="TEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="start_time" type="${timestamp-type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="end_time" type="${timestamp-type}" />
+			<column name="running_job_instance_id" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="status" type="varchar(45)" />
+			<column name="is_running" type="varchar(5)" />
+			<column name="is_break" type="varchar(5)" />
+			<column name="last_status_update" type="${timestamp-type}" />
+			<column name="break_count" type="INT" />
+			<column name="latest" type="varchar(5)" />
+			<column name="failure_reason" type="INT" />
+			<column name="predicted_start_time" type="${timestamp-type}" />
+			<column name="predicted_end_time" type="${timestamp-type}" />
+			<column name="link" type="varchar(50)" />
+			<column name="mile" type="INT" />
+			<column name="complete_percent" type="INT" />
+			<column name="parent" type="INT" />
+			<column name="description" type="TEXT" />
+			<column name="tag2" type="INT" />
+			<column name="tag3" type="varchar(45)" />
+		</createTable>
+	</changeSet>
+	
+	
+
+	<!-- After release 1.3.10 -->
+
+
+</databaseChangeLog>

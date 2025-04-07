@@ -1,0 +1,133 @@
+<div class="clearfix" id="mainCtr">
+    <div class="container-fluid">
+        <div class="le-l-middle-col le-u-no-mar-l__mb" id="mainrightCnt">
+            <div class="le-l-level1-wrapper">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="le-l-level1-middle-col le-l-base-layout-center">
+                            <div class="d-flex justify-content-between le-u-mar-b-8">
+                                <div class="d-flex align-items-center">
+                                    <leds-tooltip [tooltip]="'Back'" [position]="'above'">
+                                        <span class="pt-3 aip-cursor d-flex" style="height: max-content;">
+                                            <i class="aip-led-icons icon x-32 back-icon" (click)="navigateBack()"></i>
+                                        </span>
+                                    </leds-tooltip>
+                                    <h1 class="le-u-header-xxl">
+                                        My Solutions
+                                    </h1>
+                                </div>
+                                <div class=" d-flex ">
+                                    <div class="le-u-mar-r-16 aip-cursor d-flex align-items-center">
+                                        <i class="icon x-24 icon-add le-u-mar-r-8 aip-base-color"></i>
+                                        <span class="le-u-body-md">Create Solution</span>
+                                    </div>
+                                    <div class="aip-cursor d-flex align-items-center" (click)="navigateInbox()">
+                                        <i class="icon x-24 icon_PMS le-u-mar-r-8 aip-base-color"></i>
+                                        <span class="le-u-body-md">My Inbox</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="le-l-level2-middle-ctr">
+                                <div *ngIf="data.lenth>0">
+                                    <div class="d-flex justify-content-center align-items-center flex-column">
+                                        <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive"
+                                            alt="aip_empty_state_leds" style="width:15rem" />
+                                        No records found.
+                                    </div>
+                                </div>
+                                <div class="aip-initiative-card">
+                                    <div class="" *ngFor="let intiative of data">
+                                        <div class="" style="width: 250px">
+                                            <div class="aip-cursor" (click)="deleteInitiativeById(intiative)" *ngIf="deleteInitiative" style="position: absolute; top: 0.5rem;right:0.5rem;z-index: 99;">
+                                                <i class="icon x-16 delete-sm-icon"></i>
+                                            </div>
+                                            <leds-card designType='simple'
+                                                (click)="toviewInitiative(intiative.name,intiative.id)">
+                                                <div class="le-u-header-sm le-u-text-primary-80 le-u-mar-b-8">
+                                                    {{intiative.createdBy}}</div>
+                                                <mat-card-header>
+                                                    <mat-card-title class="le-c-card__container clearfix">
+                                                        <div class="le-c-card__container-left">
+                                                            <h2 class="le-u-header-xl le-u-ellipsis aip-fullname-card"
+                                                                style="line-height: 2rem;">
+                                                                {{intiative.name}}</h2>
+                                                        </div>
+
+                                                    </mat-card-title>
+                                                </mat-card-header>
+                                                <mat-card-content class="le-u-no-mar-b" style="color: #737373;">
+                                                    <p
+                                                        class="le-u-body-md le-u-text-neutral-80 le-u-line-2 aip-desc-ellipsis">
+                                                        {{intiative.description}}
+                                                    </p>
+                                                </mat-card-content>
+                                            </leds-card>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <!-- PAGINATION START -->
+                                    <div *ngIf="data.length > 0"
+                                        class="inbox-table-footer table-paginator flex-row flex-space-between standard-margin bottom-padding-20">
+                                        <div class="showing-entries d-flex justify-content-end my-3">
+                                            <span class="grey-color font-size-12">Showing </span>
+                                            &nbsp;&nbsp;
+                                            <span class="black-color font-weight-600">
+                                                {{ ((pageNumber - 1) * pageSize) + 1 }} -
+                                                {{ (((pageNumber - 1) * pageSize) + pageSize) < noOfItems ? ((pageNumber
+                                                    - 1) * pageSize) + pageSize : noOfItems }} of {{noOfItems}} </span>
+                                                    &nbsp;&nbsp;
+                                                    <span class="grey-color font-size-12">entries </span>
+                                        </div>
+                                        <div class="paginator-buttons d-flex w-60  flex-row"
+                                            style="justify-content:flex-end">
+                                            <div class="page-input go-to-input box-shadow standard-padding">
+                                                <span class="grey-color">Go to: </span>
+                                                <input class="right-margin" type="number" min="1" [max]="noOfPages"
+                                                    (change)="changePage(pageNumberInput)"
+                                                    [(ngModel)]="pageNumberInput" />
+                                            </div>
+                                            <div class="mx-4">
+                                                <span class="">Items per page</span>
+                                                <select type="number" [(ngModel)]="pageSize"
+                                                    (change)="optionChange($event)">
+                                                    <option *ngFor="let p of itemsPerPage" [ngValue]="p">{{p}}</option>
+                                                </select>
+
+                                            </div>
+                                            <div class="pages-details d-flex">
+
+                                                <div class="previous-page">
+                                                    <button class="standard-padding table-button font-weight-600"
+                                                        [disabled]="pageNumber == 1"
+                                                        (click)="pageNumberInput=null;prevPage()">&lt;</button>
+                                                </div>
+                                                <div class="pages">
+                                                    <button class="standard-padding table-button font-weight-600"
+                                                        *ngFor="let i of pageArr | slice:startIndex:endIndex"
+                                                        (click)="pageNumberInput=null;changePage(i+1)"
+                                                        [class.selected-page]="(i + 1) == pageNumber"
+                                                        [ngStyle]="selectedButton(i+1)">
+                                                        {{i + 1}}
+                                                    </button>
+                                                </div>
+                                                <div class="next-page">
+                                                    <button class="standard-padding table-button font-weight-600"
+                                                        [disabled]="pageNumber == noOfPages"
+                                                        (click)="pageNumberInput=null;nextPage()">&gt;</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- PAGINATION END -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

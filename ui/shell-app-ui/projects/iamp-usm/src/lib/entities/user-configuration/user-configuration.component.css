@@ -1,0 +1,38 @@
+.user_tab {
+    color: #ffffff;
+}
+
+.usm_table th {
+    background-color: inherit ;
+    text-align: left;
+
+}
+
+.usm_table td {
+    background-color: inherit ;
+    text-align: left;
+}
+
+i.icon{
+    font-size: 24px; 
+ }
+ .mat-tab-body-content {
+    height: 100%;
+    overflow: hidden !important;
+}
+ :host /deep/ .mat-tab-header, .mat-tab-nav-bar {
+    border-bottom: 0px solid rgba(0,0,0,.12) !important;
+    border-bottom-width: 0px;
+    border-bottom-style: solid;
+    border-bottom-color: rgba(0, 0, 0, 0.12);
+}
+
+.DSA_panel {
+    border-radius: 0px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0px;
+    background: #ffffff;
+    min-height: 100px;
+}

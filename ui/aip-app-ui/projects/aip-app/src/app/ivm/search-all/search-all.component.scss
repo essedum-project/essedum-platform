@@ -1,0 +1,7 @@
+.aip-ivm-search-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 274px);
+  grid-template-rows: repeat(auto-fit, 163px);
+  grid-row-gap: 24px;
+  grid-column-gap: 24px;
+}

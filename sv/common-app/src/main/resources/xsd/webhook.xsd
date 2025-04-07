@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="http://infosys.com/icets/icip/icipwebeditor/ws"
+	targetNamespace="http://infosys.com/icets/icip/icipwebeditor/ws"
+	elementFormDefault="qualified">
+	<xs:element name="getWebhookRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="name" type="xs:string" />
+				<xs:element name="org" type="xs:string" />
+				<xs:element name="corelid" type="xs:string" />
+				<xs:element name="param" type="xs:string" />
+				<!-- <xs:element name="payload" type="tns:payload"></xs:element> -->
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="getWebhookResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="message" type="xs:string" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

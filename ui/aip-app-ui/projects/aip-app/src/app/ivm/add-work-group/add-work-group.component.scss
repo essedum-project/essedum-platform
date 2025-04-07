@@ -1,0 +1,13 @@
+.aip_workGroup_user_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 200px);
+    grid-gap: 24px;
+  }
+  .workgroup_add_button {
+    background: #000000 0% 0% no-repeat padding-box;
+    border-radius: 4px;
+    opacity: 1;
+    height: max-content;
+    color: white;
+  }
+  
