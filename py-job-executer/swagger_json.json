@@ -1,0 +1,333 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "JobExecuter API",
+    "description": "A doc for JobExecuter API ",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/execute/jobs": {
+      "get": {
+        "summary": "Render Job UI template",
+        "responses": {
+          "200": {
+            "description": "Job details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/execute/{task_id}/getLog": {
+      "get": {
+        "summary": "Get a task log",
+        "description": "Returns log and output of task from given job ID.",
+        "parameters": [
+          {
+              "required": true,
+              "name": "task_id",
+              "type": "string",
+              "description": " ID of the task",
+              "in": "path"
+          }
+      ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema":{
+                  "type":"object"
+                },
+                "example":[
+                  {
+                    "logs": {
+                      "content": "string"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "404":{
+            "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string"
+                      }
+                    }}}}
+          }
+        }
+      }
+    },
+    "/execute/getLog": {
+      "get": {
+        "summary": "Get app log",
+        "description": "Returns log aof app.",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema":{
+                  "type":"object"
+                },
+                "example":[
+                  {
+                    "logs": {
+                      "content": "string"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "404":{
+            "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string"
+                      }
+                    }}}}
+          }
+        }
+      }
+    },
+
+    "/execute/{task_id}/getStatus": {
+      "get": {
+        "summary": "Get a task status",
+        "description": "Returns status of task from given job ID.",
+        "parameters": [
+          {
+              "required": true,
+              "name": "task_id",
+              "type": "string",
+              "description": " ID of the task",
+              "in": "path"
+          }
+      ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                    "type": "object",
+                    "properties": {
+                      "task_id": {
+                        "type": "string"
+                      },
+                      "task_status": {
+                        "type": "string"
+                      },
+                      "log_path": {
+                        "type": "string"
+                      }
+                    }
+                  
+                }
+              }
+            }
+          },
+          "404":{
+            "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string"
+                      }
+                    }}}}
+          }
+        }
+      }
+    },
+    "/execute/{task_id}/stop": {
+      "get": {
+        "summary": "Terminate the process",
+        "description": "Returns status of termination from given job ID.",
+        "parameters": [
+          {
+              "required": true,
+              "name": "task_id",
+              "type": "string",
+              "description": " ID of the task",
+              "in": "path"
+          }
+      ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                    "type": "object",
+                    "properties": {
+                      "Task cancelled": {
+                        "type": "bool"
+                      }
+                    }
+                  
+                }
+              }
+            }
+          },
+          "404":{
+            "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string"
+                      }
+                    }}}}
+          }
+        }
+      }
+    },
+
+    "/execute": {
+      "get": {
+        "summary": "Get a task list",
+        "description": "Returns list of tasks",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema":{
+                  "type":"array"
+                },
+                "example":[
+                  {
+                    "id":"string",
+                    "pid":"string",
+                    "status":"string",
+                    "submitted":"string"
+                  },{
+                    "id":"string",
+                    "pid":"string",
+                    "status":"string",
+                    "submitted":"string"
+                  }
+                ]
+                
+              }
+            }
+          },
+          "404":{
+            "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string"
+                      }
+                    }}}}
+          }
+        }
+      },
+      "post": {
+        "summary": "Execute task",
+        "description": "Post request for task execution",
+        "requestBody":{
+          "required":true,
+          "content":{
+
+            "application/json":{
+              "schema":{
+                "type":"object"
+              },
+              "example":{
+                "bucket": "string",
+                "project_id": "string",
+                "name": "string",
+                "version": "string",
+                "credentials": {"endpoint": "string",
+                "access_key": "string",
+                "secret_key": "string"},
+                "input_artifacts": "string",
+                "command" : "string",
+                "storage" :"string"
+              }
+            }
+          }
+
+        },
+
+
+        "responses": {
+          "201": {
+            "description": "Successful execution",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "task_id": {
+                      "type": "integer"
+                    },
+                    "task_status": {
+                      "type": "string"
+                    },
+                    "log_path": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400":{
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string"
+                      }
+                    }}}}
+
+          }
+
+        }
+      }
+    }
+
+  }
+}

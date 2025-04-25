@@ -1,0 +1,12 @@
+flask
+mysql-connector-python
+sagemaker
+minio
+flask_swagger_ui
+dateutils
+gitpython
+psutil
+gradio
+pandas
+pmdarima
+boto3==1.34.117
