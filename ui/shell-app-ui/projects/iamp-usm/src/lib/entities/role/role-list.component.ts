@@ -12,7 +12,7 @@
 // * will be prosecuted to the maximum extent possible under the law.
 // Template pack-angular:web/src/app/-entities/entity-list.component.ts.e.vm
 //
-import { Component, OnInit, ViewChild, Input, ElementRef } from "@angular/core";
+import { Component, OnInit, ViewChild, Input, ElementRef, OnDestroy } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { PageResponse } from "../../support/paging";
 import { MessageService } from "../../services/message.service";
@@ -34,12 +34,13 @@ import { Users } from "../../models/users";
 import { LeapTelemetryService } from "../../telemetry-util/telemetry.service";
 import { DeleteComponent } from "../../shared-modules/confirm-delete/delete.component";
 import { IampUsmService } from "../../iamp-usm.service";
+import { OpenTelemetryService } from "../../telemetry-util/open-telemetry.service";
 @Component({
   templateUrl: "role-list.component.html",
   selector: "role-list",
   styleUrls: ["./role-list.component.css"],
 })
-export class RoleListComponent implements OnInit {
+export class RoleListComponent implements OnInit, OnDestroy {
   lazyload = { first: 0, rows: 1000, sortField: null, sortOrder: null };
   statusArray = [];
   role: Role = new Role();
@@ -72,6 +73,7 @@ export class RoleListComponent implements OnInit {
   viewFlag: boolean = true;
   deleteFlag: boolean = false;
   createFlag: boolean = false;
+  portfolioAdminPermsFlag: any[] = [];
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -81,7 +83,8 @@ export class RoleListComponent implements OnInit {
     public confirmDeleteDialog: MatDialog,
     private messageService: MessageService,
     private telemetryService: LeapTelemetryService,
-    private usmService: IampUsmService
+    private usmService: IampUsmService,
+    private openTelemetryService: OpenTelemetryService
   ) {}
 
   @ViewChild(MatSort, { static: false }) set matSort(ms: MatSort) {
@@ -138,8 +141,14 @@ export class RoleListComponent implements OnInit {
   }
 
   telemetryImpression() {
-    this.telemetryService.impression("iamp-usm", "list", "RoleListComponent");
+    // this.telemetryService.impression("iamp-usm", "list", "RoleListComponent");
+    this.openTelemetryService.startTelemetry("iamp-usm", "RoleListComponent", "list");
   }
+
+  ngOnDestroy() {
+    let activeSpan = this.openTelemetryService.fetchActiveSpan();
+    this.openTelemetryService.endTelemetry(activeSpan);
+ }
 
   setDataSourceAttributes() {
     this.roleList.paginator = this.paginator;
@@ -156,7 +165,7 @@ export class RoleListComponent implements OnInit {
     let role: Role;
     try {
       role = JSON.parse(sessionStorage.getItem("role"));
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.parse error - ", e.message);
     }
     let example: Project = new Project();
@@ -178,7 +187,7 @@ export class RoleListComponent implements OnInit {
             portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
             project = JSON.parse(sessionStorage.getItem("project"));
             user = JSON.parse(sessionStorage.getItem("user"));
-          } catch (e) {
+          } catch (e : any)  {
             portfolio = null;
             project = null;
             user = null;
@@ -191,8 +200,24 @@ export class RoleListComponent implements OnInit {
           this.roleService.findAll(allRole, this.lazyload).subscribe((res) => {
             this.rolesArraySorted = [];
             res.content.forEach((item) => {
-              if (item.id != 6) this.rolesArraySorted.push(item);
+              if (item.id != 6) {
+                if(!item.roleadmin){
+                  if(!(item.projectadmin && item.projectAdminId != project.id)){
+                    this.rolesArraySorted.push(item);
+                  }
+                }
+              }
             });
+            if(portfolio.id == role.portfolioId && role.roleadmin && !role.projectadmin){
+              this.rolesArraySorted.forEach((ele) => {
+                if(ele.projectId == project.id){
+                  this.portfolioAdminPermsFlag.push(ele.id);
+                }
+                if(ele.projectadmin == true && ele.projectAdminId == project.id){
+                  this.portfolioAdminPermsFlag.push(ele.id);
+                }
+              })
+            }
             this.computeRole(false);
           });
         } else {
@@ -206,6 +231,26 @@ export class RoleListComponent implements OnInit {
         }
       }
     );
+  }
+
+  checkPerms(roleSent:any){
+    let role: Role;
+    let portfolio: UsmPortfolio;
+    try {
+      role = JSON.parse(sessionStorage.getItem("role"));
+      portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
+    } catch (e : any)  {
+      console.error("JSON.parse error - ", e.message);
+    }
+    if(role.name == "Admin" || (role.roleadmin && role.portfolioId != portfolio.id) ){
+      return true;
+    }
+
+    if(this.portfolioAdminPermsFlag.includes(roleSent.id)){
+      return true;
+    }else{
+      return false;
+    }
   }
 
   Search() {
@@ -283,12 +328,12 @@ export class RoleListComponent implements OnInit {
     this.router.navigate(["../create"], { relativeTo: this.route });
   }
 
-  editRole(role) {
-    this.router.navigate(["../edit", window.btoa(role.id)], { relativeTo: this.route });
+  editRole(role: Role) {
+    this.router.navigate(["../edit", role.id], { relativeTo: this.route });
   }
 
-  viewRole(role) {
-    this.router.navigate(["../view", window.btoa(role.id)], { relativeTo: this.route });
+  viewRole(role: Role) {
+    this.router.navigate(["../view", role.id], { relativeTo: this.route });
   }
 
   clear() {
@@ -315,7 +360,7 @@ export class RoleListComponent implements OnInit {
     this.roleService.delete(role.id).subscribe(
       (Response) => {
         if (sessionStorage.getItem("telemetry") == "true") {
-        this.telemetryService.audit(role,"DELETE");
+        // this.telemetryService.audit(role,"DELETE");
         }
         sessionStorage.setItem("UpdatedUser", "true");
         this.messageService.info("Role Deleted successfully", "IAMP");
@@ -335,7 +380,7 @@ export class RoleListComponent implements OnInit {
     let project: Project;
     try {
       project = JSON.parse(sessionStorage.getItem("project"));
-    } catch (e) {
+    } catch (e : any)  {
       project = null;
       console.error("JSON.parse error - ", e.message);
     }
@@ -355,7 +400,7 @@ export class RoleListComponent implements OnInit {
     let project: Project;
     try {
       project = JSON.parse(sessionStorage.getItem("project"));
-    } catch (e) {
+    } catch (e : any)  {
       project = null;
       console.error("JSON.parse error - ", e.message);
     }

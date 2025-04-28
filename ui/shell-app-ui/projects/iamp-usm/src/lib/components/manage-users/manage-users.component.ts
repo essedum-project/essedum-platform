@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, Injector, SkipSelf } from "@angular/core";
+import { Component, OnInit, ViewChild, ElementRef, Injector, SkipSelf, OnDestroy } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { MatDialog } from "@angular/material/dialog";
 import { MatPaginator } from "@angular/material/paginator";
@@ -28,12 +28,14 @@ import { DeleteComponent } from "../../shared-modules/confirm-delete/delete.comp
 import { IampUsmService } from "../../iamp-usm.service";
 import * as moment from "moment-timezone";
 import { C } from "@angular/cdk/keycodes";
+import { DashConstantService } from "com-lib-util";
+import { OpenTelemetryService } from "../../telemetry-util/open-telemetry.service";
 @Component({
   selector: "lib-manage-users",
   templateUrl: "./manage-users.component.html",
   styleUrls: ["./manage-users.component.css"],
 })
-export class ManageUsersComponent implements OnInit {
+export class ManageUsersComponent implements OnInit, OnDestroy {
   lazyloadevent = {
     first: 0,
     rows: 5000,
@@ -73,6 +75,7 @@ export class ManageUsersComponent implements OnInit {
   filterFlag: boolean = false;
   filterFlag1: boolean = false;
   userSearched: any;
+  enableGlobalSearch: boolean = false;
 
   url;
   showList: boolean = true;
@@ -85,6 +88,7 @@ export class ManageUsersComponent implements OnInit {
   user: Users;
   edit: boolean = false;
   buttonFlag: boolean = false;
+  defaultFlag: boolean = false;
   viewWave: boolean = false;
   userlogins: string[] = [];
   useremails: string[] = [];
@@ -106,6 +110,7 @@ export class ManageUsersComponent implements OnInit {
   viewFlag: boolean = true;
   deleteFlag: boolean = false;
   createFlag: boolean = false;
+  flag: boolean = false;
   permissionList: any[];
   selectedPermissionList: any[];
   demoUserFlag: boolean = false;
@@ -116,9 +121,18 @@ export class ManageUsersComponent implements OnInit {
   pageIndex: number = 0;
   tzNames: string[] = [];
   isUserName: boolean =true;
+  lastPage: boolean = false;
+  pageEvent: any;
+  callId: any;
+  deleteItem: boolean = false;
   private options = { headers: new HttpHeaders({ "Content-Type": "application/json" }) };
 
+  nonallowedExtention: boolean = false;
+  imageSizeExceeded: boolean = false;
+  imageSizeExceededErrMsg = '';
+
   constructor(
+    protected dashConstantService: DashConstantService,
     private usersService: UsersService,
     private unitService: OrgUnitService,
     private userUnitService: UserUnitService,
@@ -132,12 +146,19 @@ export class ManageUsersComponent implements OnInit {
     private helperService: HelperService,
     private telemetryService: LeapTelemetryService,
     private usmService: IampUsmService,
+    private openTelemetryService: OpenTelemetryService,
     @SkipSelf() private https: HttpClient,
   ) { 
     this.options.headers.append("Authorization", `Bearer ` + localStorage.getItem("jwtToken"));
   }
 
+  ngOnDestroy(): void {
+    let activeSpan = this.openTelemetryService.fetchActiveSpan();
+    this.openTelemetryService.endTelemetry(activeSpan);
+  }
+
   ngOnInit() {
+    this.lazyloadevent.rows=this.dashConstantService.getrowCount();
     this.telemetryImpression();
     if (sessionStorage.getItem("usmAuthority")) {
       sessionStorage.removeItem("usmAuthority");
@@ -162,6 +183,12 @@ export class ManageUsersComponent implements OnInit {
         this.auth = sessionStorage.getItem("usmAuthority");
         this.selectedPermissionList = this.auth.split(",");
         this.selectedPermissionList.forEach((ele) => {
+          let role;
+          try {
+            role = JSON.parse(sessionStorage.getItem("role"));
+          } catch (e:any) {
+            console.error("JSON.parse error - ", e.message);
+          }
           if (ele === "edit") {
             this.editFlag = true;
           }
@@ -169,7 +196,11 @@ export class ManageUsersComponent implements OnInit {
             this.viewFlag = true;
           }
           if (ele === "delete") {
-            this.deleteFlag = true;
+            if(role.projectadmin || role.roleadmin){
+              this.deleteFlag = false;
+            }else{
+              this.deleteFlag = true;
+            }
           }
           if (ele === "create") {
             this.createFlag = true;
@@ -188,24 +219,25 @@ export class ManageUsersComponent implements OnInit {
         this.viewuser = false;
         this.buttonFlag = false;
         this.user = new Users();
+        this.user.isUiInactivityTracked=true;
       } else if (this.id != null && this.id != undefined && params["view"] == "false") {
         this.showCreate = true;
         this.edit = true;
         this.view = false;
         this.viewWave = true;
         this.buttonFlag = false;
-        this.usersService.getUsers(Number(window.atob(this.id))).subscribe((res) => {
+        this.usersService.getUsers(this.id).subscribe((res) => {
           this.user = res;
           try {
             if (this.user.clientDetails) {
               try {
                 this.userDetailJson = JSON.parse(this.user.clientDetails);
-              } catch (e) {
+              } catch (e : any)  {
                 console.error("JSON.parse error - ", e.message);
               }
               this.userDetailCheck = true;
             }
-          } catch (e) {
+          } catch (e : any)  {
             this.userDetailCheck = false;
           }
           if (this.user.profileImage) {
@@ -223,7 +255,7 @@ export class ManageUsersComponent implements OnInit {
         this.viewuser = true;
         this.viewWave = true;
         this.buttonFlag = true;
-        this.usersService.getUsers(Number(window.atob(this.id))).subscribe((res) => {
+        this.usersService.getUsers(this.id).subscribe((res) => {
           this.user = res;
           if (this.user.user_email == "demouser@infosys.com") {
             this.demoUserFlag = true;
@@ -232,13 +264,13 @@ export class ManageUsersComponent implements OnInit {
             if (this.user.clientDetails) {
               try {
                 this.userDetailJson = JSON.parse(this.user.clientDetails);
-              } catch (e) {
+              } catch (e : any)  {
                 console.error("JSON.parse error - ", e.message);
               }
 
               this.userDetailCheck = true;
             }
-          } catch (e) {
+          } catch (e : any)  {
             this.userDetailCheck = false;
           }
           if (this.user.profileImage) {
@@ -259,7 +291,8 @@ export class ManageUsersComponent implements OnInit {
   }
 
   telemetryImpression() {
-    this.telemetryService.impression("iamp-usm", "detail", "ManageUsersComponent");
+    // this.telemetryService.impression("iamp-usm", "detail", "ManageUsersComponent");
+    this.openTelemetryService.startTelemetry("iamp-usm", "ManageUsersComponent", 'detail');
   }
 
   @ViewChild(MatSort, { static: false }) set matSort(ms: MatSort) {
@@ -268,18 +301,29 @@ export class ManageUsersComponent implements OnInit {
 
   profileImageAdded(event) {
     if (event && event.target.files && event.target.files[0]) {
-      if (event.target.files[0].size > 10 * 1000000) {
-        this.messageService.error("Image file size exceeds 10 MB", "IAMP");
-        return;
-      } else if (event.target.files[0].name.length > 100) {
-        this.messageService.error("Image Name  cannot be more than 100 characters", "IAMP");
-        return;
-      } else {
-        this.helperService.toBase64(event.target.files[0], (base64Data) => {
-          this.user.profileImage = base64Data;
-          this.user.profileImageName = event.target.files[0].name;
-          this.url = "data:image/png;base64," + this.user.profileImage;
-        });
+      var filePath = event.target.files[0].name;
+      var allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
+      if (!allowedExtensions.exec(filePath)) {
+        this.imageSizeExceeded = false;
+        this.nonallowedExtention = true;
+      }
+      else {
+        this.nonallowedExtention = false;
+        if (event.target.files[0].size > 10 * 1000000) {
+          this.imageSizeExceeded = true;
+          this.imageSizeExceededErrMsg = "Image file size exceeds 10 MB";
+        } else if (event.target.files[0].name.length > 100) {
+          this.imageSizeExceeded = true;
+          this.imageSizeExceededErrMsg = "Image Name  cannot be more than 100 characters";
+        } else {
+          this.imageSizeExceeded = false;
+          this.imageSizeExceededErrMsg = "";
+          this.helperService.toBase64(event.target.files[0], (base64Data) => {
+            this.user.profileImage = base64Data;
+            this.user.profileImageName = event.target.files[0].name;
+            this.url = "data:image/png;base64," + this.user.profileImage;
+          });
+        }
       }
     } else this.url = null;
   }
@@ -293,58 +337,146 @@ export class ManageUsersComponent implements OnInit {
   }
 
   getAllUsers() {
-    this.usersService.findAll(new Users(), this.lazyloadevent).subscribe((response) => {
-      this.currentPage = response;
-      this.userss = response.content;
-      this.userss = this.userss.sort((a, b) =>
-        a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1
-      );
-      this.userss.forEach((element) => {
-        this.useremails.push(element.user_email);
-        this.userlogins.push(element.user_login);
-      });
-      this.useremails = this.useremails.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
-      this.userlogins = this.userlogins.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
-      //this.UserProjectRoleList = new MatTableDataSource(this.userss);
-      //this.UserProjectRoleList.sort = this.sort;
-      //this.UserProjectRoleList.paginator = this.paginator;
-    }),
-      (error) => this.messageService.error(error, Msg.APP);
+    this.checkForAdminAuthority();
+    if(!this.defaultFlag){
+      this.usersService.findAllByProjectIdOrPortfolioId(new Users(), this.lazyloadevent, this.flag, this.callId).subscribe((response) => {
+        let users = response.content;
+        users = users.sort((a, b) => (a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1));
+        this.useremails = [];
+        this.userlogins = [];
+        users.forEach((element) => {
+          this.useremails.push(element.user_email);
+          this.userlogins.push(element.user_login);
+        });
+        this.useremails = this.useremails.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
+        this.userlogins = this.userlogins.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
+      }),
+        (error) => this.messageService.error(error, Msg.APP);
+    }
+    else{
+      this.usersService.findAll(new Users(), this.lazyloadevent).subscribe((response) => {
+        this.currentPage = response;
+        this.userss = response.content;
+        this.userss = this.userss.sort((a, b) =>
+          a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1
+        );
+        this.userss.forEach((element) => {
+          this.useremails.push(element.user_email);
+          this.userlogins.push(element.user_login);
+        });
+        this.useremails = this.useremails.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
+        this.userlogins = this.userlogins.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
+      }),
+        (error) => this.messageService.error(error, Msg.APP);
+    }
   }
   callApi() {
+    this.checkForAdminAuthority();
     //if (!(this.userlogins && this.userlogins.length > 0)) {
-    this.usersService.findAll(new Users(), this.lazyloadevent).subscribe((response) => {
-      let users = response.content;
-      users = users.sort((a, b) => (a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1));
-      this.useremails = [];
-      this.userlogins = [];
-      users.forEach((element) => {
-        this.useremails.push(element.user_email);
-        this.userlogins.push(element.user_login);
-      });
-      this.useremails = this.useremails.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
-      this.userlogins = this.userlogins.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
-    }),
-      (error) => this.messageService.error(error, Msg.APP);
+    if(!this.defaultFlag){
+      this.usersService.findAllByProjectIdOrPortfolioId(new Users(), this.lazyloadevent, this.flag, this.callId).subscribe((response) => {
+        let users = response.content;
+        users = users.sort((a, b) => (a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1));
+        this.useremails = [];
+        this.userlogins = [];
+        users.forEach((element) => {
+          this.useremails.push(element.user_email);
+          this.userlogins.push(element.user_login);
+        });
+        this.useremails = this.useremails.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
+        this.userlogins = this.userlogins.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
+      }),
+        (error) => this.messageService.error(error, Msg.APP);
+    } else {
+      this.usersService.findAll(new Users(), this.lazyloadevent).subscribe((response) => {
+        let users = response.content;
+        users = users.sort((a, b) => (a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1));
+        this.useremails = [];
+        this.userlogins = [];
+        users.forEach((element) => {
+          this.useremails.push(element.user_email);
+          this.userlogins.push(element.user_login);
+        });
+        this.useremails = this.useremails.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
+        this.userlogins = this.userlogins.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
+      }),
+        (error) => this.messageService.error(error, Msg.APP);
+    }
     //}
   }
-  getAllUserss(pageEvent) {
-    if (pageEvent == null || !pageEvent) {
-      pageEvent = { page: 0, size: this.pageSize };
+
+  checkForAdminAuthority(){
+    let project: any;
+    try {
+      project = JSON.parse(sessionStorage.getItem("project"));
+    } catch (e: any) {
+      console.error("JSON.parse error - ", e.message);
     }
 
-    this.usersService.FindAll(this.example, pageEvent).subscribe((response) => {
-      this.currentPage = response;
-      this.users = response.content;
-      this.wavesLength = this.currentPage.totalElements;
-      this.users = this.users.sort((a, b) =>
-        a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1
-      );
-      this.UserProjectRoleList = new MatTableDataSource(this.users);
-      this.UserProjectRoleList.sort = this.sort;
-      this.UserProjectRoleList.paginator = this.paginator;
-    }),
-      (error) => this.messageService.error(error, Msg.APP);
+    let role: any;
+    try {
+      role = JSON.parse(sessionStorage.getItem("role"));
+    } catch (e: any) {
+      console.error("JSON.parse error - ", e.message);
+    }
+
+    let portfolio: any;
+    try {
+      portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
+    } catch (e: any) {
+      console.error("JSON.parse error - ", e.message);
+    }
+
+    if(role.roleadmin){
+      this.flag = true;
+      this.callId = portfolio.id;
+    } else if(role.projectadmin){
+      this.flag = false;
+      this.callId = project.id;
+    } else {
+      this.defaultFlag = true;
+    }
+  }
+
+  
+  getAllUserss(pageEvent) {
+
+    this.checkForAdminAuthority();
+
+    if (pageEvent == null || !pageEvent) {
+      pageEvent = { page: 0, size: this.pageSize };
+      this.pageIndex = 0;
+    }
+
+    if(!this.defaultFlag){
+
+      this.usersService.findByProjectIdOrPortfolioId(this.example, pageEvent, this.flag, this.callId).subscribe((response) => {
+        this.currentPage = response;
+        this.users = response.content;
+        this.wavesLength = this.currentPage.totalElements;  
+        this.users = this.users.sort((a, b) =>
+          a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1
+        );
+        this.UserProjectRoleList = new MatTableDataSource(this.users);
+        this.UserProjectRoleList.sort = this.sort;
+        this.UserProjectRoleList.paginator = this.paginator;
+      }),
+        (error) => this.messageService.error(error, Msg.APP);
+
+    } else {
+      this.usersService.FindAll(this.example, pageEvent).subscribe((response) => {
+        this.currentPage = response;
+        this.users = response.content;
+        this.wavesLength = this.currentPage.totalElements;
+        this.users = this.users.sort((a, b) =>
+          a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1
+        );
+        this.UserProjectRoleList = new MatTableDataSource(this.users);
+        this.UserProjectRoleList.sort = this.sort;
+        this.UserProjectRoleList.paginator = this.paginator;
+      }),
+        (error) => this.messageService.error(error, Msg.APP);
+    }
   }
 
   getAllUserAuthorities() {
@@ -408,7 +540,7 @@ export class ManageUsersComponent implements OnInit {
       this.user.user_email.trim().length == 0
     ) {
       this.messageService.error("Please Provide User Email", Msg.APP);
-    } else if (!this.user.user_email.match(/^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/)) {
+    } else if (!this.user.user_email.match(/^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,10})$/)) {
       this.messageService.error("This User Email does not match the required pattern", Msg.APP);
     } else if (
       this.user.user_f_name == undefined ||
@@ -484,6 +616,7 @@ export class ManageUsersComponent implements OnInit {
           this.newUser.other_details = this.user.other_details;
           this.newUser.contact_number = this.user.contact_number;
           let flag: boolean = false;
+          this.newUser.isUiInactivityTracked = this.user.isUiInactivityTracked;
           if (this.userDetailCheck) {
             this.userDetailJson.forEach((ele) => {
               if (ele.pointer == "" || ele.value == "") {
@@ -500,7 +633,7 @@ export class ManageUsersComponent implements OnInit {
                 this.userDetailJson[0].value != ""
               )
                 this.newUser.clientDetails = JSON.stringify(this.userDetailJson);
-            } catch (e) {
+            } catch (e : any)  {
               this.newUser.clientDetails = null;
             }
           }
@@ -521,7 +654,7 @@ export class ManageUsersComponent implements OnInit {
 
   addUser(newUser: Users) {
     if (sessionStorage.getItem("telemetry") == "true") {
-    this.telemetryService.audit(newUser,"CREATE");
+    // this.telemetryService.audit(newUser,"CREATE");
     }
     this.busy = this.usersService.create(newUser).subscribe(
       (response) => {
@@ -607,10 +740,10 @@ export class ManageUsersComponent implements OnInit {
   //   });
   // }
   editUser(user) {
-    this.router.navigate(["./" + window.btoa(user.id) + "/" + false], { relativeTo: this.route });
+    this.router.navigate(["./" + user.id + "/" + false], { relativeTo: this.route });
   }
   viewUser(user) {
-    this.router.navigate(["./" + window.btoa(user.id) + "/" + true], { relativeTo: this.route });
+    this.router.navigate(["./" + user.id + "/" + true], { relativeTo: this.route });
   }
   addNewUser() {
     this.router.navigate(["./new/" + false], { relativeTo: this.route });
@@ -633,11 +766,11 @@ export class ManageUsersComponent implements OnInit {
         (response) => {
           this.messageService.info(Msg.INF013, Msg.APP);
           if (sessionStorage.getItem("telemetry") == "true") {
-          this.telemetryService.audit(user,"DELETE");
+          // this.telemetryService.audit(user,"DELETE");
           }
           try {
             this.router.navigate(["/logout"]);
-          } catch (e) {
+          } catch (e : any)  {
             user = null;
             console.error("JSON.parse error - ", e.message);
           }
@@ -648,13 +781,13 @@ export class ManageUsersComponent implements OnInit {
       this.busy = this.usersService.delete(user.id).subscribe(
         (response) => {
           if (sessionStorage.getItem("telemetry") == "true") {
-          this.telemetryService.audit(user,"DELETE");
+          // this.telemetryService.audit(user,"DELETE");
           }
           this.messageService.info(Msg.INF013, Msg.APP);
           let sessionUser: Users;
           try {
             sessionUser = JSON.parse(sessionStorage.getItem("user"));
-          } catch (e) {
+          } catch (e : any)  {
             sessionUser = null;
             console.error("JSON.parse error - ", e.message);
           }
@@ -662,6 +795,7 @@ export class ManageUsersComponent implements OnInit {
           if (sessionUser.id == currentUser.id) {
             sessionStorage.setItem("UpdatedUser", "true");
           }
+          this.deleteItem = true;
           this.ClearFilter();
         },
         (error) => this.messageService.error("Could not Delete", Msg.APP)
@@ -723,6 +857,7 @@ export class ManageUsersComponent implements OnInit {
 }
   // name search filter
   filterItem(value, pageEvent) {
+    this.checkForAdminAuthority();
     let isValidEmail = this.validateEmail(value);
     if (!value) {
       this.assignCopy();
@@ -755,14 +890,96 @@ export class ManageUsersComponent implements OnInit {
       if (pageEvent == null || !pageEvent) {
         pageEvent = { page: 0, size: this.pageSize };
       }
+      if(!this.enableGlobalSearch){
       if (this.filterFlag1) {
+        if(!this.defaultFlag){
+
+          this.usersService.searchInProjectOrPortfolio(params, pageEvent, this.flag, this.callId).subscribe((res) => {
+            this.currentPage = res;
+            this.users = res.content;
+            this.users = this.users.sort((a, b) =>
+              a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1
+            );
+            this.wavesLength = res.totalElements;
+            this.pageIndex = 0;
+            this.UserProjectRoleList = new MatTableDataSource(this.users);
+            this.UserProjectRoleList.sort = this.sort;
+            this.UserProjectRoleList.paginator = this.paginator;
+            //If cannot find a username, it will then look for an email address
+            if (this.UserProjectRoleList.data.length===0){
+              let params;
+              this.filterFlag1 = true;
+              if (pageEvent == null || !pageEvent) {
+                pageEvent = { page: 0, size: this.pageSize };
+              }
+              params = {
+                user_email: this.userSearched
+              };
+              if (this.filterFlag1) {
+                this.usersService.searchInProjectOrPortfolio(params, pageEvent, this.flag, this.callId).subscribe((res) => {
+                  this.currentPage = res;
+                  this.users = res.content;
+                  this.users = this.users.sort((a, b) =>
+                    a.user_email.toLowerCase() > b.user_email.toLowerCase() ? 1 : -1
+                  );
+                  this.wavesLength = res.totalElements;
+                  this.UserProjectRoleList = new MatTableDataSource(this.users);
+                  this.UserProjectRoleList.sort = this.sort;
+                  this.UserProjectRoleList.paginator = this.paginator;
+                });
+              }
+            }
+          });
+
+        } else {
+          this.usersService.search(params, pageEvent).subscribe((res) => {
+            this.currentPage = res;
+            this.users = res.content;
+            this.users = this.users.sort((a, b) =>
+              a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1
+            );
+            this.wavesLength = res.totalElements;
+            this.pageIndex = 0;
+            this.UserProjectRoleList = new MatTableDataSource(this.users);
+            this.UserProjectRoleList.sort = this.sort;
+            this.UserProjectRoleList.paginator = this.paginator;
+            //If cannot find a username, it will then look for an email address
+            if (this.UserProjectRoleList.data.length===0){
+              let params;
+              this.filterFlag1 = true;
+              if (pageEvent == null || !pageEvent) {
+                pageEvent = { page: 0, size: this.pageSize };
+              }
+              params = {
+                user_email: this.userSearched
+              };
+              if (this.filterFlag1) {
+                this.usersService.search(params, pageEvent).subscribe((res) => {
+                  this.currentPage = res;
+                  this.users = res.content;
+                  this.users = this.users.sort((a, b) =>
+                    a.user_email.toLowerCase() > b.user_email.toLowerCase() ? 1 : -1
+                  );
+                  this.wavesLength = res.totalElements;
+                  this.UserProjectRoleList = new MatTableDataSource(this.users);
+                  this.UserProjectRoleList.sort = this.sort;
+                  this.UserProjectRoleList.paginator = this.paginator;
+                });
+              }
+            }
+          });
+        }
+      }
+      } else {
+
         this.usersService.search(params, pageEvent).subscribe((res) => {
           this.currentPage = res;
           this.users = res.content;
+          this.users = this.users.filter((ele) => ele.user_email.toLowerCase() == value.toLowerCase());
           this.users = this.users.sort((a, b) =>
             a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1
           );
-          this.wavesLength = res.totalElements;
+          this.wavesLength = this.users.length;
           this.pageIndex = 0;
           this.UserProjectRoleList = new MatTableDataSource(this.users);
           this.UserProjectRoleList.sort = this.sort;
@@ -781,10 +998,11 @@ export class ManageUsersComponent implements OnInit {
               this.usersService.search(params, pageEvent).subscribe((res) => {
                 this.currentPage = res;
                 this.users = res.content;
+                this.users = this.users.filter((ele) => ele.user_email.toLowerCase() == value.toLowerCase());
                 this.users = this.users.sort((a, b) =>
                   a.user_email.toLowerCase() > b.user_email.toLowerCase() ? 1 : -1
                 );
-                this.wavesLength = res.totalElements;
+                this.wavesLength = this.users.length;
                 this.UserProjectRoleList = new MatTableDataSource(this.users);
                 this.UserProjectRoleList.sort = this.sort;
                 this.UserProjectRoleList.paginator = this.paginator;
@@ -832,6 +1050,7 @@ export class ManageUsersComponent implements OnInit {
     if (pageEvent == null || !pageEvent) {
       pageEvent = { page: 0, size: this.pageSize };
     }
+    this.pageIndex = 0;
     let params;
     if (this.selecteduserlogin == undefined && this.selectedemail == undefined) {
       this.ClearFilter();
@@ -871,7 +1090,19 @@ export class ManageUsersComponent implements OnInit {
     this.selectedemail = undefined;
     this.selecteduserlogin = undefined;
     this.myInputReference.nativeElement.value = null;
-    this.getAllUserss(null);
+    if(this.pageEvent && this.deleteItem){
+      if((this.pageEvent.length-1)%this.pageSize == 0){
+          this.pageEvent.pageIndex = this.pageEvent.pageIndex == 0 ? this.pageEvent.pageIndex : this.pageEvent.pageIndex-1;
+          this.pageIndex = this.pageEvent.pageIndex;
+      }
+      this.pageEvent.length--;
+      this.getAllUserss({ page: this.pageEvent.pageIndex, size: this.pageSize });
+    }
+    else{
+      // this.lastPage = false;
+      this.getAllUserss(null);
+    }
+    this.deleteItem = false;
     this.filterFlag1 = false;
     this.userSearched = undefined;
     this.filterFlag = false;
@@ -961,7 +1192,7 @@ export class ManageUsersComponent implements OnInit {
 
       if (this.userDetailCheck) {
         this.userDetailJson.forEach((ele) => {
-          if (ele.pointer == "" || ele.value == "") {
+          if (ele.pointer == "" || ele.value == "" || ele.pointer == null || ele.value == null) {
             flag = true;
             this.messageService.info("User Details cannot be empty", "LEAP");
           }
@@ -973,7 +1204,7 @@ export class ManageUsersComponent implements OnInit {
         try {
           if (this.userDetailCheck && this.userDetailJson[0].pointer != "" && this.userDetailJson[0].value != "")
             user.clientDetails = JSON.stringify(this.userDetailJson);
-        } catch (e) {
+        } catch (e : any)  {
           user.clientDetails = null;
         }
       }
@@ -988,7 +1219,7 @@ export class ManageUsersComponent implements OnInit {
         );
         }
         let diff=this.compareTodiff(user,arr1[0])
-        this.telemetryService.audit(user, arr1[0],diff);
+        // this.telemetryService.audit(user, arr1[0],diff);
       }
         this.busy = this.usersService.update(user).subscribe(
           (res) => {
@@ -997,7 +1228,7 @@ export class ManageUsersComponent implements OnInit {
               let user: Users;
               try {
                 user = JSON.parse(sessionStorage.getItem("user"));
-              } catch (e) {
+              } catch (e : any)  {
                 user = null;
                 console.error("JSON.parse error - ", e.message);
               }
@@ -1005,7 +1236,7 @@ export class ManageUsersComponent implements OnInit {
               if (res.id == currentUser.id) {
                 try {
                   sessionStorage.setItem("user", JSON.stringify(res));
-                } catch (e) {
+                } catch (e : any)  {
                   console.error("JSON.stringify error - ", e.message);
                 }
                 sessionStorage.setItem("UpdatedUser", "true");
@@ -1052,6 +1283,9 @@ export class ManageUsersComponent implements OnInit {
   }
   trackByMethod(index, item) { }
   onPageFired(event) {
+    this.pageEvent = event;
+    // this.lastPage = !(this.paginator.hasNextPage());
+    // console.log(this.paginator.hasNextPage());
     if (this.filterFlag == false && this.filterFlag1 == false){
       this.getAllUserss({ page: event.pageIndex, size: this.pageSize });
       this.pageIndex = event.pageIndex;
@@ -1140,5 +1374,17 @@ export class ManageUsersComponent implements OnInit {
     this.tzNames = [];
     this.user.timezone = '';
     this.tzNames = moment.tz.zonesForCountry(this.countryMap.get(event.value));
+  }
+
+  resetChanges(isDisabled,type){
+    if(!isDisabled){
+      if(type === "userDetailCheck"){
+        this.userDetailJson.forEach(item => {
+          item.key = null;
+          item.pointer = null;
+          item.value = null;
+        })
+      }
+    }
   }
 }

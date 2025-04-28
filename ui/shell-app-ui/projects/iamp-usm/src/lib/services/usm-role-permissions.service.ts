@@ -13,15 +13,16 @@
 // Template pack-angular:web/src/app/entities/entity.service.ts.e.vm
 //
 import { Injectable, SkipSelf } from "@angular/core";
-import { Observable } from "rxjs/Observable";
+import { Observable, map, catchError, throwError } from "rxjs";
+// import { Observable } from "rxjs/Observable";
 import { MessageService } from "./message.service";
 import { PageResponse } from "../support/paging";
 import { PageRequestByExample } from "../support/page-request";
 import { UsmRolePermissions } from "../models/usm-role-permissions";
 import { UsmPermissions } from "../models/usm-permissions";
-import { map, catchError } from "rxjs/operators";
+// import { map, catchError } from "rxjs/operators";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { throwError } from "rxjs";
+// import { throwError } from "rxjs";
 @Injectable()
 export class UsmRolePermissionsService {
   constructor(private https: HttpClient, private messageService: MessageService) { }
@@ -33,7 +34,7 @@ export class UsmRolePermissionsService {
   create(usm_role_permissions: UsmRolePermissions): Observable<UsmRolePermissions> {
     const copy = this.convert(usm_role_permissions);
     return this.https
-      .post("/api/usm-role-permissionss/", copy, {
+      .post("/api/usm-role-permissionss", copy, {
         observe: "response",
       })
       .pipe(
@@ -75,12 +76,12 @@ export class UsmRolePermissionsService {
     let body;
     try {
       body = JSON.stringify(usm_role_permissions);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
 
     return this.https
-      .put("/api/usm-role-permissionss/", body, {
+      .put("/api/usm-role-permissionss", body, {
         observe: "response",
       })
       .pipe(
@@ -106,7 +107,7 @@ export class UsmRolePermissionsService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     let headers = new HttpHeaders();
@@ -133,6 +134,52 @@ export class UsmRolePermissionsService {
       );
   }
 
+  findAllPaginated(page,size,sortBy,orderBy): Observable<PageResponse<UsmRolePermissions>> {
+    return this.https
+      .get("/api/usm-role-permissionss/paginated?page="+page+"&size="+size, {
+        observe: "response",
+      })
+      .pipe(
+        map((response) => {
+          let pr: any = response.body;
+          return new PageResponse<UsmRolePermissions>(
+            pr.totalPages,
+            pr.totalElements,
+            UsmRolePermissions.toArray(pr.content)
+          );
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+
+
+  findAllSearched(module,permission,role,page,size,sortBy,orderBy): Observable<PageResponse<UsmRolePermissions>> {
+    return this.https
+      .get("/api/usm-role-permissionss/searched?"+"module="+module+"&permission="+permission+"&role="+role+"&page="+page+"&size="+size, {
+        observe: "response",
+      })
+      .pipe(
+        map((response) => {
+          let pr: any = response.body;
+          return new PageResponse<UsmRolePermissions>(
+            pr.totalPages,
+            pr.totalElements,
+            UsmRolePermissions.toArray(pr.content)
+          );
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
   findAllPermissions(usm_permissions: UsmPermissions, event: any): Observable<PageResponse<UsmPermissions>> {
     let req = new PageRequestByExample(usm_permissions, event);
     let body;
@@ -141,7 +188,7 @@ export class UsmRolePermissionsService {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
 
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     let headers = new HttpHeaders();
@@ -170,7 +217,7 @@ export class UsmRolePermissionsService {
     let body;
     try {
       body = JSON.stringify({ query: query, maxResults: 10 });
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -211,7 +258,7 @@ export class UsmRolePermissionsService {
   createAll(usm_role_permissions: UsmRolePermissions[]): Observable<UsmRolePermissions[]> {
     const copy: UsmRolePermissions[] = Object.assign([], usm_role_permissions);
     return this.https
-      .post("/api/usm-role-permissionss-list/", copy, {
+      .post("/api/usm-role-permissionss-list", copy, {
         observe: "response",
       })
       .pipe(
@@ -233,9 +280,9 @@ export class UsmRolePermissionsService {
     let errMsg = error.error;
     error.status ? `Status: ${error.status} - Text: ${error.statusText}` : "Server error";
     console.error(errMsg); // log to console instead
-    if (error.status === 401) {
-      window.location.href = "/";
-    }
+    // if (error.status === 401) {
+    //   window.location.href = "/";
+    // }
     return throwError(errMsg);
   }
 

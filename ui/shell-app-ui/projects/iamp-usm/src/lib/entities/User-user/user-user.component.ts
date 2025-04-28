@@ -19,6 +19,7 @@ import {
   OnChanges,
   EventEmitter,
   SimpleChanges,
+  OnDestroy,
   OnInit,
   ViewChild,
   ElementRef,
@@ -42,11 +43,12 @@ import { Role } from "../../models/role";
 import { UsmPermissions } from "../../models/usm-permissions";
 import { Project } from "../../models/project";
 import { DeleteComponent } from "../../shared-modules/confirm-delete/delete.component";
-import { Subscription } from "rxjs/Subscription";
+import { Subscription } from "rxjs";
 import { IampUsmService } from "../../iamp-usm.service";
 // import { DashConstantService } from "../../services/dash-constant.service";
 import { DashConstant } from "../../models/dash-constant";
 import { Users } from '../../models/users';
+import { OpenTelemetryService } from "../../telemetry-util/open-telemetry.service";
 
 
 @Component({
@@ -54,7 +56,7 @@ import { Users } from '../../models/users';
   templateUrl: './user-user.component.html',
   styleUrls: ['./user-user.component.css']
 })
-export class UserUserComponent implements OnInit {
+export class UserUserComponent implements OnInit, OnDestroy {
   @Input() header = "UsmRolePermissions...";
   @Input() selectedUser: Users;
   @Output() changeView: EventEmitter<boolean> = new EventEmitter();
@@ -97,6 +99,9 @@ export class UserUserComponent implements OnInit {
   examplerole: Role = new Role();
   // list is paginated
   currentPage: PageResponse<Usertouser> = new PageResponse<Usertouser>(0, 0, []);
+  callId: any;
+  flag: boolean = false;
+  defaultFlag: boolean = false;
 
   //foreign key dependencies
 
@@ -109,6 +114,7 @@ export class UserUserComponent implements OnInit {
     private route: ActivatedRoute,
     public useruserService: UseruserService,
     public roleservice: RoleService,
+    private openTelemetryService: OpenTelemetryService,
     private usersService:UsersService,
     private telemetryService: LeapTelemetryService,
     private usmService: IampUsmService,
@@ -226,7 +232,7 @@ export class UserUserComponent implements OnInit {
   //     let project: Project;
   //     try {
   //       project = JSON.parse(sessionStorage.getItem("project"));
-  //     } catch (e) {
+  //     } catch (e : any)  {
   //       project = null;
   //       console.error("JSON.parse error - ", e.message);
   //     }
@@ -240,32 +246,96 @@ export class UserUserComponent implements OnInit {
   //   this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
   // }
 
+  checkForAdminAuthority(){
+    let project: any;
+    try {
+      project = JSON.parse(sessionStorage.getItem("project"));
+    } catch (e: any) {
+      console.error("JSON.parse error - ", e.message);
+    }
+
+    let role: any;
+    try {
+      role = JSON.parse(sessionStorage.getItem("role"));
+    } catch (e: any) {
+      console.error("JSON.parse error - ", e.message);
+    }
+
+    let portfolio: any;
+    try {
+      portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
+    } catch (e: any) {
+      console.error("JSON.parse error - ", e.message);
+    }
+
+    if(role.roleadmin){
+      this.flag = true;
+      this.callId = portfolio.id;
+    } else if(role.projectadmin){
+      this.flag = false;
+      this.callId = project.id;
+    } else {
+      this.defaultFlag = true;
+    }
+  }
+
   fetchmodule() {
+    this.checkForAdminAuthority();
     this.userlistarray = [];
     this.array = [];
     // this.busy=this.usersService.findAll(this.exampleUser,this.lazyloadevent).subscribe(res=>{
     this.exampleUser=new Users();
-    this.usersService.findAll(this.exampleUser, this.lazyload).subscribe((response) => {
-      let project: Project;
-      try {
-        project = JSON.parse(sessionStorage.getItem("project"));
-      } catch (e) {
-        project = null;
-        console.error("JSON.parse error - ", e.message);
-      }
-      this.userlistarray = response.content;
-      // this.userlistarray = this.userlistarray.filter(
-      //   (arr, index, self) =>
-      //     index === self.findIndex((t) => t.module === arr.module && t.permission === arr.permission)
-      // );
-      this.userlistarray = this.userlistarray.sort((a, b) =>
-        a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1
-      );
-    });
+    if(!this.defaultFlag){
+
+      this.usersService.findAllByProjectIdOrPortfolioId(this.exampleUser, this.lazyload, this.flag, this.callId ).subscribe((response) => {
+        let project: Project;
+        try {
+          project = JSON.parse(sessionStorage.getItem("project"));
+        } catch (e : any)  {
+          project = null;this
+          console.error("JSON.parse error - ", e.message);
+        }
+        this.userlistarray = response.content;
+        // this.userlistarray = this.userlistarray.filter(
+        //   (arr, index, self) =>
+        //     index === self.findIndex((t) => t.module === arr.module && t.permission === arr.permission)
+        // );
+        this.userlistarray = this.userlistarray.sort((a, b) =>
+          a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1
+        );
+      });
+
+    }else{
+
+      this.usersService.findAll(this.exampleUser, this.lazyload).subscribe((response) => {
+        let project: Project;
+        try {
+          project = JSON.parse(sessionStorage.getItem("project"));
+        } catch (e : any)  {
+          project = null;
+          console.error("JSON.parse error - ", e.message);
+        }
+        this.userlistarray = response.content;
+        // this.userlistarray = this.userlistarray.filter(
+        //   (arr, index, self) =>
+        //     index === self.findIndex((t) => t.module === arr.module && t.permission === arr.permission)
+        // );
+        this.userlistarray = this.userlistarray.sort((a, b) =>
+          a.user_f_name.toLowerCase() > b.user_f_name.toLowerCase() ? 1 : -1
+        );
+      });
+
+    }
   }
 
   telemetryImpression() {
-    this.telemetryService.impression("iamp-usm", "list", "UsmRolePermissionComponent");
+    // this.telemetryService.impression("iamp-usm", "list", "UsmRolePermissionComponent");
+    this.openTelemetryService.startTelemetry("iamp-usm", "UsmRolePermissionComponent", "list");
+  }
+
+  ngOnDestroy() {
+    let activeSpan = this.openTelemetryService.fetchActiveSpan();
+    this.openTelemetryService.endTelemetry(activeSpan);
   }
 
   listView() {
@@ -304,7 +374,7 @@ export class UserUserComponent implements OnInit {
     let project: Project;
     try {
       project = JSON.parse(sessionStorage.getItem("project"));
-    } catch (e) {
+    } catch (e : any)  {
       project = null;
       console.error("JSON.parse error - ", e.message);
     }
@@ -319,7 +389,7 @@ export class UserUserComponent implements OnInit {
     // });
     // try {
     //  this.usertouseritem.permission = JSON.stringify(array);
-    // } catch (e) {
+    // } catch (e : any)  {
     //  console.error("JSON.stringify error - ", e.message);
     // }
     this.errorMessage = false;
@@ -398,7 +468,7 @@ export class UserUserComponent implements OnInit {
       let project:any
       try {
         project = JSON.parse(sessionStorage.getItem("project"));
-      } catch (e) {
+      } catch (e : any)  {
         project = null;
         console.error("JSON.parse error - ", e.message);
       }

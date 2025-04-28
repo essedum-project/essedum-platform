@@ -1,0 +1,20 @@
+::ng-deep .mat-mdc-floating-label {
+    line-height: 2.5rem !important;
+}
+
+::ng-deep .mdc-text-field__input {
+    border: none !important
+}
+
+::ng-deep input:focus
+ {
+    border: none !important
+}
+
+::ng-deep .mdc-text-field--focused:not(.mdc-text-field--disabled)  ::ng-deep.mdc-floating-label  {
+    color:#8626C3
+    }
+
+    ::ng-deep   .mdc-text-field--filled .mdc-line-ripple::after{
+        border-bottom-color: #8626C3;
+    }

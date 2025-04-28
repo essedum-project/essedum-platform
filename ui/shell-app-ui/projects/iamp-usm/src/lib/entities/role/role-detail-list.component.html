@@ -1,5 +1,5 @@
 <div class="ContentSideSections Implementation selector-666-1" style="padding: 1%">
-  <mat-card class="selector-666-2">
+  <mat-card appearance="outlined" class="selector-666-2">
     <mat-card-title class="selector-666-3">Role Details</mat-card-title>
     <mat-card-actions class="selector-666-4">
       <button mat-raised-button="" (click)="addNew()" style="background-color:#00acac;margin-left: 81%;" class="selector-666-5">
@@ -8,7 +8,7 @@
     </mat-card-actions>
     <mat-card-content class="selector-666-7">
       <div class="table-responsive selector-666-8">
-        <table mat-table="" [dataSource]="RoleList" class="table table-hover selector-666-9">
+        <table aria-label="" mat-table="" [dataSource]="RoleList" class="table table-hover selector-666-9">
 
           <ng-container matColumnDef="name" class="selector-666-10">
             <th mat-header-cell="" *matHeaderCellDef="" class="selector-666-11"><strong class="selector-666-12"> Role Name </strong></th>

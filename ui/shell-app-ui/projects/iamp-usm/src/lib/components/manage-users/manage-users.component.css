@@ -1,3 +1,16 @@
 .error {
     color: red;
  }
+
+ .cardResponsive{
+    margin: 6vh;
+ }
+
+ .globalSearchLabel {
+   display: block;
+   font-size: 14px;
+   font-weight: normal;
+   text-overflow: ellipsis;
+   overflow: hidden;
+   font-family: var(--font-type) !important;
+ }

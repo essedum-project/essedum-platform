@@ -59,7 +59,7 @@ export class AuditService {
       errObj["detailedMessage"] = error.detail ? error.detail : msg;
     }
     error["_body"] = errObj;
-    if (error.status === 401) window.location.href = "/";
+    // if (error.status === 401) window.location.href = "/";
     return throwError(errObj.message);
   }
 }

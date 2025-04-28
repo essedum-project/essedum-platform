@@ -21,7 +21,7 @@ export class PermissionConfigurationService {
   create(usm_role_permissions: UsmRolePermissions): Observable<Object> {
     const copy = this.convert(usm_role_permissions);
     return this.https
-      .post("/api/usm-role-permissionss/", copy, {
+      .post("/api/usm-role-permissionss", copy, {
         observe: "response",
       })
       .pipe(
@@ -79,12 +79,12 @@ export class PermissionConfigurationService {
     let body;
     try {
       body = JSON.stringify(usm_role_permissions);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
 
     return this.https
-      .put("/api/usm-role-permissionss/", body, {
+      .put("/api/usm-role-permissionss", body, {
         observe: "response",
       })
       .pipe(
@@ -111,7 +111,7 @@ export class PermissionConfigurationService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     let headers = new HttpHeaders();
@@ -145,7 +145,7 @@ export class PermissionConfigurationService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     let headers = new HttpHeaders();
@@ -179,9 +179,9 @@ export class PermissionConfigurationService {
     let errMsg = error.error;
     error.status ? `Status: ${error.status} - Text: ${error.statusText}` : "Server error";
     console.error(errMsg); // log to console instead
-    if (error.status === 401) {
-      window.location.href = "/";
-    }
+    // if (error.status === 401) {
+    //   window.location.href = "/";
+    // }
     return throwError(errMsg);
   }
 

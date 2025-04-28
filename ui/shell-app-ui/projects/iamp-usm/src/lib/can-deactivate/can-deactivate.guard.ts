@@ -1,7 +1,7 @@
 //import { BroadcasterService } from "./../shared-modules/services/broadcaster.service";
 import { Injectable } from "@angular/core";
 import { CanDeactivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from "@angular/router";
-import { Observable } from "rxjs/Observable";
+// import { Observable } from "rxjs/Observable";
 import { ComponentCanDeactivate } from "./component-can-deactivate";
 
 @Injectable()

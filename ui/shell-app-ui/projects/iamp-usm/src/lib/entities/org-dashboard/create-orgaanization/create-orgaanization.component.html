@@ -59,14 +59,14 @@
 
         <mat-grid-tile [colspan]="11">
             <div class="text-inside-grid">
-            <mat-chip-list>
-                <mat-chip style="background-color: white; font-size: 14px; "
+            <mat-chip-listbox>
+                <mat-chip-option style="background-color: white; font-size: 14px; "
                     *ngFor="let eachDomain of savedDomains;let k=index"
                     class="DSA_wb_chipStyle-Normal DSA_wb_chip-input marR16  web-GreywhiteBg " disableRipple="true">
                     <a class="icon x-16 icon-close-mini DSA_wb_chipIconRight" (click)="removeDomain(k)"></a>
                     <span> {{eachDomain}}</span>
-                </mat-chip>
-            </mat-chip-list>
+                </mat-chip-option>
+            </mat-chip-listbox>
             </div>
 
         </mat-grid-tile>
@@ -94,14 +94,14 @@
             <span style="position: absolute; left: 10px;" class="marR8" style="color:#7E7E7E">Whitelisted Domains</span>
         </mat-grid-tile>
         <mat-grid-tile [colspan]="8">
-            <mat-chip-list style="position: absolute; left: 10px;">
-                <mat-chip *ngFor="let domains of savedDomains"
+            <mat-chip-listbox style="position: absolute; left: 10px;">
+                <mat-chip-option *ngFor="let domains of savedDomains"
                     class="DSA_wb_chipStyle-Normal DSA_wb_chip-input marR16 web-GreywhiteBg"
                     style="font-size: 14px; background-color: white;" disableRipple="true">
                     <!-- <a  class="icon x-16 icon-close-mini DSA_wb_chipIconRight" ></a> -->
                     {{domains}}
-                </mat-chip>
-            </mat-chip-list>
+                </mat-chip-option>
+            </mat-chip-listbox>
         </mat-grid-tile>
         <!-- <mat-grid-tile [colspan]="2">
 
@@ -205,11 +205,11 @@
     <ng-container *ngFor="let module of moduleListforOrg" >
         
     <div class="col-md-6 col-lg-5 col-xl-4" style="margin-top: 10px;"  *ngIf="module.module.name!='cip' && module.module.name!='Dashboard'"  >
-        <mat-card class="DSA_wb_card-widget"  style="min-height: 146px;">
+        <mat-card appearance="outlined" class="DSA_wb_card-widget"  style="min-height: 146px;">
             <mat-card-header>
                 <mat-card-title class="DSA_wb_flex clearfix">
                     <div class="DSA_wb_flex80">
-                        <img *ngIf="getImageLink(module.module.name)"[src]="getImageLink(module.module.name)" style="margin: -13px;">
+                        <img *ngIf="getImageLink(module.module.name)"[src]="getImageLink(module.module.name)" style="margin: -13px;" alt="">
                         <h2 class="DSA_wb_h2Header DSA_wb_text-1line" style="display: inline;">{{module.module.name}}</h2>
                     </div>
                     <div class="DSA_wb_flex20">
@@ -278,13 +278,13 @@
 <div *ngIf="!(orgSavedShowModule ||showAllModules)" class="row" style="margin-top: 5px;">
     <ng-container *ngFor="let module of noOfModules;let i=index">
     <div class="col-md-6 col-lg-5 col-xl-4" style="margin-top: 10px;"  *ngIf="module.module.name!='cip' && module.module.name!='Dashboard'" >
-        <mat-card class="DSA_wb_card-widget padTB16">
+        <mat-card appearance="outlined" class="DSA_wb_card-widget padTB16">
             <mat-card-header>
                 <mat-card-title class="DSA_wb_flex clearfix">
                     <mat-grid-list cols="12" rowHeight="75px">
                         <mat-grid-tile [colspan]="6" style="height: 35px !important;">
                             <div style="position: absolute; left: 0px; top:10px">
-                                <img  *ngIf=" getImageLink(module.module.name)"  [src]="getImageLink(module.module.name)" style="margin: -13px;">
+                                <img  *ngIf=" getImageLink(module.module.name)"  [src]="getImageLink(module.module.name)" style="margin: -13px;" alt="">
                                 <h2 class="DSA_wb_h2Header DSA_wb_text-1line"  style="display: inline;">{{module.module.name}}</h2>
                             </div>
                         </mat-grid-tile>
@@ -442,7 +442,7 @@
                     [disabled]="!isDataSourceTested">Add Product</button> -->
             </mat-grid-tile>
         </mat-grid-list>
-        <table class="DSA_wb_custom-table usm_table">
+        <table aria-label="" class="DSA_wb_custom-table usm_table">
             <thead>
                 <tr>
                     <th>Product</th>
@@ -718,7 +718,7 @@
         <h5 class="ds_h5Inner">
             Roles
         </h5>
-        <table class="DSA_wb_custom-table usm_table">
+        <table aria-label="" class="DSA_wb_custom-table usm_table">
             <thead>
                 <tr>
                     <th>Organization</th>
@@ -888,7 +888,7 @@
             <button mat-flat-button class="DSA_wb_primary-btn float-right"
                 (click)="saveRoleModulePermission()">{{!isEdit?'Save':'Update'}}</button>
             
-            <table class="DSA_wb_custom-table usm_table">
+            <table aria-label="" class="DSA_wb_custom-table usm_table">
                 <thead>
                     <tr>
                         <th>Group</th>
@@ -910,17 +910,17 @@
                             </td>
 
                             <td>
-                                <mat-chip-list>
+                                <mat-chip-listbox>
                                     <!-- <mat-chip *ngFor="let perm of roleModule.permission" class="DSA_wb_chipStyle-Normal DSA_wb_chip-input marR16" disableRipple="true">
                                     {{perm.permission.permission}}
                                 </mat-chip> -->
-                                    <mat-chip *ngFor="let perm of roleModule.permission;let k=index"
+                                    <mat-chip-option *ngFor="let perm of roleModule.permission;let k=index"
                                         class="DSA_wb_chipStyle-Normal DSA_wb_chip-input marR16" disableRipple="true">
                                         <a  class="icon x-16 icon-close-mini DSA_wb_chipIconRight"
                                             (click)="deleteRolePermission(perm,i,j,k)"></a>
                                         {{perm.permission.permission}}
-                                    </mat-chip>
-                                </mat-chip-list>
+                                    </mat-chip-option>
+                                </mat-chip-listbox>
                             </td>
                             <td>
                                 <button [disabled]="currentRole==roleModule.Role.name" mat-flat-button class="DSA_wb_Icon-btn web-raisedShadow" [matMenuTriggerFor]="menu">
@@ -956,7 +956,7 @@
     </mat-form-field> -->
     <div class="DSA_panel" style="margin-top: 10px;">
         <div [ngBusy]="{busy:busy,backdrop:true}" class="DSA_panelBody padTB16 padLR24">
-            <table class="DSA_wb_custom-table usm_table">
+            <table aria-label="" class="DSA_wb_custom-table usm_table">
                 <thead>
                     <tr>
                         <th>Organization</th>

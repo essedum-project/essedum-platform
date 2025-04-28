@@ -14,19 +14,20 @@
 //
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { Observable } from "rxjs/Observable";
-import { map } from "rxjs/operators";
-import "rxjs/add/observable/of";
-import { catchError } from "rxjs/operators";
-import { throwError, Subject } from "rxjs";
+import { Observable, map, catchError, throwError } from "rxjs";
+// import { Observable } from "rxjs/Observable";
+import { switchMap } from "rxjs/operators";
+// import "rxjs/add/observable/of";
+// import { catchError } from "rxjs/operators";
+import { Subject, from, of } from "rxjs";
 import { Ng4LoadingSpinnerService } from "ng4-loading-spinner";
 import { BehaviorSubject } from "rxjs";
 import { Router } from "@angular/router";
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/observable/throw';
-import * as CryptoJS from 'crypto-js';
+// import 'rxjs/add/operator/catch';
+// import 'rxjs/add/observable/throw';
 import { DashConstant } from "../models/dash-constant";
 import { PageRequestByExample, PageResponse } from "../shared-modules/services/paging";
+import { UsmPortfolio } from "../models/usm-portfolio";
 @Injectable()
 export class ApisService {
   private messageSource = new BehaviorSubject("Please Wait...");
@@ -57,7 +58,7 @@ export class ApisService {
         let temp;
         try {
           temp = JSON.parse(res[0].value)
-        } catch (e) {
+        } catch (e : any)  {
           console.error("JSON.parse error - ", e.message);
         }
         let value = temp;
@@ -70,7 +71,7 @@ export class ApisService {
               let porfolios;
               try {
                 porfolios = JSON.stringify(userInfo.porfolios[0].projectWithRoles[projectindex].projectId)
-              } catch (e) {
+              } catch (e : any)  {
                 console.error("JSON.parse error - ", e.message);
               }
               sessionStorage.setItem(
@@ -91,7 +92,7 @@ export class ApisService {
         let project;
         try {
           project = JSON.parse(sessionStorage.getItem("project"));
-        } catch (e) {
+        } catch (e : any)  {
           console.error("JSON.parse error - ", e.message);
         }
         let value = JSON.parse(res[0].value).defaultprojectroles.filter(
@@ -107,7 +108,7 @@ export class ApisService {
                 let value;
                 try {
                   value = JSON.stringify(element);
-                } catch (e) {
+                } catch (e : any)  {
                   console.error("JSON.stringify error - ", e.message);
                 }
                 sessionStorage.setItem("role", value);
@@ -125,7 +126,7 @@ export class ApisService {
       let project;
       try {
         project = JSON.parse(sessionStorage.getItem("project"));
-      } catch (e) {
+      } catch (e : any)  {
         console.error("JSON.parse error - ", e.message);
       }
       this.dashconstants = this.dashconstants.filter(
@@ -141,7 +142,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     const headerValue = Buffer.from(body, 'utf8').toString('base64');
@@ -176,7 +177,7 @@ export class ApisService {
       if (this.dashconstants && this.dashconstants.length) {
         let tempDashConst = this.dashconstants.filter(item => !item.keys.endsWith('default'))
         if (tempDashConst && tempDashConst.length && tempDashConst[0].project_id.id == project)
-          return Observable.of(this.dashconstants);
+          return of(this.dashconstants);
         else
           return this.callDashConstantApi(project);
       } else
@@ -202,7 +203,7 @@ export class ApisService {
   createDashConstant(dash_constant: DashConstant, isDefault?: boolean): Observable<DashConstant> {
     const copy = this.convert(dash_constant);
     return this.https
-      .post("/api/dash-constants/", copy, { observe: "response" })
+      .post("/api/dash-constants", copy, { observe: "response" })
       .pipe(
         map((response) => {
           if (!isDefault)
@@ -222,7 +223,7 @@ export class ApisService {
   updateDashConstant(dash_constant: DashConstant, isDefault?: boolean): Observable<DashConstant> {
     const copy = this.convert(dash_constant);
     return this.https
-      .put("/api/dash-constants/", copy, { observe: "response" })
+      .put("/api/dash-constants", copy, { observe: "response" })
       .pipe(
         map((response) => {
           if (!isDefault)
@@ -246,8 +247,14 @@ export class ApisService {
 
 
   callDashConstantApi(project) {
+    let portfolio: UsmPortfolio;
+      try {
+        portfolio = JSON.parse(sessionStorage.getItem("project") || "").portfolioId;
+      } catch (e: any) {
+        console.error("JSON.parse error - ", e.message);
+      }
     return this.https
-      .get("/api/get-dash-constants?projectId=" + project, {
+      .get("/api/get-dash-constants?projectId=" + project + "&portfolioId=" + portfolio.id, {
         observe: "response",
       })
       .pipe(
@@ -269,7 +276,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(filters);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     const headerValue = Buffer.from(body, 'utf8').toString('base64');
@@ -291,7 +298,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     const headerValue = Buffer.from(body, 'utf8').toString('base64');
@@ -313,7 +320,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(formdata);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     body = Buffer.from(body, 'utf8').toString('base64');
@@ -324,7 +331,7 @@ export class ApisService {
       .pipe(
         map((response) => {
           if (response.status == 200) {
-            localStorage.setItem("jwtToken", response.body["id_token"]);
+            localStorage.setItem("jwtToken", response.body["access_token"]);
             return new Object(response.body);
           }
         })
@@ -347,8 +354,8 @@ export class ApisService {
         responseType: "text",
       })
       .pipe(
-        map((response) => {
-          result=JSON.parse(this.decryptUsingAES256(response.body,this.salt))
+        switchMap(async (response) => {
+          result=JSON.parse(await this.decryptUsingAES256(response.body,this.salt))
           this.userinfodata = result;
           sessionStorage.removeItem("UpdatedUser");
           return this.userinfodata;
@@ -378,7 +385,7 @@ export class ApisService {
     if (cached && cached == "true") return this.getUserInfo();
     else {
       if (this.userinfodata) {
-        return Observable.of(this.userinfodata);
+        return of(this.userinfodata);
       } else return this.getUserInfo();
     }
   }
@@ -387,12 +394,12 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(users);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
 
     return this.https
-      .put("/api/userss/", body, {
+      .put("/api/userss", body, {
         observe: "response",
       })
       .pipe(
@@ -413,7 +420,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     let headerValue = Buffer.from(body, 'utf8').toString('base64');
@@ -478,16 +485,16 @@ export class ApisService {
   getDatasetDetails(dataset): Observable<any> {
     if (dataset)
       return this.https
-        .get(
+        .post(
           "/api/datasets/getData/" +
           dataset.name +
           "/" +
           localStorage.getItem("organization") +
           "?limit=" +
-          sessionStorage.getItem("Limit"),
+          sessionStorage.getItem("Limit"),dataset.attributes,
           {
             observe: "response",
-            headers: new HttpHeaders().append("attributes", dataset.attributes)
+            // headers: new HttpHeaders().append("attributes", dataset.attributes)
           }
         )
         .pipe(
@@ -502,7 +509,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(users);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -528,7 +535,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     let headerValue = Buffer.from(body, 'utf8').toString('base64');
@@ -557,7 +564,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     let headerValue = Buffer.from(body, 'utf8').toString('base64');
@@ -604,10 +611,10 @@ export class ApisService {
         ? `Status: ${error.status} - Text: ${error.statusText}`
         : "Server error";
     console.error(errMsg); // log to console instead
-    if (error.status === 401) {
-      window.location.href = "/";
-    }
-    return Observable.throw(errMsg);
+    // if (error.status === 401) {
+    //   window.location.href = "/";
+    // }
+    return throwError(errMsg);
   }
 
   handleAPIError(error: any) {
@@ -640,7 +647,7 @@ export class ApisService {
 
     console.log(errObj);
     
-    if (error.status === 401) window.location.href = "/";
+    // if (error.status === 401) window.location.href = "/";
     return throwError(errObj.message);
   }
   changeMessage(message: string) {
@@ -654,7 +661,7 @@ export class ApisService {
   }
  getPermission(mod: any): Observable<any> {
     let role = JSON.parse(sessionStorage.getItem('role')).id
-    return this.https.get( 'api/usm-role-permissionss/formodule/'+role, 
+    return this.https.get( '/api/usm-role-permissionss/formodule/'+role, 
     { observe: 'response', responseType: 'text' ,params: {module: mod}})
       .pipe(map(response => {
         return response.body;
@@ -669,7 +676,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -694,7 +701,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -808,7 +815,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -849,7 +856,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     const headerValue = Buffer.from(body, "utf8").toString("base64");
@@ -877,7 +884,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     const headerValue = Buffer.from(body, "utf8").toString("base64");
@@ -905,7 +912,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     const headerValue = Buffer.from(body, "utf8").toString("base64");
@@ -934,7 +941,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     // if (sessionStorage.getItem('icmUrl') == null || sessionStorage.getItem('icmUrl') == undefined || sessionStorage.getItem('icmUrl') == "" || sessionStorage.getItem("icmUrl") == "undefined" || sessionStorage.getItem("icmUrl") == "null") {
@@ -1003,10 +1010,10 @@ export class ApisService {
 
   
   getBotFactoryNotification(): Observable<any> {
-    return this.https.get<any>("api/notifications");
+    return this.https.get<any>("/api/notifications");
   }
   deleteBotFactoryNotification(notification: any): Observable<any> {
-    let abc = this.https.put<any>("api/notifications", notification, { observe: "response" });
+    let abc = this.https.put<any>("/api/notifications", notification, { observe: "response" });
     //console.log("abc : ",abc);
     return abc;
   }
@@ -1016,7 +1023,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     headerValue = Buffer.from(body, "utf8").toString("base64");
@@ -1043,7 +1050,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(users);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
 
@@ -1068,7 +1075,7 @@ export class ApisService {
     let body;
     try {
       body = JSON.stringify(userDetails);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
 
@@ -1105,24 +1112,24 @@ export class ApisService {
       );
   }
 
-  checkEmail(email): Observable<any> {
-    this.salt = sessionStorage.getItem('encDefault');
-    
-    let emailencrypt=this.encrypt(email,this.salt);
-    let headers = new HttpHeaders();
-    headers = headers.append("email", emailencrypt);
-    return this.https
-      .get("/api/userss/checkemail",  {
-        observe: "response",
-        headers: headers,
-      })
-      .pipe(
-        map((response) => {
-          return response.body;
-        })
-      )
-      .pipe(catchError((err) => this.handleError(err)));
+  checkEmail(email: any): Observable<any> {
+    this.salt = sessionStorage.getItem('encDefault') || '';
+    return from(this.encrypt(email, this.salt)).pipe(
+      switchMap((encryptedEmail) => {
+        let headers = new HttpHeaders();
+        headers = headers.append('email', encryptedEmail);
+        return this.https.get('/api/userss/checkemail', {
+          observe: 'response',
+          headers: headers,
+        });
+      }),
+      map((response) => {
+        return response.body;
+      }),
+      catchError((err) => this.handleError(err))
+    );
   }
+  
   getaicloudUser():Observable<any>{
     return this.https.get("/api/authenticate",{
       observe: "response"
@@ -1130,7 +1137,7 @@ export class ApisService {
     .pipe(
       map((response) => {
         if (response.status == 200) {
-          localStorage.setItem("jwtToken", response.body["id_token"]);
+          localStorage.setItem("jwtToken", response.body["access_token"]);
           return new Object(response.body);
         }
       })
@@ -1138,14 +1145,14 @@ export class ApisService {
     .pipe(catchError((err) => this.handleError(err)));
    }
    getUserAtLogin(event:any) {
-    localStorage.setItem("jwtToken", localStorage.getItem("id_token"));
+    localStorage.setItem("jwtToken", localStorage.getItem("access_token"));
     this.getUserInfoData().subscribe(
      (userInfo) => {
       if (userInfo.porfolios.length == 0) {
        let activeProfiles;
         try{
           activeProfiles = JSON.parse(sessionStorage.getItem("activeProfiles"));
-        } catch (e) {
+        } catch (e : any)  {
         console.error("JSON.parse error - ", e.message);
         }
        if (
@@ -1167,7 +1174,7 @@ export class ApisService {
       let activeProfiles;
         try{
           activeProfiles = JSON.parse(sessionStorage.getItem("activeProfiles"));
-        } catch (e) {
+        } catch (e : any)  {
         console.error("JSON.parse error - ", e.message);
         }
       if (
@@ -1188,33 +1195,80 @@ export class ApisService {
   public onCancelPendingRequests() {
     return this.cancelPendingRequests$.asObservable()
   }
-  encrypt(dashFilter,key){
-    key= window.btoa(key);
-    var parsedBase64Key = CryptoJS.enc.Base64.parse(key);
-    let iv =  CryptoJS.enc.Base64.parse(key);
-    var encrypted = CryptoJS.AES.encrypt(dashFilter, parsedBase64Key, {
-      blockSize: 128,
-      keySize: 128,
-      iv: iv,
-      mode: CryptoJS.mode.CBC,
-      padding: CryptoJS.pad.Pkcs7
-  });
-  return encrypted.toString();
+  async encrypt(plaintext, password) {
+
+    const encryptedData = await this.encryptgcm(plaintext, password);
+    return JSON.stringify(encryptedData);
 
   }
-  decryptUsingAES256(decString,key) {
-    key= window.btoa(key);
-    var parsedBase64Key = CryptoJS.enc.Base64.parse(key);
-    let iv =  CryptoJS.enc.Base64.parse(key);
-    var decrypted = CryptoJS.AES.decrypt(decString, parsedBase64Key, {
-      blockSize: 128,
-      keySize: 128,
-      iv: iv,
-      mode: CryptoJS.mode.CBC,
-      padding: CryptoJS.pad.Pkcs7
-    });
-    // console.log('Decrypted : ' + decrypted);
-    // console.log('utf8 = ' + decrypted.toString(CryptoJS.enc.Utf8));
-    return decrypted.toString(CryptoJS.enc.Utf8);
-}
+
+  async decryptUsingAES256(cipherResponse, password) {
+    
+    let cipherJson = JSON.parse(cipherResponse);    
+    let output = await this.decryptgcm(cipherJson["ciphertext"], cipherJson["iv"], password);
+    return output;
+
+  }
+
+  async decryptgcm(ciphertext, iv, password) {
+    // Decode the ciphertext and IV from Base64 strings
+    const decodedCiphertext = Uint8Array.from(atob(ciphertext), c => c.charCodeAt(0));
+    const decodedIV = Uint8Array.from(atob(iv), c => c.charCodeAt(0));
+
+    // Prepare the decryption parameters
+    const algorithm = {
+      name: 'AES-GCM',
+      iv: decodedIV
+    };
+
+    // Import the key from password
+    const importedKey = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(password),
+      algorithm,
+      false,
+      ['decrypt']
+    )
+
+    const decryptedData = await crypto.subtle.decrypt(algorithm, importedKey, decodedCiphertext);
+    const decryptedText = new TextDecoder().decode(decryptedData);
+
+    return decryptedText;
+
+  }
+
+  async encryptgcm(plaintext, password) {
+    // Generate random 12-byte IV
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+  
+    // Prepare the encryption parameters
+    const algorithm = {
+      name: 'AES-GCM',
+      iv: iv
+    };
+  
+    // Import the key from password
+    const importedKey = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(password),
+      algorithm,
+      false,
+      ['encrypt']
+    );
+
+    // Encrypt the plaintext
+    const encodedText = new TextEncoder().encode(plaintext);
+    const ciphertext = await crypto.subtle.encrypt(algorithm, importedKey, encodedText);
+
+    const ciphertextArray = Array.from(new Uint8Array(ciphertext)); 
+    // Convert Uint8Array to regular array 
+    const encodedCiphertext = btoa(String.fromCharCode.apply(null, ciphertextArray));
+    // const encodedIV = btoa(Array.from(iv));
+    // const encodedIV = btoa(String.fromCharCode.apply(null, iv));
+    const encodedIV = btoa( Array.from(iv) .map((byte) => String.fromCharCode(byte)) .join('') );
+
+    const encryptedJSON = { ciphertext: encodedCiphertext, iv: encodedIV }
+
+    return encryptedJSON;
+  }
 }

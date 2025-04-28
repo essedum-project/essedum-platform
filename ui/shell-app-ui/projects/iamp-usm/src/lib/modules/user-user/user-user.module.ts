@@ -34,7 +34,7 @@ import { UserUserComponent } from "../../entities/User-user/user-user.component"
     NgBusyModule
   ],
   exports: [UserUserComponent],
-  entryComponents:[UserUserComponent],
+  // entryComponents:[UserUserComponent],
   providers: [UseruserService],
 })
 export class UserUserModule { }

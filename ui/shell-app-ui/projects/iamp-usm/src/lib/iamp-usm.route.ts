@@ -16,42 +16,58 @@ import { DelegateFormComponent } from "./components/delegate-form/delegate-form.
 import { ProcessFormComponent } from "./components/process-form/process-form.component";
 import { StageFormComponent } from "./components/stage-form/stage-form.component";
 import { CopyBlueprintComponent } from "./components/copy-blueprint/copy-blueprint.component";
-
+import { UsmModuleComponent } from "./entities/usm-module/usm-module.component";
+import { UsmPermissionDetailsComponent } from "./entities/usm-permission/usm-permission-details/usm-permission-details.component";
+import { UsmPermissionComponent } from "./entities/usm-permission/usm-permission.component";
+import { SecretsComponent } from "./components/secrets/secrets.component";
+import { PersonalAccessTokenUserComponent } from "./components/personal-access-token/user-view/personal-access-token-user.component";
 const routes: Routes = [
- {
-  path: "",
-  component: IampUserMgmtComponent,
-  children: [
-   { path: "manageUsers", component: ManageUsersComponent },
-   { path: "manageUsers/:uid/:view", component: ManageUsersComponent },
-   { path: "projectlist", component: ProjectListViewComponent },
-   { path: "projectlist/:projectid/:view", component: ProjectListViewComponent },
-   { path: "role/list", component: RoleListComponent },
-   { path: "role/view/:rid", component: RoleDetailComponent },
-   { path: "role/edit/:rid", component: RoleDetailComponent },
-   { path: "role/create", component: RoleDetailComponent },
-   { path: "portfoliolist", component: UsmPortfolioListViewComponent },
-   { path: "portfoliolist/:id/:view", component: UsmPortfolioListViewComponent },
-   { path: "portfoliolist/create", component: UsmPortfolioListViewComponent },
-   { path: "permissionlist", component: UsmRolePermissionComponent },
-   { path: "permissionlist/create/permission", component: UsmRolePermissionComponent },
-   { path: "permissionlist/:id/:view", component: UsmRolePermissionComponent },
-   { path: 'export-import', component: ExportImportComponent },
-   { path: "dashconstant", component: DashConstantComponent },
-   { path: "dashconstant/:dashconstantid/:dashconstantview", component: DashConstantComponent },
-   { path: "theme" , component:ThemeMgmtComponent},
-   { path: "subscription", component: OrgDashboardComponent },
-   { path: "UserConfiguration", component: UserConfigurationComponent },
-   { path: "process", component: ProcessFormComponent },
-   { path: "stage", component: StageFormComponent },
-   { path: 'copy-blueprint', component: CopyBlueprintComponent },
-  ],
- },
+    {
+        path: "",
+        component: IampUserMgmtComponent,
+        children: [
+            { path: "manageUsers", component: ManageUsersComponent },
+            { path: "manageUsers/:uid/:view", component: ManageUsersComponent },
+            { path: "projectlist", component: ProjectListViewComponent },
+            { path: "projectlist/:projectid/:view", component: ProjectListViewComponent },
+            { path: "role/list", component: RoleListComponent },
+            { path: "role/view/:rid", component: RoleDetailComponent },
+            { path: "role/edit/:rid", component: RoleDetailComponent },
+            { path: "role/create", component: RoleDetailComponent },
+            { path: "modulelist", component: UsmModuleComponent },
+            { path: "modulelist/:id/:view", component: UsmModuleComponent },
+            { path: "modulelist/create", component: UsmModuleComponent },
+            { path: "portfoliolist", component: UsmPortfolioListViewComponent },
+            { path: "portfoliolist/:id/:view", component: UsmPortfolioListViewComponent },
+            { path: "portfoliolist/create", component: UsmPortfolioListViewComponent },
+            { path: "permissionlist", component: UsmRolePermissionComponent },
+            { path: "permissionlist/create/permission", component: UsmRolePermissionComponent },
+            { path: "permissionlist/:id/:view", component: UsmRolePermissionComponent },
+            { path: 'export-import', component: ExportImportComponent },
+            { path: "dashconstant", component: DashConstantComponent },
+            { path: "dashconstant/:dashconstantid/:dashconstantview", component: DashConstantComponent },
+            { path: "dashconstant/:configtype/:dashconstantid/:dashconstantview", component: DashConstantComponent },
+            { path: "dashconstant/:configtype", component: DashConstantComponent },
+            { path: "secret", component: SecretsComponent},
+            { path: "secret/:key/:type", component: SecretsComponent},
+            { path: "theme", component: ThemeMgmtComponent },
+            { path: "subscription", component: OrgDashboardComponent },
+            { path: "UserConfiguration", component: UserConfigurationComponent },
+            { path: "process", component: ProcessFormComponent },
+            { path: "stage", component: StageFormComponent },
+            { path: 'copy-blueprint', component: CopyBlueprintComponent },
+            { path: "usmPermission/create", component: UsmPermissionDetailsComponent },
+            { path: "usmPermission/edit/:rid/true", component: UsmPermissionDetailsComponent },
+            { path: "usmPermission/view/:rid/false", component: UsmPermissionDetailsComponent },
+            { path: "usmPermission/list", component: UsmPermissionComponent },
+            { path: "user-profile", component: PersonalAccessTokenUserComponent }
+        ],
+    },
 ];
 
 @NgModule({
- exports: [RouterModule],
- imports: [RouterModule.forChild(routes)],
- declarations: [],
+    exports: [RouterModule],
+    imports: [RouterModule.forChild(routes)],
+    declarations: [],
 })
-export class IampUsmRouteModule {}
+export class IampUsmRouteModule { }

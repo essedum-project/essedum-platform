@@ -22,6 +22,7 @@ import {
   OnInit,
   ViewChild,
   ElementRef,
+  OnDestroy,
 } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { PageResponse } from "../../support/paging";
@@ -38,16 +39,17 @@ import { UsmPortfolio } from "../../models/usm-portfolio";
 import { UsmPortfolioService } from "../../services/usm-portfolio.service";
 import { LeapTelemetryService } from "../../telemetry-util/telemetry.service";
 import { DeleteComponent } from "../../shared-modules/confirm-delete/delete.component";
-import { Subscription } from "rxjs/Subscription";
+import { Subscription } from "rxjs";
 import { IampUsmService } from "../../iamp-usm.service";
 import { Project } from "../../models/project";
 import { ProjectService } from "../../services/project.service";
+import { OpenTelemetryService } from "../../telemetry-util/open-telemetry.service";
 
 @Component({
   templateUrl: "usm-portfolio-list-view.component.html",
   selector: "usm-portfolio-list-view",
 })
-export class UsmPortfolioListViewComponent implements OnInit {
+export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
   @Input() header = "UsmPortfolios...";
   @Output() changeView: EventEmitter<boolean> = new EventEmitter();
   @Input() sub: boolean = false;
@@ -92,6 +94,7 @@ export class UsmPortfolioListViewComponent implements OnInit {
     private telemetryService: LeapTelemetryService,
     private usmService: IampUsmService,
     public projectService: ProjectService,
+    private openTelemetryService: OpenTelemetryService
   ) { }
 
   //Temps
@@ -176,9 +179,9 @@ export class UsmPortfolioListViewComponent implements OnInit {
       this.view = true;
       this.viewUsmPortfolio = true;
       this.buttonFlag = true;
-      this.route.params.subscribe((res) => {
+      this.route.params.subscribe((res:any) => {
         //res.id
-        this.getUsmPortfolios(Number(window.atob(res.id)));
+        this.getUsmPortfolios(res.id);
       });
       this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
     } else if (window.location.href.includes("portfoliolist") && window.location.href.includes("false")) {
@@ -186,9 +189,9 @@ export class UsmPortfolioListViewComponent implements OnInit {
       this.edit = true;
       this.view = false;
       this.buttonFlag = false;
-      this.route.params.subscribe((res) => {
+      this.route.params.subscribe((res:any) => {
         //res.id
-        this.getUsmPortfolios(Number(window.atob(res.id)));
+        this.getUsmPortfolios(res.id);
       });
       this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
     } else if (window.location.href.includes("portfoliolist") && window.location.href.includes("create")) {
@@ -202,7 +205,13 @@ export class UsmPortfolioListViewComponent implements OnInit {
     }
   }
   telemetryImpression() {
-    this.telemetryService.impression("iamp-usm", "list", "UsmPortfolioListViewComponent");
+    // this.telemetryService.impression("iamp-usm", "list", "UsmPortfolioListViewComponent");
+    this.openTelemetryService.startTelemetry("iamp-usm", "UsmPortfolioListViewComponent", "list");
+  }
+
+  ngOnDestroy() {
+    let activeSpan = this.openTelemetryService.fetchActiveSpan();
+    this.openTelemetryService.endTelemetry(activeSpan);
   }
 
   listView() {
@@ -235,27 +244,27 @@ export class UsmPortfolioListViewComponent implements OnInit {
       (error) => this.messageService.error("Could not get the results", "IAMP")
     );
     });
-    
-  
+
+
   }
 
-  editUsmPortfolio(usmPortfolio) {
+  editUsmPortfolio(usmPortfolio: UsmPortfolio) {
     sessionStorage.setItem("usmPortfolioid", usmPortfolio.id.toString());
     sessionStorage.setItem("pageview", "usmPortfolio");
     if (window.location.href.includes("true") || window.location.href.includes("false")) {
-      this.router.navigate(["./" + window.btoa(usmPortfolio.id) + "/" + false], { relativeTo: this.route });
+      this.router.navigate(["./" + usmPortfolio.id + "/" + false], { relativeTo: this.route });
     } else {
-      this.router.navigate(["./" + window.btoa(usmPortfolio.id) + "/" + false], { relativeTo: this.route });
+      this.router.navigate(["./" + usmPortfolio.id + "/" + false], { relativeTo: this.route });
     }
   }
 
-  view_UsmPortfolio(usmPortfolio) {
+  view_UsmPortfolio(usmPortfolio: UsmPortfolio) {
     sessionStorage.setItem("usmPortfolioid", usmPortfolio.id.toString());
     sessionStorage.setItem("pageview", "usmPortfolio");
     if (window.location.href.includes("true") || window.location.href.includes("false")) {
-      this.router.navigate(["./" +  window.btoa(usmPortfolio.id )+ "/" + true], { relativeTo: this.route });
+      this.router.navigate(["./" + usmPortfolio.id + "/" + true], { relativeTo: this.route });
     } else {
-      this.router.navigate(["./" + window.btoa( usmPortfolio.id) + "/" + true], { relativeTo: this.route });
+      this.router.navigate(["./" + usmPortfolio.id + "/" + true], { relativeTo: this.route });
     }
   }
 
@@ -283,7 +292,7 @@ export class UsmPortfolioListViewComponent implements OnInit {
       !/^[a-zA-Z][a-zA-Z0-9 \@\%\!\#\*\-\_\&\$\(\)\=\+\/\.\?\\]*?$/.test(this.usmPortfolio.portfolioName)
     ) {
       this.messageService.error("Portfolio name format is incorrect", "IAMP");
-    }else if (this.usmPortfolio.description && (!/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(this.usmPortfolio.description))) {
+    }else if (this.usmPortfolio.description && (!/^[a-zA-Z0-9][a-zA-Z0-9 \-\_\.]*?$/.test(this.usmPortfolio.description))) {
       this.messageService.error("Portfolio description format is incorrect", "IAMP");
     } else {
       let flag: boolean = false;
@@ -295,7 +304,7 @@ export class UsmPortfolioListViewComponent implements OnInit {
       });
       if (!flag) {
         if (sessionStorage.getItem("telemetry") == "true") {
-          this.telemetryService.audit(this.usmPortfolio,"CREATE");
+          // this.telemetryService.audit(this.usmPortfolio,"CREATE");
           }
         this.busy = this.usmPortfolioService.create(this.usmPortfolio).subscribe(
           (response) => {
@@ -337,7 +346,7 @@ export class UsmPortfolioListViewComponent implements OnInit {
       !/^[a-zA-Z][a-zA-Z0-9 \@\%\!\#\*\-\_\&\$\(\)\=\+\/\.\?\\]*?$/.test(this.usmPortfolio.portfolioName)
     ) {
       this.messageService.error("Portfolio name format is incorrect", "IAMP");
-    }else if (this.usmPortfolio.description && (!/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(this.usmPortfolio.description))) {
+    }else if (this.usmPortfolio.description && (!/^[a-zA-Z0-9][a-zA-Z0-9 \-\_\.]*?$/.test(this.usmPortfolio.description))) {
       this.messageService.error("Portfolio description format is incorrect", "IAMP");
     } else {
       let flag: boolean = false;
@@ -355,11 +364,11 @@ export class UsmPortfolioListViewComponent implements OnInit {
           let arr1=[];
           if(this.usmPortfolios){
          arr1 = this.usmPortfolios.filter(
-            (item) => item.id == this.usmPortfolio.id 
+            (item) => item.id == this.usmPortfolio.id
           );
           }
           let diff=this.compareTodiff(this.usmPortfolio,arr1[0])
-          this.telemetryService.audit(this.usmPortfolio, arr1[0],diff);
+          // this.telemetryService.audit(this.usmPortfolio, arr1[0],diff);
         }
         this.busy = this.usmPortfolioService.update(this.usmPortfolio).subscribe(
           (rs) => {
@@ -529,7 +538,7 @@ export class UsmPortfolioListViewComponent implements OnInit {
     //  else if (this.searchedName == "" || this.filterUsmPortfolio == "") {
     //   this.Clear();
     //   this.filterFlag = false;
-    // } 
+    // }
     else if (this.searchedName != undefined && (this.filterUsmPortfolio == undefined || this.filterUsmPortfolio == "")) {
       params = {
         portfolioName: this.searchedName,

@@ -1,0 +1,190 @@
+<div class="col-md-12 centerStyle paddingBottom selector-875-1" style="border: none">
+    <div class="selector-875-2">
+      <div class="clearfix selector-875-3">
+        <div class="padTop20 selector-875-4">
+          <h2 class="ams_h2 h2Mar selector-875-5">Permission list</h2>
+          <div class="ams_toptoolbar selector-875-6">
+                      <i class="fa fa-plus-square-o create-icon-color selector-875-17" (click)="createView()"
+                          *ngIf="createFlag" aria-hidden="true"></i>
+                      <span style="cursor: pointer" (click)="createView()" *ngIf="createFlag"
+                          class="selector-875-18">Create Permission</span>
+          </div>
+          <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-875-19 filterStyle">
+            <h3 class="clearfix selector-875-20">
+              <div class="search-container ams_cusSrch pull-left selector-875-21">
+                <input style="color: black;" #myInput="" type="text" placeholder="Search by module"
+                  (keypress)="checkEnterPressed($event, myInput.value)" class="selector-875-22" />
+                <button type="button" (click)="filterItem(myInput.value)" class="selector-875-23">
+                  <i class="searchIcon selector-875-24"></i>
+                </button>
+              </div>
+              <a href="javascript:void(0)" class="paddLeft selector-875-25">Filter</a>
+            </h3>
+            <div class="ams_panelCnt formRow relative selector-665-16 labelsAlign">
+              <div class="row rwMAr selector-665-17">
+                <div class="col-md-6 clearboth selector-665-22">
+                  <mat-form-field style="width: 85%;padding-top: 0vh !important;" class="selector-665-23">
+                    <label class="formLabel selector-665-24" style="margin: auto;" >Module</label>
+                    <mat-select [(ngModel)]="filterModule" name="module" (selectionChange)="isEmpty()" class="selector-665-25" panelClass="matpanel">
+                      <mat-option *ngFor="let item of usm_modules; trackBy: trackByMethod" [value]="item" class="selector-665-26">
+                        <div  class="td-span td-ellipsis pull-left selector-665-261" matTooltipClass="crud-tooltip" [matTooltip]="item">{{ item}}</div>
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div class="col-md-6 selector-665-18">
+                  <label class="formLabel selector-665-19" style="position: sticky;">Permission</label>
+                  <div class="input-group ams_datetime selector-665-20" style="margin-top: 1%">
+                    <input matInput [(ngModel)]="filterPermission" (keyup)="isEmpty()" class="txtInput selector-876-18"  />
+                  </div>
+                </div>
+                <div class="col-md-6 selector-665-18">
+                  <label class="formLabel selector-665-19" style="position: sticky;">Api Name</label>
+                  <div class="input-group ams_datetime selector-665-20" style="margin-top: 1%">
+                    <input matInput [(ngModel)]="filterApi" (keyup)="isEmpty()" class="txtInput selector-876-18" />
+                  </div>
+                </div>
+                <div class="col-md-6 clearboth selector-665-2594" >
+                  <mat-form-field style="width: 85%;padding-top: 0vh !important;" class="selector-665-2337">
+                    <label  class="formLabel selector-665-2596" style="margin: auto;">Type</label>
+                    <mat-select [(ngModel)]="filterType" (selectionChange)="isEmpty()" name="type" class="selector-665-2523">
+                      <mat-option *ngFor="let item of methodType; trackBy: trackByMethod" [value]="item"  class="selector-665-2597">
+                        <div style="padding-top: 10px;" class="td-span td-ellipsis pull-left selector-665-665-2598"  matTooltipClass="crud-tooltip" [matTooltip]="item">{{ item }}</div>
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="ams_panelFooter selector-665-27">
+                <button type="button" class="genBtn marRght30 selector-665-28"[ngStyle]="isDisabled ? {'opacity':'.5'} : {'opacity':'1'}" [disabled]="isDisabled"  (click)="search()">Submit</button>
+                <button type="button" class="secBtn selector-665-29" (click)="Clear()">Clear</button>
+              </div>
+            </div>
+          </div>
+          <div class="selector-875-41">
+            <div class="ams_panelCnt formRow relative selector-875-42" style="margin-top: auto;">
+              <div style="float: right; cursor: pointer" class="selector-875-47">
+                <i class="fa fa-list-ul fa-lg icon1 selector-875-48" aria-hidden="true" matTooltip="Table View"
+                  (click)="showList = true"></i>
+                <i class="fa fa-th-large fa-lg icon1 selector-875-49" aria-hidden="true" matTooltip="Card View"
+                  (click)="showList = false"></i>
+              </div>
+              <br class="selector-875-50" />
+              <br class="selector-875-51" />
+              <!-- card view -->
+              <div class="row selector-875-40" *ngIf="!showList &amp;&amp; permission.length >= 0">
+  
+                <div class="col-md-6 selector-875-41" *ngFor="
+                                  let usmPermission of permission | paginate: { itemsPerPage: 6, currentPage: p };
+                                  trackBy: trackByMethod
+                                ">
+                  <div class="ams_cardCtr ams_cardfooterCtr selector-875-42">
+                    <div class="ams_cardBorder clearfix selector-875-43">
+                                    <h4 class="td-ellipsis selector-875-44" [matTooltip]="usmPermission.permission" [TooltipDisabled]="usmPermission.permission == null" matTooltipClass="crud-tooltip">
+                        {{ usmPermission.permission }}
+                      </h4>
+                      <div class="ams_cardCnt selector-875-45">
+                        <div class="row rwMAr selector-875-46">
+                          <div class="col-md-6 selector-875-47">
+                            <label class="formLabel selector-875-48">ID</label>
+                            <span class="formSpan selector-875-49">{{ usmPermission.id }}</span>
+                          </div>
+                          <div class="col-md-6 selector-875-50">
+                            <label class="formLabel selector-875-51">Module</label>
+                                          <span class="formSpan selector-875-52" [matTooltip]="usmPermission.module" [matTooltipDisabled]="usmPermission.module == null" matTooltipClass="crud-tooltip">{{ usmPermission.module }}</span>
+                          </div>
+                        </div>
+  
+                      </div>
+                    </div>
+                    <div class="selector-875-60">
+                      <div class="selector-875-61">
+                        <div class="ams_cardfooter text-center selector-875-62">
+                                        <i class="fa fa-info-circle fa-lg create-icon-color selector-875-63" aria-hidden="true" matTooltip="View  Permission" (click)="viewPermission(usmPermission)" style="padding-right: 2%"></i>
+                                        <i class="fa fa-pencil fa-lg create-icon-color selector-875-64" aria-hidden="true" matTooltip="Edit  permission"  (click)="editPermission(usmPermission)" style="padding-right: 2%"></i>
+                                        <i class="fa fa-trash fa-lg create-icon-color selector-875-65" aria-hidden="true" (click)="deletePermission(usmPermission)"  matTooltip="Delete  Permission"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-12 selector-875-66" id="noRecordsMsg">
+                  <pagination-controls (pageChange)="p = $event" class="selector-875-67"></pagination-controls>
+                </div>
+              </div>
+            </div>
+            <!-- list view -->
+            <div *ngIf="permissionLength > 0 &amp;&amp; showList" class="table-responsive selector-875-76">
+              <mat-card appearance="outlined" class="selector-674-61">
+                <mat-card-content class="selector-674-62">
+              <table aria-label="" mat-table="" [dataSource]="permissionList" class="table-hover list-table table selector-875-77"
+                matSort="" matSortActive="scheduled_from" matSortDirection="asc">
+                <ng-container matColumnDef="id" class="selector-875-78">
+                  <th mat-header-cell="" *matHeaderCellDef="" class="number-col selector-875-79">
+                    <strong class="selector-875-80"> Permission Id </strong>
+                  </th>
+                  <td mat-cell="" (click)="viewPermission(permission)" style="cursor:pointer" *matCellDef="let permission"
+                    class="td-ellipsis number-col selector-875-81">
+                                      <div class="td-span td-ellipsis pull-right td-padding selector-875-82"
+                                          [matTooltip]="permission.id" [matTooltipDisabled]="permission.id == null"
+                                          matTooltipClass="crud-tooltip">
+                      {{ permission.id ? permission.id : "--" }}
+                    </div>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="module" class="selector-875-83">
+                  <th mat-header-cell="" *matHeaderCellDef="" class="selector-875-84">
+                    <strong class="selector-875-85"> Module </strong>
+                  </th>
+                  <td mat-cell="" (click)="viewPermission(permission)" style="cursor:pointer" *matCellDef="let permission"
+                    class="td-ellipsis selector-875-86">
+                                      <div class="td-span td-ellipsis pull-left td-padding selector-875-87"
+                                          [matTooltip]="permission.module" [matTooltipDisabled]="permission.module == null"
+                                          matTooltipClass="crud-tooltip">
+                      {{ permission.module ? permission.module : "--" }}
+                    </div>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="permission" class="selector-875-88">
+                  <th mat-header-cell="" *matHeaderCellDef="" class="selector-875-89">
+                    <strong class="selector-875-90"> Permission </strong>
+                  </th>
+                  <td mat-cell="" (click)="viewPermission(permission)" style="cursor:pointer" *matCellDef="let permission"
+                    class="td-ellipsis selector-875-91">
+                    <div class="td-span td-ellipsis pull-left td-padding selector-875-92"
+                      [matTooltip]="permission.permission" [matTooltipDisabled]="permission.permission == null"
+                      matTooltipClass="crud-tooltip">
+                      {{ permission.permission ? permission.permission : "--" }}
+                    </div>
+                  </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="actions" class="selector-875-98">
+                  <th mat-header-cell="" *matHeaderCellDef="" class="actions-col selector-875-99">
+                    <strong class="selector-875-100"> Actions </strong>
+                  </th>
+                  <td mat-cell="" *matCellDef="let permission" class="actions-col selector-875-101">
+                                      <i class="fa fa-info-circle fa-lg create-icon-color selector-875-102"
+                                          aria-hidden="true" (click)="viewPermission(permission)" matTooltip="View Permission"></i>
+                    <i class="fa fa-pencil fa-lg create-icon-color selector-875-103" aria-hidden="true"
+                      (click)="editPermission(permission)" matTooltip="Edit Permission" style="padding-left: 5px"></i>
+                    <i class="fa fa-trash fa-lg create-icon-color selector-875-104" aria-hidden="true"
+                      style="padding-left: 5px" (click)="deletePermission(permission)" matTooltip="Delete Permission"></i>
+                  </td>
+                </ng-container>
+                <tr mat-header-row="" *matHeaderRowDef="displayedColumns" class="selector-875-105"></tr>
+                <tr mat-row="" *matRowDef="let row; columns: displayedColumns" class="selector-875-106">
+                </tr>
+              </table>
+              <div style="padding-bottom: 40px;">
+              <mat-paginator [pageSize]="6" showFirstLastButtons="" class="selector-875-107"></mat-paginator>
+            </div>
+            </mat-card-content>
+          </mat-card>
+            </div>
+          </div>
+          <div *ngIf="permission.length == 0" id="noRecordsMsg" class="selector-875-108">No Records Found</div>
+        </div>
+      </div>
+    </div>
+  </div>

@@ -1,4 +1,6 @@
-.mat-tab-label-active {
+
+/* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
+.mat-mdc-tab-label-active {
     opacity: 1 !important;
     border-bottom: solid 2px #3f51b5;
 }

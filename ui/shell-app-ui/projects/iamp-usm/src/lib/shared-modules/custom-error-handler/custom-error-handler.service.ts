@@ -1,6 +1,6 @@
-import { throwError } from "rxjs";
+// import { throwError } from "rxjs";
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs/Observable";
+import { Observable, throwError } from "rxjs";
 import { MessageService } from "../../services/message.service";
 @Injectable({
  providedIn: "root",
@@ -43,7 +43,7 @@ export class CustomErrorHandlerService {
 
   console.dir(error);
 
-  if (error.status === 401) window.location.href = "/";
+//   if (error.status === 401) window.location.href = "/";
   return throwError(errObj.message);
  }
 }

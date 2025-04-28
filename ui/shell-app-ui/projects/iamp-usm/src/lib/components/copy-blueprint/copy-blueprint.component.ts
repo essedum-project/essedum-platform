@@ -8,6 +8,11 @@ import { takeUntil } from 'rxjs/operators';
 import { Project } from '../../models/project';
 import { MessageService } from '../../services/message.service';
 import { ProjectService } from '../../services/project.service';
+import { ApisService } from 'src/app/services/apis.service';
+import { JobServices } from './jobs/jobservice';
+import { DashConstantService } from 'com-lib-util';
+import { JobsComponent } from './jobs/jobs.component';
+
 
 @Component({
   selector: 'lib-copy-blueprint',
@@ -15,7 +20,7 @@ import { ProjectService } from '../../services/project.service';
   styleUrls: ['./copy-blueprint.component.css']
 })
 export class CopyBlueprintComponent implements OnInit {
-
+  @ViewChild(JobsComponent) jobsComponent: JobsComponent;
   busy: Subscription;
   fromProject: Project = new Project();
   toProject: Project = new Project();
@@ -39,21 +44,48 @@ export class CopyBlueprintComponent implements OnInit {
   };
   sourceProjectList: Project[] = [];
   destinationProjectList: Project[] = [];
+  copyDisabled: boolean = false;
   constructor(
+    protected dashConstantService: DashConstantService,
     private messageService: MessageService,
     private projectService: ProjectService,
     private route: Router,
-    private router: ActivatedRoute
+    private router: ActivatedRoute,
+    private apisService: ApisService,
+    private service: JobServices,
   ) { }
-  cols12=5;
-  colspan2=1;
+  cols12 = 5;
+  colspan2 = 1;
+  role: any;
+  processdata: any;
+  filteredProjectListcopy = [];
+  desProj: string;
   onResize(event) {
     this.cols12 = (event.target.outerWidth <= 640) ? 1 : 5;
-    this.colspan2 = (event.target.outerWidth <= 640) ? 1 : 1; 
+    this.colspan2 = (event.target.outerWidth <= 640) ? 1 : 1;
   }
 
-    
+
   ngOnInit(): void {
+    this.lazyloadevent.rows=this.dashConstantService.getrowCount();
+    this.desProj = sessionStorage.getItem("organization");
+    let totalJobs = 0;
+    let internalJobs = ['CopyPipelines', 'CopyDatasets', 'CopyDashboards']
+    internalJobs.forEach((job, index) => {
+      this.service.fetchInternalJobLenByname(job, this.desProj).
+        subscribe(
+          response => {
+            var n: Number = new Number(response);
+            totalJobs = totalJobs + n.valueOf();
+            if (index == internalJobs.length - 1) {
+              if (totalJobs > 0) {
+                this.copyDisabled = true;
+              }
+            }
+          },
+          error => this.service.message('Could not fetch jobs', 'error')
+        );
+    });
     this.cols12 = (window.outerWidth <= 640) ? 1 : 5;
     this.colspan2 = (window.outerWidth <= 640) ? 1 : 1;
     let project: Project = new Project();
@@ -62,10 +94,37 @@ export class CopyBlueprintComponent implements OnInit {
         this.sourceProjectList = response.content.sort((a, b) =>
           a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
         );
-        this.sourceProjectList= this.sourceProjectList.filter((project) => project.name.toLowerCase()!="core");
-        this.destinationProjectList=Object.assign([],this.sourceProjectList)
+        let index = this.sourceProjectList.findIndex(x => x.name === sessionStorage.getItem("organization"));
+        this.toProject = this.sourceProjectList[index];
+        try {
+          this.role = JSON.parse(sessionStorage.getItem("role"));
+        } catch (e: any) {
+          this.role = null;
+          console.error("JSON.parse error - ", e.message);
+        }
+        if (this.role.projectadmin) {
+          this.apisService.getUserInfoData().subscribe((pageResponse) => {
+            this.processdata = pageResponse["porfolios"];
+            this.processdata.forEach((element) => {
+              if (element.porfolioId.id) {
+                element.projectWithRoles.forEach((element1) => {
+                  this.sourceProjectList.forEach((ele) => {
+                    if (ele.id == element1.projectId.id) {
+                      this.filteredProjectListcopy.push(ele);
+                    }
+                  })
+                });
+              }
+            });
+          });
+        }
+        this.sourceProjectList = this.sourceProjectList.filter((project) => project.name.toLowerCase() != "core");
+        this.destinationProjectList = Object.assign([], this.sourceProjectList)
+        if (this.role.projectadmin) {
+          this.destinationProjectList = Object.assign([], this.filteredProjectListcopy)
+        }
         this.filteredProjectList.next(this.sourceProjectList.slice());
-        this.filteredDestProjectList.next(this.sourceProjectList.slice());
+        this.filteredDestProjectList.next(this.destinationProjectList.slice());
       }
     );
 
@@ -80,7 +139,7 @@ export class CopyBlueprintComponent implements OnInit {
         this.filterProject();
       });
   }
-  
+
   filterProject() {
     if (!this.sourceProjectList) {
       return;
@@ -118,34 +177,45 @@ export class CopyBlueprintComponent implements OnInit {
   copy() {
     this.clickedcopyblueprint = true;
     if (this.fromProject == null || this.fromProject == undefined) {
-      this.messageService.info("Source Project Should be Selected", "IAMP");
+      this.service.message("Source Project Should be Selected", "error");
       this.clickedcopyblueprint = false;
-    } 
+    }
     else if (!this.toProject.name || this.toProject.name == null || this.toProject.name == undefined) {
-      this.messageService.info("Destiantion Project Should be Selected", "IAMP");
+      this.service.message("Destination Project Should be Selected", "error");
       this.clickedcopyblueprint = false;
-    } 
+    }
+    else if(this.toProject.name.toLowerCase() == "core"){
+      this.service.message("Cannot copy to Core Project", "error");
+      this.clickedcopyblueprint = false;
+    }
     else if (this.fromProject.name == this.toProject.name) {
-      this.messageService.info("Source Project and Destination Project cannot be same", "IAMP");
+      this.service.message("Source Project and Destination Project cannot be same", "error");
       this.clickedcopyblueprint = false;
     }
     else {
-        this.busy = this.projectService
-        .copyBluePrint(this.fromProject.name,this.toProject.name, this.toProject.id)
+      this.busy = this.projectService
+        .copyDatasets(this.fromProject.name, this.toProject.name, this.toProject.id)
         .subscribe(
           (res) => {
-            this.messageService.info("Copy Blue Print Pipeline has started. Please check the Job Status", "IAMP");
+            this.service.message("Copy Blue Print Pipeline has started. Please check the Job Status", "success");
+            this.jobsComponent.onRefresh(); 
           },
           (error) => {
             if (error instanceof TypeError)
-              this.messageService.error("Copy Blueprint has already been done for this project", "IAMP");
-            else this.messageService.error("Copy blueprint failed", "IAMP");
+              this.service.message("Copy Blueprint has already been done for this project", "error");
+            else this.service.message("Copy blueprint failed", "error");
           }
         );
+      this.jobsComponent.onRefresh(); 
     }
+    
   }
   trackByMethod(index, item) {
     return item;
   }
 
+  setDisable($event) {
+    this.copyDisabled = $event;
+    
+  }
 }

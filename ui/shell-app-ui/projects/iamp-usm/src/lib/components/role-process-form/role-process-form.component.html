@@ -32,7 +32,7 @@
 
         <div class="noPad" *ngIf="roleProcesses.length > 0">
             <div class="table-responsive" style="max-height: 66vh; border: 1px solid grey;">
-                <table mat-table="" [dataSource]="roleProcessList" class="table-hover list-table" matSort="" matSortActive="fromDate" matSortDirection="asc">
+                <table aria-label="" mat-table="" [dataSource]="roleProcessList" class="table-hover list-table" matSort="" matSortActive="fromDate" matSortDirection="asc">
                     <ng-container matColumnDef="is_active">
                         <th mat-header-cell="" *matHeaderCellDef="">
                             <strong> Select </strong>

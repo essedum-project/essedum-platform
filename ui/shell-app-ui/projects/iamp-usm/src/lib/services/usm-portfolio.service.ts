@@ -13,7 +13,8 @@
 // Template pack-angular:web/src/app/entities/entity.service.ts.e.vm
 //
 import { Injectable, SkipSelf } from "@angular/core";
-import { Observable } from "rxjs/Observable";
+import { Observable, map, catchError, throwError } from "rxjs";
+// import { Observable } from "rxjs/Observable";
 import { MessageService } from "../services/message.service";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { PageResponse } from "../support/paging";
@@ -21,8 +22,8 @@ import { PageRequestByExample } from "../support/page-request";
 import { UsmPortfolio } from "../models/usm-portfolio";
 import { AuthService } from "../services/auth.service";
 
-import { throwError, pipe } from "rxjs";
-import { map, catchError } from "rxjs/operators";
+// import { throwError, pipe } from "rxjs";
+// import { map, catchError } from "rxjs/operators";
 @Injectable()
 export class UsmPortfolioService {
 
@@ -38,7 +39,7 @@ export class UsmPortfolioService {
   create(usm_portfolio: UsmPortfolio): Observable<UsmPortfolio> {
     const copy = this.convert(usm_portfolio);
     return this.https
-      .post("/api/usm-portfolios/", copy, {
+      .post("/api/usm-portfolios", copy, {
         observe: "response",
       })
       .pipe(
@@ -80,12 +81,12 @@ export class UsmPortfolioService {
     let body;
     try {
       body = JSON.stringify(usm_portfolio);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
 
     return this.https
-      .put("/api/usm-portfolios/", body, {
+      .put("/api/usm-portfolios", body, {
         observe: "response",
       })
       .pipe(
@@ -112,7 +113,7 @@ export class UsmPortfolioService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     let headers = new HttpHeaders();
@@ -140,7 +141,7 @@ export class UsmPortfolioService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     let headers = new HttpHeaders();
@@ -166,7 +167,7 @@ export class UsmPortfolioService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -194,7 +195,7 @@ export class UsmPortfolioService {
     let body;
     try {
       body = JSON.stringify({ query: query, maxResults: 10 });
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -238,9 +239,9 @@ export class UsmPortfolioService {
         ? `Status: ${error.status} - Text: ${error.statusText}`
         : "Server error";
     console.error(errMsg); // log to console instead
-    if (error.status === 401) {
-      window.location.href = "/";
-    }
+    // if (error.status === 401) {
+    //   window.location.href = "/";
+    // }
     return throwError(errMsg)
   }
 

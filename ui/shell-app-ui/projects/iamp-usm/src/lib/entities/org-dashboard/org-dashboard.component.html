@@ -16,7 +16,7 @@
         <div class="row marT16">
             <div class="col-md-4 col-lg-3 col-xl-2 "
                 *ngIf="filteredModuleList && filteredModuleList.includes('cyber watch')">
-                <mat-card class="DSA_wb_card-widget" style="padding: 16px !important;">
+                <mat-card appearance="outlined" class="DSA_wb_card-widget" style="padding: 16px !important;">
                     <mat-card-header>
                         <mat-card-title>
                             <p class="DSA_wb_mainBodyTxt2SM">Cyber Watch</p>
@@ -36,7 +36,7 @@
             </div>
             <div class="col-md-4 col-lg-3 col-xl-2 "
                 *ngIf="filteredModuleList && filteredModuleList.includes('cyber intel')">
-                <mat-card class="DSA_wb_card-widget " style="padding: 16px !important;">
+                <mat-card appearance="outlined" class="DSA_wb_card-widget " style="padding: 16px !important;">
                     <mat-card-header>
                         <mat-card-title>
                             <p class="DSA_wb_mainBodyTxt2SM">Cyber Intel</p>
@@ -56,7 +56,7 @@
             </div>
             <div class="col-md-4 col-lg-3 col-xl-2 "
                 *ngIf="filteredModuleList && filteredModuleList.includes('cyber hunt')">
-                <mat-card class="DSA_wb_card-widget " style="padding: 16px !important;">
+                <mat-card appearance="outlined" class="DSA_wb_card-widget " style="padding: 16px !important;">
                     <mat-card-header>
                         <mat-card-title>
                             <p class="DSA_wb_mainBodyTxt2SM">Cyber Hunt</p>
@@ -74,7 +74,7 @@
             </div>
             <div class="col-md-4 col-lg-3 col-xl-2 "
                 *ngIf="filteredModuleList && filteredModuleList.includes('cyber scan')">
-                <mat-card class="DSA_wb_card-widget" style="padding: 16px !important;">
+                <mat-card appearance="outlined" class="DSA_wb_card-widget" style="padding: 16px !important;">
                     <mat-card-header>
                         <mat-card-title>
                             <p class="DSA_wb_mainBodyTxt2SM">Cyber Scan</p>
@@ -92,7 +92,7 @@
             </div>
             <div class="col-md-4 col-lg-3 col-xl-2 "
                 *ngIf="filteredModuleList && filteredModuleList.includes('cyber gaze')">
-                <mat-card class="DSA_wb_card-widget" style="padding: 16px !important;">
+                <mat-card appearance="outlined" class="DSA_wb_card-widget" style="padding: 16px !important;">
                     <mat-card-header>
                         <mat-card-title>
                             <p class="DSA_wb_mainBodyTxt2SM">Cyber Gaze</p>
@@ -112,7 +112,7 @@
             </div>
             <div class="col-md-4 col-lg-3 col-xl-2 "
                 *ngIf="filteredModuleList && filteredModuleList.includes('cyber compass')">
-                <mat-card class="DSA_wb_card-widget " style="padding: 16px !important;">
+                <mat-card appearance="outlined" class="DSA_wb_card-widget " style="padding: 16px !important;">
                     <mat-card-header>
                         <mat-card-title>
                             <p class="DSA_wb_mainBodyTxt2SM">Cyber Compass</p>
@@ -160,7 +160,7 @@
 
         <div *ngIf="!isTableView" class="row " [ngBusy]="{busy:busy,backdrop:true}" style="margin-top: 42px;">
             <div class="col-md-6 col-lg-5 col-xl-3" *ngFor="let org of filteredOrganisationList; let i = index">
-                <mat-card class="DSA_wb_card-widget padd-15 mar-bottom-15" style="height: 192px;">
+                <mat-card appearance="outlined" class="DSA_wb_card-widget padd-15 mar-bottom-15" style="height: 192px;">
 
                     <mat-card-header>
                         <mat-card-title>
@@ -219,7 +219,7 @@
             <div [ngBusy]="{busy:busy,backdrop:true}" class="DSA_panelBody padTB16 padLR24">
                 <div class="row" [ngBusy]="{busy:busy,backdrop:true}" style="margin-top: 16px;">
 
-                    <table class="DSA_wb_custom-table usm_table">
+                    <table aria-label="" class="DSA_wb_custom-table usm_table">
                         <thead>
                             <tr>
                                 <th >

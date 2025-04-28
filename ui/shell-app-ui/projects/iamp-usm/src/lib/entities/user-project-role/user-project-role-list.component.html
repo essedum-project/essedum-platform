@@ -11,7 +11,7 @@
           <i class="fa fa-plus-square-o create-icon-color selector-673-10" *ngIf="selectedRole != undefined &amp;&amp; createFlag" (click)="createView()" aria-hidden="true"></i>
           <span style="cursor: pointer" *ngIf="selectedRole != undefined &amp;&amp; createFlag" (click)="createView(); fetchRelatedProjects()" class="selector-673-11">Create Portfolio User Project</span>
         </div>
-        <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-673-12">
+        <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-673-12 filterStyle">
           <h3 class="clearfix selector-673-13">
             <div class="search-container ams_cusSrch pull-left selector-673-14">
               <input style="color: black;" #myInput="" type="text" [placeholder]="role.projectadmin ? 'Search By Role' : 'Search'" [(ngModel)]="projectSearched" (keydown.enter)="filterItem(myInput.value, null)" class="selector-673-15" />
@@ -21,7 +21,7 @@
             </div>
             <a href="javascript:void(0)" class="paddLeft selector-673-18" (click)="fetchApis()">Filter</a>
           </h3>
-          <div class="ams_panelCnt formRow relative selector-673-19">
+          <div class="ams_panelCnt formRow relative selector-673-19 labelsAlign">
             <div class="row rwMAr selector-673-20">
               <div class="col-md-6 select-style selector-673-21" *ngIf="project != undefined || selectedRole != undefined">
                 <label class="formLabel selector-673-22">User*</label>
@@ -65,8 +65,8 @@
       <div class="selector-673-39">
         <div class="ams_panelCnt formRow relative selector-673-40">
           <div style="float: right; cursor: pointer" class="selector-673-41">
-            <i class="fa fa-list-ul fa-lg icon1 selector-673-42" aria-hidden="true" title="Table View" (click)="showList = false"></i>
-            <i class="fa fa-th-large fa-lg icon1 selector-673-43" aria-hidden="true" title="Card View" (click)="showList = true"></i>
+            <i class="fa fa-list-ul fa-lg icon1 selector-673-42" aria-hidden="true" matTooltip="Table View" (click)="showList = false"></i>
+            <i class="fa fa-th-large fa-lg icon1 selector-673-43" aria-hidden="true" matTooltip="Card View" (click)="showList = true"></i>
           </div>
           <br class="selector-673-44" />
           <br class="selector-673-45" />
@@ -127,19 +127,19 @@
                 <div class="selector-673-76">
                   <div class="selector-673-77">
                     <div class="ams_cardfooter text-center selector-673-78" *ngIf="project != undefined">
-                      <i class="fa fa-info-circle fa-lg create-icon-color selector-673-79" aria-hidden="true" title="View Portfolio User Role" *ngIf="viewFlag" (click)="onView(user)"></i>
-                      <i class="fa fa-pencil fa-lg create-icon-color selector-673-80" aria-hidden="true" title="Edit Portfolio User Role" *ngIf="editFlag &amp;&amp;  user.user_id.user_email != 'demouser@infosys.com'  &amp;&amp;  user.project_id.name!='Core'" (click)="onEdit(user)" style="padding-left: 5px"></i>
-                      <i class="fa fa-trash fa-lg create-icon-color selector-673-81" aria-hidden="true" style="padding-left: 5px" *ngIf="deleteFlag &amp;&amp; user.user_id.user_email != 'demouser@infosys.com'  &amp;&amp; user.project_id.name!='Core'" (click)="deleteUserProjectRole(user)" title="Delete Portfolio User Role"></i>
+                      <i class="fa fa-info-circle fa-lg create-icon-color selector-673-79" aria-hidden="true" matTooltip="View Portfolio User Role" *ngIf="viewFlag" (click)="onView(user)"></i>
+                      <i class="fa fa-pencil fa-lg create-icon-color selector-673-80" aria-hidden="true" matTooltip="Edit Portfolio User Role" *ngIf="editFlag &amp;&amp;  user.user_id.user_email != 'demouser@infosys.com'  &amp;&amp;  user.project_id.name!='Core'" (click)="onEdit(user)" style="padding-left: 5px"></i>
+                      <i class="fa fa-trash fa-lg create-icon-color selector-673-81" aria-hidden="true" style="padding-left: 5px" *ngIf="deleteFlag &amp;&amp; user.user_id.user_email != 'demouser@infosys.com'  &amp;&amp; user.project_id.name!='Core'" (click)="deleteUserProjectRole(user)" matTooltip="Delete Portfolio User Role"></i>
                     </div>
                     <div class="ams_cardfooter text-center selector-673-82" *ngIf="selectedUser != undefined">
-                      <i class="fa fa-info-circle fa-lg create-icon-color selector-673-83" aria-hidden="true" title="View Portfolio Project Role" *ngIf="viewFlag" (click)="onView(user)"></i>
-                      <i class="fa fa-pencil fa-lg create-icon-color selector-673-84" aria-hidden="true" title="Edit Portfolio Project Role" *ngIf="editFlag &amp;&amp; user.user_id.user_email != 'demouser@infosys.com'  &amp;&amp; user.project_id.name!='Core'" (click)="onEdit(user)" style="padding-left: 5px"></i>
-                      <i class="fa fa-trash fa-lg create-icon-color selector-673-85" aria-hidden="true" style="padding-left: 5px" *ngIf="deleteFlag &amp;&amp; user.user_id.user_email != 'demouser@infosys.com'  &amp;&amp; user.project_id.name!='Core'" (click)="deleteUserProjectRole(user)" title="Delete Portfolio Project Role"></i>
+                      <i class="fa fa-info-circle fa-lg create-icon-color selector-673-83" aria-hidden="true" matTooltip="View Portfolio Project Role" *ngIf="viewFlag" (click)="onView(user)"></i>
+                      <i class="fa fa-pencil fa-lg create-icon-color selector-673-84" aria-hidden="true" matTooltip="Edit Portfolio Project Role" *ngIf="editFlag &amp;&amp; user.user_id.user_email != 'demouser@infosys.com'  &amp;&amp; user.project_id.name!='Core'" (click)="onEdit(user)" style="padding-left: 5px"></i>
+                      <i class="fa fa-trash fa-lg create-icon-color selector-673-85" aria-hidden="true" style="padding-left: 5px" *ngIf="deleteFlag &amp;&amp; user.user_id.user_email != 'demouser@infosys.com'  &amp;&amp; user.project_id.name!='Core'" (click)="deleteUserProjectRole(user)" matTooltip="Delete Portfolio Project Role"></i>
                     </div>
                     <div class="ams_cardfooter text-center selector-673-86" *ngIf="selectedRole != undefined">
-                      <i class="fa fa-info-circle fa-lg create-icon-color selector-673-87" aria-hidden="true" title="View Portfolio User Project" *ngIf="viewFlag" (click)="onView(user)"></i>
-                      <i class="fa fa-pencil fa-lg create-icon-color selector-673-88" aria-hidden="true" title="Edit Portfolio User Project" *ngIf="editFlag &amp;&amp; user.user_id.user_email != 'demouser@infosys.com'  &amp;&amp; user.project_id.name!='Core'" (click)="onEdit(user)" style="padding-left: 5px"></i>
-                      <i class="fa fa-trash fa-lg create-icon-color selector-673-89" aria-hidden="true" style="padding-left: 5px" *ngIf="deleteFlag &amp;&amp; user.user_id.user_email != 'demouser@infosys.com'  &amp;&amp; user.project_id.name!='Core'" (click)="deleteUserProjectRole(user)" title="Delete Portfolio User Project"></i>
+                      <i class="fa fa-info-circle fa-lg create-icon-color selector-673-87" aria-hidden="true" matTooltip="View Portfolio User Project" *ngIf="viewFlag" (click)="onView(user)"></i>
+                      <i class="fa fa-pencil fa-lg create-icon-color selector-673-88" aria-hidden="true" matTooltip="Edit Portfolio User Project" *ngIf="editFlag &amp;&amp; user.user_id.user_email != 'demouser@infosys.com'  &amp;&amp; user.project_id.name!='Core'" (click)="onEdit(user)" style="padding-left: 5px"></i>
+                      <i class="fa fa-trash fa-lg create-icon-color selector-673-89" aria-hidden="true" style="padding-left: 5px" *ngIf="deleteFlag &amp;&amp; user.user_id.user_email != 'demouser@infosys.com'  &amp;&amp; user.project_id.name!='Core'" (click)="deleteUserProjectRole(user)" matTooltip="Delete Portfolio User Project"></i>
                     </div>
                   </div>
                 </div>
@@ -151,10 +151,10 @@
           </div>
           <!-- list view -->
           <div class="ContentSideSections Implementation selector-673-92" style="padding: 1%" *ngIf="!showList &amp;&amp; users.length >= 0">
-            <mat-card class="selector-673-93">
+            <mat-card appearance="outlined" class="selector-673-93">
               <mat-card-content class="selector-673-94">
                 <div class="table-responsive selector-673-95">
-                  <table *ngIf="project != undefined" mat-table="" [dataSource]="UserList" class="table table-hover list-table selector-673-96">
+                  <table *ngIf="project != undefined" aria-label=""mat-table="" [dataSource]="UserList" class="table table-hover list-table selector-673-96">
                     <ng-container matColumnDef="name" class="selector-673-97">
                       <th mat-header-cell="" *matHeaderCellDef="" class="selector-673-98">
                         <strong class="selector-673-99"> User Name </strong>
@@ -182,16 +182,16 @@
                         <strong class="selector-673-109"> Actions </strong>
                       </th>
                       <td mat-cell="" *matCellDef="let task" class="actions-col selector-673-110">
-                        <i class="fa fa-info-circle fa-lg create-icon-color selector-673-111" aria-hidden="true" title="View Portfolio User Role" *ngIf="viewFlag" (click)="onView(task)" style="margin-top:5%"></i>
-                        <i class="fa fa-pencil fa-lg create-icon-color selector-673-112" aria-hidden="true" title="Edit Portfolio User Role" *ngIf="editFlag &amp;&amp; task.user_id.user_email != 'demouser@infosys.com'  &amp;&amp; task.project_id.name!='Core'" (click)="onEdit(task)" style="padding-left: 5px"></i>
-                        <i class="fa fa-trash fa-lg create-icon-color selector-673-113" aria-hidden="true" style="padding-left: 5px" *ngIf="deleteFlag &amp;&amp; task.user_id.user_email != 'demouser@infosys.com' &amp;&amp; task.project_id.name!='Core'" (click)="deleteUserProjectRole(task)" title="Delete Portfolio User Role"></i>
+                        <i class="fa fa-info-circle fa-lg create-icon-color selector-673-111" aria-hidden="true" matTooltip="View Portfolio User Role" *ngIf="viewFlag" (click)="onView(task)" style="margin-top:5%"></i>
+                        <i class="fa fa-pencil fa-lg create-icon-color selector-673-112" aria-hidden="true" matTooltip="Edit Portfolio User Role" *ngIf="editFlag &amp;&amp; task.user_id.user_email != 'demouser@infosys.com'  &amp;&amp; task.project_id.name!='Core'" (click)="onEdit(task)" style="padding-left: 5px"></i>
+                        <i class="fa fa-trash fa-lg create-icon-color selector-673-113" aria-hidden="true" style="padding-left: 5px" *ngIf="deleteFlag &amp;&amp; task.user_id.user_email != 'demouser@infosys.com' &amp;&amp; task.project_id.name!='Core'" (click)="deleteUserProjectRole(task)" matTooltip="Delete Portfolio User Role"></i>
                       </td>
                     </ng-container>
 
                     <tr mat-header-row="" *matHeaderRowDef="displayedColumns" class="selector-673-114"></tr>
                     <tr mat-row="" *matRowDef="let row; columns: displayedColumns" class="selector-673-115"></tr>
                   </table>
-                  <table *ngIf="selectedUser != undefined" mat-table="" [dataSource]="UserList" class="table table-hover list-table selector-673-116">
+                  <table *ngIf="selectedUser != undefined" aria-label="" mat-table="" [dataSource]="UserList" class="table table-hover list-table selector-673-116">
                     <ng-container matColumnDef="name" class="selector-673-117">
                       <th mat-header-cell="" *matHeaderCellDef="" class="selector-673-118">
                         <strong class="selector-673-119"> Project Name </strong>
@@ -219,16 +219,16 @@
                         <strong class="selector-673-129"> Actions </strong>
                       </th>
                       <td mat-cell="" *matCellDef="let task" class="actions-col selector-673-130">
-                        <i class="fa fa-info-circle fa-lg create-icon-color selector-673-131" aria-hidden="true" title="View Portfolio Project Role" *ngIf="viewFlag" (click)="onView(task)" style="margin-top:5%"></i>
-                        <i class="fa fa-pencil fa-lg create-icon-color selector-673-132" aria-hidden="true" title="Edit Portfolio Project Role" *ngIf="editFlag &amp;&amp; task.user_id.user_email != 'demouser@infosys.com' &amp;&amp; task.project_id.name!='Core'" (click)="onEdit(task)" style="padding-left: 5px"></i>
-                        <i class="fa fa-trash fa-lg create-icon-color selector-673-133" aria-hidden="true" style="padding-left: 5px" *ngIf="deleteFlag &amp;&amp; task.user_id.user_email != 'demouser@infosys.com' &amp;&amp; task.project_id.name!='Core'" (click)="deleteUserProjectRole(task)" title="Delete Portfolio Project Role"></i>
+                        <i class="fa fa-info-circle fa-lg create-icon-color selector-673-131" aria-hidden="true" matTooltip="View Portfolio Project Role" *ngIf="viewFlag" (click)="onView(task)" style="margin-top:5%"></i>
+                        <i class="fa fa-pencil fa-lg create-icon-color selector-673-132" aria-hidden="true" matTooltip="Edit Portfolio Project Role" *ngIf="editFlag &amp;&amp; task.user_id.user_email != 'demouser@infosys.com' &amp;&amp; task.project_id.name!='Core'" (click)="onEdit(task)" style="padding-left: 5px"></i>
+                        <i class="fa fa-trash fa-lg create-icon-color selector-673-133" aria-hidden="true" style="padding-left: 5px" *ngIf="deleteFlag &amp;&amp; task.user_id.user_email != 'demouser@infosys.com' &amp;&amp; task.project_id.name!='Core'" (click)="deleteUserProjectRole(task)" matTooltip="Delete Portfolio Project Role"></i>
                       </td>
                     </ng-container>
 
                     <tr mat-header-row="" *matHeaderRowDef="displayedColumns" class="selector-673-134"></tr>
                     <tr mat-row="" *matRowDef="let row; columns: displayedColumns" class="selector-673-135"></tr>
                   </table>
-                  <table *ngIf="selectedRole != undefined" mat-table="" [dataSource]="UserList" class="table table-hover list-table selector-673-136">
+                  <table *ngIf="selectedRole != undefined" aria-label="" mat-table="" [dataSource]="UserList" class="table table-hover list-table selector-673-136">
                     <ng-container matColumnDef="name" class="selector-673-137">
                       <th mat-header-cell="" *matHeaderCellDef="" class="selector-673-138">
                         <strong class="selector-673-139"> Project Name </strong>
@@ -256,9 +256,9 @@
                         <strong class="selector-673-149"> Actions </strong>
                       </th>
                       <td mat-cell="" *matCellDef="let task" class="actions-col selector-673-150">
-                        <i class="fa fa-info-circle fa-lg create-icon-color selector-673-151" aria-hidden="true" title="View Portfolio User Project" *ngIf="viewFlag" (click)="onView(task)" style="margin-top:5%"></i>
-                        <i class="fa fa-pencil fa-lg create-icon-color selector-673-152" aria-hidden="true" title="Edit Portfolio User Project" *ngIf="editFlag &amp;&amp; task.user_id.user_email != 'demouser@infosys.com' &amp;&amp; task.project_id.name!='Core'" (click)="onEdit(task)" style="padding-left: 5px"></i>
-                        <i class="fa fa-trash fa-lg create-icon-color selector-673-153" aria-hidden="true" style="padding-left: 5px" *ngIf="deleteFlag &amp;&amp; task.user_id.user_email != 'demouser@infosys.com' &amp;&amp; task.project_id.name!='Core'"  (click)="deleteUserProjectRole(task)" title="Delete Portfolio User Project"></i>
+                        <i class="fa fa-info-circle fa-lg create-icon-color selector-673-151" aria-hidden="true" matTooltip="View Portfolio User Project" *ngIf="viewFlag" (click)="onView(task)" style="margin-top:5%"></i>
+                        <i class="fa fa-pencil fa-lg create-icon-color selector-673-152" aria-hidden="true" matTooltip="Edit Portfolio User Project" *ngIf="editFlag &amp;&amp; task.user_id.user_email != 'demouser@infosys.com' &amp;&amp; task.project_id.name!='Core'" (click)="onEdit(task)" style="padding-left: 5px"></i>
+                        <i class="fa fa-trash fa-lg create-icon-color selector-673-153" aria-hidden="true" style="padding-left: 5px" *ngIf="deleteFlag &amp;&amp; task.user_id.user_email != 'demouser@infosys.com' &amp;&amp; task.project_id.name!='Core'"  (click)="deleteUserProjectRole(task)" matTooltip="Delete Portfolio User Project"></i>
                       </td>
                     </ng-container>
 
@@ -359,12 +359,12 @@
               !role.projectadmin &amp;&amp;
               (selectedRole != undefined || selectedUser != undefined || project != undefined) &amp;&amp;
               !edit &amp;&amp;
-              !view
+              !view &amp;&amp; (!enablePortfolioAdminView && !enableProjectAdminView)
             ">
             <mat-form-field style="width: 85%" class="selector-673-191">
               <label class="formLabel selector-673-192">Portfolio*</label>
               <mat-select [(ngModel)]="userProjectRole.portfolio_id" [compareWith]="compareObjects" [disabled]="view" [ngModelOptions]="{ standalone: true }" (selectionChange)="fetchprojectsbasedonportfolio()" required="" class="selector-673-193">
-                <mat-option *ngFor="let item of usm_portfolio_idArray; trackBy: trackByMethod" [value]="item" class="selector-673-194">
+                <mat-option *ngFor="let item of usm_portfolio_idArray; trackBy: trackByMethod" [value]="item" class="selector-673-194" [matTooltip]="item.portfolioName">
                   {{ item.portfolioName }}
                 </mat-option>
               </mat-select>
@@ -374,36 +374,36 @@
               !role.roleadmin &amp;&amp;
               !role.projectadmin &amp;&amp;
               (selectedRole != undefined || selectedUser != undefined || project != undefined) &amp;&amp;
-              (edit || view)
+              (edit || view) &amp;&amp; (!enablePortfolioAdminView && !enableProjectAdminView)
             ">
             <label class="formLabel selector-673-196">Portfolio*</label>
             <mat-form-field style="width: 85%" class="selector-673-197">
               <mat-select [(ngModel)]="userProjectRole.portfolio_id" [compareWith]="compareObjects" [disabled]="view" [ngModelOptions]="{ standalone: true }" (selectionChange)="fetchprojectsbasedonportfolio()" required="" class="selector-673-198">
-                <mat-option *ngFor="let item of usm_portfolio_idArray; trackBy: trackByMethod" [value]="item" class="selector-673-199">{{ item.portfolioName }}
+                <mat-option *ngFor="let item of usm_portfolio_idArray; trackBy: trackByMethod" [value]="item" class="selector-673-199" [matTooltip]="item.portfolioName">{{ item.portfolioName }}
                 </mat-option>
               </mat-select>
             </mat-form-field>
           </div>
 
           <div class="col-md-6 select-style selector-673-200" *ngIf="
-              !role.projectadmin &amp;&amp; !edit &amp;&amp; !view &amp;&amp; (selectedRole != undefined || selectedUser != undefined)
+              !role.projectadmin &amp;&amp; !edit &amp;&amp; !view &amp;&amp; (selectedRole != undefined || selectedUser != undefined) &amp;&amp; (!enableProjectAdminView)
             ">
             <mat-form-field style="width: 85%" class="selector-673-201">
               <label class="formLabel selector-673-202">Project*</label>
               <mat-select [compareWith]="compareObjects" [disabled]="view" [ngModelOptions]="{ standalone: true }" [(ngModel)]="userProjectRole.project_id" (selectionChange)="filterRolesForProject()" required="" class="selector-673-203">
-                <mat-option *ngFor="let item of specificProjectList; trackBy: trackByMethod" [value]="item" class="selector-673-204">
+                <mat-option *ngFor="let item of specificProjectList; trackBy: trackByMethod" [value]="item" class="selector-673-204" [matTooltip]="item.name">
                   {{ item.name }}
                 </mat-option>
               </mat-select>
             </mat-form-field>
           </div>
           <div class="col-md-6 select-style selector-673-205" *ngIf="
-              !role.projectadmin &amp;&amp; (edit || view) &amp;&amp; (selectedRole != undefined || selectedUser != undefined)
+              !role.projectadmin &amp;&amp; (edit || view) &amp;&amp; (selectedRole != undefined || selectedUser != undefined) &amp;&amp; (!enableProjectAdminView)
             ">
             <label class="formLabel selector-673-206">Project*</label>
             <mat-form-field style="width: 85%" class="selector-673-207">
               <mat-select [compareWith]="compareObjects" [disabled]="view" [ngModelOptions]="{ standalone: true }" [(ngModel)]="userProjectRole.project_id" (selectionChange)="filterRolesForProject()" required="" class="selector-673-208">
-                <mat-option *ngFor="let item of specificProjectList; trackBy: trackByMethod" [value]="item" class="selector-673-209">
+                <mat-option *ngFor="let item of specificProjectList; trackBy: trackByMethod" [value]="item" class="selector-673-209" [matTooltip]="item.name">
                   {{ item.name }}
                 </mat-option>
               </mat-select>
@@ -414,11 +414,11 @@
             <mat-form-field style="width: 85%" class="selector-673-211">
               <label class="formLabel selector-673-212">Role*</label>
               <mat-select multiple="" [compareWith]="compareObjects" [disabled]="view" [ngModelOptions]="{ standalone: true }" [(ngModel)]="userProjectRole.role_id" required="" class="selector-673-213">
-                <mat-option class="selector-673-253">
+                <mat-option class="selector-673-253" style="position: relative; opacity: 1;pointer-events: auto;">
                   <ngx-mat-select-search [formControl]="rolesFilterCtrl" [placeholderLabel]="'Find Roles...'" [noEntriesFoundLabel]="'No matching Roles found'" class="selector-673-254">
                   </ngx-mat-select-search>
                 </mat-option>
-                <mat-option *ngFor="let item of rolesListSearch | async; trackBy: trackByMethod" [value]="item" class="selector-673-214">
+                <mat-option *ngFor="let item of rolesListSearch | async; trackBy: trackByMethod" [value]="item" class="selector-673-214" [matTooltip]="item.name">
                   {{ item.name }}
                 </mat-option>
               </mat-select>
@@ -428,7 +428,7 @@
             <label class="formLabel selector-673-216">Role*</label>
             <mat-form-field style="width: 85%" class="selector-673-217">
               <mat-select [compareWith]="compareObjects" [disabled]="view" [ngModelOptions]="{ standalone: true }" [(ngModel)]="userProjectRole.role_id" required="" class="selector-673-218">
-                <mat-option *ngFor="let item of specificRoleList; trackBy: trackByMethod" [value]="item" class="selector-673-219">
+                <mat-option *ngFor="let item of specificRoleList; trackBy: trackByMethod" [value]="item" class="selector-673-219" [matTooltip]="item.name">
                   {{ item.name }}
                 </mat-option>
               </mat-select>
@@ -440,11 +440,11 @@
             <mat-form-field style="width: 85%" class="selector-673-221">
               <label class="formLabel selector-673-222">User*</label>
               <mat-select multiple="" [compareWith]="compareObjects" [disabled]="view" [ngModelOptions]="{ standalone: true }" [(ngModel)]="userProjectRole.user_id" required="" class="selector-673-223">
-                <mat-option class="selector-673-251">
+                <mat-option class="selector-673-251" style="position: relative; opacity: 1;pointer-events: auto;">
                   <ngx-mat-select-search [formControl]="usersFilterCtrl" [placeholderLabel]="'Find Users...'" [noEntriesFoundLabel]="'No matching Users found'" class="selector-673-252">
                   </ngx-mat-select-search>
                 </mat-option>
-                <mat-option *ngFor="let item of usersListSearch | async; trackBy: trackByMethod" [value]="item" class="selector-673-224">
+                <mat-option *ngFor="let item of usersListSearch | async; trackBy: trackByMethod" [value]="item" class="selector-673-224" [matTooltip]="item.user_login">
                   {{ item.user_login }}
                 </mat-option>
               </mat-select>
@@ -478,7 +478,7 @@
           Duplicate Mappings
         </h4>
         <div class="table-responsive selector-673-236">
-          <table mat-table="" [dataSource]="existingUserProjectRole" class="table table-hover list-table selector-673-237">
+          <table mat-table="" aria-label="" [dataSource]="existingUserProjectRole" class="table table-hover list-table selector-673-237">
             <ng-container matColumnDef="name" class="selector-673-238">
               <th mat-header-cell="" *matHeaderCellDef="" class="selector-673-239">
                 <strong class="selector-673-240"> Project Name </strong>

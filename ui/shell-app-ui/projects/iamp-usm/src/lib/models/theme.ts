@@ -52,6 +52,7 @@ export class AppTheme {
     sidebariconcolor: string;
     sidebaractivecolor: string;
     sidebarhovercolor: string;
+    sidebartexticonhovercolor:string;
     headercolor: string;
     headericoncolor: string;
 }
@@ -67,8 +68,11 @@ export class BCCTheme {
 export class DashboardTheme {
     backgroundcolor: string;
     dashboardbackgroundcolor: string;
+    iconcolor:string;
     titlecolor: string;
     filtercolor:string;
+    filtertextcolor:string;
+    applybuttontextcolor:string;
     filterapplybuttonbackgroundcolor:string;
     widgetfilterapply:boolean;
     filterbackgroundcolor:boolean;

@@ -11,6 +11,9 @@
 // * may result in severe civil and criminal penalties, and
 // * will be prosecuted to the maximum extent possible under the law.
 // Template pack-angular:web/src/app/base-entities/entity.ts.e.vm
+
+import { UsmModule } from "./usm-module";
+
 //
 export class UsmPermissions {
  id: number;

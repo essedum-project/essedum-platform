@@ -5,7 +5,20 @@
   }
 }
 
+.col-md-6 .col-md-12{
+  padding: 0px 15px;
+}
+
+.formLabel {
+  margin: 0px 0px 7px;
+}
+
+.formCheckBox{
+  margin: 4px 0px 0px;
+}
+
 .inputLabel {
+  cursor: pointer;
   text-overflow: ellipsis;
   overflow: hidden;
   margin-bottom: -0.5rem;

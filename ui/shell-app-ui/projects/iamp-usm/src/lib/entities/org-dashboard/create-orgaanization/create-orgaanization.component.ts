@@ -1112,7 +1112,7 @@ private removeFileFromArray(file: FileUploadModel) {
        let project;
        try {
         project = JSON.parse(sessionStorage.getItem("project"));
-       } catch (e) {
+       } catch (e : any)  {
         console.error("JSON.parse error - ", e.message);
        }
        res = res.filter(
@@ -1349,7 +1349,7 @@ private removeFileFromArray(file: FileUploadModel) {
       let project;
       try {
        project = this.savedOrganisation
-      } catch (e) {
+      } catch (e : any)  {
        console.error("JSON.parse error - ", e.message);
       }
      

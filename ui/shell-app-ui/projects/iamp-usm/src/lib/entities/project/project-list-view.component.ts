@@ -22,6 +22,7 @@ import {
   OnInit,
   ViewChild,
   ElementRef,
+  OnDestroy
 } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { PageResponse } from "../../support/paging";
@@ -48,14 +49,15 @@ import { RoleService } from "../../services/role.service";
 import { Role } from "../../models/role";
 import { AppTheme, BCCTheme, DashboardTheme, Theme, WidgetTheme } from "../../models/theme";
 import { DashConstant } from "../../models/dash-constant";
-import { DashConstantService } from "projects/com-lib-util/src/public-api";
+import { DashConstantService } from "com-lib-util";
+import { OpenTelemetryService } from '../../telemetry-util/open-telemetry.service';
 @Component({
   //moduleId: module.id,
   templateUrl: "project-list-view.component.html",
   selector: "project-list-view",
   styleUrls: ["project-list-view.component.css"],
 })
-export class ProjectListViewComponent implements OnInit {
+export class ProjectListViewComponent implements OnInit, OnDestroy {
   @Input() header = "Projects...";
   @Output() changeView: EventEmitter<boolean> = new EventEmitter();
   // When 'sub' is true, it means this list is used as a one-to-many list.
@@ -94,9 +96,9 @@ export class ProjectListViewComponent implements OnInit {
   coreProjectFlag: boolean = false;
   copyblueprintProjects: Project[];
   extension: string = "";
-  extensionArray=[];
-  allowedTypes:string;
-  themeoriginalcolor:string;
+  extensionArray = [];
+  allowedTypes: string;
+  themeoriginalcolor: string;
   @ViewChild(MatSort, { static: false }) set matSort(ms: MatSort) {
     this.sort = ms;
   }
@@ -127,9 +129,10 @@ export class ProjectListViewComponent implements OnInit {
     private usersService: UsersService,
     private usm_portfolio: UsmPortfolioService,
     private telemetryService: LeapTelemetryService,
+    private openTelemetryService: OpenTelemetryService,
     public dashConstantService: DashConstantService,
     private usmService: IampUsmService,
-  ) {}
+  ) { }
 
   //code related to make it consistent with wave UI
   filterProject: any;
@@ -178,7 +181,7 @@ export class ProjectListViewComponent implements OnInit {
     this.showDescLengthErrorMessage = false;
   }
 
-  showProjectList() {}
+  showProjectList() { }
 
   getProjects(id) {
     this.projectService.getProject(id).subscribe((res) => {
@@ -193,16 +196,16 @@ export class ProjectListViewComponent implements OnInit {
       } else {
         this.url = null;
       }
-      if(this.project.name=="Core"){
-        this.coreProjectFlag=true
-        if(this.edit && this.coreProjectFlag){
-          window.location.href='/unauthorized.html'; 
+      if (this.project.name == "Core") {
+        this.coreProjectFlag = true
+        if (this.edit && this.coreProjectFlag) {
+          window.location.href = '/unauthorized.html';
         }
       }
     });
   }
 
-  editProject(project) {
+  editProject(project: Project) {
     this.changeView.emit(false);
     this.view = false;
     this.edit = true;
@@ -210,14 +213,14 @@ export class ProjectListViewComponent implements OnInit {
     this.project = project;
     this.buttonFlag = false;
     this.clickedcopyblueprint = false;
-    this.router.navigate(["./" +window.btoa(project.id) + "/" + false], { relativeTo: this.route });
+    this.router.navigate(["./" + project.id + "/" + false], { relativeTo: this.route });
     // if (window.location.href.includes('project')) {
     //     this.router.navigate(["projectlist/" + project.id + "/" + false]);
 
     // }
   }
 
-  view_Project(project) {
+  view_Project(project: Project) {
     this.view = true;
     this.edit = true;
     this.viewProject = true;
@@ -230,7 +233,7 @@ export class ProjectListViewComponent implements OnInit {
     //     this.router.navigate(["projectlist/" + project.id + "/" + true]);
 
     // }
-    this.router.navigate(["./" + window.btoa(project.id)+ "/" + true], { relativeTo: this.route });
+    this.router.navigate(["./" + project.id + "/" + true], { relativeTo: this.route });
   }
 
   createView() {
@@ -246,10 +249,11 @@ export class ProjectListViewComponent implements OnInit {
     if (this.project && this.project.name) {
       this.project.name = this.project.name.trim();
     }
+    if(this.project.autoUserProject==null) this.project.autoUserProject=false;
     let portfolio: UsmPortfolio;
     try {
       portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
-    } catch (e) {
+    } catch (e: any) {
       portfolio = null;
       console.error("JSON.parse error - ", e.message);
     }
@@ -261,9 +265,9 @@ export class ProjectListViewComponent implements OnInit {
       this.messageService.info("Project name cannot be more than 255 characters", "IAMP");
     else if (!/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(tool.name)) {
       this.messageService.info("Project name format is incorrect", "IAMP");
-    } else if (tool.description && (!/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(tool.description))) {
+    } else if (tool.description && (!/^[a-zA-Z0-9][a-zA-Z0-9 \-\_\.]*?$/.test(tool.description))) {
       this.messageService.info("Project description format is incorrect", "IAMP");
-    } 
+    }
     else if (tool.portfolioId == undefined || tool.portfolioId == null) {
       this.messageService.info("Portfolio can't be empty", "IAMP");
     } else if (
@@ -275,9 +279,9 @@ export class ProjectListViewComponent implements OnInit {
       this.messageService.info("Project Display Name can't be empty", "IAMP");
     } else if (this.edit && tool.projectdisplayname > 255) {
       this.messageService.info("Project Display name cannot be more than 255 characters", "IAMP");
-    } else if (this.edit &&  !/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(tool.projectdisplayname)) {
+    } else if (this.edit && !/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(tool.projectdisplayname)) {
       this.messageService.info("Project Display Name format is incorrect", "IAMP");
-    } 
+    }
      else {
       if (tool.defaultrole == undefined || tool.defaultrole == null)
         /**To check -  If checkbox is not selected initially it will be undefined */
@@ -307,11 +311,11 @@ export class ProjectListViewComponent implements OnInit {
       } else {
         this.project.projectdisplayname = this.project.name;
         if (sessionStorage.getItem("telemetry") == "true") {
-        this.telemetryService.audit(this.project,"CREATE");
+          // this.telemetryService.audit(this.project, "CREATE");
         }
         this.busy = this.projectService.create(this.project).subscribe(
           (response) => {
-            this.getDashConstant(this.project.theme,response)
+            this.getDashConstant(this.project.theme, response)
             this.messageService.info("Project Saved Successfully", "IAMP");
             // this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
             this.fetchWave(null);
@@ -342,18 +346,18 @@ export class ProjectListViewComponent implements OnInit {
         (error) => this.messageService.error("Could not get the results", error)
       );
   }
-  compareTodiff(curr:any,prev:any){
-    let temparr=[];
+  compareTodiff(curr: any, prev: any) {
+    let temparr = [];
     Object.keys(prev).forEach(key => {
-    if(prev[key]!=curr[key])
+      if (prev[key] != curr[key])
     temparr.push(key)
    });
    return temparr;
   }
 
   updateWave() {
-    if(this.project && this.project.name=="Core"){
-      this.messageService.error("Unauthorized Operation!!","ERROR");
+    if (this.project && this.project.name == "Core") {
+      this.messageService.error("Unauthorized Operation!!", "ERROR");
       return;
     }
     let arr1 = this.projects.filter((item) => item.projectdisplayname != undefined);
@@ -369,18 +373,18 @@ export class ProjectListViewComponent implements OnInit {
       if (sessionStorage.getItem("telemetry") == "true") {
       let arr = this.projects.filter(
         (item) =>
-          item.id == this.project.id 
+          item.id == this.project.id
       );
-      let diff=this.compareTodiff(this.project,arr1[0])
-      this.telemetryService.audit(this.project,arr[0],diff);
+        let diff = this.compareTodiff(this.project, arr1[0])
+        // this.telemetryService.audit(this.project, arr[0], diff);
       }
       this.busy = this.projectService.update(this.project).subscribe(
         (rs) => {
-          
+
           let project: Project;
           try {
             project = JSON.parse(sessionStorage.getItem("project"));
-          } catch (e) {
+          } catch (e: any) {
             project = null;
             console.error("JSON.parse error - ", e.message);
           }
@@ -390,7 +394,7 @@ export class ProjectListViewComponent implements OnInit {
             if (rs.id == currentproject.id) {
               try {
                 sessionStorage.setItem("project", JSON.stringify(rs));
-              } catch (e) {
+              } catch (e: any) {
                 console.error("JSON.stringify error - ", e.message);
               }
             }
@@ -416,7 +420,7 @@ export class ProjectListViewComponent implements OnInit {
       (response) => {
         sessionStorage.setItem("UpdatedUser", "true");
         if (sessionStorage.getItem("telemetry") == "true") {
-        this.telemetryService.audit(projectToDelete,"DELETE");
+          // this.telemetryService.audit(projectToDelete, "DELETE");
         }
         this.currentPage.remove(projectToDelete);
         // this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
@@ -459,6 +463,12 @@ export class ProjectListViewComponent implements OnInit {
   ngOnInit() {
     this.telemetryImpression();
     this.tzNames = momentTz.tz.names();
+    try {
+      this.role = JSON.parse(sessionStorage.getItem("role"));
+    } catch (e: any) {
+      this.role = null;
+      console.error("JSON.parse error - ", e.message);
+    }
     if (sessionStorage.getItem("usmAuthority")) {
       sessionStorage.removeItem("usmAuthority");
       this.auth = "";
@@ -477,7 +487,7 @@ export class ProjectListViewComponent implements OnInit {
           sessionStorage.setItem("usmAuthority", "");
         }
       },
-      (error) => {},
+      (error) => { },
       () => {
         this.auth = sessionStorage.getItem("usmAuthority");
         this.selectedPermissionList = this.auth.split(",");
@@ -489,7 +499,12 @@ export class ProjectListViewComponent implements OnInit {
             this.viewFlag = true;
           }
           if (ele === "delete") {
-            this.deleteFlag = true;
+            if(this.role.roleadmin){
+              this.deleteFlag = false;
+            }
+            else{
+               this.deleteFlag = true;
+            }
           }
           if (ele === "create") {
             this.createFlag = true;
@@ -498,21 +513,16 @@ export class ProjectListViewComponent implements OnInit {
       }
     );
 
-    try {
-      this.role = JSON.parse(sessionStorage.getItem("role"));
-    } catch (e) {
-      this.role = null;
-      console.error("JSON.parse error - ", e.message);
-    }
+
     if (window.location.href.includes("project") && window.location.href.includes("true")) {
       this.showCreate = true;
       this.edit = false;
       this.view = true;
       this.viewProject = true;
       this.buttonFlag = true;
-      this.route.params.subscribe((res) => {
+      this.route.params.subscribe((res: any) => {
         if (res && res.projectid) {
-          this.getProjects(Number(window.atob(res.projectid)));
+          this.getProjects(res.projectid);
         }
         this.getid();
         this.loadPage({ first: 0, rows: 3000, sortField: null, sortOrder: null });
@@ -522,10 +532,10 @@ export class ProjectListViewComponent implements OnInit {
       this.edit = true;
       this.view = false;
       this.buttonFlag = false;
-      this.route.params.subscribe((res) => {
+      this.route.params.subscribe((res: any) => {
         //res.id
         if (res && res.projectid) {
-        this.getProjects(Number(window.atob(res.projectid)));
+          this.getProjects(res.projectid);
         }
         this.getid();
         this.loadPage({ first: 0, rows: 3000, sortField: null, sortOrder: null });
@@ -535,16 +545,22 @@ export class ProjectListViewComponent implements OnInit {
       this.fetchWave(null);
     }
     this.dashConstantService.getExtensionKey("FileUpload.AllowedExtension.USM.AddImage").subscribe(
-      (res)=>{
+      (res) => {
       this.extension = res["allowedFileTypes"];
-      if(this.extension) this.extensionArray = this.extension.split(",");
-      this.allowedTypes = res["allowedFileExtension"];  
+        if (this.extension) this.extensionArray = this.extension.split(",");
+      this.allowedTypes = res["allowedFileExtension"];
       });
 
   }
 
+  ngOnDestroy(): void {
+    let activeSpan = this.openTelemetryService.fetchActiveSpan();
+    this.openTelemetryService.endTelemetry(activeSpan);
+  }
+
   telemetryImpression() {
-    this.telemetryService.impression("iamp-usm", "detail", "ProjectListViewComponent");
+    // this.telemetryService.impression("iamp-usm", "detail", "ProjectListViewComponent");
+    this.openTelemetryService.startTelemetry("iamp-usm", "ProjectListViewComponent", "detail");
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -565,7 +581,7 @@ export class ProjectListViewComponent implements OnInit {
       let portfolio: UsmPortfolio;
       try {
         portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
-      } catch (e) {
+      } catch (e: any) {
         portfolio = null;
         console.error("JSON.parse error - ", e.message);
       }
@@ -579,7 +595,7 @@ export class ProjectListViewComponent implements OnInit {
             a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
           ));
         this.projects = this.currentPage.content;
-        this.copyblueprintProjects= this.currentPage.content.filter((project) => project.name.toLowerCase()!="core")
+        this.copyblueprintProjects = this.currentPage.content.filter((project) => project.name.toLowerCase() != "core")
         this.projectsCopy = this.projects;
         //this.ProjectList = new MatTableDataSource(this.currentPage.content);
         //this.ProjectList.paginator = this.paginator;
@@ -587,21 +603,20 @@ export class ProjectListViewComponent implements OnInit {
       },
       (error) => this.messageService.error("Could not get the results", "IAMP")
     );
-    
+
     let allRole = new Role(); /** To fetch all roles */
     allRole.projectId = null;
-    this.roleService.findAll(allRole,  { first: 0, rows: 1000, sortField: null, sortOrder: null }).subscribe(res=>{
+    this.roleService.findAll(allRole, { first: 0, rows: 1000, sortField: null, sortOrder: null }).subscribe(res => {
       let rolesArr = []
       res.content.forEach((item) => {
         if (item.id != 6) rolesArr.push(item)    /** Array of all roles */
       })
       this.rolesArray = rolesArr.filter(r => r.projectId == this.project.id) /** Project specific roles */
-      if(this.rolesArray.length == 0 && this.project.defaultrole) /** If project specific roles not exist and defaultrole is true */
-      {
+      if (this.rolesArray.length == 0 && this.project.defaultrole) /** If project specific roles not exist and defaultrole is true */ {
         rolesArr = rolesArr.filter(r => r.projectId == null)
         this.rolesArray = rolesArr
       }
-      this.rolesArray.sort((a,b) => a.name.localeCompare(b.name))
+      this.rolesArray.sort((a, b) => a.name.localeCompare(b.name))
     })
   }
   fetchWave(pageEvent) {
@@ -609,7 +624,7 @@ export class ProjectListViewComponent implements OnInit {
       let portfolio: UsmPortfolio;
       try {
         portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
-      } catch (e) {
+      } catch (e: any) {
         portfolio = null;
         console.error("JSON.parse error - ", e.message);
       }
@@ -669,7 +684,7 @@ export class ProjectListViewComponent implements OnInit {
   rowSelected(item: Project) {
     this.router.navigate(["/project-view", item.id]);
   }
-  setSelectedEntities(event) {}
+  setSelectedEntities(event) { }
   // Search() {
   //   let newtasks = new Array<Project>();
 
@@ -740,7 +755,7 @@ export class ProjectListViewComponent implements OnInit {
       let portfolio: UsmPortfolio;
       try {
         portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
-      } catch (e) {
+      } catch (e: any) {
         portfolio = null;
         console.error("JSON.parse error - ", e.message);
       }
@@ -786,7 +801,7 @@ export class ProjectListViewComponent implements OnInit {
         let portfolio: UsmPortfolio;
         try {
           portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
-        } catch (e) {
+        } catch (e: any) {
           portfolio = null;
           console.error("JSON.parse error - ", e.message);
         }
@@ -814,7 +829,7 @@ export class ProjectListViewComponent implements OnInit {
     if (this.fromProject == "" || this.fromProject == null || this.fromProject == undefined) {
       this.messageService.info("Project Should be Selected", "IAMP");
       this.clickedcopyblueprint = false;
-    } 
+    }
     else if (this.fromProject == this.project.name) {
       this.messageService.info("Source Project and Destination Project cannot be same", "IAMP");
       this.clickedcopyblueprint = false;
@@ -843,10 +858,10 @@ export class ProjectListViewComponent implements OnInit {
       } else if (event.target.files[0].name.length > 100) {
         this.messageService.error("Image Name  cannot be more than 100 characters", "IAMP");
         return;
-      } else if (!this.extensionArray?.includes(event.target.files[0].type )){
-        this.messageService.error("File type should be "+this.allowedTypes+" ", "IAMP");
+      } else if (!this.extensionArray?.includes(event.target.files[0].type)) {
+        this.messageService.error("File type should be " + this.allowedTypes + " ", "IAMP");
         return;
-      } 
+      }
       else {
         this.helperService.toBase64(event.target.files[0], (base64Data) => {
           this.project.logo = base64Data;
@@ -873,10 +888,10 @@ export class ProjectListViewComponent implements OnInit {
     this.loadPage({ first: 0, rows: 3000, sortField: null, sortOrder: null });
     // this.router.navigate(["../"], { relativeTo: this.route });
   }
-  trackByMethod(index, item) {}
+  trackByMethod(index, item) { }
 
   onPageFired(event) {
-    if (this.filterFlag == false && this.filterFlag1 == false){
+    if (this.filterFlag == false && this.filterFlag1 == false) {
       this.fetchWave({ page: event.pageIndex, size: this.pageSize });
       this.pageIndex = event.pageIndex;
     }
@@ -930,7 +945,7 @@ export class ProjectListViewComponent implements OnInit {
   }
   theme = new Theme();
   response;
-  saveTheme(theme,project?) {
+  saveTheme(theme, project?) {
     let projectTheme = this.response.content.filter((item) => (item.keys == "Project Theme")
       && item.project_id.id == this.project.id && item.project_name == this.project.name)[0];
     let themeId;
@@ -955,11 +970,11 @@ export class ProjectListViewComponent implements OnInit {
     }
       let dashconstant = new DashConstant()
       dashconstant.keys = "Project Theme"
-      dashconstant.project_id = new Project({ id: project?project.id:this.project.id })
-      dashconstant.project_name = project?project.name:this.project.name
+    dashconstant.project_id = new Project({ id: project ? project.id : this.project.id })
+    dashconstant.project_name = project ? project.name : this.project.name
       dashconstant.value = JSON.stringify(this.theme)
       dashconstant.id = themeId
-    if(this.themeoriginalcolor != this.theme.apptheme.themecolor){
+    if (this.themeoriginalcolor != this.theme.apptheme.themecolor) {
       this.dashConstantService.saveTheme(dashconstant).subscribe(
         response => {
           sessionStorage.setItem("AppCacheDashConstant", "true");
@@ -969,16 +984,16 @@ export class ProjectListViewComponent implements OnInit {
     }
     this.listView();
   }
-  getDashConstant(theme,project?) {
+  getDashConstant(theme, project?) {
     if (theme) {
       let dashconstant = new DashConstant()
       dashconstant.keys = "Project Theme"
-      dashconstant.project_id = new Project({ id: project?project.id:this.project.id })
-      dashconstant.project_name = project?project.name:this.project.name
+      dashconstant.project_id = new Project({ id: project ? project.id : this.project.id })
+      dashconstant.project_name = project ? project.name : this.project.name
       this.dashConstantService.findAll(dashconstant, this.lazyload).subscribe((res) => {
         this.response = res
       }, error => { this.listView() }, () => {
-        this.saveTheme(theme,project)
+        this.saveTheme(theme, project)
       })
     }
   }

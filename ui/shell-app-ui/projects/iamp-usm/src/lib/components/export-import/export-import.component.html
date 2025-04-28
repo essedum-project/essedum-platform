@@ -14,7 +14,7 @@
                 </ngx-mat-select-search>
               </mat-option>
               <mat-option *ngFor="let project of filteredProjectList | async; trackBy: trackByMethod" [value]="project"
-                (click)="getDashboard(project.name, project.id)" [title]="project.name">{{
+                (click)="getDashboard(project.name, project.id)" [matTooltip]="project.name">{{
                 project.name
                 }}</mat-option>
             </mat-select>
@@ -27,7 +27,7 @@
             <mat-select [multiple]="true" #multiSelect class="matSelectHeight form-control  fontSize" [formControl]="dashCtrl"
               (selectionChange)="exportFile = null">
 
-              <mat-option *ngIf="dashLength > 0">
+              <mat-option *ngIf="dashLength > 0" style="pointer-events: auto;">
                 <ngx-mat-select-search [formControl]="dashFilterCtrl" [placeholderLabel]="'Find Dashboard...'"
                   [noEntriesFoundLabel]="'No matching Dashboard found'" [showToggleAllCheckbox]="true"
                   [toggleAllCheckboxIndeterminate]="dashCtrl?.value.length > 0 && dashCtrl.value.length < dashLength"
@@ -36,7 +36,7 @@
                 </ngx-mat-select-search>
               </mat-option>
               <mat-option *ngFor="let item of filteredDashList | async;trackBy: trackByMethod" [value]="item"
-                [title]="item.name">
+                [matTooltip]="item.name">
                 {{ item.name }}
               </mat-option>
             </mat-select>
@@ -44,7 +44,7 @@
 
           <mat-grid-tile [colspan]="colspan2">
             <div class="minimunHeightForButtonSection">
-            <button id="btnPosition" [ngClass]="{ 'ex-im-dt-curs': dashCtrl?.value.length == 0 }"
+            <button mat-raised-button id="btnPosition" [ngClass]="{ 'ex-im-dt-curs': dashCtrl?.value.length == 0 }"
               [disabled]="dashCtrl?.value.length == 0"
               *ngIf="(exportFile == null || exportFile == undefined) && !exportStarted" class="button fontSize"
               (click)="export()">
@@ -80,7 +80,7 @@
               <label id="fileLabel" tabindex="0" for="my-file" class="input-file-trigger"> Select file... </label>
             </div>
           </div>
-          <button *ngIf="!importStarted" [ngClass]="{ 'ex-im-dt-curs': fileSelected == false}"
+          <button mat-raised-button *ngIf="!importStarted" [ngClass]="{ 'ex-im-dt-curs': fileSelected == false}"
             [disabled]="!fileSelected" id="btnPosImp" class="button fontSize" (click)="save()">
             Import
           </button>
@@ -88,7 +88,7 @@
             <mat-progress-spinner color="warn" mode="indeterminate" diameter="20">
             </mat-progress-spinner>
           </button>
-          <button *ngIf="showLogs" id="btnPosImp" class="button fontSize" (click)="routeLogs()">
+          <button mat-raised-button *ngIf="showLogs" id="btnPosImp" class="button fontSize" (click)="routeLogs()">
             Logs
           </button>
         </div>

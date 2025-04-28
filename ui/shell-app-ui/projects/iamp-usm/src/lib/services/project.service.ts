@@ -13,17 +13,18 @@
 // Template pack-angular:web/src/app/entities/entity.service.ts.e.vm
 //
 import { Injectable, Inject, SkipSelf } from "@angular/core";
-import { Observable } from "rxjs/Observable";
+import { Observable, map, catchError, throwError } from "rxjs";
+// import { Observable } from "rxjs/Observable";
 // import { MessageService } from './message.service';
 import { PageResponse } from "../support/paging";
 import { PageRequestByExample } from "../support/page-request";
 import { Project } from "../models/project";
 //import { environment } from '../../../../../src/environments/environment';
 import { AuthService } from "./auth.service";
-import { throwError } from "rxjs";
+// import { throwError } from "rxjs";
 
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { map, catchError } from "rxjs/operators";
+// import { map, catchError } from "rxjs/operators";
 @Injectable()
 export class ProjectService {
   constructor(private https: HttpClient) { }
@@ -35,7 +36,7 @@ export class ProjectService {
   create(project: Project): Observable<Project> {
     const copy = this.convert(project);
     return this.https
-      .post("/api/projects/", copy, {
+      .post("/api/projects", copy, {
         observe: "response",
       })
       .pipe(
@@ -75,12 +76,12 @@ export class ProjectService {
     let body;
     try {
       body = JSON.stringify(project);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
 
     return this.https
-      .put("/api/projects/", body, {
+      .put("/api/projects", body, {
         observe: "response",
       })
       .pipe(
@@ -106,7 +107,7 @@ export class ProjectService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     let headers = new HttpHeaders();
@@ -138,7 +139,7 @@ export class ProjectService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     let headers = new HttpHeaders();
@@ -165,7 +166,7 @@ export class ProjectService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -193,7 +194,7 @@ export class ProjectService {
     let body;
     try {
       body = JSON.stringify({ query: query, maxResults: 10 });
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -232,11 +233,78 @@ export class ProjectService {
     let body;
     try {
       body = toproject;
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
       .post("/api/copyblueprint/" + toproject + "/" + fromproject + "?projectId=" + toprojectid, body, {
+        observe: "response",
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  copyPipelines(fromproject, toproject, toprojectid) {
+    let body;
+    try {
+      body = toproject;
+    } catch (e : any)  {
+      console.error("JSON.stringify error - ", e.message);
+    }
+    return this.https
+      .post("/api/aip/jobs/copyPipelines/" + toproject + "/" + fromproject + "?projectId=" + toprojectid, body, {
+        observe: "response",
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+  copyDatasets(fromproject, toproject, toprojectid) {
+    let body;
+    try {
+      body = toproject;
+    } catch (e : any)  {
+      console.error("JSON.stringify error - ", e.message);
+    }
+    return this.https
+      .post("/api/aip/jobs/copyDatasets/" + toproject + "/" + fromproject + "?projectId=" + toprojectid, body, {
+        observe: "response",
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+  copyDashboards(fromproject, toproject, toprojectid) {
+    let body;
+    try {
+      body = toproject;
+    } catch (e : any)  {
+      console.error("JSON.stringify error - ", e.message);
+    }
+    return this.https
+      .post("/api/copyDashboards/" + toproject + "/" + fromproject + "?projectId=" + toprojectid, body, {
         observe: "response",
       })
       .pipe(
@@ -256,9 +324,9 @@ export class ProjectService {
     let errMsg = error.error;
     error.status ? `Status: ${error.status} - Text: ${error.statusText}` : "Server error";
     console.error(errMsg); // log to console instead
-    if (error.status === 401) {
-      window.location.href = "/";
-    }
+    // if (error.status === 401) {
+    //   window.location.href = "/";
+    // }
     return throwError(errMsg)
   }
 

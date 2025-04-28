@@ -22,6 +22,7 @@ import {
     OnInit,
     ViewChild,
     ElementRef,
+    OnDestroy
   } from "@angular/core";
   import { Router, ActivatedRoute } from "@angular/router";
   import { PageResponse } from "../../support/paging";
@@ -41,11 +42,12 @@ import {
   import { UsmPermissions } from "../../models/usm-permissions";
   import { Project } from "../../models/project";
   import { DeleteComponent } from "../../shared-modules/confirm-delete/delete.component";
-  import { Subscription } from "rxjs/Subscription";
+  import { Subscription } from "rxjs";
   import { IampUsmService } from "../../iamp-usm.service";
   // import { DashConstantService } from "../../services/dash-constant.service";
   import { DashConstant } from "../../models/dash-constant";
   import { Users } from '../../models/users';
+import { OpenTelemetryService } from "../../telemetry-util/open-telemetry.service";
   
   
   @Component({
@@ -53,7 +55,7 @@ import {
     templateUrl: './role-role.component.html',
     styleUrls: ['./role-role.component.css']
   })
-  export class RoleRoleComponent implements OnInit {
+  export class RoleRoleComponent implements OnInit, OnDestroy {
     @Input() selectedRole: Role;
     @Input() header = "UsmRolePermissions...";
     @Output() changeView: EventEmitter<boolean> = new EventEmitter();
@@ -113,6 +115,7 @@ import {
       public roleservice: RoleService,
       private telemetryService: LeapTelemetryService,
       private usmService: IampUsmService,
+      private openTelemetryService: OpenTelemetryService
       // public dashConstantService: DashConstantService,
     ) {}
   
@@ -227,7 +230,7 @@ import {
     //     let project: Project;
     //     try {
     //       project = JSON.parse(sessionStorage.getItem("project"));
-    //     } catch (e) {
+    //     } catch (e : any)  {
     //       project = null;
     //       console.error("JSON.parse error - ", e.message);
     //     }
@@ -242,6 +245,18 @@ import {
     // }
   
     fetchmodule() {
+        let role;
+        let project;
+        let portfolio;
+        let tempRolesArray = [];
+        try {
+          role = JSON.parse(sessionStorage.getItem("role") || '');
+          project = JSON.parse(sessionStorage.getItem("project") || '');
+          portfolio = JSON.parse(sessionStorage.getItem("portfoliodata") || '');
+        } catch (e: any) {
+          console.error("JSON.parse error - ", e.message);
+        }
+
       this.roletorolearray = [];
       this.array = [];
       let event={ first: 0, rows: 1000, sortField: null, sortOrder: null };
@@ -252,11 +267,22 @@ import {
         // let project: Project;
         // try {
         //   project = JSON.parse(sessionStorage.getItem("project"));
-        // } catch (e) {
+        // } catch (e : any)  {
         //   project = null;
         //   console.error("JSON.parse error - ", e.message);
         // }
         this.roletorolearray = response.content;
+        if(role.roleadmin && role.portfolioId == portfolio.id){
+          this.roletorolearray.forEach((element)=>{
+            if(element.projectId == null || element.projectId == project.id){
+              tempRolesArray.push(element);
+            }
+          });
+          this.roletorolearray = tempRolesArray;
+        }
+
+        console.log(this.roletorolearray);
+
         // this.roletorolearray = this.roletorolearray.filter(
         //   (arr, index, self) =>
         //     index === self.findIndex((t) => t.module === arr.module && t.permission === arr.permission)
@@ -268,8 +294,14 @@ import {
     }
   
     telemetryImpression() {
-      this.telemetryService.impression("iamp-usm", "list", "UsmRolePermissionComponent");
+      // this.telemetryService.impression("iamp-usm", "list", "UsmRolePermissionComponent");
+      this.openTelemetryService.startTelemetry("iamp-usm", "UsmRolePermissionComponent", "list");
     }
+
+    ngOnDestroy() {
+      let activeSpan = this.openTelemetryService.fetchActiveSpan();
+      this.openTelemetryService.endTelemetry(activeSpan);
+   }
   
     listView() {
       this.showCreate = false;
@@ -307,7 +339,7 @@ import {
       let project: Project;
       try {
         project = JSON.parse(sessionStorage.getItem("project"));
-      } catch (e) {
+      } catch (e : any)  {
         project = null;
         console.error("JSON.parse error - ", e.message);
       }
@@ -322,7 +354,7 @@ import {
       // });
       // try {
       //  this.roletoroleitem.permission = JSON.stringify(array);
-      // } catch (e) {
+      // } catch (e : any)  {
       //  console.error("JSON.stringify error - ", e.message);
       // }
       this.errorMessage = false;
@@ -402,7 +434,7 @@ import {
         let project:any
         try {
           project = JSON.parse(sessionStorage.getItem("project"));
-        } catch (e) {
+        } catch (e : any)  {
           project = null;
           console.error("JSON.parse error - ", e.message);
         }

@@ -13,13 +13,14 @@
 // Template pack-angular:web/src/app/entities/entity.service.ts.e.vm
 //
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs/Observable";
+import { Observable, map, catchError, throwError } from "rxjs";
+// import { Observable } from "rxjs/Observable";
 import { PageResponse } from "../support/paging";
 import { PageRequestByExample } from "../support/page-request";
 import { Usertouser } from "../models/user-user";
-import { map, catchError } from "rxjs/operators";
+// import { map, catchError } from "rxjs/operators";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { throwError } from "rxjs";
+// import { throwError } from "rxjs";
 @Injectable()
 export class UseruserService {
   constructor(private https: HttpClient) { }
@@ -31,7 +32,7 @@ export class UseruserService {
   create(usm_role_permissions: Usertouser): Observable<Usertouser> {
     const copy = this.convert(usm_role_permissions);
     return this.https
-      .post("/api/usm-user-user/", copy, {
+      .post("/api/usm-user-user", copy, {
         observe: "response",
       })
       .pipe(
@@ -73,12 +74,12 @@ export class UseruserService {
     let body;
     try {
       body = JSON.stringify(usm_role_permissions);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
 
     return this.https
-      .put("/api/usm-user-user/", body, {
+      .put("/api/usm-user-user", body, {
         observe: "response",
       })
       .pipe(
@@ -104,7 +105,7 @@ export class UseruserService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     let headers = new HttpHeaders();
@@ -139,7 +140,7 @@ export class UseruserService {
     let body;
     try {
       body = JSON.stringify({ query: query, maxResults: 10 });
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -180,7 +181,7 @@ export class UseruserService {
   createAll(usm_role_permissions: Usertouser[]): Observable<Usertouser[]> {
     const copy: Usertouser[] = Object.assign([], usm_role_permissions);
     return this.https
-      .post("/api/usm-user-user-list/", copy, {
+      .post("/api/usm-user-user-list", copy, {
         observe: "response",
       })
       .pipe(
@@ -202,9 +203,9 @@ export class UseruserService {
     let errMsg = error.error;
     error.status ? `Status: ${error.status} - Text: ${error.statusText}` : "Server error";
     console.error(errMsg); // log to console instead
-    if (error.status === 401) {
-      window.location.href = "/";
-    }
+    // if (error.status === 401) {
+    //   window.location.href = "/";
+    // }
     return throwError(errMsg);
   }
 

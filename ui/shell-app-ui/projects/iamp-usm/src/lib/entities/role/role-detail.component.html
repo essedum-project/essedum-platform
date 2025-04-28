@@ -1,4 +1,4 @@
-<div #roleForm="ngForm" ngForm="" class="col-md-12 centerStyle selector-668-1" style="border: none">
+<div #roleForm="ngForm" ngForm="" class="col-md-12 centerStyle paddingBottom selector-668-1" style="border: none">
   <div class="padTop20 selector-668-2">
     <div>
       <div class="backIconcrud">
@@ -6,8 +6,8 @@
     <i class="fa fa-caret-square-o-left create-icon-color pull-right linkMar selector-668-4" (click)="listView()" aria-hidden="true"></i>
     </div>
     <div class="selector-668-5">
-      <span class="ams-back pull-right linkMar selector-668-6" style="cursor: pointer" *ngIf="view &amp;&amp; !edit &amp;&amp; editFlag" (click)="view = false; edit = true">Edit Role</span>
-      <i class="fa fa-pencil-square-o create-icon-color pull-right linkMar selector-668-7" style="cursor: pointer" *ngIf="view &amp;&amp; editFlag" (click)="view = false; edit = true" aria-hidden="true"></i>
+      <span class="ams-back pull-right linkMar selector-668-6" style="cursor: pointer" *ngIf="view &amp;&amp; !edit &amp;&amp; editFlag &amp;&amp; !disableEditOfDefaultRoles" (click)="view = false; edit = true">Edit Role</span>
+      <i class="fa fa-pencil-square-o create-icon-color pull-right linkMar selector-668-7" style="cursor: pointer" *ngIf="view &amp;&amp; editFlag &amp;&amp; !disableEditOfDefaultRoles" (click)="view = false; edit = true" aria-hidden="true"></i>
       <span class="ams-back pull-right linkMar selector-668-8" style="cursor: pointer" *ngIf="edit &amp;&amp; !view &amp;&amp; viewRole" (click)="view = true; edit = false">View Role</span>
       <i class="fa fa-eye create-icon-color pull-right linkMar selector-668-9" style="cursor: pointer" *ngIf="edit &amp;&amp; !view &amp;&amp; viewRole" (click)="view = true; edit = false" aria-hidden="true"></i>
     </div>
@@ -22,7 +22,7 @@
         <div class="row rwMAr selector-668-15">
           <div class="col-md-6 selector-668-16">
             <label class="formLabel selector-668-17">Role*</label>
-            <input [disabled]="view" type="text" class="txtInput selector-668-18" maxlength="255" required="" [ngModelOptions]="{ standalone: true }" [(ngModel)]="role &amp;&amp; role.name" (keyup)="checkNameMaxLength()" />
+            <input [disabled]="view" type="text" class="txtInput selector-668-18" maxlength="255" required="" [ngModelOptions]="{ standalone: true }" [(ngModel)]="role.name" (keyup)="checkNameMaxLength()" />
             <span class="error selector-668-19" style="font-size: 1.6vmin">
               Note: Alpha numeric and special characters -_. allowed </span><br class="selector-668-20" />
             <span class="error selector-668-21" style="font-size: 1.6vmin" *ngIf="showNameLengthErrorMessage == true">{{
@@ -31,7 +31,7 @@
           </div>
           <div class="col-md-6 selector-668-22">
             <label class="formLabel selector-668-23">Role Description</label>
-            <input [disabled]="view" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="role &amp;&amp; role.description" maxlength="255" class="txtInput selector-668-24" (keyup)="checkDescMaxLength()" />
+            <input [disabled]="view" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="role.description" maxlength="255" class="txtInput selector-668-24" (keyup)="checkDescMaxLength()" />
             <span class="error selector-668-19" style="font-size: 1.6vmin">
               Note: Alpha numeric and special characters -_. allowed </span><br class="selector-668-20" />
             <span class="error selector-668-25" style="font-size: 1.6vmin" *ngIf="showDescLengthErrorMessage == true">{{
@@ -52,11 +52,11 @@
               </mat-radio-button>
             </mat-radio-group>
           </div> -->
-          <div class="col-md-6 selector-668-27">
+          <div class="col-md-6 selector-668-27" *ngIf="(!(role.roleadmin) && !(role.projectadmin)) || normalRole">
             <label class="formLabel selector-668-28">Map to Specific Project</label>
-            <input [disabled]="view" type="checkbox" [ngModelOptions]="{ standalone: true }" [(ngModel)]="displayProjectDropdown" class="selector-668-29" />
+            <input [disabled]="view" type="checkbox" [ngModelOptions]="{ standalone: true }" [(ngModel)]="displayProjectDropdown" (ngModelChange) = "resetChanges($event,1)" class="formCheckBox selector-668-29" />
           </div>
-          <div class="col-md-6 select-style selector-668-30" *ngIf="displayProjectDropdown">
+          <div class="col-md-6 select-style selector-668-30" *ngIf="displayProjectDropdown && ((!(role.roleadmin) && !(role.projectadmin)) || normalRole)">
             <label class="formLabel selector-668-31">Select Project to map role</label>
             <mat-form-field style="width: 85%" class="selector-668-32">
               <mat-select [disabled]="view" [(ngModel)]="role.projectId" [ngModelOptions]="{ standalone: true }" class="selector-668-33">
@@ -70,13 +70,33 @@
 
         <div class="row rwMAr selector-668-35">
           
-          <div class="col-md-6 selector-668-36" *ngIf="role.id != 6 &amp;&amp; !role.projectadmin">
+          <div class="col-md-6 selector-668-36" *ngIf="role.id != 6 &amp;&amp; !role.projectadmin && !normalRole && !portfolioAdminBoolean">
             <label class="formLabel selector-668-37">Portfolio Admin</label>
-            <input [disabled]="view" type="checkbox" [ngModelOptions]="{ standalone: true }" [(ngModel)]="role &amp;&amp; role.roleadmin" class="selector-668-38" />
+            <input [disabled]="view" type="checkbox" [ngModelOptions]="{ standalone: true }" (ngModelChange) = "resetChanges($event,2)" [(ngModel)]="role.roleadmin" class="formCheckBox selector-668-38" />
           </div>
-          <div class="col-md-6 selector-668-39" *ngIf="role.id != 6 &amp;&amp; !role.roleadmin">
+          <div class="col-md-6 selector-668-36" *ngIf="role.roleadmin">
+            <mat-form-field style="width: 85%" class="selector-665-141">
+            <label class="formLabel selector-668-37">Portfolio</label>
+            <mat-select [(ngModel)]="role.portfolioId" [disabled]="view" required="" [ngModelOptions]="{ standalone: true }" class="selector-665-143">
+              <mat-option *ngFor="let item of usm_portfolio_idArray; trackBy: trackByMethod" [value]="item.id" class="selector-665-145">{{
+                item.portfolioName
+              }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          </div>
+          <div class="col-md-6 selector-668-39" *ngIf="(role.id != 6 &amp;&amp; !role.roleadmin) && !normalRole">
             <label class="formLabel selector-668-40">Project Admin</label>
-            <input [disabled]="view" type="checkbox" [ngModelOptions]="{ standalone: true }" [(ngModel)]="role &amp;&amp; role.projectadmin" class="selector-668-41" />
+            <input [disabled]="view" type="checkbox" [ngModelOptions]="{ standalone: true }" [(ngModel)]="role.projectadmin" class="formCheckBox selector-668-41" />
+          </div>
+          <div class="col-md-6 selector-668-36" *ngIf="role.projectadmin">
+            <mat-form-field style="width: 85%" class="selector-665-141">
+            <label class="formLabel selector-668-37">Project*</label>
+            <mat-select [(ngModel)]="role.projectAdminId" [disabled]="view" required="" [ngModelOptions]="{ standalone: true }" class="selector-665-143">
+              <mat-option *ngFor="let item of projectList; trackBy: trackByMethod" [value]="item.id" class="selector-665-145">{{
+                item.name
+              }}</mat-option>
+            </mat-select>
+          </mat-form-field>
           </div>
         </div>
       </div>
@@ -94,10 +114,10 @@
   <div *ngIf="edit || view" class="selector-668-46">
     <mat-tab-group class="selector-668-47">
       <mat-tab label="Portfolio-Project-User" class="selector-668-48">
-        <user-project-role-list *ngIf="role &amp;&amp; role.id" [selectedRole]="role" class="selector-668-49"></user-project-role-list>
+        <user-project-role-list *ngIf="role.id" [selectedRole]="role" class="selector-668-49"></user-project-role-list>
       </mat-tab>
       <mat-tab label="Role-Role" class="selector-663-168">
-        <lib-role-role *ngIf="role &amp;&amp; role.id" [selectedRole]="role" class="selector-668-49">
+        <lib-role-role *ngIf="role.id" [selectedRole]="role" class="selector-668-49">
         </lib-role-role>
       </mat-tab>
     </mat-tab-group>

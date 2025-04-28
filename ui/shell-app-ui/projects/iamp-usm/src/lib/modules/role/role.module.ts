@@ -78,6 +78,6 @@ import { RoleroleService } from "../../services/role-role.service";
   AuthService,
   RoleroleService
  ],
- entryComponents: [RoleDetailNewComponent],
+//  entryComponents: [RoleDetailNewComponent],
 })
 export class RoleModule {}

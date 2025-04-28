@@ -15,13 +15,13 @@
                 </ngx-mat-select-search>
               </mat-option>
               <mat-option *ngFor="let project of filteredProjectList | async; trackBy: trackByMethod" [value]="project"
-                [title]="project.name">
+                [matTooltip]="project.name">
                 {{ project.name }}
               </mat-option>
             </mat-select>
           </mat-grid-tile>
 
-          <mat-grid-tile [colspan]="colspan2" class="fontSize">
+          <!-- <mat-grid-tile [colspan]="colspan2" class="fontSize">
             <mat-label>Destination Project Name</mat-label>
           </mat-grid-tile>
           <mat-grid-tile [colspan]="colspan2">
@@ -33,16 +33,22 @@
                 </ngx-mat-select-search>
               </mat-option>
               <mat-option *ngFor="let project of filteredDestProjectList | async; trackBy: trackByMethod"
-                [value]="project" [title]="project.name">
+                [value]="project" [matTooltip]="project.name">
                 {{ project.name }}
               </mat-option>
             </mat-select>
-          </mat-grid-tile>
+          </mat-grid-tile> -->
 
           <mat-grid-tile [colspan]="colspan2">
-            <div class="minimunHeightForButtonSection">
+            <div *ngIf="!copyDisabled" class="minimunHeightForButtonSection">
               <button [ngBusy]="{ busy: busy, message: 'Copy BluePrint Processing...' }" type="button"
-                class="copyButton genBtn marRght30" (click)="copy()">
+                class="copyButton genBtn marRght30" (click)="copy()" [disabled]="false">
+                Copy
+              </button>
+            </div>
+            <div *ngIf="copyDisabled" class="minimunHeightForButtonSection">
+              <button [ngBusy]="{ busy: busy, message: 'Copy BluePrint Processing...' }" type="button"
+                class="copyButton genBtn marRght30" (click)="copy()" [disabled]="true" style="background-color: #96989a;">
                 Copy
               </button>
             </div>
@@ -60,3 +66,9 @@
     </mat-tab>
   </span>
 </mat-tab-group>
+<div *ngIf="fromProject && toProject">
+  <lib-jobs [internalJob]="'copyblueprint'" [srcProj]="fromProject.name" [desProj]="toProject.name" (statusChanged)="setDisable($event)"></lib-jobs>
+</div>
+<div *ngIf="!fromProject">
+  <lib-jobs [internalJob]="'copyblueprint'" [desProj]="desProj" (statusChanged)="setDisable($event)"></lib-jobs>
+</div>

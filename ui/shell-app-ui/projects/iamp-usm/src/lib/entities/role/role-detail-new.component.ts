@@ -21,6 +21,7 @@ import { RoleService } from "../../services/role.service";
 import { HelperService } from "../../services/helper.service";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { LeapTelemetryService } from "../../telemetry-util/telemetry.service";
+import { OpenTelemetryService } from "../../telemetry-util/open-telemetry.service";
 @Component({
  //moduleId: module.id,
  templateUrl: "role-detail-new.component.html",
@@ -45,7 +46,8 @@ export class RoleDetailNewComponent implements OnInit, OnDestroy {
   public helperService: HelperService,
   public elementRef: ElementRef,
   public roleService: RoleService,
-  private telemetryService: LeapTelemetryService
+  private telemetryService: LeapTelemetryService,
+  private openTelemetryService: OpenTelemetryService
  ) {}
 
  ngOnInit() {
@@ -73,13 +75,16 @@ export class RoleDetailNewComponent implements OnInit, OnDestroy {
  }
 
  telemetryImpression() {
-  this.telemetryService.impression("iamp-usm", "detail", "RoleDetailNewComponent");
+//   this.telemetryService.impression("iamp-usm", "detail", "RoleDetailNewComponent");
+  this.openTelemetryService.startTelemetry("iamp-usm", "RoleDetailNewComponent", "detail");
  }
 
  ngOnDestroy() {
-  if (!this.sub) {
-   this.params_subscription.unsubscribe();
-  }
+    let activeSpan = this.openTelemetryService.fetchActiveSpan();
+    this.openTelemetryService.endTelemetry(activeSpan);
+    if (!this.sub) {
+    this.params_subscription.unsubscribe();
+    }
  }
 
  onSave() {

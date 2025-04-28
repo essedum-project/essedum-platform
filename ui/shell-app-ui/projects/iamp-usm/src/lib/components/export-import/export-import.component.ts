@@ -10,7 +10,8 @@ import { FormControl } from '@angular/forms';
 import { take, takeUntil } from 'rxjs/operators';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { MatSelect } from '@angular/material/select';
-import { DashConstantService } from "projects/com-lib-util/src/public-api";
+import { DashConstantService } from "com-lib-util";
+import { ApisService } from 'src/app/services/apis.service';
 
 @Component({
   selector: 'lib-export-import',
@@ -63,6 +64,8 @@ export class ExportImportComponent implements OnInit {
   extension: string = "";
   allowedTypes: string="";
   extensionArray: string[];
+  processdata: any;
+  filteredprojects = [];
   constructor(
     private messageService: MessageService,
     private exportimportService: ExportImportService,
@@ -70,6 +73,7 @@ export class ExportImportComponent implements OnInit {
     private route: Router,
     private router: ActivatedRoute,
     private dashConstantService: DashConstantService,
+    private apisService: ApisService
   ) { }
 
   cols12 = 5;
@@ -93,6 +97,31 @@ export class ExportImportComponent implements OnInit {
         this.projectList = response.content.sort((a, b) =>
           a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
         );
+        try {
+          this.role = JSON.parse(sessionStorage.getItem("role"));
+        } catch (e:any) {
+          this.role = null;
+          console.error("JSON.parse error - ", e.message);
+        }
+        if(this.role.projectadmin){
+          this.apisService.getUserInfoData().subscribe((pageResponse) => {
+            this.processdata = pageResponse["porfolios"];
+            this.processdata.forEach((element) => {
+              if (element.porfolioId.id == project.portfolioId.id) {
+                element.projectWithRoles.forEach((element1) => {
+                 this.projectList.forEach((ele)=>{
+                  if(ele.id == element1.projectId.id){
+                    this.filteredprojects.push(ele);
+                  }
+                 }) 
+                });
+              }
+            });
+          });
+        }
+        if(this.role.projectadmin){
+          this.projectList = this.filteredprojects;
+        }
         this.filteredProjectList.next(this.projectList.slice());
       }
     );
@@ -272,6 +301,6 @@ export class ExportImportComponent implements OnInit {
   }
 
   routeLogs() {
-    this.route.navigate(['../../aibrain/jobs/logs'], { relativeTo: this.router })
+    this.route.navigate(['../../aip/jobs-log'], { relativeTo: this.router })
   }
 }

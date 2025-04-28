@@ -6,9 +6,10 @@
     width: 20% !important;
     background: white !important;
     font-size: medium !important;
+    float: none !important;
 }
 
-::ng-deep .p-fieldset-legend>a {
+ .p-fieldset-legend>a {
     justify-content: left !important;
 }
 
@@ -37,3 +38,43 @@ h4 {
 .mat-pseudo-checkbox-checked {
     background-color: var(--base-color);
 }
+
+::ng-deep p-fieldset > fieldset.p-fieldset.p-component.p-fieldset-toggleable{
+    padding: 0.35em 0.75em 0.625em;
+}
+
+::ng-deep .p-fieldset-legend>a {
+    justify-content: left !important;
+}
+
+label {
+    margin-bottom: 10px;
+}
+
+input.mat-mdc-input-element {
+    padding: 2px;
+}
+
+.col-md-6 {
+    float: left !important;
+}
+
+::ng-deep.p-fieldset-toggler.pi.pi-plus::before{
+    font-family: FontAwesome, sans-serif;
+    content: "\f067";
+}
+
+::ng-deep.p-fieldset-toggler.pi.pi-minus::before{
+    font-family: FontAwesome, sans-serif;
+    content: "\f068";
+}
+
+::ng-deep.p-fieldset-legend>a:hover {
+    text-decoration: underline;
+    }
+
+ .inputFieldstyle{
+    margin-top: 3%;
+    border: none;
+    font-size: revert;
+ }  

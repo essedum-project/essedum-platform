@@ -1,4 +1,4 @@
-<div class="col-md-12 selector-674-1">
+<div class="col-md-12 paddingBottom selector-674-1">
   <!-- search and filter wave -->
   <div *ngIf="!showCreate" class="selector-674-2">
     <div class="clearfix selector-674-3">
@@ -10,7 +10,7 @@
           <span style="cursor: pointer" *ngIf="createFlag" (click)="createView()" class="selector-674-8">Create
             Portfolio</span>
         </div>
-        <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-674-9">
+        <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-674-9 filterStyle">
           <h3 class="clearfix selector-674-10">
             <div class="search-container ams_cusSrch pull-left selector-674-11">
               <input style="color: black;" #myInput="" type="text" placeholder="Search By Portfolio Name"
@@ -22,7 +22,7 @@
             </div>
             <a href="javascript:void(0)" class="paddLeft selector-674-15">Filter</a>
           </h3>
-          <div class="ams_panelCnt formRow relative selector-674-16">
+          <div class="ams_panelCnt formRow relative selector-674-16  labelsAlign">
             <div class="row rwMAr selector-674-17">
               <div class="col-md-6 selector-674-18">
                 <label class="formLabel selector-674-19">Portfolio Name</label>
@@ -48,9 +48,9 @@
       <div class="selector-674-29">
         <div class="ams_panelCnt formRow relative selector-674-30">
           <div style="float: right; cursor: pointer" class="selector-674-31">
-            <i class="fa fa-list-ul fa-lg icon1 selector-674-32" aria-hidden="true" title="Table View"
+            <i class="fa fa-list-ul fa-lg icon1 selector-674-32" aria-hidden="true" matTooltip="Table View"
               (click)="showList = true"></i>
-            <i class="fa fa-th-large fa-lg icon1 selector-674-33" aria-hidden="true" title="Card View"
+            <i class="fa fa-th-large fa-lg icon1 selector-674-33" aria-hidden="true" matTooltip="Card View"
               (click)="showList = false"></i>
           </div>
           <br class="selector-674-34" />
@@ -104,13 +104,13 @@
                   <div class="selector-674-53">
                     <div class="ams_cardfooter text-center selector-674-54">
                       <i class="fa fa-info-circle fa-lg create-icon-color selector-674-55" aria-hidden="true"
-                        title="View Portfolio" *ngIf="viewFlag" (click)="view_UsmPortfolio(usmPortfolio)"></i>
+                         matTooltip="View Portfolio" *ngIf="viewFlag" (click)="view_UsmPortfolio(usmPortfolio)"></i>
                       <i class="fa fa-pencil fa-lg create-icon-color selector-674-56" aria-hidden="true"
-                        title="Edit Portfolio" *ngIf="editFlag" (click)="editUsmPortfolio(usmPortfolio)"
+                        matTooltip="Edit Portfolio" *ngIf="editFlag" (click)="editUsmPortfolio(usmPortfolio)"
                         style="padding-left: 5px"></i>
                       <i class="fa fa-trash fa-lg create-icon-color selector-674-57" aria-hidden="true"
                         style="padding-left: 5px" *ngIf="deleteFlag" (click)="showDeleteDialog(usmPortfolio)"
-                        title="Delete Portfolio"></i>
+                        matTooltip="Delete Portfolio"></i>
                     </div>
                   </div>
                 </div>
@@ -124,10 +124,10 @@
           <!-- list view -->
           <div class="ContentSideSections Implementation selector-674-60" style="padding: 1%"
             *ngIf="showList &amp;&amp; usmPortfolios.length >= 0">
-            <mat-card class="selector-674-61">
+            <mat-card appearance="outlined" class="selector-674-61">
               <mat-card-content class="selector-674-62">
                 <div class="table-responsive selector-674-63">
-                  <table mat-table="" [dataSource]="UsmPortfolioList"
+                  <table aria-label="" mat-table="" [dataSource]="UsmPortfolioList"
                     class="table table-hover list-table selector-674-64">
                     <ng-container matColumnDef="id" class="selector-674-65">
                       <th mat-header-cell="" *matHeaderCellDef="" class="number-col selector-674-66">
@@ -172,13 +172,13 @@
                       <td mat-cell="" *matCellDef="let task" class="actions-col selector-674-83"
                         style="padding-top: 1em !important;">
                         <i class="fa fa-info-circle fa-lg create-icon-color selector-674-84" aria-hidden="true"
-                          title="View Portfolio" *ngIf="viewFlag" (click)="view_UsmPortfolio(task)"></i>
+                        matTooltip="View Portfolio" *ngIf="viewFlag" (click)="view_UsmPortfolio(task)"></i>
                         <i class="fa fa-pencil fa-lg create-icon-color selector-674-85" aria-hidden="true"
-                          title="Edit Portfolio" *ngIf="editFlag" (click)="editUsmPortfolio(task)"
+                        matTooltip="Edit Portfolio" *ngIf="editFlag" (click)="editUsmPortfolio(task)"
                           style="padding-left: 5px"></i>
                         <i class="fa fa-trash fa-lg create-icon-color selector-674-86" aria-hidden="true"
                           style="padding-left: 5px" *ngIf="deleteFlag" (click)="showDeleteDialog(task)"
-                          title="Delete Portfolio"></i>
+                          matTooltip="Delete Portfolio"></i>
                       </td>
                     </ng-container>
 
@@ -233,12 +233,12 @@
       <h4 class="ams_h2 h2Mar crud-header selector-674-103" style="padding-left: 15%" *ngIf="edit &amp;&amp; view">View
         Portfolio</h4>
       <div *ngIf="!view" class="noPad selector-674-104">
-        <div class="selector-674-105">
+        <div class="selector-674-105 CreatePortfolioScreenFlex">
           <div style="margin-top: 15px" class="col-md-6 selector-674-106">
             <label class="formLabel selector-674-107">Portfolio Name* </label>
             <input (keypress)="deleteSpecialChars($event)" [disabled]="view" type="text"
               class="txtInput selector-674-108" maxlength="255" required="" [ngModelOptions]="{ standalone: true }"
-              [(ngModel)]="usmPortfolio &amp;&amp; usmPortfolio.portfolioName" (keyup)="checkNameMaxLength()" />
+              [(ngModel)]="usmPortfolio.portfolioName" (keyup)="checkNameMaxLength()" />
             <span class="error selector-674-109" style="font-size: 1.6vmin;color:red">
               Note: Alpha numeric characters and _ allowed </span><br class="selector-674-110" />
             <span class="error selector-674-111" style="font-size: 1.6vmin;color:red"
@@ -250,7 +250,7 @@
           <div style="margin-top: 15px" class="col-md-6 selector-674-112">
             <label class="formLabel selector-674-113">Portfolio Description </label>
             <input [disabled]="view" type="text" class="txtInput selector-674-114" maxlength="255" required=""
-              [ngModelOptions]="{ standalone: true }" [(ngModel)]="usmPortfolio &amp;&amp; usmPortfolio.description"
+              [ngModelOptions]="{ standalone: true }" [(ngModel)]="usmPortfolio.description"
               (keyup)="checkDescriptionMaxLength()" />
             <span class="error selector-668-19" style="font-size: 1.6vmin;color:red">
               Note: Alpha numeric and special characters -_. allowed </span><br class="selector-668-20" />
@@ -267,17 +267,17 @@
             <label class="formLabel selector-674-119">Portfolio Name </label>
             <input [disabled]="view" type="text" class="txtInput selector-674-120" required=""
               [ngModelOptions]="{ standalone: true }"
-              [(ngModel)]="usmPortfolio &amp;&amp; usmPortfolio.portfolioName" />
+              [(ngModel)]="usmPortfolio.portfolioName" />
           </div>
 
           <div style="margin-top: 15px" class="col-md-6 selector-674-121">
             <label class="formLabel selector-674-122">Portfolio Description </label>
             <input [disabled]="view" type="text" class="txtInput selector-674-123" required=""
-              [ngModelOptions]="{ standalone: true }" [(ngModel)]="usmPortfolio &amp;&amp; usmPortfolio.description" />
+              [ngModelOptions]="{ standalone: true }" [(ngModel)]="usmPortfolio.description" />
           </div>
         </div>
       </div>
-      <div id="btnMargin" style="margin-left: 1rem" class="selector-674-124">
+      <div id="btnMargin" style="margin-left: 1rem; margin-top:2vh" class="selector-674-124">
         <button *ngIf="!edit &amp;&amp; !buttonFlag" [ngBusy]="{ busy: busy, message: 'Saving Portfolio...' }"
           type="button" class="genBtn marRght30 selector-674-125" (click)="onSave()"
           [disabled]="!usmPortfoliosForm.form.valid">
@@ -295,7 +295,7 @@
           Projects under "{{usmPortfolio.portfolioName}}" Portfolio
         </h4>
         <div class="table-responsive selector-674-236">
-          <table mat-table="" [dataSource]="ProjectList" class="table table-hover list-table selector-674-237">
+          <table aria-label="" mat-table="" [dataSource]="ProjectList" class="table table-hover list-table selector-674-237">
             <ng-container matColumnDef="id" class="selector-674-238">
               <th mat-header-cell="" *matHeaderCellDef="" class="selector-674-239">
                 <strong class="selector-674-240"> Project Id </strong>

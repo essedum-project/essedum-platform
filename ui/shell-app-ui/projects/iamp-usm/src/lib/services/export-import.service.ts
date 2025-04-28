@@ -13,11 +13,12 @@
 // Template pack-angular:web/src/app/entities/entity.service.ts.e.vm
 //
 import { Injectable, SkipSelf } from "@angular/core";
-import { Observable } from "rxjs/Observable";
-import { throwError } from "rxjs";
-import "rxjs/add/operator/map";
+import { Observable, map, catchError, throwError } from "rxjs";
+// import { Observable } from "rxjs/Observable";
+// import { throwError } from "rxjs";
+// import "rxjs/add/operator/map";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { map, catchError } from "rxjs/operators";
+// import { map, catchError } from "rxjs/operators";
 import { Project } from "../models/project";
 
 @Injectable()
@@ -76,9 +77,9 @@ export class ExportImportService {
     let errMsg = error.error.error;
     error.status ? `Status: ${error.status} - Text: ${error.statusText}` : "Server error";
     console.error(errMsg); // log to console instead
-    if (error.status === 401) {
-      window.location.href = "/";
-    }
+    // if (error.status === 401) {
+    //   window.location.href = "/";
+    // }
     return throwError(errMsg);
   }
 }

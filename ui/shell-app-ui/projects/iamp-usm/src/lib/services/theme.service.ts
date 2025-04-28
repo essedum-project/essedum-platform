@@ -13,12 +13,13 @@
 // Template pack-angular:web/src/app/entities/entity.service.ts.e.vm
 //
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs/Observable";
-import { throwError } from "rxjs";
+import { Observable, map, catchError, throwError } from "rxjs";
+// import { Observable } from "rxjs/Observable";
+// import { throwError } from "rxjs";
 import { MessageService } from "./message.service";
 import { Theme } from "../models/theme";
 import { HttpClient } from "@angular/common/http";
-import { map, catchError } from "rxjs/operators";
+// import { map, catchError } from "rxjs/operators";
 @Injectable()
 export class ThemeService {
   constructor(private https: HttpClient, private messageService: MessageService) { }
@@ -75,7 +76,7 @@ export class ThemeService {
     let body;
     try {
       body = JSON.stringify(theme);
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
 
@@ -101,9 +102,9 @@ export class ThemeService {
     let errMsg = error.error;
     error.status ? `Status: ${error.status} - Text: ${error.statusText}` : "Server error";
     console.error(errMsg); // log to console instead
-    if (error.status === 401) {
-      window.location.href = "/";
-    }
+    // if (error.status === 401) {
+    //   window.location.href = "/";
+    // }
     return throwError(errMsg);
   }
 }

@@ -38,6 +38,7 @@ export class Users {
  timezone: string;
  other_details: string;
  contact_number: string;
+ isUiInactivityTracked: boolean;
  constructor(json?: any) {
   if (json != null) {
    this.id = json.id;
@@ -61,6 +62,7 @@ export class Users {
    this.timezone = json.timezone;
    this.other_details = json.other_details;
    this.contact_number = json.contact_number;
+   this.isUiInactivityTracked = json.isUiInactivityTracked;
   }
  }
 

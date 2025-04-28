@@ -61,6 +61,6 @@ import { CommonModule } from "@angular/common";
   MessageService,
   AuthService,
  ],
- entryComponents: [UsmPortfolioListViewComponent],
+//  entryComponents: [UsmPortfolioListViewComponent],
 })
 export class UsmPortfolioModule {}

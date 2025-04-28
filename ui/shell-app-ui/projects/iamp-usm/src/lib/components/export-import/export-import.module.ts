@@ -15,7 +15,7 @@ import { ExportImportComponent } from './export-import.component';
 import { SharedMaterialModule } from '../../shared-modules/material/material.module';
 import { ExportImportService } from '../../services/export-import.service';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
-import { DashConstantService } from 'projects/com-lib-util/src/public-api';
+import { DashConstantService } from 'com-lib-util';
 @NgModule({
     imports: [
         CommonModule,

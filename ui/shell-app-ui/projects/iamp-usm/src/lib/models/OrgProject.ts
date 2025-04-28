@@ -20,6 +20,7 @@ export class OrgProject {
     ModulesOrg: any;
     createdDate: any;
     projectAutologin: Boolean;
+    autoUserProject: Boolean;
     autologinRole : Role;
     User: any;
     Groups: any;
@@ -42,6 +43,7 @@ export class OrgProject {
             this.theme = json.theme;
             this.timeZone=json.timeZone;
             this.projectAutologin = json.projectAutologin
+            this.autoUserProject = json.autoUserProject
             this.autologinRole = json.autologinRole
             this.azureOrgId=json.azureOrgId;
             this.ModulesOrg = json.ModulesOrg;

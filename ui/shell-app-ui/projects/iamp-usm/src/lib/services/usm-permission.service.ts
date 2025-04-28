@@ -13,14 +13,15 @@
 // Template pack-angular:web/src/app/entities/entity.service.ts.e.vm
 //
 import { Injectable, SkipSelf } from "@angular/core";
-import { Observable } from "rxjs/Observable";
+import { Observable, map, catchError, throwError } from "rxjs";
+// import { Observable } from "rxjs/Observable";
 import { MessageService } from "./message.service";
 import { PageResponse } from "../support/paging";
 import { PageRequestByExample } from "../support/page-request";
 import { UsmPermissions } from "../models/usm-permissions";
-import { map, catchError } from "rxjs/operators";
+// import { map, catchError } from "rxjs/operators";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { throwError } from "rxjs";
+// import { throwError } from "rxjs";
 @Injectable()
 export class UsmPermissionsService {
   constructor(private https: HttpClient, private messageService: MessageService) { }
@@ -32,7 +33,7 @@ export class UsmPermissionsService {
   create(usm_permissions: UsmPermissions): Observable<UsmPermissions> {
     const copy = this.convert(usm_permissions);
     return this.https
-      .post("/api/usm-permissionss/", copy, {
+      .post("/api/usm-permissionss", copy, {
         observe: "response",
       })
       .pipe(
@@ -57,7 +58,7 @@ export class UsmPermissionsService {
       })
       .pipe(
         map((response) => {
-          return new UsmPermissions(response);
+          return new UsmPermissions(response.body);
         })
       )
       .pipe(
@@ -74,12 +75,12 @@ export class UsmPermissionsService {
     let body;
     try {
       body = JSON.stringify(usm_permissions);
-    } catch (e) {
+    } catch (e : any) {
       console.error("JSON.stringify error - ", e.message);
     }
 
     return this.https
-      .put("/api/usm-permissionss/", body, {
+      .put("/api/usm-permissionss", body, {
         observe: "response",
       })
       .pipe(
@@ -105,7 +106,7 @@ export class UsmPermissionsService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e) {
+    } catch (e : any) {
       console.error("JSON.stringify error - ", e.message);
     }
     let headers = new HttpHeaders();
@@ -140,13 +141,13 @@ export class UsmPermissionsService {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
 
-    } catch (e) {
+    } catch (e : any) {
       console.error("JSON.stringify error - ", e.message);
     }
     let headers = new HttpHeaders();
     headers = headers.append('example', headerValue);
     return this.https
-      .get("/api/usm-permissionss/page", {
+      .get(`/api/usm-permissionss?page=${event.page}&size=${event.size}`, {
         observe: "response",
         headers: headers
       })
@@ -169,7 +170,7 @@ export class UsmPermissionsService {
     let body;
     try {
       body = JSON.stringify({ query: query, maxResults: 10 });
-    } catch (e) {
+    } catch (e : any) {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -194,9 +195,35 @@ export class UsmPermissionsService {
    */
   delete(id: any) {
     return this.https
-      .delete("/api/usm-permissions/" + id, {
+      .delete("/api/usm-permissionss/" + id, {
         observe: "response",
       })
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  search(usm_permission: UsmPermissions, event: any): Observable<PageResponse<UsmPermissions>> {
+    let req = new PageRequestByExample(usm_permission, event);
+    let body;
+    try {
+      body = JSON.stringify(req);
+    } catch (e : any) {
+      console.error("JSON.stringify error - ", e.message);
+    }
+    return this.https
+      .post(`/api/search/usm-permissions/page?page=${event.page}&size=${event.size}`, body,
+        {
+          observe: "response"
+        })
+      .pipe(
+        map((response) => {
+          let pr: any = response.body;
+          return new PageResponse<UsmPermissions>(pr.totalPages, pr.totalElements, UsmPermissions.toArray(pr.content));
+        })
+      )
       .pipe(
         catchError((err) => {
           return this.handleError(err);
@@ -210,9 +237,9 @@ export class UsmPermissionsService {
     let errMsg = error.error;
     error.status ? `Status: ${error.status} - Text: ${error.statusText}` : "Server error";
     console.error(errMsg); // log to console instead
-    if (error.status === 401) {
-      window.location.href = "/";
-    }
+    // if (error.status === 401) {
+    //   window.location.href = "/";
+    // }
     return throwError(errMsg);
   }
 

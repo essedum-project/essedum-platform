@@ -78,6 +78,6 @@ import { NgBusyModule } from "ng-busy";
         MessageService,
         AuthService,
     ],
-    entryComponents: [UserProjectRoleListComponent],
+    // entryComponents: [UserProjectRoleListComponent],
 })
 export class UserProjectRoleModule { }

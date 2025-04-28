@@ -1,0 +1,424 @@
+<div>
+    <div *ngIf="!isCreateAndUpdateApi">
+        <div #permissionForm="ngForm" ngForm="" class="col-md-12 centerStyle paddingBottom selector-876-1" style="border: none">
+            <div class="padTop20 selector-876-2">
+                <div class="backIconcrud">
+                    <span class="pull-right linkMar selector-876-3" (click)="listView()">Back to Permissions</span>
+                    <i class="fa fa-caret-square-o-left create-icon-color pull-right linkMar selector-876-4"
+                        (click)="listView()" aria-hidden="true"></i>
+                </div>
+                <h4 *ngIf="isCreatePermission" class="ams_h2 h2Mar crud-header selector-876-4"
+                    style="padding-left: 11%">Create Permission</h4>
+                <h4 *ngIf="!isCreatePermission&& !viewflag" class="ams_h2 h2Mar crud-header selector-876-4"
+                    style="padding-left: 11%">Edit Permission</h4>
+                <h4 *ngIf="viewflag" class="ams_h2 h2Mar crud-header selector-876-4" style="padding-left: 11%">View
+                    Permission</h4>
+                <div class="row rwMAr selector-876-41">
+                    <!-- <div class="col-md-6 selector-876-42">
+                        <label class="formLabel selector-876-43">Module *</label>
+                        <input [disabled]="viewflag" type="text" class="txtInput selector-876-18" maxlength="255"
+                            required="" [ngModelOptions]="{ standalone: true }" [(ngModel)]="usmpermission.module"
+                            (keyup)="checkModuleMaxLength()" />
+                        <span class="error selector-876-44" style="font-size: 1.6vmin; color:red"
+                            *ngIf="showModuleLengthErrorMessage">{{
+                            lengthNameErrorMessage
+                            }}</span>
+                    </div> -->
+                    <div class="col-md-6 select-style selector-876-42">
+                        <mat-form-field style="width: 85%" class="selector-876-32">
+                            <label class="formLabel selector-876-31">Module</label>
+                            <mat-select [disabled]="!isCreatePermission || viewflag" [(ngModel)]="usmpermission.module"
+                                [ngModelOptions]="{ standalone: true }" class="selector-876-33">
+                                <mat-option *ngFor="let module of modules; trackBy: trackByMethod" [value]="module.name"
+                                    class="selector-876-34">
+                                    {{ module.name }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-6 selector-876-22">
+                        <label class="formLabel selector-876-23">Permission*</label>
+                        <input [disabled]="viewflag" type="text" [ngModelOptions]="{ standalone: true }"
+                            [(ngModel)]="usmpermission.permission" maxlength="255" class="txtInput selector-876-24"
+                            (keyup)="checkPermissionMaxLength()" />
+                        <span class="error selector-876-44" style="font-size: 1.6vmin; color:red"
+                            *ngIf="showPermissionLengthErrorMessage">{{
+                            lengthNameErrorMessage
+                            }}</span>
+                    </div>
+
+                </div>
+                <div id="btnMargin" class="selector-876-42">
+                    <button *ngIf="isCreatePermission" type="button" class="genBtn marRght30 selector-876-43"
+                        (click)="savePermission()">
+                        save
+                    </button>
+                    <button [disabled]="viewflag" *ngIf="!isCreatePermission" type="button"
+                        class="genBtn marRght30 selector-876-43" (click)="updatePermission()">
+                        Update
+                    </button>
+                    <button *ngIf="isCreatePermission" type="button" class="secBtn selector-876-45"
+                        (click)="clearRole()">Clear</button>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="showPermissionApiList" class="col-md-12 centerStyle paddingBottom selector-876-1" style="border: none">
+            <div class="selector-876-2">
+                <div class="clearfix selector-876-3">
+                    <div class="padTop20 selector-876-4">
+                        <h2 class="ams_h2 h2Mar selector-876-5">Permission Api list</h2>
+                        <div class="ams_toptoolbar selector-876-6">
+                            <i class="fa fa-plus-square-o create-icon-color selector-876-17"
+                                (click)="createApiPermission()" *ngIf="!viewflag" aria-hidden="true"></i>
+                            <span style="cursor: pointer" (click)="createApiPermission()" *ngIf="!viewflag"
+                                class="selector-876-18">Create
+                                Permission Api</span>
+                        </div>
+
+
+
+                        <!-- Serach and filter -->
+                        <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-875-19 filterStyle">
+                            <h3 class="clearfix selector-875-20">
+                              <div class="search-container ams_cusSrch pull-left selector-875-21">
+                                <input style="color: black;" #myInput="" type="text" placeholder="Search by Api"
+                                (keypress)="checkEnterPressed($event, myInput.value)" class="selector-875-22" />
+                                <button type="button" (click)="filterItem(myInput.value)" class="selector-875-23">
+                                  <i class="searchIcon selector-875-24"></i>
+                                </button>
+                              </div>
+                              <a href="javascript:void(0)" class="paddLeft selector-875-25">Filter</a>
+                            </h3>
+                            <div class="ams_panelCnt formRow relative selector-665-16 labelsAlign">
+                              <div class="row rwMAr selector-665-17">
+                                <div class="col-md-6 selector-665-18">
+                                    <label class="formLabel selector-665-19" style="position: sticky;">Api </label>
+                                    <div class="input-group ams_datetime selector-665-20" style="margin-top: 1%">
+                                      <input matInput [(ngModel)]="apiFilter" (keyup)="onKeyApi(apiFilter)"   class="txtInput selector-876-18"  />
+                                    </div>
+                                  </div>
+                                <div class="col-md-6 selector-665-18">
+                                    <label class="formLabel selector-665-19" style="position: sticky;">Description</label>
+                                    <div class="input-group ams_datetime selector-665-20" style="margin-top: 1%">
+                                      <input matInput [(ngModel)]="descriptionFilter" (keyup)="onKeyDescription(descriptionFilter)"   class="txtInput selector-876-18"  />
+                                    </div>
+                                  </div>
+                                
+                              </div>
+                              <div class="ams_panelFooter selector-665-27">
+                                <button type="button" class="genBtn marRght30 selector-665-28" [ngStyle]="isDisabled ? {'opacity':'.5'} : {'opacity':'1'}" [disabled]="isDisabled" (click)="search()">Submit</button>
+                                <button type="button" class="secBtn selector-665-29" (click)="clear()">Clear</button>
+                              </div>
+                            </div>
+                          </div>
+
+                        <div class="selector-876-41">
+                            <div class="ams_panelCnt formRow relative selector-876-42" style="margin-top: auto;">
+                                <div style="float: right; cursor: pointer" class="selector-876-47">
+                                    <i class="fa fa-list-ul fa-lg icon1 selector-876-48" aria-hidden="true"
+                                        title="Table View" (click)="showList = true"></i>
+                                    <i class="fa fa-th-large fa-lg icon1 selector-876-49" aria-hidden="true"
+                                        title="Card View" (click)="showList = false"></i>
+                                </div>
+                                <br class="selector-876-50" />
+                                <br class="selector-876-51" />
+                                <!-- card view -->
+                                <div class="row selector-876-52" *ngIf="permissionApiLength > 0 &amp;&amp; !showList">
+                                    <div class="col-md-6 selector-876-53"
+                                        *ngFor="let api of permissionApi | paginate: { itemsPerPage: 6, currentPage: p }; trackBy: trackByMethod">
+                                        <div class="ams_cardCtr ams_cardfooterCtr selector-876-54">
+                                            <div class="ams_cardBorder clearfix selector-876-55">
+                                                <h4 (click)="viewPermissionApi(api)" class="td-ellipsis selector-876-56"
+                                                    style="cursor:pointer" [matTooltip]="api.id"
+                                                    [matTooltipDisabled]="api.id == null"
+                                                    matTooltipClass="crud-tooltip">
+                                                    {{ api.id }}
+                                                </h4>
+                                                <div class="ams_cardCnt selector-876-57">
+                                                    <div class="row rwMAr selector-876-58">
+                                                        <div class="col-md-6 selector-876-59">
+                                                            <label class="formLabel selector-876-60"
+                                                                (click)="viewPermissionApi(api)" style="cursor:pointer">
+                                                                Api</label>
+                                                            <span class="formSpan selector-876-61"
+                                                                (click)="viewPermissionApi(api)" style="cursor:pointer"
+                                                                [matTooltip]="api.api"
+                                                                [matTooltipDisabled]="api.api == null"
+                                                                matTooltipClass="crud-tooltip">{{ api.api ? api.api :
+                                                                "--"
+                                                                }}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="ams_cardCnt selector-876-57">
+                                                        <div class="row rwMAr selector-876-58">
+                                                            <div class="col-md-6 selector-876-59">
+                                                                <label class="formLabel selector-876-60"
+                                                                    (click)="viewPermissionApi(api)"
+                                                                    style="cursor:pointer"> isWhiteListed</label>
+                                                                <span class="formSpan selector-876-61"
+                                                                    (click)="viewPermissionApi(api)"
+                                                                    style="cursor:pointer"
+                                                                    [matTooltip]="api.isWhiteListed"
+                                                                    [matTooltipDisabled]="api.isWhiteListed == null"
+                                                                    matTooltipClass="crud-tooltip">{{ api.isWhiteListed
+                                                                    ? api.isWhiteListed : "--"
+                                                                    }}</span>
+                                                            </div>
+                                                            <div class="col-md-6 selector-876-59">
+                                                                <label class="formLabel selector-876-60"
+                                                                    (click)="viewPermissionApi(api)"
+                                                                    style="cursor:pointer"> Type</label>
+                                                                <span class="formSpan selector-876-61"
+                                                                    (click)="viewPermissionApi(api)"
+                                                                    style="cursor:pointer" [matTooltip]="api.type"
+                                                                    [matTooltipDisabled]="api.type == null"
+                                                                    matTooltipClass="crud-tooltip">{{ api.type ?
+                                                                    api.type : "--"
+                                                                    }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="ams_cardCnt selector-876-57">
+                                                        <div class="row rwMAr selector-876-58">
+                                                            <div class="col-md-6 selector-876-59">
+                                                                <label class="formLabel selector-876-60"
+                                                                    (click)="viewPermissionApi(api)"
+                                                                    style="cursor:pointer"> description</label>
+                                                                <span class="formSpan selector-876-61"
+                                                                    (click)="viewPermissionApi(api)"
+                                                                    style="cursor:pointer"
+                                                                    [matTooltip]="api.description"
+                                                                    [matTooltipDisabled]="api.description == null"
+                                                                    matTooltipClass="crud-tooltip">{{ api.description ?
+                                                                    api.description : "--"
+                                                                    }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="selector-876-68">
+                                                    <div class="selector-876-69">
+                                                        <div class="ams_cardfooter text-center selector-876-70">
+                                                            <i class="fa fa-info-circle fa-lg create-icon-color selector-876-71"
+                                                                aria-hidden="true" title="View Permission API"
+                                                                (click)="viewPermissionApi(api)"></i>
+                                                            <i *ngIf="!viewflag"
+                                                                class="fa fa-pencil fa-lg create-icon-color selector-876-72"
+                                                                aria-hidden="true" title="Edit Permission API"
+                                                                (click)="editPermissionApi(api)"
+                                                                style="padding-left: 5px"></i>
+                                                            <i *ngIf="!viewflag"
+                                                                class="fa fa-trash fa-lg create-icon-color selector-876-73"
+                                                                aria-hidden="true" style="padding-left: 5px"
+                                                                title="Delete Permission API"
+                                                                (click)="deletePermissionApi(api)"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div *ngIf="permissionApiLength > 0 &amp;&amp; !showList"
+                                        class="col-md-12 selector-876-74" id="noRecordsMsg">
+                                        <pagination-controls (pageChange)="p = $event"
+                                            class="selector-876-75"></pagination-controls>
+                                    </div>
+                                </div>
+                                <!-- list view -->
+                                <div *ngIf="permissionApiLength > 0 &amp;&amp; showList"
+                                    class="table-responsive selector-876-76">
+                                    <table mat-table="" aria-label="" [dataSource]="permissionApiList"
+                                        class="table-hover list-table table selector-876-77" matSort=""
+                                        matSortActive="scheduled_from" matSortDirection="asc">
+                                        <ng-container matColumnDef="id" class="selector-876-78">
+                                            <th mat-header-cell="" *matHeaderCellDef=""
+                                                class="number-col selector-876-79">
+                                                <strong class="selector-876-80"> Id </strong>
+                                            </th>
+                                            <td mat-cell="" (click)="viewPermissionApi(permissionApi)"
+                                                style="cursor:pointer" *matCellDef="let permissionApi"
+                                                class="td-ellipsis number-col selector-876-81">
+                                                <div class="td-span td-ellipsis pull-right td-padding selector-876-82"
+                                                    [matTooltip]="permissionApi.id"
+                                                    [matTooltipDisabled]="permissionApi.id == null"
+                                                    matTooltipClass="crud-tooltip">
+                                                    {{ permissionApi.id ? permissionApi.id : "--" }}
+                                                </div>
+                                            </td>
+                                        </ng-container>
+                                        <ng-container matColumnDef="api" class="selector-876-83">
+                                            <th mat-header-cell="" *matHeaderCellDef="" class="selector-876-84">
+                                                <strong class="selector-876-85"> Api </strong>
+                                            </th>
+                                            <td mat-cell="" (click)="viewPermissionApi(permissionApi)"
+                                                style="cursor:pointer" *matCellDef="let permissionApi"
+                                                class="td-ellipsis selector-876-86">
+                                                <div class="td-span td-ellipsis pull-left td-padding selector-876-87"
+                                                    [matTooltip]="permissionApi.api"
+                                                    [matTooltipDisabled]="permissionApi.api == null"
+                                                    matTooltipClass="crud-tooltip">
+                                                    {{ permissionApi.api ? permissionApi.api : "--" }}
+                                                </div>
+                                            </td>
+                                        </ng-container>
+                                        <ng-container matColumnDef="type" class="selector-876-88">
+                                            <th mat-header-cell="" *matHeaderCellDef="" class="selector-876-89">
+                                                <strong class="selector-876-90"> Type </strong>
+                                            </th>
+                                            <td mat-cell="" (click)="viewPermissionApi(permissionApi)"
+                                                style="cursor:pointer" *matCellDef="let permissionApi"
+                                                class="td-ellipsis selector-876-91">
+                                                <div class="td-span td-ellipsis pull-left td-padding selector-876-92"
+                                                    [matTooltip]="permissionApi.type"
+                                                    [matTooltipDisabled]="permissionApi.type == null"
+                                                    matTooltipClass="crud-tooltip">
+                                                    {{ permissionApi.type ? permissionApi.type : "--" }}
+                                                </div>
+                                            </td>
+                                        </ng-container>
+                                        <ng-container matColumnDef="isWhiteListed" class="selector-876-88">
+                                            <th mat-header-cell="" *matHeaderCellDef="" class="selector-876-89">
+                                                <strong class="selector-876-90"> isWhiteListed </strong>
+                                            </th>
+                                            <td mat-cell="" (click)="viewPermissionApi(permissionApi)"
+                                                style="cursor:pointer" *matCellDef="let permissionApi"
+                                                class="td-ellipsis selector-876-91">
+                                                <div class="td-span td-ellipsis pull-left td-padding selector-876-92"
+                                                    [matTooltip]="permissionApi.isWhiteListed"
+                                                    [matTooltipDisabled]="permissionApi.isWhiteListed == null"
+                                                    matTooltipClass="crud-tooltip">
+                                                    {{ permissionApi.isWhiteListed }}
+                                                </div>
+                                            </td>
+                                        </ng-container>
+                                        <ng-container matColumnDef="description" class="selector-876-88">
+                                            <th mat-header-cell="" *matHeaderCellDef="" class="selector-876-89">
+                                                <strong class="selector-876-90"> Description </strong>
+                                            </th>
+                                            <td mat-cell="" (click)="viewPermissionApi(permissionApi)"
+                                                style="cursor:pointer" *matCellDef="let permissionApi"
+                                                class="td-ellipsis selector-876-91">
+                                                <div class="td-span td-ellipsis pull-left td-padding selector-876-92"
+                                                    [matTooltip]="permissionApi.description"
+                                                    [matTooltipDisabled]="permissionApi.description == null"
+                                                    matTooltipClass="crud-tooltip">
+                                                    {{ permissionApi.description ? permissionApi.description : "--" }}
+                                                </div>
+                                            </td>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="actions" class="selector-876-98">
+                                            <th mat-header-cell="" *matHeaderCellDef=""
+                                                class="actions-col selector-876-99">
+                                                <strong class="selector-876-100"> Actions </strong>
+                                            </th>
+                                            <td mat-cell="" *matCellDef="let permission"
+                                                class="actions-col selector-876-101">
+                                                <i class="fa fa-info-circle fa-lg create-icon-color selector-876-102"
+                                                    aria-hidden="true" (click)="viewPermissionApi(permission)"
+                                                    title="View Permission API"></i>
+                                                <i *ngIf="!viewflag"
+                                                    class="fa fa-pencil fa-lg create-icon-color selector-876-103"
+                                                    aria-hidden="true" (click)="editPermissionApi(permission)"
+                                                    title="Edit Permission API" style="padding-left: 5px"></i>
+                                                <i *ngIf="!viewflag"
+                                                    class="fa fa-trash fa-lg create-icon-color selector-876-104"
+                                                    aria-hidden="true" style="padding-left: 5px"
+                                                    (click)="deletePermissionApi(permission)"
+                                                    title="Delete Permission API"></i>
+                                            </td>
+                                        </ng-container>
+                                        <tr mat-header-row="" *matHeaderRowDef="displayedColumns"
+                                            class="selector-876-105">
+                                        </tr>
+                                        <tr mat-row="" *matRowDef="let row; columns: displayedColumns"
+                                            class="selector-876-106">
+                                        </tr>
+                                    </table>
+                                    <mat-paginator [pageSize]="6" showFirstLastButtons=""
+                                        class="selector-876-107"></mat-paginator>
+                                </div>
+                            </div>
+                            <div *ngIf="permissionApiLength == 0" id="noRecordsMsg" class="selector-876-108">No Records
+                                Found</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="isCreateAndUpdateApi" #permissionForm="ngForm" ngForm="" class="col-md-12 centerStyle paddingBottom selector-876-1"
+        style="border: none">
+        <div class="padTop20 selector-876-2">
+            <div class="selector-668-5">
+                <div class="backIconcrud">
+                    <span class="ams back pull-right linkMar selector-876-3"  (click)="editView()">Back to Edit Permission</span>
+                    <i class="fa fa-caret-square-o-left create-icon-color pull-right linkMar selector-876-4"
+                        (click)="editView()" aria-hidden="true"></i>
+                </div>
+            </div>
+            <h4 *ngIf="!apieditflag && !apiViewflag" class="ams_h2 h2Mar crud-header selector-876-4"
+                style="padding-left: 11%">Create Permission API</h4>
+            <h4 *ngIf="apieditflag" class="ams_h2 h2Mar crud-header selector-876-4" style="padding-left: 11%">Edit
+                Permission API</h4>
+            <h4 *ngIf="apiViewflag" class="ams_h2 h2Mar crud-header selector-876-4" style="padding-left: 11%">View
+                Permission API</h4>
+            <div class="row rwMAr selector-876-41">
+                <div class="col-md-6 selector-876-42">
+                    <label class="formLabel selector-876-43">Api *</label>
+                    <input [disabled]="apiViewflag" type="text" class="txtInput selector-876-18" maxlength="500"
+                        required="" [ngModelOptions]="{ standalone: true }" [(ngModel)]="usmpermissionApi.api"
+                        (keyup)="checkApiMaxLength(usmpermissionApi.api)" />
+                    <span class="error selector-876-44" style="font-size: 1.6vmin; color:red"
+                        *ngIf="showApiLengthErrorMessage">{{
+                        lengthNameErrorMessage
+                        }}</span>
+                    <span class="error selector-876-44" style="font-size: 1.6vmin; color:red" *ngIf="isValidRegex">{{
+                        invalidRegexMessage
+                        }}</span>
+                </div>
+                <div class="col-md-6 select-style selector-876-42">
+                    <label class="formLabel selector-876-31">Type</label>
+                    <mat-form-field style="width: 85%" class="selector-876-32">
+                        <mat-select [disabled]="apiViewflag" [(ngModel)]="usmpermissionApi.type"
+                            [ngModelOptions]="{ standalone: true }" class="selector-876-33">
+                            <mat-option *ngFor="let type of methodType; trackBy: trackByMethod" [value]="type"
+                                class="selector-876-34">
+                                {{ type }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6 selector-876-22" style="margin-top: 2vh; margin-bottom:2vh">
+                    <section>
+                        <mat-checkbox [disabled]="apiViewflag" #type id="type" type="checkbox" matTooltip={{tooltipMessage}} [matTooltipPosition]="'left'"
+                            [checked]="usmpermissionApi.isWhiteListed"
+                            (change)="onSaveUsernameChanged(type.checked)">isWhiteListed *</mat-checkbox>
+                    </section>
+                </div>
+                <div class="col-md-6 selector-876-22">
+                    <label class="formLabel selector-876-23">Description </label>
+                    <input [disabled]=" apiViewflag" type="text" [ngModelOptions]="{ standalone: true }"
+                        [(ngModel)]="usmpermissionApi.description" maxlength="500" class="txtInput selector-876-24"
+                        (keyup)="checkDescMaxLength(usmpermissionApi.description)" />
+                    <span class="error selector-876-44" style="font-size: 1.6vmin; color:red"
+                        *ngIf="showDescLengthErrorMessage">{{
+                        lengthNameErrorMessage
+                        }}</span>
+                </div>
+            </div>
+            <div id="btnMargin" class="selector-876-42">
+                <button *ngIf="!isUpdateApi" type="button" class="genBtn marRght30 selector-876-43"
+                    (click)="savePermissionApi()">
+                    Save
+                </button>
+                <button [disabled]=" apiViewflag" *ngIf="isUpdateApi" type="button"
+                    class="genBtn marRght30 selector-876-43" (click)="updatePermissionApi()">
+                    Update
+                </button>
+                <button *ngIf="!isUpdateApi" type="button" class="secBtn selector-876-45"
+                    (click)="clearPermissionApi()">Clear</button>
+            </div>
+        </div>
+    </div>
+</div>

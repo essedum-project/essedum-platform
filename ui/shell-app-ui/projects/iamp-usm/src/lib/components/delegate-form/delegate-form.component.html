@@ -13,7 +13,7 @@
                 <div class="row rwMAr">
                     <div class="col-md-6">
                         <label class="formLabel">Process*</label>
-                        <mat-select class="txtInput" style="width: 85%" [(ngModel)]="delegate &amp;&amp; delegate.process_id" name="process" id="process" [ngModelOptions]="{ standalone: true }" placeholder="SELECT" required 
+                        <mat-select class="txtInput" style="width: 85%" [(ngModel)]="delegate.process_id" name="process" id="process" [ngModelOptions]="{ standalone: true }" placeholder="SELECT" required 
                         [compareWith]="compareObjects" (selectionChange)="fetchRoles()">
                             <mat-option *ngFor="let item of processList; trackBy: trackByMethod" [value]="item.process_id">
                                 {{ item.process_name }}
@@ -23,21 +23,21 @@
                     <div class="col-md-6">
                         <label class="formLabel">Reason*</label>
                         <mat-select *ngIf="!inputReason" class="txtInput" style="width: 85%" 
-                        [(ngModel)]="delegate &amp;&amp; delegate.reason" name="reason" id="reason" [ngModelOptions]="{ standalone: true }" required placeholder="SELECT" 
+                        [(ngModel)]="delegate.reason" name="reason" id="reason" [ngModelOptions]="{ standalone: true }" required placeholder="SELECT" 
                         [compareWith]="compareObjects" (ngModelChange)="customReason()">
                             <mat-option *ngFor="let item of reasonList; trackBy: trackByMethod" [value]="item">
                                 {{ item }}
                             </mat-option>
                             <mat-option value="Other">Other</mat-option>
                         </mat-select>
-                        <input *ngIf="inputReason" type="text" id="customReason" name="customReason" class="txtInput" [(ngModel)]="delegate &amp;&amp; delegate.reason" [ngModelOptions]="{ standalone: true }" required 
+                        <input *ngIf="inputReason" type="text" id="customReason" name="customReason" class="txtInput" [(ngModel)]="delegate.reason" [ngModelOptions]="{ standalone: true }" required 
                         placeholder="Enter custom reason">
                     </div>
                 </div>
                 <div class="row rwMAr">
                     <div class="col-md-6">
                         <label class="formLabel">Role*</label>
-                        <mat-select class="txtInput" style="width: 85%" [(ngModel)]="delegate &amp;&amp; delegate.role_id" name="role" id="role" [ngModelOptions]="{ standalone: true }" required placeholder="SELECT" [compareWith]="compareObjects" 
+                        <mat-select class="txtInput" style="width: 85%" [(ngModel)]="delegate.role_id" name="role" id="role" [ngModelOptions]="{ standalone: true }" required placeholder="SELECT" [compareWith]="compareObjects" 
                         (selectionChange)="fetchUsers()">
                             <mat-option *ngFor="let item of roleList; trackBy: trackByMethod" [value]="item">
                                 {{ item.name }}
@@ -46,7 +46,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="formLabel">Alternate User*</label>
-                        <mat-select class="txtInput" style="width: 85%" [(ngModel)]="delegate &amp;&amp; delegate.alternate_user" name="alternateUser" id="alternateUser" [ngModelOptions]="{ standalone: true }" required placeholder="SELECT" 
+                        <mat-select class="txtInput" style="width: 85%" [(ngModel)]="delegate.alternate_user" name="alternateUser" id="alternateUser" [ngModelOptions]="{ standalone: true }" required placeholder="SELECT" 
                         [compareWith]="compareObjects">
                             <mat-option *ngFor="let item of alternateUserList; trackBy: trackByMethod" [value]="item.user_login">
                                 {{ item.user_f_name }}
@@ -57,20 +57,20 @@
                 <div class="row rwMAr">
                     <div class="col-md-6">
                         <label class="formLabel">From Date*</label>
-                        <input matInput="" [ngxMatDatetimePicker]="picker" placeholder="DD-MM-YYYY HH:MM:SS" #startDatePicker="" [(ngModel)]="delegate &amp;&amp; delegate.start_time" [ngModelOptions]="{ standalone: true }" style="width: 35% !important;" class="filter form-input col-md-10" required>
+                        <input matInput="" [ngxMatDatetimePicker]="picker" placeholder="DD-MM-YYYY HH:MM:SS" #startDatePicker="" [(ngModel)]="delegate.start_time" [ngModelOptions]="{ standalone: true }" style="width: 35% !important;" class="filter form-input col-md-10" required>
                             <mat-datepicker-toggle  matSuffix="" [for]="picker" class="col-md-1" style="color: #ff7941"></mat-datepicker-toggle>
                             <ngx-mat-datetime-picker #picker="" [stepSecond]="1" showSeconds="false" [defaultTime]="[0,0,0]"></ngx-mat-datetime-picker>
                     </div>
                     <div class="col-md-6">
                         <label class="formLabel">To Date*</label>
-                        <input matInput="" [ngxMatDatetimePicker]="picker1" placeholder="DD-MM-YYYY HH:MM:SS" #startDatePicker="" [(ngModel)]="delegate &amp;&amp; delegate.end_time" [ngModelOptions]="{ standalone: true }" style="width: 35% !important;" class="filter form-input col-md-10" required>
+                        <input matInput="" [ngxMatDatetimePicker]="picker1" placeholder="DD-MM-YYYY HH:MM:SS" #startDatePicker="" [(ngModel)]="delegate.end_time" [ngModelOptions]="{ standalone: true }" style="width: 35% !important;" class="filter form-input col-md-10" required>
                             <mat-datepicker-toggle  matSuffix="" [for]="picker1" class="col-md-1" style="color: #ff7941"></mat-datepicker-toggle>
                             <ngx-mat-datetime-picker #picker1="" [stepSecond]="1" showSeconds="false" [defaultTime]="[0,0,0]"></ngx-mat-datetime-picker>
                     </div>
                 </div>
                 <div class="row rwMAr">
                     <div class="col-md-6">
-                        <mat-checkbox color="primary" [(ngModel)]="delegate &amp;&amp; delegate.notifyViaMail" name="notifyViaMail" id="notifyViaMail" 
+                        <mat-checkbox color="primary" [(ngModel)]="delegate.notifyViaMail" name="notifyViaMail" id="notifyViaMail" 
                         (ngModelChange)="clearMailFields($event)">
                             <label style="margin-bottom: 0;" class="formLabel">Notify Mail</label>
                         </mat-checkbox>
@@ -81,19 +81,19 @@
                         <div class="col-md-6">
                             <label class="formLabel">Email To</label>
                             <input type="emailTo" id="emailTo" name="emailTo" class="txtInput"
-                            [(ngModel)]="delegate &amp;&amp; delegate.to" [ngModelOptions]="{ standalone: true }" required>
+                            [(ngModel)]="delegate.to" [ngModelOptions]="{ standalone: true }" required>
                         </div>
                         <div class="col-md-6">
                             <label class="formLabel">Email CC</label>
                             <input type="email" id="emailCC" name="emailCC" class="txtInput"
-                            [(ngModel)]="delegate &amp;&amp; delegate.cc" [ngModelOptions]="{ standalone: true }">
+                            [(ngModel)]="delegate.cc" [ngModelOptions]="{ standalone: true }">
                             <span class="error" style="font-size: 1.6vmin">Note: To add multiple email-id's, please put a ',' between them</span><br/>
                         </div>
                     </div>
                     <div class="row rwMAr">
                         <div class="col-md-12">
                             <label class="formLabel">Subject</label>
-                            <input style="width: 93%;" type="text" id="subject" name="subject" class="txtInput" [(ngModel)]="delegate &amp;&amp; delegate.subject" [ngModelOptions]="{ standalone: true }" required>
+                            <input style="width: 93%;" type="text" id="subject" name="subject" class="txtInput" [(ngModel)]="delegate.subject" [ngModelOptions]="{ standalone: true }" required>
                         </div>
                     </div>
                     <div class="row rwMAr">
@@ -101,7 +101,7 @@
                             <div>
                                 <quill-editor [modules]="modules" name="message" 
                                 style="text-align: left !important;" [ngModelOptions]="{ standalone: true }"
-                                [(ngModel)]="delegate &amp;&amp; delegate.message"></quill-editor>
+                                [(ngModel)]="delegate.message"></quill-editor>
                             </div>
                         </div>
                     </div>
@@ -123,7 +123,7 @@
         <div class="noPad" *ngIf="!editScreen &amp;&amp; delegates.length > 0">
             <h5>Delegates</h5>
             <div class="table-responsive">
-                <table mat-table="" [dataSource]="delegateList" class="table-hover list-table" matSort="" matSortActive="fromDate" matSortDirection="asc">
+                <table aria-label="" mat-table="" [dataSource]="delegateList" class="table-hover list-table" matSort="" matSortActive="fromDate" matSortDirection="asc">
                     <ng-container matColumnDef="process">
                         <th mat-header-cell="" *matHeaderCellDef="">
                             <strong> ProcessName </strong>

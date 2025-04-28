@@ -1,11 +1,12 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from "@angular/core";
 import { NgBusyModule, BusyConfig } from "ng-busy";
-import { FormsModule } from "@angular/forms";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MessageService } from "./services/message.service";
 import { OrgUnitService } from "./services/org-unit.service";
 import { AuthService } from "./services/auth.service";
 import { UserUnitService } from "./services/user-unit.service";
 import { NgxPaginationModule } from "ngx-pagination";
+import { Ng4LoadingSpinnerService } from 'ng4-loading-spinner';
 import { SharedModule } from "./shared-modules/shared.module";
 import { ModulesModule } from "./modules/modules.module";
 import { ConfirmDeleteDialogComponent } from "./support/confirm-delete-dialog.component";
@@ -32,7 +33,25 @@ import { NgxMatSelectSearchModule } from "ngx-mat-select-search";
 import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { IampUsmService } from "./iamp-usm.service";
 import { IampUsmInterceptorService } from "./services/iamp-usm-interceptor.service";
-
+import { UsmPermissionComponent } from './entities/usm-permission/usm-permission.component';
+import { UsmPermissionDetailsComponent } from './entities/usm-permission/usm-permission-details/usm-permission-details.component';
+import { SecretsComponent } from './components/secrets/secrets.component';
+import { MatTableModule } from "@angular/material/table";
+import { MatTreeModule } from "@angular/material/tree";
+import { RouterModule } from "@angular/router";
+import { PersonalAccessTokenUserComponent } from "./components/personal-access-token/user-view/personal-access-token-user.component";
+import { ConfirmRevokeDialogComponent } from "./support/confirm-revoke-dialog.component";
+import { ConfirmRegenerateDialogComponent } from "./support/confirm-regenerate-dialog.component";
+import { JobsComponent } from "./components/copy-blueprint/jobs/jobs.component";
+import { JobServices } from "./components/copy-blueprint/jobs/jobservice";
+import { MatButtonModule } from "@angular/material/button";
+import { BadgeModule, ButtonModule, CardModule, CheckboxModule, DataGridModule, InputFieldModule, ListModule, PopoverModule, SelectModule, TooltipModule } from "leds-lib";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+import { MatSelectModule } from "@angular/material/select";
+import { MatCardModule } from "@angular/material/card";
+import { JobDataViewerComponent } from "./components/copy-blueprint/job-data-viewer/job-data-viewer.component";
+import { MatTooltipModule } from "@angular/material/tooltip";
 @NgModule({
     imports: [
         NgBusyModule,
@@ -49,7 +68,27 @@ import { IampUsmInterceptorService } from "./services/iamp-usm-interceptor.servi
         NgxMatSelectSearchModule,
         QuillModule.forRoot(),
         HttpClientModule,
-        HttpClientXsrfModule
+        HttpClientXsrfModule,
+        RouterModule,
+        MatTreeModule,
+        MatTableModule,
+        MatButtonModule,
+        ButtonModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        DataGridModule,
+        CheckboxModule,
+        SelectModule,
+        InputFieldModule,
+        BadgeModule,
+        MatCardModule,
+        PopoverModule,
+        ListModule,
+        CardModule,
+        MatTooltipModule,
+        TooltipModule,
     ],
     declarations: [
         ConfirmDeleteDialogComponent,
@@ -61,7 +100,15 @@ import { IampUsmInterceptorService } from "./services/iamp-usm-interceptor.servi
         ProcessFormComponent,
         RoleProcessFormComponent,
         StageFormComponent,
-        CopyBlueprintComponent
+        CopyBlueprintComponent,
+        UsmPermissionComponent,
+        UsmPermissionDetailsComponent,
+        SecretsComponent,
+        PersonalAccessTokenUserComponent,
+        ConfirmRegenerateDialogComponent,
+        ConfirmRevokeDialogComponent,
+        JobsComponent,
+        JobDataViewerComponent
     ],
     providers: [
         OrgUnitService,
@@ -74,10 +121,12 @@ import { IampUsmInterceptorService } from "./services/iamp-usm-interceptor.servi
         ApisService,
         { provide: BusyConfig, useFactory: busyConfigFactory },
         IampUsmService,
-        { provide: HTTP_INTERCEPTORS, useClass: IampUsmInterceptorService, multi: true }
+        Ng4LoadingSpinnerService,
+        { provide: HTTP_INTERCEPTORS, useClass: IampUsmInterceptorService, multi: true },
+        JobServices
     ],
-    exports: [IampUsmComponent],
-    entryComponents: [ConfirmDeleteDialogComponent, ConfirmProjectDeleteDialogComponent,],
+    exports: [IampUsmComponent,SecretsComponent,PersonalAccessTokenUserComponent],
+    // entryComponents: [ConfirmDeleteDialogComponent, ConfirmProjectDeleteDialogComponent,ConfirmRevokeDialogComponent,ConfirmRegenerateDialogComponent,],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
 export class IampUsmModule { }

@@ -12,6 +12,7 @@ i.icon{
     text-align: left;
 }
 
-.mat-progress-bar.mat-accent .mat-progress-bar-buffer {
+/* TODO(mdc-migration): The following rule targets internal classes of progress-bar that may no longer apply for the MDC version. */
+.mat-mdc-progress-bar.mat-mdc-accent .mat-mdc-progress-bar-buffer {
     background-color: #B71C1C !important;
 }

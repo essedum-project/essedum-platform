@@ -8,7 +8,7 @@
             <i class="fa fa-plus-square-o create-icon-color selector-675-7" *ngIf="createFlag" (click)="createView()" aria-hidden="true"></i>
             <span style="cursor: pointer" *ngIf="createFlag" (click)="createView()" class="selector-675-8">Create User-User Mapping</span>
           </div>
-          <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-675-9">
+          <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-675-9 filterStyle">
             <h3 class="clearfix selector-675-10">
               <div class="search-container ams_cusSrch pull-left selector-675-11">
                 <input style="color: black;" #myInput="" type="text" placeholder="Search By Child User" (keypress)="checkEnterPressed($event, myInput.value)" class="selector-675-12" />
@@ -18,7 +18,7 @@
               </div>
               <a href="javascript:void(0)" class="paddLeft selector-675-15">Filter</a>
             </h3>
-            <div class="ams_panelCnt formRow relative selector-675-16">
+            <div class="ams_panelCnt formRow relative selector-675-16 labelsAlign">
               <div class="row rwMAr selector-675-17">
                 <!-- <div class="col-md-6 select-style selector-675-18">
                   <mat-form-field style="width: 85%" class="selector-675-19">
@@ -34,8 +34,8 @@
                   <mat-form-field style="width: 85%" class="selector-675-25">
                     <label class="formLabel selector-675-26">Child User</label>
                     <mat-select [disabled]="view" class="customSelect selector-675-27" [compareWith]="compareObjects" [ngModelOptions]="{ standalone: true }" [(ngModel)]="filteruserlist">
-                      <mat-option value="All" selected="" class="selector-675-28">All</mat-option>
-                      <mat-option *ngFor="let item of userlistarray; trackBy: trackByMethod" [value]="item" class="selector-675-29">
+                      <mat-option value="All" selected="" class="selector-675-28" matTooltip="All">All</mat-option>
+                      <mat-option *ngFor="let item of userlistarray; trackBy: trackByMethod" [value]="item" class="selector-675-29" [matTooltip]="item.user_f_name">
                         {{ item.user_f_name }}</mat-option>
                     </mat-select>
                   </mat-form-field>
@@ -52,8 +52,8 @@
         <div class="selector-675-33">
           <div class="ams_panelCnt formRow relative selector-675-34">
             <div style="float: right; cursor: pointer" class="selector-675-35">
-              <i class="fa fa-list-ul fa-lg icon1 selector-675-36" aria-hidden="true" title="Table View" (click)="showList = true"></i>
-              <i class="fa fa-th-large fa-lg icon1 selector-675-37" aria-hidden="true" title="Card View" (click)="showList = false"></i>
+              <i class="fa fa-list-ul fa-lg icon1 selector-675-36" aria-hidden="true" matTooltip="Table View" (click)="showList = true"></i>
+              <i class="fa fa-th-large fa-lg icon1 selector-675-37" aria-hidden="true" matTooltip="Card View" (click)="showList = false"></i>
             </div>
             <br class="selector-675-38" />
             <br class="selector-675-39" />
@@ -93,9 +93,9 @@
                   <div class="selector-675-60">
                     <div class="selector-675-61">
                       <div class="ams_cardfooter text-center selector-675-62">
-                        <i class="fa fa-info-circle fa-lg create-icon-color selector-675-63" aria-hidden="true" title="View User-User Mapping" *ngIf="viewFlag" (click)="view_usertouser(usertouseritem)" style="padding-right: 2%"></i>
-                        <i class="fa fa-pencil fa-lg create-icon-color selector-675-64" aria-hidden="true" title="Edit User-User Mapping" *ngIf="editFlag" (click)="editUsertouser(usertouseritem)" style="padding-right: 2%"></i>
-                        <i class="fa fa-trash fa-lg create-icon-color selector-675-65" aria-hidden="true" (click)="showDeleteDialog(usertouseritem)" *ngIf="deleteFlag" title="Delete User-User Mapping"></i>
+                        <i class="fa fa-info-circle fa-lg create-icon-color selector-675-63" aria-hidden="true" matTooltip="View User-User Mapping" *ngIf="viewFlag" (click)="view_usertouser(usertouseritem)" style="padding-right: 2%"></i>
+                        <i class="fa fa-pencil fa-lg create-icon-color selector-675-64" aria-hidden="true" matTooltip="Edit User-User Mapping" *ngIf="editFlag" (click)="editUsertouser(usertouseritem)" style="padding-right: 2%"></i>
+                        <i class="fa fa-trash fa-lg create-icon-color selector-675-65" aria-hidden="true" (click)="showDeleteDialog(usertouseritem)" *ngIf="deleteFlag" matTooltip="Delete User-User Mapping"></i>
                       </div>
                     </div>
                   </div>
@@ -107,10 +107,10 @@
             </div>
             <!-- list view -->
             <div class="ContentSideSections Implementation selector-675-68" style="padding: 1%" *ngIf="showList &amp;&amp; usertouserlist.length >= 0">
-              <mat-card class="selector-675-69">
+              <mat-card appearance="outlined" class="selector-675-69">
                 <mat-card-content class="selector-675-70">
                   <div class="table-responsive selector-675-71">
-                    <table mat-table="" [dataSource]="UsertouserdetailList" class="table table-hover list-table selector-675-72">
+                    <table aria-label="" mat-table="" [dataSource]="UsertouserdetailList" class="table table-hover list-table selector-675-72">
                       <ng-container matColumnDef="id" class="selector-675-73">
                         <th mat-header-cell="" *matHeaderCellDef="" class="number-col selector-675-74">
                           <strong class="selector-675-75">Id</strong>
@@ -147,9 +147,9 @@
                           <strong class="selector-675-95"> Actions </strong>
                         </th>
                         <td mat-cell="" *matCellDef="let task" class="actions-col selector-675-96" style="padding-top: 1em !important;">
-                          <i class="fa fa-info-circle fa-lg create-icon-color selector-675-97" aria-hidden="true" title="View User-User Mapping" *ngIf="viewFlag" (click)="view_usertouser(task)" style="padding-right: 2%"></i>
-                          <i class="fa fa-pencil fa-lg create-icon-color selector-675-98" aria-hidden="true" title="Edit User-User Mapping" *ngIf="editFlag" (click)="editUsertouser(task)" style="padding-right: 2%"></i>
-                          <i class="fa fa-trash fa-lg create-icon-color selector-675-99" aria-hidden="true" (click)="showDeleteDialog(task)" *ngIf="deleteFlag" title="Delete User-User Mapping"></i>
+                          <i class="fa fa-info-circle fa-lg create-icon-color selector-675-97" aria-hidden="true" matTooltip="View User-User Mapping" *ngIf="viewFlag" (click)="view_usertouser(task)" style="padding-right: 2%"></i>
+                          <i class="fa fa-pencil fa-lg create-icon-color selector-675-98" aria-hidden="true" matTooltip="Edit User-User Mapping" *ngIf="editFlag" (click)="editUsertouser(task)" style="padding-right: 2%"></i>
+                          <i class="fa fa-trash fa-lg create-icon-color selector-675-99" aria-hidden="true" (click)="showDeleteDialog(task)" *ngIf="deleteFlag" matTooltip="Delete User-User Mapping"></i>
                         </td>
                       </ng-container>
   
@@ -196,7 +196,7 @@
                 <mat-form-field style="width: 85%" class="selector-675-125">
                   <label class="formLabel selector-675-126"> User* </label>
                   <mat-select multiple="" [disabled]="view" [compareWith]="compareObjects" [ngModelOptions]="{ standalone: true }" [(ngModel)]="usertouseritem.childUserId" required="" class="selector-675-127" >
-                    <mat-option *ngFor="let item of userlistarray; trackBy: trackByMethod" [value]="item" class="selector-675-128">
+                    <mat-option *ngFor="let item of userlistarray; trackBy: trackByMethod" [value]="item" class="selector-675-128" [matTooltip]="item.user_f_name">
                       {{ item.user_f_name }} </mat-option>
                   </mat-select>
                 </mat-form-field>
@@ -225,7 +225,7 @@
         <div *ngIf="errorMessage" class="selector-675-138">
           <h4 class="ams_h2 h2Mar crud-header selector-675-139" *ngIf="errorMessage">Duplicate Mappings</h4>
           <div class="table-responsive selector-675-140">
-            <table mat-table="" [dataSource]="existingUsertousermapping" class="table table-hover list-table selector-675-141">
+            <table aria-label="" mat-table="" [dataSource]="existingUsertousermapping" class="table table-hover list-table selector-675-141">
               <ng-container matColumnDef="name" class="selector-675-142">
                 <th mat-header-cell="" *matHeaderCellDef="" class="selector-675-143">
                   <strong class="selector-675-144"> Parent User </strong>

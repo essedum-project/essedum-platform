@@ -20,11 +20,11 @@ project= JSON.parse(sessionStorage.getItem("project")).name
      telemetryConfig.subtype = subType;
      telemetryConfig.id = className;
      telemetryConfig.pageid = page;
-     this.telemetryService.interact(telemetryConfig, {
-      actor: {
-        id: this.user?this.user:"deafult",
-        type: this.project?this.project:"deafult",
-      }});
+    //  this.telemetryService.interact(telemetryConfig, {
+    //   actor: {
+    //     id: this.user?this.user:"deafult",
+    //     type: this.project?this.project:"deafult",
+    //   }});
     }
    }
   
@@ -34,11 +34,11 @@ project= JSON.parse(sessionStorage.getItem("project")).name
      telemetryConfig.pageid = module;
      telemetryConfig.type = type;
      telemetryConfig.stageto = className;
-     this.telemetryService.impression(telemetryConfig, {
-      actor: {
-        id: this.user?this.user:"deafult",
-        type: this.project?this.project:"deafult",
-      }});
+    //  this.telemetryService.impression(telemetryConfig, {
+    //   actor: {
+    //     id: this.user?this.user:"deafult",
+    //     type: this.project?this.project:"deafult",
+    //   }});
     }
    }
    audit(state: any, prevstate: any,props?:any) {
@@ -48,11 +48,11 @@ project= JSON.parse(sessionStorage.getItem("project")).name
      telemetryConfig.prevstate = prevstate;
      telemetryConfig.props = props;
     //  telemetryConfig.stageto = className;
-     this.telemetryService.audit(telemetryConfig, {
-      actor: {
-        id: this.user?this.user:"deafult",
-        type: this.project?this.project:"deafult",
-      }});
+    //  this.telemetryService.audit(telemetryConfig, {
+      // actor: {
+        // id: this.user?this.user:"deafult",
+        // type: this.project?this.project:"deafult",
+      // }});
     }
    }
 }

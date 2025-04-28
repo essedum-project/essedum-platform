@@ -15,7 +15,8 @@
 import { Injectable } from "@angular/core";
 import { Subject } from "rxjs";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { Observable } from "rxjs/Observable";
+// import { Observable } from "rxjs/Observable";
+import { MessageBarComponent } from 'leds-lib';
 @Injectable()
 export class MessageService {
  constructor(private snackBar: MatSnackBar) {}
@@ -35,4 +36,39 @@ export class MessageService {
    duration: 8000,
   });
  }
+ message(resp: any, msg?: any) {
+    console.log(resp);
+    if(resp.status==200){
+    let message = {
+        message: msg,
+        button: false,
+        type: 'success',
+        successButton: 'Ok',
+        errorButton: 'Cancel',
+      };
+      this.snackBar.openFromComponent(MessageBarComponent, {
+        data: message,
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+        panelClass: '',
+      });
+    }
+    else {
+            let message = {
+                message: resp,
+                button: false,
+                type: 'error',
+                successButton: 'Ok',
+                errorButton: 'Cancel',
+            };
+            this.snackBar.openFromComponent(MessageBarComponent, {
+                data: message,
+                duration: 5000,
+                horizontalPosition: 'center',
+                verticalPosition: 'top',
+                panelClass: '',
+            }); 
+        }
+    }
 }

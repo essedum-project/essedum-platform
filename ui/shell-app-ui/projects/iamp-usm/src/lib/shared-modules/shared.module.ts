@@ -9,6 +9,6 @@ import { ConfirmationDialogComponent } from "./confirmation-dialog/confirmation-
  declarations: [DeleteComponent, ConfirmationDialogComponent],
  providers: [],
  exports: [SharedMaterialModule],
- entryComponents: [DeleteComponent, ConfirmationDialogComponent],
+//  entryComponents: [DeleteComponent, ConfirmationDialogComponent],
 })
 export class SharedModule {}

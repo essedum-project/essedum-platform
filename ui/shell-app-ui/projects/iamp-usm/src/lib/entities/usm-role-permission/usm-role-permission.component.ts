@@ -22,6 +22,7 @@ import {
   OnInit,
   ViewChild,
   ElementRef,
+  OnDestroy,
 } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { PageResponse } from "../../support/paging";
@@ -42,16 +43,17 @@ import { Role } from "../../models/role";
 import { UsmPermissions } from "../../models/usm-permissions";
 import { Project } from "../../models/project";
 import { DeleteComponent } from "../../shared-modules/confirm-delete/delete.component";
-import { Subscription } from "rxjs/Subscription";
+import { Subscription } from "rxjs";
 import { IampUsmService } from "../../iamp-usm.service";
 import { DashConstantService } from "../../services/dash-constant.service";
 import { DashConstant } from "../../models/dash-constant";
+import { OpenTelemetryService } from "../../telemetry-util/open-telemetry.service";
 
 @Component({
   templateUrl: "./usm-role-permission.component.html",
   selector: "lib-usm-role-permission",
 })
-export class UsmRolePermissionComponent implements OnInit {
+export class UsmRolePermissionComponent implements OnInit, OnDestroy {
   @Input() header = "UsmRolePermissions...";
   @Output() changeView: EventEmitter<boolean> = new EventEmitter();
   @Input() sub: boolean = false;
@@ -63,29 +65,24 @@ export class UsmRolePermissionComponent implements OnInit {
 
   displayedColumns: string[] = ["id", "role", "module", "permission", "actions"];
 
-  private paginator: MatPaginator;
-  private sort: MatSort;
   busy: Subscription;
   widgetSettingsArray: DashConstant[];
   widgetsSettingsAll:any[]=[];
   selectedWidgetSettings:any[]=[];
   dashconstant: DashConstant;
-  @ViewChild(MatSort, { static: false }) set matSort(ms: MatSort) {
+  wavesLength :number= 0;
+  pageSize:number=6;
+  pageInde= 0;
+  pageEvent: any;
+
+
+
+  private sort: MatSort;
+  @ViewChild(MatSort, { static: true }) set matSort(ms: MatSort) {
     this.sort = ms;
-    this.setDataSourceAttributes();
   }
+  @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
 
-  @ViewChild(MatPaginator, { static: false }) set matPaginator(mp: MatPaginator) {
-    this.paginator = mp;
-    this.setDataSourceAttributes();
-  }
-
-  setDataSourceAttributes() {
-    if (this.UsmRolePermissionsList) {
-      this.UsmRolePermissionsList.paginator = this.paginator;
-      this.UsmRolePermissionsList.sort = this.sort;
-    }
-  }
 
   example: UsmRolePermissions = new UsmRolePermissions();
   examplepermission: UsmPermissions = new UsmPermissions();
@@ -108,6 +105,7 @@ export class UsmRolePermissionComponent implements OnInit {
     private telemetryService: LeapTelemetryService,
     private usmService: IampUsmService,
     public dashConstantService: DashConstantService,
+    private openTelemetryService: OpenTelemetryService
   ) {}
 
   //Temps
@@ -147,6 +145,7 @@ export class UsmRolePermissionComponent implements OnInit {
   // permissionarray: any[] = [];
   // permissionarraycopy: any[] = [];
   dbsViewFlag:boolean=false;
+  modulepermissionarrayFilter:any[]=[]
 
   ngOnInit() {
     this.telemetryImpression();
@@ -205,7 +204,7 @@ export class UsmRolePermissionComponent implements OnInit {
       // var that = this;
       // this.getUsmRolePermissionss(that).then((value) => {
       this.route.params.subscribe((res) => {
-        this.getUsmRolePermissionss(Number(window.atob(res.id)));
+        this.getUsmRolePermissionss(Number(window.atob(res['id'])));
         //   that.currentUsmRolePermissions = value.filter((usmRolePermissions) => usmRolePermissions.id == res.id).pop
         //();
         //   that.usmRolePermissions = value.filter((usmRolePermissions) => usmRolePermissions.id == res.id).pop();
@@ -213,7 +212,7 @@ export class UsmRolePermissionComponent implements OnInit {
         //  try {
         //   this.target = JSON.parse(this.usmRolePermissions.permission);
         //  } catch (e) {
-        //   console.error("JSON.parse error - ", e.message);
+        //   //console.error("JSON.parse error - ", e.message);
         //  }
       });
       //  });
@@ -230,7 +229,7 @@ export class UsmRolePermissionComponent implements OnInit {
       // var that = this;
       // this.getUsmRolePermissionss(that).then((value) => {
       this.route.params.subscribe((res) => {
-        this.getUsmRolePermissionss(Number(window.atob(res.id)));
+        this.getUsmRolePermissionss(Number(window.atob(res['id'])));
         //   that.currentUsmRolePermissions = value.filter((usmRolePermissions) => usmRolePermissions.id == res.id).pop
         //();
         //   that.usmRolePermissions = value.filter((usmRolePermissions) => usmRolePermissions.id == res.id).pop();
@@ -245,7 +244,7 @@ export class UsmRolePermissionComponent implements OnInit {
         //    }
         //   });
         //  } catch (e) {
-        //   console.error("JSON.parse error - ", e.message);
+        //   //console.error("JSON.parse error - ", e.message);
         //  }
         // });
       });
@@ -264,7 +263,7 @@ export class UsmRolePermissionComponent implements OnInit {
       this.changeView.emit(false);
       //  });
     } else {
-      this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
+      this.loadPaginated( 0, this.pageSize, null,null );
     }
   }
   fetchdashconstants() {
@@ -280,13 +279,6 @@ export class UsmRolePermissionComponent implements OnInit {
     })
   }
 
-  //  fetcharray(event) {
-  //   const temp: String[] = [];
-  //   event.forEach((element) => {
-  //    temp.push(element._name);
-  //   });
-  //   this.target = temp;
-  //  }
 
   fetchrole() {
     this.rolearray = [];
@@ -297,17 +289,31 @@ export class UsmRolePermissionComponent implements OnInit {
         project = JSON.parse(sessionStorage.getItem("project"));
       } catch (e) {
         project = null;
-        console.error("JSON.parse error - ", e.message);
+        //console.error("JSON.parse error - ", e.message);
       }
       this.rolearray = response.content;
       // let projectid = project.id;
       // this.rolearray = response.content.filter((role) => role.projectId == null || role.projectId == projectid);
       this.rolearray=response.content.filter((role) => role.id!=8);
+      let role = JSON.parse(sessionStorage.getItem("role"))
+      if(role.roleadmin){
+        this.rolearray=response.content.filter((value) => (!value.projectId || value.projectId==project.id) && value.id!=6);
+      }
       this.rolearray = this.rolearray.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1));
     });
 
-    this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
+    // this.loadPage({ first: 0, rows: 5000, sortField: null, sortOrder: null });
   }
+  onKey(value) { 
+    this.modulepermissionarrayFilter = this.search(value);
+    console.log("searched usm-permission",this.modulepermissionarrayFilter)
+    }
+    
+    search(value: string) { 
+      let filter = value.toLowerCase();
+      return this.modulepermissionarray.filter((option:UsmPermissions)=> 
+        (option.module+"-"+option.permission).toLowerCase().includes(filter))
+    }
 
   fetchmodule() {
     this.modulepermissionarray = [];
@@ -318,7 +324,7 @@ export class UsmRolePermissionComponent implements OnInit {
         project = JSON.parse(sessionStorage.getItem("project"));
       } catch (e) {
         project = null;
-        console.error("JSON.parse error - ", e.message);
+        //console.error("JSON.parse error - ", e.message);
       }
       this.modulepermissionarray = response.content;
       this.modulepermissionarray = this.modulepermissionarray.filter(
@@ -328,6 +334,8 @@ export class UsmRolePermissionComponent implements OnInit {
       this.modulepermissionarray = this.modulepermissionarray.sort((a, b) =>
         a.module.toLowerCase() > b.module.toLowerCase() ? 1 : -1
       );
+      this.modulepermissionarrayFilter=this.modulepermissionarray
+    
       // this.permissionarray = response.content;
       // this.permissionarray = this.permissionarray.filter(
       //   (arr, index, self) => index === self.findIndex((t) => t.permission === arr.permission)
@@ -336,11 +344,18 @@ export class UsmRolePermissionComponent implements OnInit {
       //toLowerCase() ? 1 : -1));
       // this.permissionarraycopy=this.permissionarray;
     });
-    // this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
+    // this.loadPage({ first: 0, rows: 5000, sortField: null, sortOrder: null });
   }
 
   telemetryImpression() {
-    this.telemetryService.impression("iamp-usm", "list", "UsmRolePermissionComponent");
+    // this.telemetryService.impression("iamp-usm", "list", "UsmRolePermissionComponent");
+    this.openTelemetryService.startTelemetry("iamp-usm", "UsmRolePermissionComponent", "list");
+
+  }
+
+  ngOnDestroy() {
+    let activeSpan = this.openTelemetryService.fetchActiveSpan();
+    this.openTelemetryService.endTelemetry(activeSpan);
   }
 
   listView() {
@@ -349,7 +364,7 @@ export class UsmRolePermissionComponent implements OnInit {
     this.view = false;
     this.edit = false;
     this.viewUsmRolePermissions = false;
-    this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
+    this.loadPaginated( 0, this.pageSize, null,null);
     this.router.navigate(["../../"], { relativeTo: this.route });
   }
   checkUsmRolePermissions() {
@@ -380,7 +395,7 @@ export class UsmRolePermissionComponent implements OnInit {
       project = JSON.parse(sessionStorage.getItem("project"));
     } catch (e) {
       project = null;
-      console.error("JSON.parse error - ", e.message);
+      //console.error("JSON.parse error - ", e.message);
     }
     // this.usmRolePermissions.projectId = project.id;
     // let array = [];
@@ -443,7 +458,7 @@ export class UsmRolePermissionComponent implements OnInit {
             (response) => {
               this.messageService.info("Role-Permissions Saved Successfully", "LEAP");
               this.saveDashConstant();
-              this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
+              this.loadPaginated( 0, this.pageSize, null,null);
               this.clearWave();
               this.showCreate = false;
               this.testCreate = true;
@@ -468,7 +483,7 @@ export class UsmRolePermissionComponent implements OnInit {
   getUsmRolePermissionss(that) {
     this.usmRolePermissionsService.getUsmRolePermissions(that).subscribe((res) => {
       this.usmRolePermissions = res;
-      if(this.usmRolePermissions.permission.module=="dbs" && this.usmRolePermissions.permission.permission=="view"){
+      if(this.usmRolePermissions.permission?.module=="dbs" && this.usmRolePermissions.permission?.permission=="view"){
         this.dbsViewFlag=true;
       }
       let project:any
@@ -476,7 +491,7 @@ export class UsmRolePermissionComponent implements OnInit {
         project = JSON.parse(sessionStorage.getItem("project"));
       } catch (e) {
         project = null;
-        console.error("JSON.parse error - ", e.message);
+        //console.error("JSON.parse error - ", e.message);
       }
       if(this.dbsViewFlag){
       this.dashConstantService.getDashConsts(project).subscribe((res) => {
@@ -580,6 +595,107 @@ export class UsmRolePermissionComponent implements OnInit {
     );
   }
 
+  loadPaginated(pageIndex: number, pageSize: number, sortField: string, orderBy: string) {
+     this.usmRolePermissionsService.findAllPaginated(pageIndex, pageSize, sortField, orderBy).subscribe(
+      (pageResponse) => {
+       this.loadData(pageResponse);
+      },
+      (error) => {
+        this.testCreate = false;
+        this.messageService.error("Could not get the results", "LEAP");
+      }
+    );
+  }
+
+  loadData(pageResponse){
+    console.log("pageResponse",pageResponse)
+    pageResponse.content = pageResponse.content.sort((a, b) => {
+      const nameA = a.role ? a.role.name.toLowerCase() : '';
+      const nameB = b.role ? b.role.name.toLowerCase() : '';
+      return nameA > nameB ? 1 : nameA < nameB ? -1 : 0;
+     } );
+  (this.currentPage = pageResponse), (this.usmRolePermissionss = this.currentPage.content);
+  this.usmRolePermissionssCopy = this.usmRolePermissionss;
+  this.UsmRolePermissionsList = new MatTableDataSource(this.currentPage.content);
+  this.wavesLength = pageResponse.totalElements;
+  if (this.currentPage.totalPages > 0) this.testCreate = true;
+  }
+
+
+
+  onPageFired(event) {
+    this.pageEvent = event;
+    if(this.filterUsmRolePermissions.role=="All" && this.filterUsmRolePermissions.module=="All")
+      this.loadPaginated(event.pageIndex, this.pageSize, null, null);
+    else
+      this.SearchedPage(true,"","","All");
+      
+  }
+
+    filterItem(value) {
+      console.log("inside filterItem value",value)
+    // if (!value) {
+    //   this.assignCopy();
+    // }
+    // this.usmRolePermissionss = Object.assign([], this.usmRolePermissionssCopy).filter(
+    //   (item1) => item1.role.name.toLowerCase().indexOf(value.toLowerCase()) > -1
+    // );
+    // this.UsmRolePermissionsList = new MatTableDataSource(this.usmRolePermissionss);
+    // this.UsmRolePermissionsList.sort = this.sort;
+    // this.UsmRolePermissionsList.paginator = this.paginator;
+    this.filterUsmRolePermissions.role=value;
+    this.filterUsmRolePermissions.module="All";
+
+    console.log("filterUsmRolePermissions",this.filterUsmRolePermissions)
+
+    this.SearchedPage(false,"","",value);
+    this.paginator.firstPage();
+
+  }
+
+
+  checkEnterPressed(event: any, val: any) {
+    console.log("inside checkEnterpressed event",event,"val",val)
+    if (event.keyCode === 13) {
+      // this.filterItem(event.srcElement.value);
+      this.filterItem(val);
+    }
+  }
+
+  Search() {
+    let module=this.filterUsmRolePermissions.module=="All"?"":this.filterUsmRolePermissions.module.module
+    let permission=this.filterUsmRolePermissions.module=="All"?"":this.filterUsmRolePermissions.module.permission
+    let role=this.filterUsmRolePermissions.role=="All"?"All":this.filterUsmRolePermissions.role.name 
+    this.SearchedPage(false,module,permission,role);
+    this.paginator.firstPage();
+  }
+
+
+  SearchedPage(flag,module,permission,role){
+    let index= flag?this.pageEvent.pageIndex:0
+    if(role=="All"){
+      this.usmRolePermissionsService.findAllSearched(module,
+        permission,"",index,this.pageSize,null,null).subscribe((pageResponse) => {
+        this.loadData(pageResponse);
+       },
+       (error) => {
+         this.testCreate = false;
+         this.messageService.error("Could not get the results", "LEAP");
+       }
+     );
+    }else{
+      this.usmRolePermissionsService.findAllSearched(module,
+        permission,role,index,
+        this.pageSize,null,null).subscribe((pageResponse) => {
+        this.loadData(pageResponse);
+       },
+       (error) => {
+         this.testCreate = false;
+         this.messageService.error("Could not get the results", "LEAP");
+       }
+     );
+    }
+  }
   updateWave() {
     let arr = this.usmRolePermissionss.filter(
       (item) =>
@@ -617,7 +733,7 @@ export class UsmRolePermissionComponent implements OnInit {
         this.testCreate = true;
         this.deletedashconstant(usmRolePermissionsToDelete)
         this.currentPage.remove(usmRolePermissionsToDelete);
-        this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
+        this.loadPaginated( 0, this.pageSize, null,null);
         this.messageService.info("Role-Permission Deleted successfully", "LEAP!");
         this.Clear();
       },
@@ -639,7 +755,7 @@ export class UsmRolePermissionComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
+    this.loadPaginated( 0, this.pageSize, null,null);
   }
 
   compareObjects(o1: any, o2: any): boolean {
@@ -650,58 +766,21 @@ export class UsmRolePermissionComponent implements OnInit {
     return o1 && o2 && o1.permission == o2.permission;
   }
 
-  Search() {
-    let newtasks = Object.assign([], this.usmRolePermissionssCopy);
-    if (this.filterUsmRolePermissions.role == "All" && this.filterUsmRolePermissions.module == "All") {
-      newtasks = this.usmRolePermissionssCopy;
-    }
-    if (this.filterUsmRolePermissions.role != "All") {
-      newtasks = newtasks.filter(
-        (item1) => item1.role.name.toLowerCase() == this.filterUsmRolePermissions.role.name.toLowerCase()
-      );
-    }
-    if (this.filterUsmRolePermissions.module != "All") {
-      newtasks = newtasks.filter(
-        (item1) =>
-          item1.permission.module.toLowerCase() ==
-            this.filterUsmRolePermissions.module.module.toLowerCase() &&
-          item1.permission.permission.toLowerCase() ==
-            this.filterUsmRolePermissions.module.permission.toLowerCase()
-      );
-    }
-    this.usmRolePermissionss = newtasks;
-    this.UsmRolePermissionsList = new MatTableDataSource(this.usmRolePermissionss);
-    this.UsmRolePermissionsList.sort = this.sort;
-    this.UsmRolePermissionsList.paginator = this.paginator;
-  }
+
   Clear() {
     this.filterUsmRolePermissions.role = "All";
     this.filterUsmRolePermissions.module = "All";
     this.myInputReference.nativeElement.value = null;
     this.usmRolePermissionss = this.usmRolePermissionssCopy;
-    this.UsmRolePermissionsList = new MatTableDataSource(this.usmRolePermissionssCopy);
-    this.UsmRolePermissionsList.sort = this.sort;
-    this.UsmRolePermissionsList.paginator = this.paginator;
+    this.loadPaginated( 0, this.pageSize, null,null);
+    
   }
   assignCopy() {
     this.usmRolePermissionss = Object.assign([], this.usmRolePermissionssCopy);
   }
-  filterItem(value) {
-    if (!value) {
-      this.assignCopy();
-    }
-    this.usmRolePermissionss = Object.assign([], this.usmRolePermissionssCopy).filter(
-      (item1) => item1.role.name.toLowerCase().indexOf(value.toLowerCase()) > -1
-    );
-    this.UsmRolePermissionsList = new MatTableDataSource(this.usmRolePermissionss);
-    this.UsmRolePermissionsList.sort = this.sort;
-    this.UsmRolePermissionsList.paginator = this.paginator;
-  }
-  checkEnterPressed(event: any, val: any) {
-    if (event.keyCode === 13) {
-      this.filterItem(event.srcElement.value);
-    }
-  }
+
+
+
   trackByMethod(index, item) {}
   // filterPermission(){
   //   this.permissionarray=this.permissionarraycopy.filter(item=>item.module==this.usmRolePermissions.permission.
@@ -737,7 +816,7 @@ export class UsmRolePermissionComponent implements OnInit {
       project = JSON.parse(sessionStorage.getItem("project"));
     } catch (e) {
       project = null;
-      console.error("JSON.parse error - ", e.message);
+      //console.error("JSON.parse error - ", e.message);
     }
     let dashConstant:DashConstant=new DashConstant();
     dashConstant.keys=this.usmRolePermissions.role.name+"dbsViewSettingsdefault";
@@ -759,7 +838,7 @@ export class UsmRolePermissionComponent implements OnInit {
       project = JSON.parse(sessionStorage.getItem("project"));
     } catch (e) {
       project = null;
-      console.error("JSON.parse error - ", e.message);
+      //console.error("JSON.parse error - ", e.message);
     }
     if(this.dashconstant)
       this.dashconstant.value=JSON.stringify(this.selectedWidgetSettings);
@@ -786,7 +865,7 @@ export class UsmRolePermissionComponent implements OnInit {
       project = JSON.parse(sessionStorage.getItem("project"));
     } catch (e) {
       project = null;
-      console.error("JSON.parse error - ", e.message);
+      //console.error("JSON.parse error - ", e.message);
     }
     if(usmRolePermissionsToDelete.permission.module=="dbs" && usmRolePermissionsToDelete.permission.permission=="view"){
       dbsViewFlag=true;

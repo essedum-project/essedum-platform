@@ -23,6 +23,8 @@ export class Role {
  permission: boolean;
  roleadmin: boolean;
  projectadmin: boolean;
+ portfolioId: number;
+ projectAdminId: number;
  constructor(json?: any) {
   this.projectId = this.getProjectId();
   if (json != null) {
@@ -33,13 +35,15 @@ export class Role {
    this.projectId = json.projectId;
    this.roleadmin = json.roleadmin;
    this.projectadmin = json.projectadmin;
+   this.portfolioId = json.portfolioId;
+   this.projectAdminId = json.projectAdminId;
   }
  }
  getProjectId() {
   let project: any;
   try {
    project = JSON.parse(sessionStorage.getItem("project"));
-  } catch (e) {
+  } catch (e : any)  {
    project = null;
    console.error("JSON.parse error - ", e.message);
   }

@@ -1,14 +1,16 @@
-<div class="col-md-12 centerStyle selector-374-1" style="border: none">
+<div class="col-md-12 centerStyle paddingBottom selector-374-1" style="border: none">
   <!-- search and filter constants -->
   <div *ngIf="!showCreate && !configureTheme" class="selector-374-2">
     <div class="clearfix selector-374-3">
       <div class="padTop20 selector-374-4">
-        <h2 class="ams_h2 h2Mar selector-374-5" *ngIf="!heading">Configuration List</h2>
+        <h2 class="ams_h2 h2Mar selector-374-5" *ngIf="!heading && configtype == 'side'">Menu List</h2>
+        <h2 class="ams_h2 h2Mar selector-374-5" *ngIf="!heading && configtype != 'side'">Configuration</h2>
         <div class="ams_toptoolbar selector-374-6">
           <i class="fa fa-plus-square-o create-icon-color selector-374-7" (click)="createView()" aria-hidden="true"></i>
-          <span style="cursor: pointer" (click)="createView()" class="selector-374-8">Create Configuration</span>
+          <span *ngIf="configtype == 'side'" style="cursor: pointer" (click)="createView()" class="selector-374-8">Create Menu</span>
+          <span *ngIf="configtype != 'side'" style="cursor: pointer" (click)="createView()" class="selector-374-8">Create Configuration</span>
         </div>
-        <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-374-9">
+        <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-374-9 filterStyle">
           <h3 class="clearfix selector-374-10">
             <div class="search-container ams_cusSrch pull-left selector-374-11">
               <input #myInput="" style="color: black;" type="text" placeholder="Search by Key/Value"
@@ -22,9 +24,9 @@
         <div class="selector-374-15">
           <div class="ams_panelCnt formRow relative selector-374-16">
             <div style="float: right; cursor: pointer" class="selector-374-17">
-              <i class="fa fa-list-ul fa-lg icon1 selector-374-18" aria-hidden="true" title="Table View"
+              <i class="fa fa-list-ul fa-lg icon1 selector-374-18" aria-hidden="true" matTooltip="Table View"
                 (click)="showList = true"></i>
-              <i class="fa fa-th-large fa-lg icon1 selector-374-19" aria-hidden="true" title="Card View"
+              <i class="fa fa-th-large fa-lg icon1 selector-374-19" aria-hidden="true" matTooltip="Card View"
                 (click)="showList = false"></i>
             </div>
             <br class="selector-374-20" />
@@ -32,7 +34,7 @@
             <!-- card view -->
             <div class="row selector-374-22" *ngIf="dashConstantLength >= 0 &amp;&amp; !showList">
               <div class="col-md-6 selector-374-23" *ngFor="
-                  let constants of dashConstants | paginate: { itemsPerPage: 6, currentPage: p };
+                  let constants of dashConstantsPageList | paginate: { itemsPerPage: 6, currentPage: p };
                   trackBy: trackByMethod
                 ">
                 <div class="ams_cardCtr ams_cardfooterCtr selector-374-24">
@@ -49,23 +51,33 @@
                           <span class="formSpan selector-374-31">{{ constants.id }}</span>
                         </div>
                         <div class="col-md-6 selector-374-32" matTooltipClass="crud-tooltip"
-                          [matTooltip]="constants.val_alias">
+                          [matTooltip]="constants.value">
                           <label class="formLabel selector-374-33">Value</label>
-                          <span class="formSpan selector-374-34"> {{ constants.val_alias }}</span>
+                          <span class="formSpan selector-374-34"> {{ constants.value }}</span>
                         </div>
                       </div>
                     </div>
                   </div>
                   <div class="selector-374-35">
                     <div class="selector-374-36">
-                      <div class="ams_cardfooter text-center selector-374-37">
+                      <div *ngIf="configtype == 'side'" class="ams_cardfooter text-center selector-374-37">
                         <i class="fa fa-info-circle fa-lg create-icon-color selector-374-38" aria-hidden="true"
-                          title="View Configuration" (click)="ViewDashConstants(constants)"></i>
+                          matTooltip="View Menu" (click)="ViewDashConstants(constants)"></i>
                         <i class="fa fa-pencil fa-lg create-icon-color selector-374-39" aria-hidden="true"
-                          title="Edit Configuration" (click)="editDashConstants(constants)"
+                          matTooltip="Edit Menu" (click)="editDashConstants(constants)"
                           style="padding-left: 5px"></i>
                         <i class="fa fa-trash fa-lg create-icon-color selector-374-40" aria-hidden="true"
-                          style="padding-left: 5px" title="Delete Configuration"
+                          style="padding-left: 5px" matTooltip="Delete Menu"
+                          (click)="deleteDashConstants(constants)"></i>
+                      </div>
+                      <div *ngIf="configtype != 'side'" class="ams_cardfooter text-center selector-374-37">
+                        <i class="fa fa-info-circle fa-lg create-icon-color selector-374-38" aria-hidden="true"
+                        matTooltip="View Configuration" (click)="ViewDashConstants(constants)"></i>
+                        <i class="fa fa-pencil fa-lg create-icon-color selector-374-39" aria-hidden="true"
+                        matTooltip="Edit Configuration" (click)="editDashConstants(constants)"
+                          style="padding-left: 5px"></i>
+                        <i class="fa fa-trash fa-lg create-icon-color selector-374-40" aria-hidden="true"
+                          style="padding-left: 5px" matTooltip="Delete Configuration"
                           (click)="deleteDashConstants(constants)"></i>
                       </div>
                     </div>
@@ -77,8 +89,9 @@
               </div>
             </div>
             <!-- list view -->
+            <mat-card appearance="outlined" class="cardResponsive">
             <div *ngIf="dashConstantLength >= 0 &amp;&amp; showList" class="table-responsive selector-374-43">
-              <table mat-table="" [dataSource]="dashConstantList" class="table-hover list-table selector-374-44"
+              <table aria-label="" mat-table="" [dataSource]="dashConstantList" class="table-hover list-table selector-374-44"
                 matSort="" matSortActive="scheduled_from" matSortDirection="asc">
                 <ng-container matColumnDef="id" class="selector-374-45">
                   <th mat-header-cell="" *matHeaderCellDef="" class="number-col selector-374-46">
@@ -106,31 +119,45 @@
                   </td>
                 </ng-container>
 
-                <ng-container matColumnDef="value" class="selector-374-55">
-                  <th mat-header-cell="" *matHeaderCellDef="" class="selector-374-56">
-                    <strong class="selector-374-57"> Value </strong>
+                <ng-container matColumnDef="role" class="selector-374-50">
+                  <th mat-header-cell="" *matHeaderCellDef="" class="selector-374-51">
+                    <strong class="selector-374-52"> Value </strong>
                   </th>
-                  <td mat-cell="" (click)="ViewDashConstants(constants)" class="td-ellipsis selector-374-58"
+                  <td mat-cell="" (click)="ViewDashConstants(constants)" class="td-ellipsis selector-374-53"
                     *matCellDef="let constants">
-                    <div class="td-span td-ellipsis pull-left selector-374-59" matTooltipClass="crud-tooltip"
-                      [matTooltip]="constants.val_alias">
-                      {{ constants.val_alias }}
+                    <div class="td-span td-ellipsis pull-left selector-374-54" matTooltipClass="crud-tooltip"
+                      [matTooltip]="constants.value">
+                      {{ constants.value }}
                     </div>
                   </td>
                 </ng-container>
 
-                <ng-container matColumnDef="actions" class="selector-374-60">
+                <ng-container *ngIf="configtype == 'side'" matColumnDef="actions" class="selector-374-60">
                   <th mat-header-cell="" *matHeaderCellDef="" class="actions-col selector-374-61">
                     <strong class="selector-374-62"> Actions </strong>
                   </th>
                   <td mat-cell="" *matCellDef="let constants" class="actions-col selector-374-63">
                     <i class="fa fa-info-circle fa-lg create-icon-color selector-374-64" aria-hidden="true"
-                      (click)="ViewDashConstants(constants)" title="View Configuration"></i>
+                      (click)="ViewDashConstants(constants)" matTooltip="View Menu"></i>
                     <i class="fa fa-pencil fa-lg create-icon-color selector-374-65" aria-hidden="true"
-                      (click)="editDashConstants(constants)" title="Edit Configuration" style="padding-left: 5px"></i>
+                      (click)="editDashConstants(constants)" matTooltip="Edit Menu" style="padding-left: 5px"></i>
                     <i class="fa fa-trash fa-lg create-icon-color selector-374-66" aria-hidden="true"
                       style="padding-left: 5px" (click)="deleteDashConstants(constants)"
-                      title="Delete Configuration"></i>
+                      matTooltip="Delete Menu"></i>
+                  </td>
+                </ng-container>
+                <ng-container *ngIf="configtype != 'side'" matColumnDef="actions" class="selector-374-60">
+                  <th mat-header-cell="" *matHeaderCellDef="" class="actions-col selector-374-61">
+                    <strong class="selector-374-62"> Actions </strong>
+                  </th>
+                  <td mat-cell="" *matCellDef="let constants" class="actions-col selector-374-63">
+                    <i class="fa fa-info-circle fa-lg create-icon-color selector-374-64" aria-hidden="true"
+                      (click)="ViewDashConstants(constants)" matTooltip="View Configuration"></i>
+                    <i class="fa fa-pencil fa-lg create-icon-color selector-374-65" aria-hidden="true"
+                      (click)="editDashConstants(constants)" matTooltip="Edit Configuration" style="padding-left: 5px"></i>
+                    <i class="fa fa-trash fa-lg create-icon-color selector-374-66" aria-hidden="true"
+                      style="padding-left: 5px" (click)="deleteDashConstants(constants)"
+                      matTooltip="Delete Configuration"></i>
                   </td>
                 </ng-container>
                 <tr mat-header-row="" *matHeaderRowDef="displayedColumns" class="selector-374-67"></tr>
@@ -138,6 +165,7 @@
               </table>
               <mat-paginator [pageSize]="6" showFirstLastButtons="" class="selector-374-69"></mat-paginator>
             </div>
+          </mat-card> 
             <div *ngIf="dashConstantLength == 0" id="noRecordsMsg" class="selector-374-70">No Records Found</div>
           </div>
         </div>
@@ -147,35 +175,52 @@
 
   <!-- create-constants -->
   <div *ngIf="showCreate && !configureTheme" #dashConstantForm="ngForm" class="selector-374-71" ngForm=""
-    [ngBusy]="{ busy: busy, message: 'Saving Configuration...', backdrop: true }">
+    [ngBusy]="{ busy: busy, message: 'Saving Menu...', backdrop: true }">
     <div class="padTop20 selector-374-72">
       <div>
         <div class="backIconcrud">
-          <span class="ams_back pull-right linkMar selector-374-73" (click)="listView()">Back to Configuration</span>
+          <span *ngIf="configtype == 'side'" class="ams_back pull-right linkMar selector-374-73" (click)="listView()">Back to Menu</span>
+          <span *ngIf="configtype != 'side'" class="ams_back pull-right linkMar selector-374-73" (click)="listView()">Back to Configurations</span>
           <i class="fa fa-caret-square-o-left create-icon-color pull-right linkMar selector-374-74" (click)="listView()"
             aria-hidden="true"></i>
         </div>
         <div class="selector-374-75">
           <span class="am_-back pull-right linkMar selector-374-76"
-            *ngIf="edit &amp;&amp; !view &amp;&amp; view_dashConstant" (click)="view = true; buttonFlag = true">View
+            *ngIf="edit &amp;&amp; !view &amp;&amp; view_dashConstant &amp;&amp; configtype == 'side'" (click)="view = true; buttonFlag = true">View
+            Menu</span>
+            <span class="am_-back pull-right linkMar selector-374-76"
+            *ngIf="edit &amp;&amp; !view &amp;&amp; view_dashConstant &amp;&amp; configtype !='side'" (click)="view = true; buttonFlag = true">View
             Configuration</span>
           <i class="fa fa-eye create-icon-color pull-right linkMar selector-374-77"
             *ngIf="edit &amp;&amp; !view &amp;&amp; view_dashConstant" (click)="view = true; buttonFlag = true"
             aria-hidden="true"></i>
-          <span class="ams_back pull-right linkMar selector-374-78" *ngIf="edit &amp;&amp; view"
+          <span class="ams_back pull-right linkMar selector-374-78" *ngIf="edit &amp;&amp; view &amp;&amp; configtype == 'side'"
+            (click)="view = false; buttonFlag = false">Edit Menu</span>
+            <span class="ams_back pull-right linkMar selector-374-78" *ngIf="edit &amp;&amp; view &amp;&amp; configtype != 'side'"
             (click)="view = false; buttonFlag = false">Edit Configuration</span>
           <i class="fa fa-pencil-square-o create-icon-color pull-right linkMar selector-374-79"
             *ngIf="edit &amp;&amp; view" (click)="view = false; buttonFlag = false" aria-hidden="true"></i>
         </div>
       </div>
-      <h4 class="ams_h2 h2Mar crud-header selector-374-80" style="padding-left: 4%" *ngIf="!edit">Create Configuration
+      <h4 class="ams_h2 h2Mar crud-header selector-374-80" style="padding-left: 4%" *ngIf="!edit && configtype == 'side'">Create Menu
+      </h4>
+      <h4 class="ams_h2 h2Mar crud-header selector-374-80" style="padding-left: 4%" *ngIf="!edit && configtype !='side'">Create Configuration</h4>
+      <h4 class="ams_h2 h2Mar crud-header selector-374-81"
+        [ngStyle]="{ 'padding-left': edit &amp;&amp; !view &amp;&amp; view_dashConstant ? '14%' : '4%' }"
+        *ngIf="edit &amp;&amp; !view &amp;&amp; configtype == 'side'">
+        Edit Menu
       </h4>
       <h4 class="ams_h2 h2Mar crud-header selector-374-81"
         [ngStyle]="{ 'padding-left': edit &amp;&amp; !view &amp;&amp; view_dashConstant ? '14%' : '4%' }"
-        *ngIf="edit &amp;&amp; !view">
+        *ngIf="edit &amp;&amp; !view &amp;&amp; configtype != 'side'">
         Edit Configuration
       </h4>
-      <h4 class="ams_h2 h2Mar crud-header selector-374-82" style="padding-left: 14%" *ngIf="edit &amp;&amp; view">
+      <h4 class="ams_h2 h2Mar crud-header selector-374-82" style="padding-left: 14%" *ngIf="edit &amp;&amp; view &amp;&amp; configtype == 'side'">
+        View Menu
+        <i *ngIf="!view_dashConstant" class="fa fa-pencil fa-lg create-icon-color selector-374-83"
+          title="Edit Menu" (click)="view = false"></i>
+      </h4>
+      <h4 class="ams_h2 h2Mar crud-header selector-374-82" style="padding-left: 14%" *ngIf="edit &amp;&amp; view &amp;&amp; configtype != 'side'">
         View Configuration
         <i *ngIf="!view_dashConstant" class="fa fa-pencil fa-lg create-icon-color selector-374-83"
           title="Edit Configuration" (click)="view = false"></i>
@@ -183,60 +228,83 @@
       <div class="noPad selector-374-84">
         <div *ngIf="sideCheck == false || sideCheck == undefined" class="selector-374-85">
           <div class="row rwMAr selector-374-86"
-            *ngIf="!defaultCheck &amp;&amp; !defaultsidebar &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload">
+            *ngIf="!defaultCheck &amp;&amp; !defaultsidebar &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap">
             <div class="col-md-6 selector-374-87" *ngIf="!configureUserLand">
               <label class="formLabel selector-374-88">Key*</label>
               <input [disabled]="view" type="text" maxlength="250" [ngModelOptions]="{ standalone: true }"
-                [(ngModel)]="dashConstant &amp;&amp; dashConstant.keys" class="txtInput selector-374-89"
+                [(ngModel)]="dashConstant.keys" class="txtInput selector-374-89"
                 (keydown)="checkMaxlengthForKey()" required="" />
               <span class="error selector-374-90" style="font-size: 1.6vmin">
                 Note: Value should start with alpha numeric characters and can contain special characters
-                @%!#*-_&amp;$()=+/.?\ </span><br class="selector-374-91" />
+                &#64;%!#*-_&amp;$()=+/.?\ </span><br class="selector-374-91" />
               <span class="error selector-374-92" style="font-size: 1.6vmin" *ngIf="showKeyLengthErrorMessage">{{
                 lengthNameErrorMessage
                 }}</span>
             </div>
-            
-
-            <mat-form-field style="width: 41%;margin-left:1%;" *ngIf="configureUserLand" class="selector-374-93">
-
-              <label class="formLabel  selector-374-94" style="width: 85%">User*</label>
-              <br class="selector-374-95">
-              <mat-select [disabled]="view" [(ngModel)]="configureuserlandusers" name="configureuserlandusers" single=""
-                class="selector-374-96">
-                <mat-option *ngFor="let u of userList; trackBy: trackByMethod" [value]="u.user_login" required=""
-                  class="selector-374-97">
-                  {{ u.user_login }}
-                </mat-option>
-              </mat-select>
-
-            </mat-form-field>
-            <mat-form-field style="width: 41%;margin-left:15%;" *ngIf="configureUserLand" class="selector-374-93">
-              <label class="formLabel selector-374-94">Role*</label>
-              <br class="selector-374-95">
-              <mat-select [disabled]="view" [(ngModel)]="configureuserlandrole" name="configureuserlandrole" single=""
-                class="selector-374-96">
-                <mat-option *ngFor="let role of roles; trackBy: trackByMethod" [value]="role.name"
-                  class="selector-374-97">
-                  {{ role.name }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-            <div class="col-md-6 selector-374-98" [ngStyle]="{'margin-top':configureUserLand?'19px':''}">
-              <label class="formLabel selector-374-99">Value*</label>
-              <input [disabled]="view" type="text" [ngModelOptions]="{ standalone: true }"
-                [(ngModel)]="dashConstant &amp;&amp; dashConstant.value" class="txtInput selector-374-100"
-                required="" />
-            </div>
+                  
+          <div class="col-md-6 selector-374-98" *ngIf="!configureUserLand" [ngStyle]="{'margin-top':configureUserLand?'19px':''}">
+            <label class="formLabel selector-374-99">Value*</label>
+            <input [disabled]="view" type="text" [ngModelOptions]="{ standalone: true }"
+              [(ngModel)]="dashConstant.value" class="txtInput selector-374-100"
+              required="" /><br>
+          </div>
           </div>
         </div>
+        <br class="selector-374-145">
+        <mat-checkbox color="primary" [disabled]="view"
+          *ngIf="configtype &amp;&amp; !defaultCheck &amp;&amp; !defaultsidebar &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
+          [(ngModel)]="sideCheck" name="sideCheck" (change)="sideCheckChange($event)" class="selector-374-146">
+          <label class="formLabel selector-374-147">Configure Sidebar</label>
+        </mat-checkbox>
+        <mat-checkbox style="padding-left: 1%" color="primary"
+          *ngIf="!configtype &amp;&amp; !defaultsidebar &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
+          [disabled]="view" [(ngModel)]="defaultCheck" name="defaultCheck" (change)="defaultCheckChange($event)"
+          class="selector-374-148">
+          <label class="formLabel selector-374-149">Default Project/Role in Landing</label>
+        </mat-checkbox>
+        <mat-checkbox style="padding-left: 2%" color="primary" [disabled]="view" [(ngModel)]="defaultsidebar"
+          *ngIf="configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
+          name="defaultsidebar" (change)="defaultsidebarroles($event)" class="selector-374-150">
+          <label class="formLabel selector-374-151">Default Sidebar</label>
+        </mat-checkbox>
+        <mat-checkbox [ngStyle]="{'padding-left': configureUserLand ? '2%' : '3%'}" color="primary" [disabled]="view" [(ngModel)]="configureUserLand"
+          *ngIf="!configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !defaultsidebar &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
+          name="configureUserLand" (change)="configureUserLandRole($event)" class="selector-374-152">
+          <label class="formLabel selector-374-153">Configure User Landing</label>
+        </mat-checkbox>
+        <mat-checkbox style="padding-left: 3%" color="primary" [disabled]="view" [(ngModel)]="rearrangesidebar"
+          *ngIf="configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !defaultsidebar &amp;&amp; !configureUserLand &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
+          name="rearrangesidebar" (change)="rearrangesidebarfun($event)" class="selector-374-252">
+          <label class="formLabel selector-374-253">Rearrange Sidebar</label>
+        </mat-checkbox>
+        <mat-checkbox style="padding-left: 3%" color="primary" [disabled]="view" [(ngModel)]="configureTheme"
+          *ngIf="!configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !defaultsidebar &amp;&amp; !configureUserLand &amp;&amp;!rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
+          name="configureTheme" class="selector-374-1152">
+          <label class="formLabel selector-374-153">Configure Theme for Project</label>
+        </mat-checkbox>
+        <mat-checkbox style="padding-left: 2%" color="primary" [disabled]="view" [(ngModel)]="iconsidebar"
+          *ngIf="configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !defaultsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
+          name="defaultsidebar" (change)="iconsidebarroles($event)" class="selector-374-150">
+          <label class="formLabel selector-374-151">Icon Sidebar</label>
+        </mat-checkbox>
+        <mat-checkbox style="padding-left: 2%" color="primary" [disabled]="view" [(ngModel)]="configureFileUpload"
+          *ngIf="!configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !defaultsidebar  &amp;&amp; !iconsidebar"
+          name="defaultsidebar" (change)="configureFileUploadChanges($event)" class="selector-374-150">
+          <label class="formLabel selector-374-151">Configure File Upload</label>
+        </mat-checkbox>
+        <mat-checkbox style="padding-left: 2%" color="primary" [disabled]="view" [(ngModel)]="projectRoleMap"
+          *ngIf="!configtype &amp;&amp; !defaultsidebar &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !defaultCheck"
+          name="projectRoleMap" (change)="projectRoleMapChange($event)" class="selector-374-158">
+          <label class="formLabel selector-374-149">Project Role Mapping</label>
+        </mat-checkbox>
+        
         <div *ngIf="sideCheck == true &amp;&amp; !defaultsidebar" class="selector-374-101">
           <div class="row rwMAr selector-374-102">
             <div class="col-md-6 selector-374-103">
               <div class="selector-374-104">
                 <mat-form-field style="width: 85%" class="selector-374-105">
                   <label class="formLabel selector-374-106">Role*</label>
-                  <mat-select [disabled]="view" [(ngModel)]="sideRole" name="sideRole" required=""
+                  <mat-select (openedChange)="onSelectionChange($event)" [(value)]="currentRole" [disabled]="view" [(ngModel)]="sideRole" name="sideRole" required=""
                     class="selector-374-107">
                     <mat-option *ngFor="let role of roles; trackBy: trackByMethod" [value]="role.name"
                       class="selector-374-108">
@@ -255,7 +323,15 @@
                     <input type="text" (keyup)="checkMaxlengthForTitle()" maxlength="50"
                       class="txtInput selector-374-112" formControlName="label">
                   </label>
-                  <span class="error selector-374-113" style="font-size: 1.6vmin" *ngIf="showTitleLengthErrorMessage">{{
+                  <span class="error selector-374-1131" style="font-size: 1.6vmin; color: red;" *ngIf="showTitleLengthErrorMessage">{{
+                    TitleLengthErrorMessage
+                  }}</span>
+                  <br class="selector-374-1132">
+                  <label class="formLabel selector-374-1133">
+                    Alt Text
+                    <input type="text" (keyup)="checkMaxlengthForAltText()" maxlength="50" class="txtInput selector-374-1134" formControlName="altText">
+                  </label>
+                  <span class="error selector-374-1135" style="font-size: 1.6vmin; color: red;" *ngIf="showAltTextLengthErrorMessage">{{
                     TitleLengthErrorMessage
                     }}</span>
                   <br class="selector-374-114">
@@ -285,7 +361,7 @@
                     </label>
                     <br class="selector-374-120">
                     <img [src]="imageDataDetails" class="selector-411-5908 uploadImage"
-                      style="max-width: 200px; max-height: 200px;">
+                      style="max-width: 200px; max-height: 200px;" alt="">
                     <div *ngIf="imageDataDetails">
                       <button (click)="removeImage()" style="margin-left: 150px;"
                         class="genBtn marRght30 selector-374-122" type="button">Remove Image / SVG</button>
@@ -295,7 +371,7 @@
 
                   <label class="formLabel selector-374-118" *ngIf="!hideURL">
                     URL
-                    <input type="text" class="txtInput selector-374-119" formControlName="url">
+                    <input type="text" class="txtInput selector-374-119" formControlName="url" placeholder="./dynamicDashboard/grid/OCC/2">
                   </label>
                   <br class="selector-374-120">
                   <div id="btnMargin" class="selector-374-121">
@@ -312,6 +388,17 @@
                   </div>
 
                 </div>
+                <label class="formLabel" style="height: 3vmin;">Upload Using</label>
+                <div style="display: flex;">  
+                  <div style="margin-right: 5vmin;">
+                    <label for="project" style="margin-right: 1vmin;">Project</label>
+                    <input type="radio" class="radioButtonColor" id="project" name="uploadUsing" value="project" [(ngModel)]="uploadUsing">
+                  </div>
+                  <div>
+                    <label for="portfolio" style="margin-right: 1vmin;">Portfolio</label>
+                    <input type="radio" class="radioButtonColor" id="portfolio" name="uploadUsing" value="portfolio" [(ngModel)]="uploadUsing">
+                  </div>
+                </div>
                 <div *ngIf="(displayAddChildFormFlag || displayEditDataFormFlag) &amp;&amp; sideCheck">
                   <mat-checkbox [(ngModel)]="uploadImage" [ngModelOptions]="{standalone: true}"
                     (ngModelChange)="imageCheck()"> Upload Image/SVG</mat-checkbox>
@@ -327,91 +414,87 @@
                 [treeControl]="treeControl" class="example-tree treeBox selector-374-126">
                 <!-- This is the tree node template for leaf nodes -->
                 <mat-tree-node matTreeNodePadding cdkDrag [cdkDragData]="node" class="resetOverflow selector-374-127"
-                  *matTreeNodeDef="let node" matTreeNodeToggle="">
-                  <li class="mat-tree-node resetOverflow selector-374-128" style="cursor: all-scroll;">
-                    <!-- use a disabled button to provide padding for tree leaf -->
-                    <button mat-icon-button="" disabled="" class="selector-374-129"></button>
-                    <span style="white-space: nowrap;" class="selector-374-130">{{node.label}}</span>
-                    <i style="margin-left: 25px;" class="fa fa-plus icon1 pad-betw-icon selector-374-131"
-                      (click)="displayAddChildForm(node)" *ngIf="!view" title="Add Child"></i>
-                    <i class="fa fa-pencil icon1 pad-betw-icon selector-374-132" title="Edit" *ngIf="!view"
-                      (click)="displayEditForm(node)"></i>
-                    <i class="fa fa-trash icon1 pad-betw-icon selector-374-133" title="Delete Child" *ngIf="!view"
-                      (click)="deleteChildFromTree(node)"></i>
-                  </li>
+                  *matTreeNodeDef="let node" [ngClass]="{'highlight': node.highlight}"
+                  matTreeNodeToggle="">
+                  <ul>
+                    <li class="mat-tree-node resetOverflow selector-374-128" style="cursor: all-scroll;">
+                      <!-- use a disabled button to provide padding for tree leaf -->
+                      <button mat-icon-button="" disabled="" class="selector-374-129"></button>
+                      <span style="white-space: nowrap;" class="selector-374-130">{{node.label}}</span>
+                      <i style="margin-left: 25px;" class="fa fa-plus icon1 pad-betw-icon selector-374-131"
+                        (click)="displayAddChildForm(node)" *ngIf="!view" title="Add Child"></i>
+                      <i class="fa fa-pencil icon1 pad-betw-icon selector-374-132" title="Edit" *ngIf="!view"
+                        (click)="displayEditForm(node)"></i>
+                      <i class="fa fa-trash icon1 pad-betw-icon selector-374-133" title="Delete Child" *ngIf="!view"
+                        (click)="deleteChildFromTree(node)"></i>
+                    </li>
+                  </ul>
                 </mat-tree-node>
                 <!-- This is the tree node template for expandable nodes -->
                 <mat-tree-node matTreeNodePadding cdkDrag [cdkDragData]="node"
-                  *matTreeNodeDef="let node; when: hasChild" class="selector-374-134">
-                  <li class="selector-374-135">
-                    <div class="mat-tree-node resetOverflow selector-374-136" style="cursor: all-scroll;">
-                      <button (click)="expansionModel.toggle(node._id)" mat-icon-button="" matTreeNodeToggle=""
-                        [attr.aria-label]="'Toggle ' + node.label" class="selector-374-137">
-                        <mat-icon class="mat-icon-rtl-mirror selector-374-138">
-                          {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
-                        </mat-icon>
-                      </button>
-                      <span style="white-space: nowrap;" class="selector-374-139">{{node.label}}</span>
-                      <i style="margin-left: 25px;" class="fa fa-plus icon1 pad-betw-icon selector-374-140"
-                        (click)="displayAddChildForm(node)" *ngIf="!view" title="Add Child"></i>
-                      <i class="fa fa-pencil icon1 pad-betw-icon selector-374-141" title="Edit" *ngIf="!view"
-                        (click)="displayEditForm(node)"></i>
-                      <i class="fa fa-trash icon1 pad-betw-icon selector-374-142" title="Delete Child" *ngIf="!view"
-                        (click)="deleteChildFromTree(node)"></i>
-                    </div>
-                    <ul [class.example-tree-invisible]="!treeControl.isExpanded(node)" class="selector-374-143">
-                      <ng-container matTreeNodeOutlet="" class="selector-374-144"></ng-container>
-                    </ul>
-                  </li>
+                  *matTreeNodeDef="let node; when: hasChild" [ngClass]="{'highlight': node.highlight}"
+                  class="selector-374-134">
+                  <ul>
+                    <li class="selector-374-135">
+                      <div class="mat-tree-node resetOverflow selector-374-136" style="cursor: all-scroll;">
+                        <button (click)="expansionModel.toggle(node._id)" mat-icon-button="" matTreeNodeToggle=""
+                          [attr.aria-label]="'Toggle ' + node.label" class="selector-374-137">
+                          <mat-icon class="mat-icon-rtl-mirror selector-374-138">
+                            {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                          </mat-icon>
+                        </button>
+                        <span style="white-space: nowrap;" class="selector-374-139">{{node.label}}</span>
+                        <i style="margin-left: 25px;" class="fa fa-plus icon1 pad-betw-icon selector-374-140"
+                          (click)="displayAddChildForm(node)" *ngIf="!view" title="Add Child"></i>
+                        <i class="fa fa-pencil icon1 pad-betw-icon selector-374-141" title="Edit" *ngIf="!view"
+                          (click)="displayEditForm(node)"></i>
+                        <i class="fa fa-trash icon1 pad-betw-icon selector-374-142" title="Delete Child" *ngIf="!view"
+                          (click)="deleteChildFromTree(node)"></i>
+                      </div>
+                      <ul [class.example-tree-invisible]="!treeControl.isExpanded(node)" class="selector-374-143">
+                        <ng-container matTreeNodeOutlet="" class="selector-374-144"></ng-container>
+                      </ul>
+                    </li>
+                  </ul>
                 </mat-tree-node>
               </mat-tree>
             </div>
           </div>
         </div>
-        <br class="selector-374-145">
-        <mat-checkbox color="primary" [disabled]="view"
-          *ngIf="!defaultCheck &amp;&amp; !defaultsidebar &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload"
-          [(ngModel)]="sideCheck" name="sideCheck" (change)="sideCheckChange($event)" class="selector-374-146">
-          <label class="formLabel selector-374-147">Configure Sidebar</label>
-        </mat-checkbox>
-        <mat-checkbox style="padding-left: 1%" color="primary"
-          *ngIf="!defaultsidebar &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload"
-          [disabled]="view" [(ngModel)]="defaultCheck" name="defaultCheck" (change)="defaultCheckChange($event)"
-          class="selector-374-148">
-          <label class="formLabel selector-374-149">Default Project/Role in Landing</label>
-        </mat-checkbox>
-        <mat-checkbox style="padding-left: 2%" color="primary" [disabled]="view" [(ngModel)]="defaultsidebar"
-          *ngIf="!defaultCheck &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload"
-          name="defaultsidebar" (change)="defaultsidebarroles($event)" class="selector-374-150">
-          <label class="formLabel selector-374-151">Default Sidebar</label>
-        </mat-checkbox>
-        <mat-checkbox style="padding-left: 3%" color="primary" [disabled]="view" [(ngModel)]="configureUserLand"
-          *ngIf="!defaultCheck &amp;&amp; !sideCheck &amp;&amp; !defaultsidebar &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload"
-          name="configureUserLand" (change)="configureUserLandRole($event)" class="selector-374-152">
-          <label class="formLabel selector-374-153">Configure User Landing</label>
-        </mat-checkbox>
-        <mat-checkbox style="padding-left: 3%" color="primary" [disabled]="view" [(ngModel)]="rearrangesidebar"
-          *ngIf="!defaultCheck &amp;&amp; !sideCheck &amp;&amp; !defaultsidebar &amp;&amp; !configureUserLand &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload"
-          name="rearrangesidebar" (change)="rearrangesidebarfun($event)" class="selector-374-252">
-          <label class="formLabel selector-374-253">Rearrange Sidebar</label>
-        </mat-checkbox>
-        <mat-checkbox style="padding-left: 3%" color="primary" [disabled]="view" [(ngModel)]="configureTheme"
-          *ngIf="!defaultCheck &amp;&amp; !sideCheck &amp;&amp; !defaultsidebar &amp;&amp; !configureUserLand &amp;&amp;!rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload"
-          name="configureTheme" class="selector-374-1152">
-          <label class="formLabel selector-374-153">Configure Theme for Project</label>
-        </mat-checkbox>
-        <mat-checkbox style="padding-left: 2%" color="primary" [disabled]="view" [(ngModel)]="iconsidebar"
-          *ngIf="!defaultCheck &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !defaultsidebar  &amp;&amp; !configureFileUpload"
-          name="defaultsidebar" (change)="iconsidebarroles($event)" class="selector-374-150">
-          <label class="formLabel selector-374-151">Icon Sidebar</label>
-        </mat-checkbox>
-        <mat-checkbox style="padding-left: 2%" color="primary" [disabled]="view" [(ngModel)]="configureFileUpload"
-          *ngIf="!defaultCheck &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !defaultsidebar  &amp;&amp; !iconsidebar"
-          name="defaultsidebar" (change)="iconsidebarroles($event)" class="selector-374-150">
-          <label class="formLabel selector-374-151">Configure File Upload</label>
-        </mat-checkbox>
+        <div *ngIf="configureUserLand">
+          <mat-form-field style="width: 41%;margin-left:1%;" class="selector-374-93">
+
+            <label class="formLabel  selector-374-94" style="width: 85%">User*</label>
+            <br class="selector-374-95">
+            <mat-select [disabled]="view" [(ngModel)]="configureuserlandusers" name="configureuserlandusers" single=""
+              class="selector-374-96">
+              <mat-option *ngFor="let u of userList; trackBy: trackByMethod" [value]="u.user_login" required=""
+                class="selector-374-97">
+                {{ u.user_login }}
+              </mat-option>
+            </mat-select>
+
+          </mat-form-field>
+          <mat-form-field style="width: 41%;margin-left:15%;" class="selector-374-93">
+            <label class="formLabel selector-374-94">Role*</label>
+            <br class="selector-374-95">
+            <mat-select [disabled]="view" [(ngModel)]="configureuserlandrole" name="configureuserlandrole" single=""
+              class="selector-374-96">
+              <mat-option *ngFor="let role of roles; trackBy: trackByMethod" [value]="role.name"
+                class="selector-374-97">
+                {{ role.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div class="col-md-6 selector-374-98" [ngStyle]="{'margin-top':'19px'}">
+            <label class="formLabel selector-374-99">Value</label>
+            <input [disabled]="view" type="text" [ngModelOptions]="{ standalone: true }"
+              [(ngModel)]="dashConstant.value" class="txtInput selector-374-100"
+              required="" style="border-bottom: 2px solid #d2d2d2 !important;"/><br>
+          </div>
+        </div>
         <div *ngIf="defaultCheck" class="selector-374-154">
-          <div class="row rwMAr selector-374-155">
+            <!-- <div class="row rwMAr selector-374-155">
             <div class="col-md-4 selector-374-156">
               <mat-form-field style="width: 100%" class="selector-374-157">
                 <label class="formLabel selector-374-158">Default Project</label>
@@ -424,7 +507,7 @@
                 </mat-select>
               </mat-form-field>
             </div>
-          </div>
+          </div> -->
           <div class="row rwMAr selector-374-161">
             <div class="col-md-4 selector-374-162">
               <label class="formLabel selector-374-163">Map Default Role to Project for landing</label>
@@ -437,7 +520,7 @@
                 <label class="formLabel selector-374-167">Project</label>
                 <mat-select [disabled]="view" [(ngModel)]="child.project" name="projectRole{{ i }}"
                   (selectionChange)="selectedProject(child, i)" class="selector-374-168">
-                  <mat-option [value]="null" class="selector-374-169">-------</mat-option>
+                  <!-- <mat-option [value]="null" class="selector-374-169">-------</mat-option> -->
                   <mat-option *ngFor="let project of projects; trackBy: trackByMethod" [value]="project.id"
                     class="selector-374-170">
                     {{ project.name }}
@@ -456,6 +539,36 @@
                   </mat-option>
                 </mat-select>
               </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="projectRoleMap" class="selector-374-154">
+          <div class="row rwMAr">
+            <div class="col-md-4">
+              <label class="formLabel selector-374-163">Map Current Project to Roles</label>
+            </div>
+          </div>
+          <div class="row rwMAr" *ngFor="let child of defaultArray; trackBy: trackByMethod; let i = index;">
+            <div class="col-md-4">
+              <label class="formLabel"> Project Name </label>
+              <h3 style="color: #7e7e7e !important;">{{currentProjectName()}}</h3>
+            </div>
+          
+          
+            <div class="col-md-4">
+              <div class="col-md-4" style="width: 80% !important;">
+                <mat-form-field style="width: 100%" class="selector-374-172">
+                <label class="formLabel selector-374-173">Role</label>
+                  <mat-select [disabled]="view" [(ngModel)]="child.role" name="sideRole{{ i }}" class="selector-374-174">
+                    <mat-option [value]="null" class="selector-374-175">----NA---</mat-option>
+                    <mat-option *ngFor="let role of roles; trackBy: trackByMethod" [value]="role.id"
+                      class="selector-374-176">
+                      {{ role.name }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
             </div>
           </div>
         </div>
@@ -497,11 +610,11 @@
 
               <label class="formLabel selector-374-181">Key*</label>
               <input [disabled]="view" type="text" maxlength="250" [ngModelOptions]="{ standalone: true }"
-                [(ngModel)]="dashConstant &amp;&amp; dashConstant.keys" class="txtInput selector-374-89"
+                [(ngModel)]="dashConstant.keys" class="txtInput selector-374-89"
                 (keydown)="checkMaxlengthForKey()" required="" />
               <span class="error selector-374-90" style="font-size: 1.6vmin">
                 Note: Value should start with alpha numeric characters and can contain special characters
-                @%!#*-_&amp;$()=+/.?\ </span><br class="selector-374-91" />
+                &#64;%!#*-_&amp;$()=+/.?\ </span><br class="selector-374-91" />
               <span class="error selector-374-92" style="font-size: 1.6vmin" *ngIf="showKeyLengthErrorMessage">{{
                 lengthNameErrorMessage
                 }}</span>
@@ -618,7 +731,7 @@
   <div *ngIf="configureTheme">
     <div class="padTop20 selector-374-1721">
       <span class="ams_back pull-right linkMar selector-374-1731" (click)="configureTheme=false;listView()">Back to
-        Configuration</span>
+        Menu</span>
       <i class="fa fa-caret-square-o-left create-icon-color pull-right linkMar selector-374-1741"
         (click)="configureTheme=false;listView()" aria-hidden="true"></i>
     </div>

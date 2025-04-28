@@ -1,4 +1,3 @@
-import { Role } from "com-lib-util";
 
 /*CopyRight
 * @ 2018 - 2019 Infosys Limited, Bangalore, India. All Rights Reserved.

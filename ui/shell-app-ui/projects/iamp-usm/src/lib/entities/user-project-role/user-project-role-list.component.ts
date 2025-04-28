@@ -51,13 +51,14 @@ import { IampUsmService } from "../../iamp-usm.service";
 import { takeUntil } from "rxjs/operators";
 import { DatePipe } from "@angular/common";
 import { LeapTelemetryService } from "../../telemetry-util/telemetry.service";
+import { ApisService } from "../../services/apis.service";
 @Component({
   //moduleId: module.id,
   templateUrl: "user-project-role-list.component.html",
   selector: "user-project-role-list",
   styleUrls: ["user-project-role-list.component.css"],
 })
-export class UserProjectRoleListComponent implements OnInit {
+export class UserProjectRoleListComponent implements OnInit, OnChanges {
   @Input() header = "User Roles...";
   @Output() changeView: EventEmitter<boolean> = new EventEmitter();
   @Input() sub: boolean;
@@ -69,6 +70,8 @@ export class UserProjectRoleListComponent implements OnInit {
   UserList: MatTableDataSource<any>;
   existingUserProjectRole: MatTableDataSource<any>;
   displayColumns: string[] = ["name", "description", "actions"];
+  enablePortfolioAdminView: boolean = false;
+  enableProjectAdminView: boolean = false;
 
   @Input() project: Project;
   public usersFilterCtrl: FormControl = new FormControl();
@@ -84,6 +87,9 @@ export class UserProjectRoleListComponent implements OnInit {
   filterRole: any;
   filterProject: any;
   role;
+  flag: boolean = false;
+  defaultFlag: boolean = false;
+  callId: any;
   errorMessage: boolean = false;
   pageEvent: any;
   constructor(
@@ -101,6 +107,7 @@ export class UserProjectRoleListComponent implements OnInit {
     private usmService: IampUsmService,
     private telemetryService: LeapTelemetryService,
     public datePipe: DatePipe,
+    private apisService: ApisService
   ) {}
 
   //code related to make it consistent with wave UI
@@ -121,6 +128,7 @@ export class UserProjectRoleListComponent implements OnInit {
   example: UserProjectRole = new UserProjectRole();
   projectList = new Array<Project>();
   roleList = new Array<Role>();
+  rolesToBeFiltered = new Array<Role>();
   usersList = new Array<Users>();
   userProjectRole = new UserProjectRole();
   usm_portfolio_idArray: UsmPortfolio[] = [];
@@ -148,7 +156,11 @@ export class UserProjectRoleListComponent implements OnInit {
   permissionList: any[];
   selectedPermissionList: any[];
   demoUserFlag: boolean = false;
+  fromProject: any;
+  fromProjectFlag: boolean = false;
   prjFlag: boolean = false;
+  filteredroleslist = [];
+  processdata: any;
 
   @ViewChild(MatSort, { static: false }) set matSort(ms: MatSort) {
     this.sort = ms;
@@ -167,6 +179,24 @@ export class UserProjectRoleListComponent implements OnInit {
     this.filterUser = undefined;
     this.filterFlag = false;
     this.filterFlag1 = false;
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    let role: any;
+    try {
+      role = JSON.parse(sessionStorage.getItem("role"));
+    } catch (e: any) {
+      console.error("JSON.parse error - ", e.message);
+    }
+
+    if(role.id != 6 && role.roleadmin && changes["project"]){
+      if(changes["project"].currentValue){
+        this.fromProjectFlag = true;
+        this.fromProject = changes["project"].currentValue;
+      }
+
+    }
+
   }
 
   createView() {
@@ -196,6 +226,27 @@ export class UserProjectRoleListComponent implements OnInit {
     if (sessionStorage.getItem("usmAuthority")) {
       sessionStorage.removeItem("usmAuthority");
       this.auth = "";
+    }
+
+    if(this.selectedRole != undefined){
+      if(this.selectedRole.roleadmin){
+        this.enablePortfolioAdminView = true;
+      } else if(this.selectedRole.projectadmin){
+          this.enableProjectAdminView = true
+      } else{
+          this.enablePortfolioAdminView = false;
+          this.enableProjectAdminView = false;
+      }
+    } else {
+        this.enablePortfolioAdminView = false;
+        this.enableProjectAdminView = false;
+    }
+
+    try {
+      this.role = JSON.parse(sessionStorage.getItem("role"));
+    } catch (e : any)  {
+      this.role = null;
+      console.error("JSON.parse error - ", e.message);
     }
     this.usmService.getPermission("usm").subscribe(
       (resp) => {
@@ -231,12 +282,7 @@ export class UserProjectRoleListComponent implements OnInit {
         });
       }
     );
-    try {
-      this.role = JSON.parse(sessionStorage.getItem("role"));
-    } catch (e) {
-      this.role = null;
-      console.error("JSON.parse error - ", e.message);
-    }
+
     if (this.showCreateUserRole) {
       this.showCreate = true;
       this.edit = false;
@@ -346,7 +392,7 @@ export class UserProjectRoleListComponent implements OnInit {
       let project: Project;
       try {
         project = JSON.parse(sessionStorage.getItem("project"));
-      } catch (e) {
+      } catch (e : any)  {
         project = null;
         console.error("JSON.parse error - ", e.message);
       }
@@ -354,6 +400,18 @@ export class UserProjectRoleListComponent implements OnInit {
       if (this.selectedUser != undefined)
         tempUserProjectRole.user_id = new Users({ id: this.selectedUser.id });
     }
+ 
+      if (this.role.roleadmin) {
+        let portfolio: UsmPortfolio;
+        try {
+          portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
+        } catch (e : any)  {
+          portfolio = null;
+          console.error("JSON.parse error - ", e.message);
+        }
+        tempUserProjectRole.portfolio_id = new UsmPortfolio({ id: portfolio.id });
+      }
+
     this.userRoleService.FindAll(tempUserProjectRole, pageEvent).subscribe(
       (pageResponse) => {
         this.currentPage = pageResponse;
@@ -390,14 +448,62 @@ export class UserProjectRoleListComponent implements OnInit {
     this._onDestroy.complete();
   }
 
+  checkForAdminAuthority(){
+    let project: any;
+    try {
+      project = JSON.parse(sessionStorage.getItem("project"));
+    } catch (e: any) {
+      console.error("JSON.parse error - ", e.message);
+    }
+
+    let role: any;
+    try {
+      role = JSON.parse(sessionStorage.getItem("role"));
+    } catch (e: any) {
+      console.error("JSON.parse error - ", e.message);
+    }
+
+    let portfolio: any;
+    try {
+      portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
+    } catch (e: any) {
+      console.error("JSON.parse error - ", e.message);
+    }
+
+    if(role.roleadmin){
+      this.flag = true;
+      this.callId = portfolio.id;
+    } else if(role.projectadmin){
+      this.flag = false;
+      this.callId = project.id;
+    } else {
+      this.defaultFlag = true;
+    }
+  }
+
   fetchUsers() {
-    this.userService.findAll(new Users(), this.lazyload).subscribe((res) => {
-      this.usersList = res.content;
-      this.usersList = this.usersList.sort((a, b) =>
-        a.user_login.toLowerCase() > b.user_login.toLowerCase() ? 1 : -1
-      );
-      this.usersListSearch.next(this.usersList.slice());
-    });
+    this.checkForAdminAuthority();
+    if(!this.defaultFlag){
+
+      this.userService.findAllByProjectIdOrPortfolioId(new Users(), this.lazyload, this.flag, this.callId).subscribe((res) => {
+        this.usersList = res.content;
+        this.usersList = this.usersList.sort((a, b) =>
+          a.user_login.toLowerCase() > b.user_login.toLowerCase() ? 1 : -1
+        );
+        this.usersListSearch.next(this.usersList.slice());
+      });
+
+    } else {
+
+      this.userService.findAll(new Users(), this.lazyload).subscribe((res) => {
+        this.usersList = res.content;
+        this.usersList = this.usersList.sort((a, b) =>
+          a.user_login.toLowerCase() > b.user_login.toLowerCase() ? 1 : -1
+        );
+        this.usersListSearch.next(this.usersList.slice());
+      });
+
+    }
     
   }
 
@@ -407,7 +513,7 @@ export class UserProjectRoleListComponent implements OnInit {
       let portfolio: UsmPortfolio;
       try {
         portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
-      } catch (e) {
+      } catch (e : any)  {
         portfolio = null;
         console.error("JSON.parse error - ", e.message);
       }
@@ -424,23 +530,28 @@ export class UserProjectRoleListComponent implements OnInit {
   }
 
   fetchRoles() {
+
+    let userprojectrole = new UserProjectRole();
+
+    let portfolio: UsmPortfolio;
+    let project: Project;
+    let user: Users;
+    let allRole = new Role(); /** To fetch all the roles */
+    allRole.projectId = null;
+
+    try {
+      portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
+      project = JSON.parse(sessionStorage.getItem("project"));
+      user = JSON.parse(sessionStorage.getItem("user"));
+    } catch (e : any)  {
+      portfolio = null;
+      project = null;
+      user = null;
+      console.error("JSON.parse error - ", e.message);
+    }
+
     if (this.role.roleadmin) {
-      let userprojectrole = new UserProjectRole();
 
-      let portfolio: UsmPortfolio;
-      let project: Project;
-      let user: Users;
-
-      try {
-        portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
-        project = JSON.parse(sessionStorage.getItem("project"));
-        user = JSON.parse(sessionStorage.getItem("user"));
-      } catch (e) {
-        portfolio = null;
-        project = null;
-        user = null;
-        console.error("JSON.parse error - ", e.message);
-      }
 
       userprojectrole.portfolio_id = new UsmPortfolio({ id: portfolio.id });
       userprojectrole.project_id = new Project({ id: project.id });
@@ -454,28 +565,58 @@ export class UserProjectRoleListComponent implements OnInit {
       //         }
       //     })
       // })
-      let allRole = new Role(); /** To fetch all the roles */
-      allRole.projectId = null;
+
       this.roleService.findAll(allRole, this.lazyload).subscribe((res) => {
-        this.roleList = res.content;
+        res.content.forEach((item) => {
+          if (item.id != 6) {
+            if(!item.projectadmin && !item.roleadmin){
+              this.roleList.push(item);
+              this.rolesToBeFiltered.push(item);
+            }
+          }
+        });
         this.roleList = this.roleList.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1));
         //this.filterRolesForProject()
-        if (this.project != undefined) {
-          this.fetchRelatedRoles();
+        if(this.fromProjectFlag){
+          this.fetchRelatedRoles(this.fromProject);
+        } else {
+          this.fetchRelatedRoles(project);
         }
+        
         if (this.selectedUser != undefined) {
           this.fetchAllProject();
         }
       });
-    } else {
+    } else if(this.role.projectadmin){
+      this.roleService.findAll(allRole, this.lazyload).subscribe((res) => {
+        res.content.forEach((item) => {
+          if (item.id != 6) {
+            if(!item.projectadmin && !item.roleadmin){
+              this.roleList.push(item);
+              this.rolesToBeFiltered.push(item);
+            }
+          }
+        });
+        this.roleList = this.roleList.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1));
+        if(this.fromProjectFlag){
+          this.fetchRelatedRoles(this.fromProject);
+        } else {
+          this.fetchRelatedRoles(project);
+        }
+        
+        if (this.selectedUser != undefined) {
+          this.fetchAllProject();
+        }
+      });
+    }
+    else {
       let allRole = new Role(); /** To fetch all the roles */
       allRole.projectId = null;
       this.roleService.findAll(allRole, this.lazyload).subscribe((res) => {
         this.roleList = res.content;
+        this.rolesToBeFiltered = res.content;
         this.roleList = this.roleList.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1));
-        if (this.project != undefined) {
-          this.fetchRelatedRoles();
-        }
+        this.fetchRelatedRoles(this.project);          
         if (this.selectedUser != undefined) {
           this.fetchAllProject();
         }
@@ -485,6 +626,7 @@ export class UserProjectRoleListComponent implements OnInit {
 
   fetchRelatedProjects() {
     let tempProjectArray = new Array<Project>();
+    let tempspecificProjectList = new Array<Project>();
     if (this.selectedRole.projectId == null) {
       /** Default role */ this.projectList.forEach((element) => {
         if (element.defaultrole == true) tempProjectArray.push(element);
@@ -498,23 +640,40 @@ export class UserProjectRoleListComponent implements OnInit {
       });
     }
     this.specificProjectList = tempProjectArray;
-  }
-  fetchRelatedRoles() {
-    let tempRolesArray = new Array<Role>();
-    if (this.project.defaultrole == false) {
-      this.roleList.forEach((element) => {
-        if (element.projectId == this.project.id) tempRolesArray.push(element);
+    
+    if(this.enablePortfolioAdminView && this.selectedRole && this.specificProjectList.length){
+      this.specificProjectList.forEach((item) => {
+        if(item.portfolioId != null && item.portfolioId.id == this.selectedRole.portfolioId){
+          tempspecificProjectList.push(item);
+        }
       });
-    } else {
-      /** if default roles are used (==true) along with specific roles */
-      this.roleList.forEach((element) => {
-        if (element.projectId == this.project.id || element.projectId == null) tempRolesArray.push(element);
-      });
-    }
-    this.specificRoleList = tempRolesArray;
-    this.rolesListSearch.next(this.specificRoleList.slice());
-  }
 
+      this.specificProjectList = tempspecificProjectList;
+    }
+  }
+  fetchRelatedRoles(project?: any) {
+    let tempRolesArray = new Array<Role>();
+
+      if(project != null || project != undefined){
+        if (project.defaultrole == false) {
+          this.roleList.forEach((element) => {
+            if (element.projectId == project.id) tempRolesArray.push(element);
+          });
+        } else {
+          /** if default roles are used (==true) along with specific roles */
+          this.roleList.forEach((element) => {
+            if (element.projectId == project.id || element.projectId == null) tempRolesArray.push(element);
+          });
+        }
+        this.specificRoleList = tempRolesArray;
+        this.roleList = tempRolesArray;
+        this.rolesListSearch.next(this.specificRoleList.slice());
+       } else {
+          this.specificRoleList = this.roleList;
+          this.rolesListSearch.next(this.specificRoleList.slice());
+       }
+
+  }
   fetchAllProject() {
     this.specificProjectList = this.projectList;
 
@@ -527,32 +686,97 @@ export class UserProjectRoleListComponent implements OnInit {
   }
 
   filterRolesForProject() {
-    if(!this.userProjectRole?.role_id)
-    this.userProjectRole.role_id = new Role();
-    if (this.userProjectRole.project_id != undefined && this.userProjectRole.project_id != null) {
-      this.setSpecificRolesAgain(this.userProjectRole.project_id);
-    }
-    if (this.role.projectadmin) {
-      let project: Project;
-      try {
-        project = JSON.parse(sessionStorage.getItem("project"));
-        this.setSpecificRolesAgain(project);
-      } catch (e) {
-        this.project = undefined;
-        console.error("JSON.parse error - ", e.message);
+    if(this.role.id != 6){
+
+      if(!this.userProjectRole?.role_id)
+      this.userProjectRole.role_id = new Role();
+      if (this.userProjectRole.project_id != undefined && this.userProjectRole.project_id != null) {
+        this.setSpecificRolesAgain(this.userProjectRole.project_id);
       }
+
     }
+    // if (this.role.projectadmin) {
+    //   let project: Project;
+    //   try {
+    //     project = JSON.parse(sessionStorage.getItem("project"));
+    //     this.setSpecificRolesAgain(project);
+    //   } catch (e : any)  {
+    //     this.project = undefined;
+    //     console.error("JSON.parse error - ", e.message);
+    //   }
+    // }
+    this.fetchRolebasedonProject();
   }
+
+  // filterrolesforprojectadmin(){
+  //   if (this.role.projectadmin) {
+  //     let project: Project;
+  //     try {
+  //       project = JSON.parse(sessionStorage.getItem("project"));
+  //     } catch (e:any) {
+  //       this.project = undefined;
+  //       console.error("JSON.parse error - ", e.message);
+  //     }
+  //     this.apisService.getUserInfoData().subscribe((pageResponse) => {
+  //       this.processdata = pageResponse["porfolios"];
+  //       this.processdata.forEach((element) => {
+  //         if (element.porfolioId.id == project.portfolioId.id) {
+  //           element.projectWithRoles.forEach((element1) => {
+  //             try{
+  //               if (element1.projectId.id == project.id) {
+  //                 this.filteredroleslist = element1.roleId
+  //                 this.setSpecificRolesAgain(project);
+  //               }
+  //             }catch(e){}
+  //           });
+  //         }
+  //       });
+  //     });
+
+  //   }
+  // }
+
+  // filterrolesforportfolioadmin(){
+  //   if (this.role.roleadmin) {
+  //     let project: Project;
+  //     try {
+  //       project = JSON.parse(sessionStorage.getItem("project"));
+  //     } catch (e:any) {
+  //       this.project = undefined;
+  //       console.error("JSON.parse error - ", e.message);
+  //     }
+  //     this.apisService.getUserInfoData().subscribe((pageResponse) => {
+  //       this.processdata = pageResponse["porfolios"];
+  //       this.processdata.forEach((element) => {
+  //         if (element.porfolioId.id == project.portfolioId.id) {
+  //           element.projectWithRoles.forEach((element1) => {
+  //             try{
+  //                 .push(...element1.projectId.id);
+  //                 =
+  //             }catch(e){}
+  //           });
+  //         }
+  //       });
+
+  //       // this.filteredroleslist = this.filteredroleslist.filter((obj, index) => {
+  //       //   return index === this.filteredroleslist.findIndex(o => obj.id === o.id);
+  //       // });
+  //       // this.setSpecificRolesAgain(project);
+  //     });
+
+  //   }
+  // }
 
   setSpecificRolesAgain(project: any) {
     let tempRolesArray = new Array<Role>();
+
     if (project.defaultrole == false) {
-      this.roleList.forEach((element) => {
+      this.rolesToBeFiltered.forEach((element) => {
         if (element.projectId == project.id) tempRolesArray.push(element);
       });
     } else {
       /** if default roles are used (==true) along with specific roles */
-      this.roleList.forEach((element) => {
+      this.rolesToBeFiltered.forEach((element) => {
         if (element.projectId == project.id || element.projectId == null) tempRolesArray.push(element);
       });
     }
@@ -561,6 +785,14 @@ export class UserProjectRoleListComponent implements OnInit {
       a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
     );
     this.rolesListSearch.next(this.specificRoleList.slice());
+    // if(this.role.projectadmin){
+    //   this.specificRoleList = this.roleList;
+    //   this.rolesListSearch.next(this.specificRoleList.slice());
+    // }
+    // if(this.role.roleadmin){
+    //   this.specificRoleList = this.roleList;
+    //   this.rolesListSearch.next(this.specificRoleList.slice());
+    // }
     // if (!this.edit)
     //     this.userProjectRole.role_id = this.specificRoleList[0];
   }
@@ -684,6 +916,7 @@ export class UserProjectRoleListComponent implements OnInit {
     }
   }
   onSave() {
+    let portfolioForSave: UsmPortfolio;
     // if(this.edit){
       this.userProjectRole.time_stamp = new Date();
     this.errorMessage = false;
@@ -694,7 +927,7 @@ export class UserProjectRoleListComponent implements OnInit {
       let portfolio: UsmPortfolio;
       try {
         portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
-      } catch (e) {
+      } catch (e : any)  {
         portfolio = null;
         console.error("JSON.parse error - ", e.message);
       }
@@ -704,7 +937,7 @@ export class UserProjectRoleListComponent implements OnInit {
       let portfolio: UsmPortfolio;
       try {
         portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
-      } catch (e) {
+      } catch (e : any)  {
         portfolio = null;
         console.error("JSON.parse error - ", e.message);
       }
@@ -712,11 +945,31 @@ export class UserProjectRoleListComponent implements OnInit {
       let project: Project;
       try {
         project = JSON.parse(sessionStorage.getItem("project"));
-      } catch (e) {
+      } catch (e : any)  {
         project = null;
         console.error("JSON.parse error - ", e.message);
       }
       this.userProjectRole.project_id = new Project({ id: project.id });
+    }
+    if(this.enablePortfolioAdminView){
+      if(this.selectedRole){
+        this.userProjectRole.portfolio_id = new UsmPortfolio({ id: this.selectedRole.portfolioId });
+      }
+    }
+    if(this.enableProjectAdminView){
+      if(this.selectedRole){
+        this.userProjectRole.project_id = new Project({id: this.selectedRole.projectAdminId})
+
+        if(this.projectList.length > 0){
+          this.projectList.forEach((item) => {
+            if(item.id != null && item.id == this.selectedRole.projectAdminId){
+              portfolioForSave = item.portfolioId;
+            }
+          });
+
+          this.userProjectRole.portfolio_id = new UsmPortfolio({ id: portfolioForSave.id });
+        }
+      }
     }
     if (
       this.userProjectRole.role_id == undefined ||
@@ -739,7 +992,7 @@ export class UserProjectRoleListComponent implements OnInit {
 
       if (!flag) {
         if (sessionStorage.getItem("telemetry") == "true") {
-        this.telemetryService.audit(this.userProjectRoles,"CREATE");
+        // this.telemetryService.audit(this.userProjectRoles,"CREATE");
         }
         this.busy = this.userRoleService.createAll(this.userProjectRoles).subscribe(
           (res) => {
@@ -747,7 +1000,7 @@ export class UserProjectRoleListComponent implements OnInit {
             let user: Users;
             try {
               user = JSON.parse(sessionStorage.getItem("user"));
-            } catch (e) {
+            } catch (e : any)  {
               user = null;
               console.error("JSON.parse error - ", e.message);
             }
@@ -811,7 +1064,7 @@ export class UserProjectRoleListComponent implements OnInit {
         let portfolio: UsmPortfolio;
         try {
           portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
-        } catch (e) {
+        } catch (e : any)  {
           portfolio = null;
           console.error("JSON.parse error - ", e.message);
         }
@@ -821,14 +1074,14 @@ export class UserProjectRoleListComponent implements OnInit {
         let portfolio: UsmPortfolio;
         try {
           portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
-        } catch (e) {
+        } catch (e : any)  {
           portfolio = null;
           console.error("JSON.parse error - ", e.message);
         }
         let project: Project;
         try {
           project = JSON.parse(sessionStorage.getItem("project"));
-        } catch (e) {
+        } catch (e : any)  {
           project = null;
           console.error("JSON.parse error - ", e.message);
         }
@@ -844,7 +1097,7 @@ export class UserProjectRoleListComponent implements OnInit {
             item.id == this.userProjectRole.id 
         );
         let diff=this.compareTodiff(this.userProjectRole,arr[0])
-        this.telemetryService.audit(this.userProjectRole,arr[0],diff);
+        // this.telemetryService.audit(this.userProjectRole,arr[0],diff);
         }
         this.busy = this.userRoleService.update(this.userProjectRole).subscribe(
           (res) => {
@@ -852,7 +1105,7 @@ export class UserProjectRoleListComponent implements OnInit {
             let user: Users;
             try {
               user = JSON.parse(sessionStorage.getItem("user"));
-            } catch (e) {
+            } catch (e : any)  {
               user = null;
               console.error("JSON.parse error - ", e.message);
             }
@@ -954,7 +1207,7 @@ export class UserProjectRoleListComponent implements OnInit {
           let project: Project;
           try {
             project = JSON.parse(sessionStorage.getItem("project"));
-          } catch (e) {
+          } catch (e : any)  {
             project = null;
             console.error("JSON.parse error - ", e.message);
           }
@@ -1006,7 +1259,11 @@ export class UserProjectRoleListComponent implements OnInit {
 
   valueChangeProject(event) {
     this.filterProject = event.value;
+    if(this.role.id != 6){
+      this.fetchRelatedRoles(this.filterProject);
+    }
   }
+
   valueChangeUser(event) {
     this.filterUser = event.value;
   }
@@ -1046,7 +1303,7 @@ export class UserProjectRoleListComponent implements OnInit {
         let project: Project;
         try {
           project = JSON.parse(sessionStorage.getItem("project"));
-        } catch (e) {
+        } catch (e : any)  {
           project = null;
           console.error("JSON.parse error - ", e.message);
         }
@@ -1195,13 +1452,13 @@ export class UserProjectRoleListComponent implements OnInit {
     this.userRoleService.delete(upr.id).subscribe(
       (Response) => {
         if (sessionStorage.getItem("telemetry") == "true") {
-        this.telemetryService.audit(upr,"DELETE");
+        // this.telemetryService.audit(upr,"DELETE");
         }
         this.messageService.info("User project Role Mapping Deleted successfully", "IAMP");
         let user: Users;
         try {
           user = JSON.parse(sessionStorage.getItem("user"));
-        } catch (e) {
+        } catch (e : any)  {
           user = null;
           console.error("JSON.parse error - ", e.message);
         }
@@ -1262,7 +1519,42 @@ export class UserProjectRoleListComponent implements OnInit {
       // this.userProjectRole.project_id = this.specificProjectList[0];
     }
     this.filterRolesForProject();
+    this.fetchRolebasedonportfolio();
   }
+  fetchRolebasedonportfolio(){
+    let roleSpecific=new Array<Role>();
+    roleSpecific=this.roleList.filter((element)=>{
+    if( element.roleadmin)
+    {
+      //Check if the portfolioAdmin matches to the selected portfolio  or portfolioadmin role which can be mapped to any portfolio
+    return  (element.portfolioId == this.userProjectRole.portfolio_id.id) || element.portfolioId==null
+    } 
+    else 
+    // return the roles having both portfolioAdmin and projectAdmin not selected and   excluing the roles which is under any other portfolio or project
+    {
+    return  (!element.projectadmin || !element.roleadmin && element.projectAdminId==null) || (this.project.id == element.projectAdminId)
+  }
+    }); 
+    this.specificRoleList=roleSpecific;
+    this.filterroles();    
+  }
+
+  fetchRolebasedonProject(){
+  let roleSpecific=new Array<Role>();
+  roleSpecific = this.roleList.filter((element) => {
+  if (element.projectadmin==true) {
+  
+    // Check if role is specifically mapped to the selected project  or projectadmin role which can be mapped to any project (not specified the projectName). 
+     return this.userProjectRole.project_id.id==element.projectAdminId ||(element.projectAdminId==null);
+    }
+   else {
+    // Check if projectadmin and profolioadmin are not checked and if role is specifically mapped to the selected portfolio or portfolioadmin role which can be mapped to any portfolio. 
+    return (!element.projectadmin && element.portfolioId == this.userProjectRole.portfolio_id.id || !element.roleadmin) || (element.portfolioId==null && element.roleadmin);
+  }
+});
+this.specificRoleList = roleSpecific;
+this.filterroles();
+}
   ngAfterViewInit() {}
   fetchApis() {
     /*If the list is already populated dont need to call the api again*/

@@ -32,6 +32,9 @@ export class ThemeMgmtComponent implements OnInit {
 
   save(){
     let project = JSON.parse(sessionStorage.getItem('project'));
+    if(this.theme.widgettheme.proritizeThemeColorArr?.length == 0){
+      this.theme.widgettheme.proritizeThemeColor = false
+    }
     if(this.theme.apptheme.themecolor)
     project.theme=this.theme.apptheme.themecolor
     else{
@@ -67,6 +70,7 @@ export class ThemeMgmtComponent implements OnInit {
       let tempdashboardtextcolor = res.filter((item) => (item.keys == "DashboardName_Text_Color" ))[0];
       let tempSidebarbgcolor = res.filter((item) => (item.keys == "Sidebar_Background_Color" ))[0];
       let tempSidebartextcolor = res.filter((item) => (item.keys == "Sidebar_Text_Color" ))[0];
+      let tempSidebarTextIconHover = res.filter((item) => (item.keys == "Sidebar_TextIconHover_Color" ))[0];
       let tempSidebarhighlightcolor = res.filter((item) => (item.keys == "Sidebar_Highlight_Color" ))[0];
       let tempSidebarhovercolor = res.filter((item) => (item.keys == "Sidebar_Hover_Color" ))[0];
       let temptoggledashcolor = res.filter((item) => item.keys == "ToggleUnderline_Color")[0];
@@ -89,11 +93,15 @@ export class ThemeMgmtComponent implements OnInit {
         }
         if(tempSidebarhighlightcolor && tempSidebarhighlightcolor.value)
         this.theme.apptheme.sidebaractivecolor = tempSidebarhighlightcolor.value
+        if(tempSidebarTextIconHover && tempSidebarTextIconHover.value)
+        this.theme.apptheme.sidebartexticonhovercolor = tempSidebarTextIconHover.value
         if(tempSidebarhovercolor && tempSidebarhovercolor.value)
         this.theme.apptheme.sidebarhovercolor = tempSidebarhovercolor.value
         if(temptoggledashcolor && temptoggledashcolor.value)
         this.theme.dashboardtheme.toggleactiveunderlinecolor = tempSidebarhighlightcolor.value
       }
+      if(!this.theme.apptheme)this.theme.apptheme = new AppTheme()
+      if(!this.theme.bcctheme)this.theme.bcctheme = new BCCTheme()
       if(sessionStorage.getItem("defaultTheme"))
       this.theme.apptheme.themecolor = sessionStorage.getItem("defaultTheme")
       if(project && project.theme)
@@ -116,7 +124,12 @@ export class ThemeMgmtComponent implements OnInit {
   addThemeAttr(type){
     if(this.theme.widgettheme.proritizeThemeColorArr==undefined)
     this.theme.widgettheme.proritizeThemeColorArr=[]
+    if(this.theme.widgettheme.proritizeThemeColorArr?.length>0){
+      if(!this.theme.widgettheme.proritizeThemeColorArr.includes(type))
+         this.theme.widgettheme.proritizeThemeColorArr.push(type);
+    }else{
     this.theme.widgettheme.proritizeThemeColorArr.push(type)
+    }
   }
   changeBoltTitle() {
     if(this.theme.widgettheme.boldtitle)
@@ -125,7 +138,7 @@ export class ThemeMgmtComponent implements OnInit {
       this.addThemeAttr('boldtitle');
   }
   changeBorderShadow() {
-    if(this.theme.widgettheme.bordershadow)
+    if(!this.theme.widgettheme.bordershadow)
       this.removeThemeAttr('bordershadow');
     else
       this.addThemeAttr('bordershadow');

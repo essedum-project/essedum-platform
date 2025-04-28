@@ -73,7 +73,7 @@
 		"ngModuleName": "MlstudioModule"
 	},
 	"aip_app": {
-		"remoteEntry": "/aip/remoteEntry.js",
+		"remoteEntry": "/aipui/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "aip",
 		"ngModuleName": "AipModule"

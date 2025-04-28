@@ -19,46 +19,50 @@ import { QuillModule } from "ngx-quill";
 import { RoleProcessModule } from "./role-process/role-process.module";
 import { StageModule } from "./stage/stage.module";
 import { UserUserModule } from "./user-user/user-user.module";
+import { UsmModuleModule } from "./usm-module/usm-module.module";
+
 @NgModule({
- imports: [
-  CommonModule,
-  DragScrollModule,
-  ProjectModule,
-  NgBusyModule,
-  RoleModule,
-  UserProjectRoleModule,
-  DashConstantModule,
-  UsersModule,
-  NgxPaginationModule,
-  UsmPortfolioModule,
-  MatDialogModule,
-  DelegateModule,
-  ProcessModule,
-  CountryTimezoneModule,
-  QuillModule.forRoot(),
-  RoleProcessModule,
-  StageModule,
-  UserUserModule
- ],
- declarations: [
-  /*SidebarComponent
-   */
- ],
- exports: [
-  DragScrollModule,
-  FormsModule,
-  ProjectModule,
-  RoleModule,
-  UserProjectRoleModule,
-  UsersModule,
-  UsmPortfolioModule,
-  DelegateModule,
-  ProcessModule,
-  CountryTimezoneModule,
-  RoleProcessModule,
-  StageModule,
-  UserUserModule
- ],
- providers: [MessageService ],
+  imports: [
+    CommonModule,
+    DragScrollModule,
+    ProjectModule,
+    NgBusyModule,
+    RoleModule,
+    UserProjectRoleModule,
+    DashConstantModule,
+    UsersModule,
+    NgxPaginationModule,
+    UsmPortfolioModule,
+    UsmModuleModule,
+    MatDialogModule,
+    DelegateModule,
+    ProcessModule,
+    CountryTimezoneModule,
+    QuillModule.forRoot(),
+    RoleProcessModule,
+    StageModule,
+    UserUserModule
+  ],
+  declarations: [
+    /*SidebarComponent
+     */
+  ],
+  exports: [
+    DragScrollModule,
+    FormsModule,
+    ProjectModule,
+    RoleModule,
+    UserProjectRoleModule,
+    UsersModule,
+    UsmPortfolioModule,
+    UsmModuleModule,
+    DelegateModule,
+    ProcessModule,
+    CountryTimezoneModule,
+    RoleProcessModule,
+    StageModule,
+    UserUserModule
+  ],
+  providers: [MessageService],
 })
-export class ModulesModule {}
+export class ModulesModule { }

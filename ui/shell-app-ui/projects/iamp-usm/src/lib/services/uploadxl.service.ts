@@ -13,13 +13,14 @@
 // Template pack-angular:web/src/app/entities/entity.service.ts.e.vm
 //
 import { Injectable, SkipSelf } from "@angular/core";
-import { Observable } from "rxjs/Observable";
+// import { Observable } from "rxjs/Observable";
+import { Observable, map, catchError, throwError } from "rxjs";
 import { MessageService } from "./message.service";
 // import { Task } from '../models/task';
-import { throwError } from "rxjs";
+// import { throwError } from "rxjs";
 
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import { map, catchError } from "rxjs/operators";
+// import { map, catchError } from "rxjs/operators";
 
 @Injectable()
 export class UploadXLSService {
@@ -35,7 +36,7 @@ export class UploadXLSService {
     let project;
     try {
       project = JSON.parse(sessionStorage.getItem("project"));
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.parse error - ", e.message);
     }
     return this.https.post("/api/uploadUserRoleExcel/" + project.id, excelfile,{
@@ -56,7 +57,7 @@ export class UploadXLSService {
     let project;
     try {
       project = JSON.parse(sessionStorage.getItem("project"));
-    } catch (e) {
+    } catch (e : any)  {
       console.error("JSON.parse error - ", e.message);
     }
     return this.https
@@ -110,9 +111,9 @@ export class UploadXLSService {
     let errMsg = error.error;
     error.status ? `Status: ${error.status} - Text: ${error.statusText}` : "Server error";
     console.error(errMsg); // log to console instead
-    if (error.status === 401) {
-      window.location.href = "/";
-    }
+    // if (error.status === 401) {
+    //   window.location.href = "/";
+    // }
     return throwError(errMsg)
   }
 

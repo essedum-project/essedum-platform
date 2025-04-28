@@ -1,4 +1,4 @@
-<div class="col-md-12 centerStyle selector-669-1" style="border: none">
+<div class="col-md-12 centerStyle paddingBottom selector-669-1" style="border: none">
   <div class="selector-669-2">
     <div class="clearfix selector-669-3">
       <div class="padTop20 selector-669-4">
@@ -22,7 +22,7 @@
           <i class="fa fa-plus-square-o create-icon-color selector-669-17" (click)="createView()" *ngIf="createFlag" aria-hidden="true"></i>
           <span style="cursor: pointer" (click)="createView()" *ngIf="createFlag" class="selector-669-18">Create Roles</span>
         </div>
-        <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-669-19">
+        <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-669-19 filterStyle">
           <h3 class="clearfix selector-669-20">
             <div class="search-container ams_cusSrch pull-left selector-669-21">
               <input style="color: black;" #myInput="" type="text" placeholder="Search By Role Name" (keypress)="checkEnterPressed($event, myInput.value)" class="selector-669-22" />
@@ -32,7 +32,7 @@
             </div>
             <a href="javascript:void(0)" class="paddLeft selector-669-25">Filter</a>
           </h3>
-          <div class="ams_panelCnt formRow relative selector-669-26">
+          <div class="ams_panelCnt formRow relative selector-669-26 labelsAlign">
             <div class="row rwMAr selector-669-27">
               <div class="col-md-6 clearboth select-style selector-669-28">
                 <!-- <label class="formLabel">Role</label>
@@ -40,9 +40,9 @@
                                     <input type="text" placeholder="Role" [ngModelOptions]="{standalone: true}"
                                         [(ngModel)]="searchedRole" class="form-control">
                                 </div> -->
-                <mat-form-field style="width: 85%" class="selector-669-29">
+                <mat-form-field style="width: 85%; margin-top:-1vh" class="selector-669-29">
                   <label class="formLabel selector-669-30">Role</label>
-                  <mat-select [(ngModel)]="searchedRole" [ngModelOptions]="{ standalone: true }" name="role" class="selector-669-31">
+                  <mat-select [(ngModel)]="searchedRole" [ngModelOptions]="{ standalone: true }" name="role" class="selector-669-31" style="padding-top: 2vh;">
                     <mat-option selected="" value="All" class="selector-669-32">All</mat-option>
                     <mat-option *ngFor="let role of rolesFilter; trackBy: trackByMethod" [value]="role.name" class="selector-669-33">
                       <div  class="td-span td-ellipsis pull-left selector-669-109" matTooltipClass="crud-tooltip" [matTooltip]="role.name">{{role.name}}</div>
@@ -53,7 +53,7 @@
               <div class="col-md-6 clearboth selector-669-34">
                 <label class="formLabel selector-669-35">Description</label>
                 <div class="input-group ams_datetime selector-669-36" style="margin-top: 2%">
-                  <input type="text" placeholder="Description" [ngModelOptions]="{ standalone: true }" [(ngModel)]="selectedDesc" class="form-control selector-669-37" />
+                  <input type="text" style="font-size:inherit;" placeholder="Description" [ngModelOptions]="{ standalone: true }" [(ngModel)]="selectedDesc" class="form-control selector-669-37"  />
                 </div>
               </div>
             </div>
@@ -72,8 +72,8 @@
               </a>
             </div> -->
             <div style="float: right; cursor: pointer" class="selector-669-47">
-              <i class="fa fa-list-ul fa-lg icon1 selector-669-48" aria-hidden="true" title="Table View" (click)="showList = false"></i>
-              <i class="fa fa-th-large fa-lg icon1 selector-669-49" aria-hidden="true" title="Card View" (click)="showList = true"></i>
+              <i class="fa fa-list-ul fa-lg icon1 selector-669-48" aria-hidden="true" matTooltip="Table View" (click)="showList = false"></i>
+              <i class="fa fa-th-large fa-lg icon1 selector-669-49" aria-hidden="true" matTooltip="Card View" (click)="showList = true"></i>
             </div>
             <br class="selector-669-50" />
             <br class="selector-669-51" />
@@ -108,9 +108,9 @@
                   <div class="selector-669-68">
                     <div class="selector-669-69">
                       <div class="ams_cardfooter text-center selector-669-70">
-                        <i class="fa fa-info-circle fa-lg create-icon-color selector-669-71" aria-hidden="true" title="View Role" *ngIf="viewFlag" (click)="viewRole(role)"></i>
-                        <i class="fa fa-pencil fa-lg create-icon-color selector-669-72" aria-hidden="true" title="Edit Role" (click)="editRole(role)" style="padding-left: 5px" *ngIf="editFlag"></i>
-                        <i class="fa fa-trash fa-lg create-icon-color selector-669-73" aria-hidden="true" style="padding-left: 5px" title="Delete Role" (click)="deleteRole(role)" *ngIf="deleteFlag"></i>
+                        <i class="fa fa-info-circle fa-lg create-icon-color selector-669-71" aria-hidden="true" matTooltip="View Role" *ngIf="viewFlag" (click)="viewRole(role)"></i>
+                        <i class="fa fa-pencil fa-lg create-icon-color selector-669-72" aria-hidden="true" matTooltip="Edit Role" (click)="editRole(role)" style="padding-left: 5px" *ngIf="editFlag"></i>
+                        <i class="fa fa-trash fa-lg create-icon-color selector-669-73" aria-hidden="true" style="padding-left: 5px" matTooltip="Delete Role" (click)="deleteRole(role)" *ngIf="deleteFlag"></i>
                       </div>
                     </div>
                   </div>
@@ -122,8 +122,9 @@
             </div>
           </div>
           <!-- list view -->
+          <mat-card appearance="outlined" class="cardResponsive">
           <div *ngIf="rolesLength > 0 &amp;&amp; !showList" class="table-responsive selector-669-76">
-            <table mat-table="" [dataSource]="roleList" class="table-hover list-table table selector-669-77" matSort="" matSortActive="scheduled_from" matSortDirection="asc">
+            <table aria-label="" mat-table="" [dataSource]="roleList" class="table-hover list-table table selector-669-77" matSort="" matSortActive="scheduled_from" matSortDirection="asc">
               <ng-container matColumnDef="id" class="selector-669-78">
                 <th mat-header-cell="" *matHeaderCellDef="" class="number-col selector-669-79">
                   <strong class="selector-669-80"> Role Id </strong>
@@ -170,9 +171,9 @@
                   <strong class="selector-669-100"> Actions </strong>
                 </th>
                 <td mat-cell="" *matCellDef="let role" class="actions-col selector-669-101">
-                  <i class="fa fa-info-circle fa-lg create-icon-color selector-669-102" aria-hidden="true" (click)="viewRole(role)" *ngIf="viewFlag" title="View Role"></i>
-                  <i class="fa fa-pencil fa-lg create-icon-color selector-669-103" aria-hidden="true" (click)="editRole(role)" title="Edit Role" style="padding-left: 5px" *ngIf="editFlag"></i>
-                  <i class="fa fa-trash fa-lg create-icon-color selector-669-104" aria-hidden="true" style="padding-left: 5px" (click)="deleteRole(role)" title="Delete Role" *ngIf="deleteFlag"></i>
+                  <i class="fa fa-info-circle fa-lg create-icon-color selector-669-102" aria-hidden="true" (click)="viewRole(role)" *ngIf="viewFlag" matTooltip="View Role"></i>
+                  <i class="fa fa-pencil fa-lg create-icon-color selector-669-103" aria-hidden="true" (click)="editRole(role)" matTooltip="Edit Role" style="padding-left: 5px" *ngIf="editFlag && checkPerms(role)"></i>
+                  <i class="fa fa-trash fa-lg create-icon-color selector-669-104" aria-hidden="true" style="padding-left: 5px" (click)="deleteRole(role)" matTooltip="Delete Role" *ngIf="deleteFlag && checkPerms(role)"></i>
                 </td>
               </ng-container>
               <tr mat-header-row="" *matHeaderRowDef="displayedColumns" class="selector-669-105"></tr>
@@ -180,6 +181,7 @@
             </table>
             <mat-paginator [pageSize]="6" showFirstLastButtons="" class="selector-669-107"></mat-paginator>
           </div>
+        </mat-card>
         </div>
         <div *ngIf="roles.length == 0" id="noRecordsMsg" class="selector-669-108">No Records Found</div>
       </div>

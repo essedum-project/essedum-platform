@@ -12,7 +12,7 @@
                 <div class="row rwMAr">
                     <div class="col-md-6">
                         <label class="formLabel">Workflow Process*</label>
-                        <mat-select class="txtInput" style="width: 85%" [(ngModel)]="stage &amp;&amp; stage.process_id" name="process" id="process" [ngModelOptions]="{ standalone: true }" placeholder="SELECT" required [compareWith]="compareObjects">
+                        <mat-select class="txtInput" style="width: 85%" [(ngModel)]="stage.process_id" name="process" id="process" [ngModelOptions]="{ standalone: true }" placeholder="SELECT" required [compareWith]="compareObjects">
                             <mat-option *ngFor="let item of processList; trackBy: trackByMethod" [value]="item">
                                 {{ item.process_name }}
                             </mat-option>
@@ -20,7 +20,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="formLabel">User*</label>
-                        <mat-select class="txtInput" style="width: 85%" [(ngModel)]="stage &amp;&amp; stage.user_id" name="user" id="user" [ngModelOptions]="{ standalone: true }" placeholder="SELECT" required [compareWith]="compareObjects">
+                        <mat-select class="txtInput" style="width: 85%" [(ngModel)]="stage.user_id" name="user" id="user" [ngModelOptions]="{ standalone: true }" placeholder="SELECT" required [compareWith]="compareObjects">
                             <mat-option *ngFor="let item of usersList; trackBy: trackByMethod" [value]="item">
                                 {{ item.user_f_name }}
                             </mat-option>
@@ -31,7 +31,7 @@
                     <div class="col-md-6">
                         <label class="formLabel">Stage*</label>
                         <input type="text" id="displayName" name="displayName" class="txtInput" 
-                        [(ngModel)]="stage &amp;&amp; stage.stage_id" 
+                        [(ngModel)]="stage.stage_id" 
                         [ngModelOptions]="{ standalone: true }" required 
                         placeholder="Enter stage workflow at">
                     </div>

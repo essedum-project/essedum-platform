@@ -1,4 +1,4 @@
-<mat-card>
+<mat-card appearance="outlined" style="padding-bottom: 45px;">
     <mat-card-title class="fontSize">
         <span>Theme</span>
     </mat-card-title>
@@ -11,25 +11,25 @@
                         <!-- theme color -->
                         <div class="col-md-3">
                             <label class="formLabel">Project Theme color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.apptheme && theme.apptheme.themecolor" value="color" name="projecttheme" /><i class="fa fa-close" *ngIf="theme.apptheme && theme.apptheme.themecolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.apptheme.themecolor" value="color" name="projecttheme" /><i class="fa fa-close" *ngIf="theme.apptheme && theme.apptheme.themecolor"
                                 (click)="theme.apptheme.themecolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                         <!-- header color -->
                         <div class="col-md-3">
                             <label class="formLabel">Header Background color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.apptheme && theme.apptheme.headercolor" value="color" name="headercolor" /><i class="fa fa-close" *ngIf="theme.apptheme && theme.apptheme.headercolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.apptheme.headercolor" value="color" name="headercolor" /><i class="fa fa-close" *ngIf="theme.apptheme && theme.apptheme.headercolor"
                                 (click)="theme.apptheme.headercolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                         <!-- header color -->
                         <div class="col-md-3">
                             <label class="formLabel">Header Icon color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.apptheme && theme.apptheme.headericoncolor" value="color" name="headericoncolor" /><i class="fa fa-close" *ngIf="theme.apptheme && theme.apptheme.headericoncolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.apptheme.headericoncolor" value="color" name="headericoncolor" /><i class="fa fa-close" *ngIf="theme.apptheme && theme.apptheme.headericoncolor"
                                 (click)="theme.apptheme.headericoncolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                         <!-- sidebar color -->
                         <div class="col-md-3">
                             <label class="formLabel">Sidebar Background color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.apptheme && theme.apptheme.sidebarbackgroundcolor" value="color" name="sidebarcolor" /><i class="fa fa-close" *ngIf="theme.apptheme && theme.apptheme.sidebarbackgroundcolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.apptheme.sidebarbackgroundcolor" value="color" name="sidebarcolor" /><i class="fa fa-close" *ngIf="theme.apptheme && theme.apptheme.sidebarbackgroundcolor"
                                 (click)="theme.apptheme.sidebarbackgroundcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                     </div>
@@ -37,25 +37,31 @@
                         <!-- sidebar icon color -->
                         <div class="col-md-3">
                             <label class="formLabel">Sidebar Text color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.apptheme && theme.apptheme.sidebartextcolor" value="color" name="sidebartextcolor" /><i class="fa fa-close" *ngIf="theme.apptheme && theme.apptheme.sidebartextcolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.apptheme.sidebartextcolor" value="color" name="sidebartextcolor" /><i class="fa fa-close" *ngIf="theme.apptheme && theme.apptheme.sidebartextcolor"
                                 (click)="theme.apptheme.sidebartextcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                         <!-- sidebar color -->
                         <div class="col-md-3">
                             <label class="formLabel">Sidebar Hover color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.apptheme && theme.apptheme.sidebarhovercolor" value="color" name="sidebarhovercolor" /><i class="fa fa-close" *ngIf="theme.apptheme && theme.apptheme.sidebarhovercolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.apptheme.sidebarhovercolor" value="color" name="sidebarhovercolor" /><i class="fa fa-close" *ngIf="theme.apptheme && theme.apptheme.sidebarhovercolor"
                                 (click)="theme.apptheme.sidebarhovercolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
+                        </div>
+                         <!-- sidebar color -->
+                         <div class="col-md-3">
+                            <label class="formLabel">Sidebar Text/Icon Hover color</label>
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.apptheme.sidebartexticonhovercolor" value="color" name="sidebartexticonhovercolor" /><i class="fa fa-close" *ngIf="theme.apptheme && theme.apptheme.sidebartexticonhovercolor"
+                                (click)="theme.apptheme.sidebartexticonhovercolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                         <!-- sidebar color -->
                         <div class="col-md-3">
                             <label class="formLabel">Sidebar Highlight color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.apptheme && theme.apptheme.sidebaractivecolor" value="color" name="sidebaractivecolor" /><i class="fa fa-close" *ngIf="theme.apptheme && theme.apptheme.sidebaractivecolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.apptheme.sidebaractivecolor" value="color" name="sidebaractivecolor" /><i class="fa fa-close" *ngIf="theme.apptheme && theme.apptheme.sidebaractivecolor"
                                 (click)="theme.apptheme.sidebaractivecolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                         <!-- sidebar color -->
                         <div class="col-md-3">
                             <label class="formLabel">Sidebar Icon color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.apptheme && theme.apptheme.sidebariconcolor" value="color" name="sidebariconcolor" /><i class="fa fa-close" *ngIf="theme.apptheme && theme.apptheme.sidebariconcolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.apptheme.sidebariconcolor" value="color" name="sidebariconcolor" /><i class="fa fa-close" *ngIf="theme.apptheme && theme.apptheme.sidebariconcolor"
                                 (click)="theme.apptheme.sidebariconcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                     </div>
@@ -70,13 +76,13 @@
                         <!-- header color -->
                         <div class="col-md-3">
                             <label class="formLabel">Header color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.bcctheme && theme.bcctheme.bccheaderbackgroundcolor" value="color" name="bccheaderbackgroundcolor" /><i class="fa fa-close" *ngIf="theme.bcctheme && theme.bcctheme.bccheaderbackgroundcolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.bcctheme.bccheaderbackgroundcolor" value="color" name="bccheaderbackgroundcolor" /><i class="fa fa-close" *ngIf="theme.bcctheme && theme.bcctheme.bccheaderbackgroundcolor"
                                 (click)="theme.bcctheme.bccheaderbackgroundcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                         <!-- header color -->
                         <div class="col-md-3">
                             <label class="formLabel">Header Icon/Text color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.bcctheme && theme.bcctheme.bccheadertextcolor" value="color" name="bccheadertextcolor" /><i class="fa fa-close" *ngIf="theme.bcctheme && theme.bcctheme.bccheadertextcolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.bcctheme.bccheadertextcolor" value="color" name="bccheadertextcolor" /><i class="fa fa-close" *ngIf="theme.bcctheme && theme.bcctheme.bccheadertextcolor"
                                 (click)="theme.bcctheme.bccheadertextcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                     </div>
@@ -84,25 +90,25 @@
                         <!-- sidebar color -->
                         <div class="col-md-3">
                             <label class="formLabel">Sidebar Background color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.bcctheme && theme.bcctheme.bccsidebarbackgroundcolor" value="color" name="bccsidebarbackgroundcolor" /><i class="fa fa-close" *ngIf="theme.bcctheme && theme.bcctheme.bccsidebarbackgroundcolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.bcctheme.bccsidebarbackgroundcolor" value="color" name="bccsidebarbackgroundcolor" /><i class="fa fa-close" *ngIf="theme.bcctheme && theme.bcctheme.bccsidebarbackgroundcolor"
                                 (click)="theme.bcctheme.bccsidebarbackgroundcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                         <!-- sidebar color -->
                         <div class="col-md-3">
                             <label class="formLabel">Sidebar Text color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.bcctheme && theme.bcctheme.bccsidebarcolor" value="color" name="bccsidebarcolor" /><i class="fa fa-close" *ngIf="theme.bcctheme && theme.bcctheme.bccsidebarcolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.bcctheme.bccsidebarcolor" value="color" name="bccsidebarcolor" /><i class="fa fa-close" *ngIf="theme.bcctheme && theme.bcctheme.bccsidebarcolor"
                                 (click)="theme.bcctheme.bccsidebarcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                         <!-- sidebar color -->
                         <div class="col-md-3">
                             <label class="formLabel">Sidebar Highlight color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.bcctheme && theme.bcctheme.bccsidebarhighlightcolor" value="color" name="bccsidebarhighlightcolor" /><i class="fa fa-close" *ngIf="theme.bcctheme && theme.bcctheme.bccsidebarhighlightcolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.bcctheme.bccsidebarhighlightcolor" value="color" name="bccsidebarhighlightcolor" /><i class="fa fa-close" *ngIf="theme.bcctheme && theme.bcctheme.bccsidebarhighlightcolor"
                                 (click)="theme.bcctheme.bccsidebarhighlightcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                         <!-- sidebar color -->
                         <div class="col-md-3">
                             <label class="formLabel">Sidebar Icon color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.bcctheme && theme.bcctheme.bccsidebariconcolor" value="color" name="bccsidebariconcolor" /><i class="fa fa-close" *ngIf="theme.bcctheme && theme.bcctheme.bccsidebariconcolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.bcctheme.bccsidebariconcolor" value="color" name="bccsidebariconcolor" /><i class="fa fa-close" *ngIf="theme.bcctheme && theme.bcctheme.bccsidebariconcolor"
                                 (click)="theme.bcctheme.bccsidebariconcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                     </div>
@@ -117,88 +123,102 @@
                         <!-- title color -->
                         <div class="col-md-3">
                             <label class="formLabel">Dashboard Background color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme && theme.dashboardtheme.dashboardbackgroundcolor" value="color" name="dashboardbackgroundcolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.dashboardbackgroundcolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme.dashboardbackgroundcolor" value="color" name="dashboardbackgroundcolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.dashboardbackgroundcolor"
                                 (click)="theme.dashboardtheme.dashboardbackgroundcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="formLabel">Dashboard Icon and Filter Apply button Color</label>
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme.iconcolor" value="color" name="iconcolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.iconcolor"
+                                (click)="theme.dashboardtheme.iconcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="formLabel">Filter Apply button Text Color</label>
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme.applybuttontextcolor" value="color" name="applybuttontextcolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.applybuttontextcolor"
+                                (click)="theme.dashboardtheme.applybuttontextcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                         <!-- background color -->
                         <div class="col-md-3">
                             <label class="formLabel">Header Background color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme && theme.dashboardtheme.backgroundcolor" value="color" name="bgcolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.backgroundcolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme.backgroundcolor" value="color" name="bgcolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.backgroundcolor"
                                 (click)="theme.dashboardtheme.backgroundcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
-                        </div>
-                        <!-- title color -->
-                        <div class="col-md-3">
-                            <label class="formLabel">Header Text color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme && theme.dashboardtheme.titlecolor" value="color" name="titlecolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.titlecolor"
-                                (click)="theme.dashboardtheme.titlecolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
 
                     </div>
                     <div class="row marginTop">
+                         <!-- title color -->
+                         <div class="col-md-3">
+                            <label class="formLabel">Header Text color</label>
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme.titlecolor" value="color" name="titlecolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.titlecolor"
+                                (click)="theme.dashboardtheme.titlecolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
+                        </div>
                         <!-- title color -->
                         <div class="col-md-3">
-                            <label class="formLabel">Filter Text color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme && theme.dashboardtheme.filtercolor" value="color" name="filtercolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.filtercolor"
+                            <label class="formLabel">Filter Name color</label>
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme.filtercolor" value="color" name="filtercolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.filtercolor"
                                 (click)="theme.dashboardtheme.filtercolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="formLabel">Filter Text color</label>
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme.filtertextcolor" value="color" name="filtertextcolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.filtertextcolor"
+                                (click)="theme.dashboardtheme.filtertextcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
 
                         <!-- title color -->
                         <div class="col-md-3">
                             <label class="formLabel"> Filter Background color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme && theme.dashboardtheme.filterbackgroundcolor" value="color" name="filterbackgroundcolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.filterbackgroundcolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme.filterbackgroundcolor" value="color" name="filterbackgroundcolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.filterbackgroundcolor"
                                 (click)="theme.dashboardtheme.filterbackgroundcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
-
+                        </div>
+                        <div class="row marginTop">
                         <!-- title color -->
                         <div class="col-md-3" *ngIf="theme.dashboardtheme && (theme.dashboardtheme.filtercolor || theme.dashboardtheme.filterbackgroundcolor)">
                             <label class="formLabel">Apply to Widget Filters</label>
-                            <mat-checkbox matInput [(ngModel)]="theme.dashboardtheme && theme.dashboardtheme.widgetfilterapply" name="widgetfilterapply"></mat-checkbox>
+                            <mat-checkbox matInput [(ngModel)]="theme.dashboardtheme.widgetfilterapply" name="widgetfilterapply"></mat-checkbox>
                         </div>
 
                         <!-- title color -->
-                        <div class="col-md-3">
+                        <!-- <div class="col-md-3">
                             <label class="formLabel">Filter Background color for Apply Button</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme && theme.dashboardtheme.filterapplybuttonbackgroundcolor" value="color" name="filterapplybuttonbackgroundcolor" /><i class="fa fa-close"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme.filterapplybuttonbackgroundcolor" value="color" name="filterapplybuttonbackgroundcolor" /><i class="fa fa-close"
                                 *ngIf="theme.dashboardtheme && theme.dashboardtheme.filterapplybuttonbackgroundcolor" (click)="theme.dashboardtheme.filterapplybuttonbackgroundcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
-                        </div>
+                        </div> -->
                         <!-- title color -->
-                        <div class="col-md-3" [ngStyle]="{'margin-top':theme.dashboardtheme && (theme.dashboardtheme.filtercolor || theme.dashboardtheme.filterbackgroundcolor)? '1% ' : '0'}">
+                        <div class="col-md-3">
                             <label class="formLabel">Dashboard Dropdown Text color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme && theme.dashboardtheme.dashboarddropdowncolor" value="color" name="dashboarddropdowncolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.dashboarddropdowncolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme.dashboarddropdowncolor" value="color" name="dashboarddropdowncolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.dashboarddropdowncolor"
                                 (click)="theme.dashboardtheme.dashboarddropdowncolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
-                    </div>
-                    <div class="row marginTop">
-                        <!-- title color -->
-                        <div class="col-md-3">
+                         <!-- title color -->
+                         <div class="col-md-3">
                             <label class="formLabel">Toggle Inactive Text color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme && theme.dashboardtheme.toggleinactivecolor" value="color" name="toggleinactivecolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.toggleinactivecolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme.toggleinactivecolor" value="color" name="toggleinactivecolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.toggleinactivecolor"
                                 (click)="theme.dashboardtheme.toggleinactivecolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
-                        <!-- title color -->
-                        <div class="col-md-3">
+                         <!-- title color -->
+                         <div class="col-md-3">
                             <label class="formLabel">Toggle Inactive Background color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme && theme.dashboardtheme.toggleinactivebackgroundcolor" value="color" name="toggleinactivebackgroundcolor" /><i class="fa fa-close"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme.toggleinactivebackgroundcolor" value="color" name="toggleinactivebackgroundcolor" /><i class="fa fa-close"
                                 *ngIf="theme.dashboardtheme && theme.dashboardtheme.toggleinactivebackgroundcolor" (click)="theme.dashboardtheme.toggleinactivebackgroundcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                         <!-- title color -->
                         <div class="col-md-3">
                             <label class="formLabel">Toggle Active Text color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme && theme.dashboardtheme.toggleactivecolor" value="color" name="toggleactivecolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.toggleactivecolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme.toggleactivecolor" value="color" name="toggleactivecolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.toggleactivecolor"
                                 (click)="theme.dashboardtheme.toggleactivecolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
-                        </div>
-                        <!-- title color -->
-                        <div class="col-md-3">
-                            <label class="formLabel">Toggle Active Background color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme && theme.dashboardtheme.toggleactivebackgroundcolor" value="color" name="toggleactivebackgroundcolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.toggleactivebackgroundcolor"
-                                (click)="theme.dashboardtheme.toggleactivebackgroundcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                     </div>
                     <div class="row marginTop">
                         <!-- title color -->
                         <div class="col-md-3">
+                            <label class="formLabel">Toggle Active Background color</label>
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme.toggleactivebackgroundcolor" value="color" name="toggleactivebackgroundcolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.toggleactivebackgroundcolor"
+                                (click)="theme.dashboardtheme.toggleactivebackgroundcolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
+                        </div>
+                        <div class="col-md-3">
                             <label class="formLabel">Toggle Active Underline color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme && theme.dashboardtheme.toggleactiveunderlinecolor" value="color" name="toggleactiveunderlinecolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.toggleactiveunderlinecolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.dashboardtheme.toggleactiveunderlinecolor" value="color" name="toggleactiveunderlinecolor" /><i class="fa fa-close" *ngIf="theme.dashboardtheme && theme.dashboardtheme.toggleactiveunderlinecolor"
                                 (click)="theme.dashboardtheme.toggleactiveunderlinecolor=null" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                     </div>
@@ -213,25 +233,25 @@
                         <!-- background color -->
                         <div class="col-md-3">
                             <label class="formLabel">Background color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.widgettheme && theme.widgettheme.backgroundcolor" value="color" name="wbgcolor" (click)="addThemeAttr('background')" /><i class="fa fa-close" *ngIf="theme.widgettheme && theme.widgettheme.backgroundcolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.widgettheme.backgroundcolor" value="color" name="wbgcolor" (click)="addThemeAttr('background')" /><i class="fa fa-close" *ngIf="theme.widgettheme && theme.widgettheme.backgroundcolor"
                                 (click)="theme.widgettheme.backgroundcolor=null;removeThemeAttr('background');" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                         <!-- border color -->
                         <div class="col-md-3">
                             <label class="formLabel">Border color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.widgettheme && theme.widgettheme.bordercolor" value="color" name="wbordercolor" (click)="addThemeAttr('border')" /><i class="fa fa-close" *ngIf="theme.widgettheme && theme.widgettheme.bordercolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.widgettheme.bordercolor" value="color" name="wbordercolor" (click)="addThemeAttr('border')" /><i class="fa fa-close" *ngIf="theme.widgettheme && theme.widgettheme.bordercolor"
                                 (click)="theme.widgettheme.bordercolor=null;removeThemeAttr('border');" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                         <!-- text color -->
                         <div class="col-md-3">
                             <label class="formLabel">Text color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.widgettheme && theme.widgettheme.textcolor" value="color" (click)="addThemeAttr('text')" name="wtextcolor" /><i class="fa fa-close" *ngIf="theme.widgettheme && theme.widgettheme.textcolor"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.widgettheme.textcolor" value="color" (click)="addThemeAttr('text')" name="wtextcolor" /><i class="fa fa-close" *ngIf="theme.widgettheme && theme.widgettheme.textcolor"
                                 (click)="theme.widgettheme.textcolor=null;removeThemeAttr('text');" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                         <!-- tile color -->
                         <div class="col-md-3">
                             <label class="formLabel">Tile Widget Background color</label>
-                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.widgettheme && theme.widgettheme.tilebackgroundcolor" value="color" name="wbackgroundcolor" (click)="addThemeAttr('tilebackground')" /><i class="fa fa-close"
+                            <input matInput="" type="color" class="colorPickerHeight" [(ngModel)]="theme.widgettheme.tilebackgroundcolor" value="color" name="wbackgroundcolor" (click)="addThemeAttr('tilebackground')" /><i class="fa fa-close"
                                 *ngIf="theme.widgettheme && theme.widgettheme.tilebackgroundcolor" (click)="theme.widgettheme.tilebackgroundcolor=null;removeThemeAttr('tilebackground');" style="font-size:3vmin;margin-left: 2px;"></i>
                         </div>
                     </div>
@@ -239,20 +259,20 @@
                         <!-- font family -->
                         <div class="col-md-3">
                             <label class="formLabel">Font Family</label>
-                            <input matInput="" type="text" [(ngModel)]="theme.widgettheme && theme.widgettheme.fontfamily" pattern="^[A-Za-z0-9,][A-Za-z0-9, ]{0,}" value="color" name="wfontfamily" (click)="addThemeAttr('fontfamily')" />
+                            <input matInput="" type="text" [(ngModel)]="theme.widgettheme.fontfamily" pattern="^[A-Za-z0-9,][A-Za-z0-9, ]{0,}" value="color" name="wfontfamily" (click)="addThemeAttr('fontfamily')" class="inputFieldstyle"/>
                         </div>
                         <!-- tile color -->
                         <div class="col-md-3">
                             <label class="formLabel">Border Radius</label>
-                            <input matInput="" type="number" pattern="[0-7]" [(ngModel)]="theme.widgettheme && theme.widgettheme.borderradius" value="color" name="wborderradius" (click)="addThemeAttr('borderradius')" />
+                            <input matInput="" type="number" pattern="[0-7]" [(ngModel)]="theme.widgettheme.borderradius" value="color" name="wborderradius" (click)="addThemeAttr('borderradius')" class="inputFieldstyle"/>
                         </div>
                         <div class="col-md-3">
                             <label class="formLabel">Bold Title</label>
-                            <mat-checkbox matInput [(ngModel)]="theme.widgettheme && theme.widgettheme.boldtitle" name="wboldtitle" (click)="changeBoltTitle()"></mat-checkbox>
+                            <mat-checkbox matInput [(ngModel)]="theme.widgettheme.boldtitle" name="wboldtitle" (click)="changeBoltTitle()"></mat-checkbox>
                         </div>
                         <div class="col-md-3">
                             <label class="formLabel">Border shadow</label>
-                            <mat-checkbox matInput type="color" [(ngModel)]="theme.widgettheme && theme.widgettheme.bordershadow" name="bordershadow" (click)="changeBorderShadow()"></mat-checkbox>
+                            <mat-checkbox matInput type="color" [(ngModel)]="theme.widgettheme.bordershadow" name="bordershadow" (click)="changeBorderShadow()"></mat-checkbox>
                         </div>
                     </div>
                     <div class="row marginTop" *ngIf="theme.widgettheme && (theme.widgettheme.backgroundcolor || theme.widgettheme.bordercolor 
@@ -263,13 +283,13 @@
                         || theme.widgettheme.boldtitle)">
                         <div class="col-md-3">
                             <label class="formLabel">Prioritize Theme</label>
-                            <mat-checkbox matInput [(ngModel)]="theme.widgettheme && theme.widgettheme.proritizeThemeColor" name="proritizeThemeColor"></mat-checkbox>
+                            <mat-checkbox matInput [(ngModel)]="theme.widgettheme.proritizeThemeColor" name="proritizeThemeColor"></mat-checkbox>
                         </div>
                         <!-- title color -->
                         <div class="col-md-3" *ngIf="theme.widgettheme && theme.widgettheme.proritizeThemeColor">
                             <label class="formLabel">Priority Theme</label>
                             <mat-form-field>
-                                <mat-select id="proritizeThemeColorArr" required [(ngModel)]="theme.widgettheme && theme.widgettheme.proritizeThemeColorArr" name="proritizeThemeColorArr" class="proritizeThemeColorArr" multiple>
+                                <mat-select id="proritizeThemeColorArr" required [(ngModel)]="theme.widgettheme.proritizeThemeColorArr" name="proritizeThemeColorArr" class="proritizeThemeColorArr" multiple>
                                     <mat-option *ngIf="theme.widgettheme && theme.widgettheme.backgroundcolor" value="background" class="selector-397-343">Background</mat-option>
                                     <mat-option *ngIf="theme.widgettheme && theme.widgettheme.textcolor" value="text" class="selector-397-344">Text
                                     </mat-option>
@@ -288,22 +308,22 @@
                     <div class="row">
                         <!-- palette -->
                         <div class="col-md-12">
-                            <h4 class="fontSize"> Chart color palette configuration</h4>
+                            <h4 class="fontSize" style="font-weight: 600"> Chart color palette configuration</h4>
                         </div>
                         <div class="col-md-6 row paletteDiv">
-                            <div *ngFor="let data of paletteArray;let i = index;let k = index;trackBy: trackByMethod">
+                            <div *ngFor="let data of paletteArray;let i = index;let k = index;trackBy: trackByMethod" style="display: flex; padding:inherit; align-items: center">
                                 <div class="col-md-6">
-                                    <label class="formLabel">Choose Color*</label>
+                                    <label class="formLabel" style="margin:0;">Choose Color*</label>
                                 </div>
                                 <div class="col-md-4">
                                     <input matInput="" [(ngModel)]="paletteArray[i]" value="data" type="color" class="colorPickerHeight" id="color{{i}}" name="color{{i}}" required="" />
                                     <i class="fa fa-close" *ngIf="paletteArray[i]!='Black'" (click)="paletteArray[i]='Black'" style="font-size:3vmin;margin-left: 2px;"></i>
                                 </div>
                                 <div class="col-md-1">
-                                    <i class="fa fa-trash fa-lg create-icon-color " id="close-icon" (click)="paletteArray.splice(i,1)" *ngIf="paletteArray.length > 1" title="Delete Palette" style="padding-left: 10px;padding-top: 1vmin;" aria-hidden="true"></i>
+                                    <i class="fa fa-trash fa-lg create-icon-color " id="close-icon" (click)="paletteArray.splice(i,1)" *ngIf="paletteArray.length > 1" matTooltip="Delete Palette" style="padding-left: 10px;padding-top: 1vmin;" aria-hidden="true"></i>
                                 </div>
                                 <div class="col-md-1">
-                                    <i class="fa fa-plus-circle fa-lg create-icon-color" *ngIf="k == paletteArray.length - 1" id="close-icon" (click)="paletteArray.push('Black')" title="Add Palette" style="padding-top: 1vmin;" aria-hidden="true"></i>
+                                    <i class="fa fa-plus-circle fa-lg create-icon-color" *ngIf="k == paletteArray.length - 1" id="close-icon" (click)="paletteArray.push('Black')" matTooltip="Add Palette" style="padding-top: 1vmin;" aria-hidden="true"></i>
                                 </div>
                             </div>
                         </div>

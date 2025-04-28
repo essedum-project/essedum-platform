@@ -36,7 +36,7 @@ input[type=number]:focus,
     position: absolute;
     left: 5px;
   }
-.web-hoverShadow, .DSA_wb_customSlider .ng5-slider .ng5-slider-pointer:hover, .DSA_wb_custom-dropdown.dropdown-menu, .DSA_wb_custom-pagination .page-link:hover, .option_ul li a:hover, .DSA_wb_card-widget.mat-card:hover, .DSA_wb_custom-table tbody tr.active, .DSA_wb_custom-table tbody tr:hover, .mat-chip.mat-standard-chip.DSA_wb_chipStyle-Normal:hover, .mat-chip.mat-standard-chip.DSA_wb_chipStyle-Big:hover, .DSA_wb_miniPrimary-btn:hover, .DSA_wb_Icon-btn:hover, .DSA_wb_innerSecondary-btn:hover, .DSA_wb_innerPrimary-btn:hover, .DSA_wb_secondary-btn:hover, .DSA_wb_primary-btn:hover {
+.web-hoverShadow, .DSA_wb_customSlider .ng5-slider .ng5-slider-pointer:hover, .DSA_wb_custom-dropdown.dropdown-menu, .DSA_wb_custom-pagination .page-link:hover, .option_ul li a:hover, .DSA_wb_card-widget.mat-mdc-card:hover, .DSA_wb_custom-table tbody tr.active, .DSA_wb_custom-table tbody tr:hover, .mat-mdc-chip.mat-mdc-standard-chip.DSA_wb_chipStyle-Normal:hover, .mat-chip.mat-standard-chip.DSA_wb_chipStyle-Big:hover, .DSA_wb_miniPrimary-btn:hover, .DSA_wb_Icon-btn:hover, .DSA_wb_innerSecondary-btn:hover, .DSA_wb_innerPrimary-btn:hover, .DSA_wb_secondary-btn:hover, .DSA_wb_primary-btn:hover {
     box-shadow: none!important;
 }
 

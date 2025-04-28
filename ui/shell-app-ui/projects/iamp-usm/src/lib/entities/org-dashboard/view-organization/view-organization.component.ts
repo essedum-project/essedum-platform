@@ -190,7 +190,7 @@ export class ViewOrganizationComponent implements OnInit {
        let project;
        try {
         project = this.selectedOrganization
-       } catch (e) {
+       } catch (e : any)  {
         console.error("JSON.parse error - ", e.message);
        }
       
@@ -221,7 +221,7 @@ export class ViewOrganizationComponent implements OnInit {
       let project;
       try {
        project = this.selectedOrganization
-      } catch (e) {
+      } catch (e : any)  {
        console.error("JSON.parse error - ", e.message);
       }
      

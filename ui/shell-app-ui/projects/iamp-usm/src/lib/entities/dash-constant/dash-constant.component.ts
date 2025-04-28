@@ -12,7 +12,7 @@
 // * will be prosecuted to the maximum extent possible under the law.
 // Template pack-angular:web/src/app/base-entities/entity-detail.component.ts.e.vm
 //
-import { Component, OnInit, Output, EventEmitter, ViewChild, ElementRef } from "@angular/core";
+import { Component, OnInit, Output, EventEmitter, ViewChild, ElementRef, SimpleChanges, OnDestroy } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { DatePipe } from "@angular/common";
 import { DashConstant } from "../../models/dash-constant";
@@ -44,6 +44,7 @@ import {
   MatTreeFlatDataSource,
   MatTreeFlattener,
 } from '@angular/material/tree';
+import { OpenTelemetryService } from "../../telemetry-util/open-telemetry.service";
 
 interface FileNode {
   label: string;
@@ -69,7 +70,7 @@ interface FileFlatNode {
   selector: "dash-constant-detail",
   styleUrls: ["./dash-constant.component.css"],
 })
-export class DashConstantComponent implements OnInit {
+export class DashConstantComponent implements OnInit, OnDestroy {
   @Output() changeView: EventEmitter<boolean> = new EventEmitter();
   @ViewChild("myInput", { static: false }) myInputReference: ElementRef;
   treeControl: FlatTreeControl<FileFlatNode>;
@@ -90,7 +91,8 @@ export class DashConstantComponent implements OnInit {
   view: boolean = false;
   heading: boolean = false;
   view_dashConstant: boolean = false;
-  displayedColumns: string[] = ["id", "keys", "value", "actions"];
+  isSavedUpdated: boolean = false;
+  displayedColumns: string[] = ["id", "keys", "role", "actions"];
   defaultsidebarrole: any = [];
   iconsidebarrole: any = [];
   rearrangesidebarrole: any;
@@ -119,6 +121,7 @@ export class DashConstantComponent implements OnInit {
   childrenCheck: boolean = false;
   horizontal: boolean = true;
   defaultCheck: boolean = false;
+  projectRoleMap: boolean = false;
   roles = new Array<Role>();
   allRoles = new Array<Role>();
   projects = new Array<Project>();
@@ -156,6 +159,8 @@ export class DashConstantComponent implements OnInit {
   iconsidebar: boolean;
   configureFileUpload: boolean;
   fetchChildrendata: any;
+  configtype: any;
+  filterDash: DashConstant[];
   imagenameDetails: any;
   imageDataDetails: any;
   uploadImage: boolean;
@@ -164,6 +169,9 @@ export class DashConstantComponent implements OnInit {
   allowedDepthValue: number = 0;
   allowedMandatoryFileExtensionValue: string = "";
   logoText: string;
+  uploadUsing: string = "project";
+  showAltTextLengthErrorMessage: boolean;
+  index: number;
 
   constructor(
     public router: Router,
@@ -176,7 +184,8 @@ export class DashConstantComponent implements OnInit {
     private telemetryService: LeapTelemetryService,
     private confirmDialog: MatDialog,
     private fb: FormBuilder,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private openTelemetryService: OpenTelemetryService
 
   ) {
     this.treeFlattener = new MatTreeFlattener(this.nestedTreeToFlatTreeTransformer, (node) => node.level,
@@ -197,11 +206,12 @@ export class DashConstantComponent implements OnInit {
 
     this.dataSource.data = [];
     this.dataSource.data = this.TREE_DATA;
-
+    this.isSavedUpdated = false;
     this.telemetryImpression();
     this.route.params.subscribe((params) => {
       this.dashconstantid = params["dashconstantid"];
       this.dashconstantview = params["dashconstantview"];
+      this.configtype = params["configtype"];
     });
     if (window.location.href.includes("dashconstant") && this.dashconstantview == "true") {
       this.showCreate = true;
@@ -219,6 +229,9 @@ export class DashConstantComponent implements OnInit {
       this.fetchDashConstant();
     } else this.fetchDashConstant();
   }
+  ngOnChanges(changes: SimpleChanges){
+    this.isSavedUpdated = false;
+  }
 
   // hasChild = (_: number, node) => !!node.children && node.children.length > 0;
 
@@ -227,13 +240,14 @@ export class DashConstantComponent implements OnInit {
       this.messageService.error("All * marked fields are mandatory", "IAMP");
       return;
     }
+    this.isSavedUpdated = true;
     let node = this.trackedClickedNode;
     let id = node._id;
     this.displayEditDataFormFlag = false;
     this.trackedClickedNode = undefined;
     let treeData = this.dataSource.data;
     let children = this.fetchChildren(treeData, node)
-    let newData = { label: this.dataForm.value.label, icon: this.dataForm.value.logo, url: this.dataForm.value.url, children: this.fetchChildrendata, _id: node._id }
+    let newData = { label: this.dataForm.value.label, altText: this.dataForm.value.altText, icon: this.dataForm.value.logo, url: this.dataForm.value.url, children: this.fetchChildrendata, _id: node._id }
     this.editDataAtId(treeData, id, newData)
     this.dataSource.data = [];
     this.dataSource.data = treeData;
@@ -241,6 +255,7 @@ export class DashConstantComponent implements OnInit {
       const node = this.treeControl.dataNodes.find((n) => Number(n._id) == Number(_id));
       this.treeControl.expand(node);
     });
+    this.messageService.info("Please click on Update button to save the changes", "IAMP");
   }
 
   private fetchChildren(treeData, node) {
@@ -285,33 +300,61 @@ export class DashConstantComponent implements OnInit {
     this.dataForm = this.fb.group({
       label: [""],
       logo: [""],
-      url: [""]
+      url: [""],
+      altText:[""]
     })
     this.imageDataDetails = "";
     this.logoText = "";
     this.uploadImage = false;
     this.displayAddChildFormFlag = true;
-
+    this.isSavedUpdated = false;
   }
 
+  findparent(level){
+    this.index-=1
+    if(this.treeControl.dataNodes[this.index].level==level){
+      this.treeControl.dataNodes.find(data=> data._id==this.treeControl.dataNodes[this.index]._id)['highlight']=true
+    }
+    else this.findparent(level)
+  }
+
+  resethighlightvalue(){
+    this.treeControl.dataNodes.forEach(value => {
+      value['highlight']=false
+    })
+  }
+
+
   displayAddChildForm(node) {
+    let tempnode=node
+    this.resethighlightvalue()
+    if(tempnode.level>=0){
+      this.treeControl.dataNodes.find(data=> data._id==tempnode._id)['highlight']=true
+      this.index=this.treeControl.dataNodes.findIndex(data=> data._id==tempnode._id)
+      for(let i=tempnode.level-1;i>=0;i--){
+        this.findparent(i)
+      }
+    }
+
     this.displayEditDataFormFlag = false;
     this.hideURL = false;
     this.dataForm = this.fb.group({
       label: [""],
       logo: [""],
-      url: [""]
+      url: [""],
+      altText:[""]
     })
     this.imageDataDetails = "";
     this.logoText = "";
     this.uploadImage = false;
     this.displayAddChildFormFlag = true;
     this.trackedClickedNode = node;
-
+    this.isSavedUpdated = false;
   }
 
   displayEditForm(node) {
 
+    this.resethighlightvalue()
     this.displayAddChildFormFlag = false;
     this.trackedClickedNode = node;
     this.displayEditDataFormFlag = true;
@@ -323,7 +366,8 @@ export class DashConstantComponent implements OnInit {
     this.dataForm = this.fb.group({
       label: [node.label],
       logo: [node.icon],
-      url: [node.url]
+      url: [node.url],
+      altText:[node.altText]
     })
     if (node.icon) {
       if (node.icon.includes("data:image")) {
@@ -343,13 +387,13 @@ export class DashConstantComponent implements OnInit {
     }
   }
 
-  addChildToTree() {
+  addChildToTree() {    
     if (this.dataForm.value.label == "") {
       this.messageService.error("All * marked fields are mandatory", "IAMP");
       return;
     }
     let treeData = this.dataSource.data;
-    let childTemplate = { label: this.dataForm.value.label, icon: this.dataForm.value.logo, url: this.dataForm.value.url, children: [], _id: ++this._lastUsedIdForTree }
+    let childTemplate = { label: this.dataForm.value.label, altText: this.dataForm.value.altText, icon: this.dataForm.value.logo, url: this.dataForm.value.url, children: [], _id: ++this._lastUsedIdForTree }
     this.displayAddChildFormFlag = false;
     if (treeData.length == 0) {
       treeData = [childTemplate]
@@ -370,12 +414,17 @@ export class DashConstantComponent implements OnInit {
       const node = this.treeControl.dataNodes.find((n) => Number(n._id) == Number(_id));
       this.treeControl.expand(node);
     });
-
+    this.isSavedUpdated = true;
+    if(this.edit){
+      this.messageService.info("Please click on Update button to save the changes", "IAMP");
+    } else {
+      this.messageService.info("Please click on Save button to save the changes", "IAMP");
+    }
   }
 
   deleteChildFromTree(node) {
     let id = node._id;
-    let childTemplate = { label: "addChildToTree", icon: "", url: "", children: [], _id: ++this._lastUsedIdForTree }
+    let childTemplate = { label: "addChildToTree", altText: "", icon: "", url: "", children: [], _id: ++this._lastUsedIdForTree }
     let treeData = this.dataSource.data;
     this.deleteChildAtId(treeData, id);
     this.dataSource.data = [];
@@ -439,9 +488,14 @@ export class DashConstantComponent implements OnInit {
 
   }
 
+  ngOnDestroy(): void {
+    let activeSpan = this.openTelemetryService.fetchActiveSpan();
+    this.openTelemetryService.endTelemetry(activeSpan);
+  }
 
   telemetryImpression() {
-    this.telemetryService.impression("iamp-ccl", "list", "DashConstantComponent");
+    // this.telemetryService.impression("iamp-ccl", "list", "DashConstantComponent");
+    this.openTelemetryService.startTelemetry("iamp-ccl", "DashConstantComponent", "list");
   }
 
   @ViewChild(MatSort, { static: false }) set matSort(ms: MatSort) {
@@ -518,23 +572,23 @@ export class DashConstantComponent implements OnInit {
         this.configureFileUpload = true;
 
         if (!this.isJson(obj.value)) {
-          let customFileObj = ( {
-            allowedFileExtension : obj.value,
-            allowedFileTypes : "",
-            allowedDepth:0,
-            allowedMandatoryFileExtension :""
-          } )
+          let customFileObj = ({
+            allowedFileExtension: obj.value,
+            allowedFileTypes: "",
+            allowedDepth: 0,
+            allowedMandatoryFileExtension: ""
+          })
           obj.value = JSON.stringify(customFileObj)
         }
 
-          if (JSON.parse(obj.value)['allowedFileExtension'])
-            this.allowedFileExtensionValue = JSON.parse(obj.value)['allowedFileExtension']
-          if (JSON.parse(obj.value)['allowedFileTypes'])
-            this.allowedFileTypeValue = JSON.parse(obj.value)['allowedFileTypes']
-          if (JSON.parse(obj.value)['allowedDepth'])
-            this.allowedDepthValue = JSON.parse(obj.value)['allowedDepth']
-          if (JSON.parse(obj.value)['allowedMandatoryFileExtension'])
-            this.allowedMandatoryFileExtensionValue = JSON.parse(obj.value)['allowedMandatoryFileExtension']
+        if (JSON.parse(obj.value)['allowedFileExtension'])
+          this.allowedFileExtensionValue = JSON.parse(obj.value)['allowedFileExtension']
+        if (JSON.parse(obj.value)['allowedFileTypes'])
+          this.allowedFileTypeValue = JSON.parse(obj.value)['allowedFileTypes']
+        if (JSON.parse(obj.value)['allowedDepth'])
+          this.allowedDepthValue = JSON.parse(obj.value)['allowedDepth']
+        if (JSON.parse(obj.value)['allowedMandatoryFileExtension'])
+          this.allowedMandatoryFileExtensionValue = JSON.parse(obj.value)['allowedMandatoryFileExtension']
       }
       this.dashConstant = obj;
       if (this.dashConstant.keys.endsWith("Side") || this.dashConstant.keys.endsWith("SideConfigurations")) {
@@ -555,17 +609,27 @@ export class DashConstantComponent implements OnInit {
         this.sideCheck = true;
         this.getRoles();
         this.fetchUsers();
+        if(obj.portfolio_id.id != null) this.uploadUsing = "portfolio";
       }
+      if(this.dashConstant.keys.endsWith("prodefaultrole")){
+        this.projectRoleMap = true;
+        try {
+          this.defaultArray[0].role = JSON.parse(this.dashConstant.value).defaultprojectroles.role;
+        } catch (e: any) {
+          console.error("JSON.parse error - ", e.message);
+        }
+        this.getRoles();
+        this.fetchUsers();
+        }
       if (
-        this.dashConstant.value.includes("defaultprojectroles") ||
-        this.dashConstant.value.includes("defaultproject")
+        this.dashConstant.keys.endsWith("default")
       ) {
         this.defaultCheck = true;
 
         try {
           this.defaultproject = JSON.parse(this.dashConstant.value).defaultproject;
           this.defaultArray = JSON.parse(this.dashConstant.value).defaultprojectroles;
-        } catch (e) {
+        } catch (e: any) {
           console.error("JSON.parse error - ", e.message);
         }
 
@@ -587,11 +651,22 @@ export class DashConstantComponent implements OnInit {
     });
   }
 
+  
+  currentRole: string;
+  currentSCRole: string;
+  onSelectionChange(opened: boolean): void {
+    if (!opened && this.currentRole) {
+      this.currentSCRole=this.currentRole
+      console.log('Selected role ################## :', this.currentRole);
+    }
+  }
   getRoles() {
     let project: Project;
+    let rolename;
+    this.onSelectionChange(true);
     try {
       project = JSON.parse(sessionStorage.getItem("project"));
-    } catch (e) {
+    } catch (e: any) {
       project = null;
       console.error("JSON.parse error - ", e.message);
     }
@@ -600,12 +675,20 @@ export class DashConstantComponent implements OnInit {
     this.roleService.findAll(role, this.lazyload).subscribe((obj) => {
       this.allRoles = obj.content;
       this.roles = obj.content.filter(
-        (item) => (project.defaultrole && item.projectId == null) || item.projectId == project.id
+        (item) => (project.defaultrole || item.projectId == null) || item.projectId == project.id
       );
       this.roles = this.roles.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1));
       if (this.dashConstant && this.dashConstant.keys) {
         this.roles.forEach((element) => {
-          if (this.dashConstant.keys.slice(0, -4).includes(element.name)) {
+          if(this.dashConstant.keys.endsWith("SideConfigurations")){
+            const requiredLength = this.dashConstant.keys.length - 19; 
+            rolename=this.dashConstant.keys.slice(0, requiredLength);
+            }
+            else
+            {
+             rolename = this.dashConstant.keys.slice(0, -5);
+            }
+            if (rolename === element.name) {
             this.sideRole = element.name;
             return;
           }
@@ -613,7 +696,7 @@ export class DashConstantComponent implements OnInit {
 
         try {
           this.sideJson = JSON.parse(this.dashConstant.value);
-        } catch (e) {
+        } catch (e: any) {
           console.error("JSON.parse error - ", e.message);
         }
 
@@ -629,7 +712,7 @@ export class DashConstantComponent implements OnInit {
     let project: Project;
     try {
       project = JSON.parse(sessionStorage.getItem("project"));
-    } catch (e) {
+    } catch (e: any) {
       project = null;
       console.error("JSON.parse error - ", e.message);
     }
@@ -638,7 +721,7 @@ export class DashConstantComponent implements OnInit {
     this.dashConstantService.getDashConsts(project).subscribe(
       (res) => {
         res = res.filter((item) => item.project_id.id == project.id && item.id != null);
-        res = res.map(obj => ({ ...obj, val_alias: obj.value }))
+        res = res.map(obj => ({ ...obj, val_alias: obj.keys.split("Side")[0] }))
         let response = res;
         this.dashConstants = response;
         this.dashConstants = this.dashConstants.filter(
@@ -647,9 +730,25 @@ export class DashConstantComponent implements OnInit {
 
         );
         this.sortingAlphabetically();
-        this.dashConstantsPageList = this.dashConstants;
         this.dashConstantLength = this.dashConstants.length;
-        this.dashConstantList = new MatTableDataSource(this.dashConstants);
+        // this.dashConstantList = new MatTableDataSource(this.dashConstants);
+        this.filterDash = this.dashConstants;
+        this.dashConstantList = new MatTableDataSource();
+        this.dashConstants.forEach((dashConstant) => {
+          if (this.configtype == "side") {
+            //filter all the constants which has side/sideconfigurations as the key
+            if (dashConstant.keys.endsWith("Side") || dashConstant.keys.endsWith("SideConfigurations") || dashConstant.keys.endsWith("sidebar")) {
+              this.dashConstantList.data.push(dashConstant);
+            }
+          }
+          else {
+            //set all the dash constants in the list other then side/sideconfigurations
+            if (!(dashConstant.keys.endsWith("Side") || dashConstant.keys.endsWith("SideConfigurations") || dashConstant.keys.endsWith("sidebar"))) {
+              this.dashConstantList.data.push(dashConstant);
+            }
+          }
+        })
+        this.dashConstantsPageList = this.dashConstantList.data;
         this.dashConstantList.sort = this.sort;
         this.dashConstantList.paginator = this.paginator;
       },
@@ -659,7 +758,7 @@ export class DashConstantComponent implements OnInit {
   }
 
   assignCopy() {
-    this.dashConstants = Object.assign([], this.dashConstantsPageList);
+    this.dashConstants = Object.assign([], this.filterDash);
     this.sortingAlphabetically();
   }
 
@@ -667,13 +766,29 @@ export class DashConstantComponent implements OnInit {
     if (!value) {
       this.assignCopy();
     }
-    this.dashConstants = Object.assign([], this.dashConstantsPageList).filter(
+    this.dashConstants = Object.assign([], this.filterDash).filter(
       (item1) =>
-        item1.keys.toLowerCase().indexOf(value.toLowerCase()) > -1 ||
-        item1.value.toLowerCase().indexOf(value.toLowerCase()) > -1
+        item1.keys?.toLowerCase().indexOf(value.toLowerCase()) > -1 ||
+        item1.value?.toLowerCase().indexOf(value.toLowerCase()) > -1
     );
     this.sortingAlphabetically();
-    this.dashConstantList = new MatTableDataSource(this.dashConstants);
+    this.dashConstantList = new MatTableDataSource();
+    // this.dashConstantList = new MatTableDataSource();
+    this.dashConstants.forEach((dashConstant) => {
+      if (this.configtype == "side") {
+        //filter all the constants which has side/sideconfigurations as the key
+        if (dashConstant.keys.endsWith("Side") || dashConstant.keys.endsWith("SideConfigurations") || dashConstant.keys.includes("sidebar") || dashConstant.keys.includes("Sidebar")) {
+          this.dashConstantList.data.push(dashConstant);
+        }
+      }
+      else {
+        //set all the dash constants in the list other then side/sideconfigurations
+        if (!(dashConstant.keys.endsWith("Side") || dashConstant.keys.endsWith("SideConfigurations") || dashConstant.keys.includes("sidebar") || dashConstant.keys.includes("Sidebar"))) {
+          this.dashConstantList.data.push(dashConstant);
+        }
+      }
+    })
+    this.dashConstantsPageList = this.dashConstantList.data;
     this.dashConstantList.sort = this.sort;
     this.dashConstantList.paginator = this.paginator;
     this.dashConstantLength = this.dashConstants.length;
@@ -699,8 +814,54 @@ export class DashConstantComponent implements OnInit {
     }
     return invalidEle;
   }
-
+  async showPopup(){
+    this.messageService.error("Sidebar Mapping already exists for " + this.currentRole, "IAMP")
+  }
+  flag: boolean = false;
+  isAlreadyPresent: boolean=false;
+  
   onSave() {
+    // this.dashConstants.forEach(element => {
+    //   console.log(element);
+    //   return;
+    // })
+    // if(this.dashConstant && this.dashConstant.keys && this.dashConstant.keys.endsWith("SideConfigurations") && this.sideJson && this.sideJson.length==0){
+    //   this.messageService.error("Create mapping before saving", "IAMP");      
+    //   return;
+    // }
+    // this.getRoles();
+    // console.log(this.dashConstant.keys+" ######################")
+    
+    if(this.dashConstant.keys){
+    if(!this.currentRole) this.currentSCRole = this.dashConstant.keys.slice(0, -17);
+    }
+    console.log(this.currentSCRole + " ####################### ");
+    this.dashConstants.forEach(element => {
+      if(this.currentSCRole + " SideConfigurations" == element.keys){
+        this.isAlreadyPresent = true;
+        // this.messageService.error("Sidebar Mapping already exists for " + this.currentRole, "IAMP")
+        this.flag = true;
+        return;
+      }
+      // if (element.keys == role + " SideConfigurations" && element.id != this.dashConstant.id) {
+      //   this.messageService.error("Sidebar Mapping already exists for " + role, "IAMP")
+      //   return;
+      // }
+    });
+    if(this.currentSCRole + " SideConfigurations" != this.dashConstant.keys) {
+      this.isAlreadyPresent=true;
+    }
+    if(this.flag){
+      this.messageService.error("Sidebar Mapping already exists for " + this.currentSCRole, "IAMP")
+      this.flag=false;
+      return;
+    }
+
+    if(!this.isSavedUpdated && this.sideCheck && !this.isAlreadyPresent){
+      this.messageService.error("Please Submit/Update configurations first ", "IAMP");
+      return;
+    }
+    this.isSavedUpdated = false;
     if (this.defaultsidebar) {
       this.defaultsidebarsave()
     }
@@ -710,13 +871,30 @@ export class DashConstantComponent implements OnInit {
     else if (this.configureUserLand) {
       this.configureUserLandSave();
     }
+    else if(this.projectRoleMap){
+      if(this.defaultArray[0].role==null || this.defaultArray[0].role==""){     
+    this.messageService.error("Enter Role field", "IAMP");
+         return;
+    }
+    else{
+   this.projectRoleMapsave();
+    }
+}
     else {
       let f = 0;
       this.assignObject();
       let invalidURLLabels = this.validateURL(this.sideJson);
+      if(this.dashConstant && this.dashConstant.keys && this.dashConstant.keys.endsWith("SideConfigurations") && this.sideJson && this.sideJson.length==0){
+        this.messageService.error("Create mapping before saving", "IAMP");
+        f=1
+        return;
+      }
       if (this.dashConstant.keys.endsWith("Side") || this.dashConstant.keys.endsWith("SideConfigurations")) {
         if (this.dashConstant.keys.endsWith("SideConfigurations")) {
           this.dashConstant.keys = this.sideRole + " SideConfigurations";
+        }
+        if(this.uploadUsing == "project") {
+          this.dashConstant.portfolio_id = null;
         }
         if (invalidURLLabels.length > 0) {
           if (invalidURLLabels[0]) {
@@ -796,7 +974,7 @@ export class DashConstantComponent implements OnInit {
 
               if (res.content.length) {
                 this.messageService.info(
-                  "Default Configuration for landing already exists for this portfolio",
+                  "Default Configuration for landing already exists for this portfolio in Project: " + res.content[0].project_name ,
                   "IAMP"
                 );
                 return;
@@ -804,6 +982,19 @@ export class DashConstantComponent implements OnInit {
               this.createMapping();
             });
           } else {
+            let duplicateCheck;
+            this.dashConstants.forEach(element => {
+              if(element.keys == this.dashConstant.keys && this.configtype!="side")
+              duplicateCheck = true;
+            });
+            if(duplicateCheck){
+              this.messageService.info(
+                "Duplicate entry cannot be created",
+                "IAMP"
+              );
+              return;
+            }
+            else
             this.createMapping();
           }
         }
@@ -812,8 +1003,62 @@ export class DashConstantComponent implements OnInit {
 
 
   }
+  projectRoleMapsave(){
+    let f = 0;
+    this.assignObject();
+    this.getSideJSONFromTreeData();
+    if (this.checkConstant()){
+      if(this.edit){
+        this.updateDashConstant();
+      }
+      else{
+        let dashconstant = new DashConstant();
+        dashconstant.keys = this.dashConstant.keys;
+        this.dashConstantService.findAll(dashconstant, this.lazyload).subscribe((obj)=> {
+          if(obj.content.length){
+            this.messageService.info("Role already mapped for this project", "IAMP");
+            return;   
+          }
+          this.keyvaluemapping();
+        });
+      }
+    }
+  }
+
+  keyvaluemapping(){
+    let dashconstant1 = new DashConstant();
+    let defp = JSON.parse(this.dashConstant.value).defaultprojectroles.project;
+    dashconstant1.keys = JSON.parse(sessionStorage.getItem("portfoliodata")).portfolioName + "default" ;
+    this.dashConstantService.findAll(dashconstant1, this.lazyload).subscribe((obj1)=>{
+      if(obj1.content.length > 0){
+        let defp1 = JSON.parse(obj1.content[0].value).defaultproject;
+        if(defp == defp1){
+          this.messageService.info("Already Default landing mapped for this project", "IAMP");
+          return; 
+        }
+      } 
+      this.busy = this.dashConstantService.create(this.dashConstant, this.projectRoleMap).subscribe(
+      (response) => {
+        this.messageService.info("Configuration for Project Role Map Saved Successfully", "IAMP");
+        this.fetchDashConstant();
+        this.clear();
+        this.listView();
+      },
+      (error) => this.messageService.error("Could not save", "IAMP"),
+      () => {
+        this.dashConstantService.refresh().subscribe(res => { });
+      }
+    );
+      });
+  }
+  currentProjectName(){
+    let project = JSON.parse(sessionStorage.getItem("project"));
+    let projectname = project.name;
+    return projectname;
+  }
 
   selectedProject(child, idx) {
+    this.defaultproject = child.project;
     let temp = this.defaultArray.filter((item) => item.project == child.project);
     if (temp && temp.length > 1) {
       child.project = null;
@@ -825,9 +1070,11 @@ export class DashConstantComponent implements OnInit {
     let user = JSON.parse(sessionStorage.getItem("user"));
     let role = JSON.parse(sessionStorage.getItem("role"));
     let project: Project;
+    let portfolio: UsmPortfolio;
     try {
       project = JSON.parse(sessionStorage.getItem("project"));
-    } catch (e) {
+      portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
+    } catch (e: any) {
       project = null;
       console.error("JSON.parse error - ", e.message);
     }
@@ -876,6 +1123,31 @@ export class DashConstantComponent implements OnInit {
       //this.dashConstant.keys = user.user_login + " " + this.configureuserlandrole + " " + "USLand";
       this.dashConstant.keys = this.configureuserlandusers + " " + this.configureuserlandrole + " " + "USLand";
     }
+    else if(this.projectRoleMap){
+      let dashconstant1 = new DashConstant();
+      let defp = JSON.parse(this.dashConstant.value).defaultprojectroles.project;
+      dashconstant1.keys = JSON.parse(sessionStorage.getItem("portfoliodata")).portfolioName + "default" ;
+      this.dashConstantService.findAll(dashconstant1, this.lazyload).subscribe((obj1)=>{
+        if(obj1.content.length > 0){
+          let defp1 = JSON.parse(obj1.content[0].value).defaultproject;
+          if(defp == defp1){
+            this.messageService.info("Already Default landing mapped for this project, Delete this", "IAMP");
+            return; 
+          }
+        }
+      this.busy = this.dashConstantService.update(this.dashConstant, this.projectRoleMap).subscribe(
+      (rs) => {
+        this.messageService.info("Configuration  updated successfully", "IAMP");
+        this.listView();
+      },
+      (error) => this.messageService.error("Could not update", "IAMP"),
+      () => {
+        this.dashConstantService.refresh().subscribe(res => { });
+      }
+    );
+  });
+    }
+
     else {
       if (this.sideCheck == true) {
         if (this.dashConstant.keys.includes("SideConfigurations")) {
@@ -890,8 +1162,42 @@ export class DashConstantComponent implements OnInit {
         }
       }
       this.dashConstant.project_id = new Project({ id: project.id });
+      if(this.uploadUsing == "portfolio") {
+        this.dashConstant.portfolio_id = new UsmPortfolio({ id: portfolio.id })
+      }
       this.dashConstant.keys = this.dashConstant.keys.trim();
-    }
+      if(this.dashConstant.keys.endsWith("Side")) 
+        this.dashConstant.keys=this.currentRole!=null?this.currentRole + " Side":this.dashConstant.keys.trim() 
+      //if any other role is selected then currentRole will be assigned to dashconstant.key.
+      if(!this.currentRole) this.currentSCRole = this.dashConstant.keys.slice(0, -17);
+      console.log(this.currentSCRole + " ####################### ");
+      this.dashConstants.forEach(element => {
+        if(this.currentSCRole + " SideConfigurations" == element.keys){
+          this.isAlreadyPresent = true;
+          // this.messageService.error("Sidebar Mapping already exists for " + this.currentRole, "IAMP")
+          this.flag = true;
+          return;
+        }
+      })
+      if(this.flag){
+        this.messageService.error("Sidebar Mapping already exists for " + this.currentSCRole, "IAMP")
+        this.flag=false;
+        return;
+      }
+  }
+  if(this.defaultCheck){
+    this.dashConstant;
+      let defaultpro = JSON.parse(this.dashConstant.value).defaultproject;
+      let dashconstant1 = new DashConstant();
+      this.dashConstantService.findAll(dashconstant1, this.lazyload).subscribe((res)=>{
+        let item1 = res.content.filter((item)=> item.keys.endsWith("prodefaultrole"));
+        for(let i=0 ; i<item1.length ; i++){
+           let arr = JSON.parse(item1[i].value).defaultprojectroles.project;
+           if(defaultpro == arr){
+            this.messageService.error("Configuration already mapped for project role mapping, Delete First", "IAMP");
+            return;
+          }
+        }
     this.busy = this.dashConstantService.update(this.dashConstant, this.defaultCheck).subscribe(
       (rs) => {
         this.messageService.info("Configuration  updated successfully", "IAMP");
@@ -902,6 +1208,36 @@ export class DashConstantComponent implements OnInit {
         this.dashConstantService.refresh().subscribe(res => { });
       }
     );
+  });
+}
+else{
+    let duplicateCheck;
+    this.dashConstants.forEach(element => {
+      if(element.keys == this.dashConstant.keys ) {
+        if(element.id != this.dashConstant.id && this.configtype!="side")
+          duplicateCheck = true;
+        else duplicateCheck = false;
+      }
+    });
+     if(duplicateCheck){
+      this.messageService.info(
+       "Duplicate entry cannot be created","IAMP"
+      );
+      return;
+      }
+      else{
+  this.busy = this.dashConstantService.update(this.dashConstant, this.defaultCheck).subscribe(
+    (rs) => {
+      this.messageService.info("Configuration  updated successfully", "IAMP");
+      this.listView();
+    },
+    (error) => this.messageService.error("Could not update", "IAMP"),
+    () => {
+      this.dashConstantService.refresh().subscribe(res => { });
+    }
+  );
+     }
+}
   }
 
   checkConstant(): boolean {
@@ -950,7 +1286,8 @@ export class DashConstantComponent implements OnInit {
     this.dataForm = this.fb.group({
       label: [""],
       logo: [""],
-      url: [""]
+      url: [""],
+      altText:[""]
     })
   }
 
@@ -967,15 +1304,30 @@ export class DashConstantComponent implements OnInit {
       else this.showTitleLengthErrorMessage = false;
     }
   }
+  checkMaxlengthForAltText() {
+    if (this.dataForm.value.altText != null) {
+      if (this.dataForm.value.altText.length >= 50) this.showAltTextLengthErrorMessage = true;
+      else this.showAltTextLengthErrorMessage = false;
+    }
+  }
+
   clear() {
     this.dashConstant = this.dashconstantid
       ? new DashConstant({ id: this.dashconstantid })
       : new DashConstant();
     this.sideRole = "";
+    this.dataForm.get("logo").reset();
+    this.dataForm.get("label").reset()
+    this.dataForm.get("url").reset();
     this.childrenCheck = false;
     this.sideJson = {};
-    this.defaultsidebar = false
-    //this.configureUserLand = false
+    this.defaultsidebar = false   
+    this.sideCheck=false;
+    this.rearrangesidebar=false;
+    this.configureTheme=false;
+    this.iconsidebar=false;
+    this.configureFileUpload=false;
+    this.configureUserLand = false
     this.configureuserlandrole = false
     this.configureuserlandusers = false
     this.defaultsidebarrole = []
@@ -983,8 +1335,13 @@ export class DashConstantComponent implements OnInit {
     this.sideChildrenArray = [{ label: "", icon: "", url: "", _id: "" }];
     this.defaultArray = [{ project: null, role: null }];
     this.defaultproject = null;
+    this.projectRoleMap = false;
     this.showTitleLengthErrorMessage = false
+    this.showAltTextLengthErrorMessage = false
     this.defaultCheck = false;
+    this.dataForm = this.fb.group({ //Add label, icon and url if needed
+      altText:[""]
+    })
     if (this.myInputReference)
       this.myInputReference.nativeElement.value = null;
   }
@@ -1015,10 +1372,30 @@ export class DashConstantComponent implements OnInit {
     if (event.checked) {
       if (!this.roles || !this.roles.length) this.getRoles();
     }
+    else{
+      this.defaultsidebarrole = []
+    }
   }
   iconsidebarroles(event) {
     if (event.checked) {
       if (!this.roles || !this.roles.length) this.getRoles();
+    }
+    else{
+     this.iconsidebarrole = null;
+    }
+  }
+
+  configureFileUploadChanges(event) {
+    if (event.checked) {
+      if (!this.roles || !this.roles.length) this.getRoles();
+    }
+    else{
+      this.allowedMandatoryFileExtensionValue = null;
+      this.allowedFileExtensionValue = null;
+      this.dashConstant = this.dashconstantid
+      ? new DashConstant({ id: this.dashconstantid })
+      : new DashConstant();
+      this.allowedDepthValue = 0;
     }
   }
 
@@ -1027,6 +1404,15 @@ export class DashConstantComponent implements OnInit {
       this.fetchUsers();
       if (!this.roles || !this.roles.length) this.getRoles();
     }
+    else{
+      this.configureUserLand = false
+      this.configureuserlandrole = false
+      this.configureuserlandusers = false
+      if(this.dashConstant && this.dashConstant.value){
+        this.dashConstant.value = null;
+      }
+    }
+
   }
 
   getSideJSONFromTreeData() {
@@ -1069,7 +1455,7 @@ export class DashConstantComponent implements OnInit {
           else
             this.dashConstant.value = JSON.stringify(this.sideJson);
         }
-      } catch (e) {
+      } catch (e: any) {
         console.error("JSON.stringify error - ", e.message);
       }
     }
@@ -1077,7 +1463,7 @@ export class DashConstantComponent implements OnInit {
       let portfolio: UsmPortfolio;
       try {
         portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
-      } catch (e) {
+      } catch (e: any) {
         portfolio = null;
         console.error("JSON.parse error - ", e.message);
       }
@@ -1088,15 +1474,38 @@ export class DashConstantComponent implements OnInit {
 
       try {
         this.dashConstant.value = JSON.stringify(mapping);
-      } catch (e) {
+      } catch (e: any) {
         console.error("JSON.stringify error - ", e.message);
       }
     }
+    if(this.projectRoleMap){
+      let project: Project;
+      try {
+        project = JSON.parse(sessionStorage.getItem("project"));
+      } catch (e: any) {
+        project = null;
+        console.error("JSON.parse error - ", e.message);
+      }
+        this.dashConstant.keys = project.name + "prodefaultrole";
+        
+        let prj = JSON.parse(sessionStorage.getItem("project"));
+        let mapping = {};
+        let rol = this.defaultArray[0].role;
+       this.defaultArray[0].project = prj.id;
+        mapping["defaultproject"] = "";
+        mapping["defaultprojectroles"] = this.defaultArray[0];
+        try {
+          this.dashConstant.value = JSON.stringify(mapping);
+        } catch (e: any) {
+          console.error("JSON.stringify error - ", e.message);
+        }
+      }
+  
 
     let project: Project;
     try {
       project = JSON.parse(sessionStorage.getItem("project"));
-    } catch (e) {
+    } catch (e: any) {
       project = null;
       console.error("JSON.parse error - ", e.message);
     }
@@ -1175,11 +1584,30 @@ export class DashConstantComponent implements OnInit {
     if (event.checked)
       this.displayAddChildFormFlag = true
     if (event.checked) if (!this.roles || !this.roles.length) this.getRoles();
+    else{
+      this.sideRole = null;
+      this.uploadImage = false;
+      this.dataForm.get("logo").reset();
+      this.dataForm.get("label").reset()
+      this.dataForm.get("url").reset();
+      this.removeImage();
+      this.removeImageText();
+      this.uploadUsing = "project"
+
+    }
   }
   defaultCheckChange(event) {
     if (event.checked) {
       if (!this.roles || !this.roles.length) this.getRoles();
       if (!this.projects || !this.projects.length) this.getProjects();
+    }
+    else{
+      this.defaultArray = [{ project: null, role: null }]
+    }
+  }
+  projectRoleMapChange(event) {
+    if (event.checked) {
+      if (!this.roles || !this.roles.length) this.getRoles();
     }
   }
   getProjects() {
@@ -1187,7 +1615,7 @@ export class DashConstantComponent implements OnInit {
     let portfolio: UsmPortfolio;
     try {
       portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
-    } catch (e) {
+    } catch (e: any) {
       portfolio = null;
       console.error("JSON.parse error - ", e.message);
     }
@@ -1200,14 +1628,17 @@ export class DashConstantComponent implements OnInit {
   hideform() {
     this.displayAddChildFormFlag = false;
     this.displayEditDataFormFlag = false;
+    this.resethighlightvalue()
   }
   createMapping() {
     let user = JSON.parse(sessionStorage.getItem("user"));
     let role = JSON.parse(sessionStorage.getItem("role"));
     let project: Project;
+    let portfolio: UsmPortfolio;
     try {
       project = JSON.parse(sessionStorage.getItem("project"));
-    } catch (e) {
+      portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
+    } catch (e: any) {
       project = null;
       console.error("JSON.parse error - ", e.message);
     }
@@ -1279,9 +1710,41 @@ export class DashConstantComponent implements OnInit {
         }
       }
       this.dashConstant.project_id = new Project({ id: project.id });
+      if(this.uploadUsing == "portfolio") {
+        this.dashConstant.portfolio_id = new UsmPortfolio({ id: portfolio.id })
+      }
       this.dashConstant.keys = this.dashConstant.keys.trim();
     }
+    if(this.defaultCheck){
+      this.dashConstant;
+      let defaultpro = JSON.parse(this.dashConstant.value).defaultproject;
+      this.dashConstantService.findAll(this.dashConstant, this.lazyload).subscribe((res)=>{
+       let item1 = res.content.filter((item)=> item.keys.endsWith("prodefaultrole"));
+       for(let i=0 ; i<item1.length ; i++){
+          let arr = JSON.parse(item1[i].value).defaultprojectroles.project;
+          if(defaultpro == arr){
+            this.messageService.error("Configuration already mapped for project role mapping, Delete First", "IAMP");
+            return;
+          }
+       }
+    this.busy = this.dashConstantService.create(this.dashConstant, this.defaultCheck).subscribe(
+      (response) => {
+        this.messageService.info("Configuration Saved Successfully", "IAMP");
+        this.fetchDashConstant();
+        this.clear();
+        this.listView();
 
+
+      },
+      (error) => this.messageService.error("Could not save", "IAMP"),
+      () => {
+        this.dashConstantService.refresh().subscribe(res => { });
+      }
+
+    );
+      });
+  }
+  else{
     this.busy = this.dashConstantService.create(this.dashConstant, this.defaultCheck).subscribe(
       (response) => {
         this.messageService.info("Configuration Saved Successfully", "IAMP");
@@ -1298,6 +1761,7 @@ export class DashConstantComponent implements OnInit {
 
     );
   }
+}
   trackByMethod(index, item) { }
   defaultsidebarsave() {
     if (this.defaultsidebarrole.length > 0) {
@@ -1399,7 +1863,7 @@ export class DashConstantComponent implements OnInit {
     const node = event.item.data;
     let isValidDrop = Boolean(siblings.filter((item) => item._id == node._id).length)
     if (!isValidDrop) {
-      this.messageService.info("Items can only be moved within the same level", "IAMP");
+      this.messageService.info("Items can only be moved within the same level", "LEAP");
       return;
     }
     const siblingIndex = siblings.findIndex(n => n._id === node._id);
@@ -1445,7 +1909,7 @@ export class DashConstantComponent implements OnInit {
       let project: Project;
       try {
         project = JSON.parse(sessionStorage.getItem("project"));
-      } catch (e) {
+      } catch (e: any) {
         project = null;
         console.error("JSON.parse error - ", e.message);
       }
@@ -1488,7 +1952,12 @@ export class DashConstantComponent implements OnInit {
   }
 
   rearrangesidebarfun(event) {
-    this.getRoles()
+    if(event.checked){
+      this.getRoles();
+    }
+    else{
+      this.rearrangesidebarrole = null;
+    }
   }
 
   setFileImage(event, field, isImage) {
@@ -1535,6 +2004,7 @@ export class DashConstantComponent implements OnInit {
 
   removeImageText() {
     this.dataForm.get("logo").reset();
+    this.logoText = "";
   }
 
   setLogoText() {

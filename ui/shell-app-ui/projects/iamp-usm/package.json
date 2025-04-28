@@ -1,12 +1,24 @@
 {
   "name": "iamp-usm",
-  "version": "3.0.0",
+  "version": "3.2.0",
   "publishConfig": {
-    "registry": "https://infyartifactory.ad.infosys.com/artifactory/api/npm/icets-ai_npm/"
+    "registry": "https://infyartifactory.jfrog.io/artifactory/api/npm/icets-ai_npm/"
   },
   "peerDependencies": {
     "@angular/common": "^11.2.8",
-    "@angular/core": "^11.2.8"
+    "@angular/core": "^11.2.8",
+    "@angular-material-components/datetime-picker": "^8.0.0",
+    "@angular-material-components/moment-adapter": "^8.0.0",
+    "ng2-file-upload": "^1.4.0",
+    "ng4-loading-spinner": "1.2.3",
+    "ngx-drag-scroll": "13.0.2",
+    "ngx-mat-select-search": "^4.2.1",
+    "ngx-pagination": "^6.0.2",
+    "ngx-quill": "^14.3.0",
+    "primeng": "^14.0.0",
+    "quill": "1.3.7",
+    "file-saver": "^2.0.5",
+    "moment-timezone": "^0.5.34",
+    "tslib": "^2.3.0"
   }
 }
-

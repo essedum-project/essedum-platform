@@ -12,6 +12,9 @@ import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
    <button id="ok" mat-raised-button (click)="dialogRef.close('yes')">Ok</button>
   </mat-dialog-actions>
  `,
+ styles:[
+    'button {background: var(--base-color) !important; color: white !important;}'
+ ]
 })
 export class DeleteComponent {
  constructor(public dialogRef: MatDialogRef<DeleteComponent>, @Inject(MAT_DIALOG_DATA) public data: any) {}
