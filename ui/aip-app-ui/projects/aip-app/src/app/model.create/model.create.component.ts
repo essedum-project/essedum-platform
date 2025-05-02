@@ -10,7 +10,7 @@ import {
 } from '../renderers/api-dropdown.renderer';
 import { RaiservicesService } from '../services/raiservices.service';
 import { MatDialogRef } from '@angular/material/dialog';
-import { CommonCreateDialogComponent } from '../ivm/ivm-view-initiative/ivm-view-initiative-detail/common-create/common-create-dialog.component';
+//import { CommonCreateDialogComponent } from '../ivm/ivm-view-initiative/ivm-view-initiative-detail/common-create/common-create-dialog.component';
 import { OpenTelemetryService } from 'com-lib-util';
 
 @Component({
@@ -58,7 +58,7 @@ export class ModelCreateComponent {
     private router: Router,
     private service: Services,
     private formBuilder: FormBuilder,
-    public dialogRef: MatDialogRef<CommonCreateDialogComponent>,
+   // public dialogRef: MatDialogRef<CommonCreateDialogComponent>,
     private raiService: RaiservicesService
   ) {}
 
@@ -140,7 +140,7 @@ export class ModelCreateComponent {
   }
 
   closeModal() {
-      this.dialogRef.close();
+      //this.dialogRef.close();
   }
 
   ngOnDestroy(): void {

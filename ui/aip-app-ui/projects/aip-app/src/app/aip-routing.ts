@@ -21,8 +21,7 @@ import { InstanceComponent } from './instance/instance.component';
 import { AppListComponent } from './apps/app-list/app-list.component';
 import { SpecTemplateComponent } from './spec-template/spec-template.component';
 import { SpecTemplateDescriptionComponent } from './spec-template/spec-template-description/spec-template-description.component';
-import { ChainsComponent } from './chains/chains.component';
-import { ChainsViewComponent } from './chains-view/chains-view.component';
+
 import { ViewAppComponent } from './apps/view-app/view-app.component';
 import { ModelEditsComponent } from './model-edit/model-edit.component';
 
@@ -37,37 +36,25 @@ import { AdapterDescriptionComponent } from './adapter/adapter-description/adapt
 import { EditFeatureStoreComponent } from './feature-store/edit-feature-store/edit-feature-store.component';
 import { InstanceCreateEditComponent } from './instance/instance-create-edit/instance-create-edit.component';
 import { TemplateComponent } from './template/template.component';
-import { ChainPipelineComponent } from './chain-pipeline/chain-pipeline.component';
+//import { ChainPipelineComponent } from './chain-pipeline/chain-pipeline.component';
 import { InstanceDescriptionComponent } from './instance/instance-description/instance-description.component';
 import { ConnectionViewComponent } from './datasource/connection-view/connection-view.component';
 import { ModalConfigDatasetComponent } from './dataset/modal-config-dataset/modal-config-dataset.component';
 import { ModelDescriptionComponent } from './model.description/model.description.component';
-import { EventsComponent } from './events/events.component';
 import { EndpointDescriptionComponent } from './endpoint/endpoint-description/endpoint-description.component';
 import { NativeScriptComponent } from './native-script/native-script.component';
 import { DatasetEditComponent } from './dataset/dataset-edit/dataset-edit.component';
-import { JobsLogComponent } from './jobs-log/jobs-log.component';
-import { ToolsComponent } from './tools/tools.component';
 import { PluginComponent } from './plugin/plugin.component';
 import { ModalConfigSchemaComponent } from './schema/modal-config-schema/modal-config-schema.component';
 import { EditDeleteTagsComponent } from './edit-delete-tags/edit-delete-tags.component';
-import { IvmComponent } from './ivm/ivm.component';
-import { IvmInboxComponent } from './ivm/ivm-inbox/ivm-inbox.component';
-import { IvmViewInitiativeComponent } from './ivm/ivm-view-initiative/ivm-view-initiative.component';
-import { SchedulerListComponent } from './scheduler/scheduler-list/scheduler-list.component';
-import { CopyPipelinesComponent } from './copy-pipelines/copy-pipelines.component';
-import { IvmViewAllInitiativeComponent } from './ivm/ivm-view-all-initiative/ivm-view-all-initiative.component';
-import { IvmViewInitiativeQuestionareComponent } from './ivm/ivm-view-initiative/ivm-view-initiative-questionare/ivm-view-initiative-questionare.component';
-import { IvmViewInitiativeDetailComponent } from './ivm/ivm-view-initiative/ivm-view-initiative-detail/ivm-view-initiative-detail.component';
+
 import { RelationshipComponent } from './schema/relationship/relationship.component';
 import { TicketlistComponent } from './ticketlist/ticketlist.component';
-import { CopyCipComponent } from './copy-cip/copy-cip.component';
 import { FeatureStoreDescriptionComponent } from './feature-store/feature-store-description/feature-store-description.component';
-import { CopydatasetsComponent } from './copydatasets/copydatasets.component';
-import { SolutionBotComponent } from './solution-bot/solution-bot.component';
+
 import { DgInstanceComponent } from './digital-brain/dg-instance/dg-instance.component';
 import { DgAppComponent } from './digital-brain/dg-app/dg-app.component';
-import { SearchAllComponent } from './ivm/search-all/search-all.component';
+
 import { VideoSoltionComponent } from './video-soltion/video-soltion.component';
 import { DatasetTemplateComponent } from './dataset/dataset-template/dataset-template.component';
 import { ClusterTicketsComponent } from './cluster-tickets/cluster-tickets.component';
@@ -81,14 +68,7 @@ import { EditDgappComponent } from './digital-brain/dg-app/edit-dgapp/edit-dgapp
 import { CreateDgtoolComponent } from './digital-brain/dg-instance/create-dgtool/create-dgtool.component';
 import { DgToolDescriptionComponent } from './digital-brain/dg-instance/dg-tool-description/dg-tool-description.component';
 import { EditDgToolComponent } from './digital-brain/dg-instance/edit-dg-tool/edit-dg-tool.component';
-import { QuestionareFormComponent } from './ivm/ivm-view-initiative/ivm-view-initiative-questionare/questionare-form/questionare-form.component';
-import { WorkflowCreateSpecComponent } from './workflows/workflow-create-spec/workflow-create-spec.component';
-import { WorkflowTableComponent } from './workflows/workflow-table/workflow-table.component';
-import { WorkflowDetailsComponent } from './workflows/workflow-details/workflow-details.component';
-import { SemanticSearchConfigComponent } from './semantic-search-dialog/semantic-search-config/semantic-search-config.component';
-import { SemanticSearchInferComponent } from './semantic-search-dialog/semantic-search-infer/semantic-search-infer.component';
-import { ConfigureTemplatesComponent } from './ivm/configure-templates/configure-templates.component';
-import { InitiativeApproveComponent } from './ivm/initiative-approve/initiative-approve.component';
+
 import { MashupsComponent } from './mashups/mashups.component';
 import { MashupCreateComponent } from './mashups/mashup-create/mashup-create.component';
 import { MashupViewWrapperComponent } from './mashups/mashup-view-wrapper/mashup-view-wrapper.component';
@@ -98,29 +78,14 @@ import { CustomListboxComponent } from './digital-brain/custom-listbox/custom-li
 import { AssignAppsComponent } from './digital-brain/assign-apps/assign-apps.component';
 import { PaginationComponent } from './pagination/pagination.component';
 import { AgentComponent } from './digital-brain/agent/agent.component';
-import { InitiativeActivityComponent } from './ivm/initiative-activity/initiative-activity.component';
 import { AgentDescriptionComponent } from './digital-brain/agent/agent-description/agent-description.component';
 import { CreateAgentComponent } from './digital-brain/agent/create-agent/create-agent.component';
 import { WranglingComponent } from './dataset/wrangling/wrangling.component';
-import { ColorThemeSelectorComponent } from './ivm/color-theme-selector/color-theme-selector.component';
 import { DataAnalyticsComponent } from './dataset/data-analytics/data-analytics.component';
-import { RemoteConsoleComponent } from './remote-console/remote-console.component';
 import { DataMiningComponent } from './data-mining/data-mining.component';
-import { DocumentsLibraryComponent } from './documents-library/documents-library.component';
-import { PromptsComponent } from './prompts/prompts.component';
-import { PromptCreateComponent } from './prompts/prompt-create/prompt-create.component';
-import { PromptEditComponent } from './prompts/prompt-edit/prompt-edit.component';
-import { DocumentCreateComponent } from './documents-library/document-create/document-create.component';
+
 import { AipRatingViewComponent } from './aip-rating/aip-rating-view/aip-rating-view.component';
 import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-name.component';
-import { DatasetKnowledgeComponent } from './dataset/dataset-knowledge/dataset-knowledge.component';
-import { PromptAgentComponent } from './prompt-agent/prompt-agentList/prompt-agent.component';
-import { PromptAgentCreateComponent } from './prompt-agent/prompt-agent-create/prompt-agent-create.component';
-import { PrepareAgentComponent } from './prompt-agent/prepare-agent/prepare-agent.component';
-import { PromptAgentExecuteComponent } from './prompt-agent/prompt-agent-execute/prompt-agent-execute.component';
-import { PromptTaskViewComponent } from './prompt-agent/prompt-task-view/prompt-task-view.component';
-import { WorkerToolsComponent } from './worker-tools/worker-tools.component';
-import { CreateWorkerToolsComponent } from './worker-tools/create-worker-tools/create-worker-tools.component';
 import { ClusteringComponent } from './clustering/clustering.component';
 
 const routes: Routes = [
@@ -254,48 +219,42 @@ const routes: Routes = [
             path: 'view/:cname',
             children: [
               { path: '', component: DatasetDescriptionComponent },
-              { path: 'infer', component: SemanticSearchInferComponent },
+              // { path: 'infer', component: SemanticSearchInferComponent },
               { path: 'wrangling/:wname/:action/:rname', component: WranglingComponent },
             ],
           },
           { path: 'preview/:cname', component: DatasetDescriptionComponent },
         ],
       },
-      {
-        path: 'knowledge',
-        children: [
-          { path: '', component: DatasetKnowledgeComponent },
-          { path: 'create', component: ModalConfigDatasetComponent },
-          { path: 'data', component: DatasetEditComponent },
-          { path: ':type', component: DatasetKnowledgeComponent },
-          {
-            path: 'view/:cname',
-            children: [
-              { path: '', component: DatasetDescriptionComponent },
-              { path: 'infer', component: SemanticSearchInferComponent },
-              { path: 'wrangling/:wname/:action/:rname', component: WranglingComponent },
-            ],
-          },
-          { path: 'preview/:cname', component: DatasetDescriptionComponent },
-        ],
-      },
+      // {
+      //   path: 'knowledge',
+      //   children: [
+      //     { path: '', component: DatasetKnowledgeComponent },
+      //     { path: 'create', component: ModalConfigDatasetComponent },
+      //     { path: 'data', component: DatasetEditComponent },
+      //     { path: ':type', component: DatasetKnowledgeComponent },
+      //     {
+      //       path: 'view/:cname',
+      //       children: [
+      //         { path: '', component: DatasetDescriptionComponent },
+      //        // { path: 'infer', component: SemanticSearchInferComponent },
+      //         { path: 'wrangling/:wname/:action/:rname', component: WranglingComponent },
+      //       ],
+      //     },
+      //     { path: 'preview/:cname', component: DatasetDescriptionComponent },
+      //   ],
+      // },
       {
         path: 'workflows',
         children: [
           {path: ':name/clustering', component: ClusteringComponent},
-          { path: 'create/specification', component: WorkflowTableComponent },
-          { path: ':name', component: WorkflowTableComponent },
-          {
-            path: 'create/specification/:id',
-            component: WorkflowCreateSpecComponent,
-          },
-          { path: ':name/:id', component: WorkflowDetailsComponent },
+         // { path: 'create/specification', component: WorkflowTableComponent },
+         // { path: ':name', component: WorkflowTableComponent },
+         // {path: 'create/specification/:id', component: WorkflowCreateSpecComponent},
+         // { path: ':name/:id', component: WorkflowDetailsComponent },
         ],
       },
-      {
-        path: 'search',
-        component: SemanticSearchInferComponent,
-      },
+    
       {
         path: 'datasetTemplates',
         children: [
@@ -341,14 +300,7 @@ const routes: Routes = [
           { path: 'edit/:dname', component: EditSpecTemplateComponent },
         ],
       },
-      {
-        path: 'chains',
-        children: [
-          { path: '', component: ChainsComponent },
-          { path: 'create', component: ChainsViewComponent },
-          { path: ':name', component: ChainsViewComponent },
-        ],
-      },
+      
       {
         path: 'templates',
         children: [
@@ -360,51 +312,23 @@ const routes: Routes = [
           { path: 'view/:cname', component: NativeScriptComponent },
         ],
       },
-      {
-        path: 'chain-list',
-        children: [
-          { path: '', component: ChainPipelineComponent },
-          {
-            path: 'view/drgndrp/:cname',
-            component: PipelineDescriptionComponent,
-          },
-          { path: 'view/:cname', component: NativeScriptComponent },
-        ],
-      },
-      {
-        path: 'events',
-        component: EventsComponent,
-      },
-      {
-        path: 'jobs-log',
-        component: JobsLogComponent,
-      },
-      {
-        path: 'comprehendLibrary',
-        children: [
-          { path: '', component: DocumentsLibraryComponent },
-          { path: 'create', component: DocumentCreateComponent },
-        ]
-      },
-      {
-        path: 'remote-console',
-        component: RemoteConsoleComponent,
-      },
+      // {
+      //   path: 'chain-list',
+      //   children: [
+      //     { path: '', component: ChainPipelineComponent },
+      //     {
+      //       path: 'view/drgndrp/:cname',
+      //       component: PipelineDescriptionComponent,
+      //     },
+      //     { path: 'view/:cname', component: NativeScriptComponent },
+      //   ],
+      // },
+     
       {
         path: 'cluster',
         component: ClusterTicketsComponent,
       },
-      {
-        path: 'tools',
-        children: [
-          { path: '', component: ToolsComponent },
-          {
-            path: 'view/drgndrp/:cname',
-            component: PipelineDescriptionComponent,
-          },
-          { path: 'view/:cname', component: NativeScriptComponent },
-        ],
-      },
+      
       {
         path: 'plugins',
         children: [
@@ -412,56 +336,12 @@ const routes: Routes = [
           { path: ':name', component: PluginComponent },
         ],
       },
-      {
-        path: 'semanticConfig',
-        component: SemanticSearchConfigComponent,
-      },
+     
       {
         path: 'taglist',
         component: EditDeleteTagsComponent,
       },
-      {
-        path: 'copyPipelines',
-        component: CopyPipelinesComponent,
-      },
-      {
-        path: 'initiative',
-        children: [
-          { path: '', component: IvmComponent },
-          { path: 'inbox', component: IvmInboxComponent },
-          { path: 'configTemplate', component: ConfigureTemplatesComponent },
-          { path: 'activityTemplate', component: InitiativeActivityComponent },
-          { path: 'searchAll', component: SearchAllComponent },
-          {
-            path: 'viewinitiative/:id/:initiativeName',
-            component: IvmViewInitiativeComponent,
-            children: [
-              { path: '', component: IvmViewInitiativeDetailComponent },
-              {
-                path: 'view/:questionare/:taskTemplateId',
-                component: IvmViewInitiativeQuestionareComponent,
-              },
-            ],
-          },
-          { path: 'viewAll', component: IvmViewAllInitiativeComponent },
-          { path: 'checklist', component: RaiCheckListComponent },
-          { path: 'qform', component: QuestionareFormComponent },
-          {
-            path: 'approve/:initaitiveId/:checklistId',
-            component: InitiativeApproveComponent,
-          },
-        ],
-      },
-
-      {
-        path: 'scheduler',
-        children: [{ path: '', component: SchedulerListComponent }],
-      },
-
-      {
-        path: 'copydatasets',
-        children: [{ path: '', component: CopydatasetsComponent }],
-      },
+      
 
       {
         path: 'constants',
@@ -514,10 +394,7 @@ const routes: Routes = [
           },
         ],
       },
-      {
-        path: 'copyCipModules',
-        component: CopyCipComponent,
-      },
+      
       {
         path: 'datasetAnalytics',
         component: DataAnalyticsComponent,
@@ -528,10 +405,7 @@ const routes: Routes = [
       //     { path: '', component: SchedulerListComponent },
       //   ],
       // },
-      {
-        path: 'bot',
-        children: [{ path: '', component: SolutionBotComponent }],
-      },
+    
       {
         path: 'videobot',
         children: [{ path: '', component: VideoSoltionComponent }],
@@ -542,45 +416,18 @@ const routes: Routes = [
       {
         path: "rating/:type", component: AipRatingViewComponent
       },
-      {
-        path: 'ai-workers',
-        children :[
-          { path: '', component: PromptAgentComponent },
-          { path: 'createConfig/new', component: PromptAgentCreateComponent},
-          { path: 'viewConfig/:name', component: PromptAgentCreateComponent},
-          { path: 'editConfig/:name', component: PromptAgentCreateComponent},
-          { path: 'tasks/:name', component: PromptTaskViewComponent},
-          { path: 'prepare-workers/:name', component: PrepareAgentComponent},
-          { path: 'execute-workers/:name', component: PromptAgentExecuteComponent},
-        ]
-      },
-      {
-        path: 'worker-tools',
-        children: [
-          { path: '', component: WorkerToolsComponent },
-          { path: 'create/new', component: CreateWorkerToolsComponent},
-          { path: 'edit/:name', component: CreateWorkerToolsComponent},
-          { path: 'preview/:name', component: CreateWorkerToolsComponent},
-        ]
-      }
+      
+      
     ],
   },
-  {
-    path:'aip-theme',component:ColorThemeSelectorComponent
-  },
+  // {
+  //   path:'aip-theme',component:ColorThemeSelectorComponent
+  // },
   {
     path: 'data-mining',
     component: DataMiningComponent,
   },
-  {
-    path: 'prompt',
-    children: [
-      { path: '', component: PromptsComponent},
-      { path: 'create', component: PromptCreateComponent},
-      { path: 'edit/:name', component: PromptCreateComponent},
-      { path: 'preview/:name', component: PromptEditComponent},
-    ],
-  }
+  
   // { path: "", redirectTo: "home", pathMatch: 'full' },
 ];
 

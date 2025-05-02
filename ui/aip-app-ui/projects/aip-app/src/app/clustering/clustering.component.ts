@@ -5,7 +5,7 @@ import { EventsService } from '../services/event.service';
 import { Services } from '../services/service';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { WorkflowService } from '../workflows/entities/workflow.service';
+//import { WorkflowService } from '../workflows/entities/workflow.service';
 import { HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ClusteringWorkflow } from './clusteringWorkflow';
@@ -82,7 +82,7 @@ export class ClusteringComponent implements OnInit {
     private location: Location,
     private router: Router,
     private route: ActivatedRoute,
-    private workflowService: WorkflowService
+   // private workflowService: WorkflowService
   ) { }
 
   async onStatusChange(newStatus: string) {
@@ -96,11 +96,11 @@ export class ClusteringComponent implements OnInit {
       this.workflowName = params['name'];
       this.workflowAlias = params['displayName'];
     });
-    this.workflowService.getClusteringWorkflowByName(this.workflowName, sessionStorage.getItem('organization'))
-      .subscribe((res) => {
-        const instance = new ClusteringWorkflow(res);
-        this.selectedDataset = instance.getSelectedDataset();
-      });
+    // this.workflowService.getClusteringWorkflowByName(this.workflowName, sessionStorage.getItem('organization'))
+    //   .subscribe((res) => {
+    //     const instance = new ClusteringWorkflow(res);
+    //     this.selectedDataset = instance.getSelectedDataset();
+    //   });
     this.getDatasets('First');
   }
 
@@ -324,9 +324,9 @@ export class ClusteringComponent implements OnInit {
         "selectedDataset": this.selectedDataset,
       },
     }
-    this.workflowService.saveClusteringWorkflow(payload, params).subscribe((res) => {
-      this.service.message("Saved Successfully", 'success');
-    });
+    // this.workflowService.saveClusteringWorkflow(payload, params).subscribe((res) => {
+    //   this.service.message("Saved Successfully", 'success');
+    // });
   }
 
 }

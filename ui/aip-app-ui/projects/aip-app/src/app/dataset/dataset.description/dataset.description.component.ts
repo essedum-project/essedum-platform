@@ -6,7 +6,7 @@ import { Location } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.component/confirm-delete-dialog.component';
 import { DatasetServices } from '../dataset-service';
-import { SemanticSearchDialogComponent } from '../../semantic-search-dialog/semantic-search-dialog.component';
+//import { SemanticSearchDialogComponent } from '../../semantic-search-dialog/semantic-search-dialog.component';
 import { AdapterServices } from '../../adapter/adapter-service';
 import { Stomp } from '@stomp/stompjs';
 import * as SockJS from 'sockjs-client';
