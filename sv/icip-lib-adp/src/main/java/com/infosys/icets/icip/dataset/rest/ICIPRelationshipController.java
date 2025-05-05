@@ -42,6 +42,8 @@ import com.infosys.icets.icip.dataset.service.IICIPRelationshipService;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Hidden;
 
+//COMMENTED AS PART OF API CLEANUP
+
 // TODO: Auto-generated Javadoc
 // 
 /**
@@ -49,115 +51,117 @@ import io.swagger.v3.oas.annotations.Hidden;
  *
  * @author icets
  */
-@RestController
-@Timed
-@Hidden
-@RequestMapping(path = "/${icip.pathPrefix}/relationship")
-public class ICIPRelationshipController {
-
-	/** The relationship service. */
-	@Autowired
-	private IICIPRelationshipService relationshipService;
+//@RestController
+//@Timed
+//@Hidden
+//@RequestMapping(path = "/${icip.pathPrefix}/relationship")
+//public class ICIPRelationshipController {
+//
+//	/** The relationship service. */
+//	@Autowired
+//	private IICIPRelationshipService relationshipService;
 	
-	/** The claim. */
-	@Value("${security.claim:#{null}}")
-	private String claim;
+// COMMENTED AS PART OF CODE CLEANUP
 	
-	/** The Constant ENTITY_NAME. */
-	private static final String ENTITY_NAME = "relationship";
-	
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPRelationshipController.class);
-	
-	
-	/**
-	 * Gets all the relationships.
-	 *
-	 * @return all the relationships
-	 */
-	@GetMapping(path = "")
-	public ResponseEntity<List<ICIPRelationship>> getAllRelationships() {
-		return new ResponseEntity<>(relationshipService.getAllRelationships(), HttpStatus.OK);
-	}
-	
-	@GetMapping("/{org}")
-	public ResponseEntity<List<ICIPRelationship>> getAllRelationshipByOrg(@PathVariable(name = "org") String org) {
-		return new ResponseEntity<>(relationshipService.getAllRelationshipsByOrg(org), HttpStatus.OK);
-	}
-	
-	/**
-	 * Creates the relationship.
-	 *
-	 * @param relationshipDTO the relationship DTO
-	 * @return the response entity
-	 * @throws URISyntaxException the URI syntax exception
-	 * @throws SQLException       the SQL exception
-	 */
-	@PostMapping("/add")
-	public ResponseEntity<ICIPRelationship> createRelationship(@RequestBody ICIPRelationshipDTO relationshipDTO)
-			throws URISyntaxException, SQLException {
-		logger.info("Creating relationship : {}", relationshipDTO.getName());
-		relationshipDTO.setAlias(relationshipDTO.getAlias());
-		relationshipDTO.setLastmodifiedby(ICIPUtils.getUser(claim));
-		relationshipDTO.setLastmodifieddate(new Timestamp(System.currentTimeMillis()));
-		ModelMapper modelmapper = new ModelMapper();
-		ICIPRelationship rel = modelmapper.map(relationshipDTO, ICIPRelationship.class);
-		ICIPRelationship result = relationshipService.save(rel);
-		return ResponseEntity.created(new URI("/relationship/" + result.getId()))
-				.headers(ICIPHeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString())).body(result);
-	}
-	
-	/**
-	 * Update relationship.
-	 *
-	 * @param relationshipDTO the relationship DTO
-	 * @return the response entity
-	 * @throws URISyntaxException the URI syntax exception
-	 * @throws SQLException       the SQL exception
-	 */
-	@PutMapping("/update")
-	public ResponseEntity<ICIPRelationship> updateRelationship(@RequestBody ICIPRelationshipDTO relationshipDTO)
-			throws URISyntaxException, SQLException {
-		if (relationshipDTO.getId() == null) {
-			return createRelationship(relationshipDTO);
-		}
-		relationshipDTO.setLastmodifiedby(ICIPUtils.getUser(claim));
-		relationshipDTO.setLastmodifieddate(new Timestamp(System.currentTimeMillis()));
-		logger.info("Updating relationship : {}", relationshipDTO.getName());
-		ModelMapper modelmapper = new ModelMapper();
-		ICIPRelationship rel = modelmapper.map(relationshipDTO, ICIPRelationship.class);
-		ICIPRelationship result = relationshipService.update(rel);
-		return ResponseEntity.ok()
-				.headers(ICIPHeaderUtil.createEntityUpdateAlert(ENTITY_NAME, rel.getId().toString()))
-				.body(result);
-	}
-	
-	/**
-	 * Delete Relationship.
-	 *
-	 * @param id the id
-	 * @return the response entity
-	 * @throws SQLException the SQL exception
-	 */
-	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<Void> deleteRelationship(@PathVariable(name = "id") Integer id) throws SQLException {
-		relationshipService.delete(id);
-		logger.info("Deleting relationship by Id : {}", id);
-		return ResponseEntity.ok().headers(ICIPHeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString()))
-				.build();
-	}
-	
-	/**
-	 * Gets the relationship.
-	 *
-	 * @param id the id
-	 * @return the relationship
-	 */
-	@GetMapping("/id/{id}")
-	public ResponseEntity<ICIPRelationship> getById(@PathVariable(name = "id") Integer id) {
-		ICIPRelationship rel = relationshipService.findOne(id);
-		logger.info("Fetching relationship by id : {} ", rel.getId());
-		return new ResponseEntity<>(rel, new HttpHeaders(), HttpStatus.OK);
-	}
-
-}
+//	/** The claim. */
+//	@Value("${security.claim:#{null}}")
+//	private String claim;
+//	
+//	/** The Constant ENTITY_NAME. */
+//	private static final String ENTITY_NAME = "relationship";
+//	
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPRelationshipController.class);
+//	
+//	
+//	/**
+//	 * Gets all the relationships.
+//	 *
+//	 * @return all the relationships
+//	 */
+//	@GetMapping(path = "")
+//	public ResponseEntity<List<ICIPRelationship>> getAllRelationships() {
+//		return new ResponseEntity<>(relationshipService.getAllRelationships(), HttpStatus.OK);
+//	}
+//	
+//	@GetMapping("/{org}")
+//	public ResponseEntity<List<ICIPRelationship>> getAllRelationshipByOrg(@PathVariable(name = "org") String org) {
+//		return new ResponseEntity<>(relationshipService.getAllRelationshipsByOrg(org), HttpStatus.OK);
+//	}
+//	
+//	/**
+//	 * Creates the relationship.
+//	 *
+//	 * @param relationshipDTO the relationship DTO
+//	 * @return the response entity
+//	 * @throws URISyntaxException the URI syntax exception
+//	 * @throws SQLException       the SQL exception
+//	 */
+//	@PostMapping("/add")
+//	public ResponseEntity<ICIPRelationship> createRelationship(@RequestBody ICIPRelationshipDTO relationshipDTO)
+//			throws URISyntaxException, SQLException {
+//		logger.info("Creating relationship : {}", relationshipDTO.getName());
+//		relationshipDTO.setAlias(relationshipDTO.getAlias());
+//		relationshipDTO.setLastmodifiedby(ICIPUtils.getUser(claim));
+//		relationshipDTO.setLastmodifieddate(new Timestamp(System.currentTimeMillis()));
+//		ModelMapper modelmapper = new ModelMapper();
+//		ICIPRelationship rel = modelmapper.map(relationshipDTO, ICIPRelationship.class);
+//		ICIPRelationship result = relationshipService.save(rel);
+//		return ResponseEntity.created(new URI("/relationship/" + result.getId()))
+//				.headers(ICIPHeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString())).body(result);
+//	}
+//	
+//	/**
+//	 * Update relationship.
+//	 *
+//	 * @param relationshipDTO the relationship DTO
+//	 * @return the response entity
+//	 * @throws URISyntaxException the URI syntax exception
+//	 * @throws SQLException       the SQL exception
+//	 */
+//	@PutMapping("/update")
+//	public ResponseEntity<ICIPRelationship> updateRelationship(@RequestBody ICIPRelationshipDTO relationshipDTO)
+//			throws URISyntaxException, SQLException {
+//		if (relationshipDTO.getId() == null) {
+//			return createRelationship(relationshipDTO);
+//		}
+//		relationshipDTO.setLastmodifiedby(ICIPUtils.getUser(claim));
+//		relationshipDTO.setLastmodifieddate(new Timestamp(System.currentTimeMillis()));
+//		logger.info("Updating relationship : {}", relationshipDTO.getName());
+//		ModelMapper modelmapper = new ModelMapper();
+//		ICIPRelationship rel = modelmapper.map(relationshipDTO, ICIPRelationship.class);
+//		ICIPRelationship result = relationshipService.update(rel);
+//		return ResponseEntity.ok()
+//				.headers(ICIPHeaderUtil.createEntityUpdateAlert(ENTITY_NAME, rel.getId().toString()))
+//				.body(result);
+//	}
+//	
+//	/**
+//	 * Delete Relationship.
+//	 *
+//	 * @param id the id
+//	 * @return the response entity
+//	 * @throws SQLException the SQL exception
+//	 */
+//	@DeleteMapping("/delete/{id}")
+//	public ResponseEntity<Void> deleteRelationship(@PathVariable(name = "id") Integer id) throws SQLException {
+//		relationshipService.delete(id);
+//		logger.info("Deleting relationship by Id : {}", id);
+//		return ResponseEntity.ok().headers(ICIPHeaderUtil.createEntityDeletionAlert(ENTITY_NAME, id.toString()))
+//				.build();
+//	}
+//	
+//	/**
+//	 * Gets the relationship.
+//	 *
+//	 * @param id the id
+//	 * @return the relationship
+//	 */
+//	@GetMapping("/id/{id}")
+//	public ResponseEntity<ICIPRelationship> getById(@PathVariable(name = "id") Integer id) {
+//		ICIPRelationship rel = relationshipService.findOne(id);
+//		logger.info("Fetching relationship by id : {} ", rel.getId());
+//		return new ResponseEntity<>(rel, new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//}

@@ -11,7 +11,7 @@ telemetry:
     driverClassName: com.mysql.cj.jdbc.Driver
     jdbcurl: jdbc:mysql://localhost:3306/telemetrydb
     username: root
-    password: Infy@123 
+    password: root 
 
 config:
   active-profiles: mysql,dbjwt,btf,dbconstants,vault
@@ -21,8 +21,8 @@ config:
   
   datasourceurl: jdbc:mysql://localhost:3306
   datasourceuser: root
-  datasourcepass: Infy@123
-  leapcoredb: leap_8000_coredb_m18
+  datasourcepass: root
+  leapcoredb: leap_8000_coredb_m117
   leapquartzdb: leap2_8000_quartz
   
   leapbtfdb: leapmaster_btf
@@ -392,5 +392,5 @@ endpoint:
 port_automation_app_url: http://localhost:5000
 
 jobexecutor:
-  enabled: false
+  enabled: true
   runtimeList: azure, ams

@@ -190,15 +190,16 @@ public class ICIPJobsController {
 		return new ResponseEntity<>(listJobs, new HttpHeaders(), HttpStatus.OK);
 	}
 	
-	@GetMapping("/downloadCsv/{org}")
-	public ResponseEntity<String> getJobsByModel(
-			@PathVariable(name = "org") String org,
-			@RequestParam(required = false, name = "colsToDownload") String colsToDownload) {
-		
-		String csvData= iICIPJobsService.getCsvData(colsToDownload,org).toString();
-
-		return new ResponseEntity<>(csvData.toString(), new HttpHeaders(), HttpStatus.OK);
-	}
+//Commented as part of code clean up
+//	@GetMapping("/downloadCsv/{org}")
+//	public ResponseEntity<String> getJobsByModel(
+//			@PathVariable(name = "org") String org,
+//			@RequestParam(required = false, name = "colsToDownload") String colsToDownload) {
+//		
+//		String csvData= iICIPJobsService.getCsvData(colsToDownload,org).toString();
+//
+//		return new ResponseEntity<>(csvData.toString(), new HttpHeaders(), HttpStatus.OK);
+//	}
 
 	/**
 	 * Gets the common jobs.

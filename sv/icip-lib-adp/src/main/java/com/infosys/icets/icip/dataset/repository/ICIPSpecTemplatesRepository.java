@@ -16,6 +16,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.Repository;
 
 import com.infosys.icets.icip.dataset.model.ICIPSpecTemplate;
+//COMMENTED AS PART OF API CLEANUP
 
 // TODO: Auto-generated Javadoc
 /**
@@ -24,26 +25,26 @@ import com.infosys.icets.icip.dataset.model.ICIPSpecTemplate;
 /**
  * @author icets
  */
-@NoRepositoryBean
-public interface ICIPSpecTemplatesRepository extends Repository<ICIPSpecTemplate, Integer> {
-
-	/**
-	 * Search by templateName.
-	 *
-	 * @param templateName the templateName
-	 * @return the ICIPSpecTemplate
-	 */
-
-	ICIPSpecTemplate searchByTemplateName(String templateName);
-
-	/**
-	 * Gets all TemplateNames.
-	 *
-	 * @param templateName the templateName
-	 * @return the List of templateName
-	 */
-
-	List<String> getAllTemplateNames();
-
-	List<ICIPSpecTemplate> getAllSpecTemplates();
-}
+//@NoRepositoryBean
+//public interface ICIPSpecTemplatesRepository extends Repository<ICIPSpecTemplate, Integer> {
+//
+//	/**
+//	 * Search by templateName.
+//	 *
+//	 * @param templateName the templateName
+//	 * @return the ICIPSpecTemplate
+//	 */
+//
+//	ICIPSpecTemplate searchByTemplateName(String templateName);
+//
+//	/**
+//	 * Gets all TemplateNames.
+//	 *
+//	 * @param templateName the templateName
+//	 * @return the List of templateName
+//	 */
+//
+//	List<String> getAllTemplateNames();
+//
+//	List<ICIPSpecTemplate> getAllSpecTemplates();
+//}

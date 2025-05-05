@@ -7,8 +7,8 @@ import org.springframework.stereotype.Repository;
 
 import com.infosys.icets.ai.comm.lib.util.telemetry.domain.OpenTelemetryEvents;
 
-
-@Repository
-public interface OpenTelemetryEventsRepository extends JpaRepository<OpenTelemetryEvents,Long>{
-
-}
+//COMMENTED AS PART OF API CLEANUP
+//@Repository
+//public interface OpenTelemetryEventsRepository extends JpaRepository<OpenTelemetryEvents,Long>{
+//
+//}

@@ -48,24 +48,26 @@ public class ICIPMLAIWorkerLogsController {
 	@Autowired
 	ICIPMLAIWorkerLogsService aiWorkerLogsService;
 	
-	@GetMapping("/count/{org}")
-	public ResponseEntity<Long> getMlAiWorkerLogsLen(@PathVariable(name = "org") String org) {
-		return new ResponseEntity<>(aiWorkerLogsService.logsCountByOrganization(org), HttpStatus.OK);
-	}
-
+	//COMMENTED AS PART OF CODE CLEANUP
 	
-	@GetMapping("/count/{task}/{org}")
-	public ResponseEntity<Long> getMlAiWorkerJobsLenByTask(@PathVariable(name = "task") String task,
-			@PathVariable(name = "org") String org) {
-		return new ResponseEntity<>(aiWorkerLogsService.logsCountByTaskAndOrganization(task, org), HttpStatus.OK);
-	}
-	
-	@PostMapping( "/save")
-	public ResponseEntity<ICIPMLAIWorkerLogs> save(@RequestParam(name = "project", required = true) String project,
-			@RequestBody String body ){
-		JSONObject reqBody= new JSONObject(body);
-		ICIPMLAIWorkerLogs aiWorkerLog = aiWorkerLogsService.saveLog(project, reqBody);
-		return new ResponseEntity<>(aiWorkerLog,HttpStatus.OK);
-	}
+//	@GetMapping("/count/{org}")
+//	public ResponseEntity<Long> getMlAiWorkerLogsLen(@PathVariable(name = "org") String org) {
+//		return new ResponseEntity<>(aiWorkerLogsService.logsCountByOrganization(org), HttpStatus.OK);
+//	}
+//
+//	
+//	@GetMapping("/count/{task}/{org}")
+//	public ResponseEntity<Long> getMlAiWorkerJobsLenByTask(@PathVariable(name = "task") String task,
+//			@PathVariable(name = "org") String org) {
+//		return new ResponseEntity<>(aiWorkerLogsService.logsCountByTaskAndOrganization(task, org), HttpStatus.OK);
+//	}
+//	
+//	@PostMapping( "/save")
+//	public ResponseEntity<ICIPMLAIWorkerLogs> save(@RequestParam(name = "project", required = true) String project,
+//			@RequestBody String body ){
+//		JSONObject reqBody= new JSONObject(body);
+//		ICIPMLAIWorkerLogs aiWorkerLog = aiWorkerLogsService.saveLog(project, reqBody);
+//		return new ResponseEntity<>(aiWorkerLog,HttpStatus.OK);
+//	}
 	
 }

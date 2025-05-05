@@ -80,237 +80,238 @@ public class ICIPGroupsController {
 	/** The claim. */
 	@Value("${security.claim:#{null}}")
 	private String claim;
-
-	/**
-	 * Gets the groups by org and entity.
-	 *
-	 * @param entityType the entity type
-	 * @param entity     the entity
-	 * @param org        the org
-	 * @param page       the page
-	 * @param size       the size
-	 * @return the groups by org and entity
-	 */
-	@GetMapping("/search/{entityType}/{entity}")
-	public ResponseEntity<List<ICIPPartialGroups>> getGroupsByOrgAndEntity(
-			@PathVariable(name = "entityType") String entityType, @PathVariable("entity") String entity,
-			@RequestParam(name = "org", required = true) String org,
-			@RequestParam(name = "page", defaultValue = "0", required = false) String page,
-			@RequestParam(name = "size", defaultValue = "12", required = false) String size) {
-		logger.info("Getting Groups by Organization : {} and EntityType : {} and Entity : {}", org, entityType, entity);
-		return new ResponseEntity<>(iICIPPartialGroupsService.getGroupsByOrgAndEntity(org, entity, entityType,
-				Integer.parseInt(page), Integer.parseInt(size)), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	@GetMapping("/searchByType/{org}/{type}")
-	public ResponseEntity<List<ICIPGroups>> getGroupsByOrgAndType(
-			@PathVariable(name = "org", required = true) String org,
-			@PathVariable(name = "type", required = true) String type,
-			@RequestParam(name = "page", defaultValue = "0", required = false) String page,
-			@RequestParam(name = "size", defaultValue = "12", required = false) String size) {
-		logger.info("Getting Groups by Organization : {} and Type : {}", org, org, type);
-		return new ResponseEntity<>(iICIPGroupsService.getGroupsByOrganizationAndType(org, type), new HttpHeaders(), HttpStatus.OK);
-	}
-	/**
-	 * Gets the groups len by org and entity.
-	 *
-	 * @param entityType the entity type
-	 * @param entity     the entity
-	 * @param org        the org
-	 * @return the groups len by org and entity
-	 */
-	@GetMapping("/search/len/{entityType}/{entity}/{org}")
-	public ResponseEntity<Long> getGroupsLenByOrgAndEntity(@PathVariable(name = "entityType") String entityType,
-			@PathVariable("entity") String entity, @PathVariable(name = "org") String org) {
-		logger.info("Getting Groups Len by Organization : {} and EntityType : {} and Entity : {}", org, entityType,
-				entity);
-		return new ResponseEntity<>(iICIPPartialGroupsService.getGroupsLenByOrgAndEntity(org, entity, entityType), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the groups by entity and org.
-	 *
-	 * @param entity the entity
-	 * @param org    the org
-	 * @return the groups by entity and org
-	 */
-	@GetMapping("/pipeline/{entity}/{org}")
-	public ResponseEntity<ICIPPartialGroups> getGroupsByEntityAndOrg(@PathVariable("entity") String entity,
-			@PathVariable("org") String org) {
-		logger.info("Getting Groups by Organization : {} and Entity : {}", org, entity);
-		return new ResponseEntity<>(iICIPPartialGroupsService.getSingleGroupsByOrgAndEntity(org, entity), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the paginated groups.
-	 *
-	 * @param org  the org
-	 * @param page the page
-	 * @param size the size
-	 * @return the paginated groups
-	 */
-	@GetMapping("/paginated/all")
-	public ResponseEntity<List<ICIPPartialGroups>> getPaginatedGroups(
-			@RequestParam(name = "org", required = true) String org,
-			@RequestParam(name = "page", defaultValue = "0", required = false) String page,
-			@RequestParam(name = "size", defaultValue = "12", required = false) String size) {
-		logger.info("Getting Groups by Organization [/paginated/all] : {} ", org);
-		return new ResponseEntity<>(iICIPPartialGroupsService.getGroupsByOrg(org, Integer.parseInt(page),
-				Integer.parseInt(size)), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the group names.
-	 *
-	 * @param org the org
-	 * @return the group names
-	 */
-	@GetMapping("/names")
-	public ResponseEntity<List<NameAndAliasDTO>> getGroupNames(
-			@RequestParam(name = "org", required = true) String org) {
-		logger.info("Getting Groups by Organization [/names] : {} ", org);
-		return new ResponseEntity<>(iICIPGroupsService.getGroupNames(org), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the groups len.
-	 *
-	 * @param org the org
-	 * @return the groups len
-	 */
-	@GetMapping("/all/len/{org}")
-	public ResponseEntity<Long> getGroupsLen(@PathVariable(name = "org") String org) {
-		logger.info("Getting Groups Length by Organization : {} ", org);
-		return new ResponseEntity<>(iICIPPartialGroupsService.getGroupsLenByOrg(org), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the featured groups.
-	 *
-	 * @param org the org
-	 * @return the featured groups
-	 */
-	@GetMapping("/featured")
-	public ResponseEntity<List<ICIPPartialGroups>> getFeaturedGroups(
-			@RequestParam(name = "org", required = true) String org) {
-		logger.info("Getting Groups by Organization [/featured] : {} ", org);
-		return new ResponseEntity<>(iICIPPartialGroupsService.getFeaturedGroupsByOrg(org), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the ICIP group.
-	 *
-	 * @param name the name
-	 * @param org  the org
-	 * @return the ICIP group
-	 */
-	@GetMapping("/view/{nameStr}/{org}")
-	public ResponseEntity<ICIPGroups> getICIPGroup(@PathVariable(name = "nameStr") String name,
-			@PathVariable(name = "org") String org) {
-		logger.info("Getting Group : {}_{}", name, org);
-		
-		return new ResponseEntity<>(iICIPGroupsService.getGroup(name, org), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Creates the groups.
-	 *
-	 * @param alias the alias
-	 * @param groupDTO the group DTO
-	 * @return the response entity
-	 * @throws URISyntaxException the URI syntax exception
-	 */
-	@PostMapping("/add/{nameStr}")
-	public ResponseEntity<ICIPGroups> createGroups(@PathVariable(name = "nameStr") String alias,
-			@RequestBody ICIPGroupsDTO groupDTO) throws URISyntaxException {
-		groupDTO.setLastmodifiedby(ICIPUtils.getUser(claim));
-		groupDTO.setLastmodifieddate(Timestamp.from(Instant.now()));
-		groupDTO.setAlias(alias);
-		ModelMapper modelMapper = new ModelMapper();
-		ICIPGroups group = modelMapper.map(groupDTO, ICIPGroups.class);
-		ICIPGroups result = iICIPGroupsService.save(group);
-		logger.info("Creating Group : {} ", alias);
-		return ResponseEntity.created(new URI("/groups/" + result.getId()))
-				.headers(ICIPHeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString())).body(result);
-	}
-
-	/**
-	 * Gets the groups for entity.
-	 *
-	 * @param entityType the entity type
-	 * @param entity     the entity
-	 * @param org        the org
-	 * @return the groups for entity
-	 */
-	@GetMapping("/all/{entityType}/{entity}")
-	public ResponseEntity<List<ICIPGroups>> getGroupsForEntity(@PathVariable(name = "entityType") String entityType,
-			@PathVariable("entity") String entity, @RequestParam(name = "org", required = true) String org) {
-		List<ICIPGroupModel> groups = iICIPPartialGroupsService.getAllGroupsByOrgAndEntity(org, entity, entityType);
-		logger.info("Getting Groups for Entity :{} ", groups);
-		List grps = new ArrayList<>();
-		groups.forEach(grp -> grps.add(grp.getGroups()));
-		return new ResponseEntity<>(grps, new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the group.
-	 *
-	 * @param org       the org
-	 * @param groupName the group name
-	 * @return the group
-	 * @throws URISyntaxException the URI syntax exception
-	 */
-	@GetMapping("/get/{nameStr}/{org}")
-	public ResponseEntity<ICIPGroups> getGroup(@PathVariable("org") String org,
-			@PathVariable("nameStr") String groupName) throws URISyntaxException {
-
-		return new ResponseEntity<>( iICIPGroupsService.getGroup(groupName, org), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the groups.
-	 *
-	 * @param org  the org
-	 * @param page the page
-	 * @param size the size
-	 * @return the groups
-	 */
-	@GetMapping("/all")
-	public ResponseEntity<List<ICIPPartialGroups>> getGroups(@RequestParam(name = "org", required = true) String org,
-			@RequestParam(name = "page", defaultValue = "0", required = false) String page,
-			@RequestParam(name = "size", defaultValue = "12", required = false) String size) {
-		logger.info("Getting Groups by Organization [/all] : {} ", org);
-		return new ResponseEntity<>(iICIPPartialGroupsService.getGroups(org), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Delete groups.
-	 *
-	 * @param name the name
-	 * @param org  the org
-	 * @return the response entity
-	 */
-	@DeleteMapping("/delete/{nameStr}/{org}")
-	public ResponseEntity<Void> deleteGroups(@PathVariable(name = "nameStr") String name,
-			@PathVariable(name = "org") String org) {
-		iICIPGroupsService.delete(name, org);
-		logger.info("Deleting Group : {}", name);
-		return ResponseEntity.ok().headers(ICIPHeaderUtil.createEntityDeletionAlert(ENTITY_NAME, name)).build();
-	}
-
-	/**
-	 * Handle all.
-	 *
-	 * @param ex the ex
-	 * @return the response entity
-	 */
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Object> handleAll(Exception ex) {
-		logger.error(ex.getMessage(), ex);
-		Throwable rootcause = ExceptionUtil.findRootCause(ex);
-			return new ResponseEntity<>( new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, 
-					rootcause.getMessage(), "error occurred").getMessage(), new HttpHeaders(),  new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, 
-							rootcause.getMessage(), "error occurred").getStatus());
-	}
+//COMMENTED AS PART OF CODE CLEANUP
+	
+//	/**
+//	 * Gets the groups by org and entity.
+//	 *
+//	 * @param entityType the entity type
+//	 * @param entity     the entity
+//	 * @param org        the org
+//	 * @param page       the page
+//	 * @param size       the size
+//	 * @return the groups by org and entity
+//	 */
+//	@GetMapping("/search/{entityType}/{entity}")
+//	public ResponseEntity<List<ICIPPartialGroups>> getGroupsByOrgAndEntity(
+//			@PathVariable(name = "entityType") String entityType, @PathVariable("entity") String entity,
+//			@RequestParam(name = "org", required = true) String org,
+//			@RequestParam(name = "page", defaultValue = "0", required = false) String page,
+//			@RequestParam(name = "size", defaultValue = "12", required = false) String size) {
+//		logger.info("Getting Groups by Organization : {} and EntityType : {} and Entity : {}", org, entityType, entity);
+//		return new ResponseEntity<>(iICIPPartialGroupsService.getGroupsByOrgAndEntity(org, entity, entityType,
+//				Integer.parseInt(page), Integer.parseInt(size)), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	@GetMapping("/searchByType/{org}/{type}")
+//	public ResponseEntity<List<ICIPGroups>> getGroupsByOrgAndType(
+//			@PathVariable(name = "org", required = true) String org,
+//			@PathVariable(name = "type", required = true) String type,
+//			@RequestParam(name = "page", defaultValue = "0", required = false) String page,
+//			@RequestParam(name = "size", defaultValue = "12", required = false) String size) {
+//		logger.info("Getting Groups by Organization : {} and Type : {}", org, org, type);
+//		return new ResponseEntity<>(iICIPGroupsService.getGroupsByOrganizationAndType(org, type), new HttpHeaders(), HttpStatus.OK);
+//	}
+//	/**
+//	 * Gets the groups len by org and entity.
+//	 *
+//	 * @param entityType the entity type
+//	 * @param entity     the entity
+//	 * @param org        the org
+//	 * @return the groups len by org and entity
+//	 */
+//	@GetMapping("/search/len/{entityType}/{entity}/{org}")
+//	public ResponseEntity<Long> getGroupsLenByOrgAndEntity(@PathVariable(name = "entityType") String entityType,
+//			@PathVariable("entity") String entity, @PathVariable(name = "org") String org) {
+//		logger.info("Getting Groups Len by Organization : {} and EntityType : {} and Entity : {}", org, entityType,
+//				entity);
+//		return new ResponseEntity<>(iICIPPartialGroupsService.getGroupsLenByOrgAndEntity(org, entity, entityType), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the groups by entity and org.
+//	 *
+//	 * @param entity the entity
+//	 * @param org    the org
+//	 * @return the groups by entity and org
+//	 */
+//	@GetMapping("/pipeline/{entity}/{org}")
+//	public ResponseEntity<ICIPPartialGroups> getGroupsByEntityAndOrg(@PathVariable("entity") String entity,
+//			@PathVariable("org") String org) {
+//		logger.info("Getting Groups by Organization : {} and Entity : {}", org, entity);
+//		return new ResponseEntity<>(iICIPPartialGroupsService.getSingleGroupsByOrgAndEntity(org, entity), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the paginated groups.
+//	 *
+//	 * @param org  the org
+//	 * @param page the page
+//	 * @param size the size
+//	 * @return the paginated groups
+//	 */
+//	@GetMapping("/paginated/all")
+//	public ResponseEntity<List<ICIPPartialGroups>> getPaginatedGroups(
+//			@RequestParam(name = "org", required = true) String org,
+//			@RequestParam(name = "page", defaultValue = "0", required = false) String page,
+//			@RequestParam(name = "size", defaultValue = "12", required = false) String size) {
+//		logger.info("Getting Groups by Organization [/paginated/all] : {} ", org);
+//		return new ResponseEntity<>(iICIPPartialGroupsService.getGroupsByOrg(org, Integer.parseInt(page),
+//				Integer.parseInt(size)), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the group names.
+//	 *
+//	 * @param org the org
+//	 * @return the group names
+//	 */
+//	@GetMapping("/names")
+//	public ResponseEntity<List<NameAndAliasDTO>> getGroupNames(
+//			@RequestParam(name = "org", required = true) String org) {
+//		logger.info("Getting Groups by Organization [/names] : {} ", org);
+//		return new ResponseEntity<>(iICIPGroupsService.getGroupNames(org), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the groups len.
+//	 *
+//	 * @param org the org
+//	 * @return the groups len
+//	 */
+//	@GetMapping("/all/len/{org}")
+//	public ResponseEntity<Long> getGroupsLen(@PathVariable(name = "org") String org) {
+//		logger.info("Getting Groups Length by Organization : {} ", org);
+//		return new ResponseEntity<>(iICIPPartialGroupsService.getGroupsLenByOrg(org), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the featured groups.
+//	 *
+//	 * @param org the org
+//	 * @return the featured groups
+//	 */
+//	@GetMapping("/featured")
+//	public ResponseEntity<List<ICIPPartialGroups>> getFeaturedGroups(
+//			@RequestParam(name = "org", required = true) String org) {
+//		logger.info("Getting Groups by Organization [/featured] : {} ", org);
+//		return new ResponseEntity<>(iICIPPartialGroupsService.getFeaturedGroupsByOrg(org), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the ICIP group.
+//	 *
+//	 * @param name the name
+//	 * @param org  the org
+//	 * @return the ICIP group
+//	 */
+//	@GetMapping("/view/{nameStr}/{org}")
+//	public ResponseEntity<ICIPGroups> getICIPGroup(@PathVariable(name = "nameStr") String name,
+//			@PathVariable(name = "org") String org) {
+//		logger.info("Getting Group : {}_{}", name, org);
+//		
+//		return new ResponseEntity<>(iICIPGroupsService.getGroup(name, org), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Creates the groups.
+//	 *
+//	 * @param alias the alias
+//	 * @param groupDTO the group DTO
+//	 * @return the response entity
+//	 * @throws URISyntaxException the URI syntax exception
+//	 */
+//	@PostMapping("/add/{nameStr}")
+//	public ResponseEntity<ICIPGroups> createGroups(@PathVariable(name = "nameStr") String alias,
+//			@RequestBody ICIPGroupsDTO groupDTO) throws URISyntaxException {
+//		groupDTO.setLastmodifiedby(ICIPUtils.getUser(claim));
+//		groupDTO.setLastmodifieddate(Timestamp.from(Instant.now()));
+//		groupDTO.setAlias(alias);
+//		ModelMapper modelMapper = new ModelMapper();
+//		ICIPGroups group = modelMapper.map(groupDTO, ICIPGroups.class);
+//		ICIPGroups result = iICIPGroupsService.save(group);
+//		logger.info("Creating Group : {} ", alias);
+//		return ResponseEntity.created(new URI("/groups/" + result.getId()))
+//				.headers(ICIPHeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString())).body(result);
+//	}
+//
+//	/**
+//	 * Gets the groups for entity.
+//	 *
+//	 * @param entityType the entity type
+//	 * @param entity     the entity
+//	 * @param org        the org
+//	 * @return the groups for entity
+//	 */
+//	@GetMapping("/all/{entityType}/{entity}")
+//	public ResponseEntity<List<ICIPGroups>> getGroupsForEntity(@PathVariable(name = "entityType") String entityType,
+//			@PathVariable("entity") String entity, @RequestParam(name = "org", required = true) String org) {
+//		List<ICIPGroupModel> groups = iICIPPartialGroupsService.getAllGroupsByOrgAndEntity(org, entity, entityType);
+//		logger.info("Getting Groups for Entity :{} ", groups);
+//		List grps = new ArrayList<>();
+//		groups.forEach(grp -> grps.add(grp.getGroups()));
+//		return new ResponseEntity<>(grps, new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the group.
+//	 *
+//	 * @param org       the org
+//	 * @param groupName the group name
+//	 * @return the group
+//	 * @throws URISyntaxException the URI syntax exception
+//	 */
+//	@GetMapping("/get/{nameStr}/{org}")
+//	public ResponseEntity<ICIPGroups> getGroup(@PathVariable("org") String org,
+//			@PathVariable("nameStr") String groupName) throws URISyntaxException {
+//
+//		return new ResponseEntity<>( iICIPGroupsService.getGroup(groupName, org), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the groups.
+//	 *
+//	 * @param org  the org
+//	 * @param page the page
+//	 * @param size the size
+//	 * @return the groups
+//	 */
+//	@GetMapping("/all")
+//	public ResponseEntity<List<ICIPPartialGroups>> getGroups(@RequestParam(name = "org", required = true) String org,
+//			@RequestParam(name = "page", defaultValue = "0", required = false) String page,
+//			@RequestParam(name = "size", defaultValue = "12", required = false) String size) {
+//		logger.info("Getting Groups by Organization [/all] : {} ", org);
+//		return new ResponseEntity<>(iICIPPartialGroupsService.getGroups(org), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Delete groups.
+//	 *
+//	 * @param name the name
+//	 * @param org  the org
+//	 * @return the response entity
+//	 */
+//	@DeleteMapping("/delete/{nameStr}/{org}")
+//	public ResponseEntity<Void> deleteGroups(@PathVariable(name = "nameStr") String name,
+//			@PathVariable(name = "org") String org) {
+//		iICIPGroupsService.delete(name, org);
+//		logger.info("Deleting Group : {}", name);
+//		return ResponseEntity.ok().headers(ICIPHeaderUtil.createEntityDeletionAlert(ENTITY_NAME, name)).build();
+//	}
+//
+//	/**
+//	 * Handle all.
+//	 *
+//	 * @param ex the ex
+//	 * @return the response entity
+//	 */
+//	@ExceptionHandler(Exception.class)
+//	public ResponseEntity<Object> handleAll(Exception ex) {
+//		logger.error(ex.getMessage(), ex);
+//		Throwable rootcause = ExceptionUtil.findRootCause(ex);
+//			return new ResponseEntity<>( new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, 
+//					rootcause.getMessage(), "error occurred").getMessage(), new HttpHeaders(),  new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, 
+//							rootcause.getMessage(), "error occurred").getStatus());
+//	}
 
 }

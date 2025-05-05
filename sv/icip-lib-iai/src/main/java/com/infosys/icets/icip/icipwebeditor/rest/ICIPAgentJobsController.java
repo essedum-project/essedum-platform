@@ -54,116 +54,118 @@ public class ICIPAgentJobsController {
 	/** The i ICIP jobs service. */
 	@Autowired
 	private IICIPAgentJobsService iICIPAgentJobsService;
+	
+	//COMMENTED AS PART OF CODE CLEANUP
 
-	/**
-	 * Gets the jobs len.
-	 *
-	 * @param org the org
-	 * @return the jobs len
-	 */
-	@GetMapping("/jobsLen/{org}")
-	public ResponseEntity<Long> getJobsLen(@PathVariable(name = "org") String org) {
-		return new ResponseEntity<>(iICIPAgentJobsService.countByOrganization(org), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the streaming service jobs len.
-	 *
-	 * @param name the name
-	 * @param org  the org
-	 * @return the streaming service jobs len
-	 */
-	@GetMapping("/streamingLen/{nameStr}/{org}")
-	public ResponseEntity<Long> getStreamingServiceJobsLen(@PathVariable(name = "nameStr") String name,
-			@PathVariable(name = "org") String org) {
-		return new ResponseEntity<>(iICIPAgentJobsService.countByCnameAndOrganization(name, org), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the jobs by model.
-	 *
-	 * @param name the name
-	 * @param org  the org
-	 * @param page the page
-	 * @param size the size
-	 * @return the jobs by model
-	 */
-	@GetMapping("/{nameStr}/{org}")
-	public ResponseEntity<List<ICIPPartialAgentJobs>> getJobsByModel(@PathVariable(name = "nameStr") String name,
-			@PathVariable(name = "org") String org, @RequestParam(required = false, name = "page") String page,
-			@RequestParam(required = false, name = "size") String size) {
-		if (name.equals("all")) {
-			logger.info("Getting Jobs");
-		} else {
-			logger.info("Getting Jobs for Streaming Service  : {}", name);
-		}
-		return new ResponseEntity<>(iICIPAgentJobsService.getJobsByService(name, Integer.valueOf(page), Integer.valueOf(size), org), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the job console.
-	 *
-	 * @param jobId the job id
-	 * @param offset the offset
-	 * @param org the org
-	 * @param lineno the lineno
-	 * @param status the status
-	 * @return the job console
-	 * @throws IOException 
-	 */
-	@GetMapping("/console/{jobId}")
-	public ResponseEntity<ICIPAgentJobs> getJobConsole(@PathVariable(name = "jobId") String jobId,
-			@RequestParam(name = "offset", required = false, defaultValue = "0") int offset,
-			@RequestParam(name = "org", required = true) String org,
-			@RequestParam(name = "lineno", required = true) int lineno,
-			@RequestParam(name = "status", required = true) String status) throws IOException {
-		logger.debug("Getting Job response with log");
-
-		return new ResponseEntity<>(iICIPAgentJobsService.findByJobIdWithLog(jobId, offset, lineno, org, status), new HttpHeaders(), HttpStatus.OK);
-
-	}
-
-	/**
-	 * Gets the job by corelid.
-	 *
-	 * @param corelid the corelid
-	 * @return the job by corelid
-	 */
-	@GetMapping("/corelid/{corelid}")
-	public ResponseEntity<List<ICIPPartialAgentJobs>> getJobByCorelid(@PathVariable(name = "corelid") String corelid) {
-		logger.debug("Getting Job by corelid");
-		return new ResponseEntity<>(iICIPAgentJobsService.findByCorelid(corelid), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Stop job.
-	 *
-	 * @param jobid the jobid
-	 * @return the response entity
-	 */
-	@GetMapping("/stopJob/{jobid}")
-	public ResponseEntity<Void> stopJob(@PathVariable(name = "jobid") String jobid) {
-		logger.info("Request to stop job");
-		try {
-			iICIPAgentJobsService.stopLocalJob(jobid);
-			return new ResponseEntity<>(new HttpHeaders(), HttpStatus.OK);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return new ResponseEntity<>(new HttpHeaders(), HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	/**
-	 * Handle all.
-	 *
-	 * @param ex the ex
-	 * @return the response entity
-	 */
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Object> handleAll(Exception ex) {
-		logger.error(ex.getMessage(), ex);
-		Throwable rootcause = ExceptionUtil.findRootCause(ex);
-		return new ResponseEntity<>( new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getMessage(), new HttpHeaders(),  new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getStatus());
-	}
+//	/**
+//	 * Gets the jobs len.
+//	 *
+//	 * @param org the org
+//	 * @return the jobs len
+//	 */
+//	@GetMapping("/jobsLen/{org}")
+//	public ResponseEntity<Long> getJobsLen(@PathVariable(name = "org") String org) {
+//		return new ResponseEntity<>(iICIPAgentJobsService.countByOrganization(org), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the streaming service jobs len.
+//	 *
+//	 * @param name the name
+//	 * @param org  the org
+//	 * @return the streaming service jobs len
+//	 */
+//	@GetMapping("/streamingLen/{nameStr}/{org}")
+//	public ResponseEntity<Long> getStreamingServiceJobsLen(@PathVariable(name = "nameStr") String name,
+//			@PathVariable(name = "org") String org) {
+//		return new ResponseEntity<>(iICIPAgentJobsService.countByCnameAndOrganization(name, org), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the jobs by model.
+//	 *
+//	 * @param name the name
+//	 * @param org  the org
+//	 * @param page the page
+//	 * @param size the size
+//	 * @return the jobs by model
+//	 */
+//	@GetMapping("/{nameStr}/{org}")
+//	public ResponseEntity<List<ICIPPartialAgentJobs>> getJobsByModel(@PathVariable(name = "nameStr") String name,
+//			@PathVariable(name = "org") String org, @RequestParam(required = false, name = "page") String page,
+//			@RequestParam(required = false, name = "size") String size) {
+//		if (name.equals("all")) {
+//			logger.info("Getting Jobs");
+//		} else {
+//			logger.info("Getting Jobs for Streaming Service  : {}", name);
+//		}
+//		return new ResponseEntity<>(iICIPAgentJobsService.getJobsByService(name, Integer.valueOf(page), Integer.valueOf(size), org), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the job console.
+//	 *
+//	 * @param jobId the job id
+//	 * @param offset the offset
+//	 * @param org the org
+//	 * @param lineno the lineno
+//	 * @param status the status
+//	 * @return the job console
+//	 * @throws IOException 
+//	 */
+//	@GetMapping("/console/{jobId}")
+//	public ResponseEntity<ICIPAgentJobs> getJobConsole(@PathVariable(name = "jobId") String jobId,
+//			@RequestParam(name = "offset", required = false, defaultValue = "0") int offset,
+//			@RequestParam(name = "org", required = true) String org,
+//			@RequestParam(name = "lineno", required = true) int lineno,
+//			@RequestParam(name = "status", required = true) String status) throws IOException {
+//		logger.debug("Getting Job response with log");
+//
+//		return new ResponseEntity<>(iICIPAgentJobsService.findByJobIdWithLog(jobId, offset, lineno, org, status), new HttpHeaders(), HttpStatus.OK);
+//
+//	}
+//
+//	/**
+//	 * Gets the job by corelid.
+//	 *
+//	 * @param corelid the corelid
+//	 * @return the job by corelid
+//	 */
+//	@GetMapping("/corelid/{corelid}")
+//	public ResponseEntity<List<ICIPPartialAgentJobs>> getJobByCorelid(@PathVariable(name = "corelid") String corelid) {
+//		logger.debug("Getting Job by corelid");
+//		return new ResponseEntity<>(iICIPAgentJobsService.findByCorelid(corelid), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Stop job.
+//	 *
+//	 * @param jobid the jobid
+//	 * @return the response entity
+//	 */
+//	@GetMapping("/stopJob/{jobid}")
+//	public ResponseEntity<Void> stopJob(@PathVariable(name = "jobid") String jobid) {
+//		logger.info("Request to stop job");
+//		try {
+//			iICIPAgentJobsService.stopLocalJob(jobid);
+//			return new ResponseEntity<>(new HttpHeaders(), HttpStatus.OK);
+//		} catch (Exception e) {
+//			logger.error(e.getMessage(), e);
+//			return new ResponseEntity<>(new HttpHeaders(), HttpStatus.BAD_REQUEST);
+//		}
+//	}
+//
+//	/**
+//	 * Handle all.
+//	 *
+//	 * @param ex the ex
+//	 * @return the response entity
+//	 */
+//	@ExceptionHandler(Exception.class)
+//	public ResponseEntity<Object> handleAll(Exception ex) {
+//		logger.error(ex.getMessage(), ex);
+//		Throwable rootcause = ExceptionUtil.findRootCause(ex);
+//		return new ResponseEntity<>( new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getMessage(), new HttpHeaders(),  new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getStatus());
+//	}
 
 }

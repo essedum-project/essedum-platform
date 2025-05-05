@@ -23,6 +23,7 @@ import com.infosys.icets.icip.dataset.model.ICIPMlIntstance;
 /**
  * @author icets
  */
+
 @NoRepositoryBean
 public interface ICIPMlIntstanceRepository extends JpaRepository<ICIPMlIntstance, Integer> {
 

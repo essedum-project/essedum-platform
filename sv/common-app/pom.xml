@@ -120,7 +120,7 @@
 		
 		
 		
-		<!--<dependency>
+		<dependency>
 			<groupId>com.infosys.icets.icip</groupId>
 			<artifactId>icip-lib-mlops</artifactId>
 			<version>${project.version}</version>
@@ -160,7 +160,7 @@
 		<dependency>
 			<groupId>com.infosys.icets.icip.plugins</groupId>
 			<artifactId>icip-adp-postgresql</artifactId>
-		</dependency> -->
+		</dependency>
 			
 
 		<dependency>

@@ -28,68 +28,69 @@ import com.infosys.icets.icip.dataset.model.ICIPDatasetTopic;
 import com.infosys.icets.icip.dataset.service.ICIPDatasetTopicService;
 
 import io.micrometer.core.annotation.Timed;
-
-@RestController
-@Timed
-@RequestMapping("/${icip.pathPrefix}/mldatasettopics")
-@RefreshScope
-public class ICIPDatasetTopicController {
-
-	private static final Logger logger = LoggerFactory.getLogger(ICIPDatasetController.class);
-
-	@Autowired
-	private ICIPDatasetTopicService icipDatasetTopicService;
-
-	
-	@GetMapping("/{org}")
-	public ResponseEntity<List<ICIPDatasetTopic>> getAllDatasetTopicsByOrganization(@PathVariable(name = "org", required = true)String org){
-		return new ResponseEntity<List<ICIPDatasetTopic>>(icipDatasetTopicService.getDatasetTopicsByOrg(org),new HttpHeaders(), HttpStatus.OK);
-	}
-	
-	@GetMapping("/{datasetid}/{topicname}/{org}")
-	public ResponseEntity<ICIPDatasetTopic> getDatasetTopicByDatasetidAndTopicnameAndOrganization(
-			@PathVariable(name = "org", required = true) String org,
-			@PathVariable(name = "datasetid", required = true) String datasetid,
-			@PathVariable(name = "topicname", required = true) String topicname) {
-		return new ResponseEntity<ICIPDatasetTopic>(
-				icipDatasetTopicService.getDatasetTopicByDatasetnameandTopicnamendOrg(datasetid, topicname, org),
-				new HttpHeaders(), HttpStatus.OK);
-	}
-
-	@GetMapping("/{datasetid}/{org}")
-	public ResponseEntity<List<ICIPDatasetTopic>> getDatasetTopicByDatasetidAndOrganization(
-			@PathVariable(name = "org", required = true) String org,
-			@PathVariable(name = "datasetid", required = true) String datasetid) {
-		return new ResponseEntity<List<ICIPDatasetTopic>>(
-				icipDatasetTopicService.getDatasetTopicByDatasetnameandOrg(datasetid, org), new HttpHeaders(),
-				HttpStatus.OK);
-	}
-
-	@PostMapping("/add")
-	public ResponseEntity<ICIPDatasetTopic> createDatasetTopicMapping(@RequestBody ICIPDatasetTopic icipDatasetTopic) {
-
-		return new ResponseEntity<ICIPDatasetTopic>(icipDatasetTopicService.save(icipDatasetTopic), new HttpHeaders(),
-				HttpStatus.OK);
-	}
-
-	@PostMapping("/addOrUpdateTopic")
-	public ResponseEntity<ICIPDatasetTopic> addOrUpdateTopic(@RequestBody MlTopics mlTopics) {
-		logger.info("addOrUpdateTopic called for:{}-{}", mlTopics.getDatasetId(), mlTopics.getOrganization());
-		return new ResponseEntity<ICIPDatasetTopic>(icipDatasetTopicService.addOrUpdateTopic(mlTopics),
-				new HttpHeaders(), HttpStatus.OK);
-	}
-	@PostMapping("/getDatasetsByTopics/{org}")
-	public ResponseEntity<List<ICIPDataset>> getDatasetsByTopics(@RequestBody Map<String,String> topicsMap,
-			@PathVariable(name = "org", required = true) String org){
-		String[] topics = topicsMap.get("topics").split(",");
-		return new ResponseEntity<List<ICIPDataset>>(icipDatasetTopicService.getDatasetsByTopics(topics,org),new HttpHeaders(),HttpStatus.OK);
-	}
-	
-	@DeleteMapping("/softDeleteTopics/{org}")
-	public ResponseEntity<String> softDeleteTopics(@RequestParam(name = "topics", required = false) String topics,
-			@PathVariable(name = "org", required = true) String org) {
-		logger.info("Soft Deleting Topics:{}", topics);
-		return new ResponseEntity<String>(icipDatasetTopicService.softDeleteTopics(topics, org), new HttpHeaders(),
-				HttpStatus.OK);
-	}
-}
+//COMMENTED AS PART OF API CLEANUP
+//@RestController
+//@Timed
+//@RequestMapping("/${icip.pathPrefix}/mldatasettopics")
+//@RefreshScope
+//public class ICIPDatasetTopicController {
+//
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPDatasetController.class);
+//
+//	@Autowired
+//	private ICIPDatasetTopicService icipDatasetTopicService;
+//	
+//	@GetMapping("/{org}")
+//	public ResponseEntity<List<ICIPDatasetTopic>> getAllDatasetTopicsByOrganization(@PathVariable(name = "org", required = true)String org){
+//		return new ResponseEntity<List<ICIPDatasetTopic>>(icipDatasetTopicService.getDatasetTopicsByOrg(org),new HttpHeaders(), HttpStatus.OK);
+//	}
+//	
+//	@GetMapping("/{datasetid}/{topicname}/{org}")
+//	public ResponseEntity<ICIPDatasetTopic> getDatasetTopicByDatasetidAndTopicnameAndOrganization(
+//			@PathVariable(name = "org", required = true) String org,
+//			@PathVariable(name = "datasetid", required = true) String datasetid,
+//			@PathVariable(name = "topicname", required = true) String topicname) {
+//		return new ResponseEntity<ICIPDatasetTopic>(
+//				icipDatasetTopicService.getDatasetTopicByDatasetnameandTopicnamendOrg(datasetid, topicname, org),
+//				new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	@GetMapping("/{datasetid}/{org}")
+//	public ResponseEntity<List<ICIPDatasetTopic>> getDatasetTopicByDatasetidAndOrganization(
+//			@PathVariable(name = "org", required = true) String org,
+//			@PathVariable(name = "datasetid", required = true) String datasetid) {
+//		return new ResponseEntity<List<ICIPDatasetTopic>>(
+//				icipDatasetTopicService.getDatasetTopicByDatasetnameandOrg(datasetid, org), new HttpHeaders(),
+//				HttpStatus.OK);
+//	}
+//
+//	@PostMapping("/add")
+//	public ResponseEntity<ICIPDatasetTopic> createDatasetTopicMapping(@RequestBody ICIPDatasetTopic icipDatasetTopic) {
+//
+//		return new ResponseEntity<ICIPDatasetTopic>(icipDatasetTopicService.save(icipDatasetTopic), new HttpHeaders(),
+//				HttpStatus.OK);
+//	}
+//
+//	@PostMapping("/addOrUpdateTopic")
+//	public ResponseEntity<ICIPDatasetTopic> addOrUpdateTopic(@RequestBody MlTopics mlTopics) {
+//		logger.info("addOrUpdateTopic called for:{}-{}", mlTopics.getDatasetId(), mlTopics.getOrganization());
+//		return new ResponseEntity<ICIPDatasetTopic>(icipDatasetTopicService.addOrUpdateTopic(mlTopics),
+//				new HttpHeaders(), HttpStatus.OK);
+//	}
+//	@PostMapping("/getDatasetsByTopics/{org}")
+//	public ResponseEntity<List<ICIPDataset>> getDatasetsByTopics(@RequestBody Map<String,String> topicsMap,
+//			@PathVariable(name = "org", required = true) String org){
+//		String[] topics = topicsMap.get("topics").split(",");
+//		return new ResponseEntity<List<ICIPDataset>>(icipDatasetTopicService.getDatasetsByTopics(topics,org),new HttpHeaders(),HttpStatus.OK);
+//	}
+//	
+//	@DeleteMapping("/softDeleteTopics/{org}")
+//	public ResponseEntity<String> softDeleteTopics(@RequestParam(name = "topics", required = false) String topics,
+//			@PathVariable(name = "org", required = true) String org) {
+//		logger.info("Soft Deleting Topics:{}", topics);
+//		return new ResponseEntity<String>(icipDatasetTopicService.softDeleteTopics(topics, org), new HttpHeaders(),
+//				HttpStatus.OK);
+//	}
+//	
+//
+//}

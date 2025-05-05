@@ -22,44 +22,45 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.infosys.icets.icip.dataset.model.ICIPSpecTemplate;
-import com.infosys.icets.icip.dataset.service.impl.ICIPSpecTemplatesService;
+//import com.infosys.icets.icip.dataset.service.impl.ICIPSpecTemplatesService;
 import io.micrometer.core.annotation.Timed;
+//COMMENTED AS PART OF API CLEANUP
 
 /**
  * The Class ICIPSpecTemplatesController.
  *
  * @author icets
  */
-@RestController
-@Timed
-@RequestMapping("/${icip.pathPrefix}/spectemplates")
-@RefreshScope
-public class ICIPSpecTemplatesController {
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPSpecTemplatesController.class);
-
-	@Autowired
-	ICIPSpecTemplatesService iCIPSpecTemplatesService;
-
-	/* Fetches List of API Spec Template Names */
-	@GetMapping("/specTemplateNames/list")
-	public ResponseEntity<List<String>> getAllTemplateName() {
-		return new ResponseEntity<>(iCIPSpecTemplatesService.getAllTemplateNames(), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/* Fetches ICIPSpecTemplate of API Spec by Template Name */
-	@GetMapping("/{templateName}")
-	public ResponseEntity<ICIPSpecTemplate> getAllTemplateName(
-			@PathVariable(name = "templateName", required = true) String templateName) {
-		return new ResponseEntity<>(iCIPSpecTemplatesService.getByTemplateName(templateName), new HttpHeaders(),
-				HttpStatus.OK);
-	}
-
-	/* Fetches List of API Spec ICIPSpecTemplate */
-	@GetMapping("/getAllSpecTemplates")
-	public ResponseEntity<List<ICIPSpecTemplate>> getAllSpecTemplates() {
-		return new ResponseEntity<>(iCIPSpecTemplatesService.getAllSpecTemplates(), new HttpHeaders(), HttpStatus.OK);
-	}
-
-}
+//@RestController
+//@Timed
+//@RequestMapping("/${icip.pathPrefix}/spectemplates")
+//@RefreshScope
+//public class ICIPSpecTemplatesController {
+//
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPSpecTemplatesController.class);
+//
+//	@Autowired
+//	ICIPSpecTemplatesService iCIPSpecTemplatesService;
+//
+//	/* Fetches List of API Spec Template Names */
+//	@GetMapping("/specTemplateNames/list")
+//	public ResponseEntity<List<String>> getAllTemplateName() {
+//		return new ResponseEntity<>(iCIPSpecTemplatesService.getAllTemplateNames(), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/* Fetches ICIPSpecTemplate of API Spec by Template Name */
+//	@GetMapping("/{templateName}")
+//	public ResponseEntity<ICIPSpecTemplate> getAllTemplateName(
+//			@PathVariable(name = "templateName", required = true) String templateName) {
+//		return new ResponseEntity<>(iCIPSpecTemplatesService.getByTemplateName(templateName), new HttpHeaders(),
+//				HttpStatus.OK);
+//	}
+//
+//	/* Fetches List of API Spec ICIPSpecTemplate */
+//	@GetMapping("/getAllSpecTemplates")
+//	public ResponseEntity<List<ICIPSpecTemplate>> getAllSpecTemplates() {
+//		return new ResponseEntity<>(iCIPSpecTemplatesService.getAllSpecTemplates(), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//}

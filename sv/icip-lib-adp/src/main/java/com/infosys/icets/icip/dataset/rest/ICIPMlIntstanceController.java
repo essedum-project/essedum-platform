@@ -29,59 +29,62 @@ import org.springframework.web.bind.annotation.RestController;
 import com.infosys.icets.icip.dataset.model.ICIPMlIntstance;
 import com.infosys.icets.icip.dataset.service.ICIPMlIntstanceService;
 import io.micrometer.core.annotation.Timed;
-
+//COMMENTED AS PART OF CODE CLEANUP
 /**
  * The Class ICIPSpecTemplatesController.
  *
  * @author icets
  */
-@RestController
-@Timed
-@RequestMapping("/${icip.pathPrefix}/instances")
-@RefreshScope
-public class ICIPMlIntstanceController {
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPMlIntstanceController.class);
-
-	@Autowired
-	ICIPMlIntstanceService iCIPMlIntstanceService;
-
-	/* Fetches MlIntstance by Name and Organization */
-	@GetMapping("/{name}/{org}")
-	public ResponseEntity<ICIPMlIntstance> getICIPMlIntstancesByNameAndOrg(@PathVariable("name") String name,
-			@PathVariable("org") String org) {
-		return new ResponseEntity<>(iCIPMlIntstanceService.getICIPMlIntstancesByNameAndOrg(name, org),
-				new HttpHeaders(), HttpStatus.OK);
-	}
-
-	@GetMapping("/searchByAlias/{alias}/{org}")
-	public ResponseEntity<List<ICIPMlIntstance>> getICIPMlIntstancesByAliasAndTypeAndOrg(
-			@PathVariable("alias") String alias, @PathVariable("org") String org) {
-		return new ResponseEntity<>(iCIPMlIntstanceService.getICIPMlIntstancesByAliasAndOrg(alias, org),
-				new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/* Fetches count of MlIntstance by Name */
-	@GetMapping("/count/byName/{name}")
-	public ResponseEntity<Integer> countByName(@PathVariable("name") String name) {
-		return new ResponseEntity<>(iCIPMlIntstanceService.countByName(name), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	@PostMapping("/add")
-	public ResponseEntity<ICIPMlIntstance> createIntstance(@RequestBody ICIPMlIntstance iCIPMlIntstance)
-			throws NoSuchAlgorithmException {
-		logger.info("creating mlintstance:{}", iCIPMlIntstance.getAlias());
-		return new ResponseEntity<>(iCIPMlIntstanceService.save(null, iCIPMlIntstance), new HttpHeaders(),
-				HttpStatus.OK);
-	}
-
-	@DeleteMapping("/delete/{nameStr}/{org}")
-	public ResponseEntity<Void> deleteIntstance(@PathVariable(name = "nameStr") String name,
-			@PathVariable(name = "org") String org) {
-		logger.info("deleting mlintstance:{}", name);
-		iCIPMlIntstanceService.delete(name, org);
-		return ResponseEntity.ok().build();
-	}
-
-}
+//@RestController
+//@Timed
+//@RequestMapping("/${icip.pathPrefix}/instances")
+//@RefreshScope
+//public class ICIPMlIntstanceController {
+//
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPMlIntstanceController.class);
+//
+//	@Autowired
+//	ICIPMlIntstanceService iCIPMlIntstanceService;
+//	
+//
+//	
+//	
+//	/* Fetches MlIntstance by Name and Organization */
+//	@GetMapping("/{name}/{org}")
+//	public ResponseEntity<ICIPMlIntstance> getICIPMlIntstancesByNameAndOrg(@PathVariable("name") String name,
+//			@PathVariable("org") String org) {
+//		return new ResponseEntity<>(iCIPMlIntstanceService.getICIPMlIntstancesByNameAndOrg(name, org),
+//				new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	@GetMapping("/searchByAlias/{alias}/{org}")
+//	public ResponseEntity<List<ICIPMlIntstance>> getICIPMlIntstancesByAliasAndTypeAndOrg(
+//			@PathVariable("alias") String alias, @PathVariable("org") String org) {
+//		return new ResponseEntity<>(iCIPMlIntstanceService.getICIPMlIntstancesByAliasAndOrg(alias, org),
+//				new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/* Fetches count of MlIntstance by Name */
+//	@GetMapping("/count/byName/{name}")
+//	public ResponseEntity<Integer> countByName(@PathVariable("name") String name) {
+//		return new ResponseEntity<>(iCIPMlIntstanceService.countByName(name), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	@PostMapping("/add")
+//	public ResponseEntity<ICIPMlIntstance> createIntstance(@RequestBody ICIPMlIntstance iCIPMlIntstance)
+//			throws NoSuchAlgorithmException {
+//		logger.info("creating mlintstance:{}", iCIPMlIntstance.getAlias());
+//		return new ResponseEntity<>(iCIPMlIntstanceService.save(null, iCIPMlIntstance), new HttpHeaders(),
+//				HttpStatus.OK);
+//	}
+//
+//	@DeleteMapping("/delete/{nameStr}/{org}")
+//	public ResponseEntity<Void> deleteIntstance(@PathVariable(name = "nameStr") String name,
+//			@PathVariable(name = "org") String org) {
+//		logger.info("deleting mlintstance:{}", name);
+//		iCIPMlIntstanceService.delete(name, org);
+//		return ResponseEntity.ok().build();
+//	}
+//
+//}

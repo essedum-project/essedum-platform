@@ -21,77 +21,79 @@ import com.infosys.icets.icip.dataset.model.ICIPTopic;
 import com.infosys.icets.icip.dataset.model.dto.MlTopics;
 import com.infosys.icets.icip.dataset.model.dto.MlTopicsFAQs;
 import com.infosys.icets.icip.dataset.service.ICIPDatasetTopicService;
-import com.infosys.icets.icip.dataset.service.ICIPTopicService;
+//import com.infosys.icets.icip.dataset.service.ICIPTopicService;
 
 import io.micrometer.core.annotation.Timed;
+//COMMENTED AS PART OF CODE CLEANUP
+//@RestController
+//@Timed
+//@RequestMapping("/${icip.pathPrefix}/mltopics")
+//@RefreshScope
+//public class ICIPTopicController {
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPDatasetController.class);
+//
+//	@Autowired
+//	private ICIPTopicService icipTopicService;
+//
+//	@Autowired
+//	private ICIPDatasetTopicService icipDatasetTopicService;
+//	
+//	
 
-@RestController
-@Timed
-@RequestMapping("/${icip.pathPrefix}/mltopics")
-@RefreshScope
-public class ICIPTopicController {
-	private static final Logger logger = LoggerFactory.getLogger(ICIPDatasetController.class);
-
-	@Autowired
-	private ICIPTopicService icipTopicService;
-
-	@Autowired
-	private ICIPDatasetTopicService icipDatasetTopicService;
-
-	@GetMapping("/{org}")
-	public ResponseEntity<List<ICIPTopic>> getTopicsByOrg(@PathVariable(name = "org", required = true) String org) {
-		return new ResponseEntity<List<ICIPTopic>>(icipTopicService.fetchTopicsByOrg(org), new HttpHeaders(),
-				HttpStatus.OK);
-	}
-
-	@GetMapping("/{topicname}/{org}")
-	public ResponseEntity<ICIPTopic> getTopicByTopicNameAndOrg(@PathVariable(name = "org", required = true) String org,
-			@PathVariable(name = "topicname", required = true) String topicname) {
-		return new ResponseEntity<ICIPTopic>(icipTopicService.fetchTopicByTopicnameandOrg(topicname, org),
-				new HttpHeaders(), HttpStatus.OK);
-
-	}
-
-	@PostMapping("/add")
-	public ResponseEntity<ICIPTopic> saveTopic(@RequestBody ICIPTopic icipTopic) {
-
-		return new ResponseEntity<ICIPTopic>(icipTopicService.save(icipTopic), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	@PostMapping("/addOrUpdateTopic")
-	public ResponseEntity<ICIPDatasetTopic> addOrUpdateTopic(@RequestBody MlTopics mlTopics) {
-		logger.info("addOrUpdateTopic called for:{}-{}", mlTopics.getDatasetId(), mlTopics.getOrganization());
-		ICIPDatasetTopic iCIPDatasetTopic = icipDatasetTopicService.addOrUpdateTopic(mlTopics);
-		if (iCIPDatasetTopic != null)
-			return new ResponseEntity<ICIPDatasetTopic>(iCIPDatasetTopic, new HttpHeaders(), HttpStatus.OK);
-		else
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-
-	}
-
-	@DeleteMapping("/deleteTopicById/{id}")
-	public ResponseEntity<Map<String, String>> deleteTopicById(@PathVariable("id") Integer id) {
-		logger.info("deleting topic id:{}", id);
-		try {
-			icipDatasetTopicService.deleteTopicById(id);
-			return new ResponseEntity<>(icipDatasetTopicService.deleteTopicById(id), new HttpHeaders(), HttpStatus.OK);
-		} catch (Exception t) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-
-	@GetMapping("/list/activeMltopicsByOrg/{org}")
-	public ResponseEntity<List<ICIPTopic>> activeMltopicsByOrg(
-			@PathVariable(name = "org", required = true) String org) {
-		return new ResponseEntity<List<ICIPTopic>>(icipTopicService.activeMltopicsByOrg(org), new HttpHeaders(),
-				HttpStatus.OK);
-	}
-	
-	@PostMapping("/addOrUpdateTopicSuggestedQueries")
-	public ResponseEntity<ICIPTopic> addOrUpdateTopicFAQs(@RequestBody MlTopicsFAQs addOrUpdateTopicFAQs) {
-		logger.info("addOrUpdateTopicSuggestedQueries called for:{}-{}", addOrUpdateTopicFAQs.getTopicname(), addOrUpdateTopicFAQs.getOrganization());
-		return new ResponseEntity<ICIPTopic>(icipTopicService.addOrUpdateTopicFAQs(addOrUpdateTopicFAQs),
-				new HttpHeaders(), HttpStatus.OK);
-	}
-
-}
+//	@GetMapping("/{org}")
+//	public ResponseEntity<List<ICIPTopic>> getTopicsByOrg(@PathVariable(name = "org", required = true) String org) {
+//		return new ResponseEntity<List<ICIPTopic>>(icipTopicService.fetchTopicsByOrg(org), new HttpHeaders(),
+//				HttpStatus.OK);
+//	}
+//
+//	@GetMapping("/{topicname}/{org}")
+//	public ResponseEntity<ICIPTopic> getTopicByTopicNameAndOrg(@PathVariable(name = "org", required = true) String org,
+//			@PathVariable(name = "topicname", required = true) String topicname) {
+//		return new ResponseEntity<ICIPTopic>(icipTopicService.fetchTopicByTopicnameandOrg(topicname, org),
+//				new HttpHeaders(), HttpStatus.OK);
+//
+//	}
+//
+//	@PostMapping("/add")
+//	public ResponseEntity<ICIPTopic> saveTopic(@RequestBody ICIPTopic icipTopic) {
+//
+//		return new ResponseEntity<ICIPTopic>(icipTopicService.save(icipTopic), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	@PostMapping("/addOrUpdateTopic")
+//	public ResponseEntity<ICIPDatasetTopic> addOrUpdateTopic(@RequestBody MlTopics mlTopics) {
+//		logger.info("addOrUpdateTopic called for:{}-{}", mlTopics.getDatasetId(), mlTopics.getOrganization());
+//		ICIPDatasetTopic iCIPDatasetTopic = icipDatasetTopicService.addOrUpdateTopic(mlTopics);
+//		if (iCIPDatasetTopic != null)
+//			return new ResponseEntity<ICIPDatasetTopic>(iCIPDatasetTopic, new HttpHeaders(), HttpStatus.OK);
+//		else
+//			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+//
+//	}
+//
+//	@DeleteMapping("/deleteTopicById/{id}")
+//	public ResponseEntity<Map<String, String>> deleteTopicById(@PathVariable("id") Integer id) {
+//		logger.info("deleting topic id:{}", id);
+//		try {
+//			icipDatasetTopicService.deleteTopicById(id);
+//			return new ResponseEntity<>(icipDatasetTopicService.deleteTopicById(id), new HttpHeaders(), HttpStatus.OK);
+//		} catch (Exception t) {
+//			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+//		}
+//	}
+//
+//	@GetMapping("/list/activeMltopicsByOrg/{org}")
+//	public ResponseEntity<List<ICIPTopic>> activeMltopicsByOrg(
+//			@PathVariable(name = "org", required = true) String org) {
+//		return new ResponseEntity<List<ICIPTopic>>(icipTopicService.activeMltopicsByOrg(org), new HttpHeaders(),
+//				HttpStatus.OK);
+//	}
+//	
+//	@PostMapping("/addOrUpdateTopicSuggestedQueries")
+//	public ResponseEntity<ICIPTopic> addOrUpdateTopicFAQs(@RequestBody MlTopicsFAQs addOrUpdateTopicFAQs) {
+//		logger.info("addOrUpdateTopicSuggestedQueries called for:{}-{}", addOrUpdateTopicFAQs.getTopicname(), addOrUpdateTopicFAQs.getOrganization());
+//		return new ResponseEntity<ICIPTopic>(icipTopicService.addOrUpdateTopicFAQs(addOrUpdateTopicFAQs),
+//				new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//}

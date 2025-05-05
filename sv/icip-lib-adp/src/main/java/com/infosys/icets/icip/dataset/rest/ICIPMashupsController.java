@@ -38,102 +38,107 @@ import com.infosys.icets.ai.comm.lib.util.ICIPHeaderUtil;
 import com.infosys.icets.ai.comm.lib.util.exceptions.ApiError;
 import com.infosys.icets.ai.comm.lib.util.exceptions.ExceptionUtil;
 import com.infosys.icets.icip.dataset.model.ICIPMashups;
-import com.infosys.icets.icip.dataset.service.IICIPMashupService;
+//import com.infosys.icets.icip.dataset.service.IICIPMashupService;
 
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 // TODO: Auto-generated Javadoc
+//COMMENTED AS PART OF CODE CLEANUP
 // 
 /**
  * The Class ICIPSchemaRegistryController.
  *
  * @author icets
  */
-@RestController
-@Timed
-@RequestMapping(path = "/${icip.pathPrefix}/mashups")
-@Tag(name= "mashups")
-public class ICIPMashupsController {
+//@RestController
+//@Timed
+//@RequestMapping(path = "/${icip.pathPrefix}/mashups")
+//@Tag(name= "mashups")
+//public class ICIPMashupsController {
+//
+//	/** The Constant ENTITY_NAME. */
+//	private static final String ENTITY_NAME = "mashups";
+//
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPMashupsController.class);
+//
+//	/** The schema registry service. */
+//	@Autowired
+//	private IICIPMashupService mashupService;
+//	
+//	
+//	
+//	
 
-	/** The Constant ENTITY_NAME. */
-	private static final String ENTITY_NAME = "mashups";
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPMashupsController.class);
-
-	/** The schema registry service. */
-	@Autowired
-	private IICIPMashupService mashupService;
-	
-	/** The claim. */
-	@Value("${security.claim:#{null}}")
-	private String claim;
-
-	/**
-	 * Gets all mashups.
-	 *
-	 * @param org the org
-	 * @return all mashups
-	 */
-	@GetMapping("/all")
-	public ResponseEntity<List<ICIPMashups>> getMashups(@RequestParam(name = "org") String org) {
-		logger.info("Get all schema of organziation {}", org);
-		return new ResponseEntity<>(mashupService.getMashupsByOrg(org), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	@GetMapping("/all/{org}")
-	public ResponseEntity<List<ICIPMashups>> getMashupsByOrge(@PathVariable(name = "org") String org) {
-		logger.info("Get all schema of organziation {}", org);
-		return new ResponseEntity<>(mashupService.getMashupsByOrg(org), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	
-	/**
-	 * Gets the mashup.
-	 *
-	 * @param name the name
-	 * @param org  the org
-	 * @return the mashup
-	 */
-	@GetMapping("/{nameStr}/{org}")
-	public ResponseEntity<ICIPMashups> getMashupByName(@PathVariable(name = "nameStr") String name,
-			@PathVariable(name = "org") String org) {
-		return new ResponseEntity<>(mashupService.getMashupByName(name, org), new HttpHeaders(), HttpStatus.OK);
-	}
-	
-	@DeleteMapping("/{nameStr}/{org}")
-	public ResponseEntity<Map<String, String>> deleteMashupByName(@PathVariable(name = "nameStr") String name,
-			@PathVariable(name = "org") String org) {
-		return new ResponseEntity<>(mashupService.deleteMashupByName(name, org), new HttpHeaders(), HttpStatus.OK);
-	}
-	
-	@PostMapping("/add")
-	public ResponseEntity<ICIPMashups> createMshup(@RequestBody ICIPMashups mashupDto)
-			throws URISyntaxException, SQLException {
-		logger.info("Creating mashup: {}", mashupDto.getName());
-		ICIPMashups iCIPMashupsFromDB=mashupService.getMashupByName(mashupDto.getName(), mashupDto.getOrganization());
-		if (iCIPMashupsFromDB != null && mashupDto.getId() == null)
-			return new ResponseEntity<>(iCIPMashupsFromDB, new HttpHeaders(), HttpStatus.OK);
-		ModelMapper modelmapper = new ModelMapper();
-		ICIPMashups mashups = modelmapper.map(mashupDto, ICIPMashups.class);
-		ICIPMashups result = mashupService.save(mashups);
-		return ResponseEntity.created(new URI("/mashups/" + result.getId()))
-				.headers(ICIPHeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString())).body(result);
-	}
-	
-	/**
-	 * Handle all.
-	 *
-	 * @param ex the ex
-	 * @return the response entity
-	 */
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Object> handleAll(Exception ex) {
-		Throwable rootcause = ExceptionUtil.findRootCause(ex);
-		return new ResponseEntity<>(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getMessage(), new HttpHeaders(), new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getStatus());
-	}
-	
+//    /** The claim. */
+//	@Value("${security.claim:#{null}}")
+//	private String claim;
+//
+//	/**
+//	 * Gets all mashups.
+//	 *
+//	 * @param org the org
+//	 * @return all mashups
+//	 */
+//	@GetMapping("/all")
+//	public ResponseEntity<List<ICIPMashups>> getMashups(@RequestParam(name = "org") String org) {
+//		logger.info("Get all schema of organziation {}", org);
+//		return new ResponseEntity<>(mashupService.getMashupsByOrg(org), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	@GetMapping("/all/{org}")
+//	public ResponseEntity<List<ICIPMashups>> getMashupsByOrge(@PathVariable(name = "org") String org) {
+//		logger.info("Get all schema of organziation {}", org);
+//		return new ResponseEntity<>(mashupService.getMashupsByOrg(org), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	
+//	/**
+//	 * Gets the mashup.
+//	 *
+//	 * @param name the name
+//	 * @param org  the org
+//	 * @return the mashup
+//	 */
+//	@GetMapping("/{nameStr}/{org}")
+//	public ResponseEntity<ICIPMashups> getMashupByName(@PathVariable(name = "nameStr") String name,
+//			@PathVariable(name = "org") String org) {
+//		return new ResponseEntity<>(mashupService.getMashupByName(name, org), new HttpHeaders(), HttpStatus.OK);
+//	}
+//	
+//	@DeleteMapping("/{nameStr}/{org}")
+//	public ResponseEntity<Map<String, String>> deleteMashupByName(@PathVariable(name = "nameStr") String name,
+//			@PathVariable(name = "org") String org) {
+//		return new ResponseEntity<>(mashupService.deleteMashupByName(name, org), new HttpHeaders(), HttpStatus.OK);
+//	}
+//	
+//	@PostMapping("/add")
+//	public ResponseEntity<ICIPMashups> createMshup(@RequestBody ICIPMashups mashupDto)
+//			throws URISyntaxException, SQLException {
+//		logger.info("Creating mashup: {}", mashupDto.getName());
+//		ICIPMashups iCIPMashupsFromDB=mashupService.getMashupByName(mashupDto.getName(), mashupDto.getOrganization());
+//		if (iCIPMashupsFromDB != null && mashupDto.getId() == null)
+//			return new ResponseEntity<>(iCIPMashupsFromDB, new HttpHeaders(), HttpStatus.OK);
+//		ModelMapper modelmapper = new ModelMapper();
+//		ICIPMashups mashups = modelmapper.map(mashupDto, ICIPMashups.class);
+//		ICIPMashups result = mashupService.save(mashups);
+//		return ResponseEntity.created(new URI("/mashups/" + result.getId()))
+//				.headers(ICIPHeaderUtil.createEntityCreationAlert(ENTITY_NAME, result.getId().toString())).body(result);
+//	}
+//	
+//	/**
+//	 * Handle all.
+//	 *
+//	 * @param ex the ex
+//	 * @return the response entity
+//	 */
+//	@ExceptionHandler(Exception.class)
+//	public ResponseEntity<Object> handleAll(Exception ex) {
+//		Throwable rootcause = ExceptionUtil.findRootCause(ex);
+//		return new ResponseEntity<>(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getMessage(), new HttpHeaders(), new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getStatus());
+//	}
+//	
 	
 
-}
+//}

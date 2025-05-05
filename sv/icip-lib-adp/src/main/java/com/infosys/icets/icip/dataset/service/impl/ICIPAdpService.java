@@ -49,7 +49,6 @@ import com.infosys.icets.icip.dataset.model.ICIPDatasource;
 import com.infosys.icets.icip.dataset.repository.ICIPDatasourceRepository;
 import com.infosys.icets.icip.dataset.service.IICIPAdpService;
 import com.infosys.icets.icip.dataset.service.IICIPDatasourcePluginsService;
-import com.infosys.icets.icip.dataset.service.IICIPRelationshipService;
 
 // TODO: Auto-generated Javadoc
 // 

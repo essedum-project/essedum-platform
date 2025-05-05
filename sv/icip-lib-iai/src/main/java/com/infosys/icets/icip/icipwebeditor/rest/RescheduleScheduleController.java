@@ -22,16 +22,18 @@ public class RescheduleScheduleController {
 	/** The event service. */
 	@Autowired
 	private InternalJobEventService eventService;
+	
+	//COMMENTED AS PART OF CODE CLEANUP
 
-	/**
-	 * Run bootstrap model.
-	 *
-	 * @param body the body
-	 */
-	@PostMapping("/schedule")
-	public void runBootstrapModel(@RequestBody String body) {
-		eventService.runInternalJob(body, "Reschedule_Existing_Schedules", RescheduleExistingSchedulesJob.class,
-				new HashMap<>());
-	}
+//	/**
+//	 * Run bootstrap model.
+//	 *
+//	 * @param body the body
+//	 */
+//	@PostMapping("/schedule")
+//	public void runBootstrapModel(@RequestBody String body) {
+//		eventService.runInternalJob(body, "Reschedule_Existing_Schedules", RescheduleExistingSchedulesJob.class,
+//				new HashMap<>());
+//	}
 
 }

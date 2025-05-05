@@ -17,33 +17,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.infosys.icets.icip.dataset.model.ICIPSpecTemplate;
-import com.infosys.icets.icip.dataset.repository.ICIPSpecTemplatesRepository;
+//import com.infosys.icets.icip.dataset.repository.ICIPSpecTemplatesRepository;
 
+//COMMENTED AS PART OF API CLEANUP
 // TODO: Auto-generated Javadoc
 /**
  * The Class ICIPSpecTemplatesService.
  *
  * @author icets
  */
-@Service
-public class ICIPSpecTemplatesService {
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPSpecTemplatesService.class);
-
-	@Autowired
-	private ICIPSpecTemplatesRepository iCIPSpecTemplatesRepository;
-
-	public List<String> getAllTemplateNames() {
-		return iCIPSpecTemplatesRepository.getAllTemplateNames();
-	}
-
-	public ICIPSpecTemplate getByTemplateName(String templateName) {
-		return iCIPSpecTemplatesRepository.searchByTemplateName(templateName);
-	}
-
-	public List<ICIPSpecTemplate> getAllSpecTemplates() {
-		return iCIPSpecTemplatesRepository.getAllSpecTemplates();
-	}
-
-}
+//@Service
+//public class ICIPSpecTemplatesService {
+//
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPSpecTemplatesService.class);
+//
+//	@Autowired
+//	private ICIPSpecTemplatesRepository iCIPSpecTemplatesRepository;
+//
+//	public List<String> getAllTemplateNames() {
+//		return iCIPSpecTemplatesRepository.getAllTemplateNames();
+//	}
+//
+//	public ICIPSpecTemplate getByTemplateName(String templateName) {
+//		return iCIPSpecTemplatesRepository.searchByTemplateName(templateName);
+//	}
+//
+//	public List<ICIPSpecTemplate> getAllSpecTemplates() {
+//		return iCIPSpecTemplatesRepository.getAllSpecTemplates();
+//	}
+//
+//}

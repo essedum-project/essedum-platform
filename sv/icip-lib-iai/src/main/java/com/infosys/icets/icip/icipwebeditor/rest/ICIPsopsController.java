@@ -49,6 +49,8 @@ public class ICIPsopsController {
     @Autowired
 	private IICPSopsService icipSopsService;
     
+    //COMMENTED AS PART OF CODE CLEANUP
+    
 	/**
      * POST  /icm_sops_alias/page : get all the icm_sops_alias.
      *
@@ -57,42 +59,42 @@ public class ICIPsopsController {
      * @throws UnsupportedEncodingException the unsupported encoding exception
      * @throws JsonMappingException the json mapping exception
      * @throws JsonProcessingException the json processing exception
-     */
-    @GetMapping("/alias/page")
-    @Timed
-    public ResponseEntity<PageResponse<ICIPSopsAlias>> getAllIcmSopsAlias(@RequestHeader(value="example") String example) 
-			throws UnsupportedEncodingException, JsonMappingException, JsonProcessingException{
-        log.debug("REST request to get a page of icm-sops alias");
-        PageRequestByExample<ICIPSopsAlias> prbe= null;
-		LazyLoadEvent ldz = new LazyLoadEvent(0, 1000, null, 1);
-		Gson gson = new Gson();
-		ICIPSopsAlias is = new ICIPSopsAlias();
-		is = gson.fromJson(example, ICIPSopsAlias.class);
-		prbe = new PageRequestByExample<>();
-		prbe.setExample(is);
-		prbe.setLazyLoadEvent(ldz);
-   
-        return new ResponseEntity<>(icip_sops_aliasService.getAll(prbe), new HttpHeaders(), HttpStatus.OK);
-    }
-    /**
-	 * POST /icm-sopss/page : get all the icm_sopss.
-	 *
-	 * @param example the example
-	 * @return the ResponseEntity with status 200 (OK) and the list of icm_sopss in
-	 *         body as PageResponse
-	 */
-	@GetMapping("/page")
-	@Timed
-	public ResponseEntity<PageResponse<ICIPSops>> getAllIcmSopss(@RequestHeader(value = "example") String example) {
-		log.debug("REST request to get a page of icm-sopss");
-		PageRequestByExample<ICIPSops> prbe = null;
-		LazyLoadEvent ldz = new LazyLoadEvent(0, 1000, null, 1);
-		Gson gson = new Gson();
-		ICIPSops is = gson.fromJson(example, ICIPSops.class);
-		prbe = new PageRequestByExample<>();
-		prbe.setExample(is);
-		prbe.setLazyLoadEvent(ldz);
-		
-		return new ResponseEntity<>(icipSopsService.getAll(prbe), new HttpHeaders(), HttpStatus.OK);
-	}
+//     */
+//    @GetMapping("/alias/page")
+//    @Timed
+//    public ResponseEntity<PageResponse<ICIPSopsAlias>> getAllIcmSopsAlias(@RequestHeader(value="example") String example) 
+//			throws UnsupportedEncodingException, JsonMappingException, JsonProcessingException{
+//        log.debug("REST request to get a page of icm-sops alias");
+//        PageRequestByExample<ICIPSopsAlias> prbe= null;
+//		LazyLoadEvent ldz = new LazyLoadEvent(0, 1000, null, 1);
+//		Gson gson = new Gson();
+//		ICIPSopsAlias is = new ICIPSopsAlias();
+//		is = gson.fromJson(example, ICIPSopsAlias.class);
+//		prbe = new PageRequestByExample<>();
+//		prbe.setExample(is);
+//		prbe.setLazyLoadEvent(ldz);
+//   
+//        return new ResponseEntity<>(icip_sops_aliasService.getAll(prbe), new HttpHeaders(), HttpStatus.OK);
+//    }
+//    /**
+//	 * POST /icm-sopss/page : get all the icm_sopss.
+//	 *
+//	 * @param example the example
+//	 * @return the ResponseEntity with status 200 (OK) and the list of icm_sopss in
+//	 *         body as PageResponse
+//	 */
+//	@GetMapping("/page")
+//	@Timed
+//	public ResponseEntity<PageResponse<ICIPSops>> getAllIcmSopss(@RequestHeader(value = "example") String example) {
+//		log.debug("REST request to get a page of icm-sopss");
+//		PageRequestByExample<ICIPSops> prbe = null;
+//		LazyLoadEvent ldz = new LazyLoadEvent(0, 1000, null, 1);
+//		Gson gson = new Gson();
+//		ICIPSops is = gson.fromJson(example, ICIPSops.class);
+//		prbe = new PageRequestByExample<>();
+//		prbe.setExample(is);
+//		prbe.setLazyLoadEvent(ldz);
+//		
+//		return new ResponseEntity<>(icipSopsService.getAll(prbe), new HttpHeaders(), HttpStatus.OK);
+//	}
 }

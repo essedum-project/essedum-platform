@@ -59,107 +59,109 @@ public class ICIPPipelineController {
 	/** The streaming services service. */
 	@Autowired
 	private IICIPStreamingServiceService streamingServicesService;
-
-	/**
-	 * Trigger pipeline.
-	 *
-	 * @param cname  the cname
-	 * @param org    the org
-	 * @param offset the offset
-	 * @param params the params
-	 * @return the response entity
-	 */
-	@GetMapping(value = "/run/{cname}/{org}", produces = "application/json")
-	public ResponseEntity<?> triggerPipeline(@PathVariable(name = "cname") String cname,
-			@PathVariable(name = "org") String org, @RequestParam("offset") int offset,
-			@RequestParam(name = "param", required = false) String params,
-			@RequestParam(name = "datasourceName", required = false) String datasourceName) {
-		ICIPStreamingServices ss = streamingServicesService.getICIPStreamingServices(cname, org);
-		return pipelineService.createJob(ss.getType(), cname, ss.getAlias(), org, "local", params,
-				ICIPUtils.generateCorrelationId(), offset,datasourceName,"");
-	}
-
-	/**
-	 * Run pipeline.
-	 *
-	 * @param jobType the runtime
-	 * @param cname   the cname
-	 * @param org     the org
-	 * @param runtime the is local
-	 * @param params  the params
-	 * @param offset the offset
-	 * @param alias the alias
-	 * @return the response entity
-	 */
-	@GetMapping(value = "/run/{jobType}/{cname}/{org}/{runtime}")
-	public ResponseEntity<?> runPipeline(@PathVariable(name = "jobType") String jobType,
-			@PathVariable(name = "cname") String cname, @PathVariable(name = "org") String org,
-			@PathVariable(name = "runtime") String runtime,
-			@RequestParam(name = "param", required = false) String params, @RequestParam(name = "offset", required = false) int offset,
-			@RequestParam(name = "alias", required = false) String alias,
-			@RequestParam(name = "datasource", required = false) String datasource) {
-		logger.info("Submitting the Pipeline to Job Server [isLocal : {}]", runtime);
-		return pipelineService.createJob(jobType, cname, alias, org, runtime, params, ICIPUtils.generateCorrelationId(),
-				offset,datasource,"");
-	}
 	
-	
+	//COMMENTED AS PART OF CODE CLEANUP
 
-	/**
-	 * Run agent.
-	 *
-	 * @param runtime the runtime
-	 * @param cname   the cname
-	 * @param org     the org
-	 * @param offset the offset
-	 * @param params  the params
-	 * @return the response entity
-	 */
-	@GetMapping(value = "/runAgent/{runtime}/{cname}/{org}")
-	public ResponseEntity<?> runAgent(@PathVariable(name = "runtime") String runtime,
-			@PathVariable(name = "cname") String cname, @PathVariable(name = "org") String org,
-			@RequestParam("offset") int offset, @RequestParam(name = "param", required = false) String params) {
-		logger.info("Submitting the Agent Job");
-		return pipelineService.createAgentJob(runtime, cname, org, params, ICIPUtils.generateCorrelationId(), offset);
-	}
-
-	/**
-	 * Gets the pipeline.
-	 *
-	 * @param cname the cname
-	 * @param org   the org
-	 * @return the pipeline
-	 */
-	@GetMapping(value = "/get/{org}/{cname}", produces = "application/json")
-	public @ResponseBody ResponseEntity<Object> getPipeline(@PathVariable(name = "cname") String cname,
-			@PathVariable(name = "org") String org) {
-		logger.info("Getting the Pipeline : {}", cname);
-		return new ResponseEntity<>( pipelineService.populateSchemaDetails(pipelineService.getJson(cname, org), org), HttpStatus.OK);
-	}
-
-	/**
-	 * Handle all.
-	 *
-	 * @param ex the ex
-	 * @return the response entity
-	 */
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Object> handleAll(Exception ex) {
-		logger.error(ex.getMessage(), ex);
-		Throwable rootcause = ExceptionUtil.findRootCause(ex);
-		return new ResponseEntity<>(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getMessage(), new HttpHeaders(), new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getStatus());
-	}
-
-	/**
-	 * Gets the pipeline as JSON.
-	 *
-	 * @param pipelines the pipelines
-	 * @param org       the org
-	 * @return the pipeline
-	 */
-	@GetMapping(value = "/getPipelines/{org}", produces = "application/json")
-	public @ResponseBody ResponseEntity<?> exportPipelines(@RequestParam(name = "cname") List<String> pipelines,
-			@PathVariable(name = "org") String org) {
-		return new ResponseEntity<>(new Gson().toJson(pipelineService.exportPipelines(org, pipelines)), HttpStatus.OK);
-	}
+//	/**
+//	 * Trigger pipeline.
+//	 *
+//	 * @param cname  the cname
+//	 * @param org    the org
+//	 * @param offset the offset
+//	 * @param params the params
+//	 * @return the response entity
+//	 */
+//	@GetMapping(value = "/run/{cname}/{org}", produces = "application/json")
+//	public ResponseEntity<?> triggerPipeline(@PathVariable(name = "cname") String cname,
+//			@PathVariable(name = "org") String org, @RequestParam("offset") int offset,
+//			@RequestParam(name = "param", required = false) String params,
+//			@RequestParam(name = "datasourceName", required = false) String datasourceName) {
+//		ICIPStreamingServices ss = streamingServicesService.getICIPStreamingServices(cname, org);
+//		return pipelineService.createJob(ss.getType(), cname, ss.getAlias(), org, "local", params,
+//				ICIPUtils.generateCorrelationId(), offset,datasourceName,"");
+//	}
+//
+//	/**
+//	 * Run pipeline.
+//	 *
+//	 * @param jobType the runtime
+//	 * @param cname   the cname
+//	 * @param org     the org
+//	 * @param runtime the is local
+//	 * @param params  the params
+//	 * @param offset the offset
+//	 * @param alias the alias
+//	 * @return the response entity
+//	 */
+//	@GetMapping(value = "/run/{jobType}/{cname}/{org}/{runtime}")
+//	public ResponseEntity<?> runPipeline(@PathVariable(name = "jobType") String jobType,
+//			@PathVariable(name = "cname") String cname, @PathVariable(name = "org") String org,
+//			@PathVariable(name = "runtime") String runtime,
+//			@RequestParam(name = "param", required = false) String params, @RequestParam(name = "offset", required = false) int offset,
+//			@RequestParam(name = "alias", required = false) String alias,
+//			@RequestParam(name = "datasource", required = false) String datasource) {
+//		logger.info("Submitting the Pipeline to Job Server [isLocal : {}]", runtime);
+//		return pipelineService.createJob(jobType, cname, alias, org, runtime, params, ICIPUtils.generateCorrelationId(),
+//				offset,datasource,"");
+//	}
+//	
+//	
+//
+//	/**
+//	 * Run agent.
+//	 *
+//	 * @param runtime the runtime
+//	 * @param cname   the cname
+//	 * @param org     the org
+//	 * @param offset the offset
+//	 * @param params  the params
+//	 * @return the response entity
+//	 */
+//	@GetMapping(value = "/runAgent/{runtime}/{cname}/{org}")
+//	public ResponseEntity<?> runAgent(@PathVariable(name = "runtime") String runtime,
+//			@PathVariable(name = "cname") String cname, @PathVariable(name = "org") String org,
+//			@RequestParam("offset") int offset, @RequestParam(name = "param", required = false) String params) {
+//		logger.info("Submitting the Agent Job");
+//		return pipelineService.createAgentJob(runtime, cname, org, params, ICIPUtils.generateCorrelationId(), offset);
+//	}
+//
+//	/**
+//	 * Gets the pipeline.
+//	 *
+//	 * @param cname the cname
+//	 * @param org   the org
+//	 * @return the pipeline
+//	 */
+//	@GetMapping(value = "/get/{org}/{cname}", produces = "application/json")
+//	public @ResponseBody ResponseEntity<Object> getPipeline(@PathVariable(name = "cname") String cname,
+//			@PathVariable(name = "org") String org) {
+//		logger.info("Getting the Pipeline : {}", cname);
+//		return new ResponseEntity<>( pipelineService.populateSchemaDetails(pipelineService.getJson(cname, org), org), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Handle all.
+//	 *
+//	 * @param ex the ex
+//	 * @return the response entity
+//	 */
+//	@ExceptionHandler(Exception.class)
+//	public ResponseEntity<Object> handleAll(Exception ex) {
+//		logger.error(ex.getMessage(), ex);
+//		Throwable rootcause = ExceptionUtil.findRootCause(ex);
+//		return new ResponseEntity<>(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getMessage(), new HttpHeaders(), new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getStatus());
+//	}
+//
+//	/**
+//	 * Gets the pipeline as JSON.
+//	 *
+//	 * @param pipelines the pipelines
+//	 * @param org       the org
+//	 * @return the pipeline
+//	 */
+//	@GetMapping(value = "/getPipelines/{org}", produces = "application/json")
+//	public @ResponseBody ResponseEntity<?> exportPipelines(@RequestParam(name = "cname") List<String> pipelines,
+//			@PathVariable(name = "org") String org) {
+//		return new ResponseEntity<>(new Gson().toJson(pipelineService.exportPipelines(org, pipelines)), HttpStatus.OK);
+//	}
 }

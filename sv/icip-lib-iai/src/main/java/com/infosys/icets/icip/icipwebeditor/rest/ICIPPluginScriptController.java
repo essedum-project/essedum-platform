@@ -58,66 +58,68 @@ public class ICIPPluginScriptController {
 	
 	@Autowired
 	private IICIPPluginService pluginService;
+	
+	//COMMENTED AS PART OF CODE CLEANUP
 	/**
 	 * Gets the plugin iai.
 	 *
 	 * @return the plugin iai
 	 */
-	@GetMapping("/all")
-	public ResponseEntity<String> getPluginIai() {
-		logger.info("Getting PluginIAI");
-		return new ResponseEntity<>(pluginScriptService.fetchAll(), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the plugin.
-	 *
-	 * @param pluginType the plugin type
-	 * @return the plugin
-	 */
-	@GetMapping("/all/{pluginType}")
-	public ResponseEntity<String> getPlugin(@PathVariable(name = "pluginType") String pluginType) {
-		logger.info("Getting Plugin type : {}", pluginType);
-		return new ResponseEntity<>(pluginScriptService.fetchByType(pluginType), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Save plugin.
-	 *
-	 * @param script the script
-	 * @param pluginName  the plugin name
-	 * @param type the type
-	 * @return the response entity
-	 * @throws URISyntaxException the URI syntax exception
-	 */
-	@PostMapping("/add/{name}/{pluginName}/{type}")
-	public ResponseEntity<ICIPPluginScript> savePlugin(@RequestBody String script,
-			@PathVariable(name = "name") String name,@PathVariable(name = "pluginName") String pluginName, @PathVariable(name = "type") String type)
-			throws URISyntaxException {
-		logger.info("Saving plugin : {}", pluginName);
-		return new ResponseEntity<>( pluginScriptService.save(name, script, type,pluginName), new HttpHeaders(), HttpStatus.OK);
-	}
-	
-	@PostMapping("/updatescript/{pluginName}")
-	public String savePluginnew(@RequestBody String script, @PathVariable(name = "type") String pluginName) throws URISyntaxException {
-		
-		String result = pluginScriptService.updateScript(pluginName,script);
-		logger.info("Saving plugin : {}", pluginName);
-		return result;
-
-	}
-
-	/**
-	 * Handle all.
-	 *
-	 * @param ex the ex
-	 * @return the response entity
-	 */
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Object> handleAll(Exception ex) {
-		logger.error(ex.getMessage(), ex);
-		Throwable rootcause = ExceptionUtil.findRootCause(ex);
-		return new ResponseEntity<>(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getMessage(), new HttpHeaders(), new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getStatus());
-	}
+//	@GetMapping("/all")
+//	public ResponseEntity<String> getPluginIai() {
+//		logger.info("Getting PluginIAI");
+//		return new ResponseEntity<>(pluginScriptService.fetchAll(), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the plugin.
+//	 *
+//	 * @param pluginType the plugin type
+//	 * @return the plugin
+//	 */
+//	@GetMapping("/all/{pluginType}")
+//	public ResponseEntity<String> getPlugin(@PathVariable(name = "pluginType") String pluginType) {
+//		logger.info("Getting Plugin type : {}", pluginType);
+//		return new ResponseEntity<>(pluginScriptService.fetchByType(pluginType), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Save plugin.
+//	 *
+//	 * @param script the script
+//	 * @param pluginName  the plugin name
+//	 * @param type the type
+//	 * @return the response entity
+//	 * @throws URISyntaxException the URI syntax exception
+//	 */
+//	@PostMapping("/add/{name}/{pluginName}/{type}")
+//	public ResponseEntity<ICIPPluginScript> savePlugin(@RequestBody String script,
+//			@PathVariable(name = "name") String name,@PathVariable(name = "pluginName") String pluginName, @PathVariable(name = "type") String type)
+//			throws URISyntaxException {
+//		logger.info("Saving plugin : {}", pluginName);
+//		return new ResponseEntity<>( pluginScriptService.save(name, script, type,pluginName), new HttpHeaders(), HttpStatus.OK);
+//	}
+//	
+//	@PostMapping("/updatescript/{pluginName}")
+//	public String savePluginnew(@RequestBody String script, @PathVariable(name = "type") String pluginName) throws URISyntaxException {
+//		
+//		String result = pluginScriptService.updateScript(pluginName,script);
+//		logger.info("Saving plugin : {}", pluginName);
+//		return result;
+//
+//	}
+//
+//	/**
+//	 * Handle all.
+//	 *
+//	 * @param ex the ex
+//	 * @return the response entity
+//	 */
+//	@ExceptionHandler(Exception.class)
+//	public ResponseEntity<Object> handleAll(Exception ex) {
+//		logger.error(ex.getMessage(), ex);
+//		Throwable rootcause = ExceptionUtil.findRootCause(ex);
+//		return new ResponseEntity<>(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getMessage(), new HttpHeaders(), new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getStatus());
+//	}
 
 }

@@ -24,21 +24,23 @@ public class ICIPClusteringController {
 	
 	@Autowired
 	ICIPClusteringService clusteringrService;
-		
-	@PostMapping( "/save")
-	public ResponseEntity<ICIPClustering> saveWorker(@RequestParam(name = "project", required = true) String project,
-			@RequestBody String body ){
-		JSONObject reqBody= new JSONObject(body);
-		ICIPClustering agent = clusteringrService.saveWorker(project, reqBody);
-		return new ResponseEntity<>(agent,HttpStatus.OK);
-	}
 	
-	@GetMapping("/config/details")
-	public ResponseEntity<ICIPClustering> getWorkflow(
-			@RequestParam(name = "name") String name,
-			@RequestParam(name = "org") String org){
-		ICIPClustering agent= clusteringrService.getWorkflowConfigByNameAndOrg(name, org);
-		return new ResponseEntity<>(agent,HttpStatus.OK);
-	}
+	//COMMENTED AS PART OF CODE CLEANUP
+		
+//	@PostMapping( "/save")
+//	public ResponseEntity<ICIPClustering> saveWorker(@RequestParam(name = "project", required = true) String project,
+//			@RequestBody String body ){
+//		JSONObject reqBody= new JSONObject(body);
+//		ICIPClustering agent = clusteringrService.saveWorker(project, reqBody);
+//		return new ResponseEntity<>(agent,HttpStatus.OK);
+//	}
+//	
+//	@GetMapping("/config/details")
+//	public ResponseEntity<ICIPClustering> getWorkflow(
+//			@RequestParam(name = "name") String name,
+//			@RequestParam(name = "org") String org){
+//		ICIPClustering agent= clusteringrService.getWorkflowConfigByNameAndOrg(name, org);
+//		return new ResponseEntity<>(agent,HttpStatus.OK);
+//	}
 
 }

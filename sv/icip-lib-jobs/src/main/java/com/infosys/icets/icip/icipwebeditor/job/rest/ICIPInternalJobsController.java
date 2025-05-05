@@ -32,7 +32,7 @@ import com.infosys.icets.icip.icipwebeditor.job.model.ICIPPartialInternalJobs;
 import com.infosys.icets.icip.icipwebeditor.job.service.IICIPInternalJobsService;
 
 import io.micrometer.core.annotation.Timed;
-
+//COMMENTED AS PART OF CODE CLEANUP
 // TODO: Auto-generated Javadoc
 // 
 /**
@@ -40,151 +40,153 @@ import io.micrometer.core.annotation.Timed;
  *
  * @author icets
  */
-@RestController
-@Timed
-@RequestMapping(path = "/${icip.pathPrefix}/internaljob")
-public class ICIPInternalJobsController {
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPInternalJobsController.class);
-
-	/** The i ICIP jobs service. */
-	@Autowired
-	private IICIPInternalJobsService iICIPJobsService;
-
-	/** The internal job list config. */
-	@Autowired
-	private InternalJobListConfig internalJobListConfig;
-
-	/**
-	 * Gets the job console.
-	 *
-	 * @param jobId the job id
-	 * @param offset the offset
-	 * @param org the org
-	 * @param lineno the lineno
-	 * @param status the status
-	 * @return the job console
-	 * @throws IOException 
-	 */
-	@GetMapping("/console/{jobId}")
-	public ResponseEntity<ICIPInternalJobs> getJobConsole(@PathVariable(name = "jobId") String jobId,
-			@RequestParam(name = "offset", required = false, defaultValue = "0") int offset,
-			@RequestParam(name = "org", required = true) String org,
-			@RequestParam(name = "lineno", required = true) int lineno,
-			@RequestParam(name = "status", required = true) String status) throws IOException {
-		logger.debug("Getting Job console");
-		return new ResponseEntity<>(iICIPJobsService.findByJobIdWithLog(jobId, offset, lineno, org, status), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the job .
-	 *
-	 * @param name the name
-	 * @param org  the org
-	 * @param page the page
-	 * @param size the size
-	 * @return the job console
-	 */
-	@GetMapping("/dataset/{name}/{org}")
-	public ResponseEntity<List<ICIPPartialInternalJobs>> getJobByDataset(@PathVariable(name = "name") String name,
-			@PathVariable(name = "org") String org, @RequestParam(required = false, name = "page") String page,
-			@RequestParam(required = false, name = "size") String size) {
-		logger.debug("Getting Job response by dataset");
-		return new ResponseEntity<>(iICIPJobsService.findByDatasetName(name, org, Integer.valueOf(page),
-				Integer.valueOf(size)), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the job by job name.
-	 * 
-	 * @param name the name
-	 * @param org  the org
-	 * @param page the page
-	 * @param size the size
-	 * @return the job by job name
-	 */
-	@GetMapping("/jobname/{name}/{org}")
-	public ResponseEntity<List<ICIPPartialInternalJobs>> getJobByJobName(@PathVariable(name = "name") String name,
-			@PathVariable(name = "org") String org, @RequestParam(required = false, name = "page") String page,
-			@RequestParam(required = false, name = "size") String size) {
-		logger.debug("Getting Job response by jobname");
-		return new ResponseEntity<>(iICIPJobsService.findByJobName(name, org, Integer.valueOf(page),
-				Integer.valueOf(size)), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the job console.
-	 *
-	 * @param name the name
-	 * @param org  the org
-	 * @return the job console
-	 */
-	@GetMapping("/dataset/len/{name}/{org}")
-	public ResponseEntity<Long> getJobLenByDataset(@PathVariable(name = "name") String name,
-			@PathVariable(name = "org") String org) {
-		logger.debug("Getting length by dataset");
-		return new ResponseEntity<>( iICIPJobsService.countByDatasetAndOrganization(name, org), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the job console.
-	 *
-	 * @param name the name
-	 * @param org  the org
-	 * @return the job console
-	 */
-	@GetMapping("/jobname/len/{name}/{org}")
-	public ResponseEntity<Long> getJobLenByJobName(@PathVariable(name = "name") String name,
-			@PathVariable(name = "org") String org) {
-		logger.debug("Getting length by jobname");
-		return new ResponseEntity<>(iICIPJobsService.countByJobNameAndOrganization(name, org), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the all internal jobs.
-	 *
-	 * @return the all internal jobs
-	 */
-	@GetMapping("/all")
-	public ResponseEntity<String> getAllInternalJobs() {
-		logger.debug("getting all internal jobs");
-		return new ResponseEntity<>(new Gson().toJson(internalJobListConfig.getJobDetails()), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the job .
-	 *
-	 * @param name the name
-	 * @param jobName the job name
-	 * @param org  the org
-	 * @param page the page
-	 * @param size the size
-	 * @return the job console
-	 */
-	@GetMapping("/macrobase/{name}/{jobName}/{org}")
-	public ResponseEntity<List<ICIPPartialInternalJobs>> getJobByDatasetMacrobase(
-			@PathVariable(name = "name") String name, @PathVariable(name = "jobName") String jobName,
-			@PathVariable(name = "org") String org, @RequestParam(required = false, name = "page") String page,
-			@RequestParam(required = false, name = "size") String size) {
-		logger.debug("Getting Job response by dataset");
-		return new ResponseEntity<>(iICIPJobsService.findByDatasetNameAndJobName(name, jobName, org,
-				Integer.valueOf(page), Integer.valueOf(size)), new HttpHeaders(), HttpStatus.OK);
-	}
-
-	/**
-	 * Gets the job console.
-	 *
-	 * @param name the name
-	 * @param org  the org
-	 * @param jobName the job name
-	 * @return the job console
-	 */
-	@GetMapping("/macrobase/len/{name}/{jobName}/{org}")
-	public ResponseEntity<Long> getJobLenByDatasetMacrobase(@PathVariable(name = "name") String name,
-			@PathVariable(name = "org") String org, @PathVariable(name = "jobName") String jobName) {
-		logger.debug("Getting length by dataset");
-		return new ResponseEntity<>(iICIPJobsService.countByDatasetAndJobNameAndOrganization(name, jobName, org), new HttpHeaders(), HttpStatus.OK);
-	}
-
-}
+//@RestController
+//@Timed
+//@RequestMapping(path = "/${icip.pathPrefix}/internaljob")
+//public class ICIPInternalJobsController {
+//
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPInternalJobsController.class);
+//
+//	/** The i ICIP jobs service. */
+//	@Autowired
+//	private IICIPInternalJobsService iICIPJobsService;
+//
+//	/** The internal job list config. */
+//	@Autowired
+//	private InternalJobListConfig internalJobListConfig;
+//
+//	/**
+//	 * Gets the job console.
+//	 *
+//	 * @param jobId the job id
+//	 * @param offset the offset
+//	 * @param org the org
+//	 * @param lineno the lineno
+//	 * @param status the status
+//	 * @return the job console
+//	 * @throws IOException 
+//	 */
+//	
+//	
+//	@GetMapping("/console/{jobId}")
+//	public ResponseEntity<ICIPInternalJobs> getJobConsole(@PathVariable(name = "jobId") String jobId,
+//			@RequestParam(name = "offset", required = false, defaultValue = "0") int offset,
+//			@RequestParam(name = "org", required = true) String org,
+//			@RequestParam(name = "lineno", required = true) int lineno,
+//			@RequestParam(name = "status", required = true) String status) throws IOException {
+//		logger.debug("Getting Job console");
+//		return new ResponseEntity<>(iICIPJobsService.findByJobIdWithLog(jobId, offset, lineno, org, status), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the job .
+//	 *
+//	 * @param name the name
+//	 * @param org  the org
+//	 * @param page the page
+//	 * @param size the size
+//	 * @return the job console
+//	 */
+//	@GetMapping("/dataset/{name}/{org}")
+//	public ResponseEntity<List<ICIPPartialInternalJobs>> getJobByDataset(@PathVariable(name = "name") String name,
+//			@PathVariable(name = "org") String org, @RequestParam(required = false, name = "page") String page,
+//			@RequestParam(required = false, name = "size") String size) {
+//		logger.debug("Getting Job response by dataset");
+//		return new ResponseEntity<>(iICIPJobsService.findByDatasetName(name, org, Integer.valueOf(page),
+//				Integer.valueOf(size)), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the job by job name.
+//	 * 
+//	 * @param name the name
+//	 * @param org  the org
+//	 * @param page the page
+//	 * @param size the size
+//	 * @return the job by job name
+//	 */
+//	@GetMapping("/jobname/{name}/{org}")
+//	public ResponseEntity<List<ICIPPartialInternalJobs>> getJobByJobName(@PathVariable(name = "name") String name,
+//			@PathVariable(name = "org") String org, @RequestParam(required = false, name = "page") String page,
+//			@RequestParam(required = false, name = "size") String size) {
+//		logger.debug("Getting Job response by jobname");
+//		return new ResponseEntity<>(iICIPJobsService.findByJobName(name, org, Integer.valueOf(page),
+//				Integer.valueOf(size)), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the job console.
+//	 *
+//	 * @param name the name
+//	 * @param org  the org
+//	 * @return the job console
+//	 */
+//	@GetMapping("/dataset/len/{name}/{org}")
+//	public ResponseEntity<Long> getJobLenByDataset(@PathVariable(name = "name") String name,
+//			@PathVariable(name = "org") String org) {
+//		logger.debug("Getting length by dataset");
+//		return new ResponseEntity<>( iICIPJobsService.countByDatasetAndOrganization(name, org), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the job console.
+//	 *
+//	 * @param name the name
+//	 * @param org  the org
+//	 * @return the job console
+//	 */
+//	@GetMapping("/jobname/len/{name}/{org}")
+//	public ResponseEntity<Long> getJobLenByJobName(@PathVariable(name = "name") String name,
+//			@PathVariable(name = "org") String org) {
+//		logger.debug("Getting length by jobname");
+//		return new ResponseEntity<>(iICIPJobsService.countByJobNameAndOrganization(name, org), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the all internal jobs.
+//	 *
+//	 * @return the all internal jobs
+//	 */
+//	@GetMapping("/all")
+//	public ResponseEntity<String> getAllInternalJobs() {
+//		logger.debug("getting all internal jobs");
+//		return new ResponseEntity<>(new Gson().toJson(internalJobListConfig.getJobDetails()), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the job .
+//	 *
+//	 * @param name the name
+//	 * @param jobName the job name
+//	 * @param org  the org
+//	 * @param page the page
+//	 * @param size the size
+//	 * @return the job console
+//	 */
+//	@GetMapping("/macrobase/{name}/{jobName}/{org}")
+//	public ResponseEntity<List<ICIPPartialInternalJobs>> getJobByDatasetMacrobase(
+//			@PathVariable(name = "name") String name, @PathVariable(name = "jobName") String jobName,
+//			@PathVariable(name = "org") String org, @RequestParam(required = false, name = "page") String page,
+//			@RequestParam(required = false, name = "size") String size) {
+//		logger.debug("Getting Job response by dataset");
+//		return new ResponseEntity<>(iICIPJobsService.findByDatasetNameAndJobName(name, jobName, org,
+//				Integer.valueOf(page), Integer.valueOf(size)), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//	/**
+//	 * Gets the job console.
+//	 *
+//	 * @param name the name
+//	 * @param org  the org
+//	 * @param jobName the job name
+//	 * @return the job console
+//	 */
+//	@GetMapping("/macrobase/len/{name}/{jobName}/{org}")
+//	public ResponseEntity<Long> getJobLenByDatasetMacrobase(@PathVariable(name = "name") String name,
+//			@PathVariable(name = "org") String org, @PathVariable(name = "jobName") String jobName) {
+//		logger.debug("Getting length by dataset");
+//		return new ResponseEntity<>(iICIPJobsService.countByDatasetAndJobNameAndOrganization(name, jobName, org), new HttpHeaders(), HttpStatus.OK);
+//	}
+//
+//}

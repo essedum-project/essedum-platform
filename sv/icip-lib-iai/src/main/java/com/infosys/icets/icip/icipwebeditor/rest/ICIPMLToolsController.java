@@ -44,73 +44,75 @@ public class ICIPMLToolsController {
 	@Autowired
 	ICIPMLToolsService mlToolsService;
 	
-	@GetMapping("/getAllTools")
-	public ResponseEntity<List<ICIPMLTools>> getAllMLTools(
-			@RequestParam(name = "project", required = true) String project,
-			@RequestParam(name = "page", required = false) String page,
-			@RequestParam(name = "size", required = false) String size,
-			@RequestParam(name = "query", required = false) String query,
-			@RequestParam(name = "category", required = false) List<String> category) {
-		
-		if ((page == null || page.isEmpty()) || (size == null || size.isEmpty())){ 
-			List<ICIPMLTools> mlToolsList = mlToolsService.getAllMlTools(project, null, query, category);
-			return new ResponseEntity<>(mlToolsList, HttpStatus.OK);
-		}
-		Pageable paginate = PageRequest.of(Integer.valueOf(page) - 1, Integer.valueOf(size));
-		List<ICIPMLTools> mlToolsList = mlToolsService.getAllPaginatedMlTools(project, paginate, query, category);
-		return new ResponseEntity<>(mlToolsList, HttpStatus.OK);
-	}
+	//COMMENTED AS PART OF CODE CLEANUP
 	
-	@GetMapping("/list/count")
-	public ResponseEntity<Long> getMlToolsCount(
-			@RequestParam(name = "project", required = true) String project,
-			@RequestParam(name = "query", required = false) String query,
-			@RequestParam(name = "category", required = false) List<String> category
-			){
-		Long results= mlToolsService.getMLToolsCount(project,query, category);
-		return ResponseEntity.status(200).body(results);
-	}
-	
-	@PostMapping( "/save")
-	public ResponseEntity<?> save(@RequestParam(name = "project", required = true) String project,
-			@RequestBody String body ){
-		JSONObject reqBody= new JSONObject(body);
-		Boolean isAliasExist = mlToolsService.checkAlias(reqBody.getString("alias"), project);
-		if(isAliasExist) {
-			return ResponseEntity.status(500).body("Tool name already exist");
-		}
-		else {
-			ICIPMLTools mltool = mlToolsService.saveTool(project, reqBody);
-			return new ResponseEntity<>(mltool,HttpStatus.OK);
-		}
-	}
-	
-	@PostMapping( "/update/{name}/{organization}")
-	public ResponseEntity<ICIPMLTools> update(@PathVariable(name = "name") String name,
-			@PathVariable(name = "organization") String org,
-			@RequestBody String body){
-		JSONObject updateBody= new JSONObject(body);
-		ICIPMLTools tool = mlToolsService.updateTool(name, org, updateBody);
-		return new ResponseEntity<>(tool,HttpStatus.OK);
-	}
-	
-	@GetMapping("/{name}/{org}")
-	public ResponseEntity<ICIPMLTools> getMlToolByName(@PathVariable(name = "name") String name,
-			@PathVariable(name = "org") String org){
-		ICIPMLTools agent= mlToolsService.getMLToolByName(name, org);
-		return new ResponseEntity<>(agent,HttpStatus.OK);
-	}
-	
-	@DeleteMapping("/delete/{name}")
-	public ResponseEntity<String> deleteMlToolByName(@PathVariable(name = "name") String name,
-	@RequestParam(name= "org") String org){
-		mlToolsService.deleteMlToolByName(name, org);
-		return ResponseEntity.ok().headers(ICIPHeaderUtil.createEntityDeletionAlert("mltool", name))
-				.build();
-	}
-	
-	@GetMapping("/getAllToolCategory/{org}")
-	public ResponseEntity<Set<String>> getUniqueCategories(@PathVariable(name = "org") String org){
-		return new ResponseEntity<>(mlToolsService.getUniqueCategories(org),HttpStatus.OK);
-	}
+//	@GetMapping("/getAllTools")
+//	public ResponseEntity<List<ICIPMLTools>> getAllMLTools(
+//			@RequestParam(name = "project", required = true) String project,
+//			@RequestParam(name = "page", required = false) String page,
+//			@RequestParam(name = "size", required = false) String size,
+//			@RequestParam(name = "query", required = false) String query,
+//			@RequestParam(name = "category", required = false) List<String> category) {
+//		
+//		if ((page == null || page.isEmpty()) || (size == null || size.isEmpty())){ 
+//			List<ICIPMLTools> mlToolsList = mlToolsService.getAllMlTools(project, null, query, category);
+//			return new ResponseEntity<>(mlToolsList, HttpStatus.OK);
+//		}
+//		Pageable paginate = PageRequest.of(Integer.valueOf(page) - 1, Integer.valueOf(size));
+//		List<ICIPMLTools> mlToolsList = mlToolsService.getAllPaginatedMlTools(project, paginate, query, category);
+//		return new ResponseEntity<>(mlToolsList, HttpStatus.OK);
+//	}
+//	
+//	@GetMapping("/list/count")
+//	public ResponseEntity<Long> getMlToolsCount(
+//			@RequestParam(name = "project", required = true) String project,
+//			@RequestParam(name = "query", required = false) String query,
+//			@RequestParam(name = "category", required = false) List<String> category
+//			){
+//		Long results= mlToolsService.getMLToolsCount(project,query, category);
+//		return ResponseEntity.status(200).body(results);
+//	}
+//	
+//	@PostMapping( "/save")
+//	public ResponseEntity<?> save(@RequestParam(name = "project", required = true) String project,
+//			@RequestBody String body ){
+//		JSONObject reqBody= new JSONObject(body);
+//		Boolean isAliasExist = mlToolsService.checkAlias(reqBody.getString("alias"), project);
+//		if(isAliasExist) {
+//			return ResponseEntity.status(500).body("Tool name already exist");
+//		}
+//		else {
+//			ICIPMLTools mltool = mlToolsService.saveTool(project, reqBody);
+//			return new ResponseEntity<>(mltool,HttpStatus.OK);
+//		}
+//	}
+//	
+//	@PostMapping( "/update/{name}/{organization}")
+//	public ResponseEntity<ICIPMLTools> update(@PathVariable(name = "name") String name,
+//			@PathVariable(name = "organization") String org,
+//			@RequestBody String body){
+//		JSONObject updateBody= new JSONObject(body);
+//		ICIPMLTools tool = mlToolsService.updateTool(name, org, updateBody);
+//		return new ResponseEntity<>(tool,HttpStatus.OK);
+//	}
+//	
+//	@GetMapping("/{name}/{org}")
+//	public ResponseEntity<ICIPMLTools> getMlToolByName(@PathVariable(name = "name") String name,
+//			@PathVariable(name = "org") String org){
+//		ICIPMLTools agent= mlToolsService.getMLToolByName(name, org);
+//		return new ResponseEntity<>(agent,HttpStatus.OK);
+//	}
+//	
+//	@DeleteMapping("/delete/{name}")
+//	public ResponseEntity<String> deleteMlToolByName(@PathVariable(name = "name") String name,
+//	@RequestParam(name= "org") String org){
+//		mlToolsService.deleteMlToolByName(name, org);
+//		return ResponseEntity.ok().headers(ICIPHeaderUtil.createEntityDeletionAlert("mltool", name))
+//				.build();
+//	}
+//	
+//	@GetMapping("/getAllToolCategory/{org}")
+//	public ResponseEntity<Set<String>> getUniqueCategories(@PathVariable(name = "org") String org){
+//		return new ResponseEntity<>(mlToolsService.getUniqueCategories(org),HttpStatus.OK);
+//	}
 }

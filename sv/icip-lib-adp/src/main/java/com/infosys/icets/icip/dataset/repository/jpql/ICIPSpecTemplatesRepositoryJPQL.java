@@ -17,32 +17,33 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.infosys.icets.icip.dataset.model.ICIPSpecTemplate;
-import com.infosys.icets.icip.dataset.repository.ICIPSpecTemplatesRepository;
+//import com.infosys.icets.icip.dataset.repository.ICIPSpecTemplatesRepository;
+//COMMENTED AS PART OF API CLEANUP
 
 //@Profile("mysql")
-@Repository
-public interface ICIPSpecTemplatesRepositoryJPQL extends ICIPSpecTemplatesRepository {
-
-	/*
-	 * native Queries
-	 * 
-	 * @Query(value = "SELECT * FROM spectemplates sp where sp.templateName = ?1",
-	 * nativeQuery = true) ICIPSpecTemplate searchByTemplateName(String
-	 * templateName);
-	 * 
-	 * @Query(value = "SELECT sp.templateName FROM spectemplates sp", nativeQuery =
-	 * true) List<String> getAllTemplateNames();
-	 * 
-	 * @Query(value = "SELECT * FROM spectemplates sp", nativeQuery = true)
-	 * List<ICIPSpecTemplate> getAllSpecTemplates();
-	 */
-	/* JPQL Queries */
-	@Query("SELECT sp FROM ICIPSpecTemplate sp where sp.templateName = ?1")
-	ICIPSpecTemplate searchByTemplateName(String templateName);
-
-	@Query("SELECT sp.templateName FROM ICIPSpecTemplate sp")
-	List<String> getAllTemplateNames();
-
-	@Query("SELECT sp FROM ICIPSpecTemplate sp")
-	List<ICIPSpecTemplate> getAllSpecTemplates();
-}
+//@Repository
+//public interface ICIPSpecTemplatesRepositoryJPQL extends ICIPSpecTemplatesRepository {
+//
+//	/*
+//	 * native Queries
+//	 * 
+//	 * @Query(value = "SELECT * FROM spectemplates sp where sp.templateName = ?1",
+//	 * nativeQuery = true) ICIPSpecTemplate searchByTemplateName(String
+//	 * templateName);
+//	 * 
+//	 * @Query(value = "SELECT sp.templateName FROM spectemplates sp", nativeQuery =
+//	 * true) List<String> getAllTemplateNames();
+//	 * 
+//	 * @Query(value = "SELECT * FROM spectemplates sp", nativeQuery = true)
+//	 * List<ICIPSpecTemplate> getAllSpecTemplates();
+//	 */
+//	/* JPQL Queries */
+//	@Query("SELECT sp FROM ICIPSpecTemplate sp where sp.templateName = ?1")
+//	ICIPSpecTemplate searchByTemplateName(String templateName);
+//
+//	@Query("SELECT sp.templateName FROM ICIPSpecTemplate sp")
+//	List<String> getAllTemplateNames();
+//
+//	@Query("SELECT sp FROM ICIPSpecTemplate sp")
+//	List<ICIPSpecTemplate> getAllSpecTemplates();
+//}

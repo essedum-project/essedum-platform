@@ -56,163 +56,165 @@ public class ICIPChainsController {
 	/** The i ICIP chains service. */
 	@Autowired
 	private IICIPChainsService iICIPChainsService;
-
-	/**
-	 * Save chain.
-	 *
-	 * @param body the body
-	 * @return the response entity
-	 */
-	@PostMapping(value = "/save", produces = "application/json")
-	public ResponseEntity<ICIPChains> saveChain(@RequestBody String body) {
-		try {
-			Gson gson = new Gson();
-			ChainObject chain = gson.fromJson(body, ChainObject.class);
-			ICIPChains job = new ICIPChains();
-			job.setDescription(chain.getJobDesc());
-			job.setJobName(chain.getJobName());
-			job.setJsonContent(gson.toJson(chain.getJsonContent()));
-			job.setOrganization(chain.getOrg());
-			job.setParallelchain(chain.getParallelchain());
-			job.setFlowjson(chain.getFlowjson());
-			return new ResponseEntity<>(iICIPChainsService.save(job), HttpStatus.OK);
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	/**
-	 * Update chain.
-	 *
-	 * @param jobName the job name
-	 * @param org     the org
-	 * @param body    the body
-	 * @return the response entity
-	 */
-	@PostMapping(value = "/update/{name}/{org}", produces = "application/json")
-	public ResponseEntity<ICIPChains> updateChain(@PathVariable("name") String jobName, @PathVariable("org") String org,
-			@RequestBody String body) {
-		try {
-			ICIPChains job = iICIPChainsService.findByNameAndOrganization(jobName, org);
-			Gson gson = new Gson();
-			ChainObject.InitialJsonContent chainObject = gson.fromJson(job.getJsonContent(),
-					ChainObject.InitialJsonContent.class);
-			ChainObject.ChainJobElement chainElement = gson.fromJson(new JSONObject(body).get("jsonContent").toString(), ChainObject.ChainJobElement.class);
-			chainObject.setElement(chainElement);
-			job.setJsonContent(gson.toJson(chainObject));
-			job.setFlowjson(new JSONObject(body).get("flowjson").toString());
-			return new ResponseEntity<>(iICIPChainsService.save(job), HttpStatus.OK);
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	/**
-	 * Update tree chain.
-	 *
-	 * @param jobName the job name
-	 * @param org     the org
-	 * @param body    the body
-	 * @return the response entity
-	 */
-	@PostMapping(value = "/update/tree/{name}/{org}", produces = "application/json")
-	public ResponseEntity<ICIPChains> updateTreeChain(@PathVariable("name") String jobName,
-			@PathVariable("org") String org, @RequestBody String body) {
-		try {
-			ICIPChains job = iICIPChainsService.findByNameAndOrganization(jobName, org);
-			job.setJsonContent(body);
-			return new ResponseEntity<>(iICIPChainsService.save(job), HttpStatus.OK);
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	/**
-	 * Gets the chain.
-	 *
-	 * @param org     the org
-	 * @param jobName the job name
-	 * @return the chain
-	 */
-	@GetMapping(value = "/name/{org}", produces = "application/json")
-	public ResponseEntity<ICIPChains> getChain(@PathVariable("org") String org,
-			@RequestParam(name = "jobName") String jobName) {
-		try {
-			return new ResponseEntity<>(iICIPChainsService.findByNameAndOrganization(jobName, org), HttpStatus.OK);
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	/**
-	 * Gets the jobs len.
-	 *
-	 * @param org the org
-	 * @return the jobs len
-	 */
 	
-	@GetMapping("/getById/{org}")
-	public ResponseEntity<Long> getJobsLen(@PathVariable(name = "org") String org) {
-		return new ResponseEntity<>( iICIPChainsService.countByOrganization(org), new HttpHeaders(), HttpStatus.OK);
-	}
-	
-	@PostMapping("/editNameAndDesc/{id}/{org}")
-	public ResponseEntity<ICIPChains> editNameAndDesc(@PathVariable(name = "org") String org,
-			@PathVariable(name = "id") String id,
-			@RequestParam String jobName,
-			@RequestParam String jobDesc) {
-		try {
-			Optional<ICIPChains> job = iICIPChainsService.findChainByID(Integer.parseInt(id));
-			ICIPChains chainjob= job.get();
-			chainjob.setDescription(jobDesc);
-			chainjob.setJobName(jobName);
-			return new ResponseEntity<>(iICIPChainsService.save(chainjob), HttpStatus.OK);
+	//COMMENTED AS PART OF CODE CLEANUP
 
-		}
-		catch (Exception e) {
-			logger.error(e.getMessage());
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			// TODO: handle exception
-		}
-	}
-
-	/**
-	 * Delete job.
-	 *
-	 * @param id the id
-	 */
-	@DeleteMapping("/{id}")
-	public void deleteJob(@PathVariable(name = "id") String id) {
-		iICIPChainsService.deleteJob(Integer.parseInt(id));
-	}
-
-	/**
-	 * Gets the jobs by model.
-	 *
-	 * @param org  the org
-	 * @param page the page
-	 * @param size the size
-	 * @return the jobs by model
-	 */
-	@GetMapping("/{org}")
-	public ResponseEntity<List<ICIPChains>> getJobsByModel(@PathVariable(name = "org") String org,
-			@RequestParam(required = false, name = "page") String page,
-			@RequestParam(required = false, name = "filter") String filter,
-			@RequestParam(required = false, name = "size") String size) {
-		logger.info("Getting Jobs");
- 		List<ICIPChains> listJobs = null;
- 		if(filter.equalsIgnoreCase("undefined") || filter.isBlank() || filter.isEmpty()) {
- 			filter=null;
- 		}
-		if (page != null && !page.trim().isEmpty() && size != null && !size.trim().isEmpty()) {
-			listJobs = iICIPChainsService.getAllJobs(org, Integer.valueOf(page), Integer.valueOf(size));
-		} else {
-			listJobs = iICIPChainsService.getAllJobs(org,filter);
-		}
-		return new ResponseEntity<>(listJobs, new HttpHeaders(), HttpStatus.OK);
-	}
+//	/**
+//	 * Save chain.
+//	 *
+//	 * @param body the body
+//	 * @return the response entity
+//	 */
+//	@PostMapping(value = "/save", produces = "application/json")
+//	public ResponseEntity<ICIPChains> saveChain(@RequestBody String body) {
+//		try {
+//			Gson gson = new Gson();
+//			ChainObject chain = gson.fromJson(body, ChainObject.class);
+//			ICIPChains job = new ICIPChains();
+//			job.setDescription(chain.getJobDesc());
+//			job.setJobName(chain.getJobName());
+//			job.setJsonContent(gson.toJson(chain.getJsonContent()));
+//			job.setOrganization(chain.getOrg());
+//			job.setParallelchain(chain.getParallelchain());
+//			job.setFlowjson(chain.getFlowjson());
+//			return new ResponseEntity<>(iICIPChainsService.save(job), HttpStatus.OK);
+//		} catch (Exception e) {
+//			logger.error(e.getMessage());
+//			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//		}
+//	}
+//
+//	/**
+//	 * Update chain.
+//	 *
+//	 * @param jobName the job name
+//	 * @param org     the org
+//	 * @param body    the body
+//	 * @return the response entity
+//	 */
+//	@PostMapping(value = "/update/{name}/{org}", produces = "application/json")
+//	public ResponseEntity<ICIPChains> updateChain(@PathVariable("name") String jobName, @PathVariable("org") String org,
+//			@RequestBody String body) {
+//		try {
+//			ICIPChains job = iICIPChainsService.findByNameAndOrganization(jobName, org);
+//			Gson gson = new Gson();
+//			ChainObject.InitialJsonContent chainObject = gson.fromJson(job.getJsonContent(),
+//					ChainObject.InitialJsonContent.class);
+//			ChainObject.ChainJobElement chainElement = gson.fromJson(new JSONObject(body).get("jsonContent").toString(), ChainObject.ChainJobElement.class);
+//			chainObject.setElement(chainElement);
+//			job.setJsonContent(gson.toJson(chainObject));
+//			job.setFlowjson(new JSONObject(body).get("flowjson").toString());
+//			return new ResponseEntity<>(iICIPChainsService.save(job), HttpStatus.OK);
+//		} catch (Exception e) {
+//			logger.error(e.getMessage());
+//			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//		}
+//	}
+//
+//	/**
+//	 * Update tree chain.
+//	 *
+//	 * @param jobName the job name
+//	 * @param org     the org
+//	 * @param body    the body
+//	 * @return the response entity
+//	 */
+//	@PostMapping(value = "/update/tree/{name}/{org}", produces = "application/json")
+//	public ResponseEntity<ICIPChains> updateTreeChain(@PathVariable("name") String jobName,
+//			@PathVariable("org") String org, @RequestBody String body) {
+//		try {
+//			ICIPChains job = iICIPChainsService.findByNameAndOrganization(jobName, org);
+//			job.setJsonContent(body);
+//			return new ResponseEntity<>(iICIPChainsService.save(job), HttpStatus.OK);
+//		} catch (Exception e) {
+//			logger.error(e.getMessage());
+//			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//		}
+//	}
+//
+//	/**
+//	 * Gets the chain.
+//	 *
+//	 * @param org     the org
+//	 * @param jobName the job name
+//	 * @return the chain
+//	 */
+//	@GetMapping(value = "/name/{org}", produces = "application/json")
+//	public ResponseEntity<ICIPChains> getChain(@PathVariable("org") String org,
+//			@RequestParam(name = "jobName") String jobName) {
+//		try {
+//			return new ResponseEntity<>(iICIPChainsService.findByNameAndOrganization(jobName, org), HttpStatus.OK);
+//		} catch (Exception e) {
+//			logger.error(e.getMessage());
+//			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//		}
+//	}
+//
+//	/**
+//	 * Gets the jobs len.
+//	 *
+//	 * @param org the org
+//	 * @return the jobs len
+//	 */
+//	
+//	@GetMapping("/getById/{org}")
+//	public ResponseEntity<Long> getJobsLen(@PathVariable(name = "org") String org) {
+//		return new ResponseEntity<>( iICIPChainsService.countByOrganization(org), new HttpHeaders(), HttpStatus.OK);
+//	}
+//	
+//	@PostMapping("/editNameAndDesc/{id}/{org}")
+//	public ResponseEntity<ICIPChains> editNameAndDesc(@PathVariable(name = "org") String org,
+//			@PathVariable(name = "id") String id,
+//			@RequestParam String jobName,
+//			@RequestParam String jobDesc) {
+//		try {
+//			Optional<ICIPChains> job = iICIPChainsService.findChainByID(Integer.parseInt(id));
+//			ICIPChains chainjob= job.get();
+//			chainjob.setDescription(jobDesc);
+//			chainjob.setJobName(jobName);
+//			return new ResponseEntity<>(iICIPChainsService.save(chainjob), HttpStatus.OK);
+//
+//		}
+//		catch (Exception e) {
+//			logger.error(e.getMessage());
+//			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//			// TODO: handle exception
+//		}
+//	}
+//
+//	/**
+//	 * Delete job.
+//	 *
+//	 * @param id the id
+//	 */
+//	@DeleteMapping("/{id}")
+//	public void deleteJob(@PathVariable(name = "id") String id) {
+//		iICIPChainsService.deleteJob(Integer.parseInt(id));
+//	}
+//
+//	/**
+//	 * Gets the jobs by model.
+//	 *
+//	 * @param org  the org
+//	 * @param page the page
+//	 * @param size the size
+//	 * @return the jobs by model
+//	 */
+//	@GetMapping("/{org}")
+//	public ResponseEntity<List<ICIPChains>> getJobsByModel(@PathVariable(name = "org") String org,
+//			@RequestParam(required = false, name = "page") String page,
+//			@RequestParam(required = false, name = "filter") String filter,
+//			@RequestParam(required = false, name = "size") String size) {
+//		logger.info("Getting Jobs");
+// 		List<ICIPChains> listJobs = null;
+// 		if(filter.equalsIgnoreCase("undefined") || filter.isBlank() || filter.isEmpty()) {
+// 			filter=null;
+// 		}
+//		if (page != null && !page.trim().isEmpty() && size != null && !size.trim().isEmpty()) {
+//			listJobs = iICIPChainsService.getAllJobs(org, Integer.valueOf(page), Integer.valueOf(size));
+//		} else {
+//			listJobs = iICIPChainsService.getAllJobs(org,filter);
+//		}
+//		return new ResponseEntity<>(listJobs, new HttpHeaders(), HttpStatus.OK);
+//	}
 }
