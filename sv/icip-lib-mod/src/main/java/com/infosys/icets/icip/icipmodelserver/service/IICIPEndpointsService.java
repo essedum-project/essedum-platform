@@ -11,28 +11,28 @@
 package com.infosys.icets.icip.icipmodelserver.service;
 
 import com.infosys.icets.icip.icipmodelserver.model.ICIPEndpoints;
-
+//COMMENTED AS PART OF API CLEANUP
 // TODO: Auto-generated Javadoc
 /**
  * The Interface IICIPPipelineModelService.
  *
  * @author icets
  */
-public interface IICIPEndpointsService {
-
-	
-
-	/**
-	 * Find by id.
-	 *
-	 * @param id the id
-	 * @return the ICIP pipeline model
-	 */
-	ICIPEndpoints findById(Integer id);
-
-	ICIPEndpoints save(ICIPEndpoints endpoint);
-
-	void deleteById(Integer endpoint);
-
-	
-}
+//public interface IICIPEndpointsService {
+//
+//	
+//
+//	/**
+//	 * Find by id.
+//	 *
+//	 * @param id the id
+//	 * @return the ICIP pipeline model
+//	 */
+//	ICIPEndpoints findById(Integer id);
+//
+//	ICIPEndpoints save(ICIPEndpoints endpoint);
+//
+//	void deleteById(Integer endpoint);
+//
+//	
+//}

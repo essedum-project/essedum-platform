@@ -27,41 +27,41 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.infosys.icets.icip.icipmodelserver.model.ICIPModelServers;
 import com.infosys.icets.icip.icipmodelserver.model.ICIPPipelineModel;
-import com.infosys.icets.icip.icipmodelserver.service.impl.ICIPModelServersService;
+//import com.infosys.icets.icip.icipmodelserver.service.impl.ICIPModelServersService;
 import com.infosys.icets.icip.icipmodelserver.v2.service.impl.ICIPModelPluginsService;
 
 import io.micrometer.core.annotation.Timed;
 
-
+//COMMENTED AS PART OF API CLEANUP
 // TODO: Auto-generated Javadoc
 /**
  * The Class ICIPPipelineModelController.
  *
  * @author icets
  */
-@RestController
-@Timed
-@RequestMapping(path = "/${icip.pathPrefix}/modelserver")
-public class ICIPModelServerController {
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPModelServerController.class);
-
-
-	/** The model server service. */
-	@Autowired
-	private ICIPModelServersService modelServerService;
-
-	
-	/**
-	 * Gets the model servers.
-	 *
-	 * @return the model servers
-	 */
-	@GetMapping("/all")
-	public ResponseEntity<List<ICIPModelServers>> getModelServers() {
-		logger.info("Getting Model Servers");
-		return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
-	}
-	
-}
+//@RestController
+//@Timed
+//@RequestMapping(path = "/${icip.pathPrefix}/modelserver")
+//public class ICIPModelServerController {
+//
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPModelServerController.class);
+//
+//
+//	/** The model server service. */
+//	@Autowired
+//	private ICIPModelServersService modelServerService;
+//
+//	
+//	/**
+//	 * Gets the model servers.
+//	 *
+//	 * @return the model servers
+//	 */
+//	@GetMapping("/all")
+//	public ResponseEntity<List<ICIPModelServers>> getModelServers() {
+//		logger.info("Getting Model Servers");
+//		return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
+//	}
+//	
+//}

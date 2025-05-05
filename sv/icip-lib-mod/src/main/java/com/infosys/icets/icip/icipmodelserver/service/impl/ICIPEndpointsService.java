@@ -19,46 +19,46 @@ import org.springframework.stereotype.Service;
 import com.infosys.icets.ai.comm.lib.util.logger.JobLogger;
 import com.infosys.icets.icip.dataset.model.ICIPSchemaRegistry;
 import com.infosys.icets.icip.icipmodelserver.model.ICIPEndpoints;
-import com.infosys.icets.icip.icipmodelserver.repository.ICIPEndpointsRepository;
-import com.infosys.icets.icip.icipmodelserver.service.IICIPEndpointsService;
-
+//import com.infosys.icets.icip.icipmodelserver.repository.ICIPEndpointsRepository;
+//import com.infosys.icets.icip.icipmodelserver.service.IICIPEndpointsService;
+//COMMENTED AS PART OF API CLEANUP
 // TODO: Auto-generated Javadoc
 /**
  * The Class ICIPPipelineModelService.
  *
  * @author icets
  */
-@SuppressWarnings("deprecation")
-@Service
-@RefreshScope
-public class ICIPEndpointsService implements IICIPEndpointsService {
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPEndpointsService.class);
-
-	/** The Constant joblog. */
-	private static final Logger joblog = LoggerFactory.getLogger(JobLogger.class);
-
-	/** The i CIP pipeline model repository. */
-	@Autowired
-	private ICIPEndpointsRepository icipEndpointsRepository;
-
-	/**
-	 * Find by id.
-	 *
-	 * @param id the id
-	 * @return the ICIP pipeline model
-	 */
-	@Override
-	public ICIPEndpoints findById(Integer id) {
-		return icipEndpointsRepository.findById(id).orElse(null);
-	}
-	
-	public ICIPEndpoints save(ICIPEndpoints endpoint) {
-		return icipEndpointsRepository.save(endpoint);
-	}
-	
-	@Override
-	public void deleteById(Integer endpoint) {
-		icipEndpointsRepository.deleteById(endpoint);	
-	}}
+//@SuppressWarnings("deprecation")
+//@Service
+//@RefreshScope
+//public class ICIPEndpointsService implements IICIPEndpointsService {
+//
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPEndpointsService.class);
+//
+//	/** The Constant joblog. */
+//	private static final Logger joblog = LoggerFactory.getLogger(JobLogger.class);
+//
+//	/** The i CIP pipeline model repository. */
+//	@Autowired
+//	private ICIPEndpointsRepository icipEndpointsRepository;
+//
+//	/**
+//	 * Find by id.
+//	 *
+//	 * @param id the id
+//	 * @return the ICIP pipeline model
+//	 */
+//	@Override
+//	public ICIPEndpoints findById(Integer id) {
+//		return icipEndpointsRepository.findById(id).orElse(null);
+//	}
+//	
+//	public ICIPEndpoints save(ICIPEndpoints endpoint) {
+//		return icipEndpointsRepository.save(endpoint);
+//	}
+//	
+//	@Override
+//	public void deleteById(Integer endpoint) {
+//		icipEndpointsRepository.deleteById(endpoint);	
+//	}}

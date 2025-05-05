@@ -15,7 +15,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.stereotype.Repository;
 
 import com.infosys.icets.icip.icipmodelserver.model.ICIPEndpoints;
-
+//COMMENTED AS PART OF API CLEANUP
 // TODO: Auto-generated Javadoc
 /**
  * Spring Data JPA repository for the ICIPPipelineModel entity.
@@ -23,7 +23,7 @@ import com.infosys.icets.icip.icipmodelserver.model.ICIPEndpoints;
 /**
  * @author icets
  */
-@Repository
-public interface ICIPEndpointsRepository extends JpaRepository<ICIPEndpoints, Integer> {
-
-}
+//@Repository
+//public interface ICIPEndpointsRepository extends JpaRepository<ICIPEndpoints, Integer> {
+//
+//}

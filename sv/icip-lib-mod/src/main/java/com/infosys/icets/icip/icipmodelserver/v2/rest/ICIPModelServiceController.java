@@ -41,7 +41,7 @@ import io.micrometer.core.annotation.Timed;
 import com.infosys.icets.ai.comm.lib.util.exceptions.LeapException;
 import com.infosys.icets.icip.dataset.model.ICIPDatasource;
 import com.infosys.icets.icip.dataset.service.IICIPDatasourceService;
-
+//COMMENTED AS PART OF API CLEANUP
 
 // TODO: Auto-generated Javadoc
 /**
@@ -49,156 +49,156 @@ import com.infosys.icets.icip.dataset.service.IICIPDatasourceService;
  *
  * @author icets
  */
-@RestController
-@Timed
-@RequestMapping(path = "/${icip.pathPrefix}/modelservice")
-public class ICIPModelServiceController {
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPModelServiceController.class);
-
-	@Autowired
-	private ICIPModelPluginsService modelPluginService;
-	
-	@Autowired
-	private IICIPDatasourceService dsService;
-	/**
-	 * Gets the types.
-	 *
-	 * @param page the page
-	 * @param size the size
-	 * @return the types
-	 */
-	@GetMapping("types")
-	public ResponseEntity<String> getTypes(
-			@RequestParam(name = "page", defaultValue = "0", required = false) String page,
-			@RequestParam(name = "size", defaultValue = "12", required = false) String size) {
-		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString()).body(
-				modelPluginService.getModelServiceJson(Integer.parseInt(page), Integer.parseInt(size)).toString());
-	}
-
-	@PostMapping("listRegisteredModels")
-	public ResponseEntity<ICIPPolyAIResponseWrapper> listRegisteredModels(@RequestBody ICIPPolyAIRequestWrapper request) throws IOException, JSONException, LeapException, Exception {
-		logger.info("List Registered Models");
-		JSONObject requestJSON = new JSONObject(request.getRequest());
-		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
-				.body(modelPluginService.getModelService(dsService.getDatasource(requestJSON.getString("datasource"), requestJSON.getString("org")).getType()).listRegisteredModel(request));	}
-
-	
-	@PostMapping("getRegisteredModel")
-	public ResponseEntity<ICIPPolyAIResponseWrapper> getRegisteredModel(@RequestBody ICIPPolyAIRequestWrapper request)throws IOException, JSONException, LeapException, Exception {
-		logger.info("Getting Registered Model");
-		JSONObject requestJSON = new JSONObject(request.getRequest());
-		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
-				.body(modelPluginService.getModelService(dsService.getDatasource(requestJSON.getString("datasource"), requestJSON.getString("org")).getType()).getRegisteredModel(request));
-	}
-
-	
-	@PostMapping("renameRegisteredModel")
-	public ResponseEntity<ICIPPipelineModel> renameRegisteredModel() {
-		logger.info("Getting Model Servers");
-//			return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
-		return null;
-	}
-
-	// TODO implementation
-	@PostMapping("updateRegisteredModel")
-	public ResponseEntity<ICIPPipelineModel> updateRegisteredModel() {
-		logger.info("Getting Model Servers");
-//			return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
-		return null;
-	}
-
-	// TODO implementation
-	@PostMapping("deleteRegisteredModel")
-	public ResponseEntity<ICIPPipelineModel> deleteRegisteredModel() {
-		logger.info("Getting Model Servers");
-//			return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
-		return null;
-	}
-
-	@PostMapping("registerModel")
-	public ResponseEntity<ICIPMLFederatedModel> registerModel(@RequestBody ICIPPolyAIRequestWrapper request)
-			throws IOException, LeapException, Exception {
-		logger.info("Register Model");
-		JSONObject requestJSON = new JSONObject(request.getRequest());
-		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
-				.body(modelPluginService.getModelService(dsService.getDatasource(requestJSON.getString("datasource"), requestJSON.getString("org")).getType()).registerModel(request));
-	}
-
-	@PostMapping("getLatestModelVersionModel")
-	public ResponseEntity<ICIPPipelineModel> getLatestModelVersionRegisteredModel() {
-		logger.info("Getting Model Servers");
-//			return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
-		return null;
-	}
-
-	@PostMapping("createEndPointConfig")
-	public ResponseEntity<ICIPPipelineModel> createEndPointConfig() {
-		logger.info("Getting Model Servers");
-//			return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
-		return null;
-	}
-
-	@PostMapping("deleteEndPointConfig")
-	public ResponseEntity<ICIPPipelineModel> deleteEndPointConfig() {
-		logger.info("Getting Model Servers");
-//			return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
-		return null;
-	}
-
-	@PostMapping("listEndpointConfigs")
-	public ResponseEntity<ICIPPipelineModel> listEndpointConfigs() {
-		logger.info("Getting Model Servers");
-//			return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
-		return null;
-	}
-
-	@PostMapping("listEndpoints")
-	public ResponseEntity<ICIPPolyAIResponseWrapper> listEndpoints(@RequestBody ICIPPolyAIRequestWrapper request) throws IOException, JSONException, LeapException, Exception{
-		logger.info("List Endpoints");
-		JSONObject requestJSON = new JSONObject(request.getRequest());
-		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
-				.body(modelPluginService.getModelService(dsService.getDatasource(requestJSON.getString("datasource"), requestJSON.getString("org")).getType()).listEndpoints(request));
-	}
-
-	@PostMapping("createEndPoint")
-	public ResponseEntity<ICIPMLFederatedEndpoint> createEndPoint(@RequestBody ICIPPolyAIRequestWrapper request)throws IOException, LeapException, Exception {
-		logger.info("Create Endpoint");
-		JSONObject requestJSON = new JSONObject(request.getRequest());
-		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
-				.body(modelPluginService.getModelService(dsService.getDatasource(requestJSON.getString("datasource"), requestJSON.getString("org")).getType()).createEndpoint(request));
-	}
-	@PostMapping("getEndpoint")
-	public ResponseEntity<ICIPPolyAIResponseWrapper> getEndpoint(@RequestBody ICIPPolyAIRequestWrapper request) throws IOException, JSONException, LeapException, Exception {
-		logger.info("Getting Endpoint");
-		JSONObject requestJSON = new JSONObject(request.getRequest());
-		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
-				.body(modelPluginService.getModelService(dsService.getDatasource(requestJSON.getString("datasource"), requestJSON.getString("org")).getType()).getEndpoint(request));
-	}
-	
-	@PostMapping("deployModel")
-	public ResponseEntity<ICIPPolyAIResponseWrapper> deployModel(@RequestBody ICIPPolyAIRequestWrapper request) throws IOException, LeapException, Exception {
-		logger.info("Deploy Model");
-		//JSONObject requestJSON = new JSONObject(request.getRequest());
-		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
-				.body(modelPluginService.getModelService(dsService.getDatasource(request.getName(), request.getOrganization()).getType()).deployModel(request));
-	}
-	
-	@PostMapping("getDeploymentStatus")
-	public ResponseEntity<ICIPPolyAIResponseWrapper> getDeploymentStatus(@RequestBody ICIPPolyAIRequestWrapper request) throws IOException, JSONException, LeapException, Exception {
-		logger.info("Getting Deployment Status");
-		JSONObject requestJSON = new JSONObject(request.getRequest());
-		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
-				.body(modelPluginService.getModelService(dsService.getDatasource(requestJSON.getString("datasource"), requestJSON.getString("org")).getType()).getDeploymentStatus(request));
-	}
-
-	@PostMapping("deleteEndPoint")
-	public ResponseEntity<ICIPPipelineModel> deleteEndPoint() {
-		logger.info("Getting Model Servers");
-//			return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
-		return null;
-	}
-	
-		
-}
+//@RestController
+//@Timed
+//@RequestMapping(path = "/${icip.pathPrefix}/modelservice")
+//public class ICIPModelServiceController {
+//
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPModelServiceController.class);
+//
+//	@Autowired
+//	private ICIPModelPluginsService modelPluginService;
+//	
+//	@Autowired
+//	private IICIPDatasourceService dsService;
+//	/**
+//	 * Gets the types.
+//	 *
+//	 * @param page the page
+//	 * @param size the size
+//	 * @return the types
+//	 */
+//	@GetMapping("types")
+//	public ResponseEntity<String> getTypes(
+//			@RequestParam(name = "page", defaultValue = "0", required = false) String page,
+//			@RequestParam(name = "size", defaultValue = "12", required = false) String size) {
+//		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString()).body(
+//				modelPluginService.getModelServiceJson(Integer.parseInt(page), Integer.parseInt(size)).toString());
+//	}
+//
+//	@PostMapping("listRegisteredModels")
+//	public ResponseEntity<ICIPPolyAIResponseWrapper> listRegisteredModels(@RequestBody ICIPPolyAIRequestWrapper request) throws IOException, JSONException, LeapException, Exception {
+//		logger.info("List Registered Models");
+//		JSONObject requestJSON = new JSONObject(request.getRequest());
+//		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
+//				.body(modelPluginService.getModelService(dsService.getDatasource(requestJSON.getString("datasource"), requestJSON.getString("org")).getType()).listRegisteredModel(request));	}
+//
+//	
+//	@PostMapping("getRegisteredModel")
+//	public ResponseEntity<ICIPPolyAIResponseWrapper> getRegisteredModel(@RequestBody ICIPPolyAIRequestWrapper request)throws IOException, JSONException, LeapException, Exception {
+//		logger.info("Getting Registered Model");
+//		JSONObject requestJSON = new JSONObject(request.getRequest());
+//		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
+//				.body(modelPluginService.getModelService(dsService.getDatasource(requestJSON.getString("datasource"), requestJSON.getString("org")).getType()).getRegisteredModel(request));
+//	}
+//
+//	
+//	@PostMapping("renameRegisteredModel")
+//	public ResponseEntity<ICIPPipelineModel> renameRegisteredModel() {
+//		logger.info("Getting Model Servers");
+////			return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
+//		return null;
+//	}
+//
+//	// TODO implementation
+//	@PostMapping("updateRegisteredModel")
+//	public ResponseEntity<ICIPPipelineModel> updateRegisteredModel() {
+//		logger.info("Getting Model Servers");
+////			return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
+//		return null;
+//	}
+//
+//	// TODO implementation
+//	@PostMapping("deleteRegisteredModel")
+//	public ResponseEntity<ICIPPipelineModel> deleteRegisteredModel() {
+//		logger.info("Getting Model Servers");
+////			return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
+//		return null;
+//	}
+//
+//	@PostMapping("registerModel")
+//	public ResponseEntity<ICIPMLFederatedModel> registerModel(@RequestBody ICIPPolyAIRequestWrapper request)
+//			throws IOException, LeapException, Exception {
+//		logger.info("Register Model");
+//		JSONObject requestJSON = new JSONObject(request.getRequest());
+//		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
+//				.body(modelPluginService.getModelService(dsService.getDatasource(requestJSON.getString("datasource"), requestJSON.getString("org")).getType()).registerModel(request));
+//	}
+//
+//	@PostMapping("getLatestModelVersionModel")
+//	public ResponseEntity<ICIPPipelineModel> getLatestModelVersionRegisteredModel() {
+//		logger.info("Getting Model Servers");
+////			return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
+//		return null;
+//	}
+//
+//	@PostMapping("createEndPointConfig")
+//	public ResponseEntity<ICIPPipelineModel> createEndPointConfig() {
+//		logger.info("Getting Model Servers");
+////			return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
+//		return null;
+//	}
+//
+//	@PostMapping("deleteEndPointConfig")
+//	public ResponseEntity<ICIPPipelineModel> deleteEndPointConfig() {
+//		logger.info("Getting Model Servers");
+////			return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
+//		return null;
+//	}
+//
+//	@PostMapping("listEndpointConfigs")
+//	public ResponseEntity<ICIPPipelineModel> listEndpointConfigs() {
+//		logger.info("Getting Model Servers");
+////			return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
+//		return null;
+//	}
+//
+//	@PostMapping("listEndpoints")
+//	public ResponseEntity<ICIPPolyAIResponseWrapper> listEndpoints(@RequestBody ICIPPolyAIRequestWrapper request) throws IOException, JSONException, LeapException, Exception{
+//		logger.info("List Endpoints");
+//		JSONObject requestJSON = new JSONObject(request.getRequest());
+//		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
+//				.body(modelPluginService.getModelService(dsService.getDatasource(requestJSON.getString("datasource"), requestJSON.getString("org")).getType()).listEndpoints(request));
+//	}
+//
+//	@PostMapping("createEndPoint")
+//	public ResponseEntity<ICIPMLFederatedEndpoint> createEndPoint(@RequestBody ICIPPolyAIRequestWrapper request)throws IOException, LeapException, Exception {
+//		logger.info("Create Endpoint");
+//		JSONObject requestJSON = new JSONObject(request.getRequest());
+//		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
+//				.body(modelPluginService.getModelService(dsService.getDatasource(requestJSON.getString("datasource"), requestJSON.getString("org")).getType()).createEndpoint(request));
+//	}
+//	@PostMapping("getEndpoint")
+//	public ResponseEntity<ICIPPolyAIResponseWrapper> getEndpoint(@RequestBody ICIPPolyAIRequestWrapper request) throws IOException, JSONException, LeapException, Exception {
+//		logger.info("Getting Endpoint");
+//		JSONObject requestJSON = new JSONObject(request.getRequest());
+//		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
+//				.body(modelPluginService.getModelService(dsService.getDatasource(requestJSON.getString("datasource"), requestJSON.getString("org")).getType()).getEndpoint(request));
+//	}
+//	
+//	@PostMapping("deployModel")
+//	public ResponseEntity<ICIPPolyAIResponseWrapper> deployModel(@RequestBody ICIPPolyAIRequestWrapper request) throws IOException, LeapException, Exception {
+//		logger.info("Deploy Model");
+//		//JSONObject requestJSON = new JSONObject(request.getRequest());
+//		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
+//				.body(modelPluginService.getModelService(dsService.getDatasource(request.getName(), request.getOrganization()).getType()).deployModel(request));
+//	}
+//	
+//	@PostMapping("getDeploymentStatus")
+//	public ResponseEntity<ICIPPolyAIResponseWrapper> getDeploymentStatus(@RequestBody ICIPPolyAIRequestWrapper request) throws IOException, JSONException, LeapException, Exception {
+//		logger.info("Getting Deployment Status");
+//		JSONObject requestJSON = new JSONObject(request.getRequest());
+//		return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
+//				.body(modelPluginService.getModelService(dsService.getDatasource(requestJSON.getString("datasource"), requestJSON.getString("org")).getType()).getDeploymentStatus(request));
+//	}
+//
+//	@PostMapping("deleteEndPoint")
+//	public ResponseEntity<ICIPPipelineModel> deleteEndPoint() {
+//		logger.info("Getting Model Servers");
+////			return new ResponseEntity<>(modelServerService.findAll(), new HttpHeaders(), HttpStatus.OK);
+//		return null;
+//	}
+//	
+//		
+//}
