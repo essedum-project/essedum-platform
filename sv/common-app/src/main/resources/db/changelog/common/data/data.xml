@@ -197,7 +197,7 @@
 			SET IDENTITY_INSERT mlgroups OFF;
 		</sql>		
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1617868010544-202">
+	<!--<changeSet author="Leap (generated)" id="1617868010544-202">
 		<sql dbms="mssql">
 			SET IDENTITY_INSERT sbx_experiment_type ON;
 		</sql>	
@@ -213,7 +213,7 @@
 		<sql dbms="mssql">
 			SET IDENTITY_INSERT sbx_experiment_type OFF;
 		</sql>		
-	</changeSet>
+	</changeSet>-->
 	<changeSet author="Leap (generated)" id="1617868010544-203">
 		<sql dbms="mssql">
 			SET IDENTITY_INSERT twb_client ON;

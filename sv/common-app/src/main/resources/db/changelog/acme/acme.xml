@@ -2265,7 +2265,7 @@
             <column header="parallelchain" name="parallelchain" type="NUMERIC"/>
         </loadData>
     </changeSet>
-    <changeSet author="ayushi.yadav" id="1620283295335-5">
+    <!--<changeSet author="ayushi.yadav" id="1620283295335-5">
         <sql dbms="mssql">
 			SET IDENTITY_INSERT sbx_configuration ON;
 		</sql>
@@ -2436,7 +2436,7 @@
         <sql dbms="mssql">
 			SET IDENTITY_INSERT sbx_solution_assessment OFF;
 		</sql>
-    </changeSet>
+    </changeSet>-->
 	
 	
 	

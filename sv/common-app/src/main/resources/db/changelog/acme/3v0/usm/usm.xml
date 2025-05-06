@@ -44,7 +44,7 @@
 		</sql>
 	</changeSet>
  
-    <changeSet id="3v0-usm-310572" author="Leap">
+   <!-- <changeSet id="3v0-usm-310572" author="Leap">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
                 SELECT COUNT(*) FROM usm_constant WHERE item_value ='{"label":"Gamification","icon":"gamepad","url":"","children":[{"label":"Dashboard","icon":"th-large","url":"./iamp-iegp/dashboard/","children":[],"_id":2},{"label":"Demo","icon":"","url":"./iamp-iegp/amsdemo","children":[{"label":"AMS Demo","icon":"","url":"./iamp-iegp/amsdemo","children":[],"_id":4},{"label":"Game Scenario","icon":"","url":"./iamp-iegp/gamedemo","children":[],"_id":5},{\"label\":\"NFL Game\",\"icon\":\"\",\"url\":\"./iamp-iegp/nflgame\",\"children\":[],\"_id\":6}],"_id":3}]}' AND item = 'IT Portfolio Manager Side';
@@ -53,5 +53,5 @@
  		<sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
 			INSERT INTO usm_constant(item,project_name,item_value,project_id) VALUES ('IT Portfolio Manager Side','leo1311','{\"label\":\"Gamification\",\"icon\":\"gamepad\",\"url\":\"\",\"children\":[{\"label\":\"Dashboard\",\"icon\":\"th-large\",\"url\":\"./iamp-iegp/dashboard/\",\"children\":[],\"_id\":2},{\"label\":\"Demo\",\"icon\":\"\",\"url\":\"./iamp-iegp/amsdemo\",\"children\":[{\"label\":\"AMS Demo\",\"icon\":\"\",\"url\":\"./iamp-iegp/amsdemo\",\"children\":[],\"_id\":4},{\"label\":\"Game Scenario\",\"icon\":\"\",\"url\":\"./iamp-iegp/gamedemo\",\"children\":[],\"_id\":5},{\"label\":\"NFL Game\",\"icon\":\"\",\"url\":\"./iamp-iegp/nflgame\",\"children\":[],\"_id\":6}],\"_id\":3}]}','2');	
 		</sql>
-	</changeSet>
+	</changeSet>-->
 </databaseChangeLog>

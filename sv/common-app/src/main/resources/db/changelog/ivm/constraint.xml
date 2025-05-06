@@ -8,7 +8,7 @@
 
 
 
-	<changeSet author="Leap (generated)" id="1680077666558-3">
+	<!--<changeSet author="Leap (generated)" id="1680077666558-3">
 		<createIndex indexName="region_id_ivm_master_country"
 			tableName="ivm_master_country">
 			<column name="geo_id" />
@@ -1097,7 +1097,7 @@
 			referencedTableName="ivm_data_org_metric_industry_target"
 			validate="true" />
 	</changeSet>
-<!--	<changeSet author="Leap (generated)" id="1680163318773-4" dbms="mssql">
+	<changeSet author="Leap (generated)" id="1680163318773-4" dbms="mssql">
 		<addForeignKeyConstraint
 			baseColumnNames="industry_target_id"
 			baseTableName="ivm_data_org_metric_target"
@@ -1106,7 +1106,7 @@
 			referencedColumnNames="id"
 			referencedTableName="ivm_data_org_metric_industry_target"
 			validate="true" />
-	</changeSet>  -->
+	</changeSet>  
 
 	<changeSet author="Leap (generated)" id="1680164145455-3">
 		<createIndex indexName="initiative_id_ivm_data_org_task"
@@ -1321,10 +1321,10 @@
 			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
 			referencedColumnNames="id" referencedTableName="ivm_master_metric"
 			validate="true" />
-	</changeSet>
+	</changeSet>-->
 
 
-<changeSet author="Leap (generated)" id="1780091278302-5">
+<!--<changeSet author="Leap (generated)" id="1780091278302-5">
   <sql dbms="postgresql">select setval('ivm_canvas_master_attributes_id_seq', max(id)+1) from ivm_canvas_master_attributes</sql> 
   <sql dbms="postgresql">select setval('ivm_data_org_metric_dimension_id_seq', max(id)+1) from ivm_data_org_metric_dimension</sql>
   <sql dbms="postgresql">select setval('ivm_data_org_questionnaire_instance_id_seq', max(id)+1) from ivm_data_org_questionnaire_instance</sql>
@@ -1367,7 +1367,7 @@
   <sql dbms="postgresql">select setval('ivm_data_org_milestone_id_seq', max(id)+1) from ivm_data_org_milestone</sql>
   <sql dbms="postgresql">select setval('ivm_data_org_project_score_id_seq', max(id)+1) from ivm_data_org_project_score</sql>
   <sql dbms="postgresql">select setval('ivm_data_org_subtask_id_seq', max(id)+1) from ivm_data_org_subtask</sql>
-<!--   <sql dbms="postgresql">select setval('ivm_data_org_task_id_seq', max(id)+1) from ivm_data_org_task</sql> -->
+  <sql dbms="postgresql">select setval('ivm_data_org_task_id_seq', max(id)+1) from ivm_data_org_task</sql> 
   <sql dbms="postgresql">select setval('ivm_data_org_value_map_id_seq', max(id)+1) from ivm_data_org_value_map</sql>
   <sql dbms="postgresql">select setval('ivm_data_question_name_cat_id_seq', max(id)+1) from ivm_data_question_name_cat</sql>
   <sql dbms="postgresql">select setval('ivm_master_group_id_seq', max(id)+1) from ivm_master_group</sql>
@@ -1387,6 +1387,6 @@
   <sql dbms="postgresql">select setval('metric_lever', max(id)+1) from metric_lever</sql>
 
   
-</changeSet>
+</changeSet>-->
 
 </databaseChangeLog>	
