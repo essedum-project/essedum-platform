@@ -189,7 +189,7 @@ public class ICIPJobsController {
 		}
 		return new ResponseEntity<>(listJobs, new HttpHeaders(), HttpStatus.OK);
 	}
-
+	
 	@GetMapping("/downloadCsv/{org}")
 	public ResponseEntity<String> getJobsByModel(
 			@PathVariable(name = "org") String org,

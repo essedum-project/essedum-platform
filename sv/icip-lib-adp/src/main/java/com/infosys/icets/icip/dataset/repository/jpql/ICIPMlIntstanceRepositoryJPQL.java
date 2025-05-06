@@ -10,7 +10,7 @@
  */
 package com.infosys.icets.icip.dataset.repository.jpql;
 
-import java.util.List; 
+import java.util.List;
 
 //import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Query;
