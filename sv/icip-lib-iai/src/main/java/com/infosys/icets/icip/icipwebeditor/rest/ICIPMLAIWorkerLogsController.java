@@ -35,21 +35,21 @@ import com.infosys.icets.icip.icipwebeditor.service.ICIPMLAIWorkerLogsService;
 
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Hidden;
-
-@RestController
-@Timed
-@Hidden
-@RequestMapping(path = "/${icip.pathPrefix}/mlaiworkerlogs")
-public class ICIPMLAIWorkerLogsController {
-	
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPMLAIWorkerLogs.class);
-
-	@Autowired
-	ICIPMLAIWorkerLogsService aiWorkerLogsService;
-	
-	//COMMENTED AS PART OF CODE CLEANUP
-	
+//COMMENTED AS PART OF CODE CLEANUP
+//@RestController
+//@Timed
+//@Hidden
+//@RequestMapping(path = "/${icip.pathPrefix}/mlaiworkerlogs")
+//public class ICIPMLAIWorkerLogsController {
+//	
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPMLAIWorkerLogs.class);
+//
+//	@Autowired
+//	ICIPMLAIWorkerLogsService aiWorkerLogsService;
+//	
+//	
+//	
 //	@GetMapping("/count/{org}")
 //	public ResponseEntity<Long> getMlAiWorkerLogsLen(@PathVariable(name = "org") String org) {
 //		return new ResponseEntity<>(aiWorkerLogsService.logsCountByOrganization(org), HttpStatus.OK);
@@ -69,5 +69,5 @@ public class ICIPMLAIWorkerLogsController {
 //		ICIPMLAIWorkerLogs aiWorkerLog = aiWorkerLogsService.saveLog(project, reqBody);
 //		return new ResponseEntity<>(aiWorkerLog,HttpStatus.OK);
 //	}
-	
-}
+//	
+//}

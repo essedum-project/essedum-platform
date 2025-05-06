@@ -34,7 +34,7 @@ import com.infosys.icets.icip.icipwebeditor.service.IICIPAgentJobsService;
 
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Hidden;
-
+//COMMENTED AS PART OF CODE CLEANUP
 // TODO: Auto-generated Javadoc
 // 
 /**
@@ -42,21 +42,20 @@ import io.swagger.v3.oas.annotations.Hidden;
  *
  * @author icets
  */
-@RestController
-@Timed
-@Hidden
-@RequestMapping(path = "/${icip.pathPrefix}/agentjobs")
-public class ICIPAgentJobsController {
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPAgentJobsController.class);
-
-	/** The i ICIP jobs service. */
-	@Autowired
-	private IICIPAgentJobsService iICIPAgentJobsService;
-	
-	//COMMENTED AS PART OF CODE CLEANUP
-
+//@RestController
+//@Timed
+//@Hidden
+//@RequestMapping(path = "/${icip.pathPrefix}/agentjobs")
+//public class ICIPAgentJobsController {
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPAgentJobsController.class);
+//
+//	/** The i ICIP jobs service. */
+//	@Autowired
+//	private IICIPAgentJobsService iICIPAgentJobsService;
+//	
+//	
+//
 //	/**
 //	 * Gets the jobs len.
 //	 *
@@ -167,5 +166,5 @@ public class ICIPAgentJobsController {
 //		Throwable rootcause = ExceptionUtil.findRootCause(ex);
 //		return new ResponseEntity<>( new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getMessage(), new HttpHeaders(),  new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getStatus());
 //	}
-
-}
+//
+//}

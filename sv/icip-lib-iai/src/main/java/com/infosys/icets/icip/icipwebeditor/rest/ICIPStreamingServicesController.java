@@ -64,44 +64,44 @@ import com.infosys.icets.icip.icipwebeditor.util.ICIPPageResponse;
 
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Hidden;
-
+//COMMENTED AS PART OF CODE CLEANUP
 // TODO: Auto-generated Javadoc
 // 
-/**
- * The Class ICIPStreamingServicesController.
- *
- * @author icets
- */
-@RestController
-@Timed
-@Hidden
-@RequestMapping(path = "/${icip.pathPrefix}/streamingServices")
-public class ICIPStreamingServicesController {
-
-	/** The Constant ENTITY_NAME. */
-	private static final String ENTITY_NAME = "streamingServices";
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPStreamingServicesController.class);
-
-	/** The streaming services service. */
-	@Autowired
-	private IICIPStreamingServiceService streamingServicesService;
-
-	
-	/** The claim. */
-	@Value("${security.claim:#{null}}")
-	private String claim;
-
-	/**
-	 * Gets the all pipelines.
-	 *
-	 * @param org the org
-	 * @return the all pipelines
-	 * 
-	 */
-	
-	//COMMENTED AS PART OF CODE CLEANUP
+///**
+// * The Class ICIPStreamingServicesController.
+// *
+// * @author icets
+// */
+//@RestController
+//@Timed
+//@Hidden
+//@RequestMapping(path = "/${icip.pathPrefix}/streamingServices")
+//public class ICIPStreamingServicesController {
+//
+//	/** The Constant ENTITY_NAME. */
+//	private static final String ENTITY_NAME = "streamingServices";
+//
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPStreamingServicesController.class);
+//
+//	/** The streaming services service. */
+//	@Autowired
+//	private IICIPStreamingServiceService streamingServicesService;
+//
+//	
+//	/** The claim. */
+//	@Value("${security.claim:#{null}}")
+//	private String claim;
+//
+//	/**
+//	 * Gets the all pipelines.
+//	 *
+//	 * @param org the org
+//	 * @return the all pipelines
+//	 * 
+//	 */
+//	
+//	
 //	@GetMapping(path = "/allPipelines/{org}")
 //	public ResponseEntity<List<ICIPStreamingServices2DTO>> getAllPipelines(@PathVariable(name = "org") String org) {
 //		return new ResponseEntity<>(streamingServicesService.getAllPipelinesByOrg(org), HttpStatus.OK);
@@ -379,5 +379,5 @@ public class ICIPStreamingServicesController {
 //			
 //		return new ResponseEntity<>(fileObj.toString(), new HttpHeaders(), HttpStatus.OK);
 //	}
-
-}
+//
+//}

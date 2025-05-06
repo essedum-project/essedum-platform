@@ -55,29 +55,29 @@ import io.swagger.v3.oas.annotations.Hidden;
 @Hidden
 @RequestMapping(path = "/${icip.pathPrefix}/agents")
 public class ICIPAgentController {
-
-	/** The Constant ENTITY_NAME. */
-	private static final String ENTITY_NAME = "agents";
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPAgentController.class);
-
-	/** The streaming services service. */
-	@Autowired
-	private IICIPAgentService agentService;
-
-	/** The claim. */
-	@Value("${security.claim:#{null}}")
-	private String claim;
-	
-	
-	//COMMENTED AS PART OF CODE CLEANUP
-
-	/**
-	 * Gets the all pipelines.
-	 *
-	 * @return the all pipelines
-	 */
+//COMMENTED AS PART OF CODE CLEANUP
+//	/** The Constant ENTITY_NAME. */
+//	private static final String ENTITY_NAME = "agents";
+//
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPAgentController.class);
+//
+//	/** The streaming services service. */
+//	@Autowired
+//	private IICIPAgentService agentService;
+//
+//	/** The claim. */
+//	@Value("${security.claim:#{null}}")
+//	private String claim;
+//	
+//	
+//	
+//
+//	/**
+//	 * Gets the all pipelines.
+//	 *
+//	 * @return the all pipelines
+//	 */
 //	@GetMapping(path = "/allPipelines")
 //	public ResponseEntity<List<ICIPAgents>> getAllAgents() {
 //		return new ResponseEntity<>(agentService.getAllAgents(), HttpStatus.OK);

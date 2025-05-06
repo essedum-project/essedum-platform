@@ -52,7 +52,7 @@ import com.infosys.icets.icip.icipwebeditor.service.impl.JobScheduleServiceImpl;
 
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Hidden;
-
+//COMMENTED AS PART OF CODE CLEANUP
 // TODO: Auto-generated Javadoc
 // 
 /**
@@ -60,41 +60,41 @@ import io.swagger.v3.oas.annotations.Hidden;
  *
  * @author icets
  */
-@RestController
-@Timed
-@Hidden
-@RequestMapping(path = "/${icip.pathPrefix}/chainjob")
-public class ICIPChainJobsController {
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPChainJobsController.class);
-
-	/** The i ICIP jobs service. */
-	@Autowired
-	private IICIPChainJobsService iICIPJobsService;
-
-	/** The i ICIP jobs service. */
-	@Autowired
-	private IICIPJobsService jobsService;
-	
-	/** The i ICIP chains service. */
-	@Autowired
-	private IICIPChainsService iICIPChainsService;
-
-	@Autowired
-	private ICIPRuntimeLoggerService jobRuntimeLoggerService;
-	
-	/** The job scheduler service. */
-	@Autowired
-	private JobScheduleServiceImpl jobSchedulerService;
-	
-	/** The claim. */
-	@Value("${security.claim:#{null}}")
-	private String claim;
-	
-	
-	//COMMENTED AS PART OF CODE CLEANUP
-
+//@RestController
+//@Timed
+//@Hidden
+//@RequestMapping(path = "/${icip.pathPrefix}/chainjob")
+//public class ICIPChainJobsController {
+//
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPChainJobsController.class);
+//
+//	/** The i ICIP jobs service. */
+//	@Autowired
+//	private IICIPChainJobsService iICIPJobsService;
+//
+//	/** The i ICIP jobs service. */
+//	@Autowired
+//	private IICIPJobsService jobsService;
+//	
+//	/** The i ICIP chains service. */
+//	@Autowired
+//	private IICIPChainsService iICIPChainsService;
+//
+//	@Autowired
+//	private ICIPRuntimeLoggerService jobRuntimeLoggerService;
+//	
+//	/** The job scheduler service. */
+//	@Autowired
+//	private JobScheduleServiceImpl jobSchedulerService;
+//	
+//	/** The claim. */
+//	@Value("${security.claim:#{null}}")
+//	private String claim;
+//	
+//	
+//	
+//
 //	/**
 //	 * Run chain.
 //	 *
@@ -482,5 +482,5 @@ public class ICIPChainJobsController {
 //			return new ResponseEntity<>(new HttpHeaders(), HttpStatus.BAD_REQUEST);
 //		}
 //	}
-
-}
+//
+//}

@@ -37,24 +37,24 @@ import com.infosys.icets.icip.icipwebeditor.service.ICIPMLAIWorkerService;
 
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Hidden;
-
-@RestController
-@Timed
-@Hidden
-@RequestMapping(path = "/${icip.pathPrefix}/mlaiworker")
-public class ICIPMLAIWorkerController {
-	
-	@Autowired
-	ICIPMLAIWorkerConfigService mlaiworkerConfigService;
-	
-	@Autowired
-	ICIPMLAIWorkerService mlaiworkerService;
-	
-	/**
-	 * -------------------------MLAIWorkerConfig---------------
-	 */
-	
-	//COMMENTED AS PART OF CODE CLEANUP
+//COMMENTED AS PART OF CODE CLEANUP
+//@RestController
+//@Timed
+//@Hidden
+//@RequestMapping(path = "/${icip.pathPrefix}/mlaiworker")
+//public class ICIPMLAIWorkerController {
+//	
+//	@Autowired
+//	ICIPMLAIWorkerConfigService mlaiworkerConfigService;
+//	
+//	@Autowired
+//	ICIPMLAIWorkerService mlaiworkerService;
+//	
+//	/**
+//	 * -------------------------MLAIWorkerConfig---------------
+//	 */
+//	
+//	
 //	@GetMapping("/config/getAll")
 //	public ResponseEntity<List<ICIPMLAIWorkerConfig>> getAllAiWorkerConfig(
 //			@RequestParam(name = "project", required = true) String project,
@@ -219,5 +219,5 @@ public class ICIPMLAIWorkerController {
 //		return ResponseEntity.ok().headers(ICIPHeaderUtil.createEntityDeletionAlert("AiWorker", id.toString()))
 //				.build();
 //	}
-
-}
+//
+//}

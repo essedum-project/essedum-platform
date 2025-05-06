@@ -43,25 +43,25 @@ import io.swagger.v3.oas.annotations.Hidden;
  *
  * @author icets
  */
-@RestController
-@Timed
-@Hidden
-@RequestMapping("/${icip.pathPrefix}/pipeline")
-public class ICIPPipelineController {
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPPipelineController.class);
-
-	/** The pipeline service. */
-	@Autowired
-	private ICIPPipelineService pipelineService;
-
-	/** The streaming services service. */
-	@Autowired
-	private IICIPStreamingServiceService streamingServicesService;
-	
+//@RestController
+//@Timed
+//@Hidden
+//@RequestMapping("/${icip.pathPrefix}/pipeline")
+//public class ICIPPipelineController {
 	//COMMENTED AS PART OF CODE CLEANUP
-
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPPipelineController.class);
+//
+//	/** The pipeline service. */
+//	@Autowired
+//	private ICIPPipelineService pipelineService;
+//
+//	/** The streaming services service. */
+//	@Autowired
+//	private IICIPStreamingServiceService streamingServicesService;
+//	
+//	
+//
 //	/**
 //	 * Trigger pipeline.
 //	 *
@@ -164,4 +164,4 @@ public class ICIPPipelineController {
 //			@PathVariable(name = "org") String org) {
 //		return new ResponseEntity<>(new Gson().toJson(pipelineService.exportPipelines(org, pipelines)), HttpStatus.OK);
 //	}
-}
+//}

@@ -35,7 +35,7 @@ import com.infosys.icets.icip.icipwebeditor.service.IICIPPluginService;
 
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Hidden;
-
+//COMMENTED AS PART OF CODE CLEANUP
 // TODO: Auto-generated Javadoc
 // 
 /**
@@ -43,28 +43,28 @@ import io.swagger.v3.oas.annotations.Hidden;
  *
  * @author icets
  */
-@RestController
-@Timed
-@Hidden
-@RequestMapping(path = "/${icip.pathPrefix}/pluginscript")
-public class ICIPPluginScriptController {
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPPluginScriptController.class);
-
-	/** The plugin service. */
-	@Autowired
-	private IICIPPluginScriptService pluginScriptService;
-	
-	@Autowired
-	private IICIPPluginService pluginService;
-	
-	//COMMENTED AS PART OF CODE CLEANUP
-	/**
-	 * Gets the plugin iai.
-	 *
-	 * @return the plugin iai
-	 */
+//@RestController
+//@Timed
+//@Hidden
+//@RequestMapping(path = "/${icip.pathPrefix}/pluginscript")
+//public class ICIPPluginScriptController {
+//
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPPluginScriptController.class);
+//
+//	/** The plugin service. */
+//	@Autowired
+//	private IICIPPluginScriptService pluginScriptService;
+//	
+//	@Autowired
+//	private IICIPPluginService pluginService;
+//	
+//	
+//	/**
+//	 * Gets the plugin iai.
+//	 *
+//	 * @return the plugin iai
+//	 */
 //	@GetMapping("/all")
 //	public ResponseEntity<String> getPluginIai() {
 //		logger.info("Getting PluginIAI");
@@ -121,5 +121,5 @@ public class ICIPPluginScriptController {
 //		Throwable rootcause = ExceptionUtil.findRootCause(ex);
 //		return new ResponseEntity<>(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getMessage(), new HttpHeaders(), new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, rootcause.getMessage(), "error occurred").getStatus());
 //	}
-
-}
+//
+//}

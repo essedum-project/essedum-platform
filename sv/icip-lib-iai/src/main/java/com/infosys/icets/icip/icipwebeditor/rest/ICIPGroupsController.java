@@ -44,12 +44,12 @@ import com.infosys.icets.icip.icipwebeditor.model.ICIPGroupModel;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPGroups;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPPartialGroups;
 import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPGroupsDTO;
-import com.infosys.icets.icip.icipwebeditor.service.IICIPGroupsService;
+//import com.infosys.icets.icip.icipwebeditor.service.IICIPGroupsService;
 import com.infosys.icets.icip.icipwebeditor.service.IICIPPartialGroupsService;
 
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Hidden;
-
+//COMMENTED AS PART OF CODE CLEANUP
 // TODO: Auto-generated Javadoc
 // 
 /**
@@ -57,31 +57,31 @@ import io.swagger.v3.oas.annotations.Hidden;
  *
  * @author icets
  */
-@RestController
-@Timed
-@Hidden
-@RequestMapping(path = "/${icip.pathPrefix}/groups")
-public class ICIPGroupsController {
-
-	/** The Constant ENTITY_NAME. */
-	private static final String ENTITY_NAME = "groups";
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPGroupsController.class);
-
-	/** The i ICIP groups service. */
-	@Autowired
-	private IICIPGroupsService iICIPGroupsService;
-
-	/** The i ICIP partial groups service. */
-	@Autowired
-	private IICIPPartialGroupsService iICIPPartialGroupsService;
-	
-	/** The claim. */
-	@Value("${security.claim:#{null}}")
-	private String claim;
-//COMMENTED AS PART OF CODE CLEANUP
-	
+//@RestController
+//@Timed
+//@Hidden
+//@RequestMapping(path = "/${icip.pathPrefix}/groups")
+//public class ICIPGroupsController {
+//
+//	/** The Constant ENTITY_NAME. */
+//	private static final String ENTITY_NAME = "groups";
+//
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPGroupsController.class);
+//
+//	/** The i ICIP groups service. */
+//	@Autowired
+//	private IICIPGroupsService iICIPGroupsService;
+//
+//	/** The i ICIP partial groups service. */
+//	@Autowired
+//	private IICIPPartialGroupsService iICIPPartialGroupsService;
+//	
+//	/** The claim. */
+//	@Value("${security.claim:#{null}}")
+//	private String claim;
+//
+//	
 //	/**
 //	 * Gets the groups by org and entity.
 //	 *
@@ -313,5 +313,5 @@ public class ICIPGroupsController {
 //					rootcause.getMessage(), "error occurred").getMessage(), new HttpHeaders(),  new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, 
 //							rootcause.getMessage(), "error occurred").getStatus());
 //	}
-
-}
+//
+//}

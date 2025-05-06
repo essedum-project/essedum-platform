@@ -45,37 +45,37 @@ import com.infosys.icets.icip.icipwebeditor.service.IICIPWorkflowService;
 
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Hidden;
-
-// TODO: Auto-generated Javadoc
-/**
- * The Class ICIPWorkflowTrainingController.
- */
-@RestController
-@Timed
-@Hidden
-@RequestMapping(path = "/${icip.pathPrefix}/workflows")
-public class ICIPWorkflowController {
-
-	/** The Constant ENTITY_NAME. */
-	private static final String ENTITY_NAME = "wkTrainings";
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPWorkflowController.class);
-
-	/** The workflows service. */
-	@Autowired
-	private IICIPWorkflowService workflowService;
-	
-	/** The claim. */
-	@Value("${security.claim:#{null}}")
-	private String claim;
-
-	@Autowired
-	private NameEncoderService ncs;
-	
-	
-	//COMMENTED AS PART OF CODE CLEANUP
-	
+//COMMENTED AS PART OF CODE CLEANUP
+//// TODO: Auto-generated Javadoc
+///**
+// * The Class ICIPWorkflowTrainingController.
+// */
+//@RestController
+//@Timed
+//@Hidden
+//@RequestMapping(path = "/${icip.pathPrefix}/workflows")
+//public class ICIPWorkflowController {
+//
+//	/** The Constant ENTITY_NAME. */
+//	private static final String ENTITY_NAME = "wkTrainings";
+//
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPWorkflowController.class);
+//
+//	/** The workflows service. */
+//	@Autowired
+//	private IICIPWorkflowService workflowService;
+//	
+//	/** The claim. */
+//	@Value("${security.claim:#{null}}")
+//	private String claim;
+//
+//	@Autowired
+//	private NameEncoderService ncs;
+//	
+//	
+//
+//	
 //	/**
 //	 * Gets the all workflows.
 //	 *

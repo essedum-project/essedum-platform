@@ -12,21 +12,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.infosys.icets.icip.icipwebeditor.model.ICIPClustering;
-import com.infosys.icets.icip.icipwebeditor.service.ICIPClusteringService;
+//import com.infosys.icets.icip.icipwebeditor.service.ICIPClusteringService;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Hidden;
-
-@RestController
-@Timed
-@Hidden
-@RequestMapping(path = "/${icip.pathPrefix}/ClusteringWorkflow")
-public class ICIPClusteringController {
-	
-	@Autowired
-	ICIPClusteringService clusteringrService;
-	
-	//COMMENTED AS PART OF CODE CLEANUP
-		
+//COMMENTED AS PART OF CODE CLEANUP
+//@RestController
+//@Timed
+//@Hidden
+//@RequestMapping(path = "/${icip.pathPrefix}/ClusteringWorkflow")
+//public class ICIPClusteringController {
+//	
+//	@Autowired
+//	ICIPClusteringService clusteringrService;
+//	
+//	
+//		
 //	@PostMapping( "/save")
 //	public ResponseEntity<ICIPClustering> saveWorker(@RequestParam(name = "project", required = true) String project,
 //			@RequestBody String body ){
@@ -42,5 +42,5 @@ public class ICIPClusteringController {
 //		ICIPClustering agent= clusteringrService.getWorkflowConfigByNameAndOrg(name, org);
 //		return new ResponseEntity<>(agent,HttpStatus.OK);
 //	}
-
-}
+//
+//}

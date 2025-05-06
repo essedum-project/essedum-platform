@@ -1,4 +1,4 @@
-package com.infosys.icets.icip.icipwebeditor.rest;
+ package com.infosys.icets.icip.icipwebeditor.rest;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -34,18 +34,16 @@ import com.infosys.icets.icip.icipwebeditor.service.ICIPMLToolsService;
 
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Hidden;
-
-@RestController
-@Timed
-@Hidden
-@RequestMapping(path = "/${icip.pathPrefix}/mltools")
-public class ICIPMLToolsController {
-	
-	@Autowired
-	ICIPMLToolsService mlToolsService;
-	
-	//COMMENTED AS PART OF CODE CLEANUP
-	
+//COMMENTED AS PART OF CODE CLEANUP
+//@RestController
+//@Timed
+//@Hidden
+//@RequestMapping(path = "/${icip.pathPrefix}/mltools")
+//public class ICIPMLToolsController {
+//	
+//	@Autowired
+//	ICIPMLToolsService mlToolsService;
+//	
 //	@GetMapping("/getAllTools")
 //	public ResponseEntity<List<ICIPMLTools>> getAllMLTools(
 //			@RequestParam(name = "project", required = true) String project,
@@ -115,4 +113,4 @@ public class ICIPMLToolsController {
 //	public ResponseEntity<Set<String>> getUniqueCategories(@PathVariable(name = "org") String org){
 //		return new ResponseEntity<>(mlToolsService.getUniqueCategories(org),HttpStatus.OK);
 //	}
-}
+//}

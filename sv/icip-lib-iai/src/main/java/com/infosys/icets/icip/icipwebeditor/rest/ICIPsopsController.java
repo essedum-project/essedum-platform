@@ -21,45 +21,45 @@ import com.infosys.icets.ai.comm.lib.util.service.dto.support.PageRequestByExamp
 import com.infosys.icets.ai.comm.lib.util.service.dto.support.PageResponse;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPSops;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPSopsAlias;
-import com.infosys.icets.icip.icipwebeditor.service.IICIPSopsAliasService;
-import com.infosys.icets.icip.icipwebeditor.service.IICPSopsService;
+//import com.infosys.icets.icip.icipwebeditor.service.IICIPSopsAliasService;
+//import com.infosys.icets.icip.icipwebeditor.service.IICPSopsService;
 
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Hidden;
-
-/**
- * The Class ICIPPipelineController.
- *
- * @author icets
- */
-@RestController
-@Timed
-@Hidden
-@RequestMapping("/${icip.pathPrefix}/icip_sops")
-public class ICIPsopsController {
-
-	/** The log. */
-    private final Logger log = LoggerFactory.getLogger(ICIPsopsController.class);
-
-    /** The icm sops alias service. */
-    @Autowired
-    private IICIPSopsAliasService icip_sops_aliasService;
-    
-    /** The icm sops service. */
-    @Autowired
-	private IICPSopsService icipSopsService;
-    
-    //COMMENTED AS PART OF CODE CLEANUP
-    
-	/**
-     * POST  /icm_sops_alias/page : get all the icm_sops_alias.
-     *
-     * @param example the example
-     * @return the ResponseEntity with status 200 (OK) and the list of icm_sopss in body as PageResponse
-     * @throws UnsupportedEncodingException the unsupported encoding exception
-     * @throws JsonMappingException the json mapping exception
-     * @throws JsonProcessingException the json processing exception
-//     */
+//COMMENTED AS PART OF CODE CLEANUP
+///**
+// * The Class ICIPPipelineController.
+// *
+// * @author icets
+// */
+//@RestController
+//@Timed
+//@Hidden
+//@RequestMapping("/${icip.pathPrefix}/icip_sops")
+//public class ICIPsopsController {
+//
+//	/** The log. */
+//    private final Logger log = LoggerFactory.getLogger(ICIPsopsController.class);
+//
+//    /** The icm sops alias service. */
+//    @Autowired
+//    private IICIPSopsAliasService icip_sops_aliasService;
+//    
+//    /** The icm sops service. */
+//    @Autowired
+//	private IICPSopsService icipSopsService;
+//    
+//    
+//    
+//	/**
+//     * POST  /icm_sops_alias/page : get all the icm_sops_alias.
+//     *
+//     * @param example the example
+//     * @return the ResponseEntity with status 200 (OK) and the list of icm_sopss in body as PageResponse
+//     * @throws UnsupportedEncodingException the unsupported encoding exception
+//     * @throws JsonMappingException the json mapping exception
+//     * @throws JsonProcessingException the json processing exception
+////     */
 //    @GetMapping("/alias/page")
 //    @Timed
 //    public ResponseEntity<PageResponse<ICIPSopsAlias>> getAllIcmSopsAlias(@RequestHeader(value="example") String example) 
@@ -97,4 +97,4 @@ public class ICIPsopsController {
 //		
 //		return new ResponseEntity<>(icipSopsService.getAll(prbe), new HttpHeaders(), HttpStatus.OK);
 //	}
-}
+//}

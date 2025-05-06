@@ -39,44 +39,44 @@ import com.infosys.icets.icip.dataset.service.impl.ICIPDatasetService;
 import com.infosys.icets.icip.icipwebeditor.service.IICIPAppService;
 
 import io.micrometer.core.annotation.Timed;
-
-/**
- * The Class ICIPServicesController.
- *
- * @author icets
- */
-@RestController
-@Timed
-@RequestMapping("/${icip.pathPrefix}/services")
-@RefreshScope
-public class ICIPServicesController {
-
-	private static final Logger logger = LoggerFactory.getLogger(ICIPServicesController.class);
-
-	@Autowired
-	MlAdaptersService mlAdaptersService;
-
-	@Autowired
-	MlInstancesService mlInstancesService;
-
-	/** The i ICIP datasource service. */
-	@Autowired
-	private IICIPDatasourceService iICIPDatasourceService;
-	
-	/** The i ICIP dataset service. */
-	@Autowired
-	private ICIPDatasetService datasetService;
-	
-	@Autowired
-	private IICIPAppService appService;
-
-	public static final String CONNECTION = "connection";
-
-	public static final String FALSE = "false";
-	
-	
-//COMMENTED AS PART OF CODE CLEANUP
-	
+//COMMENTED AS PART OF API CLEANUP
+///**
+// * The Class ICIPServicesController.
+// *
+// * @author icets
+// */
+//@RestController
+//@Timed
+//@RequestMapping("/${icip.pathPrefix}/services")
+//@RefreshScope
+//public class ICIPServicesController {
+//
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPServicesController.class);
+//
+//	@Autowired
+//	MlAdaptersService mlAdaptersService;
+//
+//	@Autowired
+//	MlInstancesService mlInstancesService;
+//
+//	/** The i ICIP datasource service. */
+//	@Autowired
+//	private IICIPDatasourceService iICIPDatasourceService;
+//	
+//	/** The i ICIP dataset service. */
+//	@Autowired
+//	private ICIPDatasetService datasetService;
+//	
+//	@Autowired
+//	private IICIPAppService appService;
+//
+//	public static final String CONNECTION = "connection";
+//
+//	public static final String FALSE = "false";
+//	
+//	
+//
+//	
 //	/* Fetches Connection Details by AdapterInstance and Organization */
 //	@GetMapping("/fetchConnectionDetailsByAdapterInstance")
 //	public ResponseEntity<Map<String, Object>> getConnectionDetails(
@@ -141,5 +141,5 @@ public class ICIPServicesController {
 //		}
 //		return new ResponseEntity<>(list, new HttpHeaders(), HttpStatus.OK);
 //	}
-	
-}
+//	
+//}

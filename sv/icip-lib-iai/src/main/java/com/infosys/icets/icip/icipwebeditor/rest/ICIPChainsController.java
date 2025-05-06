@@ -36,7 +36,7 @@ import com.infosys.icets.icip.icipwebeditor.service.IICIPChainsService;
 
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Hidden;
-
+//COMMENTED AS PART OF CODE CLEANUP
 // TODO: Auto-generated Javadoc
 // 
 /**
@@ -44,21 +44,22 @@ import io.swagger.v3.oas.annotations.Hidden;
  *
  * @author icets
  */
-@RestController
-@Timed
-@Hidden
-@RequestMapping(path = "/${icip.pathPrefix}/chain")
-public class ICIPChainsController {
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPChainsController.class);
-
-	/** The i ICIP chains service. */
-	@Autowired
-	private IICIPChainsService iICIPChainsService;
-	
-	//COMMENTED AS PART OF CODE CLEANUP
-
+//@RestController
+//@Timed
+//@Hidden
+//@RequestMapping(path = "/${icip.pathPrefix}/chain")
+//public class ICIPChainsController {
+//
+//	//COMMENTED AS PART OF CODE CLEANUP
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPChainsController.class);
+//
+//	/** The i ICIP chains service. */
+//	@Autowired
+//	private IICIPChainsService iICIPChainsService;
+//	
+//	
+//
 //	/**
 //	 * Save chain.
 //	 *
@@ -217,4 +218,4 @@ public class ICIPChainsController {
 //		}
 //		return new ResponseEntity<>(listJobs, new HttpHeaders(), HttpStatus.OK);
 //	}
-}
+//}

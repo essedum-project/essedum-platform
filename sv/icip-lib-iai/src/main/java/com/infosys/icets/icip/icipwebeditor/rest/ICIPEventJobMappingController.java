@@ -40,7 +40,7 @@ import com.infosys.icets.icip.icipwebeditor.service.impl.ICIPJobRuntimePluginsSe
 
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Hidden;
-
+//COMMENTED AS PART OF CODE CLEANUP
 // TODO: Auto-generated Javadoc
 // 
 /**
@@ -48,24 +48,24 @@ import io.swagger.v3.oas.annotations.Hidden;
  *
  * @author icets
  */
-@RestController
-@Timed
-@Hidden
-@RequestMapping(path = "/${icip.pathPrefix}/event")
-public class ICIPEventJobMappingController {
-
-	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPEventJobMappingController.class);
-
-	/** The event mapping service. */
-	@Autowired
-	private IICIPEventJobMappingService eventMappingService;
-	
-	@Autowired
-	private ICIPJobRuntimePluginsService jobRuntimePluginService;
-	
-	//COMMENTED AS PART OF CODE CLEANUP
-	
+//@RestController
+//@Timed
+//@Hidden
+//@RequestMapping(path = "/${icip.pathPrefix}/event")
+//public class ICIPEventJobMappingController {
+//
+//	/** The Constant logger. */
+//	private static final Logger logger = LoggerFactory.getLogger(ICIPEventJobMappingController.class);
+//
+//	/** The event mapping service. */
+//	@Autowired
+//	private IICIPEventJobMappingService eventMappingService;
+//	
+//	@Autowired
+//	private ICIPJobRuntimePluginsService jobRuntimePluginService;
+//	
+//	
+//	
 //
 //	/**
 //	 * Trigger event.
@@ -387,5 +387,5 @@ public class ICIPEventJobMappingController {
 //			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 //		}
 //	}
-
-}
+//
+//}
