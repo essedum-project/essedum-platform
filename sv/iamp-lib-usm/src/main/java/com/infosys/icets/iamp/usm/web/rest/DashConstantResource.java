@@ -324,7 +324,7 @@ public class DashConstantResource {
 	 * @return the dash constants
 	 */
 	@GetMapping("/get-dash-constants")
-	public ResponseEntity<?> getDashConstants(@Parameter Integer projectId,@RequestParam(required = false, name = "portfolioId") Integer portfolioId) {
+	public ResponseEntity<?> getDashConstants(@Parameter @RequestParam(required = false, name = "projectId") Integer projectId,@RequestParam(required = false, name = "portfolioId") Integer portfolioId) {
 		try {
 //			log.info("getDashConstants : REST request to get all dash constants : {}", projectId);
 //			log.debug("REST request to get all dash constants");
@@ -363,7 +363,7 @@ public class DashConstantResource {
 	}
 
 	@GetMapping("/get-startup-constants/{key}/{project}")
-	public ResponseEntity<?> getDashConstantsByKey(@PathVariable String key, @PathVariable String project) {
+	public ResponseEntity<?> getDashConstantsByKey(@PathVariable("key") String key, @PathVariable("project") String project) {
 		try {
 //			log.info("getDashConstants : REST request to get dash constant : {}", key);
 //			log.info("getDashConstants : Dash Constants fetched successfully");

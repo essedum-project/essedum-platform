@@ -16,20 +16,6 @@
 
 		<main.basedir>${project.parent.basedir}</main.basedir>
 	</properties>
-	<distributionManagement>
-		<repository>
-			<id>central</id>
-			<name>infyartifactory-artifactory-primary-2-releases</name>
-			<url>
-				https://infyartifactory.jfrog.io/artifactory/icets-maven-virtual</url>
-		</repository>
-		<snapshotRepository>
-			<id>snapshots</id>
-			<name>infyartifactory-artifactory-primary-2-snapshots</name>
-			<url>
-				https://infyartifactory.jfrog.io/artifactory/icets-maven-virtual</url>
-		</snapshotRepository>
-	</distributionManagement>
 	<dependencyManagement>
         <dependencies>
             <dependency>

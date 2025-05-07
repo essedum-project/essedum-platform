@@ -10,36 +10,7 @@
 	<name>icip-adp-s3</name>
 	<properties>
 		<main.basedir>${project.parent.basedir}</main.basedir>
-	</properties>
-	<distributionManagement>
-		<repository>
-			<id>central</id>
-			<name>infyartifactory.jfrog.io-releases</name>
-			<url>https://infyartifactory.jfrog.io/artifactory/icets-maven-virtual</url>
-		</repository>
-		<snapshotRepository>
-			<id>snapshots</id>
-			<name>infyartifactory.jfrog.io-snapshots</name>
-			<url>https://infyartifactory.jfrog.io/artifactory/icets-maven-virtual</url>
-		</snapshotRepository>
-	</distributionManagement>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>libs-release</id>
-			<name>libs-release</name>
-			<url>https://infyartifactory.jfrog.io/artifactory/libs-release</url>
-		</pluginRepository>
-		<pluginRepository>
-			<id>maven-remote</id>
-			<name>maven-remote</name>
-			<url>https://infyartifactory.jfrog.io/artifactory/maven-remote</url>
-		</pluginRepository>
-		<pluginRepository>
-			<id>jcenter</id>
-			<name>jcenter</name>
-			<url>https://infyartifactory.jfrog.io/artifactory/jcenter</url>
-		</pluginRepository>
-	</pluginRepositories>		
+	</properties>	
 	<dependencies>
 		<dependency>
 			<groupId>com.infosys.icets.icip</groupId>

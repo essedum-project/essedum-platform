@@ -21,20 +21,6 @@
 			${basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
 		<main.basedir>${project.parent.basedir}</main.basedir>
 	</properties>
-	<distributionManagement>
-		<repository>
-			<id>central</id>
-			<name>infyartifactory-artifactory-primary-2-releases</name>
-			<url>
-				https://infyartifactory.jfrog.io/artifactory/icets-maven-virtual</url>
-		</repository>
-		<snapshotRepository>
-			<id>snapshots</id>
-			<name>infyartifactory-artifactory-primary-2-snapshots</name>
-			<url>
-				https://infyartifactory.jfrog.io/artifactory/icets-maven-virtual</url>
-		</snapshotRepository>
-	</distributionManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -120,7 +106,7 @@
 		
 		
 		
-		<!--<dependency>
+		<dependency>
 			<groupId>com.infosys.icets.icip</groupId>
 			<artifactId>icip-lib-mlops</artifactId>
 			<version>${project.version}</version>
@@ -160,7 +146,7 @@
 		<dependency>
 			<groupId>com.infosys.icets.icip.plugins</groupId>
 			<artifactId>icip-adp-postgresql</artifactId>
-		</dependency> -->
+		</dependency>
 			
 
 		<dependency>

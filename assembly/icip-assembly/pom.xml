@@ -10,35 +10,6 @@
 		<artifactId>icets_ai</artifactId>
 		<version>3.2-SNAPSHOT</version>
 	</parent>
-	
-	<!-- <pluginRepositories>
-		<pluginRepository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>central</id>
-			<name>jenkins_plugin</name>
-			<url>https://infyartifactory.jfrog.io/artifactory/jenkins_plugin</url>
-		</pluginRepository>
-		<pluginRepository>
-			<snapshots />
-			<id>snapshots</id>
-			<name>jenkins_plugin</name>
-			<url>https://infyartifactory.jfrog.io/artifactory/jenkins_plugin</url>
-		</pluginRepository>
-	</pluginRepositories>  -->
-	<distributionManagement>
-    <repository>
-        <id>central</id>
-        <name>infyartifactory-artifactory-primary-2-releases</name>
-        <url>https://infyartifactory.jfrog.io/artifactory/icets-ai_maven</url>
-    </repository>
-    <snapshotRepository>
-        <id>snapshots</id>
-        <name>infyartifactory-artifactory-primary-2-snapshots</name>
-        <url>https://infyartifactory.jfrog.io/artifactory/icets-ai_maven</url>
-    </snapshotRepository>
-  </distributionManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework</groupId>

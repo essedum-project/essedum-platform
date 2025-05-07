@@ -38,7 +38,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class ICIPRatingController {
 	
 	/** The Constant logger. */
-	private static final Logger logger = LoggerFactory.getLogger(ICIPMashupsController.class);
+	private static final Logger logger = LoggerFactory.getLogger(ICIPRatingController.class);
 	
 	/** The Constant ENTITY_NAME. */
 	private static final String ENTITY_NAME = "rating";

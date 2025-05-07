@@ -18,20 +18,6 @@
 		<aws-java-sdk-core>1.11.1000</aws-java-sdk-core>
 		<google-auth-library>1.3.0</google-auth-library>
 	</properties>
-	<distributionManagement>
-		<repository>
-			<id>central</id>
-			<name>infyartifactory-artifactory-primary-2-releases</name>
-			<url>
-				https://infyartifactory.jfrog.io/artifactory/icets-maven-virtual</url>
-		</repository>
-		<snapshotRepository>
-			<id>snapshots</id>
-			<name>infyartifactory-artifactory-primary-2-snapshots</name>
-			<url>
-				https://infyartifactory.jfrog.io/artifactory/icets-maven-virtual</url>
-		</snapshotRepository>
-	</distributionManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
