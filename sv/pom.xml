@@ -36,46 +36,6 @@
 		<spring-security.version>6.4.3</spring-security.version>
 		<spring.cloud.version>4.1.3</spring.cloud.version>
 	</properties>
-	<repositories>
-		<repository>
-			<id>central</id>
-			<url>https://infyartifactory.jfrog.io/artifactory/icets-ai_maven
-			</url>
-		</repository>
-		<repository>
-			<id>snapshots</id>
-			<url>https://infyartifactory.jfrog.io/artifactory/icets-ai_maven
-			</url>
-		</repository>
-		<repository>
-			<id>maven-remote</id>
-			<url>https://infyartifactory.jfrog.io/artifactory/maven-remote
-			</url>
-		</repository>
-		<repository>
-			<id>maven-central-cache</id>
-			<url>https://infyartifactory.jfrog.io/artifactory/maven-central-cache</url>
-		</repository>
-	</repositories>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>plugin</id>
-			<url>https://infyartifactory.jfrog.io/artifactory/jenkins_plugin
-			</url>
-		</pluginRepository>
-	</pluginRepositories>
-	<distributionManagement>
-		<repository>
-			<id>central</id>
-			<name>infyartifactory-artifactory-primary-2-releases</name>
-			<url>https://infyartifactory.jfrog.io/artifactory/icets-ai_maven</url>
-		</repository>
-		<snapshotRepository>
-			<id>snapshots</id>
-			<name>infyartifactory-artifactory-primary-2-snapshots</name>
-			<url>https://infyartifactory.jfrog.io/artifactory/icets-ai_maven</url>
-		</snapshotRepository>
-	</distributionManagement>
 	<modules>
 		<module>comm-lib-util</module>
 		<module>icip-lib-fsvr</module>

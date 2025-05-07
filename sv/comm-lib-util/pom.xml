@@ -11,18 +11,6 @@
 		<main.basedir>${project.parent.basedir}</main.basedir>
 		<tika.version>3.0.0-BETA2</tika.version>
 	</properties>
-	<distributionManagement>
-  <repository>
-        <id>central</id>
-        <name>infyartifactory-artifactory-primary-2-releases</name>
-        <url>https://infyartifactory.jfrog.io/artifactory/icets-ai_maven</url>
-    </repository>
-    <snapshotRepository>
-        <id>snapshots</id>
-        <name>infyartifactory-artifactory-primary-2-snapshots</name>
-        <url>https://infyartifactory.jfrog.io/artifactory/icets-ai_maven</url>
-    </snapshotRepository>
-    </distributionManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.springdoc</groupId>

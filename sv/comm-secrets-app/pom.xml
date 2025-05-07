@@ -15,44 +15,6 @@
 		<aws-java-sdk-core>1.11.1000</aws-java-sdk-core>
 		<google-auth-library>1.3.0</google-auth-library>
 	</properties>
-	<repositories>
-		<repository>
-			<id>maven-remote</id>
-			<url>https://infyartifactory.jfrog.io/artifactory/maven-remote</url>
-		</repository>
-		<repository>
-			<id>central</id>
-			<url>https://infyartifactory.jfrog.io/artifactory/icets-ai_maven</url>
-		</repository>
-	</repositories>
-	<pluginRepositories>
-		<pluginRepository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>central</id>
-			<name>jenkins_plugin</name>
-			<url>https://infyartifactory.jfrog.io/artifactory/jenkins_plugin</url>
-		</pluginRepository>
-		<pluginRepository>
-			<snapshots />
-			<id>snapshots</id>
-			<name>jenkins_plugin</name>
-			<url>https://infyartifactory.jfrog.io/artifactory/jenkins_plugin</url>
-		</pluginRepository>
-	</pluginRepositories>
-	<distributionManagement>
-		<repository>
-			<id>central</id>
-			<name>infyartifactory.jfrog.io-releases</name>
-			<url>https://infyartifactory.jfrog.io/artifactory/icets-ai_maven</url>
-		</repository>
-		<snapshotRepository>
-			<id>snapshots</id>
-			<name>infyartifactory.jfrog.io-snapshots</name>
-			<url>https://infyartifactory.jfrog.io/artifactory/icets-ai_maven</url>
-		</snapshotRepository>
-	</distributionManagement>
 	<dependencies>
 		<dependency>
 			<groupId>com.infosys.icets.ai</groupId>
