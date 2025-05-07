@@ -4,7 +4,7 @@ import { Services } from '../../services/service';
 import { FormBuilder } from '@angular/forms';
 import { RaiservicesService } from '../../services/raiservices.service';
 import { MatDialogRef } from '@angular/material/dialog';
-import { CommonCreateDialogComponent } from '../../ivm/ivm-view-initiative/ivm-view-initiative-detail/common-create/common-create-dialog.component';
+//import { CommonCreateDialogComponent } from '../../ivm/ivm-view-initiative/ivm-view-initiative-detail/common-create/common-create-dialog.component';
 import { OpenTelemetryService } from 'com-lib-util';
 
 
@@ -33,7 +33,7 @@ export class CreateEndpointComponent {
     private service: Services,
     private formBuilder: FormBuilder,
     private raiService: RaiservicesService,
-    public dialogRef: MatDialogRef<CommonCreateDialogComponent>
+  //  public dialogRef: MatDialogRef<CommonCreateDialogComponent>
   ) {}
 
   telemetryCall(){
@@ -106,7 +106,7 @@ export class CreateEndpointComponent {
   // }
 
   closeModal() {
-    this.dialogRef.close();
+    //this.dialogRef.close();
   }
 
   ngOnDestroy(): void {

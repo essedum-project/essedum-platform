@@ -15,7 +15,7 @@ import { HttpParams } from '@angular/common/http';
 import { DatasetServices } from '../dataset/dataset-service';
 import { Stomp } from '@stomp/stompjs';
 import * as SockJS from 'sockjs-client';
-import { CommonCreateDialogComponent } from '../ivm/ivm-view-initiative/ivm-view-initiative-detail/common-create/common-create-dialog.component';
+//import { CommonCreateDialogComponent } from '../ivm/ivm-view-initiative/ivm-view-initiative-detail/common-create/common-create-dialog.component';
 import { OpenTelemetryService } from 'com-lib-util';
 
 @Component({
@@ -96,7 +96,7 @@ export class CreateAppComponent implements OnInit, OnDestroy {
     private modalService: LedsModalService,
     private route: ActivatedRoute,
     public router: Router,
-    public dialogRef: MatDialogRef<CommonCreateDialogComponent>,
+    //public dialogRef: MatDialogRef<CommonCreateDialogComponent>,
     public sanitizer: DomSanitizer,
     @Optional() @SkipSelf() private appListComponent: AppListComponent,
     private pipelineService: PipelineService,
@@ -240,7 +240,7 @@ export class CreateAppComponent implements OnInit, OnDestroy {
   closeModal() {
     this.modalService.dismissAll();
     if (this.router.url.includes('/initiative')) {
-      this.dialogRef.close();
+     // this.dialogRef.close();
     }
   }
 

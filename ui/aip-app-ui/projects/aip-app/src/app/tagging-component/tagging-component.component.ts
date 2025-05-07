@@ -17,7 +17,7 @@ import { LeapTelemetryService } from 'com-lib-util';
 import { DatasetServices } from '../dataset/dataset-service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SemanticService } from '../services/semantic.services';
-import { PromptServices } from '../prompts/prompt.service';
+//import { PromptServices } from '../prompts/prompt.service';
 
 @Component({
   selector: 'app-tagging-component',
@@ -111,7 +111,7 @@ export class TaggingComponentComponent implements OnInit, OnChanges {
     public tagService: TagsService,
     private adapterServices: AdapterServices,
     private semanticService:SemanticService,
-    private promptService: PromptServices,
+   // private promptService: PromptServices,
     private router: Router,
     private route: ActivatedRoute
   ) { }
@@ -276,40 +276,40 @@ export class TaggingComponentComponent implements OnInit, OnChanges {
     }
   }
   getToolsTypes() {
-    this.promptService.getAllToolCategory().subscribe((res) => {
-      this.toolsTypes = res;
-      this.toolsTypes.forEach((element: any) => {
-          if (this.toolsType.length > 0) {
-            this.toolsType.forEach((type) => {
-              if (type === element) {
-                // if (element && element != 'App' && element != 'Langchain') {
-                this.toolsTypeList.push({
-                  category: 'Type',
-                  label: element.substr(element.indexOf(':') + 2),
-                  value: element.substr(element.indexOf(':') + 2),
-                  selected: true,
-                });
-                // }
-              }
-            });
-          }
-          if (
-            !this.toolsTypeList.some(
-              (obj) => obj.label === element.substr(element.indexOf(':') + 2) && obj.value === element.substr(element.indexOf(':') + 2)
-            )
-          ) {
-            // if (element && element != 'App' && element != 'Langchain') {
-            this.toolsTypeList.push({
-              category: 'Type',
-              label: element.substr(element.indexOf(':') + 2),
-              value: element.substr(element.indexOf(':') + 2),
-              selected: false,
-            });
-            // }
-          }
+    // this.promptService.getAllToolCategory().subscribe((res) => {
+    //   this.toolsTypes = res;
+    //   this.toolsTypes.forEach((element: any) => {
+    //       if (this.toolsType.length > 0) {
+    //         this.toolsType.forEach((type) => {
+    //           if (type === element) {
+    //             // if (element && element != 'App' && element != 'Langchain') {
+    //             this.toolsTypeList.push({
+    //               category: 'Type',
+    //               label: element.substr(element.indexOf(':') + 2),
+    //               value: element.substr(element.indexOf(':') + 2),
+    //               selected: true,
+    //             });
+    //             // }
+    //           }
+    //         });
+    //       }
+    //       if (
+    //         !this.toolsTypeList.some(
+    //           (obj) => obj.label === element.substr(element.indexOf(':') + 2) && obj.value === element.substr(element.indexOf(':') + 2)
+    //         )
+    //       ) {
+    //         // if (element && element != 'App' && element != 'Langchain') {
+    //         this.toolsTypeList.push({
+    //           category: 'Type',
+    //           label: element.substr(element.indexOf(':') + 2),
+    //           value: element.substr(element.indexOf(':') + 2),
+    //           selected: false,
+    //         });
+    //         // }
+    //       }
         
-      });
-    });
+    //   });
+    // });
   }
   getTopicTypes() {
     this.semanticService.getAllTopics().subscribe(res=>{
@@ -780,18 +780,18 @@ export class TaggingComponentComponent implements OnInit, OnChanges {
     }
   }
   refreshToolsTypes() {
-    this.promptService.getAllToolCategory().subscribe((res) => {
-      this.toolsTypes = res;
-      this.toolsTypeList = [];
-      this.toolsTypes.forEach((element: any) => {
-            this.toolsTypeList.push({
-              category: 'Type',
-              label: element.substr(element.indexOf(':') + 2),
-              value: element.substr(element.indexOf(':') + 2),
-              selected: false,
-            });
-      });
-    });
+    // this.promptService.getAllToolCategory().subscribe((res) => {
+    //   this.toolsTypes = res;
+    //   this.toolsTypeList = [];
+    //   this.toolsTypes.forEach((element: any) => {
+    //         this.toolsTypeList.push({
+    //           category: 'Type',
+    //           label: element.substr(element.indexOf(':') + 2),
+    //           value: element.substr(element.indexOf(':') + 2),
+    //           selected: false,
+    //         });
+    //   });
+    // });
   }
 
   fetchAdapters(): boolean {

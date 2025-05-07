@@ -6,9 +6,9 @@ import { angularMaterialRenderers } from '@jsonforms/angular-material';
 import { LocationStrategy } from '@angular/common';
 import { Location } from '@angular/common';
 import { RaiservicesService } from '../../services/raiservices.service';
-import { PromptServices } from '../../prompts/prompt.service';
+
 import { MatDialogRef } from '@angular/material/dialog';
-import { CommonCreateDialogComponent } from '../../ivm/ivm-view-initiative/ivm-view-initiative-detail/common-create/common-create-dialog.component';
+//import { CommonCreateDialogComponent } from '../../ivm/ivm-view-initiative/ivm-view-initiative-detail/common-create/common-create-dialog.component';
 import { HttpResponse } from '@angular/common/http';
 import { Datasource } from '../datasource';
 import { LeapTelemetryService, OpenTelemetryService } from 'com-lib-util';
@@ -96,8 +96,8 @@ export class DatasourceConfigComponent implements OnInit {
     private location: LocationStrategy,
     private _location: Location,
     private raiService: RaiservicesService,
-    private promptService: PromptServices,
-    public dialogRef: MatDialogRef<CommonCreateDialogComponent>
+    // private promptService: PromptServices,
+    //public dialogRef: MatDialogRef<CommonCreateDialogComponent>
   ) { }
   telemetryCall() {
     this.telemetry.startTelemetry('aip-app', 'DatasourceConfigComponent', sessionStorage.getItem('organization'));
@@ -189,12 +189,12 @@ export class DatasourceConfigComponent implements OnInit {
         this.editConnection();
       },);
 
-      this.promptService.getAllModelTypeofBedrock().subscribe((res) => {
-        this.options = res.body
-        this.options.forEach((element) => {
-          this.modelTypeOptions.push({ "viewValue": element, "value": element });
-        });
-      })
+      // this.promptService.getAllModelTypeofBedrock().subscribe((res) => {
+      //   this.options = res.body
+      //   this.options.forEach((element) => {
+      //     this.modelTypeOptions.push({ "viewValue": element, "value": element });
+      //   });
+      // })
     }
     catch (Exception: any) {
       this.Services.messageService("Some error occured")
@@ -505,12 +505,12 @@ export class DatasourceConfigComponent implements OnInit {
         this.keys.push(keyValue);
       });
     if (this.sourceType.type == 'AWSBedrock') {
-      this.promptService.getAllModelTypeofBedrock().subscribe((res) => {
-        this.options = res.body
-        this.options.forEach((element) => {
-          this.modelTypeOptions.push({ "viewValue": element, "value": element });
-        });
-      })
+      // this.promptService.getAllModelTypeofBedrock().subscribe((res) => {
+      //   this.options = res.body
+      //   this.options.forEach((element) => {
+      //     this.modelTypeOptions.push({ "viewValue": element, "value": element });
+      //   });
+      // })
     }
   }
   onCapbilityTypeChange(event) {
@@ -614,7 +614,7 @@ export class DatasourceConfigComponent implements OnInit {
   }
 
   closeModal() {
-    this.dialogRef.close();
+    //this.dialogRef.close();
   }
   ngOnDestroy(): void {
     let activeSpan = this.telemetry.fetchActiveSpan();

@@ -6,7 +6,7 @@ import { DatasetServices } from '../dataset-service';
 import { Services } from '../../services/service';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { LeapTelemetryService, OpenTelemetryService } from 'com-lib-util';
-import { SemanticSearchDataSetViewDialogComponent } from '../../semantic-search-dialog/semantic-search-dataset-view/semantic-search-dataset-view-dialog.component';
+//import { SemanticSearchDataSetViewDialogComponent } from '../../semantic-search-dialog/semantic-search-dataset-view/semantic-search-dataset-view-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { saveAs as importedSaveAs } from "file-saver";
 import { LedsModalService } from 'leds-lib';
@@ -701,20 +701,20 @@ export class DatasetByNameComponent {
   openDatasetPreview(card) {
     let selectedReferenceObject = card;
     selectedReferenceObject["path"] = JSON.parse(card.attributes).path + '/' + JSON.parse(card.attributes).object;
-    const dialogRef = this.dialog.open(SemanticSearchDataSetViewDialogComponent, {
-      height: '80%',
-      width: '80%',
-      disableClose: true,
-      data: {
-        viewType: card.views,
-        datasetId: card.name,
-        org: card.organization,
-        datasetName: card.alias,
-        path: JSON.parse(card.attributes).path,
-        actualObject: JSON.parse(card.attributes).object,
-        selectedReferenceObject: selectedReferenceObject,
-      }
-    });
+    // const dialogRef = this.dialog.open(SemanticSearchDataSetViewDialogComponent, {
+    //   height: '80%',
+    //   width: '80%',
+    //   disableClose: true,
+    //   data: {
+    //     viewType: card.views,
+    //     datasetId: card.name,
+    //     org: card.organization,
+    //     datasetName: card.alias,
+    //     path: JSON.parse(card.attributes).path,
+    //     actualObject: JSON.parse(card.attributes).object,
+    //     selectedReferenceObject: selectedReferenceObject,
+    //   }
+    // });
   }
 
   downloadSelectedFile(card: any) {

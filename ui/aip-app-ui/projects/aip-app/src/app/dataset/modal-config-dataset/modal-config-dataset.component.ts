@@ -14,7 +14,7 @@ import {Location} from '@angular/common';
 import { OptionsDTO } from '../../DTO/OptionsDTO';
 import { RaiservicesService } from '../../services/raiservices.service';
 import { LedsModalService } from 'leds-lib';
-import { CommonCreateDialogComponent } from '../../ivm/ivm-view-initiative/ivm-view-initiative-detail/common-create/common-create-dialog.component';
+//import { CommonCreateDialogComponent } from '../../ivm/ivm-view-initiative/ivm-view-initiative-detail/common-create/common-create-dialog.component';
 import { OpenTelemetryService } from 'com-lib-util';
 
 @Component({
@@ -57,7 +57,7 @@ export class ModalConfigDatasetComponent implements OnInit, OnDestroy {
     @Inject('dataSets') private dataUrl: string,
     private dialog: MatDialog,
     private _location: Location,
-    public dialogRefcreate: MatDialogRef<CommonCreateDialogComponent>,
+  //  public dialogRefcreate: MatDialogRef<CommonCreateDialogComponent>,
     private raiService: RaiservicesService
     ) { }
 
@@ -989,7 +989,7 @@ else{
   }
 
   closeModal() {
-    this.dialogRefcreate.close();
+   // this.dialogRefcreate.close();
   }
 
 }
