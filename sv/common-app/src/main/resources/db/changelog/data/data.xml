@@ -197,7 +197,7 @@
 			SET IDENTITY_INSERT mlgroups OFF;
 		</sql>		
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1617868010544-202">
+	<!--<changeSet author="Leap (generated)" id="1617868010544-202">
 		<sql dbms="mssql">
 			SET IDENTITY_INSERT sbx_experiment_type ON;
 		</sql>	
@@ -213,7 +213,7 @@
 		<sql dbms="mssql">
 			SET IDENTITY_INSERT sbx_experiment_type OFF;
 		</sql>		
-	</changeSet>
+	</changeSet>-->
 	<changeSet author="Leap (generated)" id="1617868010544-203">
 		<sql dbms="mssql">
 			SET IDENTITY_INSERT twb_client ON;
@@ -794,7 +794,7 @@
            INSERT INTO usm_constant(item,project_name,item_value,project_id) VALUES ('manage_initiave_role_name','Core','Portfolio Manager, Project Admin','1');
            INSERT INTO usm_constant(item,project_name,item_value,project_id) VALUES ('show_dimension_exclusion','Core','false','1');
            INSERT INTO usm_constant(item,project_name,item_value,project_id) VALUES ('level_heading_text','Core','Maturity Level','1');
-           INSERT INTO usm_constant(item,project_name,item_value,project_id) VALUES ('notice','Core','By using Infosys Value Management tool I agree that no personally identifiable information (including those of other individual','1');
+           <!--INSERT INTO usm_constant(item,project_name,item_value,project_id) VALUES ('notice','Core','By using Infosys Value Management tool I agree that no personally identifiable information (including those of other individual','1');-->
         </sql> 
 	</changeSet>
 	

@@ -60,7 +60,7 @@
         </sql>
     </changeSet>
  
-    <changeSet id="3v1-usm-20250128-5" author="Leap">
+    <!--<changeSet id="3v1-usm-20250128-5" author="Leap">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 SELECT COUNT(*) FROM usm_constant WHERE item_value LIKE '%Gamification%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'IT Portfolio Manager Side';
@@ -69,7 +69,7 @@
         <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
             INSERT INTO usm_constant(item,project_name,item_value,project_id) VALUES ('IT Portfolio Manager Side','leo1311','{"label":"Gamification","icon":"gamepad","url":"","children":[{"label":"Dashboard","icon":"th-large","url":"./iamp-iegp/dashboard/","children":[],"_id":2},{"label":"Demo","icon":"","url":"./iamp-iegp/amsdemo","children":[{"label":"AMS Demo","icon":"","url":"./iamp-iegp/amsdemo","children":[],"_id":4},{"label":"Game Scenario","icon":"","url":"./iamp-iegp/gamedemo","children":[],"_id":5},{"label":"NFL Game","icon":"","url":"./iamp-iegp/nflgame","children":[],"_id":6}],"_id":3}]}','2');
         </sql>
-    </changeSet>
+    </changeSet>-->
     <changeSet author="Leap" id="3v1-usm-20250131-1">  
          <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">
@@ -102,7 +102,7 @@
             UPDATE usm_constant SET item_value='tickets' WHERE item='ci_incident.ciIncidents' AND project_name='Core' AND project_id='1';
         </sql>   
     </changeSet>
-	<changeSet id="3v2-usm-20252402-1" author="Leap">
+	<!--<changeSet id="3v2-usm-20252402-1" author="Leap">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 SELECT COUNT(*) FROM usm_constant WHERE item_value LIKE '%AgenticSystems%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'IT Portfolio Manager Side';
@@ -111,6 +111,6 @@
         <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
             insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"AgenticSystems","altText":"","icon":"sitemap","url":"./aip/ai-workers","children":[{"label":"Agents","altText":"","icon":"","url":"./aip/ai-workers","children":[],"_id":2},{"label":"Tools","altText":"","icon":"","url":"./aip/worker-tools","children":[],"_id":3}],"horizontal":true}','2',NULL);
         </sql>
-    </changeSet>
+    </changeSet>-->
 
 </databaseChangeLog>

@@ -1,7 +1,7 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     
-    <changeSet author="bivek.das (generated)" id="v3.2">
+   <!-- <changeSet author="bivek.das (generated)" id="v3.2">
 		<createTable tableName="ivm_master_score_type">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints nullable="false" primaryKey="true" />
@@ -105,6 +105,6 @@
 		<sql dbms="mssql" splitStatements="true" stripComments="true">  
             ALTER TABLE ivm_data_org_milestone ADD CONSTRAINT ivm_data_org_milestone_ibfk_511 FOREIGN KEY (score_type_id) REFERENCES ivm_master_score_type (id) ON DELETE CASCADE ON UPDATE CASCADE
             </sql>   
-	</changeSet>
+	</changeSet>-->
 
 </databaseChangeLog>

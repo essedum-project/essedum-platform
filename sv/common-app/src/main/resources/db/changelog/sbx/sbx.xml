@@ -4,7 +4,7 @@
 	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-	<changeSet author="Leap (generated)" id="1615300415555-80">
+	<!--<changeSet author="Leap (generated)" id="1615300415555-80">
 		<createTable tableName="sbx_assessment">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -267,7 +267,7 @@
 		</createTable>
 	</changeSet>
 	
-	<!-- 1.3.12 changes -->
+	
 	<changeSet author="Leap (generated)" id="1312v0-sbx-104">
 		<createTable tableName="sbx_experiment_configuration">
 			<column autoIncrement="true" name="id" type="INT">
@@ -278,7 +278,7 @@
 		</createTable>
 	</changeSet>
 	
-	<!-- 2.1 changes -->
+	
 	<changeSet author="Leap" id="2v1-sbx-12">
 		<createTable tableName="sbx_discussion">
 			<column autoIncrement="true" name="id" type="INT">
@@ -434,5 +434,5 @@
 			<column name="artefacts" type="VARCHAR(45)" />
 			<column name="orgid" type="INT" />
 		</createTable>
-	</changeSet>
+	</changeSet>-->
 </databaseChangeLog>

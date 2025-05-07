@@ -5,7 +5,7 @@
 	xmlns:pro="http://www.liquibase.org/xml/ns/pro"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-	<changeSet author="Leap (generated)" id="1615300415555-661">
+	<!--<changeSet author="Leap (generated)" id="1615300415555-661">
 		<addForeignKeyConstraint
 			baseColumnNames="experiment_type" baseTableName="sbx_project"
 			constraintName="fk_experiment_type" deferrable="false"
@@ -20,7 +20,7 @@
 			referencedColumnNames="id" referencedTableName="sbx_solution" />
 	</changeSet>
 	
-	<!-- 1.3.12 changes -->
+	
 	<changeSet author="Leap (generated)" id="1312v0-sbx-779">
 		<addForeignKeyConstraint
 			baseColumnNames="projectid" baseTableName="sbx_experiment_configuration"
@@ -29,7 +29,7 @@
 			referencedColumnNames="id" referencedTableName="sbx_project" />
 	</changeSet>
 	
-	<!-- 2.1 changes -->
+	
 	<changeSet author="Leap" id="2v1-sbx-26">
 		<createIndex indexName="comment_idx"
 			tableName="sbx_discussion_comment">
@@ -246,5 +246,5 @@
 			constraintName="basket_created_by" deferrable="false" initiallyDeferred="false"
 			onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
 			referencedTableName="usm_users" validate="true" />
-	</changeSet>
+	</changeSet>-->
 </databaseChangeLog>	
