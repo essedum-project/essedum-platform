@@ -1,10 +1,9 @@
-import { ModuleWithProviders, NgModule, Optional, SkipSelf } from '@angular/core';
+import { ModuleWithProviders, NgModule, Optional, SkipSelf,CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { OAuthModule, OAuthModuleConfig, OAuthStorage } from 'angular-oauth2-oidc';
 import { AppOAuthService } from './auth.service';
 import { authModuleConfig } from './oauth-module-config';
 import { AppInitService } from '../services/common-app-init.service';
 import { BASE_OAUTH_CONFIG } from './auth-config';
-
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function storageFactory(): OAuthStorage {
@@ -22,7 +21,8 @@ export function authConfigFactory(appInitService: AppInitService) {
   ],
   providers: [
     AppOAuthService
-  ]
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class CoreModule {
   static forRoot(): ModuleWithProviders<CoreModule> {

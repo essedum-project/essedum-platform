@@ -1,6 +1,11 @@
-<leds-footer>Copyright © {{leapAppYear}} Infosys Limited
-   <span *ngIf="numberOfDays>=1 && numberOfDays<16" style="float :right" [ngStyle]="{'color': 'rgb(153, 153, 153)' }">
-      <span style="color:red">**</span>License about to expire in {{numberOfDays}} day<span *ngIf="numberOfDays==1">.</span><span *ngIf="numberOfDays>=2">s.</span> Please Raise Github Request.<span style="color:red">**</span>
-   </span>
-   <span *ngIf="numberOfDays==0" style="float :right" ><span style="color:red">**</span>License will expire today. Please Raise Github Request.<span style="color:red">**</span></span>
-</leds-footer>
+<div class="row" style="position:fixed; bottom:0; width:100%; z-index:9; left:0; background-color:#0a142f;  padding: 20px;">
+  <!--height: var(--footerHeight, 40px); line-height: var(--footerHeight, 40px);padding-bottom: 30px; -->
+   <div class="col-5" style="text-align: center;">     
+      <img id="clientimage"  src="assets/images/LFN-Logo-White.svg"
+      style="margin-left:1vh; width: 320px; height: 78px;" alt="">
+   </div>
+   <div class="col-7" style="text-align: center;">   
+     <!-- <lfx-footer></lfx-footer>-->
+      <p style="color: white;font-size: 14px;">Copyright © 2025 The Linux Foundation®. All rights reserved. The Linux Foundation has registered trademarks and uses trademarks. For more information, including terms of use, Platform Usage, <a href="https://www.linuxfoundation.org/legal/privacy-policy?hsLang=en" target="_blank" >Privacy Policy</a>, and <a href="https://www.linuxfoundation.org/legal/trademark-usage?hsLang=en" target="_blank" > Trademark Usage</a>, please see our <a href="https://www.linuxfoundation.org/legal/policies" target="_blank" >Policies page</a>.</p>
+   </div>
+</div>

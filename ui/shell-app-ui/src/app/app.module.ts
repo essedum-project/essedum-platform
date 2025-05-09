@@ -23,7 +23,7 @@ import { MatButtonModule } from "@angular/material/button";
 import { FormioModule } from "@formio/angular";
 import { MessageService } from 'com-lib-util';
 import { MatSnackBar } from '@angular/material/snack-bar';
-
+import '@linuxfoundation/lfx-ui-core';
 
 const cookieConfig: NgcCookieConsentConfig = {
   "cookie": {
@@ -56,6 +56,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     AppComponent,
     InactivityPopupComponent,
     TokenExpiryPopupComponent,
+   
   ],
   imports: [
     BrowserModule,
@@ -69,7 +70,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     MatDialogModule,
     MatCardModule,
     MatButtonModule,
-    FormioModule
+    FormioModule,
   ],
   providers: [
     ApisService,

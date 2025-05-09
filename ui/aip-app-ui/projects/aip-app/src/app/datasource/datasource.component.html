@@ -18,10 +18,9 @@
                         <div class="aip-header le-u-pad-lr-32 le-u-pad-t-16">
                             <div class=" col-sm-12 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-center">
                                 <div style="padding: 20px 0px 0px 0px;">
-                                    <leds-tooltip [tooltip]="isExpanded?'Collapse Filters':'Expand Filters'"
-                                        [position]="tooltip">
+                                    <span style="background-color: #ECF4FF; border-radius: 0.5rem;color: #4D2F09;" class="tooltip-container" [matTooltip]="isExpanded ? 'Collapse Filters' : 'Expand Filters'" matTooltipPosition="above">
                                         <i class="icon x-24 filter-icon" (click)="toggleExpand()"></i>
-                                    </leds-tooltip>
+                                    </span>
                                 </div>
                                 <div class="le-u-pad-24">
                                     <h3 class="le-u-header-xl">{{cardTitle}}</h3>
@@ -85,9 +84,7 @@
                                     </p>
                                 </mat-card-content>
                                 <mat-card-actions class="le-c-card__action-hover d-flex justify-content-between">
-                                    <leds-button buttonType="button" designType="text"
-                                        (click)="viewConnection(card.name)">View
-                                        Details</leds-button>
+                                    <button mat-button color="primary" (click)="viewConnection(card.name)">View Details</button>
                                     <!-- CreatedBy -->
                                     <div class="aip-cursor">
                                         <div class="le-c-avatar  le-c-avatar--sm aip-hover-avatar">
