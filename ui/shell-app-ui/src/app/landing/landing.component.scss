@@ -71,7 +71,7 @@ mat-drawer-container {
 	bottom: 0;
 	left: 0;
 	right: 0;
-	height: calc(100vh - var(--footerHeight,80px));
+	height: calc(100vh - var(--footerHeight,50px));
 }
 
 .is-active {

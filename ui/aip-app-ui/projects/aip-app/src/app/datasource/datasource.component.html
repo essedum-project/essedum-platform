@@ -1,8 +1,8 @@
-<div class="le-l-mainwrapper aip-top">
+<div class="aip-top">
 
-    <div *ngIf="cardToggled; else elseBlock" class="clearfix le-l-bodywrapper  js-bodywrapper"
+    <div *ngIf="cardToggled; else elseBlock" class="clearfix lfx-l-bodywrapper  js-bodywrapper"
         style="background: var(--background-colour);" id="mainCtr">
-        <div class="clearfix le-l-bodywrapper  js-bodywrapper" id="mainCtr"
+        <div class="clearfix lfx-l-bodywrapper  js-bodywrapper" id="mainCtr"
             style="background: var(--background-colour);">
             <div class="">
                 <div *ngIf="isExpanded" class="row aip-filter aip-filter-position aip-scroll-hover">
@@ -13,17 +13,17 @@
                           }"></app-tagging-component>
                 </div>
                 <div class="col-sm-12 col-md-12 col-lg-12" id="mainrightCnt" [ngStyle]="toggler(isExpanded)">
-                    <div class="le-l-level1-wrapper">
+                    <div>
                         <!-- Header -->
-                        <div class="aip-header le-u-pad-lr-32 le-u-pad-t-16">
+                        <div class="aip-header lfx-u-pad-lr-32 lfx-u-pad-t-16">
                             <div class=" col-sm-12 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-center">
                                 <div style="padding: 20px 0px 0px 0px;">
                                     <span style="background-color: #ECF4FF; border-radius: 0.5rem;color: #4D2F09;" class="tooltip-container" [matTooltip]="isExpanded ? 'Collapse Filters' : 'Expand Filters'" matTooltipPosition="above">
                                         <i class="icon x-24 filter-icon" (click)="toggleExpand()"></i>
                                     </span>
                                 </div>
-                                <div class="le-u-pad-24">
-                                    <h3 class="le-u-header-xl">{{cardTitle}}</h3>
+                                <div class="lfx-u-pad-24">
+                                    <h3 class="lfx-u-header-xl">{{cardTitle}}</h3>
                                 </div>
                             </div>
                             <div
@@ -38,103 +38,107 @@
                                 class="d-flex justify-content-center col-sm-5 col-md-6 col-lg-5 col-xl-4 aip-header-icon">
 
                                 <div *ngIf="createAuth" class="">
-                                    <div class="le-u-mar-r-24 aip-cursor" (click)="open()">
-                                        <span class="le-c-btn--icon__icon">
-                                            <i class="aip-led-icons icon x-24 icon-add"></i>
-                                        </span>
-                                        <span class="le-c-btn--icon__text"></span>
+                                    <div class="lfx-u-mar-r-24 aip-cursor" (click)="open()">
+                                        <button mat-icon-button 
+                                            [ngStyle]="{'color': isHovered ? '#0056b3' : '#0a142f'}" 
+                                            (click)="open()" 
+                                            matTooltip="Add"
+                                            (mouseenter)="isHovered = true" 
+                                            (mouseleave)="isHovered = false">
+                                            <mat-icon>add</mat-icon>
+                                        </button>
                                     </div>
                                     <ng-template #lgContent1 let-modal>
                                         <app-datasource-config> </app-datasource-config>
                                     </ng-template>
                                 </div>
                                 <div class="aip-cursor">
-                                    <span class="le-c-btn--icon__icon">
-                                        <i class="aip-led-icons icon x-24 icon_Refresh" (click)="refreshComplete()"></i>
-                                    </span>
+                                    <button mat-icon-button 
+                                        [ngStyle]="{'color': isHovered ? '#0056b3' : '#0a142f'}" 
+                                        (click)="refreshComplete()" 
+                                        matTooltip="Refresh" 
+                                        (mouseenter)="isHovered = true" 
+                                        (mouseleave)="isHovered = false">
+                                        <mat-icon>refresh</mat-icon>
+                                    </button>
                                 </div>
                             </div>
 
                         </div>
                     </div>
-                    <div class="le-c-card__action-ul aip-card-container">
+                    <div class="lfx-c-card__action-ul aip-card-container">
                         <!-- CARD -->
                         <div class="col-md-8 col-lg-6 col-xl-5" style='min-width: -webkit-fill-available;padding: 0px;'
                             *ngFor="let card of filteredCards  | slice: (pageNumber-1) * pageSize : (pageNumber-1) * pageSize + pageSize">
-                            <leds-card designType='simple' [actionsOnHover]='true'
-                                style="padding-top: 0 !important;padding-bottom: 0 !important;">
-                                <div class="le-c-card__container-right">
-                                    <span class="le-c-badge le-c-badge--active float-end">Submitted</span>
+                            <mat-card class="example-card" appearance="outlined" style="padding-top: 0 !important;padding-bottom: 0 !important;padding: 0px !important;height: 163px;display: grid" >
+                           <!-- <leds-card designType='simple' [actionsOnHover]='true'
+                                style="padding-top: 0 !important;padding-bottom: 0 !important;"> -->
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="col d-flex align-items-center" style="overflow: hidden !important; border-right: none !important;">
+                                        <div class="lfx-u-header-sm lfx-u-text-primary-80">
+                                            {{card.type}}
+                                        </div>
+                                    </div>
+                                    <!-- <div class="col-auto">
+                                        <div class="lfx-c-card__container-right">
+                                            <span class="lfx-c-badge lfx-c-badge--active">Submitted</span>
+                                        </div>
+                                    </div> -->
                                 </div>
-                                <div class="le-u-header-sm le-u-text-primary-80 le-u-mar-b-8">{{card.type}}</div>
-                                <mat-card-header>
-                                    <mat-card-title class="le-c-card__container clearfix">
-                                        <div class="le-c-card__container-left w-100">
-                                            <h2 class="le-u-header-xl le-u-ellipsis" style="line-height: 2rem;">
+                                <mat-card-header style="display: inline !important; width: 60%;">
+                                    <mat-card-title class="lfx-c-card__container clearfix">
+                                        <div class="lfx-c-card__container-left w-100">
+                                            <h2 class="lfx-u-header-xl lfx-u-ellipsis" style="line-height: 2rem;">
                                                 {{card.alias | titlecase}}</h2>
                                         </div>
 
                                     </mat-card-title>
                                     <mat-card-subtitle
-                                        class="le-u-body-sm le-u-text-neutral-80 le-u-ellipsis">{{card.lastmodifieddate}}</mat-card-subtitle>
+                                        class="lfx-u-body-sm lfx-u-text-neutral-80 lfx-u-ellipsis">{{card.lastmodifieddate}}</mat-card-subtitle>
                                 </mat-card-header>
-                                <mat-card-content class="le-u-no-mar-b">
-                                    <p class="le-u-body-md le-u-text-neutral-80 le-u-line-2 aip-desc-ellipsis">
+                                <mat-card-content class="lfx-u-no-mar-b">
+                                    <p class="lfx-u-body-md lfx-u-text-neutral-80 aip-desc-ellipsis">
                                         {{card.description}}
                                     </p>
                                 </mat-card-content>
-                                <mat-card-actions class="le-c-card__action-hover d-flex justify-content-between">
+                                <mat-card-actions class="lfx-c-card__action-hover d-flex justify-content-between">
                                     <button mat-button color="primary" (click)="viewConnection(card.name)">View Details</button>
                                     <!-- CreatedBy -->
                                     <div class="aip-cursor">
-                                        <div class="le-c-avatar  le-c-avatar--sm aip-hover-avatar">
+                                        <div class="lfx-c-avatar  lfx-c-avatar--sm aip-hover-avatar">
                                             {{(card.lastmodifiedby?card.lastmodifiedby:'Name Not
                                             Available')|firstCharacter}}</div>
                                         <div class="aip-hover-detail">
-                                            <div class="le-u-header-md le-u-mar-8">
+                                            <div class="lfx-u-header-md lfx-u-mar-8">
                                                 {{card.lastmodifiedby?card.lastmodifiedby:'Name Not Available'}}</div>
                                         </div>
                                     </div>
-                                    <leds-overflow>
-                                        <div ngbDropdown
-                                            class="aip-led-icons d-inline-block le-u-mar-r-8 le-u-v-mid float-end le-c-card__action-ul">
-                                            <a href="javascript:void(0);" id="OverflowMenu_dd" ngbDropdownToggle
-                                                (click)="clickactive($event);" aria-label="menu icon">
-                                                <i aria-hidden="true" class="icon x-24 v-menu-icon"></i>
-                                            </a>
-                                            <div *ngIf="deleteAuth || editAuth" ngbDropdownMenu
-                                                aria-labelledby="OverflowMenu_dd">
-                                                <ul overflowList class="float-end  le-c-card__action-ul"
-                                                    style="display: flex;flex-direction: column;">
-                                                    <li overflowListItem>
-                                                    <li><span *ngIf="editAuth" class="le-u-body-lg  aip-cursor"
-                                                            (click)="editConnection(card.name)">Edit</span>
-                                                        <ng-template #content3 let-modal>
-                                                            <!-- <app-model-edit [data]=card></app-model-edit> -->
-                                                        </ng-template>
-                                                    </li>
-                                                    <li overflowListItem>
-                                                        <span class="le-u-body-lg  aip-cursor"
-                                                            (click)="navigateTo(card.type)">View Datasets</span>
-                                                    </li>
-                                                    <li overflowListItem>
-                                                        <span *ngIf="deleteAuth" class="le-u-body-lg  aip-cursor"
-                                                            (click)="deleteAdapter(card.name)">Delete</span>
-                                                    </li>
-                                                    <li *ngIf="card.type=='REMOTE'" overflowListItem>
-                                                        <span class="le-u-body-lg  aip-cursor"
-                                                            (click)="jobConsole(card.name)">Job Console</span>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </leds-overflow>
+                                    <div class="dropdown d-inline-block float-end">
+                                        <button mat-button [matMenuTriggerFor]="menu" class="btn btn-secondary">
+                                            <i aria-hidden="true" class="icon x-24 v-menu-icon"></i>
+                                        </button>
+                                        <mat-menu #menu="matMenu">
+                                            <button mat-menu-item *ngIf="editAuth" (click)="editConnection(card.name)">
+                                                Edit
+                                            </button>
+                                            <button mat-menu-item (click)="navigateTo(card.type)">
+                                                View Datasets
+                                            </button>
+                                            <button mat-menu-item *ngIf="deleteAuth" (click)="deleteAdapter(card.name)">
+                                                Delete
+                                            </button>
+                                            <button mat-menu-item *ngIf="card.type=='REMOTE'" (click)="jobConsole(card.name)">
+                                                Job Console
+                                            </button>
+                                        </mat-menu>
+                                    </div>
                                     <!-- <ul class="float-end le-c-card__action-ul">
                                    
                                     <li><i class="icon x-32 delete-sm-icon"></i></li>
                                 </ul> -->
                                 </mat-card-actions>
-                            </leds-card>
+                            <!-- </leds-card> -->
+                        </mat-card>
                         </div>
                     </div>
                     <div *ngIf="!filteredCards || filteredCards.length==0">
