@@ -149,13 +149,13 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 
 	@Autowired
 	private IICIPStreamingServiceService streamingServicesService;
-	
+
 	@Autowired
 	private IICIPDatasourceService dsService;
 
 	@Autowired
 	private IICIPJobsService iICIPJobsService;
-	
+
 	/** The logger. */
 	private final Logger logger = LoggerFactory.getLogger(ICIPRemoteExecutorJob.class);
 
@@ -178,7 +178,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 
 	@Autowired
 	private IICIPEventJobMappingService eventMappingService;
-	
+
 	/** The pipeline service. */
 	@Autowired
 	private ICIPPipelineService pipelineService;
@@ -202,7 +202,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 	/** The i CIP file service. */
 	@Autowired
 	private ICIPFileService iCIPFileService;
-	
+
 	@LeapProperty("icip.certificateCheck")
 	private String certificateCheck;
 
@@ -248,7 +248,6 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 	@Autowired
 	private ICIPJobsRepository iCIPJobsRepository;
 
-
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		HashMap<String, String> configs = new HashMap<>();
@@ -260,30 +259,33 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 		String jobString = jobDataMap.getString(JobConstants.JOB_DATAMAP_VALUE);
 		JobObjectDTO jobObject = gson.fromJson(jobString, JobObjectDTO.class);
 		List<JobObjectDTO.Jobs> listjobdto = jobObject.getJobs();
-		int allScriptGenerated=1;
+		int allScriptGenerated = 1;
 		String agenticMeta = null;
 		for (int index = 0; index < listjobdto.size(); ++index) {
 			try {
 				JSONObject fileObj = null;
-				ICIPStreamingServices pipelineInfo = streamingServicesService.findbyNameAndOrganization(listjobdto.get(index).getName(),jobObject.getOrg());
-				if(!(pipelineInfo.getType().equalsIgnoreCase("NativeScript"))) {
-				fileObj =streamingServicesService.getGeneratedScript(listjobdto.get(index).getName(),jobObject.getOrg());
-					 String path = streamingServicesService.savePipelineJson(pipelineInfo.getName(),jobObject.getOrg(),pipelineInfo.getJsonContent());
-					 JsonObject payload= new JsonObject();
-					 payload.addProperty("pipelineName", pipelineInfo.getName());
-					 payload.addProperty("scriptPath", path);
-					 String corelid=eventMappingService.trigger("generateScript_"+pipelineInfo.getType(), jobObject.getOrg(), "", payload.toString(),"");
-					 String status=iICIPJobsService.getEventStatus(corelid);
-					 agenticMeta = pipelineInfo.getPipelineMetadata();
-					 
-					 if(!status.equalsIgnoreCase("COMPLETED")) {
-						 allScriptGenerated=0;
-						 System.out.println("Completed");
-					 }
+				ICIPStreamingServices pipelineInfo = streamingServicesService
+						.findbyNameAndOrganization(listjobdto.get(index).getName(), jobObject.getOrg());
+				if (!(pipelineInfo.getType().equalsIgnoreCase("NativeScript"))) {
+					fileObj = streamingServicesService.getGeneratedScript(listjobdto.get(index).getName(),
+							jobObject.getOrg());
+					String path = streamingServicesService.savePipelineJson(pipelineInfo.getName(), jobObject.getOrg(),
+							pipelineInfo.getJsonContent());
+					JsonObject payload = new JsonObject();
+					payload.addProperty("pipelineName", pipelineInfo.getName());
+					payload.addProperty("scriptPath", path);
+					String corelid = eventMappingService.trigger("generateScript_" + pipelineInfo.getType(),
+							jobObject.getOrg(), "", payload.toString(), "");
+					String status = iICIPJobsService.getEventStatus(corelid);
+					agenticMeta = pipelineInfo.getPipelineMetadata();
+
+					if (!status.equalsIgnoreCase("COMPLETED")) {
+						allScriptGenerated = 0;
+						System.out.println("Completed");
+					}
 				}
-			}
-			catch (Exception e) {
-				allScriptGenerated=0;
+			} catch (Exception e) {
+				allScriptGenerated = 0;
 				System.out.println("error");
 				// TODO: handle exception
 			}
@@ -330,7 +332,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 
 			nativeJobDetails = createNativeJobDetails(jobObject, triggerValues);
 
-			//JobMetadata jobMetadata = JobMetadata.USER;
+			// JobMetadata jobMetadata = JobMetadata.USER;
 			if (jobObject.isRunNow()) {
 				jobMetadata = JobMetadata.USER;
 			} else {
@@ -365,172 +367,138 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 			String uploadDsName = connDetails.get("datasource").toString();
 			uploadDs = dsService.getDatasource(uploadDsName, org);
 		}
-		
-		if(allScriptGenerated==1) 
-		{
-		for (int index = 0; index < listjobdto.size(); ++index) {
-			try {
-				logger.info("Running pipeline in remote with name :{}", (listjobdto.get(index).getName()));
-			} catch (Exception e) {
-				logger.error("No pipeline here");
-			}
-			if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
-				String strDs = jobDataMap.get("datasourceName").toString();
-				JSONObject mapOfDs = new JSONObject(strDs);
-				ICIPDatasource dsObjectofPipeline = null;
+
+		if (allScriptGenerated == 1) {
+			for (int index = 0; index < listjobdto.size(); ++index) {
 				try {
-					datasourceName = mapOfDs.getString(listjobdto.get(index).getName()).split("-", 2)[1];
-					logger.info("Remote datasouce for job in chain to dsObj: "+datasourceName+".");
-					dsObjectofPipeline = dsService.getDatasourceByTypeAndAlias("REMOTE", datasourceName, org);
-					try {
-					dsObject=dsObjectofPipeline;
-					}
-					catch (Exception e) {
-						// TODO: handle exception
-						logger.error(e.getMessage());
-					}
-					datasourceName = dsObjectofPipeline.getName();
+					logger.info("Running pipeline in remote with name :{}", (listjobdto.get(index).getName()));
 				} catch (Exception e) {
-					logger.error(e.getMessage());
-					// TODO: handle exception
+					logger.error("No pipeline here");
 				}
-				connDetails = new JSONObject(dsObjectofPipeline.getConnectionDetails());
-				String uploadDsNamePipeline = connDetails.get("datasource").toString();
-				uploadDs = dsService.getDatasource(uploadDsNamePipeline, org);
-			}
-			JobObjectDTO.Jobs job = jobObject.getJobs().get(index);
+				if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
+					String strDs = jobDataMap.get("datasourceName").toString();
+					JSONObject mapOfDs = new JSONObject(strDs);
+					ICIPDatasource dsObjectofPipeline = null;
+					try {
+						datasourceName = mapOfDs.getString(listjobdto.get(index).getName()).split("-", 2)[1];
+						logger.info("Remote datasouce for job in chain to dsObj: " + datasourceName + ".");
+						dsObjectofPipeline = dsService.getDatasourceByTypeAndAlias("REMOTE", datasourceName, org);
+						try {
+							dsObject = dsObjectofPipeline;
+						} catch (Exception e) {
+							// TODO: handle exception
+							logger.error(e.getMessage());
+						}
+						datasourceName = dsObjectofPipeline.getName();
+					} catch (Exception e) {
+						logger.error(e.getMessage());
+						// TODO: handle exception
+					}
+					connDetails = new JSONObject(dsObjectofPipeline.getConnectionDetails());
+					String uploadDsNamePipeline = connDetails.get("datasource").toString();
+					uploadDs = dsService.getDatasource(uploadDsNamePipeline, org);
+				}
+				JobObjectDTO.Jobs job = jobObject.getJobs().get(index);
 
-			MetaData pipelineMetadata = new MetaData();
-			version = pipelineService.getVersion(nativeJobDetails.get(index).getCname(),
-					nativeJobDetails.get(index).getOrg());
+				MetaData pipelineMetadata = new MetaData();
+				version = pipelineService.getVersion(nativeJobDetails.get(index).getCname(),
+						nativeJobDetails.get(index).getOrg());
 
-			if (version == null)
-				version = 0;
-			if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
+				if (version == null)
+					version = 0;
+				if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
 
-				pipelineMetadata.setName(jobObject.getAlias());
-				pipelineMetadata.setTag("CHAIN");
+					pipelineMetadata.setName(jobObject.getAlias());
+					pipelineMetadata.setTag("CHAIN");
 
-			} else {
-				//JobMetadata jobMetadata = JobMetadata.USER;
-				if (jobObject.isRunNow()) {
-					jobMetadata = JobMetadata.USER;
 				} else {
-					jobMetadata = JobMetadata.SCHEDULED;
+					// JobMetadata jobMetadata = JobMetadata.USER;
+					if (jobObject.isRunNow()) {
+						jobMetadata = JobMetadata.USER;
+					} else {
+						jobMetadata = JobMetadata.SCHEDULED;
+					}
+					pipelineMetadata.setTag(jobMetadata.toString());
 				}
-				pipelineMetadata.setTag(jobMetadata.toString());
-			}
-			iCIPJobs = new ICIPJobs(null, ICIPUtils.removeSpecialCharacter(jobId.toString() + job.getName()),
-					jobObject.getSubmittedBy(), job.getName(), JobStatus.STARTED.toString(), version, null, submittedOn,
-					job.getRuntime().toString(), jobObject.getOrg(), REMOTE, null, attributesHash,
-					jobObject.getCorelId(), null, gson.toJson(pipelineMetadata), 0, "{}", "{}", "{}", "{}", "{}");
-			
-			
-			
-			try {
-				// get unique hashValue for the job triggered(hashvalue=hex(digest(name&org));
+				iCIPJobs = new ICIPJobs(null, ICIPUtils.removeSpecialCharacter(jobId.toString() + job.getName()),
+						jobObject.getSubmittedBy(), job.getName(), JobStatus.STARTED.toString(), version, null,
+						submittedOn, job.getRuntime().toString(), jobObject.getOrg(), REMOTE, null, attributesHash,
+						jobObject.getCorelId(), null, gson.toJson(pipelineMetadata), 0, "{}", "{}", "{}", "{}", "{}");
 
 				try {
+					// get unique hashValue for the job triggered(hashvalue=hex(digest(name&org));
 
-					RuntimeType type = job.getRuntime();
-					String params = job.getParams();
-					String cname = job.getName();
-
-					// aicloud specific code
-					IICIPJobServiceUtil jobUtilConn;
 					try {
-						jobUtilConn = jobpluginService.getType(type.toString().toLowerCase() + "job");
-					}catch(Exception e) {
-						
-						jobUtilConn = jobpluginService.getType("dragndroplitejob");
-					}
-					RemotePipelineConfig pipelineEnvs = null;
-					JSONArray pipelineEnvsArray = null;
-					JSONArray penvsArray = new JSONArray();
-					RemotePipelineConfig pipelinConfig = null;
-					HashMap<String, String> secrets = new HashMap<>();
-					JsonArray environ = new JsonArray();
-					JsonObject envJSONO = new JsonObject();
 
-					if (type.toString().equalsIgnoreCase("nativescript")) {
-						runCmd = jobUtilConn.getCommand(nativeJobDetails.get(index));
-						logger.info("initial command--->" + runCmd);
-						// String storageString = runCmd.substring(runCmd.indexOf("storageType")-2);
-						// Integer ind = runCmd.indexOf(".py");
-						String storageString = runCmd.substring(runCmd.indexOf(".py") + 3);
-						logger.info("storageString--->" + storageString);
-						String storageString2 = runCmd.substring(0, runCmd.indexOf(".py") + 3);
-						logger.info("storageString2--->" + storageString2);
-						String[] parts = storageString2.split("[ /\\\\]+"); // split by spaces , forward slashes and
-						// backward slashes
-						String comm = "python";
-						String fileName = "";
-						for (String part : parts) {
-							 if (part.endsWith(".py")) {
-								fileName = part;
-							}
+						RuntimeType type = job.getRuntime();
+						String params = job.getParams();
+						String cname = job.getName();
 
+						// aicloud specific code
+						IICIPJobServiceUtil jobUtilConn;
+						try {
+							jobUtilConn = jobpluginService.getType(type.toString().toLowerCase() + "job");
+						} catch (Exception e) {
+
+							jobUtilConn = jobpluginService.getType("dragndroplitejob");
 						}
-						// comm = comm.substring(0, comm.length() - 1);
-						logger.info("comm" + comm);
-						fileName = fileName.substring(fileName.lastIndexOf("\\") + 1);
-						String result = comm + " " + fileName;
-						logger.info("result--->" + result);
-						runCmd = result + storageString;
-						logger.info("updated command--->" + runCmd);
-					} else {
-						String pipelineJson = pipelineService.getJson(cname, org);
-						JsonObject jsonObject = new Gson().fromJson(pipelineJson, JsonElement.class).getAsJsonObject();
-						jsonObject.addProperty("org", org);
-						environ = jsonObject.getAsJsonArray("environment");
-						for (int i = 0; i < environ.size(); i++) {
-							JsonObject envJSON = environ.get(i).getAsJsonObject();
-							String key = envJSON.get("name").getAsString();
-							String value = envJSON.get("value").getAsString();
-							envJSONO.addProperty(key, value);
-						}
+						RemotePipelineConfig pipelineEnvs = null;
+						JSONArray pipelineEnvsArray = null;
+						JSONArray penvsArray = new JSONArray();
+						RemotePipelineConfig pipelinConfig = null;
+						HashMap<String, String> secrets = new HashMap<>();
+						JsonArray environ = new JsonArray();
+						JsonObject envJSONO = new JsonObject();
 
-						String data = "{\"input_string\":" + jsonObject.toString() + "}";
-						data = pipelineService.populateDatasetDetails(data, org);
-						data = pipelineService.populateSchemaDetails(data, org);
-						if (params != null && !params.isEmpty() && !params.equals("{}")
-								&& !params.equalsIgnoreCase("generated"))
-							data = pipelineService.populateAttributeDetails(data, params);
+						if (type.toString().equalsIgnoreCase("nativescript")) {
+							runCmd = jobUtilConn.getCommand(nativeJobDetails.get(index));
+							logger.info("initial command--->" + runCmd);
+							// String storageString = runCmd.substring(runCmd.indexOf("storageType")-2);
+							// Integer ind = runCmd.indexOf(".py");
+							String storageString = runCmd.substring(runCmd.indexOf(".py") + 3);
+							logger.info("storageString--->" + storageString);
+							String storageString2 = runCmd.substring(0, runCmd.indexOf(".py") + 3);
+							logger.info("storageString2--->" + storageString2);
+							String[] parts = storageString2.split("[ /\\\\]+"); // split by spaces , forward slashes and
+							// backward slashes
+							String comm = "python";
+							String fileName = "";
+							for (String part : parts) {
+								if (part.endsWith(".py")) {
+									fileName = part;
+								}
 
-						JSONArray pipelineArgs = null;
-						// JSONArray pipelineEnvsArray = null;
-
-						if (!params.equalsIgnoreCase("generated")) {
-							JSONObject dataObj = new JSONObject(data);
-							JSONArray elements = dataObj.getJSONObject("input_string").getJSONArray("elements");
-							pipelineArgs = dataObj.getJSONObject("input_string").getJSONArray("pipeline_attributes");
-							secrets = resolveSecrets(pipelineArgs, org);
-							JSONObject secJ = new JSONObject(secrets);
-
-							Iterator<String> keys = secJ.keys();
-							while (keys.hasNext()) {
-								String key = keys.next();
-								envJSONO.addProperty(key, (String) secJ.get(key));
 							}
-							if (pipelineArgs != null && !pipelineArgs.isEmpty()) {
-								pipelineArgs.forEach(args -> {
-									JSONObject temp = new JSONObject(args.toString());
-									// configs.put(temp.getString("name").trim(), temp.getString("value").trim());
-									if (temp.has("key") && temp.getString("key").trim() != null) {
-										configs.put(temp.getString("key").trim(), temp.getString("value").trim());
-									}
-									if (temp.has("name") && temp.getString("name").trim() != null 
-											&& temp.getString("name").trim()!= "") {
-										configs.put(temp.getString("name").trim(), temp.getString("value").trim());
-									}
-								});
-							}
-						} else {
+							// comm = comm.substring(0, comm.length() - 1);
+							logger.info("comm" + comm);
+							fileName = fileName.substring(fileName.lastIndexOf("\\") + 1);
+							String result = comm + " " + fileName;
+							logger.info("result--->" + result);
+							runCmd = result + storageString;
+							logger.info("updated command--->" + runCmd);
+							String pipelineJson = pipelineService.getJson(cname, org);
+							JsonObject jsonObject = new Gson().fromJson(pipelineJson, JsonElement.class)
+									.getAsJsonObject();
+							jsonObject.addProperty("org", org);
+
+							String data = "{\"input_string\":" + jsonObject.toString() + "}";
+							data = pipelineService.populateDatasetDetails(data, org);
+							data = pipelineService.populateSchemaDetails(data, org);
+							if (params != null && !params.isEmpty() && !params.equals("{}")
+									&& !params.equalsIgnoreCase("generated"))
+								data = pipelineService.populateAttributeDetails(data, params);
 
 							JSONObject dataObj = new JSONObject(data);
+							JSONArray pipelineArgs = null;
+							JSONArray elements = null;
+							JSONObject getAttributes = null;
+							JSONObject attributes = null;
 							// pipelineEnvsArray =
 							// dataObj.getJSONObject("input_string").getJSONArray("environment");
-							pipelineArgs = dataObj.getJSONObject("input_string").getJSONArray("pipeline_attributes");
+							elements = dataObj.getJSONObject("input_string").getJSONArray("elements");
+							getAttributes = elements.getJSONObject(0);
+							attributes = getAttributes.getJSONObject("attributes");
+							pipelineArgs = attributes.getJSONArray("usedSecrets");
 							secrets = resolveSecrets(pipelineArgs, org);
 							JSONObject secJ = new JSONObject(secrets);
 
@@ -549,53 +517,134 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 										configs.put(temp.getString("key").trim(), temp.getString("value").trim());
 									}
 									if (temp.has("name") && temp.getString("name").trim() != null
-									 && temp.getString("name").trim()!= "") {
+											&& temp.getString("name").trim() != "") {
 										configs.put(temp.getString("name").trim(), temp.getString("value").trim());
 									}
 								});
 							}
 
-							/*
-							 * if (pipelineEnvsArray != null && !pipelineEnvsArray.isEmpty()) {
-							 * 
-							 * pipelineEnvsArray.forEach(args -> { JSONObject temp = new
-							 * JSONObject(args.toString()); JSONObject envs = new JSONObject(); if
-							 * (temp.has("name") && temp.getString("name").trim() != null) {
-							 * envs.put(temp.getString("name").trim(), temp.getString("value").trim()); }
-							 * penvsArray.put(envs);
-							 * 
-							 * }); penvsArray.put(new JSONObject(secrets)); }
-							 */
+						} else {
+							String pipelineJson = pipelineService.getJson(cname, org);
+							JsonObject jsonObject = new Gson().fromJson(pipelineJson, JsonElement.class)
+									.getAsJsonObject();
+							jsonObject.addProperty("org", org);
+							environ = jsonObject.getAsJsonArray("environment");
+							for (int i = 0; i < environ.size(); i++) {
+								JsonObject envJSON = environ.get(i).getAsJsonObject();
+								String key = envJSON.get("name").getAsString();
+								String value = envJSON.get("value").getAsString();
+								envJSONO.addProperty(key, value);
+							}
+
+							String data = "{\"input_string\":" + jsonObject.toString() + "}";
+							data = pipelineService.populateDatasetDetails(data, org);
+							data = pipelineService.populateSchemaDetails(data, org);
+							if (params != null && !params.isEmpty() && !params.equals("{}")
+									&& !params.equalsIgnoreCase("generated"))
+								data = pipelineService.populateAttributeDetails(data, params);
+
+							JSONArray pipelineArgs = null;
+							// JSONArray pipelineEnvsArray = null;
+
+							if (!params.equalsIgnoreCase("generated")) {
+								JSONObject dataObj = new JSONObject(data);
+								JSONArray elements = dataObj.getJSONObject("input_string").getJSONArray("elements");
+								pipelineArgs = dataObj.getJSONObject("input_string")
+										.getJSONArray("pipeline_attributes");
+								secrets = resolveSecrets(pipelineArgs, org);
+								JSONObject secJ = new JSONObject(secrets);
+
+								Iterator<String> keys = secJ.keys();
+								while (keys.hasNext()) {
+									String key = keys.next();
+									envJSONO.addProperty(key, (String) secJ.get(key));
+								}
+								if (pipelineArgs != null && !pipelineArgs.isEmpty()) {
+									pipelineArgs.forEach(args -> {
+										JSONObject temp = new JSONObject(args.toString());
+										// configs.put(temp.getString("name").trim(), temp.getString("value").trim());
+										if (temp.has("key") && temp.getString("key").trim() != null) {
+											configs.put(temp.getString("key").trim(), temp.getString("value").trim());
+										}
+										if (temp.has("name") && temp.getString("name").trim() != null
+												&& temp.getString("name").trim() != "") {
+											configs.put(temp.getString("name").trim(), temp.getString("value").trim());
+										}
+									});
+								}
+							} else {
+
+								JSONObject dataObj = new JSONObject(data);
+								// pipelineEnvsArray =
+								// dataObj.getJSONObject("input_string").getJSONArray("environment");
+								pipelineArgs = dataObj.getJSONObject("input_string")
+										.getJSONArray("pipeline_attributes");
+								secrets = resolveSecrets(pipelineArgs, org);
+								JSONObject secJ = new JSONObject(secrets);
+
+								Iterator<String> keys = secJ.keys();
+								while (keys.hasNext()) {
+									String key = keys.next();
+									envJSONO.addProperty(key, (String) secJ.get(key));
+								}
+								// pipelineEnvsArray =
+								// dataObj.getJSONObject("input_string").getJSONArray("environment");
+								if (pipelineArgs != null && !pipelineArgs.isEmpty()) {
+									pipelineArgs.forEach(args -> {
+										JSONObject temp = new JSONObject(args.toString());
+										// configs.put(temp.getString("key").trim(), temp.getString("value").trim());
+										if (temp.has("key") && temp.getString("key").trim() != null) {
+											configs.put(temp.getString("key").trim(), temp.getString("value").trim());
+										}
+										if (temp.has("name") && temp.getString("name").trim() != null
+												&& temp.getString("name").trim() != "") {
+											configs.put(temp.getString("name").trim(), temp.getString("value").trim());
+										}
+									});
+								}
+
+								/*
+								 * if (pipelineEnvsArray != null && !pipelineEnvsArray.isEmpty()) {
+								 * 
+								 * pipelineEnvsArray.forEach(args -> { JSONObject temp = new
+								 * JSONObject(args.toString()); JSONObject envs = new JSONObject(); if
+								 * (temp.has("name") && temp.getString("name").trim() != null) {
+								 * envs.put(temp.getString("name").trim(), temp.getString("value").trim()); }
+								 * penvsArray.put(envs);
+								 * 
+								 * }); penvsArray.put(new JSONObject(secrets)); }
+								 */
+							}
+
+							ObjectMapper mapper = new ObjectMapper();
+							configs.remove("usedSecrets");
+							pipelinConfig = mapper.convertValue(configs, RemotePipelineConfig.class);
+							// pipelineEnvs = mapper.convertValue(envs, RemotePipelineConfig.class);
+
+							// logger.info("pipeline envs"+ pipelineEnvs.toString());
+							String msg = String.format("%s", "About to run the job");
+							log.info(msg);
+							runCmd = getRunCommand(job, nativeJobDetails, index);
+
+						}
+						JSONObject usedSecrets = new JSONObject(secrets);
+
+						String payload = runScript(version, runCmd, jobUtilConn, nativeJobDetails, connDetails,
+								uploadDs, job, datasourceName, pipelinConfig, index, envJSONO, jobObject.isEvent(),
+								usedSecrets);
+
+						if (Objects.nonNull(dsObject.getAlias())) {
+							iCIPJobs.setRuntime("Remote-" + dsObject.getAlias());
+						} else {
+							List<String> items = Arrays.stream(runtimeList.split(",")).map(String::trim)
+									.collect(Collectors.toList());
+							SecureRandom random = new SecureRandom();
+							int randomIndex = random.nextInt(items.size());
+							iCIPJobs.setRuntime("Remote-" + items.get(randomIndex));
 						}
 
-						ObjectMapper mapper = new ObjectMapper();
-						configs.remove("usedSecrets");
-						pipelinConfig = mapper.convertValue(configs, RemotePipelineConfig.class);
-						// pipelineEnvs = mapper.convertValue(envs, RemotePipelineConfig.class);
-
-						// logger.info("pipeline envs"+ pipelineEnvs.toString());
-						String msg = String.format("%s", "About to run the job");
-						log.info(msg);
-						runCmd = getRunCommand(job, nativeJobDetails, index);
-
-					}
-					JSONObject usedSecrets = new JSONObject(secrets);
-
-
-					String payload = runScript(version, runCmd, jobUtilConn, nativeJobDetails, connDetails, uploadDs, job,
-								datasourceName, pipelinConfig, index, envJSONO, jobObject.isEvent(), usedSecrets);
-
-					if(Objects.nonNull(dsObject.getAlias())){
-						iCIPJobs.setRuntime("Remote-" + dsObject.getAlias());
-					} else {
-   						List<String> items = Arrays.stream(runtimeList.split(",")).map(String::trim).collect(Collectors.toList());
-						SecureRandom random = new SecureRandom();
-						int randomIndex = random.nextInt(items.size());
-						iCIPJobs.setRuntime("Remote-" + items.get(randomIndex));
-					}
-
-					Path outPath;
-					Path chainoutPath = null;
+						Path outPath;
+						Path chainoutPath = null;
 
 //                  iCIPJobs.setJobStatus(JobStatus.RUNNING.toString());
 //                  iCIPJobs = jobsService.save(iCIPJobs);
@@ -605,200 +654,204 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 ////            
 ////                    }
 //                  
-					if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
-						iCIPChainJobs.setJobStatus(JobStatus.OPEN.toString());
-						iCIPChainJobs = chainJobsService.save(iCIPChainJobs);
-					chainoutPath = Paths.get(annotationServiceUtil.getFolderPath(),
-						 IAIJobConstants.LOGPATH,
-								IAIJobConstants.CHAINLOGPATH, iCIPChainJobs.getCorrelationid());
+						if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
+							iCIPChainJobs.setJobStatus(JobStatus.OPEN.toString());
+							iCIPChainJobs = chainJobsService.save(iCIPChainJobs);
+							chainoutPath = Paths.get(annotationServiceUtil.getFolderPath(), IAIJobConstants.LOGPATH,
+									IAIJobConstants.CHAINLOGPATH, iCIPChainJobs.getCorrelationid());
 
+							iCIPJobs.setJobStatus(JobStatus.OPEN.toString());
+							iCIPJobs = jobsService.save(iCIPJobs);
+							outPath = Paths.get(chainoutPath.toString(),
+									String.format("%s%s", iCIPJobs.getJobId(), IAIJobConstants.OUTLOG));
 
-						iCIPJobs.setJobStatus(JobStatus.OPEN.toString());
-						iCIPJobs = jobsService.save(iCIPJobs);
-						outPath = Paths.get(chainoutPath.toString(),
-								String.format("%s%s", iCIPJobs.getJobId(), IAIJobConstants.OUTLOG));
+						} else {
+							iCIPJobs.setJobStatus(JobStatus.OPEN.toString());
+							String jobsMeta = iCIPJobs.getJobmetadata();
+							if (agenticMeta != null) {
+								JSONObject pipelinemetaJSON = new JSONObject(agenticMeta);
+								JSONObject jobsmetaJSON = new JSONObject(jobsMeta);
+								if (pipelinemetaJSON.has("agentTaskName")) {
+									jobsmetaJSON.put("agentTaskName", pipelinemetaJSON.get("agentTaskName").toString());
+									iCIPJobs.setJobmetadata(jobsmetaJSON.toString());
+								}
+							}
 
-					} else {
-						iCIPJobs.setJobStatus(JobStatus.OPEN.toString());
-						String jobsMeta = iCIPJobs.getJobmetadata();
-						if(agenticMeta != null) {
-							JSONObject pipelinemetaJSON = new JSONObject(agenticMeta);
-							JSONObject jobsmetaJSON = new JSONObject(jobsMeta);
-							if(pipelinemetaJSON.has("agentTaskName")) {
-								jobsmetaJSON.put("agentTaskName",pipelinemetaJSON.get("agentTaskName").toString());
-								iCIPJobs.setJobmetadata(jobsmetaJSON.toString());
+							iCIPJobs = jobsService.save(iCIPJobs);
+							outPath = Paths.get(annotationServiceUtil.getFolderPath(),
+									String.format(LoggerConstants.STRING_DECIMAL_STRING,
+											IAIJobConstants.PIPELINELOGPATH, iCIPJobs.getId(), IAIJobConstants.OUTLOG));
+						}
+
+						Integer result = 0;
+
+						log.info("OutPath : {}", outPath);
+						if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
+							File theDir = new File(chainoutPath.toString());
+							if (!theDir.exists()) {
+								theDir.mkdirs();
 							}
 						}
-						
+						Files.createDirectories(outPath.getParent());
+						Files.deleteIfExists(outPath);
+						Files.createFile(outPath);
+						if (!Files.exists(outPath)) {
+
+							iCIPJobs.setJobStatus(JobStatus.ERROR.toString());
+							iCIPJobs.setLog("Configuration Error : Log File Not Found [Path : "
+									+ outPath.toAbsolutePath().toString() + "]");
+							iCIPJobs = jobsService.save(iCIPJobs);
+
+							if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
+								iCIPChainJobs.setJobStatus(JobStatus.ERROR.toString());
+								iCIPChainJobs.setLog("Configuration Error : Log File Not Found [Path : "
+										+ outPath.toAbsolutePath().toString() + "]");
+								iCIPChainJobs = chainJobsService.save(iCIPChainJobs);
+							}
+						}
+						context.setResult(result);
+						log.info("run time value {}", dsObject.getAlias());
+						if (jobExecutorEnabled) {
+							log.info("jobid value {}",
+									ICIPUtils.removeSpecialCharacter(jobId.toString() + job.getName()));
+							ICIPJobs job2save = iCIPJobsRepository
+									.findByJobId(ICIPUtils.removeSpecialCharacter(jobId.toString() + job.getName()));
+							String taskId = executeScript(version, connDetails, nativeJobDetails, jobUtilConn, index,
+									uploadDs, job2save.getPayload());
+							org.json.JSONObject jobMetaData = new org.json.JSONObject(job2save.getJobmetadata());
+							jobMetaData.put("taskId", taskId);
+							job2save.setJobmetadata(jobMetaData.toString());
+							log.info("taskId value {}", taskId);
+							JSONObject statusResponse = getTaskStatus(taskId, connDetails);
+							if (statusResponse != null) {
+								String status = statusResponse.optString("task_status", null); // Use optString to avoid
+																								// NullPointerException
+								log.info("status  value {}", status);
+								job2save.setJobStatus(status);
+							}
+							iCIPJobsRepository.save(job2save);
+						}
+
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt(); // Restore the interrupted status
+
+						throw new LeapException("Thread was interrupted: " + e.getMessage()); // Throw a custom
+																								// exception
+					} catch (Exception ex) {
+						if (Objects.nonNull(dsObject.getAlias())) {
+							iCIPJobs.setRuntime("Remote-" + dsObject.getAlias());
+						} else {
+							List<String> items = Arrays.stream(runtimeList.split(",")).map(String::trim)
+									.collect(Collectors.toList());
+							SecureRandom random = new SecureRandom();
+							int randomIndex = random.nextInt(items.size());
+							iCIPJobs.setRuntime("Remote-" + items.get(randomIndex));
+						}
+						iCIPJobs.setJobStatus(JobStatus.ERROR.toString());
+						iCIPJobs.setLog(ex.getMessage());
+						iCIPJobs.setFinishtime(new Timestamp(new Date().getTime()));
 						iCIPJobs = jobsService.save(iCIPJobs);
+						if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
+
+							iCIPChainJobs.setJobStatus(JobStatus.ERROR.toString());
+							iCIPChainJobs.setLog(ex.getMessage());
+							iCIPChainJobs.setFinishtime(new Timestamp(new Date().getTime()));
+							iCIPChainJobs = chainJobsService.save(iCIPChainJobs);
+						}
+
+						// String msg = "Error in running job : " + ex.getClass().getCanonicalName() + "
+						// - " + ex.getMessage();
+						String msg = "Error in running job : " + " - "
+								+ ex.getMessage().replace("Connection reset", "");
+
+						log.error(msg, ex);
+						throw new LeapException("\n" + msg);
+
+					}
+
+				} catch (Exception ex) {
+					// Check if the caught exception is an InterruptedException
+					if (ex instanceof InterruptedException) {
+						Thread.currentThread().interrupt();
+						throw new JobExecutionException("Thread was interrupted: " + ex.getMessage(), ex);
+					}
+					Path chainoutPath = null;
+					Path outPath = null;
+
+					if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
+						chainoutPath = Paths.get(annotationServiceUtil.getFolderPath(), IAIJobConstants.LOGPATH,
+								IAIJobConstants.CHAINLOGPATH, iCIPChainJobs.getCorrelationid());
+						outPath = Paths.get(chainoutPath.toString(),
+								String.format("%s%s", iCIPJobs.getJobId(), IAIJobConstants.OUTLOG));
+					} else {
 						outPath = Paths.get(annotationServiceUtil.getFolderPath(),
 								String.format(LoggerConstants.STRING_DECIMAL_STRING, IAIJobConstants.PIPELINELOGPATH,
 										iCIPJobs.getId(), IAIJobConstants.OUTLOG));
 					}
-
-					Integer result = 0;
-
-					log.info("OutPath : {}", outPath);
-					if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
-						File theDir = new File(chainoutPath.toString());
-						if (!theDir.exists()) {
-							theDir.mkdirs();
-						}
-					}
-					Files.createDirectories(outPath.getParent());
-					Files.deleteIfExists(outPath);
-					Files.createFile(outPath);
-					if (!Files.exists(outPath)) {
-
-						iCIPJobs.setJobStatus(JobStatus.ERROR.toString());
-						iCIPJobs.setLog("Configuration Error : Log File Not Found [Path : "
-								+ outPath.toAbsolutePath().toString() + "]");
-						iCIPJobs = jobsService.save(iCIPJobs);
-
-						if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
-							iCIPChainJobs.setJobStatus(JobStatus.ERROR.toString());
-							iCIPChainJobs.setLog("Configuration Error : Log File Not Found [Path : "
-									+ outPath.toAbsolutePath().toString() + "]");
-							iCIPChainJobs = chainJobsService.save(iCIPChainJobs);
-						}
-					}
-					context.setResult(result);
-					log.info("run time value {}", dsObject.getAlias());
-					if (jobExecutorEnabled) {
-						log.info("jobid value {}", ICIPUtils.removeSpecialCharacter(jobId.toString() + job.getName()));
-						ICIPJobs job2save = iCIPJobsRepository.findByJobId(ICIPUtils.removeSpecialCharacter(jobId.toString() + job.getName()));
-						String taskId = executeScript(version, connDetails, nativeJobDetails, jobUtilConn,index, uploadDs, job2save.getPayload());
-						org.json.JSONObject jobMetaData = new org.json.JSONObject(job2save.getJobmetadata());
-						jobMetaData.put("taskId", taskId);
-						job2save.setJobmetadata(jobMetaData.toString());
-						log.info("taskId value {}", taskId);
-						JSONObject statusResponse = getTaskStatus(taskId, connDetails);
-						if (statusResponse != null) {
-							String status = statusResponse.optString("task_status", null); // Use optString to avoid NullPointerException
-							log.info("status  value {}", status);
-							job2save.setJobStatus(status);
-						}
-						iCIPJobsRepository.save(job2save);
-					}
-
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt(); // Restore the interrupted status
-
-					throw new LeapException("Thread was interrupted: " + e.getMessage()); // Throw a custom exception	
-				} catch (Exception ex) {
-					if(Objects.nonNull(dsObject.getAlias())){
-						iCIPJobs.setRuntime("Remote-" + dsObject.getAlias());
-					} else {
-						List<String> items = Arrays.stream(runtimeList.split(",")).map(String::trim).collect(Collectors.toList());
-						SecureRandom random = new SecureRandom();
-						int randomIndex = random.nextInt(items.size());
-						iCIPJobs.setRuntime("Remote-" + items.get(randomIndex));
-					}
-					iCIPJobs.setJobStatus(JobStatus.ERROR.toString());
-					iCIPJobs.setLog(ex.getMessage());
-					iCIPJobs.setFinishtime(new Timestamp(new Date().getTime()));
-					iCIPJobs = jobsService.save(iCIPJobs);
-					if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
-
-						iCIPChainJobs.setJobStatus(JobStatus.ERROR.toString());
-						iCIPChainJobs.setLog(ex.getMessage());
-						iCIPChainJobs.setFinishtime(new Timestamp(new Date().getTime()));
-						iCIPChainJobs = chainJobsService.save(iCIPChainJobs);
-					}
-
-					//String msg = "Error in running job : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
-					String msg = "Error in running job : " + " - " + ex.getMessage().replace("Connection reset", "");
-
-					log.error(msg, ex);
-					throw new LeapException("\n" +msg);
-
-
-				}
-				       
-			} catch (Exception ex) {
-				// Check if the caught exception is an InterruptedException
-				if (ex instanceof InterruptedException) {
-					Thread.currentThread().interrupt();
-					throw new JobExecutionException("Thread was interrupted: " + ex.getMessage(), ex);
-				}
-				Path chainoutPath = null;
-				Path outPath = null;
-
-				if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
-									chainoutPath = Paths.get(annotationServiceUtil.getFolderPath(), IAIJobConstants.LOGPATH,
-							IAIJobConstants.CHAINLOGPATH, iCIPChainJobs.getCorrelationid());
-					outPath = Paths.get(chainoutPath.toString(),
-							String.format("%s%s", iCIPJobs.getJobId(), IAIJobConstants.OUTLOG));
-				} else {
-					outPath = Paths.get(annotationServiceUtil.getFolderPath(),
-							String.format(LoggerConstants.STRING_DECIMAL_STRING, IAIJobConstants.PIPELINELOGPATH,
-									iCIPJobs.getId(), IAIJobConstants.OUTLOG));
-				}
-				log.info("outPath is:", outPath);
-				String error = "Error in Job Execution : " + ex.getMessage()
-						+ System.getProperty(IAIJobConstants.LINE_SEPARATOR) + ex.toString();
+					log.info("outPath is:", outPath);
+					String error = "Error in Job Execution : " + ex.getMessage()
+							+ System.getProperty(IAIJobConstants.LINE_SEPARATOR) + ex.toString();
 //				FileOutputStream writer = null;
 
 //          FileChannel channel = null;
-				try {
-					log.info("Inside try while writing error logs");
-					if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
-					File theDir = null;
-						if (chainoutPath != null) {
-							theDir = new File(chainoutPath.toString());
-							if (!theDir.exists()) {
-								theDir.mkdirs();
+					try {
+						log.info("Inside try while writing error logs");
+						if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
+							File theDir = null;
+							if (chainoutPath != null) {
+								theDir = new File(chainoutPath.toString());
+								if (!theDir.exists()) {
+									theDir.mkdirs();
+								}
+							} else {
+								logger.error("chainoutpath does not exist i.e value is null");
 							}
-						} else {
-							logger.error("chainoutpath does not exist i.e value is null");
-							}
+
+						}
+						Files.deleteIfExists(outPath);
+						Files.createFile(outPath);
+
+						try (FileOutputStream writer = new FileOutputStream(outPath.toString())) {
+
+							log.info("About to write error logs");
+							writer.write(error.getBytes());
+							writer.write(10);
+							log.info("Error logs written to path: {}", outPath);
+							handlingErrorStatus(error, jobObject);
+						}
+					} catch (LeapException | IOException e) {
+						log.error(e.getMessage(), e);
+					} catch (Exception e) {
+						log.info("Inside Exception while writing error logs");
+						log.error(e.getMessage(), e);
+					} finally {
+						log.info("Finished processing error logs.");
 
 					}
-					Files.deleteIfExists(outPath);
-					Files.createFile(outPath);
-
-					try (FileOutputStream writer = new FileOutputStream(outPath.toString())) {
-
-					log.info("About to write error logs");
-					writer.write(error.getBytes());
-					writer.write(10);
-					log.info("Error logs written to path: {}", outPath);
-					handlingErrorStatus(error, jobObject);
-					}
-				} catch (LeapException | IOException e) {
-					log.error(e.getMessage(), e);
-				} catch (Exception e) {
-					log.info("Inside Exception while writing error logs");
-					log.error(e.getMessage(), e);
-				} finally {
-					log.info("Finished processing error logs.");
-
 				}
 			}
 		}
-		}
-	
+
 		else {
 			if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
 				iCIPChainJobs.setJobStatus(JobStatus.ERROR.toString());
 				iCIPChainJobs.setLog("Scripts Generation error");
 				iCIPChainJobs.setFinishtime(new Timestamp(new Date().getTime()));
 				iCIPChainJobs = chainJobsService.save(iCIPChainJobs);
-			}
-			else {
+			} else {
 				JobObjectDTO.Jobs job = jobObject.getJobs().get(0);
 				MetaData pipelineMetadata = new MetaData();
-				//JobMetadata jobMetadata = JobMetadata.USER;
+				// JobMetadata jobMetadata = JobMetadata.USER;
 				if (jobObject.isRunNow()) {
 					jobMetadata = JobMetadata.USER;
 				} else {
 					jobMetadata = JobMetadata.SCHEDULED;
 				}
 				pipelineMetadata.setTag(jobMetadata.toString());
-				
+
 				iCIPJobs = new ICIPJobs(null, ICIPUtils.removeSpecialCharacter(jobId.toString() + job.getName()),
-						jobObject.getSubmittedBy(), job.getName(), JobStatus.STARTED.toString(), version, null, submittedOn,
-						job.getRuntime().toString(), jobObject.getOrg(), REMOTE, null, attributesHash,
+						jobObject.getSubmittedBy(), job.getName(), JobStatus.STARTED.toString(), version, null,
+						submittedOn, job.getRuntime().toString(), jobObject.getOrg(), REMOTE, null, attributesHash,
 						jobObject.getCorelId(), null, gson.toJson(pipelineMetadata), 0, "{}", "{}", "{}", "{}", "{}");
 				iCIPJobs.setJobStatus(JobStatus.ERROR.toString());
 				iCIPJobs.setLog("Scripts Generation error");
@@ -878,7 +931,8 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 
 	}
 
-	private String uploadScript(ICIPDatasource uploadDs, String attributes, String uploadFile) throws LeapException ,Exception{
+	private String uploadScript(ICIPDatasource uploadDs, String attributes, String uploadFile)
+			throws LeapException, Exception {
 		IICIPDataSourceServiceUtil uploadPluginConn = dsPluginService.getDataSourceService(uploadDs);
 		return uploadPluginConn.uploadFile(uploadDs, attributes, uploadFile);
 	}
@@ -886,7 +940,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 	private String runScript(Integer version, String runCmd, IICIPJobServiceUtil jobUtilConn,
 			List<ICIPNativeJobDetails> nativeJobDetails, JSONObject connDetails, ICIPDatasource uploadDs, Jobs job,
 			String datasourceName, RemotePipelineConfig pipelinConfig, int index, JsonObject env, Boolean isEvent,
-			JSONObject usedSecrets) throws LeapException ,InterruptedException{
+			JSONObject usedSecrets) throws LeapException, InterruptedException {
 		String payload = null;
 		String status = null;
 		JSONObject attributes = new JSONObject();
@@ -895,8 +949,8 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 		try {
 
 			// if (!checkTaskExists(nativeJobDetails, connDetails, uploadDs, version)) {
-			payload = getPayloadForScriptExecution(version, connDetails, nativeJobDetails, jobUtilConn, uploadDs, runCmd, pipelinConfig,
-					index, env, isEvent,usedSecrets);
+			payload = getPayloadForScriptExecution(version, connDetails, nativeJobDetails, jobUtilConn, uploadDs,
+					runCmd, pipelinConfig, index, env, isEvent, usedSecrets);
 			iCIPJobs.setPayload(payload);
 			JSONObject pipelineData = new JSONObject();
 			pipelineService.updatePipelineMetadata(pipelineData, nativeJobDetails.get(index).getCname(),
@@ -908,12 +962,12 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 			// }
 
 			RemoteJobMetadata metaData = new RemoteJobMetadata();
-			//metaData.setTaskId(taskId);
+			// metaData.setTaskId(taskId);
 			metaData.setTaskName(nativeJobDetails.get(index).getId().length() > 24
 					? nativeJobDetails.get(index).getId().substring(nativeJobDetails.get(index).getId().length() - 24)
 					: nativeJobDetails.get(index).getId());
 			metaData.setProjectId(connDetails.get("projectId").toString());
-			//metaData.setBucketName(connDetails.get("bucketname").toString());
+			// metaData.setBucketName(connDetails.get("bucketname").toString());
 			metaData.setBucketName(connDetails.get(BUCKET_NAME).toString());
 			metaData.setPipelineName(attributes.getString("pipelineName"));
 			metaData.setLogFilePath(generateLogFilePath(metaData, version));
@@ -927,20 +981,19 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 				datachain.setName(iCIPChainJobs.getJobName());
 				JSONObject jsondatachain = new JSONObject(datachain);
 				jsondatachain.put("runtime", REMOTE);
-				
-				JSONObject chainjobMetadata= new JSONObject(iCIPChainJobs.getJobmetadata());
-				if(chainjobMetadata.has("tag") && chainjobMetadata.get("tag").toString().equalsIgnoreCase("SCHEDULED"))
-				{
+
+				JSONObject chainjobMetadata = new JSONObject(iCIPChainJobs.getJobmetadata());
+				if (chainjobMetadata.has("tag")
+						&& chainjobMetadata.get("tag").toString().equalsIgnoreCase("SCHEDULED")) {
 					jsondatachain.put("isScheduled", "true");
-				}
-				else {
-					if(chainjobMetadata.has("isScheduled") && chainjobMetadata.get("isScheduled").toString().equalsIgnoreCase("true")) {
+				} else {
+					if (chainjobMetadata.has("isScheduled")
+							&& chainjobMetadata.get("isScheduled").toString().equalsIgnoreCase("true")) {
 						jsondatachain.put("isScheduled", "true");
-					}
-					else {
+					} else {
 						jsondatachain.put("isScheduled", "false");
 					}
-					
+
 				}
 
 				iCIPChainJobs.setJobmetadata(jsondatachain.toString());
@@ -952,21 +1005,20 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 				metaData.setTag(jobMetadata.toString());
 				iCIPJobs.setJobmetadata(gson.toJson(metaData));
 			}
-		/*	JSONObject statusResponse = getTaskStatus(taskId, connDetails);
-
-			if (statusResponse != null) {
-			status = statusResponse.optString("task_status", null); // Use optString to avoid NullPointerException
-				if ("RUNNING".equalsIgnoreCase(status) || "COMPLETED".equalsIgnoreCase(status))
-					return new ResponseEntity<>(HttpStatusCode.valueOf(200));
-				else {
-					return new ResponseEntity<>(HttpStatusCode.valueOf(400));
-				}
-
-			} else {
-				return new ResponseEntity<>(HttpStatusCode.valueOf(400));
-			}*/
+			/*
+			 * JSONObject statusResponse = getTaskStatus(taskId, connDetails);
+			 * 
+			 * if (statusResponse != null) { status =
+			 * statusResponse.optString("task_status", null); // Use optString to avoid
+			 * NullPointerException if ("RUNNING".equalsIgnoreCase(status) ||
+			 * "COMPLETED".equalsIgnoreCase(status)) return new
+			 * ResponseEntity<>(HttpStatusCode.valueOf(200)); else { return new
+			 * ResponseEntity<>(HttpStatusCode.valueOf(400)); }
+			 * 
+			 * } else { return new ResponseEntity<>(HttpStatusCode.valueOf(400)); }
+			 */
 			return payload;
-		}  catch (Exception e) {
+		} catch (Exception e) {
 			throw new LeapException("Error in executeScript:" + e.getMessage());
 
 		}
@@ -981,119 +1033,114 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 		TrustManager[] trustAllCerts = getTrustAllCerts();
 		SSLContext sslContext = getSslContext(trustAllCerts);
 		if (sslContext != null) {
-		OkHttpClient.Builder newBuilder = new OkHttpClient.Builder();
-		newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
-		newBuilder.hostnameVerifier((hostname, session) -> true);
-		OkHttpClient client = newBuilder.build();
-		//MediaType mediaType = MediaType.parse("application/json");
-		//JSONObject bodyObject = new JSONObject();
-		Request requestokHttp = new Request.Builder().url(url).addHeader("accept", "application/json").build();
-		logger.info("getStatus request " + requestokHttp);
-		try {
-			Response response = client.newCall(requestokHttp).execute();
-			logger.info("getStatus response " + response);
-			logger.info("getStatus response body " + response.body());
-			logger.info("getStatus response code " + response.code());
-			if (response.code() == 200) {
-				return new JSONObject(response.body().string());
-			} else
-				return new JSONObject(response);
+			OkHttpClient.Builder newBuilder = new OkHttpClient.Builder();
+			newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
+			newBuilder.hostnameVerifier((hostname, session) -> true);
+			OkHttpClient client = newBuilder.build();
+			// MediaType mediaType = MediaType.parse("application/json");
+			// JSONObject bodyObject = new JSONObject();
+			Request requestokHttp = new Request.Builder().url(url).addHeader("accept", "application/json").build();
+			logger.info("getStatus request " + requestokHttp);
+			try {
+				Response response = client.newCall(requestokHttp).execute();
+				logger.info("getStatus response " + response);
+				logger.info("getStatus response body " + response.body());
+				logger.info("getStatus response code " + response.code());
+				if (response.code() == 200) {
+					return new JSONObject(response.body().string());
+				} else
+					return new JSONObject(response);
 
-		} catch (Exception e) {
-			throw new LeapException("Error in getStatus:" + e.getMessage());
-				}
+			} catch (Exception e) {
+				throw new LeapException("Error in getStatus:" + e.getMessage());
+			}
 		} else {
 			throw new LeapException("SSLContext is null, could not create a secure connection.");
+		}
+	}
+
+	JSONObject getLog(String taskId, JSONObject connDetails) throws LeapException {
+		logger.info("Inside getLog");
+		String url = connDetails.get("Url").toString() + "/" + taskId + "/getLog";
+		logger.info("getLog URL " + url);
+		TrustManager[] trustAllCerts = getTrustAllCerts();
+		SSLContext sslContext = getSslContext(trustAllCerts);
+
+		if (sslContext != null) {
+			OkHttpClient.Builder newBuilder = new OkHttpClient.Builder();
+			newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
+			newBuilder.hostnameVerifier((hostname, session) -> true);
+			OkHttpClient client = newBuilder.build();
+			Request requestokHttp = new Request.Builder().url(url).addHeader("accept", "application/json").build();
+			logger.info("getLog request " + requestokHttp.toString());
+			Response response = null;
+
+			try {
+				response = client.newCall(requestokHttp).execute();
+				logger.info("getLog response " + response);
+				logger.info("getLog response code " + response.code());
+				logger.info("getLog response body " + response.body());
+
+				if (response.code() == 200) {
+					JSONObject responsebody = new JSONObject(response.body().string());
+
+					// Modify the content to change the prefix format
+					String content = responsebody.getJSONObject("logs").getString("content");
+
+					// Decode and modify the value of prefix
+					String modifiedContent = modifyPrefixInContent(content);
+
+					// Update the response body with the modified content
+					responsebody.getJSONObject("logs").put("content", modifiedContent);
+
+					return responsebody;
+
+				} else if (response.code() == 400) {
+					throw new LeapException("Remote get task Log for taskid " + taskId);
+				} else {
+					throw new LeapException("Remote get task log for  " + taskId + " Response Code " + response.code()
+							+ " Response Body " + response.body());
+				}
+
+			} catch (Exception e) {
+				throw new LeapException("Error in getLog:" + e.getMessage() + " Task Id is:" + taskId);
+
 			}
+
+		} else {
+			throw new LeapException("SSLContext is null, could not create a secure connection.");
+		}
 	}
 
-	JSONObject getLog(String taskId, JSONObject connDetails) throws LeapException {  
-	    logger.info("Inside getLog");  
-	    String url = connDetails.get("Url").toString() + "/" + taskId + "/getLog";  
-	    logger.info("getLog URL " + url);  
-	    TrustManager[] trustAllCerts = getTrustAllCerts();  
-	    SSLContext sslContext = getSslContext(trustAllCerts);  
+	private String modifyPrefixInContent(String content) {
+		// Locate the position of the prefix in the content
+		String prefixKey = "prefix=";
+		int prefixStartIndex = content.indexOf(prefixKey);
+		if (prefixStartIndex != -1) {
+			// Extracting the prefix part
+			String prefixValue = content.substring(prefixStartIndex);
 
-	    if (sslContext != null) {  
-	        OkHttpClient.Builder newBuilder = new OkHttpClient.Builder();  
-	        newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);  
-	        newBuilder.hostnameVerifier((hostname, session) -> true);  
-	        OkHttpClient client = newBuilder.build();  
-	        Request requestokHttp = new Request.Builder().url(url).addHeader("accept", "application/json").build();  
-	        logger.info("getLog request " + requestokHttp.toString());  
-	        Response response = null;  
+			// Find the end of the prefix value
+			int prefixEndIndex = prefixValue.indexOf("&");
+			if (prefixEndIndex == -1) {
+				prefixEndIndex = prefixValue.length(); // No & found, take till the end
+			}
 
-	        try {  
-	            response = client.newCall(requestokHttp).execute();  
-	            logger.info("getLog response " + response);  
-	            logger.info("getLog response code " + response.code());  
-	            logger.info("getLog response body " + response.body());  
+			// Extract the actual prefix value
+			prefixValue = prefixValue.substring(0, prefixEndIndex);
 
-	            if (response.code() == 200) {  
-	                JSONObject responsebody = new JSONObject(response.body().string());  
+			// Decode URL components
+			String modifiedPrefix = prefixValue.replace("%20", " ").replace("%27", " ").replace("%3A", ":")
+					.replace("%28", "(").replace("%29", ")").replace("%2C", ",").replace("&", "");
 
-	                // Modify the content to change the prefix format  
-	                String content = responsebody.getJSONObject("logs").getString("content");  
+			return content.replace(prefixValue, modifiedPrefix);
+		}
 
-	                // Decode and modify the value of prefix  
-	                String modifiedContent = modifyPrefixInContent(content);  
-
-	                // Update the response body with the modified content  
-	                responsebody.getJSONObject("logs").put("content", modifiedContent);  
-	                
-	                return responsebody;  
-
-	            } else if (response.code() == 400) {  
-	                throw new LeapException("Remote get task Log for taskid " + taskId);  
-	            } else {  
-	                throw new LeapException("Remote get task log for  " + taskId + " Response Code " + response.code()  
-	                        + " Response Body " + response.body());  
-	            }  
-
-	        } catch (Exception e) {  
-	            throw new LeapException("Error in getLog:" + e.getMessage() + " Task Id is:" + taskId);  
-
-	        }  
-
-	    } else {  
-	        throw new LeapException("SSLContext is null, could not create a secure connection.");  
-	    }  
-	}  
-
-	private String modifyPrefixInContent(String content) {  
-	    // Locate the position of the prefix in the content  
-	    String prefixKey = "prefix=";    
-	    int prefixStartIndex = content.indexOf(prefixKey);  
-	    if (prefixStartIndex != -1) {  
-	        // Extracting the prefix part  
-	        String prefixValue = content.substring(prefixStartIndex);  
-	        
-	        // Find the end of the prefix value  
-	        int prefixEndIndex = prefixValue.indexOf("&");  
-	        if (prefixEndIndex == -1) {  
-	            prefixEndIndex = prefixValue.length(); // No & found, take till the end  
-	        }  
-
-	        // Extract the actual prefix value  
-	        prefixValue = prefixValue.substring(0, prefixEndIndex);  
-
-	        // Decode URL components  
-	        String modifiedPrefix = prefixValue  
-	                .replace("%20", " ") 
-	                .replace("%27", " ")
-	                .replace("%3A", ":") 
-	                .replace("%28", "(")
-	                .replace("%29", ")")
-	                .replace("%2C", ",")
-	                .replace("&", "");  
-
-	        return content.replace(prefixValue, modifiedPrefix);  
-	    }  
-
-	    return content; // Return original content if prefix not found  
+		return content; // Return original content if prefix not found
 	}
 
-	private String executeScript(Integer version, JSONObject connDetails, List<ICIPNativeJobDetails> nativeJobDetails, IICIPJobServiceUtil jobUtilConn, int index, ICIPDatasource uploadDs, String payload)
+	private String executeScript(Integer version, JSONObject connDetails, List<ICIPNativeJobDetails> nativeJobDetails,
+			IICIPJobServiceUtil jobUtilConn, int index, ICIPDatasource uploadDs, String payload)
 			throws InterruptedException, LeapException {
 		String s3path = null;
 		try {
@@ -1110,43 +1157,43 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 			logger.info("About to upload the script");
 			s3path = uploadScript(uploadDs, attributes.toString(), uploadFilePath);
 			logger.info("Script uploaded to Storage in " + s3path);
-				TrustManager[] trustAllCerts = getTrustAllCerts();
-				SSLContext sslContext = getSslContext(trustAllCerts);
-				if (sslContext != null) {
-					OkHttpClient.Builder newBuilder = new OkHttpClient.Builder();
-					newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
-					newBuilder.hostnameVerifier((hostname, session) -> true);
-					OkHttpClient client = newBuilder.build();
-					MediaType mediaType = MediaType.parse("application/json");
-					RequestBody requestBody = RequestBody.create(payload, mediaType);
-					Request requestokHttp = new Request.Builder().url(url).method("POST", requestBody).build();
-					logger.info("About to submit payload to remote");
-					Response response = client.newCall(requestokHttp).execute();
-					logger.info("Response code is :" + response.code());
-					logger.info("Response body is :" + response.body());
-					if (response.code() == 201) {
-						// fetch s3 logpath and taskId from the response
-						JSONObject responsebody = new JSONObject(response.body().string());
-						String responseData = responsebody.getString("task_id");
-						logger.info("Response:" + responseData);
-						return responseData;
-					} else {
-						throw new LeapException("Remote Execution Error for jobid" + nativeJobDetails.get(index).getId()
-								+ " Response Code " + response.code() + " RequestPayload: " + payload);
-					}
+			TrustManager[] trustAllCerts = getTrustAllCerts();
+			SSLContext sslContext = getSslContext(trustAllCerts);
+			if (sslContext != null) {
+				OkHttpClient.Builder newBuilder = new OkHttpClient.Builder();
+				newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
+				newBuilder.hostnameVerifier((hostname, session) -> true);
+				OkHttpClient client = newBuilder.build();
+				MediaType mediaType = MediaType.parse("application/json");
+				RequestBody requestBody = RequestBody.create(payload, mediaType);
+				Request requestokHttp = new Request.Builder().url(url).method("POST", requestBody).build();
+				logger.info("About to submit payload to remote");
+				Response response = client.newCall(requestokHttp).execute();
+				logger.info("Response code is :" + response.code());
+				logger.info("Response body is :" + response.body());
+				if (response.code() == 201) {
+					// fetch s3 logpath and taskId from the response
+					JSONObject responsebody = new JSONObject(response.body().string());
+					String responseData = responsebody.getString("task_id");
+					logger.info("Response:" + responseData);
+					return responseData;
 				} else {
-					throw new LeapException("SSLContext is null, could not create a secure connection.");
+					throw new LeapException("Remote Execution Error for jobid" + nativeJobDetails.get(index).getId()
+							+ " Response Code " + response.code() + " RequestPayload: " + payload);
 				}
+			} else {
+				throw new LeapException("SSLContext is null, could not create a secure connection.");
+			}
 		} catch (Exception e) {
 			throw new LeapException("Error in executeScript:" + e.getMessage() + "InputArtifacts Path: " + s3path
 					+ "Payload Id is:" + payload);
 		}
 	}
 
-	private String getPayloadForScriptExecution(Integer version, JSONObject connDetails, List<ICIPNativeJobDetails> nativeJobDetails,
-								 IICIPJobServiceUtil jobUtilConn, ICIPDatasource uploadDs, String runCmd, RemotePipelineConfig pipelinConfig,
-								 int index, JsonObject env, Boolean isEvent,JSONObject usedSecrets)
-			throws LeapException {
+	private String getPayloadForScriptExecution(Integer version, JSONObject connDetails,
+			List<ICIPNativeJobDetails> nativeJobDetails, IICIPJobServiceUtil jobUtilConn, ICIPDatasource uploadDs,
+			String runCmd, RemotePipelineConfig pipelinConfig, int index, JsonObject env, Boolean isEvent,
+			JSONObject usedSecrets) throws LeapException {
 		String bodyString = null;
 		String s3path = null;
 		try {
@@ -1166,7 +1213,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 			s3path = uploadScript(uploadDs, attributes.toString(), uploadFilePath);
 			logger.info("Script uploaded to Storage in " + s3path);
 			RemoteBody remoteBody = new RemoteBody();
-            String endPointUrl = uploadDSConnDetails.optString("url");
+			String endPointUrl = uploadDSConnDetails.optString("url");
 			Credentials creds = new Credentials();
 			creds.setEndpoint(endPointUrl);
 			creds.setAccess_key(uploadDSConnDetails.optString("accessKey"));
@@ -1209,16 +1256,15 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 				JSONObject env1 = new JSONObject();
 				if (paramswithEnv.has("environment")) {
 					JSONArray ar = paramswithEnv.getJSONArray("environment");
-					for(int i=0;i<ar.length();i++) {
+					for (int i = 0; i < ar.length(); i++) {
 						JSONObject a = ar.getJSONObject(i);
-						env1.put(a.getString("name"),a.getString("value"));
+						env1.put(a.getString("name"), a.getString("value"));
 					}
 					Iterator<String> keys = usedSecrets.keys();
 					while (keys.hasNext()) {
 						String key = keys.next();
-						env1.put(key,usedSecrets.getString(key));
+						env1.put(key, usedSecrets.getString(key));
 					}
-
 
 					remoteBody.setEnvironment(env1);
 				}
@@ -1226,15 +1272,15 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 				if (env != null) {
 					JSONObject environ = new JSONObject();
 					ArrayList<String> list = new ArrayList<String>(env.keySet());
-					for(int i=0;i<list.size();i++) {
-						if(!env1.has(list.get(i)))
-							env1.put(list.get(i),env.get(list.get(i)).getAsString());
+					for (int i = 0; i < list.size(); i++) {
+						if (!env1.has(list.get(i)))
+							env1.put(list.get(i), env.get(list.get(i)).getAsString());
 					}
 					Iterator<String> keys = usedSecrets.keys();
 					while (keys.hasNext()) {
 						String key = keys.next();
-						if(!env1.has(key))
-							env1.put(key,usedSecrets.getString(key));
+						if (!env1.has(key))
+							env1.put(key, usedSecrets.getString(key));
 					}
 					remoteBody.setEnvironment(env1);
 					logger.info("environment is:" + remoteBody.getEnvironment());
@@ -1245,8 +1291,8 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 				if (env != null) {
 					JSONObject environ = new JSONObject();
 					ArrayList<String> list = new ArrayList<String>(env.keySet());
-					for(int i=0;i<list.size();i++) {
-						environ.put(list.get(i),env.get(list.get(i)).getAsString());
+					for (int i = 0; i < list.size(); i++) {
+						environ.put(list.get(i), env.get(list.get(i)).getAsString());
 					}
 					remoteBody.setEnvironment(environ);
 					logger.info("environment is:" + remoteBody.getEnvironment());
@@ -1266,10 +1312,11 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 			logger.info("Payload is:" + bodyString);
 			return bodyString;
 		} catch (Exception e) {
-			throw new LeapException("Error in getPayloadForScriptExecution:" + e.getMessage() + "InputArtifacts Path: " + s3path
-					+ "Payload Id is:" + bodyString);
+			throw new LeapException("Error in getPayloadForScriptExecution:" + e.getMessage() + "InputArtifacts Path: "
+					+ s3path + "Payload Id is:" + bodyString);
 		}
 	}
+
 	private boolean checkTaskExists(List<ICIPNativeJobDetails> nativeJobDetails, JSONObject connDetails,
 			ICIPDatasource uploadDs, Integer version, int index) {
 		logger.info("Inside checkTaskExists");
@@ -1328,8 +1375,8 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 	 */
 	@SuppressWarnings("deprecation")
 	@Override
-	public String getNativeJobCommand(ICIPNativeJobDetails jobDetails) 
-	 throws LeapException, InvalidRemoteException, TransportException, GitAPIException {
+	public String getNativeJobCommand(ICIPNativeJobDetails jobDetails)
+			throws LeapException, InvalidRemoteException, TransportException, GitAPIException {
 		String cname = jobDetails.getCname();
 		String org = jobDetails.getOrg();
 		String params = jobDetails.getParams();
@@ -1813,54 +1860,54 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 //		return trustAllCerts;
 //	}
 	private TrustManager[] getTrustAllCerts() {
-	    if ("true".equalsIgnoreCase(certificateCheck)) {
-	        try {
-	            // Load the default trust store
-	            TrustManagerFactory trustManagerFactory = TrustManagerFactory
-	                    .getInstance(TrustManagerFactory.getDefaultAlgorithm());
-	            trustManagerFactory.init((KeyStore) null);
-	            // Get the trust managers from the factory
-	            TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+		if ("true".equalsIgnoreCase(certificateCheck)) {
+			try {
+				// Load the default trust store
+				TrustManagerFactory trustManagerFactory = TrustManagerFactory
+						.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+				trustManagerFactory.init((KeyStore) null);
+				// Get the trust managers from the factory
+				TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
 
-	            // Ensure we have at least one X509TrustManager
-	            for (TrustManager trustManager : trustManagers) {
-	                if (trustManager instanceof X509TrustManager) {
-	                    return new TrustManager[] { (X509TrustManager) trustManager };
-	                }
-	            }
-	        } catch (KeyStoreException e) {
-	            logger.info(e.getMessage());
-	        } catch (NoSuchAlgorithmException e) {
-	            logger.info(e.getMessage());
-	        }
-	        throw new IllegalStateException("No X509TrustManager found. Please install the certificate in keystore");
-	    } else {
-	        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-	        	@Override
-                public void checkClientTrusted(X509Certificate[] chain, String authType) {
-                    // Log the certificate chain and authType
-                    logger.info("checkClientTrusted called with authType: {}", authType);
-                    for (X509Certificate cert : chain) {
-                        logger.info("Client certificate: {}", cert.getSubjectDN());
-                    }
-                }
+				// Ensure we have at least one X509TrustManager
+				for (TrustManager trustManager : trustManagers) {
+					if (trustManager instanceof X509TrustManager) {
+						return new TrustManager[] { (X509TrustManager) trustManager };
+					}
+				}
+			} catch (KeyStoreException e) {
+				logger.info(e.getMessage());
+			} catch (NoSuchAlgorithmException e) {
+				logger.info(e.getMessage());
+			}
+			throw new IllegalStateException("No X509TrustManager found. Please install the certificate in keystore");
+		} else {
+			TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+				@Override
+				public void checkClientTrusted(X509Certificate[] chain, String authType) {
+					// Log the certificate chain and authType
+					logger.info("checkClientTrusted called with authType: {}", authType);
+					for (X509Certificate cert : chain) {
+						logger.info("Client certificate: {}", cert.getSubjectDN());
+					}
+				}
 
-                @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType) {
-                    // Log the certificate chain and authType
-                    logger.info("checkServerTrusted called with authType: {}", authType);
-                    for (X509Certificate cert : chain) {
-                        logger.info("Server certificate: {}", cert.getSubjectDN());
-                    }
-                }
+				@Override
+				public void checkServerTrusted(X509Certificate[] chain, String authType) {
+					// Log the certificate chain and authType
+					logger.info("checkServerTrusted called with authType: {}", authType);
+					for (X509Certificate cert : chain) {
+						logger.info("Server certificate: {}", cert.getSubjectDN());
+					}
+				}
 
-	            @Override
-	            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-	                return new java.security.cert.X509Certificate[] {};
-	            }
-	        } };
-	        return trustAllCerts;
-	    }
+				@Override
+				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+					return new java.security.cert.X509Certificate[] {};
+				}
+			} };
+			return trustAllCerts;
+		}
 	}
 
 	private SSLContext getSslContext(TrustManager[] trustAllCerts) {
@@ -1878,26 +1925,26 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 	private HashMap<String, String> resolveSecrets(JSONArray pipeline_attributes, String Org) {
 		// return null;
 
- 		HashMap<String, String> paramswithsecrets = new HashMap<>();
+		HashMap<String, String> paramswithsecrets = new HashMap<>();
 
 		JSONArray pipelineAttributes = pipeline_attributes;
 		pipelineAttributes.forEach(x -> {
 			JSONObject obj = new JSONObject(x.toString());
-			if(obj.has("name") && obj.getString("name").trim() != null && obj.getString("name").trim()!= "") {
-			if (obj.getString("name").equals("usedSecrets")) {
-				String key = obj.getString("value");
-				Secret secret = new Secret();
-				secret.setOrganization(Org);
-				secret.setKey(key);
-				try {
-					ResolvedSecret resolvedSecret = smService.resolveSecret(secret);
-					if (resolvedSecret.getIsResolved()) {
+			if (obj.has("name") && obj.getString("name").trim() != null && obj.getString("name").trim() != "") {
+				if (obj.getString("name").equals("usedSecrets")) {
+					String key = obj.getString("value");
+					Secret secret = new Secret();
+					secret.setOrganization(Org);
+					secret.setKey(key);
+					try {
+						ResolvedSecret resolvedSecret = smService.resolveSecret(secret);
+						if (resolvedSecret.getIsResolved()) {
+						}
+						paramswithsecrets.put(key, resolvedSecret.getResolvedSecret());
+					} catch (KeyException e) {
+						// throw new KeyException("Secret Key:"+key +"not found");
 					}
-					paramswithsecrets.put(key, resolvedSecret.getResolvedSecret());
-				} catch (KeyException e) {
-					// throw new KeyException("Secret Key:"+key +"not found");
 				}
-			}
 			}
 
 		});
