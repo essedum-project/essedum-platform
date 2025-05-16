@@ -349,7 +349,7 @@ public class DashConstantResource {
 	 * @return the value of allowed extension key
 	 */
 	@GetMapping("/get-extension-key")
-	public ResponseEntity<?> getExtensionKey(@Parameter @RequestParam(required = false, name = "projectId") Integer projectId,@RequestParam(required = false, name = "key") String key) {
+	public ResponseEntity<?> getExtensionKey(@Parameter @RequestParam(required = false, name = "projectId") Integer projectId,@Parameter @RequestParam(required = false, name = "key") String key) {
 		try {
 			log.info("getExtensionKey : REST request to get extension key for project id : {}", projectId);
 			log.debug("REST request to get extension key");
