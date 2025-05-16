@@ -26,6 +26,7 @@ import { Location } from '@angular/common';
 import { LeapTelemetryService } from 'com-lib-util';
 import { LedsModalService } from 'leds-lib';
 import { HttpParams } from '@angular/common/http';
+import { DynamicSecretsGrid } from '../pipeline.description/pipeline.description.component';
 
 interface Elementt {
   name: string;
@@ -57,6 +58,7 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     filetype: 'Python3',
     files: [],
     arguments: [],
+    usedSecrets:[],
     dataset: [],
   };
   choosenFile = '';
@@ -91,6 +93,9 @@ export class NativeScriptComponent implements OnInit, OnChanges {
   organisation: any;
   initiativeView: boolean;
   inGroupedJob: boolean;
+  secrets: any;
+  dynamicSecretsArray: Array<DynamicSecretsGrid> = [];
+  secretsModified = false
   constructor(
     @Inject('envi') private baseUrl: string,
     private telemetryService: LeapTelemetryService,
@@ -198,10 +203,19 @@ export class NativeScriptComponent implements OnInit, OnChanges {
         if (this.data.arguments) {
           this.treeData = this.data.arguments;
         }
+        if (this.data.usedSecrets) {
+          this.dynamicSecretsArray = this.data.usedSecrets;
+        }
+        
+
         if (this.data.dataset) {
           this.dataSet.data = this.data.dataset;
         }
         if (this.data.arguments) {
+          this.refreshTree();
+        }
+
+        if (this.data.usedSecrets) {
           this.refreshTree();
         }
         if (this.data.files) {
@@ -509,6 +523,7 @@ export class NativeScriptComponent implements OnInit, OnChanges {
           this.streamItem.name = pname;
           this.data.files[0] = response;
           this.data.arguments = this.treeData;
+          this.data.usedSecrets=this.dynamicSecretsArray;
           this.streamItem.json_content = JSON.stringify({
             elements: [{ attributes: this.data }],
           });
@@ -725,5 +740,13 @@ export class NativeScriptComponent implements OnInit, OnChanges {
   openModal(content: any): void {
     this.modalService.openModal(content, 'standard');
     this.getRelatedComponent();
+  }
+
+  onSecretsDataChange($event) {
+    this.secrets = $event;
+    this.dynamicSecretsArray = $event;
+    this.secretsModified = true;
+    console.log('On Secret Data Change : ', this.dynamicSecretsArray)
+
   }
 }
