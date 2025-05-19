@@ -335,6 +335,7 @@ export class DatasourceConfigComponent implements OnInit {
         this.data.description = this.matData.description;
       } else {
         this.data.alias = this.alias;
+        this.data.description=this.description;
       }
       this.data.category = this.sourceType?.category;
       this.data.type = this.sourceType?.type;

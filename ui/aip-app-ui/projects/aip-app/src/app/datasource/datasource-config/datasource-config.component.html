@@ -112,7 +112,7 @@
                                                             <mat-hint>Select Capability</mat-hint>
                                                         </mat-form-field>
 
-                                                    <mat-form-field appearance="outline" style="width: 100%;">
+                                                    <mat-form-field appearance="outline" style="width: 100%;" *ngIf="!edit">
                                                             <mat-label>Capability</mat-label>
                                                             <mat-select [(value)]="capability" (selectionChange)="onCapbilityTypeChange($event)" multiple>
                                                                 <mat-option *ngFor="let option of capabilityOptions" [value]="option.value">
