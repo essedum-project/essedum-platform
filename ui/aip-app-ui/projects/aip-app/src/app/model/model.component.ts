@@ -340,7 +340,7 @@ export class ModelComponent implements OnInit, OnChanges {
     });
   }
   redirection(card: any, type: string) {
-    // this.telemetry.addTelemetryEvent(card.alias+ type);
+    // //this.telemetry.addTelemetryEvent(card.alias+ type);
     this.telemetryService.interact(
       'click',
       'ModelComponent',
@@ -362,7 +362,7 @@ export class ModelComponent implements OnInit, OnChanges {
       },
       relativeTo: this.route,
     });
-    this.telemetry.addTelemetryEvent(card.alias+ type);
+    //this.telemetry.addTelemetryEvent(card.alias+ type);
   }
   // openedit(content: any): void {
   //   this.modalService.openModal(content, 'standard');
@@ -449,7 +449,7 @@ export class ModelComponent implements OnInit, OnChanges {
                 'Done!  Model Un-deployed Successfully'
               );
               this.refresh();
-              this.telemetry.addTelemetryEvent(card.alias + ' un-deployed');
+              //this.telemetry.addTelemetryEvent(card.alias + ' un-deployed');
             },
             (error) => {
               this.service.messageService(error);
@@ -470,7 +470,7 @@ export class ModelComponent implements OnInit, OnChanges {
                 res,
                 'Done!  Model deleted Successfully'
               );
-              this.telemetry.addTelemetryEvent(card.alias+' Deleted');
+              //this.telemetry.addTelemetryEvent(card.alias+' Deleted');
               this.refresh();
             },
             (error) => {

@@ -510,13 +510,13 @@ export class DatasetComponent implements OnInit, OnChanges {
     }
   }
   desc(card: any) {
-    // this.telemetry.addTelemetryEvent(card.alias+ ' Dataset viewed ')
+    // //this.telemetry.addTelemetryEvent(card.alias+ ' Dataset viewed ')
     if (this.type)
       this.router.navigate(["../view/" + card.name], { state: { card }, relativeTo: this.route });
     else{
       this.router.navigate(["./view/" + card.name], { state: { card }, relativeTo: this.route });
     }
-    this.telemetry.addTelemetryEvent(card.alias+ ' Dataset viewed ')
+    //this.telemetry.addTelemetryEvent(card.alias+ ' Dataset viewed ')
   }
 
   redirect() {
@@ -707,7 +707,7 @@ export class DatasetComponent implements OnInit, OnChanges {
       if (result === "delete") {
         this.datasetService.deleteDatasets(name).subscribe((res) => {
           this.service.messageNotificaionService('success', "Dataset Deleted Successfully");
-          this.telemetry.addTelemetryEvent(name +" Deleted ");
+          //this.telemetry.addTelemetryEvent(name +" Deleted ");
           if(this.selectedAdapterType.length > 0){
             this.deleteFilteredTag = true;
             this.deleteFilteredDataset = name;
@@ -770,7 +770,7 @@ export class DatasetComponent implements OnInit, OnChanges {
   }
 
   navigate(content: any) {
-    this.telemetry.addTelemetryEvent('copied successfully');
+    //this.telemetry.addTelemetryEvent('copied successfully');
     this.copyDataset = true;
     this.modalService.openModal(content, 'standard');
   }

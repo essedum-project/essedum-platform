@@ -319,7 +319,7 @@ export class DatasourceConfigComponent implements OnInit {
         console.log('git', res);
         this.Services.message('Connection created successfully ');
         console.log('telemetry started');
-        // this.telemetry.addTelemetryEvent(this.data?.alias+ ' connection created successfully');
+        // //this.telemetry.addTelemetryEvent(this.data?.alias+ ' connection created successfully');
         if (this.router.url.includes('initiative')) {
           this.responseLink.emit(res);
           this.raiService.changeModalData(true);
@@ -374,12 +374,12 @@ export class DatasourceConfigComponent implements OnInit {
         this.Services.saveDatasource(this.data).subscribe((res) => {
           if (this.data.interfacetype === "adapter") {
             this.Services.message('Adapter saved successfully');
-            this.telemetry.addTelemetryEvent(this.data?.alias + ' Adapter saved successfully');
+            //this.telemetry.addTelemetryEvent(this.data?.alias + ' Adapter saved successfully');
 
           }
           else {
             this.Services.message('Connection saved successfully ');
-            // this.telemetry.addTelemetryEvent(this.data?.alias + ' Connection saved successfully');
+            // //this.telemetry.addTelemetryEvent(this.data?.alias + ' Connection saved successfully');
 
           }
           // this.router.navigate(['../'], { relativeTo: this.route });
@@ -415,10 +415,10 @@ export class DatasourceConfigComponent implements OnInit {
 
           if (this.data.interfacetype === "adapter") {
             this.Services.message('Adapter created successfully');
-            this.telemetry.addTelemetryEvent(this.data?.alias + ' Adapter created successfully');
+            //this.telemetry.addTelemetryEvent(this.data?.alias + ' Adapter created successfully');
           } else {
             this.Services.message('Connection created successfully');
-            // this.telemetry.addTelemetryEvent(this.data?.alias + ' Connection created successfully');
+            // //this.telemetry.addTelemetryEvent(this.data?.alias + ' Connection created successfully');
           }
           if (this.router.url.includes('initiative')) {
             this.responseLink.emit(res);
@@ -438,7 +438,7 @@ export class DatasourceConfigComponent implements OnInit {
           });
       }
     }
-    this.telemetry.addTelemetryEvent(this.data?.alias + ' connection created successfully');
+    //this.telemetry.addTelemetryEvent(this.data?.alias + ' connection created successfully');
   }
   showData(event) {
     this.data = event;

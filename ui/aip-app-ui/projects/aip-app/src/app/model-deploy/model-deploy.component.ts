@@ -148,7 +148,7 @@ export class ModelDeployComponent {
         .subscribe(
           (resp) => {
             this.service.messageService(resp, 'Model deployment initiated.');
-            this.telemetry.addTelemetryEvent('Model Deployed');
+            //this.telemetry.addTelemetryEvent('Model Deployed');
             if (resp.body.status == 'SUCCESS') {
               this.createLinked(this.endpointId);
               this.modalService.dismissAll('close the modal');

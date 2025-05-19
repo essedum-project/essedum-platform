@@ -112,5 +112,59 @@
             insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"AgenticSystems","altText":"","icon":"sitemap","url":"./aip/ai-workers","children":[{"label":"Agents","altText":"","icon":"","url":"./aip/ai-workers","children":[],"_id":2},{"label":"Tools","altText":"","icon":"","url":"./aip/worker-tools","children":[],"_id":3}],"horizontal":true}','2',NULL);
         </sql>
     </changeSet>-->
+    
+        <changeSet id="3v2-usm-20252402-2" author="Leap">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_constant WHERE item_value LIKE '%Datasets%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'IT Portfolio Manager Side';
+            </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+            insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Datasets","icon":"database","children":[{"label":"Connections","icon":"","url":"./aip/connections","children":[],"_id":2},{"label":"Datasets","icon":"","url":"./aip/datasets","children":[],"_id":3},{"label":"Schemas","altText":"","icon":"","url":"./aip/schemas","children":[],"_id":4}],"horizontal":true}','2',NULL);
+        </sql>
+    </changeSet>
+    <changeSet id="3v2-usm-20252402-3" author="Leap">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_constant WHERE item_value LIKE '%Models%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'IT Portfolio Manager Side';
+            </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+            insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Models","icon":"cubes","children":[{"label":"Models","altText":null,"icon":"","url":"./aip/models","children":[],"_id":2},{"label":"Endpoints","altText":null,"icon":"","url":"./aip/endpoints","children":[],"_id":3}],"horizontal":true}','2',NULL);
+        </sql>
+    </changeSet>
+    
+     <changeSet id="3v2-usm-20252402-4" author="Leap">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_constant WHERE item_value LIKE '%Adapters%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'IT Portfolio Manager Side';
+            </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+            insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Adapters","icon":"wrench","children":[{"label":"Specs","altText":null,"icon":"","url":"./aip/specs","children":[],"_id":2},{"label":"Implementations","altText":null,"icon":"","url":"./aip/implementations","children":[],"_id":3},{"label":"Instances","altText":"","icon":"","url":"./aip/instances","children":[],"_id":4}],"horizontal":true}','2',NULL);
+        </sql>
+    </changeSet>
+    
+        <changeSet id="3v2-usm-20252402-5" author="Leap">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_constant WHERE item_value LIKE '%Pipelines%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'IT Portfolio Manager Side';
+            </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+            insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Pipelines","altText":null,"icon":"map-signs","url":"./aip/pipelines","children":[]}','2',NULL);
+        </sql>
+    </changeSet>
+    
+        <changeSet id="3v2-usm-20252402-6" author="Leap">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_constant WHERE item_value LIKE '%Apps%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'IT Portfolio Manager Side';
+            </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+            insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Apps","altText":null,"icon":"th","url":"./aip/app-list","children":[]}','2',NULL);
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>

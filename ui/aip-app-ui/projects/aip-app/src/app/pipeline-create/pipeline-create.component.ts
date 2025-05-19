@@ -206,13 +206,13 @@ export class PipelineCreateComponent implements OnInit {
 
           }
           this.Services.message("Created Sucessfully.", "success");
-          // this.telemetry.addTelemetryEvent(data?.alias+' pipeline created');
+          // //this.telemetry.addTelemetryEvent(data?.alias+' pipeline created');
           if (this.data.edit || this.data.copy) {
             this.dialogRef.close(data);
           } else {
             this.closeModal();
           }
-          this.telemetry.addTelemetryEvent(data?.alias+' pipeline created');
+          //this.telemetry.addTelemetryEvent(data?.alias+' pipeline created');
         },
           error => {
             this.Services.messageService(error);
@@ -239,7 +239,7 @@ export class PipelineCreateComponent implements OnInit {
         this.Services.getAllPlugins(sessionStorage.getItem('organization')).subscribe(res => {
           this.plugins = res.filter(r => r.type != null);
           this.plugins.push({ type: "NativeScript" })
-          this.plugins.push({ type: "Binary" })
+          //this.plugins.push({ type: "Binary" })
           // this.plugins.push({ type: "R" })
           // this.Services.messageService(res,"Fetched Sucessfully.");
           this.plugins.forEach((opt) => {
@@ -256,7 +256,7 @@ export class PipelineCreateComponent implements OnInit {
         this.Services.getAllPluginsByOrg(sessionStorage.getItem('organization')).subscribe(res => {
           this.plugins = res.filter(r => r.type != null);
           this.plugins.push({ type: "NativeScript" })
-          this.plugins.push({ type: "Binary" })
+          //this.plugins.push({ type: "Binary" })
           // this.plugins.push({ type: "R" })
           // this.Services.messageService(res,"Fetched Sucessfully.");
           this.plugins.forEach((opt) => {
@@ -361,7 +361,7 @@ export class PipelineCreateComponent implements OnInit {
 
         this.Services.update(editCanvas).subscribe((response) => {
           this.Services.message('Updated Successfully', 'success');
-          this.telemetry.addTelemetryEvent(this.alias+' pipeline updated');
+          //this.telemetry.addTelemetryEvent(this.alias+' pipeline updated');
           // this.service.addGroupModelEntity(this.data.canvasData.name, temp).subscribe();
           this.dialogRef.close(response);
         },

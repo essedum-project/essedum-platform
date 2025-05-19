@@ -216,15 +216,15 @@ export class CreateAppComponent implements OnInit, OnDestroy {
           this.app.mfeAppName = this.appMfe
           this.Services.saveApp(this.app).subscribe(app => {
             this.responseLink.emit(app);
-            // this.telemetry.addTelemetryEvent(this.alias + ' App created');
+            // //this.telemetry.addTelemetryEvent(this.alias + ' App created');
           })
           this.Services.message('Created Sucessfully.', "success");
-          // this.telemetry.addTelemetryEvent(this.alias + ' App created');
+          // //this.telemetry.addTelemetryEvent(this.alias + ' App created');
           this.Services.addGroupModelEntity(data.name, temp).subscribe();
           this.modalService.dismissAll();
           if(this.appListComponent)
           this.appListComponent.ngOnInit();
-          this.telemetry.addTelemetryEvent(this.alias + ' App created');
+          //this.telemetry.addTelemetryEvent(this.alias + ' App created');
         },
           error => this.Services.messageService(error)
         );
@@ -388,7 +388,7 @@ export class CreateAppComponent implements OnInit, OnDestroy {
           this.responseLink.emit(resp);
           this.modalService.dismissAll();
           this.Services.message('Updated Sucessfully.', "success");
-          // this.telemetry.addTelemetryEvent(this.editCanvas['alias'] + ' App updated')
+          // //this.telemetry.addTelemetryEvent(this.editCanvas['alias'] + ' App updated')
           if(this.appListComponent)
           this.appListComponent.ngOnInit();
         });

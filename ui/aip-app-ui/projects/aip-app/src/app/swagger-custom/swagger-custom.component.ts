@@ -628,7 +628,7 @@ export class SwaggerCustomComponent implements OnInit {
   }
 
   execute(spec, template?) {
-    this.telemetry.addTelemetryEvent("Execute Adapter Method");
+    //this.telemetry.addTelemetryEvent("Execute Adapter Method");
     this.cURL = null;
     this.specPath = spec.path;
     this.response = { "Status": "Executing" };

@@ -328,7 +328,7 @@ export class InstanceComponent implements OnInit, OnChanges{
    
   }
   desc(card:any) {
-    // this.telemetry.addTelemetryEvent(card.alias+' viewed');
+    // //this.telemetry.addTelemetryEvent(card.alias+' viewed');
     this.router.navigate(["../instances/"+card.name], { queryParams: {
       page: this.pageNumber,
       search: this.filt,
@@ -338,7 +338,7 @@ export class InstanceComponent implements OnInit, OnChanges{
       roleId:  JSON.parse(sessionStorage.getItem('role')).id
     },
     queryParamsHandling: 'merge', relativeTo: this.route });
-    this.telemetry.addTelemetryEvent(card.alias+' viewed');
+    //this.telemetry.addTelemetryEvent(card.alias+' viewed');
   }
   redirect(card: any, type: string) {
     this.router.navigate([
@@ -521,7 +521,7 @@ export class InstanceComponent implements OnInit, OnChanges{
           if (res) {
             if (res.message == "success"){
               this.adapterServices.messageNotificaionService('success', "Done!  Instance Deleted Successfully");
-               this.telemetry.addTelemetryEvent(instanceName +" Deleted");
+               //this.telemetry.addTelemetryEvent(instanceName +" Deleted");
             }
             else
               this.adapterServices.messageNotificaionService('warning', "Instance Can't be Deleted");
@@ -540,7 +540,7 @@ export class InstanceComponent implements OnInit, OnChanges{
       return {"color":"black"}
   }
   startChain(data) {
-    this.telemetry.addTelemetryEvent(data+" started");
+    //this.telemetry.addTelemetryEvent(data+" started");
     this.adapterServices.getAdapteByNameAndOrganization(data.adaptername).subscribe(resp => {
       this.chainName = resp.chainName;
       this.service.getStreamingServicesByName(this.chainName, resp.organization).subscribe(
@@ -627,7 +627,7 @@ export class InstanceComponent implements OnInit, OnChanges{
     this.service.stopPipeline(data.jobid).subscribe(
       response => {
         this.service.message('Stop App Triggered!', 'success');
-        this.telemetry.addTelemetryEvent(data.alias+" Stopped");
+        //this.telemetry.addTelemetryEvent(data.alias+" Stopped");
         data.status= "CANCELLED";
         var createdon = data.createdon;
         var lastmodifiedon = data.lastmodifiedon;

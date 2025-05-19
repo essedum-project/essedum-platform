@@ -256,9 +256,9 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
     this.pageSize = this.pageSize || 9;
   }
   desc(card: any) {
-    // this.telemetry.addTelemetryEvent(card.alias+" viewed");
+    // //this.telemetry.addTelemetryEvent(card.alias+" viewed");
     this.router.navigate(["../specs/"+card.domainname], { relativeTo: this.route });
-    this.telemetry.addTelemetryEvent(card.alias+" viewed");
+    //this.telemetry.addTelemetryEvent(card.alias+" viewed");
   }
   redirect() {
     this.selectedInstance = this.selectedCard.name;
@@ -379,7 +379,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
             if (resp.body.message == "success") {
               this.adapterServices.messageNotificaionService('success', "Done!  Spec Deleted Successfully");
               this.refresh();
-              this.telemetry.addTelemetryEvent(domainname+ ' Deleted');
+              //this.telemetry.addTelemetryEvent(domainname+ ' Deleted');
             }
             else
               this.adapterServices.messageNotificaionService('warning', "Spec Can't be Deleted, It's being used by adapter(s)");

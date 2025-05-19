@@ -424,7 +424,7 @@ export class PipelineComponent implements OnInit, OnChanges {
           this.service.deletePipeline(cid).subscribe((res) => {
             this.service.message('Pipeline deleted!', 'success');
             this.refreshComplete();
-            this.telemetry.addTelemetryEvent('pipeline deleted');
+            //this.telemetry.addTelemetryEvent('pipeline deleted');
           });
         }
       });
@@ -452,7 +452,7 @@ export class PipelineComponent implements OnInit, OnChanges {
     );
   }
   redirection(card: any) {
-    // this.telemetry.addTelemetryEvent(card.alias + 'viewed successfully')
+    // //this.telemetry.addTelemetryEvent(card.alias + 'viewed successfully')
     this.telemetryService.interact(
       'click',
       'PipelineComponent',
@@ -487,7 +487,7 @@ export class PipelineComponent implements OnInit, OnChanges {
         );
       }
     });
-    this.telemetry.addTelemetryEvent(card.alias + 'viewed successfully')
+    //this.telemetry.addTelemetryEvent(card.alias + 'viewed successfully')
   }
   toggleExpand() {
     this.isExpanded = !this.isExpanded;

@@ -726,7 +726,7 @@ export class MethodCreateEditComponent {
         this.adapterServices.createDataset(this.dataset).subscribe((response) => {
           this.service.messageService(response, "Done!  Method Added Successfully");
           this.returnedName = response.body.name;
-          this.telemetry.addTelemetryEvent(this.returnedName + ' method created');
+          //this.telemetry.addTelemetryEvent(this.returnedName + ' method created');
           this.modifyAPISpec(this.dataset, this.returnedName, this.data.path, this.data.parameters);
         },
           error => {
@@ -738,7 +738,7 @@ export class MethodCreateEditComponent {
         console.log(this.dataset);
         this.adapterServices.saveDataset(this.dataset).subscribe((response) => {
           this.returnedName = response.name;
-          this.telemetry.addTelemetryEvent(this.returnedName + ' method edited');
+          //this.telemetry.addTelemetryEvent(this.returnedName + ' method edited');
           this.modifyAPISpec(this.dataset, this.returnedName, this.data.path, this.data.parameters);
         },
           error => {

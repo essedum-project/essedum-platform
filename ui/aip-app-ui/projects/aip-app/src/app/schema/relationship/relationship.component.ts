@@ -180,7 +180,7 @@ export class RelationshipComponent implements OnInit {
 
   editRelation(model, edit) {
     // if(!edit){
-    //   this.telemetry.addTelemetryEvent(model?.alias+ ' relation viewed ')
+    //   //this.telemetry.addTelemetryEvent(model?.alias+ ' relation viewed ')
     // }
     this.create = false;
     this.edit = edit;
@@ -194,7 +194,7 @@ export class RelationshipComponent implements OnInit {
       this.fetchCSchemaColNames(res.schemaB);
     })
     if(!edit){
-      this.telemetry.addTelemetryEvent(model?.alias+ ' relation viewed ')
+      //this.telemetry.addTelemetryEvent(model?.alias+ ' relation viewed ')
     }
   }
 
@@ -276,7 +276,7 @@ export class RelationshipComponent implements OnInit {
       if (result === "delete") {
         this.relationService.deleteRelation(model.id).subscribe(res => {
           this.service.message('Deleted Sucessfully', 'success');
-          this.telemetry.addTelemetryEvent(model?.alias+' Deleted');
+          //this.telemetry.addTelemetryEvent(model?.alias+' Deleted');
           this.ngOnInit();
         }, error => {
           this.service.message(JSON.stringify(error), 'error');

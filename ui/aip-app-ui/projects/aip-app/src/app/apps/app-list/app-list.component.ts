@@ -237,7 +237,7 @@ export class AppListComponent implements OnInit {
   }
 
   openApp(app: StreamingServices, type) {
-    // this.telemetry.addTelemetryEvent(app.alias+" "+type);
+    // //this.telemetry.addTelemetryEvent(app.alias+" "+type);
     this.telemetryService.interact("click", "AppListComponent", "open", app.alias);
     this.service.getAppByName(app.name).subscribe(resp => {
       if(resp.scope == "MFE"){
@@ -267,7 +267,7 @@ export class AppListComponent implements OnInit {
 
         );
     })
-    this.telemetry.addTelemetryEvent(app.alias+" "+type);
+    //this.telemetry.addTelemetryEvent(app.alias+" "+type);
   }
   openedit(content: any): void {
     this.modalService.openModal(content, 'standard');
@@ -306,7 +306,7 @@ export class AppListComponent implements OnInit {
           this.service.deleteApp(resp.id).subscribe()
         })
         this.service.messageNotificaionService('success', "Deleted Successfully");
-        this.telemetry.addTelemetryEvent('App Deleted');
+        //this.telemetry.addTelemetryEvent('App Deleted');
       }
     });
   }

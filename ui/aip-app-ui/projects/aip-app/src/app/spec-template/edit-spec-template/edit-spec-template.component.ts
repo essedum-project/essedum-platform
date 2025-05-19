@@ -68,7 +68,7 @@ editSpecTemplate(){
   this.data.capability=JSON.stringify(this.data.capability);
   this.service.updateApiSpecTemplate(this.data).subscribe((resp)=>{
     this.service.messageService(resp, "Spec Updated Successfully");
-    this.telemetry.addTelemetryEvent('spec updated');
+    //this.telemetry.addTelemetryEvent('spec updated');
   });
   this.router.navigate(["../../"], { relativeTo: this.route });
 
