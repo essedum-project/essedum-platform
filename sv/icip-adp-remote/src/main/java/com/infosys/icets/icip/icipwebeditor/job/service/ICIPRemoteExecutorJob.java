@@ -493,20 +493,26 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 							JSONArray elements = null;
 							JSONObject getAttributes = null;
 							JSONObject attributes = null;
+							JSONObject secJ = null;
 							// pipelineEnvsArray =
 							// dataObj.getJSONObject("input_string").getJSONArray("environment");
-							elements = dataObj.getJSONObject("input_string").getJSONArray("elements");
-							getAttributes = elements.getJSONObject(0);
-							attributes = getAttributes.getJSONObject("attributes");
-							pipelineArgs = attributes.getJSONArray("usedSecrets");
-							secrets = resolveSecrets(pipelineArgs, org);
-							JSONObject secJ = new JSONObject(secrets);
+							try {
+								elements = dataObj.getJSONObject("input_string").getJSONArray("elements");
+								getAttributes = elements.getJSONObject(0);
+								attributes = getAttributes.getJSONObject("attributes");
+								pipelineArgs = attributes.getJSONArray("usedSecrets");
 
-							Iterator<String> keys = secJ.keys();
-							while (keys.hasNext()) {
-								String key = keys.next();
-								envJSONO.addProperty(key, (String) secJ.get(key));
+								secrets = resolveSecrets(pipelineArgs, org);
+								secJ = new JSONObject(secrets);
+								Iterator<String> keys = secJ.keys();
+								while (keys.hasNext()) {
+									String key = keys.next();
+									envJSONO.addProperty(key, (String) secJ.get(key));
+								}
+							} catch (JSONException ex) {
+								logger.error("Exception : {}", ex);
 							}
+
 							// pipelineEnvsArray =
 							// dataObj.getJSONObject("input_string").getJSONArray("environment");
 							if (pipelineArgs != null && !pipelineArgs.isEmpty()) {
