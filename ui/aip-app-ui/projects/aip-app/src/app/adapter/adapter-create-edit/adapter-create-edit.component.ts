@@ -123,7 +123,7 @@ export class AdapterCreateEditComponent {
       .subscribe(res => {
         this.service.messageService(res, "Done!  Implementation Created Successfully");
        this.routeBackToAdaptersAndRefresh();
-        this.telemetry.addTelemetryEvent(this.data?.name+" Implementation Created");
+        //this.telemetry.addTelemetryEvent(this.data?.name+" Implementation Created");
       }, error => { this.service.messageService(error); });
   }
 
@@ -134,7 +134,7 @@ export class AdapterCreateEditComponent {
       .subscribe(res => {
         this.service.messageService(res, "Done!  Implementation Updated Successfully");
         this.closeAdapterPopup();
-        this.telemetry.addTelemetryEvent(this.data?.name+" Implementation Updated");
+        //this.telemetry.addTelemetryEvent(this.data?.name+" Implementation Updated");
       }, error => { this.service.messageService(error); });
   }
   closeAdapterPopup() {

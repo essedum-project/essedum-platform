@@ -573,7 +573,7 @@ export class DatasetByNameComponent {
   }
 
   desc(card: any) {
-    // this.telemetry.addTelemetryEvent(card.alias + ' Viewed Successfully');
+    // //this.telemetry.addTelemetryEvent(card.alias + ' Viewed Successfully');
     if (this.type)
       this.router.navigate(["../view/" + card.name], { state: { card }, relativeTo: this.route });
     else
@@ -599,7 +599,7 @@ export class DatasetByNameComponent {
         },
         relativeTo: this.route,
       });
-    this.telemetry.addTelemetryEvent(card.alias + ' Viewed Successfully');
+    //this.telemetry.addTelemetryEvent(card.alias + ' Viewed Successfully');
   }
 
   navigateTo(card: any) {
@@ -628,7 +628,7 @@ export class DatasetByNameComponent {
           this.service.messageNotificaionService('success', "Dataset Deleted Successfully");
           this.service.deleteRatingByElement(name,'Dataset').subscribe((res) => {
             this.service.messageNotificaionService('success', "Ratings Deleted Successfully");
-            this.telemetry.addTelemetryEvent(name +' Deleted ');
+            //this.telemetry.addTelemetryEvent(name +' Deleted ');
           });
           if (this.selectedAdapterType.length > 0) {
             this.deleteFilteredTag = true;
@@ -718,7 +718,7 @@ export class DatasetByNameComponent {
   }
 
   downloadSelectedFile(card: any) {
-    // this.telemetry.addTelemetryEvent(card.alias + ' Downloaded ');
+    // //this.telemetry.addTelemetryEvent(card.alias + ' Downloaded ');
     if ((card.datasource?.type && card.datasource.type == 'MYSQL') || (card.views && card.views == 'Table View')) {
       this.downloadCSV(card);
       return;
@@ -734,7 +734,7 @@ export class DatasetByNameComponent {
         this.downloadSelectedFiles(obj, res[0], extension, card)
       })
     }
-    this.telemetry.addTelemetryEvent(card.alias + ' Downloaded ');
+    //this.telemetry.addTelemetryEvent(card.alias + ' Downloaded ');
   }
 
   downloadCSV(card) {
@@ -976,7 +976,7 @@ export class DatasetByNameComponent {
   }
 
   openDialog(retrigger, type, status, card) {
-    this.telemetry.addTelemetryEvent(card.alias+' Generate Embeddings Done');
+    //this.telemetry.addTelemetryEvent(card.alias+' Generate Embeddings Done');
     this.selectedCard = card;
     this.selectedEvent = type;
     this.status = status;

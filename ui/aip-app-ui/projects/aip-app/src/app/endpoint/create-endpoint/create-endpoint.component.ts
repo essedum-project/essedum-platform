@@ -88,7 +88,7 @@ export class CreateEndpointComponent {
     this.service.registerEndpoint(this.attributes, this.name).subscribe((resp) => {
       console.log(resp);
       this.service.messageService(resp,"Done! Endpoint is registered.");
-      this.telemetry.addTelemetryEvent('Endpoint registered');
+      //this.telemetry.addTelemetryEvent('Endpoint registered');
       if(resp.status==200){
         if(this.router.url.includes('initiative')){
           this.responseLink.emit(resp);

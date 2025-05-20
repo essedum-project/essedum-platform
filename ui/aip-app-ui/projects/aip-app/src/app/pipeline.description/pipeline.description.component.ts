@@ -561,7 +561,7 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
     try {
       const blob = new Blob([JSON.stringify(this.newCanvas, null, 2)], { type: 'application/json' });
       saveAs(blob, 'source.json');
-      this.telemetry.addTelemetryEvent(this.streamItem.alias + ' pipeline exported.');
+      //this.telemetry.addTelemetryEvent(this.streamItem.alias + ' pipeline exported.');
     }
     catch (Exception) {
       this.service.message("Some error occured", "error")
@@ -1024,7 +1024,7 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
         response => {
           if (run)
             this.service.message('Updated Successfully');
-           this.telemetry.addTelemetryEvent(this.streamItem.alias + ' pipeline updated.');
+           //this.telemetry.addTelemetryEvent(this.streamItem.alias + ' pipeline updated.');
           // this.ngOnInit();
         },
         error => {
@@ -1313,7 +1313,7 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
                   res => {
                     this.service.message('Pipeline has been Started!', 'success');
                     this.runPipeline = false
-                  //  this.telemetry.addTelemetryEvent(this.streamItem.alias + ' pipeline started running.');
+                  //  //this.telemetry.addTelemetryEvent(this.streamItem.alias + ' pipeline started running.');
 
                   },
                   error => {
@@ -1328,7 +1328,7 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
                 this.service.publishPipeline(this.streamItem).subscribe(
                   res => {
                     this.service.message('Pipeline published successfully.', 'success');
-                    this.telemetry.addTelemetryEvent(this.streamItem.alias + ' pipeline published.');
+                    //this.telemetry.addTelemetryEvent(this.streamItem.alias + ' pipeline published.');
 
                   },
                   error => {
@@ -1340,7 +1340,7 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
               else {
                 this.service.message('Script generated successfully.', 'success');
               }
-              this.telemetry.addTelemetryEvent(this.streamItem.alias + ' pipeline started running.');
+              //this.telemetry.addTelemetryEvent(this.streamItem.alias + ' pipeline started running.');
             } else if (status == 'ERROR') {
               this.service.message('Error in script generation.', 'error');
               this.runPipeline = false

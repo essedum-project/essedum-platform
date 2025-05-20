@@ -420,7 +420,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy  {
           this.datasetsService.saveDataset(editCanvas).subscribe((res) => {
             let dataset = res.body
             this.services.message('Saved! Updated successfully');
-            this.telemetry.addTelemetryEvent(dataset?.alias + ' Dataset Updated');
+            //this.telemetry.addTelemetryEvent(dataset?.alias + ' Dataset Updated');
             if (this.data.datasource.category == "REST"){
               this.services.getCoreDatasource(this.data.datasource.name,sessionStorage.getItem("organization")).subscribe(res => {
                 dataset.datasource = res
@@ -520,7 +520,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy  {
           this.testLoaderBoolean=false
           this.services.message('Tested! Connected successfully');
           this.testSuccessful = true;
-          this.telemetry.addTelemetryEvent('Dataset Tested');
+          //this.telemetry.addTelemetryEvent('Dataset Tested');
         },
           error => {
             this.services.messageService('Error!', error);
@@ -991,8 +991,8 @@ export class DatasetConfigComponent implements OnInit, OnDestroy  {
     closeModal(returnedName?){
       this.modalService.dismissAll();
       this.refreshcards.emit(true);
-      if(returnedName)
-      this.telemetry.addTelemetryEvent(returnedName + ' Dataset Created');
+      //if(returnedName)
+      //this.telemetry.addTelemetryEvent(returnedName + ' Dataset Created');
     }
   
 }

@@ -297,6 +297,7 @@ import { MenubarModule } from 'primeng/menubar';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { KeyFilterModule } from 'primeng/keyfilter';
+import { HighlightSearchPipe } from './pipes/highlight.pipe';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -467,6 +468,7 @@ const dbConfig: DBConfig = {
     TimeSeriesComponent,
    
     SecondsToTimePipe,
+    HighlightSearchPipe,
   
     MashupsComponent,
     CreateMashupComponent,

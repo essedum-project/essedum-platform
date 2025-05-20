@@ -71,7 +71,7 @@ export class ModelEditsComponent implements OnInit {
         // console.log(resp);
         this.routeBackToModelList();
         this.service.messageService(resp, 'Done! Model is updated.');
-        this.telemetry.addTelemetryEvent(' Model Updated');
+        //this.telemetry.addTelemetryEvent(' Model Updated');
       },
       (error) => {
         this.service.messageService(error);

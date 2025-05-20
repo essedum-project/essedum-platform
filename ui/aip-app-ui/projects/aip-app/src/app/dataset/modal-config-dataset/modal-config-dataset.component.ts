@@ -449,7 +449,7 @@ else{
             this.modalService.openModal(this.ingest, 'standard')
           }
           this.datasetsService.message('Saved! Created successfully');
-          // this.telemetry.addTelemetryEvent(this.data?.alias+" Dataset Created");
+          // //this.telemetry.addTelemetryEvent(this.data?.alias+" Dataset Created");
           if (this.data.datasource.category == "REST")
             this.modifyAPISpec(this.data,this.returnedName)
           // this.dialogRef.close(this.data);
@@ -469,11 +469,11 @@ else{
           if(this.router.url.includes('initiative')){
             this.raiService.changeModalData(true);
             this.closeModal();
-            this.telemetry.addTelemetryEvent(this.data?.alias+" Dataset Created");
+            //this.telemetry.addTelemetryEvent(this.data?.alias+" Dataset Created");
           }
           else{
             this._location.back();
-            this.telemetry.addTelemetryEvent(this.data?.alias+" Dataset Created");
+            //this.telemetry.addTelemetryEvent(this.data?.alias+" Dataset Created");
             }
         },
           error => {
@@ -506,7 +506,7 @@ else{
               // this.datasetsService.createDatasetApprovalForExperiment(res.id, JSON.parse(sessionStorage.getItem('user')).id, new Date(), "pending").subscribe();
             }
             this.dialogRef.close(res);
-            this.telemetry.addTelemetryEvent(this.data?.alias + ' DatasetCreated');
+            //this.telemetry.addTelemetryEvent(this.data?.alias + ' DatasetCreated');
 
           },
             error => {

@@ -117,7 +117,7 @@ export class ModelCreateComponent {
       (resp) => {
         console.log(resp);
         this.service.messageService(resp, 'Done! Model is registered.');
-        this.telemetry.addTelemetryEvent('Model registered');
+        //this.telemetry.addTelemetryEvent('Model registered');
         if (resp.status == 200) {
           if(this.router.url.includes('initiative')){
             this.responseLink.emit(resp);

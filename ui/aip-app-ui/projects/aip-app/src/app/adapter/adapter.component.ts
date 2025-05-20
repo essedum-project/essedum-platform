@@ -264,7 +264,7 @@ export class AdapterComponent implements OnInit, OnChanges{
     });
   }
   desc(card:any) {
-    // this.telemetry.addTelemetryEvent(card.alias+" Viewed");
+    // //this.telemetry.addTelemetryEvent(card.alias+" Viewed");
     this.router.navigate(["../implementations/"+card.name], { queryParams: {
       page: this.pageNumber,
       search: this.filt,
@@ -273,7 +273,7 @@ export class AdapterComponent implements OnInit, OnChanges{
       roleId:  JSON.parse(sessionStorage.getItem('role')).id
     },
     queryParamsHandling: 'merge', relativeTo: this.route });
-    this.telemetry.addTelemetryEvent(card.alias+" Viewed");
+    //this.telemetry.addTelemetryEvent(card.alias+" Viewed");
   }
   redirect() {
     this.router.navigate([
@@ -445,7 +445,7 @@ export class AdapterComponent implements OnInit, OnChanges{
             if (res.message == "success") {
               this.adapterServices.messageNotificaionService('success', "Done!  Implementation Deleted Successfully");
               this.refresh();
-              this.telemetry.addTelemetryEvent(adapterName + ' Deleted');
+              //this.telemetry.addTelemetryEvent(adapterName + ' Deleted');
             }
             else
               this.adapterServices.messageNotificaionService('warning', "Implementation Can't be Deleted, It's being used by instance(s)");

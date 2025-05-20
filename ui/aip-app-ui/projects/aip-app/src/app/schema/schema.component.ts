@@ -210,7 +210,7 @@ export class SchemaComponent implements OnInit, OnChanges {
   }
 
   details(card: any, type: any,dropDown:any) {
-    // this.telemetry.addTelemetryEvent(card.alias+" schema"+type);
+    // //this.telemetry.addTelemetryEvent(card.alias+" schema"+type);
     const navigationExtras: NavigationExtras = {
       state: {
         card: card,
@@ -220,7 +220,7 @@ export class SchemaComponent implements OnInit, OnChanges {
     };
   this.router.navigate(['./' + type],
     navigationExtras);
-  this.telemetry.addTelemetryEvent(card.alias+" schema"+type);
+  //this.telemetry.addTelemetryEvent(card.alias+" schema"+type);
   }
   createSchema(dropDown:any) {
     const navigationExtras: NavigationExtras = {
@@ -298,7 +298,7 @@ export class SchemaComponent implements OnInit, OnChanges {
             // console.log(res);
             this.getCards(this.pageNumber, this.pageSize, this.filt);
             this.service.message('Schema Deleted Successfully', 'success');
-            this.telemetry.addTelemetryEvent(card.alias+ ' Schema Deleted');
+            //this.telemetry.addTelemetryEvent(card.alias+ ' Schema Deleted');
           },
           (error) => {
             this.service.message('Error in Deleting Schema' + error, 'error');

@@ -71,7 +71,7 @@ export class EndpointEditComponent implements OnInit{
     this.service.updateEndpoint(this.data).subscribe((resp) => {
       console.log(resp);
       this.service.messageService(resp,"Done! Endpoint is updated.");
-      this.telemetry.addTelemetryEvent('Endpoint updated');
+      //this.telemetry.addTelemetryEvent('Endpoint updated');
       this.router.navigate(['../'], { relativeTo: this.route });
     },error=>{this.service.messageService(error);});
   }

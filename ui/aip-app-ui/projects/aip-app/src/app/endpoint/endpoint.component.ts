@@ -107,7 +107,7 @@ export class EndpointComponent implements OnInit, OnChanges {
     this.getCards();
   }
   redirection(card: any, type: string) {
-    // this.telemetry.addTelemetryEvent(card.alias + type);
+    // //this.telemetry.addTelemetryEvent(card.alias + type);
     this.router.navigate(['./' + type + '/' + card.name], {
       queryParams: {
         page: this.pageNumber,
@@ -123,7 +123,7 @@ export class EndpointComponent implements OnInit, OnChanges {
       },
       relativeTo: this.route,
     });
-    this.telemetry.addTelemetryEvent(card.alias + type);
+    //this.telemetry.addTelemetryEvent(card.alias + type);
   }
   redirectionedit(card: any, type: string) {
     this.router.navigate(['./' + type], {
@@ -437,7 +437,7 @@ export class EndpointComponent implements OnInit, OnChanges {
               'Done!  Endpoint Deleted Successfully'
             );
             this.refresh();
-            this.telemetry.addTelemetryEvent(card.alias + " Deleted");
+            //this.telemetry.addTelemetryEvent(card.alias + " Deleted");
           },
           (error) => {
             this.service.messageService(error);

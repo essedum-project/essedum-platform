@@ -131,7 +131,7 @@ export class InstanceCreateEditComponent implements OnInit {
         this.startChain();
       }
         this.routeBackToAdapters();
-        this.telemetry.addTelemetryEvent(this.data.name+' Instance Created');
+        //this.telemetry.addTelemetryEvent(this.data.name+' Instance Created');
       }, error => { this.service.messageService(error); });
   }
 
@@ -142,7 +142,7 @@ export class InstanceCreateEditComponent implements OnInit {
       .subscribe(res => {
         this.service.messageService(res, "Instance Updated Successfully");
         this.closeAdapterPopup();
-        this.telemetry.addTelemetryEvent(this.data.name+' Instance Updated');
+        //this.telemetry.addTelemetryEvent(this.data.name+' Instance Updated');
       }, error => { this.service.messageService(error); });
   }
   closeAdapterPopup() {

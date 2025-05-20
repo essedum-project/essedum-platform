@@ -317,12 +317,12 @@ export class DatasourceComponent implements OnInit, OnChanges {
   }
 
   viewConnection(name) {
-    // this.telemetry.addTelemetryEvent('connection viewed');
+    // //this.telemetry.addTelemetryEvent('connection viewed');
     this.view = true;
     this.router.navigate(['./view/' + name, this.view], {
       relativeTo: this.route,
     });
-    this.telemetry.addTelemetryEvent('connection viewed');
+    //this.telemetry.addTelemetryEvent('connection viewed');
   }
   editConnection(name) {
     this.edit = true;
@@ -456,9 +456,9 @@ export class DatasourceComponent implements OnInit, OnChanges {
     }
   }
   open() {
-    // this.telemetry.addTelemetryEvent('Datasource Created');
+    // //this.telemetry.addTelemetryEvent('Datasource Created');
     this.router.navigate(['./create'], { relativeTo: this.route });
-    this.telemetry.addTelemetryEvent('Datasource Created');
+    //this.telemetry.addTelemetryEvent('Datasource Created');
   }
   deleteAdapter(name: string) {
     this.deleteRuntimes(name);
@@ -472,7 +472,7 @@ export class DatasourceComponent implements OnInit, OnChanges {
               'Connection Deleted Successfully'
             );
             this.ngOnInit();
-            this.telemetry.addTelemetryEvent('Connection Deleted');
+            //this.telemetry.addTelemetryEvent('Connection Deleted');
           },
           (error) => {
             this.service.messageNotificaionService('error', 'Error');

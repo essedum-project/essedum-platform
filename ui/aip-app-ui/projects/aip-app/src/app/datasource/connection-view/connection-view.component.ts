@@ -362,7 +362,7 @@ export class ConnectionViewComponent implements OnInit{
     this.Services.testConnection(this.data).subscribe((response) => {
       this.Services.message('Success Connected successfully');
       this.testSuccessful = true;
-      this.telemetry.addTelemetryEvent(this.data?.alias + ' connection test successful');
+      //this.telemetry.addTelemetryEvent(this.data?.alias + ' connection test successful');
     },
       error => {
         this.Services.messageService('Error!', 'Please check connection details: ' + error);
@@ -416,12 +416,12 @@ export class ConnectionViewComponent implements OnInit{
         );
         if(this.data.interfacetype==="adapter"){
           this.Services.message('Success Adapter saved');
-          this.telemetry.addTelemetryEvent(this.data?.alias + ' adapter saved');
+          //this.telemetry.addTelemetryEvent(this.data?.alias + ' adapter saved');
         }
         else
         {
           this.Services.message('Success! Connection saved successfully');
-          // this.telemetry.addTelemetryEvent(this.data?.alias + ' connection saved');
+          // //this.telemetry.addTelemetryEvent(this.data?.alias + ' connection saved');
         }
         this._location.back();
         // this.closeDialog()
@@ -440,10 +440,10 @@ export class ConnectionViewComponent implements OnInit{
       this.Services.createDatasource(this.data).subscribe((res) => {
         if(this.data.interfacetype==="adapter"){
           this.Services.message('Success Adapter created');
-          this.telemetry.addTelemetryEvent(this.data?.alias + ' adapter created');
+          //this.telemetry.addTelemetryEvent(this.data?.alias + ' adapter created');
         }else{
           this.Services.message('Success! Connection created successfully');
-          // this.telemetry.addTelemetryEvent(this.data?.alias + ' connection created');
+          // //this.telemetry.addTelemetryEvent(this.data?.alias + ' connection created');
         }
         this._location.back();
       },
@@ -455,7 +455,7 @@ export class ConnectionViewComponent implements OnInit{
           }  
         });
     }
-    this.telemetry.addTelemetryEvent(this.data?.alias + ' connection saved');
+    //this.telemetry.addTelemetryEvent(this.data?.alias + ' connection saved');
   }
 
   getPortDetails(port: any) {

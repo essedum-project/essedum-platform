@@ -467,7 +467,7 @@ export class ModalConfigSchemaComponent
                   temp.push(JSON.parse(element).name);
                 });
               this.services.message('Updated Sucessfully', 'success');
-              this.telemetry.addTelemetryEvent(this.schemaName+' schema updated');
+              //this.telemetry.addTelemetryEvent(this.schemaName+' schema updated');
               this.formListView = true;
                 this.location.back();
                 this.schemaService
@@ -530,7 +530,7 @@ export class ModalConfigSchemaComponent
               this.selectedFormTemplate = resp;
               // this.messageService.info('Saved successfully', 'CIP');
               this.services.message('Saved successfully -CIP', 'success');
-              this.telemetry.addTelemetryEvent('Schema form saved')
+              //this.telemetry.addTelemetryEvent('Schema form saved')
               if (!this.updateFlag)
                 this.formTemplateList.push(this.selectedFormTemplate);
               this.formListView = true;
