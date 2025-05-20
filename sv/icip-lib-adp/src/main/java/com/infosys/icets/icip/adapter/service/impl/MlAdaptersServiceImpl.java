@@ -11,6 +11,7 @@
 package com.infosys.icets.icip.adapter.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -318,6 +321,57 @@ public class MlAdaptersServiceImpl implements MlAdaptersService {
 			joblogger.error(marker, "Error in importing adapters");
 			joblogger.error(marker, ex.getMessage());
 		}
+	}
+
+	//implement pagenition count and list
+	@Override
+	public Long getAdapterImplementationCount(String organization,String category,String spec,String connection,String query) {
+		List<String> categoryList=null;
+		List<String> specList=null;
+		List<String> connectionList=null;
+		
+		if(category!=null)
+		{
+			categoryList = Arrays.asList(category.split(","));
+		}
+		
+		if(spec!=null)
+		{
+			specList = Arrays.asList(spec.split(","));
+		}
+		
+		if(connection!=null)
+		{
+			connectionList = Arrays.asList(connection.split(","));
+		}
+
+		return mlAdaptersRepository.getAdaptersCountByOptionalParams(organization, categoryList, specList, connectionList, query);
+
+	}
+
+	@Override
+	public Page<MlAdapters> getAdapterImplementation(String organization, String category, String spec,
+			String connection, String query, Pageable pageable) {
+		List<String> categoryList=null;
+		List<String> specList=null;
+		List<String> connectionList=null;
+		
+		if(category!=null)
+		{
+			categoryList = Arrays.asList(category.split(","));
+		}
+		
+		if(spec!=null)
+		{
+			specList = Arrays.asList(spec.split(","));
+		}
+		
+		if(connection!=null)
+		{
+			connectionList = Arrays.asList(connection.split(","));
+		}
+
+		return mlAdaptersRepository.getAdaptersByOptionalParams(organization, categoryList, specList, connectionList, query, pageable);
 	}
 
 }

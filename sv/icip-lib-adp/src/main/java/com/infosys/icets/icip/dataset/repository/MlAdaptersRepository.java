@@ -12,6 +12,8 @@ package com.infosys.icets.icip.dataset.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
@@ -33,4 +35,12 @@ public interface MlAdaptersRepository extends JpaRepository<MlAdapters, Integer>
 	List<MlAdapters> getMlAdaptersBySpecTemplateDomainNameAndOrg(String spectemplatedomainname, String org);
 	
 	List<String> getAdapterNamesByOrganization(String org);
+	
+	//implement pagenition count and list
+	Long getAdaptersCountByOptionalParams(String organization, List<String> category, List<String> spectemplatedomainname, 
+			List<String> connectionname, String name);
+	
+	Page<MlAdapters>  getAdaptersByOptionalParams(String organization, List<String> category, List<String> spectemplatedomainname, 
+			List<String> connectionname, String name, Pageable page);
+
 }

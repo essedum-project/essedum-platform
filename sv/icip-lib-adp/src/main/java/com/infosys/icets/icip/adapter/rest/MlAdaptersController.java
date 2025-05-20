@@ -17,6 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +28,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.infosys.icets.icip.adapter.service.MlAdaptersService;
 import com.infosys.icets.icip.dataset.model.MlAdapters;
@@ -121,5 +126,36 @@ public class MlAdaptersController {
 		return new ResponseEntity<>(mlAdaptersService.getAdapterNamesByOrganization(org), new HttpHeaders(),
 				HttpStatus.OK);
 	}
-
+	
+	//Controller to implement pagenition count and list
+	
+	@GetMapping("/getAdaptersCount/count")
+	public ResponseEntity<Long> countAdapterImplementations(
+			@RequestParam(name = "organization", required = true) String organization,
+			@RequestParam(name = "category", required = false) String category,
+			@RequestParam(name = "spec", required = false) String spec,
+			@RequestParam(name = "connection", required = false) String connection,
+			@RequestParam(name = "query", required = false) String query){  
+		logger.info("fetching MlAdapters count");
+		return new ResponseEntity<>(mlAdaptersService.getAdapterImplementationCount(organization,category,spec,connection,query),
+				new HttpHeaders(),HttpStatus.OK);
+	}
+	
+	
+	@GetMapping("/getAdapters/list")
+	public ResponseEntity<List<MlAdapters>> getAdapterImplementations(
+			@RequestParam(name = "organization", required = true) String organization,
+			@RequestParam(name = "category", required = false) String category,
+			@RequestParam(name = "spec", required = false) String spec,
+			@RequestParam(name = "connection", required = false) String connection,
+			@RequestParam(name = "query", required = false) String query,
+            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(name = "size",required = false, defaultValue = "10") int size){  
+		logger.info("fetching MlAdapters count");
+		int pageNumber = Math.max(page - 1, 0);
+        Pageable pageable = PageRequest.of(pageNumber, size);
+		return new ResponseEntity<>(mlAdaptersService.getAdapterImplementation(organization,category,spec,connection,query,pageable).getContent() ,
+				new HttpHeaders(),HttpStatus.OK);
+	}
+	
 }
