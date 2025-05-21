@@ -63,7 +63,7 @@ public interface MlAdaptersRepositoryJPQL extends MlAdaptersRepository {
 		       "(:categories IS NULL OR mladp.category IN :categories) AND " +
 		       "(:domains IS NULL OR mladp.spectemplatedomainname IN :domains) AND " +
 		       "(:connections IS NULL OR mladp.connectionname IN :connections) AND " +
-		       "(:name IS NULL OR LOWER(mladp.name) LIKE LOWER(CONCAT('%', :name, '%')))")
+		       "(:name IS NULL OR LOWER(mladp.name) LIKE LOWER(CONCAT('%', :name, '%'))) ORDER BY mladp.lastmodifiedon DESC")
 		Page<MlAdapters> getAdaptersByOptionalParams(
 		    @Param("organization") String organization,
 		    @Param("categories") List<String> categories,
