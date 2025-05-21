@@ -128,23 +128,23 @@ import lombok.Setter;
 /**
  * Instantiates a new ICIP jobs partial.
  *
- * @param id the id
- * @param jobId the job id
- * @param submittedBy the submitted by
+ * @param id               the id
+ * @param jobId            the job id
+ * @param submittedBy      the submitted by
  * @param streamingService the streaming service
- * @param jobStatus the job status
- * @param version the version
- * @param validation the validation
- * @param submittedOn the submitted on
- * @param type the type
- * @param organization the organization
- * @param runtime the runtime
- * @param hashparams the hashparams
- * @param correlationid the correlationid
- * @param finishtime the finishtime
- * @param jobmetadata the jobmetadata
- * @param jobparam the jobparam
- * @param jobmetric the jobmetric
+ * @param jobStatus        the job status
+ * @param version          the version
+ * @param validation       the validation
+ * @param submittedOn      the submitted on
+ * @param type             the type
+ * @param organization     the organization
+ * @param runtime          the runtime
+ * @param hashparams       the hashparams
+ * @param correlationid    the correlationid
+ * @param finishtime       the finishtime
+ * @param jobmetadata      the jobmetadata
+ * @param jobparam         the jobparam
+ * @param jobmetric        the jobmetric
  */
 @AllArgsConstructor
 
@@ -209,27 +209,29 @@ public class ICIPJobsPartial implements Serializable {
 
 	/** The hashparams. */
 	private String hashparams;
-	
+
 	/** The correlationid. */
 	private String correlationid;
-	
+
 	/** The finishtime. */
 	private Timestamp finishtime;
-	
+
 	/** The jobmetadata. */
 	private String jobmetadata;
-	
+
 	/** The jobparam. */
 	private String jobparam;
-	
+
 	/** The jobmetric. */
 	private String jobmetric;
-	
+
 	private String image;
 	/** The output. */
 	private String output;
 
-	
+	/** The executortaskid. */
+	private String executortaskid;
+
 	/**
 	 * Update job.
 	 *
@@ -250,7 +252,8 @@ public class ICIPJobsPartial implements Serializable {
 	 */
 	public ICIPJobs toICIPJobs(String log) {
 		return new ICIPJobs(id, jobId, submittedBy, streamingService, jobStatus, version, validation, submittedOn, type,
-				organization, runtime, log, hashparams, correlationid, finishtime, jobmetadata, 0, jobparam, jobmetric,image,output,"{}");
+				organization, runtime, log, hashparams, correlationid, finishtime, jobmetadata, 0, jobparam, jobmetric,
+				image, output, "{}", executortaskid);
 	}
 
 	/**

@@ -242,6 +242,9 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 	@Value("${jobexecutor.enabled}")
 	private boolean jobExecutorEnabled;
 
+	@Value("${jobexecutor.org}")
+	private String jobExecutorOrg;
+
 	@Value("${jobexecutor.runtimeList}")
 	private String runtimeList;
 
@@ -420,10 +423,12 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 					}
 					pipelineMetadata.setTag(jobMetadata.toString());
 				}
+				String workerlogId = jobDataMap.getString("workerlogId");
 				iCIPJobs = new ICIPJobs(null, ICIPUtils.removeSpecialCharacter(jobId.toString() + job.getName()),
 						jobObject.getSubmittedBy(), job.getName(), JobStatus.STARTED.toString(), version, null,
 						submittedOn, job.getRuntime().toString(), jobObject.getOrg(), REMOTE, null, attributesHash,
-						jobObject.getCorelId(), null, gson.toJson(pipelineMetadata), 0, "{}", "{}", "{}", "{}", "{}");
+						jobObject.getCorelId(), null, gson.toJson(pipelineMetadata), 0, "{}", "{}", "{}", "{}", "{}",
+						workerlogId);
 
 				try {
 					// get unique hashValue for the job triggered(hashvalue=hex(digest(name&org));
@@ -480,6 +485,13 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 							JsonObject jsonObject = new Gson().fromJson(pipelineJson, JsonElement.class)
 									.getAsJsonObject();
 							jsonObject.addProperty("org", org);
+
+							/*
+							 * environ = jsonObject.getAsJsonArray("environment"); for (int i = 0; i <
+							 * environ.size(); i++) { JsonObject envJSON = environ.get(i).getAsJsonObject();
+							 * String key = envJSON.get("name").getAsString(); String value =
+							 * envJSON.get("value").getAsString(); envJSONO.addProperty(key, value); }
+							 */
 
 							String data = "{\"input_string\":" + jsonObject.toString() + "}";
 							data = pipelineService.populateDatasetDetails(data, org);
@@ -717,7 +729,14 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 						}
 						context.setResult(result);
 						log.info("run time value {}", dsObject.getAlias());
+						Boolean executeEnable = jobExecutorEnabled;
 						if (jobExecutorEnabled) {
+							executeEnable = jobExecutorEnabled;
+						} else {
+							List<String> jobExecutorOrgList = Arrays.asList(jobExecutorOrg.split(","));
+							executeEnable = !jobExecutorOrgList.contains(jobObject.getOrg());
+						}
+						if (executeEnable) {
 							log.info("jobid value {}",
 									ICIPUtils.removeSpecialCharacter(jobId.toString() + job.getName()));
 							ICIPJobs job2save = iCIPJobsRepository
@@ -838,7 +857,9 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 			}
 		}
 
-		else {
+		else
+
+		{
 			if (jobObject.getJobType().toString().equalsIgnoreCase("CHAIN")) {
 				iCIPChainJobs.setJobStatus(JobStatus.ERROR.toString());
 				iCIPChainJobs.setLog("Scripts Generation error");
@@ -855,10 +876,13 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 				}
 				pipelineMetadata.setTag(jobMetadata.toString());
 
+				String workerlogId = jobDataMap.getString("workerlogId");
+
 				iCIPJobs = new ICIPJobs(null, ICIPUtils.removeSpecialCharacter(jobId.toString() + job.getName()),
 						jobObject.getSubmittedBy(), job.getName(), JobStatus.STARTED.toString(), version, null,
 						submittedOn, job.getRuntime().toString(), jobObject.getOrg(), REMOTE, null, attributesHash,
-						jobObject.getCorelId(), null, gson.toJson(pipelineMetadata), 0, "{}", "{}", "{}", "{}", "{}");
+						jobObject.getCorelId(), null, gson.toJson(pipelineMetadata), 0, "{}", "{}", "{}", "{}", "{}",
+						workerlogId);
 				iCIPJobs.setJobStatus(JobStatus.ERROR.toString());
 				iCIPJobs.setLog("Scripts Generation error");
 				iCIPJobs.setFinishtime(new Timestamp(new Date().getTime()));
@@ -1177,7 +1201,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 				Response response = client.newCall(requestokHttp).execute();
 				logger.info("Response code is :" + response.code());
 				logger.info("Response body is :" + response.body());
-				if (response.code() == 201) {
+				if (response.code() == 201 || response.code() == 200) {
 					// fetch s3 logpath and taskId from the response
 					JSONObject responsebody = new JSONObject(response.body().string());
 					String responseData = responsebody.getString("task_id");
@@ -1185,14 +1209,13 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 					return responseData;
 				} else {
 					throw new LeapException("Remote Execution Error for jobid" + nativeJobDetails.get(index).getId()
-							+ " Response Code " + response.code() + " RequestPayload: " + payload);
+							+ " Response Code " + response.code());
 				}
 			} else {
 				throw new LeapException("SSLContext is null, could not create a secure connection.");
 			}
 		} catch (Exception e) {
-			throw new LeapException("Error in executeScript:" + e.getMessage() + "InputArtifacts Path: " + s3path
-					+ "Payload Id is:" + payload);
+			throw new LeapException("Error in executeScript:" + e.getMessage() + "InputArtifacts Path: " + s3path);
 		}
 	}
 

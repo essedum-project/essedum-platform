@@ -134,25 +134,25 @@ import lombok.Setter;
 /**
  * Instantiates a new ICIP jobs.
  *
- * @param id the id
- * @param jobId the job id
- * @param submittedBy the submitted by
+ * @param id               the id
+ * @param jobId            the job id
+ * @param submittedBy      the submitted by
  * @param streamingService the streaming service
- * @param jobStatus the job status
- * @param version the version
- * @param validation the validation
- * @param submittedOn the submitted on
- * @param type the type
- * @param organization the organization
- * @param runtime the runtime
- * @param log the log
- * @param hashparams the hashparams
- * @param correlationid the correlationid
- * @param finishtime the finishtime
- * @param jobmetadata the jobmetadata
- * @param jobhide the jobhide
- * @param jobparam the jobparam
- * @param jobmetric the jobmetric
+ * @param jobStatus        the job status
+ * @param version          the version
+ * @param validation       the validation
+ * @param submittedOn      the submitted on
+ * @param type             the type
+ * @param organization     the organization
+ * @param runtime          the runtime
+ * @param log              the log
+ * @param hashparams       the hashparams
+ * @param correlationid    the correlationid
+ * @param finishtime       the finishtime
+ * @param jobmetadata      the jobmetadata
+ * @param jobhide          the jobhide
+ * @param jobparam         the jobparam
+ * @param jobmetric        the jobmetric
  */
 @AllArgsConstructor
 
@@ -221,26 +221,25 @@ public class ICIPJobs implements Serializable {
 
 	/** The hashparams. */
 	private String hashparams;
-	
+
 	/** The correlationid. */
 	private String correlationid;
-	
+
 	/** The finishtime. */
 	private Timestamp finishtime;
-	
+
 	/** The jobmetadata. */
 	private String jobmetadata;
-	
+
 	/** The jobhide. */
 	private Integer jobhide;
 
 	/** The jobparam. */
 	private String jobparam;
-	
-	
+
 	/** The jobmetric. */
 	private String jobmetric;
-	
+
 	/** The image. */
 	private String image;
 	/** The output. */
@@ -248,6 +247,9 @@ public class ICIPJobs implements Serializable {
 
 	/** The output. */
 	private String payload;
+
+	/** The executortaskid. */
+	private String executortaskid;
 
 	/**
 	 * Update job.

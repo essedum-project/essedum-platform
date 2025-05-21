@@ -26,24 +26,27 @@ import com.infosys.icets.icip.icipwebeditor.repository.ICIPJobsPartialRepository
 @Profile("postgresql")
 @Repository
 public interface ICIPJobsPartialRepositoryPOSTGRESQL extends ICIPJobsPartialRepository {
-	
+
 	@Query(value = "SELECT id, job_id, submitted_by, streaming_service, job_status, version, validation, "
 			+ "submitted_on, type, organization, runtime, hashparams, correlationid, finishtime, jobmetadata, "
-			+ " jobparam, jobmetric,image,output, SUBSTRING(log, CAST(:offset AS INTEGER), CAST(:limit AS INTEGER)) AS log FROM mljobs "
+			+ " jobparam, jobmetric,image,output, executortaskid,SUBSTRING(log, CAST(:offset AS INTEGER), CAST(:limit AS INTEGER)) AS log FROM mljobs "
 			+ "WHERE job_id = :id", nativeQuery = true)
-	ICIPJobsPartial findByJobIdBuffered(@Param("id") String jobId, @Param("offset") long offset, @Param("limit") long limit);
+	ICIPJobsPartial findByJobIdBuffered(@Param("id") String jobId, @Param("offset") long offset,
+			@Param("limit") long limit);
+
 	@Query(value = "SELECT id, job_id, submitted_by, streaming_service, job_status, version, validation, "
 			+ "submitted_on, type, organization, runtime, hashparams, correlationid, finishtime, jobmetadata, "
-			+ " jobparam, jobmetric,image,output, SUBSTRING(log, CAST(:offset AS INTEGER), CAST(:limit AS INTEGER)) AS log FROM mljobs "
+			+ " jobparam, jobmetric,image,output,executortaskid, SUBSTRING(log, CAST(:offset AS INTEGER), CAST(:limit AS INTEGER)) AS log FROM mljobs "
 			+ "WHERE correlationid = :id", nativeQuery = true)
-	ICIPJobsPartial findByCorelIdBuffered(@Param("id") String corelid, @Param("offset") long offset, @Param("limit") long limit);
-	
-	@Query(value = "SELECT * FROM mljobs "
-			+ "WHERE job_id LIKE CONCAT(:jobId, '%')", nativeQuery = true)
+	ICIPJobsPartial findByCorelIdBuffered(@Param("id") String corelid, @Param("offset") long offset,
+			@Param("limit") long limit);
+
+	@Query(value = "SELECT * FROM mljobs " + "WHERE job_id LIKE CONCAT(:jobId, '%')", nativeQuery = true)
 	ICIPJobsPartial findByJobId(@Param("jobId") String jobId);
-	@Query(value = "SELECT * FROM mljobs "
-			+ "WHERE correlationid LIKE CONCAT(:corelId, '%')", nativeQuery = true)
+
+	@Query(value = "SELECT * FROM mljobs " + "WHERE correlationid LIKE CONCAT(:corelId, '%')", nativeQuery = true)
 	ICIPJobsPartial findByCorelId(@Param("corelId") String corelId);
+
 	@Query(value = "SELECT * FROM mljobs ", nativeQuery = true)
 	List<ICIPJobsPartial> getAllJobs();
 }

@@ -330,8 +330,8 @@ public class ICIPJobsService implements IICIPJobsService {
 				String concatenatedString = "";
 				for (String word : loglist) {
 					if (containsJsonString(word)) {
-		                word = removeCredentialAndEnvironmentKey(word);
-		            }
+						word = removeCredentialAndEnvironmentKey(word);
+					}
 					concatenatedString += word + '\n';
 				}
 				log1 = concatenatedString;
@@ -380,6 +380,11 @@ public class ICIPJobsService implements IICIPJobsService {
 			logger.error("File Not Exists : {}", ex.getMessage());
 		}
 		ICIPJobs result = job.toICIPJobs(log);
+
+		if (result.getLog().equals("")) {
+			log = "Unable to write logs at this time. Please try again";
+			result.setLog(log);
+		}
 		String jobStatus = result.getJobStatus();
 
 		logger.info("Fetching ICIPJobs result" + result);
@@ -388,76 +393,76 @@ public class ICIPJobsService implements IICIPJobsService {
 		}
 		return result;
 	}
-	
-	private static boolean containsJsonString(String str) {
-        try {
-            JsonParser.parseString(str);
-            return true;
-        } catch (JsonSyntaxException e) {
-            // Check for JSON substrings
-            int startIndex = str.indexOf("{");
-            while (startIndex != -1) {
-                int endIndex = str.lastIndexOf("}");
-                if (endIndex != -1 && endIndex > startIndex) {
-                    String potentialJson = str.substring(startIndex, endIndex + 1);
-                    try {
-                        JsonParser.parseString(potentialJson);
-                        return true;
-                    } catch (JsonSyntaxException ex) {
-                    	logger.error("JsonSyntaxException occurred while replacing JSON string", ex);
-                    }
-                    startIndex = str.indexOf("{", endIndex);
-                } else {
-                    break;
-                }
-            }
-            return false;
-        }
-    }
 
-    private static String removeCredentialAndEnvironmentKey(String str) {
-        try {
-            JsonElement jsonElement = JsonParser.parseString(str);
-            if (jsonElement.isJsonObject()) {
-                JsonObject jsonObject = jsonElement.getAsJsonObject();
-                if (jsonObject.has("credentials")) {
-                    jsonObject.remove("credentials");
-                }
-                if (jsonObject.has("environment")) {
-                    jsonObject.remove("environment");
-                }
-                return jsonObject.toString();
-            }
-        } catch (JsonSyntaxException e) {
-            // Check for JSON substrings
-            int startIndex = str.indexOf("{");
-            while (startIndex != -1) {
-                int endIndex = str.lastIndexOf("}");
-                if (endIndex != -1 && endIndex > startIndex) {
-                    String potentialJson = str.substring(startIndex, endIndex + 1);
-                    try {
-                        JsonElement jsonElement = JsonParser.parseString(potentialJson);
-                        if (jsonElement.isJsonObject()) {
-                            JsonObject jsonObject = jsonElement.getAsJsonObject();
-                            if (jsonObject.has("credentials")) {
-                                jsonObject.remove("credentials");
-                            }
-                            if (jsonObject.has("environment")) {
-                                jsonObject.remove("environment");
-                            }
-                            str = str.replace(potentialJson, jsonObject.toString());
-                        }
-                    } catch (JsonSyntaxException ex) {
-                    	logger.error("JsonSyntaxException occurred while replacing JSON string", ex);
-                    }
-                    startIndex = str.indexOf("{", endIndex);
-                } else {
-                    break;
-                }
-            }
-        }
-        return str;
-    }
+	private static boolean containsJsonString(String str) {
+		try {
+			JsonParser.parseString(str);
+			return true;
+		} catch (JsonSyntaxException e) {
+			// Check for JSON substrings
+			int startIndex = str.indexOf("{");
+			while (startIndex != -1) {
+				int endIndex = str.lastIndexOf("}");
+				if (endIndex != -1 && endIndex > startIndex) {
+					String potentialJson = str.substring(startIndex, endIndex + 1);
+					try {
+						JsonParser.parseString(potentialJson);
+						return true;
+					} catch (JsonSyntaxException ex) {
+						logger.error("JsonSyntaxException occurred while replacing JSON string", ex);
+					}
+					startIndex = str.indexOf("{", endIndex);
+				} else {
+					break;
+				}
+			}
+			return false;
+		}
+	}
+
+	private static String removeCredentialAndEnvironmentKey(String str) {
+		try {
+			JsonElement jsonElement = JsonParser.parseString(str);
+			if (jsonElement.isJsonObject()) {
+				JsonObject jsonObject = jsonElement.getAsJsonObject();
+				if (jsonObject.has("credentials")) {
+					jsonObject.remove("credentials");
+				}
+				if (jsonObject.has("environment")) {
+					jsonObject.remove("environment");
+				}
+				return jsonObject.toString();
+			}
+		} catch (JsonSyntaxException e) {
+			// Check for JSON substrings
+			int startIndex = str.indexOf("{");
+			while (startIndex != -1) {
+				int endIndex = str.lastIndexOf("}");
+				if (endIndex != -1 && endIndex > startIndex) {
+					String potentialJson = str.substring(startIndex, endIndex + 1);
+					try {
+						JsonElement jsonElement = JsonParser.parseString(potentialJson);
+						if (jsonElement.isJsonObject()) {
+							JsonObject jsonObject = jsonElement.getAsJsonObject();
+							if (jsonObject.has("credentials")) {
+								jsonObject.remove("credentials");
+							}
+							if (jsonObject.has("environment")) {
+								jsonObject.remove("environment");
+							}
+							str = str.replace(potentialJson, jsonObject.toString());
+						}
+					} catch (JsonSyntaxException ex) {
+						logger.error("JsonSyntaxException occurred while replacing JSON string", ex);
+					}
+					startIndex = str.indexOf("{", endIndex);
+				} else {
+					break;
+				}
+			}
+		}
+		return str;
+	}
 
 	public TrustManager[] getTrustAllCerts() {
 		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
@@ -1076,112 +1081,104 @@ public class ICIPJobsService implements IICIPJobsService {
 
 		return stringToReturn;
 	}
-	
-	public String getAllRemoteJobs(String url) throws LeapException{
-        TrustManager[] trustAllCerts = getTrustAllCerts();
-        SSLContext sslContext = getSslContext(trustAllCerts);
-        OkHttpClient.Builder newBuilder = new OkHttpClient.Builder();
-        newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
-        newBuilder.hostnameVerifier((hostname, session) -> true);
-        OkHttpClient client = newBuilder.connectTimeout(50, TimeUnit.SECONDS).readTimeout(50, TimeUnit.SECONDS)
-                .writeTimeout(50, TimeUnit.SECONDS).build();
-        Request requestokHttp = new Request.Builder().url(url)
-                .addHeader("Content-Type", "application/json").addHeader("accept", "application/json")
-                .build();
-        Response response = null;
-        try {
-            response = client.newCall(requestokHttp).execute();
-            if (response.code() == 200) {
+
+	public String getAllRemoteJobs(String url) throws LeapException {
+		TrustManager[] trustAllCerts = getTrustAllCerts();
+		SSLContext sslContext = getSslContext(trustAllCerts);
+		OkHttpClient.Builder newBuilder = new OkHttpClient.Builder();
+		newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
+		newBuilder.hostnameVerifier((hostname, session) -> true);
+		OkHttpClient client = newBuilder.connectTimeout(50, TimeUnit.SECONDS).readTimeout(50, TimeUnit.SECONDS)
+				.writeTimeout(50, TimeUnit.SECONDS).build();
+		Request requestokHttp = new Request.Builder().url(url).addHeader("Content-Type", "application/json")
+				.addHeader("accept", "application/json").build();
+		Response response = null;
+		try {
+			response = client.newCall(requestokHttp).execute();
+			if (response.code() == 200) {
 				String jsonData = response.body().string();
 				return jsonData;
-			}
-            else {
+			} else {
 				throw new LeapException("Failed to Fetch all remote logs");
 			}
-        } catch (Exception e) {
+		} catch (Exception e) {
 			throw new LeapException("Error in fetch all remote logs:" + e.getMessage() + "Url is:" + url);
-        }
-    }
-	
-	public String getLogData(String url,String jobId) throws LeapException{
-        TrustManager[] trustAllCerts = getTrustAllCerts();
-        SSLContext sslContext = getSslContext(trustAllCerts);
-        OkHttpClient.Builder newBuilder = new OkHttpClient.Builder();
-        newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
-        newBuilder.hostnameVerifier((hostname, session) -> true);
-        OkHttpClient client = newBuilder.connectTimeout(50, TimeUnit.SECONDS).readTimeout(50, TimeUnit.SECONDS)
-                .writeTimeout(50, TimeUnit.SECONDS).build();
-        String logUrl = url + "/" + jobId + "/getLog";
-        Request requestokHttp = new Request.Builder().url(logUrl)
-                .addHeader("Content-Type", "application/json").addHeader("accept", "application/json")
-                .build();
-        Response response = null;
-        try {
-            response = client.newCall(requestokHttp).execute();
-            if (response.code() == 200) {
+		}
+	}
+
+	public String getLogData(String url, String jobId) throws LeapException {
+		TrustManager[] trustAllCerts = getTrustAllCerts();
+		SSLContext sslContext = getSslContext(trustAllCerts);
+		OkHttpClient.Builder newBuilder = new OkHttpClient.Builder();
+		newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
+		newBuilder.hostnameVerifier((hostname, session) -> true);
+		OkHttpClient client = newBuilder.connectTimeout(50, TimeUnit.SECONDS).readTimeout(50, TimeUnit.SECONDS)
+				.writeTimeout(50, TimeUnit.SECONDS).build();
+		String logUrl = url + "/" + jobId + "/getLog";
+		Request requestokHttp = new Request.Builder().url(logUrl).addHeader("Content-Type", "application/json")
+				.addHeader("accept", "application/json").build();
+		Response response = null;
+		try {
+			response = client.newCall(requestokHttp).execute();
+			if (response.code() == 200) {
 				String jsonData = response.body().string();
 				return jsonData;
-			}
-            else {
+			} else {
 				throw new LeapException("Failed to Fetch remote log");
 			}
-        } catch (Exception e) {
+		} catch (Exception e) {
 			throw new LeapException("Error while fetching remote log:" + e.getMessage() + "job Id is:" + jobId);
-        }
-    }
-	
-	public String stopRemoteJob(String url,String jobId) throws LeapException{
-        TrustManager[] trustAllCerts = getTrustAllCerts();
-        SSLContext sslContext = getSslContext(trustAllCerts);
-        OkHttpClient.Builder newBuilder = new OkHttpClient.Builder();
-        newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
-        newBuilder.hostnameVerifier((hostname, session) -> true);
-        OkHttpClient client = newBuilder.connectTimeout(50, TimeUnit.SECONDS).readTimeout(50, TimeUnit.SECONDS)
-                .writeTimeout(50, TimeUnit.SECONDS).build();
-        String logUrl = url + "/" + jobId + "/stop";
-        Request requestokHttp = new Request.Builder().url(logUrl)
-                .addHeader("Content-Type", "application/json").addHeader("accept", "application/json")
-                .build();
-        Response response = null;
-        try {
-            response = client.newCall(requestokHttp).execute();
-            if (response.code() == 200) {
+		}
+	}
+
+	public String stopRemoteJob(String url, String jobId) throws LeapException {
+		TrustManager[] trustAllCerts = getTrustAllCerts();
+		SSLContext sslContext = getSslContext(trustAllCerts);
+		OkHttpClient.Builder newBuilder = new OkHttpClient.Builder();
+		newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
+		newBuilder.hostnameVerifier((hostname, session) -> true);
+		OkHttpClient client = newBuilder.connectTimeout(50, TimeUnit.SECONDS).readTimeout(50, TimeUnit.SECONDS)
+				.writeTimeout(50, TimeUnit.SECONDS).build();
+		String logUrl = url + "/" + jobId + "/stop";
+		Request requestokHttp = new Request.Builder().url(logUrl).addHeader("Content-Type", "application/json")
+				.addHeader("accept", "application/json").build();
+		Response response = null;
+		try {
+			response = client.newCall(requestokHttp).execute();
+			if (response.code() == 200) {
 				String jsonData = response.body().string();
 				return jsonData;
-			}
-            else {
+			} else {
 				throw new LeapException("Failed to terminate the remote job");
 			}
-        } catch (Exception e) {
+		} catch (Exception e) {
 			throw new LeapException("Error in terminating remote job:" + e.getMessage() + "job Id is:" + jobId);
-        }
-    }
- 
-	
+		}
+	}
+
 	@Override
 	public List<ICIPJobsPartial> getAllCommonJobsPartial(String org, int page, int size) {
-			logger.info("Getting jobs in Page {}", page);
-			Pageable paginate = PageRequest.of(page, size, Sort.by(SUBMITTED_ON).descending());
-			Page<ICIPJobsPartial> jobs = jobsPartialRepository.findByOrganization(org, paginate);
-			List<ICIPJobsPartial> listJobs = new ArrayList<>();
-			jobs.stream().parallel().forEach(j -> {
-				String[] parts = j.getRuntime().split("-");
-				// if (j.getRuntime().equalsIgnoreCase(AICLOUD) ||
-				// j.getRuntime().equalsIgnoreCase(REMOTE) ||
-				// j.getRuntime().equalsIgnoreCase(EMR)) {
-				if (j.getRuntime().toLowerCase().startsWith(AICLOUD) || j.getRuntime().toLowerCase().startsWith(REMOTE)
-						|| j.getRuntime().toLowerCase().startsWith(EMR)) {
-					if (j.getFinishtime() == null) {
-						IICIPJobRuntimeLoggerService runtimeloggerService = jobRuntimeLoggerService
-								.getJobRuntimeLoggerService(parts[0].toLowerCase() + "loggerservice");
-						if (runtimeloggerService != null)
-							j = runtimeloggerService.updateAndLogJob(j);
-					}
+		logger.info("Getting jobs in Page {}", page);
+		Pageable paginate = PageRequest.of(page, size, Sort.by(SUBMITTED_ON).descending());
+		Page<ICIPJobsPartial> jobs = jobsPartialRepository.findByOrganization(org, paginate);
+		List<ICIPJobsPartial> listJobs = new ArrayList<>();
+		jobs.stream().parallel().forEach(j -> {
+			String[] parts = j.getRuntime().split("-");
+			// if (j.getRuntime().equalsIgnoreCase(AICLOUD) ||
+			// j.getRuntime().equalsIgnoreCase(REMOTE) ||
+			// j.getRuntime().equalsIgnoreCase(EMR)) {
+			if (j.getRuntime().toLowerCase().startsWith(AICLOUD) || j.getRuntime().toLowerCase().startsWith(REMOTE)
+					|| j.getRuntime().toLowerCase().startsWith(EMR)) {
+				if (j.getFinishtime() == null) {
+					IICIPJobRuntimeLoggerService runtimeloggerService = jobRuntimeLoggerService
+							.getJobRuntimeLoggerService(parts[0].toLowerCase() + "loggerservice");
+					if (runtimeloggerService != null)
+						j = runtimeloggerService.updateAndLogJob(j);
 				}
-				listJobs.add(j);
-			});
-			return listJobs;
-		
-	
-}
+			}
+			listJobs.add(j);
+		});
+		return listJobs;
+
+	}
 }

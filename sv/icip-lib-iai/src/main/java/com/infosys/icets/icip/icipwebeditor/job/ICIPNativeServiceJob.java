@@ -1135,7 +1135,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 			iCIPJobs = new ICIPJobs(null, ICIPUtils.removeSpecialCharacter(jobId.toString()), job.getSubmittedBy(),
 					job.getName(), JobStatus.STARTED.toString(), null, null, submittedOn,
 					job.getJobs().get(0).getRuntime().toString(), job.getOrg(), LOCAL, null, attributesHash,
-					job.getCorelId(), null, gson.toJson(pipelineMetadata), 0, "{}", "{}","{}","{}","{}");
+					job.getCorelId(), null, gson.toJson(pipelineMetadata), 0, "{}", "{}","{}","{}","{}","");
 			break;
 		default:
 			throw new LeapException(INVALID_JOBTYPE);
@@ -1307,7 +1307,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 					job.getJobs().get(index).getName(), JobStatus.RUNNING.toString(), null, null, submittedOn,
 					job.getJobs().get(index).getRuntime().toString(), job.getOrg(), LOCAL, null,
 					iCIPChainJobs.getHashparams(), job.getCorelId(), null, gson.toJson(pipelineMetadata), 0, "{}",
-					"{}","{}","{}","{}");
+					"{}","{}","{}","{}","");
 		}
 
 		String msg = String.format("%s%s%s%s%s%s%s", "About to run ", cmd[0], " ", cmd[1], " ",
