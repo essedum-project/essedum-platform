@@ -83,15 +83,6 @@ public class MlAdaptersController {
 				HttpStatus.OK);
 	}
 
-	/* Fetches MlAdapters By Organization */
-	@GetMapping("/getAdaptesByOrganization/{org}")
-	public ResponseEntity<List<MlAdapters>> getMlAdaptesByOrganization(
-			@PathVariable(name = "org", required = true) String org) {
-		logger.info("fetching MlAdapters for org:{}", org);
-		return new ResponseEntity<>(mlAdaptersService.getMlAdaptesByOrganization(org), new HttpHeaders(),
-				HttpStatus.OK);
-	}
-
 	/* Fetches MlAdapter Filters By Organization */
 	@GetMapping("/getFiltersByOrganization/{org}")
 	public ResponseEntity<Map<String, Object>> getFiltersByOrganization(
@@ -142,19 +133,18 @@ public class MlAdaptersController {
 	}
 	
 	
-	@GetMapping("/getAdapters/list")
+	@GetMapping("/getAdaptesByOrganization/{org}")
 	public ResponseEntity<List<MlAdapters>> getAdapterImplementations(
-			@RequestParam(name = "organization", required = true) String organization,
+			@PathVariable(name = "org", required = true) String org,
 			@RequestParam(name = "category", required = false) String category,
 			@RequestParam(name = "spec", required = false) String spec,
 			@RequestParam(name = "connection", required = false) String connection,
 			@RequestParam(name = "query", required = false) String query,
-            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(name = "size",required = false, defaultValue = "10") int size){  
+            @RequestParam(name = "page", required = false) Integer page,
+            @RequestParam(name = "size",required = false) Integer size){  
 		logger.info("fetching MlAdapters count");
-		int pageNumber = Math.max(page - 1, 0);
-        Pageable pageable = PageRequest.of(pageNumber, size);
-		return new ResponseEntity<>(mlAdaptersService.getAdapterImplementation(organization,category,spec,connection,query,pageable).getContent() ,
+        Pageable pageable = (page==null||size==null) ? null : PageRequest.of(Math.max(page - 1, 0), size);
+		return new ResponseEntity<>(mlAdaptersService.getAdapterImplementation(org,category,spec,connection,query,pageable).getContent(),
 				new HttpHeaders(),HttpStatus.OK);
 	}
 	
