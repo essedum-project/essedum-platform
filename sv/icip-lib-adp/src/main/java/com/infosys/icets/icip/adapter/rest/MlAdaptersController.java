@@ -142,7 +142,7 @@ public class MlAdaptersController {
 			@RequestParam(name = "query", required = false) String query,
             @RequestParam(name = "page", required = false) Integer page,
             @RequestParam(name = "size",required = false) Integer size){  
-		logger.info("fetching MlAdapters count");
+		logger.info("fetching MlAdapters List");
         Pageable pageable = (page==null||size==null) ? null : PageRequest.of(Math.max(page - 1, 0), size);
 		return new ResponseEntity<>(mlAdaptersService.getAdapterImplementation(org,category,spec,connection,query,pageable).getContent(),
 				new HttpHeaders(),HttpStatus.OK);
