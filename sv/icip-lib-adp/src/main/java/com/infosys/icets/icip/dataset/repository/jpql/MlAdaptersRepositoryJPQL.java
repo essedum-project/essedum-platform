@@ -11,7 +11,11 @@
 package com.infosys.icets.icip.dataset.repository.jpql;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.infosys.icets.icip.dataset.model.MlAdapters;
@@ -32,4 +36,43 @@ public interface MlAdaptersRepositoryJPQL extends MlAdaptersRepository {
 	
 	@Query("SELECT mladp.name FROM MlAdapters mladp where mladp.organization=?1 and mladp.isactive='Y'")
 	List<String> getAdapterNamesByOrganization(String org);
+
+	@Query("SELECT count(*) FROM MlAdapters mladp WHERE " +
+		       "mladp.isactive = 'Y' AND " +
+		       "mladp.organization = :organization AND " +
+		       "(:categories IS NULL OR mladp.category IN :categories) AND " +
+		       "(:domains IS NULL OR mladp.spectemplatedomainname IN :domains) AND " +
+		       "(:connections IS NULL OR mladp.connectionname IN :connections) AND " +
+		       "(:name IS NULL OR mladp.name = :name)")
+	Long getAdaptersCountByOptionalParams(
+		    @Param("organization") String organization,
+		    @Param("categories") List<String> categories,
+		    @Param("domains") List<String> domains,
+		    @Param("connections") List<String> connections,
+		    @Param("name") String name
+		);
+	
+	
+	@Query("SELECT new com.infosys.icets.icip.dataset.model.MlAdapters(" +
+		       "mladp.id, mladp.name, mladp.organization, mladp.connectionid, mladp.connectionname, " +
+		       "mladp.spectemplatedomainname, mladp.createdby, mladp.createdon, mladp.lastmodifiedby, mladp.lastmodifiedon, " +
+		       "null, mladp.description, mladp.isactive, mladp.category, mladp.executiontype, mladp.isChain, mladp.chainName) " +
+		       "FROM MlAdapters mladp " +
+		       "WHERE mladp.isactive = 'Y' AND " +
+		       "mladp.organization = :organization AND " +
+		       "(:categories IS NULL OR mladp.category IN :categories) AND " +
+		       "(:domains IS NULL OR mladp.spectemplatedomainname IN :domains) AND " +
+		       "(:connections IS NULL OR mladp.connectionname IN :connections) AND " +
+		       "(:name IS NULL OR LOWER(mladp.name) LIKE LOWER(CONCAT('%', :name, '%'))) ORDER BY mladp.lastmodifiedon DESC")
+		Page<MlAdapters> getAdaptersByOptionalParams(
+		    @Param("organization") String organization,
+		    @Param("categories") List<String> categories,
+		    @Param("domains") List<String> domains,
+		    @Param("connections") List<String> connections,
+		    @Param("name") String name,
+		    Pageable page
+		);
+
+
+
 }

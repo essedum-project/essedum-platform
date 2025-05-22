@@ -13,6 +13,9 @@ package com.infosys.icets.icip.adapter.service;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.infosys.icets.icip.dataset.model.MlAdapters;
 
 /**
@@ -39,4 +42,9 @@ public interface MlAdaptersService {
 	List<MlAdapters> getMlAdaptersBySpecTemplateDomainNameAndOrg(String spectemplatedomainname, String org);
 
 	List<String> getAdapterNamesByOrganization(String org);
+
+	//implement pagenition count and list
+	Long getAdapterImplementationCount(String organization,String category,String spec,String connection,String query);
+	
+	Page<MlAdapters> getAdapterImplementation(String organization,String category,String spec,String connection,String query, Pageable pageable);
 }

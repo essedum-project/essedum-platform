@@ -264,7 +264,7 @@ public class DashConstantResource {
 	 */
 	@GetMapping("/dash-constants/{id}")
 	@Timed
-	public ResponseEntity<?> getDashConstant(@PathVariable Integer id) {
+	public ResponseEntity<?> getDashConstant(@PathVariable("id") Integer id) {
 		try {
 			log.info("getDashConstant : REST request to get DashConstant for key ID: {}", id);
 			log.debug("REST request to get DashConstant : {}", id);
@@ -294,7 +294,7 @@ public class DashConstantResource {
 	 */
 	@DeleteMapping("/dash-constants/{id}")
 	@Timed
-	public ResponseEntity<?> deleteDashConstant(@PathVariable Integer id) {
+	public ResponseEntity<?> deleteDashConstant(@PathVariable("id") Integer id) {
 		try {
 			log.info("deleteDashConstant : REST request to delete DashConstant for key ID: {}", id);
 			log.debug("REST request to delete DashConstant : {}", id);
@@ -349,7 +349,7 @@ public class DashConstantResource {
 	 * @return the value of allowed extension key
 	 */
 	@GetMapping("/get-extension-key")
-	public ResponseEntity<?> getExtensionKey(@Parameter Integer projectId, @Parameter String key) {
+	public ResponseEntity<?> getExtensionKey(@Parameter @RequestParam(required = false, name = "projectId") Integer projectId,@Parameter @RequestParam(required = false, name = "key") String key) {
 		try {
 			log.info("getExtensionKey : REST request to get extension key for project id : {}", projectId);
 			log.debug("REST request to get extension key");
@@ -403,7 +403,7 @@ public class DashConstantResource {
 		}
 	}
 	@GetMapping("/get-startup-constants/id/{key}/{project}")
-	public ResponseEntity<?> getDashConstantsByKeyAndProject(@PathVariable String key, @PathVariable String project) {
+	public ResponseEntity<?> getDashConstantsByKeyAndProject(@PathVariable("key") String key, @PathVariable("project") String project) {
 		try {
 //			log.info("getDashConstants : REST request to get dash constant : {}", key);
 //			log.info("getDashConstants : Dash Constants fetched successfully");
