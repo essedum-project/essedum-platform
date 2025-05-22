@@ -8,7 +8,6 @@
  * recording, or otherwise), or any distribution of this program, or any portion of it,may result in severe civil and 
  * criminal penalties, and will be prosecuted to the maximum extent possible under the law.
 */ -->
-
 <div class="selector-3-1">
     <mat-drawer-container style="overflow: hidden;" class="example-container bgcolor2 selector-3-2 " autosize="">
         <mat-drawer #drawerLeft="" class="example-sidenav selector-3-3 "
@@ -19,9 +18,9 @@
         </mat-drawer>
         <div class="parent-div selector-3-5">
             <div class="fChild selector-3-6"
-                [ngStyle]="{'background-color':bgColorType==2?'#8626C3':headercolor?headercolor:null, 'height': headerHeight}">
+                style="background-color:#0094ff; height: headerHeight">
                 <div style="display: flex; justify-content: space-between; flex-direction: row-reverse; z-index: 5; align-items: center;"
-                    class="headericonsMobile selector-3-7 le-u-mar-l-16">
+                    class="headericonsMobile selector-3-7 lfx-u-mar-l-16">
                     <span *ngIf="showPortfolioHeader" style="padding-top:15px;padding-left: 10px;color: white;">
                         {{portfolioName?.portfolioName}} - {{projectvalue?.name}}</span>
                     <img id="clientimage" *ngIf="isimg!=null" src="{{projectimg}}"
@@ -34,8 +33,8 @@
                         (click)="homeToDash()">
                         {{ title }}
                     </span> -->
-                    <img id="clientimage" *ngIf="!isimg" src="assets/images/infy_leap_logo_white-01-automation.png"
-                    style="margin-left:1vh;width: auto" (click)="homeToDash();removeFilters();clearonlanding()" class=" mobileHeaderImg selector-3-8" alt="" 
+                    <img id="clientimage" *ngIf="!isimg" src="assets/images/LFN-Logo-White.svg"
+                    style="margin-left:1vh;width: 234px" (click)="homeToDash();removeFilters();clearonlanding()" class=" mobileHeaderImg selector-3-8" alt="" 
                     [ngStyle]="{'height': headerHeight}">
                     <span *ngIf="clientlogo" style="display: flex;flex-direction: column" class="selector-3-11">
                         <img id="clientimage"
@@ -64,7 +63,7 @@
                         *ngIf="sidebar && selectedrole.name!=currentrole && showSidebarMenu" mat-icon-button="" [ngStyle]="{'height': headerHeight, 'width': headerHeight}" style="padding: 0; display: flex; align-items: center; justify-content: center;"
                         (click)="isexpaned()"
                         id="sidebarexpand">
-                        <i class="le-c-hamburger icon icon-Hamburger white float-start le-u-mar-t-12"
+                        <i class="le-c-hamburger icon icon-Hamburger white float-start lfx-u-mar-t-12"
                             id="sidebarexpandicon" [ngStyle]="{'color':headericoncolor, 'font-size': sideMenuIconSize, 'width': sideMenuIconSize, 'height': sideMenuIconSize}"></i>
                     </button>
 
@@ -317,7 +316,7 @@
                     </a>
                 </nav>
 
-                <div *ngIf="selectedrole.name" class="headerMobile selector-3-69 le-u-mar-r-24" style="display: flex; align-items: center; justify-content: center;">
+                <div *ngIf="selectedrole.name" class="headerMobile selector-3-69 lfx-u-mar-r-24" style="display: flex; align-items: center; justify-content: center;">
                     <span class="myDIV">
                         <span [matBadge]="" matBadgeColor="warn" matBadgeSize="small" class="selector-3-72">
                             <button *ngIf="tabs.length>0 && hidesidebar" style="padding-left: 2.5vh;cursor: pointer;"
@@ -612,5 +611,4 @@
         </div>
     </mat-drawer-container>
 </div>
-
-<app-footer></app-footer>
+ <app-footer></app-footer>

@@ -304,7 +304,7 @@ export class ConnectionViewComponent implements OnInit{
   onTypeChange(event:any) {
     console.log(event);
     this.keys = [];
-    this.sourceType = this.datasourceTypes.filter(row => row.type === event)[0];
+    this.sourceType = this.datasourceTypes.filter(row => row.type === event.value)[0];
     this.category = this.sourceType?.category;
     if(this.sourceType?.attributes)
       Object.keys(this.sourceType.attributes).forEach(keyValue => {
@@ -319,7 +319,7 @@ export class ConnectionViewComponent implements OnInit{
     this.data.forpromptprovider=false;
     this.data.forendpoint=false;
 
-   event.forEach(cap=>{
+   event.value.forEach(cap=>{
     if(cap === "dataset"){
       this.data.fordataset=true;
     } else if(cap === "adapter"){

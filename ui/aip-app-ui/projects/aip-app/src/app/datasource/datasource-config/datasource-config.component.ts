@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewEncapsulation } from '@angular/core';
 import { LedsModalService } from 'leds-lib';
 import { Services } from '../../services/service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -16,7 +16,8 @@ import { LeapTelemetryService, OpenTelemetryService } from 'com-lib-util';
 @Component({
   selector: 'app-datasource-config',
   templateUrl: './datasource-config.component.html',
-  styleUrls: ['./datasource-config.component.scss']
+  styleUrls: ['./datasource-config.component.scss'],
+  encapsulation:ViewEncapsulation.None
 })
 export class DatasourceConfigComponent implements OnInit {
   @Output() responseLink = new EventEmitter<any>();
@@ -334,6 +335,7 @@ export class DatasourceConfigComponent implements OnInit {
         this.data.description = this.matData.description;
       } else {
         this.data.alias = this.alias;
+        this.data.description=this.description;
       }
       this.data.category = this.sourceType?.category;
       this.data.type = this.sourceType?.type;
@@ -498,7 +500,7 @@ export class DatasourceConfigComponent implements OnInit {
     //if(event=='S3') this.isS3Save=true;
     //else this.isS3Save=false;
     this.keys = [];
-    this.sourceType = this.datasourceTypes.filter(row => row.type === event)[0];
+    this.sourceType = this.datasourceTypes.filter(row => row.type === event.value)[0];
     this.category = this.sourceType?.category;
     if (this.sourceType?.attributes)
       Object.keys(this.sourceType.attributes).forEach(keyValue => {
@@ -521,7 +523,7 @@ export class DatasourceConfigComponent implements OnInit {
     this.data.forpromptprovider = false;
     this.data.forendpoint = false;
     this.data.app = false;
-    event.forEach(cap => {
+    event.value.forEach(cap => {
       if (cap === "dataset") {
         this.data.fordataset = true;
       } else if (cap === "adapter") {

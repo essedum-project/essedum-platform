@@ -215,7 +215,8 @@
   }
 
   .aip-led-icons:hover {
-    color: #8626c3;
+    color:#0094ff !important;
+    ;
   }
 
   .aip-filter {
@@ -726,4 +727,30 @@ div {
       grid-column-gap: 3rem;
     }
   }
+
+  .lfx-u-mar-b-16 {
+    margin-bottom: 16px !important;
+  }
+
+  .lfx-u-mar-b-20 {
+    margin-bottom: 20px !important;
+  }
+
+  .lfx-u-mar-t-20{
+    margin-top  : 20px !important;
+  }
+
+  .aip-lfx-icons {
+    font-size: 2.4rem !important;
+    color: #0a142f;
+  }
+  
 }
+
+
+
+::ng-deep .mdc-tab-indicator__content--underline{
+    border-color: #0a142f !important;
+  }
+
+

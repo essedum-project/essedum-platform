@@ -2336,7 +2336,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
 
       if (this.headerType == 'base')
         this.bgColorType = 1;
-      else if (this.headerType == "#8626C3")
+      else if (this.headerType == "#0094ff")
         this.bgColorType = 2;
       if (sessionStorage.getItem("tabs")) {
         this.routecount = true;

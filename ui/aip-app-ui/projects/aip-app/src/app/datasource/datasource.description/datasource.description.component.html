@@ -32,7 +32,7 @@
             <div class="col-md-8 col-lg-6 col-xl-5" style='min-width: -webkit-fill-available'
                 *ngFor="let n of numSequence(6)">
                 <leds-card designType='simple' [actionsOnHover]='true'>
-                    <div class="le-u-overline le-u-text-primary-80 le-u-mar-b-8">Overline</div>
+                    <div class="le-u-overline le-u-text-primary-80 lfx-u-mar-b-8">Overline</div>
                     <mat-card-header>
                         <mat-card-title class="le-c-card__container clearfix">
                             <div class="le-c-card__container-left">
@@ -56,7 +56,7 @@
                         </div>
                     </mat-card-content>
                     <mat-card-actions class="le-c-card__action-hover">
-                        <leds-button buttonType="button" designType="text">View Details</leds-button>
+                        <button type="button" class="btn btn-link">View Details</button>
                         <ul class="float-end le-c-card__action-ul">
                             <li><i class="icon x-32 edit-icon"></i></li>
                             <li><i class="icon x-32 delete-sm-icon"></i></li>

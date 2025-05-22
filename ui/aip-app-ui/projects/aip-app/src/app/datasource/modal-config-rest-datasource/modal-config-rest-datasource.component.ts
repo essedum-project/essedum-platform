@@ -686,9 +686,9 @@ export class ModalConfigRestDatasourceComponent implements OnInit, OnChanges, Do
   }
 
   optionChange(event) {
-    this.selectedOption = event;
-    this.bodyOption = event;
-    this.addHeaderRowBasedOnType(event)
+    this.selectedOption = event.value;
+    this.bodyOption = event.value;
+    this.addHeaderRowBasedOnType(event.value)
   }
 
   // clientAuthChange(event){

@@ -71,7 +71,7 @@ mat-drawer-container {
 	bottom: 0;
 	left: 0;
 	right: 0;
-	height: calc(100vh - var(--footerHeight,40px));
+	height: calc(100vh - var(--footerHeight,50px));
 }
 
 .is-active {
@@ -1003,4 +1003,20 @@ li.leftpanel-item.disabled {
 
 ::ng-deep .modal-content {
     background: none !important;
+}
+
+.lfx-u-mar-l-16{
+	margin-left: 16px !important;
+}
+
+.lfx-u-mar-t-12{
+	margin-top: 12px !important;
+}
+
+.lfx-u-mar-r-24{
+	margin-right: 24px !important
+}
+
+.lex-u-pad-24{
+	padding: 24px !important
 }

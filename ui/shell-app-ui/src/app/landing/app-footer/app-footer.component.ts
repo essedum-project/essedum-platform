@@ -39,9 +39,9 @@ export class AppFooterComponent implements OnInit {
     let screenMultiple = window.outerWidth/ window.document.documentElement.clientWidth;
     let minOfClientDimension = clientWidth * screenChangeRatio;
     this.footerHeight = ((minOfClientDimension * 3.2) / 100) * (screenMultiple) + 'px';
-    document.documentElement.style.setProperty("--footerHeight",this.footerHeight);
-    this.footerTextSize = ((minOfClientDimension * 1) / 100) * (screenMultiple) + 'px';
-    document.documentElement.style.setProperty("--footerTextSize", this.footerTextSize);
+    //document.documentElement.style.setProperty("--footerHeight",this.footerHeight);
+    // this.footerTextSize = ((minOfClientDimension * 1) / 100) * (screenMultiple) + 'px';
+    // document.documentElement.style.setProperty("--footerTextSize", this.footerTextSize);
   }
 }
 

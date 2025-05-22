@@ -15,21 +15,59 @@
   display: flex;
 }
 .aip-tag-active:hover{
-  background: var(---faf2ff) 0% 0% no-repeat padding-box;
-  background: #ebe8ec 0% 0% no-repeat padding-box;
-  box-shadow: 0px 5px 6px  #0000006b;
+  background: white 0% 0% no-repeat padding-box;
+  background: white 0% 0% no-repeat padding-box;
+  box-shadow: 0px 5px 6px  #0a142f;
 }
 .aip-tag-disabled:hover {
-  background: var(---faf2ff) 0% 0% no-repeat padding-box;
-  background: #faf2ff 0% 0% no-repeat padding-box;
-  box-shadow: 0px 5px 6px #00000029;
+  background: white 0% 0% no-repeat padding-box;
+  background: #b3dfff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 5px 6px #0a142f;
 }
 .aip-tag-active {
-  background: #edcfff 0% 0% no-repeat padding-box;
-  box-shadow: 0px 2px 4px #00000029;
-  color: #8626c3;
+  background: white 0% 0% no-repeat padding-box;
+  box-shadow: 0px 2px 4px #0a142f;
+  color:#0094ff ;
 }
 .aip-tag-active:focus {
-  background: #dadada 0% 0% no-repeat padding-box;
-  box-shadow: 0px 1px 2px #00000029;
+  background: white 0% 0% no-repeat padding-box;
+  box-shadow: 0px 1px 2px #0a142f;
+}
+
+.lfx-u-body-md
+ {
+    font-size: 1.4rem;
+    font-weight: 400;
+    font-family: "roboto", Arial, sans-serif !important;
+    font-style: normal;
+}
+
+.lfx-u-header-md {
+  font-size: 1.4rem;
+  font-weight: 600;
+  font-family: "myriad-pro", Arial, sans-serif !important;
+  font-style: normal;
+}
+
+a{
+ color: #0094ff
+}
+
+.lfx-u-pad-24{
+padding: 24px !important;
+}
+
+.lfx-u-mar-b-16{
+margin-bottom: 16px !important;
+}
+
+.lfx-u-mar-t-16{
+margin-top: 16px !important;
+}
+
+.lfx-u-header-xl{
+  font-size : 1.8rem;
+      font-weight: 600;
+      font-family: "myriad-pro", Arial, sans-serif !important;
+      font-style: normal;
 }

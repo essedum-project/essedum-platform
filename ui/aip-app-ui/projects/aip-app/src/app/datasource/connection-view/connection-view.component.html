@@ -2,22 +2,22 @@
     <div>
         <app-datasource-config [ConnectionEdit]="edit" [view]="view" [matData]="data"></app-datasource-config>
     </div>
-</div>
+</div> 
 <div *ngIf="data?.category.toLowerCase()=='rest'||data?.category.toLowerCase()=='git'" class="container-fluid backgroud-color">
-    <div class="le-l-level1-wrapper">
+
         <div class="row">
             <div class="col-lg-12">
-                <div class="le-l-level1-middle-col le-l-base-layout-center">
+                <div class="lfx-l-level1-middle-col">
                     <span *ngIf="initiativeView">
                         <div *ngIf="view" class="align-items-center d-flex">
                             <span class="" style="cursor: pointer;">
                                 <i class="aip-led-icons icon x-24 back-icon" (click)="routeBackToConnectionList()"></i>
                             </span>
-                            <span class="le-u-mar-l-8 le-u-header-xxl">View Connection</span>
+                            <span class="lfx-u-mar-l-8 lfx-u-header-xxl secondary-color">View Connection</span>
                         </div>
                     </span>
                     <span *ngIf="!initiativeView">
-                        <span class="le-u-mar-l-8 aip-desc-title le-u-header-xxl"><span
+                        <span class="lfx-u-mar-l-8 aip-desc-title lfx-u-header-xxl"><span
                                 style=" color: #737373;;">Connection:
                             </span>{{data.alias | titlecase}} </span>
 
@@ -26,53 +26,62 @@
                         <span class="" style="cursor: pointer;">
                             <i class="aip-led-icons icon x-24 back-icon" (click)="routeBackToConnectionList()"></i>
                         </span>
-                        <span class="le-u-mar-l-8 le-u-header-xxl">Edit Connection</span>
+                        <span class="lfx-u-mar-l-8 lfx-u-header-xxl secondary-color">Edit Connection</span>
                     </div>
-                    <div class="le-l-level2-middle-ctr">
-                        <div class="le-l-level2-middle-col le-u-mar-b-24__mb">
-                            <leds-panel type="default" styleClass="" contentClass="">
-                                <div class="le-u-mar-tb-16 le-u-pad-16">
-                                    <div class="row le-c-panel__content">
-                                        <div class="le-l-level2-middle-col le-u-mar-b-24__mb">
-                                            <div class="d-flex justify-content-between align-items-center px-4">
+                    <div class="lfx-l-level2-middle-ctr">
+                        <div class="lfx-l-level2-middle-col ">
+                            <mat-card class="mat-elevation-z4">
+                                <div class="lfx-u-mar-tb-16 lfx-u-pad-16">
+                                    <div class="row">
+                                        <div class="lfx-l-level2-middle-col">
+                                            <div class="d-flex justify-content-between align-items-center px-4 lfx-u-mar-b-20">
                                                 <div class="align-items-center d-flex">
-                                                    <h2 style="color:var(--base-color)">Connection Properties</h2>
+                                                    <h2 class="base-color">Connection Properties</h2>
                                                 </div>
                                             </div>
-                                            <div class="le-u-pad-t-32 le-u-pad-lr-24">
+                                            <div class=".lfx-u-pad-t-32 .lfx-u-pad-lr-24">
                                                 <div class="row">
-                                                    <div class="col-lg-12 col-md-12 le-u-mar-b-16">
-                                                        <leds-input-field label="Display Name"
-                                                            placeholder="Enter Name..." errorMessage="{
-                                    required: 'This field is required',
-                                    }" inputType="text" [disabled]="false" [required]="true"
-                                                            [(ngModel)]="data.alias"></leds-input-field>
+                                                    <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+                                                        <mat-form-field appearance="outline" style="width: 100%;" floatLabel="always">
+                                                            <mat-label>Display Name</mat-label>
+                                                            <input matInput placeholder="Enter Name..." [(ngModel)]="data.alias" required>
+                                                            <mat-error *ngIf="!data.alias">This field is required</mat-error>
+                                                        </mat-form-field>
                                                     </div>
-                                                    <div class="col-lg-12 col-md-12 le-u-mar-b-16">
-                                                        <leds-input-field label="Description"
-                                                            placeholder="Enter Description..." inputType="text"
-                                                            [disabled]="false" [required]="false"
-                                                            [(ngModel)]="data.description"></leds-input-field>
+                                                    <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+                                                        <mat-form-field appearance="outline" style="width: 100%;" floatLabel="always">
+                                                            <mat-label>Description</mat-label>
+                                                            <input matInput placeholder="Enter Description..." [(ngModel)]="data.description">
+                                                        </mat-form-field>
                                                     </div>
-                                                    <div class="col-lg-12 col-md-12 le-u-mar-b-16">
-                                                        <leds-select label="Connection Type"
-                                                            hint="Select Connection type" [options]="typeOptions"
-                                                            (selectChange)="onTypeChange($event)"
-                                                            [(ngModel)]="data.type"></leds-select>
+                                                    <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+                                                        <mat-form-field appearance="outline" style="width: 100%;">
+                                                            <mat-label>Connection Type</mat-label>
+                                                            <mat-select [(value)]="data.type" (selectionChange)="onTypeChange($event)">
+                                                                <mat-option *ngFor="let option of typeOptions" [value]="option.value">
+                                                                    {{ option.viewValue }}
+                                                                </mat-option>
+                                                            </mat-select>
+                                                            <mat-hint>Select Connection type</mat-hint>
+                                                        </mat-form-field>
                                                     </div>
-                                                    <div class="col-lg-12 col-md-12 le-u-mar-b-16">
-                                                        <leds-select *ngIf="capabilityPromise|async" label="Capability"
-                                                            hint="Select Capability" [options]="capabilityOptions"
-                                                            [isMultiple]="true"
-                                                            (selectChange)="onCapbilityTypeChange($event) "
-                                                            [selected]="capability"></leds-select>
+                                                    <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+                                                        <mat-form-field appearance="outline" style="width: 100%;">
+                                                            <mat-label>Capability</mat-label>
+                                                            <mat-select [(value)]="capability" (selectionChange)="onCapbilityTypeChange($event)" multiple>
+                                                                <mat-option *ngFor="let option of capabilityOptions" [value]="option.value">
+                                                                    {{ option.viewValue }}
+                                                                </mat-option>
+                                                            </mat-select>
+                                                            <mat-hint>Select Capability</mat-hint>
+                                                        </mat-form-field>
                                                     </div>
-                                                    <leds-accordion *ngIf="data.type.toLowerCase().endsWith('sql')"
+                                                    <mat-accordion *ngIf="data.type.toLowerCase().endsWith('sql')"
                                                         designType="3D" [hideToggle]="false" [multi]="false">
-                                                        <mat-expansion-panel>
+                                                        <mat-expansion-panel style="margin-bottom: 10px !important">
                                                             <mat-expansion-panel-header [collapsedHeight]="'40px'"
                                                                 [expandedHeight]="'40px'">
-                                                                <mat-panel-title>Connection Details</mat-panel-title>
+                                                                <mat-panel-title  [ngStyle]="{'background-color': '#0094ff'}" style="color: white; font-weight: 600;">Connection Details</mat-panel-title>
                                                             </mat-expansion-panel-header>
                                                             <div class="table-responsive selector-690-13"
                                                                 *ngIf="formData">
@@ -83,7 +92,7 @@
                                                                 </jsonforms>
                                                             </div>
                                                         </mat-expansion-panel>
-                                                    </leds-accordion>
+                                                    </mat-accordion>
                                                     <div class="col-md-12">
                                                         <div *ngIf="hideDetails">
                                                             <modal-config-rest-datasource [matData]="data" [datasourcePortJson]="datasourceportsjson"
@@ -100,42 +109,47 @@
                                     </div>
 
                                     <div *ngIf="edit && !view"
-                                        class="col-lg-12 col-md-12 le-u-mar-b-16 d-flex justify-content-end">
+                                        class="col-lg-12 col-md-12 lfx-u-mar-b-16 d-flex justify-content-end">
                                         <div *ngIf="hideDetails">
-                                            <leds-button class="" style="color:var(--base-color);"
-                                                nameText="primaryButton" idText="primaryButton" [disabled]="false"
-                                                buttonType="button" designType="primary"
-                                                (click)="testConnection()">Test</leds-button>
+                                            <button mat-raised-button style="background-color: #0a142f; color: white;"
+                                                [disabled]="false" (click)="testConnection()" 
+                                                onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';" 
+                                                onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                                Test
+                                            </button>
                                         </div>&nbsp;
-                                        <leds-button class="" nameText="primaryButton" idText="primaryButton"
-                                            [disabled]="false" buttonType="button" designType="primary"
-                                            (click)="updateConnection()">Save</leds-button>
+                                        <button mat-raised-button style="background-color: #0a142f; color: white;"
+                                            [disabled]="false" (click)="updateConnection()" 
+                                            onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';" 
+                                            onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                            Save
+                                        </button>
                                     </div>
                                 </div>
-                            </leds-panel>
+                            </mat-card>
                         </div>
-                        <div class="le-l-level2-right-col" *ngIf="initiativeView">
-                            <div class="le-u-mar-tb-16">
-                                <leds-panel type="default" styleClass="" contentClass="">
-                                    <div class="le-c-panel__content">
-                                        <div *ngIf="edit && !view" class="le-u-pad-16">
-                                            <div class="le-u-header-lg">Connection Help</div>
+                        <div class="lfx-l-level2-right-col" *ngIf="initiativeView">
+                            <div class="lfx-u-mar-tb-16">
+                                <mat-card>
+                                    <div class="lfx-c-panel__content">
+                                        <div *ngIf="edit && !view" class="lfx-u-pad-16">
+                                            <div class="lfx-u-header-lg">Connection Help</div>
                                         </div>
-                                        <div *ngIf="!edit && view" class="le-u-pad-16 le-u-no-pad-b">
-                                            <div class="le-u-header-lg le-u-mar-b-16">Connected Artifacts</div>
+                                        <div *ngIf="!edit && view" class="lfx-u-pad-16">
+                                            <div class="lfx-u-header-lg lfx-u-mar-b-16">Connected Artifacts</div>
                                             <div class="" *ngIf="component.length > 0; else noRelatedComponent">
 
-                                                <leds-navigation-list position="left" [selectOnClick]="true">
-                                                    <li class="aip-daa " *ngFor="let component of component ">
-                                                        <app-related-component [component]=component [childId]="data.id"
+                                                <ul class="list-group">
+                                                    <li class="list-group-item" *ngFor="let component of component">
+                                                        <app-related-component [component]="component" [childId]="data.id"
                                                             [parentType]="'CONNECTION'"
                                                             (reload)="reload($event)"></app-related-component>
                                                     </li>
-                                                </leds-navigation-list>
+                                                </ul>
                                             </div>
                                             <ng-template #noRelatedComponent>
                                                 <div
-                                                    class="le-u-body-md le-u-text-neutral-80 le-u-line-2 aip-desc-ellipsis">
+                                                    class="lfx-u-body-md lfx-u-text-neutral-80 aip-desc-ellipsis">
                                                     <div
                                                         class="d-flex justify-content-center align-items-center flex-column">
                                                         <img src="assets/images/aip_empty_state_leds.svg"
@@ -147,7 +161,7 @@
                                             </ng-template>
                                         </div>
                                     </div>
-                                    <div ledsPanelFooter class="le-u-mar-t-8">
+                                    <div ledsPanelFooter class="lfx-u-mar-t-8">
                                         <li *ngIf="linkAuth">
                                             <div *ngIf="relatedloaded">
                                                 <div class="lds-ring">
@@ -157,13 +171,13 @@
                                                     <div></div>
                                                 </div>
                                             </div>
-                                            <div class="aip-cursor le-u-pad-l-8 le-u-pad-b-8"
+                                            <div class="aip-cursor lfx-u-pad-l-8 lfx-u-pad-b-8"
                                                 (click)="openModal(linker)">
-                                                <div class="d-flex aip-daa le-u-mar-8 le-u-pad-8  align-items-center"
+                                                <div class="d-flex aip-daa lfx-u-mar-8  lfx-u-pad-8  align-items-center"
                                                     style="width: max-content;">
-                                                    <div class="le-u-mar-lr-8"><i class=" icon x-16 icon_link"
+                                                    <div class="lfx-u-mar-lr-8"><i class=" icon x-16 icon_link"
                                                             style="color: #8626C3;"></i></div>
-                                                    <div class="le-u-body-md">Link Artifacts</div>
+                                                    <div class="lfx-u-body-md">Link Artifacts</div>
                                                 </div>
                                             </div>
                                             <ng-template #linker let-modal>
@@ -173,12 +187,11 @@
                                             </ng-template>
                                         </li>
                                     </div>
-                                </leds-panel>
+                                </mat-card>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+   

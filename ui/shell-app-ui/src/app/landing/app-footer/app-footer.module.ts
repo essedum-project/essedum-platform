@@ -1,8 +1,9 @@
-import { NgModule } from '@angular/core';
+import { NgModule ,CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { AppFooterComponent } from './app-footer.component';
 import { ButtonModule, FooterModule } from 'leds-lib';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @NgModule({
   declarations: [
@@ -11,10 +12,11 @@ import { ButtonModule, FooterModule } from 'leds-lib';
   imports: [
     CommonModule,
     ButtonModule,
-    FooterModule
+    FooterModule,MatTooltipModule
   ],
   exports: [
     AppFooterComponent
-  ]
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppFooterModule { }
