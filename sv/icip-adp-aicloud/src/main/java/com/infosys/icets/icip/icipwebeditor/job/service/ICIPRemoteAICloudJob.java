@@ -292,7 +292,7 @@ public class ICIPRemoteAICloudJob extends ICIPCommonJobServiceUtil implements II
 							jobObject.getSubmittedBy(), jobObject.getName(), JobStatus.STARTED.toString(), version,
 							null, submittedOn, jobObject.getJobs().get(0).getRuntime().toString(), jobObject.getOrg(),
 							AICLOUD, null, attributesHash, jobObject.getCorelId(), null, gson.toJson(pipelineMetadata),
-							0, "{}", "{}", "{}", "{}", "{}");
+							0, "{}", "{}", "{}", "{}", "{}","");
 					logger.info("Submitting the Pipeline to Job Server Remotely");
 					RuntimeType type = job.getRuntime();
 					String org = jobObject.getOrg();

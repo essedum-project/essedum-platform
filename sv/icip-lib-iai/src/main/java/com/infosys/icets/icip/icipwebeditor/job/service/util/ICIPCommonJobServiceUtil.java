@@ -422,7 +422,7 @@ public abstract class ICIPCommonJobServiceUtil {
 			iCIPJobs = new ICIPJobs(null, ICIPUtils.removeSpecialCharacter(jobId.toString()), job.getSubmittedBy(),
 					job.getName(), JobStatus.STARTED.toString(), version, null, submittedOn,
 					job.getJobs().get(0).getRuntime().toString(), job.getOrg(), job.getName(), null, attributesHash,
-					job.getCorelId(), null, gson.toJson(pipelineMetadata), 0, "{}", "{}", "{}", "{}", "{}");
+					job.getCorelId(), null, gson.toJson(pipelineMetadata), 0, "{}", "{}", "{}", "{}", "{}", "");
 			break;
 		default:
 			throw new LeapException(INVALID_JOBTYPE);
@@ -790,7 +790,7 @@ public abstract class ICIPCommonJobServiceUtil {
 					job.getJobs().get(index).getName(), JobStatus.RUNNING.toString(), null, null, submittedOn,
 					job.getJobs().get(index).getRuntime().toString(), job.getOrg(), job.getName(), null,
 					iCIPChainJobs.getHashparams(), job.getCorelId(), null, gson.toJson(pipelineMetadata), 0, "{}", "{}",
-					"{}", "{}", "{}");
+					"{}", "{}", "{}", "");
 		}
 
 		String msg = String.format("%s%s%s%s%s%s%s", "About to run ", cmd[0], " ", cmd[1], " ",
@@ -861,7 +861,7 @@ public abstract class ICIPCommonJobServiceUtil {
 	protected Integer runNativeCommand(JobObjectDTO job, List<String> cmds, List<ICIPNativeJobDetails> nativeJobDetails,
 			String jobId)
 			throws IOException, LeapException, InterruptedException, NoSuchAlgorithmException, ExecutionException {
-		
+
 		initializeJob(job);
 
 		List<String[]> cmdlist = getCompleteCommand(job, cmds, nativeJobDetails);
