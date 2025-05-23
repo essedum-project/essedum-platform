@@ -9,6 +9,8 @@ from minio import Minio
 from urllib.parse import urlparse
 from utils import *
 import logging
+import subprocess
+import os
 from minio.error import S3Error
 from requests.exceptions import ConnectionError, Timeout
 from botocore.exceptions import EndpointConnectionError
@@ -61,15 +63,37 @@ class Task:
         else:
             self.log_path =WORKING_DIRECTORY+id
 
-    def execute_script(self):
-        if self.storage == "minio":
-            return self.execute_minio_script()
-        elif self.storage == "s3":
-            return self.execute_s3_script()
-        else:
-            return self.execute_local_script()
+    def create_service_request_venv(self):
+        """Create or reuse a virtual environment for the service request."""
+        try:
+            env_name = f"script_venv_{self.name}"
+            dir = os.path.join("venvs", env_name)
+            venv_dir = os.path.join(dir, "venv")
+            if not os.path.exists(venv_dir):
+                os.makedirs(dir, exist_ok=True)
+                subprocess.run(["python", "-m", "venv", "--system-site-packages", venv_dir], check=True)
+                print(f"Created virtual environment for task {self.id}")
+            else:
+                print(f"Reusing existing virtual environment for task {self.id}")
+            executable_path = os.path.normpath(
+                os.path.join(venv_dir, "bin", "activate") if os.name != 'nt' else os.path.join(venv_dir, "Scripts", "activate.bat")
+            )
+            shell_command = "call " if os.name == "nt" else ". "
+            python_executable = shell_command + os.path.abspath(executable_path)
+            return python_executable
+        except Exception as e:
+            print('Exception occurred:', e)
 
-    def execute_local_script(self):
+    def execute_script(self):
+        python_executable = self.create_service_request_venv() if config['DEFAULT']['use_venv'] == 'True' else ''
+        if self.storage == "minio":
+            return self.execute_minio_script(python_executable)
+        elif self.storage == "s3":
+            return self.execute_s3_script(python_executable)
+        else:
+            return self.execute_local_script(python_executable)
+
+    def execute_local_script(self, python_executable = ''):
         if not os.path.exists(WORKING_DIRECTORY):
             os.makedirs(WORKING_DIRECTORY)
         if self.id:
@@ -80,7 +104,10 @@ class Task:
         with open(log_text, "wb") as log_file:
             wd = os.getcwd()
             os.chdir(save_path)
-            p = subprocess.Popen(self.command, stdout=log_file, stderr=log_file, shell=True)
+            full_command = self.command
+            if(python_executable):
+                full_command =f"""{python_executable} && {self.command} && deactivate"""
+            p = subprocess.Popen(full_command, stdout=log_file, stderr=log_file,shell=True)
             out, err = p.communicate()
             returnCode = p.returncode
             logger.info("return code is ", returnCode)
@@ -88,7 +115,7 @@ class Task:
             logger.info("pid is ", pid)
         return {"pid": pid, "return_code":returnCode}
 
-    def execute_minio_script(self):
+    def execute_minio_script(self, python_executable = ''):
         if not os.path.exists(WORKING_DIRECTORY):
             os.makedirs(WORKING_DIRECTORY)
         if self.id:
@@ -121,7 +148,10 @@ class Task:
             with open(log_text, "wb") as log_file:
                 wd = os.getcwd()
                 os.chdir(save_path)
-                p = subprocess.Popen(self.command, stdout=log_file, stderr=log_file, shell=True, env=d)
+                full_command = self.command
+                if(python_executable):
+                    full_command =f"""{python_executable} && {self.command} && deactivate"""
+                p = subprocess.Popen(full_command, stdout=log_file, stderr=log_file,shell=True, env=d)
                 pid = p.pid
                 db_operations.update_job_pid(self.id, pid)
                 out, err = p.communicate()
@@ -167,7 +197,7 @@ class Task:
 
 
 
-    def execute_s3_script(self):
+    def execute_s3_script(self, python_executable = ''):
         if not os.path.exists(WORKING_DIRECTORY):
             os.makedirs(WORKING_DIRECTORY)
         if self.id:
@@ -203,7 +233,10 @@ class Task:
             with open(log_text, "wb") as log_file:
                 wd = os.getcwd()
                 os.chdir(save_path)
-                p = subprocess.Popen(self.command, stdout=log_file, stderr=log_file, shell=True, env=d)
+                full_command = self.command
+                if(python_executable):
+                    full_command =f"""{python_executable} && {self.command} && deactivate"""
+                p = subprocess.Popen(full_command, stdout=log_file, stderr=log_file,shell=True, env=d)
                 pid = p.pid
                 db_operations.update_job_pid(self.id, pid)
                 out, err = p.communicate()

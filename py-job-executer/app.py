@@ -405,12 +405,55 @@ def adapter_function_execute():
         logger.info(f"Error is: {str(exc_trace)}")
     return jsonify(result), 500
 
+@app.route('/venvs', methods=['DELETE'])
+def delete_venv():
+    if not request.get_json():
+        abort(400)
+    try:
+        venvs_to_delete = request.get_json()
+        venvs_path = os.path.join(os.getcwd(), "venvs")
+        if not os.path.exists(venvs_path):
+            return jsonify({"error": "venvs directory not found"}), 404
+        deleted_venvs = []
+        not_found_venvs = []
+        for venv in venvs_to_delete:
+            venv_path = os.path.join(venvs_path, venv)
+            if os.path.exists(venv_path) and os.path.isdir(venv_path):
+                try:
+                    import shutil
+                    shutil.rmtree(venv_path)
+                    deleted_venvs.append(venv)
+                except Exception as e:
+                    logger.error(f"Failed to delete venv {venv}: {e}", exc_info=True)
+            else:
+                not_found_venvs.append(venv)
+        response = {
+            "deleted": deleted_venvs,
+            "not_found": not_found_venvs
+        }
+        return jsonify(response), 200
+    except Exception as err:
+        logger.error(f'Exception occured: {err}', exc_info=True)
+        return jsonify({"status": "failed to delete venv"}), 500
+
+@app.route('/venvs', methods=['GET'])
+def get_venvs():
+    try:
+        venvs_path = os.path.join(os.getcwd(), "venvs")
+        if not os.path.exists(venvs_path):
+            return jsonify({"error": "venvs directory not found"}), 404
+        created_venvs = [venv for venv in os.listdir(venvs_path) if os.path.isdir(os.path.join(venvs_path, venv))]
+        return created_venvs, 200
+    except Exception as err:
+        logger.error(f'Exception occured: {err}', exc_info=True)
+        return jsonify({"status": "failed to get venvs"}), 500
+
 if __name__ == '__main__':
     if DB_TRUNCATE == "True":
         db_operations.clean_jobs_table()
     # Start the thread to process the service queue
     Thread(target=process_service_queue, daemon=True).start()
-    if USE_TASK_RETRIVER:
+    if USE_TASK_RETRIVER == "True":
         Thread(target=task_retriver_module.start_fetch_tasks, daemon=True).start()
     # Register the exit handler to ensure cleanup at application exit
     atexit.register(cleanup_threads_and_db)
