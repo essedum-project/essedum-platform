@@ -11,7 +11,7 @@ telemetry:
     driverClassName: com.mysql.cj.jdbc.Driver
     jdbcurl: jdbc:mysql://localhost:3306/telemetrydb
     username: root
-    password: root 
+    password: KaPo_%1#9
 
 config:
   active-profiles: mysql,dbjwt,btf,dbconstants,vault
@@ -21,9 +21,9 @@ config:
   
   datasourceurl: jdbc:mysql://localhost:3306
   datasourceuser: root
-  datasourcepass: root
-  leapcoredb: leap_8000_coredb_m117
-  leapquartzdb: leap2_8000_quartz
+  datasourcepass: KaPo_%1#9
+  leapcoredb: leap_8000_testjson
+  leapquartzdb: leap_8000_quartzdb
   
   leapbtfdb: leapmaster_btf
   leapsjsdb: leapmaster_sjs
@@ -77,7 +77,7 @@ spring:
     resources:
       static-locations: ${config.static-locations}
   liquibase:
-    enabled: false
+    enabled: true
     contexts: test,fresh,qa,2v13to300,acme,300to310,300to310-acme,acme_2v13to300,311to312
 
     change-log: "classpath:db/changelog/master.xml"
@@ -392,5 +392,6 @@ endpoint:
 port_automation_app_url: http://localhost:5000
 
 jobexecutor:
+  org: leo1311
   enabled: true
   runtimeList: azure, ams

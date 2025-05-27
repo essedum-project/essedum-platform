@@ -229,4 +229,15 @@
 			<column name="payload" type="TEXT" />
 		</addColumn>
 	</changeSet>
+	
+		<changeSet author="Leap" id="3v2-cip-12">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="mljobs" columnName="executortaskid" />
+			</not>
+		</preConditions>
+		<addColumn tableName="mljobs">
+			<column name="executortaskid" type="VARCHAR(255)" />
+		</addColumn>
+	</changeSet>
 </databaseChangeLog>
