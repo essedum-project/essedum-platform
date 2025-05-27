@@ -323,28 +323,11 @@ public class MlAdaptersServiceImpl implements MlAdaptersService {
 		}
 	}
 
-	//implement pagenition count and list
 	@Override
 	public Long getAdapterImplementationCount(String organization,String category,String spec,String connection,String query) {
-		List<String> categoryList=null;
-		List<String> specList=null;
-		List<String> connectionList=null;
-		
-		if(category!=null)
-		{
-			categoryList = Arrays.asList(category.split(","));
-		}
-		
-		if(spec!=null)
-		{
-			specList = Arrays.asList(spec.split(","));
-		}
-		
-		if(connection!=null)
-		{
-			connectionList = Arrays.asList(connection.split(","));
-		}
-
+		List<String> categoryList = category!= null ? Arrays.asList(category.split(",")) : null;
+		List<String> specList = spec != null ? Arrays.asList(spec.split(",")) : null;
+		List<String> connectionList = connection!=null ? Arrays.asList(connection.split(",")) : null;
 		return mlAdaptersRepository.getAdaptersCountByOptionalParams(organization, categoryList, specList, connectionList, query);
 
 	}
@@ -352,25 +335,9 @@ public class MlAdaptersServiceImpl implements MlAdaptersService {
 	@Override
 	public Page<MlAdapters> getAdapterImplementation(String organization, String category, String spec,
 			String connection, String query, Pageable pageable) {
-		List<String> categoryList=null;
-		List<String> specList=null;
-		List<String> connectionList=null;
-		
-		if(category!=null)
-		{
-			categoryList = Arrays.asList(category.split(","));
-		}
-		
-		if(spec!=null)
-		{
-			specList = Arrays.asList(spec.split(","));
-		}
-		
-		if(connection!=null)
-		{
-			connectionList = Arrays.asList(connection.split(","));
-		}
-
+		List<String> categoryList = category != null ? Arrays.asList(category.split(",")) : null;
+		List<String> specList = spec!=null ? Arrays.asList(spec.split(",")) : null;
+		List<String> connectionList=connection!=null ? Arrays.asList(connection.split(",")) : null;
 		return mlAdaptersRepository.getAdaptersByOptionalParams(organization, categoryList, specList, connectionList, query, pageable);
 	}
 

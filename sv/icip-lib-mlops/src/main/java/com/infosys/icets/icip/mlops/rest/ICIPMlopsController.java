@@ -15,13 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.text.ParseException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -30,19 +23,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.imageio.ImageIO;
 
 import org.apache.http.client.ClientProtocolException;
-import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
-import org.hibernate.internal.build.AllowSysOut;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
@@ -77,7 +64,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.infosys.icets.ai.comm.lib.util.ICIPHeaderUtil;
 import com.infosys.icets.ai.comm.lib.util.ICIPUtils;
-import com.infosys.icets.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.infosys.icets.ai.comm.lib.util.domain.NameAndAliasDTO;
 import com.infosys.icets.ai.comm.lib.util.exceptions.LeapException;
 import com.infosys.icets.icip.dataset.model.ICIPDataset;
@@ -96,12 +82,6 @@ import com.infosys.icets.icip.icipmodelserver.v2.model.dto.ICIPPolyAIRequestWrap
 import com.infosys.icets.icip.icipmodelserver.v2.model.dto.ICIPPolyAIResponseWrapper;
 import com.infosys.icets.icip.icipmodelserver.v2.service.impl.ICIPEndpointPluginsService;
 import com.infosys.icets.icip.icipmodelserver.v2.service.impl.ICIPModelPluginsService;
-import com.infosys.icets.icip.icipwebeditor.model.ICIPImageSaving;
-import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedEndpoint;
-import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedModel;
-import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedRuntime;
-import com.infosys.icets.icip.icipwebeditor.model.ICIPPartialGroups;
-import com.infosys.icets.icip.icipwebeditor.model.ICIPPlugin;
 import com.infosys.icets.icip.icipwebeditor.constants.FileConstants;
 import com.infosys.icets.icip.icipwebeditor.constants.IAIJobConstants;
 import com.infosys.icets.icip.icipwebeditor.executor.sync.service.JobSyncExecutorService;
@@ -111,14 +91,15 @@ import com.infosys.icets.icip.icipwebeditor.job.model.ICIPInternalJobs;
 import com.infosys.icets.icip.icipwebeditor.job.service.IICIPInternalJobsService;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPAgentJobs;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPAgents;
-import com.infosys.icets.icip.icipwebeditor.model.ICIPApps;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPGroupModel;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPGroups;
+import com.infosys.icets.icip.icipwebeditor.model.ICIPImageSaving;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPJobs;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPJobsPartial;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedEndpoint;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedModel;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPPartialAgentJobs;
+import com.infosys.icets.icip.icipwebeditor.model.ICIPPartialGroups;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPPlugin;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPPluginScript;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPStreamingServices;
@@ -126,10 +107,9 @@ import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPMLFederatedEndpointDTO
 import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPMLFederatedModelDTO;
 import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPStreamingServices2DTO;
 import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPStreamingServicesDTO;
+import com.infosys.icets.icip.icipwebeditor.repository.ICIPMLFederatedEndpointRepository;
+import com.infosys.icets.icip.icipwebeditor.repository.ICIPMLFederatedModelsRepository;
 import com.infosys.icets.icip.icipwebeditor.service.ICIPImageSavingService;
-import com.infosys.icets.icip.icipwebeditor.service.IICIPMLFederatedEndpointService;
-import com.infosys.icets.icip.icipwebeditor.service.IICIPMLFederatedModelService;
-import com.infosys.icets.icip.icipwebeditor.service.IICIPPartialGroupsService;
 import com.infosys.icets.icip.icipwebeditor.service.IICIPAgentJobsService;
 import com.infosys.icets.icip.icipwebeditor.service.IICIPAgentService;
 import com.infosys.icets.icip.icipwebeditor.service.IICIPAppService;
@@ -138,6 +118,7 @@ import com.infosys.icets.icip.icipwebeditor.service.IICIPJobRuntimePluginsServic
 import com.infosys.icets.icip.icipwebeditor.service.IICIPJobsService;
 import com.infosys.icets.icip.icipwebeditor.service.IICIPMLFederatedEndpointService;
 import com.infosys.icets.icip.icipwebeditor.service.IICIPMLFederatedModelService;
+import com.infosys.icets.icip.icipwebeditor.service.IICIPPartialGroupsService;
 import com.infosys.icets.icip.icipwebeditor.service.IICIPPluginDetailsService;
 import com.infosys.icets.icip.icipwebeditor.service.IICIPPluginScriptService;
 import com.infosys.icets.icip.icipwebeditor.service.IICIPPluginService;
@@ -151,11 +132,6 @@ import com.infosys.icets.icip.mlops.rest.service.impl.ICIPMlOpsRestAdapterServic
 import io.micrometer.core.annotation.Timed;
 //import liquibase.pro.license.keymgr.a;
 import jakarta.transaction.Transactional;
-
-import com.infosys.icets.icip.icipwebeditor.repository.ICIPAppsRepository;
-import com.infosys.icets.icip.icipwebeditor.repository.ICIPMLFederatedEndpointRepository;
-import com.infosys.icets.icip.icipwebeditor.repository.ICIPMLFederatedModelsRepository;
-import com.infosys.icets.icip.icipwebeditor.repository.ICIPMLFederatedRuntimeRepository;
 
 @RestController
 @Timed
@@ -1862,18 +1838,28 @@ public class ICIPMlopsController {
 	}
 
 	@GetMapping("/datasources/list")
-	public ResponseEntity<String> getDatasourcesList(@RequestParam(name = "filter", required = true) String filter,
-			@RequestParam(name = "orderBy", required = true) String orderBy,
-			@RequestParam(name = "project", required = true) String project, @RequestHeader Map<String, String> headers)
-
-	{
-		Map<String, String> params = new HashMap<String, String>();
-		List<ICIPDatasource> results = datasourceService.findByOrganization(project);
-		String response = new JSONArray(results).toString();
-		return ResponseEntity.status(200).body(response);
-
+	public ResponseEntity<List<ICIPDatasource>> getDatasourcesList(@RequestParam(name = "type", required = false) String type,
+			@RequestParam(name = "project", required = true) String project,
+			@RequestParam(name = "nameoralias", required = false) String nameoralias,
+			@RequestParam(name = "page", required = false) Integer page,
+	        @RequestParam(name = "size",required = false) Integer size){
+		Pageable pageable = (page==null||size==null) ? null : PageRequest.of(Math.max(page - 1, 0), size);
+		return ResponseEntity.status(200)
+				.body(datasourceService.getDataSourceByOptionalParameters(project, type, nameoralias, pageable).getContent());
+		
 	}
-
+	
+	
+	@GetMapping("/datasources/count")
+	public ResponseEntity<Long> getDatasourcesCount(@RequestParam(name = "type", required = false) String type,
+			@RequestParam(name = "project", required = true) String project,
+			@RequestParam(name = "nameoralias", required = false) String nameoralias ){
+		return ResponseEntity.status(200)
+				.body(datasourceService.getDataSourceCountByOptionalParameters(project, type, nameoralias));
+		
+	}
+	
+	
 	@GetMapping("/instances/list")
 	public ResponseEntity<String> getInstancesList(@RequestParam(name = "filter", required = true) String filter,
 			@RequestParam(name = "orderBy", required = true) String orderBy,

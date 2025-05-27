@@ -118,7 +118,6 @@ public class MlAdaptersController {
 				HttpStatus.OK);
 	}
 	
-	//Controller to implement pagenition count and list
 	
 	@GetMapping("/getAdaptersCount/count")
 	public ResponseEntity<Long> countAdapterImplementations(

@@ -36,7 +36,6 @@ public interface MlAdaptersRepository extends JpaRepository<MlAdapters, Integer>
 	
 	List<String> getAdapterNamesByOrganization(String org);
 	
-	//implement pagenition count and list
 	Long getAdaptersCountByOptionalParams(String organization, List<String> category, List<String> spectemplatedomainname, 
 			List<String> connectionname, String name);
 	

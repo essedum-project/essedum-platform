@@ -13,11 +13,12 @@ package com.infosys.icets.icip.dataset.repository;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.data.repository.query.Param;
 
 import com.infosys.icets.ai.comm.lib.util.domain.NameAndAliasDTO;
 import com.infosys.icets.icip.dataset.model.ICIPDatasource;
@@ -226,5 +227,48 @@ public interface ICIPDatasourceRepository extends JpaRepository<ICIPDatasource, 
 	List<ICIPDatasource> getForEndpointConnectionsByOrg(String org);
 
 	Optional<ICIPDatasource> findByAlias(String alias);
+	
+	@Query("""
+		    SELECT new com.infosys.icets.icip.dataset.model.ICIPDatasource(
+		        ds.id, ds.name, ds.description, ds.type, ds.salt, ds.organization,
+		        ds.dshashcode, ds.activetime, ds.category, ds.interfacetype,
+		        ds.fordataset, ds.forruntime, ds.foradapter, ds.formodel,
+		        ds.forpromptprovider, ds.forendpoint, ds.forapp,
+		        ds.lastmodifiedby, ds.lastmodifieddate, ds.alias
+		    )
+		    FROM ICIPDatasource ds
+		    WHERE ds.organization = :org
+		      AND (:type IS NULL OR ds.type IN :type)
+		      AND (
+		        :nameOrAlias IS NULL OR
+		        LOWER(ds.name) LIKE LOWER(CONCAT('%', :nameOrAlias, '%')) OR
+		        LOWER(ds.alias) LIKE LOWER(CONCAT('%', :nameOrAlias, '%'))
+		      ) ORDER BY ds.lastmodifieddate DESC
+		""")
+	Page<ICIPDatasource> findDataSourceByOptionalParameters(
+			    @Param("org") String org,
+			    @Param("type") List<String> type,
+			    @Param("nameOrAlias") String nameOrAlias,
+			    Pageable pageable
+			);
+		
+		
+	@Query("""
+			SELECT COUNT(ds)
+			FROM ICIPDatasource ds
+			WHERE ds.organization = :org
+			  AND (:type IS NULL OR ds.type IN :type)
+			  AND (
+			    :nameOrAlias IS NULL OR
+			    LOWER(ds.name) LIKE LOWER(CONCAT('%', :nameOrAlias, '%')) OR
+			    LOWER(ds.alias) LIKE LOWER(CONCAT('%', :nameOrAlias, '%'))
+			  )
+			""")
+	Long countByOptionalParameters(
+			    @Param("org") String org,
+			    @Param("type") List<String> type,
+			    @Param("nameOrAlias") String nameOrAlias
+			);
+
 
 }

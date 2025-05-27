@@ -134,6 +134,36 @@ public class ICIPDatasource extends BaseDomain implements Serializable, Cloneabl
 
 	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
+	
+	
+	public ICIPDatasource(Integer id, String name, String description, String type, String salt, String organization,
+            String dshashcode, Timestamp activetime, String category, String interfacetype,
+            Boolean fordataset, Boolean forruntime, Boolean foradapter, Boolean formodel,
+            Boolean forpromptprovider, Boolean forendpoint, Boolean forapp,
+            String lastmodifiedby, Timestamp lastmodifieddate, String alias) {
+		
+        this.id = id;
+		this.name = name;
+		this.description = description;
+		this.type = type;
+		this.salt = salt;
+		this.organization = organization;
+		this.dshashcode = dshashcode;
+		this.activetime = activetime;
+		this.category = category;
+		this.interfacetype = interfacetype;
+		this.fordataset = fordataset;
+		this.forruntime = forruntime;
+		this.foradapter = foradapter;
+		this.formodel = formodel;
+		this.forpromptprovider = forpromptprovider;
+		this.forendpoint = forendpoint;
+		this.forapp = forapp;
+		this.lastmodifiedby = lastmodifiedby;
+		this.lastmodifieddate = lastmodifieddate;
+		this.alias = alias;
+}
+
 
 	/** The id. */
 	@Id

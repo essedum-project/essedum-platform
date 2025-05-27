@@ -13,6 +13,7 @@ package com.infosys.icets.icip.dataset.service.impl;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -33,6 +34,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 //import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -899,5 +901,18 @@ public class ICIPDatasourceService implements IICIPDatasourceService, IICIPSearc
 	@Override
 	public ICIPDatasource findAllByAliasAndOrganization(String alias, String org) {
 		return datasourceRepository.findAllByAliasAndOrganization(alias, org).get(0);
+	}
+
+	@Override
+	public Page<ICIPDatasource> getDataSourceByOptionalParameters(String org, String type, String nameOrAlias,
+			Pageable pageabl) {
+		List<String> types = type != null ? Arrays.asList(type.split(",")) : null;
+		return datasourceRepository.findDataSourceByOptionalParameters(org, types, nameOrAlias, pageabl);
+	}
+
+	@Override
+	public Long getDataSourceCountByOptionalParameters(String org, String type, String nameOrAlias) {
+		List<String> types = type != null ? Arrays.asList(type.split(",")) : null;
+		return datasourceRepository.countByOptionalParameters(org, types, nameOrAlias);
 	}
 }

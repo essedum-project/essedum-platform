@@ -17,6 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +29,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.infosys.icets.icip.adapter.service.MlInstancesService;
 import com.infosys.icets.icip.dataset.model.MlInstance;
 
@@ -69,15 +74,6 @@ public class MlInstancesController {
 			@PathVariable(name = "name", required = true) String name,
 			@PathVariable(name = "org", required = true) String org) {
 		return new ResponseEntity<>(mlInstancesService.getMlInstanceByNameAndOrganization(name, org), new HttpHeaders(),
-				HttpStatus.OK);
-	}
-
-	/* Fetches MlInstances By Organization */
-	@GetMapping("/getMlInstanceByOrganization/{org}")
-	public ResponseEntity<List<MlInstance>> getMlAdaptesByOrganization(
-			@PathVariable(name = "org", required = true) String org) {
-		logger.info("fetching MlInstance for org:{}", org);
-		return new ResponseEntity<>(mlInstancesService.getMlInstanceByOrganization(org), new HttpHeaders(),
 				HttpStatus.OK);
 	}
 
@@ -142,6 +138,34 @@ public class MlInstancesController {
 				instanceName);
 		return new ResponseEntity<>(mlInstancesService.changeOrderPriorityBySpecTemDomNameAndInstancNameAndOrg(
 				spectemplatedomainname, instanceName, orderPriority, org), new HttpHeaders(), HttpStatus.OK);
+	}
+	
+	//Pagenition logic for implementations
+	
+	@GetMapping("/getMlInstanceCount/{org}")
+	public ResponseEntity<Long> getMlAdaptesByOrganizatioCount(
+			@PathVariable(name = "org", required = true) String org,
+			@RequestParam(name = "adaptername", required = false) String adaptername,
+			@RequestParam(name = "connection", required = false) String connection,
+			@RequestParam(name = "query", required = false) String query) {
+		logger.info("fetching MlInstance for org:{}", org);
+		return new ResponseEntity<>(mlInstancesService.getMlInstanceCountByOrganization(org,adaptername, connection, query), new HttpHeaders(),
+				HttpStatus.OK);
+	}
+
+	
+	@GetMapping("/getMlInstanceByOrganization/{org}")
+	public ResponseEntity<List<MlInstance>> getMlAdaptesByOrganization(
+			@PathVariable(name = "org", required = true) String org,
+			@RequestParam(name = "adaptername", required = false) String adaptername,
+			@RequestParam(name = "connection", required = false) String connection,
+			@RequestParam(name = "query", required = false) String query,
+		    @RequestParam(name = "page", required = false) Integer page,
+		    @RequestParam(name = "size",required = false) Integer size) {
+		logger.info("fetching MlInstance for org:{}", org);
+		Pageable pageable = (page==null||size==null) ? null : PageRequest.of(Math.max(page - 1, 0), size);
+		return new ResponseEntity<>(mlInstancesService.getMlInstanceByOrganization(org, adaptername, connection, query, pageable), new HttpHeaders(),
+				HttpStatus.OK);
 	}
 
 }
