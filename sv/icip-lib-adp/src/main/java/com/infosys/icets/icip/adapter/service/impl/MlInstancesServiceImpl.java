@@ -10,15 +10,18 @@
  */
 package com.infosys.icets.icip.adapter.service.impl;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.json.JSONObject;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -26,9 +29,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.sql.Timestamp;
-import java.time.Instant;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -152,8 +155,17 @@ public class MlInstancesServiceImpl implements MlInstancesService {
 	}
 
 	@Override
-	public List<MlInstance> getMlInstanceByOrganization(String org) {
-		return mlInstancesRepository.getMlInstanceByOrganization(org);
+	public Long getMlInstanceCountByOrganization(String org, String adapterName, String connection, String query) {
+		 List<String> adapterNamesList = adapterName!=null?Arrays.asList(adapterName.split(",")):null;
+		 List<String> connectionsList = connection!=null?Arrays.asList(connection.split(",")):null;
+		return mlInstancesRepository.getMlInstanceCountByOptionalParams(org, adapterNamesList, connectionsList, query);
+	}
+	
+	@Override
+	public List<MlInstance> getMlInstanceByOrganization(String org, String adapterName, String connection, String query, Pageable pageable) {
+		List<String> adapterNamesList = adapterName!=null?Arrays.asList(adapterName.split(",")):null;
+		List<String> connectionsList = connection!=null?Arrays.asList(connection.split(",")):null;
+		return mlInstancesRepository.getMlInstanceByOptionalParams(org, adapterNamesList, connectionsList, query, pageable).getContent();
 	}
 
 	@Override

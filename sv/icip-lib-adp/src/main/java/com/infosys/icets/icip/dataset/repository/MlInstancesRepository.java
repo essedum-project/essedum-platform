@@ -12,6 +12,8 @@ package com.infosys.icets.icip.dataset.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
@@ -27,8 +29,12 @@ import com.infosys.icets.icip.dataset.model.MlInstance;
 public interface MlInstancesRepository extends JpaRepository<MlInstance, Integer> {
 
 	MlInstance getMlInstanceByNameAndOrganization(String name, String org);
-
+	
 	List<MlInstance> getMlInstanceByOrganization(String org);
+	
+	Long getMlInstanceCountByOptionalParams(String org, List<String> adapterNames, List<String> connections, String name);
+	
+	Page<MlInstance> getMlInstanceByOptionalParams(String org, List<String> adapterNames, List<String> connections, String name, Pageable pageable);
 
 	List<String> getMlInstanceByAdapterNameAndOrganization(String adapterName, String org);
 	

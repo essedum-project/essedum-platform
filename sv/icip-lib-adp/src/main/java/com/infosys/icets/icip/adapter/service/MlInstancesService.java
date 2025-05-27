@@ -13,6 +13,9 @@ package com.infosys.icets.icip.adapter.service;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.infosys.icets.icip.dataset.model.MlInstance;
 
 /**
@@ -28,7 +31,9 @@ public interface MlInstancesService {
 
 	MlInstance getMlInstanceByNameAndOrganization(String name, String org);
 
-	List<MlInstance> getMlInstanceByOrganization(String org);
+	List<MlInstance> getMlInstanceByOrganization(String org,String adapterName, String connection, String query, Pageable pageable);
+	
+	Long getMlInstanceCountByOrganization(String org,String adapterName, String connection, String query);
 	
 	List<String> getMlInstanceNamesByAdapterNameAndOrganization(String adapterName,String org);
 

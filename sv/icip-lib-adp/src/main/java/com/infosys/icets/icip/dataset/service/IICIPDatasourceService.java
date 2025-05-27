@@ -14,6 +14,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import org.slf4j.Marker;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.infosys.icets.ai.comm.lib.util.domain.NameAndAliasDTO;
 import com.infosys.icets.icip.dataset.model.ICIPDataset;
@@ -271,5 +273,9 @@ public interface IICIPDatasourceService {
 	List<ICIPDatasource> getForEndpointConnectionsByOrg(String org);
 
 	ICIPDatasource findAllByAliasAndOrganization(String alias, String organization);
+	
+	Page<ICIPDatasource> getDataSourceByOptionalParameters(String org, String type, String nameOrAlias, Pageable pageabl);
+	
+	Long getDataSourceCountByOptionalParameters(String org, String type, String nameOrAlias);
 
 }
