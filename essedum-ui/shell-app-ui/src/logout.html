@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title></title>
+  <script>
+    const re = /^[a-zA-Z0-9/]+$/;
+    if(window.location.pathname && window.location.pathname.split('index.html').length > 0 && re.test(window.location.pathname.split('index.html')[0])){
+      document.write("<base href='" + window.location.pathname.split('index.html')[0] + "' />")
+    }
+    else document.write("<base href='/' />")
+  </script>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+</head>
+<body>
+  <script>
+    window.location.href='#/login';
+  </script>
+  <div id="parent" class="selector-7-1">
+    <div id="child" class="selector-7-2">
+      <div id="logout-message" class="selector-7-3">
+        You are logged out
+      </div>
+    </div>
+  </div>
+</body>
+</html>

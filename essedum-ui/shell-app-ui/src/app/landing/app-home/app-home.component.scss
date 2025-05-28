@@ -1,0 +1,46 @@
+.row {
+    display: flex;
+    padding: 2rem 0px;
+    min-height: 30%;
+    box-sizing: border-box;
+}
+
+/* TODO(mdc-migration): The following rule targets internal classes of button that may no longer apply for the MDC version. */
+mat-mdc-button-toggle{
+    color: black;
+}
+
+/* TODO(mdc-migration): The following rule targets internal classes of button that may no longer apply for the MDC version. */
+.mat-mdc-button-toggle-checked{
+    background-color: var(--base-color)!important;
+    color: white !important;
+}
+.le-u-text-neutral-80{
+    color:#737373;
+  }
+
+::ng-deep  .le-c-card.mat-mdc-card:hover .le-u-header-xl {
+    color:var(--base-color);
+}
+
+.le-u-header-xl{
+	font-size: 18px !important;
+}
+
+.le-u-text-neutral-80{
+    font-size: 14px !important;
+}
+
+.le-u-header-xxl{
+    font-size: 24px !important;
+}
+
+::ng-deep .le-c-card.mat-mdc-card .mat-mdc-card-actions .le-c-btn--text:first-child{
+    font-size: 14px !important;
+    color: var(--base-color);
+}
+
+hr {
+    color: black !important;
+    border-top: 1px solid !important;
+}

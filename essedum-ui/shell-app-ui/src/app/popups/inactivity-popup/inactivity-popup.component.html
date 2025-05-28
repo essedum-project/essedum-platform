@@ -1,0 +1,25 @@
+<mat-card>
+    <mat-card-header>
+        <mat-card-title>
+            <b>Inactivity Alert!</b>
+        </mat-card-title>
+    </mat-card-header>
+    <mat-card-content align="left">
+        <span *ngIf="sessionStatus == 'active'">
+            You have been inactive for a while. You will be logged out in <span [class.breathing]="countdown < 140 && countdown > 0"
+                [class.timerOver]="countdown == 0 || countdown < 0 ">{{ countdown }}</span> seconds.
+        </span>
+        <span *ngIf="sessionStatus != 'active'">You have been logged out due to Inactivity</span>
+    </mat-card-content>
+    <mat-card-actions align="end">
+        <button *ngIf="sessionStatus == 'active'" mat-raised-button (click)="keepAlive()" class="action-button" [ngStyle]="{'background-color': themeColor, 'color': 'white'}">
+            Keep Session Alive
+        </button>
+        <button *ngIf="sessionStatus == 'active'" mat-raised-button (click)="dialogRef.close('logout')" class="action-button" [ngStyle]="{'background-color': themeColor, 'color': 'white'}">
+            Logout
+        </button>
+        <button *ngIf="sessionStatus != 'active'" mat-raised-button (click)="dialogRef.close('logout')" class="action-button" [ngStyle]="{'background-color': themeColor, 'color': 'white'}">
+            Login Again
+        </button>
+    </mat-card-actions>
+</mat-card>

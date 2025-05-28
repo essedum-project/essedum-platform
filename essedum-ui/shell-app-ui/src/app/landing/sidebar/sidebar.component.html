@@ -1,0 +1,119 @@
+<div class="sidebar-wrapper selector-12-1" [ngStyle]="{'background':bgColorType==2?'#8626C3':null}">
+    <ul class="nav sidebar-nav selector-12-2">
+        <div class="sidebar-header selector-12-3">
+        </div>
+        <div *ngIf="ready==true" class="selector-12-4">
+            <div *ngFor="let item of sidebarMenu;trackBy: trackByMethod; let i = index;" class="menu-item selector-12-5">
+                <ng-container *ngIf="item.children && item.children.length>0; then: thenTemplate; else: elseTemplate" class="selector-12-6"></ng-container>
+                <ng-template #thenTemplate="" class="selector-12-7">
+                    <mat-expansion-panel class="expansionDropdown selector-12-8" [ngStyle]="{'background-color':bgColorType==2?'#8626C3':null}" (closed)="visible = true" (opened)="visible = false" 
+                    >
+                        <mat-expansion-panel-header style="margin-left:-20px" [ngStyle]="{'background-color':bgColorType==2?'#8626C3':null}" class="selector-12-9" style="margin-left: -15px;">
+                            <div data-toggle="collapse" class="selector-12-10">
+                                <ng-container *ngIf="item.label == 'Workspace'; else: AutomationIconTemplate" class="selector-12-11">
+                                    <span [matBadge]="alerts" matBadgeColor="accent" matBadgeSize="small" [matBadgeHidden]="!visible" class="selector-12-12">
+                                        <i *ngIf="item.icon" class="fa fa-{{item.icon}} selector-12-13" style="margin-right: 1vh"></i>
+                                    </span>
+                                    <span class="selector-12-14">{{ item.label }}</span>
+                                </ng-container>
+                                <ng-template #AutomationIconTemplate="" class="selector-12-15">
+                                    <ng-container *ngIf="item.label == 'Automation' &amp;&amp; capError != 'false'; else: elseTemplate" class="selector-12-16">
+                                        <p matTooltip="{{capError}}" class="selector-12-17">
+                                            <span class="selector-12-18">
+                                                <i class="fas fa-exclamation-circle selector-12-19" style="color: red; margin-right:1vh"></i>{{ item.label }}</span>
+                                        </p>
+                                    </ng-container>
+                                </ng-template>
+                                <ng-template #elseTemplate="" class="selector-12-20">
+                                    <i *ngIf="item.icon" class="fa fa-{{item.icon}} selector-12-21" style="margin-right:1vh"></i>
+                                    <span class="selector-12-22">{{ item.label }}</span>
+                                </ng-template>
+                            </div>
+                        </mat-expansion-panel-header>
+                        <ul style="margin-left:-0px" class="selector-12-23" id="{{i}}">
+                            <li *ngFor="let child of item.children;trackBy: trackByMethod; let j = index" class="selector-12-24">
+                                <ng-container *ngIf="child.label == 'My Tickets'; else: elseTemplate" class="selector-12-25">
+                                    <a style="padding-left:24px" routerLink="{{child.url}}" (click)="goTo(child.url)" class="selector-12-26">
+                                        <!--padding-left:5vh-->
+                                        <span [matBadge]="alerts" matBadgeColor="accent" matBadgeSize="small" matBadgeOverlap="false" matBadgePosition="after" class="selector-12-27">{{ child.label }}</span>
+                                    </a>
+                                </ng-container>
+                                <ng-template #elseTemplate="" class="selector-12-28">
+                                    <ng-container *ngIf="child.label == 'ML Studio'; else: elseIfTemplate" class="selector-12-29">
+                                        <a style="padding-left:24px" href="landing" target="_blank" class="selector-12-30">{{ child.label }}
+                                            <!--padding-left:5vh-->
+                                        </a>
+                                    </ng-container>
+                                    <ng-template #elseIfTemplate="" class="selector-12-31">
+                                        <div *ngIf="child.children" class="selector-12-32">
+                                            <ng-container *ngIf="child.children[0]; then: thenChildTemplate; 
+                                                else: elseChildTemplate" class="selector-12-33">
+                                            </ng-container>
+                                            <ng-template #thenChildTemplate="" class="selector-12-34">
+                                                <mat-expansion-panel [ngStyle]="{'background-color':bgColorType==2?
+                                                    '#8626C3':null}" class="expansionDropdown selector-12-35" (closed)="visible = true" (opened)="visible = false">
+                                                    <mat-expansion-panel-header [ngStyle]="{'background-color':bgColorType==2?
+                                                        '#8626C3':null}" class="selector-12-36">
+                                                        <div data-toggle="collapse" class="selector-12-37">
+                                                            <i *ngIf="child.icon" class="fa fa-{{child.icon}} selector-12-38" style="margin-right:1vh"></i>
+                                                            <span class="expand-panel-name selector-12-39">{{ child.label }}</span>
+                                                        </div>
+                                                    </mat-expansion-panel-header>
+                                                    <ul style="margin-left:-0px" class="selector-12-40" id="{{i}}">
+                                                        <li *ngFor="let childItem of child.children;
+                                                            trackBy: trackByMethod; let j = index" class="selector-12-41">
+                                                            <!-- <ng-container *ngIf="!childItem.label.toLowerCase().includes('workbench');
+                                                else: elseWbTemplate"> -->
+                                                            <ng-container *ngIf="childItem.children && !childItem.children[0];
+                                                            else: elseWbTemplate" class="selector-12-42">
+                                                                <a style="padding-left:7vh" routerLink="{{childItem.url}}" (click)="goTo(childItem.url)" class="selector-12-43">
+                                                                    {{ childItem.label }}</a>
+                                                            </ng-container>
+                                                            <ng-template #elseWbTemplate="" class="selector-12-44">
+                                                                <mat-expansion-panel  class="expansionDropdown selector-12-45" (closed)="visible = true" (opened)="visible = false" style="margin-left: 1.5vh">
+                                                                    <mat-expansion-panel-header style="margin-left: -15px;" class="selector-12-46" style="margin-left:-20px">
+                                                                        <div data-toggle="collapse" class="selector-12-47">
+                                                                            <i *ngIf="childItem.icon" class="fa fa-{{childItem.icon}} selector-12-48" style="margin-right:1vh"></i>
+                                                                            <span class="expand-panel-name selector-12-49">{{ childItem.label }}</span>
+                                                                        </div>
+                                                                    </mat-expansion-panel-header>
+                                                                    <ul style="margin-left:-0px" class="selector-12-50" id="{{i}}">
+                                                                        <li *ngFor="let wb of childItem.children;
+                                                                            trackBy: trackByMethod; let j = index" class="selector-12-51">
+                                                                            <a style="padding-left:7vh" routerLink="{{wb.url}}" [state]="{url:wb.stateUrl}" class="selector-12-52">
+                                                                                {{ wb.label }}</a>
+                                                                        </li>
+                                                                    </ul>
+                                                                </mat-expansion-panel>
+                                                            </ng-template>
+
+                                                        </li>
+                                                    </ul>
+                                                </mat-expansion-panel>
+                                            </ng-template>
+                                            <ng-template #elseChildTemplate="" class="selector-12-53">
+                                                <a style="padding-left:24px" routerLink="{{child.url}}" (click)="goTo(child.url)" class="selector-12-54">
+                                                    <!--padding-left:5vh-->
+                                                    <i *ngIf="child.icon" class="fa fa-{{child.icon}} selector-12-55" style="margin-right:1vh"></i>
+                                                    <span class="selector-12-56">{{ child.label }}</span>
+                                                </a>
+                                            </ng-template>
+                                        </div>
+                                    </ng-template>
+
+                                </ng-template>
+                            </li>
+                        </ul>
+                    </mat-expansion-panel>
+                </ng-template>
+                <ng-template #elseTemplate="" class="selector-12-57">
+                    <li class="selector-12-58">
+                        <a style="padding-left:3.6vh;margin-left: -1rem;" routerLink="{{item.url}}" (click)="goTo(item.url)" class="selector-12-59">
+                            <i class="fa fa-{{item.icon}} selector-12-60" aria-hidden="true"></i> {{ item.label }}
+                        </a>
+                    </li>
+                </ng-template>
+            </div>
+        </div>
+    </ul>
+</div>

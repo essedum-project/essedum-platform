@@ -1,0 +1,30 @@
+<mat-card>
+    <mat-card-header>
+        <mat-card-title>
+            <b>{{ tokenStatus == 'Expiring' ? 'Session Expire Warning' : 'Session Expired' }}</b>
+        </mat-card-title>
+    </mat-card-header>
+    <mat-card-content align="left">
+        <span *ngIf="tokenStatus == 'Expiring'">
+            Your session will expire in <span [class.breathing]="timer < 140 && timer > 0"
+                [class.timerOver]="timer == 0 ">{{ timer }}</span> seconds. Do you want to refresh the session?
+        </span>
+        <span *ngIf="tokenStatus != 'Expiring'">
+            Your session has expired. Click below to login again.
+        </span>
+    </mat-card-content>
+    <mat-card-actions align="end">
+        <button *ngIf="tokenStatus == 'Expiring'" mat-raised-button color="primary" (click)="refreshSession()"
+            class="action-button">
+            Refresh
+        </button>
+        <button *ngIf="tokenStatus != 'Expiring'" mat-raised-button color="primary" mat-dialog-close (click)="logout()"
+            class="action-button">
+            Login
+        </button>
+        <button *ngIf="tokenStatus == 'Expiring'" mat-raised-button color="warn" mat-dialog-close (click)="logout()"
+            class="action-button">
+            Logout
+        </button>
+    </mat-card-actions>
+</mat-card>

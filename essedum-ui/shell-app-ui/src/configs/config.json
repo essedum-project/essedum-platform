@@ -1,0 +1,26 @@
+{
+  
+  "eventSourceConfig": {
+    "endpointURL": "/services/assistance-manager/api/notification/subscribe?topic=",
+    "enabled": true,
+    "connectId": "cdnotification",
+    "reconnectDelayInMilliSeconds": 1000
+  },
+  "backendUrl": "services/conversation-config",
+  "ignoreUrlsInBackendUrlInterceptor": [".*/faq-analysis/.*"],
+  "brandLogo": "assets/images/Cortex-Blue-new.svg",
+  "backgroundImage": "/assets/images/new-background-image.jpg",
+  "showHomeOverlayLayout": true,
+  
+  "features": {
+    "virtualAssistant": {
+      "backendUrl": "https://cortex-beta4.ad.infosys.com/services/csi/",
+      "suggestionBackendUrl": "https://cortex-beta4.ad.infosys.com/services/csi/api/all-suggestions",
+      "appNameInput":["thepizzaapp245-1.0.0-design"]
+    }
+  },
+  "bot-app": {
+    "hostname": "/"
+  },
+  "locale": ["en"]
+}

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <g id="Knowledge_Graph" data-name="Knowledge Graph" transform="translate(-206 -3)">
+    <rect id="Rectangle_18" data-name="Rectangle 18" width="24" height="24" transform="translate(206 3)" fill="none"/>
+    <g id="Group_38" data-name="Group 38" transform="translate(0.545)">
+      <path id="Path_61" data-name="Path 61" d="M206.025,26.075h21.089" transform="translate(0.43)" fill="none" stroke="#000" stroke-linecap="round" stroke-width="1"/>
+      <rect id="Rectangle_14" data-name="Rectangle 14" width="4" height="8" rx="0.5" transform="translate(208 18)"/>
+      <rect id="Rectangle_15" data-name="Rectangle 15" width="4" height="13" rx="0.5" transform="translate(213 13)"/>
+      <rect id="Rectangle_16" data-name="Rectangle 16" width="4" height="9" rx="0.5" transform="translate(218 17)"/>
+      <rect id="Rectangle_17" data-name="Rectangle 17" width="4" height="14" rx="0.5" transform="translate(223 12)"/>
+      <g id="Ellipse_1" data-name="Ellipse 1" transform="translate(207 11)" fill="#fff" stroke="#000" stroke-width="1">
+        <circle cx="2" cy="2" r="2" stroke="none"/>
+        <circle cx="2" cy="2" r="1.5" fill="none"/>
+      </g>
+      <g id="Ellipse_2" data-name="Ellipse 2" transform="translate(212 5)" fill="#fff" stroke="#000" stroke-width="1">
+        <circle cx="2" cy="2" r="2" stroke="none"/>
+        <circle cx="2" cy="2" r="1.5" fill="none"/>
+      </g>
+      <g id="Ellipse_3" data-name="Ellipse 3" transform="translate(218 9)" fill="#fff" stroke="#000" stroke-width="1">
+        <circle cx="2" cy="2" r="2" stroke="none"/>
+        <circle cx="2" cy="2" r="1.5" fill="none"/>
+      </g>
+      <g id="Ellipse_4" data-name="Ellipse 4" transform="translate(223 4)" fill="#fff" stroke="#000" stroke-width="1">
+        <circle cx="2" cy="2" r="2" stroke="none"/>
+        <circle cx="2" cy="2" r="1.5" fill="none"/>
+      </g>
+      <path id="Path_62" data-name="Path 62" d="M210,11.616l2.88-3.456" fill="none" stroke="#000" stroke-width="1"/>
+      <path id="Path_63" data-name="Path 63" d="M215.259,8l3.456,2.313" fill="none" stroke="#000" stroke-width="1"/>
+      <path id="Path_64" data-name="Path 64" d="M221.209,9.888l2.833-2.748" fill="none" stroke="#000" stroke-width="1"/>
+    </g>
+  </g>
+</svg>
