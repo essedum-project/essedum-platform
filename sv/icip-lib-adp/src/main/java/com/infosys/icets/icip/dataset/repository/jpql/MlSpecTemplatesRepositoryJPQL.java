@@ -12,12 +12,15 @@ package com.infosys.icets.icip.dataset.repository.jpql;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 //import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.infosys.icets.icip.dataset.model.ICIPSpecTemplate;
 import com.infosys.icets.icip.dataset.model.MlSpecTemplates;
+import com.infosys.icets.icip.dataset.model.MlSpecTemplates2;
 import com.infosys.icets.icip.dataset.repository.MlSpecTemplatesRepository;
 
 @Repository
@@ -28,8 +31,8 @@ public interface MlSpecTemplatesRepositoryJPQL extends MlSpecTemplatesRepository
 	@Query("SELECT mls FROM MlSpecTemplates mls where mls.domainname = ?1")
 	List<MlSpecTemplates> getActiveMlSpecTemplateByDomainName(String domainName);
 	
-	@Query("SELECT mls FROM MlSpecTemplates mls where mls.organization = ?1 ORDER BY mls.lastmodifiedon DESC")
-	List<MlSpecTemplates> getAllMlSpecTemplates(String org);
+	@Query("SELECT mls FROM MlSpecTemplates2 mls where mls.organization = ?1 ORDER BY mls.lastmodifiedon DESC")
+	List<MlSpecTemplates2> getAllMlSpecTemplates(String org);
 	
 	@Query("SELECT mls FROM MlSpecTemplates mls where LOWER(mls.domainname) = LOWER(?1) and mls.organization = ?2")
 	MlSpecTemplates getMlSpecTemplateByDomainNameAndOrganization(String domainName,String organization);	
@@ -46,4 +49,16 @@ public interface MlSpecTemplatesRepositoryJPQL extends MlSpecTemplatesRepository
 
 	@Query("SELECT sp FROM ICIPSpecTemplate sp")
 	List<ICIPSpecTemplate> getAllSpecTemplates();
+	
+	@Query("SELECT m FROM MlSpecTemplates2 m WHERE m.organization = :org AND m.domainname LIKE %:domainname% ORDER BY m.lastmodifiedon DESC")
+	List<MlSpecTemplates2> getAllMlSpecTemplatesByOrganizationAndDomainname(@Param("org") String org,
+			@Param("domainname") String domainname, Pageable paginate);
+
+	@Query("SELECT m FROM MlSpecTemplates2 m WHERE m.organization = :org AND m.capability LIKE %:capability% ORDER BY m.lastmodifiedon DESC")
+	List<MlSpecTemplates2> getMlSpecTemplatesByOrganizationAndCapability(@Param("org") String org,
+			@Param("capability") String capability);
+
+	@Query("SELECT m FROM MlSpecTemplates2 m WHERE m.organization =?1 ORDER BY m.lastmodifiedon DESC")
+	List<MlSpecTemplates2> getAllMlSpecTemplatesByOrganization(String org, Pageable paginate);
+	
 }

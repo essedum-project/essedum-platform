@@ -14,7 +14,9 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +31,8 @@ import org.slf4j.Marker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
@@ -43,6 +47,7 @@ import com.infosys.icets.icip.dataset.model.ICIPDatasource;
 import com.infosys.icets.icip.dataset.model.MlAdapters;
 import com.infosys.icets.icip.dataset.model.MlInstance;
 import com.infosys.icets.icip.dataset.model.MlSpecTemplates;
+import com.infosys.icets.icip.dataset.model.MlSpecTemplates2;
 import com.infosys.icets.icip.dataset.repository.MlAdaptersRepository;
 import com.infosys.icets.icip.dataset.repository.MlSpecTemplatesRepository;
 
@@ -111,7 +116,7 @@ public class MlSpecTemplatesServiceImpl implements MlSpecTemplatesService {
 	}
 
 	@Override
-	public List<MlSpecTemplates> getAllMlSpecTemplates(String org) {
+	public List<MlSpecTemplates2> getAllMlSpecTemplates(String org) {
 		return mlSpecTemplatesRepository.getAllMlSpecTemplates(org);
 	}
 	
@@ -226,4 +231,145 @@ public class MlSpecTemplatesServiceImpl implements MlSpecTemplatesService {
 			joblogger.error(marker, ex.getMessage());
 		}
 	}
+	
+	@Override
+	public List<MlSpecTemplates2> getMlSpecTemplatesPageWise(String org, String filters, String page, String size,
+			String query) {
+		try {
+			List<MlSpecTemplates2> result;
+
+			if (filters == null) {
+				if (query == null) {
+					if (page == null || size == null) {
+						result = mlSpecTemplatesRepository.getAllMlSpecTemplates(org);
+					} else {
+						try {
+							Pageable paginate = PageRequest.of(Integer.parseInt(page) - 1, Integer.parseInt(size));
+							result = mlSpecTemplatesRepository.getAllMlSpecTemplatesByOrganization(org, paginate);
+						} catch (NumberFormatException e) {
+							logger.error(e.getMessage());
+							return Collections.emptyList();
+						}
+					}
+				} else {
+					if (page == null || size == null) {
+						result = mlSpecTemplatesRepository.getAllMlSpecTemplatesByOrganizationAndDomainname(org, query,
+								null);
+					} else {
+						try {
+							Pageable paginate = PageRequest.of(Integer.parseInt(page) - 1, Integer.parseInt(size));
+							result = mlSpecTemplatesRepository.getAllMlSpecTemplatesByOrganizationAndDomainname(org,
+									query, paginate);
+						} catch (NumberFormatException e) {
+							logger.error(e.getMessage());
+							return Collections.emptyList();
+						}
+					}
+				}
+			} else {
+				List<String> filterList = Arrays.asList(filters.split(","));
+				List<MlSpecTemplates2> specTemplates = new ArrayList<>();
+				List<MlSpecTemplates2> specs = new ArrayList<>();
+
+				Map<Integer, MlSpecTemplates2> uniqueTemplates = new LinkedHashMap<>();
+				for (String filter : filterList) {
+					List<MlSpecTemplates2> templates = mlSpecTemplatesRepository
+							.getMlSpecTemplatesByOrganizationAndCapability(org, filter);
+					for (MlSpecTemplates2 template : templates) {
+						uniqueTemplates.put(template.getId(), template); // Only one per id
+					}
+				}
+				specTemplates.clear();
+				specTemplates.addAll(uniqueTemplates.values());
+
+				if (query == null) {
+					if (page == null || size == null) {
+						result = specTemplates;
+					} else {
+						try {
+							Pageable paginate = PageRequest.of(Integer.valueOf(page) - 1, Integer.valueOf(size));
+							int start = (int) paginate.getOffset();
+							int end = Math.min((start + paginate.getPageSize()), specTemplates.size());
+							if (start > end)
+								return Collections.emptyList();
+							result = specTemplates.subList(start, end);
+						} catch (NumberFormatException | IndexOutOfBoundsException e) {
+							logger.error(e.getMessage());
+							return Collections.emptyList();
+						}
+					}
+				} else {
+					for (MlSpecTemplates2 spec : specTemplates) {
+						if (spec.getDomainname().toLowerCase().contains(query.toLowerCase())) {
+							specs.add(spec);
+						}
+					}
+
+					if (page == null || size == null) {
+						result = specs;
+					} else {
+						try {
+							Pageable paginate = PageRequest.of(Integer.valueOf(page) - 1, Integer.valueOf(size));
+							int start = (int) paginate.getOffset();
+							int end = Math.min((start + paginate.getPageSize()), specs.size());
+							if (start > end)
+								return Collections.emptyList();
+							result = specs.subList(start, end);
+						} catch (NumberFormatException | IndexOutOfBoundsException e) {
+							logger.error(e.getMessage());
+							return Collections.emptyList();
+						}
+					}
+				}
+			}
+
+			return result;
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return Collections.emptyList();
+		}
+	}
+
+	@Override
+	public Long getMlSpecTemplatesCount(String org, String filters, String query) {
+		try {
+			if (filters == null) {
+				if (query == null) {
+					return mlSpecTemplatesRepository.countByOrganization(org);
+				} else {
+					return mlSpecTemplatesRepository.countByOrganizationAndDomainnameContainingIgnoreCase(org, query);
+				}
+			} else {
+				List<String> filterList = Arrays.asList(filters.split(","));
+				long totalCount = 0;
+				List<MlSpecTemplates2> specTemplates = new ArrayList<>();
+				Map<Integer, MlSpecTemplates2> uniqueTemplates = new LinkedHashMap<>();
+				for (String filter : filterList) {
+					List<MlSpecTemplates2> templates = mlSpecTemplatesRepository
+							.getMlSpecTemplatesByOrganizationAndCapability(org, filter);
+					for (MlSpecTemplates2 template : templates) {
+						uniqueTemplates.put(template.getId(), template); // Only one per id
+					}
+				}
+				specTemplates.clear();
+				specTemplates.addAll(uniqueTemplates.values());
+				if (query != null) {
+					long filteredCount = 0;
+					for (MlSpecTemplates2 spec : specTemplates) {
+						if (spec.getDomainname().toLowerCase().contains(query.toLowerCase())) {
+							filteredCount++;
+						}
+					}
+					return filteredCount;
+				} else {
+					totalCount = specTemplates.size();
+					return totalCount;
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Error fetching template count: " + e.getMessage());
+			return 0L;
+		}
+	}
+	
 }

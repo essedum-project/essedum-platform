@@ -196,11 +196,51 @@ export class AdapterServices {
           return this.handleError(err);
         }));
     }
-  getMlSpecTemplatesCards(org): Observable<any> {
+  getMlSpecTemplatesCards(org: string, page?: number, size?: number, query?: string, type?: string): Observable<any> {
+    let params = new HttpParams();
+    if (page !== undefined) {
+      params = params.set('page', page.toString());
+    }
+    if (size !== undefined) {
+      params = params.set('size', size.toString());
+    }
+    if (query) {
+      params = params.set('query', query);
+    }
+    if (type) {
+      params = params.set('type', type);
+    }
 
     return this.https
-      .get(this.dataUrl + '/mlspectemplates/getSpecTemplatesByOrganization/'+ org, {
+      .get(this.dataUrl + '/mlspectemplates/getSpecTemplatesByOrganization/' + org, {
+        params: params,
         observe: 'response'
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  getCountSpecTemplates(org: string, query?: string, type?: string): Observable<any> {
+    let params = new HttpParams();
+    if (query) {
+      params = params.set('query', query);
+    }
+    if (type) {
+      params = params.set('type', type);
+    }
+    return this.https
+      .get(this.dataUrl + '/mlspectemplates/getSpecTemplatesCountByOrg/' + org, {
+        params: params,
+        observe: 'response',
+
       })
       .pipe(
         map((response) => {

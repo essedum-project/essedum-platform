@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.infosys.icets.icip.dataset.model.MlSpecTemplates;
+import com.infosys.icets.icip.dataset.model.MlSpecTemplates2;
 
 /**
  * The Interface MlSpecTemplatesService.
@@ -29,10 +30,15 @@ public interface MlSpecTemplatesService {
 	MlSpecTemplates updateMlSpecTemplate(MlSpecTemplates mlSpecTemplates);
 	Map<String, String> delete(String domainName,String organization);
 	
-	List<MlSpecTemplates> getAllMlSpecTemplates(String org);
+	List<MlSpecTemplates2> getAllMlSpecTemplates(String org);
 
 	Map<String, Object> getFiltersByOrganization(String org);
 	
 	List<String> getSpecTemplatesNamesByOrganization(String org);
+	
+	List<MlSpecTemplates2> getMlSpecTemplatesPageWise(String org, String capability, String page, String size,
+			String query);
+
+	Long getMlSpecTemplatesCount(String org, String capability, String query);
 
 }
