@@ -1,0 +1,31 @@
+.testt:hover{
+  background-color: #bdc1c5;
+}
+.sidebartextcolordefault{
+  color: var(--text-color);
+}
+
+.sidebarhovercolor:hover{
+  background-color: var(--sidebarhover-color);
+}
+.sidebarbgcolor{
+  background-color: var(--sidebarbg-color);
+}
+.sidebarbgcolordefault{
+  background-color: var(--bg-color);
+}
+.sidebartextcolor{
+  color: var(--sidebartext-color);
+}
+.sidebarhovercolordefault:hover{
+  background-color: #bdc1c5;
+}
+.sidebariconcolor{
+  color: var(--sidebaricon-color);
+}
+.sidebartextdefault{
+  color: var(--base-color);
+}
+.sidebartexticonhovercolor:hover{
+  color: var(--sidebartexticonhover-color);
+}

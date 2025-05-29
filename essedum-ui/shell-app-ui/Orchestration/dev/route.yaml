@@ -1,0 +1,15 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: super-app-ui
+  namespace: common-app-superapp
+  labels:
+    app: super-app-ui
+  annotations:
+    haproxy.router.openshift.io/timeout: 5m
+spec:
+  to:
+    kind: Service
+    name: super-app-ui
+  port:
+    targetPort: 8080-tcp

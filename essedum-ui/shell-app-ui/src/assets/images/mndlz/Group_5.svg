@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="222" height="25" viewBox="0 0 222 25">
+  <g id="Group_5" data-name="Group 5" transform="translate(-19 -227)">
+    <path id="ic_chat_bubble_outline_24px" d="M24.5,2H4.5A2.507,2.507,0,0,0,2,4.5V27l5-5H24.5A2.507,2.507,0,0,0,27,19.5V4.5A2.507,2.507,0,0,0,24.5,2Zm0,17.5H7L4.5,22V4.5h20Z" transform="translate(17 225)" fill="#7e7e7e"/>
+    <text id="Help_me_to_create..." data-name="Help me to create..." transform="translate(60 229)" fill="#707070" font-size="16" font-family="OpenSans, Open Sans"><tspan x="0" y="17">Help me to create...</tspan></text>
+  </g>
+</svg>

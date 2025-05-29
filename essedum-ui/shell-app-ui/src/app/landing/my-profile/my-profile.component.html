@@ -1,0 +1,122 @@
+<div class="profile-container">
+  <div style="position: absolute; top: 5px; right: 35px;">
+   <i class="fa fa-times fa-lg grey-color" id="close-icon" (click)="closePopup()" aria-hidden="true"></i>
+  </div>
+  <div class="profile-wrapper d-flex">
+   <div class="profile-left ">
+   <div class="card" style="top: -1px;
+   left: 8px;
+   width: 166px;
+   height: 166px;
+   background: var(---fafafa) 0% 0% no-repeat padding-box;
+   background: #FAFAFA 0% 0% no-repeat padding-box;
+   box-shadow: 0px 2px 8px #00000029;
+   border-radius: 16px;
+   opacity: 1;
+   padding-left: 7px;
+   padding-top: 7px;">
+    <!-- <div class ="profile-container"> -->
+     <div class="profile-image-container">
+       <img *ngIf="profileImage" [src]="url" alt="Profile Image" style="object-fit: cover; width: 96%; height: 98%;">
+       <div id="drop-zone" *ngIf="!profileImage" style="top: 230px;
+       left: 83px;width: 150px;
+       height: 150px;
+       border: 1px dashed var(---8626c3);
+       border: 1px dashed #8626C3;
+       border-radius: 16px;
+       opacity: 1;">
+         <span>Drop your picture here or click to</span><br><br>
+         <label class="highlight" for="file-input">Browse</label><br><br>
+         <input type="file" id="file-input" (change)="onImageSelected($event)" accept="image/*" style="display: none;">
+         <span>Support PNG, JPG formats</span>
+       </div>
+     </div>
+     <!-- </div> -->
+     </div>
+       <div style="justify-content: space-between; margin-top: 37px;margin-left: 66px"><label class="highlight" for="file-input">Browse</label>
+         <input type="file" id="file-input" (change)="onImageSelected($event)" accept="image/*" style="display: none;">
+       </div>
+       <div class="button-container" style="display: flex; justify-content: space-between; margin-top: 100px; padding-left: 11px;">
+        <button _ngcontent-uaf-c364="" class="btn btn-sm update-button" style="background-color: black; color: white; border-color: black; padding: 5px 10px; font-size: 15px; " (click)="updateProfile()">Update</button>
+        <button class="btn btn-sm clear-button" style="background-color: lightgray; color: black; border-color: lightgray; padding: 5px 10px; font-size: 15px;" (click)="closePopup()">Cancel</button>
+      </div>
+   </div>
+
+   <div class="profile-right" style="display: flex; flex-direction: column;">
+     <div class="profile-info-group">
+      <div class="row my-3">
+         <div class="col-md-6">
+           <label for="firstNameInput">First Name*</label>
+           <input
+             type="text"
+             maxlength="255"
+             required=""
+             id="firstNameInput"
+             class="txtInput"
+             style="width: 300px; height: 30px; border: 1px solid #ccc; background-color: #FAFAFA;"
+             [(ngModel)]="retrievedFirstName"
+           >
+         </div>
+         <div class="col-md-6">
+           <label for="lastNameInput">Last Name</label>
+           <input
+             type="text"
+             maxlength="255"
+             id="lastNameInput"
+             class="txtInput"
+             style="width: 300px; height: 30px; border: 1px solid #ccc; background-color: #FAFAFA;font-size: 14px;"
+             [(ngModel)]="retrievedLastName"
+           >
+           <span class="error" style="font-size: 1.6vmin;"></span>
+         </div>
+       </div>
+     </div>
+
+     <div class="profile-info-group my-1">
+       <div class="row">
+         <div class="col-md-6">
+           <label for="designationInput">Designation</label>
+           <input
+             type="text"
+             maxlength="255"
+             id="designationInput"
+             class="txtInput"
+             style="width: 300px; height: 30px; border: 1px solid #ccc; background-color: #FAFAFA;font-size: 14px;"
+             [(ngModel)]="retrievedDesignation"
+           >
+         </div>
+         <div class="col-md-6">
+           <label for="contactNumberInput">Phone Number</label>
+           <input
+             type="text"
+             maxlength="255"
+             required=""
+             id="contactNumberInput"
+             class="txtInput"
+             style="width: 300px; height: 30px; border: 1px solid #ccc; background-color: #FAFAFA;font-size: 14px;"
+             [(ngModel)]="retrievedContactNumber"
+           >
+         </div>
+       </div>
+     </div>
+
+     <div class="profile-info-group">
+       <div class="row my-3">
+         <div class="col-md-12">
+           <label for="emailInput">Email*</label>
+           <input
+             type="text"
+             maxlength="255"
+             required=""
+             id="emailInput"
+             class="txtInput"
+             style="width: 48%; height: 30px; border: 1px solid #ccc; background-color: #FAFAFA;"
+             readonly
+             [(ngModel)]="retrievedEmail"
+           >
+         </div>
+       </div>
+     </div>
+   </div>
+  </div>
+</div>

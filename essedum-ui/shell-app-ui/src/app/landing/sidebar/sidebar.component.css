@@ -1,0 +1,3 @@
+[data-toggle="collapse"]:before {
+content: none !important;
+}

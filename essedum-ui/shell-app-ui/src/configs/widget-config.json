@@ -1,0 +1,270 @@
+{
+  "widgets": [
+    {
+      "category": "Data cards",
+      "icon": "assets/images/card.svg",
+      "route": "data-cards",
+      "widgets": [
+        {
+          "name": "Info Card Type 1",
+          "dataEndpoint": "/duckrails-api/widget-viewer/info-card-type1"
+        },
+        {
+          "name": "Tab Info Card",
+          "dataEndpoint": "/duckrails-api/widget-viewer/tab-info-card"
+        },
+        {
+          "name": "Stepper Card",
+          "dataEndpoint": "/duckrails-api/widget-viewer/stepper-card"
+        },
+        {
+          "name": "Tab Info Card 1",
+          "dataEndpoint": "/duckrails-api/widget-viewer/tab-info-card1"
+        },
+        {
+          "name": "Caller Id Card",
+          "dataEndpoint": "/duckrails-api/widget-viewer/caller-id"
+        },
+        {
+          "name": "Accordion List Card",
+          "dataEndpoint": "/duckrails-api/widget-viewer/accordion-list"
+        },
+        {
+          "name": "Card Type 1",
+          "dataEndpoint": "/duckrails-api/widget-viewer/card-type1"
+        },
+        {
+          "name": "Card Type 2",
+          "dataEndpoint": "/duckrails-api/widget-viewer/card-type2"
+        },
+        {
+          "name": "Card Type 3",
+          "dataEndpoint": "/duckrails-api/widget-viewer/card-type3"
+        },
+        {
+          "name": "Card Type 4",
+          "dataEndpoint": "/duckrails-api/widget-viewer/card-type4"
+        },
+        {
+          "name": "Card Type 5",
+          "dataEndpoint": "/duckrails-api/widget-viewer/card-type5"
+        },
+        {
+          "name": "Card Type 6",
+          "dataEndpoint": "/duckrails-api/widget-viewer/card-type6"
+        },
+        {
+          "name": "Card Type 7",
+          "dataEndpoint": "/duckrails-api/widget-viewer/card-type7"
+        },
+        {
+          "name": "Card Type 8",
+          "dataEndpoint": "/duckrails-api/widget-viewer/card-type8"
+        },
+        {
+          "name": "Card Type 9",
+          "dataEndpoint": "/duckrails-api/widget-viewer/card-type9"
+        },
+        {
+          "name": "Card Type 10",
+          "dataEndpoint": "/duckrails-api/widget-viewer/card-type10"
+        },
+        {
+          "name": "Card Type 11",
+          "dataEndpoint": "/duckrails-api/widget-viewer/card-type11"
+        },
+        {
+          "name": "Card Type 12",
+          "dataEndpoint": "/duckrails-api/widget-viewer/card-type12"
+        },
+        {
+          "name": "Card Type 13",
+          "dataEndpoint": "/duckrails-api/widget-viewer/card-type13"
+        },
+        {
+          "name": "Card Type 14",
+          "dataEndpoint": "/duckrails-api/widget-viewer/card-type14"
+        },
+        {
+          "name": "Basic Info Card",
+          "dataEndpoint": "/duckrails-api/widget-viewer/basic-info-card"
+        },
+        {
+          "name": "Information Card",
+          "dataEndpoint": "/duckrails-api/widget-viewer/information-card"
+        },
+        {
+          "name": "Notes Card",
+          "dataEndpoint": "/duckrails-api/widget-viewer/notes-card"
+        },
+        {
+          "name": "Placeholder Card",
+          "dataEndpoint": "/duckrails-api/widget-viewer/placeholder-card"
+        },
+        {
+          "name": "Showcase Card",
+          "dataEndpoint": "/duckrails-api/widget-viewer/showcase-card"
+        },
+        {
+          "name": "Insights Card",
+          "dataEndpoint": "/duckrails-api/widget-viewer/insights-card"
+        },
+        {
+          "name": "Recommendations Card",
+          "dataEndpoint": "/duckrails-api/widget-viewer/recommendations-card"
+        },
+        {
+          "name": "Category Card",
+          "dataEndpoint": "/duckrails-api/widget-viewer/category-card"
+        }
+      ]
+    },
+    {
+      "category": "Graphs",
+      "icon": "assets/images/layers.svg",
+      "route": "graphs",
+      "widgets": [
+        {
+          "name": "Gauge Chart",
+          "dataEndpoint": "/duckrails-api/widget-viewer/gauge-chart"
+        },
+        {
+          "name": "Gauge Score Chart",
+          "dataEndpoint": "/duckrails-api/widget-viewer/gauge-score-chart"
+        },
+        {
+          "name": "Bar Chart",
+          "dataEndpoint": "/duckrails-api/widget-viewer/bar-chart"
+        },
+        {
+          "name": "Stacked Chart",
+          "dataEndpoint": "/duckrails-api/widget-viewer/stacked-chart"
+        },
+        {
+          "name": "Gauge Chart With Info",
+          "dataEndpoint": "/duckrails-api/widget-viewer/gauge-chart-info"
+        },
+        {
+          "name": "Doughnut Chart",
+          "dataEndpoint": "/duckrails-api/widget-viewer/doughnut-chart"
+        }
+      ]
+    },
+    {
+      "category": "Tables",
+      "icon": "assets/images/table.svg",
+      "route": "tables",
+      "widgets": [
+        {
+          "name": "Basic Table",
+          "dataEndpoint": "/duckrails-api/widget-viewer/basic-table"
+        }
+      ]
+    },
+    {
+      "category": "Carousels",
+      "icon": "assets/images/list.svg",
+      "route": "carousels",
+      "widgets": [
+        {
+          "name": "Carousel Button",
+          "dataEndpoint": "/duckrails-api/widget-viewer/carousel-button"
+        },
+        {
+          "name": "Carousel Type 1",
+          "dataEndpoint": "/duckrails-api/widget-viewer/carousel-type1"
+        },
+        {
+          "name": "Carousel Type 2",
+          "dataEndpoint": "/duckrails-api/widget-viewer/carousel-type2"
+        },
+        {
+          "name": "Carousel Type 3",
+          "dataEndpoint": "/duckrails-api/widget-viewer/carousel-type3"
+        },
+        {
+          "name": "Carousel Type 4",
+          "dataEndpoint": "/duckrails-api/widget-viewer/carousel-type4"
+        },
+        {
+          "name": "Carousel Type 5",
+          "dataEndpoint": "/duckrails-api/widget-viewer/carousel-type5"
+        },
+        {
+          "name": "Carousel Type 6",
+          "dataEndpoint": "/duckrails-api/widget-viewer/carousel-type6"
+        },
+        {
+          "name": "Carousel Type 7",
+          "dataEndpoint": "/duckrails-api/widget-viewer/carousel-type7"
+        }
+      ]
+    },
+    {
+      "category": "Extras",
+      "icon": "assets/images/extra.svg",
+      "route": "extra",
+      "widgets": [
+        {
+          "name": "List Type 1",
+          "dataEndpoint": "/duckrails-api/widget-viewer/list-type1"
+        },
+        {
+          "name": "Text With Badge",
+          "dataEndpoint": "/duckrails-api/widget-viewer/text-with-badge"
+        },
+        {
+          "name": "Buttons List",
+          "dataEndpoint": "/duckrails-api/widget-viewer/buttons-list"
+        },
+        {
+          "name": "List With Badge",
+          "dataEndpoint": "/duckrails-api/widget-viewer/list-with-badge"
+        },
+        {
+          "name": "Attachment",
+          "dataEndpoint": "/duckrails-api/widget-viewer/attachment"
+        },
+        {
+          "name": "Button",
+          "dataEndpoint": "/duckrails-api/widget-viewer/button"
+        },
+        {
+          "name": "Default",
+          "dataEndpoint": "/duckrails-api/widget-viewer/default"
+        },
+        {
+          "name": "Multiple Responses",
+          "dataEndpoint": "/duckrails-api/widget-viewer/multiple-responses"
+        },
+        {
+          "name": "Video",
+          "dataEndpoint": "/duckrails-api/widget-viewer/video"
+        },
+        {
+          "name": "List",
+          "dataEndpoint": "/duckrails-api/widget-viewer/list"
+        },
+        {
+          "name": "FAQ",
+          "dataEndpoint": "/duckrails-api/widget-viewer/faq"
+        },
+        {
+          "name": "Personalized Smart Video",
+          "dataEndpoint": "/duckrails-api/widget-viewer/psv"
+        },
+        {
+          "name": "Word Cloud",
+          "dataEndpoint": "/duckrails-api/widget-viewer/word-cloud"
+        }
+      ]
+    },
+    {
+      "category": "Flutter",
+      "icon": "assets/images/card.svg",
+      "route": "flutter",
+      "widgets": null,
+      "widgetCount": 15
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="24" width = "24" viewBox="0 0 20 20" class="svg-dashboard-icon">
+  <defs>
+    <style>
+      .dash-cls-2, .dash-cls-3, .dash-cls-4, .dash-cls-5 {
+        stroke-miterlimit: 10;
+      }
+
+      .dash-cls-2, .dash-cls-4 {
+        stroke-width: 1.681px;
+      }
+
+      .dash-cls-3, .dash-cls-5 {
+        stroke-width: 1.5px;
+      }
+      .svg-dashboard-icon {
+        height: inherit;
+        width: inherit;
+       }
+       <!-- @media screen and (min-width: 5000px) {
+       .svg-dashboard-icon {
+        height: auto !important;
+        width: auto !important;
+      }
+      }
+       @media screen and (min-width: 1300px) and (max-width: 3000px) {
+       .svg-dashboard-icon {
+        height: auto !important;
+        width: auto !important;
+       }
+	  }
+	  @media screen and (max-width: 600px) {
+       .svg-dashboard-icon {
+        height: auto !important;
+        width: auto !important;
+       }
+	  } -->
+    </style>
+     <script>
+    function sizing(){
+      var resizedWidth = document.getElementById("projectparent").offsetWidth
+      var resizedHeight = document.getElementById("projectparent").offsetHeight
+      var widthPercentage = (resizedWidth / 1366);
+      var heightPercentage = (resizedHeight / 625);
+      var minOf = Math.min(widthPercentage, heightPercentage);
+      Height = "25px"
+      Height = Height ? Number.parseInt(Height.replace("px", "")) * minOf + "px" : null;
+      var element = document.getElementsByClassName("svg-dashboard-icon")[0];
+      element.setAttribute("height",Height);
+      element.setAttribute("width",Height);
+    };
+    $(document).ready(sizing);
+    $(window).resize(sizing);
+    </script>
+  </defs>
+  <g id="Dashboard" transform="translate(0.229 2)">
+    <g id="Group_4" data-name="Group 4" transform="translate(0 0)">
+      <rect id="Rectangle_6" data-name="Rectangle 6" fill="none" stroke="currentColor" width="20" height="20" transform="translate(-0.229 -2)"/>
+      <rect id="Rectangle_1" data-name="Rectangle 1" fill="none" stroke="currentColor" class="dash-cls-2" width="17.34" height="11.463" rx="0.885" transform="translate(1.169)"/>
+      <g id="Group_3" data-name="Group 3" transform="translate(6.262 2.055)">
+        <path id="Path_8" data-name="Path 8" stroke="none" d="M20.2,12.82H13.924V11.108h0l.941-.973.821.836a.277.277,0,0,0,.334.062l.119-.062.7-.723,1.475,1.53a.312.312,0,0,0,.213.1h0a.3.3,0,0,0,.226-.087L19.8,10.707V11.6a.317.317,0,0,0,.3.324h0a.315.315,0,0,0,.309-.3v-1.7h0V9.866h0a.246.246,0,0,0-.156-.087H18.625a.312.312,0,0,0,0,.623h.857l-.857.892L17.3,9.789l2.572-2.643v.892a.317.317,0,0,0,.3.324h0a.3.3,0,0,0,.3-.311V6.38h0V6.287h0V6.21h0a.182.182,0,0,0-.128,0H18.707a.32.32,0,0,0,.011.637h.857l-2.7,2.494L15.136,7.557h0a.309.309,0,0,0-.441,0l-.738.765V6.361a.307.307,0,0,0-.607,0V13.15a.316.316,0,0,0,.31.311H20.2a.291.291,0,0,0,.218-.087.324.324,0,0,0-.207-.548Zm-6.279-3.66h0l.941-.96L16.41,9.8l-.487.51-.81-.836-.127-.062a.307.307,0,0,0-.334.062l-.75.774Z" transform="translate(-13.35 -6.102)"/>
+      </g>
+      <path id="Path_9" data-name="Path 9" fill="none" stroke="currentColor" class="dash-cls-3" d="M15.94,22.61" transform="translate(-2.911 -5.285)"/>
+      <path id="Path_10" data-name="Path 10" fill="currentColor" stroke="currentColor" class="dash-cls-4" d="M9.7,14.95v4.473h2.307V14.95" transform="translate(-1.285 -2.92)"/>
+      <path id="Path_11" data-name="Path 11" fill="none" stroke="currentColor" class="dash-cls-5" d="M6.07,16.36" transform="translate(-1.031 -4.33)"/>
+      <rect id="Rectangle_3" data-name="Rectangle 3" fill="currentColor" stroke="currentColor" width="8.127" height="2.618" transform="translate(5.517 14.563)"/>
+    </g>
+  </g>
+</svg>

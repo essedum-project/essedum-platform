@@ -1,0 +1,14 @@
+{
+  "auth": {
+    "authRequired": false,
+    "authInIframe": false,
+    "iframeHtmlPath": "assets/login-iframe.html",
+    "issuer":"https://login.microsoftonline.com/63ce7d59-2f3e-42cd-a8cc-be764cff5eb6/v2.0",
+    "clientId": "4c08c00f-c434-4846-85cb-544e8feb0843",
+    "responseType": "code",
+    "scope": "4c08c00f-c434-4846-85cb-544e8feb0843/.default",
+    "showDebugInformation": true,
+    "timeoutFactor": 0.5,
+    "strictDiscoveryDocumentValidation": false
+  }
+}
