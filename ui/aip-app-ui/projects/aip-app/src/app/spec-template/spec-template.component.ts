@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component, EventEmitter, HostListener, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { HttpParams } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Services } from '../services/service';
 import { TagsService } from '../services/tags.service';
@@ -75,7 +76,6 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
     private location: Location
   ) { }
   ngOnChanges(changes: SimpleChanges): void {
-
   }
   @HostListener('window:resize', ['$event'])
   onResize(event) {
@@ -129,6 +129,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
     });
     this.tagrefresh = false;
     this.updateQueryParam(this.pageNumber,this.filt);
+    this.getCountSpecTemplates();
     this.getCards(this.pageNumber, this.pageSize);
 
     if (this.pageNumberChanged) {
@@ -168,22 +169,67 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
     this.telemetryService.impression("aip-app", "list", "SpecTemplateComponent");
   }
 
+  //previous
+  // nextPage() {
+  //   if (this.pageNumber + 1 <= this.noOfPages) {
+  //     this.pageNumber += 1;
+  //     this.changePage();
+  //     this.getCountSpecTemplates();
+  //   }
+  // }
+  // prevPage() {
+  //   if (this.pageNumber - 1 >= 1) {
+  //     this.pageNumber -= 1;
+  //     this.changePage();
+  //     this.getCountSpecTemplates();
+  //   }
+  // }
+  // changePage(page?: number) {
+  //   if (page && page >= 1 && page <= this.noOfPages) this.pageNumber = page;
+  //   if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
+  //     this.pageChanged.emit(this.pageNumber);
+  //     if (this.pageNumber > 5) {
+  //       this.endIndex = this.pageNumber;
+  //       this.startIndex = this.endIndex - 5;
+  //     } else {
+  //       this.startIndex = 0;
+  //       this.endIndex = 5;
+  //     }
+  //   }
+  //   this.getCards(this.pageNumber, this.pageSize);
+  //   this.getCountSpecTemplates();
+  // }
+  // new
   nextPage() {
     if (this.pageNumber + 1 <= this.noOfPages) {
       this.pageNumber += 1;
-      this.changePage();
+      if (this.pageNumber > 5) {
+        this.endIndex = this.pageNumber;
+        this.startIndex = this.endIndex - 5;
+      }
+      this.getCards(this.pageNumber, this.pageSize);
+      this.updateQueryParam(this.pageNumber, this.filt, this.selectedCapabilityType?.toString() ?? '');
     }
   }
+  
   prevPage() {
     if (this.pageNumber - 1 >= 1) {
       this.pageNumber -= 1;
-      this.changePage();
+      if (this.pageNumber <= 5) {
+        this.startIndex = 0;
+        this.endIndex = 5;
+      } else {
+        this.endIndex = this.pageNumber;
+        this.startIndex = this.endIndex - 5;
+      }
+      this.getCards(this.pageNumber, this.pageSize);
+      this.updateQueryParam(this.pageNumber, this.filt, this.selectedCapabilityType?.toString() ?? '');
     }
   }
+  
   changePage(page?: number) {
-    if (page && page >= 1 && page <= this.noOfPages) this.pageNumber = page;
-    if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
-      this.pageChanged.emit(this.pageNumber);
+    if (page && page >= 1 && page <= this.noOfPages) {
+      this.pageNumber = page;
       if (this.pageNumber > 5) {
         this.endIndex = this.pageNumber;
         this.startIndex = this.endIndex - 5;
@@ -191,17 +237,40 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
         this.startIndex = 0;
         this.endIndex = 5;
       }
+      this.getCards(this.pageNumber, this.pageSize);
+      this.updateQueryParam(this.pageNumber, this.filt, this.selectedCapabilityType?.toString() ?? '');
     }
-    this.getCards(this.pageNumber, this.pageSize);
   }
+  // pervious
+  // rowsPerPageChanged() {
+  //   if (this.pageSize == 0) {
+  //     this.pageSize = this.prevRowsPerPageValue;
+  //   }
+  //   else {
+  //     this.pageSizeChanged.emit(this.pageSize);
+  //     this.prevRowsPerPageValue = this.pageSize;
+  //     this.changeDetectionRef.detectChanges();
+  //   }
+  // }
+  //new
   rowsPerPageChanged() {
     if (this.pageSize == 0) {
       this.pageSize = this.prevRowsPerPageValue;
-    }
-    else {
+    } else {
       this.pageSizeChanged.emit(this.pageSize);
       this.prevRowsPerPageValue = this.pageSize;
-      this.changeDetectionRef.detectChanges();
+      this.pageNumber = 1; // Reset to first page when changing page size
+      
+      // Update pagination
+      this.getCountSpecTemplates();
+      this.getCards(this.pageNumber, this.pageSize);
+      
+      // Update URL params
+      this.updateQueryParam(
+        this.pageNumber,
+        this.filt,
+        this.selectedCapabilityType?.toString() ?? ''
+      );
     }
   }
   Authentications() {
@@ -230,35 +299,159 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
   numSequence(n: number): Array<number> {
     return Array(n);
   }
-  getCards(page: any, size: any): void {
-    if (page)
-      this.pageNumber = page;
-    if (size)
-      this.pageSize = size || 8;
-    let timezoneOffset = new Date().getTimezoneOffset();
-    let org = sessionStorage.getItem("organization");
-    this.adapterServices.getMlSpecTemplatesCards(org).subscribe((res) => {
-      let data: any = [];
-      let test = res;
-      test = test.filter((element) => {
-        return element.organization === sessionStorage.getItem('organization');
-      });
-      test.forEach((element: any) => {
-        element.createdon = new Date(new Date(element.createdon).getTime() - timezoneOffset * 60 * 1000);
-        data.push(element);
-        this.users.push(element.domainname)
-      });
-      this.cards = data;
-      this.allCards=data;
-      this.allCardsFiltered=data;
-      this.filterSelectedCards(page, size);
+  // getCards(page: any, size: any): void {
+  //   if (page)
+  //     this.pageNumber = page;
+  //   if (size)
+  //     this.pageSize = size || 8;
+  //   let timezoneOffset = new Date().getTimezoneOffset();
+  //   let org = sessionStorage.getItem("organization");
+  //   this.adapterServices.getMlSpecTemplatesCards(org).subscribe((res) => {
+  //     let data: any = [];
+  //     let test = res;
+  //     test = test.filter((element) => {
+  //       return element.organization === sessionStorage.getItem('organization');
+  //     });
+  //     test.forEach((element: any) => {
+  //       element.createdon = new Date(new Date(element.createdon).getTime() - timezoneOffset * 60 * 1000);
+  //       data.push(element);
+  //       this.users.push(element.domainname)
+  //     });
+  //     this.cards = data;
+  //     this.allCards=data;
+  //     this.allCardsFiltered=data;
+  //     this.filterSelectedCards(page, size);
+  //   });
+  //   this.pageSize = this.pageSize || 9;
+  // }
+
+
+  getCountSpecTemplates() {
+    let params: HttpParams = new HttpParams();
+  
+    const org = sessionStorage.getItem("organization");
+    if (this.filt?.length >= 1) {
+      params = params.set('query', this.filt);
+    }
+  
+    params = params.set('page', this.pageNumber);
+    params = params.set('size', this.pageSize);
+  
+    if (this.selectedCapabilityType?.length >= 1) {
+      params = params.set('capabilityTypes', this.selectedCapabilityType.toString());
+    }
+    
+    // Assuming `this.organization` is passed as a path variable to the service
+    this.adapterServices.getCountSpecTemplates(org, this.filt, this.selectedCapabilityType.join()).subscribe((res) => {
+      this.noOfItems = res;
+      console.log("No of Items: ", this.noOfItems);
     });
-    this.pageSize = this.pageSize || 9;
   }
+  
+// yash has written this
+  // getCards(page?: number, size?: number, query?: string, type?: string): void {
+  //   if (page) {
+  //     this.pageNumber = page;
+  //   }  
+  //   if (size) {
+  //     this.pageSize = size;
+  //   }
+  //   if(query){
+  //     this.filt = query;
+  //   }
+  //   if(type){
+  //     this.selectedCapabilityType = type.split(',');
+  //   } 
+  //   this.pageSize = this.pageSize || 9;
+  //   const timezoneOffset = new Date().getTimezoneOffset();
+  //   const org = sessionStorage.getItem("organization");  
+  //   this.adapterServices.getMlSpecTemplatesCards(org, this.pageNumber, this.pageSize, this.filt, this.selectedCapabilityType.join(',')).subscribe((res) => {
+  //     const data: any[] = [];
+  //     this.users = []; // clear previous users
+  
+  //     const filteredRes = res.filter((element: any) => {
+  //       return element.organization === org;
+  //     });
+  
+  //     filteredRes.forEach((element: any) => {
+  //       element.createdon = new Date(new Date(element.createdon).getTime() - timezoneOffset * 60 * 1000);
+  //       data.push(element);
+  //       this.users.push(element.domainname);
+  //     });
+  
+  //     this.cards = data;
+  //     this.allCards = data;
+  //     this.allCardsFiltered = data;
+  
+  //     this.filterSelectedCards(this.pageNumber, this.pageSize);
+  //   });
+  // }
+  //mine
+  // Update getCards to not call filterSelectedCards
+  getCards(page?: number, size?: number, query?: string, type?: string): void {
+    if (page) {
+      this.pageNumber = page;
+    }  
+    if (size) {
+      this.pageSize = size;
+    }
+    if(query) {
+      this.filt = query;
+    }
+    if(type) {
+      this.selectedCapabilityType = type.split(',');
+    } 
+    
+    this.pageSize = this.pageSize || 9;
+    const timezoneOffset = new Date().getTimezoneOffset();
+    const org = sessionStorage.getItem("organization");  
+    
+    this.adapterServices.getMlSpecTemplatesCards(
+      org, 
+      this.pageNumber, 
+      this.pageSize, 
+      this.filt, 
+      this.selectedCapabilityType.join(',')
+    ).subscribe({
+      next: (res) => {
+        const data: any[] = [];
+        this.users = []; // clear previous users
+  
+        res.forEach((element: any) => {
+          element.lastmodifiedon = new Date(new Date(element.lastmodifiedon).getTime() - timezoneOffset * 60 * 1000);
+          data.push(element);
+          this.users.push(element.domainname);
+        });
+  
+        this.cards = data;
+        this.records = this.cards.length === 0;
+        
+        // Calculate pagination
+        this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
+        this.pageArr = [...Array(this.noOfPages).keys()];
+        
+        // Update pagination indexes
+        if (this.pageNumber > 5) {
+          this.endIndex = this.pageNumber;
+          this.startIndex = this.endIndex - 5;
+        } else {
+          this.startIndex = 0;
+          this.endIndex = 5;
+        }
+        
+        this.changeDetectionRef.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error fetching cards:', error);
+        this.records = true;
+      }
+    });
+  }
+
   desc(card: any) {
-    // //this.telemetry.addTelemetryEvent(card.alias+" viewed");
+    // this.telemetry.addTelemetryEvent(card.alias+" viewed");
     this.router.navigate(["../specs/"+card.domainname], { relativeTo: this.route });
-    //this.telemetry.addTelemetryEvent(card.alias+" viewed");
+    this.telemetry.addTelemetryEvent(card.alias+" viewed");
   }
   redirect() {
     this.selectedInstance = this.selectedCard.name;
@@ -271,34 +464,54 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
         relativeTo: this.route,
       });
   }
+ //previous
+  // filterz() {
+  //   if(this.filt.length!=this.filtbackup.length){
+  //     this.pageNumber=1;
+  //     this.filtbackup=this.filt;
+  //   }
+  //   let data:any=[];
+  //   this.allCardsFiltered.forEach((element:any) => {
+  //     if(element.domainname.toLowerCase().includes(this.filt.toLowerCase())){
+  //       data.push(element);
+  //     }
+  //   });
+  //   this.cards=data;
+  //   if(this.cards.length==0){
+  //     this.records=true;
+  //   }
+  //   else{
+  //     this.records=false;
+  //   }
+  //   this.noOfItems = this.cards.length;
+  //   this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
+  //   this.pageArr = [...Array(this.noOfPages).keys()];
+  //   this.updateQueryParam(
+  //     this.pageNumber,
+  //     this.filt,
+  //     this.selectedCapabilityType?.toString() ?? ''
+  //   );
 
+  // }
+
+  //new
   filterz() {
-    if(this.filt.length!=this.filtbackup.length){
-      this.pageNumber=1;
-      this.filtbackup=this.filt;
+    if(this.filt.length != this.filtbackup.length) {
+      this.pageNumber = 1;
+      this.filtbackup = this.filt;
     }
-    let data:any=[];
-    this.allCardsFiltered.forEach((element:any) => {
-      if(element.domainname.toLowerCase().includes(this.filt.toLowerCase())){
-        data.push(element);
-      }
-    });
-    this.cards=data;
-    if(this.cards.length==0){
-      this.records=true;
-    }
-    else{
-      this.records=false;
-    }
-    this.noOfItems = this.cards.length;
-    this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
-    this.pageArr = [...Array(this.noOfPages).keys()];
+    
+    // Update query parameters and refresh data from backend
     this.updateQueryParam(
       this.pageNumber,
       this.filt,
       this.selectedCapabilityType?.toString() ?? ''
     );
-
+    
+    // Fetch new data with filter
+    this.getCards(this.pageNumber, this.pageSize, this.filt);
+    // Get updated count
+    this.getCountSpecTemplates();
   }
 
   getTags() {
@@ -357,7 +570,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
   }
   refresh() {
     this.getCards(this.pageNumber, this.pageSize);
-
+    // this.pageSize = this.pageSize || 6;
   }
   openEdit() {
     console.log('openEdit');
@@ -379,7 +592,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
             if (resp.body.message == "success") {
               this.adapterServices.messageNotificaionService('success', "Done!  Spec Deleted Successfully");
               this.refresh();
-              //this.telemetry.addTelemetryEvent(domainname+ ' Deleted');
+              this.telemetry.addTelemetryEvent(domainname+ ' Deleted');
             }
             else
               this.adapterServices.messageNotificaionService('warning', "Spec Can't be Deleted, It's being used by adapter(s)");
@@ -396,47 +609,69 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
     this.pageNumber = 1;
     this.selectedTag = event.getSelectedTagList();
     this.tagrefresh = false;
+    this.changeDetectionRef.detectChanges();
     this.filterSelectedCards(this.pageNumber);
   }
-  filterSelectedCards(page:any,size?:any) {
+
+  // previous
+  // filterSelectedCards(page:any,size?:any) {
+  //   this.tagrefresh = false;
+  //     if (this.selectedCapabilityType.length > 0) {
+  //       let data:any = new Set();
+  //       this.selectedCapabilityType.forEach((element: any) => {
+  //         this.allCards.forEach((ele: any) => {
+  //           if (ele.capability?.includes(element)) {
+  //             data.add(ele);
+  //           }
+  //         });
+  //       });
+  //       this.allCardsFiltered =  Array.from(data);
+  //       this.cards = this.allCardsFiltered;
+  //     } else {
+  //       this.allCardsFiltered = this.allCards;
+  //       this.cards = this.allCards;
+  //     }
+  //     if (this.cards.length == 0) {
+  //       this.records = true;
+  //     }
+  //     else {
+  //       this.records = false;
+  //     }
+  //     if (this.filt.length >= 1) {
+  //       this.filterz();
+  //     }  else{
+  //       this.filt = "";
+  //     }
+  //     if(page)
+  //       this.pageNumber=page;
+  //     this.updateQueryParam(
+  //       this.pageNumber,
+  //       this.filt,
+  //       this.selectedCapabilityType?.toString() ?? ''
+  //     );
+  //     this.noOfItems = this.cards.length;
+  //     this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
+  //     this.pageArr = [...Array(this.noOfPages).keys()];
+  //   }
+
+  //new 
+  filterSelectedCards(page: any, size?: any) {
     this.tagrefresh = false;
-      if (this.selectedCapabilityType.length > 0) {
-        let data:any = new Set();
-        this.selectedCapabilityType.forEach((element: any) => {
-          this.allCards.forEach((ele: any) => {
-            if (ele.capability?.includes(element)) {
-              data.add(ele);
-            }
-          });
-        });
-        this.allCardsFiltered =  Array.from(data);
-        this.cards = this.allCardsFiltered;
-      } else {
-        this.allCardsFiltered = this.allCards;
-        this.cards = this.allCards;
-      }
-      if (this.cards.length == 0) {
-        this.records = true;
-      }
-      else {
-        this.records = false;
-      }
-      if (this.filt.length >= 1) {
-        this.filterz();
-      }  else{
-        this.filt = "";
-      }
-      if(page)
-        this.pageNumber=page;
-      this.updateQueryParam(
-        this.pageNumber,
-        this.filt,
-        this.selectedCapabilityType?.toString() ?? ''
-      );
-      this.noOfItems = this.cards.length;
-      this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
-      this.pageArr = [...Array(this.noOfPages).keys()];
+    if(page) {
+      this.pageNumber = page;
     }
+    
+    this.updateQueryParam(
+      this.pageNumber,
+      this.filt,
+      this.selectedCapabilityType?.toString() ?? ''
+    );
+    
+    // Fetch new data with filters
+    this.getCards(this.pageNumber, this.pageSize, this.filt, this.selectedCapabilityType.join(','));
+    // Get updated count
+    this.getCountSpecTemplates();
+  }
     selectedButton(i){
       if(i==this.pageNumber)
         return {"color": "white","background": "#7b39b1"}
@@ -456,6 +691,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
   completeRefresh() {
     this.filt = '';
     this.tagrefresh = true;
+    this.changeDetectionRef.detectChanges();
     if (!this.isExpanded) {
       this.selectedCapabilityType = [];
       this.updateQueryParam(1, '', '', '');

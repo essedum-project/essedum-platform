@@ -12,6 +12,7 @@ package com.infosys.icets.icip.adapter.rest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.infosys.icets.ai.comm.lib.util.ICIPUtils;
@@ -37,6 +39,7 @@ import com.infosys.icets.icip.adapter.service.MlSpecTemplatesService;
 import com.infosys.icets.icip.dataset.model.ICIPDatasource;
 import com.infosys.icets.icip.dataset.model.MlAdapters;
 import com.infosys.icets.icip.dataset.model.MlSpecTemplates;
+import com.infosys.icets.icip.dataset.model.MlSpecTemplates2;
 
 import io.micrometer.core.annotation.Timed;
 
@@ -95,11 +98,35 @@ public class MlSpecTemplatesController {
 
 	}
 	
+	@GetMapping("getSpecTemplatesCountByOrg/{org}")
+	public ResponseEntity<Long> getMlSpecTemplatesCount(@PathVariable(name = "org", required = true) String org,
+			@RequestParam(name = "type", required = false) String filters,
+			@RequestParam(name = "query", required = false) String query) {
+		try {
+			long count = mlSpecTemplatesService.getMlSpecTemplatesCount(org, filters, query);
+			return new ResponseEntity<>(count, HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error("Error in getting template count: {}", e.getMessage());
+			return new ResponseEntity<>(0L, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
 	/* Fetches All MlSpecTemplates */
 	@GetMapping("/getSpecTemplatesByOrganization/{org}")
-	public ResponseEntity<List<MlSpecTemplates>> getAllMlSpecTemplates(
-			@PathVariable(name = "org", required = true) String org) {
-		return new ResponseEntity<>(mlSpecTemplatesService.getAllMlSpecTemplates(org), new HttpHeaders(), HttpStatus.OK);
+	public ResponseEntity<List<MlSpecTemplates2>> getAllMlSpecTemplates(
+			@PathVariable(name = "org", required = true) String org,
+			@RequestParam(name = "type", required = false) String type,
+			@RequestParam(name = "page", required = false, defaultValue = "1") String page,
+			@RequestParam(name = "size", required = false) String size,
+			@RequestParam(name = "query", required = false) String query) {
+		try {
+			List<MlSpecTemplates2> specTemplates = mlSpecTemplatesService.getMlSpecTemplatesPageWise(org, type, page,
+					size, query);
+			return new ResponseEntity<>(specTemplates, HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error("Error in getting specs: {}", e.getMessage());
+			return new ResponseEntity<>(Collections.emptyList(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@GetMapping("/getFiltersByOrganization/{org}")

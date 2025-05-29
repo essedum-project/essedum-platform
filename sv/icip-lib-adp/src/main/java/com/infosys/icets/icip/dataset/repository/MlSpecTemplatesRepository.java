@@ -12,10 +12,12 @@ package com.infosys.icets.icip.dataset.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import com.infosys.icets.icip.dataset.model.MlSpecTemplates;
+import com.infosys.icets.icip.dataset.model.MlSpecTemplates2;
 
 /**
  * Spring Data JPA repository for the MlSpecTemplates entity.
@@ -28,9 +30,29 @@ public interface MlSpecTemplatesRepository extends JpaRepository<MlSpecTemplates
 
 	List<MlSpecTemplates> getMlSpecTemplateByDomainnameAndOrganization(String domainName,String organization);
 
-	List<MlSpecTemplates> getAllMlSpecTemplates(String org);
+	List<MlSpecTemplates2> getAllMlSpecTemplates(String org);
 
 	List<MlSpecTemplates> getMlSpecTemplateByOrganization(String org);
 	
 	List<String> getSpecTemplatesNamesByOrganization(String org);
+	
+	List<MlSpecTemplates2> getAllMlSpecTemplatesByOrganization(String org, Pageable paginate);
+
+	Long countByOrganization(String org);
+	
+	List<MlSpecTemplates2> getAllMlSpecTemplatesByOrganizationAndDomainname(String org, String domainname,
+			Pageable paginate);
+
+	List<MlSpecTemplates2> getMlSpecTemplatesByOrganizationAndCapability(String org, String capability);
+
+	// Count templates by organization and domain name (for query filter)
+	Long countByOrganizationAndDomainnameContainingIgnoreCase(String org, String domainname);
+
+	// Count templates by organization and capability
+	Long countByOrganizationAndCapability(String org, String capability);
+
+	// Count templates by organization, domain name, and list of capabilities
+	Long countByOrganizationAndDomainnameContainingIgnoreCaseAndCapabilityIn(String org, String query,
+			List<String> capabilities);
+
 }
