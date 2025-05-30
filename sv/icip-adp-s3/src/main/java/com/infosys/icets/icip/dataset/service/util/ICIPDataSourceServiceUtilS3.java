@@ -24,7 +24,12 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -33,6 +38,7 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -57,9 +63,12 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.Region;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.Download;
 import com.amazonaws.services.s3.transfer.MultipleFileDownload;
 import com.amazonaws.services.s3.transfer.TransferManager;
@@ -68,12 +77,17 @@ import com.azure.core.http.HttpClient;
 import com.azure.core.http.okhttp.OkHttpAsyncHttpClientBuilder;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.infosys.icets.ai.comm.lib.util.annotation.LeapProperty;
 import com.infosys.icets.ai.comm.lib.util.exceptions.LeapException;
 import com.infosys.icets.icip.dataset.model.ICIPDatasource;
 
+import io.minio.ListObjectsArgs;
 import io.minio.MinioClient;
+import io.minio.Result;
 import io.minio.errors.MinioException;
+import io.minio.messages.Item;
 import jline.internal.Log;
 import okhttp3.OkHttpClient;
 @Component("s3source")
@@ -174,6 +188,7 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
 			attributes.put("secretKey", "");
 			attributes.put("url", "");
 			attributes.put("Region", "");
+			attributes.put("StorageContainerName", "");
 			ds.put("attributes", attributes);
 		} catch (JSONException e) {
 			logger.error("plugin attributes mismatch", e);
@@ -522,6 +537,166 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
 	      return localFilePath;
 
 	}
+
+	@Override
+	public List<Map<String, Object>> getCustomModels(String org, List<ICIPDatasource> connectionsList, Integer page,
+			Integer size, String query) {
+
+		List<Map<String, Object>> allObjectDetails = new ArrayList<>();
+		OkHttpClient customHttpClient = null;
+		try {
+			TrustManager[] trustAllCerts = getTrustAllCerts();
+			SSLContext sslContext = getSslContext(trustAllCerts);
+			customHttpClient = new OkHttpClient.Builder()
+					.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0])
+					.hostnameVerifier((hostname, session) -> true).build();
+		} catch (Exception e) {
+			logger.error("Error initializing custom HTTP client: " + e.getMessage());
+			return allObjectDetails;
+		}
+
+		for (ICIPDatasource datasource : connectionsList) {
+			JSONObject connectionDetails = new JSONObject(datasource.getConnectionDetails());
+			String accessKey = connectionDetails.optString("accessKey");
+			String secretKey = connectionDetails.optString("secretKey");
+			String url = connectionDetails.optString("url");
+			String bucketName = connectionDetails.optString("StorageContainerName");
+			try {
+				MinioClient minioClient = MinioClient.builder().endpoint(url).credentials(accessKey, secretKey)
+						.httpClient(customHttpClient).build();
+				Iterable<Result<Item>> results = minioClient
+						.listObjects(ListObjectsArgs.builder().bucket(bucketName).recursive(true).build());
+				for (Result<Item> result : results) {
+					Item item = result.get();
+					String path = item.objectName();
+					String modelName = extractModelName(path);
+					String lastModified = item.lastModified() != null ? item.lastModified().toString() : null;
+					// Only add if file ends with .pkl (custom model file)
+					if ((query == null || query.isEmpty() || modelName.toLowerCase().contains(query.toLowerCase()))
+							&& path.toLowerCase().endsWith(".pkl")) {
+						Map<String, Object> modelInfo = new HashMap<>();
+						modelInfo.put("path", path);
+						modelInfo.put("sourceName", modelName);
+						modelInfo.put("name", extractModelNameWithoutVersion(modelName));
+						modelInfo.put("sourceModifiedDate", lastModified);
+						modelInfo.put("createdOn", lastModified);
+						modelInfo.put("type", "Custom");
+						modelInfo.put("status", "Registered");
+						modelInfo.put("createdBy", org);
+						modelInfo.put("organisation", org);
+						modelInfo.put("appOrg", org);
+						modelInfo.put("version", extractVersionFromPath(path));
+						JSONObject artifacts = new JSONObject();
+						artifacts.put("storageType", datasource.getAlias() + "-" + datasource.getName());
+						artifacts.put("uri", bucketName + "/" + path);
+						modelInfo.put("artifacts", artifacts.toString());
+						allObjectDetails.add(modelInfo);
+					}
+				}
+			} catch (Exception e) {
+				logger.error("Error fetching objects from datasource: " + e.getMessage());
+			}
+		}
+
+		// Sort by sourceModifiedDate/lastModified (latest first)
+		allObjectDetails.sort((a, b) -> {
+			String dateA = (String) a.get("sourceModifiedDate");
+			String dateB = (String) b.get("sourceModifiedDate");
+			if (dateA == null && dateB == null)
+				return 0;
+			if (dateA == null)
+				return 1;
+			if (dateB == null)
+				return -1;
+			return dateB.compareTo(dateA); // descending order
+		});
+
+		// If page or size is null or empty, return the entire list
+		if (page == null || size == null) {
+			return allObjectDetails;
+		}
+
+		// Pagination logic (page is 1-based)
+		int effectivePage = (page < 1) ? 1 : page;
+		int effectivePageSize = (size < 1) ? 8 : size;
+		int fromIndex = Math.max(0, Math.min((effectivePage - 1) * effectivePageSize, allObjectDetails.size()));
+		int toIndex = Math.max(0, Math.min(fromIndex + effectivePageSize, allObjectDetails.size()));
+		return allObjectDetails.subList(fromIndex, toIndex);
+	}
+
+	private String extractModelNameWithoutVersion(String modelName) {
+		// Removes version suffix like _v2, _v10, etc. from model name
+		return modelName.replaceFirst("_v\\d+$", "");
+	}
+
+	// Helper method to extract model name from path
+	private String extractModelName(String path) {
+		if (path == null || !path.contains("/"))
+			return path;
+		String fileName = path.substring(path.lastIndexOf('/') + 1);
+		int dotIdx = fileName.lastIndexOf('.');
+		return (dotIdx > 0) ? fileName.substring(0, dotIdx) : fileName;
+	}
+
+	// Helper method to extract model version from path
+	private String extractVersionFromPath(String path) {
+		String version = "1"; // Default version is 1
+		Pattern pattern = Pattern.compile("_v(\\d+)\\.pkl$", Pattern.CASE_INSENSITIVE);
+		Matcher matcher = pattern.matcher(path);
+		if (matcher.find()) {
+			version = matcher.group(1);
+		}
+		return version;
+	}
+
+	@Override
+	public Long getAllModelObjectDetailsCount(List<ICIPDatasource> datasources, String searchModelName, // pass null or
+																										// empty for no
+																										// filter
+			String org) {
+		long count = 0L;
+		OkHttpClient customHttpClient = null;
+
+		try {
+			TrustManager[] trustAllCerts = getTrustAllCerts();
+			SSLContext sslContext = getSslContext(trustAllCerts);
+			customHttpClient = new OkHttpClient.Builder()
+					.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0])
+					.hostnameVerifier((hostname, session) -> true).build();
+		} catch (Exception e) {
+			logger.error("Error initializing custom HTTP client: " + e.getMessage());
+			return 0L;
+		}
+
+		for (ICIPDatasource datasource : datasources) {
+			JSONObject connectionDetails = new JSONObject(datasource.getConnectionDetails());
+			String accessKey = connectionDetails.optString("accessKey");
+			String secretKey = connectionDetails.optString("secretKey");
+			String url = connectionDetails.optString("url");
+			String bucketName = connectionDetails.optString("StorageContainerName");
+			try {
+				MinioClient minioClient = MinioClient.builder().endpoint(url).credentials(accessKey, secretKey)
+						.httpClient(customHttpClient).build();
+				Iterable<Result<Item>> results = minioClient
+						.listObjects(ListObjectsArgs.builder().bucket(bucketName).recursive(true).build());
+				for (Result<Item> result : results) {
+					Item item = result.get();
+					String path = item.objectName();
+					String modelName = extractModelName(path);
+					// Filter by model name if searchModelName is provided
+					if ((searchModelName == null || searchModelName.isEmpty()
+							|| modelName.toLowerCase().contains(searchModelName.toLowerCase()))
+							&& path.toLowerCase().endsWith(".pkl")) {
+						count++;
+					}
+				}
+			} catch (Exception e) {
+				logger.error("Error fetching objects from datasource: " + e.getMessage());
+			}
+		}
+		return count;
+	}
+	
 
 	
 }

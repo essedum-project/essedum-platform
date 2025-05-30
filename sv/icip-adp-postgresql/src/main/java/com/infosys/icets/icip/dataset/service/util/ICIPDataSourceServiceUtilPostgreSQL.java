@@ -14,6 +14,8 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -151,6 +153,19 @@ public class ICIPDataSourceServiceUtilPostgreSQL extends ICIPDataSourceServiceUt
 	@Override
 	public JSONObject isTableCreationUsingSchemaSupported(ICIPDatasource datasource) {
 		return new JSONObject("{Create Table:true}");
+	}
+
+	@Override
+	public List<Map<String, Object>> getCustomModels(String org, List<ICIPDatasource> connectionsList, Integer page,
+			Integer size, String query) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Long getAllModelObjectDetailsCount(List<ICIPDatasource> datasources, String searchModelName, String org) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

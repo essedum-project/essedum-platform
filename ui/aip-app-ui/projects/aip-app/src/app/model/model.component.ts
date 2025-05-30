@@ -278,7 +278,9 @@ export class ModelComponent implements OnInit, OnChanges {
     this.service.getModelCards(params).subscribe((res) => {
       let data: any = [];
       let test = res;
+      //let timezoneOffset = new Date().getTimezoneOffset();
       test.forEach((element: any) => {
+        //element.sourceModifiedDate = new Date(new Date(element.sourceModifiedDate).getTime() - timezoneOffset * 60 * 1000);
         data.push(element);
         this.users.push(element.appName);
       });

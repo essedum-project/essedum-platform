@@ -74,6 +74,7 @@ import com.infosys.icets.icip.dataset.model.ICIPTags;
 import com.infosys.icets.icip.dataset.repository.ICIPDatasourceRepository;
 import com.infosys.icets.icip.dataset.service.ICIPMlIntstanceService;
 import com.infosys.icets.icip.dataset.service.IICIPDatasetService;
+import com.infosys.icets.icip.dataset.service.IICIPDatasourcePluginsService;
 import com.infosys.icets.icip.dataset.service.IICIPDatasourceService;
 import com.infosys.icets.icip.dataset.service.IICIPSchemaRegistryService;
 import com.infosys.icets.icip.dataset.service.IICIPTagsService;
@@ -148,6 +149,10 @@ public class ICIPMlopsController {
 
 	@Autowired
 	private ICIPDatasetPluginsService pluginService;
+	
+	/** The datasource plugin servce. */
+	@Autowired
+	private IICIPDatasourcePluginsService datasourcePluginServce;
 
 	@Autowired
 	private IICIPPluginDetailsService pluginDetailsService;
@@ -909,15 +914,13 @@ public class ICIPMlopsController {
 	/* Model */
 
 	@GetMapping("/models/list")
-	// ResponseEntity flux
-
-	public ResponseEntity<String> listModels(@RequestParam(name = "project", required = true) String project,
+	public ResponseEntity<?> listModels(@RequestParam(name = "project", required = true) String project,
 			@RequestParam(name = "type", required = false) String type,
 			@RequestParam(name = "instance", required = false) String instance,
 			@RequestParam(name = "tags", required = false) String tags,
 			@RequestParam(name = "query", required = false) String query,
-			@RequestParam(name = "page", required = false, defaultValue = "1") String page,
-			@RequestParam(name = "size", required = false, defaultValue = "10") String size,
+			@RequestParam(name = "page", required = false) String page,
+			@RequestParam(name = "size", required = false) String size,
 			@RequestParam(name = "orderBy", required = false) String orderBy,
 			@RequestParam(name = "isCached", required = true) Boolean isCached,
 			@RequestParam(name = "adapter_instance", required = false) String adapterInstance,
@@ -925,35 +928,18 @@ public class ICIPMlopsController {
 			@RequestHeader Map<String, String> headers) throws IOException {
 		Map<String, String> params = new HashMap<String, String>();
 		if (isCached) {
-			Pageable paginate = PageRequest.of(Integer.valueOf(page) - 1, Integer.valueOf(size));
-
-			List<Integer> tagList = new ArrayList<>();
-			if (tags != null) {
-				String[] splitValues = tags.split(",");
-				for (String t : splitValues) {
-					tagList.add(Integer.parseInt(t));
-				}
-			} else
-				tagList = null;
-
-			List<ICIPMLFederatedModelDTO> results = fedModelService.getAllModelsByAdpateridAndOrganisation(instance,
-					project, paginate, tagList, query, orderBy, type);
-			String response = new JSONArray(results).toString();
-
+			logger.info("fetch models for org: {}", project);
+			Integer pageInt = (page != null && !page.isEmpty()) ? Integer.valueOf(page) : null;
+			Integer sizeInt = (size != null && !size.isEmpty()) ? Integer.valueOf(size) : null;
+			ICIPDatasource datasource = new ICIPDatasource();
+			datasource.setType("S3");
+			datasource.setConnectionDetails("");
+			List<ICIPDatasource> connectionsList = iICIPDatasourceService.getForModelsTypeAndOrganization("S3",
+					project);
+			List<Map<String, Object>> response = datasourcePluginServce.getDataSourceService(datasource)
+					.getCustomModels(project, connectionsList, pageInt, sizeInt, query);
 			return ResponseEntity.status(200).body(response);
 		} else {
-			/*
-			 * ICIPPolyAIRequestWrapper payload = new ICIPPolyAIRequestWrapper(); JSONObject
-			 * content = new JSONObject(); content.put("datasource", instance);
-			 * content.put("org", project); content.put("datasourceAlias", instance);
-			 * payload.setRequest(content.toString()); try { List<ICIPMLFederatedModel>
-			 * results = modelPluginService .getModelService(getDatasource(instance,
-			 * project).getType()).getSyncModelList(payload); String response = new
-			 * JSONArray(results).toString();
-			 * 
-			 * return ResponseEntity.status(200).body(response); } catch (IOException |
-			 * ParseException e) { return ResponseEntity.status(500).body(e.getMessage()); }
-			 */
 			try {
 				params.put(ICIPMlOpsConstants.IS_INSTANCE, isInstance);
 				String results = iCIPMlOpsRestAdapterService.callGetMethod(adapterInstance,
@@ -963,7 +949,6 @@ public class ICIPMlopsController {
 				return ResponseEntity.status(500).body(e.getMessage());
 			}
 		}
-
 	}
 
 	@GetMapping("/models/getAll/{org}")
@@ -1707,20 +1692,13 @@ public class ICIPMlopsController {
 			@RequestParam(name = "query", required = false) String query,
 			@RequestParam(name = "orderBy", required = false) String orderBy,
 			@RequestParam(name = "isCached", required = true) Boolean isCached) throws IOException {
-		List<Integer> tagList = new ArrayList<>();
-		if (tags != null) {
-			String[] splitValues = tags.split(",");
-			for (String t : splitValues) {
-				tagList.add(Integer.parseInt(t));
-			}
-		} else
-			tagList = null;
-
-		Long results = fedModelService.getAllModelsCountByAdpateridAndOrganisation(instance, project, tagList, query,
-				orderBy, type);
-
+		ICIPDatasource datasource = new ICIPDatasource();
+		datasource.setType("S3");
+		datasource.setConnectionDetails("");
+		List<ICIPDatasource> connectionsList = iICIPDatasourceService.getForModelsTypeAndOrganization("S3", project);
+		Long results = datasourcePluginServce.getDataSourceService(datasource)
+				.getAllModelObjectDetailsCount(connectionsList, query, project);
 		return ResponseEntity.status(200).body(results);
-
 	}
 
 	@GetMapping("/endpoints/list/count")
