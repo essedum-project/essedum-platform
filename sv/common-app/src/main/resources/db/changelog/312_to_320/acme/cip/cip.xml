@@ -5,6 +5,156 @@
     <sql dbms="mysql, postgresql" splitStatements="true" stripComments="true"> 
 		insert into mldatasource (id, connectiondetails, description, dshashcode, name, organization, salt, type, category, activetime, lastmodifiedby, lastmodifieddate, alias, extras, interfacetype, fordataset, foradapter, forruntime, formodel, forpromptprovider) values('6147','{\"password\":\"encLkcb27L/zuAk1JyL/ZRkK+OtD+xHAnPc\",\"userName\":\"leapadm\",\"url\":\"jdbc:mysql://10.67.9.46:3307/telemetrydb\"}','','43cc308507c43465d602b076401eb02932457a977861b740e25d52d67955ddbf','LEOTLMTR19390','leo1311','MXqgjgoT80rHK7Iws+9JVbQDtx1z30l0YwsukVbKWah17uos5iceLGfHIOqKpoxngkuFjtAJRKWZZG/SCbmd6w==','MYSQL','SQL','2025-01-17 08:06:40.391611','admin','2025-01-17 08:06:40','TelemetryDB','{\"apispec\":{},\"apispectemplate\":{}}',NULL,NULL,NULL,NULL,NULL,NULL);
 		insert into mldatasource (id, connectiondetails, description, dshashcode, name, organization, salt, type, category, activetime, lastmodifiedby, lastmodifieddate, alias, extras, interfacetype, fordataset, foradapter, forruntime, formodel, forpromptprovider) values('6327','{\"password\":\"encLkcb27L/zuAk1JyL/ZRkK+OtD+xHAnPc\",\"userName\":\"leapadm\",\"url\":\"jdbc:mysql://10.67.9.46:3307/telemetrydb\"}','','43cc308507c43465d602b076401eb02932457a977861b740e25d52d67955ddbf','LEOTLMTR19390','Pragya_1177353','MXqgjgoT80rHK7Iws+9JVbQDtx1z30l0YwsukVbKWah17uos5iceLGfHIOqKpoxngkuFjtAJRKWZZG/SCbmd6w==','MYSQL','SQL','2025-01-17 08:06:40.391611','admin','2025-01-17 08:06:40','TelemetryDB','{\"apispec\":{},\"apispectemplate\":{}}',NULL,NULL,NULL,NULL,NULL,NULL);
+		INSERT INTO mldatasource (
+    id, connectiondetails, description, dshashcode, name, organization, salt, type, category,
+    activetime, lastmodifiedby, lastmodifieddate, alias, extras, interfacetype,
+    fordataset, foradapter, forruntime, formodel, forpromptprovider
+) VALUES (
+    6329,
+    '{
+        "secretKey": "",
+        "accessKey": "",
+        "Region": "us-east-1",
+        "url": "http://100.78.49.20:9000"
+    }',
+    NULL,
+    NULL,
+    'LEOMN-S310629',
+    'leo1311',
+    NULL,
+    'S3',
+    'S3',
+    '2025-05-26 10:41:38.671681',
+    'demouser',
+    '2025-05-26 10:41:39',
+    'Sample-S3',
+    '{"apispec":{},"apispectemplate":{}}',
+    NULL,
+    0, 0, 1, 0, 0
+);
+
+		INSERT INTO mldatasource (
+    id, connectiondetails, description, dshashcode, name, organization, salt, type, category,
+    activetime, lastmodifiedby, lastmodifieddate, alias, extras, interfacetype,
+    fordataset, foradapter, forruntime, formodel, forpromptprovider
+) VALUES (
+    6331,
+    '{
+        "NoProxy": "true",
+        "formats": {
+            "datasource-dp": "Datasource",
+            "bucketname-dp": "Bucket Name",
+            "storageType-dp": "Storage Type",
+            "datasource": "datasourceDropdown",
+            "bucketname": "input",
+            "projectId-dp": "Project Id",
+            "storageType": "input",
+            "projectId": "input",
+            "userId": "input",
+            "userId-dp": "User Id"
+        },
+        "ConnectionType": "ApiRequest",
+        "AuthDetails": {
+            "authParams": {
+                "grant_type": "",
+                "client_secret": "",
+                "client_id": ""
+            }
+        },
+        "userId": "test",
+        "Url": "http://100.78.49.20:5000/execute",
+        "url": "",
+        "tokenExpirationTime": "",
+        "password": "",
+        "datasource": "LEOMN-S310629",
+        "bucketname": "aiptest",
+        "testDataset": {
+            "name": "",
+            "attributes": {
+                "bodyType": "Text",
+                "Endpoint": "",
+                "RequestMethod": "GET",
+                "Headers": "",
+                "LeapParams": [],
+                "QueryParams": [],
+                "Body": ""
+            }
+        },
+        "storageType": "minio",
+        "AuthType": "NoAuth",
+        "projectId": "test",
+        "fileId": ""
+    }',
+    NULL,
+    NULL,
+    'LEOMN-RM22869',
+    'leo1311',
+    NULL,
+    'REMOTE',
+    'REST',
+    '2025-05-26 10:51:07.198841',
+    'demouser',
+    '2025-05-26 10:51:07',
+    'Sample-Remote',
+    '{"apispec":{},"apispectemplate":{}}',
+    NULL,
+    0, 0, 1, 0, 0
+);
+
+        INSERT INTO mldatasource (
+    id, connectiondetails, description, dshashcode, name, organization, salt, type, category,
+    activetime, lastmodifiedby, lastmodifieddate, alias, extras, interfacetype,
+    fordataset, foradapter, forruntime, formodel, forpromptprovider
+) VALUES (
+    6332,
+    '{
+        "NoProxy": "true",
+        "password": "",
+        "ConnectionType": "ApiRequest",
+        "testDataset": {
+            "name": "",
+            "attributes": {
+                "bodyType": "Text",
+                "Endpoint": "",
+                "RequestMethod": "GET",
+                "Headers": "",
+                "LeapParams": [],
+                "QueryParams": "",
+                "Body": ""
+            }
+        },
+        "AuthDetails": {
+            "password": "abcdef",
+            "authParams": {
+                "grant_type": "",
+                "client_secret": "",
+                "client_id": ""
+            },
+            "authToken": "abcdef"
+        },
+        "AuthType": "NoAuth",
+        "Url": "http://100.78.49.20:8000/test",
+        "url": "",
+        "fileId": "",
+        "tokenExpirationTime": ""
+    }',
+    NULL,
+    '9c360ba8e41e645e3afbdd6d26ad0f071abfa9c4cc6508e835a9e0743d627e92',
+    'LEOSMPL-36919',
+    'leo1311',
+    NULL,
+    'REST',
+    'REST',
+    '2025-05-26 11:10:16.944815',
+    'demouser',
+    '2025-05-26 11:10:17',
+    'Sample-Infer-Rest',
+    '{"apispec":{},"apispectemplate":{}}',
+    NULL,
+    0, 1, 0, 0, 0
+);
+
+
 	</sql> 
 </changeSet>
 		<changeSet author="Leap" id="24-cip-20250211-02">
