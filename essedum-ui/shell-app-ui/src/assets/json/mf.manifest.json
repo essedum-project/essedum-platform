@@ -10,28 +10,28 @@
 		"exposedModule": "./Component",
 		"routePath": "ivm",
 		"ngModuleName": "SvyLibModule",
-		"title": "Infosys LEAP"
+		"title": "Essedum"
 	},
 	"bjm": {
 		"remoteEntry": "/bjm/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-bjm",
 		"ngModuleName": "IampBjmModule",
-		"title": "Infosys LEAP"
+		"title": "Essedum"
 	},
 	"grh": {
 		"remoteEntry": "/grh/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-graph",
 		"ngModuleName": "IampGrhModule",
-		"title": "Infosys LEAP"
+		"title": "Essedum"
 	},
 	"cap": {
 		"remoteEntry": "/cap/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-cap",
 		"ngModuleName": "IcapLibModule",
-		"title": "Infosys LEAP"
+		"title": "Essedum"
 	},
 	"dbs": {
 		"remoteEntry": "/dbs/remoteEntry.js",
@@ -44,21 +44,21 @@
 		"exposedModule": "./Component",
 		"routePath": "cc",
 		"ngModuleName": "IampBccModule",
-		"title": "Infosys LEAP"
+		"title": "Essedum"
 	},
 	"ccl": {
 		"remoteEntry": "/ccl/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-ccl",
 		"ngModuleName": "IampCclModule",
-		"title": "Infosys LEAP"
+		"title": "Essedum"
 	},
 	"cas": {
 		"remoteEntry": "/cas/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-btf",
 		"ngModuleName": "IampBtfModule",
-		"title": "Infosys LEAP"
+		"title": "Essedum"
 	},
 	"sandbox": {
 		"remoteEntry": "/sbxui/remoteEntry.js",
@@ -91,35 +91,35 @@
 		"type": "script",
 		"remoteName": "codegen",
 		"elementName": "react-element",
-		"title": "Infosys LEAP"
+		"title": "Essedum"
 	},
 	"eda": {
 		"remoteEntry": "/eda/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-eda",
 		"ngModuleName": "IampEdaModule",
-		"title": "Infosys LEAP"
+		"title": "Essedum"
 	},
 	"sre_app": {
 		"remoteEntry": "/sreui/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-sre",
 		"ngModuleName": "IampSreModule",
-		"title": "Infosys LEAP"
+		"title": "Essedum"
 	},
 	"iegp-app": {
 		"remoteEntry": "/iegpui/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-iegp",
 		"ngModuleName": "IampIegpModule",
-		"title": "Infosys LEAP"
+		"title": "Essedum"
 	},
 	"tad": {
 		"remoteEntry": "/cas/remoteEntry.js",
 		"exposedModule": "./Component",
 		"routePath": "iamp-tad",
 		"ngModuleName": "IampBtfModule",
-		"title": "Infosys LEAP"
+		"title": "Essedum"
 	},
 	"g20k_cyberscan": {
 		"remoteEntry": "https://localhost:8094/scan/remoteEntry.js",
