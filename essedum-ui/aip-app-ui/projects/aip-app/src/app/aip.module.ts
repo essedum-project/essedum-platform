@@ -7,6 +7,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+import {DatasetServices } from './dataset/dataset-service'
 // import { MatFormFieldModule } from '@angular/material/form-field';
 // import { MatInputModule } from '@angular/material/input';
 // import { AutocompleteModule, BreadcrumbModule, ChatbotModule, MessagingModule, RatingModule, CheckboxModule, ChipInputModule, DataGridModule, DatepickerModule, InputFieldModule, TimepickerModule, ToggleMenuModule, TreeComponent } from 'leds-lib';
@@ -14,7 +16,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatChipsModule } from '@angular/material/chips';
 // import { ModelComponent } from './model/model.component';
 // import { HomepageComponent } from './homepage/homepage.component';
-// import { PipelineComponent } from './pipeline/pipeline.component';
+import { PipelineComponent } from './pipeline/pipeline.component';
 // import { EndpointComponent } from './endpoint/endpoint.component';
 // import { EnlCodeEditorComponent } from './enl-code-editor/enl-code-editor.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -100,6 +102,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
  import {  encKey } from "./services/encKey";
  import {   DashConstantService } from "./services/dash-constant.service";
  import { RaiservicesService   } from "./services/raiservices.service";
+ import { SemanticService } from "./services/semantic.services"
 
   
 // import { EditFeatureStoreComponent } from './feature-store/edit-feature-store/edit-feature-store.component';
@@ -255,7 +258,7 @@ import { DragDropModule as CdkDragDropModule } from '@angular/cdk/drag-drop';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 //import { SliderModule } from 'leds-lib';
 import { QuillModule } from 'ngx-quill';
-// import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-name.component';
+//import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-name.component';
 // import { AipRatingComponent } from './aip-rating/aip-rating.component';
 // import { AipRatingViewComponent } from './aip-rating/aip-rating-view/aip-rating-view.component';
 // import { ItsmSummaryComponent } from './ticketlistdetails/itsm-summary/itsm-summary.component';
@@ -316,7 +319,7 @@ const dbConfig: DBConfig = {
     // GroupedFeaturesComponent,
     // ModelCreateComponent,
     // HomepageComponent,
-    // PipelineComponent,
+     PipelineComponent,
     // PipelineDescriptionComponent,
     // EndpointComponent,
     // EnlCodeEditorComponent,
@@ -478,7 +481,7 @@ const dbConfig: DBConfig = {
     // SaveStoryComponent,
     // PdfDatasetAnnotateComponent,
    
-    // DatasetByNameComponent,
+     //DatasetByNameComponent,
    
     // AipRatingComponent,
     // AipRatingViewComponent,
@@ -585,7 +588,7 @@ const dbConfig: DBConfig = {
     // AdapterServices,
     // PipelineService,
     // TabsFilterService,
-    // DatasetServices,
+     DatasetServices,
     // EventsService,
     // JobsService,
     // GroupsService,
@@ -607,7 +610,7 @@ const dbConfig: DBConfig = {
     // NgxIndexedDBService,
      RaiservicesService,
     // DatasourceService,
-    // SemanticService,
+     SemanticService,
     // MashupsService,
     // WranglingService,
     // DynamicRemoteLoad,
