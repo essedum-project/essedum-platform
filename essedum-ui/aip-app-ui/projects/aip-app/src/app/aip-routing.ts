@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 // import { HomepageComponent } from './homepage/homepage.component';
 // import { ModelComponent } from './model/model.component';
 // import { ModelCreateComponent } from './model.create/model.create.component';
-// import { PipelineComponent } from './pipeline/pipeline.component';
+ import { PipelineComponent } from './pipeline/pipeline.component';
 // import { PipelineDescriptionComponent } from './pipeline.description/pipeline.description.component';
 // import { EndpointComponent } from './endpoint/endpoint.component';
 import { AipComponent } from './aip.component';
@@ -161,21 +161,21 @@ const routes: Routes = [
       //   //   { path: 'edit/:name/:id', component: EditManageGroupComponent },
       //   ],
       // },
-      // {
-      //   path: 'pipelines',
-      //   children: [
-      //     { path: '', component: PipelineComponent },
-      //     { path: 'full-screen', component: DrawFlowComponent },
-      //     {
-      //       path: 'view/drgndrp/:cname',
-      //       component: PipelineDescriptionComponent,
-      //     },
-      //     { path: 'view/:cname', component: NativeScriptComponent },
+       {
+        path: 'pipelines',
+        children: [
+          { path: '', component: PipelineComponent },
+          // { path: 'full-screen', component: DrawFlowComponent },
+          // {
+          //   path: 'view/drgndrp/:cname',
+          //   component: PipelineDescriptionComponent,
+          // },
+          // { path: 'view/:cname', component: NativeScriptComponent },
 
-      //     // {path:'related/:name',component:PipelineDescriptionComponent},
-      //     { path: 'preview/:name', component: PipelineComponent },
-      //   ],
-      // },
+          // // {path:'related/:name',component:PipelineDescriptionComponent},
+          // { path: 'preview/:name', component: PipelineComponent },
+        ],
+      },
       // {
       //   path: 'app-list',
       //   component: AppListComponent,
@@ -204,30 +204,30 @@ const routes: Routes = [
         children: [
            { path: '', component: DatasourceComponent },
            { path: 'create', component: DatasourceConfigComponent },
-            { path: 'create-new', component: DatasourceConfigComponent },
+        { path: 'create-new', component: DatasourceConfigComponent },
            { path: 'view/:name/:view', component: ConnectionViewComponent },
-        { path: 'edit/:name/:edit', component: ConnectionViewComponent },
-         { path: 'preview/:name', component: ConnectionViewComponent },
+           { path: 'edit/:name/:edit', component: ConnectionViewComponent },
+           { path: 'preview/:name', component: ConnectionViewComponent },
         ],
       },
-      // {
-      //   path: 'datasets',
-      //   children: [
-      //     { path: '', component: DatasetByNameComponent },
-      //     { path: 'create', component: ModalConfigDatasetComponent },
-      //     { path: 'data', component: DatasetEditComponent },
-      //     { path: ':type', component: DatasetByNameComponent },
-      //     {
-      //       path: 'view/:cname',
-      //       children: [
-      //         { path: '', component: DatasetDescriptionComponent },
-      //         // { path: 'infer', component: SemanticSearchInferComponent },
-      //         { path: 'wrangling/:wname/:action/:rname', component: WranglingComponent },
-      //       ],
-      //     },
-      //     { path: 'preview/:cname', component: DatasetDescriptionComponent },
-      //   ],
-      // },
+      //{
+     //   path: 'datasets',
+     //  children: [
+     //     { path: '', component: DatasetByNameComponent },
+          // { path: 'create', component: ModalConfigDatasetComponent },
+          // { path: 'data', component: DatasetEditComponent },
+          // { path: ':type', component: DatasetByNameComponent },
+          // {
+          //   path: 'view/:cname',
+          //   children: [
+          //     { path: '', component: DatasetDescriptionComponent },
+          //     // { path: 'infer', component: SemanticSearchInferComponent },
+          //     { path: 'wrangling/:wname/:action/:rname', component: WranglingComponent },
+          //   ],
+          // },
+          // { path: 'preview/:cname', component: DatasetDescriptionComponent },
+      //  ],
+      //},
       // {
       //   path: 'knowledge',
       //   children: [

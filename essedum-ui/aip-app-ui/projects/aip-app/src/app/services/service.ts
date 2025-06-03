@@ -1,12 +1,15 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Inject, Injectable, NgZone } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map, switchMap} from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 import { Datasource } from '../datasource/datasource';
 import { Manifest, RemoteConfig } from '@angular-architects/module-federation';
-import {  encKey } from './encKey';
+import { encKey } from './encKey';
+import { Dataset } from '../dataset/datasets';
+import { StreamingServices } from '../streaming-services/streaming-service';
+
 
 @Injectable()
 export class Services {
@@ -60,26 +63,26 @@ export class Services {
       );
   }
 
-  deleteRuntimes(name){
+  deleteRuntimes(name) {
     const org = sessionStorage.getItem('organization');
     return this.https
-    .delete(this.dataUrl + '/runtime/delete/' + name + '/' + org, {
-      observe: 'response'
-    })
-    .pipe(
-      map((response) => {
-        return response.body;
+      .delete(this.dataUrl + '/runtime/delete/' + name + '/' + org, {
+        observe: 'response'
       })
-    )
-    .pipe(
-      catchError((err) => {
-        return this.handleError(err);
-      })
-    );
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
 
   }
 
-  
+
 
   getCountPipelines(param: HttpParams): Observable<any> {
     return this.https
@@ -199,7 +202,7 @@ export class Services {
     });
   }
 
-getCommonSearchData(
+  getCommonSearchData(
     size: number,
     page: number,
     search
@@ -231,7 +234,7 @@ getCommonSearchData(
     });
   }
 
- role = sessionStorage.getItem('role');
+  role = sessionStorage.getItem('role');
   project = sessionStorage.getItem('project');
   // groupData: { [key: string]: any[] } = {};
   gheader: any = {
@@ -242,7 +245,7 @@ getCommonSearchData(
     Rolename: JSON.parse(this.role).name.toString(),
   };
 
- getGHeaders() {
+  getGHeaders() {
     return (this.gheader = {
       'Content-Type': 'text/event-stream',
       Authorization: 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -256,7 +259,7 @@ getCommonSearchData(
   data = [];
 
 
-commonSearchByType(
+  commonSearchByType(
     type: any,
     size: number,
     page: number,
@@ -309,7 +312,7 @@ commonSearchByType(
     return throwError(errMsg);
   }
 
-getCoreDatasource(name: string, org: any): Observable<any> {
+  getCoreDatasource(name: string, org: any): Observable<any> {
     return this.https
       .get(this.dataUrl + '/datasources/get/' + name + '/' + org, {
         headers: new HttpHeaders({
@@ -329,9 +332,9 @@ getCoreDatasource(name: string, org: any): Observable<any> {
       );
   }
 
-   getDatasourcePort(id:any): Observable<any> {
+  getDatasourcePort(id: any): Observable<any> {
     return this.https
-      .get(this.dataUrl + '/runtime/get/connection?connid=' + id ,{
+      .get(this.dataUrl + '/runtime/get/connection?connid=' + id, {
         headers: new HttpHeaders({
           'Content-Type': 'application/json; charset=utf-8',
         }),
@@ -349,9 +352,9 @@ getCoreDatasource(name: string, org: any): Observable<any> {
       );
   }
 
-    getAvailablePorts(id:any): Observable<any> {
+  getAvailablePorts(id: any): Observable<any> {
     return this.https
-      .get(this.dataUrl + '/runtime/get/available-ports?connid=' + id ,{
+      .get(this.dataUrl + '/runtime/get/available-ports?connid=' + id, {
         headers: new HttpHeaders({
           'Content-Type': 'application/json; charset=utf-8',
         }),
@@ -384,7 +387,7 @@ getCoreDatasource(name: string, org: any): Observable<any> {
       );
   }
 
- getDatasourceJson(page, size): Observable<any> {
+  getDatasourceJson(page, size): Observable<any> {
     let headers = new HttpHeaders().append(
       'Authorization',
       'Bearer ' + localStorage.getItem('jwtToken')
@@ -406,7 +409,7 @@ getCoreDatasource(name: string, org: any): Observable<any> {
       );
   }
 
-    createDatasource(datasource: Datasource): Observable<any> {
+  createDatasource(datasource: Datasource): Observable<any> {
     return this.https
       .post(this.dataUrl + '/datasources/add', datasource, {
         headers: new HttpHeaders({
@@ -513,7 +516,7 @@ getCoreDatasource(name: string, org: any): Observable<any> {
     }
   }
 
-    isVaultEnabled(): Observable<any> {
+  isVaultEnabled(): Observable<any> {
     return this.https
       .get(this.dataUrl + '/datasources/isVaultEnabled', {
         headers: new HttpHeaders({
@@ -580,7 +583,7 @@ getCoreDatasource(name: string, org: any): Observable<any> {
         })
       );
   }
-  
+
   message(msg: any, msgtype: any = 'success') {
     let message = {
       message: msg,
@@ -597,7 +600,7 @@ getCoreDatasource(name: string, org: any): Observable<any> {
     });
   }
 
- async encryptgcm(plaintext, password) {
+  async encryptgcm(plaintext, password) {
     // Generate random 12-byte IV
     const iv = crypto.getRandomValues(new Uint8Array(12));
 
@@ -682,7 +685,7 @@ getCoreDatasource(name: string, org: any): Observable<any> {
   }
 
 
- async decryptUsingAES256(cipherResponse, password) {
+  async decryptUsingAES256(cipherResponse, password) {
     let cipherJson = JSON.parse(cipherResponse);
     // const result = await this.usersService.decryptgcm(cipherJson["ciphertext"], cipherJson["iv"], password)
     const result = await this.decryptgcm(
@@ -711,10 +714,10 @@ getCoreDatasource(name: string, org: any): Observable<any> {
           switchMap(async (response) => {
             let result = response.body as Array<any>;
             result.forEach(async (res) => {
-                // Replace the usage of this.encKey.getSalt() with direct retrieval from sessionStorage or another secure source.
-                // The original code uses this.encKey.getSalt() to get the salt value for decryption.
-                // If encKey is not defined or not needed, you can directly get the salt from sessionStorage:
-               let salt = this.encKey.getSalt();
+              // Replace the usage of this.encKey.getSalt() with direct retrieval from sessionStorage or another secure source.
+              // The original code uses this.encKey.getSalt() to get the salt value for decryption.
+              // If encKey is not defined or not needed, you can directly get the salt from sessionStorage:
+              let salt = this.encKey.getSalt();
               if (!salt) salt = sessionStorage.getItem('salt');
               if (res.attributes != null) {
                 res.attributes = await this.decryptUsingAES256(
@@ -791,7 +794,7 @@ getCoreDatasource(name: string, org: any): Observable<any> {
       );
   }
 
-    uploadFile(formData: FormData, fileid): Observable<any> {
+  uploadFile(formData: FormData, fileid): Observable<any> {
     try {
       let body = JSON.stringify(formData);
       return this.https
@@ -828,10 +831,10 @@ getCoreDatasource(name: string, org: any): Observable<any> {
           // this.loader.hide();
           // return response.body;
           let result = response.body as Array<any>;
-            // Replace the usage of this.encKey.getSalt() with direct retrieval from sessionStorage or another secure source.
-            // The original code uses this.encKey.getSalt() to get the salt value for decryption.
-            // If encKey is not defined or not needed, you can directly get the salt from sessionStorage:
-   let salt = this.encKey.getSalt();
+          // Replace the usage of this.encKey.getSalt() with direct retrieval from sessionStorage or another secure source.
+          // The original code uses this.encKey.getSalt() to get the salt value for decryption.
+          // If encKey is not defined or not needed, you can directly get the salt from sessionStorage:
+          let salt = this.encKey.getSalt();
           if (!salt) salt = sessionStorage.getItem('salt');
           result['attributes'] = await this.decryptUsingAES256(
             result['attributes'],
@@ -847,7 +850,7 @@ getCoreDatasource(name: string, org: any): Observable<any> {
       );
   }
 
-   addPorts(addPorts: any): Observable<any> {
+  addPorts(addPorts: any): Observable<any> {
     return this.https
       .post(this.dataUrl + '/runtime/addports', addPorts, {
         headers: new HttpHeaders({
@@ -886,26 +889,26 @@ getCoreDatasource(name: string, org: any): Observable<any> {
         })
       );
   }
-  
-editPorts(addPorts: any): Observable<any> {
-  return this.https
-    .post(this.dataUrl + '/runtime/editports', addPorts, {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json; charset=utf-8',
-      }),
-      observe: 'response',
-    })
-    .pipe(
-      map((response) => {
-        return response;
+
+  editPorts(addPorts: any): Observable<any> {
+    return this.https
+      .post(this.dataUrl + '/runtime/editports', addPorts, {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json; charset=utf-8',
+        }),
+        observe: 'response',
       })
-    )
-    .pipe(
-      catchError((err) => {
-        return this.handleError(err);
-      })
-    );
-}
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
 
   getDatasourceGroups(page, size): Observable<any> {
     return this.https
@@ -928,6 +931,218 @@ editPorts(addPorts: any): Observable<any> {
       );
   }
 
+  //getDatasets
+  getDatasetCards(pageNumber, pageSize, search, template?): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let param = new HttpParams()
+      .set('adapter_instance', 'internal')
+      .set('filter', 'abc')
+      .set('orderBy', 'abc')
+      .set('project', session)
+      .set('isTemplate', template)
+      .set('isCached', true)
+      .set('page', pageNumber)
+      .set('size', pageSize)
+      .set('search', search);
+    return this.https
+      .get(this.dataUrl + '/service/v1/datasets/list', {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  messageNotificaionService(type: string, msg: string) {
+    let message = {
+      message: msg,
+      button: false,
+      type: type,
+      successButton: 'Ok',
+      errorButton: 'Cancel',
+    };
+    this.matSnackbar.open(message.message, 'Ok', {
+      duration: 2500,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+      panelClass: '',
+    });
+  }
+
+  getConstantByKey(key: string): Observable<any> {
+    return this.https
+      .get(
+        '/api/get-startup-constants/' +
+        key +
+        '/' +
+        sessionStorage.getItem('organization'),
+        {
+          observe: 'response',
+          responseType: 'text',
+        }
+      )
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+
+  getProxyDbDatasetDetails(
+    dataset: Dataset,
+    dsource,
+    params,
+    org,
+    removeCache?
+  ): Observable<any> {
+    if (removeCache == null || removeCache == undefined) removeCache = true;
+    return this.https
+      .get(
+        this.dataUrl +
+        '/service/dbdata/' +
+        dsource.type +
+        '/' +
+        dsource.alias +
+        '/' +
+        dataset.alias +
+        '/' +
+        org +
+        '/' +
+        removeCache,
+        { observe: 'response', params: params }
+      )
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  getEventStatus(corelid) {
+    return this.https
+      .get('/api/aip/jobs/eventstatus/' + corelid, {
+        observe: 'response',
+        responseType: 'text',
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+
+  getNutanixFileData(datasetName, fileList, org): Observable<any> {
+    return this.https.get('/api/aip/datasets/fileData', {
+      params: {
+        datasetName: datasetName,
+        fileName: fileList,
+        org: org,
+      },
+    });
+  }
+
+  getRatingByUserAndModule(module: String): Observable<any> {
+    let org = sessionStorage.getItem('organization');
+    let user = JSON.parse(sessionStorage.getItem('user')).id;
+    return this.https.get(this.dataUrl + '/rating/getByUserAndModule/' + user + '/' +
+       module + '/' + org,
+      {
+        observe: 'response',
+      }
+    )
+      .pipe(map((response) => { return response; }))
+      .pipe(catchError((err) => { return this.handleError(err); })
+      );
+  }
+
+    getPipelinesCards(param: HttpParams): Observable<any> {
+    // let session: any = sessionStorage.getItem('organization');
+    // let param = new HttpParams()
+    //   .set('cloud_provider', 'internal')
+    //   .set('filter', 'abc')
+    //   .set('orderBy', 'abc')
+    //   .set('project', session);
+    return this.https
+      .get(this.dataUrl + '/service/v1/pipelines/training/list', {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+    /**
+   * Get a StreamingServices by cid.
+   */
+  getStreamingServicesByName(
+    name: any,
+    org1?: any
+  ): Observable<StreamingServices> {
+    const org = org1 ? org1 : sessionStorage.getItem('organization');
+    return this.https
+      .get(this.dataUrl + '/service/v1/streamingServices/' + name + '/' + org, {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return new StreamingServices(response.body);
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+    deletePipeline(cid: any) {
+    return this.https
+      .delete(this.baseUrl + '/streamingServices/delete/' + cid)
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
 }
 
 
@@ -940,16 +1155,16 @@ export type CustomRemoteConfig = RemoteConfig & {
   elementName: string;
   remoteName: string;
 };
-export class AddPorts{
+export class AddPorts {
 
-  datasourceid:String
-  endport:String
-  exiendport:String
-  existartport:String
-  isDefaultPort:boolean
-  isExiPort:boolean
-  organization:String
-  startport:String
-  
+  datasourceid: String
+  endport: String
+  exiendport: String
+  existartport: String
+  isDefaultPort: boolean
+  isExiPort: boolean
+  organization: String
+  startport: String
+
 }
 export type CustomManifest = Manifest<CustomRemoteConfig>;

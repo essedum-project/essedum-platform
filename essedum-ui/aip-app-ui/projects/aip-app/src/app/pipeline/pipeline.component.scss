@@ -1,0 +1,232 @@
+.tagbrdr {
+  border-radius: 8px;
+  padding: 5px;
+  margin: 5px;
+  text-decoration: none;
+  box-shadow: 0 1px 4px 0 rgb(1 1 1 / 10%), 0 1px 1px 0 rgb(0 0 0 / 10%);
+}
+.items-baseline {
+  align-items: baseline;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+.flex {
+  display: flex;
+}
+.active {
+  color: #0094ff;
+}
+
+.config-background {
+  background-color: white !important;
+  border-radius: 1rem;
+}
+
+.example-card {
+  max-width: 400px;
+}
+
+.example-header-image {
+  background-size: cover;
+}
+
+
+.aip-card-container {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  grid-column-gap: 0 !important;
+ 
+  margin: 0px;
+}
+
+.header-txt{
+  font-size: 1.8rem;
+  font-weight: 600;
+  font-family: "myriad-pro", Arial, sans-serif !important;
+  font-style: normal;
+}
+
+.cardContainer {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 2px;
+  height: 163px;
+}
+
+.card-type {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 8px;
+}
+
+.card-title h2 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.card-subtitle {
+  font-size: 1.2rem;
+  font-weight: 400;
+  font-family: "roboto", Arial, sans-serif !important;
+  font-style: normal;
+}
+
+.card-description {
+  font-size: 0.9rem;
+  color: #495057;
+  margin: 12px 0;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn {
+  background-color: #0094ff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn:hover {
+  background-color: #0094ff;
+}
+.lfx-c-card__action-hover {
+  position: absolute;
+  width: 100%;
+  bottom: 0px;
+  box-shadow: 2px;
+  background: var(--default-card-action-bg-color);
+}
+
+.lfx-c-avatar {
+  background: #d1ecff;
+  color: #0094ff;
+  border-radius: 50%;
+  text-align: center;
+  vertical-align: middle;
+  font-weight: 400;
+  font-family: "roboto", Arial, sans-serif !important;
+  font-style: normal;
+  float: left;
+}
+.lfx-u-header-sm {
+  font-size: 1.2rem;
+  font-weight: 600;
+  font-family: "myriad-pro", Arial, sans-serif !important;
+  font-style: normal;
+  margin-left: 17px !important;
+}
+.lfx-u-text-primary-80 {
+  color: #0094ff;
+}
+
+.lfx-u-header-xl {
+  font-size: 1.8rem;
+  font-weight: 600;
+  font-family: "myriad-pro", Arial, sans-serif !important;
+  font-style: normal;
+}
+.lfx-c-card__container-left {
+  float: left;
+  width: 80%;
+}
+::ng-deep .card-title-wrapper {
+  display: block;
+  overflow: hidden;
+}
+
+::ng-deep .card-title {
+  line-height: 1.4em;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 1;
+  transition: -webkit-line-clamp 0.3s ease ;
+}
+
+::ng-deep .card-title-wrapper:hover .card-title{
+  -webkit-line-clamp: 2;
+}
+
+.aip-panel-input{
+  font-size: medium;
+}
+.lfx-u-mar-r-20{
+  font-size: medium;
+}
+.aip-top{
+  overflow: hidden;
+}
+.matElevateButton {
+  background-color: #0094ff;
+  border-radius: 10px;
+  border: none;
+}
+.lfx-u-pad-lr-32 {
+  padding-left: 32px !important;
+  padding-right: 32px !important;
+}
+
+.lfx-u-pad-t-16{
+padding-top: 16px !important;
+}
+
+.lfx-u-pad-24 {
+padding: 24px !important;
+}
+.lfx-u-header-xl
+{
+   font-size: 1.8rem;
+   font-weight: 600;
+   font-family: "myriad-pro", Arial, sans-serif !important;
+   font-style: normal;
+}
+.lfx-u-mar-r-30{
+  margin-right: 30px;
+  }
+  .mat-action-button-s {
+    color: #0094ff !important;
+    background-color: #ebf1f6 !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    font-size: 12px !important;
+    line-height: 1.2;
+    font-weight: 500;
+}
+::ng-deep .mdc-button__label{
+  padding-right: 7px !important;
+}
+.lfx-c-avatar
+{
+   background: #d1ecff;
+   color: #0094ff;
+   border-radius: 50%;
+   text-align: center;
+   vertical-align: middle;
+   font-weight: 500;
+   font-family: "roboto", Arial, sans-serif !important;
+   font-style: normal;
+   float: left;   
+   width: 38px !important;
+   height: 38px !important;
+  font-size: 14px;
+   padding-top: 8px;
+}
+.lfx-u-header-md{
+  font-size: 1.4rem;
+  font-weight: 600;
+  font-family: "myriad-pro", Arial, sans-serif !important;
+  font-style: normal;
+ }
+ .padded-input{
+  padding-left: 12px;
+ }
+
