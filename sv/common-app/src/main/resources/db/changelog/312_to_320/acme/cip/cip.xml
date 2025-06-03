@@ -12,8 +12,8 @@
 ) VALUES (
     6329,
     '{
-        "secretKey": "JvAZgiE3xXNq2TgXwGME4I2VibwuMCcokqGBO1Ht",
-        "accessKey": "S6fPycFZRoKFYByOoEMV",
+        "secretKey": "",
+        "accessKey": "",
         "Region": "us-east-1",
         "url": "http://100.78.49.20:9000"
     }',
