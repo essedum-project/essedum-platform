@@ -1070,7 +1070,7 @@ export class Services {
     let org = sessionStorage.getItem('organization');
     let user = JSON.parse(sessionStorage.getItem('user')).id;
     return this.https.get(this.dataUrl + '/rating/getByUserAndModule/' + user + '/' +
-       module + '/' + org,
+      module + '/' + org,
       {
         observe: 'response',
       }
@@ -1080,7 +1080,7 @@ export class Services {
       );
   }
 
-    getPipelinesCards(param: HttpParams): Observable<any> {
+  getPipelinesCards(param: HttpParams): Observable<any> {
     // let session: any = sessionStorage.getItem('organization');
     // let param = new HttpParams()
     //   .set('cloud_provider', 'internal')
@@ -1104,9 +1104,9 @@ export class Services {
       );
   }
 
-    /**
-   * Get a StreamingServices by cid.
-   */
+  /**
+ * Get a StreamingServices by cid.
+ */
   getStreamingServicesByName(
     name: any,
     org1?: any
@@ -1128,7 +1128,7 @@ export class Services {
       );
   }
 
-    deletePipeline(cid: any) {
+  deletePipeline(cid: any) {
     return this.https
       .delete(this.baseUrl + '/streamingServices/delete/' + cid)
       .pipe(
@@ -1142,6 +1142,352 @@ export class Services {
         })
       );
   }
+
+  //getModelList
+  getModelListAdapters(param: HttpParams): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/models/listAdapters', {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  // CRADS
+  getModelCards(param: HttpParams): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/models/list', {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  getCountModels(param: HttpParams): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/models/list/count', {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  // undeployeModel
+  undeployModel(adapter: any, version: any, model_id: any, deployment_id: any) {
+    let session: any = sessionStorage.getItem('organization');
+    let param = new HttpParams()
+      .set('model_id', model_id)
+      .set('version', version)
+      .set('project', session)
+      .set('deployment_id', deployment_id)
+      .append('cloud_provider', adapter);
+    return this.https
+      .delete(this.dataUrl + '/service/v1/model/deleteDeployment', {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  deleteModels(model_id: any, adapter: any, version: any) {
+    let session: any = sessionStorage.getItem('organization');
+    let param = new HttpParams()
+      .set('project', session)
+      .set('isCached', true)
+      .set('isInstance', true)
+      .set('version', version)
+      .append('adapter_instance', adapter);
+    return this.https
+      .delete(this.dataUrl + '/service/v1/models/delete/' + model_id, {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  // MODELS
+  getRegisterModelJson(adapter: any): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let param = new HttpParams()
+      .set('project', session)
+      .append('adapter_instance', adapter);
+
+    return this.https
+      .get(this.dataUrl + '/service/v1/models/getRegisterModelJson', {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json; charset=utf-8',
+        }),
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  // REGISTER MODEL
+  registerModel(regBody: any, adapter: any): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let param = new HttpParams()
+      .set('project', session)
+      .set('isCached', true)
+      .set('adapter_instance', adapter);
+    return this.https
+      .post(this.dataUrl + '/service/v1/models/register', regBody, {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json; charset=utf-8',
+        }),
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  callGetApi(url, parameters?, headers?) {
+    return this.https
+      .get(url, {
+        // headers: new HttpHeaders({ 'Content-Type': 'application/json; charset=utf-8' }),
+        observe: 'response',
+        params: parameters,
+        headers: headers,
+      })
+      .pipe(catchError(this.handleError));
+  }
+  // UPDAT MODEL
+  updateModel(regBody: any): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let param = new HttpParams().set('project', session);
+    return this.https
+      .post(this.dataUrl + '/service/v1/models/updateModel', regBody, {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json; charset=utf-8',
+        }),
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  removelinkage(regBody: any): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let param = new HttpParams().set('project', session);
+    return this.https
+      .delete(this.dataUrl + '/service/v1/useCase/unlink', {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json; charset=utf-8',
+        }),
+        observe: 'response',
+        body: regBody,
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  getModelBySourceId(param: HttpParams): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/fetchmodels', {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  getUniqueEndpointList(adapterid: any): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let param = new HttpParams()
+      .set('app_org', session)
+      .append('adapter_id', adapterid);
+
+    return this.https
+      .get(this.dataUrl + '/service/v1/endpoints/listAdapterEndpoints', {
+        // headers: new HttpHeaders({
+        //   'Content-Type': 'application/json; charset=utf-8',
+        // }),
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  createlinkage(regBody: any): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let param = new HttpParams().set('project', session);
+    return this.https
+      .post(this.dataUrl + '/service/v1/useCase/add', regBody, {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json; charset=utf-8',
+        }),
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  getDeployModelJson(adapter: any): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let param = new HttpParams()
+      .set('project', session)
+      .append('adapter_instance', adapter);
+
+    return this.https
+      .get(this.dataUrl + '/service/v1/models/getDeployModelJson', {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json; charset=utf-8',
+        }),
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+  
+  deployModel(deployBody: any, adapter: any, modelId: any): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let param = new HttpParams()
+      .set('project', session)
+      .set('isCached', true)
+      .set('adapter_instance', adapter);
+    return this.https
+      .post(
+        this.dataUrl + '/service/v1/models/' + modelId + '/export',
+        deployBody,
+        {
+          headers: new HttpHeaders({
+            'Content-Type': 'application/json; charset=utf-8',
+          }),
+          observe: 'response',
+          params: param,
+        }
+      )
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+          // return err
+        })
+      );
+  }
+  
+
+
 
 }
 
