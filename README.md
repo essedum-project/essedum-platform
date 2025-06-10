@@ -1,4 +1,4 @@
-### Back-End and Front-End Setup guide for Essedum
+# Back-End and Front-End Setup guide for Essedum
 
 # 1 Required Software’s and tools
 # Backend:
