@@ -1,8 +1,11 @@
 package com.infosys.icets.icip.icipmodelserver.v2.service.util;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.JsonArray;
 import com.infosys.icets.icip.dataset.model.ICIPDatasource;
 import com.infosys.icets.icip.dataset.properties.ProxyProperties;
 import com.infosys.icets.icip.dataset.service.util.ICIPDataSourceServiceUtil;
@@ -99,5 +103,17 @@ public class ICIPDataSourceServiceUtilRemoteJob extends ICIPDataSourceServiceUti
 			logger.error("Error while executing request:", e);
 		}
 		return false;
+	}
+
+	@Override
+	public List<Map<String, Object>> getCustomModels(String org, List<ICIPDatasource> connectionsList,Integer page,Integer size,String query) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Long getAllModelObjectDetailsCount(List<ICIPDatasource> datasources, String searchModelName, String org) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

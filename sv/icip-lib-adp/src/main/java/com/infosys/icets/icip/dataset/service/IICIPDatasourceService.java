@@ -278,4 +278,6 @@ public interface IICIPDatasourceService {
 	
 	Long getDataSourceCountByOptionalParameters(String org, String type, String nameOrAlias);
 
+	List<ICIPDatasource> getForModelsTypeAndOrganization(String type, String organization);
+
 }

@@ -270,5 +270,6 @@ public interface ICIPDatasourceRepository extends JpaRepository<ICIPDatasource, 
 			    @Param("nameOrAlias") String nameOrAlias
 			);
 
+			List<ICIPDatasource> getForModelsTypeAndOrganization(String org, String type);
 
 }

@@ -1,6 +1,8 @@
 package com.infosys.icets.icip.icipmodelserver.v2.service.util;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -112,6 +114,19 @@ public class ICIPDataSourceServiceUtilAICloud extends ICIPDataSourceServiceUtilR
         }
         return ds;
     }
+
+	@Override
+	public List<Map<String, Object>> getCustomModels(String org, List<ICIPDatasource> connectionsList, Integer page,
+			Integer size, String query) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Long getAllModelObjectDetailsCount(List<ICIPDatasource> datasources, String searchModelName, String org) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	
 	

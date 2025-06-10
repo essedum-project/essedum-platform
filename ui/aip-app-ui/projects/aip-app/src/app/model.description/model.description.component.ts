@@ -62,6 +62,8 @@ export class ModelDescriptionComponent implements OnInit {
         this.organisation = sessionStorage.getItem('organization');
       }
     });
+    if(history?.state?.card)
+      this.card = history.state.card;
   }
   calledRelatedComponent = false;
 
@@ -100,8 +102,8 @@ export class ModelDescriptionComponent implements OnInit {
     );
   }
   ngOnInit() {
-    this.router.url.includes('initiative')?this.initiativeView=false:this.initiativeView=true;
-    this.getpermissions();
+    // this.router.url.includes('initiative')?this.initiativeView=false:this.initiativeView=true;
+    // this.getpermissions();
     // console.log(history.state);
     // if (history.state.relatedData) {
     //   // console.log(history.state);
@@ -112,16 +114,16 @@ export class ModelDescriptionComponent implements OnInit {
     //   let cards = this.location.getState();
     //   this.card = cards['card'];
     // }
-    if(!this.sourceName){
-      this.sourceName = this.initiativeData.sourceName;
-    }
-    let params: HttpParams = new HttpParams();
-    params = params.set('fed_Name', this.sourceName);
-    params = params.set('org', this.organisation);
-    this.service.getModelBySourceId(params).subscribe((res) => {
-      this.card = res[0];
-      this.getRelatedComponent();
-    });
+    // if(!this.sourceName){
+    //   this.sourceName = this.initiativeData.sourceName;
+    // }
+    // let params: HttpParams = new HttpParams();
+    // params = params.set('fed_Name', this.sourceName);
+    // params = params.set('org', this.organisation);
+    // this.service.getModelBySourceId(params).subscribe((res) => {
+    //   this.card = res[0];
+    //   this.getRelatedComponent();
+    // });
 
     // console.log("this.cardToggled",this.cardToggled);
     if (this.card.createdBy) {
