@@ -1,0 +1,82 @@
+<div class="container-fluid backgroud-color ">
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="lfx-l-level1-middle-col">
+                <div class="align-items-center d-flex">
+                    <span class="">
+                        <i class="fa fa-long-arrow-left back-icon" aria-hidden="true"
+                            (click)="routeBackToModelList()"></i>
+                    </span>
+                    <span class="lfx-u-mar-l-8 lfx-u-header-xxl">{{cardTitle}}</span>
+                </div>
+                <div class="lfx-l-level2-middle-ctr">
+                    <div class="lfx-l-level2-middle-col">
+                        <mat-card>
+                            <div class="lfx-c-panel__content lfx-u-mar-tb-16 lfx-u-pad-16">
+                                <div class="" *ngFor="let key of keys; let i = index">
+                                    <div class="lfx-u-body-md">{{key}}</div>
+                                    <div *ngIf="key=='Model Id';else second">
+                                        <mat-form-field appearance="fill" class="w-100">
+                                            <textarea matInput  [value]="data.sourceId" readonly></textarea>
+                                        </mat-form-field>
+                                    </div>
+                                    <ng-template #second>
+                                        <div class="" *ngIf="key=='Endpoint Id';  else third">
+                                            <mat-form-field appearance="fill" style="width: 100%;">
+                                                <mat-select [(value)]="attributes[key]" >
+                                                    <mat-option *ngFor="let option of options" [value]="option.value">
+                                                        {{ option.viewValue }}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+                                    </ng-template>
+                                    <ng-template #third>
+                                        <div class="" *ngIf="key=='Serving Framework';  else fourth">
+                                            <mat-form-field appearance="fill" style="width: 100%;">
+                                                <mat-select  [(value)]="attributes[key]">
+                                                    <mat-option *ngFor="let option of servingOptions" [value]="option.value">
+                                                        {{ option.viewValue }}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+                                    </ng-template>
+                                    <ng-template #fourth>
+                                        <div class="" *ngIf="key=='Computes Type';  else all">
+                                            <mat-form-field appearance="fill" style="width: 100%;">
+                                                <mat-select [(value)]="attributes[key]" (selectionChange)="onComputesTypeChange($event)">
+                                                    <mat-option *ngFor="let option of computesOptions" [value]="option.value">
+                                                        {{ option.viewValue }}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+                                    </ng-template>
+                                    <ng-template #all>
+                                        <mat-form-field appearance="fill" class="w-100">
+                                            <input matInput style=" border: none; border-bottom: 1px solid #000" type="text" [(ngModel)]="attributes[key]" />
+                                        </mat-form-field>
+                                    </ng-template>
+
+                                </div>
+                                <div class="">
+                                    <div class="d-flex m-2 justify-content-end lfx-u-pad-lr-24">
+
+                                        <button mat-raised-button style="background-color: #0a142f; color: white;"
+                                            [disabled]="false" (click)="onClickSubmit()"
+                                            onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                                            onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                            DEPLOY
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </mat-card>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

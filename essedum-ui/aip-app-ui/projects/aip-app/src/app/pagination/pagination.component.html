@@ -1,0 +1,47 @@
+<div
+class="inbox-table-footer table-paginator flex-row flex-space-between standard-margin bottom-padding-20" style="margin-right: 5rem;">
+<div class="showing-entries d-flex justify-content-end my-3">
+    <span class="grey-color font-size-12">Showing </span>
+    &nbsp;&nbsp;
+    <span class="black-color font-weight-600">
+        {{ pageNumber === 0 ? pageNumber : ((pageNumber - 1) * pageSize) + 1 }} -
+        {{ (((pageNumber - 1) * pageSize) + pageSize) < noOfItems ? ((pageNumber - 1) * pageSize) +
+            pageSize : noOfItems }} of {{noOfItems}} </span>
+            &nbsp;&nbsp;
+            <span class="grey-color font-size-12">entries </span>
+</div>
+<div class="paginator-buttons d-flex w-60  flex-row" style="justify-content:flex-end">
+    <div class="page-input go-to-input box-shadow standard-padding">
+        <span class="grey-color">Go to: </span>
+        <input class="right-margin" type="number" min="1" [max]="noOfPages"
+            (change)="changePage(pageNumberInput)" [(ngModel)]="pageNumberInput" />
+    </div>
+    <div class="mx-4">
+        <span class="">Items per page</span>
+        <select type="number" [(ngModel)]="pageSize" (change)="optionChange($event)">
+            <option *ngFor="let p of itemsPerPage" [ngValue]="p">{{p}}</option>
+        </select>
+
+    </div>
+    <div class="pages-details d-flex">
+
+        <div class="previous-page">
+            <button class="standard-padding table-button font-weight-600" [disabled]="pageNumber == 1"
+                (click)="pageNumberInput=null;prevPage()">&lt;</button>
+        </div>
+        <div class="pages">
+            <button class="standard-padding table-button font-weight-600"
+                *ngFor="let i of pageArr | slice:startIndex:endIndex"
+                (click)="pageNumberInput=null;changePage(i+1)"
+                [class.selected-page]="(i + 1) == pageNumber" [ngStyle]="selectedButton(i+1)">
+                {{i + 1}}
+            </button>
+        </div>
+        <div class="next-page">
+            <button class="standard-padding table-button font-weight-600"
+                [disabled]="pageNumber == noOfPages"
+                (click)="pageNumberInput=null;nextPage()">&gt;</button>
+        </div>
+    </div>
+</div>
+</div>

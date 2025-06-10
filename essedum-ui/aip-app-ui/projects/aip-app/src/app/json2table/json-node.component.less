@@ -1,0 +1,208 @@
+@nullColor: #DADADA;
+@stringColor: #deebff;
+@numberColor: #deebff;
+@booleanColor: #d0def3;
+@arrayColor: #b7dcf5;
+// @objectColor: #7B39B1 ;
+@objectColor: #b7dcf5;
+
+@offsetPercentage: 45%;
+@padding: 6px 6px 6px 6px;
+
+:host {
+  display: block;
+  font-family: monospace;
+  font-size: inherit;
+}
+
+.payload {
+  display: inline-grid;
+  grid-template-columns: 1fr autp;
+  grid-gap: 2px;
+}
+
+.header {
+//   border: 1px solid #DADADA ;
+  border-radius:8px;
+  background-color: #cccccc;
+  cursor: pointer;
+  font-weight: bold;
+  grid-column: 1 / span 2;
+  padding: @padding;
+
+  &.is-null {
+    background-color: @nullColor;
+    // border-color: darken( @nullColor, @offsetPercentage ) ;
+    color: contrast(@nullColor);
+  }
+
+  &.is-string {
+    background-color: @stringColor;
+    // border-color: darken( @stringColor, @offsetPercentage ) ;
+    color: contrast(@stringColor);
+  }
+
+  &.is-number {
+    background-color: @numberColor;
+    // border-color: darken( @numberColor, @offsetPercentage ) ;
+    color: contrast(@numberColor);
+  }
+
+  &.is-boolean {
+    background-color: @booleanColor;
+    // border-color: darken( @booleanColor, @offsetPercentage ) ;
+    color: contrast(@booleanColor);
+  }
+
+  &.is-array {
+    background-color: @arrayColor;
+    // border-color: darken( @arrayColor, @offsetPercentage ) ;
+    color: contrast(@arrayColor);
+  }
+
+  &.is-object {
+    background-color: #0094ff;
+    // border-color: darken( @objectColor, @offsetPercentage ) ;
+    color: white;
+  }
+
+  &.is-collapsed {
+    background-color: #0a142f;
+    border-color: #0094ff;
+    color: white;
+    font-style: italic;
+  }
+
+  &:hover {
+    // border-color: #ffffff ;
+    border: 1px solid #0a142f;
+    border-radius: 8px;
+    border-color: #0094ff;
+  }
+}
+
+.type {
+}
+
+.entry-count {
+  margin-top: 4px;
+}
+
+.label {
+//   background-color: #DADADA;
+  border: 1px solid #DADADA ;
+  border-radius:8px;
+  cursor: pointer;
+  grid-column: 1 / span 1;
+  padding: @padding;
+
+  &.is-null {
+    background-color: @nullColor;
+    // border-color: darken( @nullColor, @offsetPercentage ) ;
+    color: contrast(@nullColor);
+  }
+
+  &.is-string {
+    background-color: @stringColor;
+    // border-color: darken( @stringColor, @offsetPercentage ) ;
+    color: contrast(@stringColor);
+    height: fit-content;
+  }
+
+  &.is-number {
+    background-color: @numberColor;
+    // border-color: darken( @numberColor, @offsetPercentage ) ;
+    color: contrast(@numberColor);
+  }
+
+  &.is-boolean {
+    background-color: @booleanColor;
+    // border-color: darken( @booleanColor, @offsetPercentage ) ;
+    color: contrast(@booleanColor);
+  }
+
+  &.is-array {
+    background-color: @arrayColor;
+    // border-color: darken( @arrayColor, @offsetPercentage ) ;
+    color: contrast(@arrayColor);
+    height: fit-content;
+  }
+
+  &.is-object {
+    background-color: #0094ff;
+    // border-color: darken( @objectColor, @offsetPercentage ) ;
+    color: white;
+    padding: 1.3rem;
+    height: fit-content;
+  }
+
+  &.is-collapsed {
+    background-color: #0a142f;
+    border-color: #0094ff;
+    color: white;
+    font-style: italic;
+  }
+
+  &:hover {
+    // border-color: #ffffff ;
+    border-color: #0a142f;
+  }
+}
+
+.value {
+//   background-color: #f0f0f0;
+  border: 1px solid #DADADA;
+  border-radius: 8px;
+  grid-column: 2 / span 1;
+  padding: @padding;
+
+  &.is-null {
+    background-color: lighten(@nullColor, @offsetPercentage);
+    border-color: darken(@nullColor, @offsetPercentage);
+  }
+
+  &.is-string {
+    background-color: lighten(@stringColor, @offsetPercentage);
+    // border-color: darken( @stringColor, @offsetPercentage ) ;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+
+  &.is-number {
+    background-color: lighten(@numberColor, @offsetPercentage);
+    // border-color: darken( @numberColor, @offsetPercentage ) ;
+  }
+
+  &.is-boolean {
+    background-color: lighten(@booleanColor, @offsetPercentage);
+    // border-color: darken( @booleanColor, @offsetPercentage ) ;
+  }
+
+  &.is-array {
+    background-color: lighten(@arrayColor, @offsetPercentage);
+    // border-color: darken( @arrayColor, @offsetPercentage ) ;
+  }
+
+  &.is-object {
+    background-color: lighten(@objectColor, @offsetPercentage);
+    // border-color: darken( @objectColor, @offsetPercentage ) ;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+
+  &.is-string a {
+    display: block;
+  }
+  &.is-string:hover
+    &.is-boolean:hover
+    &.is-number:hover
+    &.is-array:hover
+    &.is-object:hover {
+    // border-color: #ffffff ;
+    border-color: darken(@objectColor, @offsetPercentage);
+    border: 1px solid darken(@objectColor, @offsetPercentage);
+    border-radius: 8px;
+  }
+}
