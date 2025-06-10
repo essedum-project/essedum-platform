@@ -56,9 +56,7 @@ Pyjob Executor:
   
    
   2.5 Crate Maven Build
-    •	Run below maven command in SV directory “ai-platform/sv”
-    ![image](https://github.com/user-attachments/assets/16697851-ba5b-4549-bb17-bb5b26c89af5)
-  
+    •	Run below maven command in SV directory “ai-platform/sv” 
     •	mvn clean install -Dmaven.test.skip=true -Dlicense.skip=true
     Maven build can also be created directly form the Eclipse or STS Ide
     •	To create Maven build from Eclipse below are the steps
@@ -66,8 +64,7 @@ Pyjob Executor:
     •	Right click on Aip project->Run as-> maven build->paste the command in goals as shown below                          
     •	Once build was success you will see below output
                           
-  ![image](https://github.com/user-attachments/assets/a9d2f339-82ef-43d8-ad12-ae9115e99093)
-  
+ 
   
   While creating build might fail because of improper Lombok dependency detection. To avoid that configure Lombok dependency in to eclipse by following below steps
   1.	Copy the lombok.jar into the root Eclipse folder and run the below command
@@ -80,9 +77,7 @@ Pyjob Executor:
   2.6 Run application in Eclipse IDE
     •	Do Maven force update before running project.
     •	Open Application.Yaml under Resource folder of Common-app and keep Liquibase enabled as true if you are running application for the first time.
-                   ![image](https://github.com/user-attachments/assets/61877e3d-9539-4a40-9c98-66bc867719c2)
-  
-    •	Configure MYSQL server user and password in application.yaml highlighted in yellow
+     •	Configure MYSQL server user and password in application.yaml highlighted in yellow
     •	Create schemas highlighted in red in MYSQL server using MYSQL Work Bench
   
             
