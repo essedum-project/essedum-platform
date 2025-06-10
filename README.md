@@ -104,3 +104,7 @@ Pyjob Executor:
     •	Place the path of dist file generated for both shell app, and aip app in nginx.conf
     •	Now open nginx.exe application. This starts nginx in port 8087 
 
+4. Pyjob Executor:
+    • Go to pyjob-executor folder and run below command
+        pip install -r requirements.tx
+    • Run python app.py
