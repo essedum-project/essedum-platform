@@ -1,0 +1,75 @@
+::ng-deep .jsoneditor {
+  border: thin solid #0094ff;
+}
+
+::ng-deep .jsoneditor-menu {
+  background: #0094ff;
+  border-bottom: 1px solid #0094ff;
+}
+
+::ng-deep
+  mat-form-field.no-subscript-space
+  .mat-mdc-form-field-subscript-wrapper {
+  height: 0 !important;
+  min-height: 0 !important;
+}
+
+.flex {
+  display: flex;
+}
+
+::ng-deep mat-form-field.description-no-underline .mdc-line-ripple,
+::ng-deep mat-form-field.description-no-underline .mdc-notched-outline {
+  display: none !important;
+}
+
+.container,
+.container-fluid {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+.col-lg-12 {
+  flex: 0 0 auto;
+  width: 100%;
+}
+.lfx-u-mar-b-32 {
+  margin-bottom: 32px !important;
+}
+
+.lfx-u-mar-l-8 {
+  margin-left: 8px !important;
+}
+
+.lfx-u-header-xxl {
+  font-size: 2.4rem;
+  font-weight: 500;
+}
+
+.lfx-u-pad-t-8 {
+  padding-top: 8px !important;
+}
+.lfx-u-pad-t-16 {
+  padding-top: 16px !important;
+}
+.lfx-u-mar-8 {
+  margin: 8px !important;
+}
+
+.lfx-u-pad-r-8 {
+  padding-right: 8px !important;
+}
+
+.lfx-l-level1-wrapper .lfx-l-level1-middle-col {
+  padding: 32px 16px;
+}
+.lfx-l-level1-wrapper .DSA_contentRightCol {
+  padding: 30px 20px;
+  min-height: 500px;
+}
+.lfx-l-level1-wrapper .lfx-l-whiteBG {
+  background: #ffffff;
+}
+
+.lfx-u-pad-l-8 {
+  padding-left: 8px !important;
+}
