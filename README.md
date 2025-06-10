@@ -1,26 +1,26 @@
 # Back-End and Front-End Setup guide for Essedum
 
-# 1 Required Software’s and tools
-# Backend:
+## 1. Required Software’s and tools
+### Backend:
   •	JDK version 21 or higher
   •	Maven 3.9.6
   •	Mysql server V 8.3 or higher
   •	Mysql workbench V 8.3 pr higher
   •	Eclipse or STS IDE for Code editing
 
-# Front End:
+### Front End:
   •	Noje Js 
   •	VS Code
 
-# Pyjob Executor:
+### Pyjob Executor:
   • Python 3.12
 
-# 2. Backend Setup Steps
-    # 2.1 Java setup
+## 2. Backend Setup Steps
+    ### 2.1 Java setup
       •	Download java Standard Edition and add Java_Home environment Variable
       •	Add java bin path in the system environment variables path variable
       •	Check java is added configured correctly in system environment variables using command java -version
-    # 2.2 Maven setup
+    ### 2.2 Maven setup
       •	Go to the official Maven website: https://maven.apache.org/download.cgi
       •	Download the binary zip archive (e.g., apache-maven-3.9.x-bin.zip)
       •	Extract the ZIP file to a directory C:\Program Files\Apache\Maven\apache-maven-3.9.x
@@ -33,7 +33,7 @@
       •	Click New and add: C:\Program Files\Apache\Maven\apache-maven-3.9.x\bin
  
 
-    # 2.3 MySQL server setup 
+    ### 2.3 MySQL server setup 
       •	Go to the official site: https://dev.mysql.com/downloads/installer/
       •	Right-click the downloaded .msi file → Run as Administrator
       •	Select Developer Default (includes MySQL Server, Workbench, Shell, and connectors)
@@ -49,13 +49,13 @@
       •	Once complete, you can launch MySQL Workbench or MySQL Shell to connect to the server using user credentials created while server setup.
       •	Once connection is successful create schemas with database names for Core & Quartz mentioned in the Common-App application.yaml under config property.
                                        
-    # 2.4 Clone code from repository
+    ### 2.4 Clone code from repository
       •	Clone existing code from existing repository in development branch
       •	Backend related code placed in SV path
       •	Front End related code placed in UI folder
     
      
-    # 2.5 Crate Maven Build
+    ### 2.5 Crate Maven Build
       •	Run below maven command in SV directory “ai-platform/sv” 
       •	mvn clean install -Dmaven.test.skip=true -Dlicense.skip=true
       Maven build can also be created directly form the Eclipse or STS Ide
@@ -74,7 +74,7 @@
     
     
     
-    # 2.6 Run application in Eclipse IDE
+    ### 2.6 Run application in Eclipse IDE
       •	Do Maven force update before running project.
       •	Open Application.Yaml under Resource folder of Common-app and keep Liquibase enabled as true if you are running application for the first time.
        •	Configure MYSQL server user and password in application.yaml highlighted in yellow
@@ -94,12 +94,12 @@
   •	Run “npm run build” command in shell-app-UI & aip-app-ui directory
   •	Once Node Modules are crated and dist file is generated in those directories.  Copy both dist files path.        
  
-  # 3.1. Configuring and Starting Nginix
+  ### 3.1. Configuring and Starting Nginix
     •	Go to the path "nginx-1.23.3\conf\nginx.conf" and open conf folder
     •	Place the path of dist file generated for both shell app, and aip app in nginx.conf
     •	Now open nginx.exe application. This starts nginx in port 8087 
 
-# 4. Pyjob Executor:
+## 4. Pyjob Executor:
     • Go to pyjob-executor folder and run below command
         pip install -r requirements.tx
     • Run python app.py
