@@ -4,7 +4,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { ModelComponent } from './model/model.component';
 import { ModelCreateComponent } from './model/model.create/model.create.component';
 import { PipelineComponent } from './pipeline/pipeline.component';
-// import { PipelineDescriptionComponent } from './pipeline.description/pipeline.description.component';
+import { PipelineCreateComponent } from './pipeline/pipeline-create/pipeline-create.component';
+//import { PipelineDescriptionComponent } from './pipeline.description/pipeline.description.component';
 // import { EndpointComponent } from './endpoint/endpoint.component';
 import { AipComponent } from './aip.component';
 import { DatasourceComponent } from './datasource/datasource.component';
@@ -25,8 +26,6 @@ import { DatasourceComponent } from './datasource/datasource.component';
 
 // import { ViewAppComponent } from './apps/view-app/view-app.component';
 import { ModelEditsComponent } from './model/model-edit/model-edit.component';
-
-// import { AdapterCreateEditComponent } from './adapter/adapter-create-edit/adapter-create-edit.component';
 import { ModelDeployComponent } from './model/model-deploy/model-deploy.component';
 // import { FeatureStoreComponent } from './feature-store/feature-store.component';
 // import { CreateSpecTemplateComponent } from './spec-template/create-spec-template/create-spec-template.component';
@@ -40,7 +39,7 @@ import { DatasourceConfigComponent } from './datasource/datasource-config/dataso
 // //import { ChainPipelineComponent } from './chain-pipeline/chain-pipeline.component';
 // import { InstanceDescriptionComponent } from './instance/instance-description/instance-description.component';
 import { ConnectionViewComponent } from './datasource/connection-view/connection-view.component';
-// import { ModalConfigDatasetComponent } from './dataset/modal-config-dataset/modal-config-dataset.component';
+import { ModalConfigDatasetComponent } from './dataset/modal-config-dataset/modal-config-dataset.component';
 import { ModelDescriptionComponent } from './model/model.description/model.description.component';
 // import { EndpointDescriptionComponent } from './endpoint/endpoint-description/endpoint-description.component';
 // import { NativeScriptComponent } from './native-script/native-script.component';
@@ -86,7 +85,18 @@ import { PaginationComponent } from './pagination/pagination.component';
 // import { DataMiningComponent } from './data-mining/data-mining.component';
 
 // import { AipRatingViewComponent } from './aip-rating/aip-rating-view/aip-rating-view.component';
-//import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-name.component';
+import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-name.component';
+import { InstanceComponent } from './instance/instance.component';
+import { InstanceCreateEditComponent } from './instance/instance-create-edit/instance-create-edit.component';
+import { InstanceDescriptionComponent } from './instance/instance-description/instance-description.component';
+import { SpecTemplateComponent } from './spec-template/spec-template.component';
+import { CreateSpecTemplateComponent } from './spec-template/create-spec-template/create-spec-template.component';
+import { SpecTemplateDescriptionComponent } from './spec-template/spec-template-description/spec-template-description.component';
+import { EditSpecTemplateComponent } from './spec-template/edit-spec-template/edit-spec-template.component';
+import { AdapterDescriptionComponent } from './adapter/adapter-description/adapter-description.component';
+import { AdapterComponent } from './adapter/adapter.component';
+import { AdapterCreateEditComponent } from './adapter/adapter-create-edit/adapter-create-edit.component';
+
 // import { ClusteringComponent } from './clustering/clustering.component';
 
 const routes: Routes = [
@@ -105,7 +115,6 @@ const routes: Routes = [
           { path: 'edit/:name', component: ModelEditsComponent },
           { path: 'deploy/:name', component: ModelDeployComponent },
           { path: 'preview/:name', component: ModelDescriptionComponent },
-          
         ],
       },
       // {
@@ -165,14 +174,11 @@ const routes: Routes = [
         path: 'pipelines',
         children: [
           { path: '', component: PipelineComponent },
+          // { path: 'create', component: PipelineCreateComponent },
           // { path: 'full-screen', component: DrawFlowComponent },
-          // {
-          //   path: 'view/drgndrp/:cname',
-          //   component: PipelineDescriptionComponent,
-          // },
+         // { path: 'view/drgndrp/:cname', component: PipelineDescriptionComponent },
           // { path: 'view/:cname', component: NativeScriptComponent },
-
-          // // {path:'related/:name',component:PipelineDescriptionComponent},
+          //{path:'related/:name',component:PipelineDescriptionComponent},
           // { path: 'preview/:name', component: PipelineComponent },
         ],
       },
@@ -210,24 +216,26 @@ const routes: Routes = [
           { path: 'preview/:name', component: ConnectionViewComponent },
         ],
       },
-     // {
-       // path: 'datasets',
-        //children: [
-         // { path: '', component: DatasetByNameComponent },
-          // { path: 'create', component: ModalConfigDatasetComponent },
-          // { path: 'data', component: DatasetEditComponent },
-          // { path: ':type', component: DatasetByNameComponent },
-          // {
-          //   path: 'view/:cname',
-          //   children: [
-          //     { path: '', component: DatasetDescriptionComponent },
-          //     // { path: 'infer', component: SemanticSearchInferComponent },
-          //     { path: 'wrangling/:wname/:action/:rname', component: WranglingComponent },
-          //   ],
-          // },
-          // { path: 'preview/:cname', component: DatasetDescriptionComponent },
-       // ],
-      //},
+
+       {
+       path: 'datasets',
+      children: [
+       { path: '', component: DatasetByNameComponent },
+       { path: 'create', component: ModalConfigDatasetComponent },
+      // { path: 'data', component: DatasetEditComponent },
+      // { path: ':type', component: DatasetByNameComponent },
+      // {
+      //   path: 'view/:cname',
+      //   children: [
+      //     { path: '', component: DatasetDescriptionComponent },
+      //     // { path: 'infer', component: SemanticSearchInferComponent },
+      //     { path: 'wrangling/:wname/:action/:rname', component: WranglingComponent },
+      //   ],
+      // },
+      // { path: 'preview/:cname', component: DatasetDescriptionComponent },
+       ],
+      },
+
       // {
       //   path: 'knowledge',
       //   children: [
@@ -277,31 +285,33 @@ const routes: Routes = [
       //     { path: 'edit', component: ModalConfigSchemaComponent },
       //   ],
       // },
-      // {
-      //   path: 'implementations',
-      //   children: [
-      //     { path: '', component: AdapterComponent },
-      //     { path: 'create', component: AdapterCreateEditComponent },
-      //     { path: ':adapter', component: AdapterDescriptionComponent },
-      //   ],
-      // },
-      // {
-      //   path: 'instances',
-      //   children: [
-      //     { path: '', component: InstanceComponent },
-      //     { path: 'create', component: InstanceCreateEditComponent },
-      //     { path: ':instance', component: InstanceDescriptionComponent },
-      //   ],
-      // },
-      // {
-      //   path: 'specs',
-      //   children: [
-      //     { path: '', component: SpecTemplateComponent },
-      //     { path: 'create', component: CreateSpecTemplateComponent },
-      //     { path: ':cname', component: SpecTemplateDescriptionComponent },
-      //     { path: 'edit/:dname', component: EditSpecTemplateComponent },
-      //   ],
-      // },
+
+       {
+        path: 'implementations',
+        children: [
+          { path: '', component: AdapterComponent },
+          { path: 'create', component: AdapterCreateEditComponent },
+          { path: ':adapter', component: AdapterDescriptionComponent },
+        ],
+      },
+      {
+        path: 'instances',
+        children: [
+          { path: '', component: InstanceComponent },
+          { path: 'create', component: InstanceCreateEditComponent },
+          { path: ':instance', component: InstanceDescriptionComponent },
+        ],
+      },
+      {
+        path: 'specs',
+        children: [
+          { path: '', component: SpecTemplateComponent },
+          { path: 'create', component: CreateSpecTemplateComponent },
+          { path: ':cname', component: SpecTemplateDescriptionComponent },
+          { path: 'edit/:dname', component: EditSpecTemplateComponent },
+        ],
+      },
+
 
       // {
       //   path: 'templates',

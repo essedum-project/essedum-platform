@@ -20,6 +20,7 @@ import { Location } from '@angular/common';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog.component/confirm-delete-dialog.component';
 // import { PaginationComponent } from '../pagination/pagination.component';
 import { MatGridTileHeaderCssMatStyler } from '@angular/material/grid-list';
+import { PipelineCreateComponent } from './pipeline-create/pipeline-create.component';
 @Component({
   selector: 'app-pipeline',
   templateUrl: './pipeline.component.html',
@@ -387,8 +388,22 @@ filteredCards: any[] = [];
       });
   }
 
-  open(content: any): void {
-    // this.modalService.openModal(content, 'standard');
+  open(content): void {
+    // this.dialog.open(content, {
+    //   panelClass: 'standard'
+    // });
+    //this.modalService.openModal(content, 'standard');
+    const dialogRef = this.dialog.open(PipelineCreateComponent, {
+      height: '80%',
+      width: '60%',
+      minWidth: '60vw',
+      disableClose: true,
+      data: {
+      edit: false,
+      },
+    });
+    dialogRef.afterClosed().subscribe((result) => {});
+
   }
 
   refresh() {
@@ -436,23 +451,23 @@ filteredCards: any[] = [];
     }
   }
   editPipeline(id) {
-    // this.service.getStreamingServices(id).subscribe(
-    //   (pageResponse) => {
-    //     const dialogRef = this.dialog.open(PipelineCreateComponent, {
-    //       height: '80%',
-    //       width: '60%',
-    //       minWidth: '60vw',
-    //       disableClose: true,
-    //       data: {
-    //         canvasData: pageResponse,
-    //         edit: true,
-    //       },
-    //     });
-    //     dialogRef.afterClosed().subscribe((result) => {});
-    //   },
-    //   (error) =>
-    //     this.service.messageService('Could not get the results', 'error')
-    // );
+    this.service.getStreamingServices(id).subscribe(
+      (pageResponse) => {
+        const dialogRef = this.dialog.open(PipelineCreateComponent, {
+          height: '80%',
+          width: '60%',
+          minWidth: '60vw',
+          disableClose: true,
+          data: {
+            canvasData: pageResponse,
+            edit: true,
+          },
+        });
+        dialogRef.afterClosed().subscribe((result) => {});
+      },
+      (error) =>
+        this.service.messageService('Could not get the results', 'error')
+    );
   }
 
   redirection(card: any) {

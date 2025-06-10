@@ -353,6 +353,7 @@
     display: flex;
     align-content: center;
     flex-wrap: wrap;
+    position: relative;
   }
 
   .aip-related-badge {
@@ -1195,5 +1196,49 @@ div {
   // .mat-mdc-form-field .mdc-line-ripple {
   //   display: none !important;
   // }
+
+  .input-style {
+    border-bottom: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  // Show underline only for readonly input fields, hide for normal fields
+  .mat-mdc-form-field.mat-mdc-form-field-type-mat-input:not(.mat-form-field-readonly) .mdc-line-ripple {
+    display: none !important;
+  }
+
+  .mat-mdc-form-field.mat-mdc-form-field-type-mat-input.mat-form-field-readonly .mdc-line-ripple {
+    display: block !important;
+  }
+
+  .lfx-u-pad-t-8 {
+    padding-top: 8px !important;
+  }
+
+  .lfx-u-pad-t-32 {
+    padding-top: 32px !important;
+  }
+
+  .lfx-u-pad-r-16 {
+    padding-right: 16px !important;
+  }
+
+  .lfx-u-mar-r-16 {
+    margin-right: 16px !important;
+  }
+
+  .lfx-u-mar-t-16 {
+    margin-top: 16px !important;
+  }
+
+  .lfx-u-mar-lr-16{
+    margin-left: 16px !important;
+    margin-right: 16px !important;
+  }
+
+  .lfx-u-mar-t-30{
+    margin-top: 30px !important;
+  }
 
 }
