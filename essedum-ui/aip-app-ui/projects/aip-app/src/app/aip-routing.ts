@@ -26,8 +26,6 @@ import { DatasourceComponent } from './datasource/datasource.component';
 
 // import { ViewAppComponent } from './apps/view-app/view-app.component';
 import { ModelEditsComponent } from './model/model-edit/model-edit.component';
-
- //import { AdapterCreateEditComponent } from './adapter/adapter-create-edit/adapter-create-edit.component';
 import { ModelDeployComponent } from './model/model-deploy/model-deploy.component';
 // import { FeatureStoreComponent } from './feature-store/feature-store.component';
 // import { CreateSpecTemplateComponent } from './spec-template/create-spec-template/create-spec-template.component';
@@ -98,6 +96,7 @@ import { EditSpecTemplateComponent } from './spec-template/edit-spec-template/ed
 import { AdapterDescriptionComponent } from './adapter/adapter-description/adapter-description.component';
 import { AdapterComponent } from './adapter/adapter.component';
 import { AdapterCreateEditComponent } from './adapter/adapter-create-edit/adapter-create-edit.component';
+
 // import { ClusteringComponent } from './clustering/clustering.component';
 
 const routes: Routes = [
@@ -116,7 +115,6 @@ const routes: Routes = [
           { path: 'edit/:name', component: ModelEditsComponent },
           { path: 'deploy/:name', component: ModelDeployComponent },
           { path: 'preview/:name', component: ModelDescriptionComponent },
-
         ],
       },
       // {
@@ -218,6 +216,7 @@ const routes: Routes = [
           { path: 'preview/:name', component: ConnectionViewComponent },
         ],
       },
+
        {
        path: 'datasets',
       children: [
@@ -236,6 +235,7 @@ const routes: Routes = [
       // { path: 'preview/:cname', component: DatasetDescriptionComponent },
        ],
       },
+
       // {
       //   path: 'knowledge',
       //   children: [
@@ -285,6 +285,7 @@ const routes: Routes = [
       //     { path: 'edit', component: ModalConfigSchemaComponent },
       //   ],
       // },
+
        {
         path: 'implementations',
         children: [
@@ -310,6 +311,7 @@ const routes: Routes = [
           { path: 'edit/:dname', component: EditSpecTemplateComponent },
         ],
       },
+
 
       // {
       //   path: 'templates',

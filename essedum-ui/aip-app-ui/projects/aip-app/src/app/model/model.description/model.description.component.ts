@@ -7,12 +7,12 @@ import {
   OnInit,
 } from '@angular/core';
 import { Output, EventEmitter } from '@angular/core';
-import { LedsModalService } from 'leds-lib';
+//import { LedsModalService } from 'leds-lib';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog.component/confirm-delete-dialog.component';
-import { Services } from '../services/service';
+import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.component/confirm-delete-dialog.component';
+import { Services } from '../../services/service';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Location } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
@@ -46,7 +46,7 @@ export class ModelDescriptionComponent implements OnInit {
   initiativeView: boolean ;
   sourceName: string = this.route.snapshot.paramMap.get('name');
   constructor(
-    private modalService: LedsModalService,
+    //private modalService: LedsModalService,
     private clipboard: Clipboard,
     private route: ActivatedRoute,
     private router: Router,
@@ -62,8 +62,6 @@ export class ModelDescriptionComponent implements OnInit {
         this.organisation = sessionStorage.getItem('organization');
       }
     });
-    if(history?.state?.card)
-      this.card = history.state.card;
   }
   calledRelatedComponent = false;
 
@@ -102,8 +100,8 @@ export class ModelDescriptionComponent implements OnInit {
     );
   }
   ngOnInit() {
-    // this.router.url.includes('initiative')?this.initiativeView=false:this.initiativeView=true;
-    // this.getpermissions();
+    this.router.url.includes('initiative')?this.initiativeView=false:this.initiativeView=true;
+    this.getpermissions();
     // console.log(history.state);
     // if (history.state.relatedData) {
     //   // console.log(history.state);
@@ -114,16 +112,16 @@ export class ModelDescriptionComponent implements OnInit {
     //   let cards = this.location.getState();
     //   this.card = cards['card'];
     // }
-    // if(!this.sourceName){
-    //   this.sourceName = this.initiativeData.sourceName;
-    // }
-    // let params: HttpParams = new HttpParams();
-    // params = params.set('fed_Name', this.sourceName);
-    // params = params.set('org', this.organisation);
-    // this.service.getModelBySourceId(params).subscribe((res) => {
-    //   this.card = res[0];
-    //   this.getRelatedComponent();
-    // });
+    if(!this.sourceName){
+      this.sourceName = this.initiativeData.sourceName;
+    }
+    let params: HttpParams = new HttpParams();
+    params = params.set('fed_Name', this.sourceName);
+    params = params.set('org', this.organisation);
+    this.service.getModelBySourceId(params).subscribe((res) => {
+      this.card = res[0];
+      this.getRelatedComponent();
+    });
 
     // console.log("this.cardToggled",this.cardToggled);
     if (this.card.createdBy) {
@@ -161,7 +159,7 @@ export class ModelDescriptionComponent implements OnInit {
     });
   }
   openModal(content: any): void {
-    this.modalService.openModal(content, 'standard');
+   // this.modalService.openModal(content, 'standard');
   }
   navigateBack() {
     this.location.back();
@@ -200,7 +198,7 @@ export class ModelDescriptionComponent implements OnInit {
     });
   }
   open(content: any): void {
-    this.modalService.openModal(content, 'standard');
+   // this.modalService.openModal(content, 'standard');
   }
   refeshrelated(event: any) {
     if (event == true) {

@@ -34,7 +34,7 @@ import { DatasourceComponent } from './datasource/datasource.component';
 // import { EndpointEditComponent } from './endpoint/endpoint-edit/endpoint-edit.component';
 import { environment } from '../environments/environment';
 import { Services } from './services/service';
- import { PipelineService } from './services/pipeline.service'
+ import { PipelineService } from './services/pipeline.service';
 import { CommonModule } from '@angular/common';
 import { AipInterceptorService } from './services/interceptor';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -322,7 +322,7 @@ const dbConfig: DBConfig = {
     PipelineComponent,
       PipelineCreateComponent,
     //PipelineDescriptionComponent,
-    // ModalViewEditPropertiesComponent,
+    // ModalViewEditPropertiesComponent
     // EndpointComponent,
     // EnlCodeEditorComponent,
     // DatasetComponent,
@@ -482,9 +482,7 @@ const dbConfig: DBConfig = {
     // BivariateAnalyticsComponent,
     // SaveStoryComponent,
     // PdfDatasetAnnotateComponent,
-
     DatasetByNameComponent,
-
     // AipRatingComponent,
     // AipRatingViewComponent,
     // ItsmSummaryComponent,

@@ -226,6 +226,11 @@ public class ICIPDatasourceService implements IICIPDatasourceService, IICIPSearc
 	public List<ICIPDatasource> getDatasourceByType(String type, String organization) {
 		return datasourceRepository.findByTypeAndOrganization(type, organization);
 	}
+	
+	@Override
+	public List<ICIPDatasource> getForModelsTypeAndOrganization(String type, String organization) {
+		return datasourceRepository.getForModelsTypeAndOrganization(type, organization);
+	}
 
 	/**
 	 * Gets the paginated datasource by type and search.

@@ -15,14 +15,17 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.client.CredentialsProvider;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Marker;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.gson.JsonArray;
 import com.infosys.icets.icip.dataset.model.ICIPDatasource;
 
 
@@ -142,6 +145,10 @@ public interface IICIPDataSourceServiceUtil {
 	
 	
 	String getElasticSearchResponse(ICIPDatasource datasource, String pipelineId, String trailId, String formattedDate, String elasticSearchIndex);
+
+	List<Map<String, Object>> getCustomModels(String org, List<ICIPDatasource> connectionsList,Integer page,Integer size,String query);
+
+	Long getAllModelObjectDetailsCount(List<ICIPDatasource> datasources, String searchModelName, String org);
 
 
 	

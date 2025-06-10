@@ -10,14 +10,14 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
-import { LedsModalService, LedsLibService } from 'leds-lib';
+//import { LedsModalService, LedsLibService } from 'leds-lib';
 import { Services } from '../services/service';
 import { TagsService } from '../services/tags.service';
 import { HttpParams } from '@angular/common/http';
 import { TagEventDTO } from '../DTO/tagEventDTO.model';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog.component/confirm-delete-dialog.component';
-import { LeapTelemetryService, OpenTelemetryService } from 'com-lib-util';
+//import { LeapTelemetryService, OpenTelemetryService } from 'com-lib-util';
 import { Location } from '@angular/common';
 import { PaginationComponent } from '../pagination/pagination.component';
 @Component({
@@ -75,19 +75,20 @@ export class ModelComponent implements OnInit, OnChanges {
   cortexwindow: any;
   isExpanded = false;
   tooltip: string = 'above';
-
+isSearchHovered=false;
+isHovered=false;
   pageNumber: number;
   pageSize: number;
   noOfItems: number;
-  @ViewChild('pagination') paginationComponent: PaginationComponent;
+ // @ViewChild('pagination') paginationComponent: PaginationComponent;
   constructor(
-    private telemetryService: LeapTelemetryService,
-    private telemetry: OpenTelemetryService,
+   // private telemetryService: LeapTelemetryService,
+    //private telemetry: OpenTelemetryService,
     private service: Services,
     private route: ActivatedRoute,
     private router: Router,
-    private modalService: LedsModalService,
-    private ledsLibService: LedsLibService,
+   // private modalService: LedsModalService,
+   // private ledsLibService: LedsLibService,
     private changeDetectionRef: ChangeDetectorRef,
     public tagService: TagsService,
     private dialog: MatDialog,
@@ -103,13 +104,13 @@ export class ModelComponent implements OnInit, OnChanges {
     this.refresh();
   }
   cardTitle: String = 'Model';
-  telemetryCall(){
-    this.telemetry.startTelemetry('aip-app','ModelComponent',sessionStorage.getItem('organization'))
-  }
+  // telemetryCall(){
+  //   this.telemetry.startTelemetry('aip-app','ModelComponent',sessionStorage.getItem('organization'))
+  // }
   ngOnInit(): void {
-    this.telemetryCall();
+    //this.telemetryCall();
     this.records = false;
-    this.telemetryImpression();
+   // this.telemetryImpression();
     //  this.pageSize = this.itemsPerPage[0];
     this.route.queryParams.subscribe((params) => {
       // Update this.pageNumber if the page query param is present
@@ -144,12 +145,12 @@ export class ModelComponent implements OnInit, OnChanges {
     this.fetchAdapters();
   }
 
-  telemetryImpression() {
-    this.telemetryService.start();
-    this.telemetryService.impression('aip-app', 'list', 'ModelComponent');
-  }
+  // telemetryImpression() {
+  //   this.telemetryService.start();
+  //   this.telemetryService.impression('aip-app', 'list', 'ModelComponent');
+  // }
   resetPage(page: number) {
-    this.paginationComponent.changePage(page);
+   // this.paginationComponent.changePage(page);
   }
   // nextPage() {
   //   if (this.pageNumber + 1 <= this.noOfPages) {
@@ -278,9 +279,7 @@ export class ModelComponent implements OnInit, OnChanges {
     this.service.getModelCards(params).subscribe((res) => {
       let data: any = [];
       let test = res;
-      //let timezoneOffset = new Date().getTimezoneOffset();
       test.forEach((element: any) => {
-        //element.sourceModifiedDate = new Date(new Date(element.sourceModifiedDate).getTime() - timezoneOffset * 60 * 1000);
         data.push(element);
         this.users.push(element.appName);
       });
@@ -343,12 +342,12 @@ export class ModelComponent implements OnInit, OnChanges {
   }
   redirection(card: any, type: string) {
     // //this.telemetry.addTelemetryEvent(card.alias+ type);
-    this.telemetryService.interact(
-      'click',
-      'ModelComponent',
-      'open',
-      card.name
-    );
+    // this.telemetryService.interact(
+    //   'click',
+    //   'ModelComponent',
+    //   'open',
+    //   card.name
+    // );
     this.router.navigate(['./' + type + '/' + card.sourceName], {
       queryParams: {
         page: this.pageNumber,
@@ -373,16 +372,17 @@ export class ModelComponent implements OnInit, OnChanges {
     this.selectedInstance = value;
     this.redirect();
   }
+  
   editModel(card: any) {
     console.log(card);
-
     this.router.navigate(['./edit'], {
       queryParams: { data: card },
       relativeTo: this.route,
     });
   }
+
   clickactive(eventObj: any) {
-    this.ledsLibService.clickactive(eventObj);
+    //this.ledsLibService.clickactive(eventObj);
   }
   refresh() {
     this.getCountModels();
@@ -460,6 +460,7 @@ export class ModelComponent implements OnInit, OnChanges {
       }
     });
   }
+  
   deleteModels(card) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
     dialogRef.afterClosed().subscribe((result) => {
@@ -497,7 +498,7 @@ export class ModelComponent implements OnInit, OnChanges {
     }
   }
   ngOnDestroy() : void {
-    let activeSpan = this.telemetry.fetchActiveSpan();
-    this.telemetry.endTelemetry(activeSpan);
+    // let activeSpan = this.telemetry.fetchActiveSpan();
+    // this.telemetry.endTelemetry(activeSpan);
   }
 }

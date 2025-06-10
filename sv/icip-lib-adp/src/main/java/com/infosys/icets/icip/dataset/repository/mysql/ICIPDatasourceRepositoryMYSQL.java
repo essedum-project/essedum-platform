@@ -228,5 +228,8 @@ public interface ICIPDatasourceRepositoryMYSQL extends ICIPDatasourceRepository 
 
 	@Query(value="SELECT ds FROM ICIPDatasource ds WHERE ds.alias = :alias")
 	Optional<ICIPDatasource> findByAlias(@Param("alias") String alias);
+	
+	@Query(value = "SELECT * FROM mldatasource WHERE organization= :org AND type=:type AND formodel is true", nativeQuery = true)
+	List<ICIPDatasource> getForModelsTypeAndOrganization(@Param("type") String type,@Param("org") String org);
 
 }
