@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pyjob-executor
+  namespace: aipns # Namespace where the deployment will run
+spec:
+  replicas: 1 # Number of replicas
+  selector:
+    matchLabels:
+      app: pyjob-executor
+  template:
+    metadata:
+      labels:
+        app: pyjob-executor
+    spec:
+      containers:
+      - name: pyjob-executor-container
+        image: acrreq0762935.azurecr.io/pyjob-excecutor:latest # Updated to use the ACR image
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000 # Flask app listens on port 5000
+      imagePullSecrets:
+      - name: acr-secret # Secret to authenticate with ACR
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pyjob-executor-service
+  namespace: aipns
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true" # Makes the LoadBalancer internal
+spec:
+  selector:
+    app: pyjob-executor # Matches the label in the Deployment
+  ports:
+  - protocol: TCP
+    port: 80          # External port to expose
+    targetPort: 5000  # Port where the application is running inside the pod
+  type: LoadBalancer
