@@ -21,6 +21,9 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 
+db_path = f"{os.getcwd()}/data/app.db"
+
+
 class JobNF(Exception):
     pass
 
@@ -32,7 +35,7 @@ class DatabaseOperations:
         """Get a thread-local database connection."""
         if not hasattr(self.thread_local, 'connection'):
             try:
-                self.thread_local.connection = sqlite3.connect('data/app.db', isolation_level=None)
+                self.thread_local.connection = sqlite3.connect(db_path, isolation_level=None)
                 self.thread_local.connection.execute('PRAGMA journal_mode = WAL')
                 self.thread_local.connection.execute('PRAGMA wal_checkpoint(FULL)')
             except Exception as e:
@@ -41,11 +44,11 @@ class DatabaseOperations:
 
     def create_database(self):
         """Create the database and tables if they don't exist."""
-        data_dir = '/data'
+        data_dir = f"{os.getcwd()}/data"
         if not os.path.exists(data_dir):
             os.makedirs(data_dir)
 
-        with sqlite3.connect('data/app.db', isolation_level=None) as db:
+        with sqlite3.connect(db_path, isolation_level=None) as db:
             db.execute('BEGIN')
             try:
                 # Perform your delete operation here
@@ -183,7 +186,7 @@ class DatabaseOperations:
                 raise e
             
     def clean_jobs_table(self):
-        with sqlite3.connect('data/app.db', isolation_level=None) as db:
+        with sqlite3.connect(db_path, isolation_level=None) as db:
             db.execute('BEGIN')
             try:
                 # Perform your delete operation here

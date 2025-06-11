@@ -3,15 +3,18 @@ from utils import *
 import json
 import mysql.connector
 import logging
+from dotenv import load_dotenv
 
 file_handler = logging.FileHandler('logfile.log')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+load_dotenv()
+
 db_configs = config['TASK_RETRIVER_MYSQL_CONFIGS']
 def getConnection():
     username = db_configs['username']
-    password = db_configs['password']
+    password = os.getenv("mysql_db_password")
     host = db_configs['host']
     port = db_configs['port']
     database = db_configs['database']

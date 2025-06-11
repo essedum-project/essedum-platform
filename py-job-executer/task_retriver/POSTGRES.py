@@ -3,10 +3,13 @@ from utils import *
 import json
 import asyncpg
 import logging
+from dotenv import load_dotenv
 
 file_handler = logging.FileHandler('logfile.log')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+load_dotenv()
 
 db_configs = config['TASK_RETRIVER_PG_CONFIGS']
 
@@ -14,7 +17,7 @@ async def get_connection():
     """Establish a connection to the PostgreSQL database."""
     return await asyncpg.connect(
         user=db_configs['username'],
-        password=db_configs['password'],
+        password=os.getenv("postgres_db_password"),
         host=db_configs['host'],
         port=db_configs['port'],
         database=db_configs['database'],

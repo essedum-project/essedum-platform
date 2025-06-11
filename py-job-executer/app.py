@@ -317,13 +317,12 @@ def create_task_util(payload, push_in_queue=True, entry_id=''):
     command = payload.get("command","")
     storage=payload.get("storage", "local")
     env=payload.get("environment", "")
-    referrer = payload.get("referrer", "")
     
     if isinstance(env, str):
         payload["environment"] = {}
         env = {}
 
-    valid_parameters = {"bucket", "project_id", "name", "version", "credentials", "input_artifacts", "command", "storage", "environment", "referrer"}
+    valid_parameters = {"bucket", "project_id", "name", "version", "credentials", "input_artifacts", "command", "storage", "environment"}
     input_parameters = set(payload.keys())
 
     # checking for valid parameters
@@ -360,8 +359,7 @@ def create_task_util(payload, push_in_queue=True, entry_id=''):
     response = {
         "task_id": task.id,
         "task_status": "Submitted",
-        "log_path": task.log_path,
-        "referrer": referrer,
+        "log_path": task.log_path
     }
     return response
 
@@ -380,7 +378,6 @@ def create_task():
     if not request.get_json():
         abort(400)
     payload = request.get_json()
-    payload["referrer"] = request.headers.get('Referer', "")
     return create_task_util(payload)
 
 @app.route('/execute', methods=['GET'])
