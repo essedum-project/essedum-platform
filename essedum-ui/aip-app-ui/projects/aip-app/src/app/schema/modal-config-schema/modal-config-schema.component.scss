@@ -1,0 +1,149 @@
+::ng-deep .my-select .mat-option-text {
+  font-size: 20px; /* Replace with the font size you want */
+}
+
+.lfx-l-middle-col {
+  margin-left: 16px;
+}
+
+.lfx-u-no-mar-l__mb {
+  margin-left: 0 !important;
+}
+
+.lfx-l-level1-wrapper .DSA_contentRightCol {
+  padding: 30px 20px;
+  min-height: 500px;
+}
+
+.lfx-l-level1-wrapper .lfx-l-whiteBG {
+  background: #ffffff;
+}
+
+@media screen and (min-width: 1367px) {
+  .lfx-l-base-layout-center {
+    width: 1216px;
+    margin: 0 auto;
+  }
+
+  .lfx-l-left-layout-center,
+  .lfx-l-right-layout-center {
+    width: 1001px;
+    margin: 0 auto;
+  }
+
+  .lfx-l-lr-layout-center {
+    width: 786px;
+    margin: 0 auto;
+  }
+}
+
+.lfx-u-pad-lr-16 {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+
+.lfx-u-mar-lr-24 {
+  margin-left: 24px !important;
+  margin-right: 24px !important;
+}
+
+.lfx-u-pad-32 {
+  padding: 32px !important;
+}
+
+.lfx-l-level2-middle-ctr {
+  display: block;
+  width: 100%;
+  table-layout: unset;
+}
+
+.lfx-l-level2-middle-col,
+.lfx-l-level2-right-col {
+  display: block;
+  height: auto;
+}
+
+.lfx-u-mar-b-24__mb {
+  margin-bottom: 24px !important;
+}
+
+.lfx-c-panel__content {
+  min-height: 100px;
+}
+
+.lfx-u-mar-tb-32 {
+  margin-top: 32px !important;
+  margin-bottom: 32px !important;
+}
+
+.lfx-u-body-md {
+  font-size: 1.4rem;
+  font-weight: 400;
+  font-family: roboto, Arial, sans-serif !important;
+  font-style: normal;
+}
+
+.lfx-u-bg-primary-80 {
+  background: #8626c3;
+  color: #fff;
+}
+
+.lfx-u-text-status-success {
+  color: #007a52;
+  background: #dff6dd;
+}
+
+.lfx-u-pad-16 {
+  padding: 16px !important;
+}
+
+.lfx-u-body-sm {
+  font-size: 1.2rem;
+  font-weight: 400;
+  font-family: roboto, Arial, sans-serif !important;
+  font-style: normal;
+}
+
+.lfx-u-text-neutral-80 {
+  color: #737373;
+}
+
+.lfx-u-no-mar-b {
+  margin-bottom: 0 !important;
+}
+.lfx-u-header-md {
+  font-size: 1.4rem;
+  font-weight: 600;
+  font-family: myriad-pro, Arial, sans-serif !important;
+  font-style: normal;
+}
+
+.lfx-u-pad-b-20 {
+  padding-bottom: 20px;
+}
+
+.lfx-u-pad-tb-8 {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+.mdc-button.lfx-c-btn--icon span.lfx-c-btn--icon__icon {
+  padding: 4px 8px;
+  background-position: center center;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.lfx-u-body-xl {
+  font-size: 1.6rem;
+  font-weight: 400;
+  font-family: roboto, Arial, sans-serif !important;
+  font-style: normal;
+}
+
+.lfx-c-card.mat-mdc-card {
+  padding: 24px;
+  min-height: 50px;
+  border-radius: 16px;
+  display: block;
+}

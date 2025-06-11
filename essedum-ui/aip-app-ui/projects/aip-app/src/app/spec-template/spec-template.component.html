@@ -62,15 +62,17 @@
                                 <div class="lfx-u-header-sm lfx-u-text-primary-80 lfx-u-mar-b-8">{{card.domainname}}
                                 </div>
                                 <mat-card-header style="padding: 0 !important; width: 95%;">
-                                    <mat-card-title class="lfx-c-card__container clearfix">
-                                        <div class="lfx-c-card__container-left w-100">
-                                            <h2 class="lfx-u-header-xl lfx-u-ellipsis aip-fullname-card"
-                                                style="line-height: 2rem;">
-                                                {{card.domainname | titlecase}}</h2>
-                                        </div>
-                                    </mat-card-title>
-                                    <mat-card-subtitle
-                                        class="lfx-u-body-sm lfx-u-text-neutral-80 lfx-u-ellipsis">{{card.lastmodifiedon}}</mat-card-subtitle>
+                                    <div class="w-100">
+                                        <mat-card-title class="lfx-c-card__container clearfix">
+                                            <div class="lfx-c-card__container-left w-100">
+                                                <h2 class="lfx-u-header-xl lfx-u-ellipsis aip-fullname-card"
+                                                    style="line-height: 2rem;">
+                                                    {{card.domainname | titlecase}}</h2>
+                                            </div>
+                                        </mat-card-title>
+                                        <mat-card-subtitle
+                                            class="lfx-u-body-sm lfx-u-text-neutral-80 lfx-u-ellipsis">{{card.lastmodifiedon}}</mat-card-subtitle>
+                                    </div>
                                 </mat-card-header>
                                 <!-- <mat-card-content class="lfx-u-no-mar-b">
                                     <p class="lfx-u-body-md lfx-u-text-neutral-80 lfx-u-line-2 aip-desc-ellipsis">

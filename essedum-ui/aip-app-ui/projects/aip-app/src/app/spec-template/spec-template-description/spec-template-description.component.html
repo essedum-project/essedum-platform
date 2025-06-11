@@ -149,47 +149,39 @@
                                                                             <span [matTooltip]="'Related Instance'"
                                                                                 [matTooltipPosition]="tooltipPosition">{{component.viewValue}}</span>
                                                                         </div>
-                                                                        <leds-overflow *ngIf="executionRequired">
-                                                                            <div ngbDropdown
-                                                                                class="aip-cursor lfx-u-pad-l-8 d-inline-block"
-                                                                                container="body">
-                                                                                <a id="OverflowMenu_dd"
-                                                                                    ngbDropdownToggle
-                                                                                    title="Change Order">
-                                                                                    {{ priorityMapIns[component.value]
-                                                                                    || '-' }}
-                                                                                </a>
-                                                                                <div ngbDropdownMenu
-                                                                                    aria-labelledby="OverflowMenu_dd">
-                                                                                    <ul overflowList>
-                                                                                        <li overflowListItem
-                                                                                            (click)="setDefault(component)">
-                                                                                            <a
-                                                                                                href="javascript:void(0);">
-                                                                                                <span overflowSpan
-                                                                                                    class="lfx-u-mar-l-8">setDefault</span>
-                                                                                            </a>
-                                                                                        </li>
-                                                                                        <li overflowListItem>
-                                                                                            <a
-                                                                                                href="javascript:void(0);">
-                                                                                                <span overflowSpan
-                                                                                                    class="lfx-u-mar-l-8">changeOrder</span>
-                                                                                                <select
-                                                                                                    [(ngModel)]="priorityMapIns[component.value]"
-                                                                                                    (change)="changePriority($event, component)">
-                                                                                                    <option
-                                                                                                        *ngFor="let num of [].constructor(nOfIns); let i = index"
-                                                                                                        [value]="i+1">{{
-                                                                                                        i+1 }}
-                                                                                                    </option>
-                                                                                                </select>
-                                                                                            </a>
-                                                                                        </li>
-                                                                                    </ul>
-                                                                                </div>
-                                                                            </div>
-                                                                        </leds-overflow>
+                                                                        <ng-container *ngIf="executionRequired">
+                                                                            <button mat-button
+                                                                                [matMenuTriggerFor]="overflowMenu"
+                                                                                class="aip-cursor lfx-u-pad-l-8 d-inline-block">
+                                                                                {{ priorityMapIns[component.value] ||
+                                                                                '-' }}
+                                                                            </button>
+                                                                            <mat-menu #overflowMenu="matMenu">
+                                                                                <button mat-menu-item
+                                                                                    (click)="setDefault(component)">
+                                                                                    <span
+                                                                                        class="lfx-u-mar-l-8">setDefault</span>
+                                                                                </button>
+                                                                                <button mat-menu-item>
+                                                                                    <span
+                                                                                        class="lfx-u-mar-l-8">changeOrder</span>
+                                                                                    <mat-form-field appearance="fill"
+                                                                                        class="ml-2"
+                                                                                        style="width: 80px; margin-left: 8px;">
+                                                                                        <mat-select
+                                                                                            [(ngModel)]="priorityMapIns[component.value]"
+                                                                                            (selectionChange)="changePriority($event, component)">
+                                                                                            <mat-option
+                                                                                                *ngFor="let num of [].constructor(nOfIns); let i = index"
+                                                                                                [value]="i+1">
+                                                                                                {{ i+1 }}
+                                                                                            </mat-option>
+                                                                                        </mat-select>
+                                                                                    </mat-form-field>
+                                                                                </button>
+                                                                            </mat-menu>
+                                                                        </ng-container>
+
                                                                     </div>
                                                                 </div>
                                                             </div>

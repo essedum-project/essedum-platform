@@ -5,14 +5,13 @@
 @import url("https://cdn.quilljs.com/1.3.7/quill.bubble.css");
 @import url("https://cdn.quilljs.com/1.3.7/quill.core.css");
 
-
 ::ng-deep {
   body {
     background-color: var(--background-colour) !important;
   }
 
-  .le-c-dropdown__list li>a,
-  .le-c-dropdown__list li>span {
+  .le-c-dropdown__list li > a,
+  .le-c-dropdown__list li > span {
     padding: 0.4rem 1.6rem;
   }
 
@@ -184,7 +183,7 @@
     outline: none;
   }
 
-  .aip-select-adapter-dropDown>option {
+  .aip-select-adapter-dropDown > option {
     // background-color: white;
     background-color: var(--background-colour) !important;
   }
@@ -516,9 +515,6 @@
   }
 }
 
-
-
-
 // ::ng-deep .angular-tree-component {
 //   width: 100%;
 //   position: relative;
@@ -606,7 +602,8 @@
   padding-right: 0.3rem;
 }
 
-@media (width<=576px) {}
+@media (width<=576px) {
+}
 
 .ace_print-margin ::ng-deep {
   left: 0 !important;
@@ -644,7 +641,7 @@
   word-break: break-all;
 }
 
-::ng-deep.aip-hover-avatar:hover~.aip-hover-detail {
+::ng-deep.aip-hover-avatar:hover ~ .aip-hover-detail {
   display: block;
   transition: display 1s ease-out 0.5s;
 }
@@ -673,7 +670,6 @@
   color: #978989;
 }
 
-
 div {
   h3 {
     color: var(--text-color);
@@ -688,7 +684,6 @@ div {
 
 ::ng-deep {
   @media (min-width: 2500px) {
-
     // html {
     //   font-size: 100%; /* 1rem = 14px */
     // }
@@ -708,7 +703,6 @@ div {
   }
 }
 
-
 .lfx-fs-18 {
   font-size: 18px !important;
 }
@@ -717,7 +711,6 @@ div {
   font-size: 24px !important;
   color: #0a142f !important;
 }
-
 
 ::ng-deep .mdc-button.mat-mdc-button.mat-mdc-button-base,
 .mdc-button.mat-mdc-raised-button.mat-mdc-button-base,
@@ -730,7 +723,6 @@ div {
 }
 
 ::ng-deep {
-
   //for global CSS datasets, connections , model
   .lfx-u-pad-8 {
     padding: 8px !important;
@@ -793,7 +785,6 @@ div {
     padding-bottom: 16px !important;
   }
 
-
   .lfx-c-panel__content {
     min-height: 100px !important;
   }
@@ -801,7 +792,6 @@ div {
   .lfx-u-mar-t-24 {
     margin-top: 24px !important;
   }
-
 
   .lfx-fs-16 {
     font-size: 16px !important;
@@ -849,11 +839,6 @@ div {
 
   .flex {
     display: flex;
-  }
-
-  .lfx-u-pad-lr-32 {
-    padding-left: 32px !important;
-    padding-right: 32px !important;
   }
 
   .lfx-u-pad-t-16 {
@@ -912,12 +897,17 @@ div {
 
   .lfx-c-badge--blue {
     background: #dae2e8;
-    color: #0094ff !important
+    color: #0094ff !important;
   }
 
   .lfx-c-badge--warning {
     background: #fff4ce;
     color: #a15c08 !important;
+  }
+
+  .lfx-c-badge--info {
+    background: #deebff;
+    color: #0052cc;
   }
 
   .base-color {
@@ -928,37 +918,10 @@ div {
     color: #0a142f !important;
   }
 
-
-  .lfx-u-mar-b-8 {
-    margin-bottom: 8px !important;
-  }
-
   .lfx-u-text-primary-80 {
     //color: #8626C3;
     color: #0094ff;
     // color:#0a142f;
-  }
-
-  .lfx-u-header-sm {
-    font-size: 1.2rem;
-    font-weight: 600;
-    font-family: "myriad-pro", Arial, sans-serif !important;
-    font-style: normal;
-  }
-
-  .lfx-u-no-mar-b {
-    margin-bottom: 0px !important;
-  }
-
-  .lfx-u-body-md {
-    font-size: 1.4rem;
-    font-weight: 400;
-    font-family: "roboto", Arial, sans-serif !important;
-    font-style: normal;
-  }
-
-  .lfx-u-text-neutral-80 {
-    color: #737373;
   }
 
   .lfx-u-mar-8 {
@@ -974,10 +937,6 @@ div {
 
   .lfx-u-mar-r-8 {
     margin-right: 8px !important;
-  }
-
-  .lfx-u-mar-r-20 {
-    margin-right: 20px !important;
   }
 
   .lfx-c-avatar {
@@ -996,14 +955,9 @@ div {
     padding-top: 8px;
   }
 
-  .lfx-c-card__action-ul {
-    margin: 0;
-  }
-
   .lfx-u-v-mid {
     vertical-align: middle !important;
   }
-
 
   .lfx-u-body-lg {
     font-size: 1.6rem;
@@ -1012,14 +966,13 @@ div {
     font-style: normal;
   }
 
-
   .lfx-c-card__container-left {
     float: left;
     width: 80%;
   }
 
-  .lfx-c-card {
-    padding: 24px;
+  .lfx-c-card.mat-mdc-card {
+    padding: 16px;
     min-height: 50px;
     border-radius: 16px;
     display: block;
@@ -1046,7 +999,6 @@ div {
     background: var(--default-card-action-bg-color);
   }
 
-
   .lfx-c-card--hover {
     overflow: hidden;
   }
@@ -1062,13 +1014,6 @@ div {
     font-size: 1.2rem;
     font-weight: 400;
     font-family: "roboto", Arial, sans-serif !important;
-    font-style: normal;
-  }
-
-  .lfx-u-header-xl {
-    font-size: 1.8rem;
-    font-weight: 600;
-    font-family: "myriad-pro", Arial, sans-serif !important;
     font-style: normal;
   }
 
@@ -1104,13 +1049,10 @@ div {
     margin-left: 16px !important;
   }
 
-
-
-
-  //   .card-actions-container:hover .card-actions-hover {
-  //                                             opacity: 1 !important;
-  //                                             pointer-events: auto !important;
-  //                                         }
+  // .card-actions-container:hover .card-actions-hover {
+  //   opacity: 1 !important;
+  //   pointer-events: auto !important;
+  // }
 
   .mat-action-button-s {
     color: #0094ff !important;
@@ -1122,25 +1064,23 @@ div {
     font-weight: 500;
   }
 
-
-  //  .card-title-wrapper {
+  // .card-title-wrapper {
   //   display: block;
   //   overflow: hidden;
-  //   }
-  //   .card-title {
+  // }
+  // .card-title {
   //   line-height: 1.4em;
   //   display: -webkit-box;
   //   -webkit-box-orient: vertical;
   //   overflow: hidden;
   //   text-overflow: ellipsis;
   //   -webkit-line-clamp: 1;
-  //   transition: -webkit-line-clamp 0.3s ease ;
-  //   }
+  //   transition: -webkit-line-clamp 0.3s ease;
+  // }
 
   .card-title-wrapper:hover .card-title {
     -webkit-line-clamp: 2;
   }
-
 
   .lfx-u-mar-lr-8 {
     margin-left: 8px !important;
@@ -1159,9 +1099,16 @@ div {
     padding: 16px !important;
   }
 
+  .lfx-u-pad-b-16 {
+    padding-bottom: 16px !important;
+  }
 
   .lfx-u-mar-b-16 {
     margin-bottom: 16px !important;
+  }
+
+  .lfx-u-mar-b-24__mb {
+    margin-bottom: 24px !important;
   }
 
   .lfx-u-mar-t-8 {
@@ -1172,17 +1119,12 @@ div {
     padding-left: 8px !important;
   }
 
-  .lfx-u-pad-b-8 {
-    padding-bottom: 8px !important;
-  }
-
   .lfx-u-header-lg {
     font-size: 1.6rem;
     font-weight: 600;
     font-family: "myriad-pro", Arial, sans-serif !important;
     font-style: normal;
   }
-
 
   .lfx-l-level2-right-col {
     width: 350px !important;
@@ -1204,11 +1146,15 @@ div {
   }
 
   // Show underline only for readonly input fields, hide for normal fields
-  .mat-mdc-form-field.mat-mdc-form-field-type-mat-input:not(.mat-form-field-readonly) .mdc-line-ripple {
+  .mat-mdc-form-field.mat-mdc-form-field-type-mat-input:not(
+      .mat-form-field-readonly
+    )
+    .mdc-line-ripple {
     display: none !important;
   }
 
-  .mat-mdc-form-field.mat-mdc-form-field-type-mat-input.mat-form-field-readonly .mdc-line-ripple {
+  .mat-mdc-form-field.mat-mdc-form-field-type-mat-input.mat-form-field-readonly
+    .mdc-line-ripple {
     display: block !important;
   }
 
@@ -1227,18 +1173,55 @@ div {
   .lfx-u-mar-r-16 {
     margin-right: 16px !important;
   }
-
+  .lfx-u-pad-lr-16 {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
   .lfx-u-mar-t-16 {
     margin-top: 16px !important;
   }
 
-  .lfx-u-mar-lr-16{
+  .lfx-u-mar-lr-16 {
     margin-left: 16px !important;
     margin-right: 16px !important;
   }
 
-  .lfx-u-mar-t-30{
+  .lfx-u-mar-t-30 {
     margin-top: 30px !important;
   }
 
+  .lfx-l-level1-wrapper .lfx-l-level1-middle-col {
+    padding: 32px 16px;
+  }
+
+  .lfx-u-pad-l-32 {
+    padding-left: 32px !important;
+  }
+
+  .container,
+  .container-fluid {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .col-lg-12 {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .lfx-u-mar-b-32 {
+    margin-bottom: 32px !important;
+  }
+
+  .lfx-u-pad-r-8 {
+    padding-right: 8px !important;
+  }
+
+  .lfx-l-level1-wrapper .DSA_contentRightCol {
+    padding: 30px 20px;
+    min-height: 500px;
+  }
+  .lfx-l-level1-wrapper .lfx-l-whiteBG {
+    background: #ffffff;
+  }
 }

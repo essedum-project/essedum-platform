@@ -10,7 +10,6 @@ import { encKey } from './encKey';
 import { Dataset } from '../dataset/datasets';
 import { StreamingServices } from '../streaming-services/streaming-service';
 
-
 @Injectable()
 export class Services {
   datasetsFetched: any;
@@ -25,9 +24,8 @@ export class Services {
     @Inject('envi') private baseUrl: string,
     private matSnackbar: MatSnackBar,
     private zone: NgZone,
-    private encKey: encKey,
-  ) { }
-
+    private encKey: encKey
+  ) {}
 
   getMlTags(): Observable<any> {
     return this.https
@@ -67,7 +65,7 @@ export class Services {
     const org = sessionStorage.getItem('organization');
     return this.https
       .delete(this.dataUrl + '/runtime/delete/' + name + '/' + org, {
-        observe: 'response'
+        observe: 'response',
       })
       .pipe(
         map((response) => {
@@ -79,10 +77,7 @@ export class Services {
           return this.handleError(err);
         })
       );
-
   }
-
-
 
   getCountPipelines(param: HttpParams): Observable<any> {
     return this.https
@@ -174,8 +169,8 @@ export class Services {
     return new Observable((observer) => {
       let eventSource = new EventSourcePolyfill(
         this.dataUrl +
-        '/service/v1/useCase/get' +
-        `?project=${session}&id=${id}&type=${type}`,
+          '/service/v1/useCase/get' +
+          `?project=${session}&id=${id}&type=${type}`,
         {
           headers: this.getGHeaders(),
           withCredentials: true,
@@ -211,8 +206,8 @@ export class Services {
     return new Observable((observer) => {
       let eventSource = new EventSourcePolyfill(
         this.dataUrl +
-        '/service/v1/search/' +
-        `?project=${session}&size=${size}&page=${page}&search=${search}`,
+          '/service/v1/search/' +
+          `?project=${session}&size=${size}&page=${page}&search=${search}`,
         {
           headers: this.getGHeaders(),
           withCredentials: true,
@@ -258,7 +253,6 @@ export class Services {
   data_flux = [];
   data = [];
 
-
   commonSearchByType(
     type: any,
     size: number,
@@ -272,8 +266,8 @@ export class Services {
     return new Observable((observer) => {
       let eventSource = new EventSourcePolyfill(
         this.dataUrl +
-        '/service/v1/search/type' +
-        `?project=${session}&size=${size}&page=${page}&type=${type}&search=${search}`,
+          '/service/v1/search/type' +
+          `?project=${session}&size=${size}&page=${page}&type=${type}&search=${search}`,
         {
           headers: this.getGHeaders(),
           withCredentials: true,
@@ -429,7 +423,6 @@ export class Services {
       );
   }
 
-
   messageService(resp: any, msg?: any) {
     console.log(resp);
     if (resp.status == 200) {
@@ -556,14 +549,12 @@ export class Services {
       );
   }
 
-
-
   saveDatasource(datasource: Datasource): Observable<any> {
     return this.https
       .post(
         this.dataUrl +
-        '/datasources/save/' +
-        (datasource.id ? datasource.id : datasource.alias),
+          '/datasources/save/' +
+          (datasource.id ? datasource.id : datasource.alias),
         datasource,
         {
           headers: new HttpHeaders({
@@ -684,7 +675,6 @@ export class Services {
     return decryptedText;
   }
 
-
   async decryptUsingAES256(cipherResponse, password) {
     let cipherJson = JSON.parse(cipherResponse);
     // const result = await this.usersService.decryptgcm(cipherJson["ciphertext"], cipherJson["iv"], password)
@@ -701,8 +691,8 @@ export class Services {
       this.https
         .get(
           this.dataUrl +
-          '/datasets/dsetNames/' +
-          sessionStorage.getItem('organization'),
+            '/datasets/dsetNames/' +
+            sessionStorage.getItem('organization'),
           {
             observe: 'response',
             params: { datasource: data },
@@ -754,7 +744,6 @@ export class Services {
       );
   }
 
-
   getDatasourcesNames1(org): Observable<any> {
     return this.https
       .get(this.dataUrl + '/datasources/names', {
@@ -800,10 +789,10 @@ export class Services {
       return this.https
         .post(
           this.dataUrl +
-          '/datasets/upload/' +
-          fileid +
-          '/' +
-          sessionStorage.getItem('organization'),
+            '/datasets/upload/' +
+            fileid +
+            '/' +
+            sessionStorage.getItem('organization'),
           formData,
           { observe: 'response' }
         )
@@ -981,9 +970,9 @@ export class Services {
     return this.https
       .get(
         '/api/get-startup-constants/' +
-        key +
-        '/' +
-        sessionStorage.getItem('organization'),
+          key +
+          '/' +
+          sessionStorage.getItem('organization'),
         {
           observe: 'response',
           responseType: 'text',
@@ -1001,6 +990,146 @@ export class Services {
       );
   }
 
+  //getSchemas
+  getSchemasCards(param): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+
+    return this.https
+      .get(this.dataUrl + '/service/v1/schemas/list', {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  deleteSchema(name: any): Observable<any> {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .delete(this.baseUrl + '/schemaRegistry/delete/' + name + '/' + org, {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  updateSchema(
+    name: any,
+    alias: any,
+    value: any,
+    description?: string,
+    formTemplate?: any,
+    type?: any,
+    capability?: any
+  ): Observable<any> {
+    try {
+      if (name?.length == 0) name = 'new';
+      const body = {
+        alias: alias,
+        description: description,
+        schemavalue: JSON.stringify(value),
+        formtemplate: JSON.stringify(formTemplate),
+        type: type,
+        capability: capability,
+      };
+      return this.https
+        .post(
+          this.baseUrl +
+            '/schemaRegistry/add/' +
+            name +
+            '/' +
+            sessionStorage.getItem('organization'),
+          body,
+          { observe: 'response' }
+        )
+        .pipe(
+          map((response) => {
+            return response.body;
+          })
+        )
+        .pipe(
+          catchError((err) => {
+            return this.handleError(err);
+          })
+        );
+    } catch (Exception) {
+      // this.messageService.error("Some error occured", "Error")
+    }
+  }
+
+  deleteFormTemplate(id: any): Observable<any> {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .delete(this.baseUrl + '/schemaRegistry/deleteFormtemplate/' + id, {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          console.log(response);
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  saveSchemaForm(schemaForm): Observable<any> {
+    try {
+      return this.https
+        .post(this.baseUrl + '/schemaRegistry/add/schemaForm', schemaForm, {
+          observe: 'response',
+        })
+        .pipe(
+          map((response) => {
+            return response.body;
+          })
+        )
+        .pipe(
+          catchError((err) => {
+            return this.handleError(err);
+          })
+        );
+    } catch (Exception) {
+      console.log(Exception);
+    }
+  }
+
+  getSchemaByName(name: any): Observable<any> {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .get(this.baseUrl + '/schemaRegistry/schemas/' + name + '/' + org, {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
 
   getProxyDbDatasetDetails(
     dataset: Dataset,
@@ -1013,16 +1142,16 @@ export class Services {
     return this.https
       .get(
         this.dataUrl +
-        '/service/dbdata/' +
-        dsource.type +
-        '/' +
-        dsource.alias +
-        '/' +
-        dataset.alias +
-        '/' +
-        org +
-        '/' +
-        removeCache,
+          '/service/dbdata/' +
+          dsource.type +
+          '/' +
+          dsource.alias +
+          '/' +
+          dataset.alias +
+          '/' +
+          org +
+          '/' +
+          removeCache,
         { observe: 'response', params: params }
       )
       .pipe(
@@ -1055,7 +1184,6 @@ export class Services {
       );
   }
 
-
   getNutanixFileData(datasetName, fileList, org): Observable<any> {
     return this.https.get('/api/aip/datasets/fileData', {
       params: {
@@ -1069,14 +1197,28 @@ export class Services {
   getRatingByUserAndModule(module: String): Observable<any> {
     let org = sessionStorage.getItem('organization');
     let user = JSON.parse(sessionStorage.getItem('user')).id;
-    return this.https.get(this.dataUrl + '/rating/getByUserAndModule/' + user + '/' +
-      module + '/' + org,
-      {
-        observe: 'response',
-      }
-    )
-      .pipe(map((response) => { return response; }))
-      .pipe(catchError((err) => { return this.handleError(err); })
+    return this.https
+      .get(
+        this.dataUrl +
+          '/rating/getByUserAndModule/' +
+          user +
+          '/' +
+          module +
+          '/' +
+          org,
+        {
+          observe: 'response',
+        }
+      )
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
       );
   }
 
@@ -1105,8 +1247,8 @@ export class Services {
   }
 
   /**
- * Get a StreamingServices by cid.
- */
+   * Get a StreamingServices by cid.
+   */
   getStreamingServicesByName(
     name: any,
     org1?: any
@@ -1486,7 +1628,6 @@ export class Services {
       );
   }
 
-
   //read native file
   readNativeFile(cname, org, filename): Observable<any> {
     return this.https.get(this.baseUrl + '/file/read/' + cname + '/' + org, {
@@ -1494,7 +1635,6 @@ export class Services {
       responseType: 'arraybuffer',
     });
   }
-
 
   //modal-edit-canvas
   create(streaming_services: StreamingServices): Observable<StreamingServices> {
@@ -1549,7 +1689,6 @@ export class Services {
       );
   }
 
-
   //modal-edit-canvas
   update(streaming_services: StreamingServices): Observable<StreamingServices> {
     try {
@@ -1596,11 +1735,20 @@ export class Services {
     );
   }
   getAllPluginsByOrg(org): Observable<any> {
-    return this.https.get(this.baseUrl + '/plugin/allPluginsByOrg/' + org, {
-      observe: 'response'
-    })
-      .pipe(map(response => { return response.body }))
-      .pipe(catchError(error => { return this.handleError(error) }));
+    return this.https
+      .get(this.baseUrl + '/plugin/allPluginsByOrg/' + org, {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((error) => {
+          return this.handleError(error);
+        })
+      );
   }
 
   //modal-edit-canvas
@@ -1653,18 +1801,18 @@ export class Services {
       return this.https
         .get(
           this.dataUrl +
-          '/jobs/console/' +
-          jobId +
-          '?offset=' +
-          offset +
-          '&org=' +
-          org +
-          '&lineno=' +
-          linenumber +
-          '&status=' +
-          status +
-          '&readconsole=' +
-          read
+            '/jobs/console/' +
+            jobId +
+            '?offset=' +
+            offset +
+            '&org=' +
+            org +
+            '&lineno=' +
+            linenumber +
+            '&status=' +
+            status +
+            '&readconsole=' +
+            read
         )
         .pipe(map((response) => response))
         .pipe(catchError(this.handleError));
@@ -1833,18 +1981,23 @@ export class Services {
     return this.https
       .get(
         this.dataUrl +
-        '/service/v1/pipeline/run-pipeline/' +
-        pipelineType +
-        '/' +
-        cname +
-        '/' +
-        org +
-        '/' +
-        isLocal +
-        '?offset=' +
-        offset,
+          '/service/v1/pipeline/run-pipeline/' +
+          pipelineType +
+          '/' +
+          cname +
+          '/' +
+          org +
+          '/' +
+          isLocal +
+          '?offset=' +
+          offset,
         {
-          params: { param: params, alias: alias, datasource: datasource, workerlogId: workerlogId },
+          params: {
+            param: params,
+            alias: alias,
+            datasource: datasource,
+            workerlogId: workerlogId,
+          },
           responseType: 'text',
         }
       )
@@ -1922,19 +2075,21 @@ export class Services {
     let name = streamItem.name;
     let org = sessionStorage.getItem('organization');
     let type = streamItem.type;
-    return this.https.post(
-      this.dataUrl +
-      '/service/v1/pipeline/publish/' +
-      name +
-      '/' +
-      org +
-      '/' +
-      type, {},
-      {
-        observe: 'response',
-        responseType: 'text',
-      }
-    )
+    return this.https
+      .post(
+        this.dataUrl +
+          '/service/v1/pipeline/publish/' +
+          name +
+          '/' +
+          org +
+          '/' +
+          type,
+        {},
+        {
+          observe: 'response',
+          responseType: 'text',
+        }
+      )
       .pipe(
         map((response) => {
           return response;
@@ -1945,19 +2100,17 @@ export class Services {
           return this.handleError(err);
         })
       );
-
   }
-
 
   //modal-edit-canvas
   addGroupModelEntity(name: String, groups: any[]): Observable<any> {
     return this.https
       .post(
         this.dataUrl +
-        '/entities/add/pipeline/' +
-        sessionStorage.getItem('organization') +
-        '/' +
-        name,
+          '/entities/add/pipeline/' +
+          sessionStorage.getItem('organization') +
+          '/' +
+          name,
         groups
       )
       .pipe(
@@ -1971,7 +2124,7 @@ export class Services {
         })
       );
   }
-//modal-edit-canvas
+  //modal-edit-canvas
   getPipelineGroups(): Observable<any> {
     return this.https
       .get(this.dataUrl + '/service/v1/groups/all', {
@@ -1993,7 +2146,7 @@ export class Services {
       );
   }
 
-    //modal-edit-canvas
+  //modal-edit-canvas
   getGroupsForEntity(name: string): Observable<any> {
     return this.https
       .get(this.dataUrl + '/service/v1/groups/all/pipeline/' + name, {
@@ -2012,8 +2165,7 @@ export class Services {
       );
   }
 
-
-    getAllSchemas(): Observable<any> {
+  getAllSchemas(): Observable<any> {
     return this.https
       .get(this.baseUrl + '/schemaRegistry/schemas/all', {
         observe: 'response',
@@ -2049,12 +2201,12 @@ export class Services {
       );
   }
 
-    getGroupsLength(): Observable<any> {
+  getGroupsLength(): Observable<any> {
     return this.https
       .get(
         this.baseUrl +
-        '/groups/all/len/' +
-        sessionStorage.getItem('organization')
+          '/groups/all/len/' +
+          sessionStorage.getItem('organization')
       )
       .pipe(
         map((response) => {
@@ -2068,7 +2220,7 @@ export class Services {
       );
   }
 
-   getEndpointBySourceId(param: HttpParams): Observable<any> {
+  getEndpointBySourceId(param: HttpParams): Observable<any> {
     return this.https
       .get(this.dataUrl + '/service/v1/fetchEndpoint', {
         observe: 'response',
@@ -2086,7 +2238,7 @@ export class Services {
       );
   }
 
-    // ENDPOINT update
+  // ENDPOINT update
   updateEndpoint(regBody: any): Observable<any> {
     let session: any = sessionStorage.getItem('organization');
     let param = new HttpParams().set('project', session);
@@ -2110,7 +2262,7 @@ export class Services {
       );
   }
 
-   getStatus(jobid) {
+  getStatus(jobid) {
     return this.https
       .get('/api/aip/jobs/jobstatus/' + jobid, {
         observe: 'response',
@@ -2138,7 +2290,7 @@ export class Services {
       .pipe(catchError(this.handleError));
   }
 
-   getallPipelinesByOrg(): Observable<any> {
+  getallPipelinesByOrg(): Observable<any> {
     const org = sessionStorage.getItem('organization');
     return this.https
       .get(
@@ -2156,7 +2308,7 @@ export class Services {
         })
       );
   }
- getDatasetJson(): Observable<any> {
+  getDatasetJson(): Observable<any> {
     return this.https
       .get(this.dataUrl + '/datasets/types', { observe: 'response' })
       .pipe(
@@ -2170,9 +2322,7 @@ export class Services {
         })
       );
   }
-
 }
-
 
 export type CustomRemoteConfig = RemoteConfig & {
   exposedModule: string;
@@ -2184,15 +2334,13 @@ export type CustomRemoteConfig = RemoteConfig & {
   remoteName: string;
 };
 export class AddPorts {
-
-  datasourceid: String
-  endport: String
-  exiendport: String
-  existartport: String
-  isDefaultPort: boolean
-  isExiPort: boolean
-  organization: String
-  startport: String
-
+  datasourceid: String;
+  endport: String;
+  exiendport: String;
+  existartport: String;
+  isDefaultPort: boolean;
+  isExiPort: boolean;
+  organization: String;
+  startport: String;
 }
 export type CustomManifest = Manifest<CustomRemoteConfig>;
