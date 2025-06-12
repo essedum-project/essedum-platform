@@ -124,8 +124,8 @@ import { ConnectionViewComponent } from './datasource/connection-view/connection
 // import { DatasetTableViewComponent, HighlightSearch } from './dataset/dataset-table-view/dataset-table-view.component';
 // import { CreateLinkedComponent } from './create-linked/create-linked.component';
 import { ModalConfigDatasetComponent } from './dataset/modal-config-dataset/modal-config-dataset.component';
-// import { RestDatasetConfigComponent } from './dataset/rest-dataset-config/rest-dataset-config.component';
-// import { DefaultComponent } from './dataset/default/default.component';
+import { RestDatasetConfigComponent } from './dataset/rest-dataset-config/rest-dataset-config.component';
+import { DefaultComponent } from './dataset/default/default.component';
 // import { DatasetEditComponent } from './dataset/dataset-edit/dataset-edit.component';
 // import { DatasetFullscreenViewComponent } from './dataset/dataset-fullscreen-view/dataset-fullscreen-view.component';
 // import { DatasetViewWrapperComponent } from './dataset/dataset-view-wrapper/dataset-view-wrapper.component';
@@ -404,8 +404,8 @@ const dbConfig: DBConfig = {
     // DatasetTableViewComponent,
     // CreateLinkedComponent,
     ModalConfigDatasetComponent,
-    // RestDatasetConfigComponent,
-    // DefaultComponent,
+    RestDatasetConfigComponent,
+    DefaultComponent,
 
     // DatasetEditComponent,
     // DatasetFullscreenViewComponent,
