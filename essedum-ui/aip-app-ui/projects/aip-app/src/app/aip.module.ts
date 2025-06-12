@@ -18,11 +18,11 @@ import { ModelComponent } from './model/model.component';
 // import { HomepageComponent } from './homepage/homepage.component';
 import { PipelineComponent } from './pipeline/pipeline.component';
 // import { EndpointComponent } from './endpoint/endpoint.component';
-// import { EnlCodeEditorComponent } from './enl-code-editor/enl-code-editor.component';
+import { EnlCodeEditorComponent } from './enl-code-editor/enl-code-editor.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatError, MatHint, MatSelectModule } from '@angular/material/select';
 import { ModelCreateComponent } from './model/model.create/model.create.component';
-//import { PipelineDescriptionComponent } from './pipeline.description/pipeline.description.component';
+import { PipelineDescriptionComponent } from './pipeline.description/pipeline.description.component';
 // import { DatasetComponent } from './dataset/dataset.component';
 import { DatasourceComponent } from './datasource/datasource.component';
 // import { DatasourceDescriptionComponent } from './datasource/datasource.description/datasource.description.component';
@@ -70,7 +70,7 @@ import { SpecTemplateComponent } from './spec-template/spec-template.component';
 import { SpecTemplateDescriptionComponent } from './spec-template/spec-template-description/spec-template-description.component';
 // import { AppListComponent } from './apps/app-list/app-list.component';
 // import { ViewAppComponent } from './apps/view-app/view-app.component';
-// import { AppConfigComponent } from './app-config/app-config.component';
+import { AppConfigComponent } from './app-config/app-config.component';
 import { FileUploadModule } from 'ng2-file-upload';
 
 // import { CreateAppComponent } from './create-app/create-app.component';
@@ -80,7 +80,7 @@ import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component/
 // import { CodeEditorComponent } from './code-editor/code-editor.component';
 // import { ConsoleTabComponent } from './pipeline.description/console-tab/console-tab.component';
 // import { MetricViewerComponent } from './pipeline.description/metric-viewer/metric-viewer.component';
-// import { JobDataViewerComponent } from './pipeline.description/job-data-viewer/job-data-viewer.component';
+import { JobDataViewerComponent } from './pipeline.description/job-data-viewer/job-data-viewer.component';
 import { DialogModule } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 // import { ModalEditCanvasTitleComponent } from './pipeline.description/modal-edit-canvas-title/modal-edit-canvas-title.component';
@@ -92,15 +92,15 @@ import { AdapterDescriptionComponent } from './adapter/adapter-description/adapt
 import { SwaggerCustomComponent } from './swagger-custom/swagger-custom.component';
 
 import { NgJsonEditorModule } from 'ang-jsoneditor';
-// import { JobsComponent } from './jobs/jobs.component';
+import { JobsComponent } from './jobs/jobs.component';
 import { SpecTemplateCustomSwaggerComponent } from './spec-template/spec-template-custom-swagger/spec-template-custom-swagger.component';
 // import { CreateFeaturestoreComponent } from './feature-store/create-featurestore/create-featurestore.component';
 // import { CreateFeaturesComponent } from './feature/create-features/create-features.component';
 // import { FeatureComponent } from './feature/feature.component';
 import { MatExpansionModule } from '@angular/material/expansion';
-// import { NativeScriptComponent } from './native-script/native-script.component';
+import { NativeScriptComponent } from './native-script/native-script.component';
 import { MatTreeModule } from '@angular/material/tree';
-// import { NativeScriptDialogComponent } from './native-script/native-script-dialog/native-script-dialog.component';
+import { NativeScriptDialogComponent } from './native-script/native-script-dialog/native-script-dialog.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MethodCreateEditComponent } from './adapter/method-create-edit/method-create-edit.component';
 import { encKey } from './services/encKey';
@@ -159,7 +159,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 // import { GroupsService } from './groups/groups.service';
 
-// import { UserSecretsComponent } from './pipeline.description/user-secrets/user-secrets.component';
+import { UserSecretsComponent } from './pipeline.description/user-secrets/user-secrets.component';
 // import { RelationshipComponent } from './schema/relationship/relationship.component';
 import {
   FilterPipe,
@@ -174,7 +174,7 @@ import {
 // import { DgAppComponent } from './digital-brain/dg-app/dg-app.component';
 // import { VideoSoltionComponent } from './video-soltion/video-soltion.component';
 // import { DatasetTemplateComponent } from './dataset/dataset-template/dataset-template.component';
-// import { ShowOutputArtifactsComponent } from './pipeline.description/show-output-artifacts/show-output-artifacts.component';
+import { ShowOutputArtifactsComponent } from './pipeline.description/show-output-artifacts/show-output-artifacts.component';
 // import { ConstantsComponent } from './constants/constants.component';
 import { NgxIndexedDBModule, DBConfig } from 'ngx-indexed-db';
 import { NgApexchartsModule } from 'ng-apexcharts';
@@ -341,10 +341,10 @@ const dbConfig: DBConfig = {
     // HomepageComponent,
     PipelineComponent,
     PipelineCreateComponent,
-    //PipelineDescriptionComponent,
+    PipelineDescriptionComponent,
     // ModalViewEditPropertiesComponent
     // EndpointComponent,
-    // EnlCodeEditorComponent,
+    EnlCodeEditorComponent,
     // DatasetComponent,
     DatasourceComponent,
 
@@ -370,31 +370,31 @@ const dbConfig: DBConfig = {
     AdapterComponent,
     InstanceComponent,
     InstanceCreateEditComponent,
-    // TaggingComponentComponent,
+    //TaggingComponentComponent,
 
     // CreateAppComponent,
     // AppListComponent,
     SpecTemplateComponent,
     SpecTemplateDescriptionComponent,
     // ViewAppComponent,
-    // AppConfigComponent,
+    AppConfigComponent,
     AdapterCreateEditComponent,
     ConfirmDeleteDialogComponent,
     // CodeEditorComponent,
     // ConsoleTabComponent,
     // MetricViewerComponent,
-    // JobDataViewerComponent,
-    // ShowOutputArtifactsComponent,
+    JobDataViewerComponent,
+    ShowOutputArtifactsComponent,
     // ModalEditCanvasTitleComponent,
 
     CreateSpecTemplateComponent,
     EditSpecTemplateComponent,
     AdapterDescriptionComponent,
     SwaggerCustomComponent,
-    // JobsComponent,
+    JobsComponent,
     SpecTemplateCustomSwaggerComponent,
-    // NativeScriptComponent,
-    // NativeScriptDialogComponent,
+    NativeScriptComponent,
+    NativeScriptDialogComponent,
     MethodCreateEditComponent,
     // TemplateComponent,
     InstanceDescriptionComponent,
@@ -429,7 +429,7 @@ const dbConfig: DBConfig = {
     // LogViewerComponent,
     // EditDeleteTagsComponent,
     // FiltertagPipe,
-    // UserSecretsComponent,
+    UserSecretsComponent,
     // RelationshipComponent,
     // StringToJSON,
     // HighlightSearch,

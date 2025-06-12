@@ -5,7 +5,7 @@ import { ModelComponent } from './model/model.component';
 import { ModelCreateComponent } from './model/model.create/model.create.component';
 import { PipelineComponent } from './pipeline/pipeline.component';
 import { PipelineCreateComponent } from './pipeline/pipeline-create/pipeline-create.component';
-//import { PipelineDescriptionComponent } from './pipeline.description/pipeline.description.component';
+import { PipelineDescriptionComponent } from './pipeline.description/pipeline.description.component';
 // import { EndpointComponent } from './endpoint/endpoint.component';
 import { AipComponent } from './aip.component';
 import { DatasourceComponent } from './datasource/datasource.component';
@@ -42,7 +42,7 @@ import { ConnectionViewComponent } from './datasource/connection-view/connection
 import { ModalConfigDatasetComponent } from './dataset/modal-config-dataset/modal-config-dataset.component';
 import { ModelDescriptionComponent } from './model/model.description/model.description.component';
 // import { EndpointDescriptionComponent } from './endpoint/endpoint-description/endpoint-description.component';
-// import { NativeScriptComponent } from './native-script/native-script.component';
+import { NativeScriptComponent } from './native-script/native-script.component';
 // import { DatasetEditComponent } from './dataset/dataset-edit/dataset-edit.component';
 // import { PluginComponent } from './plugin/plugin.component';
 import { ModalConfigSchemaComponent } from './schema/modal-config-schema/modal-config-schema.component';
@@ -176,8 +176,8 @@ const routes: Routes = [
           { path: '', component: PipelineComponent },
           // { path: 'create', component: PipelineCreateComponent },
           // { path: 'full-screen', component: DrawFlowComponent },
-          // { path: 'view/drgndrp/:cname', component: PipelineDescriptionComponent },
-          // { path: 'view/:cname', component: NativeScriptComponent },
+           { path: 'view/drgndrp/:cname', component: PipelineDescriptionComponent },
+           { path: 'view/:cname', component: NativeScriptComponent },
           //{path:'related/:name',component:PipelineDescriptionComponent},
           // { path: 'preview/:name', component: PipelineComponent },
         ],
