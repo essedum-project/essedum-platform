@@ -50,7 +50,7 @@
                         </mat-checkbox>&nbsp;&nbsp;
                         <br>
                     </div>
-                    <div *ngIf="type != 'NativeScript'" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+                    <!-- <div *ngIf="type != 'NativeScript'" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
                         <input id="mdledtcnvsttlId" (change)="onFileChanged($event)" style="display: none;"
                             accept=".json" name="mdledtcnvsttlNm" type="file" #fileInput="" placeholder="file"
                             class="selector-779-35" />
@@ -58,7 +58,7 @@
                             style="font-size: 3rem; cursor: pointer; margin-top: 2rem; color: cornflowerblue;"></i>
                         <h5 style=" color: cornflowerblue; cursor: arrow;">Import Json</h5>&nbsp;&nbsp;
                         <span *ngIf="selectedFile" class="selector-779-37">{{ selectedFile.name}}</span>
-                    </div>
+                    </div> -->
                     <div class="">
                         <mat-error *ngIf="errFlag">Please provide the required field.</mat-error>
                     </div>

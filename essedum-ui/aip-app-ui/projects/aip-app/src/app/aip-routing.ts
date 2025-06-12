@@ -176,7 +176,7 @@ const routes: Routes = [
           { path: '', component: PipelineComponent },
           // { path: 'create', component: PipelineCreateComponent },
           // { path: 'full-screen', component: DrawFlowComponent },
-           { path: 'view/drgndrp/:cname', component: PipelineDescriptionComponent },
+           //{ path: 'view/drgndrp/:cname', component: PipelineDescriptionComponent },
            { path: 'view/:cname', component: NativeScriptComponent },
           //{path:'related/:name',component:PipelineDescriptionComponent},
           // { path: 'preview/:name', component: PipelineComponent },

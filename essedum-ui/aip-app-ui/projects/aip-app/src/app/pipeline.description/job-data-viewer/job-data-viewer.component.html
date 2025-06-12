@@ -16,9 +16,10 @@
             <div class="flexdivcolumn selector-769-9">
                 <mat-accordion *ngIf="data &amp;&amp; !isRemoteLog" designType="3D" [hideToggle]="false" [multi]="false">
                     <mat-expansion-panel>
-                        <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
-                            <mat-panel-title> Log Details</mat-panel-title>
+                        <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'" [ngStyle]="{'background-color': '#0094ff'}">
+                            <mat-panel-title style="color: white; font-weight: 600;"> Log Details</mat-panel-title>
                         </mat-expansion-panel-header>
+
                         <div class="lfx-u-mar-16">
                             <div class="hidden-details">
                                 <div>
@@ -63,7 +64,9 @@
                                 <div class="footer-content">
                                     <div class="icon-data-wrap">
                                         <div>
-                                            <span class="icon icon_color_avatar"></span>
+                                            <span class="lfx-c-avatar  lfx-c-avatar--sm aip-hover-avatar">
+                                                {{(logContent.get('submittedBy') ? logContent.get('submittedBy') : 'Name Not Available') | firstCharacter}}
+                                            </span>
                                         </div>
                                         <div>
                                             <h3 class="id">Submitted By</h3>

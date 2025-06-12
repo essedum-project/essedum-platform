@@ -175,10 +175,14 @@ export class NativeScriptComponent implements OnInit, OnChanges {
           this.data = JSON.parse(
             this.streamItem.jsonContent
           ).elements[0].attributes;
+          this.dynamicEnvArray=JSON.parse(this.streamItem.jsonContent).environment;
+
         } else {
           this.data = JSON.parse(
             this.streamItem.json_content
           ).elements[0].attributes;
+          this.dynamicEnvArray=JSON.parse(this.streamItem.json_content).environment;
+
         }
         if (this.data.dataset) {
           this.data.dataset.forEach((data) => {
@@ -208,7 +212,12 @@ export class NativeScriptComponent implements OnInit, OnChanges {
         }
         if (this.data.files) {
           this.readFile(this.data.files[0]);
-        } else {
+        }
+        if(this.data.usedSecrets){
+          this.dynamicSecretsArray=this.data.usedSecrets;
+        }
+        
+         else {
           this.data['files'] = [];
           this.loadScript = true;
         }
@@ -512,8 +521,10 @@ export class NativeScriptComponent implements OnInit, OnChanges {
           this.streamItem.name = pname;
           this.data.files[0] = response;
           this.data.arguments = this.treeData;
+          this.data.usedSecrets=this.dynamicSecretsArray;
           this.streamItem.json_content = JSON.stringify({
             elements: [{ attributes: this.data }],
+            environment:this.dynamicEnvArray,
           });
           this.service.update(this.streamItem).subscribe(
             (response) => {
