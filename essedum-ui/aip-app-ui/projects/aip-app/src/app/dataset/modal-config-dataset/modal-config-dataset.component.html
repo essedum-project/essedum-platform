@@ -12,6 +12,9 @@
 
                 <mat-card class="lfx-card">
                     <mat-card-title class="lfx-card">Dataset Properties</mat-card-title>
+                     <div class="col-md-1" *ngIf="proceed" style="text-align: center">
+                <i class="fa fa-long-arrow-left back-icon" style="cursor:pointer" (click)="proceed = false"></i>
+            </div>
                     <mat-card-content>
                         <form (ngSubmit)="onNext()" *ngIf="!proceed">
 
@@ -34,7 +37,7 @@
                                     <mat-select [(ngModel)]="data_type" name="usageType" required
                                         (selectionChange)="selectChange()">
                                         <mat-option *ngFor="let opt of datasetUsageType"
-                                            [value]="opt">{{opt.value}}</mat-option>
+                                            [value]="opt.value">{{opt.viewValue}}</mat-option>
                                     </mat-select>
                                     <mat-error>Please select data usage type</mat-error>
                                 </mat-form-field>
@@ -71,7 +74,7 @@
                                     <mat-select (selectionChange)="onTemplateChange($event)"
                                         [disabled]="!isAuth && !isSchema">
                                         <mat-option *ngFor="let opt of originalSchemaTemplatesOpt"
-                                            [value]="opt">{{opt}}</mat-option>
+                                            [value]="opt.value">{{opt.viewValue}}</mat-option>
                                     </mat-select>
                                 </mat-form-field>
                             </div>
@@ -81,7 +84,8 @@
                                     <mat-label>Select Tags</mat-label>
                                     <mat-select multiple (selectionChange)="onTagChange($event)" [disabled]="isAuth"
                                         [(ngModel)]="selectedTags" name="tags">
-                                        <mat-option *ngFor="let tag of tagsOptions" [value]="tag">{{tag.value}}</mat-option>
+                                        <mat-option *ngFor="let tag of tagsOptions" [value]="tag.value">
+                                            {{tag.viewValue}}</mat-option>
                                     </mat-select>
                                 </mat-form-field>
 
@@ -89,7 +93,7 @@
                                     <mat-label>Select View for Datasets</mat-label>
                                     <mat-select required [(ngModel)]="data_views" name="views"
                                         (selectionChange)="selectChange($event)" [disabled]="isAuth || type === 'GIT'">
-                                        <mat-option *ngFor="let view of viewType" [value]="view">{{view.value}}</mat-option>
+                                        <mat-option *ngFor="let view of viewType" [value]="view.value">{{view.value}}</mat-option>
                                     </mat-select>
                                     <mat-error>Please select viewType</mat-error>
                                 </mat-form-field>
