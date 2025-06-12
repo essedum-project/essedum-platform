@@ -8,49 +8,6 @@
 .items-baseline {
   align-items: baseline;
 }
-.flex-wrap {
-  flex-wrap: wrap;
-}
-.flex {
-  display: flex;
-}
-
-.lfx-u-pad-lr-32 {
-  padding-left: 32px !important;
-  padding-right: 32px !important;
-}
-
-.lfx-u-pad-lr-16 {
-  padding-left: 16px !important;
-  padding-right: 16px !important;
-}
-
-.lfx-u-pad-t-16 {
-  padding-top: 16px !important;
-}
-
-.lfx-u-pad-b-16 {
-  padding-bottom: 16px !important;
-}
-
-.lfx-u-pad-24 {
-  padding: 24px !important;
-}
-
-.lfx-u-mar-r-24 {
-  margin-right: 24px !important;
-}
-
-.lfx-u-header-xl {
-  font-size: 1.8rem;
-  font-weight: 600;
-  font-family: "myriad-pro", Arial, sans-serif !important;
-  font-style: normal;
-}
-
-.lfx-c-card__action-ul {
-  margin: 0;
-}
 
 .aip-fullname-card {
   overflow: hidden;
@@ -72,51 +29,6 @@
   position: relative;
 }
 
-.lfx-u-header-sm {
-  font-size: 1.2rem;
-  font-weight: 600;
-  font-family: "myriad-pro", Arial, sans-serif !important;
-  font-style: normal;
-}
-
-.lfx-c-card__container-right {
-  width: 20%;
-}
-
-.lfx-u-mar-b-8 {
-  margin-bottom: 8px !important;
-}
-
-.lfx-u-text-primary-80 {
-  color: #0094ff;
-}
-
-.lfx-u-header-sm {
-  font-size: 1.2rem;
-  font-weight: 600;
-  font-family: "myriad-pro", Arial, sans-serif !important;
-  font-style: normal;
-}
-
-.lfx-u-no-mar-b {
-  margin-bottom: 0px !important;
-}
-
-.lfx-u-body-md {
-  font-size: 1.4rem;
-  font-weight: 400;
-  font-family: "roboto", Arial, sans-serif !important;
-  font-style: normal;
-}
-
-.lfx-u-text-neutral-80 {
-  color: #737373;
-}
-
-.lfx-u-mar-8 {
-  margin: 8px !important;
-}
-
 .lfx-u-header-md {
   font-size: 1.4rem;
   font-weight: 600;
@@ -124,93 +36,8 @@
   font-style: normal;
 }
 
-.lfx-u-mar-r-8 {
-  margin-right: 8px !important;
-}
-.lfx-u-mar-r-20 {
-  margin-right: 20px !important;
-}
-
-.lfx-c-avatar {
-  background: #d1ecff;
-  color: #0094ff;
-  border-radius: 50%;
-  text-align: center;
-  vertical-align: middle;
-  font-weight: 500;
-  font-family: "roboto", Arial, sans-serif !important;
-  font-style: normal;
-  float: left;
-  width: 38px !important;
-  height: 38px !important;
-  font-size: 14px;
-  padding-top: 8px;
-}
-
-.lfx-c-card__action-ul {
-  margin: 0;
-}
-
 .lfx-u-v-mid {
   vertical-align: middle !important;
-}
-
-.lfx-u-body-lg {
-  font-size: 1.6rem;
-  font-weight: 400;
-  font-family: "roboto", Arial, sans-serif !important;
-  font-style: normal;
-}
-
-.lfx-c-card__container-left {
-  float: left;
-  width: 80%;
-}
-
-.lfx-c-card {
-  padding: 16px;
-  min-height: 50px;
-  border-radius: 16px;
-  display: block;
-  background: #ffffff;
-  color: #000000;
-}
-
-.lfx-c-dropdown__list {
-  margin: 3px !important;
-}
-
-.lfx-c-nav-list {
-  list-style: none;
-  padding: 0px;
-  margin: 0;
-  background-color: #00000000;
-}
-
-.lfx-c-card__action-hover {
-  position: absolute;
-  width: 100%;
-  bottom: 0px;
-  transition: bottom 0.2s ease 0.2s;
-  background: var(--default-card-action-bg-color);
-}
-
-.lfx-c-card--hover {
-  overflow: hidden;
-}
-
-.lfx-u-ellipsis {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: block;
-}
-
-.lfx-u-body-sm {
-  font-size: 1.2rem;
-  font-weight: 400;
-  font-family: "roboto", Arial, sans-serif !important;
-  font-style: normal;
 }
 
 .lfx-l-bodywrapper {

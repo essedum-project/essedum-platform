@@ -9,6 +9,13 @@
   align-items: baseline;
 }
 
+@media (min-width: 768px) and (max-width: 1367px) {
+  .aip-schema-center {
+    margin-left: 12.5%;
+    width: 80% !important;
+  }
+}
+
 .aip-fullname-card {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -27,6 +34,13 @@
   background: #fff;
   z-index: 2;
   position: relative;
+}
+
+.lfx-u-body-md {
+  font-size: 1.4rem;
+  font-weight: 400;
+  font-family: "roboto", Arial, sans-serif !important;
+  font-style: normal;
 }
 
 .lfx-u-header-md {
@@ -85,60 +99,4 @@
   font-size: 12px !important;
   line-height: 1.2;
   font-weight: 500;
-}
-
-.lfx-c-card__container-right {
-  float: right;
-  width: 20%;
-}
-
-ul,
-li {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.col-md-8 {
-  flex: 0 0 auto;
-  width: 66.66666667%;
-}
-.col-lg-6 {
-  flex: 0 0 auto;
-  width: 50%;
-}
-.col-xl-5 {
-  flex: 0 0 auto;
-  width: 41.66666667%;
-}
-
-.col-md-8,
-.col-lg-6,
-.col-xl-5 {
-  padding-right: 16px;
-  padding-left: 16px;
-}
-
-.aip-fullname-card {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  transition: all 0.2s;
-  cursor: pointer;
-  max-width: 100%;
-  display: block;
-}
-
-.aip-fullname-card:hover {
-  white-space: normal;
-  overflow: visible;
-  text-overflow: unset;
-  color: #0094ff;
-  background: #fff;
-  z-index: 2;
-  position: relative;
-}
-
-.w-100 {
-  width: 100% !important;
 }

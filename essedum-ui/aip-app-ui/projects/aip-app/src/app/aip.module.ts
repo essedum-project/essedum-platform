@@ -8,7 +8,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import { DatasetServices } from './dataset/dataset-service'
+import { DatasetServices } from './dataset/dataset-service';
 // import { MatFormFieldModule } from '@angular/material/form-field';
 // import { MatInputModule } from '@angular/material/input';
 // import { AutocompleteModule, BreadcrumbModule, ChatbotModule, MessagingModule, RatingModule, CheckboxModule, ChipInputModule, DataGridModule, DatepickerModule, InputFieldModule, TimepickerModule, ToggleMenuModule, TreeComponent } from 'leds-lib';
@@ -20,9 +20,9 @@ import { PipelineComponent } from './pipeline/pipeline.component';
 // import { EndpointComponent } from './endpoint/endpoint.component';
 // import { EnlCodeEditorComponent } from './enl-code-editor/enl-code-editor.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSelectModule } from '@angular/material/select';
+import { MatError, MatHint, MatSelectModule } from '@angular/material/select';
 import { ModelCreateComponent } from './model/model.create/model.create.component';
- //import { PipelineDescriptionComponent } from './pipeline.description/pipeline.description.component';
+//import { PipelineDescriptionComponent } from './pipeline.description/pipeline.description.component';
 // import { DatasetComponent } from './dataset/dataset.component';
 import { DatasourceComponent } from './datasource/datasource.component';
 // import { DatasourceDescriptionComponent } from './datasource/datasource.description/datasource.description.component';
@@ -34,14 +34,18 @@ import { DatasourceComponent } from './datasource/datasource.component';
 // import { EndpointEditComponent } from './endpoint/endpoint-edit/endpoint-edit.component';
 import { environment } from '../environments/environment';
 import { Services } from './services/service';
- import { PipelineService } from './services/pipeline.service';
+import { PipelineService } from './services/pipeline.service';
 import { CommonModule } from '@angular/common';
 import { AipInterceptorService } from './services/interceptor';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ModelEditsComponent } from './model/model-edit/model-edit.component';
 import { ModelDescriptionComponent } from './model/model.description/model.description.component';
 // import { JsNodeComponent } from './js-node/js-node.component';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 //import { PaginationModule } from 'leds-lib';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 // import { CreateEndpointComponent } from './endpoint/create-endpoint/create-endpoint.component';
@@ -49,30 +53,30 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ModelDeployComponent } from './model/model-deploy/model-deploy.component';
 import { JsonFormsModule } from '@jsonforms/angular';
 import { JsonFormsAngularMaterialModule } from '@jsonforms/angular-material';
-import { ApiDropdownRenderer } from './renderers/api-dropdown.renderer';
+// import { ApiDropdownRenderer } from './renderers/api-dropdown.renderer';
 // import { TagsComponent } from './tags/tags.component';
 // import { DrawFlowComponent } from './draw-flow/draw-flow.component';
 // import { PipelinenodeDirective } from './pipeline-node.directive'
 // import { TreeStructureComponent } from './tree-structure/tree-structure.component';
-// import { SchemaComponent } from './schema/schema.component';
- import { AdapterComponent } from './adapter/adapter.component';
- import { InstanceComponent } from './instance/instance.component';
+import { SchemaComponent } from './schema/schema.component';
+import { AdapterComponent } from './adapter/adapter.component';
+import { InstanceComponent } from './instance/instance.component';
 // import { TaggingComponentComponent } from './tagging-component/tagging-component.component';
 import { PipelineCreateComponent } from './pipeline/pipeline-create/pipeline-create.component';
 import { TreeModule } from '@ali-hm/angular-tree-component';
 import { MatRadioModule } from '@angular/material/radio';
 //import { RadioModule } from 'leds-lib';
- import { SpecTemplateComponent } from './spec-template/spec-template.component';
- import { SpecTemplateDescriptionComponent } from './spec-template/spec-template-description/spec-template-description.component';
+import { SpecTemplateComponent } from './spec-template/spec-template.component';
+import { SpecTemplateDescriptionComponent } from './spec-template/spec-template-description/spec-template-description.component';
 // import { AppListComponent } from './apps/app-list/app-list.component';
 // import { ViewAppComponent } from './apps/view-app/view-app.component';
 // import { AppConfigComponent } from './app-config/app-config.component';
 import { FileUploadModule } from 'ng2-file-upload';
 
 // import { CreateAppComponent } from './create-app/create-app.component';
- import { AdapterCreateEditComponent } from './adapter/adapter-create-edit/adapter-create-edit.component';
+import { AdapterCreateEditComponent } from './adapter/adapter-create-edit/adapter-create-edit.component';
 // import { FeatureStoreComponent } from './feature-store/feature-store.component';
-import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component/confirm-delete-dialog.component'
+import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component/confirm-delete-dialog.component';
 // import { CodeEditorComponent } from './code-editor/code-editor.component';
 // import { ConsoleTabComponent } from './pipeline.description/console-tab/console-tab.component';
 // import { MetricViewerComponent } from './pipeline.description/metric-viewer/metric-viewer.component';
@@ -82,10 +86,10 @@ import { TableModule } from 'primeng/table';
 // import { ModalEditCanvasTitleComponent } from './pipeline.description/modal-edit-canvas-title/modal-edit-canvas-title.component';
 // import { ModalViewEditPropertiesComponent } from './pipeline.description/modal-view-edit-properties/modal-view-edit-properties.component';
 // import { FeatureStoreDescriptionComponent } from './feature-store/feature-store-description/feature-store-description.component';
- import { CreateSpecTemplateComponent } from './spec-template/create-spec-template/create-spec-template.component';
- import { EditSpecTemplateComponent } from './spec-template/edit-spec-template/edit-spec-template.component';
- import { AdapterDescriptionComponent } from './adapter/adapter-description/adapter-description.component';
- import { SwaggerCustomComponent } from './swagger-custom/swagger-custom.component'
+import { CreateSpecTemplateComponent } from './spec-template/create-spec-template/create-spec-template.component';
+import { EditSpecTemplateComponent } from './spec-template/edit-spec-template/edit-spec-template.component';
+import { AdapterDescriptionComponent } from './adapter/adapter-description/adapter-description.component';
+import { SwaggerCustomComponent } from './swagger-custom/swagger-custom.component';
 
 import { NgJsonEditorModule } from 'ang-jsoneditor';
 // import { JobsComponent } from './jobs/jobs.component';
@@ -99,11 +103,10 @@ import { MatTreeModule } from '@angular/material/tree';
 // import { NativeScriptDialogComponent } from './native-script/native-script-dialog/native-script-dialog.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MethodCreateEditComponent } from './adapter/method-create-edit/method-create-edit.component';
-import { encKey } from "./services/encKey";
-import { DashConstantService } from "./services/dash-constant.service";
-import { RaiservicesService } from "./services/raiservices.service";
-import { SemanticService } from "./services/semantic.services"
-
+import { encKey } from './services/encKey';
+import { DashConstantService } from './services/dash-constant.service';
+import { RaiservicesService } from './services/raiservices.service';
+import { SemanticService } from './services/semantic.services';
 
 // import { EditFeatureStoreComponent } from './feature-store/edit-feature-store/edit-feature-store.component';
 import { DatasourceConfigComponent } from './datasource/datasource-config/datasource-config.component';
@@ -120,7 +123,7 @@ import { ConnectionViewComponent } from './datasource/connection-view/connection
 // import { GroupedFeaturesComponent } from './feature/grouped-features/grouped-features.component';
 // import { DatasetTableViewComponent, HighlightSearch } from './dataset/dataset-table-view/dataset-table-view.component';
 // import { CreateLinkedComponent } from './create-linked/create-linked.component';
- import { ModalConfigDatasetComponent } from './dataset/modal-config-dataset/modal-config-dataset.component';
+import { ModalConfigDatasetComponent } from './dataset/modal-config-dataset/modal-config-dataset.component';
 // import { RestDatasetConfigComponent } from './dataset/rest-dataset-config/rest-dataset-config.component';
 // import { DefaultComponent } from './dataset/default/default.component';
 // import { DatasetEditComponent } from './dataset/dataset-edit/dataset-edit.component';
@@ -130,9 +133,7 @@ import { ConnectionViewComponent } from './datasource/connection-view/connection
 // import { DatasetPowerModeViewComponent } from './dataset/dataset-power-mode-view/dataset-power-mode-view.component';
 // import { DatasetFormViewComponent } from './dataset/dataset-form-view/dataset-form-view.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-imports: [
-  ScrollingModule
-]
+imports: [ScrollingModule];
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 // import { RelatedComponentComponent } from './related-component/related-component.component';
 // import { DatasetLoadComponent } from './dataset/dataset-load/dataset-load.component';
@@ -142,15 +143,15 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 // import { PluginDialogComponent } from './plugin/plugin-dialog/plugin-dialog.component';
 // import { ViewerPdfComponent } from './viewer-pdf/viewer-pdf.component';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
-// import { ModalConfigSchemaComponent } from './schema/modal-config-schema/modal-config-schema.component';
-// import { ModalConfigSchemaEditorComponent } from './schema/modal-config-schema-editor/modal-config-schema-editor.component';
+import { ModalConfigSchemaComponent } from './schema/modal-config-schema/modal-config-schema.component';
+import { ModalConfigSchemaEditorComponent } from './schema/modal-config-schema-editor/modal-config-schema-editor.component';
 // import { ViewerImageComponent } from './viewer-image/viewer-image.component';
 //import { ViewerZipComponent } from './viewer-zip/viewer-zip.component';
-import { FormioModule } from "@formio/angular";
+import { FormioModule } from '@formio/angular';
 // import { LogViewerComponent } from './dataset/log-viewer/log-viewer.component';
 // import { EditDeleteTagsComponent } from './edit-delete-tags/edit-delete-tags.component';
 // import { FiltertagPipe } from './pipes/filtertag.pipe';
-import { NgxPaginationModule } from "ngx-pagination";
+import { NgxPaginationModule } from 'ngx-pagination';
 // import { ModalInfoComponent } from './pipeline.description/modal-info/modal-info.component';
 import { CarouselModule as CModule } from 'ngx-owl-carousel-o';
 // import { CarouselModule } from 'leds-lib';
@@ -160,7 +161,11 @@ import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 
 // import { UserSecretsComponent } from './pipeline.description/user-secrets/user-secrets.component';
 // import { RelationshipComponent } from './schema/relationship/relationship.component';
-import { FilterPipe, FirstCharacterPipe, StringToJSON } from './services/pipes/stringtojson.pipe';
+import {
+  FilterPipe,
+  FirstCharacterPipe,
+  StringToJSON,
+} from './services/pipes/stringtojson.pipe';
 // import { ViewerAudioComponent } from './viewer-audio/viewer-audio.component';
 // import { TicketlistComponent } from './ticketlist/ticketlist.component';
 // import { ClusterTicketsComponent } from './cluster-tickets/cluster-tickets.component';
@@ -208,7 +213,7 @@ import { NgApexchartsModule } from 'ng-apexcharts';
 // import { MashupCreateComponent } from './mashups/mashup-create/mashup-create.component';
 // import { MashupViewWrapperComponent } from './mashups/mashup-view-wrapper/mashup-view-wrapper.component';
 // import { AibrainViewComponent } from './mashups/aibrain-view/aibrain-view.component';
-import { FieldsetModule } from "primeng/fieldset";
+import { FieldsetModule } from 'primeng/fieldset';
 // import { ManageGroupComponent } from './digital-brain/dg-app/manage-group/manage-group.component';
 // import { EditManageGroupComponent } from './digital-brain/dg-app/edit-manage-group/edit-manage-group.component';
 
@@ -276,21 +281,34 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { AdapterServices } from './adapter/adapter-service';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { SchemaRegistryService } from './services/schema-registry.service';
+import { SchemaRelationshipService } from './schema/schema-relationship.service';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
   name: 'icm_tickets',
   version: 1,
-  objectStoresMeta: [{
-    store: 'ticketData',
-    storeConfig: { keyPath: 'number', autoIncrement: false },
-    storeSchema: [
-      { name: 'incidentNumber', keypath: 'incidentNumber', options: { unique: false } },
-      { name: 'type', keypath: 'type', options: { unique: false } },
-      { name: 'priority', keypath: 'priority', options: { unique: false } },
-      { name: 'date', keypath: 'date', options: { unique: false } }
-    ]
-  }
+  objectStoresMeta: [
+    {
+      store: 'ticketData',
+      storeConfig: { keyPath: 'number', autoIncrement: false },
+      storeSchema: [
+        {
+          name: 'incidentNumber',
+          keypath: 'incidentNumber',
+          options: { unique: false },
+        },
+        { name: 'type', keypath: 'type', options: { unique: false } },
+        { name: 'priority', keypath: 'priority', options: { unique: false } },
+        { name: 'date', keypath: 'date', options: { unique: false } },
+      ],
+    },
     // ,
     // {
     //     store: 'tagsData',
@@ -300,14 +318,16 @@ const dbConfig: DBConfig = {
     //       { name: 'tags', keypath: 'tags', options: { unique: false } }
     //     ]
     //   }
-  ]
+  ],
 };
 
 // @NgModule({
 // declarations: [AipComponent, ModelComponent, ModelDescriptionComponent, HomepageComponent, PipelineComponent, PipelineDescriptionComponent, EndpointComponent, EnlCodeEditorComponent, JsNodeComponent, DatasetComponent, DatasourceComponent, DatasourceDescriptionComponent, DatasetDescriptionComponent, DatasetViewComponent, DatasetConfigComponent, JsNodeComponent,],
 @NgModule({
   declarations: [
-    AipComponent, ModelComponent, DatasourceConfigComponent,
+    AipComponent,
+    ModelComponent,
+    DatasourceConfigComponent,
     // FeatureStoreComponent,
     // FeatureComponent,
     // FeaturesDescriptionComponent,
@@ -320,7 +340,7 @@ const dbConfig: DBConfig = {
     ModelCreateComponent,
     // HomepageComponent,
     PipelineComponent,
-      PipelineCreateComponent,
+    PipelineCreateComponent,
     //PipelineDescriptionComponent,
     // ModalViewEditPropertiesComponent
     // EndpointComponent,
@@ -341,17 +361,17 @@ const dbConfig: DBConfig = {
     // CreateEndpointComponent,
     // EndpointDescriptionComponent,
     ModelDeployComponent,
-    ApiDropdownRenderer,
+    // ApiDropdownRenderer,
     // TagsComponent,
     // DrawFlowComponent,
     // PipelinenodeDirective,
     // TreeStructureComponent,
-    // SchemaComponent,
-     AdapterComponent,
-     InstanceComponent,
+    SchemaComponent,
+    AdapterComponent,
+    InstanceComponent,
     InstanceCreateEditComponent,
     // TaggingComponentComponent,
-  
+
     // CreateAppComponent,
     // AppListComponent,
     SpecTemplateComponent,
@@ -366,24 +386,24 @@ const dbConfig: DBConfig = {
     // JobDataViewerComponent,
     // ShowOutputArtifactsComponent,
     // ModalEditCanvasTitleComponent,
-  
-     CreateSpecTemplateComponent,
-     EditSpecTemplateComponent,
-     AdapterDescriptionComponent,
-     SwaggerCustomComponent,
+
+    CreateSpecTemplateComponent,
+    EditSpecTemplateComponent,
+    AdapterDescriptionComponent,
+    SwaggerCustomComponent,
     // JobsComponent,
-     SpecTemplateCustomSwaggerComponent,
+    SpecTemplateCustomSwaggerComponent,
     // NativeScriptComponent,
     // NativeScriptDialogComponent,
-     MethodCreateEditComponent,
+    MethodCreateEditComponent,
     // TemplateComponent,
-     InstanceDescriptionComponent,
+    InstanceDescriptionComponent,
     JsonTreeComponent,
     JsonNodeComponent,
     ConnectionViewComponent,
     // DatasetTableViewComponent,
     // CreateLinkedComponent,
-     ModalConfigDatasetComponent,
+    ModalConfigDatasetComponent,
     // RestDatasetConfigComponent,
     // DefaultComponent,
 
@@ -401,14 +421,14 @@ const dbConfig: DBConfig = {
     // PluginComponent,
     // PluginViewComponent,
     // PluginDialogComponent,
-    // ModalConfigSchemaComponent,
-    // ModalConfigSchemaEditorComponent,
+    ModalConfigSchemaComponent,
+    ModalConfigSchemaEditorComponent,
     // ViewerImageComponent,
     // ViewerZipComponent,
     // ModalInfoComponent,
     // LogViewerComponent,
     // EditDeleteTagsComponent,
-    // FiltertagPipe, 
+    // FiltertagPipe,
     // UserSecretsComponent,
     // RelationshipComponent,
     // StringToJSON,
@@ -501,6 +521,7 @@ const dbConfig: DBConfig = {
     MatPaginatorModule,
     MatGridListModule,
     MatDatepickerModule,
+    MatIconModule,
     FormsModule,
     ReactiveFormsModule,
     // MatFormFieldModule,
@@ -511,6 +532,14 @@ const dbConfig: DBConfig = {
     MatTooltipModule,
     MatSelectModule,
     MatDialogModule,
+    MatError,
+    MatHint,
+    MatCheckboxModule,
+    MatSelectModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatSlideToggle,
+    MatSnackBarModule,
     // LedsModuleModule,
     // PaginationModule,
     NgbModule,
@@ -556,7 +585,9 @@ const dbConfig: DBConfig = {
     MatMenuModule,
     PlotlyModule,
     NgBusyModule,
-    MatButtonModule, AccordionModule, DragDropModule,
+    MatButtonModule,
+    AccordionModule,
+    DragDropModule,
     OverlayPanelModule,
     TooltipModule,
     ListboxModule,
@@ -576,8 +607,12 @@ const dbConfig: DBConfig = {
       provide: 'envi',
       useValue: environment.baseUrl,
     },
-    { provide: "dataSets", useValue: environment.datasetsUrl },
-    { provide: HTTP_INTERCEPTORS, useClass: AipInterceptorService, multi: true },
+    { provide: 'dataSets', useValue: environment.datasetsUrl },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AipInterceptorService,
+      multi: true,
+    },
 
     {
       provide: 'sbx',
@@ -585,20 +620,20 @@ const dbConfig: DBConfig = {
     },
 
     Services,
-     AdapterServices,
-     PipelineService,
+    AdapterServices,
+    PipelineService,
     // TabsFilterService,
     DatasetServices,
     // EventsService,
     // JobsService,
     // GroupsService,
-    // SchemaRegistryService,
+    SchemaRegistryService,
     // AppGlobals,
     encKey,
     DashConstantService,
     // JobsService,
     // PluginService,
-    // SchemaRelationshipService,
+    SchemaRelationshipService,
     // MessageService,
     // ScheduleService,
     // PipelinesummaryService,
@@ -625,5 +660,4 @@ const dbConfig: DBConfig = {
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AipComponent],
 })
-
-export class AipModule { }
+export class AipModule {}

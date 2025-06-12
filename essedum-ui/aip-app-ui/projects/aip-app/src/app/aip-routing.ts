@@ -17,7 +17,7 @@ import { DatasourceComponent } from './datasource/datasource.component';
 // import { EndpointEditComponent } from './endpoint/endpoint-edit/endpoint-edit.component';
 // import { CreateEndpointComponent } from './endpoint/create-endpoint/create-endpoint.component';
 // import { DrawFlowComponent } from './draw-flow/draw-flow.component';
-// import { SchemaComponent } from './schema/schema.component';
+import { SchemaComponent } from './schema/schema.component';
 // import { AdapterComponent } from './adapter/adapter.component';
 // import { InstanceComponent } from './instance/instance.component';
 // import { AppListComponent } from './apps/app-list/app-list.component';
@@ -45,7 +45,7 @@ import { ModelDescriptionComponent } from './model/model.description/model.descr
 // import { NativeScriptComponent } from './native-script/native-script.component';
 // import { DatasetEditComponent } from './dataset/dataset-edit/dataset-edit.component';
 // import { PluginComponent } from './plugin/plugin.component';
-// import { ModalConfigSchemaComponent } from './schema/modal-config-schema/modal-config-schema.component';
+import { ModalConfigSchemaComponent } from './schema/modal-config-schema/modal-config-schema.component';
 // import { EditDeleteTagsComponent } from './edit-delete-tags/edit-delete-tags.component';
 
 // import { RelationshipComponent } from './schema/relationship/relationship.component';
@@ -176,7 +176,7 @@ const routes: Routes = [
           { path: '', component: PipelineComponent },
           // { path: 'create', component: PipelineCreateComponent },
           // { path: 'full-screen', component: DrawFlowComponent },
-         // { path: 'view/drgndrp/:cname', component: PipelineDescriptionComponent },
+          // { path: 'view/drgndrp/:cname', component: PipelineDescriptionComponent },
           // { path: 'view/:cname', component: NativeScriptComponent },
           //{path:'related/:name',component:PipelineDescriptionComponent},
           // { path: 'preview/:name', component: PipelineComponent },
@@ -217,23 +217,23 @@ const routes: Routes = [
         ],
       },
 
-       {
-       path: 'datasets',
-      children: [
-       { path: '', component: DatasetByNameComponent },
-       { path: 'create', component: ModalConfigDatasetComponent },
-      // { path: 'data', component: DatasetEditComponent },
-      // { path: ':type', component: DatasetByNameComponent },
-      // {
-      //   path: 'view/:cname',
-      //   children: [
-      //     { path: '', component: DatasetDescriptionComponent },
-      //     // { path: 'infer', component: SemanticSearchInferComponent },
-      //     { path: 'wrangling/:wname/:action/:rname', component: WranglingComponent },
-      //   ],
-      // },
-      // { path: 'preview/:cname', component: DatasetDescriptionComponent },
-       ],
+      {
+        path: 'datasets',
+        children: [
+          { path: '', component: DatasetByNameComponent },
+          { path: 'create', component: ModalConfigDatasetComponent },
+          // { path: 'data', component: DatasetEditComponent },
+          // { path: ':type', component: DatasetByNameComponent },
+          // {
+          //   path: 'view/:cname',
+          //   children: [
+          //     { path: '', component: DatasetDescriptionComponent },
+          //     // { path: 'infer', component: SemanticSearchInferComponent },
+          //     { path: 'wrangling/:wname/:action/:rname', component: WranglingComponent },
+          //   ],
+          // },
+          // { path: 'preview/:cname', component: DatasetDescriptionComponent },
+        ],
       },
 
       // {
@@ -276,17 +276,17 @@ const routes: Routes = [
       //     { path: 'preview/:cname', component: DatasetDescriptionComponent },
       //   ],
       // },
-      // {
-      //   path: 'schemas',
-      //   children: [
-      //     { path: '', component: SchemaComponent },
-      //     { path: 'create', component: ModalConfigSchemaComponent },
-      //     { path: 'view', component: ModalConfigSchemaComponent },
-      //     { path: 'edit', component: ModalConfigSchemaComponent },
-      //   ],
-      // },
+      {
+        path: 'schemas',
+        children: [
+          { path: '', component: SchemaComponent },
+          { path: 'create', component: ModalConfigSchemaComponent },
+          { path: 'view', component: ModalConfigSchemaComponent },
+          { path: 'edit', component: ModalConfigSchemaComponent },
+        ],
+      },
 
-       {
+      {
         path: 'implementations',
         children: [
           { path: '', component: AdapterComponent },
@@ -311,7 +311,6 @@ const routes: Routes = [
           { path: 'edit/:dname', component: EditSpecTemplateComponent },
         ],
       },
-
 
       // {
       //   path: 'templates',
@@ -353,7 +352,6 @@ const routes: Routes = [
       //   path: 'taglist',
       //   component: EditDeleteTagsComponent,
       // },
-
 
       // {
       //   path: 'constants',
@@ -428,8 +426,6 @@ const routes: Routes = [
       // {
       //   path: "rating/:type", component: AipRatingViewComponent
       // },
-
-
     ],
   },
   // {

@@ -336,3 +336,8 @@ li {
 .lfx-u-pad-t-8 {
   padding-top: 8px !important;
 }
+
+.col-12 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
