@@ -4,3 +4,4 @@ __pycache__/
 logfile.log
 leaputils-2.0.0-py3-none-any.whl
 .env
+/venvs
