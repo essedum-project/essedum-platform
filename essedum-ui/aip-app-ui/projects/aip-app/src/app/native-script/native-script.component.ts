@@ -16,14 +16,11 @@ import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { Subscription } from 'rxjs';
 import { StreamingServices } from '../streaming-services/streaming-service';
 import { Services } from '../services/service';
-//import { ModalEditCanvasTitleComponent } from '../pipeline.description/modal-edit-canvas-title/modal-edit-canvas-title.component';
 import { OptionsDTO } from '../DTO/OptionsDTO';
 import { NativeScriptDialogComponent } from './native-script-dialog/native-script-dialog.component';
 import { PipelineCreateComponent } from '../pipeline/pipeline-create/pipeline-create.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
-//import { LeapTelemetryService } from 'com-lib-util';
-//import { LedsModalService } from 'leds-lib';
 import { HttpParams } from '@angular/common/http';
 import { DynamicParamsGrid, DynamicSecretsGrid } from '../pipeline.description/pipeline.description.component';
 
@@ -96,7 +93,8 @@ export class NativeScriptComponent implements OnInit, OnChanges {
   envModified = false;
     secrets: any;
   dynamicSecretsArray: Array<DynamicSecretsGrid> = [];
-  secretsModified = false
+  secretsModified = false;
+    defaultRuntime: any;
   constructor(
     @Inject('envi') private baseUrl: string,
     //private telemetryService: LeapTelemetryService,
@@ -105,9 +103,9 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     private _location: Location,
     private router: Router,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef // public datasourceService: DatasourceService,
-  ) // private modalService: LedsModalService // private streamingServicesService: StreamingServicesService, // public messageService: MessageService, public pipelinesummaryService: PipelinesummaryService,
-  // public dialog: MatDialog, private scheduleJobService: ScheduleService, public icipComService: IcipComService
+    private cdr: ChangeDetectorRef 
+  ) 
+ 
   {
     this.route.queryParams.subscribe((params) => {
       if (params['org']) {
@@ -287,14 +285,6 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     });
   }
 
-  // telemetryImpression() {
-  //  // this.telemetryService.start();
-  //   this.telemetryService.impression(
-  //     'aip-app',
-  //     'list',
-  //     'NativeScriptComponent'
-  //   );
-  // }
 
   ngOnChanges() {
     this.ngOnInit();
@@ -336,6 +326,14 @@ export class NativeScriptComponent implements OnInit, OnChanges {
         (option) => option.viewValue === 'Local-'
       );
       if (index > -1) this.runTypes.splice(index, 1); // 2nd parameter means remove one item only
+    }
+  }
+
+  runTypeChanged($event) {
+    this.defaultRuntime = $event;
+    const data = this.runTypes.find(option => option.value === this.defaultRuntime);
+    if (data) {
+      this.selectedRunType = data.value;
     }
   }
 
@@ -625,27 +623,7 @@ export class NativeScriptComponent implements OnInit, OnChanges {
       }
     });
   }
-  // displayParam(button) {
-  //   const dialogRef = this.dialog.open(ParamArgumentPopupComponent, {
-  //     height: '80%',
-  //     width: '50%',
-  //     // maxWidth: '50%',
-  //     disableClose: false,
-  //     data: {
-  //       "datasource": this.dataSource,
-  //       "treecontrol": this.treeControl,
-  //       "tree": this.treeData,
-  //       "type": "native",
-  //       "button": button
-
-  //     }
-  //   });
-  //   dialogRef.afterClosed().subscribe(result => {
-  //     if (result.button == "CONTINUE") {
-  //       this.runPipeline();
-  //     }
-  //   })
-  // }
+ 
 
   deleteAll() {
     this.treeData = [];
@@ -724,14 +702,6 @@ export class NativeScriptComponent implements OnInit, OnChanges {
   getAlias(node) {
     return node.alias ? node.alias : node.value;
   }
-
-  // toggler() {
-  //   this.cardToggled = !this.cardToggled;
-  //   this.newItemEvent.emit(this.cardToggled);
-  //   if(this.router.url.includes('preview')){
-  //     window.history.go(-1);
-  //   }
-  // }
 
   navigateBack() {
     this._location.back();

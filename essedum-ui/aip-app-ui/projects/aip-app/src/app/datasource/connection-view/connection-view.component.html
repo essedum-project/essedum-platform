@@ -43,7 +43,7 @@
                                                 <div class="row">
                                                     <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
                                                     <div>
-                                                        <mat-form-field appearance="outline" style="width: 100%;" floatLabel="always">
+                                                        <mat-form-field appearance="fill" style="width: 100%;" floatLabel="always">
                                                             <mat-label>Display Name</mat-label>
                                                             <input matInput placeholder="Enter Name..." [(ngModel)]="data.alias" required>
                                                             <mat-error *ngIf="!data.alias">This field is required</mat-error>
@@ -51,13 +51,13 @@
                                                     </div>
                                                     </div>
                                                     <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-                                                        <mat-form-field appearance="outline" style="width: 100%;" floatLabel="always">
+                                                        <mat-form-field appearance="fill" style="width: 100%;" floatLabel="always">
                                                             <mat-label>Description</mat-label>
                                                             <input matInput placeholder="Enter Description..." [(ngModel)]="data.description">
                                                         </mat-form-field>
                                                     </div>
                                                     <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-                                                        <mat-form-field appearance="outline" style="width: 100%;">
+                                                        <mat-form-field appearance="fill" style="width: 100%;">
                                                             <mat-label>Connection Type</mat-label>
                                                             <mat-select [(value)]="data.type" (selectionChange)="onTypeChange($event)">
                                                                 <mat-option *ngFor="let option of typeOptions" [value]="option.value">
@@ -68,7 +68,7 @@
                                                         </mat-form-field>
                                                     </div>
                                                     <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-                                                        <mat-form-field appearance="outline" style="width: 100%;">
+                                                        <mat-form-field appearance="fill" style="width: 100%;">
                                                             <mat-label>Capability</mat-label>
                                                             <mat-select [(value)]="capability" (selectionChange)="onCapbilityTypeChange($event)" multiple>
                                                                 <mat-option *ngFor="let option of capabilityOptions" [value]="option.value">
@@ -129,68 +129,7 @@
                                 </div>
                             </mat-card>
                         </div>
-                        <div class="lfx-l-level2-right-col" *ngIf="initiativeView">
-                            <div class="lfx-u-mar-tb-16">
-                                <mat-card>
-                                    <div class="lfx-c-panel__content">
-                                        <div *ngIf="edit && !view" class="lfx-u-pad-16">
-                                            <div class="lfx-u-header-lg">Connection Help</div>
-                                        </div>
-                                        <div *ngIf="!edit && view" class="lfx-u-pad-16">
-                                            <div class="lfx-u-header-lg lfx-u-mar-b-16">Connected Artifacts</div>
-                                            <div class="" *ngIf="component.length > 0; else noRelatedComponent">
-
-                                                <ul class="list-group">
-                                                    <li class="list-group-item" *ngFor="let component of component">
-                                                        <app-related-component [component]="component" [childId]="data.id"
-                                                            [parentType]="'CONNECTION'"
-                                                            (reload)="reload($event)"></app-related-component>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                            <ng-template #noRelatedComponent>
-                                                <div
-                                                    class="lfx-u-body-md lfx-u-text-neutral-80 aip-desc-ellipsis">
-                                                    <div
-                                                        class="d-flex justify-content-center align-items-center flex-column">
-                                                        <img src="assets/images/aip_empty_state_leds.svg"
-                                                            class="img-responsive" alt="aip_empty_state"
-                                                            style="width:15rem" />
-                                                        No connected artifacts for now!
-                                                    </div>
-                                                </div>
-                                            </ng-template>
-                                        </div>
-                                    </div>
-                                    <div  class="lfx-u-mar-t-8">
-                                        <li *ngIf="linkAuth">
-                                            <div *ngIf="relatedloaded">
-                                                <div class="lds-ring">
-                                                    <div></div>
-                                                    <div></div>
-                                                    <div></div>
-                                                    <div></div>
-                                                </div>
-                                            </div>
-                                            <div class="aip-cursor lfx-u-pad-l-8 lfx-u-pad-b-8"
-                                                (click)="openModal(linker)">
-                                                <div class="d-flex aip-daa lfx-u-mar-8  lfx-u-pad-8  align-items-center"
-                                                    style="width: max-content;">
-                                                    <div class="lfx-u-mar-lr-8"><i class=" icon x-16 icon_link"
-                                                            style="color: #8626C3;"></i></div>
-                                                    <div class="lfx-u-body-md">Link Artifacts</div>
-                                                </div>
-                                            </div>
-                                            <ng-template #linker let-modal>
-                                                <app-create-linked (refeshrelated)="refeshrelated($event)"
-                                                    [data]=data.id [type]="'CONNECTION'"
-                                                    [component]=component></app-create-linked>
-                                            </ng-template>
-                                        </li>
-                                    </div>
-                                </mat-card>
-                            </div>
-                        </div>
+                      
                     </div>
                 </div>
             </div>
