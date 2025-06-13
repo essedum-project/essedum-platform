@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatSelect, MatSelectChange } from '@angular/material/select';
+import { MatSelect } from '@angular/material/select';
 import { FileUploader } from 'ng2-file-upload';
 import { ReplaySubject, Subject, Subscription } from 'rxjs';
 import { takeUntil, take } from 'rxjs/operators';
@@ -37,7 +37,7 @@ export class ModalConfigDatasetComponent implements OnInit, OnDestroy {
   data_datasource: OptionsDTO;
   data_schema: OptionsDTO;
   data_views: any;
-  selectedTags:string[] = [];
+  selectedTags = [];
   datasourceAllOpt = [];
   schemaAllOpt = [];
   nextbtn: boolean = true
@@ -174,10 +174,12 @@ export class ModalConfigDatasetComponent implements OnInit, OnDestroy {
     // this.telemetryCall()
     if(this.router.url.includes('datasets') || this.router.url.includes('pipelines') || this.router.url.includes('knowledge')){
       this.customCreate = false;
+      console.log("WE ARE HERE IN FALSE");
     }
     else
     {
       this.customCreate = true;
+            console.log("WE ARE HERE IN TRUE");
 
     }
 //console.log("alias=", this.matData)
@@ -754,8 +756,8 @@ else{
   //     });
   // }
 
-  onTagChange(event:MatSelectChange){
-  this.selectedTags = event.value;
+  onTagChange(tag){
+  this.selectedTags = tag
   }
 
   onSchemaChange(schemaAlias) {

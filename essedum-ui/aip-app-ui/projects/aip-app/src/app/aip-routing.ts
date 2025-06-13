@@ -43,7 +43,7 @@ import { ModalConfigDatasetComponent } from './dataset/modal-config-dataset/moda
 import { ModelDescriptionComponent } from './model/model.description/model.description.component';
 // import { EndpointDescriptionComponent } from './endpoint/endpoint-description/endpoint-description.component';
 import { NativeScriptComponent } from './native-script/native-script.component';
-// import { DatasetEditComponent } from './dataset/dataset-edit/dataset-edit.component';
+import { DatasetEditComponent } from './dataset/dataset-edit/dataset-edit.component';
 // import { PluginComponent } from './plugin/plugin.component';
 import { ModalConfigSchemaComponent } from './schema/modal-config-schema/modal-config-schema.component';
 // import { EditDeleteTagsComponent } from './edit-delete-tags/edit-delete-tags.component';
@@ -222,7 +222,7 @@ const routes: Routes = [
         children: [
           { path: '', component: DatasetByNameComponent },
           { path: 'create', component: ModalConfigDatasetComponent },
-          // { path: 'data', component: DatasetEditComponent },
+          { path: 'data', component: DatasetEditComponent },
           // { path: ':type', component: DatasetByNameComponent },
           // {
           //   path: 'view/:cname',

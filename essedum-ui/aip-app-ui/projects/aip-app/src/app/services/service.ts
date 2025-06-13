@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Inject, Injectable, NgZone } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
+import { from, Observable, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EventSourcePolyfill } from 'event-source-polyfill';
@@ -2593,6 +2593,716 @@ export class Services {
           return this.handleError(err);
         })
       );
+  }
+
+  getDatasetForm(name: string): Observable<any> {
+    return this.https
+      .get(
+        this.dataUrl +
+        '/datasets/datasetform/' +
+        name +
+        '/' +
+        sessionStorage.getItem('organization'),
+        { observe: 'response' }
+      )
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+    getProxyDatasetDetails(
+    dataset: Dataset,
+    dsource,
+    params,
+    headers,
+    org,
+    removeCache?
+  ): Observable<any> {
+    // console.log(org);
+    if (removeCache == null || removeCache == undefined) removeCache = true;
+    return this.https
+      .get(
+        this.dataUrl +
+        '/service/' +
+        dsource.type +
+        '/' +
+        dsource.alias +
+        '/' +
+        dataset.alias +
+        '/' +
+        org +
+        '/' +
+        removeCache,
+        { observe: 'response', params: params, headers: headers }
+      )
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+  getPaginatedDetails(dataset: any, pagination: any): Observable<any> {
+    // let body = dataset.attributes
+    let body: any;
+    let salt = this.encKey.getSalt();
+    if (!salt) salt = sessionStorage.getItem('salt');
+    if (dataset.attributes && dataset.attributes.length > 0)
+      return from(this.encrypt(dataset.attributes, salt)).pipe(
+        switchMap((body) => {
+          let tmpParams = pagination.sortEvent
+            ? {
+              page: pagination.page,
+              size: pagination.size,
+              sortEvent: pagination.sortEvent,
+              sortOrder: pagination.sortOrder,
+            }
+            : { page: pagination.page, size: pagination.size };
+          const org = sessionStorage.getItem('organization');
+          return this.https.get(
+            this.dataUrl +
+            '/datasets/getPaginatedData/' +
+            dataset.name +
+            '/' +
+            org,
+            {
+              observe: 'response',
+              params: tmpParams,
+              headers: new HttpHeaders().append('attribute', body),
+            }
+          );
+        })
+      );
+    else
+      return from(this.encrypt(JSON.stringify(dataset.attributes), salt)).pipe(
+        switchMap((body) => {
+          let tmpParams = pagination.sortEvent
+            ? {
+              page: pagination.page,
+              size: pagination.size,
+              sortEvent: pagination.sortEvent,
+              sortOrder: pagination.sortOrder,
+            }
+            : { page: pagination.page, size: pagination.size };
+          const org = sessionStorage.getItem('organization');
+          return this.https.get(
+            this.dataUrl +
+            '/datasets/getPaginatedData/' +
+            dataset.name +
+            '/' +
+            org,
+            {
+              observe: 'response',
+              params: tmpParams,
+              headers: new HttpHeaders().append('attribute', body),
+            }
+          );
+        })
+      );
+    // let tmpParams = (pagination.sortEvent) ? { page: pagination.page, size: pagination.size, sortEvent: pagination.sortEvent, sortOrder: pagination.sortOrder } : { page: pagination.page, size: pagination.size }
+    // const org = sessionStorage.getItem("organization");
+    // return this.https.get(this.dataUrl + '/datasets/getPaginatedData/' + dataset.name + '/' + org,
+    //   { observe: 'response', params: tmpParams, headers: new HttpHeaders().append("attribute", body) })
+    // .pipe(map(response => {
+    //   this.loader.hide();
+    //   return response.body;
+    // }))
+    // .pipe(catchError(err => {
+    //   this.loader.hide();
+    //   return err;
+    // }));
+  }
+
+  getSearchCount(
+    datasetName: string,
+    projectName: string,
+    searchValues,
+    queryParams?: string
+  ): Observable<string> {
+    try {
+      let searchparams = searchValues;
+      let queryParamsValue = null;
+      if (queryParams) queryParamsValue = queryParams;
+      if (searchValues && searchValues.length > 0) searchparams = searchValues;
+      else searchparams = JSON.stringify(searchValues);
+      let apiParams = {
+        searchParams: searchparams,
+        datasetName: datasetName,
+        projectName: projectName,
+      };
+      if (queryParams) {
+        apiParams['queryParams'] = queryParamsValue;
+      }
+      return this.https
+        .get('/api/aip/datasets/searchDataCount', {
+          params: apiParams,
+          responseType: 'text',
+        })
+        .pipe(
+          map((response) => {
+            if (response) {
+              return response.toString();
+            }
+          })
+        )
+        .pipe(
+          catchError((err) => {
+            return this.handleError(err);
+          })
+        );
+    } catch (Exception) {
+      this.message('Some error occured', 'error');
+    }
+  }
+ searchTicketsUsingDataset(
+    datasetName: string,
+    projectName: string,
+    pagination,
+    searchValues,
+    selectClauseParams?: string
+  ): Observable<any[] | string> {
+    try {
+      let searchParamsValue = null;
+      let selectClauseParamsValue = null;
+      this.setPaginationValues(pagination);
+      this.setSearchValues(searchValues);
+      if (searchValues && searchValues.length > 0)
+        searchParamsValue = searchValues;
+      else if (searchValues) {
+        searchParamsValue = JSON.stringify(searchValues);
+      }
+      if (selectClauseParams) selectClauseParamsValue = selectClauseParams;
+      let apiParams = pagination.sortEvent
+        ? {
+          page: pagination.page,
+          size: pagination.size,
+          sortEvent: pagination.sortEvent,
+          sortOrder: pagination.sortOrder,
+        }
+        : {
+          datasetName: datasetName,
+          projectName: projectName,
+          page: pagination.page,
+          size: pagination.size,
+        };
+
+      if (selectClauseParams) {
+        apiParams['searchParams'] = searchParamsValue;
+        apiParams['selectClauseParams'] = selectClauseParamsValue;
+        apiParams['datasetName'] = datasetName;
+        apiParams['projectName'] = projectName;
+      } else {
+        apiParams['searchParams'] = searchParamsValue;
+        apiParams['datasetName'] = datasetName;
+        apiParams['projectName'] = projectName;
+      }
+      return this.https
+        .get('/api/aip/datasets/searchData', {
+          params: apiParams,
+        })
+        .pipe(
+          map((response) => {
+            if (
+              response &&
+              response[0] &&
+              response[0].hasOwnProperty('Error: ')
+            ) {
+              let errorMsg: string = response[0]['Error: '];
+              return errorMsg;
+            } else {
+              let responseArray: any[] = [];
+              responseArray = <any[]>response;
+              return responseArray;
+            }
+          })
+        )
+        .pipe(
+          catchError((err) => {
+            return this.handleError(err);
+          })
+        );
+    } catch (Exception) {
+      this.message('Some error occured', 'error');
+    }
+  }
+
+    getAiOpsData(endpoint, body, adapterInstance): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    // let adapterInstance = 'AIOPS-Adapter'
+    // let adapterInstance = 'AIOPS-Instance'
+    // let adapterInstance = 'ITSM-Adapter'
+    let isInstance = 'true';
+    let param = new HttpParams()
+      .set('project', session)
+      .set('adapter_instance', adapterInstance)
+      .set('isInstance', isInstance);
+
+    return this.https
+      .post(this.dataUrl + '/service/aiops/v1/' + endpoint, body, {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json; charset=utf-8',
+        }),
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+    searchTicketsUsingDataset1(
+    datasetName: string,
+    projectName: string,
+    pagination,
+    searchValues,
+    searchClause?
+  ): Observable<any[] | string> {
+    try {
+      let searchParamsValue = searchValues;
+      let selectClauseParamsValue = searchClause ? searchClause : null;
+      if (searchValues && searchValues.length > 0)
+        searchParamsValue = searchValues;
+      else if (searchValues) {
+        searchParamsValue = JSON.stringify(searchValues);
+      }
+      if (searchClause && searchClause.length > 0)
+        selectClauseParamsValue = searchClause;
+      else if (searchClause) {
+        selectClauseParamsValue = JSON.stringify(searchClause);
+      }
+      let apiParams = pagination.sortEvent
+        ? {
+          page: pagination.page,
+          size: pagination.size,
+          sortEvent: pagination.sortEvent,
+          sortOrder: pagination.sortOrder,
+        }
+        : {
+          datasetName: datasetName,
+          projectName: projectName,
+          page: pagination.page,
+          size: pagination.size,
+        };
+      if (searchClause) {
+        apiParams['datasetName'] = datasetName;
+        apiParams['projectName'] = projectName;
+        apiParams['searchParams'] = searchParamsValue;
+        apiParams['selectClauseParams'] = selectClauseParamsValue;
+      } else {
+        apiParams['datasetName'] = datasetName;
+        apiParams['projectName'] = projectName;
+        apiParams['searchParams'] = searchParamsValue;
+      }
+      // return this.https.get('/api/aip/datasets/searchData/'+datasetName+"/"+projectName, {
+      //   params: apiParams,
+      // })
+      return this.https
+        .get('/api/aip/datasets/searchData', {
+          params: apiParams,
+        })
+        .pipe(
+          map((response) => {
+            if (
+              response &&
+              response[0] &&
+              response[0].hasOwnProperty('Error: ')
+            ) {
+              let errorMsg: string = response[0]['Error: '];
+              return errorMsg;
+            } else {
+              let responseArray: any[] = [];
+              responseArray = <any[]>response;
+              return responseArray;
+            }
+          })
+        )
+        .pipe(
+          catchError((err) => {
+            return this.handleError(err);
+          })
+        );
+    } catch (Exception) {
+      this.messageService('Some error occured', 'Error');
+    }
+  }
+
+    getDownloadData(
+    datasetName: string,
+    projectName: string,
+    searchValues,
+    chunkSize: string,
+    apiCount: string,
+    sortEvent: string,
+    sortOrder: string,
+    fieldsToDownload: string
+  ): Observable<string> {
+    try {
+      let body = searchValues;
+      let salt = this.encKey.getSalt();
+      if (!salt) salt = sessionStorage.getItem('salt');
+      if (searchValues && searchValues.length > 0) {
+        return from(this.encrypt(searchValues, salt)).pipe(
+          switchMap((encryptedSearchValues) => {
+            // searchValues = encryptedSearchValues
+            return from(this.encrypt(fieldsToDownload, salt)).pipe(
+              switchMap((encryptedFieldsToDownload) => {
+                let apiParams = sortEvent
+                  ? {
+                    datasetName: datasetName,
+                    projectName: projectName,
+                    chunkSize: chunkSize,
+                    apiCount: apiCount,
+                    sortEvent: sortEvent,
+                    sortOrder: sortOrder,
+                  }
+                  : {
+                    datasetName: datasetName,
+                    projectName: projectName,
+                    chunkSize: chunkSize,
+                    apiCount: apiCount,
+                  };
+                return this.https
+                  .get('/api/aip/datasets/downloadCsvData', {
+                    params: apiParams,
+                    responseType: 'text/csv' as 'json',
+                    headers: new HttpHeaders()
+                      .append('searchParams', encryptedSearchValues)
+                      .append('fieldsToDownload', encryptedFieldsToDownload),
+                  })
+                  .pipe(
+                    map((response) => {
+                      if (
+                        response &&
+                        response[0] &&
+                        response[0].hasOwnProperty('Error: ')
+                      ) {
+                        let errorMsg: string = response[0]['Error: '];
+                        return errorMsg;
+                      } else {
+                        return response.toString();
+                      }
+                    })
+                  )
+                  .pipe(
+                    catchError((err) => {
+                      return this.handleError(err);
+                    })
+                  );
+              })
+            );
+          })
+        );
+      } else {
+        return from(this.encrypt(JSON.stringify(searchValues), salt)).pipe(
+          switchMap((encryptedSearchValues) => {
+            return from(
+              this.encrypt(JSON.stringify(fieldsToDownload), salt)
+            ).pipe(
+              switchMap((encryptedFieldsToDownload) => {
+                let apiParams = sortEvent
+                  ? {
+                    datasetName: datasetName,
+                    projectName: projectName,
+                    chunkSize: chunkSize,
+                    apiCount: apiCount,
+                    sortEvent: sortEvent,
+                    sortOrder: sortOrder,
+                  }
+                  : {
+                    datasetName: datasetName,
+                    projectName: projectName,
+                    chunkSize: chunkSize,
+                    apiCount: apiCount,
+                  };
+                return this.https
+                  .get('/api/aip/datasets/downloadCsvData', {
+                    params: apiParams,
+                    responseType: 'text/csv' as 'json',
+                    headers: new HttpHeaders()
+                      .append('searchParams', encryptedSearchValues)
+                      .append('fieldsToDownload', encryptedFieldsToDownload),
+                  })
+                  .pipe(
+                    map((response) => {
+                      if (
+                        response &&
+                        response[0] &&
+                        response[0].hasOwnProperty('Error: ')
+                      ) {
+                        let errorMsg: string = response[0]['Error: '];
+                        return errorMsg;
+                      } else {
+                        return response.toString();
+                      }
+                    })
+                  )
+                  .pipe(
+                    catchError((err) => {
+                      return this.handleError(err);
+                    })
+                  );
+              })
+            );
+          })
+        );
+      }
+    } catch (Exception) {
+      this.messageService('Some error occured', 'Error');
+    }
+  }
+
+    getDataset(name: string): Observable<any> {
+    return this.https
+      .get(
+        this.dataUrl +
+        '/datasets/' +
+        name +
+        '/' +
+        sessionStorage.getItem('organization'),
+        { observe: 'response' }
+      )
+      .pipe(
+        switchMap(async (response) => {
+          let result = response.body as Array<any>;
+          let salt = this.encKey.getSalt();
+          if (!salt) salt = sessionStorage.getItem('salt');
+          result['attributes'] = await this.decryptUsingAES256(
+            result['attributes'],
+            salt
+          );
+          return result;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+    getTextDatasetDetails(dataset: Dataset): Observable<any> {
+    let body: any;
+    let salt = this.encKey.getSalt();
+    if (!salt) salt = sessionStorage.getItem('salt');
+    if (dataset.attributes && dataset.attributes.length > 0)
+      return from(this.encrypt(dataset.attributes, salt)).pipe(
+        switchMap((body) => {
+          const org = sessionStorage.getItem('organization');
+          return this.https
+            .get(
+              this.dataUrl + '/datasets/viewData/' + dataset.name + '/' + org,
+              {
+                observe: 'response',
+                responseType: 'text',
+                params: { limit: '10' },
+                headers: new HttpHeaders().append('attributes', body),
+              }
+            )
+            .pipe(
+              map((response) => {
+                return response.body;
+              })
+            )
+            .pipe(
+              catchError((err) => {
+                return this.handleError(err);
+              })
+            );
+        })
+      );
+    else
+      return from(this.encrypt(JSON.stringify(dataset.attributes), salt)).pipe(
+        switchMap((body) => {
+          const org = sessionStorage.getItem('organization');
+          return this.https
+            .get(
+              this.dataUrl + '/datasets/viewData/' + dataset.name + '/' + org,
+              {
+                observe: 'response',
+                responseType: 'text',
+                params: { limit: '10' },
+                headers: new HttpHeaders().append('attributes', body),
+              }
+            )
+            .pipe(
+              map((response) => {
+                return response.body;
+              })
+            )
+            .pipe(
+              catchError((err) => {
+                return this.handleError(err);
+              })
+            );
+        })
+      );
+  }
+
+   setSearchValues(searchValues) {
+    this.searchValues = searchValues;
+  }
+  setPaginationValues(paginationValues) {
+    this.paginationValues = paginationValues;
+  }
+
+  
+  getDatasetDetails(dataset: Dataset): Observable<any> {
+    let body: any;
+    // let body = dataset.attributes
+    let salt = this.encKey.getSalt();
+    if (!salt) salt = sessionStorage.getItem('salt');
+    if (dataset.attributes && dataset.attributes.length > 0)
+      return from(this.encrypt(dataset.attributes, salt)).pipe(
+        switchMap((body) => {
+          const org = sessionStorage.getItem('organization');
+          return this.https
+            .get(
+              this.dataUrl + '/datasets/viewData/' + dataset.name + '/' + org,
+              {
+                observe: 'response',
+                params: { limit: '10' },
+                headers: new HttpHeaders().append('attributes', body),
+              }
+            )
+            .pipe(
+              map((response) => {
+                return response.body;
+              })
+            )
+            .pipe(
+              catchError((err) => {
+                return this.handleError(err);
+              })
+            );
+        })
+      );
+    else
+      return from(this.encrypt(JSON.stringify(dataset.attributes), salt)).pipe(
+        map((body) => {
+          const org = sessionStorage.getItem('organization');
+          return this.https
+            .get(
+              this.dataUrl + '/datasets/viewData/' + dataset.name + '/' + org,
+              {
+                observe: 'response',
+                params: { limit: '10' },
+                headers: new HttpHeaders().append('attributes', body),
+              }
+            )
+            .pipe(
+              map((response) => {
+                return response.body;
+              })
+            )
+            .pipe(
+              catchError((err) => {
+                return this.handleError(err);
+              })
+            );
+        })
+      );
+  }
+
+  getDirectDatasetDetails(dataset: Dataset, pagination): Observable<any> {
+    if (
+      dataset.alias == 'Daily Volume_forecast' ||
+      dataset.alias == 'Daily Volume'
+    ) {
+      dataset.taskdetails = null;
+    }
+    try {
+      let tmpParams = pagination.sortEvent
+        ? {
+          page: pagination.page,
+          size: pagination.size,
+          sortEvent: pagination.sortEvent,
+          sortOrder: pagination.sortOrder,
+        }
+        : { page: pagination.page, size: pagination.size };
+      const org = sessionStorage.getItem('organization');
+      return this.https
+        .post(
+          this.dataUrl +
+          '/datasets/direct/viewData/' +
+          dataset.alias +
+          '/' +
+          org,
+          dataset,
+          { observe: 'response', params: tmpParams }
+        )
+        .pipe(
+          map((response) => {
+            return response.body;
+          })
+        )
+        .pipe(
+          catchError((err) => {
+            return this.handleError(err);
+          })
+        );
+    } catch (Exception) {
+      this.messageService('Some error occured', 'Error');
+    }
+  }
+
+    checkVisualizeSupport(datasetName): Observable<any> {
+    return this.https
+      .get(
+        this.dataUrl +
+        '/datasets/isVisualizationSupported/' +
+        datasetName +
+        '/' +
+        sessionStorage.getItem('organization'),
+        { observe: 'response' }
+      )
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+  downloadFile(filePath: string, dataset: Dataset): Observable<any> {
+    try {
+      this.jwt = JSON.parse(
+        String(sessionStorage.getItem('authenticationToken'))
+      );
+      const options = {
+        headers: new HttpHeaders({
+          Authorization: `Bearer ${this.jwt}`,
+          responseType: 'blob as json',
+          'Content-Type': 'application/json',
+        }),
+      };
+      return this.https
+        .post(this.dataUrl + '/datasets/download/' + filePath, dataset, {
+          observe: 'response',
+        })
+        .pipe(catchError(this.handleError));
+    } catch (Exception) {
+      this.messageService('Some error occured', 'Error');
+    }
   }
 
 }
