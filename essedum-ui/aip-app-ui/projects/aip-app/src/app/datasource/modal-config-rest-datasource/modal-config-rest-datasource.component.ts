@@ -301,7 +301,7 @@ export class ModalConfigRestDatasourceComponent implements OnInit, OnChanges, Do
   }
 
   setDatasource(key,datasource){
-    this.sourceType.attributes[key] = datasource.name
+    this.sourceType.attributes[key] = datasource.value
     
   }
   setDgInstanceType(key,instanceType){

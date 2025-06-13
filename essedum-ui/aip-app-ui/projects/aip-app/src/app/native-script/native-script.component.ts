@@ -96,7 +96,8 @@ export class NativeScriptComponent implements OnInit, OnChanges {
   envModified = false;
     secrets: any;
   dynamicSecretsArray: Array<DynamicSecretsGrid> = [];
-  secretsModified = false
+  secretsModified = false;
+    defaultRuntime: any;
   constructor(
     @Inject('envi') private baseUrl: string,
     //private telemetryService: LeapTelemetryService,
@@ -336,6 +337,14 @@ export class NativeScriptComponent implements OnInit, OnChanges {
         (option) => option.viewValue === 'Local-'
       );
       if (index > -1) this.runTypes.splice(index, 1); // 2nd parameter means remove one item only
+    }
+  }
+
+  runTypeChanged($event) {
+    this.defaultRuntime = $event;
+    const data = this.runTypes.find(option => option.value === this.defaultRuntime);
+    if (data) {
+      this.selectedRunType = data.value;
     }
   }
 

@@ -143,7 +143,8 @@
                                             </div>
                                         </div>
                                         <div class="dropdown d-inline-block float-end">
-                                            <i class="fa fa-ellipsis-v aip-cursor" aria-hidden="true" [matMenuTriggerFor]="menu" style="font-size: 18px; padding: 8px; color: #a5aaad; font-weight: 300;"></i>
+                                                           <mat-icon class="aip-cursor" [matMenuTriggerFor]="menu"
+                  style="font-size: 22px; padding: 2px; color: #a5aaad; font-weight: 300;">more_vert</mat-icon>
                                             <mat-menu #menu="matMenu">
                                                 <button mat-menu-item *ngIf="editAuth" (click)="editConnection(card.name)">
                                                     Edit

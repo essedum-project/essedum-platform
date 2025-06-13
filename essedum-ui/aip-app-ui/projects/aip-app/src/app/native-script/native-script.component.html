@@ -427,7 +427,7 @@
                           [(ngModel)]="selectedRunType"
                           [required]="true"
                           [disabled]="false"
-                          placeholder=""
+                          placeholder="" (selectionChange)="runTypeChanged(selectedRunType)"
                         >
                           <mat-option
                             *ngFor="let type of runTypes"
