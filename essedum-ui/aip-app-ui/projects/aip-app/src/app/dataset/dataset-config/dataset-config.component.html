@@ -1,0 +1,256 @@
+<!--
+
+     @ 2018 Infosys Limited, Bangalore, India. All Rights Reserved.
+     Version: 1.0
+     Except for any free or open source software components embedded in this Infosys proprietary software program (Program),
+     this Program is protected by copyright laws, international treaties and  other pending or existing intellectual property
+     rights in India, the United States, and other countries. Except as expressly permitted, any unauthorized reproduction, storage,
+     transmission in any form or by any means(including without limitation electronic, mechanical, printing, photocopying,
+     recording, or otherwise), or any distribution of this program, or any portion of it, may result in severe civil and
+     criminal penalties, and will be prosecuted to the maximum extent possible under the law.
+
+-->
+<div *ngIf="copyDataset" class="justify-content-between align-items-center d-flex">
+    <span class="le-u-mar-l-8 le-u-header-xxl">Copy Dataset</span>
+    <!-- <div class="le-u-pad-8">
+        <i class="icon x-24 close-icon d-flex" (click)="closeModal()"></i>
+    </div> -->
+</div>
+<div *ngIf="data" class="le-u-pad-tb-16 col-md-12 selector-678-1" style="position: relative;">
+    <div class="col-md-1 selector-678-3" *ngIf="proceed" style="text-align: center">
+        <i id="dset-conf-back" class="icon x-24 back-icon" style="cursor:pointer" (click)="proceed = false"></i>
+    </div>
+    <!-- <br /> -->
+    <form [formGroup]="firstForm" (ngSubmit)="onNext()" style="padding-left: 15px" *ngIf="!proceed"
+        class="col-md-12 selector-678-5">
+        <div *ngIf="!copyDataset" class="col-lg-6 col-md-12 le-u-mar-b-16 le-u-header-xxl">
+            <h4 *ngIf="data.name" class="selector-678-6-name">Name: {{data.name}}</h4>
+        </div>
+        <div class="row col-lg-12 col-md-12">
+           <div *ngIf="!copyDataset" class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+    <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Alias</mat-label>
+        <input matInput formControlName="alias" [(ngModel)]="alias" required>
+    </mat-form-field>
+</div>
+<div *ngIf="copyDataset" class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+    <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Alias</mat-label>
+        <input matInput formControlName="alias" [(ngModel)]="alias" required>
+    </mat-form-field>
+</div>
+<div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+    <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Description</mat-label>
+        <input matInput formControlName="description" >
+    </mat-form-field>
+</div>
+
+
+        </div><br class="selector-678-13" />
+
+
+        <div class="row col-lg-12 col-md-12"><!--style="overflow-y: scroll;" -->
+            <!-- <div class="col-lg-6 col-md-6 le-u-mar-b-16">
+                <leds-select formControlName="groupsCtrl" label="Select Dataset Groups"
+                    [required]="true" [isMultiple]="true" [options]="groupsOptions"
+                    [(ngModel)]="SelectedGroup"></leds-select>
+                <mat-error *ngIf="firstForm.controls['groupsCtrl'].hasError('required')" class="selector-678-18">Please
+                    select group
+                </mat-error>
+            </div> -->
+            <!-- &nbsp;&nbsp; -->
+            <div *ngIf="data.datasource" class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+    <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Select datasource</mat-label>
+        <input matInput [matAutocomplete]="autoDS" formControlName="datasourceAliasCtrl" placeholder="Enter Datasource Name">
+        <mat-autocomplete #autoDS="matAutocomplete" (optionSelected)="onDatasourceChange($event.option.value)">
+            <mat-option *ngFor="let opt of datasourcesOpt" [value]="opt">{{ opt }}</mat-option>
+        </mat-autocomplete>
+    </mat-form-field>
+</div>
+<div *ngIf="!data.datasource" class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+    <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Select datasource</mat-label>
+        <mat-select formControlName="datasourceCtrl" (selectionChange)="onDatasourceChange($event.value)">
+            <mat-option *ngFor="let opt of filteredDataSourcesOpt" [value]="opt.name">{{ opt.name }}</mat-option>
+        </mat-select>
+    </mat-form-field>
+</div>
+            <div class="col-lg-6 col-md-6 le-u-mar-b-16">
+              <mat-form-field appearance="outline" class="w-100">
+    <mat-label>Select Dataset Usage Type</mat-label>
+    <mat-select formControlName="Usagetype" >
+        <mat-option *ngFor="let opt of rwOptions" [value]="opt.value">{{opt.viewValue}}</mat-option>
+    </mat-select>
+</mat-form-field>
+</div>
+<div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+    <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Choose View type</mat-label>
+        <mat-select [disabled]="type === 'GIT'" formControlName="Viewertype" >
+            <mat-option *ngFor="let opt of viewType" [value]="opt.value">{{opt.viewValue}}</mat-option>
+        </mat-select>
+    </mat-form-field>
+    <mat-error *ngIf="firstForm.controls['Viewertype'].hasError('required')" class="selector-678-30">
+        Please select viewType
+    </mat-error>
+</div>
+<div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+    <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Select Tags</mat-label>
+        <mat-select formControlName="tagsDisp" [multiple]="true">
+            <mat-option *ngFor="let opt of fetchedtagsOptions" [value]="opt.value">{{opt.value}}</mat-option>
+        </mat-select>
+    </mat-form-field>
+</div>
+
+        </div>
+        <br class="selector-678-23" />
+
+
+        <div class="row selector-678-24 ">
+            <div class="col-md-6" style="padding-left: 1rem;">
+
+                <div *ngIf="data.schema" class="col-lg-12 col-md-12 le-u-mar-b-16">
+                   <!-- <mat-form-field appearance="outline" class="w-100">
+    <mat-label>Select Schema Type</mat-label>
+    <input matInput formControlName="schemaAliasCtrl" placeholder="Enter Schema Type">
+    <mat-autocomplete (optionSelected)="onSchemaChange($event.option.value)">
+        <mat-option *ngFor="let opt of originalSchemasOpt" [value]="opt.value">{{opt.value}}</mat-option>
+    </mat-autocomplete>
+</mat-form-field> -->
+ <mat-form-field appearance="outline" class="lfx-field lfx-half-col">
+                                    <mat-label>Select Schema Type</mat-label>
+                                    <input type="text" matInput [matAutocomplete]="schemaAuto"
+                                        placeholder="Enter Schema Type" name="schema"
+                                        [disabled]="isAuth" />
+                                    <mat-autocomplete #schemaAuto="matAutocomplete"
+                                        (optionSelected)="onSchemaChange($event.option.value)">
+                                        <mat-option *ngFor="let opt of originalSchemasOpt"
+                                            [value]="opt">{{opt}}</mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>
+<div *ngIf="!data.schema" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+    <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Choose Schema</mat-label>
+        <input matInput placeholder="Choose Schema" >
+        <mat-autocomplete  (optionSelected)="onSchemaChange($event.option.value)">
+            <mat-option *ngFor="let opt of originalSchemasOpt" [value]="opt">{{ opt }}</mat-option>
+        </mat-autocomplete>
+    </mat-form-field>
+</div>
+
+                </div>
+
+                <!-- below span for download template icon -->
+                <!-- <button class="cip-icon selector-678-48 ticket-icon" *ngIf="scmValList?.length > 0" type="button"
+                    #cipDtstColsToDwnldTrgt (click)="cipDtstColsToDwnld.show($event,cipDtstColsToDwnldTrgt)"
+                    style="cursor: pointer; font-size: 22px; margin-top: 8px; margin-left: -16px;"
+                    [title]="(!scmValList || scmValList?.length<=0)?'No entries found to download':'Download Entries'">
+
+                    <i class="fa fa-download" aria-hidden="true"></i>
+                </button> -->
+                <p-overlayPanel #cipDtstColsToDwnld id="cipDtstColsToDownload" [dismissable]="true">
+                    <ng-template pTemplate>
+                        <div>
+                            <div style="display: flex; justify-content: space-evenly;">
+
+                                <button class="cip-btn" type="button" style="margin:5px;height:80%;"
+                                    (click)="downloadCsvTemplate('All');cipDtstColsToDwnld.hide()">All Columns</button>
+                                <button class="cip-btn" type="button" style="margin:5px;height:80%;"
+                                    (click)="downloadCsvTemplate('Required');cipDtstColsToDwnld.hide()">Required
+                                    Columns</button>
+                            </div>
+                        </div>
+                    </ng-template>
+                </p-overlayPanel>
+
+
+                <!-- <mat-form-field class="selector-689-411 " style="width: 100%;">
+                    <mat-select && !isSchema" multiple formControlName="schemaFormCtrl"
+                        placeholder="select form template" #schemaFormSelect=""
+                        id="icip-apd-modal-config-dataset-schemaform-select" class="selector-689-421">
+                        <mat-option class="selector-689-43">
+                            <ngx-mat-select-search [formControl]="schemaFormFilterCtrl"
+                                [placeholderLabel]="'Find Form template...'"
+                                [noEntriesFoundLabel]="'No matching Template found'"
+                                id="icip-apd-modal-config-dataset-schema-findSchemaForm" class="selector-689-441">
+                            </ngx-mat-select-search>
+                        </mat-option>
+                        <mat-option *ngFor="let template of filteredSchemaTemplates | async" [value]="template.name"
+                            id="icip-apd-modal-config-dataset-schema-select-{{template.name}}"
+                            (click)="onTemplateChange(template)" class="selector-689-451">{{template.alias}}</mat-option>
+                    </mat-select>
+                </mat-form-field> -->
+                <!-- edit schemas and forms icon -->
+                <!-- <span style="margin-top: 15px;">
+                    <i class="fa fa-info-circle fa-lg" style="color: var(--base-color);" [hidden]="!isSchema"
+                        (click)="openFormEditor()" aria-hidden="true" title="Edit Schema and Forms"></i>
+                </span> -->
+
+            </div>
+          <div class="col-md-6 d-flex flex-column" style="justify-content: space-evenly;">
+    <div class="d-flex justify-content-between">
+        <mat-checkbox color="primary" style="width: 16rem;" [(ngModel)]="isExperiment">For Experiments</mat-checkbox>
+        <mat-checkbox color="primary" *ngIf="!copyDataset" style="position: relative; right: 20rem;" (change)="alterInterfaceType($event)" [(ngModel)]="isTemplate">isTemplate?</mat-checkbox>
+        <mat-checkbox color="primary" *ngIf="copyDataset" style="position: relative; right: 5rem;" (change)="alterInterfaceType($event)" [(ngModel)]="isTemplate">isTemplate?</mat-checkbox>
+    </div>
+</div>
+
+<div *ngIf="schemajsonAlias" class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+    <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Select form template</mat-label>
+        <input matInput formControlName="schemajsonAliasCtrl" [matAutocomplete]="autoTMP">
+        <mat-autocomplete #autoTMP="matAutocomplete" (optionSelected)="onTemplateChange($event.option.value)">
+            <mat-option *ngFor="let opt of originalSchemaTemplateAlias" [value]="opt">{{ opt }}</mat-option>
+        </mat-autocomplete>
+    </mat-form-field>
+</div>
+<div *ngIf="!schemajsonAlias" class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+    <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Choose Schema Form Template</mat-label>
+        <input matInput placeholder="Choose Schema Form Template" [matAutocomplete]="autoTMP2">
+        <mat-autocomplete #autoTMP2="matAutocomplete" (optionSelected)="onTemplateChange($event.option.value)">
+            <mat-option *ngFor="let opt of originalSchemaTemplateAlias" [value]="opt">{{ opt }}</mat-option>
+        </mat-autocomplete>
+    </mat-form-field>
+</div>
+</div>
+<div id="nxt-btn" class="d-flex justify-content-end">
+        <button mat-flat-button color="primary" type="submit" id="dset-conf-nxt" class="selector-678-42 base-btn">
+                                    NEXT
+                                </button>
+</div>
+
+
+
+    </form>
+
+    <div *ngIf="proceed" class="selector-678-43">
+
+        <div #restExp *ngIf="category.toLowerCase() === 'rest'; else others">
+            <!-- <app-rest-dataset-config [copyDataset]="copyDataset" [isInEdit]="isInEdit" [dataset]="data"
+                (action)="eventHandler($event)">
+            </app-rest-dataset-config> -->
+              <app-rest-dataset-config [dataset]="data" [isInEdit]="isInEdit"
+                                    (action)="eventHandler($event)">
+                                </app-rest-dataset-config>
+        </div>
+        <ng-template #others="" class="selector-678-46">
+
+            <!-- <app-default [copyDataset]="copyDataset" [dataset]="data" [testSuccessful]="testSuccessful"
+                (action)="eventHandler($event)" (testLoaderBoolean)="loader($event)" [edit]="contentVal"
+                [schemaVal]="schemaBol" (cache)="getCache($event)" class="selector-678-47"></app-default> -->
+<app-default [dataset]="data" (action)="eventHandler($event)"
+                                    [testSuccessful]="testSuccessful" [edit]="contentVal" [schemaVal]="schemaBol"
+                                    (cache)="getCache($event)">
+                                </app-default>
+
+        </ng-template>
+    </div>
+</div>
+<div class="" *ngIf="testLoaderBoolean">
+ <mat-progress-spinner mode="indeterminate" diameter="40" color="primary"></mat-progress-spinner>
+<p>Testing...</p>
+</div>

@@ -196,6 +196,7 @@ public isFilterHovered:boolean=false;
       }
       this.getTags();
     });
+    this.filterCards();
 
   }
 

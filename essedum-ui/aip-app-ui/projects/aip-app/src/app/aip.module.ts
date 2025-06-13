@@ -27,8 +27,8 @@ import { PipelineDescriptionComponent } from './pipeline.description/pipeline.de
 import { DatasourceComponent } from './datasource/datasource.component';
 // import { DatasourceDescriptionComponent } from './datasource/datasource.description/datasource.description.component';
 // import { DatasetDescriptionComponent } from './dataset/dataset.description/dataset.description.component';
-// import { DatasetViewComponent } from './dataset/dataset-view/dataset-view.component';
-// import { DatasetConfigComponent } from './dataset/dataset-config/dataset-config.component';
+import { DatasetViewComponent } from './dataset/dataset-view/dataset-view.component';
+import { DatasetConfigComponent } from './dataset/dataset-config/dataset-config.component';
 // import { EndpointViewComponent } from './endpoint/endpoint-view/endpoint-view.component';
 // import { LedsModuleModule } from './leds-module/leds-module.module';
 // import { EndpointEditComponent } from './endpoint/endpoint-edit/endpoint-edit.component';
@@ -54,7 +54,7 @@ import { ModelDeployComponent } from './model/model-deploy/model-deploy.componen
 import { JsonFormsModule } from '@jsonforms/angular';
 import { JsonFormsAngularMaterialModule } from '@jsonforms/angular-material';
 // import { ApiDropdownRenderer } from './renderers/api-dropdown.renderer';
-// import { TagsComponent } from './tags/tags.component';
+import { TagsComponent } from './tags/tags.component';
 // import { DrawFlowComponent } from './draw-flow/draw-flow.component';
 // import { PipelinenodeDirective } from './pipeline-node.directive'
 // import { TreeStructureComponent } from './tree-structure/tree-structure.component';
@@ -121,17 +121,17 @@ import { JsonNodeComponent } from './json2table/json-node.component';
 import { JsonTreeComponent } from './json2table/json-tree.component';
 import { ConnectionViewComponent } from './datasource/connection-view/connection-view.component';
 // import { GroupedFeaturesComponent } from './feature/grouped-features/grouped-features.component';
-// import { DatasetTableViewComponent, HighlightSearch } from './dataset/dataset-table-view/dataset-table-view.component';
+import { DatasetTableViewComponent, HighlightSearch } from './dataset/dataset-table-view/dataset-table-view.component';
 // import { CreateLinkedComponent } from './create-linked/create-linked.component';
 import { ModalConfigDatasetComponent } from './dataset/modal-config-dataset/modal-config-dataset.component';
 import { RestDatasetConfigComponent } from './dataset/rest-dataset-config/rest-dataset-config.component';
 import { DefaultComponent } from './dataset/default/default.component';
-// import { DatasetEditComponent } from './dataset/dataset-edit/dataset-edit.component';
-// import { DatasetFullscreenViewComponent } from './dataset/dataset-fullscreen-view/dataset-fullscreen-view.component';
+import { DatasetEditComponent } from './dataset/dataset-edit/dataset-edit.component';
+import { DatasetFullscreenViewComponent } from './dataset/dataset-fullscreen-view/dataset-fullscreen-view.component';
 // import { DatasetViewWrapperComponent } from './dataset/dataset-view-wrapper/dataset-view-wrapper.component';
 // import { MethodConfigComponent } from './dataset/method-config/method-config.component';
-// import { DatasetPowerModeViewComponent } from './dataset/dataset-power-mode-view/dataset-power-mode-view.component';
-// import { DatasetFormViewComponent } from './dataset/dataset-form-view/dataset-form-view.component';
+import { DatasetPowerModeViewComponent } from './dataset/dataset-power-mode-view/dataset-power-mode-view.component';
+import { DatasetFormViewComponent } from './dataset/dataset-form-view/dataset-form-view.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 imports: [ScrollingModule];
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -351,8 +351,8 @@ const dbConfig: DBConfig = {
     ModalConfigRestDatasourceComponent,
     // DatasourceDescriptionComponent,
     // DatasetDescriptionComponent,
-    // DatasetViewComponent,
-    // DatasetConfigComponent,
+    DatasetViewComponent,
+    DatasetConfigComponent,
     // EndpointViewComponent,
     // EndpointEditComponent,
     ModelEditsComponent,
@@ -362,7 +362,7 @@ const dbConfig: DBConfig = {
     // EndpointDescriptionComponent,
     ModelDeployComponent,
     // ApiDropdownRenderer,
-    // TagsComponent,
+    TagsComponent,
     // DrawFlowComponent,
     // PipelinenodeDirective,
     // TreeStructureComponent,
@@ -401,18 +401,18 @@ const dbConfig: DBConfig = {
     JsonTreeComponent,
     JsonNodeComponent,
     ConnectionViewComponent,
-    // DatasetTableViewComponent,
+    DatasetTableViewComponent,
     // CreateLinkedComponent,
     ModalConfigDatasetComponent,
     RestDatasetConfigComponent,
     DefaultComponent,
 
-    // DatasetEditComponent,
-    // DatasetFullscreenViewComponent,
+    DatasetEditComponent,
+    DatasetFullscreenViewComponent,
     // DatasetViewWrapperComponent,
     // MethodConfigComponent,
-    // DatasetPowerModeViewComponent,
-    // DatasetFormViewComponent,
+    DatasetPowerModeViewComponent,
+    DatasetFormViewComponent,
     // RelatedComponentComponent,
     // DatasetLoadComponent,
     // LogConsoleComponent,
@@ -432,7 +432,7 @@ const dbConfig: DBConfig = {
     UserSecretsComponent,
     // RelationshipComponent,
     // StringToJSON,
-    // HighlightSearch,
+    HighlightSearch,
     // ViewerAudioComponent,
     FirstCharacterPipe,
     // TicketlistComponent,
