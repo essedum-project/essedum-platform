@@ -9,6 +9,8 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { DatasetServices } from './dataset/dataset-service';
+import { EventsService } from './services/event.service';
+
 // import { MatFormFieldModule } from '@angular/material/form-field';
 // import { MatInputModule } from '@angular/material/input';
 // import { AutocompleteModule, BreadcrumbModule, ChatbotModule, MessagingModule, RatingModule, CheckboxModule, ChipInputModule, DataGridModule, DatepickerModule, InputFieldModule, TimepickerModule, ToggleMenuModule, TreeComponent } from 'leds-lib';
@@ -26,7 +28,7 @@ import { PipelineDescriptionComponent } from './pipeline.description/pipeline.de
 // import { DatasetComponent } from './dataset/dataset.component';
 import { DatasourceComponent } from './datasource/datasource.component';
 // import { DatasourceDescriptionComponent } from './datasource/datasource.description/datasource.description.component';
-// import { DatasetDescriptionComponent } from './dataset/dataset.description/dataset.description.component';
+import { DatasetDescriptionComponent } from './dataset/dataset.description/dataset.description.component';
 import { DatasetViewComponent } from './dataset/dataset-view/dataset-view.component';
 import { DatasetConfigComponent } from './dataset/dataset-config/dataset-config.component';
 // import { EndpointViewComponent } from './endpoint/endpoint-view/endpoint-view.component';
@@ -350,7 +352,7 @@ const dbConfig: DBConfig = {
 
     ModalConfigRestDatasourceComponent,
     // DatasourceDescriptionComponent,
-    // DatasetDescriptionComponent,
+    DatasetDescriptionComponent,
     DatasetViewComponent,
     DatasetConfigComponent,
     // EndpointViewComponent,
@@ -624,7 +626,7 @@ const dbConfig: DBConfig = {
     PipelineService,
     // TabsFilterService,
     DatasetServices,
-    // EventsService,
+    EventsService,
     // JobsService,
     // GroupsService,
     SchemaRegistryService,

@@ -1,0 +1,95 @@
+.text-view{
+    overflow-y: hidden;
+    overflow-x: auto;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 5px;
+}
+
+
+.lfx-u-pad-t-32{
+    padding: 3%;
+}
+
+b{
+    color: gray;
+}
+
+.data-container{
+    border-radius: 8px;
+    margin: 3%;
+}
+
+.metadata{
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: 12px;
+}
+
+.meta-val{
+    background-color: #EFEFEF;
+    padding: 5px 8px 5px 8px;
+    border-radius: 8px;
+    margin: 0px 10px 0px 5px;
+    line-height: 2;
+    word-break: break-all;
+}
+
+.meta-key{
+    color: #737373;
+}
+
+::ng-deep  .ngx-spinner-overlay{
+    position: relative !important;
+}
+
+::ng-deep .le-c-card.mat-mdc-card .mat-mdc-card-content {
+    margin-bottom: 0px;
+}
+
+::ng-deep .aip-initiative-desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  ::ng-deep .le-c-tab .mat-mdc-tab.mdc-tab{
+    text-transform: none;
+  }
+
+  .txt-cont{
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+.msg-banner{
+    padding: 10px;
+    border-radius: 5px;
+    background-color: rgb(255, 255, 255);
+    // width: 730px;
+    text-align: justify;
+    overflow-wrap: break-word !important;;
+    // display: block;
+    line-height: 1.2;
+}
+
+@media screen and (min-width: 1367px) {
+  .lfx-l-base-layout-center {
+    width: 1216px;
+    margin: 0 auto;
+  }
+
+  .lfx-l-left-layout-center,
+  .lfx-l-right-layout-center {
+    width: 1001px;
+    margin: 0 auto;
+  }
+
+  .lfx-l-lr-layout-center {
+    width: 786px;
+    margin: 0 auto;
+  }
+}
+
