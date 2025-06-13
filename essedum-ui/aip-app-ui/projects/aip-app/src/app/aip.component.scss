@@ -895,6 +895,11 @@ div {
     color: #007a52;
   }
 
+  .lfx-c-badge--error {
+    background: #efe1e1;
+    color: #aa0606;
+  }
+
   .lfx-c-badge--blue {
     background: #dae2e8;
     color: #0094ff !important;
@@ -902,7 +907,7 @@ div {
 
   .lfx-c-badge--warning {
     background: #fff4ce;
-    color: #a15c08 !important;
+    color: #da7f11 !important;
   }
 
   .lfx-c-badge--info {
@@ -1224,4 +1229,55 @@ div {
   .lfx-l-level1-wrapper .lfx-l-whiteBG {
     background: #ffffff;
   }
+
+
+  
+  .lfx-u-pad-t-8 {
+    padding-top: 8px !important;
+  }
+
+  .lfx-u-pad-t-32 {
+    padding-top: 32px !important;
+  }
+
+  .lfx-u-pad-r-16 {
+    padding-right: 16px !important;
+  }
+
+  .lfx-u-mar-r-16 {
+    margin-right: 16px !important;
+  }
+
+  .lfx-u-mar-t-16 {
+    margin-top: 16px !important;
+  }
+
+  .lfx-u-mar-lr-16{
+    margin-left: 16px !important;
+    margin-right: 16px !important;
+  }
+
+  .lfx-u-mar-t-30{
+    margin-top: 30px !important;
+  }
+
+  .lfx-u-mar-16{
+    margin: 16px !important;
+  }
+
+  .lfx-u-mar-t-4{
+    margin-top: 4px !important;
+  }
+  .lfx-u-pad-b-16 {
+  padding-bottom: 16px !important;
+}
+
+.lfx-c-datagrid__title-
+ {
+    margin: 0 0 16px;
+    margin-top: 0px;
+    margin-right: 0px;
+    margin-bottom: 16px;
+    margin-left: 0px;
+}
 }

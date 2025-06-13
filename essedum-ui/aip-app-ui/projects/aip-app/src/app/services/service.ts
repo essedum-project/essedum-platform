@@ -2262,7 +2262,44 @@ export class Services {
       );
   }
 
-  getStatus(jobid) {
+
+ 
+
+  getallPipelinesByOrg(): Observable<any> {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .get(
+        this.dataUrl + '/service/v1/streamingServices/allPipelinesByOrg/' + org,
+        { observe: 'response' }
+      )
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+  getDatasetJson(): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/datasets/types', { observe: 'response' })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+
+   getStatus(jobid) {
     return this.https
       .get('/api/aip/jobs/jobstatus/' + jobid, {
         observe: 'response',
@@ -2290,13 +2327,28 @@ export class Services {
       .pipe(catchError(this.handleError));
   }
 
-  getallPipelinesByOrg(): Observable<any> {
+
+ 
+    //download native file
+  downloadNativeFile(cname, org, filename): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/file/download/native/' + cname + '/' + org, {
+        params: { filename: filename },
+        responseType: 'blob',
+      })
+      .pipe((resp: any) => resp);
+  }
+
+   //get datasource
+  getDatasource(name: string): Observable<any> {
     const org = sessionStorage.getItem('organization');
     return this.https
-      .get(
-        this.dataUrl + '/service/v1/streamingServices/allPipelinesByOrg/' + org,
-        { observe: 'response' }
-      )
+      .get(this.dataUrl + '/datasources/' + name + '/' + org, {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json; charset=utf-8',
+        }),
+        observe: 'response',
+      })
       .pipe(
         map((response) => {
           return response.body;
@@ -2308,12 +2360,232 @@ export class Services {
         })
       );
   }
-  getDatasetJson(): Observable<any> {
+
+    getDatasetNames(org): Observable<any> {
     return this.https
-      .get(this.dataUrl + '/datasets/types', { observe: 'response' })
+      .get(this.dataUrl + '/datasets/dataset', {
+        observe: 'response',
+        params: { org: org },
+      })
       .pipe(
         map((response) => {
           return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  fetchoutputArtifacts(jobId): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/jobs/outputArtifacts/' + jobId)
+      .pipe(map((response) => response))
+      .pipe(catchError(this.handleError));
+  }
+
+   //job-data-viewer findByCoreid
+  fetchInternalJob(
+    jobId: string,
+    linenumber: Number,
+    offset: Number,
+    status
+  ): Observable<any> {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .get(
+        this.dataUrl +
+        '/service/v1/internaljob/console/' +
+        jobId +
+        '?offset=' +
+        offset +
+        '&org=' +
+        org +
+        '&lineno=' +
+        linenumber +
+        '&status=' +
+        status
+      )
+      .pipe(map((response) => response))
+      .pipe(catchError(this.handleError));
+  }
+
+   fetchInternalJobByName(name: string, page, rows): Observable<any> {
+    return this.https
+      .get(
+        this.dataUrl +
+        '/jobs/' +
+        name +
+        '/' +
+        localStorage.getItem('organization'),
+        { params: { page: page, size: rows } }
+      )
+
+      .pipe(map((response) => response))
+
+      .pipe(catchError(this.handleError));
+  }
+  fetchInternalJobByName2(name: string, page, rows): Observable<any> {
+    return this.https
+      .get(
+        this.dataUrl +
+        '/internaljob/jobname/' +
+        name +
+        '/' +
+        sessionStorage.getItem('organization'),
+        { params: { page: page, size: rows } }
+      )
+      .pipe(map((response) => response))
+      .pipe(catchError(this.handleError));
+  }
+
+    //console-tab getJobsByStreamingServiceLen
+  getJobsByStreamingServiceLen(name: any): Observable<any> {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .get(this.dataUrl + '/service/v1/jobs/streamingLen/' + name + '/' + org, {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((error) => {
+          return this.handleError(error);
+        })
+      );
+  }
+
+   fetchInternalJobLenByname(name: string): Observable<any> {
+    return this.https
+      .get(
+        this.dataUrl +
+        '/internaljob/jobname/len/' +
+        name +
+        '/' +
+        sessionStorage.getItem('organization')
+      )
+      .pipe(map((response) => response))
+      .pipe(catchError(this.handleError));
+  }
+
+
+   //console-tab fetchAgentJob
+  fetchAgentJob(
+    jobId: string,
+    linenumber: Number,
+    offset: Number,
+    status,
+    read
+  ): Observable<any> {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .get(
+        this.dataUrl +
+        '/service/v1/agentjobs/console/' +
+        jobId +
+        '?offset=' +
+        offset +
+        '&org=' +
+        org +
+        '&lineno=' +
+        linenumber +
+        '&status=' +
+        status +
+        '&readconsole=' +
+        read
+      )
+      .pipe(map((response) => response))
+      .pipe(catchError(this.handleError));
+  }
+
+   //job-data-viewer findByCoreid
+  downloadPipelineLog(id): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/file/download/log/pipeline', {
+        params: { id: id },
+        responseType: 'blob',
+      })
+      .pipe((resp: any) => resp);
+  }
+
+
+   //job-data-viewer getPipelineNames
+  getPipelineNames(org): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/streamingServices/allPipelineNames', {
+        observe: 'response',
+        params: { org: org },
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+   //job-data-viewer findByCoreid
+  findByCoreid(corelid): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/jobs/corelid/' + corelid)
+      .pipe((resp: any) => resp);
+  }
+
+  updateTags(tagIds: any, entityType: any, entityId: any): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let regBody = {};
+    // let param = new HttpParams()
+    //   .set('tagIds', tagIds.toString())
+    //   .append('entityType', entityType)
+    //   .append('entityId', entityId)
+    //   .append('organization', session);
+    let param = {
+      entityType: entityType,
+      tagIds: tagIds,
+      entityId: entityId,
+      organization: session,
+    };
+    return this.https
+      .post(this.dataUrl + '/service/v1/add/tags', regBody, {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  getMappedTags(entityId: any, entityType: any): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let param = {
+      entityType: entityType,
+      entityId: entityId,
+      organization: session,
+    };
+    return this.https
+      .get(this.dataUrl + '/service/v1/getMappedTags', {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response;
         })
       )
       .pipe(

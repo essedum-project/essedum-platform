@@ -1,0 +1,21 @@
+<div class="totheright modal-header selector-769-2">
+    <button mat-icon-button matTooltip="Close" matTooltipPosition="above" (click)="closeDialog()">
+        <mat-icon>close</mat-icon>
+    </button>
+</div>
+
+<div class="lfx-u-mar-16">
+    <div class="hidden-details">
+        <div style="margin-bottom: 1%;">
+            <div class="space">
+                <h3 class="id">Output Artifacts</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab_content" id="tabContent_1">
+        <div class="lfx-c-panel__content">
+            <div class=""><json-tree [value]="outputData"></json-tree></div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,551 @@
+<!-- <section [ngBusy]="{busy:busy,message:'Loading...'}" class="selector-764-1"> -->
+<div class="row">
+  <div class="col-lg-12">
+    <div class="lfx-l-level1-middle-col">
+      <div class="lfx-l-level2-middle-ctr">
+        <div class="lfx-l-level2-middle-col">
+          <div class="align-items-center justify-content-between d-flex">
+            <div class="selector-model-title-head d-flex align-items-center">
+              <span class="">
+                <i
+                  class="fa fa-long-arrow-left back-icon"
+                  aria-hidden="true"
+                  (click)="navigateBack()"
+                ></i>
+              </span>
+              <span class="aip-desc-title lfx-u-header-xxl"
+                ><span style="color: #737373">Pipeline: </span
+                >{{ pipelineAlias | titlecase }}
+              </span>
+            </div>
+            <div class="selector-model-title-tail">
+              <ul
+                class="d-flex justify-content-between align-items-center py-2 px-4"
+              >
+                <li
+                  class="aip-cursor li-style"
+                  style="padding: 5px 13px 2px 0px"
+                  (click)="openModal(content4)"
+                >
+                  <span
+                    matTooltip="{{ addTags }}"
+                    matTooltipPosition="{{ tooltipPoition }}"
+                    class="aip-led-icons"
+                  >
+                    <mat-icon
+                      class="lfx-u-mar-r-16 aip-led-icons"
+                        style="color: gray;"
+                      (click)="openModal(content4)"
+                      >local_offer</mat-icon
+                    >
+                  </span>
+                  <ng-template #content4 let-modal>
+                    <app-tags
+                      [data]="card"
+                      [entityType]="entity"
+                      [componentType]="'pipelines'"
+                    ></app-tags>
+                  </ng-template>
+                </li>
+                <li class="li-style">
+                    <span
+                    matTooltip="Start"
+                    [matTooltipPosition]="tooltipPoition"
+                    >
+                    <mat-icon
+                      class="lfx-u-mar-r-16 aip-led-icons"
+                      style="color: gray;"
+                      (click)="runPipeline()"
+                      >play_arrow</mat-icon
+                    >
+                    </span>
+                </li>
+                <li class="li-style">
+                  <span matTooltip="Save" matTooltipPosition="above">
+                    <mat-icon
+                      class="lfx-u-mar-r-16 aip-led-icons"
+                       style="color: gray;" 
+                      (click)="saveJson(streamItem.name)"
+                      >save</mat-icon
+                    >
+                  </span>
+                </li>
+                <li class="li-style">
+                  <span matTooltip="Duplicate" matTooltipPosition="above">
+                    <mat-icon
+                      class="lfx-u-mar-r-16 aip-led-icons"
+                        style="color: gray;"
+                      (click)="copyPipeline()"
+                      >content_copy</mat-icon
+                    >
+                  </span>
+                </li>
+                <li class="li-style" *ngIf="!isExpand && initiativeView">
+                  <span
+                    matTooltip="Maximize"
+                    [matTooltipPosition]="tooltipPoition"
+                  >
+                    <mat-icon
+                      class="lfx-u-mar-r-16 aip-led-icons"
+                      style="font-size: 24px"
+                      (click)="expandCollapse()"
+                        style="color: gray;"
+                      >fullscreen</mat-icon
+                    >
+                  </span>
+                </li>
+                <li
+                  class="li-style"
+                  (click)="expandCollapse()"
+                  *ngIf="isExpand && initiativeView"
+                >
+                    <span matTooltip="Minimize" matTooltipPosition="above">
+                    <mat-icon
+                      class="lfx-u-mar-r-16 aip-led-icons"
+                      style="font-size: 24px"
+                        style="color: gray;"
+                    >fullscreen</mat-icon>
+                    </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div
+            class="lfx-u-mar-t-16 mx-4 px-5 my-4 mt-0 aip-panel-shadow"
+            style="background-color: white"
+          >
+            <mat-tab-group disableRipple>
+              <mat-tab label="Configuration" class="lfx-u-header-xl">
+                <div class="tab-content mb-5">
+                  <div class="col-md-12">
+                    <div class="d-flex">
+                      <span class="fs" style="margin-top: 20px !important; margin-right: 5px;" >Type</span>
+                      <mat-form-field class="lfx-u-mar-lr-8" appearance="fill">
+                        <mat-select
+                          [(ngModel)]="data.filetype"
+                          [required]="true"
+                          [disabled]="false"
+                          (selectionChange)="onInputTypeChange($event)"
+                        >
+                          <mat-option
+                            *ngFor="let type of filetypes"
+                            [value]="type.value"
+                            >{{ type.viewValue }}</mat-option
+                          >
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <!-- <div class="row">
+                                <div class="col d-flex">
+                                    <label class="col-2">Arguments:</label>
+                                    <mat-form-field class="col-4">
+                                        <textarea cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="5" type="text" class="txtInput" matInput
+                                            [(ngModel)]="data.arguments"></textarea>
+                                    </mat-form-field>
+                                </div>
+                            </div> -->
+                  <div class="col-md-12">
+                    <div class="d-flex selector-764-14">
+                      <div class="col-2 selector-764-15  d-flex align-items-start" style="gap: 8px;">
+                        <span style="font-size: 14px;size: 500;">Arguments:</span>
+                        <mat-icon
+                          class="selector-764-17 fs"
+                          matTooltip="Add Argument"
+                          (click)="displayDialog('ADD', '', '', 'Text', 0, '')"
+                          style="vertical-align: middle; cursor: pointer;"
+                        >add</mat-icon>
+                        <mat-icon
+                          class="selector-764-18 fs"
+                          matTooltip="Remove All"
+                          (click)="deleteAll()"
+                          style="vertical-align: middle; cursor: pointer;"
+                        >remove</mat-icon>
+                      </div>
+                      <mat-tree
+                        [dataSource]="dataSource"
+                        [treeControl]="treeControl"
+                        class="example-tree col-8 selector-764-19"
+                      >
+                        <mat-tree-node
+                          *matTreeNodeDef="let node"
+                          matTreeNodeToggle=""
+                          class="selector-764-20"
+                        >
+                          <li class="mat-tree-node selector-764-21">
+                            <button
+                              mat-icon-button=""
+                              disabled=""
+                              class="selector-764-22"
+                            ></button>
+                            <span
+                              style="max-width: -webkit-fill-available"
+                              class="selector-764-23"
+                              >{{
+                                node.name +
+                                  " :
+                                                            " +
+                                  getAlias(node)
+                              }}&nbsp;&nbsp;
+                              <mat-icon
+                                class="selector-764-24"
+                                matTooltip="Edit"
+                                style="vertical-align: middle; cursor: pointer;"
+                                (click)="
+                                  displayDialog(
+                                    'MODIFY',
+                                    node.name,
+                                    node.value,
+                                    node.type,
+                                    node.index,
+                                    node.alias
+                                  )
+                                "
+                              >edit</mat-icon>&nbsp;&nbsp;
+                                <mat-icon
+                                class="selector-764-25"
+                                matTooltip="Delete"
+                                (click)="deleteNode(node.index)"
+                                style="vertical-align: middle; cursor: pointer;"
+                                >remove</mat-icon>
+                            </span>
+                          </li>
+                        </mat-tree-node>
+                      </mat-tree>
+                    </div>
+                    <mat-tab-group disableRipple>
+                      <!-- <mat-tab label="Attributes" class="lfx-u-header-xl">
+                                        <div class="tab_content mb-5" id="tabContent_1">
+                                            <div class="config-container" style="margin-bottom: 6.6rem;">
+                                                <app-app-config [configData]="dynamicParamsArray" [isauth]="isAuth"
+                                                    (configDataChange)="onConfigDataChange($event)"></app-app-config>
+                                                <app-user-secrets [configData]="dynamicSecretsArray" [isauth]="isAuth"
+                                                    (configDataChange)="onSecretsDataChange($event)"></app-user-secrets>
+                                            </div>
+
+                                        </div>
+                                    </mat-tab>
+                                    <mat-tab label="Runtimes" class="lfx-u-header-xl">
+                                        <div class="col-md-12 lfx-u-mar-t-16 mb-5" *ngIf="pipelineType!='Apps'">
+                                            <span class="lfx-u-mar-t-24 lfx-u-mar-l-16">Choose default runtime</span>
+                                            <mat-radio-group
+                                                [disabled]="false"
+                                                [(ngModel)]="defaultRuntime"
+                                                (change)="defaultRuntimeChange($event)"
+                                                style="display: flex; flex-direction: column;"
+                                            >
+                                                <mat-radio-button
+                                                    *ngFor="let runtime of runTypes"
+                                                    [value]="runtime.viewValue"
+                                                    style="display: list-item; line-height: 4rem;"
+                                                >
+                                                    {{ runtime.viewValue }}
+                                                </mat-radio-button>
+                                            </mat-radio-group>
+                                        </div>
+                                        <div *ngIf="pipelineType =='Apps'">
+                                            <div class="col-md-12 col-lg-12 aip-desc lfx-u-pad-b-8 lfx-u-mar-t-24 lfx-u-pad-tb-16 row aip-panel-shadow"
+                                                style="align-items: start;width: 99%;margin-left: 4px;">
+                                                <div
+                                                    class="col-md-6 aip-panel-shadow lfx-u-pad-b-8 lfx-u-mar-t-24 lfx-u-pad-tb-16">
+                                                    <div class="flex-wrap justify-content-between"
+                                                        style="padding-top: 8px;display:flex;align-items: center;padding-bottom: 8px;">
+
+                                                        <div class="">
+                                                            <mat-checkbox (change)="onEventChangeIsApp($event)" [checked]="is_app">Is it an App ?</mat-checkbox>
+                                                        </div>
+
+
+                                                        <div *ngIf="is_app" class="">
+                                                            <button mat-raised-button
+                                                                style="background-color: #0a142f; color: white;"
+                                                                [disabled]="false"
+                                                                (click)="assignRuntime()"
+                                                                onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                                                                onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                                                Assign Port
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-12 lfx-u-mar-t-30 mb-20">
+
+                                                        <span class="lfx-u-mar-t-24 lfx-u-mar-l-16">Select
+                                                            Runtime</span>
+                                                        <div class=""
+                                                            style="height: 28vh;overflow: auto;margin-top: 1.5rem;">
+                                                            <mat-radio-group
+                                                                [disabled]="false"
+                                                                [(ngModel)]="defaultRuntime"
+                                                                (change)="defaultRuntimeChange($event)"
+                                                                style="display: flex; flex-direction: column;"
+                                                            >
+                                                                <mat-radio-button
+                                                                    *ngFor="let runtime of runTypes"
+                                                                    [value]="runtime.viewValue"
+                                                                    style="display: list-item; line-height: 4rem;"
+                                                                >
+                                                                    {{ runtime.viewValue }}
+                                                                </mat-radio-button>
+                                                            </mat-radio-group>
+                                                        </div>
+                                                    </div>
+
+
+                                                </div>
+
+                                                <div class="col-md-6"
+                                                    style="padding-top: 8px;display:flex;padding-bottom: 8px;">
+
+                                                    <div
+                                                        class="col-md-12 col-lg-12 aip-desc lfx-u-pad-b-8 lfx-u-mar-t-16 lfx-u-pad-tb-16 aip-panel-shadow">
+                                                        <div class="ml-2 row col-md-12">
+                                                            <div class="row mt-4" style="display: block;">
+                                                                <div class="flex-wrap justify-content-between"
+                                                                    style="padding-top: 8px;display:flex;align-items: center;padding-bottom: 8px;">
+                                                                    <span class="lfx-u-body-sm aip-label-color"
+                                                                        matTooltip="Refresh"
+                                                                        [matTooltipPosition]="tooltipPoition">
+                                                                        <i class="aip-led-icons icon icon_Refresh x-24"
+                                                                            (click)="refreshPipelineDataResponse()"></i>
+                                                                    </span>
+                                                               
+                                                                    <button mat-raised-button
+                                                                        style="background-color: #0a142f; color: white;"
+                                                                        [disabled]="false" (click)="releasePort()"
+                                                                        onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                                                                        onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                                                        Release Port
+                                                                    </button>
+                                                                </div>
+                                                                <div class="aip-model-type col-md-4">
+                                                                    <div class="lfx-u-body-sm aip-label-color">
+                                                                        Runtime
+                                                                    </div>
+                                                                    <div
+                                                                        class="lfx-u-body-md d-flex align-items-center mt-3">
+                                                                        <span
+                                                                            style="width: 90%;line-height: 1.9rem;letter-spacing: .1rem; word-wrap: break-word;background: var(--background-colour)  0% 0% no-repeat padding-box;">
+                                                                            {{pipelineDataResponse.runtime}} </span>
+                                                                        <span class="mx-4"><i
+                                                                                class="aip-led-icons icon x-32 copy-icon"
+                                                                                (click)="copyModel(card.artifacts)"></i></span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="aip-model-type col-md-4">
+                                                                    <div class="lfx-u-body-sm aip-label-color">Assigned
+                                                                        Port
+                                                                    </div>
+                                                                    <div class="lfx-u-body-md mt-3">
+                                                                        {{pipelineDataResponse.assignedPort}}</div>
+                                                                </div>
+
+                                                                <div class="aip-model-type col-md-4">
+                                                                    <div class="lfx-u-body-sm aip-label-color">Endpoint
+                                                                        URL
+                                                                    </div>
+                                                                    <div class="lfx-u-body-md mt-3">
+                                                                        {{pipelineDataResponse.endpointUrl}}</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </mat-tab> -->
+                      <mat-tab label="Environment" class="lfx-u-header-xl">
+                        <div class="tab_content" id="tabContent_1">
+                          <div
+                            class="config-container"
+                            style="margin-bottom: 6.6rem"
+                          >
+                            <app-app-config
+                              [configData]="dynamicEnvArray"
+                              [isauth]="isAuth"
+                              (configDataChange)="onEnvDataChange($event)"
+                            ></app-app-config>
+                          </div>
+                        </div>
+                      </mat-tab>
+                    </mat-tab-group>
+                  </div>
+                  <div class="col-md-12">
+                    <app-user-secrets
+                      [configData]="dynamicSecretsArray"
+                      [isauth]="isAuth"
+                      (configDataChange)="onSecretsDataChange($event)"
+                    ></app-user-secrets>
+                  </div>
+                  <!-- <div class="row selector-764-26">
+                            <div class="col d-flex selector-764-27">
+                                <label class="col-2 selector-764-28">Datasets:&nbsp;&nbsp;
+                                    <span class="selector-764-29">
+                                        <a *ngIf="!isAuth" class="fa fa-plus selector-764-30" href="javascript:void(0);"
+                                            matTooltip="Add Dataset" (click)="showDatasets('')"></a>&nbsp;&nbsp;
+                                    </span>
+                                </label>
+                                <mat-tree [dataSource]="dataSet" [treeControl]="treeControl"
+                                    class="example-tree col-8 selector-764-31">
+                                    <mat-tree-node *matTreeNodeDef="let data" matTreeNodeToggle="" class="selector-764-32">
+                                        <li class="mat-tree-node selector-764-33">
+                                            <button mat-icon-button="" disabled="" class="selector-764-34"></button>
+                                            <span style="max-width: -webkit-fill-available"
+                                                class="selector-764-35">{{data.name}}&nbsp;&nbsp;
+                                                <a *ngIf="!isAuth" class="fa fa-pencil selector-764-36"
+                                                    href="javascript:void(0);" matTooltip="Edit"
+                                                    (click)="showDatasets(data)"></a>&nbsp;&nbsp;
+                                                <a *ngIf="!isAuth" class="fa fa-info selector-764-37"
+                                                    href="javascript:void(0);" matTooltip="View"
+                                                    (click)="showInfo(data)"></a>&nbsp;&nbsp;
+                                                <a *ngIf="!isAuth" class="fa fa-minus selector-764-38"
+                                                    href="javascript:void(0);" matTooltip="Delete"
+                                                    (click)="deleteDataset(data)"></a>
+                                            </span>
+                                        </li>
+                                    </mat-tree-node>
+                                </mat-tree>
+                            </div>
+                        </div> -->
+                </div>
+                <!--/ng-template-->
+              </mat-tab>
+              <mat-tab label="Script" class="lfx-u-header-xl">
+                <div class="tab-content selector-764-41 mb-5">
+                  <div class="col-md-12">
+                    <div class="d-flex">
+                      <span class="lfx-u-mar-t-24 lfx-u-mar-l-16 fs"
+                        >Select run type</span
+                      >
+                      <mat-form-field class="lfx-u-mar-lr-8" appearance="fill">
+                        <mat-select
+                          [(ngModel)]="selectedRunType"
+                          [required]="true"
+                          [disabled]="false"
+                          placeholder=""
+                        >
+                          <mat-option
+                            *ngFor="let type of runTypes"
+                            [value]="type.value"
+                            >{{ type.viewValue }}</mat-option
+                          >
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <div style="height: max-content">
+                    <app-enl-code-editor
+                      id="ele"
+                      *ngIf="loadScript"
+                      [script]="script"
+                      [lang]="lang"
+                      (scriptChange)="onScriptChange($event)"
+                      class="selector-764-48"
+                    >
+                    </app-enl-code-editor>
+                  </div>
+                </div>
+              </mat-tab>
+              <mat-tab label="Jobs" class="lfx-u-header-xl">
+                <app-jobs *ngIf="streamItem" [cname]="streamItem.name"></app-jobs>
+                <!--/ng-template-->
+              </mat-tab>
+              <!-- <mat-tab label="Draw">
+                        <ng-template mat-tab-label>Draw</ng-template>
+                    </mat-tab> -->
+            </mat-tab-group>
+          </div>
+          <!-- <span class="label label-danger" style="float: right;">{{data.version}}</span> -->
+        </div>
+        <div *ngIf="!isExpand" class="lfx-l-level2-right-col lfx-u-pad-t-32">
+          <mat-card>
+            <div class="lfx-c-panel__content">
+              <div class="lfx-u-pad-16">
+                <div class="lfx-u-header-lg lfx-u-mar-b-16">
+                  Connected Artifacts
+                </div>
+                <div
+                  class=""
+                  *ngIf="component.length > 0; else noRelatedComponent"
+                >
+                  <mat-nav-list>
+                    <mat-list-item
+                      class="aip-daa"
+                      *ngFor="let component of component"
+                    >
+                      <app-related-component
+                        [component]="component"
+                        [childId]="card.cid"
+                        [parentType]="'PIPELINE'"
+                        (reload)="reload($event)"
+                      ></app-related-component>
+                    </mat-list-item>
+                  </mat-nav-list>
+                </div>
+                <ng-template #noRelatedComponent>
+                  <div
+                    class="lfx-u-body-md lfx-u-text-neutral-80 aip-desc-ellipsis"
+                  >
+                    <div
+                      class="d-flex justify-content-center align-items-center flex-column"
+                    >
+                      <img
+                        src="assets/images/aip_empty_state_leds.svg"
+                        class="img-responsive"
+                        alt="aip_empty_state_leds"
+                        style="width: 15rem"
+                      />
+                      No connected artifacts for now!
+                    </div>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+            <div class="lfx-u-mar-t-8">
+              <li *ngIf="linkAuth">
+                <div *ngIf="relatedloaded">
+                  <div class="lds-ring">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                  </div>
+                </div>
+                <div
+                  class="aip-cursor lfx-u-pad-l-8 lfx-u-pad-b-8"
+                  *ngIf="!relatedloaded"
+                  (click)="openModal(linker)"
+                >
+                  <div
+                    class="d-flex aip-daa lfx-u-mar-8 lfx-u-pad-8 align-items-center"
+                    style="width: max-content"
+                  >
+                    <div class="lfx-u-mar-lr-8">
+                      <i class="icon x-16 icon_link" style="color: #8626c3"></i>
+                    </div>
+                    <div class="lfx-u-body-md">Link Artifacts</div>
+                  </div>
+                </div>
+                <ng-template #linker let-modal>
+                  <app-create-linked
+                    [data]="this.streamItem.cid"
+                    [type]="'PIPELINE'"
+                    (refeshrelated)="refeshrelated($event)"
+                    [component]="component"
+                  ></app-create-linked>
+                </ng-template>
+              </li>
+            </div>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- </section> -->
+<!-- </section> -->
