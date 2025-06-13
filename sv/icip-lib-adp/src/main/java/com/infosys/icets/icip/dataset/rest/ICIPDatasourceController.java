@@ -116,7 +116,7 @@ public class ICIPDatasourceController {
 	 * @return the datasources
 	 */
 	@GetMapping("/all")
-	public ResponseEntity<List<ICIPDatasource>> getDatasources(@RequestParam String org) {
+	public ResponseEntity<List<ICIPDatasource>> getDatasources(@RequestParam("org") String org) {
 		logger.info("Fetching datasource for {}", org);
 		List<ICIPDatasource> datasources = iICIPDatasourceService.findByOrganization(org);
 		List<ICIPDatasource> coreDatasources = iICIPDatasourceService.findByOrganization("Core");
