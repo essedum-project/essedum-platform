@@ -1,0 +1,372 @@
+<div class="lfx-u-pad-16" style="position: relative">
+  <div class="d-flex justify-content-between align-items-center px-4">
+    <div class="justify-content-start align-items-center d-flex">
+      <h2 style="color: var(--base-color)">Dataset Enrichments</h2>
+    </div>
+    <div class="d-flex justify-content-end">
+      <button
+        type="button"
+        class="btn-close"
+        aria-label="Close"
+        (click)="closeModal()"
+      >
+        <i class="icon x-16 close-icon"></i>
+      </button>
+    </div>
+
+    <mat-grid-list cols="1" rowHeight="fit">
+      <mat-grid-tile>
+        <div panel panelRounded panelBorder class="lfx-u-mar-tb-16 lfx-u-pad-8">
+          <div>
+            <div *ngIf="loadingPageForSpinner">
+              <mat-card-content>
+                <mat-card>
+                  <mat-progress-spinner
+                    *ngIf="loadingPageForSpinner"
+                    mode="indeterminate"
+                    color="primary"
+                    [diameter]="40"
+                    [strokeWidth]="4"
+                  >
+                  </mat-progress-spinner>
+                </mat-card>
+              </mat-card-content>
+            </div>
+            <div *ngIf="!loadingPageForSpinner" class="row">
+              <div thirdColPanel *ngIf="cards">
+                <div>
+                  <div
+                    class="container d-flex justify-content-between lfx-u-mar-8 lfx-u-mar-lr-16 align-items-center"
+                  >
+                    <div>
+                      <h2
+                        class="lfx-u-header-xl lfx-u-ellipsis"
+                        style="line-height: 2rem"
+                      >
+                        Select Task to trigger:
+                      </h2>
+                    </div>
+                    <div class="d-flex" *ngIf="type">
+                      <mat-tooltip
+                        class="lfx-u-pad-16"
+                        [matTooltip]="'Transcription'"
+                        [matTooltipPosition]="tooltipPoition"
+                      >
+                        <span
+                          class="aip-cursor"
+                          style="font-size: large"
+                          (click)="trigger('Transcribe')"
+                        >
+                          <i
+                            class="lfx-u-mar-r-16 icon x-24 icon_blog aip-led-icons"
+                          ></i>
+                        </span>
+                      </mat-tooltip>
+                      <div class="d-flex">
+                        <mat-tooltip
+                          class="lfx-u-pad-16"
+                          [matTooltip]="'Translation'"
+                          [matTooltipPosition]="tooltipPoition"
+                        >
+                          <span
+                            class="aip-cursor"
+                            style="font-size: large"
+                            (click)="translationn()"
+                          >
+                            <i
+                              class="lfx-u-mar-r-16 icon x-24 icon_languages aip-led-icons"
+                            ></i>
+                          </span>
+                        </mat-tooltip>
+                      </div>
+                      <div class="d-flex">
+                        <mat-tooltip
+                          class="lfx-u-pad-16"
+                          [matTooltip]="'Summary'"
+                          [matTooltipPosition]="tooltipPoition"
+                        >
+                          <span
+                            class="aip-cursor"
+                            style="font-size: large"
+                            (click)="trigger('Summary')"
+                          >
+                            <i
+                              class="lfx-u-mar-r-16 icon x-24 document-icon aip-led-icons"
+                            ></i>
+                          </span>
+                        </mat-tooltip>
+                      </div>
+                      <div class="d-flex">
+                        <mat-tooltip
+                          class="lfx-u-pad-16"
+                          [matTooltip]="'Questions'"
+                          [matTooltipPosition]="tooltipPoition"
+                        >
+                          <span
+                            class="aip-cursor"
+                            style="font-size: large"
+                            (click)="trigger('Questions')"
+                          >
+                            <i
+                              class="lfx-u-mar-r-16 icon x-24 icon_FAQ aip-led-icons"
+                            ></i>
+                          </span>
+                        </mat-tooltip>
+                      </div>
+                      <div class="d-flex">
+                        <mat-tooltip
+                          class="lfx-u-pad-16"
+                          [matTooltip]="'Refresh'"
+                          [matTooltipPosition]="'above'"
+                        >
+                          <span
+                            class="aip-cursor"
+                            style="font-size: large"
+                            (click)="ngOnInit()"
+                          >
+                            <i
+                              class="aip-led-icons icon purple x-24 icon x-16 icon_Refresh"
+                            ></i>
+                          </span>
+                        </mat-tooltip>
+                        <mat-form-field appearance="fill" class="w-100">
+                          <mat-label>Search</mat-label>
+                          <input
+                            matInput
+                            type="text"
+                            placeholder="Search..."
+                            [(ngModel)]="searchInp"
+                            (ngModelChange)="searchfilteredTopics($event)"
+                          />
+                        </mat-form-field>
+                      </div>
+                    </div>
+                    <div
+                      class="aip-link-card-height d-flex justify-content-center"
+                    >
+                      <div
+                        *ngIf="cardData.length > 0"
+                        [ngClass]="
+                          showLog ? 'aip-link-card-mini' : 'aip-link-card'
+                        "
+                      >
+                        <div
+                          class="aip-cursor"
+                          *ngFor="let result of cardData; index as i"
+                          [ngStyle]="{
+                            border:
+                              result.eventName == selectedTopic
+                                ? '2px solid #8626C3'
+                                : '2px solid #0000ff00',
+                            'pointer-events': result.linked ? 'none' : 'auto'
+                          }"
+                          style="border-radius: 1.8rem"
+                          (click)="linked(result.eventName)"
+                        >
+                          <mat-card *ngIf="result.eventName != null">
+                            <mat-card-header>
+                              <mat-card-title>
+                                <div class="d-flex justify-content-between">
+                                  <h2 class="lfx-u-header-md aip-lnk-ellipsis">
+                                    {{ result.eventName }}
+                                  </h2>
+                                  <span>
+                                    <mat-tooltip
+                                      *ngIf="result.status == 'COMPLETED'"
+                                      [matTooltip]="'Completed'"
+                                      [matTooltipPosition]="'above'"
+                                    >
+                                      <i
+                                        class="icon x-16 icon-process-complete green"
+                                      ></i>
+                                    </mat-tooltip>
+                                    <mat-tooltip
+                                      *ngIf="result.status == 'RUNNING'"
+                                      [matTooltip]="'In-Progress'"
+                                      [matTooltipPosition]="'above'"
+                                    >
+                                      <i
+                                        class="icon x-16 icon-inprogressBlue yellow"
+                                      ></i>
+                                    </mat-tooltip>
+                                    <mat-tooltip
+                                      *ngIf="result.status == 'ERROR'"
+                                      [matTooltip]="'Failed'"
+                                      [matTooltipPosition]="'above'"
+                                    >
+                                      <i
+                                        class="icon x-16 icon-rejected red"
+                                      ></i>
+                                    </mat-tooltip>
+                                    <mat-tooltip
+                                      *ngIf="result.status == 'CANCELLED'"
+                                      [matTooltip]="'Cancelled'"
+                                      [matTooltipPosition]="'above'"
+                                    >
+                                      <i
+                                        class="icon x-16 icon-rejected red"
+                                      ></i>
+                                    </mat-tooltip>
+                                  </span>
+                                </div>
+                              </mat-card-title>
+                            </mat-card-header>
+                          </mat-card>
+                        </div>
+                      </div>
+                      <div
+                        *ngIf="!cardData.length > 0"
+                        class="d-flex justify-content-center align-items-center flex-column"
+                      >
+                        <img
+                          src="assets/images/aip_empty_state_leds.svg"
+                          class="img-responsive"
+                          alt="aip_empty_state_leds"
+                          style="width: 15rem"
+                        />
+                        No records found.
+                      </div>
+                      <div style="width: 50%" *ngIf="showLog">
+                        <div class="lfx-u-pad-lr-16">
+                          <div class="d-flex lfx-u-pad-l-8 lfx-u-body-sm">
+                            <p style="color: var(--base-color)">Logs -</p>
+                            &nbsp;
+                            <p>{{ selectedTopic }}</p>
+                          </div>
+                          <div
+                            class="lfx-u-pad-l-16 lfx-u-body-md mt-3 lfx-u-pad-l-4"
+                            style="
+                              white-space: pre-line;
+                              height: 19rem;
+                              overflow: auto;
+                            "
+                          >
+                            {{ logs || json }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div *ngIf="selectedTopic">
+                      <hr />
+                      <button
+                        mat-raised-button
+                        style="background-color: #0a142f; color: white"
+                        *ngIf="!showLog"
+                        [disabled]="false"
+                        (click)="showOrHideLog()"
+                        onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                        onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';"
+                      >
+                        Show Logs
+                      </button>
+                      <button
+                        mat-raised-button
+                        style="background-color: #0a142f; color: white"
+                        *ngIf="showLog"
+                        [disabled]="false"
+                        (click)="showOrHideLog()"
+                        onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                        onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';"
+                      >
+                        Hide Logs
+                      </button>
+                      <button
+                        mat-raised-button
+                        style="background-color: #0a142f; color: white"
+                        *ngIf="cardStatus == 'ERROR'"
+                        [disabled]="false"
+                        (click)="retryLinkKB(selectedTopic)"
+                        onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                        onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';"
+                      >
+                        Retry
+                      </button>
+                      <div
+                        class="d-flex justify-content-between lfx-u-pad-t-8 lfx-u-pad-b-4"
+                      >
+                        <div
+                          class="d-flex justify-content-between lfx-u-pad-t-8 lfx-u-pad-b-4"
+                        >
+                          <div class="lfx-u-pad-l-8" *ngIf="startTime">
+                            <div class="lfx-u-body-sm aip-label-color">
+                              Triggered on:
+                            </div>
+                            <div class="lfx-u-body-md mt-3">
+                              {{ startTime }}
+                            </div>
+                          </div>
+                          <div class="lfx-u-pad-l-8" *ngIf="endTime">
+                            <div class="lfx-u-body-sm aip-label-color">
+                              Finished on:
+                            </div>
+                            <div class="lfx-u-body-md mt-3">
+                              {{ endTime }}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div *ngIf="translationConfig">
+                    <div class="row lfx-u-mar-32">
+                      <mat-form-field appearance="fill" class="w-100">
+                        <mat-label>Language to translate</mat-label>
+                        <input
+                          type="text"
+                          matInput
+                          [matAutocomplete]="auto"
+                          [(ngModel)]="language"
+                          [required]="true"
+                          placeholder="Select Language"
+                          (optionSelected)="translate($event.option.value)"
+                          (ngModelChange)="filterLanguages($event)"
+                        />
+                        <mat-autocomplete
+                          #auto="matAutocomplete"
+                          (optionSelected)="translate($event.option.value)"
+                        >
+                          <mat-option
+                            *ngFor="let option of filteredLanguageOpt"
+                            [value]="option"
+                          >
+                            {{ option }}
+                          </mat-option>
+                        </mat-autocomplete>
+                        <mat-error *ngIf="!language"
+                          >This field is required</mat-error
+                        >
+                      </mat-form-field>
+                      <mat-hint class="custom-hint-or-error"></mat-hint>
+                    </div>
+                    <button
+                      mat-raised-button
+                      style="background-color: #0a142f; color: white"
+                      [disabled]="false"
+                      (click)="cancelTranslation()"
+                      onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                      onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      mat-raised-button
+                      style="background-color: #0a142f; color: white"
+                      [disabled]="errMsgFlag"
+                      (click)="closeDialog(); trigger('Translation')"
+                      onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                      onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';"
+                    >
+                      Translate
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Close the div opened for panel/panelRounded/panelBorder -->
+        </div>
+        <!-- Close the mat-grid-tile content div -->
+      </mat-grid-tile>
+    </mat-grid-list>
+  </div>
+</div>

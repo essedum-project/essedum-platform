@@ -31,18 +31,9 @@
                     >
                       <li *ngIf="!isGitUrl">
                         <mat-menu #overflowMenu="matMenu">
-                            <button mat-menu-item (click)="ingestDialog(ingest)">
-                                <span class="lfx-u-mar-l-8">Generate Embeddings</span>
-                            </button>
-                            <ng-template #ingest let-modal>
-                                <app-semantic-search-dialog [data]="card.name"></app-semantic-search-dialog>
-                            </ng-template>
-                            <button mat-menu-item *ngIf="AnnotateFlag" (click)="ConfigDialog(annotation)">
-                                <span class="lfx-u-mar-l-8">Annotation Settings</span>
-                            </button>
-                            <ng-template #annotation let-modal>
-                                <app-annotate-config [data]="card.name"></app-annotate-config>
-                            </ng-template>
+                           
+                           
+                          
                             <button mat-menu-item *ngIf="type" (click)="pipelineDialog(pipelines)">
                                 <span class="lfx-u-mar-l-8">Dataset Enrichments</span>
                             </button>
@@ -77,29 +68,8 @@
                           </span>
                         </mat-tooltip>
                       </li>
-                      <li (click)="expandCollapse()" *ngIf="!isExpand">
-                        <mat-tooltip
-                          [matTooltip]="'Maximize'"
-                          [matTooltipPosition]="tooltipPoition"
-                        >
-                          <i
-                            class="lfx-u-mar-r-16 icon x-24 icon_maximise aip-led-icons"
-                          ></i>
-                        </mat-tooltip>
-                      </li>
-                      <li
-                        (click)="expandCollapse()"
-                        *ngIf="isExpand && initiativeView"
-                      >
-                        <mat-tooltip
-                          [matTooltip]="'Minimize'"
-                          [matTooltipPosition]="tooltipPoition"
-                        >
-                          <i
-                            class="lfx-u-mar-r-16 icon x-24 icon_minimise aip-led-icons"
-                          ></i>
-                        </mat-tooltip>
-                      </li>
+                   
+                     
                     </ul>
                   </div>
                 </span>
@@ -598,20 +568,7 @@
                       </div>
                     </div>
                     <div panelBody>
-                      <div>
-                        <app-viewer-folder
-                          *ngIf="
-                            views == 'GIT View' &&
-                            datasetData &&
-                            !isEmptyArray(datasetData)
-                          "
-                          [AnnotateFlag]="AnnotateFlag"
-                          [ResponseList]="datasetData"
-                          [cardData]="card"
-                          [path]="this.fileName"
-                          (refresh)="getActions()"
-                        ></app-viewer-folder>
-                      </div>
+                   
                       <div *ngIf="!datasetData && !datasetDataErr">
                         <mat-card>
                           <div

@@ -11,11 +11,9 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { Services } from '../services/service';
 import { TagsService } from '../services/tags.service';
-//import { LedsModalService } from 'leds-lib';
 import { HttpParams } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog.component/confirm-delete-dialog.component';
-// import { LeapTelemetryService, OpenTelemetryService } from 'com-lib-util';
 import { Location } from '@angular/common';
 
 @Component({
@@ -76,12 +74,9 @@ export class DatasourceComponent implements OnInit, OnChanges {
   tagSelected: boolean = false;
   datasourceName:any;
   constructor(
-    // private telemetryService: LeapTelemetryService,
-    // private telemetry: OpenTelemetryService,
     private route: ActivatedRoute,
     private router: Router,
     private service: Services,
-    // private modalService: LedsModalService,
     private changeDetectionRef: ChangeDetectorRef,
     public tagService: TagsService,
     private dialog: MatDialog,
@@ -123,19 +118,14 @@ export class DatasourceComponent implements OnInit, OnChanges {
       this.getCards(this.pageNumber,this.pageSize);
     }
   }
-  // telemetryCall(){
-  //   this.telemetry.startTelemetry('aip-app','DatasourceComponent',sessionStorage.getItem('organization'))
-  // }
 
   ngOnInit(): void {
-  // this.telemetryCall()
     this.updatePageSize();
     const currentRoute = this.router.url;
     if (currentRoute === '/landing/aip/core-datasources') {
       this.cardTitle = 'Core Datasources';
     }
     this.records = false;
-    // this.telemetryImpression();
     this.pageSize = this.itemsPerPage[0];
     this.route.queryParams.subscribe((params) => {
       // Update this.pageNumber if the page query param is present
@@ -152,11 +142,6 @@ export class DatasourceComponent implements OnInit, OnChanges {
     });
     this.updateQueryParam(this.pageNumber,this.filt,this.selectedAdapterType.toString());
     this.getCards(this.pageNumber, this.pageSize);
-    // if (this.pageNumberChanged) {
-    //   this.pageNumber = 1;
-    //   this.startIndex = 0;
-    //   this.endIndex = 5;
-    // }
     if (this.pageNumber && this.pageNumber >= 5) {
       this.endIndex = this.pageNumber + 2;
       this.startIndex = this.endIndex - 5;
@@ -197,11 +182,6 @@ export class DatasourceComponent implements OnInit, OnChanges {
     this.location.replaceState(url);
   }
 
-  // telemetryImpression() {
-  //   this.telemetryService.start();
-  //   this.telemetryService.impression('aip-app', 'list', 'DatasourceComponent');
-  // }
-
   nextPage() {
     if (this.pageNumber + 1 <= this.noOfPages) {
       this.pageNumber += 1;
@@ -227,7 +207,6 @@ export class DatasourceComponent implements OnInit, OnChanges {
       }
     }
     this.updateQueryParam(this.pageNumber, this.filt,this.selectedAdapterType.toString());
-    //this.getCards(this.pageNumber, this.pageSize);
   }
   rowsPerPageChanged() {
     if (this.pageSize == 0) {
@@ -259,11 +238,6 @@ export class DatasourceComponent implements OnInit, OnChanges {
     });
   }
 
-  // desc() {
-  //   console.log("description");
-  //   // this.router.navigate(["View/:cardTitle"],{relativeTo:this.route,state:{data:this.cardTitle}});
-  //   this.router.navigate(["./view/" + this.cardTitle], { relativeTo: this.route });
-  // }
   numSequence(n: number): Array<number> {
     return Array(n);
   }
@@ -317,12 +291,10 @@ export class DatasourceComponent implements OnInit, OnChanges {
   }
 
   viewConnection(name) {
-    // this.telemetry.addTelemetryEvent('connection viewed');
     this.view = true;
     this.router.navigate(['./view/' + name, this.view], {
       relativeTo: this.route,
     });
-    // this.telemetry.addTelemetryEvent('connection viewed');
   }
   editConnection(name) {
     this.edit = true;
@@ -456,9 +428,7 @@ export class DatasourceComponent implements OnInit, OnChanges {
     }
   }
   open() {
-    // this.telemetry.addTelemetryEvent('Datasource Created');
     this.router.navigate(['create'], { relativeTo: this.route });
-    // this.telemetry.addTelemetryEvent('Datasource Created');
   }
 
   deleteAdapter(name: string) {
@@ -467,16 +437,10 @@ export class DatasourceComponent implements OnInit, OnChanges {
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'delete') {
         this.service.deleteDatasource(name).subscribe(
-          (res) => {
-            // this.service.messageNotificaionService(
-            //   'success',
-            //   'Connection Deleted Successfully'
-            // );
+          (res) => {            
             this.ngOnInit();
-            // this.telemetry.addTelemetryEvent('Connection Deleted');
           },
           (error) => {
-            // this.service.messageNotificaionService('error', 'Error');
           }
         );
       }
@@ -489,10 +453,7 @@ export class DatasourceComponent implements OnInit, OnChanges {
    });
   }
 
-  jobConsole(cardName) {
-    this.router.navigate(['../remote-console'], {  queryParams: {name: cardName}, relativeTo: this.route });
-  }
-
+ 
   selectedButton(i) {
     if (i == this.pageNumber) return { color: 'white', background: '#0094ff' };
     else return { color: 'black' };
@@ -515,9 +476,6 @@ export class DatasourceComponent implements OnInit, OnChanges {
     this.selectedAdapterType = [];
     this.getCards(1, this.pageSize);
   }
-  // ngOnDestroy() : void {
-  //   let activeSpan = this.telemetry.fetchActiveSpan();
-  //   this.telemetry.endTelemetry(activeSpan);
-  // }
+ 
 }
 

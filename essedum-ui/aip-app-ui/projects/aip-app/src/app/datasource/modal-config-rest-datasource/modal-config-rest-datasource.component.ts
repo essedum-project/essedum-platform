@@ -1,5 +1,4 @@
 import { Component, OnInit,OnChanges, Inject, Input, Output, EventEmitter, ViewChild, DoCheck } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormControl } from '@angular/forms';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 import { Services } from '../../services/service';
@@ -17,7 +16,6 @@ export class ModalConfigRestDatasourceComponent implements OnInit, OnChanges, Do
   @Output() close = new EventEmitter();
   datasetsoptions =[]
   constructor(
-    // @Inject(MAT_DIALOG_DATA) public matData: any,
     private Services: Services,) {
       
 
@@ -294,7 +292,6 @@ export class ModalConfigRestDatasourceComponent implements OnInit, OnChanges, Do
 
   OnDatasetChange(dataset){
     this.Services.getDatasetByNameAndOrg(dataset.name).subscribe(res=>{
-//console.log(this.AuthDetails)
       res.datasource.extras = "{}"
       this.AuthDetails['tokenDataset'] = res
     })
@@ -311,15 +308,6 @@ export class ModalConfigRestDatasourceComponent implements OnInit, OnChanges, Do
   }
   testConnection() {
     if (this.isInEdit || this.isWordValid(this.data.name)) {
-    //  if (this.scope != "" && this.grant_type != "" && this.authParams.client_id != "" && this.client_secret != "") {
-    //    this.authParams.scope = this.scope;
-    //    this.authParams.grant_type = this.grant_type;
-    //    this.authParams.client_id = this.client_id;
-    //    this.authParams.client_secret = this.client_secret;
-    //    if (this.username != "" && this.pswd != "") {
-    //      this.authParams.username = this.username;
-    //      this.authParams.pswd = this.pswd;
-    //    }
     
         this.AuthDetails['authParams'] = this.authParams;
       
@@ -352,11 +340,6 @@ export class ModalConfigRestDatasourceComponent implements OnInit, OnChanges, Do
       this.data.category = this.sourceType.category;
 
       this.connectionDetails.emit(this.data.connectionDetails);
-    
-      // this.addPorts['startport']=this.datasourcePort['connport-startrange'];
-      // this.addPorts['endport']=this.datasourcePort['connport-endrange'];
-      // this.addPorts['existartport']=this.datasourcePort['exiport-startrange'];
-      // this.addPorts['exiendport']=this.datasourcePort['exiport-endrange'];
       this.portDetails.emit(this.addPorts);
 
     } else {
@@ -394,7 +377,6 @@ export class ModalConfigRestDatasourceComponent implements OnInit, OnChanges, Do
                 Object.keys(this.sourceType.formats).forEach(keyValue => {
                   if(!keyValue.includes('-dp')){
                     this.formats.push(keyValue)
-                    // this.sourceType.storage[keyValue] = this.sourceType.attributes[keyValue]
                   }
                 })
               }              
@@ -430,12 +412,6 @@ export class ModalConfigRestDatasourceComponent implements OnInit, OnChanges, Do
     this.sourceType = this.datasourceTypes.filter(row => row.type === this.type)[0];
   }
 
-  // fetchGroups() {
-  //   this.Services.getDatasourceGroups(0, 12).subscribe((res) => {
-  //     this.groups = res;
-  //     this.groups.sort((a, b) => a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1);
-  //   })
-  // }
 
   selectedz(data) {
     return JSON.stringify(data);
@@ -542,13 +518,9 @@ export class ModalConfigRestDatasourceComponent implements OnInit, OnChanges, Do
     return true;
   }
   deleteLeapParamsRow(index){
-    //if (this.dynamicLeapParamsArray.length == 1) {
-    //  return false;
-    //} else {
       this.dynamicLeapParamsArray.splice(index, 1);
       this.testDataset.attributes['LeapParams'] = this.dynamicLeapParamsArray;
       return true;
-    //}
   }
 
   onAuthTypeChange() {
@@ -569,13 +541,9 @@ export class ModalConfigRestDatasourceComponent implements OnInit, OnChanges, Do
   }
 
   deleteParamsRow(index) {
-    //if (this.dynamicParamsArray.length == 1) {
-    //  return false;
-    //} else {
       this.dynamicParamsArray.splice(index, 1);
       this.testDataset.attributes['QueryParams'] = this.dynamicParamsArray;
       return true;
-    //}
   }
 
   addHeadersRow() {
@@ -589,19 +557,12 @@ export class ModalConfigRestDatasourceComponent implements OnInit, OnChanges, Do
   }
 
   deleteHeadersRow(index) {
-    //if (this.dynamicHeadersArray.length == 1) {
-    //  return false;
-    //} else {
       this.dynamicHeadersArray.splice(index, 1);
       this.testDataset.attributes['Headers'] = this.dynamicHeadersArray;
       return true;
-    //}
   }
 
   addUrlEncodedRow() {
-    // this.urlEncodedDynamic = { key: "", value: "" };
-    // this.urlEncodedArray.push(this.urlEncodedDynamic);
-    // return true;
     if (this.urlEncodedArray.length == 0) {
       this.urlEncodedArray = [];
     }
@@ -624,17 +585,11 @@ export class ModalConfigRestDatasourceComponent implements OnInit, OnChanges, Do
   }
 
   ngDoCheck() {
-    // this.type = 'rest';
     this.category = 'rest';
       this.scope?this.authParams.scope = this.scope:null;
       this.authParams.grant_type = this.grant_type;
       this.authParams.client_id = this.client_id;
       this.authParams.client_secret = this.client_secret;
-      // if (this.username != "" && this.pswd != "") {
-      //   this.authParams.username = this.username;
-      //   this.authParams.pswd = this.pswd;
-      // }
-
       this.AuthDetails['authParams'] = this.authParams;
 
     if(this.sourceType?.attributes?.AuthDetails)
@@ -668,7 +623,6 @@ export class ModalConfigRestDatasourceComponent implements OnInit, OnChanges, Do
       this.testDataset.attributes.bodyType = this.selectedOption;
     if(this.sourceType?.attributes?.testDataset)
     this.sourceType.attributes.testDataset = this.testDataset;
-    // this.sourceType.attributes["storage"] = this.sourceType.storage
     if(this.sourceType.formats)
       this.sourceType.attributes["formats"]=this.sourceType.formats
     this.data.connectionDetails = JSON.stringify(this.sourceType.attributes);
@@ -677,10 +631,6 @@ export class ModalConfigRestDatasourceComponent implements OnInit, OnChanges, Do
     this.data.categoy = this.sourceType.category;
 
     this.connectionDetails.emit(this.data.connectionDetails);
-    // this.addPorts['startport']=this.datasourcePort['connport-startrange'];
-    // this.addPorts['endport']=this.datasourcePort['connport-endrange'];
-    // this.addPorts['existartport']=this.datasourcePort['exiport-startrange'];
-    // this.addPorts['exiendport']=this.datasourcePort['exiport-endrange'];
     this.portDetails.emit(this.addPorts);
 
   }
@@ -691,9 +641,6 @@ export class ModalConfigRestDatasourceComponent implements OnInit, OnChanges, Do
     this.addHeaderRowBasedOnType(event.value)
   }
 
-  // clientAuthChange(event){
-  //  
-  // }
 
   addfile(file){
     if (file.target.files[0].name.endsWith(".csv") || file.target.files[0].name.endsWith(".xlsx")

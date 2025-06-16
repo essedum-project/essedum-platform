@@ -1,11 +1,9 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { Services } from '../../services/service';
-//import { LedsModalService } from 'leds-lib';
 import { ActivatedRoute, Router } from '@angular/router';
 import { angularMaterialRenderers } from '@jsonforms/angular-material';
 import {Location} from '@angular/common';
 import { HttpParams } from '@angular/common/http';
-//import { OpenTelemetryService } from 'com-lib-util';
 
 @Component({
   selector: 'app-connection-view',
@@ -71,9 +69,7 @@ export class ConnectionViewComponent implements OnInit{
     ];
   initiativeView: boolean;
   constructor(
-    private Services: Services,
-  
-   // private modalService: LedsModalService,
+    private Services: Services, 
     private route: ActivatedRoute,
     private router: Router,
     private _location: Location,
@@ -114,11 +110,8 @@ export class ConnectionViewComponent implements OnInit{
       
      });
   }
-  // telemetryCall(){
-  //   this.telemetry.startTelemetry('aip-app','ConnectionViewComponent', sessionStorage.getItem('organization'));
-  // }
+
   ngOnInit() {
-   // this.telemetryCall();
     this.router.url.includes('initiative')? (this.initiativeView = false): (this.initiativeView = true);
         this.service.getPermission("cip").subscribe((cipAuthority)=>{
           if (
@@ -145,10 +138,6 @@ export class ConnectionViewComponent implements OnInit{
         this.data = cards['card'];
       }
 
-
-      // let cards = this._location.getState();  
-      // console.log('relatedData', cards['relatedData'].data);
-      // this.data = cards['relatedData'].data;
       if(this.data.fordataset){
         this.capability.push("dataset")
       }
@@ -364,7 +353,6 @@ export class ConnectionViewComponent implements OnInit{
     this.Services.testConnection(this.data).subscribe((response) => {
       this.Services.message('Success Connected successfully');
       this.testSuccessful = true;
-      //this.telemetry.addTelemetryEvent(this.data?.alias + ' connection test successful');
     },
       error => {
         this.Services.messageService('Error!', 'Please check connection details: ' + error);
@@ -418,15 +406,12 @@ export class ConnectionViewComponent implements OnInit{
         );
         if(this.data.interfacetype==="adapter"){
           this.Services.message('Success Adapter saved');
-          //this.telemetry.addTelemetryEvent(this.data?.alias + ' adapter saved');
         }
         else
         {
           this.Services.message('Success! Connection saved successfully');
-          //this.telemetry.addTelemetryEvent(this.data?.alias + ' connection saved');
         }
         this._location.back();
-        // this.closeDialog()
       },
         error => {
           if(this.data.interfacetype==="adapter"){
@@ -442,10 +427,8 @@ export class ConnectionViewComponent implements OnInit{
       this.Services.createDatasource(this.data).subscribe((res) => {
         if(this.data.interfacetype==="adapter"){
           this.Services.message('Success Adapter created');
-          //this.telemetry.addTelemetryEvent(this.data?.alias + ' adapter created');
         }else{
          this.Services.message('Success! Connection created successfully');
-          // //this.telemetry.addTelemetryEvent(this.data?.alias + ' connection created');
         }
         this._location.back();
       },
@@ -476,9 +459,6 @@ export class ConnectionViewComponent implements OnInit{
       this.isVaultEnabled = resp
     })
   }
-  openModal(content: any): void{
-   // this.modalService.openModal(content, 'standard');
-   }
   
     related(relatedData:any){
       this.router.navigate(['../../../'+relatedData.type.toLowerCase()+'s/preview/'+relatedData.alias], {
@@ -489,7 +469,6 @@ export class ConnectionViewComponent implements OnInit{
       });
       }
       ngOnDestroy(): void {
-       // let activeSpan = this.telemetry.fetchActiveSpan();
-       // this.telemetry.endTelemetry(activeSpan);
+      
       }
 }

@@ -1,17 +1,11 @@
 import { Component, OnInit, Input, Output, EventEmitter, ViewEncapsulation } from '@angular/core';
-//import { LedsModalService } from 'leds-lib';
 import { Services } from '../../services/service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { angularMaterialRenderers } from '@jsonforms/angular-material';
 import { LocationStrategy } from '@angular/common';
 import { Location } from '@angular/common';
 import { RaiservicesService } from '../../services/raiservices.service';
-//import { PromptServices } from '../../prompts/prompt.service';
-import { MatDialogRef } from '@angular/material/dialog';
-//import { CommonCreateDialogComponent } from '../../ivm/ivm-view-initiative/ivm-view-initiative-detail/common-create/common-create-dialog.component';
-import { HttpResponse } from '@angular/common/http';
-import { Datasource } from '../datasource';
-//import { LeapTelemetryService, OpenTelemetryService } from 'com-lib-util';
+
 
 @Component({
   selector: 'app-datasource-config',
@@ -48,12 +42,10 @@ export class DatasourceConfigComponent implements OnInit {
     ];
   fileData: any;
   fileToUpload: File;
-  // form: FormGroup;
   headers: Headers;
   filename: string;
   filepath: string;
   groups: any[] = [];
-  // inputColumns = new FormControl();
   editCanvas: any;
   keypass = 'abcdef';
   isAuth: boolean = true;
@@ -80,7 +72,7 @@ export class DatasourceConfigComponent implements OnInit {
   edit: boolean = false;
   capability: string[] = [];
   initiativeView: boolean;
-  //isS3Save:boolean=false;
+
   modelTypeOptions: any = [];
   options: any = [];
   @Input() initiativeCreate: boolean;
@@ -89,22 +81,15 @@ export class DatasourceConfigComponent implements OnInit {
   portPayload: any;
 
   constructor(
-  //  private telemetry: OpenTelemetryService,
-  //  private modalService: LedsModalService,
     private Services: Services,
     private route: ActivatedRoute,
     private router: Router,
     private location: LocationStrategy,
     private _location: Location,
-    private raiService: RaiservicesService,
-     //private promptService: PromptServices,
-    //public dialogRef: MatDialogRef<CommonCreateDialogComponent>
+    private raiService: RaiservicesService
   ) { }
-  // telemetryCall() {
-  //   this.telemetry.startTelemetry('aip-app', 'DatasourceConfigComponent', sessionStorage.getItem('organization'));
-  // }
+
   ngOnInit() {
-    //this.telemetryCall();
     this.initiativeCreate ? this.initiativeView = false : this.initiativeView = true
     this.router.url.includes('initiative') ? (this.initiativeView = false) : (this.initiativeView = true);
     if (this.router.url.includes('connections')) {
@@ -113,9 +98,6 @@ export class DatasourceConfigComponent implements OnInit {
     else {
       this.customCreate = true;
     }
-    // this.matData = this.location.getState();
-    // this.Jdata = this.matData['matData'];
-    // this.getdatasourceTypes();
     try {
       setTimeout(() => {
         this.checkVaultStatus();
@@ -184,18 +166,9 @@ export class DatasourceConfigComponent implements OnInit {
         }
         this.Services.getDatasourcesNames().subscribe(resp => {
           this.allDatasources = resp
-        })
-        // this.fetchGroups();
-
+        })      
         this.editConnection();
       },);
-
-      // this.promptService.getAllModelTypeofBedrock().subscribe((res) => {
-      //   this.options = res.body
-      //   this.options.forEach((element) => {
-      //     this.modelTypeOptions.push({ "viewValue": element, "value": element });
-      //   });
-      // })
     }
     catch (Exception: any) {
       this.Services.messageService("Some error occured")
@@ -245,11 +218,6 @@ export class DatasourceConfigComponent implements OnInit {
 
   routeBackToConnectionList() {
     this._location.back();
-    // if(this.edit){
-    //   this.router.navigate(['../../'], { relativeTo: this.route });
-    // }else{
-    // this.router.navigate(['../'], { relativeTo: this.route });
-    // }
   }
 
   testConnection() {
@@ -263,12 +231,6 @@ export class DatasourceConfigComponent implements OnInit {
       this.data.connectionDetails = this.connectionDetails;
     }
     else {
-      // let e ={}
-      // e['password'] = this.data.password;
-      // e['userName'] = this.data.userName;  
-      // e['url'] = this.data.url;
-      // this.data.connectionDetails = JSON.stringify(e);
-      //this.data={...this.data }
       this.data.connectionDetails = this.sourceType && this.sourceType.attributes && JSON.stringify(this.sourceType.attributes);
 
     }
@@ -283,7 +245,6 @@ export class DatasourceConfigComponent implements OnInit {
     this.Services.testConnection(this.data).subscribe((response) => {
       this.Services.message('Tested! Connected successfully');
       this.testSuccessful = true;
-      //this.isS3Save=false;
     },
       error => {
         this.Services.messageService('Error! Please check connection details: ' + error);
@@ -320,7 +281,6 @@ export class DatasourceConfigComponent implements OnInit {
         console.log('git', res);
         this.Services.message('Connection created successfully ');
         console.log('telemetry started');
-        // //this.telemetry.addTelemetryEvent(this.data?.alias+ ' connection created successfully');
         if (this.router.url.includes('initiative')) {
           this.responseLink.emit(res);
           this.raiService.changeModalData(true);
@@ -347,11 +307,6 @@ export class DatasourceConfigComponent implements OnInit {
         }
       }
       else {
-        // let e ={}
-        // e['password'] = this.data.password;
-        // e['userName'] = this.data.userName;  
-        // e['url'] = this.data.url;
-        // this.data.connectionDetails = JSON.stringify(e);
         this.data.connectionDetails = this.sourceType?.attributes && JSON.stringify(this.sourceType.attributes);
 
       }
@@ -376,15 +331,10 @@ export class DatasourceConfigComponent implements OnInit {
         this.Services.saveDatasource(this.data).subscribe((res) => {
           if (this.data.interfacetype === "adapter") {
             this.Services.message('Adapter saved successfully');
-            //this.telemetry.addTelemetryEvent(this.data?.alias + ' Adapter saved successfully');
-
           }
           else {
             this.Services.message('Connection saved successfully ');
-            // //this.telemetry.addTelemetryEvent(this.data?.alias + ' Connection saved successfully');
-
           }
-          // this.router.navigate(['../'], { relativeTo: this.route });
           if (this.router.url.includes('initiative')) {
             this.raiService.changeModalData(true);
           }
@@ -417,10 +367,8 @@ export class DatasourceConfigComponent implements OnInit {
 
           if (this.data.interfacetype === "adapter") {
             this.Services.message('Adapter created successfully');
-            //this.telemetry.addTelemetryEvent(this.data?.alias + ' Adapter created successfully');
           } else {
             this.Services.message('Connection created successfully');
-            // //this.telemetry.addTelemetryEvent(this.data?.alias + ' Connection created successfully');
           }
           if (this.router.url.includes('initiative')) {
             this.responseLink.emit(res);
@@ -429,7 +377,6 @@ export class DatasourceConfigComponent implements OnInit {
           else {
             this._location.back();
           }
-          // this.router.navigate(['../'], { relativeTo: this.route });
         },
           error => {
             if (this.data.interfacetype === "adapter") {
@@ -440,7 +387,6 @@ export class DatasourceConfigComponent implements OnInit {
           });
       }
     }
-    //this.telemetry.addTelemetryEvent(this.data?.alias + ' connection created successfully');
   }
   showData(event) {
     this.data = event;
@@ -497,8 +443,7 @@ export class DatasourceConfigComponent implements OnInit {
     console.log('event', event);
     if (event == 'GIT') this.isGithub = true;
     else this.isGithub = true;
-    //if(event=='S3') this.isS3Save=true;
-    //else this.isS3Save=false;
+
     this.keys = [];
     this.sourceType = this.datasourceTypes.filter(row => row.type === event.value)[0];
     this.category = this.sourceType?.category;
@@ -507,12 +452,7 @@ export class DatasourceConfigComponent implements OnInit {
         this.keys.push(keyValue);
       });
     if (this.sourceType.type == 'AWSBedrock') {
-      // this.promptService.getAllModelTypeofBedrock().subscribe((res) => {
-      //   this.options = res.body
-      //   this.options.forEach((element) => {
-      //     this.modelTypeOptions.push({ "viewValue": element, "value": element });
-      //   });
-      // })
+
     }
   }
   onCapbilityTypeChange(event) {
@@ -584,26 +524,17 @@ export class DatasourceConfigComponent implements OnInit {
 
   isWordValid(word) {
     word = word.toString()
-    //for (var i = 0, j = word.length; i < j; i++) {
-    //  if (!this.isValidLetter(word.charCodeAt(i))) {
-    //   return false
-    //  }
-    //}
+
     if (this.allDatasources.includes(word))
       return false
     return true
   }
 
   onPasswordChange() {
-    // try{
     this.sourceType.attributes.password = this.keypass;
     if (this.editCanvas) {
       this.editCanvas.connectionDetails = this.sourceType?.attributes && JSON.stringify(this.sourceType.attributes);
     }
-    // }
-    // catch(Exception){
-    // this.messageService.error("Some error occured", "Error")
-    // }
 
   }
 
@@ -618,8 +549,5 @@ export class DatasourceConfigComponent implements OnInit {
   closeModal() {
     //this.dialogRef.close();
   }
-  ngOnDestroy(): void {
-   // let activeSpan = this.telemetry.fetchActiveSpan();
-   // this.telemetry.endTelemetry(activeSpan);
-  }
+
 }

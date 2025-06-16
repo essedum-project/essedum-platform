@@ -23,16 +23,13 @@ import { Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StreamingServices } from '../streaming-services/streaming-service';
 import { Canvas, Connector, PipelineModel, Element } from '../sharedModule/pipeline-model/canvas';
-//import { LedsLibService, LedsModalService } from 'leds-lib';
 import { Services } from '../services/service';
 import { FormBuilder, FormGroup, FormArray, FormControl } from '@angular/forms';
 import { MatRadioModule } from '@angular/material/radio';
-//import { RadioModule } from 'leds-lib';
-//import { ConsoleTabComponent } from './console-tab/console-tab.component';
 import { PipelineCreateComponent } from '../pipeline/pipeline-create/pipeline-create.component';
 import { OptionsDTO } from '../DTO/OptionsDTO';
 import { HttpParams } from '@angular/common/http';
-//import { OpenTelemetryService } from 'com-lib-util';
+
 
 interface ParamsElement {
   value: String;
@@ -55,7 +52,6 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
   @Output() statusChanged = new EventEmitter();
   @Output() newItemEvent = new EventEmitter<boolean>();
   @ViewChild('currentDiv', { static: false }) mlCanvas: ElementRef;
- // @ViewChild('console', { static: false }) consoleTab: ConsoleTabComponent; //for jobs
   @ViewChild('nav', { static: false }) public tabs: NgbNav;
   @ViewChild(TreeComponent, { static: false }) private tree: TreeComponent;
   entity: string = 'pipeline';
@@ -106,7 +102,6 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
   permissionList
   Uid = JSON.parse(sessionStorage.user).user_email;
   pip: any = {};
-  // swaggerapispec: SwaggerAPISpec = new SwaggerAPISpec();
   requestbodytype: any = "application/json";
   modelVersion: any = "1";
   serverurl: any = "_url_";
@@ -143,7 +138,6 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
   secrets: any;
   selectedRunType: any = [];
   defaultRuntime: any;
-  // dynamicRuntimeParamsArray:Array<DynamicParamsGrid> = [];
   runtime_attributes: any;
   plugin
   runTypes: OptionsDTO[] = [];
@@ -163,7 +157,7 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
   runtypesCheck: boolean = true;
   pluginData: any = "";
   relatedComponent: any;
-  // script_generated: boolean = false;
+
   cardName: any;
   organisation: any;
   initiativeView: boolean;
@@ -179,10 +173,7 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
   assingnedRuntimeDetails: any;
   pipelineType: any;
   constructor(
-   // private modalService: LedsModalService,
-   // private telemetry: OpenTelemetryService,
     private route: ActivatedRoute,
-    //private ledsLibService: LedsLibService,
     private service: Services,
     public confirmDeleteDialog: MatDialog,
     public dialog: MatDialog,
@@ -202,11 +193,9 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
       }
     });
   }
-  // telemetryCall(){
-  //   this.telemetry.startTelemetry('aip-app','PipelineDescriptionComponent', sessionStorage.getItem('organization'));
-  // }
+
   ngOnInit() {
-  ///  this.telemetryCall();
+
     let state = this._location.getState()
     this.card = state['card']
     this.pipelineType = this.card ? this.card.type : '';
@@ -237,32 +226,7 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
 
     try {
 
-      // let state = this._location.getState()
-      // this.cardTitle = state['cardTitle']
-      // if (this.pipelineAlias == null) {
-      //   this.pipelineAlias = state['pipelineAlias']
-      // }
-      // if (this.streamItem == null) {
-      //   this.streamItem = state['streamItem']
-      // }
-      // this.card = state['card']
-      // console.log(history.state);
-      // if (history.state.relatedData) {
-      //   console.log(history.state);
-      //   let cards = this._location.getState();
-      //   console.log('relatedData', cards['relatedData'].data);
-      //   this.streamItem = cards['relatedData'].data;
-      // if (this.router.url.includes('preview')) {
-      //   this.pipelineAlias = this.streamItem.alias;
-      // }
-      // if(this.router.url.includes('related')){
-      //   let cards = this._location.getState();  
-      //   console.log('cards', cards['card'].data);
-      //   this.streamItem = cards['card'].data;
-      //   this.pipelineAlias = this.streamItem.alias;
-      // }
       this.authentications();
-      // this.isPageLoad = true;
       this.newCanvas = new Canvas();
       this.newCanvas.elements = [];
       this.service.getDatasources().subscribe(res => {
@@ -333,7 +297,7 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
           this.instanceCreation();
         }
       });
-      // this.instanceCreation();
+
       if (this.runtypesCheck == true)
         this.fetchRunTypes()
       this.linkAuth = true;
@@ -345,7 +309,7 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
   }
 
   ngOnChanges() {
-    // this.ngOnInit()
+
     if (this.runtypesCheck == true)
       this.fetchRunTypes()
   }
@@ -372,7 +336,6 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
         this.component.push(this.relatedComponent);
         this.cdr.detectChanges();
 
-        // console.log(this.component);
       },
       complete() {
         console.log('completed');
@@ -449,9 +412,6 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
         this.pipelineDataResponse = {};
        }
 
-
-
-
     });
 
 
@@ -519,78 +479,24 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
 
   }
 
-  // addForm() {
-  //  const newFormGroup = this._formBuilder.group({
-  //   runtype: this._formBuilder.control(''),
-  //   config: this._formBuilder.array([this._formBuilder.group({
-  //     key: '',
-  //     value:''})])
-  //  });
-  // //  this.formGroups.push(newFormGroup)
-  //  this.jsondata.push(newFormGroup)
-  // }
-
-  // get jsondata(): FormArray {
-  //   return this.orderForm.get('jsondata') as FormArray;
-  // };
-
-  // onSubmit() {
-  //   console.log(this.orderForm.value);
-  // }
 
   ngOnDestroy() : void{
     clearInterval(this.timeInterval);
     this.isBeingDestroyed = true;
     this.busy.unsubscribe()
-  //  let activeSpan = this.telemetry.fetchActiveSpan();
-   // this.telemetry.endTelemetry(activeSpan);
+
   }
 
   exportToFile() {
     try {
       const blob = new Blob([JSON.stringify(this.newCanvas, null, 2)], { type: 'application/json' });
       saveAs(blob, 'source.json');
-      //this.telemetry.addTelemetryEvent(this.streamItem.alias + ' pipeline exported.');
     }
     catch (Exception) {
       this.service.message("Some error occured", "error")
     }
   }
 
-  // runscripts() {
-  //   let obj
-  //   if (this.streamItem.type.toLowerCase() == 'icmm') {
-
-  //     obj = {
-  //       "elements": this.newCanvas.elements,
-  //       "userId": this.Uid,
-  //       "platform": "iecp",
-  //       "experiment_name": this.streamItem.alias ? this.streamItem.alias : this.streamItem.name,
-  //       "pipeline_attributes": this.pipeline_attributes,
-  //     }
-  //   }
-  //   else {
-  //     obj = {
-  //       "elements": this.newCanvas.elements,
-  //       "userId": this.Uid,
-  //       "platform": this.streamItem.type,
-  //       "experiment_name": this.streamItem.alias ? this.streamItem.alias : this.streamItem.name,
-  //       "pipeline_attributes": this.pipeline_attributes,
-  //     }
-  //   }
-
-  //   this.service.runIcmmPipeline(obj).subscribe(
-  //     resp => {
-
-
-  //       this.load = false
-  //       this.messageService.info('Started!', resp.Message);
-  //     },
-  //     error => {
-  //       this.load = false
-  //       this.messageService.error('Could not get the results', error);
-  //     });
-  // }
 
   onModelChange() {
     if (this.newCanvas) {
@@ -722,9 +628,6 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
           }
         ]);
 
-        // ele_I.bind('mouseout', function (endpoint) {
-        //   endpoint.removeOverlay('label');
-        // });
       });
     }
     if (ele.outputEndpoints) {
@@ -751,9 +654,6 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
           }
         ]);
 
-        // ele_O.bind('mouseout', function (endpoint) {
-        //   endpoint.removeOverlay('label');
-        // });
       });
     }
   }
@@ -815,7 +715,6 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
     )) {
       this.jsPlumbInstance.deleteEndpoint(el);
     }
-    // this.jsPlumbInstance.remove(e);
     let index = -1;
     for (let i = 0; i < this.newCanvas.elements.length; i++) {
       if (this.newCanvas.elements[i].id === e.id) {
@@ -824,8 +723,6 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
       }
     }
     this.newCanvas.elements.splice(index, 1);
-    // this.jsPlumbInstance.repaintEverything(true);
-    // this.instanceCreation();
   }
 
   onSave(e) {
@@ -834,68 +731,7 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
     this.saveJson();
   }
 
-  // modifyAPISpec() {
-  //   this.swaggerapispec.changeType(this.requestbodytype)
-  //   this.swaggerapispec.addTitle(this.pipelineModel.modelname)
-  //   this.swaggerapispec.addDescription(this.pipelineModel.explanation)
-  //   this.swaggerapispec.addVersion(this.modelVersion)
-  //   this.swaggerapispec.addUrl(this.serverurl)
-  //   this.swaggerapispec.addUrlPath(this.endpoint)
-  //   this.paramslist.forEach(element => {
-  //     // if (this.requestbodytype == 'application/json') {
-  //     this.swaggerapispec.addElementInJson(element.value, element.type)
-  //     // } else {
-  //     //   this.swaggerapispec.addElementInFormData(element.value, element.type, element.required)
-  //     // }
-  //   })
-  //   this.pipelineModel.apispec = this.swaggerapispec.getAPISpec(true)//(this.requestbodytype == 'application/json')
-  // }
 
-  // runPipeline() {
-  // ##this.generateScript(this.streamItem.name)
-  // ##this.saveJson(true);
-  // if (this.currentJob && this.currentJob.status !== 'STARTED' && this.currentJob.status !== 'RUNNING') {
-  //   if (this.streamItem.type == "Azure" || this.streamItem.type == "Vertex") {
-  //     this.service.runIecpPipeline(this.newCanvas).subscribe();
-  //   }
-  //   else if (this.streamItem.type == "Mlflow") {
-  //     this.service.runMlFlowPipeline(this.newCanvas).subscribe()
-  //   }
-  //   else {
-  //     let passType = '';
-  //     if (this.type != 'Binary' && this.type != 'NativeScript') passType = 'DragAndDrop'
-  //     else passType = this.type
-  //     this.service.runPipeline(this.streamItem.alias ? this.streamItem.alias : this.streamItem.name, this.streamItem.name, passType, this.selectedRunType['type'], this.selectedRunType['dsName'], this.tmpParams).subscribe(
-  //       pageResponse => {
-  //         pageResponse = JSON.parse(pageResponse)
-  //         this.service.message('Pipeline has been Started!', 'success');
-  //         this.currentJob = pageResponse;
-  //         this.onChangeStatus(this.currentJob.status);
-  //         this.streamItem.job_id = this.currentJob.jobId;
-  //         this.saveJson();
-  //         if (this.currentJob.status) {
-  //           if (
-  //             this.currentJob.status === 'STARTED' ||
-  //             this.currentJob.status === 'RUNNING'
-  //           ) {
-  //             const interval = 10000;
-  //             this.timeInterval = setInterval(() => {
-  //               this.fetchJob(this.currentJob.jobId, this.currentJob.status, this.currentJob.runtime);
-  //             }, interval);
-  //           }
-  //         }
-  //       },
-  //       error => {
-  //         this.service.message('Error : ' + error, 'error');
-  //         clearInterval(this.timeInterval);
-  //       }
-  //     );
-  //   }
-  // } else {
-  //   this.service.message('Pipeline is already running!', 'error');
-  // }
-  // ##this.consoleTab.ngOnChanges();
-  // }
 
   fetchJob(jobId: string, status: string, runtime?: string) {
     let linenumber = status.toLowerCase() == "running" ? 0 : -1
@@ -918,8 +754,6 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
   }
 
   saveJson(run?) {
-    // try {
-    // console.log(this.formGroups)
 
     this.streamItem.is_app = this.is_app;
     console.log("savejsondrawflow = ", this.streamItem)
@@ -1013,8 +847,7 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
         response => {
           if (run)
             this.service.message('Updated Successfully');
-           //this.telemetry.addTelemetryEvent(this.streamItem.alias + ' pipeline updated.');
-          // this.ngOnInit();
+     
         },
         error => {
           if (run)
@@ -1024,10 +857,7 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
             )
         }
       );
-      // }
-      // catch (Exception) {
-      //   // this.messageService.error("Some error occured", "Error")
-      // }
+
 
     }
   }
@@ -1140,10 +970,6 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
 
 
   fetchPluginData(type: string) {
-    // this.service.getPluginByTypeAndOrg(type).subscribe(response => {
-    //   let resp = JSON.parse(response)
-    //   this.plugin_editortype = resp.editortype
-    // });
     this.busy = this.service.listJsonByType(type).subscribe(response => {
       this.nodes = [];
       let resp = JSON.parse(response)
@@ -1151,9 +977,6 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
       resp.forEach(ele => {
         this.pluginData.push(JSON.parse(ele.plugindetails))
       })
-      // let resp = JSON.parse(response)
-      // this.plugin = resp
-      // this.finalJsonList = JSON.parse(this.pluginData);
       this.finalJsonList = this.pluginData;
 
       var data = this.pluginData,
@@ -1302,8 +1125,6 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
                   res => {
                     this.service.message('Pipeline has been Started!', 'success');
                     this.runPipeline = false
-                  //  //this.telemetry.addTelemetryEvent(this.streamItem.alias + ' pipeline started running.');
-
                   },
                   error => {
                     this.service.message('Some error occured.', 'error');
@@ -1317,7 +1138,6 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
                 this.service.publishPipeline(this.streamItem).subscribe(
                   res => {
                     this.service.message('Pipeline published successfully.', 'success');
-                    //this.telemetry.addTelemetryEvent(this.streamItem.alias + ' pipeline published.');
 
                   },
                   error => {
@@ -1329,7 +1149,6 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
               else {
                 this.service.message('Script generated successfully.', 'success');
               }
-              //this.telemetry.addTelemetryEvent(this.streamItem.alias + ' pipeline started running.');
             } else if (status == 'ERROR') {
               this.service.message('Error in script generation.', 'error');
               this.runPipeline = false
@@ -1337,14 +1156,12 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
             }
           },
           error => {
-            // this.service.message('Could not get the results', 'error');
             this.service.message('Error! Could not generate script.', 'error');
             this.runPipeline = false
             this.publishnow = false
           });
       },
       error => {
-        // this.service.message('Could not get the results', 'error');
         this.service.message('Error! Could not generate script.', 'error');
         this.runPipeline = false
         this.publishnow = false
@@ -1401,20 +1218,7 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
     else passType = this.type
 
     this.runPipeline = true
-    this.generateScript(this.streamItem.name)
-    // passType = this.type
-    // this.busy = this.service.runPipeline(this.streamItem.alias ? this.streamItem.alias : this.streamItem.name, this.streamItem.name, passType, this.selectedRunType['type'], this.selectedRunType['dsName'], "generated").subscribe(
-    //   res => {
-    //     this.service.message('Pipeline has been Started!', 'success');
-    //   },
-    //   error => {
-    //     this.service.message('Some error occured.', 'error');
-    //   }
-    // )
-    // }else{
-    //   this.service.message('Please generate script to run pipeline.', 'error');
-    // }
-
+    this.generateScript(this.streamItem.name);
   }
 
   addRuntimeParamsRow() {
@@ -1423,7 +1227,7 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
     }
     this.paramsRuntimeDynamic = { key: "", value: "" };
     this.dynamicRuntimeParamsArray.push(this.paramsRuntimeDynamic);
-    // this.runtime_params_attributes = this.dynamicRuntimeParamsArray;
+
     return true;
   }
   addRuntimeRow() {
@@ -1435,15 +1239,7 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
     this.runtime_params_attributes = this.dynamicRuntimeArray;
     return true;
   }
-  // addRuntimeParamsRow(){
-  //   if (!this.dynamicRuntimeParamsArray || this.dynamicRuntimeParamsArray.length == 0) {
-  //     this.dynamicRuntimeParamsArray = [];
-  //   }
-  //   this.paramsDynamic = { key: "", value: { key: "", value: "" } };
-  //   this.dynamicRuntimeParamsArray.push(this.paramsDynamic);
-  //   this.runtime_attributes = this.dynamicRuntimeParamsArray;
-  //   return true;
-  // }
+ 
 
   toggler() {
     this.cardToggled = !this.cardToggled;
@@ -1531,8 +1327,7 @@ export class PipelineDescriptionComponent implements OnInit, OnDestroy, OnChange
 
   addRuntype() {
     this.dynamicRuntimeArray.push({ runtype: "", value: [{ name: "", value: "" }] })
-    // this.editMode=true
-    // this.editIndex=this.configData.length-1
+
   }
 
   onSecretsDataChange($event) {

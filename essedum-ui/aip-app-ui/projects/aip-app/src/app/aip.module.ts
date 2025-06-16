@@ -109,6 +109,8 @@ import { encKey } from './services/encKey';
 import { DashConstantService } from './services/dash-constant.service';
 import { RaiservicesService } from './services/raiservices.service';
 import { SemanticService } from './services/semantic.services';
+import { JobsService } from './services/jobs.service';
+
 
 // import { EditFeatureStoreComponent } from './feature-store/edit-feature-store/edit-feature-store.component';
 import { DatasourceConfigComponent } from './datasource/datasource-config/datasource-config.component';
@@ -247,7 +249,7 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { TooltipModule } from 'primeng/tooltip';
 import { ListboxModule } from 'primeng/listbox';
 // import { AddViewRecipeComponent } from './dataset/wrangling/add-view-recipe/add-view-recipe.component';
-// import { PipelineDialogComponent } from './pipeline-dialog/pipeline-dialog.component';
+import { PipelineDialogComponent } from './pipeline-dialog/pipeline-dialog.component';
 // import { PivotComponent } from './dataset/pivot/pivot.component';
 // import { PivotFilterComponent } from './dataset/pivot/pivot-filter/pivot-filter.component';
 // import { PivotTableComponent } from './dataset/pivot/pivot-table/pivot-table.component';
@@ -497,7 +499,7 @@ const dbConfig: DBConfig = {
     // PivotFilterComponent,
     // PivotTableComponent,
     // AddViewRecipeComponent,
-    // PipelineDialogComponent,
+    PipelineDialogComponent,
     // DynamicControlsComponent,
     // ConfirmationComponent,
     // MultivariateAnalyticsComponent,
@@ -627,7 +629,7 @@ const dbConfig: DBConfig = {
     // TabsFilterService,
     DatasetServices,
     EventsService,
-    // JobsService,
+    JobsService,
     // GroupsService,
     SchemaRegistryService,
     // AppGlobals,

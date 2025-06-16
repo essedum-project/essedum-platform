@@ -10,14 +10,13 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
-//import { LedsModalService, LedsLibService } from 'leds-lib';
+
 import { Services } from '../services/service';
 import { TagsService } from '../services/tags.service';
 import { HttpParams } from '@angular/common/http';
 import { TagEventDTO } from '../DTO/tagEventDTO.model';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog.component/confirm-delete-dialog.component';
-//import { LeapTelemetryService, OpenTelemetryService } from 'com-lib-util';
 import { Location } from '@angular/common';
 import { PaginationComponent } from '../pagination/pagination.component';
 @Component({
@@ -38,19 +37,7 @@ export class ModelComponent implements OnInit, OnChanges {
   filter: string = '';
   selectedCard: any = [];
   cardToggled: boolean = true;
-  // pageSize: number;
-  // pageNumber: number;
-  // pageArr: number[] = [];
-  // pageNumberInput: number;
-  // noOfPages: number = 0;
-  // prevRowsPerPageValue: number;
-  // itemsPerPage: number[] = [6, 9, 18, 36, 54, 72];
-  // noOfItems: number;
-  // @Output() pageChanged = new EventEmitter<any>();
-  // @Output() pageSizeChanged = new EventEmitter<any>();
-  // endIndex: number;
-  // startIndex: number;
-  // pageNumberChanged: boolean = true;
+
   createAuth: boolean;
   editAuth: boolean;
   deleteAuth: boolean;
@@ -80,40 +67,29 @@ isHovered=false;
   pageNumber: number;
   pageSize: number;
   noOfItems: number;
- // @ViewChild('pagination') paginationComponent: PaginationComponent;
+ 
   constructor(
-   // private telemetryService: LeapTelemetryService,
-    //private telemetry: OpenTelemetryService,
+
     private service: Services,
     private route: ActivatedRoute,
     private router: Router,
-   // private modalService: LedsModalService,
-   // private ledsLibService: LedsLibService,
     private changeDetectionRef: ChangeDetectorRef,
     public tagService: TagsService,
     private dialog: MatDialog,
     private location: Location
   ) {
-    // this.cortexwindow = window['cortexCore'].config.getConfig().features.virtualAssistant;
-    // this.route.queryParams.subscribe((params) => {
-    //   this.pageNumber = params['page'] ? parseInt(params['page']) : 1;
-    //   this.filter = params['search'] || this.filter;
-    // });
+
   }
   ngOnChanges(changes: SimpleChanges): void {
     this.refresh();
   }
   cardTitle: String = 'Model';
-  // telemetryCall(){
-  //   this.telemetry.startTelemetry('aip-app','ModelComponent',sessionStorage.getItem('organization'))
-  // }
+
   ngOnInit(): void {
-    //this.telemetryCall();
+
     this.records = false;
-   // this.telemetryImpression();
-    //  this.pageSize = this.itemsPerPage[0];
-    this.route.queryParams.subscribe((params) => {
-      // Update this.pageNumber if the page query param is present
+  
+    this.route.queryParams.subscribe((params) => {      
       if (params['page']) {
         this.pageNumber = params['page'];
         this.filter = params['search'];
@@ -131,48 +107,13 @@ isHovered=false;
     });
     this.updateQueryParam(this.pageNumber);
     this.getCountModels();
-    this.getCards();
-    // if (this.pageNumber && this.pageNumber >= 5) {
-    //   this.endIndex = this.pageNumber + 2;
-    //   this.startIndex = this.endIndex - 5;
-    // } else {
-    //   this.startIndex = 0;
-    //   this.endIndex = 5;
-    // }
+    this.getCards();   
     this.Authentications();
-    // this.getTags();
-    // this.fetchAdaptersTypes()
     this.fetchAdapters();
   }
 
-  // telemetryImpression() {
-  //   this.telemetryService.start();
-  //   this.telemetryService.impression('aip-app', 'list', 'ModelComponent');
-  // }
-  resetPage(page: number) {
-   // this.paginationComponent.changePage(page);
-  }
-  // nextPage() {
-  //   if (this.pageNumber + 1 <= this.noOfPages) {
-  //     this.pageNumber += 1;
-  //     // this.changePage(this.pageNumber);
-  //     this.changePage();
-  //   }
-  // }
-  // prevPage() {
-  //   if (this.pageNumber - 1 >= 1) {
-  //     this.pageNumber -= 1;
-  //     // this.changePage(this.pageNumber);
-  //     this.changePage();
-  //   }
-  // }
-  // updatequeryParam(page: number, search: string) {
-  //   this.router.navigate([], {
-  //     relativeTo: this.route,
-  //     queryParams: { page: page, search: search },
-  //     queryParamsHandling: 'merge',
-  //   });
-  // }
+
+ 
   updateQueryParam(
     page: number = 1,
     search: string = '',
@@ -197,30 +138,7 @@ isHovered=false;
 
     this.location.replaceState(url);
   }
-  // changePage(page?: number) {
-  //   if (page && page >= 1 && page <= this.noOfPages) this.pageNumber = page;
-  //   if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
-  //     this.pageChanged.emit(this.pageNumber);
-  //     // this.updatequeryParam(this.pageNumber,this.filter);
-  //     if (this.pageNumber > 5) {
-  //       this.endIndex = this.pageNumber + 2;
-  //       this.startIndex = this.endIndex - 3;
-  //     } else {
-  //       this.startIndex = 0;
-  //       this.endIndex = 5;
-  //     }
-  //   }
-  //   this.getCards();
-  // }
-  // rowsPerPageChanged() {
-  //   if (this.pageSize == 0) {
-  //     this.pageSize = this.prevRowsPerPageValue;
-  //   } else {
-  //     this.pageSizeChanged.emit(this.pageSize);
-  //     this.prevRowsPerPageValue = this.pageSize;
-  //     this.changeDetectionRef.detectChanges();
-  //   }
-  // }
+  
   Authentications() {
     this.service.getPermission('cip').subscribe((cipAuthority) => {
       if (cipAuthority.includes('model-create')) this.createAuth = true;
@@ -262,7 +180,6 @@ isHovered=false;
     });
   }
   getCards(): void {
-    //this.pageNumberInput = this.pageNumber;
     let params: HttpParams = new HttpParams();
     if (this.selectedTag.length >= 1)
       params = params.set('tags', this.selectedTag.toString());
@@ -290,12 +207,9 @@ isHovered=false;
         this.records = false;
       }
       console.log('DATA', this.cards);
-      // this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
-      // this.pageArr = [...Array(this.noOfPages).keys()];
-      // console.log(this.pageArr, 'pageArr');
-      // console.log(this.noOfPages, 'noOfPages');
+
     });
-    //this.pageSize = this.pageSize || 6;
+
     this.updateQueryParam(
       this.pageNumber,
       this.filter,
@@ -323,14 +237,8 @@ isHovered=false;
       }
     });
   }
-  // optionChange(event: Event) {
-  //   let i: number = event.target['selectedIndex'];
-  //   this.pageSize = this.itemsPerPage[i];
-  //   this.pageNumber = 1;
-  //   this.getCards();
-  // }
+
   redirect() {
-    // console.log('redirect');
     this.options.forEach((element: any) => {
       if (element.alias === this.selectedInstance) {
         this.selectedInstance = element.name;
@@ -340,14 +248,7 @@ isHovered=false;
       relativeTo: this.route,
     });
   }
-  redirection(card: any, type: string) {
-    // //this.telemetry.addTelemetryEvent(card.alias+ type);
-    // this.telemetryService.interact(
-    //   'click',
-    //   'ModelComponent',
-    //   'open',
-    //   card.name
-    // );
+  redirection(card: any, type: string) {    
     this.router.navigate(['./' + type + '/' + card.sourceName], {
       queryParams: {
         page: this.pageNumber,
@@ -363,11 +264,9 @@ isHovered=false;
       },
       relativeTo: this.route,
     });
-    //this.telemetry.addTelemetryEvent(card.alias+ type);
+    
   }
-  // openedit(content: any): void {
-  //   this.modalService.openModal(content, 'standard');
-  // }
+
   selectChange(value: string): void {
     this.selectedInstance = value;
     this.redirect();
@@ -382,12 +281,12 @@ isHovered=false;
   }
 
   clickactive(eventObj: any) {
-    //this.ledsLibService.clickactive(eventObj);
+   
   }
   refresh() {
     this.getCountModels();
     this.fetchAdapters();
-    this.resetPage(1);
+
     this.getCards();
   }
   refreshComplete() {
@@ -397,15 +296,10 @@ isHovered=false;
     this.selectedTag = [];
     this.getCountModels();
     this.fetchAdapters();
-    this.resetPage(1);
+   
     this.getCards();
   }
-  filterz() {
-    // setTimeout(() => {
-    //   this.updatequeryParam(1, this.filter);
-    // this.refresh();
-
-    // }, 1500);
+  filterz() {  
     this.refresh();
   }
   handlePageAndSizeChange(event: { pageNumber: number; pageSize: number }) {
@@ -421,13 +315,7 @@ isHovered=false;
   tagSelectedEvent(event) {
     this.selectedAdapterInstance = event.getSelectedAdapterInstance();
     this.selectedAdapterType = event.getSelectedAdapterType();
-    this.pageNumber = 1;
-    // if (this.selectedAdapterType.length >= 1) {
-    //   this.updatequeryParam(
-    //     this.pageNumber,
-    //     this.selectedAdapterType.toString()
-    //   );
-    // }
+    this.pageNumber = 1; 
     this.selectedTag = event.getSelectedTagList();
     this.tagrefresh = false;
     this.refresh();
@@ -451,7 +339,6 @@ isHovered=false;
                 'Done!  Model Un-deployed Successfully'
               );
               this.refresh();
-              //this.telemetry.addTelemetryEvent(card.alias + ' un-deployed');
             },
             (error) => {
               this.service.messageService(error);
@@ -473,7 +360,6 @@ isHovered=false;
                 res,
                 'Done!  Model deleted Successfully'
               );
-              //this.telemetry.addTelemetryEvent(card.alias+' Deleted');
               this.refresh();
             },
             (error) => {
@@ -497,8 +383,5 @@ isHovered=false;
       return { width: '100%', margin: '0%' };
     }
   }
-  ngOnDestroy() : void {
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
-  }
+
 }

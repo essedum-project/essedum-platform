@@ -19,8 +19,7 @@ export class ShowOutputArtifactsComponent {
     this.jobId = this.data.jobId;
   }
 
-  closeDialog() {
-    // this.unsubscribe();
+  closeDialog() {    
     this.dialogRef.close();
   }
 }

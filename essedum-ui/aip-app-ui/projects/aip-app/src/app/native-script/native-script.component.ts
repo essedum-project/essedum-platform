@@ -97,7 +97,6 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     defaultRuntime: any;
   constructor(
     @Inject('envi') private baseUrl: string,
-    //private telemetryService: LeapTelemetryService,
     private service: Services,
     public dialog: MatDialog,
     private _location: Location,
@@ -136,17 +135,7 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     } else {
       this.initiativeView = true;
     }
-    // if (history.state) {
-    //   let state = this._location.getState();
-    //   this.cardTitle = state['cardTitle'];
-    //   if (this.pipelineAlias == null) {
-    //     this.pipelineAlias = state['pipelineAlias'];
-    //   }
-    //   if (this.streamItem == null) {
-    //     this.streamItem = state['streamItem'];
-    //   }
-    //   this.card = state['card'];
-    // }
+
     this.getStreamService();
     this.getPipelineByName();
     this.authentications();
@@ -238,13 +227,12 @@ export class NativeScriptComponent implements OnInit, OnChanges {
       .getRelatedComponent(this.streamItem.cid, 'PIPELINE')
       .subscribe({
         next: (res) => {
-          // this.relatedloaded=true;
           this.relatedComponent = res[0];
           this.relatedComponent.data = JSON.parse(this.relatedComponent.data);
           this.component.push(this.relatedComponent);
           this.cdr.detectChanges();
 
-          // console.log(this.component);
+
         },
         complete() {
           console.log('completed');
@@ -306,8 +294,7 @@ export class NativeScriptComponent implements OnInit, OnChanges {
       // resp.forEach(e=>{console.log(new OptionsDTO(e.type+"-"+e.dsAlias, e))})
       this.selectedRunType = this.runTypes[0].value;
       this.runtypesCheck = false;
-      // this.runTypes=(resp);
-      // this.selectedRunType=this.runTypes[0];
+
     });
   }
   onInputTypeChange(filetype) {
@@ -384,35 +371,11 @@ export class NativeScriptComponent implements OnInit, OnChanges {
       );
   }
   showDatasets(dataset) {
-    // const dialogRef = this.dialog.open(ModalConfigDatasetComponent, {
-    //   height: '90%',
-    //   width: '60%',
-    //   disableClose: true,
-    //   data: {
-    //     purpose: 'pipeline',
-    //     data: dataset
-    //   }
-    // });
-    // dialogRef.afterClosed().subscribe(result => {
-    //   if (result != null) {
-    //     if (this.data.dataset) {
-    //       this.deleteDataset(dataset)
-    //       this.data.dataset.push(result)
-    //     }
-    //     else
-    //       this.data.dataset = [result]
-    //     this.saveJson(this.data.name);
-    //   }
-    // });
+    
   }
 
   showInfo(dataset) {
-    // this.dialog.open(ModalInfoComponent, {
-    //   width: '90%',
-    //   height: '95%',
-    //   disableClose: true,
-    //   data: dataset
-    // });
+
   }
 
   deleteDataset(dataset) {

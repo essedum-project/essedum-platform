@@ -223,7 +223,7 @@ const routes: Routes = [
           { path: '', component: DatasetByNameComponent },
           { path: 'create', component: ModalConfigDatasetComponent },
           { path: 'data', component: DatasetEditComponent },
-          // { path: ':type', component: DatasetByNameComponent },
+           { path: ':type', component: DatasetByNameComponent },
            {
              path: 'view/:cname',
              children: [

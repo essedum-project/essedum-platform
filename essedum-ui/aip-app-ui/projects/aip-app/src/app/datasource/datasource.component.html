@@ -18,22 +18,7 @@
                         <div class="aip-header lfx-u-pad-lr-32 lfx-u-pad-t-16">
                             <div class=" col-sm-12 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-center">
                                 <div style="padding: 4px 0px 0px 0px;">
-                                    <!-- Make sure Font Awesome is loaded in your project, e.g., in index.html: -->
-                                    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> -->
-<!-- Filter tagging part
-                                    <span 
-                                        (mouseenter)="isFilterHovered = true" 
-                                        (mouseleave)="isFilterHovered = false">
-                                        <button mat-icon-button class="tooltip-container" 
-                                            [matTooltip]="isExpanded ? 'Collapse Filters' : 'Expand Filters'" 
-                                            matTooltipPosition="above" 
-                                            (click)="toggleExpand()">
-                                            <i 
-                                                class="fa fa-sort-amount-desc" 
-                                                [ngStyle]="{'color': isFilterHovered ? '#0056b3' : '#0a142f'}">
-                                            </i>
-                                        </button>
-                                    </span> -->
+                                
                                 </div>
                                 <div class="lfx-u-pad-24 lfx-u-mar-r-30">
                                     <h3 class="lfx-u-header-xl">{{cardTitle}}</h3>
@@ -41,8 +26,7 @@
                             </div>
                             <div
                                 class="col-10 offset-1 offset-xs-1 offset-sm-1 offset-md-0 col-sm-6 col-md-6 col-lg-7 col-xl-6 aip-panel aip-panel-shadow d-flex align-items-center">
-                                <!-- <leds-input-field designType="search" inputType="text" styleClass=""
-                                [disabled]="false" [required]="false"></leds-input-field> -->
+                         
                                 <input type="text" name="" id="" placeholder="Search by Name" class="aip-panel-input"
                                     [(ngModel)]="filt" (keyup)="filterz()">
                                 <span 
@@ -53,7 +37,6 @@
                                         [ngStyle]="{'color': isSearchHovered ? '#0056b3' : '#0a142f'}">
                                     </i>
                                 </span>
-                               <!-- <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"> -->
                             </div>
                             <div
                                 class="d-flex justify-content-center col-sm-5 col-md-6 col-lg-5 col-xl-4 aip-header-icon">
@@ -92,19 +75,13 @@
                         <div class="col-md-8 col-lg-6 col-xl-5" style='min-width: -webkit-fill-available;padding: 0px;'
                             *ngFor="let card of filteredCards  | slice: (pageNumber-1) * pageSize : (pageNumber-1) * pageSize + pageSize">
                             <mat-card class="example-card" appearance="outlined" style="padding-top: 0 !important;padding-bottom: 0 !important;padding: 0px !important;height: 163px;display: grid" >
-                           <!-- <leds-card designType='simple' [actionsOnHover]='true'
-                                style="padding-top: 0 !important;padding-bottom: 0 !important;"> -->
-                                <div class="d-flex align-items-center justify-content-between lfx-u-mar-l-18">
+                           <div class="d-flex align-items-center justify-content-between lfx-u-mar-l-18">
                                     <div class="col d-flex align-items-center" style="overflow: hidden !important; border-right: none !important;">
                                         <div class="lfx-u-header-sm lfx-u-text-primary-80">
                                             {{card.type}}
                                         </div>
                                     </div>
-                                     <!-- <div class="col-auto">
-                                        <div class="lfx-c-card__container-right">
-                                            <span class="lfx-c-badge lfx-c-badge--active">Submitted</span>
-                                        </div>
-                                    </div>  -->
+                              
                                 </div>
                                 <mat-card-header style="display: inline !important; width: 60%;padding-top: 0px !important;">
                                     <mat-card-title class="lfx-c-card__container clearfix">
@@ -117,11 +94,7 @@
                                     <mat-card-subtitle
                                         class="lfx-u-body-sm lfx-u-text-neutral-80 lfx-u-ellipsis">{{card.lastmodifieddate}}</mat-card-subtitle>
                                 </mat-card-header>
-                                <!-- <mat-card-content class="lfx-u-no-mar-b">
-                                    <p class="lfx-u-body-md lfx-u-text-neutral-80 aip-desc-ellipsis">
-                                        {{card.description}}
-                                    </p>
-                                </mat-card-content> -->
+                             
                                 <div class="card-actions-container" style="position: relative;">
                                     <mat-card-actions 
                                         class="lfx-c-card__action-hover d-flex justify-content-between card-actions-hover"
@@ -154,10 +127,7 @@
                                                 </button>
                                                 <button mat-menu-item *ngIf="deleteAuth" (click)="deleteAdapter(card.name)">
                                                     Delete
-                                                </button>
-                                                <button mat-menu-item *ngIf="card.type=='REMOTE'" (click)="jobConsole(card.name)">
-                                                    Job Console
-                                                </button>
+                                                </button>                    
                                             </mat-menu>
                                         </div>
                                     </mat-card-actions>
@@ -232,27 +202,3 @@
             [cardToggled]="cardToggled" [datasourceAlias]="selectedCard.alias"></app-datasource-description>
     </ng-template>
 </div>
-<!-- MODAL -->
-<!-- <ng-template #lgContent1 let-modal>
-    <div ledsModalHeader>
-        <div class="clearfix">
-            <h4 class="le-u-header-xl float-start" id="modalTitle2">SELECT ADAPTERS</h4>
-            <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-                <i class="icon x-16 close-icon"></i>
-            </button>
-        </div>
-    </div>
-    <div ledsModalBody>
-        <select #teams (change)="selectChange(teams.value)">
-            <option default>Choose Adapters</option>
-            <option *ngFor="let opt of alias">{{opt}}</option>
-
-        </select>
-    </div>
-    <div ledsModalFooter>
-        <leds-button designType="miniPrimary" class="le-u-mar-r-8" buttonType="button"
-            (click)=" modal.dismiss('Cross click')" (click)="redirect()">
-            Select
-        </leds-button>
-    </div>
-</ng-template> -->

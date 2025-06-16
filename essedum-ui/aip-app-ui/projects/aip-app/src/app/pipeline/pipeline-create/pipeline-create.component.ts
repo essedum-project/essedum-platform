@@ -3,11 +3,9 @@ import { StreamingServices } from '../../streaming-services/streaming-service';
 import { FormControl, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef,MatDialog } from '@angular/material/dialog';
 import { Services } from '../../services/service';
-//import { LedsModalService } from 'leds-lib';
 import * as _ from "lodash";
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
-//import { OpenTelemetryService } from 'com-lib-util';
 
 @Component({
   selector: 'app-pipeline-create',
@@ -47,22 +45,15 @@ export class PipelineCreateComponent implements OnInit {
   constructor(
     public dialogRef: MatDialogRef<PipelineCreateComponent>,
     public dialog: MatDialog,
-    //private telemetry: OpenTelemetryService,
     private Services: Services,
     private router: Router,
-    // private modalService: LedsModalService,
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
     dialogRef.disableClose = true;
   }
 
-  // telemetryCall(){
-  //   this.telemetry.startTelemetry('aip-app','PipelineCreateComponent', sessionStorage.getItem('organization'));
-  // }
 
   ngOnInit() {
-    // this.telemetryCall();
-    // this.getAllPlugins()
     this.authentications();
     if (this.data) {
       if (this.data.type) {
@@ -100,7 +91,6 @@ export class PipelineCreateComponent implements OnInit {
       }
     }
     this.getAllPlugins()
-    // if ((this.route.url).includes('iamp-iecp')) {
     this.ssTypes.push('Azure');
     this.ssTypes.push('Vertex');
     this.ssTypes.push('ICMM');
@@ -110,7 +100,7 @@ export class PipelineCreateComponent implements OnInit {
     this.ssTypes.push('Haystack');
 
     this.groups = true
-    // }
+
   }
 
   authentications() {
@@ -200,22 +190,19 @@ export class PipelineCreateComponent implements OnInit {
                 }
               );
             }
-            // else{
-            //   data.json_content = JSON.stringify({"elements":[{"attributes":{"filetype":"Python3","files":[data.name+"_"+sessionStorage.getItem('organization')+".py"],"arguments":[],"dataset":[]}}]})
-            //   this.Services.update(data).subscribe();
-            // }
+     
 
           }
           this.Services.message("Created Sucessfully.", "success");
-          // //this.telemetry.addTelemetryEvent(data?.alias+' pipeline created');
+
           if (this.data.edit || this.data.copy) {
             this.dialogRef.close(data);
           } else {
             this.closeModal();
              this.dialogRef.close(data);
-            //this.closePipelineOpenDialog();
+
           }
-          //this.telemetry.addTelemetryEvent(data?.alias+' pipeline created');
+ 
         },
           error => {
             this.Services.messageService(error);
@@ -242,12 +229,11 @@ export class PipelineCreateComponent implements OnInit {
         this.Services.getAllPlugins(sessionStorage.getItem('organization')).subscribe(res => {
           this.plugins = res.filter(r => r.type != null);
           this.plugins.push({ type: "NativeScript" })
-          //this.plugins.push({ type: "Binary" })
-          // this.plugins.push({ type: "R" })
-          // this.Services.messageService(res,"Fetched Sucessfully.");
           this.plugins.forEach((opt) => {
             let val = { viewValue: opt.type, value: opt.type };
-            this.options.push(val)
+            if (opt.type === 'NativeScript') {
+              this.options.push(val);
+            }
           })
         },
           error => {
@@ -259,12 +245,11 @@ export class PipelineCreateComponent implements OnInit {
         this.Services.getAllPluginsByOrg(sessionStorage.getItem('organization')).subscribe(res => {
           this.plugins = res.filter(r => r.type != null);
           this.plugins.push({ type: "NativeScript" })
-          //this.plugins.push({ type: "Binary" })
-          // this.plugins.push({ type: "R" })
-          // this.Services.messageService(res,"Fetched Sucessfully.");
           this.plugins.forEach((opt) => {
             let val = { viewValue: opt.type, value: opt.type };
-            this.options.push(val)
+          if (opt.type === 'NativeScript') {
+              this.options.push(val);
+            }
           })
         },
           error => {
@@ -327,7 +312,7 @@ export class PipelineCreateComponent implements OnInit {
       return JSON.stringify(data);
     }
     catch (Exception) {
-      // this.messageService.error("Some error occured", "Error")
+     
     }
   }
 
@@ -343,11 +328,6 @@ export class PipelineCreateComponent implements OnInit {
 
   isWordValid(word) {
     word = word.toString()
-    //for (var i = 0, j = word.length; i < j; i++) {
-    //  if (!this.isValidLetter(word.charCodeAt(i))) {
-    //    return false
-    //  }
-    //}
     return true
   }
   editDetails() {
@@ -359,14 +339,7 @@ export class PipelineCreateComponent implements OnInit {
         editCanvas.alias = this.alias;
         editCanvas.description = this.description;
         editCanvas.type = this.type;
-        // newCanvas.interfacetype = this.type;
-        // if(editCanvas.type === 'Langchain'){
-        //   editCanvas.interfacetype = 'chain';
-        // }else if(editCanvas.type === 'App'){
-        //   editCanvas.interfacetype = 'App';
-        // }else{
-        //   editCanvas.interfacetype = 'pipeline';
-        // }
+  
         if (this.importedJson) {
           editCanvas.json_content = this.importedJson;
         } else {
@@ -375,8 +348,7 @@ export class PipelineCreateComponent implements OnInit {
 
         this.Services.update(editCanvas).subscribe((response) => {
           this.Services.message('Updated Successfully', 'success');
-          //this.telemetry.addTelemetryEvent(this.alias+' pipeline updated');
-          // this.service.addGroupModelEntity(this.data.canvasData.name, temp).subscribe();
+
           this.dialogRef.close(response);
         },
           error => this.Services.message('Canvas not updated due to error: ' + error, 'error')
@@ -389,8 +361,5 @@ export class PipelineCreateComponent implements OnInit {
     }
   }
 
-  ngOnDestroy(): void {
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
-  }
+
 }

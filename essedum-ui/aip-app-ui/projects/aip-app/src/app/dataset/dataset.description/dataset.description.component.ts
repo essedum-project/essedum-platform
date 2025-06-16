@@ -1,12 +1,10 @@
 import { ChangeDetectorRef, Component, EventEmitter, Injector, Input, OnInit, Output } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-//import { LedsLibService, LedsModalService } from 'leds-lib';
 import { Services } from '../../services/service';
 import { Location } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.component/confirm-delete-dialog.component';
 import { DatasetServices } from '../dataset-service';
-//import { SemanticSearchDialogComponent } from '../../semantic-search-dialog/semantic-search-dialog.component';
 import { AdapterServices } from '../../adapter/adapter-service';
 import { Stomp } from '@stomp/stompjs';
 import * as SockJS from 'sockjs-client';
@@ -149,11 +147,9 @@ export class DatasetDescriptionComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    //private ledsLibService: LedsLibService,
     private service: Services,
     private adapterServices: AdapterServices,
     private location: Location,
-   // private modalService: LedsModalService,
     private cdRef: ChangeDetectorRef,
     private dialog: MatDialog,
     private datasetsService: DatasetServices,
@@ -216,18 +212,6 @@ export class DatasetDescriptionComponent implements OnInit {
       this.datasetName = this.chatUrl.substring(this.chatUrl.lastIndexOf('/')+1);
       this.getDatasetByName();
     }
-    // if (history.state.card) {
-    //   let cards = this.location.getState();
-    //   this.card = cards['card'];
-    //   this.tempDataset['attributes']=this.card.attributes;
-    //   this.tempDataset['datasource']=this.card.datasource;
-    //   this.metaData = JSON.parse(this.card.attributes);
-    //   this.metaDataKeys = Object.keys(this.metaData);
-    //   this.metaDataValues = Object.values(this.metaData);
-    //   this.datasetAlias = this.card.alias;
-    // }
-    
-    //this.renderSemanticSeach();
     this.renderSemanticSearchForTabs();
     this.getknowledgebases();
    
@@ -257,7 +241,6 @@ export class DatasetDescriptionComponent implements OnInit {
       }
       this.getActions();
       this.getRelatedComponent();
-      // description attribute and url from metaData
       this.metaDataDescKey = this.metaDataKeys[2];
       this.metaDataUrlKey = this.metaDataKeys[4];
       this.descValue = this.metaData.description;
@@ -326,9 +309,6 @@ export class DatasetDescriptionComponent implements OnInit {
     this.router.navigate(["../../"], { relativeTo: this.route })
   }
 
-  showTabContent = (eventObj: any) => {
-   // this.ledsLibService.showTabContent(eventObj);
-  };
 
   getActions() {
     this.selectedDatasetName = this.rowObj.name;
@@ -377,6 +357,9 @@ export class DatasetDescriptionComponent implements OnInit {
                   } else {
                     this.datasetDataErr=false;
                     this.datasetData = resp;
+                    if(this.dataset.views=='Table view'){
+                       this.datasetData = resp;
+                    }
                     if(this.dataset.views == 'Doc View'){
                       this.http.get(resp[0], { responseType: 'arraybuffer' }).subscribe(async (docxArray) => {
                         let docxHtml = mammoth.convertToHtml({ arrayBuffer: docxArray })
