@@ -12,6 +12,7 @@ import { MatSelect } from '@angular/material/select';
 import { SwaggerAPISpec } from '../../DTO/swaggerapispec';
 import { FileUploader } from 'ng2-file-upload';
 import { Location } from "@angular/common";
+import { Router } from '@angular/router';
 // import { LedsModalService } from 'leds-lib';
 // import { OpenTelemetryService } from 'com-lib-util';
 
@@ -61,6 +62,8 @@ export class DatasetConfigComponent implements OnInit, OnDestroy  {
       public services: Services,
       public schemaRegistryService: SchemaRegistryService,
       private location : Location,
+          private router: Router,
+      
       // private loader: LoaderService,
       private formBuilder: FormBuilder,
       private dialog: MatDialog) {
@@ -447,7 +450,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy  {
       try {
           const dataset = JSON.parse(JSON.stringify(this.data));
           dataset.name = ""
-          dataset.alias = this.copyData.alias
+          dataset.alias = this.data.alias
           dataset.backingDataset = dataset.backingDataset !== '' ? dataset.backingDataset : null;
           if(this.isExperiment =true){dataset.expStatus = 2}
           dataset.attributes["Cacheable"] = this.isCacheable;
@@ -465,7 +468,6 @@ export class DatasetConfigComponent implements OnInit, OnDestroy  {
           dataset.taskdetails = dataset.taskdetails?JSON.parse(dataset.taskdetails):[]
           dataset.tags = JSON.stringify(this.firstForm.controls.tagsDisp.value)
           dataset.views = this.firstForm.controls.Viewertype.value
-  
           this.busy = this.datasetsService.createDataset(dataset).subscribe((res) => {
             let returnedName = res.name;
             this.datasetsService.message('Saved! Created successfully');
@@ -485,8 +487,9 @@ export class DatasetConfigComponent implements OnInit, OnDestroy  {
             }
               this.datasetsService.addGroupModelEntity(returnedName, temp, dataset.organization).subscribe();
             }
-            this.closeModal(returnedName);
-           
+            // this.closeModal(returnedName);
+                       this.location.back();
+
           },
             error => {
               this.datasetsService.message('Error!', 'Dataset not created due to  ' + error);

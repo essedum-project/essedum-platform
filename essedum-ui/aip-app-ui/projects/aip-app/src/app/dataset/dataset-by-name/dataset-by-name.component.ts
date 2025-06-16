@@ -36,6 +36,8 @@ public isFilterHovered:boolean=false;
   allCards: any;
   deleteFilteredTag: boolean = false;
   deleteFilteredDataset: any;
+    editData: any;
+
 
   type: any;
   users: any = [];
@@ -300,7 +302,7 @@ public isFilterHovered:boolean=false;
       this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
       this.pageArr = [...Array(this.noOfPages).keys()];
       this.pageSize = 8;
-      this.pageNumber = 1;
+      // this.pageNumber = 1;
       param = param.set('page', this.pageNumber);
       param = param.set('size', this.pageSize);
       this.datasetService.getDatasetsAdvancedFilter(param).subscribe((res) => {
@@ -392,6 +394,7 @@ public isFilterHovered:boolean=false;
     );
     // generate embedding status
     this.getIconStatus();
+    this.filterCards();
   }
 
   getRatingByUserAndModule() {
@@ -626,7 +629,7 @@ public isFilterHovered:boolean=false;
 
   deleteAdapter(name: string) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
-    dialogRef.afterClosed().subscribe((result) => {
+    // dialogRef.afterClosed().subscribe((result) => {
       // if (result === "delete") {
       //   this.datasetService.deleteDatasets(name).subscribe((res) => {
       //     this.service.messageNotificaionService('success', "Dataset Deleted Successfully");
@@ -646,6 +649,23 @@ public isFilterHovered:boolean=false;
       //     this.service.messageNotificaionService('error', "Error");
       //   }));
       // }
+    // });
+    
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === 'delete') {
+         this.datasetService.deleteDatasets(name).subscribe((res) => {
+            // this.service.messageNotificaionService(
+            //   'success',
+            //   'Connection Deleted Successfully'
+            // );
+            this.ngOnInit();
+            // this.telemetry.addTelemetryEvent('Connection Deleted');
+          },
+          (error) => {
+            // this.service.messageNotificaionService('error', 'Error');
+          }
+        );
+      }
     });
   }
 
@@ -653,6 +673,33 @@ public isFilterHovered:boolean=false;
     this.ngOnInit();
   }
 
+  changePage(page?: number) {
+    if (page && page >= 1 && page <= this.noOfPages) this.pageNumber = page;
+    if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
+      this.pageChanged.emit(this.pageNumber);
+      if (this.pageNumber > 5) {
+        this.endIndex = this.pageNumber;
+        this.startIndex = this.endIndex - 5;
+      } else {
+        this.startIndex = 0;
+        this.endIndex = 5;
+      }
+          this.filterCards();
+
+    }
+  }
+    nextPage() {
+    if (this.pageNumber + 1 <= this.noOfPages) {
+      this.pageNumber += 1;
+      this.changePage();
+    }
+  }
+  prevPage() {
+    if (this.pageNumber - 1 >= 1) {
+      this.pageNumber -= 1;
+      this.changePage();
+    }
+  }
   rowsPerPageChanged() {
     if (this.pageSize == 0) {
       this.pageSize = this.prevRowsPerPageValue;
@@ -670,9 +717,14 @@ public isFilterHovered:boolean=false;
 
   navigate(content: any) {
     this.copyDataset = true;
-    this.dialog.open(content, { width: '600px' });
-  }
+    // this.dialog.open(content, { width: '600px' });
+        this.selectedCard = content;
 
+  }
+routeBackToList(){
+      this.copyDataset = false;
+
+}
   // new cards
   getIconClass(views): string {
     switch (views) {
@@ -722,11 +774,10 @@ public isFilterHovered:boolean=false;
     // });
   }
 selectedButton(i) {
-    if (i == this.pageNumber)
-      return { "color": "white", "background": "#7b39b1" }
-    else
-      return { "color": "black" }
+    if (i == this.pageNumber) return { color: 'white', background: '#0094ff' };
+    else return { color: 'black' };
   }
+ 
   downloadSelectedFile(card: any) {
     // //this.telemetry.addTelemetryEvent(card.alias + ' Downloaded ');
     if ((card.datasource?.type && card.datasource.type == 'MYSQL') || (card.views && card.views == 'Table View')) {
