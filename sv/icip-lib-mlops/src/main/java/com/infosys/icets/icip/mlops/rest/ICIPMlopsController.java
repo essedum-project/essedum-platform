@@ -929,15 +929,19 @@ public class ICIPMlopsController {
 		Map<String, String> params = new HashMap<String, String>();
 		if (isCached) {
 			logger.info("fetch models for org: {}", project);
-			Integer pageInt = (page != null && !page.isEmpty()) ? Integer.valueOf(page) : null;
-			Integer sizeInt = (size != null && !size.isEmpty()) ? Integer.valueOf(size) : null;
-			ICIPDatasource datasource = new ICIPDatasource();
-			datasource.setType("S3");
-			datasource.setConnectionDetails("");
-			List<ICIPDatasource> connectionsList = iICIPDatasourceService.getForModelsTypeAndOrganization("S3",
-					project);
-			List<Map<String, Object>> response = datasourcePluginServce.getDataSourceService(datasource)
-					.getCustomModels(project, connectionsList, pageInt, sizeInt, query);
+			Pageable paginate = PageRequest.of(Integer.valueOf(page) - 1, Integer.valueOf(size));
+			List<Integer> tagList = new ArrayList<>();
+			if (tags != null) {
+				String[] splitValues = tags.split(",");
+				for (String t : splitValues) {
+					tagList.add(Integer.parseInt(t));
+				}
+			} else
+				tagList = null;
+
+			List<ICIPMLFederatedModelDTO> results = fedModelService.getAllModelsByAdpateridAndOrganisation(instance,
+					project, paginate, tagList, query, orderBy, type);
+			String response = new JSONArray(results).toString();
 			return ResponseEntity.status(200).body(response);
 		} else {
 			try {
@@ -1692,12 +1696,17 @@ public class ICIPMlopsController {
 			@RequestParam(name = "query", required = false) String query,
 			@RequestParam(name = "orderBy", required = false) String orderBy,
 			@RequestParam(name = "isCached", required = true) Boolean isCached) throws IOException {
-		ICIPDatasource datasource = new ICIPDatasource();
-		datasource.setType("S3");
-		datasource.setConnectionDetails("");
-		List<ICIPDatasource> connectionsList = iICIPDatasourceService.getForModelsTypeAndOrganization("S3", project);
-		Long results = datasourcePluginServce.getDataSourceService(datasource)
-				.getAllModelObjectDetailsCount(connectionsList, query, project);
+		List<Integer> tagList = new ArrayList<>();
+		if (tags != null) {
+			String[] splitValues = tags.split(",");
+			for (String t : splitValues) {
+				tagList.add(Integer.parseInt(t));
+			}
+		} else
+			tagList = null;
+
+		Long results = fedModelService.getAllModelsCountByAdpateridAndOrganisation(instance, project, tagList, query,
+				orderBy, type);
 		return ResponseEntity.status(200).body(results);
 	}
 

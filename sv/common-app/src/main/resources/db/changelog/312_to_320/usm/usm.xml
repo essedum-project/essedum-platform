@@ -130,7 +130,7 @@
             </sqlCheck>
         </preConditions>
         <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
-            insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Models","icon":"cubes","children":[{"label":"Models","altText":null,"icon":"","url":"./aip/models","children":[],"_id":2},{"label":"Endpoints","altText":null,"icon":"","url":"./aip/endpoints","children":[],"_id":3}],"horizontal":true}','2',NULL);
+            insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Models","altText":null,"icon":"cubes","url":"./aip/models","children":[]}','2',NULL);
         </sql>
     </changeSet>
     

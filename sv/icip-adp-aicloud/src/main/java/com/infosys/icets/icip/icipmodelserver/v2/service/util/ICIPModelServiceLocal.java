@@ -2,9 +2,7 @@ package com.infosys.icets.icip.icipmodelserver.v2.service.util;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
