@@ -478,7 +478,7 @@ export class AdapterComponent implements OnInit, OnChanges {
   }
 
   selectedButton(i) {
-    if (i == this.pageNumber) return { color: 'white', background: '#7b39b1' };
+    if (i == this.pageNumber) return { color: 'white', background: '#0094ff' };
     else return { color: 'black' };
   }
   toggleExpand() {

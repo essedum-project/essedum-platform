@@ -9,6 +9,7 @@ import { Manifest, RemoteConfig } from '@angular-architects/module-federation';
 import { encKey } from './encKey';
 import { Dataset } from '../dataset/datasets';
 import { StreamingServices } from '../streaming-services/streaming-service';
+import { App } from '../apps/app';
 
 @Injectable()
 export class Services {
@@ -425,7 +426,7 @@ export class Services {
 
   messageService(resp: any, msg?: any) {
     console.log(resp);
-    if (resp.status == 200) {
+    if (resp?.status == 200) {
       if (resp.body.length === 0) {
         let message = {
           message: msg,
@@ -2262,9 +2263,6 @@ export class Services {
       );
   }
 
-
- 
-
   getallPipelinesByOrg(): Observable<any> {
     const org = sessionStorage.getItem('organization');
     return this.https
@@ -2298,8 +2296,7 @@ export class Services {
       );
   }
 
-
-   getStatus(jobid) {
+  getStatus(jobid) {
     return this.https
       .get('/api/aip/jobs/jobstatus/' + jobid, {
         observe: 'response',
@@ -2327,9 +2324,7 @@ export class Services {
       .pipe(catchError(this.handleError));
   }
 
-
- 
-    //download native file
+  //download native file
   downloadNativeFile(cname, org, filename): Observable<any> {
     return this.https
       .get(this.dataUrl + '/file/download/native/' + cname + '/' + org, {
@@ -2339,7 +2334,7 @@ export class Services {
       .pipe((resp: any) => resp);
   }
 
-   //get datasource
+  //get datasource
   getDatasource(name: string): Observable<any> {
     const org = sessionStorage.getItem('organization');
     return this.https
@@ -2361,7 +2356,7 @@ export class Services {
       );
   }
 
-    getDatasetNames(org): Observable<any> {
+  getDatasetNames(org): Observable<any> {
     return this.https
       .get(this.dataUrl + '/datasets/dataset', {
         observe: 'response',
@@ -2386,7 +2381,7 @@ export class Services {
       .pipe(catchError(this.handleError));
   }
 
-   //job-data-viewer findByCoreid
+  //job-data-viewer findByCoreid
   fetchInternalJob(
     jobId: string,
     linenumber: Number,
@@ -2397,29 +2392,29 @@ export class Services {
     return this.https
       .get(
         this.dataUrl +
-        '/service/v1/internaljob/console/' +
-        jobId +
-        '?offset=' +
-        offset +
-        '&org=' +
-        org +
-        '&lineno=' +
-        linenumber +
-        '&status=' +
-        status
+          '/service/v1/internaljob/console/' +
+          jobId +
+          '?offset=' +
+          offset +
+          '&org=' +
+          org +
+          '&lineno=' +
+          linenumber +
+          '&status=' +
+          status
       )
       .pipe(map((response) => response))
       .pipe(catchError(this.handleError));
   }
 
-   fetchInternalJobByName(name: string, page, rows): Observable<any> {
+  fetchInternalJobByName(name: string, page, rows): Observable<any> {
     return this.https
       .get(
         this.dataUrl +
-        '/jobs/' +
-        name +
-        '/' +
-        localStorage.getItem('organization'),
+          '/jobs/' +
+          name +
+          '/' +
+          localStorage.getItem('organization'),
         { params: { page: page, size: rows } }
       )
 
@@ -2431,17 +2426,17 @@ export class Services {
     return this.https
       .get(
         this.dataUrl +
-        '/internaljob/jobname/' +
-        name +
-        '/' +
-        sessionStorage.getItem('organization'),
+          '/internaljob/jobname/' +
+          name +
+          '/' +
+          sessionStorage.getItem('organization'),
         { params: { page: page, size: rows } }
       )
       .pipe(map((response) => response))
       .pipe(catchError(this.handleError));
   }
 
-    //console-tab getJobsByStreamingServiceLen
+  //console-tab getJobsByStreamingServiceLen
   getJobsByStreamingServiceLen(name: any): Observable<any> {
     const org = sessionStorage.getItem('organization');
     return this.https
@@ -2460,21 +2455,20 @@ export class Services {
       );
   }
 
-   fetchInternalJobLenByname(name: string): Observable<any> {
+  fetchInternalJobLenByname(name: string): Observable<any> {
     return this.https
       .get(
         this.dataUrl +
-        '/internaljob/jobname/len/' +
-        name +
-        '/' +
-        sessionStorage.getItem('organization')
+          '/internaljob/jobname/len/' +
+          name +
+          '/' +
+          sessionStorage.getItem('organization')
       )
       .pipe(map((response) => response))
       .pipe(catchError(this.handleError));
   }
 
-
-   //console-tab fetchAgentJob
+  //console-tab fetchAgentJob
   fetchAgentJob(
     jobId: string,
     linenumber: Number,
@@ -2486,24 +2480,24 @@ export class Services {
     return this.https
       .get(
         this.dataUrl +
-        '/service/v1/agentjobs/console/' +
-        jobId +
-        '?offset=' +
-        offset +
-        '&org=' +
-        org +
-        '&lineno=' +
-        linenumber +
-        '&status=' +
-        status +
-        '&readconsole=' +
-        read
+          '/service/v1/agentjobs/console/' +
+          jobId +
+          '?offset=' +
+          offset +
+          '&org=' +
+          org +
+          '&lineno=' +
+          linenumber +
+          '&status=' +
+          status +
+          '&readconsole=' +
+          read
       )
       .pipe(map((response) => response))
       .pipe(catchError(this.handleError));
   }
 
-   //job-data-viewer findByCoreid
+  //job-data-viewer findByCoreid
   downloadPipelineLog(id): Observable<any> {
     return this.https
       .get(this.dataUrl + '/service/v1/file/download/log/pipeline', {
@@ -2513,8 +2507,7 @@ export class Services {
       .pipe((resp: any) => resp);
   }
 
-
-   //job-data-viewer getPipelineNames
+  //job-data-viewer getPipelineNames
   getPipelineNames(org): Observable<any> {
     return this.https
       .get(this.dataUrl + '/service/v1/streamingServices/allPipelineNames', {
@@ -2533,7 +2526,7 @@ export class Services {
       );
   }
 
-   //job-data-viewer findByCoreid
+  //job-data-viewer findByCoreid
   findByCoreid(corelid): Observable<any> {
     return this.https
       .get(this.dataUrl + '/service/v1/jobs/corelid/' + corelid)
@@ -2599,10 +2592,10 @@ export class Services {
     return this.https
       .get(
         this.dataUrl +
-        '/datasets/datasetform/' +
-        name +
-        '/' +
-        sessionStorage.getItem('organization'),
+          '/datasets/datasetform/' +
+          name +
+          '/' +
+          sessionStorage.getItem('organization'),
         { observe: 'response' }
       )
       .pipe(
@@ -2616,7 +2609,7 @@ export class Services {
         })
       );
   }
-    getProxyDatasetDetails(
+  getProxyDatasetDetails(
     dataset: Dataset,
     dsource,
     params,
@@ -2629,16 +2622,16 @@ export class Services {
     return this.https
       .get(
         this.dataUrl +
-        '/service/' +
-        dsource.type +
-        '/' +
-        dsource.alias +
-        '/' +
-        dataset.alias +
-        '/' +
-        org +
-        '/' +
-        removeCache,
+          '/service/' +
+          dsource.type +
+          '/' +
+          dsource.alias +
+          '/' +
+          dataset.alias +
+          '/' +
+          org +
+          '/' +
+          removeCache,
         { observe: 'response', params: params, headers: headers }
       )
       .pipe(
@@ -2662,19 +2655,19 @@ export class Services {
         switchMap((body) => {
           let tmpParams = pagination.sortEvent
             ? {
-              page: pagination.page,
-              size: pagination.size,
-              sortEvent: pagination.sortEvent,
-              sortOrder: pagination.sortOrder,
-            }
+                page: pagination.page,
+                size: pagination.size,
+                sortEvent: pagination.sortEvent,
+                sortOrder: pagination.sortOrder,
+              }
             : { page: pagination.page, size: pagination.size };
           const org = sessionStorage.getItem('organization');
           return this.https.get(
             this.dataUrl +
-            '/datasets/getPaginatedData/' +
-            dataset.name +
-            '/' +
-            org,
+              '/datasets/getPaginatedData/' +
+              dataset.name +
+              '/' +
+              org,
             {
               observe: 'response',
               params: tmpParams,
@@ -2688,19 +2681,19 @@ export class Services {
         switchMap((body) => {
           let tmpParams = pagination.sortEvent
             ? {
-              page: pagination.page,
-              size: pagination.size,
-              sortEvent: pagination.sortEvent,
-              sortOrder: pagination.sortOrder,
-            }
+                page: pagination.page,
+                size: pagination.size,
+                sortEvent: pagination.sortEvent,
+                sortOrder: pagination.sortOrder,
+              }
             : { page: pagination.page, size: pagination.size };
           const org = sessionStorage.getItem('organization');
           return this.https.get(
             this.dataUrl +
-            '/datasets/getPaginatedData/' +
-            dataset.name +
-            '/' +
-            org,
+              '/datasets/getPaginatedData/' +
+              dataset.name +
+              '/' +
+              org,
             {
               observe: 'response',
               params: tmpParams,
@@ -2764,7 +2757,7 @@ export class Services {
       this.message('Some error occured', 'error');
     }
   }
- searchTicketsUsingDataset(
+  searchTicketsUsingDataset(
     datasetName: string,
     projectName: string,
     pagination,
@@ -2784,17 +2777,17 @@ export class Services {
       if (selectClauseParams) selectClauseParamsValue = selectClauseParams;
       let apiParams = pagination.sortEvent
         ? {
-          page: pagination.page,
-          size: pagination.size,
-          sortEvent: pagination.sortEvent,
-          sortOrder: pagination.sortOrder,
-        }
+            page: pagination.page,
+            size: pagination.size,
+            sortEvent: pagination.sortEvent,
+            sortOrder: pagination.sortOrder,
+          }
         : {
-          datasetName: datasetName,
-          projectName: projectName,
-          page: pagination.page,
-          size: pagination.size,
-        };
+            datasetName: datasetName,
+            projectName: projectName,
+            page: pagination.page,
+            size: pagination.size,
+          };
 
       if (selectClauseParams) {
         apiParams['searchParams'] = searchParamsValue;
@@ -2836,7 +2829,7 @@ export class Services {
     }
   }
 
-    getAiOpsData(endpoint, body, adapterInstance): Observable<any> {
+  getAiOpsData(endpoint, body, adapterInstance): Observable<any> {
     let session: any = sessionStorage.getItem('organization');
     // let adapterInstance = 'AIOPS-Adapter'
     // let adapterInstance = 'AIOPS-Instance'
@@ -2867,7 +2860,7 @@ export class Services {
       );
   }
 
-    searchTicketsUsingDataset1(
+  searchTicketsUsingDataset1(
     datasetName: string,
     projectName: string,
     pagination,
@@ -2889,17 +2882,17 @@ export class Services {
       }
       let apiParams = pagination.sortEvent
         ? {
-          page: pagination.page,
-          size: pagination.size,
-          sortEvent: pagination.sortEvent,
-          sortOrder: pagination.sortOrder,
-        }
+            page: pagination.page,
+            size: pagination.size,
+            sortEvent: pagination.sortEvent,
+            sortOrder: pagination.sortOrder,
+          }
         : {
-          datasetName: datasetName,
-          projectName: projectName,
-          page: pagination.page,
-          size: pagination.size,
-        };
+            datasetName: datasetName,
+            projectName: projectName,
+            page: pagination.page,
+            size: pagination.size,
+          };
       if (searchClause) {
         apiParams['datasetName'] = datasetName;
         apiParams['projectName'] = projectName;
@@ -2943,7 +2936,7 @@ export class Services {
     }
   }
 
-    getDownloadData(
+  getDownloadData(
     datasetName: string,
     projectName: string,
     searchValues,
@@ -2965,19 +2958,19 @@ export class Services {
               switchMap((encryptedFieldsToDownload) => {
                 let apiParams = sortEvent
                   ? {
-                    datasetName: datasetName,
-                    projectName: projectName,
-                    chunkSize: chunkSize,
-                    apiCount: apiCount,
-                    sortEvent: sortEvent,
-                    sortOrder: sortOrder,
-                  }
+                      datasetName: datasetName,
+                      projectName: projectName,
+                      chunkSize: chunkSize,
+                      apiCount: apiCount,
+                      sortEvent: sortEvent,
+                      sortOrder: sortOrder,
+                    }
                   : {
-                    datasetName: datasetName,
-                    projectName: projectName,
-                    chunkSize: chunkSize,
-                    apiCount: apiCount,
-                  };
+                      datasetName: datasetName,
+                      projectName: projectName,
+                      chunkSize: chunkSize,
+                      apiCount: apiCount,
+                    };
                 return this.https
                   .get('/api/aip/datasets/downloadCsvData', {
                     params: apiParams,
@@ -3018,19 +3011,19 @@ export class Services {
               switchMap((encryptedFieldsToDownload) => {
                 let apiParams = sortEvent
                   ? {
-                    datasetName: datasetName,
-                    projectName: projectName,
-                    chunkSize: chunkSize,
-                    apiCount: apiCount,
-                    sortEvent: sortEvent,
-                    sortOrder: sortOrder,
-                  }
+                      datasetName: datasetName,
+                      projectName: projectName,
+                      chunkSize: chunkSize,
+                      apiCount: apiCount,
+                      sortEvent: sortEvent,
+                      sortOrder: sortOrder,
+                    }
                   : {
-                    datasetName: datasetName,
-                    projectName: projectName,
-                    chunkSize: chunkSize,
-                    apiCount: apiCount,
-                  };
+                      datasetName: datasetName,
+                      projectName: projectName,
+                      chunkSize: chunkSize,
+                      apiCount: apiCount,
+                    };
                 return this.https
                   .get('/api/aip/datasets/downloadCsvData', {
                     params: apiParams,
@@ -3068,36 +3061,7 @@ export class Services {
     }
   }
 
-    getDataset(name: string): Observable<any> {
-    return this.https
-      .get(
-        this.dataUrl +
-        '/datasets/' +
-        name +
-        '/' +
-        sessionStorage.getItem('organization'),
-        { observe: 'response' }
-      )
-      .pipe(
-        switchMap(async (response) => {
-          let result = response.body as Array<any>;
-          let salt = this.encKey.getSalt();
-          if (!salt) salt = sessionStorage.getItem('salt');
-          result['attributes'] = await this.decryptUsingAES256(
-            result['attributes'],
-            salt
-          );
-          return result;
-        })
-      )
-      .pipe(
-        catchError((err) => {
-          return this.handleError(err);
-        })
-      );
-  }
-
-    getTextDatasetDetails(dataset: Dataset): Observable<any> {
+  getTextDatasetDetails(dataset: Dataset): Observable<any> {
     let body: any;
     let salt = this.encKey.getSalt();
     if (!salt) salt = sessionStorage.getItem('salt');
@@ -3155,14 +3119,13 @@ export class Services {
       );
   }
 
-   setSearchValues(searchValues) {
+  setSearchValues(searchValues) {
     this.searchValues = searchValues;
   }
   setPaginationValues(paginationValues) {
     this.paginationValues = paginationValues;
   }
 
-  
   getDatasetDetails(dataset: Dataset): Observable<any> {
     let body: any;
     // let body = dataset.attributes
@@ -3230,20 +3193,20 @@ export class Services {
     try {
       let tmpParams = pagination.sortEvent
         ? {
-          page: pagination.page,
-          size: pagination.size,
-          sortEvent: pagination.sortEvent,
-          sortOrder: pagination.sortOrder,
-        }
+            page: pagination.page,
+            size: pagination.size,
+            sortEvent: pagination.sortEvent,
+            sortOrder: pagination.sortOrder,
+          }
         : { page: pagination.page, size: pagination.size };
       const org = sessionStorage.getItem('organization');
       return this.https
         .post(
           this.dataUrl +
-          '/datasets/direct/viewData/' +
-          dataset.alias +
-          '/' +
-          org,
+            '/datasets/direct/viewData/' +
+            dataset.alias +
+            '/' +
+            org,
           dataset,
           { observe: 'response', params: tmpParams }
         )
@@ -3262,14 +3225,14 @@ export class Services {
     }
   }
 
-    checkVisualizeSupport(datasetName): Observable<any> {
+  checkVisualizeSupport(datasetName): Observable<any> {
     return this.https
       .get(
         this.dataUrl +
-        '/datasets/isVisualizationSupported/' +
-        datasetName +
-        '/' +
-        sessionStorage.getItem('organization'),
+          '/datasets/isVisualizationSupported/' +
+          datasetName +
+          '/' +
+          sessionStorage.getItem('organization'),
         { observe: 'response' }
       )
       .pipe(
@@ -3305,6 +3268,389 @@ export class Services {
     }
   }
 
+  // Apps
+
+  getAppByName(name: String) {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .get(this.baseUrl + '/app/' + name + '/' + org, { observe: 'response' })
+      .pipe(
+        map((response) => {
+          return new App(response.body);
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  getImage(name: string): Observable<any> {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .get(this.dataUrl + '/service/v1/get/image/' + name + '/' + org, {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  deleteStreamingService(cid: any) {
+    return this.https
+      .delete(this.baseUrl + '/streamingServices/delete/' + cid)
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  deleteApp(id: Number) {
+    return this.https.delete(this.baseUrl + '/app/delete/' + id);
+  }
+
+  public getMfeAppConfig(): Observable<CustomManifest> {
+    return Observable.create((observer) => {
+      this.https
+        .get<CustomManifest>(
+          sessionStorage.getItem('contextPath') + 'assets/json/mf.manifest.json'
+        )
+        .subscribe((response) => {
+          return observer.next(response);
+        });
+    });
+  }
+
+  getVideoDatasets(param: HttpParams): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/videolist', {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+  saveImage(
+    alias: any,
+    name: any,
+    fileName: any,
+    mimeType: any,
+    url: any
+  ): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let regBody = {
+      alias: alias,
+      name: name,
+      filename: fileName,
+      mimetype: mimeType,
+      url: url,
+      organization: session,
+    };
+    return this.https
+      .post(this.dataUrl + '/service/v1/save/image', regBody, {
+        observe: 'response',
+      })
+      .pipe(
+        map((res) => {
+          return res;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  saveApp(app: App) {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .post(this.baseUrl + '/app/save', app)
+      .pipe(
+        map((response) => {
+          return new App(response);
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  getTemplate(name: string): Observable<any> {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .get(
+        this.dataUrl +
+          '/service/v1/streamingServices/template/' +
+          name +
+          '/' +
+          org,
+        { observe: 'response' }
+      )
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  updateImage(
+    id: any,
+    alias: any,
+    name: any,
+    fileName: any,
+    mimeType: any,
+    url: any
+  ): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let regBody = {
+      id: id,
+      alias: alias,
+      name: name,
+      filename: fileName,
+      mimetype: mimeType,
+      url: url,
+      organization: session,
+    };
+    return this.https
+      .put(this.dataUrl + '/service/v1/image/update', regBody, {
+        observe: 'response',
+      })
+      .pipe(
+        map((res) => {
+          return res;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  getPipelinesByInterfacetype(org, type: String): Observable<any> {
+    // let org: any = sessionStorage.getItem('organization');
+
+    return this.https
+      .get(this.dataUrl + '/service/v1/pipelines/' + type + '/' + org, {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  uploadToStorageServer(storageAttributes): Observable<any> {
+    let param = new HttpParams()
+      .set('objectKey', storageAttributes.objectKey)
+      .set('uploadFile', storageAttributes.uploadFile)
+      .set('org', sessionStorage.getItem('organization'));
+    return this.https
+      .post(
+        this.baseUrl + '/app/uploadToServer',
+        {},
+        { observe: 'response', responseType: 'text', params: param }
+      )
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  uploadFile2(file, chunkMetadata) {
+    const org = sessionStorage.getItem('organization');
+    let headers = new HttpHeaders();
+
+    let form = new FormData();
+    form.append('file', file);
+    form.append('chunkMetadata', JSON.stringify(chunkMetadata));
+    //form.append("metadata", JSON.stringify(metadata))
+
+    headers.append('Accept', 'application/json');
+    headers.append(
+      'Content-Type',
+      'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'
+    );
+
+    return this.https
+      .post(this.dataUrl + '/service/v1/saveFile/' + org, form)
+      .pipe(map((response) => response))
+      .pipe(catchError(this.handleError));
+  }
+
+  getAppRoute(name: String) {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .get(this.baseUrl + '/app/appRoute/' + name + '/' + org, {
+        observe: 'response',
+        responseType: 'text',
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  getDataset(name: string): Observable<any> {
+    return this.https
+      .get(
+        this.dataUrl +
+          '/datasets/' +
+          name +
+          '/' +
+          sessionStorage.getItem('organization'),
+        { observe: 'response' }
+      )
+      .pipe(
+        switchMap(async (response) => {
+          let result = response.body as Array<any>;
+          let salt = this.encKey.getSalt();
+          if (!salt) salt = sessionStorage.getItem('salt');
+          result['attributes'] = await this.decryptUsingAES256(
+            result['attributes'],
+            salt
+          );
+          return result;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
+  readScriptFile(cname, filename): Observable<any> {
+    const org = sessionStorage.getItem('organization');
+    return this.https.get(this.baseUrl + '/file/read/' + cname + '/' + org, {
+      params: { file: filename },
+      responseType: 'arraybuffer',
+    });
+  }
+
+  fetchJobRunTypes2(): Observable<string> {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .get(this.baseUrl + '/jobs/runtime/types/' + org)
+      .pipe((resp: any) => resp);
+  }
+
+  getPresignedUrl(fileName: string) {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .get(this.baseUrl + '/app/streamFile/' + fileName + '/' + org, {
+        observe: 'response',
+        responseType: 'text',
+      })
+      .pipe(
+        map((response) => {
+          return <any>response.body;
+        })
+      )
+      .pipe(catchError(this.handleError));
+  }
+
+  saveNativeScript(cname: String, filetype: String, script: any) {
+    const org = sessionStorage.getItem('organization');
+    let headers = new HttpHeaders();
+    headers.append('Accept', 'application/json');
+    headers.append(
+      'Content-Type',
+      'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'
+    );
+    // let filename = cname+"_"+org
+    return this.https.post(
+      this.baseUrl + '/file/create/' + cname + '/' + org + '/' + filetype,
+      script,
+      {
+        params: { file: '' },
+        headers: headers,
+        observe: 'response',
+      }
+    );
+  }
+
+  getFile(fileId) {
+    const org = sessionStorage.getItem('organization');
+
+    return this.https
+      .get(this.baseUrl + '/fileserver/downloadFile/' + fileId + '/' + org, {
+        observe: 'response',
+        responseType: 'blob',
+      })
+      .pipe(
+        map((response) => {
+          return <any>response.body;
+        })
+      )
+      .pipe(catchError(this.handleError));
+  }
+
+  createTempTextFileforS3(fileData, fileName) {
+    let body = {
+      fileData: fileData,
+      fileName: fileName,
+    };
+    return this.https
+      .post(this.baseUrl + '/fileserver/uploadTempFileFromData', body, {
+        observe: 'response',
+        responseType: 'text',
+      })
+      .pipe(
+        map((response) => {
+          return <any>response.body;
+        })
+      )
+      .pipe(catchError(this.handleError));
+  }
 }
 
 export type CustomRemoteConfig = RemoteConfig & {

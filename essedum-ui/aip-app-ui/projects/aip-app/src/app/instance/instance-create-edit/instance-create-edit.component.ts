@@ -188,9 +188,9 @@ export class InstanceCreateEditComponent implements OnInit {
     //   }
     //  });
   }
-  implchangeoccur(adpName: string) {
+  implchangeoccur(adpName: any) {
     this.adapterServices
-      .getAdapteByNameAndOrganization(adpName)
+      .getAdapteByNameAndOrganization(adpName.value)
       .subscribe((resp) => {
         if (resp.isChain == true) {
           this.isChain = true;
@@ -199,18 +199,19 @@ export class InstanceCreateEditComponent implements OnInit {
         }
       });
   }
-  connectionNameSelectChange(connectionNameSelectd: string) {
-    this.data.connectionid = connectionNameSelectd;
+
+  connectionNameSelectChange(connectionNameSelectd: any) {
+    this.data.connectionid = connectionNameSelectd.value;
     this.selectedConnection = this.datasourcesForConnection.filter(
-      (datasource) => datasource.alias == connectionNameSelectd
+      (datasource) => datasource.alias == connectionNameSelectd.value
     )[0];
-    this.data.connectionid = this.selectedConnection.name;
-    if (this.selectedConnection.type == 'REST')
+    this.data.connectionid = this.selectedConnection?.name;
+    if (this.selectedConnection?.type == 'REST')
       this.data.executiontype = 'REST';
     else this.data.executiontype = 'REMOTE';
   }
-  runtimeNameSelectChange(runtimeNameSelectd: string) {
-    this.data.runtimename = runtimeNameSelectd;
+  runtimeNameSelectChange(runtimeNameSelectd: any) {
+    this.data.runtimename = runtimeNameSelectd.value;
   }
 
   findalldatasourcesForConnection() {

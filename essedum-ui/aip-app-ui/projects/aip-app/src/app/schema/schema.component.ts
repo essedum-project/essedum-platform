@@ -184,7 +184,7 @@ export class SchemaComponent implements OnInit, OnChanges {
   }
   selectedButton(i) {
     if (i == this.pageNumber) {
-      return { color: 'white', background: '#7b39b1' };
+      return { color: 'white', background: '#0094ff' };
     } else return { color: 'black' };
   }
   Authentications() {
