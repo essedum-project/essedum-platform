@@ -14,6 +14,7 @@ name,tryoutlink,status,type,organization,scope,file,job_name,video_file
 "JCICHTBT63416","https://victlpth5-04:2426/","NULL","App","leo1311","chain","NULL","JCICHTBT27294","NULL"
 "LEOCNFLN60833","https://victlpth5-04:2423/","NULL","App","leo1311","embed","NULL","LEOCHTBT89242","NULL"
 "LEOHRCHT43838","https://victlpth5-04:2425/","NULL","App","leo1311","chain","NULL","LEOHRCHT47550","HRChatbot.mp4"
-LEOSMPLL19634,http://100.78.49.20:8080,NULL,App,leo1311,embed,NULL,NULL,NULL
-LEOTST_G57191,http://100.78.49.20:8080,NULL,App,leo1311,embed,NULL,NULL,NULL
-LEOSMPL_87385,http://100.78.49.20:8081,NULL,App,leo1311,external,NULL,NULL,NULL
+"LEOSMPLL19634","http://100.78.49.20:8080","NULL","App","leo1311","embed","NULL","NULL","NULL"
+"LEOTST_G57191","http://100.78.49.20:8080","NULL","App","leo1311","embed","NULL","NULL","NULL"
+"LEOSMPL_87385","http://100.78.49.20:8081","NULL","App","leo1311","external","NULL","NULL","NULL"
+"LEORG_SC89080","http://100.78.49.20:8081/","NULL","App","leo1311","embed","NULL","NULL","NULL"
