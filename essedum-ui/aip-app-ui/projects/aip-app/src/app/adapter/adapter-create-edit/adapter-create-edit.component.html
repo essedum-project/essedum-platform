@@ -57,7 +57,7 @@
                                 <mat-select [(value)]="data.connectionname"
                                     (selectionChange)="connectionNameSelectChange($event)" required>
                                     <mat-option *ngFor="let option of connectionOptions" [value]="option.value">
-                                        {{ option.value }}
+                                        {{ option.viewValue }}
                                     </mat-option>
                                 </mat-select>
                             </mat-form-field>
@@ -102,7 +102,7 @@
                                     <mat-select [(ngModel)]="chainSelected" required
                                         (selectionChange)="chainNameSelectChange($event)">
                                         <mat-option *ngFor="let option of chainOptions"
-                                            [value]="option.value">{{option.value}}</mat-option>
+                                            [value]="option.value">{{option.viewValue}}</mat-option>
                                     </mat-select>
 
                                 </mat-form-field>

@@ -56,7 +56,7 @@
                                 <mat-select [(value)]="data.connectionname"
                                     (selectionChange)="connectionNameSelectChange($event)" required>
                                     <mat-option *ngFor="let option of connectionOptions" [value]="option.value">
-                                        {{ option.value }}
+                                        {{ option.viewValue }}
                                     </mat-option>
                                 </mat-select>
                             </mat-form-field>
@@ -110,8 +110,9 @@
                         </div>
                     </div>
                     <div *ngIf="action==='create'" class="m-2 flex justify-content-end lfx-u-pad-t-8 lfx-u-pad-r-8">
+
                         <button mat-raised-button color="primary" class="ml-2"
-                            [disabled]="!nameFlag || !createAuth || !data.connectionname || !data.spectemplatedomainname || (data.isChain ? !data.chainName : false)"
+                            [disabled]="!nameFlag || !createAuth || !data.connectionname || !data.adaptername|| !(isChain? data.runtimename : true)"
                             (click)="createInstance()">
                             Create
                         </button>

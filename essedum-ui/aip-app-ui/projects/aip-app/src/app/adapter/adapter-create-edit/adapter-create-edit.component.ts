@@ -180,21 +180,23 @@ export class AdapterCreateEditComponent {
     }
   }
 
-  connectionNameSelectChange(connectionNameSelectd: string) {
-    this.data.connectionid = connectionNameSelectd;
+  connectionNameSelectChange(connectionNameSelectd: any) {
+    this.data.connectionname = connectionNameSelectd.value;
     this.selectedConnection = this.datasourcesForConnection.filter(
-      (datasource) => datasource.alias == connectionNameSelectd
+      (datasource) => datasource.alias == connectionNameSelectd.value
     )[0];
-    this.data.connectionid = this.selectedConnection.name;
+    this.data.connectionid = this.selectedConnection.id;
     if (this.selectedConnection.type == 'REST')
       this.data.executiontype = 'REST';
     else this.data.executiontype = 'REMOTE';
   }
-  chainNameSelectChange(chainNameSelected: string) {
-    this.selecteddChain = this.chains.filter(
-      (chain) => chain.alias == chainNameSelected
-    )[0];
-    this.data.chainName = this.selecteddChain.name;
+
+  chainNameSelectChange(event: any) {
+    const chainNameSelected = event.value;
+    this.selecteddChain = this.chains.find(
+      (chain) => chain.alias === chainNameSelected
+    );
+    this.data.chainName = this.selecteddChain?.name;
     if (this.data.chainName) {
       this.chainError = false;
     }

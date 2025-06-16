@@ -68,12 +68,12 @@ import { MatRadioModule } from '@angular/material/radio';
 //import { RadioModule } from 'leds-lib';
 import { SpecTemplateComponent } from './spec-template/spec-template.component';
 import { SpecTemplateDescriptionComponent } from './spec-template/spec-template-description/spec-template-description.component';
-// import { AppListComponent } from './apps/app-list/app-list.component';
-// import { ViewAppComponent } from './apps/view-app/view-app.component';
+import { AppListComponent } from './apps/app-list/app-list.component';
+import { ViewAppComponent } from './apps/view-app/view-app.component';
 import { AppConfigComponent } from './app-config/app-config.component';
 import { FileUploadModule } from 'ng2-file-upload';
 
-// import { CreateAppComponent } from './create-app/create-app.component';
+import { CreateAppComponent } from './apps/create-app/create-app.component';
 import { AdapterCreateEditComponent } from './adapter/adapter-create-edit/adapter-create-edit.component';
 // import { FeatureStoreComponent } from './feature-store/feature-store.component';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component/confirm-delete-dialog.component';
@@ -121,7 +121,10 @@ import { JsonNodeComponent } from './json2table/json-node.component';
 import { JsonTreeComponent } from './json2table/json-tree.component';
 import { ConnectionViewComponent } from './datasource/connection-view/connection-view.component';
 // import { GroupedFeaturesComponent } from './feature/grouped-features/grouped-features.component';
-import { DatasetTableViewComponent, HighlightSearch } from './dataset/dataset-table-view/dataset-table-view.component';
+import {
+  DatasetTableViewComponent,
+  HighlightSearch,
+} from './dataset/dataset-table-view/dataset-table-view.component';
 // import { CreateLinkedComponent } from './create-linked/create-linked.component';
 import { ModalConfigDatasetComponent } from './dataset/modal-config-dataset/modal-config-dataset.component';
 import { RestDatasetConfigComponent } from './dataset/rest-dataset-config/rest-dataset-config.component';
@@ -189,7 +192,7 @@ import { NgApexchartsModule } from 'ng-apexcharts';
 // import { DgToolDescriptionComponent } from './digital-brain/dg-instance/dg-tool-description/dg-tool-description.component';
 // import { EditDgToolComponent } from './digital-brain/dg-instance/edit-dg-tool/edit-dg-tool.component';
 
-// import { ChooseRuntimeComponent } from './apps/choose-runtime/choose-runtime.component';
+import { ChooseRuntimeComponent } from './apps/choose-runtime/choose-runtime.component';
 // import { WorkflowService } from './workflows/entities/workflow.service';
 // import { WorkflowCreateSpecComponent } from './workflows/workflow-create-spec/workflow-create-spec.component';
 // import { WorkflowTableComponent } from './workflows/workflow-table/workflow-table.component';
@@ -289,6 +292,7 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { SchemaRegistryService } from './services/schema-registry.service';
 import { SchemaRelationshipService } from './schema/schema-relationship.service';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { DynamicRemoteLoad } from './apps/view-app/remoteLoad';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -372,11 +376,12 @@ const dbConfig: DBConfig = {
     InstanceCreateEditComponent,
     //TaggingComponentComponent,
 
-    // CreateAppComponent,
-    // AppListComponent,
+    CreateAppComponent,
+    AppListComponent,
+    ChooseRuntimeComponent,
     SpecTemplateComponent,
     SpecTemplateDescriptionComponent,
-    // ViewAppComponent,
+    ViewAppComponent,
     AppConfigComponent,
     AdapterCreateEditComponent,
     ConfirmDeleteDialogComponent,
@@ -648,7 +653,7 @@ const dbConfig: DBConfig = {
     SemanticService,
     // MashupsService,
     // WranglingService,
-    // DynamicRemoteLoad,
+    DynamicRemoteLoad,
     // WranglingDataService,
     // ExpressionBuilderUtilsService,
 
