@@ -11,7 +11,6 @@ import {
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { Services } from '../services/service';
 import { TagsService } from '../services/tags.service';
-// import { LeapTelemetryService, OpenTelemetryService } from 'com-lib-util';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog.component/confirm-delete-dialog.component';
 import { HttpParams } from '@angular/common/http';
@@ -63,8 +62,6 @@ export class SchemaComponent implements OnInit, OnChanges {
   records: boolean = false;
   dropDown: any;
   constructor(
-    // private telemetryService: LeapTelemetryService,
-    // private telemetry: OpenTelemetryService,
     private route: ActivatedRoute,
     private router: Router,
     private service: Services,
@@ -73,17 +70,18 @@ export class SchemaComponent implements OnInit, OnChanges {
     private dialog: MatDialog,
     private location: Location
   ) {}
+
   ngOnChanges(changes: SimpleChanges): void {
     this.getCards(this.pageNumber, this.pageSize, this.filt);
-    // console.log(this.tagService.tags, 'tags');
     this.tagchange();
     this.updatePageSize();
-    // console.log(this.tagService.tags, 'tags');
   }
+
   @HostListener('window:resize', ['$event'])
   onResize(event) {
     this.updatePageSize();
   }
+
   updatePageSize() {
     this.pageSize = 0;
     if (window.innerWidth > 2500) {
@@ -108,14 +106,10 @@ export class SchemaComponent implements OnInit, OnChanges {
       this.getCards(this.pageNumber, this.pageSize, this.filt);
     }
   }
-  telemetryCall() {
-    // this.telemetry.startTelemetry('aip-app','SchemaComponent',sessionStorage.getItem('organization'))
-  }
+
   ngOnInit(): void {
-    this.telemetryCall();
     this.records = false;
     this.updatePageSize();
-    this.telemetryImpression();
     this.service.getConstantByKey('icip.schema.system').subscribe((res) => {
       this.createDropdown(JSON.parse(res.body));
     });
@@ -142,23 +136,20 @@ export class SchemaComponent implements OnInit, OnChanges {
     this.Authentications();
   }
 
-  telemetryImpression() {
-    // this.telemetryService.start();
-    // this.telemetryService.impression('aip-app', 'list', 'SchemaComponent');
-  }
-
   nextPage() {
     if (this.pageNumber + 1 <= this.noOfPages) {
       this.pageNumber += 1;
       this.changePage();
     }
   }
+
   prevPage() {
     if (this.pageNumber - 1 >= 1) {
       this.pageNumber -= 1;
       this.changePage();
     }
   }
+
   changePage(page?: number) {
     if (page && page >= 1 && page <= this.noOfPages) this.pageNumber = page;
     if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
@@ -173,6 +164,7 @@ export class SchemaComponent implements OnInit, OnChanges {
     }
     this.getCards(this.pageNumber, this.pageSize, this.filt);
   }
+
   rowsPerPageChanged() {
     if (this.pageSize == 0) {
       this.pageSize = this.prevRowsPerPageValue;
@@ -182,11 +174,13 @@ export class SchemaComponent implements OnInit, OnChanges {
       this.changeDetectionRef.detectChanges();
     }
   }
+
   selectedButton(i) {
     if (i == this.pageNumber) {
       return { color: 'white', background: '#0094ff' };
     } else return { color: 'black' };
   }
+
   Authentications() {
     this.service.getPermission('cip').subscribe((cipAuthority) => {
       // schema-create permission
@@ -204,12 +198,11 @@ export class SchemaComponent implements OnInit, OnChanges {
 
   tagchange() {
     this.tagService.tags.forEach((element: any) => {
-      // console.log(element, 'element');
+
     });
   }
 
   details(card: any, type: any, dropDown: any) {
-    // //this.telemetry.addTelemetryEvent(card.alias+" schema"+type);
     const navigationExtras: NavigationExtras = {
       state: {
         card: card,
@@ -218,7 +211,6 @@ export class SchemaComponent implements OnInit, OnChanges {
       relativeTo: this.route,
     };
     this.router.navigate(['./' + type], navigationExtras);
-    //this.telemetry.addTelemetryEvent(card.alias+" schema"+type);
   }
 
   createSchema(dropDown: any) {
@@ -230,9 +222,11 @@ export class SchemaComponent implements OnInit, OnChanges {
     };
     this.router.navigate(['./create'], navigationExtras);
   }
+
   numSequence(n: number): Array<number> {
     return Array(n);
   }
+
   getCards(page: any, size: any, filter: any): void {
     let params: HttpParams = new HttpParams();
     if (filter?.length > 0) {
@@ -262,11 +256,12 @@ export class SchemaComponent implements OnInit, OnChanges {
     // this.pageSize = this.pageSize || 6;
     this.updateQueryParam(this.pageNumber, this.filt);
   }
+
   desc(card: any) {
     this.cardToggled = !this.cardToggled;
     this.selectedCard = card;
-    // console.log(this.selectedCard);
   }
+
   redirect() {
     this.selectedInstance = this.selectedCard.name;
     this.router.navigate(['./view', this.cardTitle, this.selectedInstance], {
@@ -277,23 +272,22 @@ export class SchemaComponent implements OnInit, OnChanges {
   filterz(event: any) {
     this.getCards((this.pageNumber = 1), this.pageSize, this.filt);
   }
+
   refresh() {
     this.filt = '';
     this.pageNumber = 1;
     this.updateQueryParam(this.pageNumber, this.filt);
     this.changePage(this.pageNumber);
-    // this.ngOnInit();
   }
+
   deleteSchema(card: any) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'delete') {
         this.service.deleteSchema(card.name).subscribe(
           (res) => {
-            // console.log(res);
             this.getCards(this.pageNumber, this.pageSize, this.filt);
             this.service.message('Schema Deleted Successfully', 'success');
-            //this.telemetry.addTelemetryEvent(card.alias+ ' Schema Deleted');
           },
           (error) => {
             this.service.message('Error in Deleting Schema' + error, 'error');
@@ -302,6 +296,7 @@ export class SchemaComponent implements OnInit, OnChanges {
       }
     });
   }
+
   updateQueryParam(
     page: number = 1,
     search: string = '',
@@ -357,9 +352,5 @@ export class SchemaComponent implements OnInit, OnChanges {
     this.dropDown = drop;
 
     console.log('this is dropDown', this.dropDown);
-  }
-  ngOnDestroy(): void {
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
   }
 }

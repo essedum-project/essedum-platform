@@ -10,7 +10,6 @@ import { OptionsDTO } from '../DTO/OptionsDTO';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog.component/confirm-delete-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-// import { LeapTelemetryService, OpenTelemetryService } from 'com-lib-util';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { Services } from '../services/service';
 import { MLOpsSwaggerAPISpec } from '../DTO/mlopsapispec';
@@ -82,8 +81,6 @@ export class SwaggerCustomComponent implements OnInit {
   formJsonEditor: JsonEditorComponent;
 
   constructor(
-    // private telemetryService: LeapTelemetryService,
-    // private telemetry: OpenTelemetryService,
     private adapterServices: AdapterServices,
     private dialog: MatDialog,
     private clipboard: Clipboard,
@@ -91,12 +88,7 @@ export class SwaggerCustomComponent implements OnInit {
     private service: Services
   ) {}
 
-  telemetryCall() {
-    // this.telemetry.startTelemetry('aip-app','SwaggerCustomComponent', sessionStorage.getItem('organization'));
-  }
   ngOnInit(): void {
-    this.telemetryCall();
-    this.telemetryImpression();
     this.authentications();
     this.serverUrl = window.location.origin;
     if (!this.serverUrls.some((item) => item.value === this.serverUrl))
@@ -148,6 +140,7 @@ export class SwaggerCustomComponent implements OnInit {
       this.loadEndpointDetails();
     }
   }
+
   loadEndpointDetails() {
     let params: HttpParams = new HttpParams();
     params = params.set('fed_Name', this.endpointName);
@@ -182,6 +175,7 @@ export class SwaggerCustomComponent implements OnInit {
       }
     });
   }
+
   initializeSwaggerView() {
     this.swaggerView = !this.swaggerView;
     if (!this.isToggle) {
@@ -197,6 +191,7 @@ export class SwaggerCustomComponent implements OnInit {
     }
     this.loadEndpointDetails();
   }
+
   getDatasourceData() {
     let params: HttpParams = new HttpParams();
     params = params.append('name', this.restProvider);
@@ -304,6 +299,7 @@ export class SwaggerCustomComponent implements OnInit {
     });
     return JSON.stringify(body);
   };**/
+
   public generateFinalBody = (connectionDetails: any): string => {
     const { testDataset } = connectionDetails;
     let body = { ...testDataset.attributes.Body };
@@ -404,10 +400,6 @@ export class SwaggerCustomComponent implements OnInit {
   backToEditor() {
     this.swaggerView = false;
   }
-  telemetryImpression() {
-    // this.telemetryService.start();
-    // this.telemetryService.impression("aip-app", "list", "SwaggerCustomComponent");
-  }
 
   getAdapter() {
     this.adapterServices
@@ -443,6 +435,7 @@ export class SwaggerCustomComponent implements OnInit {
         this.getSpecTemplate(this.adapter.spectemplatedomainname);
       });
   }
+
   getSpecTemplate(spectemplatedomainname: string) {
     this.adapterServices
       .fetchApiSpecTemplate(
@@ -495,6 +488,7 @@ export class SwaggerCustomComponent implements OnInit {
     this.editorOptions.enableSort = false;
     this.editorOptions.enableTransform = false;
   }
+
   toggle() {
     if (this.restProvider) {
       this.isToggle = !this.isToggle;
@@ -576,6 +570,7 @@ export class SwaggerCustomComponent implements OnInit {
       this.resFormattedapispec = element.responses;
     });
   }
+
   getPaths() {
     this.paths = [];
     for (let path in this.apispecTemplate.paths) {
@@ -732,7 +727,6 @@ export class SwaggerCustomComponent implements OnInit {
   }
 
   execute(spec, template?) {
-    //this.telemetry.addTelemetryEvent("Execute Adapter Method");
     this.cURL = null;
     this.specPath = spec.path;
     this.response = { Status: 'Executing' };
@@ -923,10 +917,5 @@ export class SwaggerCustomComponent implements OnInit {
       }
     }
     this.cURL = cUrlReq;
-  }
-
-  ngOnDestroy(): void {
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
   }
 }

@@ -16,7 +16,6 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { Services } from '../../services/service';
 import { FileUploader } from 'ng2-file-upload';
 import * as _ from 'lodash';
-// import { LedsModalService } from 'leds-lib';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { App } from '../../apps/app';
@@ -26,15 +25,13 @@ import { HttpParams } from '@angular/common/http';
 import { DatasetServices } from '../../dataset/dataset-service';
 import { Stomp } from '@stomp/stompjs';
 import * as SockJS from 'sockjs-client';
-//import { CommonCreateDialogComponent } from '../ivm/ivm-view-initiative/ivm-view-initiative-detail/common-create/common-create-dialog.component';
-// import { OpenTelemetryService } from 'com-lib-util';
 
 @Component({
   selector: 'app-create-app',
   templateUrl: './create-app.component.html',
   styleUrls: ['./create-app.component.scss'],
 })
-export class CreateAppComponent implements OnInit, OnDestroy {
+export class CreateAppComponent implements OnInit {
   @Output() responseLink = new EventEmitter<any>();
   public uploader: FileUploader;
   public docUploader: FileUploader;
@@ -104,22 +101,16 @@ export class CreateAppComponent implements OnInit, OnDestroy {
 
   constructor(
     private Services: Services,
-    // private telemetry: OpenTelemetryService,
     private dialogRef: MatDialogRef<CreateAppComponent>,
     private route: ActivatedRoute,
     public router: Router,
-    //public dialogRef: MatDialogRef<CommonCreateDialogComponent>,
     public sanitizer: DomSanitizer,
     @Optional() @SkipSelf() private appListComponent: AppListComponent,
     private pipelineService: PipelineService,
     private datasetsService: DatasetServices
   ) {}
 
-  telemetryCall() {
-    // this.telemetry.startTelemetry('aip-app','CreateAppComponent', sessionStorage.getItem('organization'));
-  }
   ngOnInit() {
-    this.telemetryCall();
     this.editApp();
     this.logoUploaded = false;
     this.uploader = new FileUploader({
@@ -260,14 +251,11 @@ export class CreateAppComponent implements OnInit, OnDestroy {
             this.app.mfeAppName = this.appMfe;
             this.Services.saveApp(this.app).subscribe((app) => {
               this.responseLink.emit(app);
-              // //this.telemetry.addTelemetryEvent(this.alias + ' App created');
             });
             this.Services.message('Created Sucessfully.', 'success');
-            // //this.telemetry.addTelemetryEvent(this.alias + ' App created');
             this.Services.addGroupModelEntity(data.name, temp).subscribe();
             this.dialogRef.close();
             if (this.appListComponent) this.appListComponent.ngOnInit();
-            //this.telemetry.addTelemetryEvent(this.alias + ' App created');
           },
           (error) => this.Services.messageService(error)
         );
@@ -280,7 +268,6 @@ export class CreateAppComponent implements OnInit, OnDestroy {
   closeModal() {
     this.dialogRef.close();
     if (this.router.url.includes('/initiative')) {
-      // this.dialogRef.close();
     }
   }
 
@@ -437,7 +424,6 @@ export class CreateAppComponent implements OnInit, OnDestroy {
                 this.responseLink.emit(resp);
                 this.dialogRef.close();
                 this.Services.message('Updated Sucessfully.', 'success');
-                // //this.telemetry.addTelemetryEvent(this.editCanvas['alias'] + ' App updated')
                 if (this.appListComponent) this.appListComponent.ngOnInit();
               });
             },
@@ -671,10 +657,5 @@ export class CreateAppComponent implements OnInit, OnDestroy {
 
   isDefaultUserLink(istrue: any) {
     this.isDefaultLink = istrue.checked;
-  }
-
-  ngOnDestroy(): void {
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
   }
 }

@@ -8,23 +8,19 @@ import {
 } from '@angular/core';
 import { Services } from '../../services/service';
 import { Router, ActivatedRoute, NavigationExtras } from '@angular/router';
-// import { LedsLibService, LedsModalService } from 'leds-lib';
 import { HttpParams } from '@angular/common/http';
-// import { LeapTelemetryService, OpenTelemetryService } from 'com-lib-util';
 import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.component/confirm-delete-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { App } from '../app';
 import { StreamingServices } from '../../streaming-services/streaming-service';
 import { ChooseRuntimeComponent } from '../choose-runtime/choose-runtime.component';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Location } from '@angular/common';
+
 @Component({
   selector: 'app-view-apps',
   templateUrl: './app-list.component.html',
   styleUrls: ['./app-list.component.scss'],
 })
 export class AppListComponent implements OnInit {
-  // selectedTagType: string[]=[];
   editable: boolean = false;
   alias: any;
   filter: string = '';
@@ -75,6 +71,7 @@ export class AppListComponent implements OnInit {
       this.updatePageSize();
     }, 2000);
   }
+
   updatePageSize() {
     this.pageSize = 0;
     if (window.innerWidth > 2500) {
@@ -99,14 +96,10 @@ export class AppListComponent implements OnInit {
       this.getAllApps();
     }
   }
-  telemetryCall() {
-    // this.telemetry.startTelemetry('aip-app','AppListComponent',sessionStorage.getItem('organization'))
-  }
+
   ngOnInit(): void {
-    this.telemetryCall();
     this.records = false;
     this.Authentications();
-    this.telemetryImpression();
     this.route.queryParams.subscribe((params) => {
       // Update this.pageNumber if the page query param is present
       if (params['page']) {
@@ -166,21 +159,13 @@ export class AppListComponent implements OnInit {
 
     this.location.replaceState(url);
   }
-  telemetryImpression() {
-    // this.telemetryService.start();
-    // this.telemetryService.impression("aip-app", "list", "AppListComponent");
-  }
 
   constructor(
     private location: Location,
-    // private telemetryService: LeapTelemetryService,
-    // private telemetry: OpenTelemetryService,
     private service: Services,
     private router: Router,
     private route: ActivatedRoute,
-    // private modalService: LedsModalService,
     private dialog: MatDialog,
-    // private ledsLibService: LedsLibService,
     private el: ElementRef
   ) {}
 
@@ -232,8 +217,6 @@ export class AppListComponent implements OnInit {
   }
 
   openApp(app: StreamingServices, type) {
-    // //this.telemetry.addTelemetryEvent(app.alias+" "+type);
-    // this.telemetryService.interact("click", "AppListComponent", "open", app.alias);
     this.service.getAppByName(app.name).subscribe((resp) => {
       if (resp.scope == 'MFE') {
         console.log('MFE');
@@ -256,7 +239,6 @@ export class AppListComponent implements OnInit {
         relativeTo: this.route,
       });
     });
-    //this.telemetry.addTelemetryEvent(app.alias+" "+type);
   }
 
   openedit(content: any): void {
@@ -306,7 +288,6 @@ export class AppListComponent implements OnInit {
           'success',
           'Deleted Successfully'
         );
-        //this.telemetry.addTelemetryEvent('App Deleted');
       }
     });
   }
@@ -404,9 +385,7 @@ export class AppListComponent implements OnInit {
       this.changePage();
     }
   }
-  clickactive(eventObj: any) {
-    // this.ledsLibService.clickactive(eventObj);
-  }
+
   open(content: any): void {
     this.dialog.open(content, {
       width: '400px',
@@ -617,6 +596,7 @@ export class AppListComponent implements OnInit {
         }
       );
   }
+
   navigate(app: StreamingServices) {
     this.service.getAppByName(app.name).subscribe((resp) => {
       if (resp.scope == 'pipeline') {
@@ -626,6 +606,7 @@ export class AppListComponent implements OnInit {
       }
     });
   }
+
   redirectToPipeline(jobName) {
     this.service.getStreamingServicesByName(jobName).subscribe((res) => {
       this.streamItem = res;
@@ -676,16 +657,5 @@ export class AppListComponent implements OnInit {
         );
       }
     });
-  }
-
-  // redirectToDataset(dataset) {
-  //   if(dataset)
-  //   this.router.navigate(["../../datasets/data"], { state: {selectedCard : dataset} , relativeTo: this.route });
-  //   // this.router.navigate(["../../datasets/view/" + this.dataset.name], { state: {card:dataset} , relativeTo: this.route });
-  // }
-
-  ngOnDestroy(): void {
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
   }
 }

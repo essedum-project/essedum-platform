@@ -12,7 +12,7 @@
                 style="padding-right: 1.5em;" matTooltip="Configure" (click)="openWdModal(content2)">settings</mat-icon>
             <span *ngIf="editAuth && !(appData?.scope==='video')" style="padding-right: 1.5em;">
                 <button mat-icon-button matTooltip="Try out link" (click)="open(content3)">
-                    <mat-icon>link</mat-icon>
+                    <mat-icon style="transform: rotate(-45deg);">link</mat-icon>
                 </button>
             </span>
             <span *ngIf="isOverview" (click)="openModal(content4)">
@@ -150,8 +150,6 @@
                                     </div>
                                 </div>
                                 <hr class="aip-line" />
-                                <!-- <pdf-viewer *ngIf="pdfUrl" [src]="pdfUrl" [render-text]="true"
-                                    style="display: block; height: 80vh;"></pdf-viewer> -->
                                 <iframe #pdfIframe width="100%" height="500px"></iframe>
                             </div>
 
@@ -177,7 +175,7 @@
                                                 class="lfx-u-body-md lfx-u-text-neutral-80 lfx-u-line-2 aip-desc-ellipsis">
                                                 <div class="flex justify-content-center align-items-center flex-column">
                                                     <img src="assets/images/aip_empty_state_leds.svg"
-                                                        class="img-responsive" alt="aip_empty_state_leds"
+                                                        class="img-responsive img-color" alt="aip_empty_state_leds"
                                                         style="width:15rem" />
                                                     No connected artifacts for now!
                                                 </div>
@@ -200,7 +198,8 @@
                                             <div class="flex aip-daa lfx-u-mar-8 lfx-u-pad-8 align-items-center"
                                                 style="width: max-content;">
                                                 <div class="lfx-u-mar-lr-8">
-                                                    <mat-icon style="color: #8626C3;">link</mat-icon>
+                                                    <mat-icon
+                                                        style="color: #0094ff; transform: rotate(-45deg);">link</mat-icon>
                                                 </div>
                                                 <div class="lfx-u-body-md">Link Artifacts</div>
                                             </div>

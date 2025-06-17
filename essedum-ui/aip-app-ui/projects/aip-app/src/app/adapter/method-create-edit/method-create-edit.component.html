@@ -416,7 +416,6 @@
                                   <tr>
                                     <th style="color: var(--base-color); width: 9%">Action</th>
                                     <th style="color: var(--base-color);">Requirements</th>
-                                    <!-- <th style="color: var(--base-color);">Value</th> -->
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -463,17 +462,6 @@
                           #formJsonEditor class="cipJSONEditor"></json-editor>
                       </div>
                     </div>
-                    <!-- <div class="row">
-                        <div class="col-md-4">
-                          <mat-form-field>
-                            <mat-label>Script Type</mat-label>
-                            <mat-select [(ngModel)]="dataset['attributes']['ScriptType']" required>
-                              <mat-option *ngFor="let rm of scriptType" [value]="rm">{{rm}}
-                              </mat-option>
-                            </mat-select>
-                          </mat-form-field>
-                        </div>
-                      </div> -->
 
                     <div *ngIf="methodType">
                       <button mat-stroked-button color="primary" *ngIf="action !== 'view'" [disabled]="false"

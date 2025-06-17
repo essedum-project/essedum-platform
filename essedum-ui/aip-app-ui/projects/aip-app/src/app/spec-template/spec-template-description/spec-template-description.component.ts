@@ -7,7 +7,6 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-// import { LedsLibService } from 'leds-lib';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 import { AdapterServices } from '../../adapter/adapter-service';
 import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.component/confirm-delete-dialog.component';
@@ -15,6 +14,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { OptionsDTO } from '../../DTO/OptionsDTO';
 import { Services } from '../../services/service';
 import { Location } from '@angular/common';
+
 @Component({
   selector: 'app-spec-template-description',
   templateUrl: './spec-template-description.component.html',
@@ -52,13 +52,14 @@ export class SpecTemplateDescriptionComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    // private ledsLibService: LedsLibService,
     private adapterService: AdapterServices,
     private dialog: MatDialog,
     private service: Services,
     private location: Location
   ) {}
+
   @Output() newItemEvent = new EventEmitter<boolean>();
+
   ngOnInit() {
     this.nOfIns = 0;
     this.executionRequired = false;
@@ -161,17 +162,17 @@ export class SpecTemplateDescriptionComponent implements OnInit {
   routeBackToModelList() {
     this.router.navigate(['../../'], { relativeTo: this.route });
   }
-  showTabContent = (eventObj: any) => {
-    // this.ledsLibService.showTabContent(eventObj);
-  };
+
   redirectToEdit() {
     this.router.navigate(['../edit/' + this.domainName], {
       relativeTo: this.route,
     });
   }
+
   getShortName(fullName: string) {
     return fullName.charAt(0).toUpperCase();
   }
+
   redirectToSelectedComponent(component) {
     if (component.viewValue == 'Instance')
       this.router.navigate(['../../instances/' + component.value], {
@@ -186,6 +187,7 @@ export class SpecTemplateDescriptionComponent implements OnInit {
         relativeTo: this.route,
       });
   }
+
   deleteSpecTemplate(domainName: any) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
     dialogRef.afterClosed().subscribe((result) => {
@@ -210,6 +212,7 @@ export class SpecTemplateDescriptionComponent implements OnInit {
       }
     });
   }
+
   listToggle() {
     this.showRelatedAdapters = !this.showRelatedAdapters;
   }
