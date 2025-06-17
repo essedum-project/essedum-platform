@@ -33,7 +33,7 @@
   display: none !important;
 }
 
-::ng-deep .mat-mdc-select-arrow {
+::ng-deep .mat-mdc-select:not(.mat-mdc-select-disabled) .mat-mdc-select-arrow {
   color: #0094ff !important;
   fill: #0094ff !important;
 }

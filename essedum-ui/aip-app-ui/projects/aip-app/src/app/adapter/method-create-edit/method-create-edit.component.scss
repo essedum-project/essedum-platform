@@ -47,6 +47,10 @@
   padding-left: 16px;
 }
 
+.icon-color {
+  color: #0094ff !important;
+}
+
 ::ng-deep .mat-mdc-dialog-container {
   max-height: 90vh;
   overflow-y: auto;
@@ -73,4 +77,29 @@
 
 ::ng-deep .mat-mdc-tab-group .mat-mdc-tab .mdc-tab__text-label {
   font-size: 1.8rem !important;
+}
+
+.mat-mdc-outlined-button:not(:disabled) {
+  color: #0094ff !important;
+}
+
+.mat-mdc-tab-header {
+  overflow: hidden !important;
+}
+
+::ng-deep .mat-mdc-select:not(.mat-mdc-select-disabled) .mat-mdc-select-arrow {
+  color: #0094ff !important;
+  fill: #0094ff !important;
+}
+
+input:focus,
+.txtInput:focus {
+  outline: none !important;
+  border-bottom: 1px solid #0094ff !important;
+}
+
+::ng-deep
+  .mdc-text-field--filled:not(.mdc-text-field--disabled).mdc-text-field--focused
+  .mdc-floating-label {
+  color: #0094ff !important;
 }
