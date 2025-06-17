@@ -474,7 +474,7 @@ const dbConfig: DBConfig = {
     // TimeSeriesComponent,
 
     // SecondsToTimePipe,
-    // HighlightSearchPipe,
+    HighlightSearchPipe,
     // MashupsComponent,
     // CreateMashupComponent,
     // MashupCreateComponent,
