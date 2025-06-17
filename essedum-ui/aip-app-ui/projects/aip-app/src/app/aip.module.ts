@@ -111,7 +111,6 @@ import { RaiservicesService } from './services/raiservices.service';
 import { SemanticService } from './services/semantic.services';
 import { JobsService } from './services/jobs.service';
 
-
 // import { EditFeatureStoreComponent } from './feature-store/edit-feature-store/edit-feature-store.component';
 import { DatasourceConfigComponent } from './datasource/datasource-config/datasource-config.component';
 import { ModalConfigRestDatasourceComponent } from './datasource/modal-config-rest-datasource/modal-config-rest-datasource.component';
@@ -125,7 +124,10 @@ import { JsonNodeComponent } from './json2table/json-node.component';
 import { JsonTreeComponent } from './json2table/json-tree.component';
 import { ConnectionViewComponent } from './datasource/connection-view/connection-view.component';
 // import { GroupedFeaturesComponent } from './feature/grouped-features/grouped-features.component';
-import { DatasetTableViewComponent, HighlightSearch } from './dataset/dataset-table-view/dataset-table-view.component';
+import {
+  DatasetTableViewComponent,
+  HighlightSearch,
+} from './dataset/dataset-table-view/dataset-table-view.component';
 // import { CreateLinkedComponent } from './create-linked/create-linked.component';
 import { ModalConfigDatasetComponent } from './dataset/modal-config-dataset/modal-config-dataset.component';
 import { RestDatasetConfigComponent } from './dataset/rest-dataset-config/rest-dataset-config.component';
@@ -293,6 +295,7 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { SchemaRegistryService } from './services/schema-registry.service';
 import { SchemaRelationshipService } from './schema/schema-relationship.service';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { HighlightSearchPipe } from './pipes/highlight.pipe';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -471,7 +474,7 @@ const dbConfig: DBConfig = {
     // TimeSeriesComponent,
 
     // SecondsToTimePipe,
-
+    // HighlightSearchPipe,
     // MashupsComponent,
     // CreateMashupComponent,
     // MashupCreateComponent,
