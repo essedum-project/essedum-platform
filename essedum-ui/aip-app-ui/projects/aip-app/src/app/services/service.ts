@@ -3285,14 +3285,21 @@ export class Services {
     panelClass: message.type === 'error' ? 'mat-warn' : '',
   });
 }
-
-  createDashConstant(dash_constant: DashConstant): Observable<DashConstant> {
+ createDashConstant(dash_constant: DashConstant): Observable<DashConstant> {
     const copy = this.convertDashConstant(dash_constant);
     return this.https
       .post('/api/dash-constants', copy, { observe: 'response' })
       .pipe(
         map((response) => {
           return new DashConstant(response.body);
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
 
   // Apps
 
