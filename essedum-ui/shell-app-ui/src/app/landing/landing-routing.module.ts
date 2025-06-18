@@ -13,28 +13,7 @@ export const routes: Routes = [
       {
         path: '', canActivate: [AuthGuardService], component: AppHomeComponent
       },
-      // {
-      //   path: 'mfe14',
-      //   loadChildren: () => loadRemoteModule({
-      //     type: 'module',
-      //     remoteEntry: 'http://localhost:5002/remoteEntry.js',
-      //     exposedModule: './FeatureModule',
-      //   }).then(m => m.FeatureModule)
-
-      // },
-      // {
-      //   path: 'ivm',
-      //   loadChildren: () => loadRemoteModule({
-      //     type: 'module',
-      //     remoteEntry: 'http://localhost:8082/remoteEntry.js',
-      //     exposedModule: './Component',
-      //   }).then(m => m.SvyLibModule)
-
-      // },
-      // {
-      //   path: "iamp-usm",
-      //   loadChildren: () => import('../../../projects/iamp-usm/src/public-api').then(m => m.IampUsmModule),
-      // },
+      
       {
         path: "feature/:name", component: AppNavigationComponent
       },

@@ -4,13 +4,11 @@ import { AuthConfig } from 'angular-oauth2-oidc';
 import { forkJoin } from "rxjs";
 import { tap } from "rxjs/operators";
 import { environment } from "../../environments/environment";
-// import { MessageService } from "com-lib-util";
 
 @Injectable()
 export class AppInitService {
 
    constructor(private https: HttpClient, 
-      // public messageService: MessageService
    ) { }
 
    private authConfig: AuthConfig = {
@@ -63,10 +61,7 @@ export class AppInitService {
             if (sessionStorage.getItem("activeProfiles").indexOf("dbjwt") != -1) {
                sessionStorage.setItem("expireTokenTime", res["expireTokenTime"]);
             }
-            //Initialize the Auth Config
-            // this.authConfig.issuer = res["issuerUri"];
-            // this.authConfig.clientId = res["clientId"];
-            // this.authConfig.scope = res["scope"];
+         
             this.authConfig.issuer = res["issuerUri"];
             this.authConfig.clientId = res["clientId"];
             this.authConfig.responseType = 'code';
@@ -80,7 +75,6 @@ export class AppInitService {
             } else {
                this.authConfig.timeoutFactor = 0.9;
             }
-            // this.authConfig.timeoutFactor = res["silentRefreshTimeoutFactor"]; // For faster testing
             this.authConfig.sessionChecksEnabled = true;
             this.authConfig.showDebugInformation = true; // Also requires enabling "Verbose" level in devtools
             this.authConfig.clearHashAfterLogin = false; // https=//github.com/manfredsteyer/angular-oauth2-oidc/issues/457#issuecomment-431807040,
@@ -89,7 +83,6 @@ export class AppInitService {
             this.authConfig.postLogoutRedirectUri = window.location.origin + sessionStorage.getItem("contextPath");
             sessionStorage.setItem("baseUrl", environment.baseUrl);
             if(res["autoUserProject"].id==null){
-               // this.messageService.error("Auto User Project is not available. Please contact the admin.", "Error")
             }
          }));
    }

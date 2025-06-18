@@ -13,9 +13,7 @@ export class CommonAppInterceptorService implements HttpInterceptor {
   constructor(private apisService: ApisService) { }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    //  if (request.url.indexOf("/api/") != -1) {
-    //     request = request.clone({ url: environment.baseUrl + "/api/" + request.url.split("/api/")[1] });
-    //  }
+
     if(!sessionStorage.hasOwnProperty("contextPath"))
       sessionStorage.setItem("contextPath", document.querySelector('base').getAttribute('href'));
     if (request.url.indexOf("/api/") != -1 && !request.url.includes(sessionStorage.getItem("capBaseUrl")))
@@ -31,12 +29,7 @@ export class CommonAppInterceptorService implements HttpInterceptor {
     if (request.body instanceof FormData) {
       request = request.clone({ headers: request.headers.delete('Content-Type', 'application/json') });
     }
-    // if (
-    //   localStorage.hasOwnProperty("jwtToken") &&
-    //   request.url.includes("api") &&
-    //   !request.url.endsWith("/api/getConfigDetails")) {
-    //   request = request.clone({ setHeaders: { Authorization: "Bearer " + localStorage.getItem("jwtToken") } });
-    // }
+
 
     if (
       localStorage.hasOwnProperty("jwtToken") &&
