@@ -43,17 +43,6 @@
                     </mat-form-field>
                 </div>
 
-                <div *ngIf="!edit" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-                    <mat-slide-toggle style="margin-top: 1em;" [(ngModel)]="isDefaultLink"
-                        (change)="isDefaultUserLink($event)">
-                        Map the App Pipeline
-                    </mat-slide-toggle>
-                    <mat-form-field appearance="fill" class="w-100">
-                        <mat-label>Tryout Link</mat-label>
-                        <input matInput placeholder="Paste your link..." [(ngModel)]="link" [disabled]="isDefaultLink">
-                    </mat-form-field>
-                </div>
-
                 <div *ngIf="edit" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
                     <mat-form-field appearance="fill" class="w-100">
                         <mat-label>Tryout Link</mat-label>
@@ -115,7 +104,7 @@
                                     class="selector-724-196">Logo</label>
                                 <label class="exp-projlabel selector-724-197" style="cursor:pointer;">
                                     <input id="adOrgUpldId" (change)="onImageChange($event)" style="display: none;"
-                                        accept=".png,.jpg,.jpeg" name="adOrgUpldNm" type="file" uploader="uploader"
+                                        accept=".png,.jpg,.jpeg" name="adOrgUpldNm" type="file"
                                         placeholder="file" class="selector-724-198" />
                                     <mat-icon>upload</mat-icon>
                                 </label>

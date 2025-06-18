@@ -24,6 +24,10 @@ import { Location } from '@angular/common';
 })
 export class InstanceComponent implements OnInit, OnChanges {
   cardTitle: String = 'Instances';
+  isSearchHovered: boolean = false;
+  isAddHovered: boolean = false;
+  isRefreshHovered: boolean = false;
+  isMenuHovered: boolean = false;
   createAction = 'create';
   editAction = 'edit';
   test: any;
@@ -126,7 +130,7 @@ export class InstanceComponent implements OnInit, OnChanges {
       this.getCards(this.pageNumber, this.pageSize);
     }
   }
- 
+
   ngOnInit(): void {
     this.updatePageSizeOnly();
     this.records = false;

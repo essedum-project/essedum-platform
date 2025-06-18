@@ -7,8 +7,10 @@
                         <div class="lfx-l-level1-middle-col lfx-l-base-layout-center">
                             <div class="flex lfx-u-mar-8">
                                 <span class="mx-2 aip-cursor">
-                                    <mat-icon class="aip-led-icons x-24 back-icon"
-                                        (click)="navigateBack()">arrow_back</mat-icon>
+                                    <mat-icon class="aip-led-icons" (click)="navigateBack()"
+                                        [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
+                                        matTooltipPosition="above" (mouseenter)="isBackHovered = true"
+                                        (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
                                 </span>
 
                                 <h1 class="lfx-u-header-xxl">

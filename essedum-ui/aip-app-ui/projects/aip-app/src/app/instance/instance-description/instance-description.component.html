@@ -7,8 +7,10 @@
                         <div class="lfx-l-level2-middle-col lfx-u-mar-b-24__mb">
                             <div class="align-items-center flex  justify-content-between flex">
                                 <div class=" selector-model-title-head flex  align-items-center">
-                                    <mat-icon class="mx-2 aip-cursor" (click)="toggler()" matTooltip="Back"
-                                        [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
+                                    <mat-icon class="mx-2 aip-cursor" (click)="toggler()"
+                                        [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
+                                        matTooltipPosition="above" (mouseenter)="isBackHovered = true"
+                                        (mouseleave)="isBackHovered = false">
                                         arrow_back
                                     </mat-icon>
 

@@ -39,6 +39,7 @@ import { DynamicRemoteLoad } from './remoteLoad';
 export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
   @Input() initiativeData: any;
   url: string = '';
+  isBackHovered: boolean = false;
   urlSafe: SafeResourceUrl;
   basicReqTab: any = 'configTab';
   dynamicParamsArray: any[] = [];

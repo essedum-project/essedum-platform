@@ -27,25 +27,27 @@
                             class="col-10 offset-1 offset-xs-1 offset-sm-1 offset-md-0 col-sm-6 col-md-6 col-lg-7 col-xl-6 aip-panel aip-panel-shadow flex align-items-center">
                             <input type="text" name="" id="" placeholder="Search by Name" class="aip-panel-input"
                                 [(ngModel)]="filt" (keyup)="filterz()" [disabled]="false">
-                            <i class="aip-led-icons icon x-24 search-icon"></i>
+                            <mat-icon [ngStyle]="{'color': isSearchHovered ? '#0094ff' : '#0a142f'}"
+                                (mouseenter)="isSearchHovered = true" (mouseleave)="isSearchHovered = false"
+                                class="lfx-u-mar-r-20">
+                                search
+                            </mat-icon>
                         </div>
                         <div class="flex justify-content-center col-sm-5 col-md-6 col-lg-5 col-xl-4 aip-header-icon">
 
                             <div *ngIf="createAuth">
-                                <div class="lfx-u-mar-r-24 aip-cursor" (click)="createSpecTemplate()">
-                                    <button mat-icon-button [ngStyle]="{'color': isHovered ? '#0056b3' : '#0a142f'}"
-                                        (click)="createSpecTemplate()" matTooltip="Add" (mouseenter)="isHovered = true"
-                                        (mouseleave)="isHovered = false">
-                                        <mat-icon>add</mat-icon>
-                                    </button>
+                                <div class="lfx-u-mar-r-24 aip-cursor">
+                                    <mat-icon [ngStyle]="{'color': isAddHovered ? '#0094ff' : '#0a142f'}"
+                                        (click)="createSpecTemplate()" matTooltip="Add" matTooltipPosition="above"
+                                        (mouseenter)="isAddHovered = true"
+                                        (mouseleave)="isAddHovered = false">add</mat-icon>
                                 </div>
                             </div>
                             <div class="aip-cursor">
-                                <button mat-icon-button [ngStyle]="{'color': isHovered ? '#0056b3' : '#0a142f'}"
-                                    (click)="completeRefresh()" matTooltip="Refresh" (mouseenter)="isHovered = true"
-                                    (mouseleave)="isHovered = false">
-                                    <mat-icon>refresh</mat-icon>
-                                </button>
+                                <mat-icon [ngStyle]="{'color': isRefreshHovered ? '#0094ff' : '#0a142f'}"
+                                    (click)="completeRefresh()" matTooltip="Refresh" matTooltipPosition="above"
+                                    (mouseenter)="isRefreshHovered = true"
+                                    (mouseleave)="isRefreshHovered = false">refresh</mat-icon>
                             </div>
                         </div>
                     </div>
@@ -100,9 +102,12 @@
 
                                     <div *ngIf="editAuth || deployAuth || deleteAuth"
                                         class="dropdown d-inline-block float-end">
-                                        <i class="fa fa-ellipsis-v aip-cursor" aria-hidden="true"
-                                            [matMenuTriggerFor]="menu"
-                                            style="font-size: 18px; padding: 8px; color: #a5aaad; font-weight: 300;"></i>
+                                        <mat-icon class="aip-cursor" [matMenuTriggerFor]="menu"
+                                            style="font-size: 18px; padding: 8px; color: #a5aaad; font-weight: 300;"
+                                            [ngStyle]="{'color': isMenuHovered ? '#0094ff' : '#0a142f'}"
+                                            (mouseenter)="isMenuHovered = true" (mouseleave)="isMenuHovered = false">
+                                            more_vert
+                                        </mat-icon>
                                         <mat-menu #menu="matMenu">
                                             <button mat-menu-item *ngIf="editAuth"
                                                 (click)="redirectToEdit(card.domainname)">

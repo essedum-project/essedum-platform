@@ -6,7 +6,10 @@
                     <div class="table-responsive selector-693-2 " style=" margin: 0rem 0rem 1rem 1.5rem;">
                         <div class="align-items-center flex lfx-u-mar-b-16">
                             <span class="">
-                                <mat-icon class="aip-led-icons x-24 back-icon" (click)="back()">arrow_back</mat-icon>
+                                <mat-icon class="aip-led-icons" (click)="back()"
+                                    [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
+                                    matTooltipPosition="above" (mouseenter)="isBackHovered = true"
+                                    (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
                             </span>
                             <span class="lfx-u-pad-l-8 aip-desc-title lfx-u-header-xxl">Create Spec</span>
                         </div>

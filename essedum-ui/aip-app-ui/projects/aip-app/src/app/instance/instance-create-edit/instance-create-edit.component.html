@@ -5,7 +5,10 @@
                 <div class="flex align-items-center lfx-u-pad-t-8" style="justify-content: space-between;">
                     <div class="align-items-center flex">
                         <span class="mx-2 aip-cursor" *ngIf="action==='create'">
-                            <mat-icon class="aip-led-icons x-24 back-icon" (click)="back()">arrow_back</mat-icon>
+                            <mat-icon class="aip-led-icons" (click)="back()"
+                                [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
+                                matTooltipPosition="above" (mouseenter)="isBackHovered = true"
+                                (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
                         </span>
                         <span *ngIf="action==='create'" class="lfx-u-mar-l-8 lfx-u-header-xxl">{{cardTitle}} -
                             Create</span>
