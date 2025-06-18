@@ -13,7 +13,7 @@ export class Dataset {
     attributes: string;
     organization: string;
     backingDataset: Dataset;
-    expStatus: number;       //Exp
+    expStatus: number;     
     schemajson: any;
     archivalConfig: string
     dashboard: any;
@@ -83,15 +83,11 @@ export const DEFAULT_OPERATOR_PACKS = [
 export class StatisticsRequestObject {
     recipe_id: number;
     recipe_name: string;
-    // object_id: number;
     function_name: string[];
     args: Object[];
-    // mode: string;
-    //user_id: number;
-    // user_id:string;
+   
     actions_changed: string;
     screen: string;
-    //target_attribute:string;
     dataset_type: string;
     dataset_name: string;
     aip_login: string;
@@ -105,7 +101,6 @@ export class TransformObject {
     args: Object[];
     object_id: number;
     object_name: string;
-    // collection_id: number[];
     collection_name: string[];
     connection_id: number;
     mode: string;

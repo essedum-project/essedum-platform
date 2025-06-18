@@ -2,13 +2,10 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Inject, Injectable, NgZone } from '@angular/core';
 import { Observable, Subject, from, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
-//import { MessageBarComponent } from 'leds-lib';
 import { MatSnackBar } from '@angular/material/snack-bar';
-//import { StreamingServices } from '../streaming-services/streaming-service';
-//import { App } from '../apps/app';
+
 import { encKey } from '../services/encKey';
-//import { Datasource } from '../datasource/datasource';
-//import { EventSourcePolyfill } from 'event-source-polyfill';
+
 import { Dataset } from './datasets';
 @Injectable()
 export class DatasetServices {
@@ -36,23 +33,19 @@ export class DatasetServices {
 
   async decryptUsingAES256(cipherResponse, password) {
     let cipherJson = JSON.parse(cipherResponse);
-    // const result = await this.usersService.decryptgcm(cipherJson["ciphertext"], cipherJson["iv"], password)
     const result = await this.decryptgcm(cipherJson["ciphertext"], cipherJson["iv"], password)
 
     return result;
   }
   async decryptgcm(ciphertext, iv, password) {
-    // Decode the ciphertext and IV from Base64 strings
     const decodedCiphertext = Uint8Array.from(atob(ciphertext), c => c.charCodeAt(0));
     const decodedIV = Uint8Array.from(atob(iv), c => c.charCodeAt(0));
 
-    // Prepare the decryption parameters
     const algorithm = {
       name: 'AES-GCM',
       iv: decodedIV
     };
 
-    // Import the key from password
     const importedKey = await crypto.subtle.importKey(
       'raw',
       new TextEncoder().encode(password),
@@ -69,9 +62,8 @@ export class DatasetServices {
   }
 
   private handleError(error: any) {
-    // TODO: seems we cannot use messageService from here...
     const errMsg = error.error;
-    console.error(errMsg); // log to console instead
+    console.error(errMsg);
     if (error.status === 401) {
       window.location.href = '/';
     }
@@ -84,8 +76,7 @@ export class DatasetServices {
 
     return this.https.post(this.dataUrl + '/datasets/add', dataset, { observe: 'response' })
       .pipe(switchMap(async (response) => {
-        // this.loader.hide();
-        // return response;
+   
         let result = response.body;
         let salt = this.encKey.getSalt()
         if (!salt)
@@ -118,8 +109,7 @@ export class DatasetServices {
 
       return this.https.post(this.dataUrl + '/exp/dataset/createDatasetApproval', form, { observe: 'response', responseType: "text", headers: headers })
         .pipe(switchMap(async (response) => {
-          // this.loader.hide();
-          // return response.body;
+       
           let result = JSON.parse(response.body);
           let salt = this.encKey.getSalt()
           if (!salt)
@@ -133,7 +123,7 @@ export class DatasetServices {
 
     }
     catch (Exception) {
-      //   this.messageService.error("Some error occured", "Error")
+     
     }
 
   }
@@ -168,7 +158,6 @@ export class DatasetServices {
 
     }
     catch (Exception) {
-      //   this.messageService.error("Some error occured", "Error")
     }
 
   }
@@ -200,7 +189,6 @@ export class DatasetServices {
         observe: 'response',
         params: { schema: schema }
       })
-      // .pipe(map(response => response.body))
       .pipe(switchMap(async (response) => {
         let result = response.body as Array<any>;
         result.forEach(async res => {
@@ -217,8 +205,7 @@ export class DatasetServices {
   getDataset(name: string): Observable<any> {
     return this.https.get(this.dataUrl + '/datasets/' + name + '/' + sessionStorage.getItem("organization"), { observe: 'response' })
       .pipe(switchMap(async (response) => {
-        // this.loader.hide();
-        // return response.body;
+    
         let result = response.body;
         if (result) {
           let salt = this.encKey.getSalt()
@@ -254,7 +241,6 @@ export class DatasetServices {
 
     }
     catch (Exception) {
-      //   this.messageService.error("Some error occured", "Error")
     }
 
   }
@@ -300,7 +286,6 @@ export class DatasetServices {
 
     }
     catch (Exception) {
-      //   this.messageService.error("Some error occured", "Error")
     }
 
   }
@@ -425,7 +410,6 @@ export class DatasetServices {
       if (sessionStorage.getItem("icip.breadcrumb")) {
         stack = JSON.parse(sessionStorage.getItem("icip.breadcrumb"))
         let index = stack.findIndex(x => x.item.alias === item.item.alias)
-        // stack.splice(index,stack.length-index-1)
         let len = stack.length
         for (let i = index + 1; i < len; i++)
           stack.pop()
@@ -439,7 +423,6 @@ export class DatasetServices {
   }
   async encrypt(plaintext, password) {
 
-    // const encryptedData = await this.usersService.encryptgcm(plaintext, password);
     const encryptedData = await this.encryptgcm(plaintext, password);
 
     return JSON.stringify(encryptedData);
@@ -447,16 +430,13 @@ export class DatasetServices {
   }
 
   async encryptgcm(plaintext, password) {
-    // Generate random 12-byte IV
     const iv = crypto.getRandomValues(new Uint8Array(12));
 
-    // Prepare the encryption parameters
     const algorithm = {
       name: 'AES-GCM',
       iv: iv
     };
 
-    // Import the key from password
     const importedKey = await crypto.subtle.importKey(
       'raw',
       new TextEncoder().encode(password),
@@ -465,15 +445,12 @@ export class DatasetServices {
       ['encrypt']
     );
 
-    // Encrypt the plaintext
     const encodedText = new TextEncoder().encode(plaintext);
     const ciphertext = await crypto.subtle.encrypt(algorithm, importedKey, encodedText);
 
     const ciphertextArray = Array.from(new Uint8Array(ciphertext));
-    // Convert Uint8Array to regular array 
     const encodedCiphertext = btoa(String.fromCharCode.apply(null, ciphertextArray));
-    // const encodedIV = btoa(Array.from(iv));
-    // const encodedIV = btoa(String.fromCharCode.apply(null, iv));
+
     const encodedIV = btoa(Array.from(iv).map((byte) => String.fromCharCode(byte)).join(''));
 
     const encryptedJSON = { ciphertext: encodedCiphertext, iv: encodedIV }
@@ -482,7 +459,6 @@ export class DatasetServices {
   }
 
   getTextDatasetDetails(dataset: Dataset): Observable<any> {
-    // let body = dataset.attributes
     let body: any
     let salt = this.encKey.getSalt()
     if (!salt)
@@ -513,22 +489,11 @@ export class DatasetServices {
               return this.handleError(err);
             }));
         }));
-    // const org = sessionStorage.getItem("organization");
-    // return this.https.get(this.dataUrl + '/datasets/viewData/' + dataset.name + '/' + org,
-    //   { observe: 'response',responseType: 'text', params: { limit: '10' }, headers: new HttpHeaders().append("attributes", body) })
-    //   .pipe(map(response => {
-    //     this.loader.hide();
-    //     return response.body;
-    //   }))
-    //   .pipe(catchError(err => {
-    //     this.loader.hide();
-    //     return this.handleError(err);
-    //   }));
+    
   }
 
   getDatasetDetails(dataset: Dataset): Observable<any> {
     let body: any;
-    // let body = dataset.attributes
     let salt = this.encKey.getSalt()
     if (!salt)
       salt = sessionStorage.getItem("salt")
@@ -558,17 +523,7 @@ export class DatasetServices {
               return this.handleError(err);
             }));
         }));
-    // const org = sessionStorage.getItem("organization");
-    // return this.https.get(this.dataUrl + '/datasets/viewData/' + dataset.name + '/' + org,
-    //   { observe: 'response', params: { limit: '10' }, headers: new HttpHeaders().append("attributes", body) })
-    //   .pipe(map(response => {
-    //     this.loader.hide();
-    //     return response.body;
-    //   }))
-    //   .pipe(catchError(err => {
-    //     this.loader.hide();
-    //     return this.handleError(err);
-    //   }));
+    
   }
   getDirectDatasetDetails(dataset: Dataset, pagination): Observable<any> {
     if (dataset.alias == "Daily Volume_forecast" || dataset.alias == "Daily Volume") {
@@ -625,8 +580,7 @@ export class DatasetServices {
     dataset.organization = String(sessionStorage.getItem('organization'));
     return this.https.post(this.dataUrl + '/datasets/save/' + (dataset.id ? dataset.id : dataset.alias), dataset, { observe: 'response' })
       .pipe(switchMap(async (response) => {
-        // this.loader.hide();
-        // return response;
+       
         let result = response.body;
         let salt = this.encKey.getSalt()
         if (!salt)
@@ -667,7 +621,6 @@ export class DatasetServices {
       }));
   }
   getPaginatedDetails(dataset: any, pagination: any): Observable<any> {
-    // let body = dataset.attributes
     let body: any
     let salt = this.encKey.getSalt()
     if (!salt)
@@ -694,18 +647,7 @@ export class DatasetServices {
               return response.body;
             }));
         }));
-    // let tmpParams = (pagination.sortEvent) ? { page: pagination.page, size: pagination.size, sortEvent: pagination.sortEvent, sortOrder: pagination.sortOrder } : { page: pagination.page, size: pagination.size }
-    // const org = sessionStorage.getItem("organization");
-    // return this.https.get(this.dataUrl + '/datasets/getPaginatedData/' + dataset.name + '/' + org,
-    //   { observe: 'response', params: tmpParams, headers: new HttpHeaders().append("attribute", body) })
-    // .pipe(map(response => {
-    //   this.loader.hide();
-    //   return response.body;
-    // }))
-    // .pipe(catchError(err => {
-    //   this.loader.hide();
-    //   return err;
-    // }));
+  
   }
   getSearchCount(datasetName: string, projectName: string, searchValues): Observable<string> {
     try {
@@ -763,9 +705,7 @@ export class DatasetServices {
         apiParams["projectName"] = projectName;
         apiParams["searchParams"] = searchParamsValue;
       }
-      // return this.https.get('/api/aip/datasets/searchData/'+datasetName+"/"+projectName, {
-      //   params: apiParams,
-      // })
+   
       return this.https.get('/api/aip/datasets/searchData', {
         params: apiParams,
       })
@@ -1139,8 +1079,7 @@ export class DatasetServices {
         observe: 'response',
         params: { datasource: data }
       })
-      // .pipe(map(response => response.body))
-      // .pipe(catchError(err => this.handleError(err)));
+      
       .pipe(switchMap(async (response) => {
         let result = response.body as Array<any>;
         result.forEach(async res => {
@@ -1221,7 +1160,6 @@ export class DatasetServices {
         }
       })
       .pipe(switchMap(async (response) => {
-        // return response.body;
         let result = response.body as Array<any>;
         result.forEach(async res => {
           let salt = this.encKey.getSalt()
@@ -1245,7 +1183,6 @@ export class DatasetServices {
         }
       })
       .pipe(switchMap(async (response) => {
-        // return response.body;
         let result = response.body as Array<any>;
         result.forEach(async res => {
           let salt = this.encKey.getSalt()
@@ -1384,9 +1321,7 @@ export class DatasetServices {
         observe: 'response',
         params: { datasource: datasource }
       })
-      // .pipe(map(response => {
-      //   return response.body;
-      // }))
+   
       .pipe(switchMap(async (response) => {
         let result = response.body as Array<any>;
         result.forEach(async res => {

@@ -30,12 +30,10 @@ export class DatasetFullscreenViewComponent implements OnInit, OnChanges, DoChec
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    // private telemetryService: LeapTelemetryService,
     private datasetsService: DatasetServices
   ) { }
 
   ngOnInit() {
-    // this.telemetryImpression();
     this.getSourceApiParameters();
   }
 
@@ -112,7 +110,6 @@ export class DatasetFullscreenViewComponent implements OnInit, OnChanges, DoChec
   }
 
   ngDoCheck() {
-    //console.log("fullscreen=",this.datasetNamebackup)
     if (this.datasetNamebackup != this.data?.name) {
       this.datasetNamebackup = this.data.name
       this.ngOnInit()

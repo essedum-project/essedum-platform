@@ -53,15 +53,12 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
   ;
 
   constructor(private datasetsService: DatasetServices,
-    // private telemetry: OpenTelemetryService,
-    // private groupService: GroupsService,
-    // private modalService: LedsModalService,
+ 
     public services: Services,
     public schemaRegistryService: SchemaRegistryService,
     private location: Location,
     private router: Router,
 
-    // private loader: LoaderService,
     private formBuilder: FormBuilder,
     private dialog: MatDialog) {
 
@@ -85,8 +82,8 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
     isInboxRequired: '',
     tags: '',
   };
-  isExperiment: boolean = false;       //Exp
-  isPrivateDataset: boolean = false;   //Exp
+  isExperiment: boolean = false;      
+  isPrivateDataset: boolean = false;   
   isSchema: boolean = false;
   schemas: any = [];
   datasources: any = [];
@@ -143,8 +140,8 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
     schemaAliasCtrl: new FormControl(''),
     schemajsonAliasCtrl: new FormControl(''),
     schemaFormCtrl: new FormControl([]),
-    isExperiment: new FormControl(''),      //Exp
-    isPrivateDataset: new FormControl(''),   //Exp
+    isExperiment: new FormControl(''),      
+    isPrivateDataset: new FormControl(''),   
     isAuditRequired: new FormControl(''),
     isPermissionManaged: new FormControl(''),
     isApprovalRequired: new FormControl(''),
@@ -197,7 +194,6 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
       this.matData.schema ? this.firstForm.controls.schemaCtrl.setValue(this.matData.schema) : null;
       this.matData.schema ? this.firstForm.controls.schemaAliasCtrl.setValue(this.matData.schema.alias) : null;
       this.matData.schemajson ? this.schemajsonAlias = JSON.parse(this.matData.schemajson)[0]?.alias : null;
-      // this.matData.schemajson ? this.firstForm.controls.schemajsonAliasCtrl.setValue(JSON.parse(this.matData.schemajson)[0].alias) : null;
       this.firstForm.controls.isArchivalEnabled.setValue(this.matData.isArchivalEnabled);
       this.firstForm.controls.archivalConfig.setValue(this.matData.archivalConfig);
       if (typeof this.data.tags === 'string') {
@@ -333,8 +329,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.onDestroy.next();
     this.onDestroy.complete();
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
+   
   }
   setDataSourceInitialValue() {
     this.filteredDataSources
@@ -399,7 +394,6 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
         editCanvas.backingDataset = editCanvas.backingDataset !== '' ? editCanvas.backingDataset : null;
         if (this.isExperiment = true) { this.data.expStatus = 2 }
         editCanvas.attributes["Cacheable"] = this.isCacheable;
-        // editCanvas.attributes = JSON.stringify(editCanvas.attributes);
         if (editCanvas.schema && typeof (editCanvas.schema) == "string" && editCanvas.schema.toString().replace(/\s/g, '').length > 0) {
           const schema = this.originalSchemas.filter(s => s.name === editCanvas.schema)[0];
           editCanvas.schema = schema;
@@ -409,14 +403,12 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
             editCanvas.schema = undefined;
         if (this.data.schemajson && typeof (editCanvas.schemajson) != "string")
           editCanvas.schemajson = JSON.stringify(this.data.schemajson);
-        // delete editCanvas["groups"]
         editCanvas.taskdetails = editCanvas.taskdetails ? JSON.parse(editCanvas.taskdetails) : []
         editCanvas.tags = JSON.stringify(this.firstForm.controls.tagsDisp.value)
         editCanvas.views = this.firstForm.controls.Viewertype.value
         this.datasetsService.saveDataset(editCanvas).subscribe((res) => {
           let dataset = res.body
           this.services.message('Saved! Updated successfully');
-          //this.telemetry.addTelemetryEvent(dataset?.alias + ' Dataset Updated');
           if (this.data.datasource.category == "REST") {
             this.services.getCoreDatasource(this.data.datasource.name, sessionStorage.getItem("organization")).subscribe(res => {
               dataset.datasource = res
@@ -447,7 +439,6 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
       dataset.backingDataset = dataset.backingDataset !== '' ? dataset.backingDataset : null;
       if (this.isExperiment = true) { dataset.expStatus = 2 }
       dataset.attributes["Cacheable"] = this.isCacheable;
-      // dataset.attributes = JSON.stringify(dataset.attributes);
       if (dataset.schema && typeof (dataset.schema) == "string" && dataset.schema.toString().replace(/\s/g, '').length > 0) {
         const schema = this.originalSchemas.filter(s => s.name === dataset.schema)[0];
         dataset.schema = schema;
@@ -457,7 +448,6 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
           dataset.schema = undefined;
       if (this.data.schemajson && typeof (dataset.schemajson) != "string")
         dataset.schemajson = JSON.stringify(this.data.schemajson);
-      // delete dataset["groups"]
       dataset.taskdetails = dataset.taskdetails ? JSON.parse(dataset.taskdetails) : []
       dataset.tags = JSON.stringify(this.firstForm.controls.tagsDisp.value)
       dataset.views = this.firstForm.controls.Viewertype.value
@@ -467,9 +457,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
 
         if (this.data.datasource.category == "REST")
           this.modifyAPISpec(this.data, returnedName)
-        // this.dialogRef.close(this.data);
         if (JSON.parse(res.expStatus) != 0) {
-          // this.datasetsService.createDatasetApprovalForExperiment(res.id, JSON.parse(sessionStorage.getItem('user')).id, new Date(), "pending").subscribe();
         }
         const temp = [];
         if (this.firstForm.controls.groupsCtrl.value != null) {
@@ -480,7 +468,6 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
           }
           this.datasetsService.addGroupModelEntity(returnedName, temp, dataset.organization).subscribe();
         }
-        // this.closeModal(returnedName);
         this.location.back();
 
       },
@@ -502,7 +489,6 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
     try {
       const editCanvas = JSON.parse(JSON.stringify(this.data));
       editCanvas.backingDataset = editCanvas.backingDataset !== '' ? editCanvas.backingDataset : null;
-      // editCanvas.attributes = JSON.stringify(editCanvas.attributes);
       editCanvas.taskdetails = editCanvas.taskdetails ? JSON.parse(editCanvas.taskdetails) : []
       if (editCanvas.schema && editCanvas.schema.toString().replace(/\s/g, '').length > 0) {
         const schema = this.originalSchemas.filter(s => s.name === editCanvas.schema)[0];
@@ -516,11 +502,9 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
         this.testLoaderBoolean = false
         this.services.message('Tested! Connected successfully');
         this.testSuccessful = true;
-        //this.telemetry.addTelemetryEvent('Dataset Tested');
       },
         error => {
           this.services.messageService('Error!', error);
-          // this.loader.hide();
         });
     }
     catch (Exception) {
@@ -534,7 +518,6 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
     attributes.Headers = attributes.Headers == '' ? [] : attributes.Headers
     attributes.QueryParams = attributes.QueryParams == '' ? [] : attributes.QueryParams
     let parameters = []
-    // if(attributes.QueryParams == true || attributes.QueryParams && attributes.Headers == true ){
     attributes.QueryParams?.forEach(param => {
       let params = {}
       params["name"] = param.key
@@ -566,7 +549,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
     this.swaggerapispec.addUrl(window.location.origin)
     this.swaggerapispec.addRequestMethod(JSON.parse(dataset.attributes).RequestMethod.toLowerCase())
     this.swaggerapispec.addUrlPath("/api/aip/service/" + dataset.datasource.type + "/" + dataset.datasource.alias + "/" + dataset.alias)
-    let apispec;//(this.requestbodytype == 'application/json')
+    let apispec;
     let datasrc = dataset.datasource
     let extras;
     if (datasrc.extras) {
@@ -605,7 +588,6 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
             this.setDataSourceInitialValue();
             this.onDatasourceChange(this.data.datasource.alias)
             this.matData.schema ? this.firstForm.controls.schemaCtrl.setValue(this.data.schema) : null;
-            // this.matData.schemajson && this.data.schemajson && Array.isArray(JSON.parse(this.data.schemajson)) ? this.firstForm.controls.schemaFormCtrl.setValue([...JSON.parse(this.data.schemajson).map(ele => ele.templateName)]) : null;
 
             if (this.matData.isCopy) {
               this.data.alias = '';
@@ -739,12 +721,10 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
       }
       else {
         this.templates.splice(index, 1);
-        // this.data.schemajson.splice(index,1);
         this.data.schemajson = [];
         let templ = this.originalSchemaTemplates.filter(temp => temp.name == templateName)[0];
         this.data.schemajson.push(templ);
-        // this.data.schemajson.splice(index,1);
-        // this.data.schemajson = this.templates
+   
       }
     }
     catch (Exception) {

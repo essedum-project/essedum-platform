@@ -32,7 +32,6 @@ export class DatasetEditComponent implements OnInit {
   currentDatasourceName = "NA";
   currentEntity = "NA";
   currentdatasourcealias = "";
-  // currentGroups: Groups[];
   activeTab: any = "view"
   @ViewChild("singleSelect", { static: false }) singleSelect: MatSelect;
   dataset: Dataset;
@@ -58,7 +57,6 @@ export class DatasetEditComponent implements OnInit {
   datasetDetails: any = [];
   dash1 = new DashConstant();
   dash3 = new DashConstant();
-  // tabList: string[] = ["View", "Configuration", "Pivot", "Visualize", "Tasks", "Logs"];
   tabList: string[] = ["View", "Configuration", "Tasks", "Logs"];
 
   selectedTab: string;

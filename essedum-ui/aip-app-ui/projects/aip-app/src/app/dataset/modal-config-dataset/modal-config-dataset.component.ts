@@ -13,9 +13,6 @@ import { SwaggerAPISpec } from '../../DTO/swaggerapispec';
 import {Location} from '@angular/common';
 import { OptionsDTO } from '../../DTO/OptionsDTO';
 import { RaiservicesService } from '../../services/raiservices.service';
-// import { LedsModalService } from 'leds-lib';
-//import { CommonCreateDialogComponent } from '../../ivm/ivm-view-initiative/ivm-view-initiative-detail/common-create/common-create-dialog.component';
-// import { OpenTelemetryService } from 'com-lib-util';
 
 @Component({
   selector: 'app-modal-config-dataset',
@@ -48,16 +45,13 @@ export class ModalConfigDatasetComponent implements OnInit, OnDestroy {
   constructor(private datasetsService: DatasetServices,
     private service: Services,
     private route: ActivatedRoute,
-    // private telemetry: OpenTelemetryService,
-    // private modalService: LedsModalService,
+    
     @Inject(MAT_DIALOG_DATA) public matData1: any,
     public dialogRef: MatDialogRef<ModalConfigDatasetComponent>,
-    // private loader: LoaderService,
     private router: Router,
     @Inject('dataSets') private dataUrl: string,
     private dialog: MatDialog,
     private _location: Location,
-  //  public dialogRefcreate: MatDialogRef<CommonCreateDialogComponent>,
     private raiService: RaiservicesService
     ) { }
 
@@ -162,16 +156,12 @@ export class ModalConfigDatasetComponent implements OnInit, OnDestroy {
 
   public uploader: FileUploader = new FileUploader({
     url: '/api/aip/datasets/upload',
-    // authToken: 'Bearer ' + JSON.parse(localStorage.getItem('authenticationToken'))
   });
 
   groupsOptions =[]
   datasetUsageType = [ {viewValue:'Read Only',value:'r'}, {viewValue:'Read Write',value:'rw'}]
-  // telemetryCall(){
-  //   this.telemetry.startTelemetry('aip-app','ModalConfigDatasetComponent', sessionStorage.getItem('organization'));
-  // }
+
   ngOnInit() {
-    // this.telemetryCall()
     if(this.router.url.includes('datasets') || this.router.url.includes('pipelines') || this.router.url.includes('knowledge')){
       this.customCreate = false;
     }
@@ -180,7 +170,6 @@ export class ModalConfigDatasetComponent implements OnInit, OnDestroy {
       this.customCreate = true;
 
     }
-//console.log("alias=", this.matData)
 this.findallschema();
 this.fetchGroups();
 this.findalldatasources();
@@ -211,7 +200,6 @@ else if (this.matData1.edit) {
   if(this.matData.data.datasource && this.matData.data.datasource.name ){
     let index = this.datasourceAllOpt.findIndex(option => option.value ===  this.matData.data.datasource.name || option.viewValue ===  this.matData.data.datasource.name );
     this.data_datasource = this.datasourceAllOpt[index]?.viewValue.toString();
-    // this.data_datasource = this.matData.data.datasource.name
     if(this.data_datasource) this.nextbtn = false
   }
   if(this.matData.data.schema)this.data_schema = this.matData.data.schema
@@ -232,8 +220,7 @@ else{
     if (this.matData.data) {
       if (typeof (this.matData.data) != "string") {
         this.data = this.matData.data
-        // this.matData.data.datasource ? this.matData.purpose == 'pipeline' || this.matData.purpose == 'swagger' ? this.firstForm.controls.datasourceCtrl.setValue(this.matData.data.datasource.alias) : this.firstForm.controls.datasourceCtrl.setValue(this.matData.data.datasource) : null;
-        // this.matData.data.schema ? this.matData.purpose == 'pipeline' ? this.firstForm.controls.schemaCtrl.setValue(this.matData.data.schema.alias) : this.firstForm.controls.schemaCtrl.setValue(this.matData.data.schema) : null;
+       
         this.category = this.matData.data.datasource?.category
       }
       else {
@@ -246,10 +233,6 @@ else{
     }
    }, 0);
 
-    // this.findallschema();
-    // this.fetchGroups();
-    // this.findalldatasources();
-    // this.getdatasetTypes();
     this.dataSourceFilterCtrl.valueChanges
       .pipe(takeUntil(this.onDestroy))
       .subscribe(() => {
@@ -265,19 +248,7 @@ else{
       .subscribe(() => {
         this.filterSchemaTemplate();
       });
-    // this.backingDatasetFilterCtrl.valueChanges
-    //   .pipe(takeUntil(this.onDestroy))
-    //   .subscribe(() => {
-    //     this.filterDatasets();
-    //   });
-    // if (this.matData.data) {
-    //   if (typeof (this.matData.data) != "string") {
-    //     this.data = this.matData.data
-    //     this.firstForm.controls.datasourceCtrl.setValue(this.matData.data.datasource);
-    //     this.firstForm.controls.schemaCtrl.setValue(this.matData.data.schema);
-    //   }
-    // }
-    // this.fetchTags();
+   
     if(this.matData.tags)
       this.firstForm.controls.tagsDisp.setValue(JSON.parse(this.matData.tags));
     
@@ -338,22 +309,7 @@ else{
     );
   }
 
-  // filterDatasets() {
-  //   if (!this.datasets) {
-  //     return;
-  //   }
-  //   let search = this.backingDatasetFilterCtrl.value;
-  //   if (!search) {
-  //     this.filteredDatasets.next(this.datasets.slice());
-  //     return;
-  //   } else {
-  //     search = search.toLowerCase();
-  //   }
-  //   this.filteredDatasets.next(
-  //     this.datasets.filter(dataset => dataset.toLowerCase().indexOf(search) > -1)
-  //   );
-  // }
-
+ 
   filterSchemaTemplate() {
     if (!this.schemaTemplates) {
       return;
@@ -373,8 +329,7 @@ else{
   ngOnDestroy() {
     this.onDestroy.next();
     this.onDestroy.complete();
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
+    
   }
 
   setDataSourceInitialValue() {
@@ -408,15 +363,6 @@ else{
       });
   }
 
-  // setBackingDatasetInitialValue() {
-  //   this.filteredDatasets
-  //     .pipe(take(1), takeUntil(this.onDestroy))
-  //     .subscribe(() => {
-  //       if (this.datasetSelect) {
-  //         this.datasetSelect.compareWith = (a: any, b: any) => a && b && a === b;
-  //       }
-  //     });
-  // }
 
   saveDataset() {
     try {
@@ -425,7 +371,6 @@ else{
         this.data.description = this.data_description
         const dataset = JSON.parse(JSON.stringify(this.data));
         dataset.backingDataset = dataset.backingDataset !== '' ? dataset.backingDataset : null;
-        // editCanvas.schema = editCanvas.schema !== '' ? editCanvas.schema : null;
         dataset.tags = JSON.stringify(this.selectedTags)
         dataset.views = this.data_views
         dataset.type = this.data_type
@@ -447,15 +392,11 @@ else{
           this.responseLink.emit(res);
           this.returnedName = res.name;
           if(this.router.url.includes('knowledge')){
-            // this.modalService.openModal(this.ingest, 'standard')
           }
           this.datasetsService.message('Saved! Created successfully');
-          // //this.telemetry.addTelemetryEvent(this.data?.alias+" Dataset Created");
           if (this.data.datasource.category == "REST")
             this.modifyAPISpec(this.data,this.returnedName)
-          // this.dialogRef.close(this.data);
           if (JSON.parse(res.expStatus) != 0) {
-            // this.datasetsService.createDatasetApprovalForExperiment(res.id, JSON.parse(sessionStorage.getItem('user')).id, new Date(), "pending").subscribe();
           }
           const temp = [];
           if (this.firstForm.controls.groupsCtrl.value != null) {
@@ -466,15 +407,11 @@ else{
           }
             this.datasetsService.addGroupModelEntity(this.returnedName, temp, dataset.organization).subscribe();
           }
-          // this._location.back();
           if(this.router.url.includes('initiative')){
             this.raiService.changeModalData(true);
-            this.closeModal();
-            //this.telemetry.addTelemetryEvent(this.data?.alias+" Dataset Created");
           }
           else{
             this._location.back();
-            //this.telemetry.addTelemetryEvent(this.data?.alias+" Dataset Created");
             }
         },
           error => {
@@ -484,9 +421,7 @@ else{
       } else {
         this.data.alias = this.data_alias
         this.data.description = this.data_description
-        // this.data.type = this.data_type
-        // this.data.datasource = this.data_datasource
-        // this.data.schema = this.data_schema
+      
         this.data.backingDataset = this.data.backingDataset !== '' ? this.data.backingDataset : null;
         if (typeof (this.data.schema) != "object") this.data.schema = undefined;
         this.data.schemajson = JSON.stringify(this.data.schemajson)
@@ -502,12 +437,9 @@ else{
             this.datasetsService.message('Saved! Created successfully','success');
             if (this.data.datasource.category == "REST")
               this.modifyAPISpec(this.data,this.returnedName)
-            // this.dialogRef.close(this.data);
             if (JSON.parse(res.expStatus) != 0) {
-              // this.datasetsService.createDatasetApprovalForExperiment(res.id, JSON.parse(sessionStorage.getItem('user')).id, new Date(), "pending").subscribe();
             }
             this.dialogRef.close(res);
-            //this.telemetry.addTelemetryEvent(this.data?.alias + ' DatasetCreated');
 
           },
             error => {
@@ -524,10 +456,7 @@ else{
           
         }
     
-        // let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-        // const lengthOfCode = 10;
-        // this.data.name = this.makeRandom(lengthOfCode, possible)
-        // this.closeDialog()
+      
       }
     }
     catch (Exception) {
@@ -541,7 +470,6 @@ else{
   modifyAPISpec(dataset,name) {
     let attributes = (dataset.attributes)
     let parameters = []
-    // if(attributes.QueryParams == true || attributes.QueryParams && attributes.Headers == true ){
     attributes.QueryParams?.forEach(param => {
       let params = {}
       params["name"] = param.key
@@ -564,7 +492,7 @@ else{
       parameters.push(params)
 
     })
-  // }
+  
     this.swaggerapispec.changeType("application/json")
     this.swaggerapispec.addTitle(dataset.datasource.alias)
     this.swaggerapispec.addVersion(1)
@@ -573,7 +501,7 @@ else{
     this.swaggerapispec.addUrl(window.location.origin)
     this.swaggerapispec.addRequestMethod(dataset.attributes.RequestMethod.toLowerCase())
     this.swaggerapispec.addUrlPath("/api/aip/service/"+dataset.datasource.type+"/"+dataset.datasource.alias+"/"+dataset.alias)
-    let apispec;//(this.requestbodytype == 'application/json')
+    let apispec;
     let datasrc = dataset.datasource
     let extras;
     if (JSON.stringify(JSON.parse(datasrc.extras).apispec)!="{}") {
@@ -590,7 +518,6 @@ else{
       apispec.apispec = JSON.parse(spec)
     }
     datasrc.extras = JSON.stringify(apispec)
-//console.log("datasrc=", datasrc)
     this.service.saveDatasource(datasrc).subscribe((res) => {
 
     })
@@ -631,7 +558,6 @@ else{
       },
         error => {
           this.datasetsService.message('Error!', 'error');
-          // this.loader.hide();
         });
     }
     catch (Exception) {
@@ -644,9 +570,7 @@ else{
 
     if(this.data.attributes.uploadFile){
       if(this.data.name===''){
-      /*
-       * Deleting Temporary File and Temporary Folder after closing the dialog box,if dialog box is closed without saving the dataset
-       */
+     
         let reqBody:any = {
           uploadFilePath: this.data.attributes.uploadFile
         }
@@ -656,7 +580,6 @@ else{
           })
       }
     }
-    // this.dialogRef.close(this.data);
   }
 
   getdatasetTypes() {
@@ -727,7 +650,6 @@ else{
             if(this.data_datasource){
               this.nextbtn = false;
             }
-            // this.data_datasource = this.matData.data.datasource.name
             if(this.data_datasource){
               this.nextbtn = false;
             }
@@ -744,15 +666,6 @@ else{
         });
   }
 
-  // findalldatasets() {
-  //   this.datasetsService.getDatasets()
-  //     .subscribe(res => {
-  //       res.forEach(dataset => {
-  //         this.datasets.push(dataset.alias);
-  //       });
-  //       this.filteredDatasets.next(this.datasets.slice());
-  //     });
-  // }
 
   onTagChange(event:MatSelectChange){
   this.selectedTags = event.value;
@@ -922,21 +835,9 @@ else{
   }
 
   onNext() {
-    // if (this.firstForm.valid) {
-    //   // this.data.groups = this.firstForm.controls.groupsCtrl.value;
-    //   /** Experiments **/
-    //   if (!this.firstForm.controls.isExperiment.value) {
-    //     this.data.expStatus = 0;     //Not for experiment
-    //   }
-    //   else if (this.firstForm.controls.isExperiment.value && this.firstForm.controls.isPrivateDataset.value) {
-    //     this.data.expStatus = 1;     //for private experiment marked for approval
-    //   }
-    //   else if (this.firstForm.controls.isExperiment.value && !this.firstForm.controls.isPrivateDataset.value) {
-    //     this.data.expStatus = 2;     //for public experiment marked for approval
-    //   }
-      /** Experiments **/
+    
       if(!this.nextbtn) this.proceed = true;
-    // }
+    
   }
 
   fetchTags(){
@@ -989,8 +890,6 @@ else{
 
   }
 
-  closeModal() {
-   // this.dialogRefcreate.close();
-  }
+
 
 }
