@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
 import { Output, EventEmitter } from '@angular/core';
-import { Clipboard } from '@angular/cdk/clipboard';
 import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.component/confirm-delete-dialog.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AdapterServices } from '../adapter-service';
@@ -8,6 +7,7 @@ import { Services } from '../../services/service';
 import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { OptionsDTO } from '../../DTO/OptionsDTO';
 import { Location } from '@angular/common';
+
 @Component({
   selector: 'app-adapter-description',
   templateUrl: './adapter-description.component.html',
@@ -97,10 +97,8 @@ export class AdapterDescriptionComponent {
             this.relatedInstances.push(new OptionsDTO('Instance', insName));
           });
         }
-        // this.fethchAllInstanceNamesByOrg();
       });
     this.fethchAllSpecTemplateNamesByOrg();
-    // this.fethchAllAdapterNamesByOrg();
   }
 
   fethchAllSpecTemplateNamesByOrg() {
@@ -122,8 +120,8 @@ export class AdapterDescriptionComponent {
       panelClass: 'standard-dialog',
     });
   }
+
   toggler() {
-    // this.router.navigate(["../"], { relativeTo: this.route })
     this.location.back();
   }
 
@@ -243,6 +241,7 @@ export class AdapterDescriptionComponent {
         }
       });
   }
+
   filterChains(chainName): void {
     this.service.getallPipelinesByOrg().subscribe((res) => {
       var chains = res;

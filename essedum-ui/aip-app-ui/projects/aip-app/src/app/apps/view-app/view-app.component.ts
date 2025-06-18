@@ -21,14 +21,12 @@ import {
   Router,
   Routes,
 } from '@angular/router';
-// import { LedsLibService } from 'leds-lib';
 import { StreamingServices } from '../../streaming-services/streaming-service';
 import { Services } from '../../services/service';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
 import { App } from '../app';
 import { Location } from '@angular/common';
-// import { LeapTelemetryService } from 'com-lib-util';
 import { HttpParams } from '@angular/common/http';
 import { ComponentType } from '@angular/cdk/overlay';
 import { DynamicRemoteLoad } from './remoteLoad';
@@ -336,8 +334,6 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // this.ledsLibService.middleHeight();
-    // this.ledsLibService.equalHT();
     this.pdfIframe.nativeElement.style.display = 'none';
   }
 
@@ -345,21 +341,15 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
     private router: Router,
     private route: ActivatedRoute,
     public sanitizer: DomSanitizer,
-    //  private ledsLibService: LedsLibService,
     private service: Services,
     public dialog: MatDialog,
-    // private telemetryService: LeapTelemetryService,
     private cdr: ChangeDetectorRef,
     private _location: Location,
     private remoteLoad: DynamicRemoteLoad
   ) {}
+
   ngOnChanges(changes: SimpleChanges): void {
     this.ngOnInit();
-  }
-
-  telemetryImpression() {
-    // this.telemetryService.start();
-    // this.telemetryService.impression("aip-app", "view", "AppListComponent");
   }
 
   basicReqTabChange(index) {
@@ -375,6 +365,7 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
         break;
     }
   }
+
   getRelatedComponent() {
     this.component = this.autoComponent;
     this.service.getRelatedComponent(this.appId, 'APP').subscribe({
@@ -384,8 +375,6 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
         this.relatedComponent.data = JSON.parse(this.relatedComponent.data);
         this.component.push(this.relatedComponent);
         this.cdr.detectChanges();
-
-        // console.log(this.component);
       },
       complete() {
         console.log('completed');
@@ -526,15 +515,8 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
       this.service.message('Script saved Successfully', 'success');
     });
   }
+
   toggler() {
-    // this.router.navigate([
-    //   '../../../app-list',
-
-    // ],
-
-    //   {
-    //     relativeTo: this.route,
-    //   });
     this._location.back();
   }
 
@@ -565,6 +547,7 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
         }
       });
   }
+
   redirectToChain() {
     this.service
       .getStreamingServicesByName(this.appData.jobName)
@@ -599,7 +582,6 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
         state: { selectedCard: dataset },
         relativeTo: this.route,
       });
-    // this.router.navigate(["../../datasets/view/" + this.dataset.name], { state: {card:dataset} , relativeTo: this.route });
   }
 
   getFile(fileId) {

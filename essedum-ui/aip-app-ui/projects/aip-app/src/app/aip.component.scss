@@ -157,7 +157,6 @@
     border: none;
     outline: none;
     -webkit-appearance: none;
-    // color: #8626c3;
     color: var(--base-color);
     height: 4rem;
     -moz-appearance: none;
@@ -928,9 +927,7 @@ div {
   }
 
   .lfx-u-text-primary-80 {
-    //color: #8626C3;
     color: #0094ff;
-    // color:#0a142f;
   }
 
   .lfx-u-mar-8 {
@@ -1260,5 +1257,17 @@ div {
 
   .w-75 {
     width: 75% !important;
+  }
+
+  .lfx-c-card.mat-mdc-card:hover .lfx-u-body-xxl,
+  .lfx-c-card.mat-mdc-card:hover .lfx-u-header-xl {
+    color: #0094ff;
+  }
+
+  .mat-mdc-raised-button.mat-primary {
+    --mdc-protected-button-container-color: #0094ff;
+    --mdc-protected-button-label-text-color: white;
+    --mat-protected-button-state-layer-color: white;
+    --mat-protected-button-ripple-color: rgba(255, 255, 255, 0.1);
   }
 }

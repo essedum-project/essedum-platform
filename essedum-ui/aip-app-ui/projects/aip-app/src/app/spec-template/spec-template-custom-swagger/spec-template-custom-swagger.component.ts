@@ -54,6 +54,7 @@ export class SpecTemplateCustomSwaggerComponent implements OnInit {
       this.getSpecTemplate(this.data.domainname);
     }
   }
+
   getSpecTemplate(spectemplatedomainname: string) {
     this.adapterServices
       .fetchApiSpecTemplate(
@@ -158,6 +159,7 @@ export class SpecTemplateCustomSwaggerComponent implements OnInit {
       this.resFormattedapispec = element.responses;
     });
   }
+
   getPaths() {
     this.paths = [];
     for (let path in this.apispecTemplate.paths) {

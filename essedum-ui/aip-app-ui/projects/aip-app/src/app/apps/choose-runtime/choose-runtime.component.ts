@@ -14,6 +14,7 @@ export class ChooseRuntimeComponent implements OnInit {
   errFlag: boolean = false;
   isEdit: boolean = false;
   default_runtime: any;
+
   constructor(
     public dialogRef: MatDialogRef<ChooseRuntimeComponent>,
     private service: Services,
@@ -21,6 +22,7 @@ export class ChooseRuntimeComponent implements OnInit {
   ) {
     dialogRef.disableClose = true;
   }
+
   ngOnInit() {
     this.service.fetchJobRunTypes().subscribe((resp) => {
       resp.forEach((ele) => {
@@ -42,6 +44,7 @@ export class ChooseRuntimeComponent implements OnInit {
   dismiss() {
     this.dialogRef.close();
   }
+
   closeDialog() {
     this.dialogRef.close(this.selectedRunType);
   }

@@ -62,3 +62,8 @@
     margin: 0 auto;
   }
 }
+
+.img-color {
+  filter: invert(45%) sepia(98%) saturate(2834%) hue-rotate(183deg)
+    brightness(98%) contrast(112%);
+}

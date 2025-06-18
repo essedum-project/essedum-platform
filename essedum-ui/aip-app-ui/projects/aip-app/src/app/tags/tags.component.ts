@@ -1,9 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Services } from '../services/service';
-//import { LedsModalService } from 'leds-lib';
 import { TagsService } from '../services/tags.service';
 import { MatDialogRef } from '@angular/material/dialog';
-//import { LeapTelemetryService } from 'com-lib-util';
 
 @Component({
   selector: 'app-tags',
@@ -25,54 +23,48 @@ export class TagsComponent {
   selectedTag = [];
   selectTag = [];
   constructor(
-    //private telemetryService: LeapTelemetryService,
     private service: Services,
-    //private modalService: LedsModalService,
     private tagService: TagsService,
     private dialogRef: MatDialogRef<TagsComponent>
   ) {}
 
   ngOnInit(): void {
-    //this.telemetryImpression();
-    // console.log(this.data);
     this.getTags();
   }
-
-  // telemetryImpression() {
-  //   this.telemetryService.start();
-  //   this.telemetryService.impression("aip-app", "list", "TagsComponent");
-  // }
 
   closeModal() {
     this.dialogRef.close('close the modal');
   }
-  getSelectedTags(){
-    if(this.entityType=='pipeline')
-       { this.service.getMappedTags(this.data.cid,this.entityType).subscribe((resp)=>{
-        console.log(resp.body);
-        resp.body.forEach((tag:any)=>{
-          this.selectedTag.push(tag);
-          this.tagStatus[tag.category + ' - ' + tag.label] = true;
+
+  getSelectedTags() {
+    if (this.entityType == 'pipeline') {
+      this.service
+        .getMappedTags(this.data.cid, this.entityType)
+        .subscribe((resp) => {
+          console.log(resp.body);
+          resp.body.forEach((tag: any) => {
+            this.selectedTag.push(tag);
+            this.tagStatus[tag.category + ' - ' + tag.label] = true;
+          });
         });
-      });  
-        
-       }
-       else{
-    this.service.getMappedTags(this.data.id,this.entityType).subscribe((resp)=>{
-      console.log(resp.body);
-      resp.body.forEach((tag:any)=>{
-        this.selectedTag.push(tag);
-        this.tagStatus[tag.category + ' - ' + tag.label] = true;
-      });
-    });  
-  }  
+    } else {
+      this.service
+        .getMappedTags(this.data.id, this.entityType)
+        .subscribe((resp) => {
+          console.log(resp.body);
+          resp.body.forEach((tag: any) => {
+            this.selectedTag.push(tag);
+            this.tagStatus[tag.category + ' - ' + tag.label] = true;
+          });
+        });
+    }
   }
+
   getTags() {
     this.tags = {};
     this.tagsBackup = {};
     this.service.getMlTags().subscribe((resp) => {
       this.allTags = resp;
-      // console.log(this.allTags);
 
       resp.forEach((tag) => {
         if (this.category.indexOf(tag.category) == -1) {
@@ -99,20 +91,19 @@ export class TagsComponent {
     throw new Error('Method not implemented.');
   }
   filterByTag(tag) {
-    let id=[];
-    this.selectedTag.forEach((t:any)=>{
+    let id = [];
+    this.selectedTag.forEach((t: any) => {
       id.push(t.id);
     });
     this.tagStatus[tag.category + ' - ' + tag.label] =
       !this.tagStatus[tag.category + ' - ' + tag.label];
-    if (!this.tagStatus[tag.category + ' - ' + tag.label]) {  
-      const index = id.indexOf(tag.id);   
-      this.selectedTag.splice(index,1);
-     }
-     else {
+    if (!this.tagStatus[tag.category + ' - ' + tag.label]) {
+      const index = id.indexOf(tag.id);
+      this.selectedTag.splice(index, 1);
+    } else {
       this.selectedTag.push(tag);
     }
-     console.log(this.selectedTag,"selectedTag after filter");
+    console.log(this.selectedTag, 'selectedTag after filter');
   }
   showMore(category) {
     this.catStatus[category] = !this.catStatus[category];
@@ -143,38 +134,37 @@ export class TagsComponent {
   }
   updateTag() {
     let ids = [];
-    console.log(this.entityType)
+    console.log(this.entityType);
     console.log(this.selectedTag, 'selectedTag');
     this.selectedTag.forEach((tag: any) => {
       ids.push(tag.id);
     });
     this.selectedTag = [];
     this.tagId = ids.join(',');
-    if(this.entityType=='pipeline'){
-    this.service
-      .updateTags(this.tagId, this.entityType, this.data.cid)
-      .subscribe(
-        (resp) => {
-          console.log(resp);
-          this.service.messageService(resp, 'Tags updated.');
-        },
-        (error) => {
-          this.service.messageService(error);
-        }
-      );
-  }  else{
-    this.service
-    .updateTags(this.tagId, this.entityType, this.data.id)
-    .subscribe(
-      (resp) => {
-        console.log(resp);
-        this.service.messageService(resp, 'Tags updated.');
-      },
-      (error) => {
-        this.service.messageService(error);
-      }
-    );
+    if (this.entityType == 'pipeline') {
+      this.service
+        .updateTags(this.tagId, this.entityType, this.data.cid)
+        .subscribe(
+          (resp) => {
+            console.log(resp);
+            this.service.messageService(resp, 'Tags updated.');
+          },
+          (error) => {
+            this.service.messageService(error);
+          }
+        );
+    } else {
+      this.service
+        .updateTags(this.tagId, this.entityType, this.data.id)
+        .subscribe(
+          (resp) => {
+            console.log(resp);
+            this.service.messageService(resp, 'Tags updated.');
+          },
+          (error) => {
+            this.service.messageService(error);
+          }
+        );
+    }
   }
-}
-
 }

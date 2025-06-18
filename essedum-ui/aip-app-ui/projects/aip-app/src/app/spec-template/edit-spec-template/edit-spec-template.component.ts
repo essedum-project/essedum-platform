@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 import { Validators } from '@angular/forms';
 import { Location } from '@angular/common';
-// import { OpenTelemetryService } from 'com-lib-util';
+
 @Component({
   selector: 'app-edit-spec-template',
   templateUrl: './edit-spec-template.component.html',
@@ -36,7 +36,6 @@ export class EditSpecTemplateComponent implements OnInit {
     private service: AdapterServices,
     private route: ActivatedRoute,
     private location: Location,
-    // private telemetry: OpenTelemetryService,
     private router: Router
   ) {
     this.service
@@ -52,11 +51,8 @@ export class EditSpecTemplateComponent implements OnInit {
         this.capabilityPromise = Promise.resolve(true);
       });
   }
-  telemetryCall() {
-    // this.telemetry.startTelemetry('aip-app','EditSpecTemplateComponent', sessionStorage.getItem('organization'));
-  }
+
   ngOnInit(): void {
-    this.telemetryCall();
     this.editorOptions.modes = ['text', 'tree', 'view'];
     this.editorOptions.statusBar = true;
     this.editorOptions.enableSort = false;
@@ -66,19 +62,21 @@ export class EditSpecTemplateComponent implements OnInit {
       this.data.apispectemplate = this.formJsonEditor.get();
     };
   }
+
   back() {
     this.location.back();
   }
+
   domainNameChanges(event) {
     this.data.domainname = event;
   }
+
   editSpecTemplate() {
     this.data.apispectemplate = this.formJsonEditor.get();
     this.data.apispectemplate = JSON.stringify(this.data.apispectemplate);
     this.data.capability = JSON.stringify(this.data.capability);
     this.service.updateApiSpecTemplate(this.data).subscribe((resp) => {
       this.service.messageService(resp, 'Spec Updated Successfully');
-      //this.telemetry.addTelemetryEvent('spec updated');
     });
     this.router.navigate(['../../'], { relativeTo: this.route });
   }
@@ -86,9 +84,4 @@ export class EditSpecTemplateComponent implements OnInit {
     this.data.capability = event;
   }
   openChange(event) {}
-
-  ngOnDestroy(): void {
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
-  }
 }

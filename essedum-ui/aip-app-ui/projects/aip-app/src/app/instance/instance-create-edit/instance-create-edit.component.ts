@@ -7,7 +7,6 @@ import { Validators } from '@angular/forms';
 import { StreamingServices } from '../../streaming-services/streaming-service';
 import { Location } from '@angular/common';
 import { MatDialogRef } from '@angular/material/dialog';
-// import { OpenTelemetryService } from 'com-lib-util';
 
 @Component({
   selector: 'app-instance-create-edit',
@@ -24,8 +23,6 @@ export class InstanceCreateEditComponent implements OnInit {
 
   constructor(
     private dialogRef: MatDialogRef<InstanceCreateEditComponent>,
-
-    // private telemetry: OpenTelemetryService,
     private router: Router,
     private route: ActivatedRoute,
     private location: Location,
@@ -64,10 +61,6 @@ export class InstanceCreateEditComponent implements OnInit {
   connectionPromise: Promise<boolean>;
   org: any;
   runtimeAlias: any;
-
-  telemetryCall() {
-    // this.telemetry.startTelemetry('aip-app','InstanceCreateEditComponent', sessionStorage.getItem('organization'));
-  }
 
   ngOnInit(): void {
     if (this.data && this.data.adaptername) {
@@ -128,7 +121,6 @@ export class InstanceCreateEditComponent implements OnInit {
           this.startChain();
         }
         this.routeBackToAdapters();
-        //this.telemetry.addTelemetryEvent(this.data.name+' Instance Created');
       },
       (error) => {
         this.service.messageService(error);
@@ -143,7 +135,6 @@ export class InstanceCreateEditComponent implements OnInit {
       (res) => {
         this.service.messageService(res, 'Instance Updated Successfully');
         this.closeAdapterPopup();
-        //this.telemetry.addTelemetryEvent(this.data.name+' Instance Updated');
       },
       (error) => {
         this.service.messageService(error);
@@ -188,6 +179,7 @@ export class InstanceCreateEditComponent implements OnInit {
     //   }
     //  });
   }
+
   implchangeoccur(adpName: any) {
     this.adapterServices
       .getAdapteByNameAndOrganization(adpName.value)
@@ -210,6 +202,7 @@ export class InstanceCreateEditComponent implements OnInit {
       this.data.executiontype = 'REST';
     else this.data.executiontype = 'REMOTE';
   }
+
   runtimeNameSelectChange(runtimeNameSelectd: any) {
     this.data.runtimename = runtimeNameSelectd.value;
   }
@@ -347,9 +340,11 @@ export class InstanceCreateEditComponent implements OnInit {
       ];
     });
   }
+
   toggleChain() {
     this.data.isChain = this.isChain;
   }
+
   startChain() {
     this.adapterServices
       .getAdapteByNameAndOrganization(this.data.adaptername)
@@ -376,6 +371,7 @@ export class InstanceCreateEditComponent implements OnInit {
           });
       });
   }
+
   triggerEvent(path) {
     let body = { pipelineName: this.streamItem.name, scriptPath: path[0] };
     this.service
@@ -395,6 +391,7 @@ export class InstanceCreateEditComponent implements OnInit {
         }
       );
   }
+
   runScript() {
     let passType = '';
     if (
@@ -441,10 +438,5 @@ export class InstanceCreateEditComponent implements OnInit {
     // }else{
     //   this.service.message('Please generate script to run pipeline.', 'error');
     // }
-  }
-
-  ngOnDestroy(): void {
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
   }
 }

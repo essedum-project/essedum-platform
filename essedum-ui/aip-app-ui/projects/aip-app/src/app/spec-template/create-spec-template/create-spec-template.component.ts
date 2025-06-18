@@ -5,7 +5,7 @@ import { AdapterServices } from '../../adapter/adapter-service';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 import { Services } from '../../services/service';
 import { Location } from '@angular/common';
-// import { OpenTelemetryService } from 'com-lib-util';
+
 @Component({
   selector: 'app-create-spec-template',
   templateUrl: './create-spec-template.component.html',
@@ -42,19 +42,12 @@ export class CreateSpecTemplateComponent implements OnInit {
     private route: ActivatedRoute,
     private dsService: Services,
     private location: Location,
-    // private telemetry: OpenTelemetryService,
     private router: Router,
     private service: AdapterServices
   ) {}
 
-  telemetryCall() {
-    // this.telemetry.startTelemetry('aip-app','CreateSpecTemplateComponent', sessionStorage.getItem('organization'));
-  }
-
   ngOnInit(): void {
-    this.telemetryCall();
     this.authentications();
-
     this.editorOptions.modes = ['text', 'tree', 'view'];
     this.editorOptions.statusBar = true;
     this.editorOptions.enableSort = false;
@@ -114,19 +107,21 @@ export class CreateSpecTemplateComponent implements OnInit {
     capability: null,
     organization: sessionStorage.getItem('organization'),
   };
+
   createSpecTemplate() {
     this.data.apispectemplate = JSON.stringify(this.data.apispectemplate);
     this.service.createApiSpecTemplate(this.data).subscribe((resp) => {
       console.log(resp);
       this.service.messageService(resp, 'Spec  Created Successfully');
-      //this.telemetry.addTelemetryEvent("Spec Created");
     });
     console.log(this.data);
     this.router.navigate(['../'], { relativeTo: this.route });
   }
+
   back() {
     this.location.back();
   }
+
   domainNameChanges(specName: string) {
     this.errMsg = 'Name is required filed.';
     if (this.regexPatternObj.test(specName)) {
@@ -147,13 +142,10 @@ export class CreateSpecTemplateComponent implements OnInit {
       }
     }
   }
+
   selectChange(event) {
     this.data.capability = JSON.stringify(event);
   }
-  openChange(event) {}
 
-  ngOnDestroy(): void {
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
-  }
+  openChange(event) {}
 }
