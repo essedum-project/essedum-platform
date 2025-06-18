@@ -9,6 +9,7 @@ import { Manifest, RemoteConfig } from '@angular-architects/module-federation';
 import { encKey } from './encKey';
 import { Dataset } from '../dataset/datasets';
 import { StreamingServices } from '../streaming-services/streaming-service';
+import { DashConstant } from '../DTO/dash-constant';
 import { App } from '../apps/app';
 
 @Injectable()
@@ -3268,6 +3269,38 @@ export class Services {
     }
   }
 
+
+  errorMessage(msg: any, msgtype: any = 'error') {
+  let message = {
+    message: msg,
+    button: false,
+    type: msgtype,
+    // successButton: 'Ok',
+    errorButton: 'Cancel',
+  };
+  this.matSnackbar.open(message.message, 'Ok', {
+    duration: 5000,
+    horizontalPosition: 'center',
+    verticalPosition: 'top',
+    panelClass: message.type === 'error' ? 'mat-warn' : '',
+  });
+}
+ createDashConstant(dash_constant: DashConstant): Observable<DashConstant> {
+    const copy = this.convertDashConstant(dash_constant);
+    return this.https
+      .post('/api/dash-constants', copy, { observe: 'response' })
+      .pipe(
+        map((response) => {
+          return new DashConstant(response.body);
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
   // Apps
 
   getAppByName(name: String) {
@@ -3285,6 +3318,13 @@ export class Services {
         })
       );
   }
+
+
+   private convertDashConstant(dash_constant: DashConstant): DashConstant {
+    const copy: DashConstant = Object.assign({}, dash_constant);
+    return copy;
+  }
+
 
   getImage(name: string): Observable<any> {
     const org = sessionStorage.getItem('organization');

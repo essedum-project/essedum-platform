@@ -12,7 +12,7 @@ import { DatasourceComponent } from './datasource/datasource.component';
 // import { DatasourceComponent } from './datasource/datasource.component';
 // import { DatasourceDescriptionComponent } from './datasource/datasource.description/datasource.description.component';
 // import { DatasetComponent } from './dataset/dataset.component';
-// import { DatasetDescriptionComponent } from './dataset/dataset.description/dataset.description.component';
+import { DatasetDescriptionComponent } from './dataset/dataset.description/dataset.description.component';
 // import { EndpointViewComponent } from './endpoint/endpoint-view/endpoint-view.component';
 // import { EndpointEditComponent } from './endpoint/endpoint-edit/endpoint-edit.component';
 // import { CreateEndpointComponent } from './endpoint/create-endpoint/create-endpoint.component';
@@ -213,15 +213,15 @@ const routes: Routes = [
           { path: '', component: DatasetByNameComponent },
           { path: 'create', component: ModalConfigDatasetComponent },
           { path: 'data', component: DatasetEditComponent },
-          // { path: ':type', component: DatasetByNameComponent },
-          // {
-          //   path: 'view/:cname',
-          //   children: [
-          //     { path: '', component: DatasetDescriptionComponent },
-          //     // { path: 'infer', component: SemanticSearchInferComponent },
-          //     { path: 'wrangling/:wname/:action/:rname', component: WranglingComponent },
-          //   ],
-          // },
+           { path: ':type', component: DatasetByNameComponent },
+           {
+             path: 'view/:cname',
+             children: [
+              { path: '', component: DatasetDescriptionComponent },
+              // { path: 'infer', component: SemanticSearchInferComponent },
+             // { path: 'wrangling/:wname/:action/:rname', component: WranglingComponent },
+             ],
+           },
           // { path: 'preview/:cname', component: DatasetDescriptionComponent },
         ],
       },

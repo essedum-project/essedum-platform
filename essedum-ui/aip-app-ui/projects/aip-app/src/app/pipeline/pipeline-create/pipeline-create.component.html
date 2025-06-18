@@ -7,9 +7,7 @@
             <div class="align-items-center d-flex" *ngIf="edit">
                 <h2 class="base-color">Edit Pipeline</h2>
             </div>
-              <!-- <div class="align-items-center d-flex">
-                <h2 class="base-color">Pipeline Details</h2>
-            </div> -->
+    
             <div class="d-flex justify-content-end">
                 <button type="button" class="btn-close" aria-label="Close" (click)="closePipelineOpenDialog()">
                     <i class="icon x-16 close-icon"></i>
@@ -50,15 +48,7 @@
                         </mat-checkbox>&nbsp;&nbsp;
                         <br>
                     </div>
-                    <!-- <div *ngIf="type != 'NativeScript'" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-                        <input id="mdledtcnvsttlId" (change)="onFileChanged($event)" style="display: none;"
-                            accept=".json" name="mdledtcnvsttlNm" type="file" #fileInput="" placeholder="file"
-                            class="selector-779-35" />
-                        <i class="fa fa-upload selector-779-36" (click)="fileInput.click()"
-                            style="font-size: 3rem; cursor: pointer; margin-top: 2rem; color: cornflowerblue;"></i>
-                        <h5 style=" color: cornflowerblue; cursor: arrow;">Import Json</h5>&nbsp;&nbsp;
-                        <span *ngIf="selectedFile" class="selector-779-37">{{ selectedFile.name}}</span>
-                    </div> -->
+             
                     <div class="">
                         <mat-error *ngIf="errFlag">Please provide the required field.</mat-error>
                     </div>

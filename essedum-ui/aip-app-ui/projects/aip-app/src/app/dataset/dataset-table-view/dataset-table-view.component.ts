@@ -6,11 +6,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from "@angular/common";
 import { MatTableDataSource } from '@angular/material/table';
 import * as _ from "lodash";
-// import { PageResponse, Project } from 'com-lib-util';
-// import { LedsLibService, LedsModalService } from 'leds-lib';
-import { MatCheckboxChange } from '@angular/material/checkbox';
+import {  Project } from '../../DTO/project';
 import { DatasetServices } from '../dataset-service';
-import { Project } from '../../DTO/project';
+import { MatDialog } from '@angular/material/dialog';
 @Component({
   selector: 'app-dataset-table-view',
   templateUrl: './dataset-table-view.component.html',
@@ -132,9 +130,8 @@ export class DatasetTableViewComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private changeDetectorRefs: ChangeDetectorRef,
-    // private ledsLibService: LedsLibService,
     private datasetsService: DatasetServices,
-    // private modalService: LedsModalService,
+     private dialog: MatDialog,
   ) {
 
   }
@@ -154,9 +151,6 @@ name_id:any;
     this.sampleQueries = _.cloneDeep(this.samples);
   }
 
-  showTabContent = (eventObj: any) => {
-    // this.ledsLibService.showTabContent(eventObj);
-  };
 
   getSourceApiParameters() {
     try {
@@ -179,8 +173,6 @@ name_id:any;
       else {
         this.busy = this.datasetsService.getDataset(this.datasetName)
           .subscribe(resp => {
-                          console.log("resp--", resp)
-
             if (resp) {
               this.dataset = resp;
               this.showSpinnertable=false;
@@ -197,7 +189,6 @@ name_id:any;
           },
             error => { this.service.messageService("Error in fetching dataset details", "error") })
       }
-      console.log("dataset-",this.datasetName )
     }
     catch (Exception) {
       this.service.messageService("Some error occured", "error")
@@ -207,15 +198,8 @@ name_id:any;
 
   getDatasetFormTemplate() {
     this.service.getDatasetForm(this.dataset.name).subscribe(resp => {
-      console.log("RESP-", resp);
-      if(resp && resp.length>0){
-              console.log("WE ARE IN IF");
-
       this.schemaFormTemplate = resp[0]?.formtemplate?.formtemplate
-      // this.schemaFormTemplate = this.dataset.schemajson && Array.isArray(JSON.parse(this.dataset.schemajson)) && JSON.parse(this.dataset.schemajson).filter(ele => ele.templateTags?.toString().split(",").includes(actionToBeCompared))[0];
-      // if (!this.schemaFormTemplate && this.dataset.schemajson && Array.isArray(JSON.parse(this.dataset.schemajson)) && JSON.parse(this.dataset.schemajson).length > 0) this.schemaFormTemplate = JSON.parse(this.dataset.schemajson)[0];
-      if (this.asChildView) this.actionsList = [];
-      // if (this.schemaFormTemplate && this.schemaFormTemplate.length>0) {
+        if (this.asChildView) this.actionsList = [];
       JSON.stringify(this.schemaFormTemplate, (_, nestedValue) => {
         if (nestedValue && nestedValue['type'] == "button"
           && (nestedValue['key'] == "refresh" || nestedValue['key'] == "internalNavigation"
@@ -248,12 +232,6 @@ name_id:any;
 
       this.lastRefreshDate = this.datepipe.transform(new Date(), "dd-MMM-yyyy hh:mm:ss a");
       this.getColumnNamesAndPrmKys();
-    }else{
-                    console.log("WE ARE IN ELSE");
-
-      this.datasetsCount=0;
-      console.log("dataset--", this.datasetsCount);
-    }
 
     })
   }
@@ -390,13 +368,10 @@ name_id:any;
       this.goToPage = null;
       this.paginatorFirstRow = 0;
       project = JSON.parse(sessionStorage.getItem("project"));
-      // let previousUrl = this.datasetsService.getPreviousUrl();
-      // let currentUrl = this.datasetsService.getCurrentUrl();
+
       let projName: string = project.name;
       let pagination = { 'page': this.page, 'size': this.rows, 'sortEvent': this.sortEvent, 'sortOrder': this.sortorder }
-      // let urlLastFragment: any;
-      // if (this.datasetsService.getUrl())
-      //   urlLastFragment = this.datasetsService.getUrl().split("/").reverse()[0];
+
       if (decodedSPrList && decodedSValList) {
         // To Be Generalised
         decodedSPrList.forEach((param, index) => {
@@ -447,7 +422,6 @@ name_id:any;
             else {
               let response: number = +resp;
               this.datasetsCount = response;
-              console.log("dataset count", this.datasetsCount);
               // this.analyticsDatas(this.searchIncidentObj,finalAndObj,paramObj,this.datasetsCount);
               this.initializePaginationVariables();
             }
@@ -463,43 +437,7 @@ name_id:any;
           paramObj[param] = this.id
         })
       }
-      // this.busy = this.service.searchTicketsUsingDataset(this.datasetName, projName, pagination, finalAndObj, paramObj)
-      //   .subscribe(
-      //     (pageResponse:any) => {
-      //       if(this.dataset.views=='Csv View'){
-      //         pageResponse=Object.values(pageResponse[0])[0]
-      //       }
-      //       if (typeof pageResponse == "string") {
-      //         this.service.messageService(pageResponse, "error");
-      //         this.ticketList = this.ticketListBackup;
-      //       }
-      //       else {
-      //         pageResponse.forEach((element) => {
-      //           if (element) {
-      //             Object.keys(element).map(ky => { if (element[ky]) element[ky] = element[ky].toString() });
-      //             this.ticketList.push(element);
-      //           }
-      //         });
-      //         this.ticketListBackup = this.ticketList;
-      //       }
-      //     },
-      //     (error) => {
-      //       this.service.messageService("Could not get the results", "error");
-      //       this.ticketList = this.ticketListBackup;
-      //     }
-      //   );
-      // if(this.showWranglingData){
-      //   console.log('countInside showWranglingdata',this.data);
-        
-      //   pagination={ 'page': this.page, 'size': this.datasetsCount, 'sortEvent': this.sortEvent, 'sortOrder': this.sortorder };
-      //   this.service.searchTicketsUsingDataset(this.datasetName, projName, pagination, finalAndObj, paramObj)
-      //   .subscribe((pageResponse:any)=>{
-      //     if (typeof pageResponse == "string") {
-      //       this.service.messageService(pageResponse, "error");
-      //       this.ticketList = this.ticketListBackup;
-      //     }
-      //   })
-      // }
+      
       if(!this.itsm && !this.tickets){ 
         if(this.showWranglingData){
           pagination={ 'page': this.page, 'size': this.datasetsCount, 'sortEvent': this.sortEvent, 'sortOrder': this.sortorder };
@@ -510,7 +448,6 @@ name_id:any;
               if (typeof pageResponse == "string") {
                 this.service.messageService(pageResponse, "error");
                 this.ticketList = this.ticketListBackup;
-                console.log("TICKET LISTT-----", this.ticketList)
               }
               else {
                 this.ticketList = [];
@@ -518,8 +455,6 @@ name_id:any;
                   if (element) {
                     Object.keys(element).map(ky => { if (element[ky]) element[ky] = element[ky].toString() });
                     this.ticketList.push(element);
-                                    console.log("TICKET LISTT-----", this.ticketList)
-
                   }
                 });
                 if(this.showWranglingData){
@@ -535,8 +470,6 @@ name_id:any;
             (error) => {
               this.service.messageService("Could not get the results", "error");
               this.ticketList = this.ticketListBackup;
-                              console.log("TICKET LISTT-----", this.ticketList)
-
             }
           );        
       } else if (this.tickets) {
@@ -566,13 +499,10 @@ name_id:any;
                   }
                 });
                 this.datasetsCount=this.ticketList.length;
-                              console.log("dataset count------------------", this.datasetsCount);
-
                 this.ticketListBackup = this.ticketList;
               }
             },
           (error) => {
-            // this.service.messageService("Could not get the results", "error");
             this.ticketList = this.ticketListBackup;
           }
         );
@@ -586,8 +516,6 @@ name_id:any;
   }
 
   initializePaginationVariables() {
-                  console.log("dataset count--------------", this.datasetsCount);
-
     if (this.datasetsCount > 0) {
       var remainder = this.datasetsCount % this.rows;
       var cof = (this.datasetsCount - remainder) / this.rows;
@@ -643,7 +571,6 @@ name_id:any;
     this.page = 0;
     this.goToPage = null;
     this.paginatorFirstRow = 0;
-    //this.typingTimer = setTimeout(() => {  }, this.doneTypingInterval);
     this.resetSelection();
     this.loadObjects(this.andObj);
   }
@@ -659,46 +586,7 @@ name_id:any;
     this.loadObjects(this.andObj);
   }
   quickStatsData:any = '';
-  // analyticsDatas(exampleIncident: any,finalAndObj:any,paramObj:any,datasetsCount:any) {
-   
-  //   let project = new Project();
-  //   project = JSON.parse(sessionStorage.getItem("project"));
-  //   let projName: string = project.name;
-  //   let pagination = { 'page': 0, 'size': datasetsCount, 'sortEvent': this.sortEvent, 'sortOrder': this.sortorder };
-  //   // let paramObj;
-  //   //   if (this.params) {
-  //   //     paramObj = {}
-  //   //     this.params.forEach(param => {
-  //   //       paramObj[param] = this.id
-  //   //     })
-  //   //   }
-  //   //   let finalAndObj = { "and": [] };
-  //   this.service.searchTicketsUsingDataset(this.datasetName, projName, pagination, finalAndObj, paramObj)
-  //         .subscribe(
-  //           (pageResponse:any) => {
-  //            this.quickStatsData=pageResponse;
-  //             if (typeof pageResponse == "string") {
-  //               this.service.messageService(pageResponse, "error");
-  //               this.ticketList = this.ticketListBackup;
-  //             }
-  //             else {
-  //               this.ticketList = [];
-  //               pageResponse.forEach((element) => {
-  //                 if (element) {
-  //                   Object.keys(element).map(ky => { if (element[ky]) element[ky] = element[ky].toString() });
-  //                   this.ticketList.push(element);
-  //                 }
-  //               });
-  //               this.ticketListBackup = this.ticketList;
-  //             }
-  //           },
-  //           (error) => {
-  //             this.service.messageService("Could not get the results", "error");
-  //             this.ticketList = this.ticketListBackup;
-  //           }
-  //         );   
-  // }
-
+  
   loadObjects(exampleIncident: any) {
     try {
       if (!exampleIncident) exampleIncident = {};
@@ -713,55 +601,19 @@ name_id:any;
           paramObj[param] = this.id
         })
       }
-      // this.busy = this.service.searchTicketsUsingDataset(this.datasetName, projName, pagination, exampleIncident)
-      //   .subscribe(res => {
-      //     if (typeof res == "string") {
-      //       this.service.messageService(res, "error");
-      //       this.ticketList = this.ticketListBackup;
-      //     }
-      //     else {
-      //       res.forEach((ele) => {
-      //         if (ele) {
-      //           Object.keys(ele).map(ky => { if (ele[ky]) ele[ky] = ele[ky].toString() });
-      //           this.ticketList.push(ele);
-      //         }
-      //       });
-      //       if (this.unqId) {
-      //         this.ticketList = this.ticketList.filter((elem, index, self) => {
-      //           return (
-      //             index ===
-      //             self.findIndex((ele) => {
-      //               return ele[this.unqId] === elem[this.unqId];
-      //             })
-      //           );
-      //         });
-      //       }
-      //       this.ticketListBackup = this.ticketList;
-      //       this.checkIfAllIdsSelected();
-      //     }
-
-      //   },
-      //     error => {
-      //       this.service.messageService("Some error occurred while fetching data", "error");
-      //       this.ticketList = this.ticketListBackup;
-      //     });
-
+    
       if(!this.itsm) {
         this.busy = this.service.searchTicketsUsingDataset(this.datasetName, projName, pagination, exampleIncident)
         .subscribe(res => {
           if (typeof res == "string") {
             this.service.messageService(res, "error");
             this.ticketList = this.ticketListBackup;
-                            console.log("TICKET LISTT-----", this.ticketList)
-
           }
           else {
             res.forEach((ele) => {
               if (ele) {
                 Object.keys(ele).map(ky => { if (ele[ky]) ele[ky] = ele[ky].toString() });
                 this.ticketList.push(ele);
-                                console.log("TICKET LISTT-----", this.ticketList)
-
               }
             });
             if (this.unqId) {
@@ -783,8 +635,6 @@ name_id:any;
           error => {
             this.service.messageService("Some error occurred while fetching data", "error");
             this.ticketList = this.ticketListBackup;
-                            console.log("TICKET LISTT-----", this.ticketList)
-
           });
       } else {
         let queryParams: any = {number: this.id}
@@ -807,21 +657,14 @@ name_id:any;
                   if (element) {
                     Object.keys(element).map(ky => { if (element[ky]) element[ky] = element[ky].toString() });
                     this.ticketList.push(element);
-                                    console.log("TICKET LISTT-----", this.ticketList)
-
                   }
                 });
                 this.datasetsCount=this.ticketList.length;
-                                  console.log("dataset count--------------", this.datasetsCount);
-
                 this.ticketListBackup = this.ticketList;
               }
             },
           error => {
-            // this.service.messageService("Some error occurred while fetching data", "error");
             this.ticketList = this.ticketListBackup;
-                            console.log("TICKET LISTT-----", this.ticketList)
-
           });
       }
       
@@ -837,8 +680,6 @@ name_id:any;
             else {
               let response: number = +resp;
               this.datasetsCount = response;
-                                console.log("dataset count--------------", this.datasetsCount);
-
               this.initializePaginationVariables();
             }
           }
@@ -897,12 +738,10 @@ name_id:any;
   }
 
   edit(dataObj) {
-    // this.saveSearchFilterExample();
     this.rowObj = {};
     if (this.schemaFormTemplate && typeof this.schemaFormTemplate == "string") this.schemaFormTemplate = JSON.parse(this.schemaFormTemplate)
     if (this.schemaFormTemplate?.components?.length > 0) {
-      // let tempArr = Object.entries(dataObj).filter(ele => Object.keys(this.schemaFormTemplate['properties']).map(ky => ky.toLowerCase()).includes(ele[0].toLowerCase()));
-      // tempArr.forEach(ele => { this.rowObj[ele[0]] = ele[1]; });
+      
       this.rowObj = dataObj;
     }
     this.formView = true;
@@ -959,14 +798,10 @@ name_id:any;
     if (this.allIdsSelected) {
       this.ticketList.forEach(ele => { this.selectedTickets.push(ele[this.unqId]) });
       this.selectedDatasetsCount = this.datasetsCount
-                        console.log("SEEKCTED dataset count--------------", this.selectedDatasetsCount);
-
       this.includeIdsToSelected = [];
     }
     else{
       this.selectedDatasetsCount = 0
-                              console.log("SEEKCTED dataset count--------------", this.selectedDatasetsCount);
-
     }
     this.excludeIdsFromSelected = [];
   }
@@ -975,8 +810,6 @@ name_id:any;
     if (!this.selectedTickets.includes(inc)) {
       this.selectedTickets.push(inc);
       this.selectedDatasetsCount = this.selectedDatasetsCount+1;
-                              console.log("SEEKCTED dataset count--------------", this.selectedDatasetsCount);
-
       if (!this.allIdsSelected && this.excludeIdsFromSelected.length == 0) {
         this.includeIdsToSelected.push(inc);
         if (this.includeIdsToSelected.length == this.length) this.allIdsSelected = true
@@ -994,8 +827,6 @@ name_id:any;
         this.excludeIdsFromSelected.push(inc);
       }
       this.selectedDatasetsCount = this.selectedDatasetsCount - 1;
-                              console.log("SEEKCTED dataset count--------------", this.selectedDatasetsCount);
-
     }
    }
 
@@ -1005,11 +836,6 @@ name_id:any;
 
   toggleSelectAllColsToDwnld() {
     this.cols.forEach(col => col.selected = this.selectAllColsToDwnld);
-
-    // Update colstodownload based on the selection
-    // this.colsToDownload = this.colsToDownload
-    //   ? this.cols.map(col => col.header)
-    //   : [];
 
     this.colsToDownload = this.selectAllColsToDwnld
       ? this.cols.map(col => col.field)
@@ -1152,12 +978,7 @@ name_id:any;
     if (col) {
       col.selected = !col.selected;
 
-      // Update colstodownload based on the selection
-      // if (col.selected) {
-      //   this.colsToDownload.push(col.header);
-      // } else {
-      //   this.colsToDownload = this.colsToDownload.filter(item => item !== col.header);
-      // }
+ 
       if (col.selected) {
         this.colsToDownload.push(col.field);
       } else {
@@ -1202,12 +1023,9 @@ name_id:any;
   }
   ngOnChanges() {
     this.ngOnInit();
-    this.ngAfterViewInit();
+   
   }
-  ngAfterViewInit(): void {
-    // this.ledsLibService.middleHeight();
-    // this.ledsLibService.equalHT();
-  }
+
 
   selectChange($event){
     this.selectedRecipe=$event;
@@ -1239,12 +1057,14 @@ name_id:any;
     });
 }
   startWrangling(content:any){
-    //this.showSpinner=true;
     this.showRecipe= true;
     this.showWranglingData=true;
-    //this.refreshTicket();
-    // this.modalService.openModal(content,'standard');
-  //this.modalService.openModal
+
+    this.dialog.open(content, {
+      width: '600px', // adjust as needed
+      data: {} // pass any data if required
+    });
+
   }
 
   triggerIngestPipeline() {

@@ -25,7 +25,7 @@
                                         style="transform: rotateY(180deg)" (click)="openModal(content4)">
                                         <span [tooltip]="addTags" [position]="tooltipPoition"
                                             class="aip-led-icons">
-                                            <!-- <i class="fa fa-tag aip-led-icons" aria-hidden="true"></i> -->
+                                          
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                                 fill="currentColor" class="bi bi-tag" viewBox="0 0 16 16">
                                                 <path
@@ -113,59 +113,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="lfx-l-level2-right-col" style="padding-top: 5rem!important" *ngIf="initiativeView">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="lfx-u-header-lg lfx-u-mar-b-16">Connected Artifacts</div>
-                                <div *ngIf="component.length > 0; else noRelatedComponent">
-                                    <ul class="list-unstyled">
-                                        <li class="aip-daa" *ngFor="let component of component">
-                                            <app-related-component [component]="component" [childId]="card.id"
-                                                [parentType]="'MODEL'"
-                                                (reload)="reload($event)"></app-related-component>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <ng-template #noRelatedComponent>
-                                    <div class="lfx-u-body-md lfx-u-text-neutral-80  aip-desc-ellipsis">
-                                        <div class="d-flex justify-content-center align-items-center flex-column">
-                                            <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive"
-                                                alt="aip_empty_state_leds" style="width:15rem" />
-                                            No connected artifacts for now!
-                                        </div>
-                                    </div>
-                                </ng-template>
-                            </div>
-                            <div class="card-footer lfx-u-mar-t-8">
-                                <li *ngIf="linkAuth">
-                                    <div *ngIf="relatedloaded">
-                                        <div class="lds-ring">
-                                            <div></div>
-                                            <div></div>
-                                            <div></div>
-                                            <div></div>
-                                        </div>
-                                    </div>
-                                    <div class="aip-cursor lfx-u-pad-l-8 lfx-u-pad-b-8 " *ngIf="!relatedloaded"
-                                        (click)="openModal(linker)">
-                                        <div class="d-flex aip-daa lfx-u-mar-8 lfx-u-pad-8  align-items-center"
-                                            style="width: max-content;">
-                                            <div class="lfx-u-mar-lr-8"><i class=" icon x-16 icon_link"
-                                                    style="color: #8626C3;"></i></div>
-                                            <div class="lfx-u-body-md">Link Artifacts</div>
-                                        </div>
-                                    </div>
-                                    <ng-template #linker let-modal>
-                                        <app-create-linked [data]=card.id [type]="'MODEL'"
-                                            (refeshrelated)="refeshrelated($event)"
-                                            [component]=component></app-create-linked>
-                                    </ng-template>
-                                </li>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-
             </div>
         </div>
     </div>

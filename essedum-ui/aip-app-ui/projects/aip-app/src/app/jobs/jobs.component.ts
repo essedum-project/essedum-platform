@@ -2,7 +2,6 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Services } from '../services/service';
 import { MatDialog } from '@angular/material/dialog';
 import { JobDataViewerComponent } from '../pipeline.description/job-data-viewer/job-data-viewer.component';
-//import { LeapTelemetryService } from 'com-lib-util';
 import { ShowOutputArtifactsComponent } from '../pipeline.description/show-output-artifacts/show-output-artifacts.component';
 
 @Component({
@@ -28,12 +27,10 @@ export class JobsComponent implements OnInit {
   logsdata: any = [];
   isHovered=false;
   constructor(
-  //  private telemetryService: LeapTelemetryService,
     private service: Services,
     public dialog: MatDialog){}
   @Output() statusChanged = new EventEmitter();
   ngOnInit(): void {
-   // this.telemetryImpression();
     if (this.internalJob) {
        this.service.fetchInternalJobLenByname(this.internalJob).
         subscribe(
@@ -56,11 +53,6 @@ export class JobsComponent implements OnInit {
           },
           error => this.service.message('Could not fetch jobs', 'error')
         );
-        // this.service.fetchInternalJobByName(this.internalJob,this.page,this.row).subscribe(resp=>{
-        //   this.jobList =  resp
-        //   console.log('jobList')
-        //   console.log(this.jobList)
-        // })
     }
      else{
       this.service.getJobsByStreamingServiceLen(this.cname).
@@ -101,10 +93,6 @@ export class JobsComponent implements OnInit {
 
   }
 
-  // telemetryImpression() {
-  //   this.telemetryService.start();
-  //   this.telemetryService.impression("icip-iai", "list", "EventsComponent");
-  // }
 
 onRefresh() {
   this.ngOnInit();
@@ -140,33 +128,7 @@ getJobs(choice: String) {
       this.page = this.lastPage;
       break;
   }
-  // if (this.type == "agent") {
-  //   this.busy = this.service.getJobsByAgents(this.item.name, this.page, this.rows).subscribe(res => {
-  //     this.jobsList = res;
-  //   });
-  // }
-  // else if(this.item.type == "Azure"){
-  //   this.busy = this.jobsService.getAzureJobs(this.uid,this.item.alias).subscribe(res=>{
-  //       res.runs.forEach(ele=>{
-  //         let data={};
-  //         data['jobId'] = ele.runId
-  //         data['submittedBy'] = this.uid;
-  //         data['submittedOn'] = ele.startTimeUtc;
-  //         data['finishtime'] = ele.endTimeUtc;
-  //         data['jobStatus'] = ele.status;
-  //         data['type'] = res.Platform;
-  //         data['jobObj'] = ele
-  //         this.jobsList.push(data);
-  //       })
-  //     console.log("jobsList",this.jobsList)
-  //     this.jobsList.forEach(ele=>{
-  //     })
-  //   },error=>{
-  //     console.log("err",error)
-  //       this.messageService.error('Some error occured',"Error");
-  //   })
-  // }
-  // else {
+
      
   if(this.cname){
     this.service.fetchInternalJobByName(this.cname,this.page,this.row).subscribe(resp=>{
@@ -187,25 +149,7 @@ getJobs(choice: String) {
 fetchJob(jobId: string, runtime: string, status) {
   try{
     let linenumber = 0
-    // if (this.type == "agent") {
-    //   this.busy = this.service.fetchAgentJob(jobId, linenumber, 0, status, false).subscribe(
-    //     response => {
-    //       this.currentJob = response
-    //       this.onChangeStatus(this.currentJob.status);
-    //       if (
-    //         this.currentJob.status !== 'STARTED' &&
-    //         this.currentJob.status !== 'RUNNING'
-    //       ) {
-    //         clearInterval(this.timeInterval);
-    //       }
-    //     },
-    //     error => {
-    //       this.currentJob['status'] = 'ERROR';
-    //       this.service.message( 'Job Status not fetched:' + error,'error');
-    //     }
-    //   );
-    // }
-    // else {
+   
       this.service.fetchSparkJob(jobId, linenumber, runtime, 50, status, false).subscribe(
         response => {
           this.currentJob = JSON.parse(response);
@@ -222,7 +166,7 @@ fetchJob(jobId: string, runtime: string, status) {
           this.service.message('Job Status not fetched:' + error,'error');
         }
       );
-    // }
+    
   }
   catch(Exception){
   this.service.message("Some error occured", "error")
@@ -253,7 +197,7 @@ fetchInternalJob(jobId:string,status){
           this.service.message('Job Status not fetched:' + error,'error');
         }
       );
-    // }
+
   }
   catch(Exception){
   this.service.message("Some error occured", "error")
@@ -383,16 +327,7 @@ showConsole(jobId: string, runtime: string, status, job) {
     dialogRef.afterClosed().subscribe(result => {
     });
   }
-  // ngOnChanges() {
-  //   this.datas = [];
-  //   if (Object.keys(this.jobData).length !== 0 && this.jobData.constructor === Object) {
-  //     for (var i in this.jobData) {
-  //       let a = { 'name': i, 'value': this.jobData[i] };
-  //       this.datas.push(a);
-  //     }
-  //   }
-  //   console.log(this.datas)
-  // }
+
 
   stopJob(id) {
     this.service.stopPipeline(id).subscribe(

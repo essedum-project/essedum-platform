@@ -1,11 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Services } from '../../services/service';
-import { FormBuilder } from '@angular/forms';
-//import { LedsModalService } from 'leds-lib';
 import { angularMaterialRenderers } from '@jsonforms/angular-material';
 import { LocationStrategy } from '@angular/common';
-//import { LeapTelemetryService, OpenTelemetryService } from 'com-lib-util';
 @Component({
   selector: 'app-model-deploy',
   templateUrl: './model-deploy.component.html',
@@ -31,27 +28,17 @@ export class ModelDeployComponent {
   message: any;
   endpointId:number;
   panelClass: string | string[];
-  // uischema;
-  // jsonData = {};
-  // renderers = angularMaterialRenderers;
+
 
   constructor(
-   // private telemetryService: LeapTelemetryService,
-   // private telemetry: OpenTelemetryService,
     private service: Services,
-    //private modalService: LedsModalService,
     private location: LocationStrategy,
     private route: ActivatedRoute,
     private router: Router,
   ) {}
 
-  // telemetryCall(){
-  //   this.telemetry.startTelemetry('aip-app','ModelDeployComponent', sessionStorage.getItem('organization'));
-  // }
-
   ngOnInit(): void {
-   // this.telemetryCall();
-    //this.telemetryImpression();
+
     let data: any;
     let cards = this.location.getState();
     this.data = cards['card'];
@@ -71,13 +58,9 @@ export class ModelDeployComponent {
 
   }
 
-  // telemetryImpression() {
-  //   this.telemetryService.start();
-  //   this.telemetryService.impression("aip-app", "list", "ModelDeployComponent");
-  // }
+
   
   routeBackToModelList() {
-    // this.router.navigate(['../'], { relativeTo: this.route });
     this.location.back();
   }
   getUniqueEndpoint() {
@@ -87,13 +70,9 @@ export class ModelDeployComponent {
         let ep = { viewValue: e.appName, value: e.fedId ,value2: e.id };
         endid.push(ep);
       });
-      this.options = endid;
-      
-
-      // this.options = resp.appName;
+      this.options = endid;    
       console.log(resp);
       console.warn(resp);
-      // alert(Object.keys(this.attributes));
     });
   }
 
@@ -126,14 +105,13 @@ export class ModelDeployComponent {
     this.service.createlinkage(this.relatedbody).subscribe((val) => {
       console.log(Date.now(), val);
     });
-   // this.refeshrelated.emit(true);
+
   }
 
   onClickSubmit() {
     let fId:any;
     console.log('form dets',this.data);
     console.log(this.keys);
-    //console.log(this.jsonData);
     this.attributes['Model Id'] = this.data.sourceId;
     fId=this.attributes['Endpoint Id']
     this.options.forEach((e:any)=>{
@@ -148,17 +126,10 @@ export class ModelDeployComponent {
         .subscribe(
           (resp) => {
             this.service.messageService(resp, 'Model deployment initiated.');
-            //this.telemetry.addTelemetryEvent('Model Deployed');
+
             if (resp.body.status == 'SUCCESS') {
               this.createLinked(this.endpointId);
-                // Close the modal using Angular general code
-                // If using Angular Material Dialog:
-                // this.dialogRef.close();
-
-                // If using Bootstrap modal or other, you might emit an event or set a flag:
-                // this.isModalOpen = false;
-
-                // If you want to navigate away after deployment:
+         
                 this.routeBackToModelList();
             }
           },
@@ -170,15 +141,10 @@ export class ModelDeployComponent {
       this.service.messageService(e);
     }
   }
-  // showData(event){
-  //   this.jsonData = event
-  // }
+
   closeModal(){
     //this.modalService.dismissAll();
   }
 
-  ngOnDestroy(): void {
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
-  }
+
 }

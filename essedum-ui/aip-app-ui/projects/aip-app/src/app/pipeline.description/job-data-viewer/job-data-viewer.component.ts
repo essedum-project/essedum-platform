@@ -1,12 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import * as FileSaver from 'file-saver';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-// import { PipelinesummaryService } from '../../entities/pipeline-summary/pipeline-summary.service';
-// import { StreamingServicesService } from '../../entities/streaming-services/streaming-services.service';
-// import { MessageService } from '../../sharedModule/service/message.service';
-// import { DashConstantService, DashConstant } from "com-lib-util";
-// import { DashConstant } from "com-lib-util";
-// import * as SockJS from 'sockjs-client';
+
 import { Subscription, interval} from 'rxjs';
 import { Services } from '../../services/service';
 declare var Stomp: any;
@@ -426,35 +421,7 @@ export class JobDataViewerComponent implements OnInit {
     // }
   }
 
-  // _connect() {
-  //   try{
-  //     let ws = new SockJS(this.webSocketEndPoint);
-  //     this.stompClient = Stomp.over(ws);
-  //     const _this = this;
-  //     _this.stompClient.connect({}, function (_frame) {
-  //       //send
-  //       _this.loadingSubscription = interval(2000).subscribe((_x => {
-  //         let request = {
-  //           jobid: _this.jobid,
-  //           offset: _this.offset,
-  //           linenumber: _this.linenumber,
-  //           org: sessionStorage.getItem("organization"),
-  //           status: _this.status
-  //         }
-  //         _this._send(JSON.stringify(request))
-  //       }));
-  //       //receive
-  //       _this.stompClient.subscribe(_this.topic, function (sdkEvent) {
-  //         _this.onMessageReceived(sdkEvent.body);
-  //       });
-  //     }, this.errorCallBack);
-  //   }
-  //   catch(Exception:any){
-  //   this.service.message("Some error occured", 'error')
-  //   }
-
-  // };
-
+ 
   _disconnect() {
     if (this.stompClient) {
       this.stompClient.disconnect();

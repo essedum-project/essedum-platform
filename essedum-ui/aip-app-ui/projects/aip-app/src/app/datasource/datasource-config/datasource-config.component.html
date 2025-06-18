@@ -20,6 +20,7 @@
                                 </span>
                                 <span class="lfx-u-mar-l-8 lfx-u-header-xxl secondary-color">View Connection</span>
                             </div>
+                            
                         </span>
                         <div *ngIf="!initiativeView">
                             <span class="lfx-u-mar-l-8 aip-desc-title lfx-u-header-xxl">
@@ -37,6 +38,12 @@
                         <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()">
                             <i class="icon x-16 close-icon"></i>
                         </button>
+                    </div>
+                    <div *ngIf="view" class="align-items-center d-flex">
+                            <span class="" style="cursor: pointer;">                          
+                                <i class="fa fa-long-arrow-left back-icon" aria-hidden="true" (click)="routeBackToConnectionList()"></i>
+                            </span>
+                            <span class="lfx-u-mar-l-8 lfx-u-header-xxl secondary-color">View Connection</span>
                     </div>
                     <div class="lfx-l-level2-middle-ctr">
                         <div class="lfx-l-level2-middle-col">

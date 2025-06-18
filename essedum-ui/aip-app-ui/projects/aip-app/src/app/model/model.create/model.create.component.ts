@@ -2,14 +2,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Services } from '../../services/service';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { NgForm } from '@angular/forms';
 import { angularMaterialRenderers } from '@jsonforms/angular-material';
-// import {
-//   ApiDropdownRenderer,  apiControlTester} from '../../renderers/api-dropdown.renderer';
 import { RaiservicesService } from '../../services/raiservices.service';
-import { MatDialogRef } from '@angular/material/dialog';
-//import { CommonCreateDialogComponent } from '../ivm/ivm-view-initiative/ivm-view-initiative-detail/common-create/common-create-dialog.component';
-//import { OpenTelemetryService } from 'com-lib-util';
 
 @Component({
   selector: 'app-model-create',
@@ -27,46 +21,20 @@ export class ModelCreateComponent {
   uischema;
   customCreate:boolean ;
   isHover=false;
-  // schema = {
-  //   type: 'object',
-  //   properties: {
-  //     name: {
-  //       type: 'string',
-  //       minLength: 1,
-  //     },
-  //     done: {
-  //       type: 'boolean',
-  //     },
-  //     due_date: {
-  //       type: 'string',
-  //       format: 'date',
-  //     },
-  //     recurrence: {
-  //       type: 'string',
-  //       enum: ['Never', 'Daily', 'Weekly', 'Monthly'],
-  //     },
-  //   },
-  //   required: ['name', 'due_date'],
-  // };
+  
   data = {};
   renderers = angularMaterialRenderers;
   check: boolean=false;
   constructor(
     private route: ActivatedRoute,
- //   private telemetry: OpenTelemetryService,
     private router: Router,
     private service: Services,
-    private formBuilder: FormBuilder,
-   // public dialogRef: MatDialogRef<CommonCreateDialogComponent>,
+    private formBuilder: FormBuilder,  
     private raiService: RaiservicesService
   ) {}
 
-  // telemetryCall(){
-  //   this.telemetry.startTelemetry('aip-app','ModelCreateComponent', sessionStorage.getItem('organization'));
-  // }
-
+ 
   ngOnInit() {
-    //this.telemetryCall();
     if(this.router.url.includes('models')){
       this.customCreate = false;
     }
@@ -87,7 +55,6 @@ export class ModelCreateComponent {
     }
     this.getRegisterModelJson();
 
-    // this.renderers.push({ tester: apiControlTester, renderer: ApiDropdownRenderer })
   }
   numSequence(n: number): Array<number> {
     return Array(n);
@@ -116,7 +83,6 @@ export class ModelCreateComponent {
       (resp) => {
         console.log(resp);
         this.service.messageService(resp, 'Done! Model is registered.');
-        //this.telemetry.addTelemetryEvent('Model registered');
         if (resp.status == 200) {
           if(this.router.url.includes('initiative')){
             this.responseLink.emit(resp);
@@ -142,8 +108,5 @@ export class ModelCreateComponent {
       //this.dialogRef.close();
   }
 
-  ngOnDestroy(): void {
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
-  }
+  
 }

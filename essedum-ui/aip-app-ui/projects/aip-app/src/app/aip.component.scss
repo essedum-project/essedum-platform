@@ -1227,6 +1227,22 @@ div {
     background: #ffffff;
   }
 
+  .lfx-u-pad-t-8 {
+    padding-top: 8px !important;
+  }
+
+  .lfx-u-pad-t-32 {
+    padding-top: 32px !important;
+  }
+
+  .lfx-u-pad-r-16 {
+    padding-right: 16px !important;
+  }
+
+  .lfx-u-mar-r-16 {
+    margin-right: 16px !important;
+  }
+
   .lfx-u-mar-t-16 {
     margin-top: 16px !important;
   }
@@ -1236,6 +1252,10 @@ div {
     margin-right: 16px !important;
   }
 
+  .lfx-u-mar-t-30 {
+    margin-top: 30px !important;
+  }
+
   .lfx-u-mar-16 {
     margin: 16px !important;
   }
@@ -1243,6 +1263,7 @@ div {
   .lfx-u-mar-t-4 {
     margin-top: 4px !important;
   }
+  
   .lfx-u-pad-b-16 {
     padding-bottom: 16px !important;
   }
@@ -1255,6 +1276,34 @@ div {
     margin-left: 0px;
   }
 
+  .lfx-u-pad-16 {
+    padding: 16px !important;
+  }
+
+  .lfx-u-pad-tb-8 {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  .lfx-u-mar-b-4 {
+    margin-bottom: 4px !important;
+  }
+
+  .lfx-u-mar-32 {
+    margin: 32px !important;
+  }
+
+  .lfx-u-pad-l-16 {
+    padding-left: 16px !important;
+  }
+  .lfx-u-pad-l-4 {
+    padding-left: 4px !important;
+  }
+
+  .lfx-u-pad-b-4{
+    padding-bottom: 4px !important;
+  }
+  
   .w-75 {
     width: 75% !important;
   }
@@ -1269,5 +1318,6 @@ div {
     --mdc-protected-button-label-text-color: white;
     --mat-protected-button-state-layer-color: white;
     --mat-protected-button-ripple-color: rgba(255, 255, 255, 0.1);
+
   }
 }

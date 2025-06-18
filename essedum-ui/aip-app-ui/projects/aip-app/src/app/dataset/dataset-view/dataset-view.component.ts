@@ -1,6 +1,4 @@
 import { Component,DoCheck, Input,OnInit, ViewChild } from '@angular/core';
-import { Dataset } from '../datasets';
-import { DatasetServices } from '../dataset-service';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 import { Subscription } from 'rxjs';
 import { Services } from '../../services/service';

@@ -1,12 +1,5 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import * as ace from 'ace-builds';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-//import { PopoverModule } from 'ngx-bootstrap/popover';
-//import { SelectModule } from 'leds-lib';
-//import { LeapTelemetryService } from 'com-lib-util';
-// const THEME = 'ace/theme/chrome';
 const THEME = 'ace/theme/dracula';
 const THEME1 = 'ace/theme/eclipse';
 const LANG = 'ace/mode/python';
@@ -22,8 +15,7 @@ export class EnlCodeEditorComponent implements OnInit, OnChanges, AfterViewInit 
   script: string[] = [];
   @Input()
   data;
-//   @Input()
-//   langList: any[] = ["Python","Java","JavaScript","R"];
+
   langList = [{viewValue:"Python",value:"Python"},{viewValue:"Java",value:"Java"},{viewValue:"JavaScript",value:"JavaScript"},{viewValue:"R",value:"R"},{viewValue:"Jython",value:"Jython"}];
   @Input() lang: string = 'python';
   @Input() dataset: boolean = false;
@@ -33,7 +25,7 @@ export class EnlCodeEditorComponent implements OnInit, OnChanges, AfterViewInit 
   @Output() event = new EventEmitter();
   @Output() jsonChange = new EventEmitter();
   constructor(
-    //private telemetryService: LeapTelemetryService
+
   ) { }
   // lang = 'python';
   options: any = { maxLines: 1000, printMargin: false };
@@ -44,7 +36,6 @@ export class EnlCodeEditorComponent implements OnInit, OnChanges, AfterViewInit 
   pyViewer: boolean = false;
 
   ngOnInit() {
-    //this.telemetryImpression();
     if(this.data && this.data.script){
       this.script = this.data.script
     }
@@ -60,7 +51,6 @@ export class EnlCodeEditorComponent implements OnInit, OnChanges, AfterViewInit 
     this.codeEditor.setTheme(THEME);
     ace.config.set('themePath','ace/theme/dracula');
     } 
-    // this.codeEditor.getSession().setMode(LANG);
     this.codeEditor.getSession().setMode('ace/mode/' + this.lang);
     
     this.codeEditor.setOptions({
@@ -107,10 +97,7 @@ export class EnlCodeEditorComponent implements OnInit, OnChanges, AfterViewInit 
     this.codeEditor.clearSelection();
   }
 
-  // telemetryImpression() {
-  //   this.telemetryService.start();
-  //   this.telemetryService.impression("aip-app", "list", "EnlCodeEditorComponent");
-  // }
+
 
   ngOnChanges(changes: SimpleChanges) {
     // this.codeEditor.getSession().setMode('ace/mode/' + this.lang);

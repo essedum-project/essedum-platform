@@ -9,6 +9,8 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { DatasetServices } from './dataset/dataset-service';
+import { EventsService } from './services/event.service';
+
 // import { MatFormFieldModule } from '@angular/material/form-field';
 // import { MatInputModule } from '@angular/material/input';
 // import { AutocompleteModule, BreadcrumbModule, ChatbotModule, MessagingModule, RatingModule, CheckboxModule, ChipInputModule, DataGridModule, DatepickerModule, InputFieldModule, TimepickerModule, ToggleMenuModule, TreeComponent } from 'leds-lib';
@@ -26,7 +28,7 @@ import { PipelineDescriptionComponent } from './pipeline.description/pipeline.de
 // import { DatasetComponent } from './dataset/dataset.component';
 import { DatasourceComponent } from './datasource/datasource.component';
 // import { DatasourceDescriptionComponent } from './datasource/datasource.description/datasource.description.component';
-// import { DatasetDescriptionComponent } from './dataset/dataset.description/dataset.description.component';
+import { DatasetDescriptionComponent } from './dataset/dataset.description/dataset.description.component';
 import { DatasetViewComponent } from './dataset/dataset-view/dataset-view.component';
 import { DatasetConfigComponent } from './dataset/dataset-config/dataset-config.component';
 // import { EndpointViewComponent } from './endpoint/endpoint-view/endpoint-view.component';
@@ -107,6 +109,7 @@ import { encKey } from './services/encKey';
 import { DashConstantService } from './services/dash-constant.service';
 import { RaiservicesService } from './services/raiservices.service';
 import { SemanticService } from './services/semantic.services';
+import { JobsService } from './services/jobs.service';
 
 // import { EditFeatureStoreComponent } from './feature-store/edit-feature-store/edit-feature-store.component';
 import { DatasourceConfigComponent } from './datasource/datasource-config/datasource-config.component';
@@ -248,7 +251,7 @@ import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { TooltipModule } from 'primeng/tooltip';
 import { ListboxModule } from 'primeng/listbox';
 // import { AddViewRecipeComponent } from './dataset/wrangling/add-view-recipe/add-view-recipe.component';
-// import { PipelineDialogComponent } from './pipeline-dialog/pipeline-dialog.component';
+import { PipelineDialogComponent } from './pipeline-dialog/pipeline-dialog.component';
 // import { PivotComponent } from './dataset/pivot/pivot.component';
 // import { PivotFilterComponent } from './dataset/pivot/pivot-filter/pivot-filter.component';
 // import { PivotTableComponent } from './dataset/pivot/pivot-table/pivot-table.component';
@@ -292,7 +295,9 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { SchemaRegistryService } from './services/schema-registry.service';
 import { SchemaRelationshipService } from './schema/schema-relationship.service';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { HighlightSearchPipe } from './pipes/highlight.pipe';
 import { DynamicRemoteLoad } from './apps/view-app/remoteLoad';
+
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -354,7 +359,7 @@ const dbConfig: DBConfig = {
 
     ModalConfigRestDatasourceComponent,
     // DatasourceDescriptionComponent,
-    // DatasetDescriptionComponent,
+    DatasetDescriptionComponent,
     DatasetViewComponent,
     DatasetConfigComponent,
     // EndpointViewComponent,
@@ -472,7 +477,7 @@ const dbConfig: DBConfig = {
     // TimeSeriesComponent,
 
     // SecondsToTimePipe,
-
+    HighlightSearchPipe,
     // MashupsComponent,
     // CreateMashupComponent,
     // MashupCreateComponent,
@@ -500,7 +505,7 @@ const dbConfig: DBConfig = {
     // PivotFilterComponent,
     // PivotTableComponent,
     // AddViewRecipeComponent,
-    // PipelineDialogComponent,
+    PipelineDialogComponent,
     // DynamicControlsComponent,
     // ConfirmationComponent,
     // MultivariateAnalyticsComponent,
@@ -629,8 +634,8 @@ const dbConfig: DBConfig = {
     PipelineService,
     // TabsFilterService,
     DatasetServices,
-    // EventsService,
-    // JobsService,
+    EventsService,
+    JobsService,
     // GroupsService,
     SchemaRegistryService,
     // AppGlobals,

@@ -80,8 +80,8 @@ export class EditSpecTemplateComponent implements OnInit {
     });
     this.router.navigate(['../../'], { relativeTo: this.route });
   }
-  selectChange(event) {
-    this.data.capability = event;
+
+  selectChange(event: any) {
+    this.data.capability = event.value;
   }
-  openChange(event) {}
 }
