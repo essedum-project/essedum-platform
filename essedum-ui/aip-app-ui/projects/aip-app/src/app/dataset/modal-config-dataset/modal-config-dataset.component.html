@@ -18,21 +18,21 @@
                     <mat-card-content>
                         <form (ngSubmit)="onNext()" *ngIf="!proceed">
 
-                            <mat-form-field appearance="outline" class="lfx-field">
+                            <mat-form-field appearance="fill" class="lfx-field">
                                 <mat-label>Display Name</mat-label>
                                 <input matInput placeholder="Enter Name..." required [(ngModel)]="data_alias"
                                     name="displayName" />
                                 <mat-error>This field is required</mat-error>
                             </mat-form-field>
 
-                            <mat-form-field appearance="outline" class="lfx-field">
+                            <mat-form-field appearance="fill" class="lfx-field">
                                 <mat-label>Description</mat-label>
                                 <input matInput placeholder="Enter Description..." [(ngModel)]="data_description"
                                     name="description" />
                             </mat-form-field>
 
                             <div class="lfx-flex-row lfx-mb-16">
-                                <mat-form-field appearance="outline" class="lfx-field lfx-half-col">
+                                <mat-form-field appearance="fill" class="lfx-field lfx-half-col">
                                     <mat-label>Select Dataset Usage Type</mat-label>
                                     <mat-select [(ngModel)]="data_type" name="usageType" required
                                         (selectionChange)="selectChange()">
@@ -42,7 +42,7 @@
                                     <mat-error>Please select data usage type</mat-error>
                                 </mat-form-field>
 
-                                <mat-form-field appearance="outline" class="lfx-field lfx-half-col">
+                                <mat-form-field appearance="fill" class="lfx-field lfx-half-col">
                                     <mat-label>Select Datasource</mat-label>
                                     <input type="text" matInput [matAutocomplete]="dsAuto"
                                         placeholder="Enter Datasource Name" [(ngModel)]="data_datasource"
@@ -57,7 +57,7 @@
                             </div>
 
                             <div class="lfx-flex-row lfx-mb-16">
-                                <mat-form-field appearance="outline" class="lfx-field lfx-half-col">
+                                <mat-form-field appearance="fill" class="lfx-field lfx-half-col">
                                     <mat-label>Select Schema Type</mat-label>
                                     <input type="text" matInput [matAutocomplete]="schemaAuto"
                                         placeholder="Enter Schema Type" [(ngModel)]="data_schema" name="schema"
@@ -69,7 +69,7 @@
                                     </mat-autocomplete>
                                 </mat-form-field>
 
-                                <mat-form-field appearance="outline" class="lfx-field lfx-half-col">
+                                <mat-form-field appearance="fill" class="lfx-field lfx-half-col">
                                     <mat-label>Select Form Template</mat-label>
                                     <mat-select (selectionChange)="onTemplateChange($event)"
                                         [disabled]="!isAuth && !isSchema">
@@ -80,7 +80,7 @@
                             </div>
 
                             <div class="lfx-flex-row lfx-mb-16">
-                                <mat-form-field appearance="outline" class="lfx-field lfx-half-col">
+                                <mat-form-field appearance="fill" class="lfx-field lfx-half-col">
                                     <mat-label>Select Tags</mat-label>
                                     <mat-select multiple (selectionChange)="onTagChange($event)" [disabled]="isAuth"
                                         [(ngModel)]="selectedTags" name="tags">
@@ -89,7 +89,7 @@
                                     </mat-select>
                                 </mat-form-field>
 
-                                <mat-form-field appearance="outline" class="lfx-field lfx-half-col">
+                                <mat-form-field appearance="fill" class="lfx-field lfx-half-col">
                                     <mat-label>Select View for Datasets</mat-label>
                                     <mat-select required [(ngModel)]="data_views" name="views"
                                         (selectionChange)="selectChange($event)" [disabled]="isAuth || type === 'GIT'">
@@ -100,7 +100,7 @@
                             </div>
 
                             <div class="lfx-button-right">
-                                <button mat-flat-button color="primary" [disabled]="nextbtn"
+                                <button mat-flat-button class="next-btn" [disabled]="nextbtn"
                                     [ngStyle]="{'pointer-events': (data_views!=null && data_datasource!=null && data_type!= null ) ? 'auto' : 'none'}" 
                                     type="submit">
                                     NEXT

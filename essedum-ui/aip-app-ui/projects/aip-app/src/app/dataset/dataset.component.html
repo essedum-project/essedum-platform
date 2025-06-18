@@ -56,13 +56,7 @@
                                     <span class="le-c-btn--icon__text"></span>
                                 </div>
                             </div>
-                            <!-- <div>
-                                <li (click)="inferDialog()">
-                                    <leds-tooltip [tooltip]="'Semantic Search'" [position]="'above'">
-                                        <i class="le-u-mar-r-16 icon x-24 search-icon aip-led-icons"></i>
-                                    </leds-tooltip>
-                                </li>
-                            </div> -->
+
                             <div class="aip-cursor">
                                 <span class="le-c-btn--icon__icon">
                                     <i class="aip-led-icons icon x-24 icon_Refresh" (click)="ngOnInit()"></i>
@@ -87,7 +81,8 @@
                             <mat-card-header>
                                 <mat-card-title class="le-c-card__container clearfix">
                                     <div class="le-c-card__container-left w-100">
-                                        <h2 class="le-u-header-md le-u-ellipsis" style="line-height: 2rem;">{{card.alias | titlecase}}</h2>
+                                        <h2 class="le-u-header-md le-u-ellipsis" style="line-height: 2rem;">{{card.alias
+                                            | titlecase}}</h2>
                                     </div>
 
                                 </mat-card-title>
@@ -104,7 +99,8 @@
                                     Details</leds-button>
                                 <div class="aip-cursor">
                                     <div class="le-c-avatar  le-c-avatar--sm aip-hover-avatar">
-                                        {{(card.lastmodifiedby?card.lastmodifiedby:'Name Not Available')|firstCharacter}}</div>
+                                        {{(card.lastmodifiedby?card.lastmodifiedby:'Name Not
+                                        Available')|firstCharacter}}</div>
                                     <div class="aip-hover-detail">
                                         <div class="le-u-header-md le-u-mar-8">
                                             {{card.lastmodifiedby?card.lastmodifiedby:'Name Not Available'}}</div>
@@ -153,53 +149,7 @@
                 <div *ngIf="records==true">
                     <p>No Records Found</p>
                 </div>
-                <!-- <div
-                    class="inbox-table-footer table-paginator flex-row flex-space-between standard-margin bottom-padding-20">
-                    <div class="showing-entries d-flex justify-content-end my-3">
-                        <span class="grey-color font-size-12">Showing </span>
-                        &nbsp;&nbsp;
-                        <span class="black-color font-weight-600">
-                            {{ ((pageNumber - 1) * pageSize) + 1 }} -
-                            {{ (((pageNumber - 1) * pageSize) + pageSize) < noOfItems ? ((pageNumber - 1) * pageSize) +
-                                pageSize : noOfItems }} of {{noOfItems}} </span>
-                                &nbsp;&nbsp;
-                                <span class="grey-color font-size-12">entries </span>
-                    </div>
-                    <div class="paginator-buttons d-flex w-60  flex-row" style="justify-content:flex-end">
-                        <div class="page-input go-to-input box-shadow standard-padding">
-                            <span class="grey-color">Go to: </span>
-                            <input class="right-margin" type="number" min="1" [max]="noOfPages"
-                                (change)="changePage(pageNumberInput)" [(ngModel)]="pageNumberInput" />
-                        </div>
-                        <div class="mx-4">
-                            <span class="">Items per page</span>
-                            <select type="number" [(ngModel)]="pageSize">
-                                <option *ngFor="let p of itemsPerPage" [ngValue]="p">{{p}}</option>
-                            </select>
 
-                        </div>
-                        <div class="pages-details d-flex">
-
-                            <div class="previous-page">
-                                <button class="standard-padding table-button font-weight-600"
-                                    [disabled]="pageNumber == 1" (click)="pageNumberInput=null;prevPage()">&lt;</button>
-                            </div>
-                            <div class="pages">
-                                <button class="standard-padding table-button font-weight-600"
-                                    *ngFor="let i of pageArr | slice:startIndex:endIndex"
-                                    (click)="pageNumberInput=null;changePage(i+1)"
-                                    [class.selected-page]="(i + 1) == pageNumber" [ngStyle]="selectedButton(i+1)">
-                                    {{i + 1}}
-                                </button>
-                            </div>
-                            <div class="next-page">
-                                <button class="standard-padding table-button font-weight-600"
-                                    [disabled]="pageNumber == noOfPages"
-                                    (click)="pageNumberInput=null;nextPage()">&gt;</button>
-                            </div>
-                        </div>
-                    </div>
-                </div> -->
 
                 <app-pagination #pagination [noOfItems]="noOfItems"
                     (pageAndSizeChanged)="handlePageAndSizeChange($event)">
@@ -207,37 +157,9 @@
             </div>
         </div>
     </div>
-    <!-- </div> -->
 
-    <!-- <ng-template #elseBlock>
-        <app-dataset-description [card]="selectedCard" (newItemEvent)="changedToogle($event)"
-        [cardToggled]="cardToggled" [datasetAlias]="selectedCard.alias"></app-dataset-description>    
-    </ng-template> -->
 </div>
-<!-- MODAL -->
-<!-- <ng-template #lgContent1 let-modal>
-    <div ledsModalHeader>
-        <div class="clearfix">
-            <h4 class="le-u-header-xl float-start" id="modalTitle2">SELECT ADAPTERS</h4>
-            <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-                <i class="icon x-16 close-icon"></i>
-            </button>
-        </div>
-    </div>
-    <div ledsModalBody>
-        <select #teams (change)="selectChange(teams.value)">
-            <option default>Choose Adapters</option>
-            <option *ngFor="let opt of alias">{{opt}}</option>
 
-        </select>
-    </div>
-    <div ledsModalFooter>
-        <leds-button designType="miniPrimary" class="le-u-mar-r-8" buttonType="button"
-            (click)=" modal.dismiss('Cross click')" (click)="redirect()">
-            Select
-        </leds-button>
-    </div>
-</ng-template> -->
 
 <div class="le-l-mainwrapper" *ngIf="isSemanticSearch">
     <div class="clearfix aip-tranparent-backgroud aip-tranparent-backgroud">
@@ -250,7 +172,8 @@
                     </div>
                     <div class="float-end">
                         <ul class="d-flex justify-content-between align-items-center">
-                            <leds-tooltip [tooltip]="'Generate Questions'" class="le-u-mar-b-16 le-u-pad-r-8" [position]="tooltipPoition">
+                            <leds-tooltip [tooltip]="'Generate Questions'" class="le-u-mar-b-16 le-u-pad-r-8"
+                                [position]="tooltipPoition">
                                 <span class="aip-cursor">
                                     <i class="icon x-16 icon_BCMS" (click)="reGenerateAllFAQs()"></i>
                                 </span>
@@ -261,11 +184,7 @@
                                     <i class="icon x-16 success-big-icon"></i>
                                 </span>
                             </leds-tooltip>
-                            <!-- <leds-tooltip *ngIf="allTopicsSelected" class="le-u-pad-r-16" [tooltip]="'Select All'" [position]="'above'">
-                                <span class="aip-cursor" style="font-size: large;">
-                                    <i class="fa fa-check-square" aria-hidden="true"></i>
-                                </span>
-                            </leds-tooltip> -->
+
                             <leds-tooltip *ngIf="allTopicsSelected" class="le-u-mar-b-16" [tooltip]="'Clear'"
                                 [position]="'above'">
                                 <span class="aip-cursor" (click)="clearSelectedTopics()">
@@ -297,8 +216,7 @@
                                 </span> </a>&nbsp;&nbsp;
                         </div>
                     </div>
-                    <!-- <leds-input-field class="col-md-6" type="text" label="Index" id="" name="Index" [(ngModel)]="index"
-                        class="aip-panel-input" autocomplete="off" placeholder="Enter index name"></leds-input-field> -->
+
                 </div>
             </div>
             <div class="col-sm-12 col-md-12 col-lg-12" [ngStyle]="toggler(isExpanded)" id="mainrightCnt">
@@ -325,8 +243,10 @@
                         <div
                             class="col-10 offset-1 offset-xs-1 offset-sm-1 offset-md-0 col-sm-6 col-md-6 col-lg-7 col-xl-6 aip-panel aip-panel-shadow d-flex align-items-center">
                             <input type="text" name="" id="" placeholder="Search by Content" class="aip-panel-input"
-                                [(ngModel)]="filt" (keyup.enter)="count=count+1;onEnter()" (keyup)="searchByContentParams(filt)">
-                            <i class="aip-led-icons icon x-24 search-icon aip-cursor" (click)="count=count+1;onEnter()"></i>
+                                [(ngModel)]="filt" (keyup.enter)="count=count+1;onEnter()"
+                                (keyup)="searchByContentParams(filt)">
+                            <i class="aip-led-icons icon x-24 search-icon aip-cursor"
+                                (click)="count=count+1;onEnter()"></i>
                         </div>
                         <div class="d-flex justify-content-center col-sm-5 col-md-12 col-lg-5 col-xl-4 aip-header-icon">
                             <div class="col-md-11 le-u-pad-l-32">
@@ -336,15 +256,19 @@
                                     (selectChange)="onSearchMethodChange($event)"></leds-select>
                             </div>
                             <div class="aip-cursor le-u-pad-r-32">
-                                <leds-tooltip *ngIf="showQuestions" [tooltip]="'Hide Questions'" [position]="tooltipPoition">
+                                <leds-tooltip *ngIf="showQuestions" [tooltip]="'Hide Questions'"
+                                    [position]="tooltipPoition">
                                     <span class="le-c-btn--icon__icon">
-                                        <i style="color:var(--base-color)" class="aip-led-icons icon x-24 icon_hint_idea"
+                                        <i style="color:var(--base-color)"
+                                            class="aip-led-icons icon x-24 icon_hint_idea"
                                             (click)="showQuestions=!showQuestions"></i>
                                     </span>
                                 </leds-tooltip>
-                                <leds-tooltip *ngIf="!showQuestions" [tooltip]="'Show Questions'" [position]="tooltipPoition">
+                                <leds-tooltip *ngIf="!showQuestions" [tooltip]="'Show Questions'"
+                                    [position]="tooltipPoition">
                                     <span class="le-c-btn--icon__icon">
-                                        <i class="aip-led-icons icon x-24 icon_hint_idea" (click)="showQuestions=!showQuestions"></i>
+                                        <i class="aip-led-icons icon x-24 icon_hint_idea"
+                                            (click)="showQuestions=!showQuestions"></i>
                                     </span>
                                 </leds-tooltip>
                             </div>
@@ -370,13 +294,16 @@
                 <div *ngIf="showQuestions && selectedQuestions && selectedQuestions.length > 0" ledsTabGroup>
                     <div class="" style="position:relative">
                         <div *ngIf="hasClickedRight" (click)="scrollLeftForQuestions()"
-                            class="aip-cursor aip-ivm-scroll-left le-u-circle-icon-grey"> <i class="icon x-24 previous-icon "> </i>
+                            class="aip-cursor aip-ivm-scroll-left le-u-circle-icon-grey"> <i
+                                class="icon x-24 previous-icon "> </i>
                         </div>
                         <div *ngIf="!isScrollAtEnd" (click)="scrollRightForQuestion()"
-                            class="aip-cursor aip-ivm-scroll-right le-u-circle-icon-grey"> <i class="icon x-24 next-icon "> </i></div>
+                            class="aip-cursor aip-ivm-scroll-right le-u-circle-icon-grey"> <i
+                                class="icon x-24 next-icon "> </i></div>
                         <div #scrollableDiv (scroll)="checkScroll()" class="faq-scroll-container"
                             *ngIf="selectedQuestions && selectedQuestions.length > 0">
-                            <a class="tagbrdr le-u-body-md" [ngClass]="(faq===selectedfaq) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                            <a class="tagbrdr le-u-body-md"
+                                [ngClass]="(faq===selectedfaq) ? 'aip-tag-active' : 'aip-tag-disabled'"
                                 *ngFor="let faq of selectedQuestions"
                                 style="min-height: 32px;display: inline-block;text-align: center; align-content: center;">
                                 <span
@@ -458,10 +385,7 @@
                                         </div>
                                     </div>
                                 </leds-overflow>
-                                <!-- <ul class="float-end le-c-card__action-ul">
-                                   
-                                    <li><i class="icon x-32 delete-sm-icon"></i></li>
-                                </ul> -->
+
                             </mat-card-actions>
                         </leds-card>
                     </div>
@@ -479,59 +403,15 @@
                         style="width:15rem" />
                     No Topic Selected
                 </div>
-                <!-- <div *ngIf="!semanticSearchActive"
-                    class="inbox-table-footer table-paginator flex-row flex-space-between standard-margin bottom-padding-20">
-                    <div class="showing-entries d-flex justify-content-end my-3">
-                        <span class="grey-color font-size-12">Showing </span>
-                        &nbsp;&nbsp;
-                        <span class="black-color font-weight-600">
-                            {{ ((pageNumber - 1) * pageSize) + 1 }} -
-                            {{ (((pageNumber - 1) * pageSize) + pageSize) < noOfItems ? ((pageNumber - 1) * pageSize) +
-                                pageSize : noOfItems }} of {{noOfItems}} </span>
-                                &nbsp;&nbsp;
-                                <span class="grey-color font-size-12">entries </span>
-                    </div>
-                    <div class="paginator-buttons d-flex w-60  flex-row" style="justify-content:flex-end">
-                        <div class="page-input go-to-input box-shadow standard-padding">
-                            <span class="grey-color">Go to: </span>
-                            <input class="right-margin" type="number" min="1" [max]="noOfPages"
-                                (change)="changePage(pageNumberInput)" [(ngModel)]="pageNumberInput" />
-                        </div>
-                        <div class="mx-4">
-                            <span class="">Items per page</span>
-                            <select type="number" [(ngModel)]="pageSize">
-                                <option *ngFor="let p of itemsPerPage" [ngValue]="p">{{p}}</option>
-                            </select>
 
-                        </div>
-                        <div class="pages-details d-flex">
-                            <div class="previous-page">
-                                <button class="standard-padding table-button font-weight-600"
-                                    [disabled]="pageNumber == 1" (click)="pageNumberInput=null;prevPage()">&lt;</button>
-                            </div>
-                            <div class="pages">
-                                <button class="standard-padding table-button font-weight-600"
-                                    *ngFor="let i of pageArr | slice:startIndex:endIndex"
-                                    (click)="pageNumberInput=null;changePage(i+1)"
-                                    [class.selected-page]="(i + 1) == pageNumber" [ngStyle]="selectedButton(i+1)">
-                                    {{i + 1}}
-                                </button>
-                            </div>
-                            <div class="next-page">
-                                <button class="standard-padding table-button font-weight-600"
-                                    [disabled]="pageNumber == noOfPages"
-                                    (click)="pageNumberInput=null;nextPage()">&gt;</button>
-                            </div>
-                        </div>
-                    </div>
-                </div> -->
                 <div *ngIf="!semanticSearchActive && !isSemanticSearch">
                     <app-pagination #pagination [noOfItems]="noOfItems"
                         (pageAndSizeChanged)="handlePageAndSizeChange($event)">
                     </app-pagination>
                 </div>
                 <div *ngIf="semanticSearchActive">
-                    <app-dataset-semantic [inputData]="inputData" (clearSemanticSearchBoolean)="clearSemanticSearchBoolean($event)"></app-dataset-semantic>
+                    <app-dataset-semantic [inputData]="inputData"
+                        (clearSemanticSearchBoolean)="clearSemanticSearchBoolean($event)"></app-dataset-semantic>
                 </div>
                 <div *ngIf="!semanticSearchActive && isSemanticSearch && records!=true"
                     class="inbox-table-footer table-paginator flex-row flex-space-between standard-margin bottom-padding-20">

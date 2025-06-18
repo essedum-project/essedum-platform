@@ -3,17 +3,12 @@
     justify-content: flex-start;">
         <div style="padding: 0px; width: 30%;" class="selector-795-105">
             <span class="col-md-5 selector-795-106" style="padding: 0px;">
-                <mat-form-field
-                style="margin-top: 11px;margin-left: 15px;margin-right: 0px;" >
-                <mat-label class="selector-795-108">Search</mat-label>
-                <input matInput class ="selector-795-100" (keyup)="powerModeInput($event)" (keydown.enter)="powerModeSearch()">
-            </mat-form-field>
-                <!-- <mat-form-field class="powerModeform selector-795-107"
-                    style="margin-top: 11px;margin-left: 15px;margin-right: 0px;">
+                <mat-form-field style="margin-top: 11px;margin-left: 15px;margin-right: 0px;">
                     <mat-label class="selector-795-108">Search</mat-label>
-                    <input matInput="" (keyup)="powerModeInput($event)" (keydown.enter)="powerModeSearch()"
-                        class="selector-795-109">
-                </mat-form-field> -->
+                    <input matInput class="selector-795-100" (keyup)="powerModeInput($event)"
+                        (keydown.enter)="powerModeSearch()">
+                </mat-form-field>
+
             </span>
             <span (click)="powerModeSearch()" class="col-md-1 selector-795-110" style="padding: 0px;">
                 <i class="pi pi-search selector-795-111"
@@ -32,8 +27,8 @@
 
             <cdk-virtual-scroll-viewport itemSize="2*rows" style="height:460px; width:100%; margin: 0px;"
                 (scroll)="onScroll($event)" class="selector-795-116">
-                <mat-card appearance="outlined" *ngFor="let incident of powerModeTicketList" class="hower-mat-card selector-795-117"
-                    (click)="updateDetails(incident)"
+                <mat-card appearance="outlined" *ngFor="let incident of powerModeTicketList"
+                    class="hower-mat-card selector-795-117" (click)="updateDetails(incident)"
                     style="margin: 1vw; padding: 1vh; width: 23rem; box-shadow: 0px 0px 6px 0px rgb(0 0 0 / 20%)">
                     <mat-card-header class="selector-795-118" id="dtstflscrnvw-crd-hdr">
                         <mat-card-title style="padding: 0px;" class="selector-795-119">
@@ -68,13 +63,11 @@
         </div>
         <div style="margin: 0px; padding: 0px; width: 70%;" class="selector-795-127">
             <div style="height:550px; width:100%; padding: 0px; margin: 0px; overflow: auto;" class="selector-795-128">
-                <!--For powermode detail view if form is vertically scrollable: overflow-y:scroll; -->
                 <div class="selector-795-93" *ngIf="data">
                     <app-dataset-form-view [dataset]="data" [action]="action" [rowObj]="rowObj" showTableViewBtn="no"
                         class="selector-795-132" (result)="checkFormViewResult($event)"></app-dataset-form-view>
                 </div>
-                <!-- <tickets-detail style="width: 100%;" [resolvingIncident]="viewIncident"
-                    [selectedTicket]="selectedTicket" class="selector-795-129"></tickets-detail> -->
+
             </div>
         </div>
     </mat-card>
