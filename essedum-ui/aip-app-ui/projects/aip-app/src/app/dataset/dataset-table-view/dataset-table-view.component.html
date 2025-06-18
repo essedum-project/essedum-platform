@@ -228,7 +228,7 @@
                     style="color:#0094ff; font-size: 16px;font-weight:500;"
                   >
                     <!--pReorderableColumn="" -->
-                    {{ col.header }}
+                    {{ col.header | titlecase }}
                     <i
                       *ngIf="col.field == sortEvent &amp;&amp; sortorder == 1"
                       class="icon x-16 up-arw-icon"
