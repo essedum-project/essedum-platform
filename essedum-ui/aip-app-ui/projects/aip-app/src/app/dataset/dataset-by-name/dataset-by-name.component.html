@@ -1,4 +1,4 @@
-<div class="aip-top">
+<div *ngIf="!copyDataset" class="aip-top">
 
     <div *ngIf="cardToggled; else elseBlock" class="clearfix lfx-l-bodywrapper  js-bodywrapper"
         style="background: var(--background-colour);" id="mainCtr">
@@ -73,7 +73,7 @@
                         <!-- CARD -->
                         <div class="col-md-8 col-lg-6 col-xl-5"
                             style="min-width: -webkit-fill-available; padding: 0px; margin-top: 12px; margin-bottom: 12px;"
-                            *ngFor="let card of filteredCards | slice: (pageNumber - 1) * pageSize : (pageNumber - 1) * pageSize + pageSize">
+                            *ngFor="let card of filteredCards ">
 
                             <mat-card class="example-card" appearance="outlined"
                                 style="padding: 0px !important; height: auto; display: grid; ">
@@ -113,7 +113,7 @@
                                 <mat-card-actions
                                     class="lfx-u-header-xs d-flex justify-content-start lfx-u-text-primary-80">
                                     <button mat-icon-button class="action-icon" [matTooltip]="'Copy'"
-                                        matTooltipPosition="above" (click)="navigate(content1)">
+                                        matTooltipPosition="above" (click)="navigate(card)">
                                         <mat-icon>content_copy</mat-icon>
                                     </button>
                                     <button *ngIf="editAuth" mat-icon-button class="action-icon" [matTooltip]="'Edit'"
@@ -125,28 +125,16 @@
                                         (click)="deleteAdapter(card.name)">
                                         <mat-icon>delete</mat-icon>
                                     </button>
-                                    <button *ngIf="card.datasource?.type == 'S3' || card.datasource?.type == 'MYSQL'"
-                                        mat-icon-button class="action-icon" [matTooltip]="'Generate Embeddings'"
-                                        matTooltipPosition="above"
-                                        (click)="openDialog(retrigger,'Embeddings',getEmbedDocStatus(card.name),card)">
-                                        <mat-icon>settings</mat-icon>
-                                    </button>
-                                    <button *ngIf="card.datasource?.type == 'S3'" mat-icon-button class="action-icon"
-                                        [matTooltip]="'Translate'" matTooltipPosition="above"
-                                        (click)="openDialog(retrigger,'Translation',getTranslationDocStatus(card.name),card)">
-                                        <mat-icon>language</mat-icon>
-                                    </button>
-                                    <button *ngIf="card.datasource?.type == 'S3'" mat-icon-button class="action-icon"
-                                        [matTooltip]="'Summary'" matTooltipPosition="above"
-                                        (click)="openDialog(retrigger,'Summary',getSummaryDocStatus(card.name),card)">
-                                        <mat-icon>summarize</mat-icon>
-                                    </button>
+                                  
+                                  
                                 </mat-card-actions>
 
                             </mat-card>
                         </div>
                     </div>
-
+ 
+             
+      
                     <div *ngIf="!filteredCards || filteredCards.length==0">
                         <div class="d-flex justify-content-center align-items-center flex-column">
                             <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive"
@@ -212,3 +200,28 @@
             [cardToggled]="cardToggled" [datasourceAlias]="selectedCard.alias"></app-datasource-description>
     </ng-template>
 </div>
+<div  *ngIf="copyDataset" class="container-fluid backgroud-color">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="lfx-l-level1-middle-col">
+
+                <div *ngIf="copyDataset" class="align-items-center d-flex">
+                    <span *ngIf="!customCreate" style="cursor: pointer;">
+                        <i class="fa fa-long-arrow-left back-icon" aria-hidden="true" (click)="routeBackToList()"></i>
+                    </span>
+                    <span class="lfx-u-mar-l-8 lfx-u-header-xxl secondary-color">Copy Datasets</span>
+                </div>
+
+                <mat-card class="lfx-card">
+                    <!-- <mat-card-title class="lfx-card">Dataset Properties</mat-card-title> -->
+                    <mat-card-content>
+<app-dataset-config *ngIf="copyDataset" [dataset]="selectedCard" [copyDataset]="copyDataset" class="selector-680-92"></app-dataset-config>
+ <!-- <app-dataset-config [dataset]=card [copyDataset]="copyDataset"
+                                                (refreshcards)="refreshcards($event)"></app-dataset-config> -->
+</mat-card-content>
+</mat-card>
+</div>
+</div>
+</div>
+</div>
+
