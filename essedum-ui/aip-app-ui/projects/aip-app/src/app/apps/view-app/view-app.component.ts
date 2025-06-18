@@ -335,7 +335,7 @@ export class ViewAppComponent implements OnInit, OnChanges, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.pdfIframe.nativeElement.style.display = 'none';
+    // this.pdfIframe.nativeElement.style.display = 'none';
   }
 
   constructor(
