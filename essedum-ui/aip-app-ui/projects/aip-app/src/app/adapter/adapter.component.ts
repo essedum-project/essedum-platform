@@ -11,13 +11,10 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { Services } from '../services/service';
 import { TagsService } from '../services/tags.service';
-// import { LedsLibService } from 'leds-lib';
 import { AdapterServices } from './adapter-service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog.component/confirm-delete-dialog.component';
-// import { LeapTelemetryService, OpenTelemetryService } from 'com-lib-util';
 import { Location } from '@angular/common';
-import { HttpParams } from '@angular/common/http';
 
 @Component({
   selector: 'app-adapter',
@@ -74,22 +71,23 @@ export class AdapterComponent implements OnInit, OnChanges {
   tooltip: string = 'above';
   filtbackup: any = '';
   tagrefresh: boolean = false;
+
   constructor(
-    // private telemetryService: LeapTelemetryService,
-    // private telemetry: OpenTelemetryService,
     private route: ActivatedRoute,
     private router: Router,
     private service: Services,
     private adapterServices: AdapterServices,
-    // private ledsLibService: LedsLibService,
     private changeDetectionRef: ChangeDetectorRef,
     public tagService: TagsService,
     private dialog: MatDialog,
     private location: Location
   ) {}
+
   ngOnChanges(changes: SimpleChanges): void {}
+
   @HostListener('window:resize', ['$event'])
   onResize(event) {}
+
   updatePageSize() {
     this.pageSize = 0;
     if (window.innerWidth > 2500) {
@@ -114,14 +112,10 @@ export class AdapterComponent implements OnInit, OnChanges {
       this.getCards(this.pageNumber, this.pageSize);
     }
   }
-  telemetryCall() {
-    // this.telemetry.startTelemetry('aip-app','AdapterComponent',sessionStorage.getItem('organization'))
-  }
+
   ngOnInit(): void {
-    this.telemetryCall();
     this.updatePageSizeOnly();
     this.records = false;
-    this.telemetryImpression();
     this.route.queryParams.subscribe((params) => {
       // Update this.pageNumber if the page query param is present
       if (params['page']) {
@@ -159,11 +153,6 @@ export class AdapterComponent implements OnInit, OnChanges {
       this.endIndex = 5;
     }
     this.Authentications();
-  }
-
-  telemetryImpression() {
-    // this.telemetryService.start();
-    // this.telemetryService.impression("aip-app", "list", "AdapterComponent");
   }
 
   nextPage() {
@@ -219,6 +208,7 @@ export class AdapterComponent implements OnInit, OnChanges {
     }
     this.getCards(this.pageNumber, this.pageSize);
   }
+
   rowsPerPageChanged() {
     if (this.pageSize == 0) {
       this.pageSize = this.prevRowsPerPageValue;
@@ -228,6 +218,7 @@ export class AdapterComponent implements OnInit, OnChanges {
       this.changeDetectionRef.detectChanges();
     }
   }
+
   Authentications() {
     this.service.getPermission('cip').subscribe((cipAuthority) => {
       // adapter-create permission
@@ -249,6 +240,7 @@ export class AdapterComponent implements OnInit, OnChanges {
   numSequence(n: number): Array<number> {
     return Array(n);
   }
+
   getCards(page: any, size: any): void {
     if (page) this.pageNumber = page;
     if (size) this.pageSize = size || 8;
@@ -270,8 +262,8 @@ export class AdapterComponent implements OnInit, OnChanges {
       this.filterSelectedCards(page, size);
     });
   }
+
   desc(card: any) {
-    // //this.telemetry.addTelemetryEvent(card.alias+" Viewed");
     this.router.navigate(['../implementations/' + card.name], {
       queryParams: {
         page: this.pageNumber,
@@ -283,8 +275,8 @@ export class AdapterComponent implements OnInit, OnChanges {
       queryParamsHandling: 'merge',
       relativeTo: this.route,
     });
-    //this.telemetry.addTelemetryEvent(card.alias+" Viewed");
   }
+
   redirect() {
     this.router.navigate(['./create'], {
       queryParams: {
@@ -437,10 +429,6 @@ export class AdapterComponent implements OnInit, OnChanges {
     });
   }
 
-  clickactive(eventObj: any) {
-    // this.ledsLibService.clickactive(eventObj);
-  }
-
   refresh() {
     this.filt = '';
     this.records = false;
@@ -460,7 +448,6 @@ export class AdapterComponent implements OnInit, OnChanges {
                   'Done!  Implementation Deleted Successfully'
                 );
                 this.refresh();
-                //this.telemetry.addTelemetryEvent(adapterName + ' Deleted');
               } else
                 this.adapterServices.messageNotificaionService(
                   'warning',
@@ -478,12 +465,14 @@ export class AdapterComponent implements OnInit, OnChanges {
   }
 
   selectedButton(i) {
-    if (i == this.pageNumber) return { color: 'white', background: '#7b39b1' };
+    if (i == this.pageNumber) return { color: 'white', background: '#0094ff' };
     else return { color: 'black' };
   }
+
   toggleExpand() {
     this.isExpanded = !this.isExpanded;
   }
+
   toggler(isExpanded: boolean) {
     if (isExpanded) {
       return { width: '80%', margin: '0 0 0 20%' };
@@ -526,9 +515,5 @@ export class AdapterComponent implements OnInit, OnChanges {
       this.tagrefresh = true;
       this.updatePageSize();
     }
-  }
-  ngOnDestroy(): void {
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
   }
 }

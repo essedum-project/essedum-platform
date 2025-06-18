@@ -10,15 +10,6 @@
   margin-left: 0 !important;
 }
 
-.lfx-l-level1-wrapper .DSA_contentRightCol {
-  padding: 30px 20px;
-  min-height: 500px;
-}
-
-.lfx-l-level1-wrapper .lfx-l-whiteBG {
-  background: #ffffff;
-}
-
 @media screen and (min-width: 1367px) {
   .lfx-l-base-layout-center {
     width: 1216px;
@@ -146,4 +137,44 @@
   min-height: 50px;
   border-radius: 16px;
   display: block;
+}
+
+::ng-deep .mat-mdc-select:not(.mat-mdc-select-disabled) .mat-mdc-select-arrow {
+  color: #0094ff !important;
+  fill: #0094ff !important;
+}
+
+input:focus,
+.txtInput:focus {
+  outline: none !important;
+  border-bottom: 1px solid #0094ff !important;
+}
+
+::ng-deep
+  .mdc-text-field--filled:not(.mdc-text-field--disabled).mdc-text-field--focused
+  .mdc-floating-label {
+  color: #0094ff !important;
+}
+
+::ng-deep .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: #0094ff !important;
+}
+
+::ng-deep .mat-mdc-tab-group {
+  --mdc-tab-indicator-active-indicator-color: #0094ff !important;
+  --mat-tab-header-active-label-text-color: #0094ff !important;
+  --mat-tab-header-active-ripple-color: #0094ff !important;
+  --mat-tab-header-inactive-ripple-color: #0094ff !important;
+  --mat-tab-header-active-focus-label-text-color: #0094ff !important;
+  --mat-tab-header-active-hover-label-text-color: #0094ff !important;
+  --mat-tab-header-active-focus-indicator-color: #0094ff !important;
+  --mat-tab-header-active-hover-indicator-color: #0094ff !important;
+  --mat-tab-header-disabled-ripple-color: #737373 !important;
+  --mat-tab-header-inactive-label-text-color: #737373 !important;
+  --mat-tab-header-inactive-focus-label-text-color: #737373 !important;
+  --mat-tab-header-inactive-hover-label-text-color: #737373 !important;
+}
+
+::ng-deep .mat-mdc-tab-group .mat-mdc-tab .mdc-tab__text-label {
+  font-size: 1.8rem !important;
 }

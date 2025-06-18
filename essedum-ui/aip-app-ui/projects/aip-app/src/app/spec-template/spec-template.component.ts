@@ -15,9 +15,9 @@ import { TagsService } from '../services/tags.service';
 import { AdapterServices } from '../adapter/adapter-service';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog.component/confirm-delete-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-// import { LeapTelemetryService, OpenTelemetryService } from 'com-lib-util';
 import { Location } from '@angular/common';
 import * as _ from 'lodash';
+
 @Component({
   selector: 'app-spec-template',
   templateUrl: './spec-template.component.html',
@@ -73,8 +73,6 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
   allCards: any;
 
   constructor(
-    // private telemetryService: LeapTelemetryService,
-    // private telemetry: OpenTelemetryService,
     private route: ActivatedRoute,
     private router: Router,
     private service: Services,
@@ -84,9 +82,12 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
     private dialog: MatDialog,
     private location: Location
   ) {}
+
   ngOnChanges(changes: SimpleChanges): void {}
+
   @HostListener('window:resize', ['$event'])
   onResize(event) {}
+
   updatePageSize() {
     this.pageSize = 0;
     if (window.innerWidth > 2500) {
@@ -111,14 +112,10 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
       this.getCards(this.pageNumber, this.pageSize);
     }
   }
-  telemetryCall() {
-    // this.telemetry.startTelemetry('aip-app','SpecTemplateComponent',sessionStorage.getItem('organization'))
-  }
+
   ngOnInit(): void {
-    this.telemetryCall();
     this.updatePageSizeOnly();
     this.records = false;
-    this.telemetryImpression();
     this.route.queryParams.subscribe((params) => {
       // Update this.pageNumber if the page query param is present
       if (params['page']) {
@@ -150,6 +147,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
     }
     this.Authentications();
   }
+
   updateQueryParam(
     page: number = 1,
     search: string = '',
@@ -173,11 +171,6 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
       })
       .toString();
     this.location.replaceState(url);
-  }
-
-  telemetryImpression() {
-    // this.telemetryService.start();
-    // this.telemetryService.impression("aip-app", "list", "SpecTemplateComponent");
   }
 
   //previous
@@ -211,6 +204,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
   //   this.getCountSpecTemplates();
   // }
   // new
+
   nextPage() {
     if (this.pageNumber + 1 <= this.noOfPages) {
       this.pageNumber += 1;
@@ -276,6 +270,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
   //   }
   // }
   //new
+
   rowsPerPageChanged() {
     if (this.pageSize == 0) {
       this.pageSize = this.prevRowsPerPageValue;
@@ -296,6 +291,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
       );
     }
   }
+
   Authentications() {
     this.service.getPermission('cip').subscribe((cipAuthority) => {
       // spectemplate-create permission
@@ -318,6 +314,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
   numSequence(n: number): Array<number> {
     return Array(n);
   }
+
   // getCards(page: any, size: any): void {
   //   if (page)
   //     this.pageNumber = page;
@@ -371,45 +368,6 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
       });
   }
 
-  // yash has written this
-  // getCards(page?: number, size?: number, query?: string, type?: string): void {
-  //   if (page) {
-  //     this.pageNumber = page;
-  //   }
-  //   if (size) {
-  //     this.pageSize = size;
-  //   }
-  //   if(query){
-  //     this.filt = query;
-  //   }
-  //   if(type){
-  //     this.selectedCapabilityType = type.split(',');
-  //   }
-  //   this.pageSize = this.pageSize || 9;
-  //   const timezoneOffset = new Date().getTimezoneOffset();
-  //   const org = sessionStorage.getItem("organization");
-  //   this.adapterServices.getMlSpecTemplatesCards(org, this.pageNumber, this.pageSize, this.filt, this.selectedCapabilityType.join(',')).subscribe((res) => {
-  //     const data: any[] = [];
-  //     this.users = []; // clear previous users
-
-  //     const filteredRes = res.filter((element: any) => {
-  //       return element.organization === org;
-  //     });
-
-  //     filteredRes.forEach((element: any) => {
-  //       element.createdon = new Date(new Date(element.createdon).getTime() - timezoneOffset * 60 * 1000);
-  //       data.push(element);
-  //       this.users.push(element.domainname);
-  //     });
-
-  //     this.cards = data;
-  //     this.allCards = data;
-  //     this.allCardsFiltered = data;
-
-  //     this.filterSelectedCards(this.pageNumber, this.pageSize);
-  //   });
-  // }
-  //mine
   // Update getCards to not call filterSelectedCards
   getCards(page?: number, size?: number, query?: string, type?: string): void {
     if (page) {
@@ -477,18 +435,18 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
   }
 
   desc(card: any) {
-    // this.telemetry.addTelemetryEvent(card.alias+" viewed");
     this.router.navigate(['../specs/' + card.domainname], {
       relativeTo: this.route,
     });
-    // this.telemetry.addTelemetryEvent(card.alias+" viewed");
   }
+
   redirect() {
     this.selectedInstance = this.selectedCard.name;
     this.router.navigate(['./view', this.cardTitle, this.selectedInstance], {
       relativeTo: this.route,
     });
   }
+
   //previous
   // filterz() {
   //   if(this.filt.length!=this.filtbackup.length){
@@ -520,6 +478,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
   // }
 
   //new
+
   filterz() {
     if (this.filt.length != this.filtbackup.length) {
       this.pageNumber = 1;
@@ -561,6 +520,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
       });
     });
   }
+
   showMore(category) {
     this.catStatus[category] = !this.catStatus[category];
     if (this.catStatus[category])
@@ -572,6 +532,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
         .filter((tag) => tag.category == category)
         .slice(0, 10);
   }
+
   filterByTag(tag) {
     this.tagStatus[tag.category + ' - ' + tag.label] =
       !this.tagStatus[tag.category + ' - ' + tag.label];
@@ -582,23 +543,28 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
       this.selectedTag.splice(this.selectedTag.indexOf(tag), 1);
     }
   }
+
   createSpecTemplate() {
     this.router.navigate(['./create'], {
       relativeTo: this.route,
     });
   }
+
   refresh() {
     this.getCards(this.pageNumber, this.pageSize);
     // this.pageSize = this.pageSize || 6;
   }
+
   openEdit() {
     console.log('openEdit');
   }
+
   redirectToEdit(dname) {
     this.router.navigate(['./edit/' + dname], {
       relativeTo: this.route,
     });
   }
+
   delete(domainname) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
     dialogRef.afterClosed().subscribe((result) => {
@@ -616,7 +582,6 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
                   'Done!  Spec Deleted Successfully'
                 );
                 this.refresh();
-                // this.telemetry.addTelemetryEvent(domainname+ ' Deleted');
               } else
                 this.adapterServices.messageNotificaionService(
                   'warning',
@@ -703,13 +668,16 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
     // Get updated count
     this.getCountSpecTemplates();
   }
+
   selectedButton(i) {
-    if (i == this.pageNumber) return { color: 'white', background: '#7b39b1' };
+    if (i == this.pageNumber) return { color: 'white', background: '#0094ff' };
     else return { color: 'black' };
   }
+
   toggleExpand() {
     this.isExpanded = !this.isExpanded;
   }
+
   toggler(isExpanded: boolean) {
     if (isExpanded) {
       return { width: '80%', margin: '0 0 0 20%' };
@@ -717,6 +685,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
       return { width: '100%', margin: '0%' };
     }
   }
+
   completeRefresh() {
     this.filt = '';
     this.tagrefresh = true;
@@ -730,6 +699,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
       this.updatePageSize();
     }
   }
+
   updatePageSizeOnly() {
     this.pageSize = 0;
     if (window.innerWidth > 1440) {
@@ -745,9 +715,5 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
       this.itemsPerPage = [4, 8, 12, 16, 20, 24];
       this.pageSize = this.pageSize || 4; //xs
     }
-  }
-  ngOnDestroy(): void {
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
   }
 }

@@ -1,5 +1,4 @@
 import { Component, Input, ViewChild } from '@angular/core';
-import { Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdapterServices } from '../adapter-service';
 import { OptionsDTO } from '../../DTO/OptionsDTO';
@@ -8,7 +7,6 @@ import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 import { SwaggerAPISpec } from '../../DTO/swaggerapispec';
 import { SwaggerCustomComponent } from '../../swagger-custom/swagger-custom.component';
 import { MatDialogRef } from '@angular/material/dialog';
-// import { OpenTelemetryService } from 'com-lib-util';
 
 @Component({
   selector: 'app-method-create-edit',
@@ -43,7 +41,6 @@ export class MethodCreateEditComponent {
   selectedConnection: any = { alias: '' };
   constructor(
     private dialogRef: MatDialogRef<MethodCreateEditComponent>,
-    // private telemetry: OpenTelemetryService,
     private router: Router,
     private route: ActivatedRoute,
     private adapterServices: AdapterServices,
@@ -107,12 +104,7 @@ export class MethodCreateEditComponent {
   formData: FormData;
   fileName: string;
 
-  telemetryCall() {
-    // this.telemetry.startTelemetry('aip-app','MethodCreateEditComponent', sessionStorage.getItem('organization'));
-  }
-
   ngOnInit(): void {
-    this.telemetryCall();
     this.editorOptions.modes = ['text', 'tree', 'view'];
     this.editorOptions.mode = 'text';
     this.options.push(new OptionsDTO('Text', 'Text'));
@@ -239,7 +231,7 @@ export class MethodCreateEditComponent {
         }
       }
     } catch (Exception) {
-      //this.messageService.error("Some error occured", "Error")
+      // this.messageService.error("Some error occured", "Error")
     }
   }
 
@@ -840,7 +832,6 @@ export class MethodCreateEditComponent {
               'Done!  Method Added Successfully'
             );
             this.returnedName = response.body.name;
-            //this.telemetry.addTelemetryEvent(this.returnedName + ' method created');
             this.modifyAPISpec(
               this.dataset,
               this.returnedName,
@@ -859,7 +850,6 @@ export class MethodCreateEditComponent {
         this.adapterServices.saveDataset(this.dataset).subscribe(
           (response) => {
             this.returnedName = response.name;
-            //this.telemetry.addTelemetryEvent(this.returnedName + ' method edited');
             this.modifyAPISpec(
               this.dataset,
               this.returnedName,
@@ -954,9 +944,11 @@ export class MethodCreateEditComponent {
       }
     }
   }
+
   transformScriptsetValue(event) {
     this.transformScriptData = event.checked;
   }
+
   remoteExecutorsetValue(event) {
     this.isRemoteExecution = event.checked;
     this.dataset.attributes.isRemoteExecution = this.isRemoteExecution;
@@ -1047,6 +1039,7 @@ export class MethodCreateEditComponent {
     }
     return mod_s;
   }
+
   transformScriptbasicReqTabChange(index) {
     switch (index) {
       case 0:
@@ -1069,6 +1062,7 @@ export class MethodCreateEditComponent {
         break;
     }
   }
+
   addImortsRow() {
     if (!this.dynamicImportsArray) {
       this.dynamicImportsArray = [];
@@ -1078,6 +1072,7 @@ export class MethodCreateEditComponent {
     this.dataset.attributes['imports'] = this.dynamicImportsArray;
     return true;
   }
+
   deleteImportsRow(index) {
     // if (this.dynamicImportsArray.length == 1) {
     //   return false;
@@ -1087,6 +1082,7 @@ export class MethodCreateEditComponent {
     return true;
     // }
   }
+
   addRequirementsRow() {
     if (!this.dynamicRequirementsArray) {
       this.dynamicRequirementsArray = [];
@@ -1096,6 +1092,7 @@ export class MethodCreateEditComponent {
     this.dataset.attributes['requirements'] = this.dynamicRequirementsArray;
     return true;
   }
+
   deleteRequirementsRow(index) {
     // if (this.dynamicRequirementsArray.length == 1) {
     //   return false;
@@ -1123,11 +1120,6 @@ export class MethodCreateEditComponent {
           if (this.schemaForm) this.schemaForm['isForTest'] = true;
         }
       });
-  }
-
-  ngOnDestroy(): void {
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
   }
 }
 

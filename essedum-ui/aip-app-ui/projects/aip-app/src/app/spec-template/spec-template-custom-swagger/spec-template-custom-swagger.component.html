@@ -1,8 +1,8 @@
 <div>
     <div style="display: flex; margin-left: 60%; align-items: center;">
         <div [ngStyle]="{'color': (!swaggerView) ? 'grey' : '#0094ff'}">Swagger View</div>
-        <mat-slide-toggle [checked]="checked" [disabled]="disabled" [labelPosition]="labelPosition"
-            [disableRipple]="disableRipple" (change)="toggle()" style="margin: 0 8px;">
+        <mat-slide-toggle checked="checked" [disabled]="disabled" [labelPosition]="labelPosition"
+            disableRipple="disableRipple" (change)="toggle()" style="margin: 0 8px;">
         </mat-slide-toggle>
         <div style="padding-left: 5px;" [ngStyle]="{'color': (swaggerView) ? 'grey' : '#0094ff'}">JSON View</div>
     </div>

@@ -1,14 +1,3 @@
-//
-//  @ 2018 Infosys Limited, Bangalore, India. All Rights Reserved.
-//  Version: 1.0
-//  Except for any free or open source software components embedded in this Infosys proprietary software program (Program),
-//  this Program is protected by copyright laws, international treaties and  other pending or existing intellectual property
-//  rights in India, the United States, and other countries. Except as expressly permitted, any unauthorized reproduction, storage,
-//  transmission in any form or by any means(including without limitation electronic, mechanical, printing, photocopying,
-//  recording, or otherwise), or any distribution of this program, or any portion of it, may result in severe civil and
-//  criminal penalties, and will be prosecuted to the maximum extent possible under the law.
-//
-
 import {
   Component,
   OnInit,
@@ -25,7 +14,7 @@ import {
   MAT_DIALOG_DATA,
 } from '@angular/material/dialog';
 import { MatTable } from '@angular/material/table';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 
 import { ModalConfigSchemaEditorComponent } from '../modal-config-schema-editor/modal-config-schema-editor.component';
 import { SelectItem } from 'primeng/api';
@@ -38,8 +27,6 @@ import { MessageService } from '../message.service';
 import { SchemaRegistryService } from '../../services/schema-registry.service';
 import { Location } from '@angular/common';
 import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.component/confirm-delete-dialog.component';
-import { MatSelectChange } from '@angular/material/select';
-// import { OpenTelemetryService } from 'com-lib-util';
 
 @Component({
   selector: 'modal-config-schema',
@@ -65,9 +52,9 @@ export class ModalConfigSchemaComponent
   // @Input('directInputs') directInputs;
   // @Input('indirectInputs') indirectInputs;
   // @Output('formScriptOutput') formScriptOutput = new EventEmitter<any>();
+
   constructor(
     private schemaService: SchemaRegistryService,
-    // private telemetry: OpenTelemetryService,
     private messageService: MessageService,
     private schemaRelService: SchemaRelationshipService,
     private dialog: MatDialog,
@@ -77,6 +64,7 @@ export class ModalConfigSchemaComponent
     private services: Services,
     private location: Location
   ) {}
+
   schemaAlias: any = '';
   schemaName: any = '';
   schemaExists: any;
@@ -184,11 +172,8 @@ export class ModalConfigSchemaComponent
       }
     });
   }
-  telemetryCall() {
-    // this.telemetry.startTelemetry('aip-app','ModalConfigSchemaComponent', sessionStorage.getItem('organization'));
-  }
+
   ngOnInit() {
-    this.telemetryCall();
     this.Authentications();
     if (this.router.url.includes('view')) {
       this.isInView = true;
@@ -465,7 +450,6 @@ export class ModalConfigSchemaComponent
                   temp.push(JSON.parse(element).name);
                 });
                 this.services.message('Updated Sucessfully', 'success');
-                //this.telemetry.addTelemetryEvent(this.schemaName+' schema updated');
                 this.formListView = true;
                 this.location.back();
                 this.schemaService
@@ -526,7 +510,6 @@ export class ModalConfigSchemaComponent
               this.selectedFormTemplate = resp;
               // this.messageService.info('Saved successfully', 'CIP');
               this.services.message('Saved successfully -CIP', 'success');
-              //this.telemetry.addTelemetryEvent('Schema form saved')
               if (!this.updateFlag)
                 this.formTemplateList.push(this.selectedFormTemplate);
               this.formListView = true;
@@ -1004,11 +987,4 @@ export class ModalConfigSchemaComponent
       .default as string;
     this.capabilities = this.dropDownVauleCapbility.get(event).value;
   }
-  ngOnDestroy(): void {
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
-  }
-  // onSelectionCapability(event: any) {
-  //   console.log("values to be shown ", event)
-  // }
 }

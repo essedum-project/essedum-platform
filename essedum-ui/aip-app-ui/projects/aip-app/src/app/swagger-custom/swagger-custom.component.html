@@ -4,7 +4,7 @@
         <mat-slide-toggle [checked]="checked" [disabled]="disabled" [labelPosition]="labelPosition"
             [disableRipple]="disableRipple" (change)="toggle()">
         </mat-slide-toggle>
-        <div class="le-u-pad-l-16" [ngStyle]="{'color': (swaggerView) ? 'grey' : '#0094ff;'}">JSON View
+        <div class="lfx-u-pad-l-16" [ngStyle]="{'color': (swaggerView) ? 'grey' : '#0094ff;'}">JSON View
         </div>
     </div>
     <div *ngIf="restProvider && restProviderData" style="display: flex;">
@@ -31,7 +31,8 @@
         <mat-slide-toggle *ngIf="swaggerView || isToggle" [checked]="checked" [disabled]="disabled"
             [labelPosition]="labelPosition" [disableRipple]="disableRipple" (change)="toggle()">
         </mat-slide-toggle>
-        <div *ngIf="swaggerView || isToggle" class="le-u-pad-l-16" [ngStyle]="{'color': (isToggle) ? '#000;' : 'grey'}">
+        <div *ngIf="swaggerView || isToggle" class="lfx-u-pad-l-16"
+            [ngStyle]="{'color': (isToggle) ? '#000;' : 'grey'}">
             JSON View</div>
     </div>
     <div style="margin:30px">
@@ -68,7 +69,7 @@
                     </section>
                 </div>
                 <div class="spec-body">
-                    <div class="le-u-mar-tb-8">
+                    <div class="lfx-u-mar-tb-8">
                         <mat-form-field appearance="fill" style="width: 100%;">
                             <mat-label>Servers</mat-label>
                             <mat-select [(value)]="serverUrl" (selectionChange)="selectChange($event)"
@@ -97,7 +98,7 @@
                                 <div *ngIf="existingPaths.indexOf(spec.path+spec.requestType)===-1"
                                     [ngStyle]="{'margin-left': isInstance || !createAuth || isRemoteExecution? '60%': '70%'}">
                                     <div *ngIf="!isRemoteExecution && !isInstance && createAuth"
-                                        class="le-u-pad-24 aip-icon_text">
+                                        class="lfx-u-pad-24 aip-icon_text">
                                         <mat-menu #overflowMenu="matMenu">
                                             <button mat-menu-item *ngFor="let opt of alias"
                                                 (click)="addMethod(specData, opt)">
@@ -116,9 +117,9 @@
                                                 [apiSpecServerUrl]="apiSpecServerUrl"></app-method-create-edit>
                                         </ng-template>
                                     </div>
-                                    <div *ngIf="isInstance || !createAuth" class="le-u-pad-24 aip-icon_text">Method Not
+                                    <div *ngIf="isInstance || !createAuth" class="lfx-u-pad-24 aip-icon_text">Method Not
                                         Implemented</div>
-                                    <div *ngIf="isRemoteExecution && !isInstance && createAuth" class="le-u-pad-24"
+                                    <div *ngIf="isRemoteExecution && !isInstance && createAuth" class="lfx-u-pad-24"
                                         (click)="addRemoteMethod(spec)">
                                         <mat-icon class="aip-led-icons  aip-cursor mx-2r"
                                             (click)="addRemoteMethod(spec)" matTooltip="'Implement Method'"
@@ -207,7 +208,7 @@
                                     <div *ngIf="spec.requestBody.content['multipart/form-data']">
                                         <input type="file" class="file-input" style="display:none;"
                                             (change)="handleFileInput($event)" #fileUpload>
-                                        <div class="file-upload le-u-pad-t-4 le-u-pad-b-8"
+                                        <div class="file-upload lfx-u-pad-t-4 lfx-u-pad-b-8"
                                             *ngIf="spec['button']=='Try it out'" style="margin-left:26%;">
                                             <button mat-mini-fab color="primary" class="upload-btn"
                                                 (click)="fileUpload.click()" disabled>
@@ -215,7 +216,7 @@
                                             </button>
                                             {{fileName || "No file uploaded yet."}}
                                         </div>
-                                        <div class="file-upload le-u-pad-t-4 le-u-pad-b-8"
+                                        <div class="file-upload lfx-u-pad-t-4 lfx-u-pad-b-8"
                                             *ngIf="spec['button']=='Cancel'" style="margin-left:26%;">
                                             <button mat-mini-fab color="primary" class="upload-btn"
                                                 (click)="fileUpload.click()">
@@ -333,7 +334,8 @@
         <div *ngIf="!swaggerView">
             <json-editor [options]="editorOptions" [data]="apispecTemplate" style="height: 450px;" #formJsonEditor=""
                 class="cipJSONEditor"></json-editor>
-            <div *ngIf="restProvider" class="m-2 d-flex justify-content-end le-u-mar-b-32 le-u-pad-lr-16 le-u-pad-t-8">
+            <div *ngIf="restProvider"
+                class="m-2 d-flex justify-content-end lfx-u-mar-b-32 lfx-u-pad-lr-16 lfx-u-pad-t-8">
                 <button mat-raised-button color="primary" [disabled]="false" type="button"
                     (click)="saveSpecTemplateToEndpoint()">
                     Save Spec

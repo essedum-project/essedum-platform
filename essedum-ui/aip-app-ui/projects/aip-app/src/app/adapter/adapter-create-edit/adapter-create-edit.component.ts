@@ -5,10 +5,8 @@ import { AdapterServices } from '../adapter-service';
 import { OptionsDTO } from '../../DTO/OptionsDTO';
 import { Services } from '../../services/service';
 import { PipelineService } from '../../services/pipeline.service';
-import { HttpParams } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { MatDialogRef } from '@angular/material/dialog';
-// import { OpenTelemetryService } from 'com-lib-util';
 
 @Component({
   selector: 'app-adapter-create-edit',
@@ -23,7 +21,6 @@ export class AdapterCreateEditComponent {
 
   constructor(
     private dialogRef: MatDialogRef<AdapterCreateEditComponent>,
-    // private telemetry: OpenTelemetryService,
     private router: Router,
     private route: ActivatedRoute,
     private adapterServices: AdapterServices,
@@ -65,11 +62,7 @@ export class AdapterCreateEditComponent {
   chainOptions: OptionsDTO[] = [];
   isChain: Boolean = false;
 
-  telemetryCall() {
-    // this.telemetry.startTelemetry('aip-app','AdapterCreateEditComponent', sessionStorage.getItem('organization'));
-  }
   ngOnInit(): void {
-    this.telemetryCall();
     this.org = sessionStorage.getItem('organization');
     if (this.data && this.data.isChain) {
       this.isChain = true;
@@ -123,7 +116,6 @@ export class AdapterCreateEditComponent {
           'Done!  Implementation Created Successfully'
         );
         this.routeBackToAdaptersAndRefresh();
-        //this.telemetry.addTelemetryEvent(this.data?.name+" Implementation Created");
       },
       (error) => {
         this.service.messageService(error);
@@ -141,13 +133,13 @@ export class AdapterCreateEditComponent {
           'Done!  Implementation Updated Successfully'
         );
         this.closeAdapterPopup();
-        //this.telemetry.addTelemetryEvent(this.data?.name+" Implementation Updated");
       },
       (error) => {
         this.service.messageService(error);
       }
     );
   }
+
   closeAdapterPopup() {
     this.dialogRef.close();
     this.triggereRefresh.emit(true);
@@ -180,21 +172,23 @@ export class AdapterCreateEditComponent {
     }
   }
 
-  connectionNameSelectChange(connectionNameSelectd: string) {
-    this.data.connectionid = connectionNameSelectd;
+  connectionNameSelectChange(connectionNameSelectd: any) {
+    this.data.connectionname = connectionNameSelectd.value;
     this.selectedConnection = this.datasourcesForConnection.filter(
-      (datasource) => datasource.alias == connectionNameSelectd
+      (datasource) => datasource.alias == connectionNameSelectd.value
     )[0];
-    this.data.connectionid = this.selectedConnection.name;
+    this.data.connectionid = this.selectedConnection.id;
     if (this.selectedConnection.type == 'REST')
       this.data.executiontype = 'REST';
     else this.data.executiontype = 'REMOTE';
   }
-  chainNameSelectChange(chainNameSelected: string) {
-    this.selecteddChain = this.chains.filter(
-      (chain) => chain.alias == chainNameSelected
-    )[0];
-    this.data.chainName = this.selecteddChain.name;
+
+  chainNameSelectChange(event: any) {
+    const chainNameSelected = event.value;
+    this.selecteddChain = this.chains.find(
+      (chain) => chain.alias === chainNameSelected
+    );
+    this.data.chainName = this.selecteddChain?.name;
     if (this.data.chainName) {
       this.chainError = false;
     }
@@ -203,6 +197,7 @@ export class AdapterCreateEditComponent {
   resolvePromise() {
     this.connectionPromise = Promise.resolve(true);
   }
+
   findalldatasourcesForConnection() {
     this.adapterServices.getDatasources().subscribe(
       (res) => {
@@ -313,6 +308,7 @@ export class AdapterCreateEditComponent {
       ];
     });
   }
+
   findAllChains(): void {
     this.service.getallPipelinesByOrg().subscribe((res) => {
       var chain = res;
@@ -331,12 +327,8 @@ export class AdapterCreateEditComponent {
       this.chainPromise = Promise.resolve(true);
     });
   }
+
   toggleChain() {
     this.data.isChain = this.isChain;
-  }
-
-  ngOnDestroy(): void {
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
   }
 }

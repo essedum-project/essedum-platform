@@ -7,7 +7,6 @@ import { Services } from '../../services/service';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { OptionsDTO } from '../../DTO/OptionsDTO';
 import { Location } from '@angular/common';
-import { HttpParams } from '@angular/common/http';
 
 @Component({
   selector: 'app-instance-description',
@@ -92,7 +91,6 @@ export class InstanceDescriptionComponent {
   }
 
   toggler() {
-    // this.router.navigate(["../"], { relativeTo: this.route })
     this.location.back();
   }
 
@@ -246,6 +244,7 @@ export class InstanceDescriptionComponent {
         relativeTo: this.route,
       });
   }
+
   filterChains(chainName): void {
     this.service.getallPipelinesByOrg().subscribe((res) => {
       var chains = res;

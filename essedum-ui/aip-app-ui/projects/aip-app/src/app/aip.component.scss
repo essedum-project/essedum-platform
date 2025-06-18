@@ -157,7 +157,6 @@
     border: none;
     outline: none;
     -webkit-appearance: none;
-    // color: #8626c3;
     color: var(--base-color);
     height: 4rem;
     -moz-appearance: none;
@@ -728,10 +727,6 @@ div {
     padding: 8px !important;
   }
 
-  .lfx-l-level1-middle-col {
-    padding: 32px 16px 32px 16px !important;
-  }
-
   .lfx-l-level2-middle-ctr {
     display: table;
     width: 100%;
@@ -757,6 +752,10 @@ div {
 
   .lfx-u-mar-l-8 {
     margin-left: 8px !important;
+  }
+
+  .lfx-u-mar-l-32 {
+    margin-left: 32px !important;
   }
 
   .lfx-u-header-xxl {
@@ -868,6 +867,10 @@ div {
     margin-bottom: 8px !important;
   }
 
+  .lfx-u-mar-b-20 {
+    margin-bottom: 20px !important;
+  }
+
   .lfx-u-header-sm {
     font-size: 1.2rem;
     font-weight: 600;
@@ -924,9 +927,7 @@ div {
   }
 
   .lfx-u-text-primary-80 {
-    //color: #8626C3;
     color: #0094ff;
-    // color:#0a142f;
   }
 
   .lfx-u-mar-8 {
@@ -1116,10 +1117,6 @@ div {
     margin-bottom: 24px !important;
   }
 
-  .lfx-u-mar-t-8 {
-    margin-top: 8px !important;
-  }
-
   .lfx-u-pad-l-8 {
     padding-left: 8px !important;
   }
@@ -1266,6 +1263,7 @@ div {
   .lfx-u-mar-t-4 {
     margin-top: 4px !important;
   }
+  
   .lfx-u-pad-b-16 {
     padding-bottom: 16px !important;
   }
@@ -1304,5 +1302,21 @@ div {
 
   .lfx-u-pad-b-4{
     padding-bottom: 4px !important;
+
+  .w-75 {
+    width: 75% !important;
+  }
+
+  .lfx-c-card.mat-mdc-card:hover .lfx-u-body-xxl,
+  .lfx-c-card.mat-mdc-card:hover .lfx-u-header-xl {
+    color: #0094ff;
+  }
+
+  .mat-mdc-raised-button.mat-primary {
+    --mdc-protected-button-container-color: #0094ff;
+    --mdc-protected-button-label-text-color: white;
+    --mat-protected-button-state-layer-color: white;
+    --mat-protected-button-ripple-color: rgba(255, 255, 255, 0.1);
+
   }
 }

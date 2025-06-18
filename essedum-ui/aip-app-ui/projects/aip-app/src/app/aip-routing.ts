@@ -18,26 +18,27 @@ import { DatasetDescriptionComponent } from './dataset/dataset.description/datas
 // import { CreateEndpointComponent } from './endpoint/create-endpoint/create-endpoint.component';
 // import { DrawFlowComponent } from './draw-flow/draw-flow.component';
 import { SchemaComponent } from './schema/schema.component';
-// import { AdapterComponent } from './adapter/adapter.component';
-// import { InstanceComponent } from './instance/instance.component';
-// import { AppListComponent } from './apps/app-list/app-list.component';
-// import { SpecTemplateComponent } from './spec-template/spec-template.component';
-// import { SpecTemplateDescriptionComponent } from './spec-template/spec-template-description/spec-template-description.component';
+import { AdapterComponent } from './adapter/adapter.component';
+import { InstanceComponent } from './instance/instance.component';
+import { AppListComponent } from './apps/app-list/app-list.component';
+import { SpecTemplateComponent } from './spec-template/spec-template.component';
+import { SpecTemplateDescriptionComponent } from './spec-template/spec-template-description/spec-template-description.component';
 
-// import { ViewAppComponent } from './apps/view-app/view-app.component';
+import { ViewAppComponent } from './apps/view-app/view-app.component';
 import { ModelEditsComponent } from './model/model-edit/model-edit.component';
 import { ModelDeployComponent } from './model/model-deploy/model-deploy.component';
 // import { FeatureStoreComponent } from './feature-store/feature-store.component';
-// import { CreateSpecTemplateComponent } from './spec-template/create-spec-template/create-spec-template.component';
-// import { EditSpecTemplateComponent } from './spec-template/edit-spec-template/edit-spec-template.component';
+import { CreateSpecTemplateComponent } from './spec-template/create-spec-template/create-spec-template.component';
+import { EditSpecTemplateComponent } from './spec-template/edit-spec-template/edit-spec-template.component';
 import { DatasourceConfigComponent } from './datasource/datasource-config/datasource-config.component';
 // import { CreateFeaturestoreComponent } from './feature-store/create-featurestore/create-featurestore.component';
-// import { AdapterDescriptionComponent } from './adapter/adapter-description/adapter-description.component';
+import { AdapterCreateEditComponent } from './adapter/adapter-create-edit/adapter-create-edit.component';
+import { AdapterDescriptionComponent } from './adapter/adapter-description/adapter-description.component';
 // import { EditFeatureStoreComponent } from './feature-store/edit-feature-store/edit-feature-store.component';
-// import { InstanceCreateEditComponent } from './instance/instance-create-edit/instance-create-edit.component';
+import { InstanceCreateEditComponent } from './instance/instance-create-edit/instance-create-edit.component';
 // import { TemplateComponent } from './template/template.component';
 // //import { ChainPipelineComponent } from './chain-pipeline/chain-pipeline.component';
-// import { InstanceDescriptionComponent } from './instance/instance-description/instance-description.component';
+import { InstanceDescriptionComponent } from './instance/instance-description/instance-description.component';
 import { ConnectionViewComponent } from './datasource/connection-view/connection-view.component';
 import { ModalConfigDatasetComponent } from './dataset/modal-config-dataset/modal-config-dataset.component';
 import { ModelDescriptionComponent } from './model/model.description/model.description.component';
@@ -86,17 +87,6 @@ import { PaginationComponent } from './pagination/pagination.component';
 
 // import { AipRatingViewComponent } from './aip-rating/aip-rating-view/aip-rating-view.component';
 import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-name.component';
-import { InstanceComponent } from './instance/instance.component';
-import { InstanceCreateEditComponent } from './instance/instance-create-edit/instance-create-edit.component';
-import { InstanceDescriptionComponent } from './instance/instance-description/instance-description.component';
-import { SpecTemplateComponent } from './spec-template/spec-template.component';
-import { CreateSpecTemplateComponent } from './spec-template/create-spec-template/create-spec-template.component';
-import { SpecTemplateDescriptionComponent } from './spec-template/spec-template-description/spec-template-description.component';
-import { EditSpecTemplateComponent } from './spec-template/edit-spec-template/edit-spec-template.component';
-import { AdapterDescriptionComponent } from './adapter/adapter-description/adapter-description.component';
-import { AdapterComponent } from './adapter/adapter.component';
-import { AdapterCreateEditComponent } from './adapter/adapter-create-edit/adapter-create-edit.component';
-
 // import { ClusteringComponent } from './clustering/clustering.component';
 
 const routes: Routes = [
@@ -176,20 +166,20 @@ const routes: Routes = [
           { path: '', component: PipelineComponent },
           // { path: 'create', component: PipelineCreateComponent },
           // { path: 'full-screen', component: DrawFlowComponent },
-           //{ path: 'view/drgndrp/:cname', component: PipelineDescriptionComponent },
-           { path: 'view/:cname', component: NativeScriptComponent },
+          //{ path: 'view/drgndrp/:cname', component: PipelineDescriptionComponent },
+          { path: 'view/:cname', component: NativeScriptComponent },
           //{path:'related/:name',component:PipelineDescriptionComponent},
           // { path: 'preview/:name', component: PipelineComponent },
         ],
       },
-      // {
-      //   path: 'app-list',
-      //   component: AppListComponent,
-      // },
-      // {
-      //   path: 'app/:name/:type',
-      //   component: ViewAppComponent,
-      // },
+      {
+        path: 'app-list',
+        component: AppListComponent,
+      },
+      {
+        path: 'app/:name/:type',
+        component: ViewAppComponent,
+      },
       // {
       //   path: 'endpoints',
       //   children: [

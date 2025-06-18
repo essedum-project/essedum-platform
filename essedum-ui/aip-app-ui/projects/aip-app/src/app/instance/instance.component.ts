@@ -12,10 +12,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Services } from '../services/service';
 import { TagsService } from '../services/tags.service';
 import { AdapterServices } from '../adapter/adapter-service';
-// import { LedsLibService} from 'leds-lib';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog.component/confirm-delete-dialog.component';
-// import { LeapTelemetryService, OpenTelemetryService } from 'com-lib-util';
 import { StreamingServices } from '../streaming-services/streaming-service';
 import { Location } from '@angular/common';
 
@@ -83,27 +81,27 @@ export class InstanceComponent implements OnInit, OnChanges {
   tagrefresh: boolean = false;
 
   constructor(
-    // private telemetryService: LeapTelemetryService,
-    // private telemetry: OpenTelemetryService,
     private route: ActivatedRoute,
     private router: Router,
     private service: Services,
     private adapterServices: AdapterServices,
-    // private ledsLibService: LedsLibService,
     private changeDetectionRef: ChangeDetectorRef,
     public tagService: TagsService,
     private dialog: MatDialog,
     private location: Location
   ) {}
+
   ngOnChanges(changes: SimpleChanges): void {
     this.getCards(this.pageNumber, this.pageSize);
     this.tagchange();
     this.updatePageSize();
   }
+
   @HostListener('window:resize', ['$event'])
   onResize(event) {
     this.updatePageSizeOnly();
   }
+
   updatePageSize() {
     this.pageSize = 0;
     if (window.innerWidth > 2500) {
@@ -128,14 +126,10 @@ export class InstanceComponent implements OnInit, OnChanges {
       this.getCards(this.pageNumber, this.pageSize);
     }
   }
-  telemetryCall() {
-    // this.telemetry.startTelemetry('aip-app','InstanceComponent',sessionStorage.getItem('organization'))
-  }
+ 
   ngOnInit(): void {
-    this.telemetryCall();
     this.updatePageSizeOnly();
     this.records = false;
-    this.telemetryImpression();
     //this.updatePageSize();
     // this.pageSize=this.itemsPerPage[0];
     // this.pageNumber = 1;
@@ -174,11 +168,6 @@ export class InstanceComponent implements OnInit, OnChanges {
     }
     this.Authentications();
     // this.getTags();
-  }
-
-  telemetryImpression() {
-    // this.telemetryService.start();
-    // this.telemetryService.impression("aip-app", "list", "InstanceComponent");
   }
 
   nextPage() {
@@ -269,9 +258,11 @@ export class InstanceComponent implements OnInit, OnChanges {
   //   // this.router.navigate(["View/:cardTitle"],{relativeTo:this.route,state:{data:this.cardTitle}});
   //   this.router.navigate(["./view/" + this.cardTitle], { relativeTo: this.route });
   // }
+
   numSequence(n: number): Array<number> {
     return Array(n);
   }
+
   getCards(page?: any, size?: any): void {
     if (page) this.pageNumber = page;
     if (size) this.pageSize = size || 8;
@@ -336,8 +327,8 @@ export class InstanceComponent implements OnInit, OnChanges {
         this.filterSelectedCards(page, size);
       });
   }
+
   desc(card: any) {
-    // //this.telemetry.addTelemetryEvent(card.alias+' viewed');
     this.router.navigate(['../instances/' + card.name], {
       queryParams: {
         page: this.pageNumber,
@@ -350,8 +341,8 @@ export class InstanceComponent implements OnInit, OnChanges {
       queryParamsHandling: 'merge',
       relativeTo: this.route,
     });
-    //this.telemetry.addTelemetryEvent(card.alias+' viewed');
   }
+
   redirect(card: any, type: string) {
     this.router.navigate(['./create'], {
       queryParams: {
@@ -512,10 +503,6 @@ export class InstanceComponent implements OnInit, OnChanges {
     });
   }
 
-  clickactive(eventObj: any) {
-    // this.ledsLibService.clickactive(eventObj);
-  }
-
   refresh() {
     this.getCards(this.pageNumber, this.pageSize);
     this.filterSelectedCards(this.pageNumber, this.pageSize);
@@ -533,7 +520,6 @@ export class InstanceComponent implements OnInit, OnChanges {
                   'success',
                   'Done!  Instance Deleted Successfully'
                 );
-                //this.telemetry.addTelemetryEvent(instanceName +" Deleted");
               } else
                 this.adapterServices.messageNotificaionService(
                   'warning',
@@ -552,11 +538,11 @@ export class InstanceComponent implements OnInit, OnChanges {
   }
 
   selectedButton(i) {
-    if (i == this.pageNumber) return { color: 'white', background: '#7b39b1' };
+    if (i == this.pageNumber) return { color: 'white', background: '#0094ff' };
     else return { color: 'black' };
   }
+
   startChain(data) {
-    //this.telemetry.addTelemetryEvent(data+" started");
     this.adapterServices
       .getAdapteByNameAndOrganization(data.adaptername)
       .subscribe((resp) => {
@@ -582,6 +568,7 @@ export class InstanceComponent implements OnInit, OnChanges {
           });
       });
   }
+
   triggerEvent(path, data) {
     let body = { pipelineName: this.streamItem.name, scriptPath: path[0] };
     this.service
@@ -601,6 +588,7 @@ export class InstanceComponent implements OnInit, OnChanges {
         }
       );
   }
+
   runScript(data) {
     let passType = '';
     if (
@@ -663,7 +651,6 @@ export class InstanceComponent implements OnInit, OnChanges {
     this.service.stopPipeline(data.jobid).subscribe(
       (response) => {
         this.service.message('Stop App Triggered!', 'success');
-        //this.telemetry.addTelemetryEvent(data.alias+" Stopped");
         data.status = 'CANCELLED';
         var createdon = data.createdon;
         var lastmodifiedon = data.lastmodifiedon;
@@ -681,9 +668,11 @@ export class InstanceComponent implements OnInit, OnChanges {
       }
     );
   }
+
   toggleExpand() {
     this.isExpanded = !this.isExpanded;
   }
+
   toggler(isExpanded: boolean) {
     if (isExpanded) {
       return { width: '80%', margin: '0 0 0 20%' };
@@ -691,9 +680,11 @@ export class InstanceComponent implements OnInit, OnChanges {
       return { width: '100%', margin: '0%' };
     }
   }
+
   triggereRefresh($event) {
     if ($event) this.ngOnInit();
   }
+
   refreshData() {
     this.records = false;
     this.tagrefresh = true;
@@ -735,9 +726,5 @@ export class InstanceComponent implements OnInit, OnChanges {
       this.itemsPerPage = [4, 8, 12, 16, 20, 24];
       this.pageSize = this.pageSize || 4; //xs
     }
-  }
-  ngOnDestroy(): void {
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
   }
 }

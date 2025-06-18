@@ -14,11 +14,6 @@
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
-        <dependency>
-         <groupId>org.elasticsearch.client</groupId>
-         <artifactId>elasticsearch-rest-high-level-client</artifactId>
-         <version>7.17.28</version>
-        </dependency>
 		<dependency>
 			<groupId>com.infosys.icets.icip</groupId>
 			<artifactId>icip-lib-adp</artifactId>
@@ -32,10 +27,6 @@
 		<dependency>
 			<groupId>com.infosys.icets.ai</groupId>
 			<artifactId>comm-lib-util</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.infosys.icets.ai</groupId>
-			<artifactId>comm-lib-secrets</artifactId>
 		</dependency>
 	</dependencies>
 	<build>
