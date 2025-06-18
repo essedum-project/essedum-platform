@@ -27,7 +27,8 @@
 
                             <mat-form-field *ngIf="capabilityPromise|async" appearance="fill" style="width: 100%;">
                                 <mat-label>Capability</mat-label>
-                                <mat-select (selectionChange)="selectChange($event)" multiple>
+                                <mat-select [(ngModel)]="data.capability" (selectionChange)="selectChange($event)"
+                                    multiple>
                                     <mat-option *ngFor="let option of capabilityList" [value]="option.value">
                                         {{ option.value }}
                                     </mat-option>

@@ -1263,7 +1263,7 @@ div {
   .lfx-u-mar-t-4 {
     margin-top: 4px !important;
   }
-  
+
   .lfx-u-pad-b-16 {
     padding-bottom: 16px !important;
   }
@@ -1300,10 +1300,10 @@ div {
     padding-left: 4px !important;
   }
 
-  .lfx-u-pad-b-4{
+  .lfx-u-pad-b-4 {
     padding-bottom: 4px !important;
   }
-  
+
   .w-75 {
     width: 75% !important;
   }
@@ -1318,6 +1318,12 @@ div {
     --mdc-protected-button-label-text-color: white;
     --mat-protected-button-state-layer-color: white;
     --mat-protected-button-ripple-color: rgba(255, 255, 255, 0.1);
+  }
 
+  .mat-mdc-unelevated-button.mat-primary {
+    --mdc-filled-button-container-color: #0094ff;
+    --mdc-filled-button-label-text-color: white;
+    --mat-filled-button-state-layer-color: white;
+    --mat-filled-button-ripple-color: rgba(255, 255, 255, 0.1);
   }
 }
