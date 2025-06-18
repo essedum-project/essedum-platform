@@ -3,33 +3,14 @@
         <div *ngIf="incShowTableViewBtn!='no'" class="col-md-12 ticket-header selector-795-138"
             style="margin-top: 12px;">
             <div class="col-md-7 selector-795-139">
-                <!-- <div class="col-md-12 selector-795-140" style="width:fit-content; margin-top: 0.7vh;">
-                    <h2 class="selector-795-141" style="color: black;" *ngIf="btnText">{{btnText}} Entry</h2>
-                    <h2 class="selector-795-142" style="color: black;" *ngIf="!btnText">Form Template</h2>
-                </div> -->
+
             </div>
-            <!-- <div *ngIf="!router.url.includes('sandbox') && incSource!='caseDetails'"
-                class="selector-795-143 le-u-mar-r-8" style="display: flex; justify-content: end;">
-                <div *ngIf="isdatasetroute" (click)="changeToTableView()" title="Close" designType='icon'>
-                    <span class="le-c-btn--icon__icon">
-                        <i class="aip-led-icons icon  close-icon"></i>
-                    </span>
-                </div>
-            </div> -->
+
         </div>
         <div *ngIf="formTemplateAvailable==true;else no_form_template_msg" class="cip-card selector-795-146"
             style="font-size: 1.4rem;display:grid; margin: 1% 3% 1% 1%; width: -webkit-fill-available;"
-            id="dtstfrmvw-frmcntnts" [ngBusy]={busy:busy,backdrop:true}><!-- [ngStyle]="formHeight"-->
-            <!-- <div class="col-md-12 selector-795-147" style="margin-top: 8px; padding: 0px;">
-                <div class="col-md-4 offset-md-8 justify-content-end selector-795-148"
-                    style="display: flex; flex-wrap: wrap; align-content: flex-end;">
-                    <button *ngIf="writeAccess && btnText=='Update' && incSource!='inbox' && incSource!='caseDetails' && isdatasetroute" class="cip-icon selector-795-149" type="button"
-                        (click)="showUpdateBtn=!showUpdateBtn" title="Edit"
-                        [ngStyle]="{color:showUpdateBtn?'darkgray':'var(--base-color)'}">
-                        <i class="fas fa-pen selector-795-150"></i>
-                    </button>
-                </div>
-            </div> -->
+            id="dtstfrmvw-frmcntnts" [ngBusy]={busy:busy,backdrop:true}>
+
             <div class="" style="position:relative">
                 <formio *ngIf="formTemplateAvailable" #datasetForm [form]="schema" [submission]="formObjValue"
                     (change)="isFormValid=(datasetForm?.formio?.checkData()) && !(disable);changeForm()"
@@ -46,18 +27,7 @@
                     </div>
                 </div>
             </div>
-            <!-- <formio *ngIf="formTemplateAvailable"  #datasetForm [form]="schema" [submission]="formObjValue" (change)="isFormValid=(datasetForm?.formio?.checkData()) && !(disable);changeForm()" class="mx-3 selector-795-151" style="padding: 2rem 1rem 2rem 1rem; color: rgba(0,0,0,.87);"
-                [ngStyle]="disableFormFields()" (click)="checkButtonClick($event)" (keydown.enter)="checkButtonClick($event)">
-            </formio> -->
-            <!-- (change)="onSubmit($event)"-->
-            <!-- <lib-json-schema-form [(value)]="formObjValue" [schema]="schema" (errorChange)="error=$event"
-                class="selector-795-151" style="padding: 2rem 1rem 2rem 1rem; color: rgba(0,0,0,.87);"
-                [ngStyle]="disableFormFields()">            </lib-json-schema-form>
-            <div *ngIf="!router.url.includes('sandbox') && (writeAccess && btnText=='Add') || (btnText=='Update' && showUpdateBtn)"
-                class="col-md-11 selector-795-152" style="margin: 1rem 1rem 1rem 2rem; padding: 0px; height: 3rem;">
-                <button mat-raised-button (click)="saveEntry()" [disabled]="!enblSaveBtn"
-                    class="selector-795-153">{{btnText}}</button>
-            </div> -->
+
             <div *ngIf="(incSource=='inbox' || incSource=='caseDetails' || incSource=='ocr' || incSource=='enduser') && writeAccess"
                 class="col-md-11 selector-795-152" style="margin: 1rem 1rem 1rem 2rem; padding: 0px; height: 3rem;">
                 <button *ngIf="incAction=='add' || incAction=='ocr'" [ngBusy]={busy:busy,backdrop:true}

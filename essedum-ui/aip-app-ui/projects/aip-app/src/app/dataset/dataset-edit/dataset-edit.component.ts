@@ -1,9 +1,7 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
-// import { Groups } from '../../groups/groups';
 import { MatSelect } from '@angular/material/select';
 import { Dataset } from '../datasets';
-// import { DashConstant } from 'com-lib-util';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatasetServices } from '../dataset-service';
 import { TabsFilterService } from '../../services/tabs-filter.service';
@@ -17,7 +15,7 @@ import { DashConstant } from '../../DTO/dash-constant';
 })
 export class DatasetEditComponent implements OnInit {
 
- 
+
   @Input() inpGroup;
   inpDataset: any;
   @Input() method;
@@ -26,7 +24,7 @@ export class DatasetEditComponent implements OnInit {
   showBreadcrumb: any = false;
   editData: any;
   showDetails = false;
-  selectedDataset:any = {}
+  selectedDataset: any = {}
   viewSelector: boolean = false;
   busy: Subscription;
   datasourceRedirect: boolean = false;
@@ -56,7 +54,7 @@ export class DatasetEditComponent implements OnInit {
   backToDashButt: boolean;
   directToDatasetFullscreenView: boolean = false;
   directToPivotFullscreenView: boolean = false;
-  directToVisualizeFullscreenView:boolean = false;
+  directToVisualizeFullscreenView: boolean = false;
   datasetDetails: any = [];
   dash1 = new DashConstant();
   dash3 = new DashConstant();
@@ -67,72 +65,67 @@ export class DatasetEditComponent implements OnInit {
   selectedTabIndex
   breadcrumb
   breadcrumbs: any[] = [];
-  uploaddata:any;
-   itsm :boolean=false;
+  uploaddata: any;
+  itsm: boolean = false;
 
-  isNavigateFromKg:boolean=false;
-  nodeNameAtNavigate =""
+  isNavigateFromKg: boolean = false;
+  nodeNameAtNavigate = ""
   card: any;
   busy1: Subscription;
   constructor(
     private route: ActivatedRoute,
-    private location : Location,
+    private location: Location,
     private router: Router,
     private datasetService: DatasetServices,
     private filtersService: TabsFilterService,
-    // public messageService: MessageService,
-    // public _globals: AppGlobals,
-    // public icipComService: IcipComService
+
   ) {
     this.checkExp();
   }
   params: any = {};
 
-  ngOnInit() { 
-    
-    if(this.router.routerState.snapshot.url.includes('uploadTicket')){
-    this.itsm=true;
-    this.currentEntity='Tickets';
-    this.datasetService. getDatasetByNameAndOrg('Tickets').subscribe((res)=>{
-      this.uploaddata=res;
-      if(res){
-      this.card=res;
-   console.log("data is",this.uploaddata);
-   this.inpDataset = this.card.name;
-   this.params['dgroup'] = this.card.datasource.type;
-   this.params['group'] = this.card.datasource.name;
-   this.params['name'] = this.card.name;
-      }
-    
-     });
+  ngOnInit() {
+
+    if (this.router.routerState.snapshot.url.includes('uploadTicket')) {
+      this.itsm = true;
+      this.currentEntity = 'Tickets';
+      this.datasetService.getDatasetByNameAndOrg('Tickets').subscribe((res) => {
+        this.uploaddata = res;
+        if (res) {
+          this.card = res;
+          this.inpDataset = this.card.name;
+          this.params['dgroup'] = this.card.datasource.type;
+          this.params['group'] = this.card.datasource.name;
+          this.params['name'] = this.card.name;
+        }
+
+      });
     }
 
-    if (history.state.selectedCard ) {
-      console.log(history.state);
+    if (history.state.selectedCard) {
       let cards = this.location.getState();
-     
-        this.card = cards['selectedCard'];
-      
-      console.log('selectedCard', cards['selectedCard']);
-      
+
+      this.card = cards['selectedCard'];
+
+
       this.inpDataset = this.card.name;
       this.params['dgroup'] = this.card.datasource.type;
       this.params['group'] = this.card.datasource.name;
       this.params['name'] = this.card.name;
-    } 
-   
-    try{
+    }
+
+    try {
       this.breadcrumb = JSON.parse(sessionStorage.getItem("icip.breadcrumb"))
-      this.breadcrumbs.push({label:"Datasets",url:"../"},
-      {label:this.itsm? 'Tickets':this.card?.alias,url:""})
+      this.breadcrumbs.push({ label: "Datasets", url: "../" },
+        { label: this.itsm ? 'Tickets' : this.card?.alias, url: "" })
       //this.fetchDashConstants();
       this.filtersService.changeText('');
       this.selectedTab = this.tabList[0];
       this.selectedTabIndex = 0
-      
-      if(history.state.isNavigateFromKg==true){
-        this.isNavigateFromKg=true
-        this.nodeNameAtNavigate=history.state.nodeNameAtNavigate
+
+      if (history.state.isNavigateFromKg == true) {
+        this.isNavigateFromKg = true
+        this.nodeNameAtNavigate = history.state.nodeNameAtNavigate
       }
       if (this.route.snapshot?.children[0]?.params?.["action"] == "upload") {
         this.selectedTab = "Tasks"
@@ -144,37 +137,37 @@ export class DatasetEditComponent implements OnInit {
         this.activeTab = "visualize"
       }
 
-    
+
       if (JSON.stringify(this.params) != JSON.stringify({})) {
         this.showDetails = true
         if (this.router.url.endsWith("/view")) {
           this.directToDatasetFullscreenView = true;
           return;
         }
-        if(this.router.url.endsWith("/pivot")){
+        if (this.router.url.endsWith("/pivot")) {
           this.directToPivotFullscreenView = true;
           return;
         }
-        if(this.router.url.endsWith("/visualize")){
+        if (this.router.url.endsWith("/visualize")) {
           this.directToVisualizeFullscreenView = true;
           return;
-        }  
+        }
         this.currentDatasourceName = this.params['group'] || this.inpGroup || "NA";
         this.currentEntity = this.params['name'] || this.inpDataset || "NA";
-  
-  
-          this.datasourceRedirect = this.params['dgroup'] ? true : false;
-          if (this.datasourceRedirect) {
-            this.datasourcePlugin = this.params['dgroup'];
-            
-          }        
+
+
+        this.datasourceRedirect = this.params['dgroup'] ? true : false;
+        if (this.datasourceRedirect) {
+          this.datasourcePlugin = this.params['dgroup'];
+
+        }
       }
       this.checkTableViewSupport()
     }
-    catch(Exception){
-    this.datasetService.message("Some error occured", "Error")
+    catch (Exception) {
+      this.datasetService.message("Some error occured", "Error")
     }
-  
+
   }
 
   //needed
@@ -184,11 +177,11 @@ export class DatasetEditComponent implements OnInit {
         .subscribe(res => {
           this.currentdatasourcealias = this.card.alias ? this.card.alias : this.card.name
           this.dataset = this.card;
-          if(!this.card.schemajson){
-            this.card.schemajson=res.schemajson;
+          if (!this.card.schemajson) {
+            this.card.schemajson = res.schemajson;
           }
           this.editData = this.card;
-          
+
         },
           () => { },
           () => {
@@ -215,7 +208,7 @@ export class DatasetEditComponent implements OnInit {
     datasourceUrl = "../../../../../datasources";
 
     if (this.currentDatasourceName !== "NA") {
-      if(this.datasourceRedirect) {
+      if (this.datasourceRedirect) {
         this.router.navigate([datasourceUrl], { relativeTo: this.route });
       } else {
         this.router.navigate([datasetUrl], { relativeTo: this.route });
@@ -243,43 +236,43 @@ export class DatasetEditComponent implements OnInit {
           this.router.navigate([datasourceUrl, this.datasourcePlugin], { relativeTo: this.route });
         }
       } else {
-          this.router.navigate(["../"], { relativeTo: this.route });
+        this.router.navigate(["../"], { relativeTo: this.route });
       }
     }
   }
 
   showDatasetsView() {
-      let currentGroupAlias;
-        currentGroupAlias = this.currentdatasourcealias;
-        this.selectedDataset["name"] = this.currentEntity;
-        if (this.datasourceRedirect)
-          this.breadcrumbName = [
-            { name: this.datasourcePlugin, parent: true },
-            { name: currentGroupAlias, parent: true, dataset: true },
-            { name: this.currentdatasourcealias, parent: false },
-          ];
-        else {
-            this.breadcrumbName = [
-              { name: this.currentDatasourceName, parent: true },
-              { name: this.currentdatasourcealias, parent: false },
-            ];
-        }
-        this.showBreadcrumb = true;
-        this.showDetails = true;
+    let currentGroupAlias;
+    currentGroupAlias = this.currentdatasourcealias;
+    this.selectedDataset["name"] = this.currentEntity;
+    if (this.datasourceRedirect)
+      this.breadcrumbName = [
+        { name: this.datasourcePlugin, parent: true },
+        { name: currentGroupAlias, parent: true, dataset: true },
+        { name: this.currentdatasourcealias, parent: false },
+      ];
+    else {
+      this.breadcrumbName = [
+        { name: this.currentDatasourceName, parent: true },
+        { name: this.currentdatasourcealias, parent: false },
+      ];
+    }
+    this.showBreadcrumb = true;
+    this.showDetails = true;
   }
 
   isScene = false;
-//needed
+  //needed
   onTabChange(event: any) {
     this.selectedTab = event?.tab?.textLabel
     // if (this.selectedTab == "View") {
-      this.checkTableViewSupport()
+    this.checkTableViewSupport()
     // }
   }
 
 
   checkExp() {
-    try{
+    try {
       if (this.router.url.includes("sandbox")) {
         sessionStorage.setItem("isSbx", "true");
         this.isSbx = true
@@ -306,10 +299,10 @@ export class DatasetEditComponent implements OnInit {
       })
 
     }
-    catch(Exception){
-    this.datasetService.message("Some error occured", "Error")
+    catch (Exception) {
+      this.datasetService.message("Some error occured", "Error")
     }
-   
+
   }
 
   //needed
@@ -317,10 +310,10 @@ export class DatasetEditComponent implements OnInit {
     this.showDetails = false;
   }
 
-  navigateToKg(){
-      this.router.navigateByUrl("/landing/iamp-graph/main",{ state: { nodeName :this.nodeNameAtNavigate} })
+  navigateToKg() {
+    this.router.navigateByUrl("/landing/iamp-graph/main", { state: { nodeName: this.nodeNameAtNavigate } })
   }
-  backToDatasets(){
+  backToDatasets() {
     this.location.back();
   }
 

@@ -1,15 +1,6 @@
 import { Datasource } from '../datasource/datasource';
 
-//
-//  @ 2018 Infosys Limited, Bangalore, India. All Rights Reserved.
-//  Version: 1.0
-//  Except for any free or open source software components embedded in this Infosys proprietary software program (Program),
-//  this Program is protected by copyright laws, international treaties and  other pending or existing intellectual property
-//  rights in India, the United States, and other countries. Except as expressly permitted, any unauthorized reproduction, storage,
-//  transmission in any form or by any means(including without limitation electronic, mechanical, printing, photocopying,
-//  recording, or otherwise), or any distribution of this program, or any portion of it, may result in severe civil and
-//  criminal penalties, and will be prosecuted to the maximum extent possible under the law.
-//
+
 
 export class Dataset {
     id: number;
@@ -25,10 +16,10 @@ export class Dataset {
     expStatus: number;       //Exp
     schemajson: any;
     archivalConfig: string
-    dashboard:any;
+    dashboard: any;
     isArchivalEnabled
-    taskdetails:any;
-    views:any;
+    taskdetails: any;
+    views: any;
     constructor(json?: any) {
         if (json != null) {
             this.id = json.id ? json.id : 0;
@@ -44,8 +35,8 @@ export class Dataset {
             this.expStatus = json.expStatus;
             this.schemajson = json.jsonSchema;
             this.archivalConfig = json.archivalConfig;
-            this.dashboard=json.dashboard;
-            this.isArchivalEnabled=json.isArchivalEnabled;
+            this.dashboard = json.dashboard;
+            this.isArchivalEnabled = json.isArchivalEnabled;
             this.taskdetails = json.taskdetails;
             this.views = json.views;
         }
@@ -76,52 +67,52 @@ export const COLUMNDATATYPES = [
     { name: 'String', code: 'string' },
     { name: 'String', code: 'category' },
     { name: 'Datetime', code: 'datetime64' },
-  ];
-  export const DEFAULT_OPERATOR_PACKS = [
-  { pack: 'comparison' },
-  { pack: 'general' },
-  { pack: 'math' },
-  { pack: 'aggregate' },
-  { pack: 'logical' },
-  { pack: 'groupby' },
-  { pack: 'datetime' },
-  { pack: 'trigonometric' },
-  { pack: 'type' },
-  { pack: 'financepack' },
+];
+export const DEFAULT_OPERATOR_PACKS = [
+    { pack: 'comparison' },
+    { pack: 'general' },
+    { pack: 'math' },
+    { pack: 'aggregate' },
+    { pack: 'logical' },
+    { pack: 'groupby' },
+    { pack: 'datetime' },
+    { pack: 'trigonometric' },
+    { pack: 'type' },
+    { pack: 'financepack' },
 ];
 export class StatisticsRequestObject {
-	recipe_id: number;
-	recipe_name: string;
-	// object_id: number;
-	function_name: string[];
-	args: Object[];
-	// mode: string;
-	//user_id: number;
+    recipe_id: number;
+    recipe_name: string;
+    // object_id: number;
+    function_name: string[];
+    args: Object[];
+    // mode: string;
+    //user_id: number;
     // user_id:string;
-	actions_changed: string;
-	screen: string;
-	//target_attribute:string;
+    actions_changed: string;
+    screen: string;
+    //target_attribute:string;
     dataset_type: string;
     dataset_name: string;
     aip_login: string;
     org: string;
 }
 export class TransformObject {
-	dataframe: string;
-	recipe_id: number;
-	recipe_name: string;
-	function_name: string[];
-	args: Object[];
-	object_id: number;
-	object_name: string;
-	// collection_id: number[];
-	collection_name: string[];
-	connection_id: number;
-	mode: string;
-	first_load: string;
-	screen: string;
-	user_id: number;
-	dataset_type: string;
+    dataframe: string;
+    recipe_id: number;
+    recipe_name: string;
+    function_name: string[];
+    args: Object[];
+    object_id: number;
+    object_name: string;
+    // collection_id: number[];
+    collection_name: string[];
+    connection_id: number;
+    mode: string;
+    first_load: string;
+    screen: string;
+    user_id: number;
+    dataset_type: string;
     dataset_name: string;
     aip_login: string;
     org: string;
@@ -130,4 +121,4 @@ export const QUERY_OPERATOR_TABLE_HEADERS = ['Operator Packs', 'Formula'];
 export const DISABLED_ADVISORIES = [
     'find_and_update_column_data',
     'cleanse_column_data',
-  ];
+];

@@ -20,10 +20,10 @@ import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.compon
 })
 export class DatasetByNameComponent {
 
-cardTitle: String = "Datasets";
-public isHovered: boolean = false;
-public isSearchHovered:boolean=false;
-public isFilterHovered:boolean=false;
+  cardTitle: String = "Datasets";
+  public isHovered: boolean = false;
+  public isSearchHovered: boolean = false;
+  public isFilterHovered: boolean = false;
   cardToggled: boolean = true;
   cards: any;
   filteredCards: any;
@@ -36,7 +36,7 @@ public isFilterHovered:boolean=false;
   allCards: any;
   deleteFilteredTag: boolean = false;
   deleteFilteredDataset: any;
-    editData: any;
+  editData: any;
 
 
   type: any;
@@ -88,7 +88,7 @@ public isFilterHovered:boolean=false;
   filteredTopics: any;
   status: any;
   ratingList: any;
-  rateData: { selectedModule: string; selectedElement: any; selectedElementAlias:any, previousRating: any; previousFeedback: any; };
+  rateData: { selectedModule: string; selectedElement: any; selectedElementAlias: any, previousRating: any; previousFeedback: any; };
 
   constructor(
     //private telemetry: OpenTelemetryService,
@@ -99,7 +99,7 @@ public isFilterHovered:boolean=false;
     private dialog: MatDialog,
     private http: HttpClient,
     private datepipe: DatePipe,
-   // private modalService: LedsModalService,
+    // private modalService: LedsModalService,
     private semanticService: SemanticService,
     private datasetService: DatasetServices,
     private changeDetectionRef: ChangeDetectorRef,
@@ -125,7 +125,7 @@ public isFilterHovered:boolean=false;
     //this.telemetryCall();
     this.records = false;
     this.route.params.subscribe(params => this.type = params.type);
-    if(this.type)this.selectedAdapterType.push(this.type);
+    if (this.type) this.selectedAdapterType.push(this.type);
     this.route.queryParams.subscribe((params) => {
       // Update this.pageNumber if the page query param is present
       if (params['page']) {
@@ -139,7 +139,7 @@ public isFilterHovered:boolean=false;
           : [];
         this.selectedIndexNames = params['indexNames']
           ? params['indexNames'].split(',')
-          : [];  
+          : [];
       } else {
         this.pageNumber = 1;
         this.pageSize = 4;
@@ -171,11 +171,11 @@ public isFilterHovered:boolean=false;
       let param: HttpParams = new HttpParams();
       let organization = sessionStorage.getItem('organization')
       param = param.set('organization', organization);
-      if(this.filt &&  this.filt!=''){
+      if (this.filt && this.filt != '') {
         param = param.set('aliasOrName', this.filt);
       }
-      if(this.selectedAdapterType && this.selectedAdapterType.length>0){
-        this.selectedAdapterType.forEach((type)=>{
+      if (this.selectedAdapterType && this.selectedAdapterType.length > 0) {
+        this.selectedAdapterType.forEach((type) => {
           param = param.set('types', type);
         });
       }
@@ -185,7 +185,7 @@ public isFilterHovered:boolean=false;
       // this.service.getDatasetCards("", "1000", "", false).subscribe((res) => {
       //   this.allCards = res;
       // })
-     // this.telemetryImpression();
+      // this.telemetryImpression();
       this.updateQueryParam(this.pageNumber, this.filt, this.selectedAdapterType.toString(), this.selectedIndexNames.toString(), sessionStorage.getItem('organization'), JSON.parse(sessionStorage.getItem('role')).id);
       // if (this.filt) this.filterz();
       // else this.getCards(this.pageNumber, this.pageSize);
@@ -341,7 +341,7 @@ public isFilterHovered:boolean=false;
           page: page,
           search: search,
           type: adapterType,
-          knowledgeBases : indexName,
+          knowledgeBases: indexName,
           org: org,
           roleId: roleId
         },
@@ -378,7 +378,7 @@ public isFilterHovered:boolean=false;
           e.lastmodifieddate = new Date(new Date(e.lastmodifieddate).getTime() - timezoneOffset * 60 * 1000);
           sort.push(e)
         })
-        this.filteredCards = sort.sort((a,b)=>b.lastmodifieddate-a.lastmodifieddate)
+        this.filteredCards = sort.sort((a, b) => b.lastmodifieddate - a.lastmodifieddate)
         this.filteredCards = this.cards;
         //this.getRatingByUserAndModule();
         this.noOfItems = this.noOfItems || data.length;
@@ -406,7 +406,7 @@ public isFilterHovered:boolean=false;
           card['rate'] = found.rating;
         else
           card['rate'] = 0;
-       })
+      })
     })
   }
 
@@ -539,7 +539,7 @@ public isFilterHovered:boolean=false;
         //this.getRatingByUserAndModule();
       });
     });
-    this.updateQueryParam(this.pageNumber,this.filt,this.selectedAdapterType.toString());
+    this.updateQueryParam(this.pageNumber, this.filt, this.selectedAdapterType.toString());
   }
 
   getDatasetByConnection() {
@@ -566,7 +566,6 @@ public isFilterHovered:boolean=false;
     this.selectedAdapterType = event.getSelectedAdapterType();
     this.selectedTag = event.getSelectedTagList();
     this.selectedIndexNames = event.getSelectedDatasetTopicType();
-    console.log(this.selectedIndexNames);
 
     this.tagrefresh = false;
     this.filterCards();
@@ -630,37 +629,37 @@ public isFilterHovered:boolean=false;
   deleteAdapter(name: string) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
     // dialogRef.afterClosed().subscribe((result) => {
-      // if (result === "delete") {
-      //   this.datasetService.deleteDatasets(name).subscribe((res) => {
-      //     this.service.messageNotificaionService('success', "Dataset Deleted Successfully");
-      //   //   this.service.deleteRatingByElement(name,'Dataset').subscribe((res) => {
-      //   //     this.service.messageNotificaionService('success', "Ratings Deleted Successfully");
-      //   //     //this.telemetry.addTelemetryEvent(name +' Deleted ');
-      //   //   }
-      //   // );
-      //     if (this.selectedAdapterType.length > 0) {
-      //       this.deleteFilteredTag = true;
-      //       this.deleteFilteredDataset = name;
-      //       this.filterCards();
-      //     } else {
-      //       this.refreshData();
-      //     }
-      //   }, ((error) => {
-      //     this.service.messageNotificaionService('error', "Error");
-      //   }));
-      // }
+    // if (result === "delete") {
+    //   this.datasetService.deleteDatasets(name).subscribe((res) => {
+    //     this.service.messageNotificaionService('success', "Dataset Deleted Successfully");
+    //   //   this.service.deleteRatingByElement(name,'Dataset').subscribe((res) => {
+    //   //     this.service.messageNotificaionService('success', "Ratings Deleted Successfully");
+    //   //     //this.telemetry.addTelemetryEvent(name +' Deleted ');
+    //   //   }
+    //   // );
+    //     if (this.selectedAdapterType.length > 0) {
+    //       this.deleteFilteredTag = true;
+    //       this.deleteFilteredDataset = name;
+    //       this.filterCards();
+    //     } else {
+    //       this.refreshData();
+    //     }
+    //   }, ((error) => {
+    //     this.service.messageNotificaionService('error', "Error");
+    //   }));
+    // }
     // });
-    
+
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'delete') {
-         this.datasetService.deleteDatasets(name).subscribe((res) => {
-            // this.service.messageNotificaionService(
-            //   'success',
-            //   'Connection Deleted Successfully'
-            // );
-            this.ngOnInit();
-            // this.telemetry.addTelemetryEvent('Connection Deleted');
-          },
+        this.datasetService.deleteDatasets(name).subscribe((res) => {
+          // this.service.messageNotificaionService(
+          //   'success',
+          //   'Connection Deleted Successfully'
+          // );
+          this.ngOnInit();
+          // this.telemetry.addTelemetryEvent('Connection Deleted');
+        },
           (error) => {
             // this.service.messageNotificaionService('error', 'Error');
           }
@@ -684,11 +683,11 @@ public isFilterHovered:boolean=false;
         this.startIndex = 0;
         this.endIndex = 5;
       }
-          this.filterCards();
+      this.filterCards();
 
     }
   }
-    nextPage() {
+  nextPage() {
     if (this.pageNumber + 1 <= this.noOfPages) {
       this.pageNumber += 1;
       this.changePage();
@@ -718,13 +717,13 @@ public isFilterHovered:boolean=false;
   navigate(content: any) {
     this.copyDataset = true;
     // this.dialog.open(content, { width: '600px' });
-        this.selectedCard = content;
+    this.selectedCard = content;
 
   }
-routeBackToList(){
-      this.copyDataset = false;
+  routeBackToList() {
+    this.copyDataset = false;
 
-}
+  }
   // new cards
   getIconClass(views): string {
     switch (views) {
@@ -773,11 +772,11 @@ routeBackToList(){
     //   }
     // });
   }
-selectedButton(i) {
+  selectedButton(i) {
     if (i == this.pageNumber) return { color: 'white', background: '#0094ff' };
     else return { color: 'black' };
   }
- 
+
   downloadSelectedFile(card: any) {
     // //this.telemetry.addTelemetryEvent(card.alias + ' Downloaded ');
     if ((card.datasource?.type && card.datasource.type == 'MYSQL') || (card.views && card.views == 'Table View')) {
@@ -1045,9 +1044,9 @@ selectedButton(i) {
     this.dialog.open(type, {
       width: '400px',
       data: {
-      retrigger,
-      status,
-      card
+        retrigger,
+        status,
+        card
       }
     });
   }
