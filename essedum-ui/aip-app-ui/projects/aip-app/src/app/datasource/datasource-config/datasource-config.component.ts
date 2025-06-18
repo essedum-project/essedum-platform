@@ -354,6 +354,7 @@ export class DatasourceConfigComponent implements OnInit {
       else {
         this.data.extras = JSON.stringify(this.data.extras);
         this.Services.createDatasource(this.data).subscribe((res) => {
+            this.Services.message('Connection created successfully');
           this.portDetails.datasourceid = res.body.id;
           this.portDetails.organization = res.body.organization;
 

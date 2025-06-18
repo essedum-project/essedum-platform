@@ -1,7 +1,4 @@
 
-
-// import { Project } from "./project";
-
 export class Role {
     projectId: number;
     id: number;

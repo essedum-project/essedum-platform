@@ -194,6 +194,8 @@ export class PipelineCreateComponent implements OnInit {
 
           }
           this.Services.message("Created Sucessfully.", "success");
+          this.dialogRef.close(data);
+
 
           if (this.data.edit || this.data.copy) {
             this.dialogRef.close(data);
@@ -348,7 +350,7 @@ export class PipelineCreateComponent implements OnInit {
 
         this.Services.update(editCanvas).subscribe((response) => {
           this.Services.message('Updated Successfully', 'success');
-
+          this.responseLink.emit(response);
           this.dialogRef.close(response);
         },
           error => this.Services.message('Canvas not updated due to error: ' + error, 'error')
