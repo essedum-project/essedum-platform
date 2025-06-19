@@ -6,7 +6,6 @@ import { ReplaySubject, Subject } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
 import { FileItem, FileUploader, ParsedResponseHeaders } from 'ng2-file-upload';
-// import { OpenTelemetryService } from 'com-lib-util';
 
 @Component({
   selector: 'app-default',
@@ -17,7 +16,6 @@ export class DefaultComponent {
   splunkTypesOpt = [];
   constructor(private datasetsService: DatasetServices,
     private service: Services,
-    // private telemetry: OpenTelemetryService,
     public dialogRef: MatDialogRef<DefaultComponent>,
     public matdialog: MatDialog) { }
 
@@ -79,15 +77,11 @@ export class DefaultComponent {
     this.cache.emit(event.checked);
   }
 
-  telemetryCall(){
-    // this.telemetry.startTelemetry('aip-app','DefaultComponent', sessionStorage.getItem('organization'));
-  }
+
   ngOnInit() {
-    this.telemetryCall();
     if(this.dataset['datasource'].type=='GIT'){
       const details = this.dataset['datasource'].connectionDetails;
       this.gitUrl = JSON.parse(details).url;
-      // this.dataset.attributes.url=this.gitUrl;
       this.isGitDataset=false;
       this.testSuccessful=true;
     }
@@ -113,8 +107,7 @@ export class DefaultComponent {
   ngOnDestroy() {
     this.onDestroy.next();
     this.onDestroy.complete();
-    // let activeSpan = this.telemetry.fetchActiveSpan();
-    // this.telemetry.endTelemetry(activeSpan);
+    
   }
 
   authentications() {
@@ -132,16 +125,13 @@ export class DefaultComponent {
       })
     }
     catch(Exception){
-    // this.messageService.error("Some error occured", "Error")
     }
    }
     
   saveDataset() {
-    // this.dataset.attributes['object']=this.dataset.attributes['path'];
     this.action.emit('save');
   }
   createDataset() {
-    // this.dataset.attributes['object']=this.dataset.attributes['path'];
     this.action.emit('create');
   }
 
@@ -276,7 +266,6 @@ export class DefaultComponent {
         })
     }
     catch(Exception){
-    // this.messageService.error("Some error occured", "Error")
     }
   
   }
@@ -304,7 +293,6 @@ export class DefaultComponent {
 
   onErrorItem(item: FileItem, response: string, status: number, headers: ParsedResponseHeaders): any {
     const error = response;
-    // this.messageService.error('Error!', 'while uploading file: '+error);
   }
 
   selectedz(data) {
@@ -347,21 +335,6 @@ export class DefaultComponent {
 
 }
 
-  callBuilder(){
-  //   let dialogRef = this.matdialog.open(QuerybuilderComponent, {
-      
-  //     width: '1000px',
-  //     height: '1000px',
-  //     data: { cols:this.colsList },
-  //   });
-  //   dialogRef.afterClosed().subscribe((result) => {
-  //     let val=this.whereStatement(result[0]);
-  //     this.whereCondStr="Select "+result[1]+" from "+result[2]+" where "+val;
-  //     this.dataset.attributes.Query=this.whereCondStr
 
-
-
-  //   });
-  }
  
 }

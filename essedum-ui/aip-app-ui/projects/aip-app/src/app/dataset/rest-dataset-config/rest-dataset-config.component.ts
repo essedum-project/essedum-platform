@@ -95,7 +95,6 @@ export class RestDatasetConfigComponent implements OnInit {
         this.connectionDetails = JSON.parse(this.dataset.datasource.connectionDetails);
         this.connectionType = this.connectionDetails['ConnectionType'];
         this.testDataset = this.connectionDetails['testDataset'];
-        // this.formType = this.dataset.formType;
 
         if (JSON.stringify(this.dataset.attributes) === JSON.stringify({})) {
           this.dynamicConfigVariablesArray = [];
@@ -167,7 +166,6 @@ export class RestDatasetConfigComponent implements OnInit {
         this.editorOptions.onChange = () => {
           if (this.basicReqTab = "bodyTab") {
             this.schemaForm = this.formJsonEditor.get();
-            // this.body = this.formJsonEditor.get();
           }
         }
 
@@ -188,7 +186,6 @@ export class RestDatasetConfigComponent implements OnInit {
 
     }
     catch (Exception) {
-      // this.messageService.error("Some error occured", "Error")
     }
 
 
@@ -207,8 +204,7 @@ export class RestDatasetConfigComponent implements OnInit {
 
           this.dataset.backingDataset = this.dataset.backingDataset &&
             this.dataset.backingDataset !== null ? this.dataset.backingDataset : '';
-          // this.backingDatasetCtrl.setValue(this.dataset.backingDataset.name);
-          // this.setBackingDatasetInitialValue();
+        
 
           if (this.dataset.datasource.type == "SQL")
             this.sourceType = this.datasetTypes.filter(row => row.type.toLocaleLowerCase() === 'mssql')[0];
@@ -241,8 +237,7 @@ export class RestDatasetConfigComponent implements OnInit {
 
           this.dataset.backingDataset = this.dataset.backingDataset &&
             this.dataset.backingDataset !== null ? this.dataset.backingDataset : '';
-          // this.backingDatasetCtrl.setValue(this.dataset.backingDataset.name);
-          // this.setBackingDatasetInitialValue();
+     
 
           if (this.dataset.datasource.type == "SQL")
             this.sourceType = this.datasetTypes.filter(row => row.type.toLocaleLowerCase() === 'mssql')[0];
@@ -323,13 +318,11 @@ export class RestDatasetConfigComponent implements OnInit {
   }
 
   deleteParamsRow(index) {
-    //if (this.dynamicParamsArray.length == 1) {
-    //  return false;
-    //} else {
+    
     this.dynamicParamsArray.splice(index, 1);
     this.dataset.attributes['QueryParams'] = this.dynamicParamsArray;
     return true;
-    //}
+    
   }
 
   addHeadersRow() {
@@ -361,29 +354,22 @@ export class RestDatasetConfigComponent implements OnInit {
     return true;
   }
   deleteConfigVariablesRow(index) {
-    //if (this.dynamicConfigVariablesArray.length == 1) {
-    //  return false;
-    //} else {
+
     this.dynamicConfigVariablesArray.splice(index, 1);
     this.dataset.attributes['ConfigVariables'] = this.dynamicConfigVariablesArray;
     return true;
     //}
   }
   deleteHeadersRow(index) {
-    //if (this.dynamicHeadersArray.length == 1) {
-    //  return false;
-    //} else {
-    // } else {
+   
     this.dynamicHeadersArray.splice(index, 1);
   }
   deletePathVariablesRow(index) {
-    // if (this.dynamicLeapParamsArray.length == 1) {
-    //   return false;
-    // } else {
+
     this.dynamicPathVariablesArray.splice(index, 1);
     this.dataset.attributes['PathVariables'] = this.dynamicPathVariablesArray;
     return true;
-    // }
+    
   }
 
   addUrlEncodedRow() {
@@ -392,8 +378,7 @@ export class RestDatasetConfigComponent implements OnInit {
     }
     this.urlEncodedDynamic = { key: "", value: "" };
     this.urlEncodedArray.push(this.urlEncodedDynamic);
-    //
-    //
+ 
     this.dataset.attributes['Body'] = this.urlEncodedArray;
     return true;
   }

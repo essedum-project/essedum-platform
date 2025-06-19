@@ -4,7 +4,6 @@ import { Subscription } from 'rxjs';
 import { Dataset } from '../datasets';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatasetServices } from '../dataset-service';
-// import { Project } from 'com-lib-util';
 import * as _ from "lodash";
 import { Project } from '../../DTO/project';
 
@@ -47,13 +46,11 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
   selectedSplit: string;
   selectedSubset: string;
   loading: boolean;
-  // fullscreenView: boolean = false;
   isFormValid: boolean = true;
   isdisabled: any;
   disable: boolean = false;
   dataComponentList: string[] = [];
   isdatasetroute: boolean = false;
-  // fullscreenView: boolean = false;
   @Input('inboxqueue') inboxqueue: string = "";
   @Input('dataset') data: Dataset;
   @Input('usedatasetobject') usedatasetobject;
@@ -153,18 +150,13 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
             error => { this.datasetsService.message("Error in fetching dataset details " + error, "Dataset View"); })
       }
     }
-    // }
-    // catch(Exception){
-    // this.datasetsService.message("Some error occured", "Error")
-    // }
+  
 
   }
 
   getData(datasetname) {
     let finalAndObj = { "and": [] };
-    // params.forEach(param => {
-    //   finalAndObj.and.push({ "or": { "property": param, "equality": "like", "value": this.rowObj.number } });
-    // })
+   
     let proj: Project = JSON.parse(sessionStorage.getItem("project"));
 
     let pagination = { 'page': 0, 'size': 10 }
@@ -183,7 +175,6 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
 
 
         this.incRowObj = tickets[0];
-        //if (this.incidents.sop) this.fetchSopList(this.incidents.sop);
 
 
       }
@@ -205,31 +196,6 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
     this.caseMgmt = (this.dataset.isApprovalRequired || this.dataset.isInboxRequired);
     this.openForm(this.incAction, { ...this.incRowObj });
   }
-
-  // edit(dataObj) {
-  //   this.saveSearchFilterExample();
-  //   this.writeAccess ? this.openForm('update', dataObj) : this.openForm('view', dataObj);
-  // }
-
-  // createTicket() {
-  //   this.saveSearchFilterExample();
-  //   this.openForm('add');
-  // }
-
-  saveSearchFilterExample() {
-    // this.datasetsService.setSearchFilterExample({ searchExample: this.searchIncident, selectedTickets: this.selectedTickets });
-  }
-
-  // checkFormValidations(): boolean {
-  //   if (this.schema && this.schema['required'] && this.schema['required'].length > 0) {
-  //     for (let i = 0; i < this.schema['required'].length; i++) {
-  //       let fld = this.schema['required'][i];
-  //       if (!this.formObjValue[fld] || this.formObjValue[fld].toString().replace(/\s/g, '').length < 1) return false;
-  //     }
-  //     return true;
-  //   }
-  //   return true;
-  // }
 
   openForm(source, rowData?) {
     try {
@@ -253,10 +219,8 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
               if (source == "add" || source == "reset") this.formObjValue.data = {};
               else if (source == "ocr") this.formObjValue.data = rowData;
               if (source == "add" || source == "ocr") this.formObjValueCpy = _.cloneDeep(this.formObjValue);
-              // this.formView = true;
             }
             else {
-              // this.formView = false;
               this.datasetsService.message("Table Name is required for inserting data", "Dataset View");
             }
           }
@@ -307,7 +271,6 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
 
                     this.incRowObj = tickets[0];
                     this.templateGenerate({ ...this.incRowObj })
-                    //if (this.incidents.sop) this.fetchSopList(this.incidents.sop);
 
 
                   }
@@ -315,7 +278,6 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
               }
             }
             else {
-              // this.formView = false;
               this.datasetsService.message("Both Table Name and Unique Identifier are required for updating data", "Dataset View");
             }
           }
@@ -323,12 +285,10 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
             if (rowData) {
               this.formObjValue.data = rowData;
               this.formObjValueCpy = _.cloneDeep(this.formObjValue);
-              // let tempArr = Object.entries(rowData).filter(ele => Object.keys(this.schema).map(ky => ky.toLowerCase()).includes(ele[0].toLowerCase()));
-              // tempArr.forEach(ele => { this.formObjValue[ele[0]] = ele[1]; })
+     
             }
             this.btnText = undefined;
             this.selectFormTemplate();
-            // this.formView = true;
           }
           else if (source == "new") {
             this.btnText = "Add";
@@ -350,7 +310,6 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
   }
 
   saveFormTemplateChanges() {
-    // try {
     this.schema = JSON.parse(JSON.stringify(this.schema, (_, nestedValue1) => {
       nestedValue1?.components?.forEach(nestedValue => {
         if (nestedValue && nestedValue['type'] == "select") {
@@ -376,14 +335,10 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
       })
       return nestedValue1;
     }));
-    // }
-    // catch (Exception) {
-    //   this.datasetsService.message("Some error occured", "Error")
-    // }
+   
   }
 
   templateGenerate(rowData) {
-    // if (rowData[this.unqId]) {
     this.unqIdValue = rowData[this.unqId];
     this.btnText = "Update";
     this.selectFormTemplate();
@@ -400,18 +355,11 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
       return nestedValue;
     });
     this.formObjValueCpy = _.cloneDeep(this.formObjValue);
-    // let tempArr = Object.entries(rowData).filter(ele => Object.keys(this.schema).map(ky => ky.toLowerCase()).includes(ele[0].toLowerCase()));
-    // tempArr.forEach(ele => { this.formObjValue[ele[0]] = ele[1]; })
+   
     this.valCpy = Object.assign({}, this.formObjValue.data);
     this.differ = this.differs.find(this.formObjValue.data).create();
     this.formTemplateAvailable = true
-    // if (!this.powerMode) 
-    // this.formView = true;
-    // }
-    // else {
-    //   // this.formView = false;
-    //   this.datasetsService.message(this.unqId + "(unique identifier) value is required for updating data", "Dataset View");
-    // }
+
   }
 
   selectFormTemplate() {
@@ -426,9 +374,7 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
         else actionToBeCompared = "view";
       }
 
-      // this.schema = JSON.parse(this.dataset.schemajson)?.filter(ele => ele.templateTags?.toString().split(",").includes(actionToBeCompared))[0];
-      // if (!this.schema && JSON.parse(this.dataset.schemajson)?.length > 0) this.schema = JSON.parse(this.dataset.schemajson)[0];
-      // this.formTemplateAvailable = this.schema && Object.keys(this.schema).length > 0;
+      
     }
     catch (Exception) {
       this.datasetsService.message("Some error occured", "Error")
@@ -447,8 +393,7 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
     if (clickedBtn) {
       this.navigateToAction(clickedBtn);
     }
-    // else
-    //   this.formData.emit(this.formObjValue.data)
+
   }
 
   navigateToAction(actionObj): Promise<string> {
@@ -518,8 +463,7 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
                         else if (this.btnText == "Update") actionToBeCompared = "update";
                         else actionToBeCompared = "view";
                       }
-                      // this.schema = JSON.parse(this.dataset.schemajson)?.filter(ele => ele.templateTags?.toString().split(",").includes(actionToBeCompared))[0];
-                      // if (!this.schema && JSON.parse(this.dataset.schemajson)?.length > 0) this.schema = JSON.parse(this.dataset.schemajson)[0];
+                     
                       this.formObjValue.data = resp[0];
                       this.formObjValueCpy = _.cloneDeep(this.formObjValue);
                       resolve("Entry refreshed successfully");
@@ -618,7 +562,6 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
 
             break;
           case "cancel":
-            // this.location.back()
             this.result.emit("backToTableView")
         }
       })
@@ -831,11 +774,8 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
   }
 
   changeToTableView() {
-    // this.formView = false;
     this.result.emit("backToTableView");
-    // if (this.powerMode) {
-    //   this.powerModeToggle(undefined);
-    // }
+ 
   }
 
   disableFormFields() {
@@ -854,7 +794,7 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
 
 
   ngDoCheck() {
-    if (this.formObjValue?.data) { //this.formView && 
+    if (this.formObjValue?.data) { 
       if (this.btnText == "Update") {
         if (this.differ) {
           let differences = this.differ.diff(this.formObjValue.data);
@@ -866,20 +806,14 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
               }
             });
           }
-          // if (Object.keys(this.rowEntryChanges).length < 1 || !this.checkFormValidations()) this.enblSaveBtn = false;
-          // else this.enblSaveBtn = true;
-          // this.enblSaveBtn = (Object.keys(this.rowEntryChanges).length > 0);
+         
         }
-        // else {
-        //   this.enblSaveBtn = false;
-        // }
+    
         if (this.router.url.includes("sandbox") || this.router.url.includes("workflows"))
           this.formData.emit(this.rowEntryChanges)
       }
       else if (this.btnText == "Add") {
-        // if (Object.keys(this.formObjValue).length < 1 || !this.checkFormValidations()) this.enblSaveBtn = false;
-        // else this.enblSaveBtn = true;
-        // this.enblSaveBtn = (Object.keys(this.formObjValue.data).length > 0);
+       
         if (this.router.url.includes("sandbox"))
           this.formData.emit(this.formObjValue.data)
       }
@@ -930,8 +864,7 @@ export class DatasetFormViewComponent implements OnInit, DoCheck, OnChanges, Aft
               this.actionsList.push({ "name": nestedValue['key'], "properties": nestedValue['properties'], "count": 0 });
               let node = document.createElement('span');
               node.classList.add("d-none", "adp-form-btn-clck-chck")
-              // node.className = ;
-              // node.className = "adp-form-btn-clck-chck"
+          
               node.id = "formio-btnclk-" + nestedValue['key'];
               this.nodeId = node.id
               node.innerHTML = "0";

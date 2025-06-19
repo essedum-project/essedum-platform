@@ -2,11 +2,9 @@ import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, O
 import { ActivatedRoute, Router } from '@angular/router';
 import { Services } from '../services/service';
 import { TagsService } from '../services/tags.service';
-//import { DashConstant } from '../DTO/dash-constant';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog.component/confirm-delete-dialog.component';
 import { DatasetServices } from './dataset-service';
-//import { LedsLibService, LedsModalService } from 'leds-lib';
 import { HttpParams } from '@angular/common/http';
 import { Location } from '@angular/common';
 import { OptionsDTO } from '../DTO/OptionsDTO';
@@ -16,7 +14,6 @@ import { AdapterServices } from '../services/adapter-service';
 import { SemanticSearchResult } from '../DTO/SemanticSearchResult';
 import { SemanticService } from '../services/semantic.services';
 import { TagEventDTO } from '../DTO/tagEventDTO.model';
-//import { PaginationComponent } from '../pagination/pagination.component';
 
 @Component({
   selector: 'app-dataset',
@@ -130,7 +127,6 @@ export class DatasetComponent implements OnInit, OnChanges {
   triggeredFirstTime = 0;
   numberOfSelectedIndexes = 0;
   selectedQuestions = [];
- // @ViewChild('pagination') paginationComponent: PaginationComponent;
 
   hasClickedRight: boolean = false;
   isScrollAtEnd: boolean = false;
@@ -213,16 +209,12 @@ export class DatasetComponent implements OnInit, OnChanges {
 
     }
     if (this.selectedSeachOption == "Content") {
-    //   this.getCards(this.pageNumber, this.pageSize);
-    // } else {
+ 
       this.getdatasetsByTopics();
     }
   }
-  // telemetryCall(){
-  //   this.telemetry.startTelemetry('aip-app','DatasetComponent',sessionStorage.getItem('organization'))
-  // }
+  
   async ngOnInit() {
-    //this.telemetryCall();
     this.count = 0;
     this.records = false;
     this.hasClickedRight = false;
@@ -240,7 +232,6 @@ export class DatasetComponent implements OnInit, OnChanges {
       this.searchOptions.push(new OptionsDTO('Content', 'Content'));
     if(this.type) this.selectedSeachOption = "Name";
     this.route.queryParams.subscribe((params) => {
-      // Update this.pageNumber if the page query param is present
       if (params['search']) {
         this.filt = params['search'];
       }
@@ -263,7 +254,6 @@ export class DatasetComponent implements OnInit, OnChanges {
                 this.onEnter();
               }, 3000);
             }
-            //this.fetchIndexNamesByOrg();
             this.getdatasetsByTopics();
           }
           else{
@@ -273,7 +263,6 @@ export class DatasetComponent implements OnInit, OnChanges {
               this.onEnter();
             }, 3000);
           }
-          //this.fetchIndexNamesByOrg();
           this.getdatasetsByTopics();
         }
         } else {
@@ -284,9 +273,7 @@ export class DatasetComponent implements OnInit, OnChanges {
       } else {
         this.fetchIndexNamesByOrg();
         this.selectAllTopics();
-        //this.clearSelectedTopics();
         this.pageNumber = 1;
-        //this.filt = '';
       }
       if (this.selectedSeachOption == "Content") {
         this.semanticSearchResult = [];
@@ -311,18 +298,11 @@ export class DatasetComponent implements OnInit, OnChanges {
         this.service.getDatasetCards("", "1000", "", false).subscribe((res) => {
           this.allCards = res;
         })
-        //this.telemetryImpression();
-        // this.pageSize=this.itemsPerPage[0];
-
+    
         this.updateQueryParam(this.pageNumber, this.filt, this.selectedAdapterType.toString(), sessionStorage.getItem('organization'), JSON.parse(sessionStorage.getItem('role')).id, this.selectedSeachOption);
-        // this.pageNumber = 1;
         if (this.filt) this.filterz();
         else this.getCards(this.pageNumber, this.pageSize);
-        // if (this.pageNumberChanged) {
-        //   this.pageNumber = 1;
-        //   this.startIndex = 0;
-        //   this.endIndex = 5;
-        // }
+      
         if (this.pageNumber && this.pageNumber > 5) {
           this.endIndex = this.pageNumber + 2;
           this.startIndex = this.endIndex - 5;
@@ -381,10 +361,6 @@ export class DatasetComponent implements OnInit, OnChanges {
     this.location.replaceState(url);
   }
 
-  // telemetryImpression() {
-  //   this.telemetryService.start();
-  //   this.telemetryService.impression("aip-app", "list", "DatasetComponent");
-  // }
 
   open() {
     if (this.type)
@@ -432,13 +408,7 @@ export class DatasetComponent implements OnInit, OnChanges {
         this.endIndex = 5;
       }
     }
-    // if (this.filt)
-    //   this.filterz();
-    // else if (this.finalDataList.length >= 1) {
-    //   this.filterCards()
-    // }
-    // else
-    //   this.getCards(this.pageNumber, this.pageSize);
+   
   }
   rowsPerPageChanged() {
     if (this.pageSize == 0) {
@@ -490,11 +460,9 @@ export class DatasetComponent implements OnInit, OnChanges {
           let sort: any = []
           let timezoneOffset = new Date().getTimezoneOffset();
           this.cards.forEach((e) => {
-            // e.lastmodifieddate = new Date(e.lastmodifieddate)
             e.lastmodifieddate = new Date(new Date(e.lastmodifieddate).getTime() - timezoneOffset * 60 * 1000);
             sort.push(e)
           })
-          // this.filteredCards = sort.sort((a,b)=>b.lastmodifieddate-a.lastmodifieddate)
           this.filteredCards = this.cards;
           this.noOfItems = this.noOfItems || data.length;
           this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
@@ -502,7 +470,6 @@ export class DatasetComponent implements OnInit, OnChanges {
           this.records = false;
         });
       }
-      // this.pageSize = this.pageSize || 6;
       this.updateQueryParam(
         this.pageNumber,
         this.filt
@@ -510,13 +477,11 @@ export class DatasetComponent implements OnInit, OnChanges {
     }
   }
   desc(card: any) {
-    // //this.telemetry.addTelemetryEvent(card.alias+ ' Dataset viewed ')
     if (this.type)
       this.router.navigate(["../view/" + card.name], { state: { card }, relativeTo: this.route });
     else{
       this.router.navigate(["./view/" + card.name], { state: { card }, relativeTo: this.route });
     }
-    //this.telemetry.addTelemetryEvent(card.alias+ ' Dataset viewed ')
   }
 
   redirect() {
@@ -570,8 +535,7 @@ export class DatasetComponent implements OnInit, OnChanges {
             this.noOfItems = resp
             this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
             this.pageArr = [...Array(this.noOfPages).keys()];
-            // this.changePage(this.pageNumber);
-            // this.resetPage(1);
+           
           })
         });
 
@@ -584,7 +548,6 @@ export class DatasetComponent implements OnInit, OnChanges {
 
     this.tags = {};
     this.tagsBackup = {};
-    // this.category.push("platform")
     this.service.getMlTags().subscribe((resp) => {
       this.allTags = resp;
       resp.forEach((tag) => {
@@ -649,7 +612,6 @@ export class DatasetComponent implements OnInit, OnChanges {
               this.selectedTag[i]
             )
         );
-        // multiFilter = [...new Set(multiFilter.map(item=>item.name))]
         this.finalDataList.push(...multiFilter);
       }
       this.filteredCards = this.finalDataList
@@ -671,7 +633,6 @@ export class DatasetComponent implements OnInit, OnChanges {
               this.selectedAdapterType[i]
             )
         );
-        // multiFilter = [...new Set(multiFilter.map(item=>item.name))]
         this.finalDataList.push(...multiFilter);
       }
       this.filteredCards = this.finalDataList
@@ -707,7 +668,6 @@ export class DatasetComponent implements OnInit, OnChanges {
       if (result === "delete") {
         this.datasetService.deleteDatasets(name).subscribe((res) => {
           this.service.messageNotificaionService('success', "Dataset Deleted Successfully");
-          //this.telemetry.addTelemetryEvent(name +" Deleted ");
           if(this.selectedAdapterType.length > 0){
             this.deleteFilteredTag = true;
             this.deleteFilteredDataset = name;
@@ -748,7 +708,6 @@ export class DatasetComponent implements OnInit, OnChanges {
     this.router.navigate(["../../connections"], { relativeTo: this.route });
   }
   clickactive(eventObj: any) {
-   // this.ledsLibService.clickactive(eventObj);
    console.log(' clickactive method clicked  ', eventObj)
   }
 
@@ -771,10 +730,8 @@ export class DatasetComponent implements OnInit, OnChanges {
   }
 
   navigate(content: any) {
-    //this.telemetry.addTelemetryEvent('copied successfully');
     this.copyDataset = true;
-    // If you want to open a modal without a 3rd party modal service,
-    // you can use Angular Material Dialog (MatDialog) which you already imported.
+
 
     this.dialog.open(content);
   }
@@ -845,7 +802,6 @@ export class DatasetComponent implements OnInit, OnChanges {
     this.datasetAlias = '';
     this.selectedIndexNames = [];
     this.selectedfaq = undefined;
-    //this.selectAllTopics();
     this.clearSelectedTopics();
   }
 
@@ -985,10 +941,8 @@ export class DatasetComponent implements OnInit, OnChanges {
       this.service.getDatasetCards("", "1000", "", false).subscribe((res) => {
         this.allCards = res;
       })
-    //  this.telemetryImpression();
-      // this.pageSize=this.itemsPerPage[0];
+  
       this.route.queryParams.subscribe((params) => {
-        // Update this.pageNumber if the page query param is present
         if (params['page']) {
           this.pageNumber = params['page'];
           this.pageNumber = parseInt(this.pageNumber);
@@ -1002,14 +956,9 @@ export class DatasetComponent implements OnInit, OnChanges {
         }
       });
       this.updateQueryParam(this.pageNumber, this.filt, this.selectedAdapterType.toString(), sessionStorage.getItem('organization'), JSON.parse(sessionStorage.getItem('role')).id, 'Name', '');
-      // this.pageNumber = 1;
       if (this.filt) this.filterz();
       else this.getCards(this.pageNumber, this.pageSize);
-      // if (this.pageNumberChanged) {
-      //   this.pageNumber = 1;
-      //   this.startIndex = 0;
-      //   this.endIndex = 5;
-      // }
+     
       if (this.pageNumber && this.pageNumber > 5) {
         this.endIndex = this.pageNumber + 2;
         this.startIndex = this.endIndex - 5;
@@ -1077,20 +1026,16 @@ export class DatasetComponent implements OnInit, OnChanges {
             setTimeout(() => {
               this.getdatasetsByTopics();
             }, 1000);
-            //this.clearSelectedTopics();
           } else {
             this.selectAllTopics();
           }
         } else {
           this.selectedIndexNames = [];
-          // this.indexNames.forEach(indexName => {
-          //   this.selectedIndexNames.push(indexName);
-          // });
+       
           this.selectedIndexNames.push(this.defaultKB);
           this.changeQuestions(this.selectedIndexNames);
           this.getdatasetsByTopics();
-          //this.clearSelectedTopics();
-          //this.selectAllTopics();
+     
         }
       }
       this.renderAdapterInstancesForSemanticSearch();
@@ -1100,12 +1045,10 @@ export class DatasetComponent implements OnInit, OnChanges {
   }
 
   selectAllTopics() {
-    //this.allTopicsSelected=true;
     this.hasClickedRight = false;
     this.isScrollAtEnd = false;
     if (!this.selectedIndexNames)
       this.selectedIndexNames = [];
-    //this.indexNames.forEach(indexName => {
     this.filteredIndexNames.forEach(indexName => {
       if (!this.selectedIndexNames.includes(indexName))
         this.selectedIndexNames.push(indexName);
@@ -1175,7 +1118,6 @@ export class DatasetComponent implements OnInit, OnChanges {
   }
 
   handlePageAndSizeChange(event: { pageNumber: number; pageSize: number }) {
-    // Handle the updated pageNumber and pageSize here
     console.log('Page number:', event.pageNumber);
     console.log('Page size:', event.pageSize);
     this.pageNumber = event.pageNumber?event.pageNumber:1;
@@ -1188,7 +1130,6 @@ export class DatasetComponent implements OnInit, OnChanges {
     }
     else
       this.getCards(this.pageNumber, this.pageSize);
-    // this.updatePageSize();
 
   }
 
@@ -1212,15 +1153,12 @@ export class DatasetComponent implements OnInit, OnChanges {
   clearKBsearch() {
     console.log('clearKBsearch');
     this.knowledgeBaseFilter = "";
-    //this.allTopicsSelected=true;
-    //this.selectedIndexNames = [];
+
     this.filteredIndexNames = [];
     this.indexNames.forEach(indexName => {
-      //this.selectedIndexNames.push(indexName);
       this.filteredIndexNames.push(indexName);
     });
     if (this.indexNames.length === this.selectedIndexNames.length) {
-      //if(this.filteredIndexNames.length===this.selectedIndexNames.length){
       this.allTopicsSelected = true;
     } else {
       this.allTopicsSelected = false;
@@ -1346,15 +1284,10 @@ export class DatasetComponent implements OnInit, OnChanges {
     }
   }
 
-  resetPage(page: number) {
-   // this.paginationComponent.changePage(page);
-  }
+
 
   searchByContentParams(filt) {
     this.updateQueryParam(this.pageNumber, filt);
   }
-  // ngOnDestroy() : void {
-  //   let activeSpan = this.telemetry.fetchActiveSpan();
-  //   this.telemetry.endTelemetry(activeSpan);
-  // }
+
 }
