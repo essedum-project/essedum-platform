@@ -276,19 +276,21 @@ filteredCards: any[] = [];
       });
   }
 
-  open(content): void {
-
+  open(): void {
     const dialogRef = this.dialog.open(PipelineCreateComponent, {
       height: '80%',
       width: '60%',
       minWidth: '60vw',
       disableClose: true,
       data: {
-      edit: false,
+        edit: false,
       },
     });
-    dialogRef.afterClosed().subscribe((result) => {});
-
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.refresh();
+      }
+    });
   }
 
   refresh() {
@@ -345,7 +347,11 @@ filteredCards: any[] = [];
             edit: true,
           },
         });
-        dialogRef.afterClosed().subscribe((result) => {});
+        dialogRef.afterClosed().subscribe((result) => {
+          if (result) {
+            this.refresh();
+          }
+        });
       },
       (error) =>
         this.service.messageService('Could not get the results', 'error')

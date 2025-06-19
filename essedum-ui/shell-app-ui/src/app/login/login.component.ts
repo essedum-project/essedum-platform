@@ -1,10 +1,8 @@
 import { Component, OnInit, HostListener } from '@angular/core';
-// import { LedsLibService } from 'leds-lib';
 import { ActivatedRoute, Router } from "@angular/router";
 import { Subject, Subscription } from 'rxjs';
 import { ApisService } from '../services/apis.service';
 import { MatDialog } from '@angular/material/dialog';
-// import { ResetPwdComponent } from './reset-pwd/reset-pwd.component';
 import { Title } from '@angular/platform-browser';
 
 @Component({
@@ -54,7 +52,6 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // this.ledsLibService.loginHeight();
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || undefined;
     sessionStorage.removeItem("hidesidebar");
     sessionStorage.removeItem("viewtabs");
@@ -131,15 +128,7 @@ export class LoginComponent implements OnInit {
     );
   }
   getUserInfo() {
-    // if (this.returnUrl) {
-    //   let autoportfolio = this.returnUrl.slice(this.returnUrl.indexOf("pfolio") + 7, this.returnUrl.indexOf("&prjct"))
-    //   let autoproject = this.returnUrl.slice(this.returnUrl.indexOf("prjct") + 6, this.returnUrl.indexOf("&prole"))
-    //   let autorole = this.returnUrl.slice(this.returnUrl.indexOf("prole") + 6, this.returnUrl.length)
-    //   this.apisService.getUsmPortfolio(autoportfolio).subscribe(p => this.autoportfolio = p)
-    //   this.apisService.getProject(autoproject).subscribe(p => this.autoproject = p)
-    //   this.apisService.getRole(autorole).subscribe(r => this.autorole = r)
-    // }
-    // let userAccess = false
+    
     this.apisService.getUserInfoData().subscribe(
       (userInfo) => {
         if (userInfo.porfolios.length == 0) {
@@ -162,8 +151,7 @@ export class LoginComponent implements OnInit {
             JSON.parse(sessionStorage.getItem("activeProfiles")!).indexOf("aicloud") != -1)
             this.apisService.initUserAccess(userInfo, this.lazyloadevent).add(() => {
               this.apisService.getDashConsts().subscribe(res => {
-                // if (this.returnUrl && this.autoportfolio && this.autoproject && this.autorole) {
-                // userAccess = this.checkUserAccess(userInfo)
+         
                 if (this.returnUrl && sessionStorage.getItem("needRouting") == "true") {
                   let sSplit = this.returnUrl.split("?")
                   if (sSplit.length > 1) {
@@ -208,10 +196,7 @@ export class LoginComponent implements OnInit {
   }
 
   showResetPopup() {
-    // let dialogRef = this.resetPopup.open(ResetPwdComponent);
-    // dialogRef.afterClosed().subscribe((result) => {
-
-    // });
+ 
   }
   goToRegUser() {
     this.router.navigate(['./registerNewUser'])
@@ -220,23 +205,6 @@ export class LoginComponent implements OnInit {
     console.log("")
   }
 
-  // checkUserAccess(userInfo:any) {
-  //   let portfolioFiltered = userInfo.porfolios.filter((p:any) => p.porfolioId.id == this.autoportfolio.id)
-  //   let projectFiltered = portfolioFiltered && portfolioFiltered[0]?.projectWithRoles.filter((pr:any) => pr.projectId.id == this.autoproject.id)
-  //   let roleFiltered = projectFiltered && projectFiltered[0]?.roleId.filter((r:any) => r.id == this.autorole.id)
-  //   /** User has access to mentioned project & role */
-  //   if (roleFiltered)
-  //     return true
-
-  //   /** Project autologin is true & role mentioned is autologin role */
-  //   else if (this.autoproject.projectAutologin && this.autoproject.autologinRole.id == this.autorole.id) {
-  //     this.createUserProjectRole(userInfo.userId)
-  //     return true
-  //   }
-  //   /** Autologin is false or role mentioned is not autologin role NOR user has access previously  */
-  //   else
-  //     return false
-  // }
   createUserProjectRole(userId: number) {
     let userProjectRole = [{
       user_id: userId,

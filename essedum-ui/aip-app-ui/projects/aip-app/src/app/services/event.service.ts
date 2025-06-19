@@ -1,10 +1,8 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-// import { MessageService } from '../../sharedModule/service/message.service';
 import { map } from 'rxjs/operators';
 import { catchError } from 'rxjs/operators';
-// import { LoaderService } from '../../sharedModule/service/loader.service';
 import { throwError } from 'rxjs';
 import { Services } from "../services/service";
 
@@ -15,7 +13,6 @@ export class EventsService {
   constructor(
     private https: HttpClient,
     private service: Services,
-    // private loader: LoaderService,
     @Inject('envi') private baseUrl: string
   ) {
 

@@ -437,8 +437,12 @@ export class DatasourceComponent implements OnInit, OnChanges {
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'delete') {
         this.service.deleteDatasource(name).subscribe(
-          (res) => {            
-            this.ngOnInit();
+          (res) => {     
+            
+            this.service.messageService(               
+                'Done! Connection deleted Successfully'
+              );
+        this.refreshComplete();
           },
           (error) => {
           }

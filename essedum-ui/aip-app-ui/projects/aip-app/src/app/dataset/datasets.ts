@@ -1,7 +1,5 @@
 import { Datasource } from '../datasource/datasource';
 
-
-
 export class Dataset {
     id: number;
     alias: string;
