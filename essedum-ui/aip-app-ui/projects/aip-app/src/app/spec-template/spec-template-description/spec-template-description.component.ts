@@ -31,6 +31,7 @@ export class SpecTemplateDescriptionComponent implements OnInit {
   delete: string = 'Delete';
   expand: string = 'Expand';
   collapse: string = 'Collapse';
+  isBackHovered: boolean = false;
   tooltipPosition: string = 'above';
   relatedAdapters: OptionsDTO[] = [];
   relatedAdaptersList = [];

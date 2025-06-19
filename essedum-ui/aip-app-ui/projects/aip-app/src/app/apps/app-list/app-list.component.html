@@ -17,14 +17,17 @@
                         <div class="aip-header lfx-u-pad-lr-32 lfx-u-pad-t-16">
 
                             <div class=" col-sm-12 col-md-2 col-lg-2 col-xl-2 flex justify-content-center">
-                                <div style="padding: 20px 0px 0px 0px;">
-                                    <mat-icon class="x-24 filter-icon" (click)="toggleExpand()" matTooltip="{{
+                                <!-- <div style="padding: 20px 0px 0px 0px;">
+                                    <button mat-icon-button [ngStyle]="{'color': isFilterHovered ? '#0094ff' : '#0a142f'}"
+                                        matTooltip="Add" (mouseenter)="isFilterHovered = true"
+                                        (mouseleave)="isFilterHovered = false">
+                                        <mat-icon class="x-24 filter-icon" (click)="toggleExpand()" matTooltip="{{
                     isExpanded ? 'Collapse Filters' : 'Expand Filters'
                   }}" [matTooltipPosition]="tooltip" style="cursor: pointer">
-                                        filter_list
-                                    </mat-icon>
-
-                                </div>
+                                            filter_list
+                                        </mat-icon>
+                                    </button>
+                                </div> -->
                                 <div class="lfx-u-pad-24">
                                     <h3 class="lfx-u-header-xl">Apps</h3>
                                 </div>
@@ -34,10 +37,11 @@
 
                                 <input type="text" name="" id="" placeholder="Search by Name" class="aip-panel-input"
                                     [(ngModel)]="filter" (keyup)="searchApp()">
-                                <span>
-                                    <i class="fa fa-search lfx-u-mar-r-20 lfx-fs-16" [ngStyle]="{'color':  '#0a142f'}">
-                                    </i>
-                                </span>
+                                <mat-icon [ngStyle]="{'color': isSearchHovered ? '#0094ff' : '#0a142f'}"
+                                    (mouseenter)="isSearchHovered = true" (mouseleave)="isSearchHovered = false"
+                                    class="lfx-u-mar-r-20">
+                                    search
+                                </mat-icon>
 
                             </div>
                             <div
@@ -45,11 +49,11 @@
 
                                 <div *ngIf="editAuth">
                                     <div class="lfx-u-mar-r-24 aip-cursor">
-                                        <button mat-icon-button [ngStyle]="{'color': isHovered ? '#0056b3' : '#0a142f'}"
-                                            (click)="openedit(content1)" matTooltip="Add"
-                                            (mouseenter)="isHovered = true" (mouseleave)="isHovered = false">
-                                            <mat-icon>add</mat-icon>
-                                        </button>
+                                        <mat-icon [ngStyle]="{'color': isAddHovered ? '#0094ff' : '#0a142f'}"
+                                            (click)="openedit(content1)" matTooltip="Add" matTooltipPosition="above"
+                                            (mouseenter)="isAddHovered = true"
+                                            (mouseleave)="isAddHovered = false">add</mat-icon>
+
                                         <ng-template #content1 let-modal>
                                             <div class="config-background">
                                                 <app-create-app>
@@ -60,10 +64,10 @@
                                     </div>
                                 </div>
                                 <div class="aip-cursor" (click)="ngOnInit()">
-                                    <button mat-icon-button [ngStyle]="{'color': '#0a142f'}" (click)="ngOnInit()"
-                                        matTooltip="Refresh">
-                                        <mat-icon>refresh</mat-icon>
-                                    </button>
+                                    <mat-icon [ngStyle]="{'color': isRefreshHovered ? '#0094ff' : '#0a142f'}"
+                                        matTooltip="Refresh" matTooltipPosition="above"
+                                        (mouseenter)="isRefreshHovered = true"
+                                        (mouseleave)="isRefreshHovered = false">refresh</mat-icon>
                                 </div>
                             </div>
                         </div>
@@ -121,7 +125,7 @@
                                         </mat-card-header>
 
                                         <mat-card-content [matTooltip]="app.description" matTooltipPosition="below"
-                                            style="font-size: 0.7em; text-overflow: ellipsis; overflow: hidden;">{{app?.description}}</mat-card-content>
+                                            style="font-size: 0.7em; text-overflow: ellipsis; overflow: hidden; padding: 0px;">{{app?.description}}</mat-card-content>
 
                                     </div>
                                     <div class="col-md-4">
@@ -172,9 +176,13 @@
                                         </ng-template>
 
                                         <div class="dropdown d-inline-block float-end">
-                                            <i class="fa fa-ellipsis-v aip-cursor" aria-hidden="true"
-                                                [matMenuTriggerFor]="menu"
-                                                style="font-size: 18px; padding: 8px; color: #a5aaad; font-weight: 300;"></i>
+                                            <mat-icon class="aip-cursor" [matMenuTriggerFor]="menu"
+                                                style="font-size: 18px; padding: 8px; color: #a5aaad; font-weight: 300;"
+                                                [ngStyle]="{'color': isMenuHovered ? '#0094ff' : '#0a142f'}"
+                                                (mouseenter)="isMenuHovered = true"
+                                                (mouseleave)="isMenuHovered = false">
+                                                more_vert
+                                            </mat-icon>
                                             <mat-menu #menu="matMenu">
                                                 <button mat-menu-item *ngIf="editAuth" (click)="openedit(content2)">
                                                     Edit

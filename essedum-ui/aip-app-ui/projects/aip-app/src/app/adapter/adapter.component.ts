@@ -23,6 +23,10 @@ import { Location } from '@angular/common';
 })
 export class AdapterComponent implements OnInit, OnChanges {
   cardTitle: String = 'Implementations';
+  isSearchHovered: boolean = false;
+  isAddHovered: boolean = false;
+  isRefreshHovered: boolean = false;
+  isMenuHovered: boolean = false;
   createAction = 'create';
   editAction = 'edit';
   test: any;

@@ -74,6 +74,7 @@ export class ModalConfigSchemaComponent
   groups: any[] = [];
   dataSource: any[] = [];
   display: boolean = false;
+  isBackHovered: boolean = false;
   isAuth = true;
   inputColumns = new FormControl();
   groupsOptions = [];

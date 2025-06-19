@@ -43,17 +43,6 @@
                     </mat-form-field>
                 </div>
 
-                <div *ngIf="!edit" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-                    <mat-slide-toggle style="margin-top: 1em;" [(ngModel)]="isDefaultLink"
-                        (change)="isDefaultUserLink($event)">
-                        Map the App Pipeline
-                    </mat-slide-toggle>
-                    <mat-form-field appearance="fill" class="w-100">
-                        <mat-label>Tryout Link</mat-label>
-                        <input matInput placeholder="Paste your link..." [(ngModel)]="link" [disabled]="isDefaultLink">
-                    </mat-form-field>
-                </div>
-
                 <div *ngIf="edit" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
                     <mat-form-field appearance="fill" class="w-100">
                         <mat-label>Tryout Link</mat-label>
@@ -79,7 +68,7 @@
                         <mat-label>Type</mat-label>
                         <mat-select [(ngModel)]="editCanvas.scope" required [disabled]="false"
                             (selectionChange)="setAppType($event)">
-                            <mat-option *ngFor="let type of appTypeList" [value]="type">{{ type.viewValue
+                            <mat-option *ngFor="let type of appTypeList" [value]="type.value">{{ type.viewValue
                                 }}</mat-option>
                         </mat-select>
                         <mat-error *ngIf="!editCanvas.scope">This field is required</mat-error>
@@ -106,7 +95,7 @@
                     <div class="upload-docs">
 
                         <!-- Logo Upload Panel -->
-                        <mat-card class="mb-3">
+                        <mat-card class="mb-3" style="min-height: 100px;">
                             <div *ngIf="exceededSize" class="selector-729-81">
                                 <em style="color: red" class="selector-729-82">Maximum upload file size: 250KB</em>
                             </div>
@@ -115,13 +104,9 @@
                                     class="selector-724-196">Logo</label>
                                 <label class="exp-projlabel selector-724-197" style="cursor:pointer;">
                                     <input id="adOrgUpldId" (change)="onImageChange($event)" style="display: none;"
-                                        accept=".png,.jpg,.jpeg" name="adOrgUpldNm" type="file" uploader="uploader"
+                                        accept=".png,.jpg,.jpeg" name="adOrgUpldNm" type="file"
                                         placeholder="file" class="selector-724-198" />
-                                    <button mat-stroked-button type="button" class="DSA_wb_Btn_normal"
-                                        style="margin-left: 2vh;">
-                                        <mat-icon>upload</mat-icon>
-
-                                    </button>
+                                    <mat-icon>upload</mat-icon>
                                 </label>
                             </div>
                             <img *ngIf="edit" [src]="finalImage">
@@ -133,9 +118,8 @@
                 </div>
             </div>
             <div *ngIf="!edit" class="col-lg-12 col-md-12 lfx-u-mar-b-16 flex justify-content-end" style="gap: 1rem;">
-                <button mat-stroked-button color="primary"
-                    style="color:var(--base-color); position: absolute; right: 20rem;" [disabled]="false" type="button"
-                    (click)="closeModal()">
+                <button mat-stroked-button color="primary" style="color:#0094ff; position: absolute; right: 20rem;"
+                    [disabled]="false" type="button" (click)="closeModal()">
                     Cancel
                 </button>
                 <button mat-flat-button color="primary" [disabled]="disableSave" type="button"
@@ -144,9 +128,8 @@
                 </button>
             </div>
             <div *ngIf="edit" class="col-lg-12 col-md-12 lfx-u-mar-b-16 flex justify-content-end" style="gap: 1rem;">
-                <button mat-stroked-button color="primary"
-                    style="color:var(--base-color); position: absolute; right: 20rem;" [disabled]="false" type="button"
-                    (click)="closeModal()">
+                <button mat-stroked-button color="primary" style="color:#0094ff; position: absolute; right: 20rem;"
+                    [disabled]="false" type="button" (click)="closeModal()">
                     Cancel
                 </button>
                 <button mat-flat-button color="primary" [disabled]="disableSave" type="button"

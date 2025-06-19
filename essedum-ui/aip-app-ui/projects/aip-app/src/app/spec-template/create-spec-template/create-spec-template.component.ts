@@ -35,9 +35,11 @@ export class CreateSpecTemplateComponent implements OnInit {
   regexPatternForValidAlphabetsObj: RegExp;
   regexPatternForExistingNamesObj: RegExp;
   errMsg: string;
+  isBackHovered: boolean = false;
   nameFlag: boolean = false;
   errMsgFlag: boolean = true;
   nameValidator: any;
+
   constructor(
     private route: ActivatedRoute,
     private dsService: Services,

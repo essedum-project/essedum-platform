@@ -34,6 +34,7 @@ export class AdapterCreateEditComponent {
 
   cardTitle: String = 'Implementation';
   createAuth = false;
+  isBackHovered: boolean = false;
   listOfNames: string[] = [];
   regexPattern = `^(?!REX)[a-zA-Z0-9\_\-]+$`;
   regexPatterForEmptyNames = `^(?!www$)[a-zA-Z0-9\_\-]+$`;

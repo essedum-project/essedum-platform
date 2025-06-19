@@ -25,6 +25,10 @@ import * as _ from 'lodash';
 })
 export class SpecTemplateComponent implements OnInit, OnChanges {
   cardTitle: String = 'Specs';
+  isSearchHovered: boolean = false;
+  isAddHovered: boolean = false;
+  isRefreshHovered: boolean = false;
+  isMenuHovered: boolean = false;
   test: any;
   cards: any;
   options = [];
@@ -173,38 +177,6 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
     this.location.replaceState(url);
   }
 
-  //previous
-  // nextPage() {
-  //   if (this.pageNumber + 1 <= this.noOfPages) {
-  //     this.pageNumber += 1;
-  //     this.changePage();
-  //     this.getCountSpecTemplates();
-  //   }
-  // }
-  // prevPage() {
-  //   if (this.pageNumber - 1 >= 1) {
-  //     this.pageNumber -= 1;
-  //     this.changePage();
-  //     this.getCountSpecTemplates();
-  //   }
-  // }
-  // changePage(page?: number) {
-  //   if (page && page >= 1 && page <= this.noOfPages) this.pageNumber = page;
-  //   if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
-  //     this.pageChanged.emit(this.pageNumber);
-  //     if (this.pageNumber > 5) {
-  //       this.endIndex = this.pageNumber;
-  //       this.startIndex = this.endIndex - 5;
-  //     } else {
-  //       this.startIndex = 0;
-  //       this.endIndex = 5;
-  //     }
-  //   }
-  //   this.getCards(this.pageNumber, this.pageSize);
-  //   this.getCountSpecTemplates();
-  // }
-  // new
-
   nextPage() {
     if (this.pageNumber + 1 <= this.noOfPages) {
       this.pageNumber += 1;
@@ -258,18 +230,6 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
       );
     }
   }
-  // pervious
-  // rowsPerPageChanged() {
-  //   if (this.pageSize == 0) {
-  //     this.pageSize = this.prevRowsPerPageValue;
-  //   }
-  //   else {
-  //     this.pageSizeChanged.emit(this.pageSize);
-  //     this.prevRowsPerPageValue = this.pageSize;
-  //     this.changeDetectionRef.detectChanges();
-  //   }
-  // }
-  //new
 
   rowsPerPageChanged() {
     if (this.pageSize == 0) {
@@ -314,32 +274,6 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
   numSequence(n: number): Array<number> {
     return Array(n);
   }
-
-  // getCards(page: any, size: any): void {
-  //   if (page)
-  //     this.pageNumber = page;
-  //   if (size)
-  //     this.pageSize = size || 8;
-  //   let timezoneOffset = new Date().getTimezoneOffset();
-  //   let org = sessionStorage.getItem("organization");
-  //   this.adapterServices.getMlSpecTemplatesCards(org).subscribe((res) => {
-  //     let data: any = [];
-  //     let test = res;
-  //     test = test.filter((element) => {
-  //       return element.organization === sessionStorage.getItem('organization');
-  //     });
-  //     test.forEach((element: any) => {
-  //       element.createdon = new Date(new Date(element.createdon).getTime() - timezoneOffset * 60 * 1000);
-  //       data.push(element);
-  //       this.users.push(element.domainname)
-  //     });
-  //     this.cards = data;
-  //     this.allCards=data;
-  //     this.allCardsFiltered=data;
-  //     this.filterSelectedCards(page, size);
-  //   });
-  //   this.pageSize = this.pageSize || 9;
-  // }
 
   getCountSpecTemplates() {
     let params: HttpParams = new HttpParams();
@@ -447,38 +381,6 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
     });
   }
 
-  //previous
-  // filterz() {
-  //   if(this.filt.length!=this.filtbackup.length){
-  //     this.pageNumber=1;
-  //     this.filtbackup=this.filt;
-  //   }
-  //   let data:any=[];
-  //   this.allCardsFiltered.forEach((element:any) => {
-  //     if(element.domainname.toLowerCase().includes(this.filt.toLowerCase())){
-  //       data.push(element);
-  //     }
-  //   });
-  //   this.cards=data;
-  //   if(this.cards.length==0){
-  //     this.records=true;
-  //   }
-  //   else{
-  //     this.records=false;
-  //   }
-  //   this.noOfItems = this.cards.length;
-  //   this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
-  //   this.pageArr = [...Array(this.noOfPages).keys()];
-  //   this.updateQueryParam(
-  //     this.pageNumber,
-  //     this.filt,
-  //     this.selectedCapabilityType?.toString() ?? ''
-  //   );
-
-  // }
-
-  //new
-
   filterz() {
     if (this.filt.length != this.filtbackup.length) {
       this.pageNumber = 1;
@@ -552,7 +454,6 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
 
   refresh() {
     this.getCards(this.pageNumber, this.pageSize);
-    // this.pageSize = this.pageSize || 6;
   }
 
   openEdit() {
@@ -604,48 +505,6 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
     this.filterSelectedCards(this.pageNumber);
   }
 
-  // previous
-  // filterSelectedCards(page:any,size?:any) {
-  //   this.tagrefresh = false;
-  //     if (this.selectedCapabilityType.length > 0) {
-  //       let data:any = new Set();
-  //       this.selectedCapabilityType.forEach((element: any) => {
-  //         this.allCards.forEach((ele: any) => {
-  //           if (ele.capability?.includes(element)) {
-  //             data.add(ele);
-  //           }
-  //         });
-  //       });
-  //       this.allCardsFiltered =  Array.from(data);
-  //       this.cards = this.allCardsFiltered;
-  //     } else {
-  //       this.allCardsFiltered = this.allCards;
-  //       this.cards = this.allCards;
-  //     }
-  //     if (this.cards.length == 0) {
-  //       this.records = true;
-  //     }
-  //     else {
-  //       this.records = false;
-  //     }
-  //     if (this.filt.length >= 1) {
-  //       this.filterz();
-  //     }  else{
-  //       this.filt = "";
-  //     }
-  //     if(page)
-  //       this.pageNumber=page;
-  //     this.updateQueryParam(
-  //       this.pageNumber,
-  //       this.filt,
-  //       this.selectedCapabilityType?.toString() ?? ''
-  //     );
-  //     this.noOfItems = this.cards.length;
-  //     this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
-  //     this.pageArr = [...Array(this.noOfPages).keys()];
-  //   }
-
-  //new
   filterSelectedCards(page: any, size?: any) {
     this.tagrefresh = false;
     if (page) {

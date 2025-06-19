@@ -19,6 +19,7 @@ export class AdapterDescriptionComponent {
 
   edit: string = 'Edit';
   delete: string = 'Delete';
+  isBackHovered: boolean = false;
   tooltipPosition: string = 'above';
   editAuth: boolean;
   deleteAuth: boolean;
