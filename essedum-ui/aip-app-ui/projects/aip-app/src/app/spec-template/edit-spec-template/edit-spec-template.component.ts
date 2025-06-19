@@ -32,6 +32,8 @@ export class EditSpecTemplateComponent implements OnInit {
     capability: '["custom"]',
     organization: sessionStorage.getItem('organization'),
   };
+  isBackHovered: boolean = false;
+
   constructor(
     private service: AdapterServices,
     private route: ActivatedRoute,

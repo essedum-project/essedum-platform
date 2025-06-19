@@ -23,6 +23,10 @@ import { Location } from '@angular/common';
 })
 export class SchemaComponent implements OnInit, OnChanges {
   cardTitle: String = 'Schemas';
+  isSearchHovered: boolean = false;
+  isAddHovered: boolean = false;
+  isRefreshHovered: boolean = false;
+  isMenuHovered: boolean = false;
   test: any;
   cards: any;
   options = [];
@@ -197,9 +201,7 @@ export class SchemaComponent implements OnInit, OnChanges {
   }
 
   tagchange() {
-    this.tagService.tags.forEach((element: any) => {
-
-    });
+    this.tagService.tags.forEach((element: any) => {});
   }
 
   details(card: any, type: any, dropDown: any) {

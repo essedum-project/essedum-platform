@@ -286,7 +286,14 @@ export class CreateAppComponent implements OnInit {
   }
 
   onImageChange(event) {
-    this.uploader.queue = [this.uploader.queue.pop()];
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    // Clear the queue
+    this.uploader.clearQueue();
+
+    // Add the file using the uploader's API
+    this.uploader.addToQueue([file]);
     if (this.uploader.queue[0].file.size <= 250000) {
       this.logoUploaded = true;
       let possible =

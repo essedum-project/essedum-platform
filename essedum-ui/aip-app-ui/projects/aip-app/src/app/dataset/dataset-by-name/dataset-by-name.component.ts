@@ -5,11 +5,9 @@ import { SemanticService } from '../../services/semantic.services';
 import { DatasetServices } from '../dataset-service';
 import { Services } from '../../services/service';
 import { HttpClient, HttpParams } from '@angular/common/http';
-//import { LeapTelemetryService, OpenTelemetryService } from 'com-lib-util';
-//import { SemanticSearchDataSetViewDialogComponent } from '../../semantic-search-dialog/semantic-search-dataset-view/semantic-search-dataset-view-dialog.component';
+
 import { MatDialog } from '@angular/material/dialog';
 import { saveAs as importedSaveAs } from "file-saver";
-//import { LedsModalService } from 'leds-lib';
 import { TagEventDTO } from '../../DTO/tagEventDTO.model';
 import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.component/confirm-delete-dialog.component';
 
@@ -20,10 +18,10 @@ import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.compon
 })
 export class DatasetByNameComponent {
 
-cardTitle: String = "Datasets";
-public isHovered: boolean = false;
-public isSearchHovered:boolean=false;
-public isFilterHovered:boolean=false;
+  cardTitle: String = "Datasets";
+  public isHovered: boolean = false;
+  public isSearchHovered: boolean = false;
+  public isFilterHovered: boolean = false;
   cardToggled: boolean = true;
   cards: any;
   filteredCards: any;
@@ -36,7 +34,7 @@ public isFilterHovered:boolean=false;
   allCards: any;
   deleteFilteredTag: boolean = false;
   deleteFilteredDataset: any;
-    editData: any;
+  editData: any;
 
 
   type: any;
@@ -88,10 +86,9 @@ public isFilterHovered:boolean=false;
   filteredTopics: any;
   status: any;
   ratingList: any;
-  rateData: { selectedModule: string; selectedElement: any; selectedElementAlias:any, previousRating: any; previousFeedback: any; };
+  rateData: { selectedModule: string; selectedElement: any; selectedElementAlias: any, previousRating: any; previousFeedback: any; };
 
   constructor(
-    //private telemetry: OpenTelemetryService,
     private router: Router,
     private route: ActivatedRoute,
     private location: Location,
@@ -99,11 +96,9 @@ public isFilterHovered:boolean=false;
     private dialog: MatDialog,
     private http: HttpClient,
     private datepipe: DatePipe,
-   // private modalService: LedsModalService,
     private semanticService: SemanticService,
     private datasetService: DatasetServices,
     private changeDetectionRef: ChangeDetectorRef,
-    //private telemetryService: LeapTelemetryService,
 
   ) { }
 
@@ -118,16 +113,12 @@ public isFilterHovered:boolean=false;
       return { width: '100%', margin: '0%' };
     }
   }
-  // telemetryCall(){
-  //   this.telemetry.startTelemetry('aip-app','DatasetByNameComponent',sessionStorage.getItem('organization'))
-  // }
+
   async ngOnInit() {
-    //this.telemetryCall();
     this.records = false;
     this.route.params.subscribe(params => this.type = params.type);
-    if(this.type)this.selectedAdapterType.push(this.type);
+    if (this.type) this.selectedAdapterType.push(this.type);
     this.route.queryParams.subscribe((params) => {
-      // Update this.pageNumber if the page query param is present
       if (params['page']) {
         this.pageNumber = params['page'];
         this.filt = params['search'];
@@ -139,7 +130,7 @@ public isFilterHovered:boolean=false;
           : [];
         this.selectedIndexNames = params['indexNames']
           ? params['indexNames'].split(',')
-          : [];  
+          : [];
       } else {
         this.pageNumber = 1;
         this.pageSize = 4;
@@ -153,7 +144,6 @@ public isFilterHovered:boolean=false;
     });
     this.authentications();
     this.route.queryParams.subscribe((params) => {
-      // Update this.pageNumber if the page query param is present
       if (params['search']) {
         this.filt = params['search'];
       }
@@ -171,24 +161,17 @@ public isFilterHovered:boolean=false;
       let param: HttpParams = new HttpParams();
       let organization = sessionStorage.getItem('organization')
       param = param.set('organization', organization);
-      if(this.filt &&  this.filt!=''){
+      if (this.filt && this.filt != '') {
         param = param.set('aliasOrName', this.filt);
       }
-      if(this.selectedAdapterType && this.selectedAdapterType.length>0){
-        this.selectedAdapterType.forEach((type)=>{
+      if (this.selectedAdapterType && this.selectedAdapterType.length > 0) {
+        this.selectedAdapterType.forEach((type) => {
           param = param.set('types', type);
         });
       }
-      // this.datasetService.getCountDatasetsAdvancedFilter(param).subscribe((res) => {
-      //   this.noOfItems = res;
-      // });
-      // this.service.getDatasetCards("", "1000", "", false).subscribe((res) => {
-      //   this.allCards = res;
-      // })
-     // this.telemetryImpression();
+
       this.updateQueryParam(this.pageNumber, this.filt, this.selectedAdapterType.toString(), this.selectedIndexNames.toString(), sessionStorage.getItem('organization'), JSON.parse(sessionStorage.getItem('role')).id);
-      // if (this.filt) this.filterz();
-      // else this.getCards(this.pageNumber, this.pageSize);
+   
       if (this.pageNumber && this.pageNumber > 5) {
         this.endIndex = this.pageNumber + 2;
         this.startIndex = this.endIndex - 5;
@@ -227,10 +210,7 @@ public isFilterHovered:boolean=false;
     }
   }
 
-  // telemetryImpression() {
-  //   this.telemetryService.start();
-  //   this.telemetryService.impression("aip-app", "list", "DatasetComponent");
-  // }
+
 
   getTags() {
     this.tags = {};
@@ -315,7 +295,6 @@ public isFilterHovered:boolean=false;
         }
         this.records = true;
         this.getIconStatus();
-        //this.getRatingByUserAndModule();
       });
     });
     this.updateQueryParam(
@@ -341,7 +320,7 @@ public isFilterHovered:boolean=false;
           page: page,
           search: search,
           type: adapterType,
-          knowledgeBases : indexName,
+          knowledgeBases: indexName,
           org: org,
           roleId: roleId
         },
@@ -374,25 +353,21 @@ public isFilterHovered:boolean=false;
         let sort: any = []
         let timezoneOffset = new Date().getTimezoneOffset();
         this.cards.forEach((e) => {
-          // e.lastmodifieddate = new Date(e.lastmodifieddate)
           e.lastmodifieddate = new Date(new Date(e.lastmodifieddate).getTime() - timezoneOffset * 60 * 1000);
           sort.push(e)
         })
-        this.filteredCards = sort.sort((a,b)=>b.lastmodifieddate-a.lastmodifieddate)
+        this.filteredCards = sort.sort((a, b) => b.lastmodifieddate - a.lastmodifieddate)
         this.filteredCards = this.cards;
-        //this.getRatingByUserAndModule();
         this.noOfItems = this.noOfItems || data.length;
         this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
         this.pageArr = [...Array(this.noOfPages).keys()];
         this.records = false;
       });
     }
-    // this.pageSize = this.pageSize || 6;
     this.updateQueryParam(
       this.pageNumber,
       this.filt
     );
-    // generate embedding status
     this.getIconStatus();
     this.filterCards();
   }
@@ -406,21 +381,10 @@ public isFilterHovered:boolean=false;
           card['rate'] = found.rating;
         else
           card['rate'] = 0;
-       })
+      })
     })
   }
 
-  // openRatingModule(rate,card,i) {
-  //   let found = this.ratingList.filter(e => e.element == card.name && e.module == "Dataset");
-  //   this.rateData = {
-  //     "selectedModule":"Dataset",
-  //     "selectedElement":card.name,
-  //     "selectedElementAlias":card.alias,
-  //     "previousRating": found["rating"] || i+1,
-  //     "previousFeedback": found["feedback"],
-  //   }
-  //   this.modalService.openModal(rate, 'mini');
-  // }
 
   getIconStatus() {
     this.filteredCards.forEach(card => {
@@ -492,7 +456,6 @@ public isFilterHovered:boolean=false;
       }
       this.records = true;
       this.getIconStatus();
-      //this.getRatingByUserAndModule();
     });
     this.updateQueryParam(this.pageNumber, this.filt, this.selectedAdapterType.toString(), this.selectedIndexNames.toString());
   }
@@ -536,10 +499,9 @@ public isFilterHovered:boolean=false;
         }
         this.records = true;
         this.getIconStatus();
-        //this.getRatingByUserAndModule();
       });
     });
-    this.updateQueryParam(this.pageNumber,this.filt,this.selectedAdapterType.toString());
+    this.updateQueryParam(this.pageNumber, this.filt, this.selectedAdapterType.toString());
   }
 
   getDatasetByConnection() {
@@ -566,7 +528,6 @@ public isFilterHovered:boolean=false;
     this.selectedAdapterType = event.getSelectedAdapterType();
     this.selectedTag = event.getSelectedTagList();
     this.selectedIndexNames = event.getSelectedDatasetTopicType();
-    console.log(this.selectedIndexNames);
 
     this.tagrefresh = false;
     this.filterCards();
@@ -580,17 +541,10 @@ public isFilterHovered:boolean=false;
   }
 
   desc(card: any) {
-    // //this.telemetry.addTelemetryEvent(card.alias + ' Viewed Successfully');
     if (this.type)
       this.router.navigate(["../view/" + card.name], { state: { card }, relativeTo: this.route });
     else
-      // this.router.navigate(["./view/" + card.name], { state: { card }, relativeTo: this.route });
-      // this.telemetryService.interact(
-      //   'click',
-      //   'DatasetByNameComponent',
-      //   'open',
-      //   card.name
-      // );
+ 
       this.router.navigate(["./view/" + card.name], {
         queryParams: {
           page: this.pageNumber,
@@ -606,7 +560,6 @@ public isFilterHovered:boolean=false;
         },
         relativeTo: this.route,
       });
-    //this.telemetry.addTelemetryEvent(card.alias + ' Viewed Successfully');
   }
 
   navigateTo(card: any) {
@@ -629,40 +582,14 @@ public isFilterHovered:boolean=false;
 
   deleteAdapter(name: string) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
-    // dialogRef.afterClosed().subscribe((result) => {
-      // if (result === "delete") {
-      //   this.datasetService.deleteDatasets(name).subscribe((res) => {
-      //     this.service.messageNotificaionService('success', "Dataset Deleted Successfully");
-      //   //   this.service.deleteRatingByElement(name,'Dataset').subscribe((res) => {
-      //   //     this.service.messageNotificaionService('success', "Ratings Deleted Successfully");
-      //   //     //this.telemetry.addTelemetryEvent(name +' Deleted ');
-      //   //   }
-      //   // );
-      //     if (this.selectedAdapterType.length > 0) {
-      //       this.deleteFilteredTag = true;
-      //       this.deleteFilteredDataset = name;
-      //       this.filterCards();
-      //     } else {
-      //       this.refreshData();
-      //     }
-      //   }, ((error) => {
-      //     this.service.messageNotificaionService('error', "Error");
-      //   }));
-      // }
-    // });
-    
+
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'delete') {
-         this.datasetService.deleteDatasets(name).subscribe((res) => {
-            // this.service.messageNotificaionService(
-            //   'success',
-            //   'Connection Deleted Successfully'
-            // );
-            this.ngOnInit();
-            // this.telemetry.addTelemetryEvent('Connection Deleted');
-          },
+        this.datasetService.deleteDatasets(name).subscribe((res) => {
+       
+          this.ngOnInit();
+        },
           (error) => {
-            // this.service.messageNotificaionService('error', 'Error');
           }
         );
       }
@@ -684,11 +611,11 @@ public isFilterHovered:boolean=false;
         this.startIndex = 0;
         this.endIndex = 5;
       }
-          this.filterCards();
+      this.filterCards();
 
     }
   }
-    nextPage() {
+  nextPage() {
     if (this.pageNumber + 1 <= this.noOfPages) {
       this.pageNumber += 1;
       this.changePage();
@@ -717,15 +644,13 @@ public isFilterHovered:boolean=false;
 
   navigate(content: any) {
     this.copyDataset = true;
-    // this.dialog.open(content, { width: '600px' });
-        this.selectedCard = content;
+    this.selectedCard = content;
 
   }
-routeBackToList(){
-      this.copyDataset = false;
+  routeBackToList() {
+    this.copyDataset = false;
 
-}
-  // new cards
+  }
   getIconClass(views): string {
     switch (views) {
       case 'Folder View':
@@ -758,26 +683,13 @@ routeBackToList(){
   openDatasetPreview(card) {
     let selectedReferenceObject = card;
     selectedReferenceObject["path"] = JSON.parse(card.attributes).path + '/' + JSON.parse(card.attributes).object;
-    // const dialogRef = this.dialog.open(SemanticSearchDataSetViewDialogComponent, {
-    //   height: '80%',
-    //   width: '80%',
-    //   disableClose: true,
-    //   data: {
-    //     viewType: card.views,
-    //     datasetId: card.name,
-    //     org: card.organization,
-    //     datasetName: card.alias,
-    //     path: JSON.parse(card.attributes).path,
-    //     actualObject: JSON.parse(card.attributes).object,
-    //     selectedReferenceObject: selectedReferenceObject,
-    //   }
-    // });
+   
   }
-selectedButton(i) {
+  selectedButton(i) {
     if (i == this.pageNumber) return { color: 'white', background: '#0094ff' };
     else return { color: 'black' };
   }
- 
+
   downloadSelectedFile(card: any) {
     // //this.telemetry.addTelemetryEvent(card.alias + ' Downloaded ');
     if ((card.datasource?.type && card.datasource.type == 'MYSQL') || (card.views && card.views == 'Table View')) {
@@ -795,7 +707,6 @@ selectedButton(i) {
         this.downloadSelectedFiles(obj, res[0], extension, card)
       })
     }
-    //this.telemetry.addTelemetryEvent(card.alias + ' Downloaded ');
   }
 
   downloadCSV(card) {
@@ -929,7 +840,6 @@ selectedButton(i) {
               });
             }
           });
-          // Object.values(resp)
         }, err => {
           console.log(err);
         });
@@ -1037,17 +947,15 @@ selectedButton(i) {
   }
 
   openDialog(retrigger, type, status, card) {
-    //this.telemetry.addTelemetryEvent(card.alias+' Generate Embeddings Done');
     this.selectedCard = card;
     this.selectedEvent = type;
     this.status = status;
-    // Open a dialog using Angular Material Dialog (MatDialog)
     this.dialog.open(type, {
       width: '400px',
       data: {
-      retrigger,
-      status,
-      card
+        retrigger,
+        status,
+        card
       }
     });
   }
@@ -1126,8 +1034,5 @@ selectedButton(i) {
     else
       return false;
   }
-  // ngOnDestroy() : void {
-  //   let activeSpan = this.telemetry.fetchActiveSpan();
-  //   this.telemetry.endTelemetry(activeSpan);
-  // }
+
 }

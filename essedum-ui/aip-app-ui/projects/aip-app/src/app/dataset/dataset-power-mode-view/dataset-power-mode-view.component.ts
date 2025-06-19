@@ -5,7 +5,6 @@ import { ActivatedRoute } from '@angular/router';
 import { DatasetServices } from '../dataset-service';
 import { Services } from '../../services/service';
 import { Project } from '../../DTO/project';
-// import { Project } from 'com-lib-util';
 
 @Component({
   selector: 'app-dataset-power-mode-view',
@@ -43,7 +42,6 @@ export class DatasetPowerModeViewComponent implements OnInit {
     action: string;
     dataset: any;
     schema: any = {};
-    // schemaFormTemplate: any = [];
   
     selectedColumn: string;
     powerModeInputValue: any;
@@ -91,8 +89,7 @@ export class DatasetPowerModeViewComponent implements OnInit {
                   || (this.dataset.attributes && JSON.parse(this.dataset.attributes)['isInboxRequired']))) 
                       actionToBeCompared = this.rowObj['action']
                 else  actionToBeCompared = "update";
-                // this.schemaFormTemplate = JSON.parse(this.dataset.schemajson)?.filter(ele=> ele.templateTags?.toString().split(",").includes(actionToBeCompared))[0];
-                // if(!this.schemaFormTemplate && JSON.parse(this.dataset.schemajson)?.length>0)  this.schemaFormTemplate = JSON.parse(this.dataset.schemajson)[0];
+               
               this.dataset.type == "rw" ? this.action = 'update' : this.action = 'view';
               (this.dataset.attributes && JSON.parse(this.dataset.attributes)['uniqueIdentifier']) ?
                 this.unqId = JSON.parse(this.dataset.attributes)['uniqueIdentifier'] :
@@ -183,7 +180,6 @@ export class DatasetPowerModeViewComponent implements OnInit {
                 incomingSearchValueList[i] = tempArray;
               }
             }
-            // To Be Generalised
             this.fmFlrDsb = true;
             sessionStorage.setItem("failureDashboardToTickets", "True");
             this.refreshTicket(incomingSearchParamList, incomingSearchValueList);
@@ -220,15 +216,11 @@ export class DatasetPowerModeViewComponent implements OnInit {
         let finalOrObj = {"or":[]};
         let finalAndObj ={"and":[]};
         project = JSON.parse(sessionStorage.getItem("project"));
-        // let previousUrl = this.datasetsService.getPreviousUrl();
-        // let currentUrl = this.datasetsService.getCurrentUrl();
+        
         let projName: string = project.name;
         let pagination = { 'page': this.page, 'size': this.rows, 'sortEvent': this.sortEvent, 'sortOrder': this.sortorder };
-        // let urlLastFragment: any;
-        // if (this.datasetsService.getUrl())
-        //   urlLastFragment = this.datasetsService.getUrl().split("/").reverse()[0];
+       
         if (decodedSPrList && decodedSValList) {
-          // To Be Generalised
           decodedSPrList.forEach((param, index) => {
             let decodedCol = this.cols.filter(ele => {
               if (ele['field']) return ele['field'].toLowerCase() == param.toLowerCase();
@@ -291,11 +283,7 @@ export class DatasetPowerModeViewComponent implements OnInit {
                     this.powerModeTicketList.push(element);
                   }
                 });
-                // this.rowObj = {};
-                // if(this.powerModeTicketList && this.powerModeTicketList[0] && this.schemaFormTemplate){
-                //   let tempArr = Object.entries(this.powerModeTicketList[0]).filter(ele => Object.keys(this.schemaFormTemplate.properties).map(ky => ky?.toLowerCase()).includes(ele[0]?.toLowerCase()));
-                //   tempArr.forEach(ele => { this.rowObj[ele[0]] = ele[1]; });
-                // }
+               
                 if(this.powerModeTicketList?.length>0 && this.powerModeTicketList[0]){
                   if(!this.rowObj)  this.rowObj = {};
                   Object.entries(this.powerModeTicketList[0]).forEach(ele => { this.rowObj[ele[0]] = ele[1]; });
@@ -381,10 +369,7 @@ export class DatasetPowerModeViewComponent implements OnInit {
     updateDetails(incident) {
       this.viewIncident = incident[this.unqId];
       this.rowObj = {};
-      // if(incident && this.schemaFormTemplate){
-      //   let tempArr = Object.entries(incident).filter(ele => Object.keys(this.schemaFormTemplate.properties).map(ky => ky?.toLowerCase()).includes(ele[0]?.toLowerCase()));
-      //   tempArr.forEach(ele => { this.rowObj[ele[0]] = ele[1]; });
-      // }
+     
       if(incident){
         Object.entries(incident).forEach(ele => { this.rowObj[ele[0]] = ele[1]; });
       }

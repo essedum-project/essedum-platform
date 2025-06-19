@@ -22,6 +22,11 @@ import { Location } from '@angular/common';
 })
 export class AppListComponent implements OnInit {
   editable: boolean = false;
+  isSearchHovered: boolean = false;
+  isAddHovered: boolean = false;
+  isRefreshHovered: boolean = false;
+  isMenuHovered: boolean = false;
+  // isFilterHovered: boolean = false;
   alias: any;
   filter: string = '';
   pageNumber = 1;
@@ -243,7 +248,7 @@ export class AppListComponent implements OnInit {
 
   openedit(content: any): void {
     this.dialog.open(content, {
-      width: '830px',
+      width: '760px',
       panelClass: 'standard-dialog',
     });
     this.editable = true;

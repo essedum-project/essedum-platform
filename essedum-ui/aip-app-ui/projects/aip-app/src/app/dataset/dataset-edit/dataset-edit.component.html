@@ -3,60 +3,30 @@
     <div class="selector-model-title-head d-flex align-items-center">
       <span class="mx-2 aip-cursor">
         <div *ngIf="isNavigateFromKg" style="cursor: pointer">
-          <!-- <i
-            class="aip-led-icons icon x-24 back-icon"
-            aria-hidden="true"
-            matTooltip="Back"
-            matTooltipPosition="left"
-            (click)="navigateToKg()"
-          ></i> -->
-                        <i class="fa fa-long-arrow-left back-icon" aria-hidden="true" (click)="navigateToKg()"></i>
+
+          <i class="fa fa-long-arrow-left back-icon" aria-hidden="true" (click)="navigateToKg()"></i>
         </div>
         <i class="aip-led-icons icon x-24 back-icon" (click)="backToDatasets()"></i>
       </span>
 
       <div class="selector-680-3">
-      
+
         <mat-breadcrumbs [breadcrumbs]="breadcrumbs" styleClass=""></mat-breadcrumbs>
 
-        <!-- 
-        <a href="javascript:void(0);" (click)="onMlStudioClick()"
-            style="font-weight:700; font-size:16px; color: #737373;" class="aip-desc-title le-u-header-xxl">
-            {{datasourceRedirect ? 'Dataset' : 'Dataset'}}
-        </a>
-        <span *ngIf="showBreadcrumb">
-            <span *ngFor="let bc of breadcrumb">
-                <span class="selector-680-7">&nbsp;&gt;&nbsp;</span>
-                <a href="javascript:void(0);" *ngIf="bc.parent" id="dset-reg-shw-{{bc.item.name}}"
-                    (click)="showParent(bc)" style="font-weight:500;color: #737373;;font-family: var(--font-type) !important;" class="aip-desc-title le-u-header-xxl">{{bc.item.alias}}</a>
-                <span *ngIf="!bc.parent" id="dset-reg-shw-{{bc.item.name}}" style="font-weight:500;color: #737373;;font-family: arial!important;" class="aip-desc-title le-u-header-xxl">{{bc.item.alias}}</span>
-            </span>
-        </span> -->
       </div>
     </div>
   </div>
 
   <mat-card class="row d-flex justify-content-between align-items-center lfx-u-pad-tb-16">
-    <button
-      mat-button
-      class="menu-button selector-680-76"
-      *ngIf="exp"
-      id="dset-reg-back"
-      (click)="routeBack()"
-      style="float: right"
-    >
+    <button mat-button class="menu-button selector-680-76" *ngIf="exp" id="dset-reg-back" (click)="routeBack()"
+      style="float: right">
       <mat-icon class="selector-680-77">keyboard_arrow_left</mat-icon>
       <span class="selector-680-78">Back</span>
     </button>
 
     <div class="" style="padding-left: 15px; height: 90%">
-      <mat-tab-group
-        id="dset-reg-tab"
-        *ngIf="!isSbx"
-        [selectedIndex]="selectedTabIndex"
-        (selectedTabChange)="onTabChange($event)"
-        class="selector-680-81"
-      >
+      <mat-tab-group id="dset-reg-tab" *ngIf="!isSbx" [selectedIndex]="selectedTabIndex"
+        (selectedTabChange)="onTabChange($event)" class="selector-680-81">
         <mat-tab label="{{tabList[0]}}" class="selector-680-81">
           <div *ngIf="selectedTab == tabList[0]" class="tab-content selector-680-82">
             <div *ngIf="selectedDataset.name" style="position: relative" class="selector-680-83">
@@ -64,15 +34,10 @@
                 <app-dataset-view [data]="selectedDataset" class="selector-680-85"></app-dataset-view>
               </div>
               <div *ngIf="showDetails && tableview == 'yes'" class="selector-680-86">
-                <app-dataset-fullscreen-view
-                  [data]="selectedDataset"
-                  class="selector-680-87"
-                ></app-dataset-fullscreen-view>
+                <app-dataset-fullscreen-view [data]="selectedDataset"
+                  class="selector-680-87"></app-dataset-fullscreen-view>
               </div>
-              <app-dataset-view-wrapper
-                *ngIf="!tableview"
-                [dataset]="selectedDataset"
-              ></app-dataset-view-wrapper>
+              <app-dataset-view-wrapper *ngIf="!tableview" [dataset]="selectedDataset"></app-dataset-view-wrapper>
             </div>
           </div>
         </mat-tab>
@@ -80,51 +45,13 @@
         <mat-tab label="{{tabList[1]}}" class="selector-680-89">
           <div *ngIf="selectedTab == tabList[1]" class="col-md-12 tab-content selector-680-90">
             <div style="position: relative" class="selector-680-91 lfx-u-mar-b-32 lfx-u-pad-b-16">
-              <app-dataset-config
-                *ngIf="editData && !method"
-                [dataset]="editData"
-                class="selector-680-92"
-              ></app-dataset-config>
-              <app-method-config
-                *ngIf="editData && method"
-                [dataset]="editData"
-              ></app-method-config>
+              <app-dataset-config *ngIf="editData && !method" [dataset]="editData"
+                class="selector-680-92"></app-dataset-config>
+              <app-method-config *ngIf="editData && method" [dataset]="editData"></app-method-config>
             </div>
           </div>
         </mat-tab>
-        
 
-        <!-- 
-        <mat-tab *ngIf="!isSbx && tableview=='yes'" label="{{tabList[2]}}" class="selector-680-111">
-          <div *ngIf="selectedTab==tabList[2]" class="tab-content">
-            <koia-front [dataset]="editData.name" menu="pivot"></koia-front>
-          </div>
-        </mat-tab>
-
-        <mat-tab *ngIf="!isSbx && tableview=='yes'" label="{{tabList[3]}}" class="selector-680-93">
-          <div *ngIf="selectedTab==tabList[3]" class="tab-content">
-            <koia-front [dataset]="editData.name" menu="flex"></koia-front>
-          </div>
-        </mat-tab>
-        -->
-
-        <!-- <mat-tab label="{{tabList[2]}}" class="selector-680-94">
-          <div *ngIf="selectedTab == tabList[2]" class="tab-content selector-680-95">
-            <app-dataset-load
-              *ngIf="editData"
-              [dataset]="editData.name"
-              class="selector-680-105"
-            ></app-dataset-load>
-          </div>
-        </mat-tab> -->
-<!-- 
-        <mat-tab label="{{tabList[3]}}" class="selector-680-107">
-          <app-log-console
-            *ngIf="selectedTab == tabList[3] && editData"
-            [dataset]="editData.name"
-            class="selector-680-108"
-          ></app-log-console>
-        </mat-tab> -->
       </mat-tab-group>
     </div>
   </mat-card>

@@ -3,7 +3,10 @@
         style="display: inline-flex; align-items: self-start; padding-top: 1em; padding-bottom: 1em; padding-left: 0; padding-right: 0;justify-content: space-between;">
         <div class="col-8" style="padding: 0; display:flex;">
             <span class="mx-2 aip-cursor" *ngIf="initiativeView">
-                <mat-icon class="aip-led-icons x-24 back-icon" (click)="toggler()">arrow_back</mat-icon>
+                <mat-icon class="aip-led-icons" (click)="toggler()"
+                    [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
+                    matTooltipPosition="above" (mouseenter)="isBackHovered = true"
+                    (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
             </span>
             <h2 style="margin: 0%;">App : {{streamItem?.alias}}</h2>
         </div>
@@ -225,9 +228,7 @@
     <div style="padding: 1em;">
         <div class="mat-dialog-title" style="display: flex; justify-content: space-between; align-items: center;">
             <h4 class="lfx-u-header-xl" id="modal-basic-title" style="margin: 0;">Try out link</h4>
-            <button mat-icon-button aria-label="Close" (click)="modal.dismiss('Cross click')">
-                <mat-icon>close</mat-icon>
-            </button>
+            <mat-icon mat-dialog-close>close</mat-icon>
         </div>
         <div class="mat-dialog-content" style="margin-top: 1em;">
             <mat-form-field appearance="fill" class="w-100">
@@ -236,8 +237,8 @@
             </mat-form-field>
         </div>
         <div class="mat-dialog-actions" style="justify-content: flex-end;">
-            <button mat-flat-button color="primary" class="lfx-u-mar-r-8" [disabled]="!editAuth" type="button"
-                (click)="updateUrl(); modal.dismiss('Cross click');">
+            <button mat-flat-button mat-dialog-close color="primary" class="lfx-u-mar-r-8" [disabled]="!editAuth"
+                type="button" (click)="updateUrl()">
                 Update
             </button>
         </div>
@@ -248,9 +249,8 @@
     <div style="padding: 1em; height: 80vh; overflow: auto;">
 
         <div class="mat-dialog-title" style="display: flex; justify-content: flex-end;">
-            <button mat-icon-button aria-label="Close"
-                (click)="modal.dismiss('Cross click'); basicReqTab='overviewTab';">
-                <mat-icon>close</mat-icon>
+            <button mat-icon-button aria-label="Close" (click)="basicReqTab='overviewTab'">
+                <mat-icon mat-dialog-close>close</mat-icon>
             </button>
         </div>
 

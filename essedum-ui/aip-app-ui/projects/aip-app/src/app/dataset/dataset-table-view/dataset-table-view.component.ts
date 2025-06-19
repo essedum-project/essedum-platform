@@ -6,7 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from "@angular/common";
 import { MatTableDataSource } from '@angular/material/table';
 import * as _ from "lodash";
-import {  Project } from '../../DTO/project';
+import { Project } from '../../DTO/project';
 import { DatasetServices } from '../dataset-service';
 import { MatDialog } from '@angular/material/dialog';
 @Component({
@@ -17,7 +17,7 @@ import { MatDialog } from '@angular/material/dialog';
 export class DatasetTableViewComponent implements OnInit {
   @Input('datasetname') inpdataset;
   @Input('datasetAlias') alias;
-  @Input('pipelineData') pipelineData : boolean = false;
+  @Input('pipelineData') pipelineData: boolean = false;
   @Output('result') result = new EventEmitter();
   filterjson = { "and": [] };
   @Input('params') params;
@@ -30,16 +30,16 @@ export class DatasetTableViewComponent implements OnInit {
   @Input('incident') incident;
   @Input('instanceName') instanceName;
   @Input('tickets') tickets;
-  showSpinnertable:boolean=true;
+  showSpinnertable: boolean = true;
   showAddTagBtn: boolean = false;
   datasetsCount: number;
-  selectedDatasetsCount:number = 0;
+  selectedDatasetsCount: number = 0;
   upload: any;
   fullscreenView: boolean;
   sidebarHeight: any = {};
   searchIncidentObj = {};
   sampleQueries = [];
-  analyticData=[];
+  analyticData = [];
   samples: string[] = [
     "and",
     "in",
@@ -92,7 +92,7 @@ export class DatasetTableViewComponent implements OnInit {
   lastPage: number;
   sortorder: any = -1;
   allIdsSelected: boolean = false;
-  selectedTickets: any[]=[];
+  selectedTickets: any[] = [];
   excludeIdsFromSelected: string[] = [];
   includeIdsFromSelected: string[] = [];
   andObj = { "and": [] };
@@ -114,15 +114,15 @@ export class DatasetTableViewComponent implements OnInit {
   cancelDownload: boolean = false;
   chunkSize: number = 500;
   search: any;
-  recipeName:any;
-  selectedRecipe:any;
+  recipeName: any;
+  selectedRecipe: any;
   searchToggle: boolean = false;
   basicReqTab: any = 'create';
-  showRecipe:boolean=true;
-  showWranglingData:boolean=false;
+  showRecipe: boolean = true;
+  showWranglingData: boolean = false;
   WranglingFileData;
-  recipeList:any[]=[{viewValue:'w1', value:'w1'},{viewValue:'Test', value:'Test'}];
-  showSpinner:boolean=false;
+  recipeList: any[] = [{ viewValue: 'w1', value: 'w1' }, { viewValue: 'Test', value: 'Test' }];
+  showSpinner: boolean = false;
 
   constructor(
     private datepipe: DatePipe,
@@ -131,16 +131,16 @@ export class DatasetTableViewComponent implements OnInit {
     private route: ActivatedRoute,
     private changeDetectorRefs: ChangeDetectorRef,
     private datasetsService: DatasetServices,
-     private dialog: MatDialog,
+    private dialog: MatDialog,
   ) {
 
   }
-name_id:any;
-  ngOnInit(): void {  
+  name_id: any;
+  ngOnInit(): void {
     this.route.params.subscribe((params) => {
       this.name_id = params['cname'];
     });
-    
+
     this.pipelineData
     this.getSourceApiParameters();
 
@@ -175,7 +175,7 @@ name_id:any;
           .subscribe(resp => {
             if (resp) {
               this.dataset = resp;
-              this.showSpinnertable=false;
+              this.showSpinnertable = false;
               this.dataset.schema ? this.schemaName = this.dataset.schema : this.schemaName = "";
               this.datasetAlias = this.dataset.alias;
               let actionToBeCompared: string;
@@ -199,7 +199,7 @@ name_id:any;
   getDatasetFormTemplate() {
     this.service.getDatasetForm(this.dataset.name).subscribe(resp => {
       this.schemaFormTemplate = resp[0]?.formtemplate?.formtemplate
-        if (this.asChildView) this.actionsList = [];
+      if (this.asChildView) this.actionsList = [];
       JSON.stringify(this.schemaFormTemplate, (_, nestedValue) => {
         if (nestedValue && nestedValue['type'] == "button"
           && (nestedValue['key'] == "refresh" || nestedValue['key'] == "internalNavigation"
@@ -236,10 +236,10 @@ name_id:any;
     })
   }
 
-  createNew(){
-    this.action="new";
+  createNew() {
+    this.action = "new";
     this.formView = true;
-    
+
   }
   getColumnNamesAndPrmKys() {
     try {
@@ -352,7 +352,7 @@ name_id:any;
 
   refreshTicket(decodedSPrList?: any[], decodedSValList?: any[]) {
     try {
-    
+
       if (sessionStorage.getItem("failureDashboardToTickets") == "True") {
         this.fmFlrDsb = true;
       }
@@ -409,26 +409,26 @@ name_id:any;
         this.searchIncidentObj = {};
         this.cols.map(ele => ele['filterValue'] = null);
       }
-      if(!this.itsm && !this.tickets){
-      let queryParams: any = {number: this.id}
-      let queryParamsJson = JSON.stringify(queryParams);  
-      this.service.getSearchCount(this.datasetName, projName, finalAndObj, queryParamsJson).
-        subscribe(resp => {
-          if (resp) {
+      if (!this.itsm && !this.tickets) {
+        let queryParams: any = { number: this.id }
+        let queryParamsJson = JSON.stringify(queryParams);
+        this.service.getSearchCount(this.datasetName, projName, finalAndObj, queryParamsJson).
+          subscribe(resp => {
+            if (resp) {
 
-            if (resp.startsWith("Error: ")) {
+              if (resp.startsWith("Error: ")) {
 
+              }
+              else {
+                let response: number = +resp;
+                this.datasetsCount = response;
+                // this.analyticsDatas(this.searchIncidentObj,finalAndObj,paramObj,this.datasetsCount);
+                this.initializePaginationVariables();
+              }
             }
-            else {
-              let response: number = +resp;
-              this.datasetsCount = response;
-              // this.analyticsDatas(this.searchIncidentObj,finalAndObj,paramObj,this.datasetsCount);
-              this.initializePaginationVariables();
-            }
-          }
-        },
-          error => { console.log(error) }
-        )
+          },
+            error => { console.log(error) }
+          )
       }
       let paramObj;
       if (this.params) {
@@ -437,14 +437,14 @@ name_id:any;
           paramObj[param] = this.id
         })
       }
-      
-      if(!this.itsm && !this.tickets){ 
-        if(this.showWranglingData){
-          pagination={ 'page': this.page, 'size': this.datasetsCount, 'sortEvent': this.sortEvent, 'sortOrder': this.sortorder };
+
+      if (!this.itsm && !this.tickets) {
+        if (this.showWranglingData) {
+          pagination = { 'page': this.page, 'size': this.datasetsCount, 'sortEvent': this.sortEvent, 'sortOrder': this.sortorder };
         }
         this.busy = this.service.searchTicketsUsingDataset(this.datasetName, projName, pagination, finalAndObj, paramObj)
           .subscribe(
-            (pageResponse:any) => {
+            (pageResponse: any) => {
               if (typeof pageResponse == "string") {
                 this.service.messageService(pageResponse, "error");
                 this.ticketList = this.ticketListBackup;
@@ -457,13 +457,13 @@ name_id:any;
                     this.ticketList.push(element);
                   }
                 });
-                if(this.showWranglingData){
-                  this.WranglingFileData=[];
-                  this.WranglingFileData=this.ticketList
-                  this.showSpinner=false;
+                if (this.showWranglingData) {
+                  this.WranglingFileData = [];
+                  this.WranglingFileData = this.ticketList
+                  this.showSpinner = false;
                 }
-                else{
-                this.ticketListBackup = this.ticketList;
+                else {
+                  this.ticketListBackup = this.ticketList;
                 }
               }
             },
@@ -471,26 +471,25 @@ name_id:any;
               this.service.messageService("Could not get the results", "error");
               this.ticketList = this.ticketListBackup;
             }
-          );        
+          );
       } else if (this.tickets) {
         this.searchOnInputForSemanticSearchResult(this.tickets)
-      } else
-        {
-        let queryParams: any = {number: this.id}
-        let queryParamsJson = JSON.stringify(queryParams);  
-        if(this.incident.remshortdescription !=null){
-          this.incident.shortdescription=this.incident.remshortdescription;
+      } else {
+        let queryParams: any = { number: this.id }
+        let queryParamsJson = JSON.stringify(queryParams);
+        if (this.incident.remshortdescription != null) {
+          this.incident.shortdescription = this.incident.remshortdescription;
         }
-        const body = {"query":this.incident};    
+        const body = { "query": this.incident };
         this.busy = this.service.getAiOpsData('similarTickets', body, this.instanceName)
           .subscribe(
-            (pageResponse:any) => {
+            (pageResponse: any) => {
               if (typeof pageResponse == "string") {
                 this.service.messageService(pageResponse, "error");
                 this.ticketList = this.ticketListBackup;
               }
               else {
-                this.ticketList=[]
+                this.ticketList = []
                 Object.keys(pageResponse.body.Answer).forEach((keyIndex) => {
                   let element = pageResponse.body.Answer[keyIndex];
                   if (element) {
@@ -498,16 +497,16 @@ name_id:any;
                     this.ticketList.push(element);
                   }
                 });
-                this.datasetsCount=this.ticketList.length;
+                this.datasetsCount = this.ticketList.length;
                 this.ticketListBackup = this.ticketList;
               }
             },
-          (error) => {
-            this.ticketList = this.ticketListBackup;
-          }
-        );
+            (error) => {
+              this.ticketList = this.ticketListBackup;
+            }
+          );
       }
-     
+
     }
     catch (Exception: any) {
       this.service.messageService(Exception, "error")
@@ -585,8 +584,8 @@ name_id:any;
     this.oldSortEvent = this.sortEvent;
     this.loadObjects(this.andObj);
   }
-  quickStatsData:any = '';
-  
+  quickStatsData: any = '';
+
   loadObjects(exampleIncident: any) {
     try {
       if (!exampleIncident) exampleIncident = {};
@@ -601,57 +600,57 @@ name_id:any;
           paramObj[param] = this.id
         })
       }
-    
-      if(!this.itsm) {
-        this.busy = this.service.searchTicketsUsingDataset(this.datasetName, projName, pagination, exampleIncident)
-        .subscribe(res => {
-          if (typeof res == "string") {
-            this.service.messageService(res, "error");
-            this.ticketList = this.ticketListBackup;
-          }
-          else {
-            res.forEach((ele) => {
-              if (ele) {
-                Object.keys(ele).map(ky => { if (ele[ky]) ele[ky] = ele[ky].toString() });
-                this.ticketList.push(ele);
-              }
-            });
-            if (this.unqId) {
-              this.ticketList = this.ticketList.filter((elem, index, self) => {
-                return (
-                  index ===
-                  self.findIndex((ele) => {
-                    return ele[this.unqId] === elem[this.unqId];
-                  })
-                );
-              });
-            }
-            this.ticketListBackup = this.ticketList;
-            this.checkIfAllIdsSelected();
-            this.changeDetectorRefs.detectChanges();
-          }
 
-        },
-          error => {
-            this.service.messageService("Some error occurred while fetching data", "error");
-            this.ticketList = this.ticketListBackup;
-          });
+      if (!this.itsm) {
+        this.busy = this.service.searchTicketsUsingDataset(this.datasetName, projName, pagination, exampleIncident)
+          .subscribe(res => {
+            if (typeof res == "string") {
+              this.service.messageService(res, "error");
+              this.ticketList = this.ticketListBackup;
+            }
+            else {
+              res.forEach((ele) => {
+                if (ele) {
+                  Object.keys(ele).map(ky => { if (ele[ky]) ele[ky] = ele[ky].toString() });
+                  this.ticketList.push(ele);
+                }
+              });
+              if (this.unqId) {
+                this.ticketList = this.ticketList.filter((elem, index, self) => {
+                  return (
+                    index ===
+                    self.findIndex((ele) => {
+                      return ele[this.unqId] === elem[this.unqId];
+                    })
+                  );
+                });
+              }
+              this.ticketListBackup = this.ticketList;
+              this.checkIfAllIdsSelected();
+              this.changeDetectorRefs.detectChanges();
+            }
+
+          },
+            error => {
+              this.service.messageService("Some error occurred while fetching data", "error");
+              this.ticketList = this.ticketListBackup;
+            });
       } else {
-        let queryParams: any = {number: this.id}
-        let queryParamsJson = JSON.stringify(queryParams);  
-        if(this.incident.remshortdescription !=null){
-          this.incident.shortdescription=this.incident.remshortdescription;
+        let queryParams: any = { number: this.id }
+        let queryParamsJson = JSON.stringify(queryParams);
+        if (this.incident.remshortdescription != null) {
+          this.incident.shortdescription = this.incident.remshortdescription;
         }
-        const body = {"query":this.incident};    
+        const body = { "query": this.incident };
         this.busy = this.service.getAiOpsData('similarTickets', body, this.instanceName)
           .subscribe(
-            (pageResponse:any) => {
+            (pageResponse: any) => {
               if (typeof pageResponse == "string") {
                 this.service.messageService(pageResponse, "error");
                 this.ticketList = this.ticketListBackup;
               }
               else {
-                this.ticketList=[]
+                this.ticketList = []
                 Object.keys(pageResponse.body.Answer).forEach((keyIndex) => {
                   let element = pageResponse.body.Answer[keyIndex];
                   if (element) {
@@ -659,18 +658,18 @@ name_id:any;
                     this.ticketList.push(element);
                   }
                 });
-                this.datasetsCount=this.ticketList.length;
+                this.datasetsCount = this.ticketList.length;
                 this.ticketListBackup = this.ticketList;
               }
             },
-          error => {
-            this.ticketList = this.ticketListBackup;
-          });
+            error => {
+              this.ticketList = this.ticketListBackup;
+            });
       }
-      
-      
-      let queryParams: any = {number: this.id}
-      let queryParamsJson = JSON.stringify(queryParams);  
+
+
+      let queryParams: any = { number: this.id }
+      let queryParamsJson = JSON.stringify(queryParams);
       this.service.getSearchCount(this.datasetName, projName, exampleIncident, queryParamsJson)
         .subscribe(resp => {
           if (resp) {
@@ -741,7 +740,7 @@ name_id:any;
     this.rowObj = {};
     if (this.schemaFormTemplate && typeof this.schemaFormTemplate == "string") this.schemaFormTemplate = JSON.parse(this.schemaFormTemplate)
     if (this.schemaFormTemplate?.components?.length > 0) {
-      
+
       this.rowObj = dataObj;
     }
     this.formView = true;
@@ -800,7 +799,7 @@ name_id:any;
       this.selectedDatasetsCount = this.datasetsCount
       this.includeIdsToSelected = [];
     }
-    else{
+    else {
       this.selectedDatasetsCount = 0
     }
     this.excludeIdsFromSelected = [];
@@ -809,7 +808,7 @@ name_id:any;
   showTickets(inc) {
     if (!this.selectedTickets.includes(inc)) {
       this.selectedTickets.push(inc);
-      this.selectedDatasetsCount = this.selectedDatasetsCount+1;
+      this.selectedDatasetsCount = this.selectedDatasetsCount + 1;
       if (!this.allIdsSelected && this.excludeIdsFromSelected.length == 0) {
         this.includeIdsToSelected.push(inc);
         if (this.includeIdsToSelected.length == this.length) this.allIdsSelected = true
@@ -828,7 +827,7 @@ name_id:any;
       }
       this.selectedDatasetsCount = this.selectedDatasetsCount - 1;
     }
-   }
+  }
 
   showcipDtstColsToDwnld() {
     this.showcipDtstCols = !this.showcipDtstCols;
@@ -840,7 +839,7 @@ name_id:any;
     this.colsToDownload = this.selectAllColsToDwnld
       ? this.cols.map(col => col.field)
       : [];
-      
+
   }
 
   download() {
@@ -856,8 +855,8 @@ name_id:any;
       let searchExample: any;
       if (this.searchIncidentObj) searchExample = this.andObj;
       else searchExample = {};
-      let queryParams: any = {number: this.id}
-      let queryParamsJson = JSON.stringify(queryParams);  
+      let queryParams: any = { number: this.id }
+      let queryParamsJson = JSON.stringify(queryParams);
       this.service.getSearchCount(this.datasetName, projName, searchExample, queryParamsJson).
         subscribe(resp => {
           if (resp) {
@@ -978,7 +977,7 @@ name_id:any;
     if (col) {
       col.selected = !col.selected;
 
- 
+
       if (col.selected) {
         this.colsToDownload.push(col.field);
       } else {
@@ -1004,12 +1003,12 @@ name_id:any;
     switch (choice) {
       case 'Next':
         this.page += 1;
-        if(this.page > this.lastPage)
+        if (this.page > this.lastPage)
           this.page = this.lastPage;
         break;
       case 'Prev':
         this.page -= 1;
-        if(this.page < 0)
+        if (this.page < 0)
           this.page = 0;
         break
       case 'First':
@@ -1023,14 +1022,13 @@ name_id:any;
   }
   ngOnChanges() {
     this.ngOnInit();
-   
+
   }
 
 
-  selectChange($event){
-    this.selectedRecipe=$event;
-    console.log('recipeEvent',this.selectedRecipe);
-    
+  selectChange($event) {
+    this.selectedRecipe = $event;
+
   }
   getIncidentsByPage() {
     // this.page = pgInfo.page;
@@ -1043,22 +1041,22 @@ name_id:any;
     this.cancelDownload = true;
     this.service.messageService("Download Terminated", "Dataset View");
   }
-  colSearch(){
-    this.searchToggle=!this.searchToggle
+  colSearch() {
+    this.searchToggle = !this.searchToggle
   }
-  displayDetails(){}
-  startAnalytics(){
-    localStorage.setItem('dataalias', this.datasetAlias );
-    localStorage.setItem('nameid',this.name_id);
-    this.router.navigate(['../../../datasetAnalytics'], { 
-      state: { dataalias: this.datasetAlias ,quickdata:this.quickStatsData},
-        relativeTo: this.route,
-       
+  displayDetails() { }
+  startAnalytics() {
+    localStorage.setItem('dataalias', this.datasetAlias);
+    localStorage.setItem('nameid', this.name_id);
+    this.router.navigate(['../../../datasetAnalytics'], {
+      state: { dataalias: this.datasetAlias, quickdata: this.quickStatsData },
+      relativeTo: this.route,
+
     });
-}
-  startWrangling(content:any){
-    this.showRecipe= true;
-    this.showWranglingData=true;
+  }
+  startWrangling(content: any) {
+    this.showRecipe = true;
+    this.showWranglingData = true;
 
     this.dialog.open(content, {
       width: '600px', // adjust as needed

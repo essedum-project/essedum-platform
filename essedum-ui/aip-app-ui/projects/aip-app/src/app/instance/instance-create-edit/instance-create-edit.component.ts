@@ -20,6 +20,7 @@ export class InstanceCreateEditComponent implements OnInit {
   latest_job: boolean;
   chainName: any;
   runtimesForConnection: any;
+  isBackHovered: boolean = false;
 
   constructor(
     private dialogRef: MatDialogRef<InstanceCreateEditComponent>,

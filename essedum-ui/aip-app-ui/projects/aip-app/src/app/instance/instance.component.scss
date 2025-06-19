@@ -142,3 +142,12 @@ li {
 .w-100 {
   width: 100% !important;
 }
+
+::ng-deep .mat-mdc-menu-item:hover {
+  background-color: #e3f2fd !important; /* Light blue background */
+  color: #0094ff !important; /* Change text color */
+}
+
+::ng-deep .mat-mdc-menu-item {
+  font-size: 1.2rem !important; /* or any size you prefer */
+}

@@ -23,6 +23,7 @@ export class InstanceDescriptionComponent {
   editAuth: boolean;
   deleteAuth: boolean;
   back: string = 'Back';
+  isBackHovered: boolean = false;
   editAction: string = 'edit';
   basicReqTab: any = 'detailsTab';
   isAdapter: string = 'no';
