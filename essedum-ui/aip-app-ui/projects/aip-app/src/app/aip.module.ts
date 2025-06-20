@@ -54,8 +54,6 @@ import { CreateAppComponent } from './apps/create-app/create-app.component';
 import { AdapterCreateEditComponent } from './adapter/adapter-create-edit/adapter-create-edit.component';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component/confirm-delete-dialog.component';
 import { JobDataViewerComponent } from './pipeline.description/job-data-viewer/job-data-viewer.component';
-import { DialogModule } from 'primeng/dialog';
-import { TableModule } from 'primeng/table';
 import { CreateSpecTemplateComponent } from './spec-template/create-spec-template/create-spec-template.component';
 import { EditSpecTemplateComponent } from './spec-template/edit-spec-template/edit-spec-template.component';
 import { AdapterDescriptionComponent } from './adapter/adapter-description/adapter-description.component';
@@ -111,30 +109,22 @@ import {
 import { ShowOutputArtifactsComponent } from './pipeline.description/show-output-artifacts/show-output-artifacts.component';
 import { NgxIndexedDBModule, DBConfig } from 'ngx-indexed-db';
 import { ChooseRuntimeComponent } from './apps/choose-runtime/choose-runtime.component';
-import { FieldsetModule } from 'primeng/fieldset';
 import { AngularDualListBoxModule } from 'angular-dual-listbox';
 import { PaginationComponent } from './pagination/pagination.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
-import { AccordionModule } from 'primeng/accordion';
-import { DragDropModule } from 'primeng/dragdrop';
 import { PlotlyModule } from 'angular-plotly.js';
 import * as PlotlyJS from 'plotly.js-dist-min';
 import { NgBusyModule } from 'ng-busy';
-import { OverlayPanelModule } from 'primeng/overlaypanel';
-import { TooltipModule } from 'primeng/tooltip';
-import { ListboxModule } from 'primeng/listbox';
+
 import { PipelineDialogComponent } from './pipeline-dialog/pipeline-dialog.component';
-import { InputNumberModule } from 'primeng/inputnumber';
+
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { MarkdownModule } from 'ngx-markdown';
 import { DragDropModule as CdkDragDropModule } from '@angular/cdk/drag-drop';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { QuillModule } from 'ngx-quill';
 import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-name.component';
-import { MenubarModule } from 'primeng/menubar';
-import { InputTextModule } from 'primeng/inputtext';
-import { KeyFilterModule } from 'primeng/keyfilter';
 import { AdapterServices } from './adapter/adapter-service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -263,8 +253,6 @@ const dbConfig: DBConfig = {
     JsonFormsAngularMaterialModule,
     MatRadioModule,
     FileUploadModule,
-    TableModule,
-    DialogModule,
     MatExpansionModule,
     NgJsonEditorModule,
     MatTreeModule,
@@ -279,23 +267,12 @@ const dbConfig: DBConfig = {
     NgxIndexedDBModule.forRoot(dbConfig),
     MarkdownModule.forRoot(), // Add this line
     NgxMatSelectSearchModule,
-    FieldsetModule,
     AngularDualListBoxModule,
     MatMenuModule,
     PlotlyModule,
     NgBusyModule,
     MatButtonModule,
-    AccordionModule,
-    DragDropModule,
-    OverlayPanelModule,
-    TooltipModule,
-    ListboxModule,
-    InputNumberModule,
-    MenubarModule,
-    InputTextModule,
-    KeyFilterModule,
     CdkDragDropModule,
-
     NgxSliderModule,
     QuillModule,
   ],

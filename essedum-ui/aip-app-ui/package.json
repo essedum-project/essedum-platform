@@ -35,6 +35,7 @@
     "@jsonforms/core": "3.3.0",
     "@ng-bootstrap/ng-bootstrap": "^17.0.0",
     "@ngtools/webpack": "^18.0.5",
+    "@popperjs/core": "^2.11.8",
     "@stomp/stompjs": "^7.0.0",
     "@types/drawflow": "^0.0.5",
     "@types/jsplumb": "^2.5.7",
