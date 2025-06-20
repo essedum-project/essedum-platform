@@ -41,6 +41,7 @@
     "font-awesome": "^4.7.0",
     "jquery": "^3.6.0",
     "jsoneditor": "^9.7.0",
+    "lodash-es": "^4.17.21",
     "luxon": "^1.24.0",
     "moment-timezone": "^0.5.34",
     "ng-busy": "14.0.0",
