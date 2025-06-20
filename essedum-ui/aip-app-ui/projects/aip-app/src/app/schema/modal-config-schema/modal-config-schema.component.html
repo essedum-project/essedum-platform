@@ -18,40 +18,7 @@
                                 </h1>
                             </div>
                             <div class="col-md-12 selector-691-13">
-                                <div class="flex justify-content-end lfx-u-mar-8 align-items-center">
-
-                                    <div>
-                                        <div class="lfx-u-pad-lr-16" style="width: 70%">
-                                            <mat-form-field appearance="fill" class="w-100 subscript-space">
-                                                <mat-label></mat-label>
-                                                <mat-select [(value)]="selectedtype"
-                                                    (selectionChange)="onSelectionType($event)">
-                                                    <mat-option *ngFor="let option of types" [value]="option">
-                                                        {{ option.value }}
-                                                    </mat-option>
-                                                </mat-select>
-                                            </mat-form-field>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <div class="lfx-u-pad-lr-16" style="width: 70%">
-                                            <mat-form-field appearance="fill" class="w-100 subscript-space">
-                                                <mat-select [(value)]="selectedCapability">
-                                                    <mat-option *ngFor="let option of capabilities" [value]="option">
-                                                        {{ option.value }}
-                                                    </mat-option>
-                                                </mat-select>
-                                            </mat-form-field>
-                                        </div>
-                                    </div>
-
-                                    <div title="Graph View" (click)="navigateToSchema()" designType='icon'
-                                        class="lfx-u-mar-lr-24">
-                                        <span class="lfx-c-btn--icon__icon">
-                                            <mat-icon class="aip-led-icons x-24">data_exploration</mat-icon>
-                                        </span>
-                                    </div>
+                                <div class="flex justify-content-end lfx-u-mar-8 align-items-center">                           
 
                                     <div *ngIf="tabValue!='Schema Form' || !formListView" class="lfx-u-mar-8"
                                         [ngClass]="isRawData?'':'lfx-u-header-lg'">Table View
@@ -64,10 +31,7 @@
                                     </div>
 
                                     <div class="selector-691-17" *ngIf="tabValue=='Schema Form'">
-                                        <i class="fa fa-wpforms selector-691-18" id="schm-modal-viewform"
-                                            *ngIf="!viewForm && formListView == false" style="font-size: 25px;"
-                                            title="View Form" (click)="openFormView(xlgContent1)"
-                                            aria-hidden="true"></i>
+                                       
                                     </div>
                                 </div>
                             </div>
@@ -439,14 +403,3 @@
             </div>
         </div>
     </div>
-    <ng-template #xlgContent1 let-modal>
-        <div class="lfx-u-pad-16">
-            <div *ngIf="viewForm" class="flex justify-content-between lfx-u-pad-tb-8">
-                <div class="lfx-u-header-xl">Form View</div>
-                <div class="" (click)="closeFormView()"><i class="icon x-16 close-icon"></i></div>
-            </div>
-            <div id="schm-modal-form-table-viewform" class="row selector-691-105" *ngIf="viewForm">
-                <formio [form]="schemaForm" class="selector-691-106"></formio>
-            </div>
-        </div>
-    </ng-template>
