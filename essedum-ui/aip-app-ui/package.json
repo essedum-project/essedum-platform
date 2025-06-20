@@ -14,6 +14,7 @@
     "run:all": "node node_modules/@angular-architects/module-federation/src/server/mf-dev-server.js"
   },
   "dependencies": {
+    "@ali-hm/angular-tree-component": "^12.0.5",
     "@angular-architects/module-federation": "^18.0.2",
     "@angular-architects/module-federation-tools": "^18.0.2",
     "@angular-slider/ngx-slider": "^18.0.0",
