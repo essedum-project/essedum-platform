@@ -23,11 +23,11 @@
               <mat-icon class="lfx-icon-hover">filter_list</mat-icon>
             </div>
 
-            <div (click)="createNew()" designType="icon" matTooltip="Add">
+            <!-- <div (click)="createNew()" designType="icon" matTooltip="Add">
               <span class="">
                 <mat-icon class="lfx-icon-hover">add</mat-icon>
               </span>
-            </div>
+            </div> -->
 
             <mat-menu #downloadMenu="matMenu">
               <div style="padding: 8px 16px; max-height: 30vh; overflow: auto">
@@ -226,10 +226,10 @@
       </div>
     </div>
 
-    <div *ngIf="formView" class="selector-795-131">
+    <!-- <div *ngIf="formView" class="selector-795-131">
       <app-dataset-form-view [dataset]="data" [initiativeDatasetName]="inpdataset" [action]="action" [rowObj]="rowObj"
         (result)="checkResult($event)" class="selector-795-133"></app-dataset-form-view>
-    </div>
+    </div> -->
 
     <div *ngIf="upload" style="margin-bottom: 45px">
       <div class="lfx-u-mar-32; lfx-u-pad-16">

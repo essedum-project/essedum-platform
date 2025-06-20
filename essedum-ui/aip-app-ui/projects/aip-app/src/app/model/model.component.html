@@ -130,14 +130,7 @@
                                     <mat-menu #menu="matMenu">
                                         <button mat-menu-item *ngIf="editAuth" (click)="redirection(card,'edit')">
                                             Edit
-                                        </button>
-                                        <button mat-menu-item *ngIf="deployAuth"  (click)="redirection(card,'deploy')">
-                                            Deploy
-                                        </button>
-                                        <button mat-menu-item *ngIf="card.status=='Deployed'"
-                                            (click)="deleteDeployment(card)">
-                                            Delete Deployment
-                                        </button>
+                                        </button>                            
                                         <button mat-menu-item *ngIf="deleteAuth" (click)="deleteModels(card)">
                                             Delete
                                         </button>

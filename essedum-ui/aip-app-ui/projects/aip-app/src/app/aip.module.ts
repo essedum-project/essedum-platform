@@ -92,14 +92,14 @@ import { DefaultComponent } from './dataset/default/default.component';
 import { DatasetEditComponent } from './dataset/dataset-edit/dataset-edit.component';
 import { DatasetFullscreenViewComponent } from './dataset/dataset-fullscreen-view/dataset-fullscreen-view.component';
 import { DatasetPowerModeViewComponent } from './dataset/dataset-power-mode-view/dataset-power-mode-view.component';
-import { DatasetFormViewComponent } from './dataset/dataset-form-view/dataset-form-view.component';
+//import { DatasetFormViewComponent } from './dataset/dataset-form-view/dataset-form-view.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 imports: [ScrollingModule];
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { ModalConfigSchemaComponent } from './schema/modal-config-schema/modal-config-schema.component';
 import { ModalConfigSchemaEditorComponent } from './schema/modal-config-schema-editor/modal-config-schema-editor.component';
-import { FormioModule } from '@formio/angular';
+//import { FormioModule } from '@formio/angular';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { CarouselModule as CModule } from 'ngx-owl-carousel-o';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -232,7 +232,7 @@ const dbConfig: DBConfig = {
     DatasetEditComponent,
     DatasetFullscreenViewComponent,  
     DatasetPowerModeViewComponent,
-    DatasetFormViewComponent,  
+   // DatasetFormViewComponent,  
     ModalConfigSchemaComponent,
     ModalConfigSchemaEditorComponent, 
     UserSecretsComponent,
@@ -281,7 +281,7 @@ const dbConfig: DBConfig = {
     ScrollingModule,
     MatAutocompleteModule,
     PdfViewerModule,
-    FormioModule,
+    //FormioModule,
     NgxPaginationModule,
     CModule,
     MatNativeDateModule,
