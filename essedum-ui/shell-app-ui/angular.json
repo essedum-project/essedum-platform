@@ -65,7 +65,6 @@
 							"node_modules/bootstrap/dist/js/bootstrap.min.js",
 							"src/assets/js/usm-script.js",
 							"src/assets/js/telemetry.min.js",
-							"src/assets/js/proj4.js",
 							"node_modules/cookieconsent/build/cookieconsent.min.js"
 						],
 						"extraWebpackConfig": "webpack.config.js",

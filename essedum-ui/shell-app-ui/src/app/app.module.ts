@@ -20,7 +20,10 @@ import { TokenExpiryPopupComponent } from './popups/token-expiry-popup/token-exp
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatCardModule } from "@angular/material/card";
 import { MatButtonModule } from "@angular/material/button";
+<<<<<<< Updated upstream
 //import { FormioModule } from "@formio/angular";
+=======
+>>>>>>> Stashed changes
 // import { MessageService } from 'com-lib-util';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import '@linuxfoundation/lfx-ui-core';
@@ -72,7 +75,10 @@ const cookieConfig: NgcCookieConsentConfig = {
     MatCardModule,
     MatButtonModule,
     MatMenuModule,
+<<<<<<< Updated upstream
   //  FormioModule,
+=======
+>>>>>>> Stashed changes
   ],
   providers: [
     ApisService,

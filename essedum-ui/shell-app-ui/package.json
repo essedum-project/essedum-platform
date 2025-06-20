@@ -29,7 +29,6 @@
     "@angular/platform-browser": "^18.0.2",
     "@angular/platform-browser-dynamic": "^18.0.2",
     "@angular/router": "^18.0.2",
-    "@formio/angular": "^5.2.9",
     "@linuxfoundation/lfx-ui-core": "^0.0.15",
     "@ng-bootstrap/ng-bootstrap": "^15.1.2",
     "@popperjs/core": "^2.11.0",

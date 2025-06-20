@@ -34,7 +34,10 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 import { StaticLandingComponent } from './static-landing/static-landing.component';
 import { NotificationMenuComponent } from './notification-menu/notification-menu.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+<<<<<<< Updated upstream
 //import { FormioModule } from '@formio/angular';
+=======
+>>>>>>> Stashed changes
 import { MyProfileComponent } from "./my-profile/my-profile.component";
 import { DialogModule } from "primeng/dialog"
 @NgModule({
@@ -76,7 +79,10 @@ import { DialogModule } from "primeng/dialog"
     NgbModule,
     MatProgressBarModule,
     InlineSVGModule.forRoot(),
+<<<<<<< Updated upstream
     //odule,
+=======
+>>>>>>> Stashed changes
     DialogModule,
     InlineSVGModule.forRoot()
 
