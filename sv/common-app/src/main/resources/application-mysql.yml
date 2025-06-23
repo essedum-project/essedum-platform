@@ -8,20 +8,20 @@ commonAppUrl: "http://localhost:8081/"
 telemetry:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    driverClassName: org.postgresql.Driver
-    jdbcurl: jdbc:postgresql://localhost:5432/telemetrydb
-    username: postgres
-    password: password
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcurl: jdbc:mysql://localhost:3306/telemetrydb
+    username: root
+    password: root
  
 config:
-  active-profiles: postgresql,dbjwt,btf,dbconstants,vault
+  active-profiles: mysql,dbjwt,btf,dbconstants,vault
   #active-profiles: mysql,oauth2,btf,dbconstants
   #static-locations: file:/D:/common-app/
   static-locations: file:/C:/Users/mohan.peta/Documents/AIP_2024_March28/common-app-mar-14/
   
-  datasourceurl: jdbc:postgresql://localhost:5432
-  datasourceuser: postgres
-  datasourcepass: password
+  datasourceurl: jdbc:mysql://localhost:3306
+  datasourceuser: root
+  datasourcepass: root
   leapcoredb: leap_8000_coredb_m116
   leapquartzdb: leap2_8000_quartz
   
