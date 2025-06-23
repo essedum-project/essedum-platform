@@ -121,7 +121,7 @@
                                         Implemented</div>
                                     <div *ngIf="isRemoteExecution && !isInstance && createAuth" class="lfx-u-pad-24"
                                         (click)="addRemoteMethod(spec)">
-                                        <mat-icon class="aip-led-icons  aip-cursor mx-2r"
+                                        <mat-icon class="aip-led-icons  aip-cursor mx-2"
                                             (click)="addRemoteMethod(spec)" matTooltip="'Implement Method'"
                                             [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
                                             add
@@ -137,7 +137,7 @@
                                         style="display: flex;">
                                         <ul class="d-flex justify-content-between align-items-center">
                                             <li *ngIf="!isRemoteExecution && editAuth && !isInstance"><mat-icon
-                                                    class="aip-led-icons  aip-cursor mx-2r"
+                                                    class="aip-led-icons  aip-cursor mx-2"
                                                     (click)="editMethod(specDataForEdit)" matTooltip="Edit"
                                                     [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
                                                     edit
@@ -148,7 +148,7 @@
                                                 </ng-template>
                                             </li>
                                             <li *ngIf="deleteAuth && !isInstance && !isEndpoint">
-                                                <mat-icon class="aip-led-icons  aip-cursor mx-2r"
+                                                <mat-icon class="aip-led-icons  aip-cursor mx-2"
                                                     (click)="deleteMethod(spec)" matTooltip="Delete"
                                                     [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
                                                     delete
@@ -156,7 +156,7 @@
                                             </li>
                                             <li
                                                 *ngIf="!isRemoteExecution && !editAuth || (isInstance && !isRemoteExecution)">
-                                                <mat-icon class="aip-led-icons  aip-cursor mx-2r"
+                                                <mat-icon class="aip-led-icons  aip-cursor mx-2"
                                                     (click)="editMethod(specDataForView)" matTooltip="View"
                                                     [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
                                                     visibility
