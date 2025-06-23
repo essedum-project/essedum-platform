@@ -20,14 +20,5 @@ spec:
         ports:
         - containerPort: 8082
         - containerPort: 8084
-        volumeMounts:
-        - name: tls-certs
-          mountPath: /etc/nginx/certs
-          readOnly: true
       imagePullSecrets:
       - name: acr-secret # Secret to authenticate with ACR
-      volumes:
-      - name: tls-certs
-        secret:
-          secretName: aiplatform-secret
-

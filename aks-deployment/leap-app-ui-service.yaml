@@ -1,34 +1,3 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: leap-app-ingress
-  namespace: aipns
-  annotations:
-    appgw.ingress.kubernetes.io/health-probe: /
-    appgw.ingress.kubernetes.io/use-private-ip: "true"
-    kubectl.kubernetes.io/last-applied-configuration: ""
-    appgw.ingress.kubernetes.io/rewrite-rule-set: AddSecurity_Headers
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-    #kubernetes.io/ingress.class: azure/application-gateway
-    #nginx.ingress.kubernetes.io/rewrite-target: /
-spec:
-  ingressClassName: nginx
-  tls:
-  - hosts:
-    - essedum.az.ad.idemo-ppc.com
-    secretName: aiplatform-secret
-  rules:
-  - host: essedum.az.ad.idemo-ppc.com
-    http:
-      paths:
-      - backend:
-          service:
-            name: leap-app-ui-service
-            port:
-              number: 8084
-        path: /
-        pathType: Prefix
----
 apiVersion: v1
 kind: Service
 metadata:
