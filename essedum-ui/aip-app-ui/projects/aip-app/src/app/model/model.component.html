@@ -68,7 +68,7 @@
                 <!-- CARD -->
                 <div class="col-md-8 col-lg-6 col-xl-5" style='min-width: -webkit-fill-available;padding: 0px;'
                     *ngFor="let card of cards">
-                    <mat-card class="example-card" appearance="outlined"
+                    <mat-card class="example-card card-shadow" appearance="outlined"
                         style="padding-top: 0 !important;padding-bottom: 0 !important;padding: 0px !important;height: 163px;display: grid">
 
                         <div class="d-flex align-items-center justify-content-between lfx-u-mar-l-18">
@@ -130,14 +130,7 @@
                                     <mat-menu #menu="matMenu">
                                         <button mat-menu-item *ngIf="editAuth" (click)="redirection(card,'edit')">
                                             Edit
-                                        </button>
-                                        <button mat-menu-item *ngIf="deployAuth"  (click)="redirection(card,'deploy')">
-                                            Deploy
-                                        </button>
-                                        <button mat-menu-item *ngIf="card.status=='Deployed'"
-                                            (click)="deleteDeployment(card)">
-                                            Delete Deployment
-                                        </button>
+                                        </button>                            
                                         <button mat-menu-item *ngIf="deleteAuth" (click)="deleteModels(card)">
                                             Delete
                                         </button>

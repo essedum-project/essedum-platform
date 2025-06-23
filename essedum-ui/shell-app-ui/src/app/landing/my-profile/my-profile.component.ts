@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ApisService } from '../../services/apis.service';
-//import { Users } from './projects/iamp-usm';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MessageService } from '../../services/message.service';
 

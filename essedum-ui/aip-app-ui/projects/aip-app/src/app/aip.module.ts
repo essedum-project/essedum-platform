@@ -4,7 +4,6 @@ import { AipComponent } from './aip.component';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatCardModule } from '@angular/material/card';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DatasetServices } from './dataset/dataset-service';
@@ -43,7 +42,6 @@ import { SchemaComponent } from './schema/schema.component';
 import { AdapterComponent } from './adapter/adapter.component';
 import { InstanceComponent } from './instance/instance.component';
 import { PipelineCreateComponent } from './pipeline/pipeline-create/pipeline-create.component';
-import { TreeModule } from '@ali-hm/angular-tree-component';
 import { MatRadioModule } from '@angular/material/radio';
 import { SpecTemplateComponent } from './spec-template/spec-template.component';
 import { SpecTemplateDescriptionComponent } from './spec-template/spec-template-description/spec-template-description.component';
@@ -56,8 +54,6 @@ import { CreateAppComponent } from './apps/create-app/create-app.component';
 import { AdapterCreateEditComponent } from './adapter/adapter-create-edit/adapter-create-edit.component';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component/confirm-delete-dialog.component';
 import { JobDataViewerComponent } from './pipeline.description/job-data-viewer/job-data-viewer.component';
-import { DialogModule } from 'primeng/dialog';
-import { TableModule } from 'primeng/table';
 import { CreateSpecTemplateComponent } from './spec-template/create-spec-template/create-spec-template.component';
 import { EditSpecTemplateComponent } from './spec-template/edit-spec-template/edit-spec-template.component';
 import { AdapterDescriptionComponent } from './adapter/adapter-description/adapter-description.component';
@@ -92,14 +88,13 @@ import { DefaultComponent } from './dataset/default/default.component';
 import { DatasetEditComponent } from './dataset/dataset-edit/dataset-edit.component';
 import { DatasetFullscreenViewComponent } from './dataset/dataset-fullscreen-view/dataset-fullscreen-view.component';
 import { DatasetPowerModeViewComponent } from './dataset/dataset-power-mode-view/dataset-power-mode-view.component';
-import { DatasetFormViewComponent } from './dataset/dataset-form-view/dataset-form-view.component';
+//import { DatasetFormViewComponent } from './dataset/dataset-form-view/dataset-form-view.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 imports: [ScrollingModule];
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { ModalConfigSchemaComponent } from './schema/modal-config-schema/modal-config-schema.component';
 import { ModalConfigSchemaEditorComponent } from './schema/modal-config-schema-editor/modal-config-schema-editor.component';
-import { FormioModule } from '@formio/angular';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { CarouselModule as CModule } from 'ngx-owl-carousel-o';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -113,35 +108,23 @@ import {
 
 import { ShowOutputArtifactsComponent } from './pipeline.description/show-output-artifacts/show-output-artifacts.component';
 import { NgxIndexedDBModule, DBConfig } from 'ngx-indexed-db';
-import { NgApexchartsModule } from 'ng-apexcharts';
 import { ChooseRuntimeComponent } from './apps/choose-runtime/choose-runtime.component';
-import { FieldsetModule } from 'primeng/fieldset';
 import { AngularDualListBoxModule } from 'angular-dual-listbox';
 import { PaginationComponent } from './pagination/pagination.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
-import { AccordionModule } from 'primeng/accordion';
-import { DragDropModule } from 'primeng/dragdrop';
 import { PlotlyModule } from 'angular-plotly.js';
 import * as PlotlyJS from 'plotly.js-dist-min';
 import { NgBusyModule } from 'ng-busy';
-import { OverlayPanelModule } from 'primeng/overlaypanel';
-import { TooltipModule } from 'primeng/tooltip';
-import { ListboxModule } from 'primeng/listbox';
+
 import { PipelineDialogComponent } from './pipeline-dialog/pipeline-dialog.component';
-import { InputNumberModule } from 'primeng/inputnumber';
+
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { MarkdownModule } from 'ngx-markdown';
 import { DragDropModule as CdkDragDropModule } from '@angular/cdk/drag-drop';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { QuillModule } from 'ngx-quill';
 import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-name.component';
-import { BaseChartDirective } from 'ng2-charts';
-import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
-import { MenubarModule } from 'primeng/menubar';
-import { InputTextModule } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button';
-import { KeyFilterModule } from 'primeng/keyfilter';
 import { AdapterServices } from './adapter/adapter-service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -232,7 +215,7 @@ const dbConfig: DBConfig = {
     DatasetEditComponent,
     DatasetFullscreenViewComponent,  
     DatasetPowerModeViewComponent,
-    DatasetFormViewComponent,  
+   // DatasetFormViewComponent,  
     ModalConfigSchemaComponent,
     ModalConfigSchemaEditorComponent, 
     UserSecretsComponent,
@@ -248,7 +231,6 @@ const dbConfig: DBConfig = {
     AipRouting,
     MatCardModule,
     MatToolbarModule,
-    MatPaginatorModule,
     MatGridListModule,
     MatDatepickerModule,
     MatIconModule,
@@ -269,11 +251,8 @@ const dbConfig: DBConfig = {
     NgbModule,
     JsonFormsModule,
     JsonFormsAngularMaterialModule,
-    TreeModule,
     MatRadioModule,
     FileUploadModule,
-    TableModule,
-    DialogModule,
     MatExpansionModule,
     NgJsonEditorModule,
     MatTreeModule,
@@ -281,7 +260,6 @@ const dbConfig: DBConfig = {
     ScrollingModule,
     MatAutocompleteModule,
     PdfViewerModule,
-    FormioModule,
     NgxPaginationModule,
     CModule,
     MatNativeDateModule,
@@ -289,28 +267,14 @@ const dbConfig: DBConfig = {
     NgxIndexedDBModule.forRoot(dbConfig),
     MarkdownModule.forRoot(), // Add this line
     NgxMatSelectSearchModule,
-    NgApexchartsModule,
-    FieldsetModule,
     AngularDualListBoxModule,
     MatMenuModule,
     PlotlyModule,
     NgBusyModule,
     MatButtonModule,
-    AccordionModule,
-    DragDropModule,
-    OverlayPanelModule,
-    TooltipModule,
-    ListboxModule,
-    InputNumberModule,
-    MenubarModule,
-    InputTextModule,
-    ButtonModule,
-    KeyFilterModule,
     CdkDragDropModule,
-    // SliderModule,
     NgxSliderModule,
     QuillModule,
-    BaseChartDirective,
   ],
   providers: [
     {
@@ -345,7 +309,6 @@ const dbConfig: DBConfig = {
 
     { provide: MatDialogRef, useValue: {} },
     { provide: MAT_DIALOG_DATA, useValue: {} },
-    provideCharts(withDefaultRegisterables()),
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AipComponent],

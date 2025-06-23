@@ -10,7 +10,7 @@ import {
   NavigationCancel,
   ActivationEnd
 } from "@angular/router";
-import * as _ from "lodash";
+import * as _ from "lodash-es";
 import { ApisService } from "../services/apis.service";
 import { LeapTelemetryService } from "../services/telemetry-util/telemetry.service";
 import { MatSidenav } from "@angular/material/sidenav";

@@ -17,7 +17,7 @@ import { MatTable } from '@angular/material/table';
 import { FormControl } from '@angular/forms';
 
 import { ModalConfigSchemaEditorComponent } from '../modal-config-schema-editor/modal-config-schema-editor.component';
-import { SelectItem } from 'primeng/api';
+// import { SelectItem } from 'primeng/api';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 import * as _ from 'lodash';
 import { Router } from '@angular/router';
@@ -102,7 +102,7 @@ export class ModalConfigSchemaComponent
   // formTabColumns: string[] = ['position', 'type', 'property', 'title', 'widget'];
   propertiesList: string[] = [];
   displaynameList: string[] = [];
-  titleList: SelectItem[] = [];
+  // titleList: SelectItem[] = [];
   formSchemaJson: any = { type: 'object', properties: {} };
   // formDataSource: any[] = [];
   schemaForm: any = {};
@@ -690,7 +690,7 @@ export class ModalConfigSchemaComponent
         tabValue: this.tabValue,
         propertiesList: this.propertiesList,
         displaynameList: this.displaynameList,
-        titleList: this.titleList,
+        // titleList: this.titleList,
         // positionList: poseList,
         colsList: this.colsList,
         // message:message

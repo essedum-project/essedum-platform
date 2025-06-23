@@ -2,8 +2,6 @@ import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from '@angu
 import { APP_INITIALIZER, CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserModule, REMOVE_STYLES_ON_COMPONENT_DESTROY, Title } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
-
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
@@ -20,8 +18,6 @@ import { TokenExpiryPopupComponent } from './popups/token-expiry-popup/token-exp
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatCardModule } from "@angular/material/card";
 import { MatButtonModule } from "@angular/material/button";
-import { FormioModule } from "@formio/angular";
-// import { MessageService } from 'com-lib-util';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import '@linuxfoundation/lfx-ui-core';
 import { MatMenuModule } from '@angular/material/menu';
@@ -71,8 +67,7 @@ const cookieConfig: NgcCookieConsentConfig = {
     MatDialogModule,
     MatCardModule,
     MatButtonModule,
-    MatMenuModule,
-    FormioModule,
+    MatMenuModule
   ],
   providers: [
     ApisService,

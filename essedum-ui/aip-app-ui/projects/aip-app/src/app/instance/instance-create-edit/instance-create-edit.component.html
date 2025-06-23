@@ -14,9 +14,10 @@
                             Create</span>
                         <span *ngIf="action==='edit'" class="lfx-u-mar-l-8 lfx-u-header-xxl">{{cardTitle}} - Edit</span>
                     </div>
-                    <button *ngIf="action==='edit'" mat-icon-button aria-label="Close" (click)="closeAdapterPopup()">
-                        <mat-icon>close</mat-icon>
-                    </button>
+                    <mat-icon *ngIf="action==='edit'" class="aip-cursor"
+                        [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Close"
+                        matTooltipPosition="above" (click)="closeAdapterPopup()" (mouseenter)="isBackHovered = true"
+                        (mouseleave)="isBackHovered = false">close</mat-icon>
                 </div>
 
                 <div class="lfx-u-mar-b-32">

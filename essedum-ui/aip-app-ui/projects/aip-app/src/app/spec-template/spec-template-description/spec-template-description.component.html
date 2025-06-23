@@ -20,27 +20,27 @@
                                     </div>
                                     <div class=" selector-model-title-tail">
                                         <ul class="flex justify-content-between align-items-center">
-                                            <li><mat-icon *ngIf="editAuth" class="aip-led-icons  aip-cursor mx-2r"
+                                            <li><mat-icon *ngIf="editAuth" class="aip-led-icons  aip-cursor mx-2"
                                                     (click)="redirectToEdit()(content3)" matTooltip="Edit"
                                                     [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
                                                     edit
                                                 </mat-icon>
                                             </li>
-                                            <li><mat-icon *ngIf="deleteAuth" class="aip-led-icons  aip-cursor mx-2r"
+                                            <li><mat-icon *ngIf="deleteAuth" class="aip-led-icons  aip-cursor mx-2"
                                                     (click)="deleteSpecTemplate(card.name)" matTooltip="Delete"
                                                     [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
                                                     delete
                                                 </mat-icon>
                                             </li>
                                             <li *ngIf="showRelatedInstances"> <mat-icon
-                                                    class="aip-led-icons  aip-cursor mx-2r" (click)="listToggle()"
+                                                    class="aip-led-icons  aip-cursor mx-2" (click)="listToggle()"
                                                     [matTooltip]="'Hide Related Components'"
                                                     [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
                                                     zoom_out_map
                                                 </mat-icon>
                                             </li>
                                             <li *ngIf="!showRelatedInstances"><mat-icon
-                                                    class="aip-led-icons  aip-cursor mx-2r" (click)="listToggle()"
+                                                    class="aip-led-icons  aip-cursor mx-2" (click)="listToggle()"
                                                     [matTooltip]="'Show Related Components'"
                                                     [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
                                                     zoom_in_map
