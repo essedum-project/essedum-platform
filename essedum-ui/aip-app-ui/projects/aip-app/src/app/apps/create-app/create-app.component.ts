@@ -54,6 +54,7 @@ export class CreateAppComponent implements OnInit {
   editCanvas: any = [];
   videoFile: string;
   isTemplate: boolean = false;
+  isCloseHovered: boolean = false; 
   public data: any;
   logoUploaded: boolean = false;
   chunkMetadata = {};

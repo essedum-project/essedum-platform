@@ -5,7 +5,8 @@
                 <h2>App Details</h2>
             </div>
             <div class="flex justify-content-end">
-                <mat-icon class="aip-cursor" aria-label="Close" (click)="closeModal()">close</mat-icon>
+                <mat-icon class="aip-cursor" aria-label="Close"  [ngStyle]="{'color': isCloseHovered ? '#0094ff' : '#0a142f'}" matTooltip="Close" matTooltipPosition="above"  (mouseenter)="isCloseHovered = true"
+                                (mouseleave)="isCloseHovered = false" (click)="closeModal()">close</mat-icon>
             </div>
         </div>
 
