@@ -5,7 +5,6 @@ import { AuthGuardService } from '../services/auth-guard.service';
 import { AppHomeComponent } from './app-home/app-home.component';
 import { AppNavigationComponent } from './app-navigation/app-navigation.component';
 import { LandingComponent } from './landing.component';
-import { StaticLandingComponent } from './static-landing/static-landing.component';
 
 export const routes: Routes = [
   {
@@ -20,9 +19,6 @@ export const routes: Routes = [
       {
         path: "feature1/:name", component: AppNavigationComponent
       },
-      {
-        path: "virtual-cc", component: StaticLandingComponent
-      }
     ]
   },
 

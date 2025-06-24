@@ -384,7 +384,7 @@ TODO(mdc-migration): The following rule targets internal classes of tabs that ma
 }
 
 #parent {
-    background-color: var(--base-color);
+    background-color: #0094ff;
     background-repeat: no-repeat;
     background-position-y: center;
     height: 100vh;
@@ -401,16 +401,16 @@ TODO(mdc-migration): The following rule targets internal classes of tabs that ma
 #login-message {
     padding-top: 10%;
     text-align: center;
-    color: var(--base-color);
+    color: #0094ff;
 }
 
 #logout-message {
     font-size: 2.6vmin;
-    color: var(--base-color);
+    color: #0094ff;
 }
 
 .button-color {
-    background-color: var(--base-color);
+    background-color: #0094ff;
     color: white;
 }
 

@@ -77,13 +77,7 @@ export class LoginComponent implements OnInit {
     if (sessionStorage.getItem("user") && sessionStorage.getItem("portfoliodata") && sessionStorage.getItem("project") && sessionStorage.getItem("role")) {
       this.checkUserProjectRolePortfolio = true
       this.showLogin = false;
-      this.fetchingDashConst = true;
-      // if (this.returnUrl) {
-      //   this.router.navigateByUrl(this.returnUrl)
-      // }
-      // else {
-      //   this.router.navigate(["landing"])
-      // }
+      this.fetchingDashConst = true; 
       this.apisService.getDashConsts().subscribe(res => {
         this.fetchingDashConst = false;
       })

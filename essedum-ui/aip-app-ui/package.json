@@ -1,9 +1,7 @@
 {
   "name": "aip-app-ui",
   "version": "3.2.0",
-  "publishConfig": {
-    "registry": "https://infyartifactory.jfrog.io/artifactory/api/npm/icets-ai_npm_virtual/"
-  },
+
   "scripts": {
     "ng": "ng",
     "start": "node --max_old_space_size=10240 ./node_modules/@angular/cli/bin/ng serve --port 8083",

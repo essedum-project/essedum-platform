@@ -7,23 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { NgBusyModule } from 'ng-busy';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { RouterModule } from '@angular/router';
-// import {
-//   AccordionModule,
-//   AppsMenuModule,
-//   BadgeModule,
-//   BreadcrumbModule,
-//   ButtonModule,
-//   CommentsModule,
-//   FooterModule,
-//   HeaderModule,
-//   ListModule,
-//   NavigationModule,
-//   OverflowModule,
-//   PanelModule,
-//   PopoverModule,
-//   RatingModule,
-//   InputFieldModule,
-// } from 'leds-lib';
+
 
 @NgModule({
   declarations: [RegisterUserComponent],
@@ -36,21 +20,7 @@ import { RouterModule } from '@angular/router';
     CommonModule,
     FormsModule,
     MatFormFieldModule,
-    // AccordionModule,
-    // AppsMenuModule,
-    // BadgeModule,
-    // BreadcrumbModule,
-    // ButtonModule,
-    // CommentsModule,
-    // FooterModule,
-    // HeaderModule,
-    // ListModule,
-    // NavigationModule,
-    // OverflowModule,
-    // PanelModule,
-    // PopoverModule,
-    // RatingModule,
-    // InputFieldModule
+    
   ]
 })
 export class RegisterUserModule { }

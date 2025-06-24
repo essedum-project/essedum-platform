@@ -12,7 +12,6 @@ import {
 } from "@angular/router";
 import * as _ from "lodash-es";
 import { ApisService } from "../services/apis.service";
-import { LeapTelemetryService } from "../services/telemetry-util/telemetry.service";
 import { MatSidenav } from "@angular/material/sidenav";
 import { MatDialog } from "@angular/material/dialog";
 import { MatMenuTrigger } from "@angular/material/menu";
@@ -20,16 +19,13 @@ import { Subscription, interval } from 'rxjs';
 import { MenuService } from "../services/menu.service";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Title } from '@angular/platform-browser';
-// import { ChatBotComponent } from "../chat-bot/chat-bot.component";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { VersionInfoComponent } from "./version-info/version-info.component";
 import { DomSanitizer } from '@angular/platform-browser';
 import { AppOAuthService } from "../core/auth.service";
 import { InactivityPopupComponent } from "../popups/inactivity-popup/inactivity-popup.component";
 import { loadRemoteModule } from "@angular-architects/module-federation";
 import { AppConfigService } from "../services/app-config.service";
 import { MyProfileComponent } from "./my-profile/my-profile.component";
-// import { MessageService } from "../services/message.service";
 
 @Component({
   selector: 'app-landing',
@@ -246,9 +242,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
     return new Promise((resolve, reject) => {
       this.apisService.getStartupConstants(['inactivityTimer', 'inactivityPopupTimer'])
         .subscribe(response => {
-          // if (response['showInactivityPopup'] == "false" || response['showInactivityPopup'] == "true") {
-          //   this.showInactivityPopup = response['showInactivityPopup'] === "true";
-          // }
+       
           if (parseInt(response['inactivityTimer']) > 119 && typeof parseInt(response['inactivityTimer']) == 'number') {
             this.inactivityTimer = parseInt(response['inactivityTimer'])
           }
@@ -376,7 +370,6 @@ export class LandingComponent implements OnInit, AfterViewInit {
     private route: ActivatedRoute,
     private apisService: ApisService,
     private modalService: NgbModal,
-    private telemetryService: LeapTelemetryService,
     private menuService: MenuService,
     private http: HttpClient,
     private titleService: Title,
@@ -2037,20 +2030,20 @@ export class LandingComponent implements OnInit, AfterViewInit {
     this.showSubHeader = false
   }
 
-  showVersionInfo(): void {
-    const dialogRef = this.dialog.open(VersionInfoComponent, {
-      maxHeight: "80vh",
-      maxWidth: "80vw",
-      minWidth: "80vw",
-      minHeight: "80vh",
-      data: {},
-    });
+  // showVersionInfo(): void {
+  //   const dialogRef = this.dialog.open(VersionInfoComponent, {
+  //     maxHeight: "80vh",
+  //     maxWidth: "80vw",
+  //     minWidth: "80vw",
+  //     minHeight: "80vh",
+  //     data: {},
+  //   });
 
-    dialogRef.afterClosed().subscribe(result => {
+  //   dialogRef.afterClosed().subscribe(result => {
 
 
-    });
-  }
+  //   });
+  // }
 
   // getSwaggerLink() {
   //   console.log("swagger link")

@@ -7,7 +7,7 @@ export const environment = {
   dashUrl: '/api',
   baseUrl: '/api',
   datasetsUrl: '/api',
-  title: 'Infosys Cyber Security Analytics',
+  title: 'Essedum Cyber Security Analytics',
   production: false,
   dashboardTest: {
     production: false,

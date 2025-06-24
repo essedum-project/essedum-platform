@@ -20,10 +20,7 @@
                     <span id="clientimage" class="mobileHeaderImg selector-3-9"
                         style="display: flex; justify-content: center; align-items: center;">
                     </span>
-                    <!-- <span *ngIf="!isimg" class="le-c-header__logo le-u-no-mar header-title float-start marT2"
-                        (click)="homeToDash()">
-                        {{ title }}
-                    </span> -->
+          
                     <img id="clientimage" *ngIf="!isimg" src="assets/images/LFN-Essedum-colour.svg" 
                     style="margin-left:1vh;width: 234px; height: 40px;" (click)="homeToDash();removeFilters();clearonlanding()" class=" mobileHeaderImg selector-3-8" alt="" 
                     [ngStyle]="{'height': headerHeight}">
@@ -65,13 +62,7 @@
                 </div>
                 <div class="example-container selector-3-19" *ngIf="sidebar && selectedrole.name!=currentrole">
                     <mat-sidenav-container class="example-sidenav-container selector-3-20 " autosize="" [ngStyle]="{'margin-top': headerHeight}">
-                        <!-- <mat-sidenav
-                            *ngIf="(showSidebarMenu && !isExpanded) ||(iconsidebarrole==selectedrole.name &&showSidebarMenu)"
-                            #sidenav="" style="overflow-x:hidden; width: 178px ;"
-                            class="selector-3-21 le-u-shadow-col le-c-nav-fixed position-absolute leftpanel-height"
-                            mode="side" opened="true"
-                            [ngClass]="{'sidebarbgcolor':sidebarbgcolor== true, 'sidebarbgcolordefault':sidebarbgcolor!=true,'sidebartextcolordefault':sidebartextcolor!= true}"> -->
-
+        
                         <mat-sidenav
                             *ngIf="(showSidebarMenu && !isExpanded) ||(iconsidebarrole==selectedrole.name &&showSidebarMenu)"
                             #sidenav="" class="width parentsidenav selector-3-21"
@@ -79,7 +70,6 @@
                             style="overflow-x:hidden; height: 100%;"
                             [ngClass]="{'enableSidebarShadow':enableSidebarShadow==true,'sidebarbgcolor':sidebarbgcolor== true,'sidebarbgcolordefault':sidebarbgcolor!=true,'sidebartextcolordefault':sidebartextcolor!= true}">
 
-                            <!-- <leds-navigation-list position='left' [selectOnClick]='true'> -->
 
                             <mat-nav-list class="dashboard sidebarlineheight"
                                 style="display: flex; flex-direction: column; overflow-x: hidden; padding-top: 1.3vh; height: inherit; align-items: center;">
@@ -150,15 +140,11 @@
                                 <div style="font-size: 5vmin; margin-left: 100vh;margin-top: 45vh"
                                     class="selector-3-49">
                                     Loading
-                                    <div class="spinner-border selector-3-50" style="color:var(--base-color)"></div>
+                                    <div class="spinner-border selector-3-50" style="color:#0094ff"></div>
                                 </div>
                             </ng-container>
                             <div *ngIf="!loadingRouteConfig" id="bcc-dashboard-content" class="selector-3-51">
-
-                                <!-- <div id="tabsContainer overlay"
-                                    style="background-color: var(--bg-color);display: unset;"
-                                    class="tabsContainer selector-3-52" *ngIf="tabs.length>0"> -->
-                                <div *ngIf="displayDialog">
+                       <div *ngIf="displayDialog">
                                     <p-dialog header="Declaration" [modal]="true"
                                         [style]="{'height':'80vh','width':'90vw'}" [(visible)]="displayDialog"
                                         [closable]="false">
@@ -375,17 +361,7 @@
                         <i [ngStyle]="{'color':headericoncolor, 'font-size': sideMenuIconSize, 'width': sideMenuIconSize, 'height': sideMenuIconSize}" 
                         class="fa fa-comments selector-3-73" aria-hidden="true"></i>
                     </button>
-                    <!-- <button 
-                        *ngIf="selectedrole.name.toLowerCase() == 'admin' || selectedrole.name.toLowerCase() == 'project manager' || selectedrole.name.toLowerCase() == 'project admin' || selectedrole.name.toLowerCase() == 'project client'"
-                        style="cursor: pointer;font-size: 3vmin" matTooltip="Bot Factory Chat Bot"
-                        [matBadgeHidden]="notificationslength >= '0'"
-                        [ngStyle]="{'color':!backgroundcolor?bgColorType==2?'#8626C3':'white':'white'}"
-						mat-icon-button=""
-                        [matBadge]="notificationslength" matBadgeColor="warn" matBadgeSize="small"
-                        class="selector-3-78">
-                         <i [ngStyle]="{'color':headericoncolor}" class="fa fa-comment selector-3-79" 
-                             (click)="getChatBot()" aria-hidden="true"></i> 
-                    </button>  -->
+         
                     <button *ngIf="isDemoProject"
                         style="cursor: pointer; font-size: 14px; color: white; padding: 8px;
                      font-weight: bolder; text-decoration: underline; width: fit-content; height: fit-content; border-radius: 0; border: 2px solid white;"
@@ -400,25 +376,7 @@
                         class="selector-3-78 header-search-icon">
                         <i [ngStyle]="{'color':headericoncolor, 'font-size': sideMenuIconSize, 'width': sideMenuIconSize, 'height': sideMenuIconSize}" class="fa fa-search selector-3-78" aria-hidden="true"></i>
                     </span>
-                    <!-- notification -->
-                    <!-- <button *ngIf="!showNotification && show_notification_icon_roles"
-                        style="cursor: pointer;" matTooltip="Notification"
-                        [ngStyle]="{'color':!backgroundcolor?bgColorType==2?'#8626C3':'white':'white', 'width': headerHeight, 'height': headerHeight}"
-                        mat-icon-button="" [matMenuTriggerFor]="notifymenu" (click)="getNotifications()"
-                        class="selector-3-78 notification-header-btn">
-                        <i [ngStyle]="{'color':headericoncolor, 'font-size': sideMenuIconSize}" class="fa fa-bell selector-3-79"
-                            aria-hidden="true"></i>
-                    </button> -->
-                    <!-- <button *ngIf="showNotification && show_notification_icon_roles"
-                        style="cursor: pointer; font-size: 17px;" matTooltip="Notification"
-                        [ngStyle]="{'color':!backgroundcolor?bgColorType==2?'#8626C3':'white':'white', 'width': headerHeight, 'height': headerHeight}"
-                        mat-icon-button="" (click)="notificationToggler()" class="notification-header-btn selector-3-78">
-                        <i [ngStyle]="{'color':headericoncolor, 'font-size': sideMenuIconSize}" toggleMenuButton class="fa fa-bell selector-3-79"
-                            aria-hidden="true"></i>
-                    </button> -->
-                    <!-- <leds-toggle-menu [showCloseButton]="'true'" [showPanel]="showPanel">
-                        <app-notification-menu></app-notification-menu>
-                    </leds-toggle-menu> -->
+                 
                     <button mat-icon-button="" [matMenuTriggerFor]="menu" (click)="getSession()"
                         [matTooltip]="user.user_f_name" class="userMobile selector-3-80" style="display: flex; justify-content: center; align-items: center; padding: 0;" [ngStyle]="{height: headerHeight, width: headerHeight}">
                             <span *ngIf="!profileimage" style="background-color: white; padding: 0.4em;" [ngClass]="umargin?'uname1':'uname2'"
@@ -506,11 +464,7 @@
                             </button>
                         </div>
                         <hr style="margin: 0px;" class="selector-3-115" />
-                        <div class="alignprofile selector-3-116 option1">v{{
-                            appVersion }}
-                            <i *ngIf="Configurableinformation!=true" matTooltip="Release Notes" style="margin-left: 5px" (click)="showVersionInfo()"
-                                class="selector-3-157 fa fa-info-circle fa-lg"></i>
-                        </div>
+                 
                     </mat-menu>
                     <mat-menu #notifymenu="matMenu" class="notifyMenuWidth selector-3-117">
                         <div class="selector-3-118">
@@ -594,7 +548,7 @@
                     [backendUrl]="backendUrl" [appNameInput]="appNameInput"></virtual-assistant></span>
             <ng-container *ngIf="load" class="selector-3-150">
                 <div style="font-size: 2.5vmin; margin-left: 100vh;margin-top: 45vh" class="selector-3-151">Loading
-                    <div class="spinner-border selector-3-152" style="color:var(--base-color)"></div>
+                    <div class="spinner-border selector-3-152" style="color:#0094ff"></div>
                 </div>
             </ng-container>
             <div *ngIf="!load && selectedrole.name==currentrole" style="height: 100%;" class="selector-3-153">
