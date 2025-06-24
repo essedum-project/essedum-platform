@@ -1,8 +1,0 @@
-FROM  infyartifactory.jfrog.io/docker-local/leap/nginx:nginx-1
-COPY nginx.conf /opt/bitnami/nginx/conf/
-COPY ./start.sh /app/
-COPY ./leapui/ /app/
-WORKDIR /app
-ENTRYPOINT [ "/opt/bitnami/scripts/nginx/entrypoint.sh" ]
-CMD [ "/opt/bitnami/scripts/nginx/run.sh" ]
-EXPOSE 8080 80 8082 8084 8443
