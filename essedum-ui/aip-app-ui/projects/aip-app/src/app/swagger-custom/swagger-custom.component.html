@@ -1,10 +1,13 @@
 <div>
     <div *ngIf="!restProvider" style="display: flex;margin-left:60%">
-        <div [ngStyle]="{'color': (!swaggerView) ? 'grey' : '#0094ff;'}">Swagger View</div>
-        <mat-slide-toggle [checked]="checked" [disabled]="disabled" [labelPosition]="labelPosition"
-            [disableRipple]="disableRipple" (change)="toggle()">
-        </mat-slide-toggle>
-        <div class="lfx-u-pad-l-16" [ngStyle]="{'color': (swaggerView) ? 'grey' : '#0094ff;'}">JSON View
+        <div class="lfx-u-pad-r-16" style="align-self: center;"
+            [ngStyle]="{'color': (!swaggerView) ? 'grey' : '#0094ff'}">Swagger View</div>
+        <mat-slider [disabled]="disabled" class="slider-toggle-width" min="0" max="1" step="1">
+            <input matSliderThumb [value]="checked ? 1 : 0" (input)="toggle($event.target.value == 1)"
+                aria-label="Toggle" />
+        </mat-slider>
+        <div class="lfx-u-pad-l-16" style="align-self: center;"
+            [ngStyle]="{'color': (swaggerView) ? 'grey' : '#0094ff'}">JSON View
         </div>
     </div>
     <div *ngIf="restProvider && restProviderData" style="display: flex;">
@@ -26,16 +29,17 @@
             </button>
         </ng-container>
         <ng-template #swaggerViewTemplate>
-            <div [ngStyle]="{'color': (swaggerView) ? '#000;' : 'grey' }">Swagger View</div>
+            <div [ngStyle]="{'color': (swaggerView) ? 'grey' : '#0094ff' }">Swagger View</div>
         </ng-template>
-        <mat-slide-toggle *ngIf="swaggerView || isToggle" [checked]="checked" [disabled]="disabled"
-            [labelPosition]="labelPosition" [disableRipple]="disableRipple" (change)="toggle()">
-        </mat-slide-toggle>
-        <div *ngIf="swaggerView || isToggle" class="lfx-u-pad-l-16"
-            [ngStyle]="{'color': (isToggle) ? '#000;' : 'grey'}">
+        <mat-slider [disabled]="disabled" class="slider-toggle-width" min="0" max="1" step="1">
+            <input matSliderThumb [value]="checked ? 1 : 0" (input)="toggle($event.target.value == 1)"
+                aria-label="Toggle" />
+        </mat-slider>
+        <div *ngIf="swaggerView || isToggle" class="lfx-u-pad-l-16" style="align-self: center;"
+            [ngStyle]="{'color': (isToggle) ? 'grey' : '#0094ff'}">
             JSON View</div>
     </div>
-    <div style="margin:30px">
+    <div style="margin:10px">
         <div *ngIf="swaggerView">
             <div *ngIf="apispecTemplate">
                 <div class="spec-header">
@@ -121,9 +125,9 @@
                                         Implemented</div>
                                     <div *ngIf="isRemoteExecution && !isInstance && createAuth" class="lfx-u-pad-24"
                                         (click)="addRemoteMethod(spec)">
-                                        <mat-icon class="aip-led-icons  aip-cursor mx-2"
-                                            (click)="addRemoteMethod(spec)" matTooltip="'Implement Method'"
-                                            [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
+                                        <mat-icon class="aip-led-icons  aip-cursor mx-2" (click)="addRemoteMethod(spec)"
+                                            matTooltip="'Implement Method'" [matTooltipPosition]="tooltipPosition"
+                                            style="cursor: pointer">
                                             add
                                         </mat-icon>
                                     </div>

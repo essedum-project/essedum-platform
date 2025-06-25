@@ -200,12 +200,6 @@ export class AppListComponent implements OnInit {
             this.appData[index]['isvideoPresent'] = false;
           }
         });
-        let jobid = this.getLatestJobId(app);
-        if (jobid) {
-          this.service.getStatus(jobid).subscribe((res) => {
-            this.appData[index]['status'] = res;
-          });
-        }
         this.service.getImage(app['name']).subscribe((image) => {
           this.appData[index]['image'] = image['url'];
         });

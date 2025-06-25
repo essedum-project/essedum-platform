@@ -546,7 +546,7 @@ export class AdapterServices {
     }
     if (headers) delete headers['access-token'];
     return this.https
-      .get(url, {
+      .get(path, {
         observe: 'response',
         params: parameters,
         headers: headers,
@@ -564,7 +564,7 @@ export class AdapterServices {
     }
     if (headers) delete headers['access-token'];
     return this.https
-      .delete(url, {
+      .delete(path, {
         observe: 'response',
         params: parameters,
         headers: headers,
@@ -586,7 +586,7 @@ export class AdapterServices {
     }
     if (headers) delete headers['access-token'];
     return this.https
-      .post(url, body, {
+      .post(path, body, {
         headers: headers,
         params: params,
         observe: 'response',
@@ -1190,7 +1190,7 @@ export class AdapterServices {
       }
       if (headers) delete headers['access-token'];
       return this.https
-        .post(url, formData, {
+        .post(path, formData, {
           headers: headers,
           params: params,
           observe: 'response',

@@ -14,10 +14,12 @@
                             Create</span>
                         <span *ngIf="action==='edit'" class="lfx-u-mar-l-8 lfx-u-header-xxl">{{cardTitle}} - Edit</span>
                     </div>
-                  
-                        <mat-icon *ngIf="action==='edit'" class="aip-cursor"  [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Close" matTooltipPosition="above" (click)="closeAdapterPopup()" (mouseenter)="isBackHovered = true"
-                                (mouseleave)="isBackHovered = false">close</mat-icon>
-                 
+
+                    <mat-icon *ngIf="action==='edit'" class="aip-cursor"
+                        [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Close"
+                        matTooltipPosition="above" (click)="closeAdapterPopup()" (mouseenter)="isBackHovered = true"
+                        (mouseleave)="isBackHovered = false">close</mat-icon>
+
                 </div>
 
                 <div class="lfx-u-mar-b-32">
@@ -92,27 +94,6 @@
 
                             </mat-form-field>
                             <mat-hint *ngIf="action==='edit'" class="custom-hint-or-error"></mat-hint>
-
-                            <!-- Chain Checkbox -->
-                            <mat-checkbox [(ngModel)]="isChain" (change)="toggleChain()" class="selector-690-41">is
-                                Chain?</mat-checkbox>
-
-                            <!-- Chain Select -->
-                            <div *ngIf="isChain">
-                                <mat-form-field *ngIf="chainPromise | async" appearance="fill"
-                                    class="w-100 subscript-space">
-                                    <mat-label>Select Chain</mat-label>
-                                    <mat-select [(ngModel)]="chainSelected" required
-                                        (selectionChange)="chainNameSelectChange($event)">
-                                        <mat-option *ngFor="let option of chainOptions"
-                                            [value]="option.value">{{option.viewValue}}</mat-option>
-                                    </mat-select>
-
-                                </mat-form-field>
-                                <mat-hint *ngIf="data.chainname" class="custom-hint-or-error"> </mat-hint>
-                                <mat-error *ngIf="chainError" class="custom-hint-or-error">Chain name is required
-                                    field.</mat-error>
-                            </div>
 
                         </div>
                     </div>

@@ -79,8 +79,8 @@ export class EditSpecTemplateComponent implements OnInit {
     this.data.capability = JSON.stringify(this.data.capability);
     this.service.updateApiSpecTemplate(this.data).subscribe((resp) => {
       this.service.messageService(resp, 'Spec Updated Successfully');
+      this.router.navigate(['../../'], { relativeTo: this.route });
     });
-    this.router.navigate(['../../'], { relativeTo: this.route });
   }
 
   selectChange(event: any) {

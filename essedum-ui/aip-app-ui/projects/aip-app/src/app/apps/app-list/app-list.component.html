@@ -77,46 +77,9 @@
                 <div class="row" style='min-width: -webkit-fill-available;padding: 0px;'>
                     <div class="col-4" *ngFor="let app of appData,let index=index" style="margin-bottom: 2%;">
                         <div style="height: 170px;display: grid">
-                            <mat-card class="mat-mdc-card mdc-card lfx-c-card lfx-c-card--hover example-card card-shadow"
+                            <mat-card
+                                class="mat-mdc-card mdc-card lfx-c-card lfx-c-card--hover example-card card-shadow"
                                 appearance="outlined">
-
-                                <div class=" selector-model-title-tail ">
-                                    <ul class="flex lfx-u-pad-b-8">
-                                        <li
-                                            *ngIf="app.scope && (app.scope === 'chain' || app.scope === 'pipeline' || app.scope === 'internal' || app.scope ==='Apps')">
-                                            <button mat-icon-button matTooltip="Start"
-                                                *ngIf="!app.status || app.status != 'RUNNING'"
-                                                (click)="app.scope === 'internal' ? startInternalApp(app) : startApp(app)">
-                                                <mat-icon>play_circle_filled</mat-icon>
-                                            </button>
-                                            <button mat-icon-button matTooltip="Stop" *ngIf="app.status === 'RUNNING'"
-                                                (click)="stopJob(getLatestJobId(app))">
-                                                <mat-icon>stop</mat-icon>
-                                            </button>
-                                        </li>
-                                        <li *ngIf="app.status && app.status === 'COMPLETED'">
-                                            <button mat-icon-button matTooltip="COMPLETED" disabled>
-                                                <mat-icon color="primary">check_circle</mat-icon>
-                                            </button>
-                                        </li>
-                                        <li *ngIf="app.status && app.status === 'ERROR'">
-                                            <button mat-icon-button matTooltip="ERROR" disabled>
-                                                <mat-icon color="warn">error</mat-icon>
-                                            </button>
-                                        </li>
-                                        <li *ngIf="app.status && app.status === 'RUNNING'">
-                                            <button mat-icon-button matTooltip="RUNNING" disabled>
-                                                <mat-icon color="accent">autorenew</mat-icon>
-                                            </button>
-                                        </li>
-                                        <li *ngIf="app.status && app.status === 'CANCELLED'">
-                                            <button mat-icon-button matTooltip="CANCELLED" disabled>
-                                                <mat-icon color="warn">cancel</mat-icon>
-                                            </button>
-                                        </li>
-                                    </ul>
-
-                                </div>
                                 <div class="row" style="margin-bottom: 2%;">
                                     <div class="col-md-8">
                                         <mat-card-header style="padding: 0 !important; width: 95%;">

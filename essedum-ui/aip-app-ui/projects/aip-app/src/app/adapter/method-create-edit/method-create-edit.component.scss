@@ -103,3 +103,7 @@ input:focus,
   .mdc-floating-label {
   color: #0094ff !important;
 }
+
+::ng-deep .mat-mdc-tab-list {
+  overflow-x: auto !important;
+}

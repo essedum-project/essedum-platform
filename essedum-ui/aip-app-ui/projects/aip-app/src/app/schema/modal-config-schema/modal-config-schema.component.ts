@@ -832,25 +832,40 @@ export class ModalConfigSchemaComponent
     return true;
   }
 
-  toggleView() {
-    if (this.tabValue == 'Schema Form') {
+  toggleView(isRaw?: boolean) {
+    if (typeof isRaw === 'boolean') {
+      this.isRawData = isRaw;
+    } else {
+      this.isRawData = !this.isRawData;
+    }
+
+    if (this.tabValue === 'Schema Form') {
       if (this.isRawData) {
-        this.form = Object.assign({}, this.schemaForm);
+        this.form = { ...this.schemaForm };
       } else {
-        this.schemaFormCpy = Object.assign({}, this.schemaForm);
+        this.schemaFormCpy = { ...this.schemaForm };
       }
-    } else if (this.tabValue == 'Schema Columns') {
+      this.ngAfterViewInit();
+      return;
+    }
+
+    if (this.tabValue === 'Schema Columns') {
       if (this.isRawData) {
-        let value = this.getColumnJEContents();
+        const value = this.getColumnJEContents();
         if (value && value.length > 0) {
           this.dataSource = value;
           this.schemaValue = value;
-        } else this.dataSource = this.schemaValue;
+        } else {
+          this.dataSource = this.schemaValue;
+        }
       } else {
         this.schemaValue = this.dataSource;
       }
+      this.ngAfterViewInit();
+      return;
     }
-    this.isRawData = !this.isRawData;
+
+    // For other tab values, just refresh the view
     this.ngAfterViewInit();
   }
 

@@ -631,7 +631,7 @@ export class MethodCreateEditComponent {
   }
 
   optionChange(event) {
-    this.selectedOption = event;
+    this.selectedOption = event.value;
     if (this.selectedOption == 'FILE')
       this.dataset.attributes.bodyType = 'FILE';
     this.addHeaderRowBasedOnType(this.selectedOption);
