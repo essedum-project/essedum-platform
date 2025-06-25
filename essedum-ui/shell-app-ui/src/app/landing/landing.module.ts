@@ -28,10 +28,8 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { AppNavigationComponent } from './app-navigation/app-navigation.component';
 import { InlineSVGModule } from 'ng-inline-svg';
 import { SidebarComponent } from './sidebar/sidebar.component';
-import { VersionInfoComponent } from './version-info/version-info.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from "@angular/material/tooltip";
-import { StaticLandingComponent } from './static-landing/static-landing.component';
 import { NotificationMenuComponent } from './notification-menu/notification-menu.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MyProfileComponent } from "./my-profile/my-profile.component";
@@ -43,8 +41,6 @@ import { DialogModule } from "primeng/dialog"
     AppHomeComponent,
     AppNavigationComponent,
     SidebarComponent,
-    VersionInfoComponent,
-    StaticLandingComponent,
     NotificationMenuComponent,
     MyProfileComponent,
   ],

@@ -9,9 +9,7 @@
     "test": "ng test",
     "run:all": "node node_modules/@angular-architects/module-federation/src/server/mf-dev-server.js"
   },
-  "publishConfig": {
-    "registry": "https://infyartifactory.jfrog.io/artifactory/api/npm/icets-ai_npm_virtual/"
-  },
+
   "dependencies": {
     "@angular-architects/module-federation": "^16.0.0",
     "@angular-architects/module-federation-tools": "^16.0.0",
@@ -29,6 +27,7 @@
     "@angular/platform-browser": "^18.0.2",
     "@angular/platform-browser-dynamic": "^18.0.2",
     "@angular/router": "^18.0.2",
+    "@babel/runtime": "^7.27.6",
     "@linuxfoundation/lfx-ui-core": "^0.0.15",
     "@ng-bootstrap/ng-bootstrap": "^15.1.2",
     "@popperjs/core": "^2.11.0",

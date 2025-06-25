@@ -33,9 +33,7 @@
 							"src/favicon.ico",
 							"src/favicon.png",
 							"src/assets",
-							"src/silent-refresh.html",
-							"src/unauthorized.html",
-							"src/licenseexpired.html",
+							"src/silent-refresh.html",					
 							"src/logout.html",
 							{
 								"glob": "*config.json",
@@ -63,8 +61,7 @@
 							"src/assets/js/popper.min.js",
 							"src/drawflow.min.js",
 							"node_modules/bootstrap/dist/js/bootstrap.min.js",
-							"src/assets/js/usm-script.js",
-							"src/assets/js/telemetry.min.js",
+							"src/assets/js/usm-script.js",							
 							"node_modules/cookieconsent/build/cookieconsent.min.js"
 						],
 						"extraWebpackConfig": "webpack.config.js",

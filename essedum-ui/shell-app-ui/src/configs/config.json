@@ -12,13 +12,7 @@
   "backgroundImage": "/assets/images/new-background-image.jpg",
   "showHomeOverlayLayout": true,
   
-  "features": {
-    "virtualAssistant": {
-      "backendUrl": "https://cortex-beta4.ad.infosys.com/services/csi/",
-      "suggestionBackendUrl": "https://cortex-beta4.ad.infosys.com/services/csi/api/all-suggestions",
-      "appNameInput":["thepizzaapp245-1.0.0-design"]
-    }
-  },
+
   "bot-app": {
     "hostname": "/"
   },

@@ -2,8 +2,12 @@
     <div id="child" [ngStyle]="{'position': display=='resetpassword' ? 'relative' : null}" class="selector-7-2">
         <div *ngIf="display=='logout'" id="logout-message" class="selector-7-3">
             You have been successfully logged out.
-            <button id="go-to-login-button" mat-raised-button="" class="button-color selector-7-4" (click)="backToLoginPage()" type="submit">Go to Login Page</button>
-        </div>
+        <button id="go-to-login-button" mat-raised-button class="selector-7-4" style="background-color: #0a142f; color: white;"
+            [disabled]="false" type="button" (click)="backToLoginPage()"
+            onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+            onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+            Go to Login Page
+        </button>
         <div *ngIf="display=='error'" id="logout-message" class="selector-7-5">
             Some error occured.
         </div>
@@ -33,7 +37,12 @@
                 </mat-form-field>
                 <!-- <span style="margin-left: 1rem;font-size: 11px;color: red;">NOTE - Password should contain special characters like @$!%*?&</span> -->
                 <br class="selector-7-20">
-                <button mat-raised-button="" class="button-color selector-7-21" type="submit" (click)="changePassword()">Reset</button>
+                <button class="selector-7-21" mat-raised-button style="background-color: #0a142f; color: white;"
+                    [disabled]="false" type="submit" (click)="changePassword()"
+                    onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                    onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                    Reset
+                </button>
             </div>
         </div>
     </div>
