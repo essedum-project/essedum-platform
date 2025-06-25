@@ -178,7 +178,7 @@ export class LoginComponent implements OnInit {
       }
     );
   }
-  loginAsDemo() {
+  loginAsGuest() {
     this.dbAuthenticate("demouser", "");
    }
   ngOnDestroy() {

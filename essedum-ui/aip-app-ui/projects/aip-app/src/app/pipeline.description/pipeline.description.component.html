@@ -42,28 +42,17 @@
                                 </li>
                                 <li class="li-style">
                                     <span matTooltip="Duplicate" [matTooltipPosition]="tooltipPoition">
-                                        <!-- <i class="lfx-u-mar-r-16 aip-led-icons icon copy-icon x-24"
-                                            (click)="copyPipeline()"></i> -->
+                                      
                                         <mat-icon class="lfx-u-mar-r-16 aip-led-icons" (click)="copyPipeline()">content_copy</mat-icon>
                                     </span>
                                 </li>
-                                <!-- <li class="li-style">
-                                    <leds-tooltip [tooltip]="'Export Json'" [position]="tooltipPoition">
-                                        <i class="lfx-u-mar-r-16 aip-led-icons icon download-icon x-24"
-                                            (click)="exportToFile()"></i>
-                                    </leds-tooltip>
-                                </li> -->
+                    
                                 <li class="li-style">
                                     <span matTooltip="Start" [matTooltipPosition]="tooltipPoition">
                                         <mat-icon class="lfx-u-mar-r-16 aip-led-icons" (click)="runScript()">play_arrow</mat-icon>
                                     </span>
                                 </li>
-                                <!-- <li class="li-style" style="padding-right: 11px;">
-                                    <leds-tooltip [tooltip]="'Generate Script'" [position]="tooltipPoition">
-                                        <i class="aip-led-icons icon icon_Technology x-24"
-                                            (click)="generateScript(streamItem.name)"></i>
-                                    </leds-tooltip>
-                                </li> -->
+                       
                                 <li class="li-style" (click)="expandCollapse()" *ngIf="!isExpand && initiativeView">
                                     <span matTooltip="Maximize" [matTooltipPosition]="tooltipPoition">
                                         <mat-icon class="lfx-u-mar-r-16 aip-led-icons" style="font-size: 24px;">fullscreen</mat-icon>
@@ -74,10 +63,7 @@
                                         <mat-icon class="lfx-u-mar-r-16 aip-led-icons" style="font-size: 24px;">fullscreen_exit</mat-icon>
                                     </span>
                                 </li>
-                                <!-- <li class="li-style" (click)="publishPipeline()" *ngIf="publishAuth">
-                                    <leds-tooltip [tooltip]="'Publish'" [position]="tooltipPoition"><i
-                                            class="lfx-u-mar-r-16 icon x-24 icon_cloud_storage aip-led-icons"></i></leds-tooltip>
-                                </li> -->
+                    
                             </ul>
                         </div>
                     </div>

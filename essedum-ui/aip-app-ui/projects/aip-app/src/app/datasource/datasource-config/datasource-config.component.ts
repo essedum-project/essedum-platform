@@ -333,8 +333,8 @@ export class DatasourceConfigComponent implements OnInit {
             this.Services.message('Adapter saved successfully');
           }
           else {
-            this.Services.message('Connection saved successfully ');
-          }
+            this.Services.message('Connection updated successfully ');
+          }   
           if (this.router.url.includes('initiative')) {
             this.raiService.changeModalData(true);
           }
@@ -355,6 +355,7 @@ export class DatasourceConfigComponent implements OnInit {
         this.data.extras = JSON.stringify(this.data.extras);
         this.Services.createDatasource(this.data).subscribe((res) => {
             this.Services.message('Connection created successfully');
+          this._location.back();
           this.portDetails.datasourceid = res.body.id;
           this.portDetails.organization = res.body.organization;
 
@@ -370,7 +371,7 @@ export class DatasourceConfigComponent implements OnInit {
             this.Services.message('Adapter created successfully');
           } else {
             this.Services.message('Connection created successfully');
-          }
+          }     
           if (this.router.url.includes('initiative')) {
             this.responseLink.emit(res);
             this.raiService.changeModalData(true);
