@@ -588,6 +588,8 @@ export class DatasetByNameComponent {
         this.datasetService.deleteDatasets(name).subscribe((res) => {
        
           this.ngOnInit();
+                  this.datasetService.message('Dataset deleted successfully');
+
         },
           (error) => {
           }
