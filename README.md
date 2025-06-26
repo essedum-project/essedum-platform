@@ -63,7 +63,7 @@
     #### 2.1.5 Crate Maven Build
       •	Run below maven command in SV directory “ai-platform/sv” 
       •	mvn clean install -Dmaven.test.skip=true -Dlicense.skip=true
-      Maven build can also be created directly form the Eclipse or STS Ide
+      •	Maven build can also be created directly form the Eclipse or STS Ide
       •	To create Maven build from Eclipse below are the steps
       •	Import code into eclipse as a maven import
       •	Right click on Aip project->Run as-> maven build->paste the command in goals as shown below                          
@@ -84,8 +84,7 @@
       •	Open Application.Yaml under Resource folder of Common-app and keep Liquibase enabled as true if you are running application for the first time.
        •	Configure MYSQL server user and password in application.yaml highlighted in yellow
       •	Create schemas highlighted in red in MYSQL server using MYSQL Work Bench
-    
-              
+               
       •	Right click on common-app->click on run-> select run configuration->select java application 
       •	Provide “com.infosys.Common” as input in Main Class.
       •	Provide “-Dencryption.key=leap$123## -Dencryption.salt=salt-token -Dspring.config.location=../common-app/src/main/resources/application.yml -DLOG_PATH=/app/log -Dlicense=licence-token -Dpublickey=public-token -Dlogging.config=../common-app/src/main/resources/logback-spring.xml” as input in the VM arguments.
