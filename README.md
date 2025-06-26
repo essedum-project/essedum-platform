@@ -162,3 +162,9 @@ kubectl apply -f leap-ui-service.yaml
   Create or upload datasets for training.
   Build your ML pipeline using Python scripts or predefined templates.
   Deploy and interact with your models through Streamlit or Gradio apps.
+
+
+## 4. Change Log:
+  Initial Version
+
+  
