@@ -61,12 +61,20 @@
                             onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
                             Cancel
                         </button>
-                        <button mat-raised-button style="background-color: #0a142f; color: white;" [disabled]="false"
-                            (click)="edit?editDetails():saveDetails()"
+                        <button  *ngIf="!edit" mat-raised-button style="background-color: #0a142f; color: white;" [disabled]="false"
+                            (click)="saveDetails()"
                             onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
                             onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
                             Save
                         </button>
+                         <div class="align-items-center d-flex" *ngIf="edit">
+                            <button mat-raised-button style="background-color: #0a142f; color: white;" [disabled]="false"
+                            (click)="editDetails()"
+                            onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                            onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                            Update
+                        </button>
+                         </div>
                     </div>
                 </div>
             </div>

@@ -24,24 +24,7 @@
                     <img id="clientimage" *ngIf="!isimg" src="assets/images/LFN-Essedum-colour.svg" 
                     style="margin-left:1vh;width: 234px; height: 40px;" (click)="homeToDash();removeFilters();clearonlanding()" class=" mobileHeaderImg selector-3-8" alt="" 
                     [ngStyle]="{'height': headerHeight}">
-                    <span *ngIf="clientlogo" style="display: flex;flex-direction: column" class="selector-3-11">
-                        <img id="clientimage"
-                            *ngIf="((selectedrole.name.toLowerCase() != 'survey admin' && selectedrole.name.toLowerCase()  != 'survey client')&&( isimg==null))"
-                            src="assets/images/infy_lead_logo.png"
-                            (click)="homeToDash();removeFilters();clearonlanding()"
-                            style="float: left;height: 30px;margin-left:-1vh;width: auto;cursor: pointer"
-                            class="selector-3-12" alt="">
-                        <img id="clientimage"
-                            *ngIf="((selectedrole.name.toLowerCase()  == 'survey admin' || selectedrole.name.toLowerCase()  == 'survey client')&&( isimg==null))"
-                            src="assets/images/infy_lead_logo.png"
-                            (click)="homeToDash();removeFilters();clearonlanding()"
-                            style="float: left;height: 40px;margin-left:-1vh;width: auto;cursor: pointer"
-                            class="selector-3-13" alt="">
-                        <span
-                            *ngIf="selectedrole.name.toLowerCase()  != 'survey admin' && selectedrole.name.toLowerCase()  != 'survey client'"
-                            style="color: white; font-size: 12px; margin-left: 2px"
-                            class="selector-3-14">{{projectname}} LEAP</span>
-                    </span>
+                 
 
                     <button *ngIf="sidebar && selectedrole.name==currentrole && showSidebarMenu" mat-icon-button=""
                         (click)="toggleLeft()" style="margin-top: 1vh" class="selector-3-15">

@@ -95,6 +95,10 @@ export class NativeScriptComponent implements OnInit, OnChanges {
   dynamicSecretsArray: Array<DynamicSecretsGrid> = [];
   secretsModified = false;
     defaultRuntime: any;
+    isHovered=false;
+    isHoveredSave=false;
+    isHoveredRun=false;
+    isHoveredTag=false;
   constructor(
     @Inject('envi') private baseUrl: string,
     private service: Services,
