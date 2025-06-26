@@ -1,13 +1,14 @@
 <div>
     <div style="display: flex; margin-left: 60%; align-items: center;">
-        <div [ngStyle]="{'color': (!swaggerView) ? 'grey' : '#0094ff'}">Swagger View</div>
-        <mat-slide-toggle checked="checked" [disabled]="disabled" [labelPosition]="labelPosition"
-            disableRipple="disableRipple" (change)="toggle()" style="margin: 0 8px;">
-        </mat-slide-toggle>
+        <div style="padding-right: 5px;" [ngStyle]="{'color': (!swaggerView) ? 'grey' : '#0094ff'}">Swagger View</div>
+        <mat-slider [disabled]="disabled" class="slider-toggle-width" min="0" max="1" step="1" style="margin: 0 8px;">
+            <input matSliderThumb [value]="swaggerView ? 0 : 1" (input)="toggle()"
+                aria-label="Toggle Swagger/JSON View" />
+        </mat-slider>
         <div style="padding-left: 5px;" [ngStyle]="{'color': (swaggerView) ? 'grey' : '#0094ff'}">JSON View</div>
     </div>
 
-    <div style="margin:30px">
+    <div style="margin:10px">
         <div *ngIf="swaggerView">
             <div *ngIf="apispecTemplate">
                 <div class="spec-header">

@@ -255,7 +255,7 @@
                           <div class="row" style="margin-left: -7px;margin-top: 7px;">
                             <mat-form-field appearance="fill" class="w-100">
                               <mat-label>Label</mat-label>
-                              <mat-select [(value)]="selectedOption" (selectionChange))="optionChange($event)">
+                              <mat-select [(value)]="selectedOption" (selectionChange)="optionChange($event)">
                                 <mat-option *ngFor="let option of options"
                                   [value]="option.value">{{option.value}}</mat-option>
                               </mat-select>

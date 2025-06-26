@@ -15,9 +15,6 @@ import { MatDialogRef } from '@angular/material/dialog';
 })
 export class AdapterCreateEditComponent {
   @Output() triggereRefresh = new EventEmitter<any>();
-  chains: any;
-  chainSelected: any;
-  chainError: boolean = true;
 
   constructor(
     private dialogRef: MatDialogRef<AdapterCreateEditComponent>,
@@ -57,24 +54,14 @@ export class AdapterCreateEditComponent {
   selectedConnection: any;
   routeToHome: boolean = false;
   connectionPromise: Promise<boolean>;
-  chainPromise: Promise<boolean>;
   org: any;
-  selecteddChain: any;
-  chainOptions: OptionsDTO[] = [];
-  isChain: Boolean = false;
 
   ngOnInit(): void {
     this.org = sessionStorage.getItem('organization');
-    if (this.data && this.data.isChain) {
-      this.isChain = true;
-    }
     this.authentications();
     this.findalldatasourcesForConnection();
     this.findAllSpecTemplates();
-    this.findAllChains();
-    if (this.data && this.data.chainName) {
-      this.chainError = false;
-    }
+
     if (!this.data) {
       this.routeToHome = true;
       this.action = 'create';
@@ -89,8 +76,6 @@ export class AdapterCreateEditComponent {
         description: '',
         category: 'DYNAMIC',
         apispec: '{}',
-        isChain: null,
-        chainName: null,
         executiontype: 'REST',
       };
     }
@@ -178,21 +163,10 @@ export class AdapterCreateEditComponent {
     this.selectedConnection = this.datasourcesForConnection.filter(
       (datasource) => datasource.alias == connectionNameSelectd.value
     )[0];
-    this.data.connectionid = this.selectedConnection.id;
+    this.data.connectionid = this.selectedConnection.name;
     if (this.selectedConnection.type == 'REST')
       this.data.executiontype = 'REST';
     else this.data.executiontype = 'REMOTE';
-  }
-
-  chainNameSelectChange(event: any) {
-    const chainNameSelected = event.value;
-    this.selecteddChain = this.chains.find(
-      (chain) => chain.alias === chainNameSelected
-    );
-    this.data.chainName = this.selecteddChain?.name;
-    if (this.data.chainName) {
-      this.chainError = false;
-    }
   }
 
   resolvePromise() {
@@ -308,28 +282,5 @@ export class AdapterCreateEditComponent {
         Validators.pattern(this.regexPatternObj),
       ];
     });
-  }
-
-  findAllChains(): void {
-    this.service.getallPipelinesByOrg().subscribe((res) => {
-      var chain = res;
-      this.chains = chain;
-      chain.forEach((element: any) => {
-        if (element.interfacetype === 'chain') {
-          this.chainOptions.push(new OptionsDTO(element.alias, element.alias));
-        }
-      });
-      if (this.data.chainName) {
-        var reqChain = this.chains.filter(
-          (chain) => chain.name == this.data.chainName
-        )[0];
-        this.chainSelected = reqChain.alias;
-      }
-      this.chainPromise = Promise.resolve(true);
-    });
-  }
-
-  toggleChain() {
-    this.data.isChain = this.isChain;
   }
 }

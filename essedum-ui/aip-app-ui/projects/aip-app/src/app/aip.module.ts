@@ -66,7 +66,8 @@ import { NativeScriptComponent } from './native-script/native-script.component';
 import { MatTreeModule } from '@angular/material/tree';
 import { NativeScriptDialogComponent } from './native-script/native-script-dialog/native-script-dialog.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MethodCreateEditComponent } from './adapter/method-create-edit/method-create-edit.component';import { encKey } from './services/encKey';
+import { MethodCreateEditComponent } from './adapter/method-create-edit/method-create-edit.component';
+import { encKey } from './services/encKey';
 import { DashConstantService } from './services/dash-constant.service';
 import { RaiservicesService } from './services/raiservices.service';
 import { SemanticService } from './services/semantic.services';
@@ -136,7 +137,7 @@ import { SchemaRelationshipService } from './schema/schema-relationship.service'
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { HighlightSearchPipe } from './pipes/highlight.pipe';
 import { DynamicRemoteLoad } from './apps/view-app/remoteLoad';
-
+import { MatSliderModule } from '@angular/material/slider';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -157,7 +158,6 @@ const dbConfig: DBConfig = {
         { name: 'date', keypath: 'date', options: { unique: false } },
       ],
     },
-    
   ],
 };
 @NgModule({
@@ -165,7 +165,7 @@ const dbConfig: DBConfig = {
     AipComponent,
     ModelComponent,
     DatasourceConfigComponent,
-   
+
     ModelCreateComponent,
     PipelineComponent,
     PipelineCreateComponent,
@@ -213,11 +213,11 @@ const dbConfig: DBConfig = {
     RestDatasetConfigComponent,
     DefaultComponent,
     DatasetEditComponent,
-    DatasetFullscreenViewComponent,  
+    DatasetFullscreenViewComponent,
     DatasetPowerModeViewComponent,
-   // DatasetFormViewComponent,  
+    // DatasetFormViewComponent,
     ModalConfigSchemaComponent,
-    ModalConfigSchemaEditorComponent, 
+    ModalConfigSchemaEditorComponent,
     UserSecretsComponent,
     HighlightSearch,
     FirstCharacterPipe,
@@ -247,6 +247,7 @@ const dbConfig: DBConfig = {
     MatInputModule,
     MatFormFieldModule,
     MatSlideToggle,
+    MatSliderModule,
     MatSnackBarModule,
     NgbModule,
     JsonFormsModule,
@@ -302,7 +303,7 @@ const dbConfig: DBConfig = {
     SchemaRegistryService,
     encKey,
     DashConstantService,
-    SchemaRelationshipService,   
+    SchemaRelationshipService,
     RaiservicesService,
     SemanticService,
     DynamicRemoteLoad,

@@ -280,48 +280,6 @@ export class InstanceComponent implements OnInit, OnChanges {
           element.createdon = new Date(
             new Date(element.createdon).getTime() - timezoneOffset * 60 * 1000
           );
-          let jobid = element.jobid;
-          if (jobid) {
-            element.isChain = true;
-            this.service.getStatus(jobid).subscribe(
-              (res) => {
-                element.status = res;
-                if (res === 'ERROR') {
-                  element.startpipeline = true;
-                } else {
-                  element.startpipeline = false;
-                }
-                var createdon = element.createdon;
-                var lastmodifiedon = element.lastmodifiedon;
-                delete element.createdon;
-                delete element.lastmodifiedon;
-                this.adapterServices
-                  .updateInstance(element)
-                  .subscribe((res) => {
-                    console.log('Instance Updated');
-                  });
-                element.createdon = createdon;
-                element.lastmodifiedon = lastmodifiedon;
-              },
-              (err) => {
-                this.startPipeline = true;
-                element.status = 'ERROR';
-                var createdon = element.createdon;
-                var lastmodifiedon = element.lastmodifiedon;
-                delete element.createdon;
-                delete element.lastmodifiedon;
-                this.adapterServices
-                  .updateInstance(element)
-                  .subscribe((res) => {
-                    console.log('Instance Updated');
-                  });
-                element.createdon = createdon;
-                element.lastmodifiedon = lastmodifiedon;
-
-                console.log(err);
-              }
-            );
-          }
           data.push(element);
           this.users.push(element.name);
         });
