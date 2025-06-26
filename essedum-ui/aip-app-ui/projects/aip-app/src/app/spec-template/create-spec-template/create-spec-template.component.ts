@@ -115,9 +115,10 @@ export class CreateSpecTemplateComponent implements OnInit {
     this.service.createApiSpecTemplate(this.data).subscribe((resp) => {
       console.log(resp);
       this.service.messageService(resp, 'Spec  Created Successfully');
+       this.router.navigate(['../'], { relativeTo: this.route });
     });
     console.log(this.data);
-    this.router.navigate(['../'], { relativeTo: this.route });
+   
   }
 
   back() {
