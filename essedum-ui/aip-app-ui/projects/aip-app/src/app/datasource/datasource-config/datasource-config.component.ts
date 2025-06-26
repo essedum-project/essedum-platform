@@ -339,7 +339,11 @@ export class DatasourceConfigComponent implements OnInit {
             this.raiService.changeModalData(true);
           }
           else {
-            this._location.back();
+                  this.router.navigate(['/connections']).then(navigated => {
+              if (!navigated) {
+                this.Services.messageService('Navigation to /connections failed');
+              }
+            });
           }
         },
           error => {
@@ -355,7 +359,11 @@ export class DatasourceConfigComponent implements OnInit {
         this.data.extras = JSON.stringify(this.data.extras);
         this.Services.createDatasource(this.data).subscribe((res) => {
             this.Services.message('Connection created successfully');
-          this._location.back();
+            this.router.navigate(['/connections']).then(navigated => {
+              if (!navigated) {
+                this.Services.messageService('Navigation to /connections failed');
+              }
+            });
           this.portDetails.datasourceid = res.body.id;
           this.portDetails.organization = res.body.organization;
 
@@ -377,7 +385,11 @@ export class DatasourceConfigComponent implements OnInit {
             this.raiService.changeModalData(true);
           }
           else {
-            this._location.back();
+                 this.router.navigate(['/connections']).then(navigated => {
+              if (!navigated) {
+                this.Services.messageService('Navigation to /connections failed');
+              }
+            });
           }
         },
           error => {
