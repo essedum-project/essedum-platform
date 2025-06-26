@@ -104,6 +104,30 @@ input:focus,
   color: #0094ff !important;
 }
 
-::ng-deep .mat-mdc-tab-list {
-  overflow-x: auto !important;
+::ng-deep .mat-mdc-tab-group .mat-mdc-tab .mdc-tab__content {
+  padding: 0 12px !important;
+}
+
+::ng-deep .mat-mdc-tab-header {
+  .mat-mdc-tab-header-pagination-before,
+  .mat-mdc-tab-header-pagination-after {
+    min-width: 32px !important;
+    cursor: pointer !important;
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+
+    .mat-mdc-tab-header-pagination-chevron {
+      border-style: solid !important;
+      border-width: 2px 2px 0 0 !important;
+
+      height: 8px !important;
+      width: 8px !important;
+      border-color: #0094ff !important;
+    }
+  }
 }

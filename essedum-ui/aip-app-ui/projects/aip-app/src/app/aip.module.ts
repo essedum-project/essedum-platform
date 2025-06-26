@@ -138,6 +138,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { HighlightSearchPipe } from './pipes/highlight.pipe';
 import { DynamicRemoteLoad } from './apps/view-app/remoteLoad';
 import { MatSliderModule } from '@angular/material/slider';
+import { MatTabsModule } from '@angular/material/tabs';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -249,6 +250,7 @@ const dbConfig: DBConfig = {
     MatSlideToggle,
     MatSliderModule,
     MatSnackBarModule,
+    MatTabsModule,
     NgbModule,
     JsonFormsModule,
     JsonFormsAngularMaterialModule,
