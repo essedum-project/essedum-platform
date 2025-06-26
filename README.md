@@ -117,19 +117,19 @@
   Log Storage: Define where logs generated during pipeline execution will be stored for monitoring and debugging.
   Dataset Storage: Connect to data sources or storage systems where training and inference datasets are located.
   
-  ### 3.2.Dataset
+  ### 3.2. Dataset
   The dataset module enables users to:
   Create and manage datasets used in ML pipelines.
   Upload, preprocess, and organize data for training and evaluation.
   Ensure datasets are versioned and accessible for reproducibility.
   
-  ### 3.3.Pipeline
+  ### 3.3. Pipeline
   This is the core of the application where users can:
   Create and configure ML pipelines for training models, performing inference, and deploying applications.
   Integrate Python scripts to define custom steps in the pipeline.
   Automate workflows including data loading, model training, evaluation, and deployment.
   
-  ### 3.4.Apps
+  ### 3.4. Apps
   This module hosts interactive applications built using:
   Streamlit and Gradio: These apps provide intuitive UIs for model interaction, visualization, and testing.
   Users can launch these apps directly from the platform to explore model predictions, adjust parameters, and share results.
