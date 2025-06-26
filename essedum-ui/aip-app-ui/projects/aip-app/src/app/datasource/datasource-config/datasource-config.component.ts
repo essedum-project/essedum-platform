@@ -11,7 +11,7 @@ import { RaiservicesService } from '../../services/raiservices.service';
   selector: 'app-datasource-config',
   templateUrl: './datasource-config.component.html',
   styleUrls: ['./datasource-config.component.scss'],
-  encapsulation:ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None
 })
 export class DatasourceConfigComponent implements OnInit {
   @Output() responseLink = new EventEmitter<any>();
@@ -166,7 +166,7 @@ export class DatasourceConfigComponent implements OnInit {
         }
         this.Services.getDatasourcesNames().subscribe(resp => {
           this.allDatasources = resp
-        })      
+        })
         this.editConnection();
       },);
     }
@@ -238,8 +238,8 @@ export class DatasourceConfigComponent implements OnInit {
     const parsedDetails = JSON.parse(this.data.connectionDetails);
     this.dsUrl = parsedDetails.Url
     const validatePort = { 'portDetails': this.portDetails, 'dsUrl': this.dsUrl }
-    if(this.portDetails && Object.keys(this.portDetails).length){
-    this.validatePorts(validatePort);
+    if (this.portDetails && Object.keys(this.portDetails).length) {
+      this.validatePorts(validatePort);
     }
 
     this.Services.testConnection(this.data).subscribe((response) => {
@@ -258,8 +258,8 @@ export class DatasourceConfigComponent implements OnInit {
       }
 
     }, error => {
-      
-      setTimeout(() => {  
+
+      setTimeout(() => {
         this.Services.messageService('Please Provide a different Port Range');
         // Place your code here that you want to execute after 2 seconds  
       }, 2000); // 2000 milliseconds = 2 seconds  
@@ -295,7 +295,7 @@ export class DatasourceConfigComponent implements OnInit {
         this.data.description = this.matData.description;
       } else {
         this.data.alias = this.alias;
-        this.data.description=this.description;
+        this.data.description = this.description;
       }
       this.data.category = this.sourceType?.category;
       this.data.type = this.sourceType?.type;
@@ -334,16 +334,13 @@ export class DatasourceConfigComponent implements OnInit {
           }
           else {
             this.Services.message('Connection updated successfully ');
-          }   
+          }
           if (this.router.url.includes('initiative')) {
             this.raiService.changeModalData(true);
           }
           else {
-                  this.router.navigate(['/connections']).then(navigated => {
-              if (!navigated) {
-                this.Services.messageService('Navigation to /connections failed');
-              }
-            });
+            this.router.navigate(['../'], { relativeTo: this.route });
+
           }
         },
           error => {
@@ -358,12 +355,10 @@ export class DatasourceConfigComponent implements OnInit {
       else {
         this.data.extras = JSON.stringify(this.data.extras);
         this.Services.createDatasource(this.data).subscribe((res) => {
-            this.Services.message('Connection created successfully');
-            this.router.navigate(['/connections']).then(navigated => {
-              if (!navigated) {
-                this.Services.messageService('Navigation to /connections failed');
-              }
-            });
+          this.Services.message('Connection created successfully');
+
+          this.router.navigate(['../'], { relativeTo: this.route });
+
           this.portDetails.datasourceid = res.body.id;
           this.portDetails.organization = res.body.organization;
 
@@ -379,17 +374,14 @@ export class DatasourceConfigComponent implements OnInit {
             this.Services.message('Adapter created successfully');
           } else {
             this.Services.message('Connection created successfully');
-          }     
+          }
           if (this.router.url.includes('initiative')) {
             this.responseLink.emit(res);
             this.raiService.changeModalData(true);
           }
           else {
-                 this.router.navigate(['/connections']).then(navigated => {
-              if (!navigated) {
-                this.Services.messageService('Navigation to /connections failed');
-              }
-            });
+            this.router.navigate(['../'], { relativeTo: this.route });
+
           }
         },
           error => {

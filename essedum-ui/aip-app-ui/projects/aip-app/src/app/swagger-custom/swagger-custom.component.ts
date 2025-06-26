@@ -614,13 +614,13 @@ export class SwaggerCustomComponent implements OnInit {
     if (formType == 'API') {
       this.formType = 'API';
       this.dialog.open(spec, {
-        width: '1430px',
+        width: '830px',
         panelClass: 'standard-dialog',
       });
     } else {
       this.formType = 'Script';
       this.dialog.open(spec, {
-        width: '1430px',
+        width: '830px',
         panelClass: 'standard-dialog',
       });
     }
@@ -628,7 +628,7 @@ export class SwaggerCustomComponent implements OnInit {
 
   editMethod(spec: any) {
     this.dialog.open(spec, {
-      width: '1430px',
+      width: '830px',
       panelClass: 'standard-dialog',
     });
   }
