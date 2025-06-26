@@ -11,7 +11,7 @@ import { MatSelect } from '@angular/material/select';
 import { SwaggerAPISpec } from '../../DTO/swaggerapispec';
 import { FileUploader } from 'ng2-file-upload';
 import { Location } from "@angular/common";
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 export class NameAndAlias {
   name: string;
@@ -53,6 +53,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
   ;
 
   constructor(private datasetsService: DatasetServices,
+        private route: ActivatedRoute,
  
     public services: Services,
     public schemaRegistryService: SchemaRegistryService,
@@ -453,7 +454,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
       dataset.views = this.firstForm.controls.Viewertype.value
       this.busy = this.datasetsService.createDataset(dataset).subscribe((res) => {
         let returnedName = res.name;
-        this.datasetsService.message('Saved! Created successfully');
+        this.datasetsService.message('Saved! Copied successfully');
 
         if (this.data.datasource.category == "REST")
           this.modifyAPISpec(this.data, returnedName)
@@ -468,7 +469,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
           }
           this.datasetsService.addGroupModelEntity(returnedName, temp, dataset.organization).subscribe();
         }
-        this.location.back();
+        this.router.navigate(['../datasets/' ], { relativeTo: this.route });
 
       },
         error => {
