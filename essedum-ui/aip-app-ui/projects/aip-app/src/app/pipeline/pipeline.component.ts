@@ -126,7 +126,7 @@ filteredCards: any[] = [];
             : [];
         } else {
           this.pageNumber = 1;
-          this.pageSize = 4;
+          this.pageSize = 8;
           this.filter = '';
         }
       });
@@ -270,7 +270,7 @@ filteredCards: any[] = [];
         else this.organization = sessionStorage.getItem('organization');
 
         this.pageNumber = event.pageNumber ? event.pageNumber : 1;
-        this.pageSize = event.pageSize ? event.pageSize : 4;
+        this.pageSize = event.pageSize ? event.pageSize : 8;
         this.getCountPipelines();
         this.getCards();
       });
