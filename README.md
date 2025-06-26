@@ -5,7 +5,9 @@
  Essedum is a modular, microservices-based framework designed to simplify the development, training, and deployment of AI-powered applications. It enables seamless connectivity between systems via REST APIs, Azure OpenAI, and AWS Bedrock, and supports data ingestion from sources like PostgreSQL, MySQL, S3, and Azure Blob Storage. Users can build and execute training and inference pipelines using Python-based services, manage models across platforms like SageMaker, Azure ML, and GCP Vertex AI, and deploy them as endpoints. The architecture includes a Java Spring Boot backend, Angular frontend, and containerized pipeline executors managed by Kubernetes for scalability and high availability.
 
 ## 2. Installation 
-### Required Software’s and tools
+
+
+###  Required Software’s and tools
 #### Backend:
   •	JDK version 21 or higher
   •	Maven 3.9.6
@@ -108,6 +110,27 @@
         pip install -r requirements.tx
     • Run python app.py
     • Pyjob Executor will be running in port 5000. 
+   
+
+### 2.5. Docker Build and Deployment in AKS Cluster :
+
+#### 2.5.1 Backend:
+sudo docker build -t essedum_app_backend:latest .
+sudo docker tag essedum_app_backend:latest 
+sudo docker push acrreq.azurecr.io/essedum_app_backend:latest
+kubectl delete -f leap_app_backend-azure.yaml
+kubectl apply -f leap_app_backend-azure.yaml
+
+#### 2.5.2 Frontend:
+sudo docker build -t essedum_app_ui:latest .
+sudo docker tag essedum_app_ui:latest 
+sudo docker push acrreq.azurecr.io/essedum_app_ui:latest
+kubectl delete -f leap-ui-azure.yaml
+kubectl delete -f leap-ui-service.yaml
+kubectl apply -f leap-ui-azure.yaml
+kubectl apply -f leap-ui-service.yaml
+
+
 
 ## 3. Usage
 
