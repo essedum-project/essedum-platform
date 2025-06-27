@@ -486,12 +486,12 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 									.getAsJsonObject();
 							jsonObject.addProperty("org", org);
 
-							/*
-							 * environ = jsonObject.getAsJsonArray("environment"); for (int i = 0; i <
-							 * environ.size(); i++) { JsonObject envJSON = environ.get(i).getAsJsonObject();
-							 * String key = envJSON.get("name").getAsString(); String value =
-							 * envJSON.get("value").getAsString(); envJSONO.addProperty(key, value); }
-							 */
+							
+							  environ = jsonObject.getAsJsonArray("environment"); for (int i = 0; i <
+							  environ.size(); i++) { JsonObject envJSON = environ.get(i).getAsJsonObject();
+							  String key = envJSON.get("name").getAsString(); String value =
+							  envJSON.get("value").getAsString(); envJSONO.addProperty(key, value); }
+							 
 
 							String data = "{\"input_string\":" + jsonObject.toString() + "}";
 							data = pipelineService.populateDatasetDetails(data, org);
@@ -605,8 +605,8 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 									String key = keys.next();
 									envJSONO.addProperty(key, (String) secJ.get(key));
 								}
-								// pipelineEnvsArray =
-								// dataObj.getJSONObject("input_string").getJSONArray("environment");
+								 pipelineEnvsArray =
+								 dataObj.getJSONObject("input_string").getJSONArray("environment");
 								if (pipelineArgs != null && !pipelineArgs.isEmpty()) {
 									pipelineArgs.forEach(args -> {
 										JSONObject temp = new JSONObject(args.toString());
@@ -621,17 +621,17 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 									});
 								}
 
-								/*
-								 * if (pipelineEnvsArray != null && !pipelineEnvsArray.isEmpty()) {
-								 * 
-								 * pipelineEnvsArray.forEach(args -> { JSONObject temp = new
-								 * JSONObject(args.toString()); JSONObject envs = new JSONObject(); if
-								 * (temp.has("name") && temp.getString("name").trim() != null) {
-								 * envs.put(temp.getString("name").trim(), temp.getString("value").trim()); }
-								 * penvsArray.put(envs);
-								 * 
-								 * }); penvsArray.put(new JSONObject(secrets)); }
-								 */
+								
+								  if (pipelineEnvsArray != null && !pipelineEnvsArray.isEmpty()) {
+								  
+								  pipelineEnvsArray.forEach(args -> { JSONObject temp = new
+								  JSONObject(args.toString()); JSONObject envs = new JSONObject(); if
+								  (temp.has("name") && temp.getString("name").trim() != null) {
+								  envs.put(temp.getString("name").trim(), temp.getString("value").trim()); }
+								  penvsArray.put(envs);
+								  
+								  }); penvsArray.put(new JSONObject(secrets)); }
+								 
 							}
 
 							ObjectMapper mapper = new ObjectMapper();
