@@ -2,9 +2,9 @@
   <div class="lfx-l-pageoverlay">
     <div class="lfx-l-login-mid">
       <div id="DSA_logoMid" class="DSA_logoMid">
-        <div class="lfx-u-text-white logo-common">Essedum</div>
+        <div class="lfx-u-text-white logo-common">ESSEDUM</div>
       </div>
-      <div class="lfx-l-login-ctr" style="height: 454px">
+      <div class="lfx-l-login-ctr">
         <h1 class="lfx-u-body-xxl lfx-l-login-mar">
           Log In
           <a
@@ -23,6 +23,7 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
+                margin-top: -16px;
               "
             >
               <button
@@ -78,7 +79,7 @@
             <button
               mat-raised-button
               style="background-color: #0a142f; color: white"
-              class="lfx-u-mar-b-16 lfx-u-mar-t-10 full-width"
+              class="full-width"
               [disabled]="false"
               (click)="dbAuthenticate()"
               onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
@@ -101,8 +102,31 @@
             </div> -->
           </mat-tab>
         </mat-tab-group>
-        <div class="lfx-u-body-sm lfx-u-mar-t-32 lfx-u-text-neutral-80">
-          Copyright © 2025 The Linux Foundation®.
+      </div>
+      <div
+        class="row"
+        style="
+          position: fixed;
+          bottom: 0;
+          width: 100%;
+          z-index: 9;
+          left: 0;
+          background-color: #0a142f;
+          padding: 10px;
+          display: flex;
+          align-items: center;
+        "
+      >
+        <div class="col-3" style="text-align: center; margin-top: 5px; flex: 1">
+          <img
+            id="clientimage"
+            src="assets/images/LFN-Logo-White.svg"
+            style="margin-left: 1vh; width: 180px; height: 20px"
+            alt=""
+          />
+        </div>
+        <div class="col-9" style="text-align: center; flex: 3">
+          <lfx-footer style="padding: 12px"></lfx-footer>
         </div>
       </div>
     </div>
