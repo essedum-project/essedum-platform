@@ -237,6 +237,7 @@ export class PipelineCreateComponent implements OnInit {
               this.options.push(val);
             }
           })
+          this.type=this.options[0].value;
         },
           error => {
             this.Services.messageService(error);
@@ -253,6 +254,7 @@ export class PipelineCreateComponent implements OnInit {
               this.options.push(val);
             }
           })
+          this.type=this.options[0].value;
         },
           error => {
             this.Services.messageService(error);
