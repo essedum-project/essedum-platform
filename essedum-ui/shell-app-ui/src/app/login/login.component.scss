@@ -18,6 +18,7 @@
 
 .lfx-l-pageoverlay{
     min-height: 551px;
+    height: 100vh;
     background-color: rgba(0, 148, 255, 0.5);
 }
 
@@ -27,6 +28,8 @@
 .lfx-l-login-ctr {
     margin-top: auto !important;
     position: relative;
+    height: 400px !important;
+    height: 100vh;
 }
 
 .lfx-l-login-mar{
