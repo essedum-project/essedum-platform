@@ -59,6 +59,5 @@ public interface UsmNotificationsService {
 	 * @return the usm notifications
 	 */
 	UsmNotifications save(UsmNotificationsDTO usm_notifications_dto);
-	public void licenseExpiryNotification(String licenseFilePath) throws SQLException;
     
 }
