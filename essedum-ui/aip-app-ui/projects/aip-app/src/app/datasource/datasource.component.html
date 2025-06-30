@@ -17,9 +17,13 @@
                         <!-- Header -->
                         <div class="aip-header lfx-u-pad-lr-32 lfx-u-pad-t-16">
                             <div class=" col-sm-12 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-center">
-                                <div style="padding: 4px 0px 0px 0px;">
-                                
-                                </div>
+                                 <div style="padding: 20px 0px 0px 0px;">
+                                <mat-icon class="x-24 filter-icon" (click)="toggleExpand()" matTooltip="{{
+                    isExpanded ? 'Collapse Filters' : 'Expand Filters'
+                  }}" [matTooltipPosition]="tooltip" style="cursor: pointer">
+                                    filter_list
+                                </mat-icon>
+                            </div>
                                 <div class="lfx-u-pad-24 lfx-u-mar-r-30">
                                     <h3 class="lfx-u-header-xl">{{cardTitle}}</h3>
                                 </div>

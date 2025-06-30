@@ -1,20 +1,26 @@
 <div class="aip-top">
-  <div class="clearfix aip-tranparent-backgroud js-bodywrapper" id="mainCtr">
-
-    <div *ngIf="isExpanded" class="row aip-filter aip-filter-position aip-scroll-hover row">
-      <i class="fa fa-sort-amount-desc"></i>
-      <app-tagging-component [servicev1]="'pipeline'" (tagSelected)="tagSelectedEvent($event)" [tagrefresh]="tagrefresh"
-        [selectedPipelineTypeList]="{
-            selectedAdapterType: selectedAdapterType
-          }"></app-tagging-component>
-    </div>
-    <div class="col-sm-12 col-md-12 col-lg-12">
+  <div class="clearfix lfx-l-bodywrapper aip-tranparent-backgroud  js-bodywrapper"
+        id="mainCtr">
+        <div>
+  <div *ngIf="isExpanded" class="row aip-filter aip-filter-position aip-scroll-hover">
+              <app-tagging-component [servicev1]="'pipeline'" (tagSelected)="tagSelectedEvent($event)"
+                    [tagrefresh]="tagrefresh"
+                    [selectedPipelineTypeList]="{ 
+                        selectedAdapterType: selectedAdapterType
+                      }"></app-tagging-component>
+            </div>
+            <div class="col-sm-12 col-md-9 col-lg-9 lfx-u-pad-lr-16" id="mainrightCnt" [ngStyle]="toggler(isExpanded)">
 
       <div>
         <div class="aip-header lfx-u-pad-lr-32 lfx-u-pad-t-16">
           <div class=" col-sm-12 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-center">
-            <div style="padding: 4px 0px 0px 0px;">
-   </div>
+           <div style="padding: 20px 0px 0px 0px;">
+                                <mat-icon class="x-24 filter-icon" (click)="toggleExpand()" matTooltip="{{
+                    isExpanded ? 'Collapse Filters' : 'Expand Filters'
+                  }}" [matTooltipPosition]="tooltip" style="cursor: pointer">
+                                    filter_list
+                                </mat-icon>
+                            </div>
             <div class="lfx-u-pad-24 lfx-u-mar-r-30">
               <h3 class="lfx-u-header-xl">{{cardTitle}}</h3>
             </div>
@@ -158,6 +164,7 @@
         <app-pagination #pagination [noOfItems]="noOfItems" (pageAndSizeChanged)="handlePageAndSizeChange($event)">
         </app-pagination>
       </div>
+    </div>
     </div>
   </div>
 
