@@ -11,12 +11,6 @@
 package com.infosys.icets.iamp.usm.service.impl;
 
 import java.sql.SQLException;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -31,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.infosys.icets.ai.comm.lib.util.annotation.LeapProperty;
 import com.infosys.icets.ai.comm.lib.util.service.dto.support.PageRequestByExample;
 import com.infosys.icets.ai.comm.lib.util.service.dto.support.PageResponse;
-import com.infosys.icets.ai.comm.licenseValidator.LicenseValidator;
 import com.infosys.icets.iamp.usm.domain.UsmNotifications;
 import com.infosys.icets.iamp.usm.dto.UsmNotificationsDTO;
 import com.infosys.icets.iamp.usm.repository.UsmNotificationsRepository;
@@ -212,39 +205,5 @@ public class UsmNotificationsServiceImpl implements UsmNotificationsService {
 
 		return usmNotifications;
 	}
-	
-	public void licenseExpiryNotification(String licenseFilePath) throws SQLException{
-
-	    LocalDate serverTodayDate = LocalDate.now();
-	    LocalDate licenseStartDate = LocalDate.parse(LicenseValidator.license.getStartDate());
-	    int licenseDuration = Integer.valueOf(LicenseValidator.license.getDurationDays());	
-	    long daysToExpiry = Duration.between(serverTodayDate.atStartOfDay(),licenseStartDate.atStartOfDay().plusDays(licenseDuration)).toDays();
-	    
-	    if(daysToExpiry<=30) {
-	    List<Integer> roleIdList = new ArrayList<Integer>(); 
-		try {
-			 if(roleid !=null & roleid!="")
-				roleIdList = Arrays.stream(roleid.split(",")).map(Integer::parseInt).collect(Collectors.toList());
-			    String daysToExpiry2 = "License will expire in " +Long.toString(daysToExpiry)+ "Days";
-			    ZonedDateTime zonedDateTime = ZonedDateTime.now();
-				for (Integer integer : roleIdList) {
-				UsmNotifications usm = new UsmNotifications();
-				usm.setReadFlag(false);
-				usm.setSeverity("P1");
-				usm.setSource(usm.getSource());
-				usm.setDateTime(zonedDateTime);
-			    usm.setRoleId(integer);
-				usm.setMessage("Remaining days to expire license is " +daysToExpiry+ " days");
-				save(usm);
-				}
-			log.warn(daysToExpiry2);
-		
-		}
-		catch(NumberFormatException e) {
-			log.error("leap property license_notification_role is empty or should be comma separated values",e);
-		}
-
-	 }
-}
 
 }

@@ -38,6 +38,7 @@ import { ModelDeployComponent } from './model/model-deploy/model-deploy.componen
 import { JsonFormsModule } from '@jsonforms/angular';
 import { JsonFormsAngularMaterialModule } from '@jsonforms/angular-material';
 import { TagsComponent } from './tags/tags.component';
+import { TaggingComponentComponent } from './tagging-component/tagging-component.component';
 import { SchemaComponent } from './schema/schema.component';
 import { AdapterComponent } from './adapter/adapter.component';
 import { InstanceComponent } from './instance/instance.component';
@@ -229,6 +230,7 @@ const dbConfig: DBConfig = {
     PipelineDialogComponent,
     DatasetByNameComponent,
     CustomSnackbarComponent,
+    TaggingComponentComponent,
   ],
   imports: [
     CommonModule,

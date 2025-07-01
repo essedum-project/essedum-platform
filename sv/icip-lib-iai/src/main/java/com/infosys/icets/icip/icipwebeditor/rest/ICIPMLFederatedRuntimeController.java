@@ -189,7 +189,7 @@ public class ICIPMLFederatedRuntimeController {
 	}
 
 	@GetMapping("/get/available-ports")
-	public ResponseEntity<Map<String, Object>> getAvailablePorts(@RequestParam Integer connid) {
+	public ResponseEntity<Map<String, Object>> getAvailablePorts(@RequestParam("connid") Integer connid) {
 
 		Map<String, Object> getAvailablePorts = federatedRuntimeService.getPorts(connid);
 		return ResponseEntity.ok(getAvailablePorts);

@@ -10,46 +10,29 @@
  */
 package com.infosys.icets.common.app.bootstrap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import com.infosys.Common;
 import com.infosys.icets.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.infosys.icets.iamp.usm.service.UsmPermissionApiService;
-import com.infosys.icets.iamp.usm.service.impl.UsmNotificationsServiceImpl;
 
 @Component
 public class PostLeapStart implements ApplicationRunner {
 
+	@Autowired
+	private ConstantsService dashConstantService;
 
+	@Autowired
+	private UsmPermissionApiService usmPermissionApiService;
 
-   private static final Logger logger = LoggerFactory.getLogger(Common.class);
-    
-    @Autowired
-    private  UsmNotificationsServiceImpl usmNotificationsService;
-    
-    @Autowired
-    private ConstantsService dashConstantService;
-    
-    @Autowired 
-    private UsmPermissionApiService usmPermissionApiService;
+	@Override
+	public void run(ApplicationArguments args) throws Exception {
 
-   @Override
-    public void run(ApplicationArguments args) throws Exception {
+		dashConstantService.refreshConfigKeyMap();
+		usmPermissionApiService.refreshConfigAPIsMap();
 
-       if (args.getSourceArgs().length>0) {
-            usmNotificationsService.licenseExpiryNotification(args.getSourceArgs()[0]);
-        }
-       
-       dashConstantService.refreshConfigKeyMap();
-       usmPermissionApiService.refreshConfigAPIsMap();
-
-    }
-
-
+	}
 
 }

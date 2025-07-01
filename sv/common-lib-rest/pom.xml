@@ -74,10 +74,6 @@
 			<groupId>com.infosys.icets.ai</groupId>
 			<artifactId>comm-lib-util</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.infosys.icets.ai</groupId>
-			<artifactId>comm-lib-licval</artifactId>
-		</dependency>
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

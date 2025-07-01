@@ -381,12 +381,7 @@ filteredCards: any[] = [];
       };
       if (this.streamItem.type === 'NativeScript') {
         this.router.navigate(['./view' + '/' + card.name], navigationExtras);
-      } else {
-        this.router.navigate(
-          ['./view/drgndrp' + '/' + card.name],
-          navigationExtras
-        );
-      }
+      } 
     });
    
   }

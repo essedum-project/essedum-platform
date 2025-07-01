@@ -17,6 +17,7 @@
                                     [ngStyle]="{'color': isFilterHovered ? '#0094ff' : '#0a142f'}"
                                     (mouseenter)="isFilterHovered = true" (mouseleave)="isFilterHovered = false"
                                     (click)="toggleExpand()" matTooltip="{{
+
                     isExpanded ? 'Collapse Filters' : 'Expand Filters'
                   }}" [matTooltipPosition]="tooltip" style="cursor: pointer">
                                     filter_list

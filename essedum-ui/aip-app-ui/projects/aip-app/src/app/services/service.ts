@@ -3602,6 +3602,157 @@ export class Services {
       )
       .pipe(catchError(this.handleError));
   }
+    getAppTypes(): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/getAppsType', {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+    getPipelinesTypeByOrganization(): Observable<any> {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .get(this.dataUrl + '/service/v1/streamingServices/getTypes/' + org, {
+        observe: 'response',
+        responseType: 'text',
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+   getDatasourcesTypeByOrganization(): Observable<any> {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .get(this.dataUrl + '/service/v1/datasources/getTypes/' + org, {
+        observe: 'response',
+        responseType: 'text',
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+   getFeastAdaptersTypes(): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/features/listAdapterTypes', {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+   getFeastAdapters(param: HttpParams): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/features/feast/listAdapters', {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+   getDGAdapters(param: HttpParams): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/dgbrain/listAdapters', {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+   getDGAdaptersTypes(): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/dgbrain/listAdapterTypes', {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+    getModelListAdaptersTypes(): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/models/listAdapterTypes', {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+   getMlTagswithparams(param: HttpParams): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/tags/fetchAll', {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
 }
 
 export type CustomRemoteConfig = RemoteConfig & {
