@@ -1,3 +1,1 @@
 name,adaptername,organization,connectionid,connectionname,spectemplatedomainname,description,category,createdby,createdon,lastmodifiedby,lastmodifiedon,executiontype,jobid,status,runtimename,orderpriority
-"ITSM_IT_Assistant_v4","ITSM_IT_Assistant","leo1311","LEOITSMV32022","ITSM v4","ITSM_IT_Assistant","Instance for ITSM IT Assistant chatbot v4","DYNAMIC","admin","2024-07-10 06:45:08",NULL,NULL,"REST",NULL,NULL,NULL,NULL
-"TicketsSearch-Adapter-Instance","TicketsSearch-Adapter","leo1311","LEOTCKTS21288","TicketsSearch","TicketsSearch","TicketsSearch-Adapter-Instance","DYNAMIC","Anonymous","2024-10-30 04:27:30","Anonymous","2024-10-30 04:27:30","REST",NULL,"RUNNING","LEOVM-5777912",NULL
