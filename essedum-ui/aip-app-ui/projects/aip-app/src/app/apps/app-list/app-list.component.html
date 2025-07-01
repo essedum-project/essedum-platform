@@ -1,6 +1,6 @@
 <div class="le-l-mainwrapper aip-top">
-    <div class="clearfix lfx-l-bodywrapper aip-tranparent-backgroud js-bodywrapper" id="mainCtr">
-        <div class="">
+    <div class="clearfix aip-tranparent-backgroud js-bodywrapper" id="mainCtr">
+        <div>
             <div *ngIf="isExpanded" class="row aip-filter aip-filter-position aip-scroll-hover">
                 <app-tagging-component [servicev1]="servicev1" (tagSelected)="tagSelectedEvent($event)"
                     [preselectedtag]="selectedTag" [tagrefresh]="tagrefresh" [selectedAppTypeList]="{ 
@@ -11,72 +11,70 @@
 
             <div class="col-sm-12 col-md-9 col-lg-9 lfx-u-pad-lr-16" id="mainrightCnt" [ngStyle]="toggler(isExpanded)">
 
-                <div class="">
-                    <div class="lfx-l-level1-wrapper">
-                        <!-- Header -->
-                        <div class="aip-header lfx-u-pad-lr-32 lfx-u-pad-t-16">
+                <div>
 
-                            <div class=" col-sm-12 col-md-2 col-lg-2 col-xl-2 flex justify-content-center">
-                                <!-- <div style="padding: 20px 0px 0px 0px;">
-                                    <button mat-icon-button [ngStyle]="{'color': isFilterHovered ? '#0094ff' : '#0a142f'}"
-                                        matTooltip="Add" (mouseenter)="isFilterHovered = true"
-                                        (mouseleave)="isFilterHovered = false">
-                                        <mat-icon class="x-24 filter-icon" (click)="toggleExpand()" matTooltip="{{
+                    <!-- Header -->
+                    <div class="aip-header lfx-u-pad-lr-32">
+                        <div class=" col-sm-12 col-md-2 col-lg-2 col-xl-2 flex">
+                            <div style="padding: 20px 0px 0px 0px;">
+                                <mat-icon class="x-24 filter-icon"
+                                    [ngStyle]="{'color': isFilterHovered ? '#0094ff' : '#0a142f'}"
+                                    (mouseenter)="isFilterHovered = true" (mouseleave)="isFilterHovered = false"
+                                    (click)="toggleExpand()" matTooltip="{{
                     isExpanded ? 'Collapse Filters' : 'Expand Filters'
                   }}" [matTooltipPosition]="tooltip" style="cursor: pointer">
-                                            filter_list
-                                        </mat-icon>
-                                    </button>
-                                </div> -->
-                                <div class="lfx-u-pad-24">
-                                    <h3 class="lfx-u-header-xl">Apps</h3>
-                                </div>
-                            </div>
-                            <div
-                                class="col-10 offset-1 offset-xs-1 offset-sm-1 offset-md-0 col-sm-6 col-md-6 col-lg-7 col-xl-6 aip-panel aip-panel-shadow flex align-items-center">
-
-                                <input type="text" name="" id="" placeholder="Search by Name" class="aip-panel-input"
-                                    [(ngModel)]="filter" (keyup)="searchApp()">
-                                <mat-icon [ngStyle]="{'color': isSearchHovered ? '#0094ff' : '#0a142f'}"
-                                    (mouseenter)="isSearchHovered = true" (mouseleave)="isSearchHovered = false"
-                                    class="lfx-u-mar-r-20">
-                                    search
+                                    filter_list
                                 </mat-icon>
 
                             </div>
-                            <div
-                                class="flex justify-content-center col-sm-5 col-md-6 col-lg-5 col-xl-4 aip-header-icon">
+                            <div class="lfx-u-pad-24">
+                                <h3 class="lfx-u-header-xl">Apps</h3>
+                            </div>
+                        </div>
+                        <div
+                            class="col-10 offset-1 offset-xs-1 offset-sm-1 offset-md-0 col-sm-6 col-md-6 col-lg-7 col-xl-6 aip-panel aip-panel-shadow flex align-items-center">
 
-                                <div *ngIf="editAuth">
-                                    <div class="lfx-u-mar-r-24 aip-cursor">
-                                        <mat-icon [ngStyle]="{'color': isAddHovered ? '#0094ff' : '#0a142f'}"
-                                            (click)="openedit(content1)" matTooltip="Add" matTooltipPosition="above"
-                                            (mouseenter)="isAddHovered = true"
-                                            (mouseleave)="isAddHovered = false">add</mat-icon>
+                            <input type="text" name="" id="" placeholder="Search by Name" class="aip-panel-input"
+                                [(ngModel)]="filter" (keyup)="searchApp()">
+                            <mat-icon [ngStyle]="{'color': isSearchHovered ? '#0094ff' : '#0a142f'}"
+                                (mouseenter)="isSearchHovered = true" (mouseleave)="isSearchHovered = false"
+                                class="lfx-u-mar-r-20">
+                                search
+                            </mat-icon>
 
-                                        <ng-template #content1 let-modal>
-                                            <div class="config-background">
-                                                <app-create-app>
+                        </div>
+                        <div class="flex justify-content-center col-sm-5 col-md-6 col-lg-5 col-xl-4 aip-header-icon">
 
-                                                </app-create-app>
-                                            </div>
-                                        </ng-template>
-                                    </div>
+                            <div *ngIf="editAuth">
+                                <div class="lfx-u-mar-r-24 aip-cursor">
+                                    <mat-icon [ngStyle]="{'color': isAddHovered ? '#0094ff' : '#0a142f'}"
+                                        (click)="openedit(content1)" matTooltip="Add" matTooltipPosition="above"
+                                        (mouseenter)="isAddHovered = true"
+                                        (mouseleave)="isAddHovered = false">add</mat-icon>
+
+                                    <ng-template #content1 let-modal>
+                                        <div class="config-background">
+                                            <app-create-app>
+
+                                            </app-create-app>
+                                        </div>
+                                    </ng-template>
                                 </div>
-                                <div class="aip-cursor" (click)="ngOnInit()">
-                                    <mat-icon [ngStyle]="{'color': isRefreshHovered ? '#0094ff' : '#0a142f'}"
-                                        matTooltip="Refresh" matTooltipPosition="above"
-                                        (mouseenter)="isRefreshHovered = true"
-                                        (mouseleave)="isRefreshHovered = false">refresh</mat-icon>
-                                </div>
+                            </div>
+                            <div class="aip-cursor" (click)="ngOnInit()">
+                                <mat-icon [ngStyle]="{'color': isRefreshHovered ? '#0094ff' : '#0a142f'}"
+                                    matTooltip="Refresh" matTooltipPosition="above"
+                                    (mouseenter)="isRefreshHovered = true"
+                                    (mouseleave)="isRefreshHovered = false">refresh</mat-icon>
                             </div>
                         </div>
                     </div>
+
                 </div>
 
                 <div class="row" style='min-width: -webkit-fill-available;padding: 0px;'>
                     <div class="col-4" *ngFor="let app of appData,let index=index" style="margin-bottom: 2%;">
-                        <div style="height: 170px;display: grid">
+                        <div style="height: 150px;display: grid">
                             <mat-card
                                 class="mat-mdc-card mdc-card lfx-c-card lfx-c-card--hover example-card card-shadow"
                                 appearance="outlined">
@@ -186,8 +184,7 @@
                                 &nbsp;&nbsp;
                                 <span class="grey-color font-size-12">entries </span>
                     </div>
-                    <div class="paginator-buttons flex w-60  flex-row"
-                        style="justify-content:flex-end; padding-bottom: 4%;">
+                    <div class="paginator-buttons flex w-60  flex-row" style="justify-content:flex-end;">
                         <div class="page-input go-to-input box-shadow standard-padding">
                             <span class="grey-color">Go to: </span>
                             <input class="right-margin" type="number" min="1" [max]="noOfPages" value="pageNumberInput"

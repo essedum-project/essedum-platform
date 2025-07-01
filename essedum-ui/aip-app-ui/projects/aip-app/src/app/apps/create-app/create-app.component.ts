@@ -54,7 +54,7 @@ export class CreateAppComponent implements OnInit {
   editCanvas: any = [];
   videoFile: string;
   isTemplate: boolean = false;
-  isCloseHovered: boolean = false; 
+  isCloseHovered: boolean = false;
   public data: any;
   logoUploaded: boolean = false;
   chunkMetadata = {};
@@ -194,10 +194,7 @@ export class CreateAppComponent implements OnInit {
           this.apptype == 'pipeline' ||
           this.apptype == 'chain'))
     ) {
-      this.Services.messageService(
-        'Please fill all the mandatory details',
-        'error'
-      );
+      this.Services.message('Please fill all the mandatory details', 'error');
     } else {
       try {
         const newCanvas = new StreamingServices();
@@ -258,7 +255,7 @@ export class CreateAppComponent implements OnInit {
             this.dialogRef.close();
             if (this.appListComponent) this.appListComponent.ngOnInit();
           },
-          (error) => this.Services.messageService(error)
+          (error) => this.Services.message(error, 'error')
         );
       } catch (Exception) {
         this.Services.messageService('Some error occured');
@@ -310,7 +307,7 @@ export class CreateAppComponent implements OnInit {
       this.exceededSize = false;
       this.editCanvas.url = '';
       var reader = new FileReader();
-      if (!this.edit) {
+      if (!this.edit && this.myImage?.nativeElement) {
         var image = this.myImage.nativeElement;
         reader.onload = (e: any) => {
           var src = e.target.result;

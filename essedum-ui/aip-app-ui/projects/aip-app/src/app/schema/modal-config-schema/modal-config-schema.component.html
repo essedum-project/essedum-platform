@@ -1,4 +1,4 @@
-<div class="clearfix lfx-l-bodywrapper aip-tranparent-backgroud">
+<div class="clearfix aip-tranparent-backgroud">
     <div class="container-fluid">
         <div class="lfx-l-middle-col lfx-u-no-mar-l__mb">
             <div class="lfx-l-level1-wrapper">
@@ -67,7 +67,7 @@
                                                                             Alias*</div>
                                                                         <div class="lfx-u-mar-lr-16 w-100">
                                                                             <mat-form-field appearance="fill"
-                                                                                class="w-100">
+                                                                                class="w-100" subscriptSizing="dynamic">
                                                                                 <!-- <mat-label>Alias</mat-label> -->
                                                                                 <input matInput id="schm-modal-alias"
                                                                                     [disabled]="isInView"
@@ -85,7 +85,8 @@
 
                                                                     <!-- DESCRIPTION -->
                                                                     <div>
-                                                                        <mat-form-field appearance="fill" class="w-100">
+                                                                        <mat-form-field appearance="fill" class="w-100"
+                                                                            subscriptSizing="dynamic">
                                                                             <mat-label>Description</mat-label>
                                                                             <textarea matInput placeholder="Description"
                                                                                 id="schm-modal-desc" name="description"
@@ -360,7 +361,8 @@
                                                                     <div class="lfx-u-header-md">
                                                                         Form Name
                                                                     </div>
-                                                                    <mat-form-field appearance="fill" class="w-100">
+                                                                    <mat-form-field appearance="fill" class="w-100"
+                                                                        subscriptSizing="dynamic">
                                                                         <!-- <mat-label>Form Name</mat-label> -->
                                                                         <input matInput type="text" id="schm-modal-name"
                                                                             name="formname" [disabled]="isAuth"
