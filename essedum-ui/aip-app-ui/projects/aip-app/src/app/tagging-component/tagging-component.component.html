@@ -1,0 +1,270 @@
+<div class="lfx-u-pad-24" style="overflow-y:overlay;height:100%; background-color: #FCFCFC;">
+    <div class="lfx-u-mar-b-16 lfx-u-mar-t-16 lfx-u-header-xl" style="color: #737373;">Filters</div>
+    <div *ngIf="(servicev1 === 'pipeline' || servicev1 === 'chain'); else elseBlock">
+        <div class="mb-4">
+            <div class="flex items-baseline mb-3">
+                <h5 class="lfx-u-header-md">Type</h5>
+    </div>
+            <div class="flex flex-wrap">
+                <a class="tagbrdr lfx-u-body-md" [ngClass]="(inc.selected) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                    *ngFor="let inc of pipelinesTypeList ">
+                    <span style="cursor:pointer;padding:5px;" (click)="pipelineTypeSelected(inc)">{{inc.label}}
+                    </span> </a>&nbsp;&nbsp;
+            </div>
+        </div>
+        <div class="mb-4" *ngFor="let cat of category">
+
+            <div class="flex items-baseline mb-3">
+
+                <h5 class="lfx-u-header-md">{{cat | titlecase}}</h5>
+
+            </div>
+
+            <div class="flex flex-wrap">
+
+                <a class="tagbrdr lfx-u-body-md"
+                    [ngClass]="(inc==selectedTag || tagStatus[inc.category+' - '+inc.label]) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                    *ngFor="let inc of tags[cat]">
+
+                    <span style="cursor:pointer;padding:5px;" (click)="filterByTag(inc)">{{inc.label}}
+
+                    </span> </a>&nbsp;&nbsp;
+
+                <a style="margin-top:5% " *ngIf="tagsBackup[cat]?.length>10" (click)="showMore(cat)"
+                    href="javascript:void(0)">
+
+                    <!-- <h6 style="font: size 8px;">{{clickedCat==cat? (expand ?'Show Less': 'Show More'):'Show More'}}</h6> -->
+
+                    <!-- <span [ngClass]="clickedCat==cat? (expand ?'fa fa-minus-square': 'fa fa-plus-square'):'fa fa-plus-square' "></span> -->
+
+                    <span [ngClass]="!catStatus[cat]?'fa fa-plus-square': 'fa fa-minus-square'"></span>
+
+                </a>
+
+            </div>
+
+        </div>
+    </div>
+    <ng-template #elseBlock>
+        <div *ngIf="(servicev1 === 'worker-tools')">
+            <div class="mb-4">
+                <div class="flex items-baseline mb-3">
+                    <h5 class="lfx-u-header-md">Type</h5>
+                </div>
+                <div class="flex flex-wrap">
+                    <a class="tagbrdr lfx-u-body-md" [ngClass]="(inc.selected) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                        *ngFor="let inc of toolsTypeList ">
+                        <span style="cursor:pointer;padding:5px;" (click)="toolsTypeSelected(inc)">{{inc.label}}
+                        </span> </a>&nbsp;&nbsp;
+                </div>
+            </div>
+        </div>
+        <div *ngIf="servicev1 === 'adapters'; else elseBlockNonAdp">
+            <div class="mb-4">
+                <div class="flex items-baseline mb-3">
+                    <h5 class="lfx-u-header-md">Category</h5>
+                </div>
+                <div class="flex flex-wrap">
+                    <a class="tagbrdr lfx-u-body-md" [ngClass]="(inc.selected) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                        *ngFor="let inc of mlAdapterCategoryTypeList ">
+                        <span style="cursor:pointer ;padding:5px;"
+                            (click)="mlAdapterCategoryTypeSelected(inc)">{{inc.label}}
+                        </span> </a>&nbsp;&nbsp;
+                </div>
+            </div>
+            <div class="mb-4">
+                <div class="flex items-baseline mb-3">
+                    <h5 class="lfx-u-header-md">Spec</h5>
+                </div>
+                <div class="flex flex-wrap">
+                    <a class="tagbrdr lfx-u-body-md" [ngClass]="(inc.selected) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                        *ngFor="let inc of mlAdapterSpecTypeList">
+                        <span style="cursor:pointer ;padding:5px;"
+                            (click)="mlAdapterScecTypeSelected(inc)">{{inc.label}}
+                        </span> </a>&nbsp;&nbsp;
+                </div>
+            </div>
+            <div class="mb-4">
+                <div class="flex items-baseline mb-3">
+                    <h5 class="lfx-u-header-md">Connection</h5>
+                </div>
+                <div class="flex flex-wrap">
+                    <a class="tagbrdr lfx-u-body-md" [ngClass]="(inc.selected) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                        *ngFor="let inc of mlAdapterConnectionTypesList ">
+                        <span style="cursor:pointer;padding:5px;"
+                            (click)="mlAdapterConnectionTypeSelected(inc)">{{inc.label}}
+                        </span> </a>&nbsp;&nbsp;
+                </div>
+            </div>
+        </div>
+        <ng-template #elseBlockNonAdp>
+            <div *ngIf="servicev1 === 'specs'; else elseBlockNonSpecTemplate">
+                <div class="mb-4">
+                    <div class="flex items-baseline mb-3">
+                        <h5 class="lfx-u-header-md">Capability</h5>
+                    </div>
+                    <div class="flex flex-wrap">
+                        <a class="tagbrdr lfx-u-body-md"
+                            [ngClass]="(inc.selected) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                            *ngFor="let inc of mlSpecTemplateCapabilityTypeList ">
+                            <span style="cursor:pointer;padding:5px;"
+                                (click)="mlSpecTemplateCapabilityTypeSelected(inc)">{{inc.label}}
+                            </span> </a>&nbsp;&nbsp;
+                    </div>
+                </div>
+            </div>
+            <ng-template #elseBlockNonSpecTemplate>
+                <div *ngIf="servicev1 === 'instances'; else elseBlockNonIns">
+                    <div class="mb-4">
+                        <div class="flex items-baseline mb-3">
+                            <h5 class="lfx-u-header-md">Implementation</h5>
+                        </div>
+                        <div class="flex flex-wrap">
+                            <a class="tagbrdr lfx-u-body-md"
+                                [ngClass]="(inc.selected) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                                *ngFor="let inc of mlInstanceAdapterTypeList">
+                                <span style="cursor:pointer;padding:5px;"
+                                    (click)="mlInstanceAdapterTypeSelected(inc)">{{inc.label}}
+                                </span> </a>&nbsp;&nbsp;
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="flex items-baseline mb-3">
+                            <h5 class="lfx-u-header-md">Connection</h5>
+                        </div>
+                        <div class="flex flex-wrap">
+                            <a class="tagbrdr lfx-u-body-md"
+                                [ngClass]="(inc.selected) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                                *ngFor="let inc of mlInstanceConnectionTypeList ">
+                                <span style="cursor:pointer;padding:5px;"
+                                    (click)="mlInstanceConnectionTypeSelected(inc)">{{inc.label}}
+                                </span> </a>&nbsp;&nbsp;
+                        </div>
+                    </div>
+                </div>
+                <ng-template #elseBlockNonIns>
+                    <div *ngIf="servicev1 === 'connections'; else elseBlockNonCons">
+                        <div class="mb-4">
+                            <div class="flex items-baseline mb-3">
+                                <h5 class="lfx-u-header-md">Type</h5>
+                            </div>
+                            <div class="flex flex-wrap">
+                                <a class="tagbrdr lfx-u-body-md"
+                                    [ngClass]="(inc.selected) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                                    *ngFor="let inc of connectionsTypeList ">
+                                    <span style="cursor:pointer;padding:5px;"
+                                        (click)="connectionTypeSelected(inc)">{{inc.label}}
+                                    </span> </a>&nbsp;&nbsp;
+                            </div>
+                        </div>
+                    </div>
+                    <ng-template #elseBlockNonCons>
+                        <div *ngIf="servicev1 === 'Datasets'; else elseBlockDefault">
+                            <div class="mb-4">
+                                <div class="flex items-baseline mb-3">
+                                    <h5 class="lfx-u-header-md">Type</h5>
+                                </div>
+                                <div class="flex flex-wrap">
+                                    <a class="tagbrdr lfx-u-body-md"
+                                        [ngClass]="(inc.selected) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                                        *ngFor="let inc of datasetsTypeList ">
+                                        <span style="cursor:pointer;padding:5px;"
+                                            (click)="datasetTypeSelected(inc)">{{inc.label}}
+                                        </span> </a>&nbsp;&nbsp;
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <div class="flex items-baseline mb-3">
+                                    <h5 class="lfx-u-header-md">Knowledge Bases</h5>
+                                </div>
+                                <div class="flex flex-wrap">
+                                    <a class="tagbrdr lfx-u-body-md"
+                                        [ngClass]="(inc.selected) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                                        *ngFor="let inc of datasetTopicList ">
+                                        <span style="cursor:pointer;padding:5px;"
+                                            (click)="datasetTopicSelected(inc)">{{inc.label}}
+                                        </span> </a>&nbsp;&nbsp;
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <div class="flex items-baseline mb-3">
+                                    <h5 class="lfx-u-header-md">Tags</h5>
+                                </div>
+                                <div class="flex flex-wrap">
+                                    <a class="tagbrdr lfx-u-body-md"
+                                        [ngClass]="(inc.selected) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                                        *ngFor="let inc of datasetsTagsList ">
+                                        <span style="cursor:pointer;padding:5px;"
+                                            (click)="datasetTypeSelected(inc)">{{inc.label}}
+                                        </span> </a>&nbsp;&nbsp;
+                                </div>
+                            </div>
+                        </div>
+                        <ng-template #elseBlockDefault>
+                            <div class="mb-4" *ngIf="!((servicev1 === 'apps') || (servicev1 === 'worker-tools'))">
+                                <div class="flex items-baseline mb-3">
+                                    <h5 class="lfx-u-header-md">Type</h5>
+                                </div>
+                                <div class="flex flex-wrap">
+                                    <a class="tagbrdr lfx-u-body-md"
+                                        [ngClass]="(inc.selected) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                                        *ngFor="let inc of adapterTypeList ">
+                                        <span style="cursor:pointer;padding:5px;"
+                                            (click)="adapterTypeSelected(inc)">{{inc.label}}
+                                        </span> </a>&nbsp;&nbsp;
+                                </div>
+                            </div>
+                            <div class="mb-4" *ngIf="!((servicev1 === 'apps') || (servicev1 === 'worker-tools'))">
+                                <div class="flex items-baseline mb-3">
+                                    <h5 class="lfx-u-header-md">Instance</h5>
+                                </div>
+                                <div class="flex flex-wrap">
+                                    <a class="tagbrdr lfx-u-body-md"
+                                        [ngClass]="(inc.selected) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                                        *ngFor="let inc of adapterInstanceList ">
+                                        <span style="cursor:pointer;padding:5px;"
+                                            (click)="adapterInstanceSelected(inc)">{{inc.label}}
+                                        </span> </a>&nbsp;&nbsp;
+                                </div>
+                            </div>
+                            <div class="mb-4" *ngIf="servicev1 === 'apps'" >
+                                <div class="flex items-baseline mb-3">
+                                    <h5 class="lfx-u-header-md">Type</h5>
+                                </div>
+                                <div class="flex flex-wrap">
+                                    <a class="tagbrdr lfx-u-body-md"
+                                        [ngClass]="(inc.selected) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                                        *ngFor="let inc of adapterTypeList ">
+                                        <span style="cursor:pointer;padding:5px;"
+                                            (click)="appTypeSelected(inc)">{{inc.label}}
+                                        </span> </a>&nbsp;&nbsp;
+                                </div>
+                            </div>
+                            <div class="mb-4" *ngFor="let cat of category">
+                                <div class="flex items-baseline mb-3">
+                                    <h5 class="lfx-u-header-md">{{cat | titlecase}}</h5>
+                                </div>
+                                <div class="flex flex-wrap">
+                                    <a class="tagbrdr lfx-u-body-md"
+                                        [ngClass]="(inc==selectedTag || tagStatus[inc.category+' - '+inc.label]) ? 'aip-tag-active' : 'aip-tag-disabled'"
+                                        *ngFor="let inc of tags[cat]">
+                                        <span style="cursor:pointer;padding:5px;"
+                                            (click)="filterByTag(inc)">{{inc.label}}
+                                        </span> </a>&nbsp;&nbsp;
+                                    <a style="margin-top:5% " *ngIf="tagsBackup[cat]?.length>10" (click)="showMore(cat)"
+                                        href="javascript:void(0)">
+                                        <!-- <h6 style="font: size 8px;">{{clickedCat==cat? (expand ?'Show Less': 'Show More'):'Show More'}}</h6> -->
+                                        <!-- <span [ngClass]="clickedCat==cat? (expand ?'fa fa-minus-square': 'fa fa-plus-square'):'fa fa-plus-square' "></span> -->
+                                        <span
+                                            [ngClass]="!catStatus[cat]?'fa fa-plus-square': 'fa fa-minus-square'"></span>
+                                    </a>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </ng-template>
+                </ng-template>
+            </ng-template>
+        </ng-template>
+    </ng-template>
+
+</div>
