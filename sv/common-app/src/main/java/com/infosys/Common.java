@@ -12,9 +12,6 @@ package com.infosys;
 
 import jakarta.servlet.MultipartConfigElement;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -32,9 +29,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.util.unit.DataSize;
 import org.springframework.web.client.RestTemplate;
-
-import com.infosys.icets.ai.comm.lib.util.exceptions.LeapException;
-import com.infosys.icets.ai.comm.licenseValidator.LicenseValidator;
 
 import lombok.Setter;
 
@@ -67,46 +61,7 @@ public class Common {
 	 * @throws Exception the exception
 	 */
 	public static void main(String[] args) throws Exception {
-		if (null == System.getProperty("license.path")) {
-			String licenseContent = System.getProperty("license");
-			String publicKeyFileContent = System.getProperty("publickey");
-			if (null == licenseContent){
-				throw new IllegalArgumentException("Please provide license file as an argument");
-			}
-			if (null == publicKeyFileContent){
-				throw new IllegalArgumentException("Please provide public key as an argument");
-			}
-			if (LicenseValidator.decryptAndValidateLicense(licenseContent,publicKeyFileContent)) {
-				logger.info("License is valid");
-				SpringApplication.run(Common.class, args);
-				
-			} else {
-				throw new LeapException("Please check the license file");
-			}	
-		}
-		else if (null == System.getProperty("license")) {
-			String licensePath = System.getProperty("license.path");
-			String publicKeyFilePath = System.getProperty("publickey.path");
-			String licenseContent = new String(Files.readAllBytes(Paths.get(licensePath)));
-			String publicKeyFileContent = new String(Files.readAllBytes(Paths.get(publicKeyFilePath)));
-			if (null == licensePath){
-				throw new IllegalArgumentException("Please provide license file path as an argument");
-			}
-			if (null == publicKeyFilePath){
-				throw new IllegalArgumentException("Please provide public key path as an argument");
-			}
-			if (LicenseValidator.decryptAndValidateLicense(licenseContent,publicKeyFileContent)) {
-				logger.info("License is valid");
-				SpringApplication.run(Common.class, args);
-				
-			} else {
-				throw new LeapException("Please check the license file");
-			}	
-		}
-		else {
-			throw new LeapException("Please check the arguments");
-			}
-	
+		SpringApplication.run(Common.class, args);
 	}
 
 	/**
