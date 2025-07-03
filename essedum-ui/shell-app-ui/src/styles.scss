@@ -326,3 +326,13 @@ app-footer .container-fluid {
   letter-spacing: normal;
 }
 
+.sidebar-menu-open {
+  margin-left: 170px; /* or the width of your sidebar-menu-popup */
+  transition: margin-left 0.3s;
+}
+
+.sidebar-menu-open {
+  width: calc(100% - 170px); /* adjust 170px to your sidebar width */
+  transition: width 0.3s;
+}
+

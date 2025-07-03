@@ -336,6 +336,11 @@ export class LandingComponent implements OnInit, AfterViewInit {
   chatBot: boolean = false;
   showHeaderChatbotIcon = true;
   show_sidebar_full_text = false;
+  showSidebarMenuList: boolean = false;
+  sidebarMenuToggle: boolean = false;
+
+
+ 
 
   sidebarMenu: any = [
     { label: "Dashboard", icon: "tachometer", url: "./" },
@@ -2883,6 +2888,19 @@ submitDeclaration(){
     element.style.left = (event.clientX - this.offsetX) + 'px';
     element.style.top = (event.clientY - this.offsetY) + 'px';
     }
+  }
+
+
+  toggleSidebarMenu() {
+    this.showSidebarMenuList = !this.showSidebarMenuList;
+    this.sidebarMenuToggle = true;
+    this.show_sidebar_full_text = true;
+    this.sidebarmaxwidth = '260px';
+  }
+  closeSidebarMenuPopup() {
+    this.showSidebarMenuList = false;
+    this.show_sidebar_full_text = false;
+    this.sidebarmaxwidth = "7vw";
   }
 
 }
