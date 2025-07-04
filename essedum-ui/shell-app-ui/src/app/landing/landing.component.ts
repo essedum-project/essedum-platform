@@ -872,6 +872,8 @@ export class LandingComponent implements OnInit, AfterViewInit {
 
   viewtabsonload() {
     sessionStorage.setItem("viewtabs", "true");
+    if(JSON.parse(sessionStorage.getItem("showSidebarMenuList"))===true)
+      this.showSidebarMenuList=true;
 
   }
   onSelection(data: any) {
@@ -966,6 +968,8 @@ export class LandingComponent implements OnInit, AfterViewInit {
   }
 
   toggleActive(event: any, label: any, parentLabel = undefined) {
+    if(JSON.parse(sessionStorage.getItem("showSidebarMenuList"))===true)
+      this.showSidebarMenuList=true;
     sessionStorage.removeItem("Scrollleft")
     if (parentLabel) this.breadcrumbs = parentLabel + " >> " + label
     else this.breadcrumbs = label
@@ -2057,6 +2061,9 @@ export class LandingComponent implements OnInit, AfterViewInit {
   // }
 
   showTabs(item: any, parent: any = undefined) {
+    if(JSON.parse(sessionStorage.getItem("showSidebarMenuList"))===true)
+      this.showSidebarMenuList=true;
+
     sessionStorage.setItem("viewtabs", "true");
     try {
       sessionStorage.setItem("tabs", JSON.stringify(item));
@@ -2892,13 +2899,16 @@ submitDeclaration(){
 
 
   toggleSidebarMenu() {
-    this.showSidebarMenuList = !this.showSidebarMenuList;
+    this.showSidebarMenuList = true;
+    sessionStorage.setItem("showSidebarMenuList", JSON.stringify(this.showSidebarMenuList));
     this.sidebarMenuToggle = true;
     this.show_sidebar_full_text = true;
     this.sidebarmaxwidth = '260px';
   }
+
   closeSidebarMenuPopup() {
     this.showSidebarMenuList = false;
+    sessionStorage.removeItem("showSidebarMenuList");
     this.show_sidebar_full_text = false;
     this.sidebarmaxwidth = "7vw";
   }
