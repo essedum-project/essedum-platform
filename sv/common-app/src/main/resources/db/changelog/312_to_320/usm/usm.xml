@@ -120,7 +120,7 @@
             </sqlCheck>
         </preConditions>
         <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
-            insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Datasets","icon":"database","children":[{"label":"Connections","icon":"","url":"./aip/connections","children":[],"_id":2},{"label":"Datasets","icon":"","url":"./aip/datasets","children":[],"_id":3},{"label":"Schemas","altText":"","icon":"","url":"./aip/schemas","children":[],"_id":4}],"horizontal":true}','2',NULL);
+            insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Datasets","icon":"database","children":[{"label":"Datasets","icon":"","url":"./aip/datasets","children":[],"_id":3},{"label":"Schemas","altText":"","icon":"","url":"./aip/schemas","children":[],"_id":4}],"horizontal":true}','2',NULL);
         </sql>
     </changeSet>
     <changeSet id="3v2-usm-20252402-3" author="Leap">
@@ -131,6 +131,16 @@
         </preConditions>
         <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
             insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Models","altText":null,"icon":"cubes","url":"./aip/models","children":[]}','2',NULL);
+        </sql>
+    </changeSet>
+    <changeSet id="3v2-usm-20252402-3-1" author="Leap">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_constant WHERE item_value LIKE '%Connections%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'IT Portfolio Manager Side';
+            </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+            insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Connections","altText":null,"icon":"link","url":"./aip/connections","children":[]}','2',NULL);
         </sql>
     </changeSet>
     
