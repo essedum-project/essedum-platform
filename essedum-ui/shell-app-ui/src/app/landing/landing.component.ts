@@ -352,7 +352,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
   show_sidebar_full_text = false;
   showSidebarMenuList: boolean = false;
   sidebarMenuToggle: boolean = false;
-  sidebarMenuPopupWidth = "150px";
+  sidebarMenuPopupWidth = "130px";
 
   sidebarMenu: any = [
     { label: "Dashboard", icon: "tachometer", url: "./" },
@@ -397,9 +397,8 @@ export class LandingComponent implements OnInit, AfterViewInit {
     private dialog: MatDialog,
     private sanitizer: DomSanitizer,
     private appOAuthService: AppOAuthService,
-    private mfeappConfigSvc: AppConfigService
-  ) // private messageService: MessageService
-  {
+    private mfeappConfigSvc: AppConfigService // private messageService: MessageService
+  ) {
     this.router.routeReuseStrategy.shouldReuseRoute = function () {
       return false;
     };
@@ -421,14 +420,9 @@ export class LandingComponent implements OnInit, AfterViewInit {
     });
 
     this.title = sessionStorage.getItem("mfetitle");
-    // console.log("landing route title value",this.route.snapshot);
-    // this.title = this.titleService.getTitle();
   }
 
   setHeaderTitleForIVMByProject() {
-    // let currentRouteUrl="."+window.location.href.split("landing")[1];
-    // this.filterData = usmDashConstantsValueArray.filter((item) => (item.keys == "IVM Header Title"));
-
     if (this.mfeRouteTitle == undefined || this.mfeRouteTitle == "") {
       if (this.filterData && this.filterData.length != 0) {
         this.titleService.setTitle(this.filterData[0].value);
@@ -457,7 +451,8 @@ export class LandingComponent implements OnInit, AfterViewInit {
     this.showSidebarMenuList = JSON.parse(
       sessionStorage.getItem("showSidebarMenuList") || "false"
     );
-    this.sidebarMenuPopupWidth = this.showSidebarMenuList ? "150px" : "0px";
+    this.sidebarMenuPopupWidth = this.showSidebarMenuList ? "130px" : "0px";
+    this.sidebarmaxwidth = this.showSidebarMenuList ? "260px" : "7vw";
     this.getNotificationsPermision();
     this.Configurableinformationicon();
     this.screenWidth = screen.width;
@@ -603,41 +598,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
       sessionStorage.removeItem("needRouting");
       // this.doroute = true;
     }
-    // else if (this.userProject.role_id.id != 8 && this.userProject.role_id.id != 11) {
-    //   let constant: any = new Object();
-    //   constant.project_id = new Object({ id: this.userProject["project_id"]["id"] });
-    //   constant["keys"] = this.userProject.role_id.name + " Land";
-    //   this.busy = this.apisService.getDashConsts().subscribe(
-    //     (res) => {
-    //       this.dashconstantbreach = res
-    //       let temp = this.userProject.user_id.user_login + " " + this.userProject.role_id.name + " USLand";
-    //       if (res.filter((item) => item.keys == temp).length != 0) {
-    //         constant["keys"] = temp;
-    //         res = res.filter((item) => item.project_id.id == constant.project_id.id && item.keys == constant.keys);
-    //         if (res && res.length > 0) {
-    //           this.doroute = false;
-    //           this.router.navigate([res[0]["value"]], { relativeTo: this.route });
-    //         } else this.doroute = true;
-    //       } else if (res.filter((item) => item.keys == this.userProject.role_id.name + " Land").length != 0) {
-    //         res = res.filter((item) => item.project_id.id == constant.project_id.id && item.keys == constant.keys);
-    //         this.doroute = false;
-    //         this.router.navigate([res[0]["value"]], { relativeTo: this.route });
-    //       } else this.doroute = true;
-    //     },
-    //     (error) => {
-    //       this.messageService.error("unable to fetch mapping", "LEAP");
-    //     }
-    //   );
-    // } else {
-    //   this.landingroute();
-    // }
-
-    // this.apisService.postTokenApi(10);
-    // this.apisService.postTokenApi(10).subscribe(portfolio => {
-    //   console.log("value of api",portfolio);
-    // })
-
-    //check for SSO
+   
 
     let profiles;
     profiles = JSON.parse(sessionStorage.getItem("activeProfiles") || "");
@@ -668,6 +629,13 @@ export class LandingComponent implements OnInit, AfterViewInit {
     this.AipChatbot();
     if (user.user_email == "demouser@infosys.com") {
       this.demouserFlag = false;
+    }
+
+    if (sessionStorage.getItem("sidebarmaxwidth")) {
+      this.sidebarMenuPopupWidth = "130px";
+      this.sidebarMenuToggle = true;
+      this.show_sidebar_full_text = true;
+      this.sidebarmaxwidth = "260px";
     }
   }
 
@@ -2919,32 +2887,11 @@ export class LandingComponent implements OnInit, AfterViewInit {
       });
     }
   }
-  // getNewChatBot() {
-  //   // console.log("in chatbot function")
-  //   const modalRef = this.modalService.open(ChatBotComponent, {
-  //     size: "lg",
-  //     windowClass: "btf-modal chat-bot",
-  //     backdrop: false,
-  //   });
-  //   modalRef.result
-  //     .then((result) => {
-  //     })
-  //     .catch((result) => {
-  //     });
-  // }
+
   notificationToggler() {
     this.showPanel = !this.showPanel;
   }
   getNotificationsPermision() {
-    // this.apisService.getDashConsts().subscribe((res) => {
-    //   // console.log(res);
-    //   res.forEach((item) => {
-    //     if(item.keys ==="showNotification"){
-    //      this.showNotification = item.value === "true" ? true : false;
-    //     }
-    //   });
-    // });
-
     let project = JSON.parse(sessionStorage.getItem("project") || "").id;
     let roleId = JSON.parse(sessionStorage.getItem("role") || "").id.toString();
     this.apisService
@@ -3229,8 +3176,10 @@ export class LandingComponent implements OnInit, AfterViewInit {
       ((minOfClientDimension * 1.6) / 100) * screenMultiple + "px";
 
     //sidebar maximum width
-    this.sidebarmaxwidth =
-      ((minOfClientDimension * 7) / 100) * screenMultiple + "px";
+    if (!sessionStorage.getItem("sidebarmaxwidth"))
+      this.sidebarmaxwidth =
+        ((minOfClientDimension * 7) / 100) * screenMultiple + "px";
+    else this.sidebarmaxwidth = "260px";
 
     //icon sidebar spacing
     this.iconsidebarpadding =
@@ -3247,6 +3196,16 @@ export class LandingComponent implements OnInit, AfterViewInit {
     //sidebar width
     this.sidebarWidth =
       ((minOfClientDimension * 4.5) / 100) * screenMultiple + "px";
+
+    if (this.showSidebarMenuList) {
+      this.sidebarMenuPopupWidth = "130px";
+      this.sidebarmaxwidth =
+        "calc(" + this.sidebarWidth + " + " + this.sidebarMenuPopupWidth + ")";
+    } else {
+      this.sidebarMenuPopupWidth = "0px";
+      this.sidebarmaxwidth =
+        ((minOfClientDimension * 7) / 100) * screenMultiple + "px";
+    }
 
     //sidebar border width
     this.sidebarBorderWidth =
@@ -3459,10 +3418,14 @@ export class LandingComponent implements OnInit, AfterViewInit {
       "showSidebarMenuList",
       JSON.stringify(this.showSidebarMenuList)
     );
-    this.sidebarMenuPopupWidth = "150px";
+    this.sidebarMenuPopupWidth = "130px";
     this.sidebarMenuToggle = true;
     this.show_sidebar_full_text = true;
     this.sidebarmaxwidth = "260px";
+    sessionStorage.setItem(
+      "sidebarmaxwidth",
+      JSON.stringify(this.sidebarmaxwidth)
+    );
   }
 
   closeSidebarMenuPopup() {
@@ -3470,6 +3433,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
     sessionStorage.removeItem("showSidebarMenuList");
     this.sidebarMenuPopupWidth = "0px";
     this.show_sidebar_full_text = false;
+    sessionStorage.removeItem("sidebarmaxwidth");
     this.sidebarmaxwidth = "7vw";
   }
 
@@ -3485,5 +3449,30 @@ export class LandingComponent implements OnInit, AfterViewInit {
     } else {
       this.viewtabsonload();
     }
+    this.sidebarMenuPopupWidth = "130px";
+    this.sidebarMenuToggle = true;
+    this.show_sidebar_full_text = true;
+    this.sidebarmaxwidth = "260px";
+  }
+
+  getContentMarginLeft(): string {
+    let mainSidebar = this.sidebarWidth;
+    let popupSidebar = this.sidebarMenuPopupWidth;
+
+    // Convert vw to px if needed
+    const toPx = (val: string) => {
+      if (val.endsWith("vw")) {
+        return (parseFloat(val) / 100) * window.innerWidth;
+      }
+      if (val.endsWith("px")) {
+        return parseFloat(val);
+      }
+      return parseFloat(val); // fallback
+    };
+
+    const mainSidebarPx = toPx(mainSidebar);
+    const popupSidebarPx = this.showSidebarMenuList ? toPx(popupSidebar) : 0;
+
+    return `${mainSidebarPx + popupSidebarPx}px`;
   }
 }
