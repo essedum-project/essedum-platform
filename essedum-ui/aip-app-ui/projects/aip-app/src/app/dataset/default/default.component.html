@@ -1,0 +1,187 @@
+<div style="width:95%" class="selector-693-1 container-fluid">
+
+    <div class="table-responsive selector-693-2" style="position:relative">
+        <table class="">
+            <thead class="selector-693-4">
+                <tr class="d-flex selector-693-5">
+                    <th class="col-2 selector-693-6" style="color:  #0094ff; font-size: medium;">Attribute</th>
+                    <th class="col-10 selector-693-7" style="color:  #0094ff; font-size: medium;">Value</th>
+                </tr>
+            </thead>
+
+            <tbody class="selector-693-8">
+                <tr *ngFor="let key of keys; let i = index" class="d-flex selector-693-9">
+                    <td class="col-2 selector-693-10 aip-center-align">
+                        <label class="selector-693-11 lfx-label"
+                            style="font-size: 15px; margin-bottom: 40px;">{{key}}:</label>
+                    </td>
+
+                    <td class="col-10 selector-693-12">
+                        <ng-container
+                            *ngIf="key != 'file' &amp;&amp; key!= 'type' &amp;&amp; key!='Request Body' &amp;&amp; key!='Cacheable' &amp;&amp;key!= 'uploadFile' &amp;&amp;key!='API Type';else file_content"
+                            class="selector-693-13">
+
+                            <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+
+                                <mat-form-field appearance="fill" *ngIf="key !== 'Query'" class="lfx-form-field"
+                                    style="width: 85%; margin-bottom: 1rem;">
+                                    <input matInput [disabled]="isAuth" [(ngModel)]="dataset.attributes[key]" />
+                                </mat-form-field>
+
+                                <div *ngIf="key=='Query'" class="row d-flex justify-content-center">
+                                    <div style="width:93%">
+
+                                        <mat-form-field appearance="fill" class="lfx-form-field"
+                                            style="width: 100%;">
+                                            <textarea matInput [disabled]="isAuth" [(ngModel)]="dataset.attributes[key]"
+                                                id="modalDef-input-{{key}}" rows="1" class="selector-693-62"></textarea>
+                                        </mat-form-field>
+
+                                    </div>
+                                    <div style="padding-top: 20px; width:5%">
+                                        <button *ngIf="schemaBolVal" mat-icon-button 
+                                            matTooltip="Open Query Builder">
+                                            <mat-icon>add</mat-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </ng-container>
+                        <ng-template #file_content="" class="selector-693-18">
+                            <ng-container *ngIf="key =='uploadFile'" class="selector-693-19_a">
+
+                                <input (change)="handleFileInput($event)" class="upload-button" #fileInput
+                                    (click)="fileInput.value=''" [accept]="file_extensions" type="file"
+                                    placeholder="Upload file" />
+                            </ng-container>
+                            <ng-container
+                                *ngIf="key !='type' &amp;&amp; key!='Request Body' &amp;&amp; key!='Cacheable' &amp;&amp; key!= 'uploadFile' &amp;&amp;key!='API Type';else type_content"
+                                class="selector-693-19">
+
+                                <input (change)="addfiletodataset($event)" class="upload-button" accept=".csv, .xlsx"
+                                    type="file" #fileInput (click)="fileInput.value=''" placeholder="Upload file" />
+                                <div class="col-md-9 selector-693-24">
+                                    <div *ngIf="uploader.queue.length > 0" class="selector-693-25">
+                                        <div class="selector-693-26">
+                                            <div class="progress selector-693-27">
+                                                <div class="progress-bar selector-693-28" role="progressbar"
+                                                    [ngStyle]="{ 'width': uploader.progress + '%' }"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><br />
+                                <div *ngIf="!uploadedFilename" class="col-md-9 selector-693-29">
+                                    {{dataset.attributes[key]}}
+                                </div><br>
+                            </ng-container>
+                            <ng-template #type_content="" class="selector-693-30">
+                            <div *ngIf="key=='type'" class="selector-693-31">
+
+                                    <mat-form-field appearance="fill" class="lfx-form-field">
+                                        <mat-label>Select Type</mat-label>
+                                        <mat-select [disabled]="isAuth" [(ngModel)]="dataset.attributes[key]">
+                                            <mat-option *ngFor="let type of splunkTypesOpt" [value]="type">{{ type
+                                                }}</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                </div>
+                                <div *ngIf="key=='Cacheable'" class="selector-693-35">
+
+                                    <mat-checkbox [disabled]="isAuth" [checked]="isCacheable === 'true'"
+                                        (change)="getCheck($event)" id="modalDef-typeContent-cacheable">
+                                        Yes
+                                    </mat-checkbox>
+
+                                </div>
+                                <div *ngIf="key=='API Type'" class="selector-693-37">
+                                    <mat-form-field class="selector-693-38">
+                                        <mat-select [disabled]="isAuth" [(ngModel)]="dataset.attributes[key]"
+                                            id="modalDef-typeContent-apitype" class="selector-693-39">
+                                            <mat-option *ngFor="let type of apitypes" [value]="type"
+                                                id="modalDef-typeContent-{{type}}"
+                                                class="selector-693-40">{{type}}</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                                <div *ngIf="key=='Request Body'" class="selector-693-41">
+                                    <mat-form-field *ngIf="dataset.attributes['API Type']!='GET'"
+                                        class="selector-693-42">
+                                        <textarea [disabled]="isAuth" matInput="" cdkTextareaAutosize=""
+                                            #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="5" type="text"
+                                            class="txtInput selector-693-43" [(ngModel)]="dataset.attributes[key]"
+                                            id="modalDef-requestbody"></textarea>
+                                    </mat-form-field>
+                                    <label *ngIf="dataset.attributes['API Type']=='GET'" class="selector-693-44">Not
+                                        Required</label>
+                                </div>
+
+                            </ng-template>
+                        </ng-template>
+                    </td>
+                </tr>
+                <tr *ngIf="dataset.datasource.type === 'REST' || dataset.datasource.type === 'FILE' || dataset.datasource.type === 'HDFS'"
+                    class="d-flex selector-693-45">
+                    <td class="col-2 selector-693-46">
+                        <label class="selector-693-47">Backing Dataset</label>
+                    </td>
+                    <td class="col-10 selector-693-48">
+                        <mat-form-field class="selector-693-49">
+                            <mat-select [disabled]="isAuth" [formControl]="backingDatasetCtrl"
+                                placeholder="select dataset" #datasetSelect=""
+                                id="icip-apd-modal-config-default-selectDataset" class="selector-693-50">
+                                <mat-option class="selector-693-51">
+                                    <ngx-mat-select-search [formControl]="backingDatasetFilterCtrl"
+                                        [placeholderLabel]="'Find dataset...'"
+                                        [noEntriesFoundLabel]="'No matching dataset found'"
+                                        id="icip-apd-modal-config-default-selectDataset-backingDatasetfilter"
+                                        class="selector-693-52"></ngx-mat-select-search>
+                                </mat-option>
+                                <mat-option *ngFor="let ds of filteredDatasets | async"
+                                    (click)="onBackingDatasetChange(ds)" [value]="ds"
+                                    id="icip-apd-modal-config-default-selectDataset-backingDataset-{{ds}}"
+                                    class="selector-693-53">{{ds}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </td>
+                </tr>
+                <tr *ngIf="scriptShow" class="d-flex selector-693-54">
+                    <td class="col-2 selector-693-55">
+                        <label class="selector-693-56">Script : </label>
+                    </td>
+                    <td class="col-10 selector-693-57">
+                        <div class="col-12 selector-693-58">
+                            <enl-code-editor [script]="script" (scriptChange)="onScriptChange($event)"
+                                class="selector-693-59"></enl-code-editor>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="d-flex justify-content-end">
+        <div class="" *ngIf="!isGitDataset">
+            <button mat-flat-button  *ngIf="!isAuth" (click)="testConnection()"
+                id="modalDef-TestConnection" class="test-btn" style="margin-right: 4px;">
+                Test
+            </button>
+        </div>
+        <div *ngIf="!copyDataset || isGitDataset" [ngStyle]="{'pointer-events': (!testSuccessful) ? 'none' : 'auto'}">
+            <button mat-flat-button  *ngIf="!isAuth" [disabled]="!testSuccessful" (click)="saveDataset()"
+                id="modalDef-SaveDataset" class="test-btn"  style="margin-right: 4px;">Save</button>
+
+        </div>
+        <div *ngIf="copyDataset && !isGitDataset" [ngStyle]="{'pointer-events': (!testSuccessful) ? 'none' : 'auto'}">
+            <button mat-flat-button  *ngIf="!isAuth" [disabled]="!testSuccessful"
+                (click)="createDataset()" id="modalDef-SaveDataset" class="test-btn" 
+                style="margin-right: 4px;">Save</button>
+
+        </div>
+    </div>
+
+</div>
+<div class="" *ngIf="fileUploader"> <mat-spinner diameter="32" strokeWidth="4" color="primary"></mat-spinner>
+
+    <p loadingText> File is being Uploaded...</p>
+</div>

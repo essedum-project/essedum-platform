@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="24" width = "24" viewBox="0 0 20 20" class="svg-discover-icon">
+  <defs>
+    <style>
+      .discover-cls-2, .discover-cls-3, .discover-cls-4, .discover-cls-5, .discover-cls-6 {
+        stroke-miterlimit: 10;
+      }
+
+      .discover-cls-2, .discover-cls-3 {
+        stroke-width: 1.5px;
+      }
+
+      .discover-cls-4, .discover-cls-5 {
+        fill: none;
+      }
+
+      .discover-cls-4 {
+        stroke-width: 1.164px;
+      }
+
+      .discover-cls-5, .discover-cls-6 {
+        stroke-width: 0.291px;
+      }
+      .svg-discover-icon {
+        height: inherit;
+        width: inherit;
+       }
+       <!-- @media screen and (min-width: 5000px) {
+       .svg-discover-icon {
+        height: 4vmin !important;
+        width: 4vmin !important;
+      }
+       }
+       @media screen and (min-width: 1300px) and (max-width: 3000px) {
+       .svg-discover-icon {
+        height: 4vmin !important;
+        width: 4vmin !important;
+       }
+	  }
+	  @media screen and (max-width: 600px) {
+       .svg-discover-icon {
+        height: 4vmin !important;
+        width: 4vmin !important;
+       }
+	  } -->
+    </style>
+  </defs>
+  <g id="Discover" transform="translate(0.91 1)">
+    <rect id="Rectangle_9" data-name="Rectangle 9" fill="none" class="cls-1" width="20" height="20" transform="translate(-0.91 -1)"/>
+    <g id="Group_6" data-name="Group 6" transform="translate(0.09 0)">
+      <path id="Path_21" data-name="Path 21" class="discover-cls-2" fill="none" stroke="currentColor" d="M15.94,22.61" transform="translate(-3.438 -4.61)"/>
+      <path id="Path_22" data-name="Path 22" class="discover-cls-3" fill="none" stroke="currentColor" d="M6.07,16.36" transform="translate(-2.784 -3.819)"/>
+      <ellipse id="Ellipse_6" data-name="Ellipse 6" class="discover-cls-4" fill="none" stroke="currentColor" cx="8.823" cy="8.733" rx="8.823" ry="8.733" transform="translate(0 0)"/>
+      <path id="Path_23" data-name="Path 23" class="discover-cls-5" fill="none" stroke="currentColor" d="M13.017,4.67,8.89,9.117l2.077,1.119Z" transform="translate(-1.057 -1.028)"/>
+      <path id="Path_24" data-name="Path 24" class="discover-cls-6" fill="currentColor" stroke="currentColor" d="M6.58,15.523l4.127-4.448L8.635,9.96Z" transform="translate(-0.904 -1.698)"/>
+    </g>
+  </g>
+</svg>

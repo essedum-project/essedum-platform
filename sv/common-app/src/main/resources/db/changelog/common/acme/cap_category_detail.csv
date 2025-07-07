@@ -1,0 +1,4 @@
+"Category_ID","Category_Name","Rec_Act_Ind","Last_Updated_Dts","Rec_Created_Dts","Auto_Verification_Pass_Percentage","Verification_Required_Ind","Last_Updated_By","Workflow_ID"
+"1","GENERIC","true","2019-03-15T23:26:20","2019-03-15T23:26:20","0.0","true","1","NULL"
+"2","Network","true","2020-04-15T03:57:30","2020-04-15T03:57:30","70.0","false","1","NULL"
+"3","ProcessInvoice","true","2021-05-27T00:37:16","2021-05-26T02:31:09","70.0","false","1","2"

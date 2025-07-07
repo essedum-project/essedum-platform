@@ -1,0 +1,16 @@
+.tagbrdr {
+  border-radius: 8px;
+  padding: 5px;
+  margin: 5px;
+  text-decoration: none;
+  box-shadow: 0 1px 4px 0 rgb(1 1 1 / 10%), 0 1px 1px 0 rgb(0 0 0 / 10%);
+}
+.items-baseline {
+  align-items: baseline;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+.flex {
+  display: flex;
+}

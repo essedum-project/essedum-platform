@@ -1,0 +1,29 @@
+<div class="selector-795-134">
+    <div *ngIf="!formView" class="selector-795-1">
+        <div *ngIf="!childTablesFormView" class="ticket-header selector-795-2" style="margin-top: 12px;">
+            <div class="col-md-7 selector-795-3">
+                <div class="col-md-6 selector-795-4" style="width:fit-content; margin-top: 0.7vh;">
+                    <h2 class="selector-795-5" style="color: black;">{{dataset?dataset.alias:''}}</h2>
+                </div>
+                <div class="col-md-6 justify-content-start ticket-header selector-795-6">
+
+                </div>
+            </div>
+
+        </div>
+        <div class="selector-795-160">
+            <app-dataset-table-view [data]="data" (result)="checkTableViewResult($event)" *ngIf="!powerMode && data"
+                class="selector-795-156"></app-dataset-table-view>
+            <app-dataset-table-view [datasetname]="datasetName" (result)="checkTableViewResult($event)"
+                *ngIf="!powerMode && !data" class="selector-795-156"></app-dataset-table-view>
+        </div>
+        <div class="selector-795-161">
+            <app-dataset-power-mode-view [datasetname]="datasetName" (result)="checkPowerModeViewResult($event)"
+                *ngIf="powerMode" class="selector-795-157"></app-dataset-power-mode-view>
+        </div>
+    </div>
+    <div *ngIf="formView" class="selector-795-158">
+        <app-dataset-form-view [dataset]="data" [action]="action" (result)="checkFormViewResult($event)"
+            class="selector-795-159"></app-dataset-form-view>
+    </div>
+</div>

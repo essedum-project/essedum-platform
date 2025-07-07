@@ -1,0 +1,4 @@
+"Category_App_Regex_ID","Category_ID","Application_ID","Rel_Act_Ind","Last_Updated_Dts","Incident_Field","Category_Regex","Pattern","ConditionType"
+"1","1","2","true","2019-09-20T08:16:51","","NULL","NULL","NULL"
+"2","2","2","true","2020-04-15T09:27:30","",".*shipment.*","NULL","NULL"
+"5","3","2","true","2021-05-27T06:07:17","short_description",".*Process_Invoice_Id.*","NULL","NULL"

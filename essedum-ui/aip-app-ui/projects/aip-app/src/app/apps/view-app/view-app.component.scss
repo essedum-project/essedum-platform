@@ -1,0 +1,69 @@
+.controls {
+  color: #fff;
+  margin-right: 10px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  margin-bottom: 15px;
+  justify-content: flex-start;
+}
+
+.icons {
+  float: right;
+  color: grey;
+  size: 7em;
+}
+
+.icons-group {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.scriptIcon {
+  font-size: 32px;
+}
+
+.loading {
+  /* Absolute position */
+  left: 0;
+  position: absolute;
+  top: 0;
+
+  /* Take full size */
+  height: 100%;
+  width: 100%;
+
+  /* Center */
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.appLogo {
+  border-radius: 15%;
+  height: 10em;
+  width: 10em;
+}
+
+@media screen and (min-width: 1367px) {
+  .lfx-l-base-layout-center {
+    width: 1216px;
+    margin: 0 auto;
+  }
+
+  .lfx-l-left-layout-center,
+  .lfx-l-right-layout-center {
+    width: 1001px;
+    margin: 0 auto;
+  }
+
+  .lfx-l-lr-layout-center {
+    width: 786px;
+    margin: 0 auto;
+  }
+}
+
+.img-color {
+  filter: invert(45%) sepia(98%) saturate(2834%) hue-rotate(183deg)
+    brightness(98%) contrast(112%);
+}

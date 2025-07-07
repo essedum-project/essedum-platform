@@ -1,0 +1,3 @@
+"id","last_updated_by","last_updated_dts","task_act_ind","task_name","task_group_id","task_type_id"
+"1","1","2019-06-17T17:17:39","true"," Python Introduction","1","1"
+"3","1","2020-04-13T09:12:40","true","Understanding Microsft cluster configuration details (OS version, cluster version, node details, applications)  (Clusters/NLB/VIP) implemented in environement with Detailed inventory and dependancy Microsoft NLB Clustering details and configuration VIP configuration details for all the clusters","1","1"

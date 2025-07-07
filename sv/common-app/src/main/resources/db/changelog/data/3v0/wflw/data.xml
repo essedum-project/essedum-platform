@@ -1,0 +1,171 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+	<changeSet author="Leap (generated)" id="3v0-wflw-1"
+		context="2v13to300">
+		<createTable tableName="entity_hierarchy_config">
+			<column autoIncrement="true" name="node_id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="node_name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="node_code" type="VARCHAR(255)" />
+			<column name="parent_id" type="INT" />
+			<column name="parent_name" type="VARCHAR(255)" />
+			<column name="entity_code" type="VARCHAR(255)" />
+			<column name="project_id" type="VARCHAR(255)" />
+			<column name="node_attributes" type="LONGTEXT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-wflw-2"
+		context="2v13to300">
+		<createTable tableName="entity_hierarchy_details">
+			<column autoIncrement="true" name="entity_id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="entity_name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="entity_project" type="VARCHAR(255)" />
+			<column name="entity_active" type="tinyint(1)" />
+			<column name="entity_code" type="VARCHAR(255)" />
+			<column name="entity_attributes" type="LONGTEXT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-wflw-3"
+		context="2v13to300">
+		<createTable tableName="entity_hierarchy_user_mapping">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="user_id" type="VARCHAR(255)" />
+			<column name="entity_code" type="VARCHAR(255)" />
+			<column name="proc_def_key" type="VARCHAR(255)" />
+			<column name="project" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-wflw-4"
+		context="2v13to300">
+		<createTable tableName="icm_escalation_configuration">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="processName" type="VARCHAR(765)" />
+			<column name="definedStageEscalationId" type="VARCHAR(765)" />
+			<column name="escalationUserName" type="VARCHAR(255)" />
+			<column name="escalationUserEmail" type="VARCHAR(765)" />
+			<column name="escalationLevel" type="INT" />
+			<column name="escalationTemplateName" type="VARCHAR(765)" />
+			<column name="organization" type="VARCHAR(765)" />
+			<column name="active" type="BIT(1)" />
+			<column name="escalationDuration" type="VARCHAR(765)" />
+			<column name="remainderCount" type="INT" />
+			<column name="escalationFrequency" type="VARCHAR(765)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-wflw-5"
+		context="2v13to300">
+		<createTable tableName="icm_approver_configuration">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="processName" type="VARCHAR(255)" />
+			<column name="stage" type="VARCHAR(255)" />
+			<column name="approverName" type="VARCHAR(255)" />
+			<column name="approverEmail" type="VARCHAR(255)" />
+			<column name="approvalLevel" type="INT" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="ruleJSON" type="LONGTEXT" />
+			<column name="active" type="BIT(1)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="3v0-wflw-6" context="2v13to300">
+		<addColumn tableName="mlocr">
+			<column name="documentId" type="VARCHAR(255)" />
+			<column name="targetLanguage" type="VARCHAR(255)" />
+			<column name="documentType" type="VARCHAR(255)" />
+			<column name="fileType" type="VARCHAR(255)" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap (generated)"  id="3v0-wflw-20241106-1" context="2v13to300">
+        <renameColumn
+            newColumnName="userName"
+            oldColumnName="user"
+            tableName="icm_audit"/>
+    </changeSet>
+        <changeSet author="Leap (generated)" dbms="mssql" id="3v0-wflw-20241106-2" context="2v13to300">
+        <modifyDataType columnName="start_time" newDataType="time(0)"  tableName="icm_shiftmng"/>
+        <modifyDataType columnName="end_time" newDataType="time(0)"  tableName="icm_shiftmng"/>
+    </changeSet>
+    
+    <changeSet  author="Leap (generated)" dbms="mysql"  id="3v0-wflw-20241106-3" context="fresh">
+        <modifyDataType columnName="email_to" newDataType="VARCHAR(4000)"  tableName="usm_emails"/>
+        <modifyDataType columnName="email_cc" newDataType="VARCHAR(4000)"  tableName="usm_emails"/>
+        <modifyDataType columnName="email_bcc" newDataType="VARCHAR(4000)"  tableName="usm_emails"/>
+        <modifyDataType columnName="email_subject" newDataType="VARCHAR(4000)"  tableName="usm_emails"/>
+        <modifyDataType columnName="email_body" newDataType="LONGTEXT"  tableName="usm_emails"/>
+        <modifyDataType columnName="mail_archival_path" newDataType="MEDIUMTEXT"  tableName="usm_emails"/>
+        <modifyDataType columnName="local_mail_archival_path" newDataType="MEDIUMTEXT"  tableName="usm_emails"/>
+    </changeSet>
+	<changeSet  author="Leap (generated)" dbms="mssql"  id="3v0-wflw-20241106-4" context="fresh">
+        <modifyDataType columnName="email_to" newDataType="nVARCHAR(4000)"  tableName="usm_emails"/>
+        <modifyDataType columnName="email_cc" newDataType="nVARCHAR(4000)"  tableName="usm_emails"/>
+        <modifyDataType columnName="email_bcc" newDataType="nVARCHAR(4000)"  tableName="usm_emails"/>
+        <modifyDataType columnName="email_subject" newDataType="nVARCHAR(4000)"  tableName="usm_emails"/>
+        <modifyDataType columnName="email_body" newDataType="nTEXT"  tableName="usm_emails"/>
+        <modifyDataType columnName="mail_archival_path" newDataType="nVARCHAR(4000)"  tableName="usm_emails"/>
+        <modifyDataType columnName="local_mail_archival_path" newDataType="nVARCHAR(4000)"  tableName="usm_emails"/>
+        <modifyDataType columnName="attachments" newDataType="nVARCHAR(4000)"  tableName="usm_emails"/>
+    </changeSet>
+    
+    <changeSet author="Leap (generated)" id="3v0-wflw-20241106-5" context="2v13to300">
+        <createTable tableName="icm_shift_user_mapping">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="shift_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="user_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="from_date" type="DATE">
+				<constraints nullable="false" />
+			</column>
+			<column name="to_date" type="DATE">
+				<constraints nullable="false" />
+			</column>
+			<column name="active_status" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="organization" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+            <column name="comments" type="VARCHAR(200)"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="icm_shift_user_mapping"
+                                 baseColumnNames="shift_id"
+                                 referencedTableName="icm_shiftmng"
+                                 referencedColumnNames="id"
+                                 constraintName="FK_icm_shift_user_mapping_shift"/>
+
+        <addForeignKeyConstraint baseTableName="icm_shift_user_mapping"
+                                 baseColumnNames="user_id"
+                                 referencedTableName="usm_users"
+                                 referencedColumnNames="id"
+                                 constraintName="FK_icm_shift_user_mapping_user"/>
+    </changeSet>
+	<changeSet author="Leap (generated)" id="3v0-usm-20241106-6" context="2v13to300">
+        <sql>
+            insert into usm_module(name)
+            values ('bizops');
+        </sql>
+	</changeSet>
+
+</databaseChangeLog>

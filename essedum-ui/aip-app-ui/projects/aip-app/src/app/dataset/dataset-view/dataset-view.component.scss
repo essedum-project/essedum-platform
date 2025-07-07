@@ -1,0 +1,24 @@
+  :host ::ng-deep .cipJSONEditor div.jsoneditor.jsoneditor-mode-tree{
+    border: thin solid #0094ff !important;
+  }
+  
+  :host ::ng-deep .cipJSONEditor div.jsoneditor-menu{
+    background-color: #0094ff !important;
+    border-bottom: 1px solid #0094ff !important;
+  }
+  
+  :host ::ng-deep .cipJSONEditor div.jsoneditor-frame{
+    color: black !important;
+  }
+
+  mat-card{
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  ::ng-deep{ 
+    .ace-jsoneditor, textarea.jsoneditor-text {
+       height: 300px;
+    }
+  }
+  

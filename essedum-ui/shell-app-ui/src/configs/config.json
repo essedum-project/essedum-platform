@@ -1,0 +1,20 @@
+{
+  
+  "eventSourceConfig": {
+    "endpointURL": "/services/assistance-manager/api/notification/subscribe?topic=",
+    "enabled": true,
+    "connectId": "cdnotification",
+    "reconnectDelayInMilliSeconds": 1000
+  },
+  "backendUrl": "services/conversation-config",
+  "ignoreUrlsInBackendUrlInterceptor": [".*/faq-analysis/.*"],
+  "brandLogo": "assets/images/Cortex-Blue-new.svg",
+  "backgroundImage": "/assets/images/new-background-image.jpg",
+  "showHomeOverlayLayout": true,
+  
+
+  "bot-app": {
+    "hostname": "/"
+  },
+  "locale": ["en"]
+}

@@ -1,0 +1,328 @@
+<!-- <section [ngBusy]="{busy:busy,message:'Loading...'}" class="selector-764-1"> -->
+<div class="row">
+  <div class="col-lg-12">
+    <div class="lfx-l-level1-middle-col">
+      <div class="lfx-l-level2-middle-ctr">
+        <div class="lfx-l-level2-middle-col">
+          <div class="align-items-center justify-content-between d-flex">
+            <div class="selector-model-title-head d-flex align-items-center">
+              <span class="">
+                <i
+                  class="fa fa-long-arrow-left back-icon"
+                  aria-hidden="true"
+                  (click)="navigateBack()"
+                ></i>
+              </span>
+              <span class="aip-desc-title lfx-u-header-xxl"
+                ><span style="color: #737373">Pipeline: </span
+                >{{ pipelineAlias | titlecase }}
+              </span>
+            </div>
+            <div class="selector-model-title-tail">
+              <ul
+                class="d-flex justify-content-between align-items-center py-2 px-4"
+              >
+                <li
+                  class="aip-cursor li-style"
+                  style="padding: 5px 13px 2px 0px"
+                  (click)="openModal(content4)"
+                >
+                  <div
+                    class="lfx-u-mar-r-24 aip-cursor"
+                    (click)="openModal(content4)"
+                    style="cursor: pointer"
+                  >
+                    <button
+                      mat-icon-button
+                      [ngStyle]="{ color: isHoveredTag ? '#0094ff' : 'gray' }"
+                      matTooltip="{{ addTags }}"
+                      (mouseenter)="isHoveredTag = true"
+                      (mouseleave)="isHoveredTag = false"
+                    >
+                      <mat-icon
+                        class="lfx-u-mar-r-16 aip-led-icons"                      
+                        >local_offer</mat-icon
+                      >
+                    </button>
+                  </div>
+                  <ng-template #content4 let-modal>
+                    <app-tags
+                      [data]="card"
+                      [entityType]="entity"
+                      [componentType]="'pipelines'"
+                    ></app-tags>
+                  </ng-template>
+                </li>
+                <li class="li-style">
+                  <div
+                    class="lfx-u-mar-r-24 aip-cursor"
+                    (click)="runPipeline()"
+                    style="cursor: pointer"
+                  >
+                    <button
+                      mat-icon-button
+                      [ngStyle]="{ color: isHoveredRun ? '#0094ff' : 'gray' }"
+                      matTooltip="Start"
+                      (mouseenter)="isHoveredRun = true"
+                      (mouseleave)="isHoveredRun = false"
+                    >
+                      <mat-icon
+                        class="lfx-u-mar-r-16 aip-led-icons"                       
+                        >play_arrow</mat-icon
+                      >
+                    </button>
+                  </div>
+                </li>
+                <li class="li-style">
+                    <div
+                    class="lfx-u-mar-r-24 aip-cursor"
+                    (click)="saveJson(streamItem.name)"
+                    style="cursor: pointer"
+                    >
+                    <button
+                      mat-icon-button
+                      [ngStyle]="{ color: isHoveredSave ? '#0094ff' : 'gray' }"
+                      matTooltip="Save"
+                      (mouseenter)="isHoveredSave = true"
+                      (mouseleave)="isHoveredSave = false"
+                    >
+                      <mat-icon
+                        class="lfx-u-mar-r-16 aip-led-icons"
+                        >save</mat-icon
+                      >
+                    </button>
+                    </div>
+                </li>
+                <li class="li-style">
+                  <div
+                    class="lfx-u-mar-r-24 aip-cursor"
+                    (click)="copyPipeline()"
+                    style="cursor: pointer"
+                  >
+                    <button
+                      mat-icon-button
+                      [ngStyle]="{ color: isHovered ? '#0094ff' : 'gray' }"
+                      matTooltip="Duplicate"
+                      (mouseenter)="isHovered = true"
+                      (mouseleave)="isHovered = false"
+                    >
+                      <mat-icon
+                        class="lfx-u-mar-r-16 aip-led-icons"                      
+                        >content_copy</mat-icon
+                      >
+                    </button>
+                  </div>
+                  <!-- <span
+                    matTooltip="Duplicate"
+                    matTooltipPosition="above"
+                    (click)="copyPipeline()"
+                    style="cursor: pointer"
+                  >
+                    <mat-icon
+                      class="lfx-u-mar-r-16 aip-led-icons"
+                      style="color: gray"
+                      >content_copy</mat-icon
+                    >
+                  </span> -->
+                </li>
+                <li class="li-style" *ngIf="!isExpand && initiativeView">
+                  <span
+                    matTooltip="Maximize"
+                    [matTooltipPosition]="tooltipPoition"
+                  >
+                    <mat-icon
+                      class="lfx-u-mar-r-16 aip-led-icons"
+                      style="font-size: 24px"
+                      (click)="expandCollapse()"
+                      style="color: gray"
+                      >fullscreen</mat-icon
+                    >
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div
+            class="lfx-u-mar-t-16 mx-4 px-5 my-4 mt-0 aip-panel-shadow"
+            style="background-color: white"
+          >
+            <mat-tab-group disableRipple>
+              <mat-tab label="Configuration" class="lfx-u-header-xl">
+                <div class="tab-content mb-5">
+                  <div class="col-md-12">
+                    <div class="d-flex">
+                      <span
+                        class="fs"
+                        style="margin-top: 20px !important; margin-right: 5px"
+                        >Type</span
+                      >
+                      <mat-form-field class="lfx-u-mar-lr-8" appearance="fill">
+                        <mat-select
+                          [(ngModel)]="data.filetype"
+                          [required]="true"
+                          [disabled]="false"
+                          (selectionChange)="onInputTypeChange($event)"
+                        >
+                          <mat-option
+                            *ngFor="let type of filetypes"
+                            [value]="type.value"
+                            >{{ type.viewValue }}</mat-option
+                          >
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                  </div>
+
+                  <div class="col-md-12">
+                    <div class="d-flex selector-764-14">
+                      <div
+                        class="col-2 selector-764-15 d-flex align-items-start"
+                        style="gap: 8px"
+                      >
+                        <span style="font-size: 14px; size: 500"
+                          >Arguments:</span
+                        >
+                        <mat-icon
+                          class="selector-764-17 fs"
+                          matTooltip="Add Argument"
+                          (click)="displayDialog('ADD', '', '', 'Text', 0, '')"
+                          style="vertical-align: middle; cursor: pointer"
+                          >add</mat-icon
+                        >
+                        <mat-icon
+                          class="selector-764-18 fs"
+                          matTooltip="Remove All"
+                          (click)="deleteAll()"
+                          style="vertical-align: middle; cursor: pointer"
+                          >remove</mat-icon
+                        >
+                      </div>
+                      <mat-tree
+                        [dataSource]="dataSource"
+                        [treeControl]="treeControl"
+                        class="example-tree col-8 selector-764-19"
+                      >
+                        <mat-tree-node
+                          *matTreeNodeDef="let node"
+                          matTreeNodeToggle=""
+                          class="selector-764-20"
+                        >
+                          <li class="mat-tree-node selector-764-21">
+                            <button
+                              mat-icon-button=""
+                              disabled=""
+                              class="selector-764-22"
+                            ></button>
+                            <span
+                              style="max-width: -webkit-fill-available"
+                              class="selector-764-23"
+                              >{{
+                                node.name +
+                                  " :
+                                                            " +
+                                  getAlias(node)
+                              }}&nbsp;&nbsp;
+                              <mat-icon
+                                class="selector-764-24"
+                                matTooltip="Edit"
+                                style="vertical-align: middle; cursor: pointer"
+                                (click)="
+                                  displayDialog(
+                                    'MODIFY',
+                                    node.name,
+                                    node.value,
+                                    node.type,
+                                    node.index,
+                                    node.alias
+                                  )
+                                "
+                                >edit</mat-icon
+                              >&nbsp;&nbsp;
+                              <mat-icon
+                                class="selector-764-25"
+                                matTooltip="Delete"
+                                (click)="deleteNode(node.index)"
+                                style="vertical-align: middle; cursor: pointer"
+                                >remove</mat-icon
+                              >
+                            </span>
+                          </li>
+                        </mat-tree-node>
+                      </mat-tree>
+                    </div>
+                    <mat-tab-group disableRipple>
+                      <mat-tab label="Environment" class="lfx-u-header-xl">
+                        <div class="tab_content" id="tabContent_1">
+                          <div
+                            class="config-container"
+                            style="margin-bottom: 6.6rem"
+                          >
+                            <app-app-config
+                              [configData]="dynamicEnvArray"
+                              [isauth]="isAuth"
+                              (configDataChange)="onEnvDataChange($event)"
+                            ></app-app-config>
+                          </div>
+                        </div>
+                      </mat-tab>
+                    </mat-tab-group>
+                  </div>
+                  <!-- <div class="col-md-12">
+                    <app-user-secrets
+                      [configData]="dynamicSecretsArray"
+                      [isauth]="isAuth"
+                      (configDataChange)="onSecretsDataChange($event)"
+                    ></app-user-secrets>
+                  </div> -->
+                </div>
+              </mat-tab>
+              <mat-tab label="Script" class="lfx-u-header-xl">
+                <div class="tab-content selector-764-41 mb-5">
+                  <div class="col-md-12">
+                    <div class="d-flex">
+                      <span class="lfx-u-mar-t-24 lfx-u-mar-l-16 fs"
+                        >Select run type</span
+                      >
+                      <mat-form-field class="lfx-u-mar-lr-8" appearance="fill">
+                        <mat-select
+                          [(ngModel)]="selectedRunType"
+                          [required]="true"
+                          [disabled]="false"
+                          placeholder=""
+                          (selectionChange)="runTypeChanged(selectedRunType)"
+                        >
+                          <mat-option
+                            *ngFor="let type of runTypes"
+                            [value]="type.value"
+                            >{{ type.viewValue }}</mat-option
+                          >
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <div style="height: max-content">
+                    <app-enl-code-editor
+                      id="ele"
+                      *ngIf="loadScript"
+                      [script]="script"
+                      [lang]="lang"
+                      (scriptChange)="onScriptChange($event)"
+                      class="selector-764-48"
+                    >
+                    </app-enl-code-editor>
+                  </div>
+                </div>
+              </mat-tab>
+              <mat-tab label="Jobs" class="lfx-u-header-xl">
+                <app-jobs
+                  *ngIf="streamItem"
+                  [cname]="streamItem.name"
+                ></app-jobs>
+              </mat-tab>
+            </mat-tab-group>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,49 @@
+<div id="parent" class="selector-7-1">
+    <div id="child" [ngStyle]="{'position': display=='resetpassword' ? 'relative' : null}" class="selector-7-2">
+        <div *ngIf="display=='logout'" id="logout-message" class="selector-7-3">
+            You have been successfully logged out.
+        <button id="go-to-login-button" mat-raised-button class="selector-7-4" style="background-color: #0a142f; color: white;"
+            [disabled]="false" type="button" (click)="backToLoginPage()"
+            onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+            onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+            Go to Login Page
+        </button>
+        <div *ngIf="display=='error'" id="logout-message" class="selector-7-5">
+            Some error occured.
+        </div>
+        <div *ngIf="display.includes('sufficient permission')" id="logout-message" class="selector-7-6">
+            {{display}}
+        </div>
+        <div *ngIf="display=='resetpassword'" class="selector-7-7">
+            <i class="fa fa-arrow-left selector-7-8" *ngIf="user" style="position: absolute; top: 5px; left: 5px; cursor: pointer;" (click)="back()"></i>
+            <div class="example-container-logout selector-7-9">
+                <mat-form-field class="selector-7-22">
+                    <input matInput="" placeholder="Old Password" [type]="hide3 ? 'password' : 'text'" name="oldPassword" [(ngModel)]="oldPassword" #pwdinput="" required="" class="selector-7-23">
+                    <i *ngIf="!hide3" class="fa fa-eye fa-lg pwdhide selector-7-24" (click)="hide3 = !hide3" aria-hidden="true"></i>
+                    <i *ngIf="hide3" class="fa fa-eye-slash fa-lg pwdhide selector-7-25" (click)="hide3 = !hide3" aria-hidden="true"></i>        
+                </mat-form-field>
+                <br class="selector-7-26">
+                <mat-form-field class="selector-7-10">
+                    <input matInput="" placeholder="New Password" [type]="hide1 ? 'password' : 'text'" name="newPassword" minlength="8" maxlength="20" [(ngModel)]="newPassword" #pwdinput="" required="" class="selector-7-11">
+                    <i *ngIf="!hide1" class="fa fa-eye fa-lg pwdhide selector-7-12" (click)="hide1 = !hide1" aria-hidden="true"></i>
+                    <i *ngIf="hide1" class="fa fa-eye-slash fa-lg pwdhide selector-7-13" (click)="hide1 = !hide1" aria-hidden="true"></i>
+                        
+                </mat-form-field>
+                <br class="selector-7-15">
+                <mat-form-field class="selector-7-16">
+                    <input matInput="" placeholder="Confirm Password" [type]="hide2 ? 'password' : 'text'" name="confirmPsd" [(ngModel)]="confirmPsd" required="" class="selector-7-17">
+                    <i *ngIf="!hide2" class="fa fa-eye fa-lg pwdhide selector-7-18" (click)="hide2 = !hide2" aria-hidden="true"></i>
+                    <i *ngIf="hide2" class="fa fa-eye-slash fa-lg pwdhide selector-7-19" (click)="hide2 = !hide2" aria-hidden="true"></i>
+                </mat-form-field>
+                <!-- <span style="margin-left: 1rem;font-size: 11px;color: red;">NOTE - Password should contain special characters like @$!%*?&</span> -->
+                <br class="selector-7-20">
+                <button class="selector-7-21" mat-raised-button style="background-color: #0a142f; color: white;"
+                    [disabled]="false" type="submit" (click)="changePassword()"
+                    onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                    onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                    Reset
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

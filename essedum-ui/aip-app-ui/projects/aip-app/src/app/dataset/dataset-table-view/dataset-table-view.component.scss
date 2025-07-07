@@ -1,0 +1,214 @@
+.card-header{
+    float: right;
+    display: flex;
+    column-gap: 24px;
+    align-items: center;
+    height: 28px;
+    margin-top: 12px;
+}
+
+.x-24{
+    width: unset;
+}
+
+.icon{
+    cursor: pointer;
+}
+
+::ng-deep{
+    .mat-mdc-card{
+        width: 100% !important;
+        height: 100% !important;
+    }
+    // .le-c-form-field.mat-mdc-form-field .mat-mdc-form-field-infix {
+    //     padding: unset !important;
+    //     border-top: none !important;
+    // }
+    // .mat-mdc-form-field-subscript-wrapper{
+    //     height: 0px !important;
+    // }
+    .le-c-card.mat-mdc-card{
+        padding: 10px;
+    }
+}
+
+.flex-display{
+    display: flex;
+}
+
+.data-count{
+    margin: 1%;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    width: 206px;
+}
+.container{
+    width: 100%;
+    height: 48px;
+}
+.aip-dataset-table-view-input{
+    
+    border: 0;
+    outline: 0;
+    color: rgb(60, 66, 87);
+    background-color: rgb(255, 255, 255);
+    box-shadow: rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(60 66 87 / 16%) 0px 0px 0px 1px, rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(0 0 0 / 0%) 0px 0px 0px 0px;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 400;
+    padding: 4px 8px;
+    min-height: 28px;
+    vertical-align: middle;
+    transition: background-color .24s,box-shadow .24s;
+    transition-property: background-color, box-shadow;
+    transition-duration: 0.24s, 0.24s;
+    transition-timing-function: ease, ease;
+    transition-delay: 0s, 0s;
+    :focus{
+        box-shadow: rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(58 151 212 / 36%) 0px 0px 0px 4px, rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(60 66 87 / 16%) 0px 0px 0px 1px, rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(0 0 0 / 0%) 0px 0px 0px 0px, rgb(0 0 0 / 0%) 0px 0px 0px 0px;
+    }
+
+}
+::ng-deep .highlight-color {
+    color: black !important;
+    background-color: #FF8800 !important;
+    padding: 2px !important;
+    border-radius: 2px !important;
+}
+.create-background {
+    background-color: white !important;
+    border-radius: 1rem;
+}
+
+// ::ng-deep .mat-mdc-form-field-infix {
+//     position: relative;
+//     top: 1rem;
+// }
+
+.lfx-u-mar-b-16 {
+    margin-bottom: 16px !important;
+}
+
+.lfx-u-header-xxl {
+    font-size: 2.4rem;
+    font-weight: 600;
+    font-family: "myriad-pro", Arial, sans-serif !important;
+    font-style: normal;
+}
+
+.lfx-u-mar-l-8
+ {
+    margin-left: 8px !important;
+}
+
+.lfx-u-pad-16
+ {
+    padding: 16px !important;
+}
+
+.lfx-u-mar-tb-16
+ {
+    margin-top: 16px !important;
+    margin-bottom: 16px !important;
+}
+
+.lfx-l-level2-middle-col
+{
+        display: table-cell;
+        vertical-align: top;
+        height: 100%;
+}
+
+.lfx-u-pad-t-32
+ {
+    padding-top: 32px !important;
+}
+
+.lfx-u-pad-lr-24
+ {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+}
+
+
+
+.lfx-l-level2-middle-ctr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+}
+
+.lfx-c-panel
+ {
+    border-radius: 16px;
+    background: #ffffff;
+    min-height: 100px;
+}
+.lfx-c-panel {
+    box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.16) !important;
+}
+
+.lfx-l-level1-middle-col
+ {
+    padding: 32px 16px 32px 16px;
+}
+
+.base-color{
+    color:#0094ff !important;
+}
+
+.secondary-color{
+    color:#0a142f !important;
+}
+
+.back-icon{
+  font-size:24px !important;
+  color: #0a142f !important;
+}
+/* Layout utilities */
+.lfx-field {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.lfx-mt-24 {
+  margin-top: 24px;
+}
+
+.lfx-mb-16 {
+  margin-bottom: 16px;
+}
+
+.lfx-button-right {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.lfx-half-col {
+  width: 100%;
+}
+
+  .lfx-half-col {
+    width: 48%;
+  }
+
+.lfx-flex-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.lfx-card {
+  margin-top: 24px;
+  padding: 16px;
+}
+.lfx-icon-hover{
+    color:grey;
+    cursor: pointer;
+}
+.lfx-icon-hover:hover{
+    color:#0094ff;
+}

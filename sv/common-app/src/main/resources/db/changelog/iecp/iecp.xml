@@ -1,0 +1,298 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">      
+     
+     <changeSet author="Leap (generated)" id="1617868010544-210">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_constant ON;
+		</sql>		
+		<sql>
+			INSERT INTO usm_constant (id, item, project_name, item_value, project_id) 
+			values
+			('55153','Content Mining User Land','Demo','./iamp-iecp/dashboard','3'),
+			('55154','System Admin Side','Demo','{\"label\":\"Home\",\"icon\":\"folder\",\"url\":\"./iamp-ast/admin/sysadminhome\",\"children\":[]}','3'),
+			('55155','System Admin Side','Demo','{\"label\":\"Portfolio Details\",\"icon\":\"folder\",\"url\":\"./iamp-ast/admin/newportfolio\",\"children\":[]}','3'),
+			('55156','System Admin Side','Demo','{\"label\":\"Reports\",\"icon\":\"folder\",\"url\":\"./iamp-ast/generatereport\",\"children\":[]}','3'),
+			('55157','System Admin Side','Demo','{\"label\":\"Functional Admin\",\"icon\":\"folder\",\"url\":\"./iamp-ast/admin/FunctionAdmin/AIStore\",\"children\":[]}','3'),
+			('55158','System Admin Side','Demo','{\"label\":\"Global Notification Management\",\"icon\":\"folder\",\"url\":\"./iamp-ast/admin/globalnotification\",\"children\":[]}','3'),
+			('55159','System Admin Side','Demo','{\"label\":\"Customize Front End\",\"icon\":\"folder\",\"url\":\"./iamp-ast/admin/cutomizefrontend\",\"children\":[]}','3'),
+			('55160','Team Member Side','Demo','{\"label\":\"Home\",\"icon\":\"folder\",\"url\":\"./iamp-ast/member/NewLanding\",\"children\":[]}','3'),
+			('55161','Team Member Side','Demo','{\"label\":\"My Assets\",\"icon\":\"wrench\",\"url\":\"./iamp-ast/member/myassets\",\"children\":[]}','3'),
+			('55162','Team Member Side','Demo','{\"label\":\"Reports\",\"icon\":\"folder\",\"url\":\"./iamp-ast/generatereport\",\"children\":[]}','3'),
+			('55163','Team Member Side','Demo','{\"label\":\"Help\",\"icon\":\"spinner\",\"url\":\"./iamp-ast/member/help\",\"children\":[]}','3'),
+			('55164','Infosysdefault','Demo','{\"defaultproject\":3,\"defaultprojectroles\":[{\"project\":3,\"role\":125}]}','3'),
+			('55165','Tenant Management User Land','Demo','./iamp-iecp/tenant/tenantManagement','3'),
+			('55166','Data Scientist Land','Demo','./dynamicDashboard/grid/OCC/51001','3'),
+			('55167','Team Member Land','Demo','./iamp-ast/member/team-member-landing','3'),
+			('55168','Bot Admin Side','Demo','{\"label\":\"Digitize\",\"icon\":\"assets/icons/Digitise.svg\",\"url\":null,\"children\":[{\"label\":\"Process Model Store\",\"icon\":\"assets/icons/icon_Technology.svg\",\"url\":\"./iamp-btf/SOP\",\"_id\":2},{\"label\":\"App Model Store\",\"icon\":\"assets/icons/icon_VisitorManagementSystem_VMS.svg\",\"url\":\"./iamp-btf/app-model\",\"_id\":3}]}','3'),
+			('55169','Bot Admin Side','Demo','{\"label\":\"Automate\",\"icon\":\"assets/icons/Automate.svg\",\"url\":null,\"children\":[{\"label\":\"Incident dashboard\",\"icon\":\"assets/icons/Incident-Dashboard.svg\",\"url\":\"./iamp-cap/inputdetails\",\"_id\":2},{\"label\":\"Monitor Bot\",\"icon\":\"area-chart\",\"url\":\"./iamp-cap/viewstatistics\",\"_id\":3},{\"label\":\"My Workspace\",\"icon\":\"assets/icons/icon-Domestic-InternationalTravel.svg\",\"url\":\"./iamp-btf/entity/automation-work-flow\",\"_id\":4},{\"label\":\"Bot Store\",\"icon\":\"assets/icons/Component_752_1.svg\",\"url\":\"./iamp-btf/entity/bot\",\"_id\":5},{\"label\":\"Build a Bot\",\"icon\":\"assets/icons/Component_753_1.svg\",\"url\":\"./iamp-btf/bpmndemo\",\"children\":[],\"_id\":6},{\"label\":\"Test a Bot\",\"icon\":\"assets/icons/icon_tb.svg\",\"url\":\"./iamp-btf/Testing\",\"children\":[],\"_id\":7}]}','3'),
+			('55170','Bot Admin Side','Demo','{\"label\":\"Innovate\",\"icon\":\"assets/icons/innovative.svg\",\"url\":\"\",\"children\":[{\"label\":\"Experiment\",\"icon\":\"assets/icons/Experiment.svg\",\"url\":\"./sandbox\",\"children\":[],\"_id\":9}]}','3'),
+			('55171','Bot Admin Side','Demo','{\"label\":\"Configure\",\"icon\":\"cog\",\"url\":\"\",\"children\":[{\"label\":\"Configuration Dashboard\",\"icon\":\"assets/icons/Component_155_2.svg\",\"url\":\"./iamp-btf/entity/config-screen\",\"children\":[],\"_id\":2},{\"label\":\"Configuration Entry\",\"icon\":\"assets/icons/icon_LaptopGatepass.svg\",\"url\":\"./iamp-btf/entity/configuration-entry\",\"children\":[],\"_id\":3},{\"label\":\"Key Words\",\"icon\":\"assets/icons/icon_keywords.svg\",\"url\":\"./iamp-btf/entity/key-words\",\"children\":[],\"_id\":4},{\"label\":\"Schedule\",\"icon\":\"assets/icons/icon-calendar.svg\",\"url\":\"./iamp-btf/entity/schedule\",\"children\":[],\"_id\":5},{\"label\":\"Server\",\"icon\":\"assets/icons/Group_106664.svg\",\"url\":\"./iamp-btf/entity/server\",\"children\":[],\"_id\":6},{\"label\":\"Technology\",\"icon\":\"assets/icons/icon_hint_idea.svg\",\"url\":\"./iamp-btf/entity/technology\",\"children\":[],\"_id\":7},{\"label\":\"Workflow Params\",\"icon\":\"assets/icons/icon_flow_tree.svg\",\"url\":\"./iamp-btf/entity/workflow-params\",\"children\":[],\"_id\":8},{\"label\":\"Groups\",\"icon\":\"users\",\"url\":\"./iamp-btf/entity/group\",\"children\":[],\"_id\":9},{\"label\":\"Tool Adapter\",\"icon\":\"\",\"url\":\"\",\"children\":[{\"label\":\"Adapter Purpose\",\"icon\":\"list\",\"url\":\"./iamp-tad/adapterPurpose-list\",\"children\":[],\"_id\":11},{\"label\":\"Adapter Config\",\"icon\":\"cog\",\"url\":\"./iamp-tad/adapterConfig-list\",\"children\":[],\"_id\":12}],\"_id\":10},{\"label\":\"Technology Property\",\"icon\":\"users\",\"url\":\"./iamp-btf/entity/technology-properties\",\"children\":[],\"_id\":13}]}','3'),
+			('55172','Bot Admin Side','Demo','{\"label\":\"Admin\",\"icon\":\"user\",\"url\":\"\",\"children\":[{\"label\":\"Monitor\",\"icon\":\"assets/icons/Component_156_1.svg\",\"url\":\"./iamp-btf/Cockpit\",\"children\":[],\"_id\":2},{\"label\":\"Bot Execution Audit Trails\",\"icon\":\"assets/icons/icon_audit.svg\",\"url\":\"./iamp-btf/entity/bot-execution-audit-trails\",\"children\":[],\"_id\":3},{\"label\":\"Schedule Background Process\",\"icon\":\"assets/icons/icon_BCMS.svg\",\"url\":\"./iamp-btf/entity/bot-factory-scheduler\",\"children\":[],\"_id\":4},{\"label\":\"Refresh Jobs\",\"icon\":\"sync\",\"url\":\"./iamp-btf/refreshjobs\",\"children\":[],\"_id\":5},{\"label\":\"API\",\"icon\":\"sync\",\"url\":\"./iamp-btf/docs\",\"children\":[],\"_id\":6}]}','3'),
+			('55173','icip.datasourcetest.lasttime','Demo','1980-01-01 14:31:54','3'),
+			('55174','icip.datasourcetest.inactivetime','Demo','720','3');
+		</sql>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_constant OFF;
+		</sql>			
+	</changeSet>
+	
+    <changeSet author="Leap (generated)" id="1618294190693-313">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/iecp/mldatasource.csv" quotchar="&quot;" separator="," tableName="mldatasource">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="connectiondetails" name="connectiondetails" type="STRING"/>
+            <column header="description" name="description" type="STRING"/>
+            <column header="dshashcode" name="dshashcode" type="STRING"/>
+            <column header="name" name="name" type="STRING"/>
+            <column header="organization" name="organization" type="STRING"/>
+            <column header="salt" name="salt" type="STRING"/>
+            <column header="type" name="type" type="STRING"/>
+            <column header="category" name="category" type="STRING"/>
+            <column header="activetime" name="activetime" type="skip"/>
+            <column header="lastmodifiedby" name="lastmodifiedby" type="STRING"/>
+            <column header="lastmodifieddate" name="lastmodifieddate" type="DATE"/>
+            <column header="alias" name="alias" type="STRING"/>
+        </loadData>
+     </changeSet>
+     
+     <changeSet author="Leap (generated)" id="1618294190693-312">
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/iecp/mldataset.csv" quotchar="&quot;" separator="," tableName="mldataset">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="name" name="name" type="STRING"/>
+            <column header="alias" name="alias" type="STRING"/>
+            <column header="description" name="description" type="STRING"/>
+            <column header="attributes" name="attributes" type="STRING"/>
+            <column header="exp_status" name="exp_status" type="NUMERIC"/>
+            <column header="organization" name="organization" type="STRING"/>
+            <column header="schemajson" name="schemajson" type="STRING"/>
+            <column header="type" name="type" type="STRING"/>
+            <column header="backing_dataset" name="backing_dataset" type="skip"/>
+            <column header="dataset_schema" name="dataset_schema" type="STRING"/>
+            <column header="datasource" name="datasource" type="STRING"/>
+            <column header="lastmodifiedby" name="lastmodifiedby" type="STRING"/>
+            <column header="lastmodifieddate" name="lastmodifieddate" type="DATE"/>
+        </loadData>
+    </changeSet>
+    
+    <changeSet author="Leap (generated)" id="1618294190693-301">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_dashboard_configuration ON;
+		</sql>	
+		<sql>
+			INSERT INTO dbs_dashboard_configuration (id,app_name,bg_image,category,created_by,created_on,dash_array,dashboard_access,dash_floating_modal,dash_json,dependent_filter,description,icon,image,is_deleted,landing_dash,layout,show_date,context,project)
+			VALUES
+			(51001,'Business Control Center',NULL,'board-category','admin',NULL,NULL,'Public',NULL,'{"title":"Business Control Center","structure":"6-6","boardInstanceId":5,"rows":[{"columns":[{"styleClass":"six wide","gadgets":[{"componentType":"MapchartComponent","selector":"app-map-component","name":"Map Chart Gadget","description":"Provides map with different map types","icon":"assets/images/map.PNG","instanceId":1618232236669,"tags":[{"facet":"Chart","name":"mapchart "}],"config":{"propertyPages":[{"displayName":"General Details","groupId":"run","position":10,"properties":[{"value":" ","key":"title","label":"Title","required":false,"order":1,"controlType":"textbox"},{"value":513489,"key":"id","label":"Id","required":false,"order":2,"controlType":"textbox"},{"value":{"id":513489,"widgetname":" ","charttype":{"id":14,"charttype":"map","description":null,"context":null},"addToSummary":"US Map","summarySubtitleAlias":"277"},"key":"widgetconf","label":"Widgetconf","required":true,"order":3,"controlType":"json"},{"value":"stop","key":"state","label":"","required":false,"order":-1,"controlType":"hidden"},{"value":1618232236669,"key":"instanceId","label":"","required":false,"order":-2,"controlType":"hidden"}]}],"compositeParams":{"paramvalues":[{"param":null,"operator":null,"value":null}]}},"actions":[{"name":"Add"}]},{"componentType":"BarHighChartGadgetComponent","selector":"app-highchart-component","name":"High Chart Gadget","description":"Provides different types of highCharts","icon":"assets/images/highcharts.png","instanceId":1618233411198,"tags":[{"facet":"Chart","name":"highchart "}],"config":{"propertyPages":[{"displayName":"General Details","groupId":"run","position":10,"properties":[{"value":"On Time Delivery","key":"title","label":"Title","required":false,"order":1,"controlType":"textbox"},{"value":513491,"key":"id","label":"Id","required":false,"order":2,"controlType":"textbox"},{"value":{"id":513491,"widgetname":"On Time Delivery","charttype":{"id":1,"charttype":"line","description":null,"context":null},"summarySubtitleAlias":"103","chartwidth":229},"key":"widgetconf","label":"Widgetconf","required":true,"order":3,"controlType":"json"},{"value":"stop","key":"state","label":"","required":false,"order":-1,"controlType":"hidden"},{"value":1618233411198,"key":"instanceId","label":"","required":false,"order":-2,"controlType":"hidden"}]}],"compositeParams":{"paramvalues":[{"param":null,"operator":null,"value":null}]}},"actions":[{"name":"Add"}]},{"componentType":"BarHighChartGadgetComponent","selector":"app-highchart-component","name":"High Chart Gadget","description":"Provides different types of highCharts","icon":"assets/images/highcharts.png","instanceId":1618236130038,"tags":[{"facet":"Chart","name":"highchart "}],"config":{"propertyPages":[{"displayName":"General Details","groupId":"run","position":10,"properties":[{"value":"Orders Per Minute","key":"title","label":"Title","required":false,"order":1,"controlType":"textbox"},{"value":513492,"key":"id","label":"Id","required":false,"order":2,"controlType":"textbox"},{"value":{"id":513492,"widgetname":"Orders Per Minute","charttype":{"id":17,"charttype":"speedometer","description":null,"context":null},"summarySubtitleAlias":"120","chartwidth":195},"key":"widgetconf","label":"Widgetconf","required":true,"order":3,"controlType":"json"},{"value":"stop","key":"state","label":"","required":false,"order":-1,"controlType":"hidden"},{"value":1618236130038,"key":"instanceId","label":"","required":false,"order":-2,"controlType":"hidden"}]}],"compositeParams":{"paramvalues":[{"param":null,"operator":null,"value":null}]}},"actions":[{"name":"Add"}]},{"componentType":"BarHighChartGadgetComponent","selector":"app-highchart-component","name":"High Chart Gadget","description":"Provides different types of highCharts","icon":"assets/images/highcharts.png","instanceId":1618236203111,"tags":[{"facet":"Chart","name":"highchart "}],"config":{"propertyPages":[{"displayName":"General Details","groupId":"run","position":10,"properties":[{"value":"On Time Shipment","key":"title","label":"Title","required":false,"order":1,"controlType":"textbox"},{"value":513493,"key":"id","label":"Id","required":false,"order":2,"controlType":"textbox"},{"value":{"id":513493,"widgetname":"On Time Shipment","charttype":{"id":3,"charttype":"column","description":null,"context":null},"summarySubtitleAlias":"120","chartwidth":235},"key":"widgetconf","label":"Widgetconf","required":true,"order":3,"controlType":"json"},{"value":"stop","key":"state","label":"","required":false,"order":-1,"controlType":"hidden"},{"value":1618236203111,"key":"instanceId","label":"","required":false,"order":-2,"controlType":"hidden"}]}],"compositeParams":{"paramvalues":[{"param":null,"operator":null,"value":null}]}},"actions":[{"name":"Add"}]},{"componentType":"BarHighChartGadgetComponent","selector":"app-highchart-component","name":"High Chart Gadget","description":"Provides different types of highCharts","icon":"assets/images/highcharts.png","instanceId":1618236317715,"tags":[{"facet":"Chart","name":"highchart "}],"config":{"propertyPages":[{"displayName":"General Details","groupId":"run","position":10,"properties":[{"value":"Incidents Operations monitoring","key":"title","label":"Title","required":false,"order":1,"controlType":"textbox"},{"value":513494,"key":"id","label":"Id","required":false,"order":2,"controlType":"textbox"},{"value":{"id":513494,"widgetname":"Incidents Operations monitoring","charttype":{"id":16,"charttype":"heatmap","description":null,"context":null},"summarySubtitleAlias":"149","chartwidth":519},"key":"widgetconf","label":"Widgetconf","required":true,"order":3,"controlType":"json"},{"value":"stop","key":"state","label":"","required":false,"order":-1,"controlType":"hidden"},{"value":1618236317715,"key":"instanceId","label":"","required":false,"order":-2,"controlType":"hidden"}]}],"compositeParams":{"paramvalues":[{"param":null,"operator":null,"value":null}]}},"actions":[{"name":"Add"}]},{"componentType":"BarHighChartGadgetComponent","selector":"app-highchart-component","name":"High Chart Gadget","description":"Provides different types of highCharts","icon":"assets/images/highcharts.png","instanceId":1618236414591,"tags":[{"facet":"Chart","name":"highchart "}],"config":{"propertyPages":[{"displayName":"General Details","groupId":"run","position":10,"properties":[{"value":"Overall Efficiency","key":"title","label":"Title","required":false,"order":1,"controlType":"textbox"},{"value":513495,"key":"id","label":"Id","required":false,"order":2,"controlType":"textbox"},{"value":{"id":513495,"widgetname":"Overall Efficiency","charttype":{"id":17,"charttype":"speedometer","description":null,"context":null},"summarySubtitleAlias":"137","chartwidth":184},"key":"widgetconf","label":"Widgetconf","required":true,"order":3,"controlType":"json"},{"value":"stop","key":"state","label":"","required":false,"order":-1,"controlType":"hidden"},{"value":1618236414591,"key":"instanceId","label":"","required":false,"order":-2,"controlType":"hidden"}]}],"compositeParams":{"paramvalues":[{"param":null,"operator":null,"value":null}]}},"actions":[{"name":"Add"}]},{"componentType":"BarHighChartGadgetComponent","selector":"app-highchart-component","name":"High Chart Gadget","description":"Provides different types of highCharts","icon":"assets/images/highcharts.png","instanceId":1618236543606,"tags":[{"facet":"Chart","name":"highchart "}],"config":{"propertyPages":[{"displayName":"General Details","groupId":"run","position":10,"properties":[{"value":"Orders Per Day (LOBs)","key":"title","label":"Title","required":false,"order":1,"controlType":"textbox"},{"value":513496,"key":"id","label":"Id","required":false,"order":2,"controlType":"textbox"},{"value":{"id":513496,"widgetname":"Orders Per Day (LOBs)","charttype":{"id":3,"charttype":"column","description":null,"context":null},"summarySubtitleAlias":"143","chartwidth":241},"key":"widgetconf","label":"Widgetconf","required":true,"order":3,"controlType":"json"},{"value":"stop","key":"state","label":"","required":false,"order":-1,"controlType":"hidden"},{"value":1618236543606,"key":"instanceId","label":"","required":false,"order":-2,"controlType":"hidden"}]}],"compositeParams":{"paramvalues":[{"param":null,"operator":null,"value":null}]}},"actions":[{"name":"Add"}]}]},{"styleClass":"six wide","gadgets":[{"componentType":"BarHighChartGadgetComponent","selector":"app-highchart-component","name":"High Chart Gadget","description":"Provides different types of highCharts","icon":"assets/images/highcharts.png","instanceId":1618233274532,"tags":[{"facet":"Chart","name":"highchart "}],"config":{"propertyPages":[{"displayName":"General Details","groupId":"run","position":10,"properties":[{"value":"Forecast Accuracy","key":"title","label":"Title","required":false,"order":1,"controlType":"textbox"},{"value":513490,"key":"id","label":"Id","required":false,"order":2,"controlType":"textbox"},{"value":{"id":513490,"widgetname":"Forecast Accuracy","charttype":{"id":15,"charttype":"gauge","description":null,"context":null},"summarySubtitleAlias":"103","chartwidth":195},"key":"widgetconf","label":"Widgetconf","required":true,"order":3,"controlType":"json"},{"value":"stop","key":"state","label":"","required":false,"order":-1,"controlType":"hidden"},{"value":1618233274532,"key":"instanceId","label":"","required":false,"order":-2,"controlType":"hidden"}]}],"compositeParams":{"paramvalues":[{"param":null,"operator":null,"value":null}]}},"actions":[{"name":"Add"}]}]}]}],"id":5,"parentfiltershow":true,"filterfullwidth":false,"responsivefiltercheck":false,"bgImageName":"No File Chosen"}',NULL,'chatbot studio','[{"gadgetid":"1618232236669","gadgetposition":{"cols":103,"rows":66,"x":1,"y":0,"dragEnabled":true,"resizeEnabled":true},"gadgetlock":"unlock","color":"var(--base-color)","open":true},{"gadgetid":"1618233411198","gadgetposition":{"cols":50,"rows":31,"x":149,"y":0,"dragEnabled":true,"resizeEnabled":true},"gadgetlock":"unlock","color":"var(--base-color)","open":true},{"gadgetid":"1618236130038","gadgetposition":{"cols":44,"rows":34,"x":104,"y":31,"dragEnabled":true,"resizeEnabled":true},"gadgetlock":"unlock","color":"var(--base-color)","open":true},{"gadgetid":"1618236203111","gadgetposition":{"cols":51,"rows":34,"x":148,"y":31,"dragEnabled":true,"resizeEnabled":true},"gadgetlock":"unlock","color":"rgb(0, 0, 0)","open":true},{"gadgetid":"1618236317715","gadgetposition":{"cols":101,"rows":39,"x":1,"y":66,"dragEnabled":true,"resizeEnabled":true},"gadgetlock":"unlock","color":"rgb(0, 0, 0)","open":true},{"gadgetid":"1618236414591","gadgetposition":{"cols":42,"rows":37,"x":104,"y":67,"dragEnabled":true,"resizeEnabled":true},"gadgetlock":"unlock","color":"rgb(0, 0, 0)","open":true},{"gadgetid":"1618236543606","gadgetposition":{"cols":52,"rows":38,"x":148,"y":66,"dragEnabled":true,"resizeEnabled":true},"gadgetlock":"unlock","color":"var(--base-color)","open":true},{"gadgetid":"1618233274532","gadgetposition":{"cols":44,"rows":31,"x":104,"y":0,"dragEnabled":true,"resizeEnabled":true},"gadgetlock":"unlock","color":"var(--base-color)","open":true}]',NULL,0,NULL,0,NULL,NULL,3);
+		</sql>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_dashboard_configuration OFF;
+		</sql>
+    </changeSet>
+    
+    <changeSet author="Leap (generated)" id="1618294190693-304">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_palette_config ON;
+		</sql>	
+		<sql>
+			INSERT INTO dbs_palette_config (id,project_id,created_by,created_on,is_deleted,modified_by,modified_on,palette_name,organisation) 
+			VALUES 
+			(3737,3,'system','2021-04-11 00:00:00',0,'system','2021-04-11 00:00:00', 'GreenPallete',NULL);
+		</sql>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_palette_config OFF;
+		</sql>
+    </changeSet>
+    
+    <changeSet author="Leap (generated)" id="1618294190693-305">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_palette_widget_sequence ON;
+		</sql>	
+		<sql>
+			INSERT INTO dbs_palette_widget_sequence (id, project_id, palette_id, palette_config, widget_sequence_id) 
+			values
+			('35727','3',NULL,'3737','520993'),
+			('35728','3',NULL,'3737','520988'),
+			('35729','3',NULL,'3737','520990');
+		</sql>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_palette_widget_sequence OFF;
+		</sql>
+    </changeSet>
+    
+    <changeSet author="Leap (generated)" id="1618294190693-303">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_palette ON;
+		</sql>	
+		<sql>
+			INSERT INTO dbs_palette (id, project_id, color, created_by, created_on, is_deleted, modified_by, modified_on, series_name, palette_config) 
+			VALUES
+			('15159','3','#7b39b1',NULL,NULL,'',NULL,NULL,NULL,'3737'),
+			('15160','3','#9667bc',NULL,NULL,'',NULL,NULL,NULL,'3737'),
+			('15161','3','#a290b2',NULL,NULL,'',NULL,NULL,NULL,'3737'),
+			('15162','3','#afa0ba',NULL,NULL,'',NULL,NULL,NULL,'3737'),
+			('15163','3','#c0b5c9',NULL,NULL,'',NULL,NULL,NULL,'3737'),
+			('15164','3','#dcd3e3',NULL,NULL,'',NULL,NULL,NULL,'3737'),
+			('15165','3','#cfc9d4',NULL,NULL,'',NULL,NULL,NULL,'3737');
+		</sql>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_palette OFF;
+		</sql>
+    </changeSet>
+    
+    <changeSet author="Leap (generated)" id="1618294190693-307">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_sequence_widget ON;
+		</sql>	
+		<sql>
+			INSERT INTO dbs_sequence_widget (id, project_id, color_type, colour, dataset_name, datasource_name, y_axis, chart_type, widget_id, isThreshold, referenceConfigurations) 
+			values
+			('520986','3','fixed','#7B39B1','map_data','leo1311','0','14','513489',NULL,NULL),
+			('520987','3','fixed','#7B39B1','DEMPRFRM26116','leo1311','0','15','513490',NULL,NULL),
+			('520988','3','palette','#7B39B1','DEMON_TM43587','leo1311','0','1','513491',NULL,NULL),
+			('520989','3','fixed','#7B39B1','DEMONLN_19698','leo1311','0','17','513492',NULL,NULL),
+			('520990','3','palette','#00AD94','DEMON_TM10508','leo1311','0','3','513493',NULL,NULL),
+			('520991','3','dynamic','#7B39B1','DEMHT_MP14555','leo1311','0','16','513494',NULL,NULL),
+			('520992','3','fixed','#7B39B1','DEMOVRL_12815','leo1311','0','17','513495',NULL,NULL),
+			('520993','3','palette','#00AD94','Water_Raising','leo1311','0','3','513496',NULL,NULL);
+		</sql>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dashboard_seq_widget OFF;
+		</sql>
+    </changeSet>
+    
+    <changeSet author="Leap (generated)" id="1618294190693-311">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_widget_configuration ON;
+		</sql>	
+		<sql>
+			INSERT INTO dbs_widget_configuration (id, project_id, add_to_summary, apply_on_category, auto_refresh, categorize_on, category, colour, count_category, count_category_column, count_column, data_label, description, drilldown, dual_axis, filters, from_date, img_src, is_cache_enabled, is_deleted, legend, legend_name, limit1, operation, refresh_time, remarks, sub_x_axis, sub_x_axis_alias, subtitle_alias, summary_subtitle_alias, summary_name, to_date, url, widget_json, widget_name, x_axis_alias, x_axis_label, x_param, x_param_value, y2_axis, y_axis_alias, y_axis_label, y_param, y_param_value, chart_type, context, dashboard, navigate_to, details, wizard_data_limit, apply_theme) 
+			values
+			('513489','3','US Map','',NULL,NULL,NULL,'#7B39B1',NULL,NULL,NULL,1,NULL,'',NULL,NULL,NULL,'fixed',NULL,'FALSE',NULL,'','0','',NULL,NULL,NULL,'',NULL,'177',NULL,NULL,NULL,'[{},{},{\"tooltip\":false},{\"minYValue\":0},{},{},{},{},{},{\"rotationXAngle\":null},{\"rotationX\":false},{},{},{},{\"alert\":false},{\"email\":null},{\"thresholdLineColor\":\"#ff0000\"},{\"xAxisStep\":false},{\"xAxisStepValue\":null},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{\"personaSetup\":{\"backgroundcolor\":null,\"colorChanged\":false,\"bordercolor\":null,\"bordercolorChanged\":false,\"headerColor\":null,\"headerColorChanged\":false,\"parameterColor\":null,\"parameterColorChanged\":false,\"parameterColumnNameColor\":null,\"parameterColumnNameColorChanged\":false,\"bottomStickedParameterColor\":null,\"bottomStickedParameterColorChanged\":false,\"headerTextColor\":null,\"headerTextColorChanged\":false,\"parameterTextColor\":null,\"parameterTextColorrChanged\":false,\"fontfamily\":\"UniversLTStd,Arial\",\"fontsize\":null,\"titlefontfamily\":null,\"titlesize\":null,\"parameterFontSize\":null,\"tabHeaderFontSize\":null,\"tabDataFontSize\":null,\"borderRadius\":0,\"textcolor\":null,\"txtColorChanged\":false,\"gridcolor\":null,\"grcolorchanged\":false,\"alternateGridColor\":null,\"altgrcolorchanged\":false,\"box1color\":null,\"box1colorchanged\":false,\"box2color\":null,\"box2colorchanged\":false,\"primarycolor\":null,\"secondarycolor\":null,\"xaxislabel\":false}},{\"urlSetup\":{\"urlParams\":false,\"drillUrlParams\":null}},{\"remarkSetup\":{\"remark\":false,\"remarkColumn\":null}},{\"layoutSetup\":{\"showFullTitleLength\":true,\"showFullinfoLength\":false,\"alignInformation\":\"center\",\"alignTitle\":\"left\",\"showFooter\":false,\"footer\":null,\"footerAlign\":\"center\",\"enableHtmlFormat\":false}},{\"drilldownSetup\":{\"paramvalues\":[{\"param\":null,\"operator\":null,\"value\":null}]}},{\"mapChartSetup\":{\"zoneColor\":false,\"configurableTooltip\":true,\"routes\":false,\"userDefinedPaths\":[{\"color\":\"#000000\",\"lineType\":\"Solid\"}],\"tooltipShadow\":true,\"tooltipBorder\":true,\"tooltipLocation\":false,\"tooltipTextColor\":\"#000000\",\"tooltipBorderColor\":\"#0000ff\",\"markerSize\":4,\"enableIconThreshold\":false,\"mapThresholdArray\":[{\"lowerLimit\":0,\"upperLimit\":0,\"color\":\"#000000\"}],\"enableLegend\":false,\"legendShapeLabels\":{}}}]',' ',NULL,NULL,'location',NULL,NULL,NULL,NULL,'latitude',NULL,'map',NULL,'42467',NULL,NULL,NULL,NULL),
+			('513490','3',NULL,'',NULL,NULL,NULL,'242',NULL,NULL,'PERCENTAGE',1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'FALSE',NULL,'0,100,,%','0',NULL,NULL,NULL,NULL,NULL,NULL,'105',NULL,NULL,NULL,'[{},{},{\"tooltip\":false},{\"minYValue\":0},{},{},{},{},{},{\"rotationXAngle\":null},{\"rotationX\":false},{},{},{},{\"alert\":false},{\"email\":null},{\"thresholdLineColor\":\"#ff0000\"},{\"xAxisStep\":false},{\"xAxisStepValue\":null},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{\"personaSetup\":{\"backgroundcolor\":null,\"colorChanged\":false,\"bordercolor\":null,\"bordercolorChanged\":false,\"headerColor\":null,\"headerColorChanged\":false,\"parameterColor\":null,\"parameterColorChanged\":false,\"parameterColumnNameColor\":null,\"parameterColumnNameColorChanged\":false,\"bottomStickedParameterColor\":null,\"bottomStickedParameterColorChanged\":false,\"headerTextColor\":null,\"headerTextColorChanged\":false,\"parameterTextColor\":null,\"parameterTextColorrChanged\":false,\"fontfamily\":\"UniversLTStd,Arial\",\"fontsize\":null,\"titlefontfamily\":null,\"titlesize\":null,\"parameterFontSize\":null,\"tabHeaderFontSize\":null,\"tabDataFontSize\":null,\"borderRadius\":0,\"textcolor\":null,\"txtColorChanged\":false,\"gridcolor\":null,\"grcolorchanged\":false,\"alternateGridColor\":null,\"altgrcolorchanged\":false,\"box1color\":null,\"box1colorchanged\":false,\"box2color\":null,\"box2colorchanged\":false,\"primarycolor\":null,\"secondarycolor\":null,\"xaxislabel\":false}},{\"urlSetup\":{\"urlParams\":false,\"drillUrlParams\":null}},{\"highchartSetup\":{}},{\"layoutSetup\":{\"showFullTitleLength\":true,\"showFullinfoLength\":false,\"alignInformation\":\"center\",\"alignTitle\":\"left\",\"showFooter\":false,\"footer\":null,\"footerAlign\":\"center\",\"enableHtmlFormat\":false}},{\"drilldownSetup\":{\"paramvalues\":[{\"param\":null,\"operator\":null,\"value\":null}]}}]','Forecast Accuracy',NULL,NULL,'',NULL,NULL,NULL,NULL,'',NULL,'gauge',NULL,'42467',NULL,NULL,NULL,NULL),
+			('513491','3','#ff0000',1,NULL,NULL,NULL,'274',NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'FALSE',NULL,'','0',NULL,NULL,NULL,NULL,NULL,NULL,'103',NULL,NULL,NULL,'[{},{},{\"tooltip\":false},{\"minYValue\":0},{},{},{},{},{},{},{},{},{},{},{\"alert\":false},{\"email\":null},{\"thresholdLineColor\":\"#ff0000\"},{\"xAxisStep\":false},{\"xAxisStepValue\":null},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{\"personaSetup\":{\"backgroundcolor\":null,\"colorChanged\":false,\"bordercolor\":null,\"bordercolorChanged\":false,\"headerColor\":null,\"headerColorChanged\":false,\"parameterColor\":null,\"parameterColorChanged\":false,\"parameterColumnNameColor\":null,\"parameterColumnNameColorChanged\":false,\"bottomStickedParameterColor\":null,\"bottomStickedParameterColorChanged\":false,\"headerTextColor\":null,\"headerTextColorChanged\":false,\"parameterTextColor\":null,\"parameterTextColorrChanged\":false,\"fontfamily\":\"UniversLTStd,Arial\",\"fontsize\":null,\"titlefontfamily\":null,\"titlesize\":null,\"parameterFontSize\":null,\"tabHeaderFontSize\":null,\"tabDataFontSize\":null,\"borderRadius\":0,\"textcolor\":null,\"txtColorChanged\":false,\"gridcolor\":null,\"grcolorchanged\":false,\"alternateGridColor\":null,\"altgrcolorchanged\":false,\"box1color\":null,\"box1colorchanged\":false,\"box2color\":null,\"box2colorchanged\":false,\"primarycolor\":null,\"secondarycolor\":null,\"xaxislabel\":false}},{\"urlSetup\":{\"urlParams\":false,\"drillUrlParams\":null}},{\"highchartSetup\":{}},{\"remarkSetup\":{\"remark\":false,\"remarkColumn\":null}},{\"tooltipSetup\":{\"tooltiplabel\":false,\"tooltiplabelname\":null}},{\"layoutSetup\":{\"showFullTitleLength\":true,\"showFullinfoLength\":false,\"alignInformation\":\"center\",\"alignTitle\":\"left\",\"showFooter\":false,\"footer\":null,\"footerAlign\":\"center\",\"enableHtmlFormat\":false}},{\"drilldownSetup\":{\"paramvalues\":[{\"param\":null,\"operator\":null,\"value\":null}]}},{\"lineChartSetup\":{\"logYAxis\":false,\"yaxisIntervalCheckBox\":false,\"yaxisIntervalValue\":null,\"yaxisIntervalExtended\":false,\"adjustyaxis\":false,\"regressionLine\":false,\"connectDots\":false}},{\"paginationSetup\":{\"enablePagination\":true,\"setElementsToDisplay\":false,\"limitFullScreen\":12,\"limitHalfScreen\":5}}]','On Time Delivery',NULL,NULL,'TXN_DATE',NULL,NULL,NULL,NULL,'COUNT',NULL,'line',NULL,'42467',NULL,NULL,NULL,NULL),
+			('513492','3',NULL,'',NULL,NULL,NULL,'242',NULL,NULL,'PERCENTAGE',1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'FALSE',NULL,'0,200,,','0',NULL,NULL,NULL,NULL,NULL,NULL,'122',NULL,NULL,NULL,'[{},{},{\"tooltip\":false},{\"minYValue\":0},{},{},{},{},{},{\"rotationXAngle\":null},{\"rotationX\":false},{},{},{},{\"alert\":false},{\"email\":null},{\"thresholdLineColor\":\"#ff0000\"},{\"xAxisStep\":false},{\"xAxisStepValue\":null},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{\"personaSetup\":{\"backgroundcolor\":null,\"colorChanged\":false,\"bordercolor\":null,\"bordercolorChanged\":false,\"headerColor\":null,\"headerColorChanged\":false,\"parameterColor\":null,\"parameterColorChanged\":false,\"parameterColumnNameColor\":null,\"parameterColumnNameColorChanged\":false,\"bottomStickedParameterColor\":null,\"bottomStickedParameterColorChanged\":false,\"headerTextColor\":null,\"headerTextColorChanged\":false,\"parameterTextColor\":null,\"parameterTextColorrChanged\":false,\"fontfamily\":\"UniversLTStd,Arial\",\"fontsize\":null,\"titlefontfamily\":null,\"titlesize\":null,\"parameterFontSize\":null,\"tabHeaderFontSize\":null,\"tabDataFontSize\":null,\"borderRadius\":0,\"textcolor\":null,\"txtColorChanged\":false,\"gridcolor\":null,\"grcolorchanged\":false,\"alternateGridColor\":null,\"altgrcolorchanged\":false,\"box1color\":null,\"box1colorchanged\":false,\"box2color\":null,\"box2colorchanged\":false,\"primarycolor\":null,\"secondarycolor\":null,\"xaxislabel\":false}},{\"urlSetup\":{\"urlParams\":false,\"drillUrlParams\":null}},{\"layoutSetup\":{\"showFullTitleLength\":true,\"showFullinfoLength\":false,\"alignInformation\":\"center\",\"alignTitle\":\"left\",\"showFooter\":false,\"footer\":null,\"footerAlign\":\"center\",\"enableHtmlFormat\":false}},{\"drilldownSetup\":{\"paramvalues\":[{\"param\":null,\"operator\":null,\"value\":null}]}},{\"speedometerChartSetup\":{\"configurableSpeedometer\":false,\"speedometerColors\":[{\"color\":\"#000000\"}],\"gaugeViewDataLabel\":false,\"gaugeViewLegend\":false}}]','Orders Per Minute',NULL,NULL,'',NULL,NULL,NULL,NULL,'',NULL,'speedometer',NULL,'42467',NULL,NULL,NULL,NULL),
+			('513493','3',NULL,1,NULL,NULL,NULL,'280',NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'FALSE',NULL,'','0',NULL,NULL,NULL,NULL,NULL,NULL,'120',NULL,NULL,NULL,'[{},{},{\"tooltip\":false},{\"minYValue\":0},{},{},{},{},{},{},{},{},{},{},{\"alert\":false},{\"email\":null},{\"thresholdLineColor\":\"#ff0000\"},{\"xAxisStep\":false},{\"xAxisStepValue\":null},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{\"personaSetup\":{\"backgroundcolor\":null,\"colorChanged\":false,\"bordercolor\":null,\"bordercolorChanged\":false,\"headerColor\":null,\"headerColorChanged\":false,\"parameterColor\":null,\"parameterColorChanged\":false,\"parameterColumnNameColor\":null,\"parameterColumnNameColorChanged\":false,\"bottomStickedParameterColor\":null,\"bottomStickedParameterColorChanged\":false,\"headerTextColor\":null,\"headerTextColorChanged\":false,\"parameterTextColor\":null,\"parameterTextColorrChanged\":false,\"fontfamily\":\"UniversLTStd,Arial\",\"fontsize\":null,\"titlefontfamily\":null,\"titlesize\":null,\"parameterFontSize\":null,\"tabHeaderFontSize\":null,\"tabDataFontSize\":null,\"borderRadius\":0,\"textcolor\":null,\"txtColorChanged\":false,\"gridcolor\":null,\"grcolorchanged\":false,\"alternateGridColor\":null,\"altgrcolorchanged\":false,\"box1color\":null,\"box1colorchanged\":false,\"box2color\":null,\"box2colorchanged\":false,\"primarycolor\":null,\"secondarycolor\":null,\"xaxislabel\":false}},{\"urlSetup\":{\"urlParams\":false,\"drillUrlParams\":null}},{\"highchartSetup\":{}},{\"remarkSetup\":{\"remark\":false,\"remarkColumn\":null}},{\"tooltipSetup\":{\"tooltiplabel\":false,\"tooltiplabelname\":null}},{\"layoutSetup\":{\"showFullTitleLength\":true,\"showFullinfoLength\":false,\"alignInformation\":\"center\",\"alignTitle\":\"left\",\"showFooter\":false,\"footer\":null,\"footerAlign\":\"center\",\"enableHtmlFormat\":false}},{\"drilldownSetup\":{\"paramvalues\":[{\"param\":null,\"operator\":null,\"value\":null}]}},{\"columnChartSetup\":{\"columnwidth\":13,\"borderradius\":7,\"logYAxis\":false,\"yaxisIntervalCheckBox\":false,\"yaxisIntervalValue\":null,\"yaxisIntervalExtended\":false,\"adjustyaxis\":false}},{\"paginationSetup\":{\"enablePagination\":true,\"setElementsToDisplay\":false,\"limitFullScreen\":12,\"limitHalfScreen\":5}}]','On Time Shipment',NULL,NULL,'DATE',NULL,NULL,NULL,NULL,'COUNT',NULL,'column',NULL,'42467',NULL,NULL,NULL,NULL),
+			('513494','3','#7B39B1','',NULL,NULL,NULL,'564',NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'FALSE',1,'','0',NULL,NULL,NULL,NULL,NULL,NULL,'149',NULL,NULL,NULL,'[{},{},{\"tooltip\":false},{\"minYValue\":0},{},{},{},{},{},{\"rotationXAngle\":null},{\"rotationX\":false},{},{},{},{\"alert\":false},{\"email\":null},{\"thresholdLineColor\":\"#ff0000\"},{\"xAxisStep\":false},{\"xAxisStepValue\":null},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{\"personaSetup\":{\"backgroundcolor\":null,\"colorChanged\":false,\"bordercolor\":null,\"bordercolorChanged\":false,\"headerColor\":null,\"headerColorChanged\":false,\"parameterColor\":null,\"parameterColorChanged\":false,\"parameterColumnNameColor\":null,\"parameterColumnNameColorChanged\":false,\"bottomStickedParameterColor\":null,\"bottomStickedParameterColorChanged\":false,\"headerTextColor\":null,\"headerTextColorChanged\":false,\"parameterTextColor\":null,\"parameterTextColorrChanged\":false,\"fontfamily\":\"UniversLTStd,Arial\",\"fontsize\":null,\"titlefontfamily\":null,\"titlesize\":null,\"parameterFontSize\":null,\"tabHeaderFontSize\":null,\"tabDataFontSize\":null,\"borderRadius\":0,\"textcolor\":null,\"txtColorChanged\":false,\"gridcolor\":null,\"grcolorchanged\":false,\"alternateGridColor\":null,\"altgrcolorchanged\":false,\"box1color\":null,\"box1colorchanged\":false,\"box2color\":null,\"box2colorchanged\":false,\"primarycolor\":null,\"secondarycolor\":null,\"xaxislabel\":false}},{\"urlSetup\":{\"urlParams\":false,\"drillUrlParams\":null}},{\"highchartSetup\":{}},{\"layoutSetup\":{\"showFullTitleLength\":true,\"showFullinfoLength\":false,\"alignInformation\":\"center\",\"alignTitle\":\"left\",\"showFooter\":false,\"footer\":null,\"footerAlign\":\"center\",\"enableHtmlFormat\":false}},{\"drilldownSetup\":{\"paramvalues\":[{\"param\":null,\"operator\":null,\"value\":null}]}},{\"heatMapSetup\":{\"showBlackDiagonal\":false,\"tooltipMessage\":\"{{value}} incidents of {{y}} are correlated with {{x}}\",\"minColor\":\"#ffffff\",\"borderCellColor\":\"#99CCFF\"}}]','Incidents Operations monitoring',NULL,NULL,'ROW_NAME',NULL,NULL,NULL,NULL,'PROD',NULL,'heatmap',NULL,'42467',NULL,NULL,NULL,NULL),
+			('513495','3',NULL,'',NULL,NULL,NULL,'229',NULL,NULL,'PERCENTAGE',1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'FALSE',NULL,'0,200,,','0',NULL,NULL,NULL,NULL,NULL,NULL,'137',NULL,NULL,NULL,'[{},{},{\"tooltip\":false},{\"minYValue\":0},{},{},{},{},{},{\"rotationXAngle\":null},{\"rotationX\":false},{},{},{},{\"alert\":false},{\"email\":null},{\"thresholdLineColor\":\"#ff0000\"},{\"xAxisStep\":false},{\"xAxisStepValue\":null},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{\"personaSetup\":{\"backgroundcolor\":null,\"colorChanged\":false,\"bordercolor\":null,\"bordercolorChanged\":false,\"headerColor\":null,\"headerColorChanged\":false,\"parameterColor\":null,\"parameterColorChanged\":false,\"parameterColumnNameColor\":null,\"parameterColumnNameColorChanged\":false,\"bottomStickedParameterColor\":null,\"bottomStickedParameterColorChanged\":false,\"headerTextColor\":null,\"headerTextColorChanged\":false,\"parameterTextColor\":null,\"parameterTextColorrChanged\":false,\"fontfamily\":\"UniversLTStd,Arial\",\"fontsize\":null,\"titlefontfamily\":null,\"titlesize\":null,\"parameterFontSize\":null,\"tabHeaderFontSize\":null,\"tabDataFontSize\":null,\"borderRadius\":0,\"textcolor\":null,\"txtColorChanged\":false,\"gridcolor\":null,\"grcolorchanged\":false,\"alternateGridColor\":null,\"altgrcolorchanged\":false,\"box1color\":null,\"box1colorchanged\":false,\"box2color\":null,\"box2colorchanged\":false,\"primarycolor\":null,\"secondarycolor\":null,\"xaxislabel\":false}},{\"urlSetup\":{\"urlParams\":false,\"drillUrlParams\":null}},{\"layoutSetup\":{\"showFullTitleLength\":true,\"showFullinfoLength\":false,\"alignInformation\":\"center\",\"alignTitle\":\"left\",\"showFooter\":false,\"footer\":null,\"footerAlign\":\"center\",\"enableHtmlFormat\":false}},{\"drilldownSetup\":{\"paramvalues\":[{\"param\":null,\"operator\":null,\"value\":null}]}},{\"speedometerChartSetup\":{\"configurableSpeedometer\":false,\"speedometerColors\":[{\"color\":\"#000000\"}],\"gaugeViewDataLabel\":false,\"gaugeViewLegend\":false}}]','Overall Efficiency',NULL,NULL,'',NULL,NULL,NULL,NULL,'',NULL,'speedometer',NULL,'42467',NULL,NULL,NULL,NULL),
+			('513496','3',NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'FALSE',NULL,'','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'[{},{},{},{\"minYValue\":0},{},{},{},{},{},{},{},{},{},{},{\"alert\":false},{\"email\":null},{\"thresholdLineColor\":\"#ff0000\"},{\"xAxisStep\":false},{\"xAxisStepValue\":null},{},{\"personaSetup\":{\"backgroundcolor\":null,\"colorChanged\":false,\"textcolor\":null,\"txtColorChanged\":false,\"bordercolor\":null,\"bordercolorChanged\":false,\"gridcolor\":null,\"grcolorchanged\":false,\"xaxislabel\":false,\"fontfamily\":\"UniversLTStd,Arial\",\"fontsize\":null,\"primarycolor\":null,\"secondarycolor\":null}},{\"remarkSetup\":{\"remark\":false,\"remarkColumn\":null}},{\"layoutSetup\":{\"showFullTitleLength\":true,\"showFullinfoLength\":false,\"alignInformation\":\"center\",\"alignTitle\":\"left\",\"showFooter\":false,\"footerAlign\":\"center\"}},{\"drilldownSetup\":{\"paramvalues\":[{\"param\":null,\"operator\":null,\"value\":null}]}},{\"columnChartSetup\":{\"columnwidth\":13,\"borderradius\":7,\"logYAxis\":false,\"yaxisIntervalCheckBox\":false,\"yaxisIntervalValue\":null,\"yaxisIntervalExtended\":false,\"adjustyaxis\":false}},{\"paginationSetup\":{\"enablePagination\":true,\"setElementsToDisplay\":false,\"limitFullScreen\":12,\"limitHalfScreen\":5}}]','Orders Per Day (LOBs)',NULL,NULL,'CC_NAME',NULL,NULL,NULL,NULL,'WATER_RAISING',NULL,'column',NULL,'42467',NULL,NULL,NULL,NULL);
+		</sql>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT dbs_widget_configuration OFF;
+		</sql>
+    </changeSet>
+    
+    <!--<changeSet author="ayushi.yadav" id="1620283295335-5">
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT sbx_configuration ON;
+		</sql>
+        <sql>
+			INSERT INTO sbx_configuration (id, is_registration_required, is_single_participation, orgid, restrict_exp_creation, team_size) 
+			values
+			('3','1','0','3','1','4');
+		</sql>
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT sbx_configuration OFF;
+		</sql>
+    </changeSet>
+    
+    <changeSet author="ayushi.yadav" id="1620283295335-11">
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT sbx_project ON;
+		</sql>
+		<sql>
+			INSERT INTO sbx_project (id, allow_model_upload, created_by, created_date, description, end_date, is_featured, is_open, is_private, last_registration_date, name, orgid, participation, start_date, experiment_type) 
+			values
+			('252','0','1','2021-11-28','The order life cycle starts with the time the order is raised online to the time it is delivered to the customer. We want to find out the reasons for delays at the warehouse. \n\nPotential factors\n - Hold Type :  Hold caused due to Order edit, Fraud Review Hold, Fraud Challenge Hold, Tax calculated Hold\n - Line type : Inline\n - Warehouse : Place from where order is being dispatched. Identified by Shipnode_Key\n - Time of day (T1) : Time the order is raised online to the time it is delivered to the warehouse\n - Time of day (T2) : Time spent in the warehouse\n - Time of day (T3) : Time the order took to go from warehouse to actual delivery location i,e; to the customer \n - Scac : Service by which orders are being delivered such as United States Postal Service(USPS), Delhivery etc.\n - Level Of Service : Order received by the customer on same day or within \'n\' days\n - Payment methods : Orders placed by the customer using credit card, debit card, upi payments, cash on delivery etc.\n\n\nThe objective is to find why T2 i.e; the time spent in warehouse is causing delay.','2023-01-30','1','1','0','2023-01-30','Exploratory Analysis of Order Management data\n','3','both','2021-10-11','3'),
+			('253','0','1','2021-11-28','Loans are the core business of banks. The main profit comes directly from the loan’s interest. The loan companies grant a loan after an intensive process of verification and validation. However, they still don’t have assurance if the applicant is able to repay the loan with no difficulties.\n\nLending loans  to \'risky\' applicants is the largest source of financial loss (called credit loss). The credit loss is the amount of money lost by the lender when the borrower refuses to pay or runs away with the money owed. In other words, borrowers who default cause the largest amount of loss to the lenders. In this case, the customers labelled as \'charged-off\' are the \'defaulters\'. If one is able to identify these risky loan applicants, then such loans can be reduced thereby cutting down the amount of credit loss. \n\nIdentification of such applicants is the aim exercise In other words, the company wants to understand the driving factors (or driver variables) behind loan default, i.e. the variables which are strong indicators of default. The company can utilize this knowledge for its portfolio and risk assessment.','2023-01-30','1','1','0','2023-01-30','Loan Applicant Prediction','3','both','2021-10-12','3'),
+			('254','0','1','2021-11-28','The SuperGlue benchmark is a collection of resources for training, evaluating, and analyzing natural language understanding systems.\nThe GLUE benchmark introduced a little over one year ago, offers a single-number metric that summarizes progress on a diverse set of such tasks, but performance on the benchmark has recently surpassed the level of non-expert humans, suggesting limited headroom for further research.  SuperGLUE, a new benchmark styled after GLUE with a new set of more difficult language understanding tasks, a software toolkit, and a public leader board.\n\nProject Approach: \n\nWe are leveraging Snorkel, a framework developed as part of Stanford DAWN research program to programmatically manage and build training data and Transfer Learning to speed up the training of deep neural network models.\nSnorkel provides Weak Supervision, Data Augmentation and Slicing capabilities. We are primarily leveraging Slicing Functions. Snorkel, slicing functions (SFs), handles the reality that many datasets have certain subsets or slices that are more important than others. In Snorkel, we can write SFs to\n(a) monitor specific slices\n(b) improve model performance over them by adding representational capacity targeted on a per-slice basis.\n\nTask: BoolQ (Boolean Questions)\n\nBoolQ is a question answering dataset for yes/no questions containing 15942 examples. These questions are naturally occurring ---they are generated in unprompted and unconstrained settings.\n\nExample:\nQuestion: do you always have to say check in chess\nPassage: In informal games, it is customary to announce check\'\' when making a move that puts the opponent\'s king in check. In formal competitions, however, check is rarely announced.\nLabel: false','2023-01-30','1','1','0','2023-01-30','SuperGLUE - BoolQ','3','both','2021-10-12','3'),
+			('255','0','1','2021-11-28','Analyze the tickets and report \n\n- Summary of Tickets : Process alerts, errors and incidents through a stream processing pipeline that performs correlation, auto incident creation and assignment, assisted root cause analysis, provide recommendations and take remedial actions.\n\n- Ticket Clustering : Create table to store enriched data of the created clusters. Perform clean ticket tasks, algorithms like NGram, Soundex, LDA, Phrase Extraction and prioritize the clusters accordingly.\n\n- SLA Analytics : Gives information regarding pending tickets, closed incidents, failed incidents, resolved incidents, incidents based on priority and many more and populates the dashboard accordingly.\n\n- EASE Analytics : Build pipeline for keyword mapping to identify EASE. Build pipeline to train model on historical data. Build pipeline to predict EASE for new tickets using trained model.\n\n- Correlation Analysis for Tickets : Big data stack to correlate information from multiple tools like incidents from ticketing tool, error events from log monitoring tools, performance events from application performance monitoring tools, infra events from infra monitoring tools and enable faster root cause analysis.','2023-01-30','1','1','0','2023-01-30','Ticket Analytics','3','both','2021-10-12','3');
+		</sql>
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT sbx_project OFF;
+		</sql>
+    </changeSet>
+    
+    <changeSet author="ayushi.yadav" id="1620283295335-6">
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT sbx_individual_participation ON;
+		</sql>
+        <sql>
+			INSERT INTO sbx_individual_participation (id, userid, projectid) 
+			values
+			('19','1','252'),
+			('20','1','253'),
+			('21','1','254'),
+			('22','1','255');
+		</sql>
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT sbx_individual_participation OFF;
+		</sql>
+    </changeSet>
+    
+    <changeSet author="ayushi.yadav" id="1620283295335-8">
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT sbx_project_img ON;
+		</sql>
+        <sql>
+        	INSERT INTO sbx_project_img (id, fileid, filename, mimetype, projectid, url) 
+			values
+			('142','expYY2022MM8DD25EE436eb7f47e7b4b22bbfba16b7a38b3c4','loan.jfif','image/jpeg','253','\\app\\uploads\\projectimagefiles\\expYY2022MM8DD25EE436eb7f47e7b4b22bbfba16b7a38b3c4\\loan.jfif'),
+			('143','expYY2022MM8DD25EEed2c49c4c79a4529984e94805c74ee6d','exploratory.png','image/png','252','\\app\\uploads\\projectimagefiles\\expYY2022MM8DD25EEed2c49c4c79a4529984e94805c74ee6d\\exploratory.png'),
+			('144','expYY2022MM8DD25EEeda410bfeb2a4e5a9cba96369482a334','BoolQ.png','image/png','254','\\app\\uploads\\projectimagefiles\\expYY2022MM8DD25EEeda410bfeb2a4e5a9cba96369482a334\\BoolQ.png'),
+			('145','expYY2022MM8DD25EE74849c5ab6684b1c86288fc1320f5484','tickets.jpg','image/jpeg','255','\\app\\uploads\\projectimagefiles\\expYY2022MM8DD25EE74849c5ab6684b1c86288fc1320f5484\\tickets.jpg');  	
+        </sql>
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT sbx_project_img OFF;
+		</sql>
+    </changeSet>
+    
+    <changeSet author="ayushi.yadav" id="1620283295335-9">
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT sbx_project_owners ON;
+		</sql>
+        <sql>
+        	INSERT INTO sbx_project_owners (id, projectid, userid) 
+			values
+			('11','253','1'),
+			('12','255','1'),
+			('13','252','1'),
+			('14','254','1');
+        </sql>
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT sbx_project_owners OFF;
+		</sql>
+    </changeSet>
+    
+    <changeSet author="ayushi.yadav" id="1620283295335-10">
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT sbx_solution ON;
+		</sql>
+        <sql>
+	        INSERT INTO sbx_solution (id, created_date, demo_links, description, name, projectid, submitted_by, teamid, final_score) 
+			values
+			('192','2021-11-30','[{\"name\":\"Macrobase\",\"link\":\"https://myzul02o:9092/#/public/job/0098a1f2-e44a-4069-9ee6-011fa5cbd9db\",\"type\":\"Iframable\"}]','Exploratory Analysis of Order Management data to Speed Up the Procurement Timeline\n','Exploratory Analysis of Order Management data','252','1',NULL,NULL),
+			('193','2021-11-30','[]','The above problem is a clear classification problem as we need to classify whether the Loan_Status is yes or no. So this can be solved by any of the classification techniques like\n\nLogistic Regression .\nDecision Tree Algorithm.\nRandom Forest Technique.','Predicting the loan application status using ML','253','1',NULL,NULL),
+			('194','2021-10-30','[]','Solution for BoolQ Task - SuperGLUE','Task - BoolQ (Boolean Question)','254','1',NULL,NULL),
+			('195','2021-11-30','[{\"name\":\"Dashboard\",\"link\":\"OCC/43177\",\"type\":\"Dashboard\"},{\"name\":\"Clustering LDA\",\"link\":\"Leap/ACMCLSTR21224\",\"type\":\"Pipeline\"},{\"name\":\"Clustering Soundex\",\"link\":\"Leap/ACMCLSTR99942\",\"type\":\"Pipeline\"}]','The solution uses the interactive LEAP ticket dashboard that tracks ticketing information. This gives information about Total Tickets, Critical, High, Medium, Low Priority Tickets, Average duration for different types of tickets raised. It also gives information about Incidents by Top Clusters. \n\n- About Latent Dirichlet Allocation (LDA)\nClustering: is the task of grouping a set of objects in such a way that objects in the same group (called a cluster) are more similar (in some sense or another) to each other than to those in other groups (clusters). Eg. LDA Clustering\nTopic modeling: Topic modeling is a type of statistical modeling for discovering the abstract “topics” that occur in a collection of documents.\nLDA: LDA is an example of topic model and is used to classify text in a document to a particular topic. It builds a topic per document model and words per topic model, modeled as Dirichlet distributions.\nLDA Clustering Steps:\nStep 1 : Tell the algorithm how many topics we think there are. We can either use an informed estimate (e.g. results from a previous analysis), or simply trial-and-error.\nStep 2 : The algorithm will assign every word to a temporary topic. in analyzing actual documents, function words (e.g. the, and, my) are removed and not assigned to any topics.\nStep 3 :(iterative) The algorithm will check and update topic assignments, looping through each word in every document. For each word, its topic assignment is updated based on two criteria:\nHow prevalent is that word across topics?\nHow prevalent are topics in the document?\nIt builds a topic per document model and words per topic model, modeled as Dirichlet distributions.\n	\n- About Soundex\nSoundex : Soundex is a phonetic algorithm for indexing names after English pronunciation of sound. SUBSTRING() is used on the result to get a standard soundex string. All nonalphabetic characters in str are ignored. All international alphabetic characters outside the A-Z range are treated as vowels.\nSOUNDEX() function : MySQL SOUNDEX() function returns soundex string of a string. If two words sound the same, they should have the same Soundex string. If two words sound similar, but not exactly the same, their Soundex string might look similar but not exactly the same.','Ticket Analytics','255','1',NULL,NULL);
+        </sql>
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT sbx_solution OFF;
+		</sql>
+    </changeSet>
+    
+    <changeSet author="ayushi.yadav" id="1615300415555-102">
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT sbx_solution_github ON;
+		</sql>
+        <sql>
+	        INSERT INTO sbx_solution_github (id, repository_name, repository_url, solution_id) 
+			values
+			('1','experiment-252-solution-192-1634043621','https://infygithub.ad.infosys.com/sandbox/experiment-252-solution-192-1634043621','192'),
+			('2','experiment-253-solution-193-1634102003','https://infygithub.ad.infosys.com/sandbox/experiment-253-solution-193-1634102003','193'),
+			('3','experiment-254-solution-194-1634102184','https://infygithub.ad.infosys.com/sandbox/experiment-254-solution-194-1634102184','194'),
+			('4','experiment-255-solution-195-1634102365','https://infygithub.ad.infosys.com/sandbox/experiment-255-solution-195-1634102365','195');
+        </sql>
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT sbx_solution_github OFF;
+		</sql>
+    </changeSet>-->
+	    
+	</databaseChangeLog>

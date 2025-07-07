@@ -1,0 +1,50 @@
+#parent {
+   color:#0a142f !important;
+    background-repeat: no-repeat;
+    background-position-y: center;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#child {
+    background: white;
+    padding: 7%;
+}
+.button-color {
+    background-color:    #0a142f !important;
+    color: white !important;
+}
+.pwdhide {
+    float: right;
+    color: black;
+    margin-right: 0vh;
+    margin-top: -3vh;
+}
+
+.pwdhidereg {
+    float: right;
+    color: black;
+    margin-right: -4vh;
+    margin-top: -2.6vh;
+}
+input.mat-mdc-input-element{
+    margin-top: 0.9375em;
+}
+
+.example-container-logout ::ng-deep .mdc-text-field {
+    display: contents;
+}
+
+.example-container-logout ::ng-deep .mat-mdc-form-field, .mat-mdc-floating-label {
+    line-height: 12px;
+}
+
+.example-container-logout ::ng-deep .mat-mdc-form-field-infix {
+    min-height: 40px !important;
+}
+
+.example-container-logout ::ng-deep .mdc-text-field--no-label:not(.mdc-text-field--outlined):not(.mdc-text-field--textarea) .mat-mdc-form-field-infix {
+	padding-top: 1px;
+	padding-bottom: 0px;
+}

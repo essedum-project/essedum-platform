@@ -1,0 +1,8 @@
+id,questionnaire_name,dimension_level,portfolio_id,description,portfolio_name,is_active,comment
+"133","SRE Questionnaire","NULL","1","NULL","Core","1","NULL"
+143,ADM,NULL,1,NULL,Core,1,"NULL"
+144,Responsible AI,NULL,1,NULL,Core,1,"NULL"
+150,AMS,NULL,1,NULL,Core,1,"NULL"
+"168","Software Engineering","NULL","1","NULL","Core","1","NULL"
+167,HR,NULL,1,NULL,Core,1,"NULL"
+"175","OPQ_Questionnaire","NULL","1","NULL","Core","1","NULL"

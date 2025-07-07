@@ -1,0 +1,30 @@
+.aip-center-align{
+    align-content: center;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+input[type="file"] {
+    padding: 15px;
+}.lfx-form-field {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.lfx-button-group {
+  margin-top: 16px;
+  gap: 8px;
+}
+
+.lfx-label {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+.test-btn{
+ background-color: #0a142f; 
+ color: white;
+}
+.test-btn:hover{
+background:#0094ff; 
+color:white;
+}

@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+	<!--<changeSet author="Leap (generated)" id="1615300415555-80">
+		<createTable tableName="sbx_assessment">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="criteria_id" type="INT" />
+			<column name="project_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-81">
+		<createTable tableName="sbx_configuration">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="is_registration_required" type="TINYINT" />
+			<column name="is_single_participation" type="TINYINT" />
+			<column name="orgid" type="INT" />
+			<column name="restrict_exp_creation" type="TINYINT" />
+			<column name="team_size" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-82">
+		<createTable tableName="sbx_criteria">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="criterianame" type="VARCHAR(255)" />
+			<column name="type" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-83">
+		<createTable tableName="sbx_criteria_options">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="criteriaoption" type="VARCHAR(255)" />
+			<column name="criteria_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-84">
+		<createTable tableName="sbx_datasets_approval">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="approved_date" type="date" />
+			<column name="approver" type="INT" />
+			<column name="datasetid" type="INT" />
+			<column name="requested_date" type="date" />
+			<column name="status" type="VARCHAR(255)" />
+			<column name="updated_date" type="date" />
+			<column name="userid" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-85">
+		<createTable tableName="sbx_individual_participation">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="userid" type="INT" />
+			<column name="projectid" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-86">
+		<createTable tableName="sbx_project">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="allow_model_upload" type="TINYINT" />
+			<column name="created_by" type="INT" />
+			<column name="created_date" type="date" />
+			<column name="description" type="TEXT" />
+			<column name="end_date" type="date" />
+			<column name="is_featured" type="TINYINT" />
+			<column name="is_open" type="TINYINT" />
+			<column name="is_private" type="TINYINT" />
+			<column name="last_registration_date" type="date" />
+			<column name="name" type="TEXT" />
+			<column name="orgid" type="INT" />
+			<column name="participation" type="VARCHAR(20)" />
+			<column name="start_date" type="date" />
+			<column name="experiment_type" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-87">
+		<createTable tableName="sbx_project_datasets">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="datasetid" type="INT" />
+			<column name="projectid" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-88">
+		<createTable tableName="sbx_project_evaluators">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="projectid" type="INT" />
+			<column name="userid" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-89">
+		<createTable tableName="sbx_project_img">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="fileid" type="VARCHAR(255)" />
+			<column name="filename" type="VARCHAR(255)" />
+			<column name="mimetype" type="VARCHAR(255)" />
+			<column name="projectid" type="INT" />
+			<column name="url" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-90">
+		<createTable tableName="sbx_project_joinstatus">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="requested_date" type="date" />
+			<column name="status" type="VARCHAR(20)" />
+			<column name="userid" type="INT" />
+			<column name="projectid" type="INT" />
+			<column name="teamid" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-91">
+		<createTable tableName="sbx_project_owners">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="projectid" type="INT" />
+			<column name="userid" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-92">
+		<createTable tableName="sbx_project_viewstatus">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="approved_date" type="date" />
+			<column name="approver" type="INT" />
+			<column name="requested_date" type="date" />
+			<column name="status" type="VARCHAR(20)" />
+			<column name="updated_date" type="date" />
+			<column name="userid" type="INT" />
+			<column name="projectid" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-93">
+		<createTable tableName="sbx_solution">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="created_date" type="date" />
+			<column name="demo_links" type="TEXT" />
+			<column name="description" type="TEXT" />
+			<column name="name" type="TEXT" />
+			<column name="projectid" type="INT" />
+			<column name="submitted_by" type="INT" />
+			<column name="teamid" type="INT" />
+			<column name="final_score" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-94">
+		<createTable tableName="sbx_solution_assessment">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="assessmentid" type="INT" />
+			<column name="criteriaoptionid" type="TEXT" />
+			<column name="rating" type="VARCHAR(255)" />
+			<column name="solutionid" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-95">
+		<createTable tableName="sbx_solution_files">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="description" type="VARCHAR(255)" />
+			<column name="fileid" type="VARCHAR(255)" />
+			<column name="filename" type="VARCHAR(255)" />
+			<column name="mimetype" type="VARCHAR(255)" />
+			<column name="solutionid" type="INT" />
+			<column name="url" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-96">
+		<createTable tableName="sbx_team">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="created_date" type="date" />
+			<column name="description" type="VARCHAR(255)" />
+			<column name="name" type="VARCHAR(255)" />
+			<column name="orgid" type="INT" />
+			<column name="owner" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-97">
+		<createTable tableName="sbx_team_joinstatus">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="approved_date" type="date" />
+			<column name="approver" type="INT" />
+			<column name="requested_date" type="date" />
+			<column name="status" type="VARCHAR(20)" />
+			<column name="updated_date" type="date" />
+			<column name="userid" type="INT" />
+			<column name="teamid" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-98">
+		<createTable tableName="sbx_team_members">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="userid" type="INT" />
+			<column name="teamid" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-99">
+		<createTable tableName="sbx_team_projects">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="projectid" type="INT" />
+			<column name="teamid" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-101">
+		<createTable tableName="sbx_experiment_type">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="experiment_type" type="VARCHAR(20)" />
+			<column name="allowed_file_types" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-102">
+		<createTable tableName="sbx_solution_github">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="repository_name" type="VARCHAR(255)" />
+			<column name="repository_url" type="VARCHAR(255)" />
+			<column name="solution_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="ayushi.yadav" id="1615300415555-103">
+		<createTable tableName="sbx_organization_banner">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="fileid" type="VARCHAR(255)" />
+			<column name="filename" type="VARCHAR(255)" />
+			<column name="mimetype" type="VARCHAR(255)" />
+			<column name="orgid" type="INT" />
+			<column name="url" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	
+	
+	<changeSet author="Leap (generated)" id="1312v0-sbx-104">
+		<createTable tableName="sbx_experiment_configuration">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="projectid" type="INT" />
+			<column name="custom_configurations" type="TEXT" />
+		</createTable>
+	</changeSet>
+	
+	
+	<changeSet author="Leap" id="2v1-sbx-12">
+		<createTable tableName="sbx_discussion">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="client_id" type="INT" />
+			<column name="details" type="TEXT" />
+			<column name="owner_id" type="INT" />
+			<column name="last_updated_by" type="VARCHAR(255)" />
+			<column name="last_updated_ts" type="datetime" />
+			<column name="is_draft" defaultValueBoolean="false"
+				type="boolean" />
+			<column name="artefacts" type="VARCHAR(45)" />
+			<column name="orgid" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-sbx-13">
+		<createTable tableName="sbx_discussion_comment">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="discussion_id" type="INT" />
+			<column name="user_id" type="INT" />
+			<column name="comment" type="VARCHAR(45)" />
+			<column name="last_updated_by" type="VARCHAR(255)" />
+			<column name="last_updated_ts" type="datetime" />
+			<column name="artefacts" type="VARCHAR(45)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-sbx-14">
+		<createTable tableName="sbx_discussion_reaction">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="discussion_id" type="INT" />
+			<column name="user_id" type="INT" />
+			<column name="reaction" type="BIT(1)" />
+			<column name="last_updated_by" type="VARCHAR(255)" />
+			<column name="last_updated_ts" type="datetime" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-sbx-15">
+		<createTable tableName="sbx_discussion_shares">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="discussion_id" type="INT" />
+			<column name="user_id" type="INT" />
+			<column name="shared_with" type="INT" />
+			<column name="last_updated_by" type="VARCHAR(255)" />
+			<column name="last_updated_ts" type="datetime" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-sbx-16">
+		<createTable tableName="sbx_discussion_tags">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="discussion_id" type="INT" />
+			<column name="tag" type="VARCHAR(45)" />
+			<column name="last_updated_by" type="VARCHAR(255)" />
+			<column name="last_updated_ts" type="datetime" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-sbx-17">
+		<createTable tableName="sbx_artefact">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="TEXT" />
+			<column name="description" type="TEXT" />
+			<column name="fileid" type="VARCHAR(45)" />
+			<column name="mimetype" type="VARCHAR(255)" />
+			<column name="orgid" type="INT" />
+			<column name="metadata" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-sbx-18">
+		<createTable tableName="sbx_comment_reaction">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="comment_id" type="INT" />
+			<column name="user_id" type="INT" />
+			<column name="reaction" type="BIT(1)" />
+			<column name="last_updated_by" type="VARCHAR(255)" />
+			<column name="last_updated_ts" type="datetime" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-sbx-19">	
+		<addColumn tableName="sbx_discussion_comment">
+			<column name="parent_comment" type="INT" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-sbx-20">
+		<createTable tableName="sbx_category">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)" />
+			<column name="type" type="VARCHAR(30)" />
+			<column name="abbreviation" type="VARCHAR(10)" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap" id="2v1-sbx-21">
+		<createTable tableName="sbx_discussion_category">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="discussion_id" type="INT" />
+			<column name="category_id" type="INT" />
+		</createTable>
+	</changeSet>
+	
+	<changeSet author="Leap" id="2v1-sbx-22">
+		<createTable tableName="sbx_user_subscription">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="user_id" type="INT" />
+			<column name="category_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-sbx-23">
+		<createTable tableName="sbx_tags">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)" />
+			<column name="type" type="VARCHAR(255)" />
+			<column name="parent_id" type="INT" />
+			<column name="orgid" type="INT" />
+			<column name="artefact" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-sbx-24">
+		<createTable tableName="sbx_artefact_tags">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="upload_artefact_id" type="INT" />
+			<column name="tag_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="2v1-sbx-25">
+		<createTable tableName="sbx_basket">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)" />
+			<column name="created_by" type="INT" />
+			<column name="artefacts" type="VARCHAR(45)" />
+			<column name="orgid" type="INT" />
+		</createTable>
+	</changeSet>-->
+</databaseChangeLog>

@@ -1,0 +1,127 @@
+{
+	"$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+	"version": 1,
+	"newProjectRoot": "projects",
+	"projects": {
+		"aip-app": {
+			"projectType": "application",
+			"schematics": {
+				"@schematics/angular:component": {
+					"style": "scss"
+				}
+			},
+			"root": "projects/aip-app",
+			"sourceRoot": "projects/aip-app/src",
+			"prefix": "app",
+			"architect": {
+				"build": {
+					"builder": "ngx-build-plus:browser",
+					"options": {
+						"outputPath": "dist/aip-app",
+						"index": "projects/aip-app/src/index.html",
+						"main": "projects/aip-app/src/main.ts",
+						"polyfills": "projects/aip-app/src/polyfills.ts",
+						"tsConfig": "projects/aip-app/tsconfig.app.json",
+						"inlineStyleLanguage": "scss",
+						"assets": [
+							"projects/aip-app/src/favicon.ico",
+							"projects/aip-app/src/assets"
+						],
+						"styles": [
+							"projects/aip-app/src/styles.scss"
+						],
+						"scripts": [
+							"node_modules/marked/marked.min.js"
+						],
+						"extraWebpackConfig": "projects/aip-app/webpack.config.js",
+						"commonChunk": false
+					},
+					"configurations": {
+						"production": {
+							"budgets": [
+								{
+									"type": "initial",
+									"maximumWarning": "500kb",
+									"maximumError": "2mb"
+								},
+								{
+									"type": "anyComponentStyle",
+									"maximumWarning": "2kb",
+									"maximumError": "20kb"
+								}
+							],
+							"fileReplacements": [
+								{
+									"replace": "projects/aip-app/src/environments/environment.ts",
+									"with": "projects/aip-app/src/environments/environment.prod.ts"
+								}
+							],
+							"outputHashing": "all",
+							"extraWebpackConfig": "projects/aip-app/webpack.prod.config.js"
+						},
+						"development": {
+							"buildOptimizer": false,
+							"optimization": false,
+							"vendorChunk": true,
+							"extractLicenses": false,
+							"sourceMap": true,
+							"namedChunks": true
+						}
+					},
+					"defaultConfiguration": "production"
+				},
+				"serve": {
+					"builder": "ngx-build-plus:dev-server",
+					"configurations": {
+						"production": {
+							"browserTarget": "aip-app:build:production",
+							"extraWebpackConfig": "projects/aip-app/webpack.prod.config.js"
+						},
+						"development": {
+							"browserTarget": "aip-app:build:development"
+						}
+					},
+					"defaultConfiguration": "development",
+					"options": {
+						"port": 4201,
+						"publicHost": "http://localhost:4201",
+						"extraWebpackConfig": "projects/aip-app/webpack.config.js"
+					}
+				},
+				"extract-i18n": {
+					"builder": "ngx-build-plus:extract-i18n",
+					"options": {
+						"browserTarget": "aip-app:build",
+						"extraWebpackConfig": "projects/aip-app/webpack.config.js"
+					}
+				},
+				"test": {
+					"builder": "@angular-devkit/build-angular:karma",
+					"options": {
+						"main": "projects/aip-app/src/test.ts",
+						"polyfills": "projects/aip-app/src/polyfills.ts",
+						"tsConfig": "projects/aip-app/tsconfig.spec.json",
+						"karmaConfig": "projects/aip-app/karma.conf.js",
+						"inlineStyleLanguage": "scss",
+						"assets": [
+							"projects/aip-app/src/favicon.ico",
+							"projects/aip-app/src/assets"
+						],
+						"styles": [
+							"projects/aip-app/src/styles.scss",				
+  							"node_modules/bootstrap/dist/css/bootstrap.min.css"
+
+						],
+						"scripts": [
+							"node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+
+						]
+					}
+				}
+			}
+		}
+  },
+  "cli": {
+    "analytics": false
+  }
+}

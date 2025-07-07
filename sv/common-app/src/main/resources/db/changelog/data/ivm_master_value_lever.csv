@@ -1,0 +1,37 @@
+id,name,type,category,parent_id,parent_name,parent_category,description,last_updated_date,last_updated_by,usm_project_id
+12,Optimize organization structure and governance,Value Lever,L1,NULL,NULL,NULL,Optimize organization structure and governance,NULL,NULL,1
+18,Improve Availability,Value Lever,L1,NULL,NULL,NULL,Improve Availability,NULL,NULL,1
+19,"Know your risks (identifying, labeling, quantifying, prioritizing areas of concern)",Operational Lever,L2,18,Improve Availability,L1,"Know your risks (identifying areas of concern, labeling them, quantifying them, and prioritizing them)",NULL,NULL,1
+21,Improve Performance,Value Lever,L1,NULL,NULL,NULL,Improve Performance,NULL,NULL,1
+22,Application and infrastructure analytics to identify performance and areas for optimization,Operational Lever,L2,21,Improve Performance,L1,Application and infrastructure analytics to identify performance and areas for optimization,NULL,NULL,1
+31,Centralize product organization structure and associated processes,Operational Lever,L2,12,Optimize organization structure and governance,L1,Centralize product organization structure and associated processes,NULL,NULL,1
+43,Optimize change management processes,Value Lever,L1,NULL,NULL,NULL,Optimize change management processes,NULL,NULL,1
+44,Improve change management using automation and standardization of processes,Operational Lever,L2,43,Optimize change management processes,L1,Improve change management using automation and standardization of processes,NULL,NULL,1
+47,Optimize request fulfillment processes,Value Lever,L1,NULL,NULL,NULL,Optimize request fulfillment processes,NULL,NULL,1
+48,Improve request fulfillment using chatbots and automation,Operational Lever,L2,47,Optimize request fulfillment processes,L1,Improve request fulfillment using chatbots and automation,NULL,NULL,1
+52,Improve User Experience,Value Lever,L1,NULL,NULL,NULL,Improve User Experience,NULL,NULL,1
+53,Reduce Cost,Value Lever,L1,NULL,NULL,NULL,Reduce Cost,NULL,NULL,1
+54,Reduce Time to Market,Value Lever,L1,NULL,NULL,NULL,Reduce Time to Market,NULL,NULL,1
+55,Improve Reliability,Value Lever,L1,NULL,NULL,NULL,Improve Reliability,NULL,NULL,1
+58,"Optimize Processes, applications, services",Operational Lever,L2,52,Improve User Experience,L1,Improve User Experience,NULL,NULL,1
+59,Increase the usage of AI/ML and automation,Operational Lever,L2,53,Reduce Cost,L1,Increase the usage of AI/ML and automation,NULL,NULL,1
+60,Adopt DevOps and DevSecOps practices,Operational Lever,L2,54,Reduce Time to Market,L1,Improve application processes,NULL,NULL,1
+61,Increase proactive resolutions at early stages,Operational Lever,L2,54,Reduce Time to Market,L1,Increase proactive resolutions at early stages,NULL,NULL,1
+62,Improve usage of Tools and Accelerators,Operational Lever,L2,54,Reduce Time to Market,L1,Improve usage of Tools and Accelerators,NULL,NULL,1
+63,Optimize problem management processes,Operational Lever,L2,52,Improve User Experience,L1,Improve User Experience,NULL,NULL,1
+65,Increase usage of Self service and chatbots,Operational Lever,L2,52,Improve User Experience,L1,Improve User Experience,NULL,NULL,1
+66,Adopt Agile processes,Operational Lever,L2,54,Reduce Time to Market,L1,Adopt Agile processes,NULL,NULL,1
+67,"Improve performance, security, availability",Operational Lever,L2,55,Improve Reliability,L1,"Improve performance, security, availability",NULL,NULL,1
+109,Reduce Risk,value lever,L1,NULL,NULL,NULL,NULL,NULL,NULL,1
+114,Increase profitability,Operational Lever,L2,5,Improve Topline,L1,NULL,NULL,NULL,1
+116,Improve Financial Planning & Analysis,Operational Lever,L2,114,Increase profitability,NULL,NULL,NULL,NULL,1
+122,Improve Internal Control,Operational Lever,L2,109,Reduce Risk,L1,NULL,NULL,NULL,1
+"127","Reduce cycle time","Operational Lever","L2","5","Improve Topline","L1","NULL","NULL","NULL",1
+"128","Improve Hire Quality","Operational Lever","L2","53","Reduce Cost","L1","NULL","NULL","NULL",1
+"129","Improve productivity","Operational Lever","L2","53","Reduce Cost","L1","NULL","NULL","NULL",1
+"130","Reduce hiring workforce ","Operational Lever","L2","53","Reduce Cost","L1","NULL","NULL","NULL",1
+"131","Reduce vendor dependency","Operational Lever","L2","53","Reduce Cost","L1","NULL","NULL","NULL",1
+"132","Reduce bad hires","Operational Lever","L2","53","Reduce Cost","L1","NULL","NULL","NULL",1
+"5","Improve Topline",Value Lever,"L1","NULL","NULL","NULL","NULL","NULL","NULL",1
+"13","Simplify organization, eliminate role map","Operational Lever","L2","12","Optimize organization structure and governance","L1","Simplify organization, eliminate role map","NULL",NULL,1
+"137","Reduce Time to Market","Value Lever","L1",NULL,NULL,NULL,"Reduce Time to Market",NULL,NULL,1        

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+	<include file="db/changelog/bcc/bcc.xml" context="fresh" />
+	<!--include file="db/changelog/bjm/bjm.xml" context="fresh" /-->
+	<include file="db/changelog/ccl/ccl.xml" context="fresh" />
+	<!--include file="db/changelog/cfm/cfm.xml" context="fresh" /-->
+	<include file="db/changelog/cip/cip.xml" context="fresh" />
+	<include file="db/changelog/common/data/3v0/cip/cip_2v13to300.xml" context="2v13to300" />
+	<include file="db/changelog/dbs/dbs.xml" context="fresh" />
+	<include file="db/changelog/icm/icm.xml" context="fresh" />
+	<include file="db/changelog/sre/sre.xml" context="fresh" />
+	<!--include file="db/changelog/twb/twb.xml" context="fresh" /--> 
+	<include file="db/changelog/usm/usm.xml" context="fresh" />
+	<!--include file="db/changelog/sbx/deletesbx.xml" context="fresh" />
+	<include file="db/changelog/sbx/sbx.xml" context="fresh" /-->
+	<include file="db/changelog/cap/cap.xml" context="fresh" />
+	<include file="db/changelog/tad/tad.xml" context="fresh" />
+	<!--include file="db/changelog/grh/grh.xml" context="fresh" />
+	<include file="db/changelog/btm/btm.xml" context="fresh" />
+	<include file="db/changelog/svy/svy.xml" context="fresh" />
+	<include file="db/changelog/eda/eda.xml" context="fresh" />
+	<include file="db/changelog/eda/eda.xml" context="2v13to300" />
+	<include file="db/changelog/ivm/ivm.xml" context="fresh" /-->  
+	<include file="db/changelog/wflw/wflw.xml" context="fresh" />
+
+
+
+	<include file="db/changelog/data/data.xml" context="fresh" />
+	<include file="db/changelog/acme/acme.xml" context="fresh" />
+	<include file="db/changelog/acme/Leo-DT.xml" context="fresh" />
+	<include file="db/changelog/acme/Leo-appd.xml" context="fresh" />
+	<include file="db/changelog/data/1312v0/masterdata.xml" context="fresh" />
+	<include file="db/changelog/data/2v0/masterdata.xml" context="fresh" />	
+	<include file="db/changelog/cip/constraint.xml" context="fresh" />
+	<include file="db/changelog/common/data/3v0/cip/cip_constraint_2v13to300.xml" context="2v13to300" />
+	<include file="db/changelog/data/2v1/masterdata.xml" context="fresh" />
+	<include file="db/changelog/test/test.xml" context="test and fresh" />
+	<include file="db/changelog/data/2v2/masterdata.xml" context="fresh" />
+	
+
+	<include file="db/changelog/cap/constraint.xml" context="fresh" />
+	<!--include file="db/changelog/bcc/constraint.xml" context="fresh" />
+	<include file="db/changelog/bjm/constraint.xml" context="fresh" /-->
+	<include file="db/changelog/ccl/constraint.xml" context="fresh" />
+	<!--include file="db/changelog/cfm/constraint.xml" context="fresh" /-->
+	<include file="db/changelog/dbs/constraint.xml" context="fresh" />
+	<include file="db/changelog/icm/constraint.xml" context="fresh" />
+	<!--include file="db/changelog/sre/constraint.xml" context="fresh" />
+    <include file="db/changelog/twb/constraint.xml" context="fresh" /-->
+	<include file="db/changelog/usm/constraint.xml" context="fresh" />
+	<!--include file="db/changelog/sbx/constraint.xml" context="fresh" /-->
+	<include file="db/changelog/tad/constraint.xml" context="fresh" />
+	<!--include file="db/changelog/btm/constraint.xml" context="fresh" />
+	<include file="db/changelog/svy/constraint.xml" context="fresh" />
+	<include file="db/changelog/eda/constraint.xml" context="fresh" />
+	<include file="db/changelog/eda/constraint.xml" context="2v13to300" />
+	<include file="db/changelog/ivm/constraint.xml" context="fresh" /-->
+	<include file="db/changelog/wflw/constraint.xml" context="fresh" />
+	<!--include file="db/changelog/bjm/bjm1311.xml" context="fresh" /-->
+	<include file="db/changelog/data/2v3/masterdata.xml" context="fresh" />
+	<include file="db/changelog/common/data/3v0/masterdata.xml" context="2v13to300" />
+	<include file="db/changelog/data/3v0/masterdataWFLW.xml" context="2v13to300" />
+    <include file="db/changelog/common/data/3v0/aip_data.xml" context="2v13to300" />
+	<include file="db/changelog/common/data/3v0/aip_data_postgres.xml" context="2v13to300" />
+	<include file="db/changelog/acme/dev/usm.xml" context="2v13to300" />
+	<include file="db/changelog/acme/qa/usm.xml" context="qa" />
+
+	<!--include file="db/changelog/acme/3v0/sre/sre.xml" context="acme" />
+	<include file="db/changelog/acme/3v0/eda/eda.xml" context="acme" />
+	<include file="db/changelog/acme/3v0/twb/twb.xml" context="acme" /-->
+	<include file="db/changelog/acme/1312v0/usm/usm.xml" context="acme" />
+	<include file="db/changelog/acme/2v0/usm/usm.xml" context="acme" />
+	<include file="db/changelog/acme/2v1/usm/usm.xml" context="acme" />
+	<include file="db/changelog/acme/3v0/usm/usm.xml" context="acme" />
+    <include file="db/changelog/acme/3v0/dbs/dbs.xml" context="acme" />
+	<!--include file="db/changelog/acme/2v3/cfm/cfm.xml" context="acme" /-->
+
+	<include file="db/changelog/acme/3v0/cip/cip.xml" context="acme" />
+	<include file="db/changelog/300_to_310/300_to_310.xml" context="300to310" />
+	<!-- <include file="db/changelog/2v13to300/acme/cip/cip.xml" context="acme_2v13to300" /> -->
+	<include file="db/changelog/300_to_310/acme/acme.xml" context="300to310-acme" />
+	<include file="db/changelog/310_to_311/310_to_311.xml" context="310to311" />
+
+</databaseChangeLog>

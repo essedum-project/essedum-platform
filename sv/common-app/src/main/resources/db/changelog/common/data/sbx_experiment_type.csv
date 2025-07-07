@@ -1,0 +1,4 @@
+"id","experiment_type","allowed_file_types"
+"1","Ideathon","[\"txt\",\"xlsx\",\"xls\",\"csv\",\"pdf\",\"mp3\",\"mp4\"]"
+"2","Hackathon","[\"txt\",\"xlsx\",\"xls\",\"csv\",\"pdf\",\"mp3\",\"mp4\",\"py\",\"ipynb\"]"
+"3","Datathon","[\"txt\",\"xlsx\",\"xls\",\"csv\",\"pdf\",\"mp3\",\"mp4\",\"py\",\"ipynb\"]"

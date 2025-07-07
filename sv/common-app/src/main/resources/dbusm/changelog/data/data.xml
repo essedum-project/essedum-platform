@@ -1,0 +1,245 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+	<changeSet author="Leap (generated)" id="1617868010544-210">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_constant ON;
+		</sql>		
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/usm_constant.csv" quotchar="&quot;"
+			separator="," tableName="usm_constant">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="item" name="item" type="STRING" />
+			<column header="project_name" name="project_name"
+				type="STRING" />
+			<column header="item_value" name="item_value" type="STRING" />
+			<column header="project_id" name="project_id" type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_constant OFF;
+		</sql>			
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617868010544-211">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_organisation ON;
+		</sql>	
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/usm_organisation.csv" quotchar="&quot;"
+			separator="," tableName="usm_organisation">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="country" name="country" type="STRING" />
+			<column header="created_by" name="created_by" type="skip" />
+			<column header="created_date" name="created_date" type="skip" />
+			<column header="decription" name="decription" type="STRING" />
+			<column header="division" name="division" type="skip" />
+			<column header="location" name="location" type="STRING" />
+			<column header="modified_by" name="modified_by" type="skip" />
+			<column header="modified_date" name="modified_date"
+				type="skip" />
+			<column header="name" name="name" type="STRING" />
+			<column header="onboarded" name="onboarded" type="BOOLEAN" />
+			<column header="status" name="status" type="STRING" />
+			<column header="context" name="context" type="skip" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_organisation OFF;
+		</sql>		
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617868010544-212">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_permissions ON;
+		</sql>	
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/usm_permissions.csv" quotchar="&quot;"
+			separator="," tableName="usm_permissions">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="module" name="module" type="STRING" />
+			<column header="permission" name="permission" type="STRING" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_permissions OFF;
+		</sql>		
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617868010544-213">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_portfolio ON;
+		</sql>		
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/usm_portfolio.csv" quotchar="&quot;"
+			separator="," tableName="usm_portfolio">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="description" name="description" type="skip" />
+			<column header="last_updated" name="last_updated" type="skip" />
+			<column header="portfolio_name" name="portfolio_name"
+				type="STRING" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_portfolio OFF;
+		</sql>		
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617868010544-214">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_project ON;
+		</sql>	
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/usm_project.csv" quotchar="&quot;"
+			separator="," tableName="usm_project">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="azure_org_id" name="azure_org_id" type="skip" />
+			<column header="default_role" name="default_role"
+				type="BOOLEAN" />
+			<column header="description" name="description" type="STRING" />
+			<column header="disable_excel" name="disable_excel"
+				type="skip" />
+			<column header="domain_name" name="domain_name" type="skip" />
+			<column header="last_updated" name="last_updated" type="skip" />
+			<column header="logo" name="logo" type="skip" />
+			<column header="logo_name" name="logo_name" type="skip" />
+			<column header="name" name="name" type="STRING" />
+			<column header="product_details" name="product_details"
+				type="skip" />
+			<column header="project_display_name"
+				name="project_display_name" type="STRING" />
+			<column header="provisioned_date" name="provisioned_date"
+				type="skip" />
+			<column header="theme" name="theme" type="STRING" />
+			<column header="time_zone" name="time_zone" type="skip" />
+			<column header="portfolio_id" name="portfolio_id"
+				type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_project OFF;
+		</sql>		
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617868010544-215">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql>	
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/usm_role.csv" quotchar="&quot;" separator=","
+			tableName="usm_role">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="project_id" name="project_id" type="NUMERIC" />
+			<column header="description" name="description" type="STRING" />
+			<column header="name" name="name" type="STRING" />
+			<column header="permission" name="permission" type="BOOLEAN" />
+			<column header="project_admin" name="project_admin"
+				type="skip" />
+			<column header="role_admin" name="role_admin" type="skip" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql>		
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617868010544-216">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role_permissions ON;
+		</sql>	
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/usm_role_permissions.csv" quotchar="&quot;"
+			separator="," tableName="usm_role_permissions">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="permission" name="permission" type="NUMERIC" />
+			<column header="role" name="role" type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role_permissions OFF;
+		</sql>		
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617868010544-217">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_unit ON;
+		</sql>	
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/usm_unit.csv" quotchar="&quot;" separator=","
+			tableName="usm_unit">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="description" name="description" type="STRING" />
+			<column header="name" name="name" type="STRING" />
+			<column header="onboarded" name="onboarded" type="BOOLEAN" />
+			<column header="context" name="context" type="skip" />
+			<column header="organisation" name="organisation"
+				type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_unit OFF;
+		</sql>		
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617868010544-218">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_user_project_role ON;
+		</sql>	
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/usm_user_project_role.csv" quotchar="&quot;"
+			separator="," tableName="usm_user_project_role">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="portfolio_id" name="portfolio_id"
+				type="NUMERIC" />
+			<column header="project_id" name="project_id" type="NUMERIC" />
+			<column header="role_id" name="role_id" type="NUMERIC" />
+			<column header="user_id" name="user_id" type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_user_project_role OFF;
+		</sql>		
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617868010544-219">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_user_unit ON;
+		</sql>	
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/usm_user_unit.csv" quotchar="&quot;"
+			separator="," tableName="usm_user_unit">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="context" name="context" type="skip" />
+			<column header="unit" name="unit" type="NUMERIC" />
+			<column header="user_cg" name="user_cg" type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_user_unit OFF;
+		</sql>		
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1617868010544-220">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_users ON;
+		</sql>	
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/usm_users.csv" quotchar="&quot;"
+			separator="," tableName="usm_users">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="activated" name="activated" type="BOOLEAN" />
+			<column header="client_details" name="client_details"
+				type="skip" />
+			<column header="force_password_change"
+				name="force_password_change" type="BOOLEAN" />
+			<column header="last_updated_dts" name="last_updated_dts"
+				type="skip" />
+			<column header="onboarded" name="onboarded" type="BOOLEAN" />
+			<column header="password" name="password" type="STRING" />
+			<column header="profile_image" name="profile_image"
+				type="skip" />
+			<column header="profile_image_name" name="profile_image_name"
+				type="skip" />
+			<column header="user_act_ind" name="user_act_ind"
+				type="BOOLEAN" />
+			<column header="user_added_by" name="user_added_by"
+				type="skip" />
+			<column header="user_email" name="user_email" type="STRING" />
+			<column header="user_f_name" name="user_f_name" type="STRING" />
+			<column header="user_l_name" name="user_l_name" type="skip" />
+			<column header="user_login" name="user_login" type="STRING" />
+			<column header="user_m_name" name="user_m_name" type="skip" />
+			<column header="context" name="context" type="skip" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_users OFF;
+		</sql>		
+	</changeSet>
+	
+	
+	
+</databaseChangeLog>

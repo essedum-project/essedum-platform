@@ -1,0 +1,100 @@
+<div style="width:100%" class="selector-785-1">
+    <div class="row selector-785-2">
+        <h2 class="col-md-11 selector-785-3" style="color:#3f51b5" mat-dialog-title="">Argument</h2>
+        <div class="col-md-1 selector-785-4" style="text-align: right">
+            <i class="fa fa-close selector-785-5" style="right: top; cursor:pointer" (click)="close()"></i>
+        </div>
+    </div>
+    <mat-dialog-content style="display:inline-flex;width:100%;padding-left:2rem;" class="selector-785-6">
+        <mat-form-field style="width:100%;padding-right:1rem;" class="selector-785-7">
+            <input placeholder="Key" matInput="" [(ngModel)]="paramsKey" class="selector-785-8" style="border-bottom: 0px !important;">
+        </mat-form-field>
+        <mat-form-field style="width:100%;padding-left:1rem;" *ngIf="source=='azure'">
+            <mat-select placeholder="Select Step Method" [(ngModel)]="paramsType"(selectionChange)='paramsTypechange(paramsType)' >
+                <mat-option value="OutputFileDatasetConfig" >OutputFileDatasetConfig</mat-option>
+                <mat-option value="PipelineParameter" >PipelineParameter</mat-option>
+                <mat-option value="PipelineData" >PipelineData</mat-option>
+            </mat-select>
+
+        </mat-form-field>
+        <mat-form-field style="width:100%;padding-left:1rem;" *ngIf="source=='azure'">
+            <mat-select placeholder="Select Data Type" [(ngModel)]="paramsDataType"(selectionChange)='paramsTypechange(paramsDataType)' >
+                <mat-option value="Integer" >Integer</mat-option>
+                <mat-option value="List" >List</mat-option>
+                <mat-option value="Boolean" >Boolean</mat-option>
+                <mat-option value="Float" >Float</mat-option>
+                <mat-option value="String" >String</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field style="width:100%;padding:0rem 1rem;" *ngIf="(paramsType == this.valueTypes[0] || source=='azure')&& ((!Tags && !typeint)&& !flags && !typeFloat && !typeString)"
+            class="selector-785-9">
+            <input placeholder="Value" matInput [(ngModel)]="paramsValue" class="selector-785-10" style="border-bottom: 0px !important;">
+        </mat-form-field>
+        <mat-form-field style="width:100%;padding:0rem 1rem;" *ngIf="typeint"
+            class="selector-785-9">
+            <input type="number" placeholder="Value" matInput [(ngModel)]="paramsValue" class="selector-785-10">
+        </mat-form-field>
+        <mat-form-field style="width:100%;padding:0rem 1rem;" *ngIf="flags"
+            class="selector-785-9">
+           <input matInput type="text" [(ngModel)]="paramsValue" class="selector-785-10" placeholder="Enter True or False">
+        </mat-form-field>
+        <mat-form-field style="width:100%;padding:0rem 1rem;" *ngIf="Tags"
+        class="selector-785-9">
+       <input matInput type="text" [(ngModel)]="paramsValue" class="selector-785-10" placeholder="Enter comma seperaterd values">
+    </mat-form-field>
+    <mat-form-field style="width:100%;padding:0rem 1rem;" *ngIf="typeFloat"
+    class="selector-785-9" >
+   <input matInput type="number" [(ngModel)]="paramsValue" placeholder="Value" class="selector-785-10" >
+</mat-form-field>
+<mat-form-field style="width:100%;padding:0rem 1rem;" *ngIf="typeString"
+class="selector-785-9">
+<input matInput type="text" [(ngModel)]="paramsValue" placeholder="Enter Text" class="selector-785-10">
+</mat-form-field>
+            
+
+
+        <mat-form-field style="width:100%;padding:0rem 1rem;" *ngIf="paramsType == this.valueTypes[1]"
+            class="selector-785-11">
+            <input matInput="" type="text" placeholder="select datasource" aria-label="Datasource"
+                [formControl]="datasourceControl" [matAutocomplete]="auto" class="selector-755-8">
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayDatasources.bind(this)" class="selector-755-9">
+                <mat-option *ngFor="let option of filteredDatasourceOptions | async"
+                    value="{{option.name.toString()+';'+option.alias.toString()}}" class="selector-755-10">
+                    {{option.alias}}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+        <mat-form-field style="width:100%;padding:0rem 1rem;" *ngIf="paramsType == this.valueTypes[2]"
+            class="selector-785-16">
+            <input matInput="" type="text" placeholder="select dataset" aria-label="Dataset"
+                [formControl]="datasetControl" [matAutocomplete]="auto" class="selector-755-8">
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayDatasets.bind(this)" class="selector-755-9">
+                <mat-option *ngFor="let option of filteredDatasetOptions | async"
+                    value="{{option.name.toString()+';'+option.alias.toString()}}" class="selector-755-10">
+                    {{option.alias}}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+        <mat-form-field style="width:100%;padding:0rem 1rem;" *ngIf="paramsType == this.valueTypes[3]"
+            class="selector-785-21">
+            <input matInput="" type="text" placeholder="select schema" aria-label="Schema" [formControl]="schemaControl"
+                [matAutocomplete]="auto" class="selector-755-8">
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displaySchemas.bind(this)" class="selector-755-9">
+                <mat-option *ngFor="let option of filteredSchemaOptions | async"
+                    value="{{option.name.toString()+';'+option.alias.toString()}}" class="selector-755-10">
+                    {{option.alias}}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+        <mat-form-field style="width:100%;padding-left:1rem;" class="selector-785-26" *ngIf="source=='native'">
+            <mat-select placeholder="select type" [(ngModel)]="paramsType" class="selector-785-27">
+                <mat-option *ngFor="let valuetype of valueTypes" [value]="valuetype" class="selector-785-28">
+                    {{valuetype}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        
+    </mat-dialog-content>
+    <mat-dialog-actions class="selector-785-29">
+        <button mat-button="" (click)="addOrModify()" class="selector-785-30">{{buttonName}}</button>
+    </mat-dialog-actions>
+</div>

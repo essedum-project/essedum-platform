@@ -1,0 +1,143 @@
+<div>
+    <div class="lfx-l-level2-middle-col p-4">
+        <div class="flex justify-content-between align-items-center px-4">
+            <div class="align-items-center flex">
+                <h2>App Details</h2>
+            </div>
+            <div class="flex justify-content-end">
+                <mat-icon class="aip-cursor" aria-label="Close"  [ngStyle]="{'color': isCloseHovered ? '#0094ff' : '#0a142f'}" matTooltip="Close" matTooltipPosition="above"  (mouseenter)="isCloseHovered = true"
+                                (mouseleave)="isCloseHovered = false" (click)="closeModal()">close</mat-icon>
+            </div>
+        </div>
+
+        <div class="p-4">
+            <div class="row">
+                <div *ngIf="!edit" class="col-lg-12 col-md-12">
+                    <mat-form-field appearance="fill" class="w-100">
+                        <mat-label>Display Name</mat-label>
+                        <input matInput placeholder="Enter Name..." [(ngModel)]="alias" [disabled]="false" required>
+                        <mat-error *ngIf="!alias">This field is required</mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div *ngIf="edit" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+                    <mat-form-field appearance="fill" class="w-100">
+                        <mat-label>Display Name</mat-label>
+                        <input matInput placeholder="Enter Name..." [(ngModel)]="editCanvas.alias" required>
+                        <mat-error *ngIf="!editCanvas.alias">This field is required</mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div *ngIf="!edit" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+                    <mat-form-field appearance="fill" class="w-100">
+                        <mat-label>Description</mat-label>
+                        <input matInput placeholder="Enter App Description..." [(ngModel)]="description"
+                            [disabled]="false">
+                    </mat-form-field>
+                </div>
+
+                <div *ngIf="edit" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+                    <mat-form-field appearance="fill" class="w-100">
+                        <mat-label>Description</mat-label>
+                        <input matInput placeholder="Enter App Description..." [(ngModel)]="editCanvas.description"
+                            [disabled]="false">
+                    </mat-form-field>
+                </div>
+
+                <div *ngIf="edit" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+                    <mat-form-field appearance="fill" class="w-100">
+                        <mat-label>Tryout Link</mat-label>
+                        <input matInput placeholder="Paste your link..." [(ngModel)]="editCanvas.tryoutlink"
+                            [disabled]="false">
+                    </mat-form-field>
+                </div>
+
+                <!-- App Type Select -->
+                <div *ngIf="!edit" class="col-lg-12 col-md-12 lfx-u-mar-b-20">
+                    <mat-form-field appearance="fill" class="w-100">
+                        <mat-label>Type</mat-label>
+                        <mat-select [(ngModel)]="apptype" required [disabled]="false"
+                            (selectionChange)="setAppType($event)">
+                            <mat-option *ngFor="let type of appTypeList" [value]="type.value">{{ type.viewValue
+                                }}</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="!apptype">This field is required</mat-error>
+                    </mat-form-field>
+                </div>
+                <div *ngIf="edit" class="col-lg-12 col-md-12 lfx-u-mar-b-20">
+                    <mat-form-field appearance="fill" class="w-100">
+                        <mat-label>Type</mat-label>
+                        <mat-select [(ngModel)]="editCanvas.scope" required [disabled]="false"
+                            (selectionChange)="setAppType($event)">
+                            <mat-option *ngFor="let type of appTypeList" [value]="type.value">{{ type.viewValue
+                                }}</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="!editCanvas.scope">This field is required</mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- URL Input -->
+                <div *ngIf="isUrl && !edit" class="col-lg-12 col-md-12 lfx-u-mar-b-20">
+                    <mat-form-field appearance="fill" class="w-100">
+                        <mat-label>URL</mat-label>
+                        <input matInput [(ngModel)]="appUrl" required [disabled]="false" />
+                        <mat-error *ngIf="!appUrl">This field is required</mat-error>
+                    </mat-form-field>
+                </div>
+                <div *ngIf="isUrl && edit" class="col-lg-12 col-md-12 lfx-u-mar-b-20">
+                    <mat-form-field appearance="fill" class="w-100">
+                        <mat-label>URL</mat-label>
+                        <input matInput [(ngModel)]="editCanvas.url" required [disabled]="false" />
+                        <mat-error *ngIf="!editCanvas.url">This field is required</mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="row col-lg-12 col-md-12 lfx-u-mar-b-16">
+                    <div class="upload-docs">
+
+                        <!-- Logo Upload Panel -->
+                        <mat-card class="mb-3" style="min-height: 100px;">
+                            <div *ngIf="exceededSize" class="selector-729-81">
+                                <em style="color: red" class="selector-729-82">Maximum upload file size: 250KB</em>
+                            </div>
+                            <div class="p-3 label-icon">
+                                <label style="font-size: 13px; color: black; font-weight: bold; padding-top: 2%;"
+                                    class="selector-724-196">Logo</label>
+                                <label class="exp-projlabel selector-724-197" style="cursor:pointer;">
+                                    <input id="adOrgUpldId" (change)="onImageChange($event)" style="display: none;"
+                                        accept=".png,.jpg,.jpeg" name="adOrgUpldNm" type="file"
+                                        placeholder="file" class="selector-724-198" />
+                                    <mat-icon>upload</mat-icon>
+                                </label>
+                            </div>
+                            <img *ngIf="edit" [src]="finalImage">
+                            <img *ngIf="!edit" #myImage alt="img" [hidden]="uploader.queue.length==0"
+                                class="selector-729-76">
+                        </mat-card>
+
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="!edit" class="col-lg-12 col-md-12 lfx-u-mar-b-16 flex justify-content-end" style="gap: 1rem;">
+                <button mat-stroked-button color="primary" style="color:#0094ff; position: absolute; right: 20rem;"
+                    [disabled]="false" type="button" (click)="closeModal()">
+                    Cancel
+                </button>
+                <button mat-flat-button color="primary" [disabled]="disableSave" type="button"
+                    (click)="disableSave ? '' : saveDetails()">
+                    Save
+                </button>
+            </div>
+            <div *ngIf="edit" class="col-lg-12 col-md-12 lfx-u-mar-b-16 flex justify-content-end" style="gap: 1rem;">
+                <button mat-stroked-button color="primary" style="color:#0094ff; position: absolute; right: 20rem;"
+                    [disabled]="false" type="button" (click)="closeModal()">
+                    Cancel
+                </button>
+                <button mat-flat-button color="primary" [disabled]="disableSave" type="button"
+                    (click)="disableSave ? '' : editDetails()">
+                    Update
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

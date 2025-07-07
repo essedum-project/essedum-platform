@@ -1,0 +1,247 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+ 
+<changeSet author="Leap-BJM" id="320_bjm_01">
+ <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE  alias ='Acme_L3_JobInstance_EndTime' ;
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mysql">
+Update mldataset SET description ="JobInstance's End_time(UTC)" where alias ='Acme_L3_JobInstance_EndTime' ;
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_02">
+ <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE  alias ='Acme_L3_JobInstanceStartTime' ;
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mysql">
+Update mldataset SET description ="JobInstance's Start_time(UTC)" where alias ='Acme_L3_JobInstanceStartTime';
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_03">
+<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE  alias='Acme_bjm1_Table_data';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mysql">
+update mldataset set attributes='{\"filter\":\"\",\"mode\":\"query\",\"Query\":\"SELECT job_name JOB_NAME , running_job_instance_id JOB_INSTANCE_ID, IFNULL(incident_no,\'NA\') TICKET, start_time \\\"Start_time(UTC)\\\", end_time \\\"End_time(UTC)\\\", TIMESTAMPDIFF(SECOND,start_time,end_time) DURATION_SEC, STATUS Status, CASE WHEN STATUS = \'Closed\' THEN \'lightGrey\'                            WHEN STATUS = \'Completed\' THEN \'LawnGreen\' WHEN STATUS = \'Cancelled\' THEN \'tomato\' WHEN STATUS = \'Yet to Start\' THEN \'PaleGoldenRod\' WHEN STATUS = \'Running\' THEN \'Yellow\' WHEN STATUS = \'succeeded\' THEN \'LawnGreen\' WHEN STATUS = \'failed\' THEN \'tomato\' WHEN STATUS = \'Failed\' THEN \'tomato\' WHEN STATUS IS NULL THEN \'tomato\' END AS Color FROM bjm_job_instance WHERE project_id = ({projectId}) AND start_time BETWEEN  ({startDate}) AND  ({endDate})\",\"Cacheable\":false,\"isStreaming\":\"false\",\"defaultValues\":\"\",\"writeMode\":\"append\",\"params\":\"{\'projectId\':\'project_id\',\'startDate\':\'\\\\\'2018-04-01\\\\\'\' , \'endDate\':\'(SELECT CURRENT_TIMESTAMP)\'}\",\"tableName\":\"\",\"uniqueIdentifier\":\"\"}' where alias='Acme_bjm1_Table_data';
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_04">
+<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE  alias='Acme_bjm2_Failed_Job_Instances_Name'
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mysql">
+UPDATE mldataset set attributes='{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME, running_job_instance_id JOB_INSTANCE_ID, status Status,  start_time \\\"Start_time(UTC)\\\", end_time \\\"End_time(UTC)\\\", TIMESTAMPDIFF(HOUR,start_time,end_time) Duration  FROM bjm_job_instance WHERE  status IN (\'Cancelled\',\'failed\',\'Failed\') and project_id = ({projectId}) AND start_time BETWEEN ({startDate}) AND ({endDate})","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\'projectId\':\'project_id\',\'startDate\':\'\\\\\'2018-04-01\\\\\'\', \'endDate\':\'(SELECT CURRENT_TIMESTAMP)\'}","tableName":"","uniqueIdentifier":""}' where alias='Acme_bjm2_Failed_Job_Instances_Name'
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_05">
+<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE  alias='Acme_bjm2_dependent_running_instances_detail';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mysql">
+ UPDATE mldataset set attributes='{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME, running_job_instance_id JOB_INSTANCE_ID, IFNULL(incident_no,\'NA\') TICKET, start_time \\\"Start_time(UTC)\\\", end_time \\\"End_time(UTC)\\\",  status Status, last_status_update \\\"Last_Status_Update(UTC)\\\" FROM bjm_job_instance WHERE project_id=({projectId})  AND start_time BETWEEN ({startDate}) AND ({endDate}) AND running_job_instance_id IN (SELECT DISTINCT running_instance1_id FROM bjm_ji_ji_mapping WHERE project_id=({projectId}) and relation_name = \'precededBy\') ORDER BY last_status_update DESC","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\'projectId\':\'project_id\',\'startDate\':\'\\\\\'2018-04-01\\\\\'\', \'endDate\':\'(SELECT CURRENT_TIMESTAMP)\'}","tableName":"","uniqueIdentifier":""}' where alias='Acme_bjm2_dependent_running_instances_detail'
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_06">
+<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE  alias='Acme_L3_FutureJobInstance_Details';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mysql">
+UPDATE mldataset set attributes='{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME, running_job_instance_id JOB_INSTANCE_ID,    TIMESTAMPDIFF(MINUTE,start_time,end_time)  DURATION_SEC, STATUS , start_time \\\"Start_time(UTC)\\\",   end_time \\\"End_time(UTC)\\\"   FROM bjm_job_instance jiParent    WHERE jiParent.job_name IN (SELECT job_name       FROM  bjm_job_instance  jiChild      WHERE jiChild.running_job_instance_id = ({running_job_instance_id})       AND jiChild.project_id = ({projectId}) )  AND jiParent.start_time > ( SELECT start_time       FROM  bjm_job_instance  jiChild       WHERE  jiChild.running_job_instance_id = ({running_job_instance_id})       AND jiChild.project_id = ({projectId}) )  ORDER BY start_time ASC","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\'running_job_instance_id\':\'\\\\\'JobX2_2\\\\\'\',\'projectId\':\'jiChild.project_id\'}","tableName":"","uniqueIdentifier":""}' where alias='Acme_L3_FutureJobInstance_Details'
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_07">
+<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE  alias='Acme_L3_PastJobInstance_Details';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mysql">
+UPDATE mldataset set attributes='{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME, running_job_instance_id JOB_INSTANCE_ID,    TIMESTAMPDIFF(MINUTE,start_time,end_time)  DURATION_SEC, STATUS , start_time \\\"Start_time(UTC)\\\",   end_time \\\"End_time(UTC)\\\"     FROM bjm_job_instance jiParent    WHERE jiParent.job_name IN  ( SELECT job_name            FROM  bjm_job_instance  jiChild                             WHERE  jiChild.running_job_instance_id = ({running_job_instance_id})           AND jiChild.project_id = ({projectId}) )  AND jiParent.start_time &lt;  (SELECT start_time        FROM  bjm_job_instance  jiChild                         WHERE  jiChild.running_job_instance_id = ({running_job_instance_id})       AND jiChild.project_id = ({projectId}))   ORDER BY start_time DESC","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\'running_job_instance_id\':\'\\\\\'JobX2_2\\\\\'\',\'project_id\':\'jiChild.project_id\'}","tableName":"","uniqueIdentifier":""}' where alias='Acme_L3_PastJobInstance_Details';
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_08">
+<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE  alias='Acme_bjm3_ticket_details';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mysql">
+UPDATE mldataset set attributes='{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME, running_job_instance_id as JOB_INSTANCE_ID, IFNULL(incident_no,\'NA\') as TICKET, status Status,  start_time \\\"Start_time(UTC)\\\", end_time \\\"End_time(UTC)\\\"  FROM bjm_job_instance WHERE project_id = ({projectId}) and running_job_instance_id=({running_job_instance_id})","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\'projectId\':\'project_id\',\'running_job_instance_id\':\'running_job_instance_id\'}","tableName":"","uniqueIdentifier":""}' where alias='Acme_bjm3_ticket_details';
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_09">
+<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE  alias='Acme_bjm2_Job_Instance_table_data';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mysql">
+UPDATE mldataset set attributes='{"filter":"","mode":"query","Query":"select running_job_instance_id JOB_INSTANCE_ID, job_name JOB_NAME, start_time \\\"Start_Time(UTC)\\\", end_time\\\"End_Time(UTC)\\\" from bjm_job_instance WHERE job_name = ({job_name}) and project_id = ({projectId}) order by start_time desc","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\'job_name\':\'job_name\', \'projectId\':\'project_id\'}","tableName":"","uniqueIdentifier":""}'  where alias='Acme_bjm2_Job_Instance_table_data';
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_010">
+<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM dbs_widget_configuration  WHERE  widget_name='Job Instance End Time';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mysql,mssql">
+UPDATE dbs_widget_configuration SET widget_name='Job Instance End Time(UTC)' WHERE widget_name='Job Instance End Time';
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_011">
+<preConditions onFail="MARK_RAN">
+  <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM dbs_widget_configuration WHERE  widget_name='Job Instance Start Time';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mysql,mssql">
+UPDATE dbs_widget_configuration SET widget_name='Job Instance Start Time(UTC)' WHERE widget_name='Job Instance Start Time';
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_012">
+<preConditions onFail="MARK_RAN">
+  <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE alias='Acme_L3_SuccessorNetworkgraph';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mssql">
+Update mldataset set attributes=N'{"filter":"","mode":"query","Query":"WITH child_jobs AS  (SELECT 1 AS Lvl, j.running_instance2_id AS startNode ,\nj.running_instance1_id AS endNode, ji.start_time AS StartTime, ji.end_time AS EndTime, \nISNULL(ji.predicted_start_time,ji.start_time) AS PredictedTime , ji.project_id Project \nFROM bjm_ji_ji_mapping j ,bjm_job_instance ji  WHERE ji.running_job_instance_id = j.running_instance2_id \nAND ji.project_id =  ({projectId}) AND j.running_instance2_id = ({running_job_instance_id})\nUNION ALL SELECT  cj.Lvl + 1 AS Lvl, j2.running_instance2_id startNode ,j2.running_instance1_id endNode,\nji2.start_time AS StartTime, ji2.end_time AS EndTime, ISNULL(ji2.predicted_start_time,ji2.start_time) \nAS PredictedTime , ji2.project_id Project FROM bjm_ji_ji_mapping j2 , child_jobs cj, bjm_job_instance ji2 \nWHERE ji2.running_job_instance_id = j2.running_instance2_id AND j2.running_instance2_id = cj.endNode AND\nji2.project_id=cj.Project) \nSELECT DISTINCT Lvl, startNode , endNode, StartTime,EndTime, PredictedTime FROM child_jobs","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{''running_job_instance_id'':''j.running_instance2_id'',''projectId'':''ji.project_id''}","tableName":"","uniqueIdentifier":""}' WHERE alias='Acme_L3_SuccessorNetworkgraph';
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_013">
+<preConditions onFail="MARK_RAN">
+  <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE alias='Acme_L3_PredecessorNetworkgraph';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mssql">
+Update mldataset set attributes=N'{"filter":"","mode":"query","Query":"WITH parent_jobs AS ( SELECT 1  AS Lvl, j.running_instance2_id startNode, j.running_instance1_id AS endNode,\nji.start_time AS StartTime, ji.end_time AS EndTime, ISNULL(ji.predicted_start_time,ji.start_time) AS \nPredictedTime , ji.project_id Project  FROM bjm_ji_ji_mapping j ,bjm_job_instance ji \nWHERE ji.running_job_instance_id = j.running_instance1_id  AND ji.project_id = ({projectId})\nAND j.running_instance1_id =j.running_instance1_id   UNION ALL  SELECT pj.Lvl + 1 Lvl, j2.running_instance2_id startNode \n,j2.running_instance1_id EndNode,\nji2.start_time StartTime, ji2.end_time AS EndTime, ISNULL(ji2.predicted_start_time,ji2.start_time) AS PredictedTime, \nji2.project_id Project FROM bjm_ji_ji_mapping j2 , parent_jobs pj,\nbjm_job_instance ji2 WHERE ji2.running_job_instance_id = j2.running_instance1_id\nAND j2.running_instance1_id = pj.StartNode AND ji2.project_id=pj.Project)\nSELECT DISTINCT Lvl, startNode ,endNode, StartTime,EndTime, PredictedTime FROM parent_jobs","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{''running_job_instance_id'':''j.running_instance1_id'',''projectId'':''ji.project_id''}","tableName":"","uniqueIdentifier":""}' WHERE alias='Acme_L3_PredecessorNetworkgraph';
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="312_bjm_014">
+  <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE  alias='Acme_bjm2_Failed_Job_Instances_Name'
+            </sqlCheck>
+        </preConditions>
+       <sql dbms="mssql">
+    UPDATE mldataset SET attributes =N'{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME, running_job_instance_id JOB_INSTANCE_ID, status Status, convert(varchar,start_time,120) AS ''Start_Time(UTC)'', convert(varchar,end_time,120) AS ''End_Time(UTC)'', datepart(MINUTE,CAST(end_time - start_time as Time)) Duration FROM bjm_job_instance WHERE  status IN (''Cancelled'',''failed'',''Failed'') AND project_id = ({projectId}) AND start_time BETWEEN ({startDate}) AND ({endDate})","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{''projectId'':''project_id'',''startDate'':''\\''2018-04-01\\'''' , ''endDate'':''(SELECT CURRENT_TIMESTAMP)''}","tableName":"","uniqueIdentifier":""}' WHERE ALIAS = 'Acme_bjm2_Failed_Job_Instances_Name' ;
+</sql>     	
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_015">
+<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE  alias='Acme_bjm2_dependent_running_instances_detail';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mssql">
+  UPDATE mldataset SET attributes = N'{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME, running_job_instance_id JOB_INSTANCE_ID, ISNULL(incident_no,''NA'') TICKET, convert(varchar,start_time,120) AS ''Start_Time(UTC)'', convert(varchar,end_time,120) AS ''End_Time(UTC)'', status Status, convert(varchar,last_status_update,120) AS ''Last_Status_Update(UTC)'' FROM bjm_job_instance WHERE project_id=({projectId})  AND start_time BETWEEN ({startDate}) AND ({endDate}) AND running_job_instance_id IN (SELECT DISTINCT running_instance1_id FROM bjm_ji_ji_mapping WHERE project_id=({projectId}) and relation_name = ''precededBy'') ORDER BY last_status_update DESC  OFFSET 0 ROWS;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{''projectId'':''project_id'',''startDate'':''\\''2018-04-01\\'''' , ''endDate'':''(SELECT CURRENT_TIMESTAMP)''}","tableName":"","uniqueIdentifier":""}'WHERE ALIAS = 'Acme_bjm2_dependent_running_instances_detail' ;
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_016">
+<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE  alias='Acme_bjm3_ticket_details';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mssql">
+  UPDATE mldataset SET attributes =N'{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME, running_job_instance_id JOB_INSTANCE_ID, ISNULL(incident_no,''NA'') TICKET, status Status, convert(varchar,start_time,120) AS ''Start_Time(UTC)'', convert(varchar,end_time,120) AS ''End_Time(UTC)''  FROM bjm_job_instance WHERE project_id = ({projectId}) and running_job_instance_id=({running_job_instance_id});","Cacheable":"false","isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"running_job_instance_id\":\"running_job_instance_id\",\"projectId\":\"project_id\"}","tableName":"","uniqueIdentifier":""}'WHERE ALIAS = 'Acme_bjm3_ticket_details' ;
+  </sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_017">
+<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE  alias='Acme_bjm1_Table_data';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mssql">
+  UPDATE mldataset SET attributes =N'{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME , running_job_instance_id JOB_INSTANCE_ID,  ISNULL(incident_no,''NA'') TICKET,convert(varchar,start_time,120) AS ''Start_Time(UTC)'', convert(varchar,end_time,120) AS ''End_Time(UTC)'', datepart(MINUTE,CAST(end_time - start_time as Time)) DURATION_SEC, STATUS Status, CASE WHEN STATUS = ''Closed'' THEN ''lightGrey'' WHEN STATUS = ''Completed'' THEN ''LawnGreen'' WHEN STATUS = ''Cancelled'' THEN ''tomato'' WHEN STATUS = ''Yet to Start'' THEN ''PaleGoldenRod'' WHEN STATUS = ''Running'' THEN ''Yellow'' WHEN STATUS = ''succeeded'' THEN ''LawnGreen'' WHEN STATUS = ''failed'' THEN ''tomato'' WHEN STATUS = ''Failed'' THEN ''tomato'' WHEN STATUS IS NULL THEN ''tomato'' END AS \"Color\"  FROM bjm_job_instance WHERE project_id = ({projectId}) AND start_time BETWEEN ({startDate}) AND ({endDate});","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"endDate\":\"(SELECT CURRENT_TIMESTAMP)\",\"projectId\":\"project_id\",\"startDate\":\"''2018-04-01''\"}","tableName":"","uniqueIdentifier":""}'WHERE ALIAS = 'Acme_bjm1_Table_data' ;
+  </sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_018">
+<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE  alias='Acme_L3_PastJobInstance_Details';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mssql">
+UPDATE mldataset SET attributes =N'{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME, running_job_instance_id JOB_INSTANCE_ID,   datepart(MINUTE,CAST(end_time - start_time as Time)) DURATION_SEC, STATUS , convert(varchar,start_time,120) AS ''Start_Time(UTC)'',  convert(varchar,end_time,120) AS ''End_Time(UTC)''    FROM bjm_job_instance jiParent   WHERE jiParent.job_name IN  ( SELECT job_name           FROM  bjm_job_instance  jiChild                            WHERE  jiChild.running_job_instance_id = ({running_job_instance_id})          AND jiChild.project_id = ({projectId}) ) AND jiParent.start_time &lt;  (SELECT start_time       FROM  bjm_job_instance  jiChild                        WHERE  jiChild.running_job_instance_id = ({running_job_instance_id})      AND jiChild.project_id = ({projectId}))  ORDER BY start_time DESC OFFSET 0 ROWS;","Cacheable":"false","isStreaming":"false","defaultValues":"","writeMode":"append","params":"{''running_job_instance_id'':''jiChild.running_job_instance_id'',''projectId'':''jiChild.project_id''}","tableName":"","uniqueIdentifier":""}'WHERE ALIAS = 'Acme_L3_PastJobInstance_Details' ;
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_019">
+<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE  alias='Acme_L3_FutureJobInstance_Details';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mssql">
+UPDATE mldataset SET attributes =N'{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME, running_job_instance_id JOB_INSTANCE_ID,   datepart(MINUTE,CAST(end_time - start_time as Time)) DURATION_SEC, STATUS , convert(varchar,start_time,120) AS ''Start_Time(UTC)'',  convert(varchar,end_time,120) AS ''End_Time(UTC)''  FROM bjm_job_instance jiParent   WHERE jiParent.job_name IN (SELECT job_name      FROM  bjm_job_instance  jiChild     WHERE jiChild.running_job_instance_id = ({running_job_instance_id})      AND jiChild.project_id = ({projectId}) ) AND jiParent.start_time > ( SELECT start_time      FROM  bjm_job_instance  jiChild      WHERE  jiChild.running_job_instance_id = ({running_job_instance_id})      AND jiChild.project_id = ({projectId}) ) ORDER BY start_time ASC OFFSET 0 ROWS;","Cacheable":"false","isStreaming":"false","defaultValues":"","writeMode":"append","params":"{''running_job_instance_id'':''jiChild.running_job_instance_id'',''project_id'':''jiChild.project_id''}","tableName":"","uniqueIdentifier":""}'WHERE ALIAS = 'Acme_L3_FutureJobInstance_Details' ;
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_20">
+<preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE  alias='Acme_bjm2_Job_Instance_table_data';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mssql">
+UPDATE mldataset SET attributes =N'{"filter":"","mode":"query","Query":"SELECT running_job_instance_id JOB_INSTANCE_ID, job_name JOB_NAME, convert(varchar,start_time,120) AS ''Start_Time(UTC)'', convert(varchar,end_time,120) AS ''End_Time(UTC)'' FROM bjm_job_instance WHERE job_name = ({job_name}) and project_id = ({projectId});","Cacheable":"false","isStreaming":"false","defaultValues":"","writeMode":"append","params":"{''job_name'':''job_name'', ''projectId'':''project_id''}","tableName":"","uniqueIdentifier":""}' where alias='Acme_bjm2_Job_Instance_table_data'
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_21">
+<preConditions onFail="MARK_RAN">
+  <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM mldataset WHERE alias='Acme_bjm3_NetworkGraph';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mssql">
+Update mldataset set attributes=N'{"filter":"","mode":"query","Query":"WITH child_jobs AS (   SELECT 1 AS Lvl,  j.running_instance2_id \nAS startNode , j.running_instance1_id AS endNode, ji.start_time AS StartTime, ji.end_time AS EndTime, \nCASE WHEN ji.Status IN (''Failed'', ''Cancelled'') THEN DATEADD(HOUR,-1,ji.End_time) \nELSE ji.End_time END  AS  PredictedTime , ji.project_id Project  FROM bjm_ji_ji_mapping j ,bjm_job_instance ji      \nWHERE ji.running_job_instance_id = j.running_instance2_id   AND ji.project_id =({projectId})  AND j.running_instance2_id IN  \n(          SELECT DISTINCT ji_jig.running_instance_id          FROM  bjm_ji_jig_mapping ji_jig         \n WHERE job_instance_Group_name IN (              SELECT ji_jig.job_instance_Group_name              \n FROM bjm_job_instance ji , bjm_ji_jig_mapping ji_jig              \n WHERE ji_jig.running_instance_id  = ji.running_job_instance_id              \n AND ji.running_job_instance_id = ({running_job_instance_id})    AND ji.project_id =({projectId})) )  \n UNION ALL SELECT cj.Lvl + 1 AS Lvl, j2.running_instance2_id startNode ,\n j2.running_instance1_id endNode,    ji2.start_time AS StartTime,       ji2.end_time AS EndTime, \nCASE WHEN ji2.Status IN (''Failed'', ''Cancelled'') THEN DATEADD(HOUR,-1,ji2.End_time) \nELSE ji2.End_time END  AS PredictedTime , ji2.project_id Project  FROM bjm_ji_ji_mapping j2 , child_jobs cj, bjm_job_instance ji2     \nWHERE ji2.running_job_instance_id = j2.running_instance2_id   AND j2.running_instance2_id = cj.endNode   AND ji2.project_id=cj.Project )  \nSELECT DISTINCT  Lvl,  startNode , endNode,  StartTime,EndTime, PredictedTime FROM child_jobs","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"running_job_instance_id\":\"running_job_instance_id\",\"projectId\":\"ji.project_id\"}","tableName":"","uniqueIdentifier":""}' WHERE alias='Acme_bjm3_NetworkGraph';
+</sql>
+</changeSet>
+
+<changeSet author="Leap-BJM" id="320_bjm_22">
+<preConditions onFail="MARK_RAN">
+  <sqlCheck expectedResult="1">
+                 SELECT COUNT(*) FROM dbs_widget_configuration  WHERE  widget_name='Job Instance Start Time(UTC)';
+            </sqlCheck>
+        </preConditions>
+<sql dbms="mssql">
+Update dbs_widget_configuration SET count_column='Start_Time' WHERE widget_name='Job Instance Start Time(UTC)';
+</sql>
+</changeSet>
+
+</databaseChangeLog>
+

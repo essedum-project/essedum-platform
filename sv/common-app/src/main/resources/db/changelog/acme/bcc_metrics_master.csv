@@ -1,0 +1,8 @@
+"id","metric_name","dashboard_id","project_id"
+"1","On Time Delivery","21","2"
+"2","Forecast Accuracy","21","2"
+"3","Pricing Accuracy","21","2"
+"4","Out of Stock","21","2"
+"5","Orders Backlog m $","42480","2"
+"6","Orders Lost m $","42480","2"
+"7","Rev Accuracy m $","42480","2"

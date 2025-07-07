@@ -1,0 +1,639 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+	<!--<changeSet author="Leap (generated)" id="1680077238499-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_geo ON;
+		</sql>	
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_geo.csv" quotchar="&quot;"
+			separator="," tableName="ivm_master_geo">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="name" name="name" type="STRING" />
+			<column header="last_updated_date" name="last_updated_date"
+				type="skip" />
+			<column header="last_updated_by" name="last_updated_by"
+				type="skip" />
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT ivm_master_geo OFF;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="Leap (generated)" id="1680077666558-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_country ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_country.csv" quotchar="&quot;"
+			separator="," tableName="ivm_master_country">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="name" name="name" type="STRING" />
+			<column header="geo_id" name="geo_id" type="NUMERIC" />
+			<column header="geo_name" name="geo_name" type="STRING" />
+			<column header="last_updated_by" name="last_updated_by"
+				type="skip" />
+			<column header="last_updated_date" name="last_updated_date"
+				type="skip" />
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT ivm_master_country OFF;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="Leap (generated)" id="1680078277487-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_industry ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_industry.csv" quotchar="&quot;"
+			separator="," tableName="ivm_master_industry">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="name" name="name" type="STRING" />
+			<column header="last_updated_date" name="last_updated_date"
+				type="skip" />
+			<column header="last_updated_by" name="last_updated_by"
+				type="skip" />
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT ivm_master_industry OFF;
+		</sql>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="1680088113508-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_region ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_region.csv" quotchar="&quot;"
+			separator="," tableName="ivm_master_region">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="name" name="name" type="STRING" />
+			<column header="country_id" name="country_id" type="NUMERIC" />
+			<column header="country_name" name="country_name"
+				type="STRING" />
+			<column header="last_updated_date" name="last_updated_date"
+				type="skip" />
+			<column header="last_updated_by" name="last_updated_by"
+				type="skip" />
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT ivm_master_region OFF;
+		</sql>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="1680088503588-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_sub_industry ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_sub_industry.csv"
+			quotchar="&quot;" separator="," tableName="ivm_master_sub_industry">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="name" name="name" type="STRING" />
+			<column header="industry_id" name="industry_id" type="NUMERIC" />
+			<column header="last_updated_date" name="last_updated_date"
+				type="skip" />
+			<column header="last_updated_by" name="last_updated_by"
+				type="skip" />
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT ivm_master_sub_industry OFF;
+		</sql>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="1680088740120-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_transformation_type ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_transformation_type.csv"
+			quotchar="&quot;" separator=","
+			tableName="ivm_master_transformation_type">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="name" name="name" type="STRING" />
+			<column header="type" name="type" type="STRING" />
+			<column header="subtype" name="subtype" type="STRING" />
+			<column header="last_updated_date" name="last_updated_date"
+				type="skip" />
+			<column header="last_updated_by" name="last_updated_by"
+				type="skip" />
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT ivm_master_transformation_type OFF;
+		</sql>
+	</changeSet>
+
+
+
+	<changeSet author="sachin.saddar (generated)"
+		id="1683215538405-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_initiative ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_initiative.csv" quotchar="&quot;"
+			separator="," tableName="ivm_master_initiative">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="name" name="name" type="STRING" />
+			<column header="parent_id" name="parent_id" type="skip" />
+			<column header="parent_name" name="parent_name" type="skip" />
+			<column header="last_updated_by" name="last_updated_by"
+				type="STRING" />
+			<column header="last_updated_date" name="last_updated_date"
+				type="DATE" />
+			<column header="dimension_id" name="dimension_id"
+				type="NUMERIC" />
+			<column header="metric_id" name="metric_id" type="NUMERIC" />
+			<column header="target_level" name="target_level"
+				type="STRING" />
+			<column header="duration" name="duration" type="NUMERIC" />
+			<column header="source" name="source" type="STRING" />
+			<column header="description" name="description" type="STRING"/>
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT ivm_master_initiative OFF;
+		</sql>
+	</changeSet>
+
+	<changeSet author="sachin.saddar (generated)"
+		id="1683215750948-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_opq ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_opq.csv" quotchar="&quot;"
+			separator="," tableName="ivm_master_opq">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="name" name="name" type="STRING" />
+			<column header="usm_project_id" name="usm_project_id"
+				type="NUMERIC" />
+			<column header="user_min_value" name="user_min_value"
+				type="NUMERIC" />
+			<column header="user_max_value" name="user_max_value"
+				type="NUMERIC" />
+			<column header="user_top_quartile_value"
+				name="user_top_quartile_value" type="NUMERIC" />
+			<column header="user_average_quartile_value"
+				name="user_average_quartile_value" type="NUMERIC" />
+			<column header="user_bottom_quartile_value"
+				name="user_bottom_quartile_value" type="NUMERIC" />
+			<column header="questionnaire_instance_id"
+				name="questionnaire_instance_id" type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT ivm_master_opq OFF;
+		</sql>
+	</changeSet>
+
+	
+
+	<changeSet author="sachin.saddar (generated)"
+		id="1683213787129-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_questionnaire ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_questionnaire.csv"
+			quotchar="&quot;" separator="," tableName="ivm_master_questionnaire">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="questionnaire_name" name="questionnaire_name"
+				type="STRING" />
+			<column header="dimension_level" name="dimension_level"
+				type="STRING" />
+			<column header="portfolio_id" name="portfolio_id"
+				type="NUMERIC" />
+			<column header="description" name="description" type="STRING" />
+			<column header="portfolio_name" name="portfolio_name"
+				type="STRING" />
+			<column header="is_active" name="is_active" type="BOOLEAN" />
+			<column header="comment" name="comment" type="BOOLEAN" />
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT ivm_master_questionnaire OFF;
+		</sql>
+	</changeSet>
+
+	
+
+	<changeSet author="sachin.saddar (generated)"
+		id="1683216259076-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_dimension ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_dimension.csv" quotchar="&quot;"
+			separator="," tableName="ivm_master_dimension">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="section" name="section" type="STRING" />
+			<column header="category" name="category" type="STRING" />
+			<column header="parent_name" name="parent_name" type="STRING" />
+			<column header="parent_id" name="parent_id" type="NUMERIC" />
+			<column header="parent_category" name="parent_category"
+				type="STRING" />
+			<column header="weightage" name="weightage" type="NUMERIC" />
+			<column header="questionnaire_id" name="questionnaire_id"
+				type="NUMERIC" />
+			<column header="dimension_details" name="dimension_details"
+				type="STRING" />
+			<column header="mandatory_all_questions"
+				name="mandatory_all_questions" type="skip" />
+			<column header="last_updated_date" name="last_updated_date"
+				type="skip" />
+			<column header="last_updated_by" name="last_updated_by"
+				type="skip" />
+			<column header="dimension_level" name="dimension_level"
+				type="NUMERIC" />
+			<column header="min_value" name="min_value" type="NUMERIC" />
+			<column header="max_value" name="max_value" type="NUMERIC" />
+			<column header="top_quartile_value" name="top_quartile_value"
+				type="NUMERIC" />
+			<column header="average_quartile_value"
+				name="average_quartile_value" type="NUMERIC" />
+			<column header="bottom_quartile_value"
+				name="bottom_quartile_value" type="NUMERIC" />
+			<column header="user_min_value" name="user_min_value"
+				type="NUMERIC" />
+			<column header="user_max_value" name="user_max_value"
+				type="NUMERIC" />
+			<column header="user_top_quartile_value"
+				name="user_top_quartile_value" type="NUMERIC" />
+			<column header="user_average_quartile_value"
+				name="user_average_quartile_value" type="NUMERIC" />
+			<column header="user_bottom_quartile_value"
+				name="user_bottom_quartile_value" type="NUMERIC" />
+			<column header="dir" name="dir" type="STRING" />
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT ivm_master_dimension OFF;
+		</sql>
+	</changeSet>
+
+	<changeSet author="sachin.saddar (generated)"
+		id="1683216400410-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_dimension_score_level ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_dimension_score_level.csv"
+			quotchar="&quot;" separator=","
+			tableName="ivm_master_dimension_score_level">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="dimension_id" name="dimension_id"
+				type="NUMERIC" />
+			<column header="level" name="level" type="NUMERIC" />
+			<column header="level_text" name="level_text" type="STRING" />
+			<column header="score_min" name="score_min" type="NUMERIC" />
+			<column header="score_max" name="score_max" type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT ivm_master_dimension_score_level OFF;
+		</sql>
+	</changeSet>
+
+	<changeSet author="sachin.saddar (generated)"
+		id="1683479505527-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_value_lever ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_value_lever.csv" quotchar="&quot;"
+			separator="," tableName="ivm_master_value_lever">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="name" name="name" type="STRING" />
+			<column header="type" name="type" type="STRING" />
+			<column header="category" name="category" type="STRING" />
+			<column header="parent_id" name="parent_id" type="NUMERIC" />
+			<column header="parent_name" name="parent_name" type="STRING" />
+			<column header="parent_category" name="parent_category"
+				type="STRING" />
+			<column header="description" name="description" type="STRING" />
+			<column header="last_updated_date" name="last_updated_date"
+				type="DATE" />
+			<column header="last_updated_by" name="last_updated_by"
+				type="STRING" />
+			<column header="usm_project_id" name="usm_project_id"
+				type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT ivm_master_value_lever OFF;
+		</sql>
+	</changeSet>
+
+
+	<changeSet author="sachin.saddar (generated)"
+		id="1683216509830-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_metric ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_metric.csv" quotchar="&quot;"
+			separator="," tableName="ivm_master_metric">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="metric_name" name="metric_name" type="STRING" />
+			<column header="metric_definition" name="metric_definition"
+				type="STRING" />
+			<column header="dimension_id" name="dimension_id"
+				type="NUMERIC" />
+			<column header="priority" name="priority" type="STRING" />
+			<column header="nature" name="nature" type="STRING" />
+			<column header="category" name="category" type="STRING" />
+			<column header="direction" name="direction" type="STRING" />
+			<column header="digital" name="digital" type="STRING" />
+			<column header="unit_of_measurement"
+				name="unit_of_measurement" type="STRING" />
+			<column header="weightage" name="weightage" type="NUMERIC" />
+			<column header="last_updated_date" name="last_updated_date"
+				type="skip" />
+			<column header="last_updated_by" name="last_updated_by"
+				type="skip" />
+			<column header="type" name="type" type="STRING" />
+			<column header="min_value" name="min_value" type="NUMERIC" />
+			<column header="max_value" name="max_value" type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT ivm_master_metric OFF;
+		</sql>
+	</changeSet>
+
+	<changeSet author="sachin.saddar (generated)"
+		id="1683221392452-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_score_calculation_config ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_score_calculation_config.csv"
+			quotchar="&quot;" separator=","
+			tableName="ivm_master_score_calculation_config">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="questionnaire_id" name="questionnaire_id"
+				type="NUMERIC" />
+			<column header="dimension_id" name="dimension_id"
+				type="NUMERIC" />
+			<column header="metric_id" name="metric_id" type="NUMERIC" />
+			<column header="ignore_zero_on_score_calc"
+				name="ignore_zero_on_score_calc" type="BOOLEAN" />
+			<column header="calculation_method" name="calculation_method"
+				type="STRING" />
+			<column header="threshold_maturity" name="threshold_maturity"
+				type="NUMERIC" />
+			<column header="na_score" name="na_score" type="skip" />
+			<column header="multiplier" name="multiplier" type="NUMERIC" />
+		</loadData>
+			<sql dbms="mssql">
+		            SET IDENTITY_INSERT ivm_master_score_calculation_config OFF;
+		</sql>
+	</changeSet>
+
+	
+
+	
+
+	<changeSet author="sachin.saddar (generated)"
+		id="1683221846419-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_data_org_metric_dimension ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_data_org_metric_dimension.csv"
+			quotchar="&quot;" separator=","
+			tableName="ivm_data_org_metric_dimension">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="metric_id" name="metric_id" type="NUMERIC" />
+			<column header="dimension_id" name="dimension_id"
+				type="NUMERIC" />
+			<column header="metric_weightage" name="metric_weightage"
+				type="NUMERIC" />
+			<column header="usm_project_id" name="usm_project_id"
+				type="NUMERIC" />
+			<column header="baseline_value" name="baseline_value"
+				type="skip" />
+			<column header="priority" name="priority" type="skip" />
+			<column header="business_impact" name="business_impact"
+				type="skip" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_data_org_metric_dimension OFF;
+		</sql>
+	</changeSet>
+
+	<changeSet author="sachin.saddar (generated)"
+		id="1683483232094-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_lk_question_type ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_lk_question_type.csv" quotchar="&quot;"
+			separator="," tableName="ivm_lk_question_type">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="question_type_name" name="question_type_name"
+				type="STRING" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_lk_question_type OFF;
+		</sql>
+	</changeSet>
+
+	<changeSet author="sachin.saddar (generated)"
+		id="1683222109522-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_question ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_question.csv" quotchar="&quot;"
+			separator="," tableName="ivm_master_question">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="question_sl_no" name="question_sl_no"
+				type="STRING" />
+			<column header="question_text" name="question_text"
+				type="STRING" />
+			<column header="use_in_score" name="use_in_score" type="skip" />
+			<column header="question_type_id" name="question_type_id"
+				type="NUMERIC" />
+			<column header="questionnaire_id" name="questionnaire_id"
+				type="NUMERIC" />
+			<column header="weightage" name="weightage" type="NUMERIC" />
+			<column header="metric_dimension_id"
+				name="metric_dimension_id" type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_question OFF;
+		</sql>
+	</changeSet>
+
+	<changeSet author="sachin.saddar (generated)"
+		id="1683222206398-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_question_option ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_question_option.csv"
+			quotchar="&quot;" separator=","
+			tableName="ivm_master_question_option">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="option_text" name="option_text" type="STRING" />
+			<column header="question_id" name="question_id" type="NUMERIC" />
+			<column header="score" name="score" type="NUMERIC" />
+			<column header="impact" name="impact" type="STRING" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_question_option OFF;
+		</sql>
+	</changeSet>
+
+	<changeSet author="sachin.saddar (generated)"
+		id="1683222364377-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_metric_score ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_metric_score.csv"
+			quotchar="&quot;" separator="," tableName="ivm_master_metric_score">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="metric_id" name="metric_id" type="NUMERIC" />
+			<column header="metric_name" name="metric_name" type="STRING" />
+			<column header="value_type" name="value_type" type="skip" />
+			<column header="start_value" name="start_value" type="NUMERIC" />
+			<column header="end_value" name="end_value" type="NUMERIC" />
+			<column header="score" name="score" type="NUMERIC" />
+			<column header="weightage" name="weightage" type="skip" />
+			<column header="question_option_id" name="question_option_id"
+				type="skip" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_metric_score OFF;
+		</sql>
+	</changeSet>
+	<changeSet author="rajesh.itagi"
+		id="1683222364377-2-1">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_canvas_master_attributes ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_canvas_master_attributes.csv"
+			quotchar="&quot;" separator="," tableName="ivm_canvas_master_attributes">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="canvas_name" name="canvas_name" type="STRING" />
+			<column header="canvas_attribute_name" name="canvas_attribute_name" type="STRING" />
+			<column header="canvas_attribute_data_type" name="canvas_attribute_data_type" type="STRING" />
+			<column header="canvas_attribute_value_list" name="canvas_attribute_value_list" type="STRING" />
+			<column header="placeholder_text" name="placeholder_text" type="STRING" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_canvas_master_attributes OFF;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="bivek.das (generated)"
+		id="1683222364377-2-1">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_data_org_answer ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_data_org_answer.csv"
+			quotchar="&quot;" separator="," tableName="ivm_data_org_answer">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="answer_text" name="answer_text" type="STRING" />
+			<column header="question_id" name="question_id" type="NUMERIC" />
+			<column header="questionnaire_instance_id" name="questionnaire_instance_id" type="NUMERIC" />
+			<column header="user_id" name="user_id" type="NUMERIC" />
+			<column header="comment" name="comment" type="STRING" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_data_org_answer OFF;
+		</sql>
+	</changeSet>
+	<changeSet author="bivek.das (generated)"
+		id="1683222364377-2-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_data_org_answer_option ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_data_org_answer_option.csv"
+			quotchar="&quot;" separator="," tableName="ivm_data_org_answer_option">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="answer" name="answer" type="NUMERIC" />
+			<column header="question_option" name="question_option" type="NUMERIC" />
+			<column header="coverage" name="coverage" type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_data_org_answer_option OFF;
+		</sql>
+	</changeSet>
+	
+	
+	
+	
+	
+	
+	<changeSet author="bivek.das (generated)"
+		id="1683222364377-2-9">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_org ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_master_org.csv"
+			quotchar="&quot;" separator="," tableName="ivm_master_org">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="name" name="name" type="STRING" />
+			<column header="industry_id" name="industry_id" type="NUMERIC" />
+			<column header="sub_industry_id" name="sub_industry_id" type="NUMERIC" />
+			<column header="geo_id" name="geo_id" type="NUMERIC" />
+			<column header="country_id" name="country_id" type="NUMERIC" />
+			<column header="region_id" name="region_id" type="NUMERIC" />
+			<column header="last_updated_date" name="last_updated_date" type="DATE" />
+			<column header="last_updated_by" name="last_updated_by" type="STRING" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_org OFF;
+		</sql>
+	</changeSet>
+	
+	
+	<changeSet author="sachin.saddar (generated)"
+		id="1683221526613-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_metric_industry_benchmark ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/data/ivm_metric_industry_benchmark.csv"
+			quotchar="&quot;" separator=","
+			tableName="ivm_metric_industry_benchmark">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="metric_id" name="metric_id" type="NUMERIC" />
+			<column header="sub_industry_id" name="sub_industry_id"
+				type="NUMERIC" />
+			<column header="geo_id" name="geo_id" type="NUMERIC" />
+			<column header="country_id" name="country_id" type="NUMERIC" />
+			<column header="region_id" name="region_id" type="NUMERIC" />
+			<column header="top_quartile" name="top_quartile"
+				type="NUMERIC" />
+			<column header="average_quartile" name="average_quartile"
+				type="NUMERIC" />
+			<column header="bottom_quartile" name="bottom_quartile"
+				type="NUMERIC" />
+			<column header="dimension_id" name="dimension_id"
+				type="NUMERIC" />
+			<column header="benchmark_date" name="benchmark_date"
+				type="DATE" />
+			<column header="last_updated_date" name="last_updated_date"
+				type="skip" />
+			<column header="last_updated_by" name="last_updated_by"
+				type="skip" />
+			<column header="baseline_value" name="baseline_value"
+				type="NUMERIC" />
+			<column header="target_value" name="target_value"
+				type="STRING" />
+			<column header="metric_value" name="metric_value"
+				type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_metric_industry_benchmark OFF;
+		</sql>
+	</changeSet>-->
+	
+</databaseChangeLog>

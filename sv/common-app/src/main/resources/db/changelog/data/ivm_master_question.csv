@@ -1,0 +1,471 @@
+"id","question_sl_no","question_text","use_in_score","question_type_id","questionnaire_id","weightage","metric_dimension_id"
+"777","1","Does the application have DDoS protection from multiple telcos / service providers and local appliance(s)?","NULL","9","133","6.0","530"
+"778","2","Do your services have network level protection (firewall) on inbound communication only?","NULL","9","133","6.0","531"
+"779","3","Does the application have DDoS protection from both a telco / service provider and local appliance?","NULL","9","133","6.0","532"
+"780","4","Are your services and supporting infrastructure capable of absorbing 2x normal capacity?","NULL","9","133","6.0","533"
+"781","5","Is your certificate renewal process fully automated?","NULL","9","133","6.0","534"
+"782","6","Does the application have DDoS protection either a telco / service provider or from a local appliance?","NULL","9","133","6.0","535"
+"783","7","Do your services have device or service level protection both for inbound and outbound communication?","NULL","9","133","6.0","536"
+"784","8","Are your services and supporting infrastructure capable of absorbing 10x normal capacity?","NULL","9","133","6.0","537"
+"785","9","Is your certificate renewal process automated with manual application (or other manual steps)?","NULL","9","133","6.0","538"
+"786","10","Can the services and supporting infrastructure absorb attack traffic by auto-scaling, with no impact to service availability?","NULL","9","133","6.0","539"
+"787","11","In addition to multi-level DDoS protection, can supporting infrastructure withstand DDoS load by automatically scaling?","NULL","9","133","6.0","530"
+"788","12","Do your services have network level protection (firewall) on inbound and outbound communication?","NULL","9","133","6.0","531"
+"789","13","Is your certificate renewal process fully automated and the issuing CA / PKI service higly available?","NULL","9","133","6.0","532"
+"790","14","Do your services have device or service level protection for inbound and network level protection for outbound communication?","NULL","9","133","6.0","533"
+"791","15","Is your certificate renewal process manual with owners alerted before expiration ?","NULL","9","133","6.0","534"
+"792","16","Are your services and supporting infrastructure capable of absorbing 5x normal capacity?","NULL","9","133","6.0","535"
+"793","17","Does a signed and monitored Contract (SLA) exist with the data owner, describing data quality, timeliness and error procedures?","NULL","9","133","2.0","540"
+"794","18","Have your data transformation processes been documented and include source-target mappings to enable analysing data flows?","NULL","9","133","2.0","541"
+"795","19","Have data ingerity checks been implemented as part of data processing - for example that the number of output records matches source data, and that source and output data are consistent?","NULL","9","133","2.0","542"
+"796","20","Does the data store have user activity logging and monitoring capability for any data access of updates performed by users?","NULL","9","133","2.0","543"
+"797","21","Are access and views to data controlled by contextual, fine-grained entitlement logic dynamically based on security, location, role etc.?","NULL","9","133","2.0","544"
+"798","22","Do you employ regular data quality checks throughout the chain of processing, ensuring it does not become corrupted?","NULL","9","133","2.0","545"
+"799","23","Is automated process in place for detecting and rolling back unexpected data deletion?","NULL","9","133","2.0","546"
+"800","24","Have exit strategies been explored for data migration scenarios to another platform?","NULL","9","133","2.0","547"
+"801","25","Have procedures been implemented to ensure a test plan is in place as part of the software development for data transformation workloads?","NULL","9","133","2.0","548"
+"802","26","Are toll-gate checks in place prior to manual data deletion - for example that backups exist and any active processing has completed, only validated deletion code is used etc.?","NULL","9","133","2.0","549"
+"803","27","Do automated tests include immediate systems consuming the data, confirming successful downstream processing?","NULL","9","133","2.0","540"
+"804","28","Do you utilise process orchestration frameworks for signalling and verification of successful upstream processing?","NULL","9","133","2.0","541"
+"805","29","Will the ingestion process automatically recover and re-run in case of failures?","NULL","9","133","2.0","542"
+"806","30","Is regular data synchronisation to a repository on another vendor platform in place?","NULL","9","133","2.0","543"
+"807","31","Are automatic event notifications in place for when source system data is unavailable, enabling action to be taken?","NULL","9","133","2.0","544"
+"808","32","Do you have basic, automated source data consistency checks in place covering field completeness, format etc?","NULL","9","133","2.0","545"
+"809","33","Is real-time data synchronisation to a repository on another vendor platform in place?","NULL","9","133","2.0","546"
+"810","34","Is ingestion process continuously monitored for failures?","NULL","9","133","2.0","547"
+"811","35","Does your application deliver structured data lineage information, mapped to HSBC Business Information Model (HBIM)?","NULL","9","133","2.0","548"
+"812","36","Do data processing routines implement  internal data integrity checks to identify corrupted data, before processing?","NULL","9","133","2.0","549"
+"813","37","Are data objects versioned and is it possible to roll back to previous version(s)?","NULL","9","133","2.0","540"
+"814","38","Do you perform continuous integration tests to ensure data processing capability, as part of software development?","NULL","9","133","2.0","541"
+"815","39","Have auto-healing routines such as creation of missing reference data been implemented?","NULL","9","133","2.0","542"
+"816","40","Is the ability to restore backup data regularly tested, on an alternative platform?","NULL","9","133","2.0","543"
+"817","41","Have your data processing routines been documented and include source-target mappings to enable analysing data flows?","NULL","9","133","2.0","544"
+"818","42","Are access rights to data being regularly reviewed?","NULL","9","133","2.0","545"
+"819","43","Is any regular data synchronisation in place to a repository on another independent data store platform, for example in a different datacentre or cloud availability zone or region?Please select this also in case you have selected the real-time synchronisation option at Gold.","NULL","9","133","2.0","546"
+"820","44","Have procedures been implemented to ensure a test plan is in place as part of the software development for data processing workloads?","NULL","9","133","2.0","547"
+"821","45","Is source data validated and quality checked, to ensure that data is present, compliant and in the right format?","NULL","9","133","2.0","548"
+"822","46","Is automated orchestration in place allowing a set of processes to re-run automatically from a point in time, for example after a failure, interruption or other error condition.","NULL","9","133","2.0","549"
+"823","47","Does a signed and monitored Contract (SLA) exist between the data owner and consumer, describing quality, timeliness and error procedures?","NULL","9","133","2.0","540"
+"824","48","Is a fully automated procedure in place to reprocess/resend the data, in case of an incompatibility, process failure or any other error condition?","NULL","9","133","2.0","541"
+"825","49","Are documented, step-by-step support procedures for data maintenance available for support teams?","NULL","9","133","2.0","542"
+"826","50","Do you perform continuous integration tests to validate successful data processing capability, as part of development?","NULL","9","133","2.0","543"
+"827","51","Are toll-gate checks in place prior to manual data deletion - for example that backups exist and any active processing has completed, that only validated deletion code is used, etc.?","NULL","9","133","2.0","544"
+"828","52","Are automatic event notifications in place for when source system data is unavailable based on monitoring, enabling action to be taken?","NULL","9","133","2.0","545"
+"829","53","Is ingestion process continuously monitored for failures?","NULL","9","133","2.0","546"
+"830","54","Is it possible to track, log and monitor user activity around data access or data updates?","NULL","9","133","2.0","547"
+"831","55","Do data processing routines implement basic internal data consistency checks covering field completeness, format etc.?","NULL","9","133","2.0","548"
+"832","56","Is any procedure in place to reprocess/resend the data, in case of an incompatibility, process failure or any other error condition? Please select this also in case you have selected the fully automated procedure option at Platinum.","NULL","9","133","2.0","549"
+"833","57","Do data processing routines implement consistency source data integrity checks, before processing?","NULL","9","133","2.0","540"
+"834","58","Is the ability to restore backup data regularly tested on another independent data store platform, for example in a different datacentre or cloud availability zone or region?","NULL","9","133","2.0","541"
+"835","59","Is real-time data synchronisation in place to a repository on another independent data store platform, for example in a different datacentre or cloud availability zone or region?","NULL","9","133","2.0","542"
+"836","60","Are automated tests with immediate downstream systems in place, validating that successful processing is possible?","NULL","9","133","2.0","543"
+"837","61","Do you utilise process orchestration frameworks for up/downstream signalling and verification of successful  processing?","NULL","9","133","2.0","544"
+"838","62","Will ingestion automatically recover and reprocess in case of failures?","NULL","9","133","2.0","545"
+"839","63","Is code build pipeline-driven and automated, with manual code reviews and scanning?","NULL","9","133","3.0","550"
+"840","64","Have performance and capacity tests been used to determine production sizing?","NULL","9","133","3.0","551"
+"841","65","Does the application follow API and microservices based, stateless design and adhere to HSBC's AIMS-FAST principles, standards and patterns?","NULL","9","133","3.0","552"
+"842","66","Do you use zero downtime deployment strategy such as Blue/Green releases, supporting gradual cut-over and immediate rollback?","NULL","9","133","3.0","553"
+"843","67","Is automatic retry pattern used for failed transactions?","NULL","9","133","3.0","554"
+"844","68","Do you use retry and fallback patterns to handle transient failures in connecting to services and resources?","NULL","9","133","3.0","555"
+"845","69","Are automated CI/CD/CT pipelines populating release dashboards for QA and production releases with pre-agreed metrics?","NULL","9","133","3.0","556"
+"846","70","Is the entire application stack implemented using declarative IaC tooling and can be repeatably and consistently (re)deployed?","NULL","9","133","3.0","557"
+"847","71","Do you use pre-defined breakpoints in transaction processing to allow resuming failed transactions without impacting data?","NULL","9","133","3.0","558"
+"848","72","Are nonfunctional or performance testing environments sized to production capacity?","NULL","9","133","3.0","559"
+"849","73","Do your CI/CD/CT pipelines have a defined gating criteria including tests and approvals?","NULL","9","133","3.0","550"
+"850","74","Is code review and automated scanning in place (binary or code level)?","NULL","9","133","3.0","551"
+"851","75","Has code deployment been automated end-to-end (one-click deployments)?","NULL","9","133","3.0","552"
+"852","76","Are timeouts being used to limit the duration of remote service calls vs waiting indefinitely?","NULL","9","133","3.0","553"
+"853","77","Is automated code review in place, covering coding standards, vulnerabilities, etc.?","NULL","9","133","3.0","554"
+"854","78","Are performance and load tests being performed to understand the maximum request rate/throughput?","NULL","9","133","3.0","555"
+"855","79","Have tests in the SDLC been automated (unit, integration, functional, penetration, performance etc.) and are they regularly performed?","NULL","9","133","3.0","556"
+"856","80","Do you use bulkhead pattern for isolating application components, allowing execution to continue when a single component fails?","NULL","9","133","3.0","557"
+"857","81","Do you use the circuit breaker pattern to handle faults related to unavailable remote system/service?","NULL","9","133","3.0","558"
+"858","82","Has automated testing with rollback on failure been implemented, as part of the automated CI/CD/CT pipeline?","NULL","9","133","3.0","559"
+"859","83","Is it possible to release new code into production on-demand at any time, without disrupting existing workloads and transactions?","NULL","9","133","3.0","550"
+"860","84","Do all components of the application adhere to Application Architecture Principles and use Application Architecture approved Patterns, including asynchronous communication and BIAN service componentisation?","NULL","9","133","3.0","551"
+"861","85","Is the application fully broken down into components that separate all BIAN service domains from one another?","NULL","9","133","3.0","552"
+"862","86","Are Performance Tests run continually as part of automated CI/CD/CT pipelines?","NULL","9","133","3.0","553"
+"863","87","Is Chaos Testing employed in Production Environments to simulate and identify failures?","NULL","9","133","3.0","554"
+"864","88","Is there a Test Environment for this IT Service that is aliugned with production software and infrastructure configurations?","NULL","9","133","3.0","555"
+"865","89","Is the application constructed of components that segregate BIAN service domains from one another?","NULL","9","133","3.0","556"
+"866","90","Is performance testing completed to identify both performance baselines and limits where performance begins to degrade?","NULL","9","133","3.0","557"
+"867","91","Is there a Test Environment for this IT Service that is of identical size to production, and is aligned with production software and infrastructure configurations?","NULL","9","133","3.0","558"
+"868","92","Do all components of the application communicate in an asynchronous way, such that independent component failure does not cause failure of dependent processes (e.g a microservices or EDA architecture)","NULL","9","133","3.0","559"
+"869","93","Are performance tests completed throughout development?","NULL","9","133","3.0","550"
+"870","94","Is performance testing completed to identify performance baselines?","NULL","9","133","3.0","551"
+"871","95","Is automated testing completed in Production Environments as part of a CI/CD/CT pipeline?","NULL","9","133","3.0","552"
+"872","96","Is the primary site implementation running Hot/Hot across separate infrastructure platforms?","NULL","9","133","6.0","560"
+"873","97","Is the failover process within the primary site being regularly tested?","NULL","9","133","6.0","561"
+"874","98","Is the DR failover process automated, causing a brief outage or interruption during cut-over?","NULL","9","133","6.0","562"
+"875","99","Is the platform being regularly tested to ascertain availability after component failure and/or failover?","NULL","9","133","6.0","563"
+"876","100","Will the platform remain available in the face of multiple infrastructure or hardware component failures?","NULL","9","133","6.0","564"
+"877","101","Is the DR failover process manual, requiring up to multiple hours of downtime?","NULL","9","133","6.0","565"
+"878","102","Is the internal failover configuration of redundant components manual?","NULL","9","133","6.0","566"
+"879","103","Is the implementation running Hot/Hot across multiple sites on the same infra platform?","NULL","9","133","6.0","567"
+"880","104","Is the primary site implementation running Hot/Hot across separate infrastructure?","NULL","9","133","6.0","568"
+"881","105","Can the primary site implementation automatically fail over to a different set of local infrastructure?","NULL","9","133","6.0","569"
+"882","106","Is the DR failover process being regularly tested?","NULL","9","133","6.0","560"
+"883","107","Is the internal failover configuration of redundant components automatic?","NULL","9","133","6.0","561"
+"884","108","Is the implementation running Hot/Hot across multiple different infra platforms or vendors (cloud, on-prem.)?","NULL","9","133","6.0","562"
+"885","109","Is the failover process within the primary site a manual process?","NULL","9","133","6.0","563"
+"886","110","Does the platform utilise multiple redundant components in Hot/Hot fashion, to maintain availability?","NULL","9","133","6.0","564"
+"887","111","Is the application or service hosted in a Group Data Centre (Tier 0)","NULL","9","133","6.0","565"
+"888","112","Is the application or service provided in a Highly Restricted Country and hosted on RDC, CDC, LDC, SaaS and non strategic CSP location?","NULL","9","133","14.0","570"
+"889","113","Is the application or service hosted in a Group Data Centre (Tier 0)?","NULL","9","133","14.0","571"
+"890","114","Is the application or service hosted in a Critical Data Centre (Tier 1)?","NULL","9","133","14.0","572"
+"891","115","Is the application or service hosted in a Local Data Centre (Tier 2)?","NULL","9","133","14.0","573"
+"892","116","Is the application or service hosted on Strategic Cloud Service Provider platform?","NULL","9","133","14.0","574"
+"893","117","Is the application or service hosted in a Regional Data Centre (Tier 0)?","NULL","9","133","14.0","575"
+"894","118","Is the application or service hosted on IKP or ICP service platform in Group Data Centre (Tier 0)?","NULL","9","133","14.0","576"
+"895","119","Is your DR solution implemented as Live / Live, with an active DR service instance?","NULL","9","133","5.0","577"
+"896","120","Is service level capacity planning process in place covering all components?","NULL","9","133","5.0","578"
+"897","121","Are daily backups taking place?","NULL","9","133","5.0","579"
+"898","122","Have predictive capacity monitoring and proactive response triggers been implemented?","NULL","9","133","5.0","580"
+"899","123","Is your service or application deployed locally following the following Live / Live availability pattern?","NULL","9","133","5.0","581"
+"900","124","Do your backups support fast partial restore or reverting to a snapshot?","NULL","9","133","5.0","582"
+"901","125","Is the failover to a local standby instance fully automated or can the whole environment be redeployed automatically?","NULL","9","133","5.0","583"
+"902","126","Is capacity planning in place for some or key components of the service?","NULL","9","133","5.0","584"
+"903","127","Are your workloads dynamically portable across different sites?","NULL","9","133","5.0","585"
+"904","128","Is your DR process a manual workflow comprising of scripted or manual actions?","NULL","9","133","5.0","586"
+"905","129","Are backups regularly tested to validate recoverability?","NULL","9","133","5.0","577"
+"906","130","Does your service have a local cold-standby instance?","NULL","9","133","5.0","578"
+"907","131","Is your DR solution and process an automated workflow, with optional manual inputs to control execution stages?","NULL","9","133","5.0","579"
+"908","132","Can environments and service components be automatically scaled in response to increased load?","NULL","9","133","5.0","580"
+"909","133","Are your workloads dynamically portable across independent local infrastructure?","NULL","9","133","5.0","581"
+"910","134","Do your backups support point-in-time recovery?","NULL","9","133","5.0","582"
+"911","135","Are daily backups taking place, and do they have alerting in place for backup failures?","NULL","9","133","5.0","583"
+"912","136","Are complete backups regularly tested to validate recoverability against RPO and RTO?","NULL","9","133","5.0","584"
+"913","137","Is there a documented Data Retention/Life Cycle/Archival Strategy for this IT Service that is aligned with Backup and Recovery plans?","NULL","9","133","5.0","585"
+"914","138","Can technical components be automatically discovered and linked to an IT service?","NULL","9","133","6.0","587"
+"915","139","Can the application stack be automatically started and stopped in the correct component sequence, without manual intervention?","NULL","9","133","6.0","588"
+"916","140","Is automated testing and gating in place as part of the release process and pipeline?","NULL","9","133","6.0","589"
+"917","141","Are proactive problem management practices in place including lessonas learnt from major incident reviews?","NULL","9","133","6.0","590"
+"918","142","Have resiliency and availability objectives been set and documented in SLAs/SLOs?","NULL","9","133","6.0","591"
+"919","143","Have resiliency and availability objectives been set, documented and communicated?","NULL","9","133","6.0","592"
+"920","144","Is the lineage and dependencies from business services, to business processes, to underlying IT services mapped?","NULL","9","133","6.0","593"
+"921","145","Is capacity planning being performed at all in-scope technology layers?","NULL","9","133","6.0","594"
+"922","146","Are regular local and DR failover tests being performed for all service components?","NULL","9","133","6.0","595"
+"923","147","Is proactive monitoring in place to enable warning notifications and action before failures occur?","NULL","9","133","6.0","596"
+"924","148","Are architects included in incident reviews?","NULL","9","133","6.0","587"
+"925","149","Can capacity be automatically increased or auto-scaled, based on telemetry feedback?","NULL","9","133","6.0","588"
+"926","150","Is source code being stored and managed in version and access-controlled repositories?","NULL","9","133","6.0","589"
+"927","151","Can all service components be automatically (re)deployed, without operator intervention?","NULL","9","133","6.0","590"
+"928","152","Are error budgets (relating to SLA thresholds) utilised to inform release prioritisation?","NULL","9","133","6.0","591"
+"929","153","Do you hold a register of risks to availability/resilience for this IT Service?","NULL","9","133","6.0","592"
+"930","154","Do the workloads emit sufficient telemetry data to monitor business level performance indicators like user experience, and is such monitoring performed?","NULL","9","133","5.0","597"
+"931","155","Is automatic notification and escalation process in place for service impacting events?","NULL","9","133","5.0","598"
+"932","156","Is logging being performed to capture the state and events of the infrastructure underpinning the application?","NULL","9","133","5.0","599"
+"933","157","Have automated recovery processes been implemented based on feedback from monitoring and telemetry data?","NULL","9","133","5.0","600"
+"934","158","Has service level situational awareness been established in  monitoring to understand 'normal' and peak loads that individual components can handle?","NULL","9","133","5.0","601"
+"935","159","Is logging being performed to capture the state and events of the application?","NULL","9","133","5.0","602"
+"936","160","Is centralised collection and processing of telemetry data in place, supporting service and incident management, visualisation, reporting etc.?","NULL","9","133","5.0","603"
+"937","161","Has heartbeat checking been implemented to detect failures of critical components?","NULL","9","133","5.0","604"
+"938","162","Has synthetic monitoring and probing been implemented to gain additional telemetry?","NULL","9","133","5.0","605"
+"939","163","Are application logs available for centralised telemetry processing, either by using standard logging tools or custom agents/exporters?","NULL","9","133","5.0","606"
+"940","164","Have service health visualisation dashboards been implemented?","NULL","9","133","5.0","597"
+"941","165","Is there a monitoring dashboard in place to visualize the health of the Service Chain in real time along with the health of the underpinning IT Services?","NULL","9","133","5.0","598"
+"942","166","Is automated correlation and grouping of events and alerts in place?","NULL","9","133","5.0","599"
+"943","167","Is Machine Learning used to identify the most probable root cause, or likely candidates, of an incident?","NULL","9","133","5.0","600"
+"944","168","Is Machine Learning used to predict and detect possible service-impacting incidents?","NULL","9","133","5.0","601"
+1374,1,"Who (""Unto Whom"") is negatively impacted by the system? (Stakeholders)",NULL,9,144,3,866
+1375,2,"Can users (""For Whom"") opt out, e.g. switch systems? Can users challenge or correct the output?",NULL,9,144,3,866
+1376,3,Is there any risk identified while developing AI tool?,NULL,9,144,5,866
+1377,4,"Are there mechanisms in place to ensure that data quality is maintained in scenarios such as data becoming obsolete, outdated, incomplete, incorrect data being used, source tool getting decommissioned etc has to be taken care and make necessary changes in algorithm (applicable for PII data)",NULL,9,144,4,866
+1378,5,"Is sensitive data such as health data, biometric data being required and processed by the tool and any propotionate controls implemented for protecting sensitive data?",NULL,9,144,4,866
+1380,7,"Is there a clearly stated and documented purpose for the tool which is aligned to Human, societal well being and does not have negative impact to the privacy, rights and freedom of individuals?",NULL,9,144,5,867
+1381,8,"Does the tool have DSR handling capabilities, including the process, procedures and technical capabilities?",NULL,9,144,4,867
+1382,9,Is communication sent to data subjects before rolling out AI solution and are there feedbacks incorporated to ensure that the solution is not overriding the interest of the data subjects?,NULL,9,144,3,867
+1383,10,Has adequate notice/consent been taken from data subjects a) before using their data for training the AI tool b) before rolling out the tool c) when they are interacting with an AI or assisted by AI for decision making or if a decision is made about them by AI. And is this consent/acknowledgement being recorded?,NULL,9,144,2,867
+1384,11,Can the system’s outputs negatively impact fundamental human rights?,NULL,9,144,4,867
+1385,12,Can the system’s outputs negatively impact areas of life related to well-being?,NULL,9,144,3,868
+1386,13,Could the system automate non-hazardous tasks that are or were being executed by humans?,NULL,9,144,1,868
+1387,14,Which industrial sector is the system deployed in?,NULL,9,144,0,868
+1388,15,What business function(s) is the system employed in?,NULL,9,144,0,869
+1389,16,Jurisdiction in which AI is trained & applied,NULL,9,144,2,870
+1390,17,Would a disruption of the system’s function / activity affect essential services?,NULL,9,144,1,870
+1391,18,Is the solution using Vendor IP solutions? If yes whether vendor has agreed to explain how the results are arrived in case of DSRs or any queries from regulatory authorities?,NULL,9,144,4,870
+1392,19,"Where vendor is involved, have they been made accountable for privacy and data protection by adding relevant data protection clauses to the contract",NULL,9,144,3,871
+1393,20,How technically mature is the system?,NULL,9,144,4,871
+1394,21,How do you ensure training & testing data is obtained in a fair and lawful manner (applicable for PII data),NULL,9,144,3,872
+1395,22,Does the AI system have functionality built in to implement data deletion after use? (Applicable for PII data),NULL,9,144,3,872
+1396,23,"Are the data and input from experts; provided, observed, synthetic or derived?",NULL,9,144,2,874
+1397,24,"If personal data, will the data be anonymized; pseudonymized?",NULL,9,144,1,874
+1398,25,"Is the model generative, discriminative or both?",NULL,9,144,1,874
+1399,26,Does the model evolve and / or acquire abilities from interacting with data in the field?,NULL,9,144,2,875
+1400,27,Is there a mechanism or documentation which explains how the decision is arrived using the AI/ML model?,NULL,9,144,3,875
+1402,29,Do you have any advisory committee for fairness and bias review of any AI model?,NULL,9,144,2,877
+1403,30,What tasks does the system perform?,NULL,9,144,0,877
+1404,31,Does the system combine several tasks and actions?,NULL,9,144,3,877
+1405,32,Are there predefined KPI's available for the tool and also for measuring output of tool?,NULL,9,144,2,878
+1406,33,How autonomous are the system’s actions and what role do humans play?,NULL,9,144,3,878
+1409,34,Are notifications provided in accessible formats for vulnerable groups such as children or persons with disabilities?,NULL,9,144,3,878
+1410,35,Is the purpose of processing of the AI system reasonably expected by Data Subject?,NULL,9,144,2,878
+1411,36,Is the output analysed every quarter to avoid any biases and discrimination?,NULL,9,144,3,879
+1412,37,Is the system that continue to learn after being rolled out is developed in such a way to ensure that possibly biased outputs due to outputs used as an input for future operations (‘feedback loops’) are duly addressed with appropriate mitigation measures,NULL,9,144,2,879
+1413,38,Is the algorithm able to produce similar results on same dataset when it is executed multiple times?,NULL,9,144,1,879
+1414,39,Is there a provision for human intervention in cases where fully automated decisions are made?,NULL,9,144,3,880
+1415,40,"Are the training & testing datasets analyzed at every quarter for representativeness? Is the data being used diverse enough and balanced and are they relevant, error free and complete and devoid of any bias and discrimination?",NULL,9,144,2,880
+1446,1,What is the status of automation planning?,NULL,11,150,33.33,908
+1447,2,Is productivity improvement plan aligned with the service line goals?,NULL,11,150,33.33,909
+1448,3,Has the team been formed for executing automation roadmap?,NULL,11,150,33.33,910
+1449,4,How is infra provisioned across environments?,NULL,11,150,33.33,911
+1450,5,How is data refresh done from prod to lower environments?,NULL,11,150,33.33,912
+1451,6,How are packaged deployed across environments?,NULL,11,150,33.33,913
+1452,7,Is the data archival and purging automated?,NULL,11,150,33.33,914
+1453,8,How is data profiling and cleaning handled?,NULL,11,150,33.33,915
+1454,9,How is data migration activity performed?,NULL,11,150,33.33,916
+1455,10,How is SLA management done?,NULL,11,150,33.33,917
+1456,11,How are audit and compliance reports produced?,NULL,11,150,33.33,918
+1457,12,How are regular progress reports generated?,NULL,11,150,33.33,919
+1461,16,How is application capacity planning and management performed?,NULL,11,150,33.33,922
+1462,17,How are DB performance managed?,NULL,11,150,33.33,923
+1463,18,What percentage of applications have the APM tool configuration done (for alert and event management)?,NULL,8,150,33.33,924
+1464,19,Which of the below describes current state of adoption of AI while facilitating operations?,NULL,11,150,100,925
+1465,20,How is application health monitoring performed?,NULL,11,150,25,926
+1466,21,"How is the monitoring done for applications, infrastructure, databases, batch jobs, interfaces ?",NULL,11,150,25,927
+1467,22,How does the Business process with Transaction monitoring set up currently?,NULL,11,150,25,928
+1468,23,"Are there standard command centers to monitor the health of applications, Severity incidents, Trends etc.",NULL,11,150,25,929
+1469,24,What is the current state of Log Management system?,NULL,11,150,100,930
+1470,25,How does the planned improvement fair against the actuals realized?,NULL,8,150,50,931
+1471,26,"How do you correlate different business, IT data sources and identify the causality for any disruptions?",NULL,11,150,25,932
+1472,27,"To derive the best business value from the IT, apps, what is the strategy you follow?",NULL,11,150,25,932
+1473,28,What do you do to measure and enhance the customer experience?,NULL,11,150,100,933
+1474,29,What do you do to bring in agility to the response to fast moving business changes?,NULL,11,150,100,934
+1475,30,What is the level of reuse maturity within your org?,NULL,11,150,100,935
+1476,31,What is the operating model structure that closely match from the options?,NULL,11,150,100,936
+1477,32,Your Application Management process closely matches with which of the options provided?,NULL,11,150,100,937
+1478,33,How are the data report Service Requests handled?,NULL,11,150,7.14,938
+1479,34,How are the data update Service Requests handled today?,NULL,11,150,7.14,939
+1480,35,How do you address user queries and user training?,NULL,11,150,7.14,940
+1481,36,How do you handle Batch job failures in the current state?,NULL,11,150,7.14,941
+1482,37,How do you handle Incident response and triage at present?,NULL,11,150,7.14,942
+1483,38,How do you handle security related request specific to user role?,NULL,11,150,7.14,943
+1484,39,How do you handle server and DB issues at present?,NULL,11,150,7.14,944
+1485,40,How does historical resolution repository help in solving the new tickets?,NULL,11,150,7.14,945
+1487,42,How does the Simple Queries get addressed in the System?,NULL,11,150,7.14,947
+1488,43,How does the ticket enrichment happens in the current process?,NULL,11,150,7.14,948
+1489,44,How does the User Lifecycle Management happens today?,NULL,11,150,7.14,949
+1490,45,What is the current state of Shift Management process?,NULL,11,150,7.14,950
+1491,46,What percentage of incidents are automatically created in ITSM tool?,NULL,8,150,7.14,951
+1492,47,Which of these is closest to the change planning and approval processes followed at your org?,NULL,11,150,7.7,952
+1493,48,How are regression test cases executed?,NULL,11,150,7.7,953
+1494,49,How are performance test cases executed?,NULL,11,150,7.7,954
+1495,50,What is the closest state of deploying new changes to production?,NULL,11,150,7.7,955
+1496,51,How is code quality improved?,NULL,11,150,7.7,956
+1497,52,How is impact analysis performed for the changes and disruptions?,NULL,11,150,7.7,957
+1498,53,How are change requests estimated?,NULL,11,150,7.7,958
+1499,54,What is the branching strategy for the source code and releases?,NULL,11,150,7.7,959
+1500,55,How is coding accelerated?,NULL,11,150,7.7,960
+1501,56,How are forward and rollback changes for DB applied?,NULL,11,150,7.7,961
+1502,57,What is the approach for unit testing of the enhancements?,NULL,11,150,7.7,962
+1503,58,How is the code quality ensured for the enhancements?,NULL,11,150,7.7,963
+1504,59,How is progressive testing performed?,NULL,11,150,7.7,964
+1505,60,Are the support processes SOP driven?,NULL,11,150,50,965
+1506,61,How capable is the team to build and deploy automations for their use cases?,NULL,11,150,50,966
+1507,62,What is the average year on year ticket reduction through different intervention plans in last 3 years,NULL,8,150,50,967
+1508,63,How frequently are the incidents/service requests reviewed to provide improvement suggestions?,NULL,11,150,50,968
+1509,64,"What percentage of alerts, anomalies in the system are proactively self healed thru automations?",NULL,8,150,50,969
+1510,65,How is the event and  alert data from various sources used to optimize the operations?,NULL,11,150,50,969
+1511,1,How many applications are in the production environment as of this month?,NULL,8,150,100,972
+1512,2,"What is the average number of problems tickets  per month, based on the last 6 months data?",NULL,8,150,100,973
+1513,3,What % applications use full stack DevOps for Application Management?,NULL,8,150,50,974
+1514,4,What % applications use ScrumBan / Kanban for Application Management?,NULL,8,150,50,974
+1515,5,"What is the average number of critical and high priority (P1 and P2) tickets per month, based on the last 6 months data?",NULL,8,150,100,975
+1516,6,What is the average number of FTEs working on Application management based on the last 6 months data?,NULL,8,150,100,976
+1517,7,What is the average monthly ticket volume for application management (exclude Infra support tickets) based on the last 6 months data?,NULL,8,150,50,977
+1518,8,What is the average number of incidents  per month based on the last 6 months data?,NULL,8,150,50,977
+1827,99,What is the maturity level of your problem management process?,NULL,11,150,100,1106
+1904,99,What percentage of tickets are handled through standard operating procedures and/ or run books?,NULL,8,150,100,1175
+1905,41,How does the service request resolution happens today?,NULL,11,150,3.57,946
+1906,41,How does the incident resolution happens today?,NULL,11,150,3.57,1176
+2067,9,What is the average number of service requests per month based on the last 6 months data?,NULL,8,150,50,977
+"1459","14","How do you correlate different business, IT data sources and identify the causality for any disruptions?",NULL,"11","150","25","921"
+"1460","15","To derive the best business value from the IT, apps, what is the strategy you follow?",NULL,"11","150","25","921"
+"1285","10","What is the operating model structure that closely match from the options","NULL","11","143","100.0","769"
+"1286","1","What % applications use ScrumBan / Kanban for Application Management?","NULL","10","143","50.0","770"
+"1287","2","What % applications use full stack DevOps for Application Management?","NULL","10","143","50.0","770"
+"1288","11","Your support process closely match with which of the options provided?","NULL","11","143","100.0","771"
+"1289","3","How many applications are in the production environment as of this month?","NULL","8","143","100.0","772"
+"1290","4","What is the average monthly ticket volume for application management (exclude Infra support tickets) based on the last 6 months data?","NULL","8","143","33.0","773"
+"1291","13","What percentage of incidents are automatically created in ITSM tool?","NULL","9","143","33.0","774"
+"1292","14","What percentage of incident resolutions are automated ( Applications and Batch)","NULL","9","143","33.0","775"
+"1293","24","What percentage of applications have the APM tool configuration done (for alert and event management)?","NULL","9","143","100.0","776"
+"1294","25","Which of the below describes current state of adoption of AI while facilitating operations?","NULL","11","143","100.0","777"
+"1295","26","Are there standard command centers to monitor the health of applications, Severity incidents, Trends etc.","NULL","11","143","100.0","778"
+"1296","16","What percentage of service requests are handled through automation?","NULL","9","143","100.0","779"
+"1297","17","What is the maturity level of your problem management process?","NULL","11","143","100.0","780"
+"1298","18","How frequently are the incidents reviewed to provide suggestions to improve app?","NULL","11","143","50.0","781"
+"1299","5","What is the average number of incidents  per month based on the last 6 months data?","NULL","8","143","33.0","773"
+"1300","6","What is the average number of service requests  per month, based on the last 6 months data?","NULL","8","143","33.0","773"
+"1301","7","What is the average number of problems tickets  per month, based on the last 6 months data?","NULL","8","143","100.0","782"
+"1302","15","What % of tickets are handled through standard operating procedures and / or run books?","NULL","9","143","33.0","783"
+"1303","19","What is the average year on year ticket reduction through different intervention plans in last 3 years","NULL","9","143","50.0","784"
+"1304","8","What is the average number of critical and high priority (P1 and P2) tickets per month, based on the last 6 months data?","NULL","8","143","100.0","785"
+"1305","9","What is the average number of FTEs working on Application management based on the last 6 months data?","NULL","8","143","100.0","786"
+"1306","20","What is the maturity level of your change management  and release management process ?","NULL","11","143","100.0","787"
+"1307","27","What is your log monitoring maturity level?","NULL","11","143","100.0","788"
+"1308","12","How do you describe the maturity of Knowledge Management (KM) processes at your organization?","NULL","11","143","100.0","789"
+"1309","28","How are any disruptions that impact business service availability dealt with?","NULL","11","143","100.0","790"
+"1310","29","What do you do to measure and enhance the customer experience?","NULL","11","143","100.0","791"
+"1311","30","To derive the best business value from the IT, apps, what is the strategy you follow?","NULL","11","143","50.0","792"
+"1312","21","How is the event data from various sources used to optimize the operations and resilience?","NULL","11","143","50.0","793"
+"1313","23","How would you best describe automation methodology used within the enterprise?","NULL","11","143","100.0","794"
+"1314","32","What do you do to bring in agility to the response to fast moving business changes?","NULL","11","143","100.0","795"
+"1315","31","How do you correlate different business, IT data sources and identify the causality for any disruptions?","NULL","11","143","50.0","796"
+"1316","22","What percentage of alerts, anomalies in the system are proactively self healed thru automations?","NULL","9","143","50.0","797"
+"3246","1","Are requirements for the enterprise applications clearly documented, well-defined, and understood by the development team?","NULL","9","168","100.0","1795"
+"3247","2","Is there a formal process in place for gathering, analyzing, and managing requirements throughout the development lifecycle?","NULL","9","168","100.0","1796"
+"3248","3","Are requirements regularly reviewed and validated with stakeholders to ensure they align with business needs and goals?","NULL","9","168","100.0","1797"
+"3249","4","Is there a systematic approach to designing the architecture and components of the enterprise applications?","NULL","9","168","100.0","1798"
+"3250","5","Are design principles and best practices followed to ensure scalability, maintainability, and reusability of the software?","NULL","9","168","100.0","1799"
+"3251","6","Is there a review process in place to evaluate the design decisions and ensure they meet the requirements and align with architectural standards?","NULL","9","168","100.0","1800"
+"3252","7","How many lines of code (LOC) on average are authored by each developer per day/week/month?","NULL","9","168","100.0","1801"
+"3253","8","Is there a coding standard or guidelines in place to maintain consistency and readability of the code?","NULL","9","168","100.0","1802"
+"3254","9","Are coding best practices followed to ensure code quality, modularity, and maintainability?","NULL","9","168","100.0","1803"
+"3255","10","Is there a comprehensive testing strategy and plan for the enterprise applications?","NULL","9","168","100.0","1804"
+"3256","11","Are different types of testing, including unit testing, integration testing, and system testing, conducted during the development process?","NULL","9","168","100.0","1805"
+"3257","12","Is there a process to track and manage defects found during testing and ensure they are addressed promptly?","NULL","9","168","100.0","1806"
+"3258","13","Is there a defined process for deploying enterprise applications to production environments?","NULL","9","168","100.0","1807"
+"3259","14","Are monitoring and alerting mechanisms in place to proactively identify and address operational issues in the enterprise applications?","NULL","9","168","100.0","1808"
+"3260","15","Is there a well-defined incident management process to handle and resolve incidents related to the enterprise applications?","NULL","9","168","100.0","1809"
+3132,1,"How does the chief human resources officer focuses on organization culture, employee experience, engagement and well-being?",NULL,9,167,9.090909090909092,1678
+3133,2,How is the employer branding done with respect to recruitment?,NULL,9,167,9.090909090909092,1678
+3134,3,Female management headcount in percentage,NULL,8,167,100.0,1679
+3135,4,"How does the organization focuses on multiple aspects of well-being (e.g., mind, body, social, financial, purpose)?",NULL,9,167,9.090909090909092,1678
+3136,5,How does the organization monitors the environment to predict any engagement and compliance issues?,NULL,9,167,9.090909090909092,1678
+3137,6,In what ways the organization ensures safe working conditions for its entire workforce?,NULL,9,167,9.090909090909092,1678
+3138,7,Do the organization has established processes for promoting diversity and inclusion?,NULL,9,167,9.090909090909092,1678
+3139,8,How is the strategy define in place to adapt to the digital future of work?,NULL,9,167,9.090909090909092,1678
+3140,9,How the HR operating model is aligned with the business model and HR strategy?,NULL,9,167,9.090909090909092,1678
+3141,10,"What is the organization strategy to measure the impact of its well-being investment and how it incorporates multiple data sources (e.g., employee feedback, business metrics)?",NULL,9,167,9.090909090909092,1678
+3142,11,"How does the chief human resources officer drives the talent agenda and alignment between the corporate strategy, people strategy and HR transformation?",NULL,9,167,9.090909090909092,1678
+3143,12,"Are HR and finance are tightly integrated (in terms of leadership, strategy, data) and work together to ensure efficient and effective business execution?",NULL,9,167,9.090909090909092,1678
+3144,13,Does your organization leverage visa programs to source talent from international labor markets?,NULL,9,167,33.333333333333336,1680
+3145,14,Time to hire external workforce in days,NULL,8,167,100.0,1681
+3146,15,New hire retention rate in percentage in a year,NULL,8,167,100.0,1682
+3147,16,"What are the ways in which the organization delivers social collaboration, connecting employees, customers, and partners with the people they need to get work done?",NULL,9,167,33.333333333333336,1680
+3148,17,How does the organization aligns present and future business needs to ensure the right people are available in the right place at the right time?,NULL,9,167,33.333333333333336,1680
+3149,18,How does the organization manages the entire workforce lifecycle for in-house talent as well as for external labor?,NULL,9,167,33.333333333333336,1683
+3150,19,External workforce in percentage,NULL,8,167,100.0,1684
+3151,20,External workforce trained on compliance and security in percentage,NULL,8,167,100.0,1685
+3152,21,How is the compensation structure defined?,NULL,9,167,33.333333333333336,1683
+3153,22,What are ways to identify new workforce segmentation patterns and guide workforce decisions (correlations between coaching and engagement etc.)?,NULL,9,167,33.333333333333336,1683
+3154,23,Do the organization measures the current state of the recruiting process to improve recruiting effectiveness and acquire the best talent?,NULL,9,167,25.0,1686
+3155,24,HR FTEs per 100 vacancies,NULL,8,167,100.0,1687
+3156,25,Cost per hire in dollars,NULL,8,167,100.0,1688
+3157,26,Time to hire in days,NULL,8,167,100.0,1689
+3158,27,Bad hires as a percentage of total hires,NULL,8,167,100.0,1690
+3159,28,Employee referral rate in percentage,NULL,8,167,100.0,1691
+3160,29,Do your organization have a reporting tool to assess current state of the recruiting process and continuously improve recruiting effectiveness ?,NULL,9,167,25.0,1686
+3161,30,Does the organization evaluate the recruitment & staffing process to identify bottlenecks and improve the process further?,NULL,9,167,25.0,1686
+3162,31,In what way is the recruiting strategy is aligned with risk management practices to optimize positive business impact?,NULL,9,167,25.0,1686
+3163,32,How does HR provides useful and relevant workforce data to key stakeholders ?,NULL,9,167,33.333333333333336,1692
+3164,33,How the Job Description(JD) is prepared and reviewed?,NULL,9,167,33.333333333333336,1692
+3165,34,"Does the organization put effort to ensure job descriptions are consistent, neutral and able to attract a diverse talent pool?",NULL,9,167,33.333333333333336,1692
+3166,35,What is the average time to draft and review JD in hours?,NULL,8,167,100.0,1693
+3167,36,What is the average time required to align and obtain approvals for JDs from relevant parties?,NULL,8,167,100.0,1694
+3168,37,How does the organization streamline the sourcing  & screening process and identify candidates with the right skills and education?,NULL,9,167,33.333333333333336,1695
+3169,38,How to gauge candidate interest for a particular position?,NULL,9,167,33.333333333333336,1695
+3170,39,What is the average time to screen 10 profiles for a role in days?,NULL,8,167,100.0,1696
+3171,40,What  multichannel sourcing is utilized for recruitment ?,NULL,9,167,33.333333333333336,1695
+3172,41,What is the cost to source 100 profiles for a role in dollars?,NULL,8,167,100.0,1697
+3173,42,What is the conversion rate? (percentage of screened candidates clearing all rounds of interview),NULL,8,167,100.0,1698
+3174,43,HR FTEs to source & screen 10 profiles,NULL,8,167,100.0,1699
+3175,44,Does the organization leverage AI for preliminary interviewing ?,NULL,9,167,100.0,1700
+3176,45,What is the average time taken to schedule the first round of interviews in days?,NULL,8,167,100.0,1701
+3177,46,What is the average time taken to schedule subsequent round of interviews in days?,NULL,8,167,100.0,1702
+3178,47,What is the average time taken to interview a candidate and provide feedback in hours?,NULL,8,167,100.0,1703
+3179,48,What is the percentage of candidates clearing round 1?,NULL,8,167,100.0,1704
+3180,49,What is the percentage of candidates clearing subsequent rounds?,NULL,8,167,100.0,1705
+3181,50,What is the average time to complete a background check in days?,NULL,8,167,100.0,1706
+3182,51,What is the average time to roll out the offer for a role in days?,NULL,8,167,100.0,1707
+3183,52,What is the average time taken by a candidate to accept the offer in days?,NULL,8,167,100.0,1708
+3184,53,What is the percentage of candidates rejecting the offer?,NULL,8,167,100.0,1709
+3185,54,What is the percentage of candidates(out of the total offer rolled out) who have been successfully onboarded?,NULL,8,167,100.0,1710
+3186,55,What steps HR takes to promote the employment brand and manages its presence outside organizational boundaries?,NULL,9,167,25.0,1711
+3187,56,How does the organization measures the current state of the onboarding process in order to continuously improve employee experience?,NULL,9,167,25.0,1711
+3188,57,New hires receiving basic training in first 3 months in percentage,NULL,8,167,100.0,1712
+3189,58,Cost to onboard per hire in dollars,NULL,8,167,100.0,1713
+3190,59,HR FTEs to onboard 100 candidates,NULL,8,167,100.0,1714
+3191,60,Is there technology-enabled onboarding process to ensure 100% day 1 onboarding readiness?,NULL,9,167,25.0,1711
+3192,61,"Does the organization's formal onboarding practices extend into socialization, personalization and enculturation of new employees?",NULL,9,167,25.0,1711
+3193,62,Does the organization's onboarding processes integrate seamlessly with goal and performance processes?,NULL,9,167,25.0,1715
+3194,63,Are AI driven tools used for training recommendations to improve performance of bottom-performing employees?,NULL,9,167,25.0,1715
+3195,64,Top performing employee turnover rate,NULL,8,167,100.0,1716
+3196,65,Employee promotions in percentage,NULL,8,167,100.0,1717
+3197,66,Employees with developmental goals in percentage,NULL,8,167,100.0,1718
+3198,67,Employees with goals aligned to org strategy in percentage,NULL,8,167,100.0,1719
+3199,68,Does your organization leverage apprenticeship and internship programs to train and develop local talent?,NULL,9,167,25.0,1715
+3200,69,What steps does the organization take to recognise and develop high potential employees?,NULL,9,167,25.0,1715
+3201,70,Are employees provided tailored career paths that enable them to be self-driven in advancing their careers?,NULL,9,167,14.285714285714286,1720
+3202,71,How does the managers evaluate employee performance?,NULL,9,167,14.285714285714286,1720
+3203,72,"Is evaluation of  employee performance done using a common, consistent set of policies & framework?",NULL,9,167,14.285714285714286,1720
+3204,73,High performer as a percentage of total employees,NULL,8,167,100.0,1721
+3205,74,Employees with on-time complete performance review in percentage,NULL,8,167,100.0,1722
+3206,75,Time to full productivity of new hires in days,NULL,8,167,100.0,1723
+3207,76,How much is data analytics leveraged in performance tracking?,NULL,9,167,14.285714285714286,1720
+3208,77,"Is there continuous performance management including dynamic goals, ongoing performance conversations, periodic feedback,with a focus on coaching and development?",NULL,9,167,14.285714285714286,1720
+3209,78,Does the organization leverage RPA for automating some tasks in the performance management?,NULL,9,167,14.285714285714286,1720
+3210,79,What are the performance feedback tools used to engage talent?,NULL,9,167,14.285714285714286,1720
+3211,80,How does the organization ensures that employees understand the link between their goals and the overall strategic objectives?,NULL,9,167,14.285714285714286,1724
+3212,81,Are the trainings aligned to business goals of the organization?,NULL,9,167,14.285714285714286,1724
+3213,82,How personalized is the learning management system?,NULL,9,167,14.285714285714286,1724
+3214,83,Percentage of employees who attended e-learning training,NULL,8,167,100.0,1725
+3215,84,Average time in days to close an identified skill or capability gap through training,NULL,8,167,100.0,1726
+3216,85,Training hours /employee,NULL,8,167,100.0,1727
+3217,86,Percentage of senior level executives undergoing training/month,NULL,8,167,100.0,1728
+3218,87,Learning & development FTE / 100 employees,NULL,8,167,100.0,1729
+3219,88,Development goals linked to learning activities in percentage,NULL,8,167,100.0,1730
+3220,89,Is there visibility on the progress of training of employees?,NULL,9,167,14.285714285714286,1724
+3221,90,Is there a feedback mechanism for the trainings done?,NULL,9,167,14.285714285714286,1724
+3222,91,Does the organization provides personalized learning to its employees that is aligned to company’s needs and employee specifics?,NULL,9,167,14.285714285714286,1724
+3223,92,"Does the organization ensures that employees have the training, licensing, and certification needed to perform their job?",NULL,9,167,14.285714285714286,1724
+3224,93,Is there a formal succession-planning process in place with key internal people and skills?,NULL,9,167,50.0,1731
+3225,94,Succession pipeline depth,NULL,8,167,100.0,1732
+3226,95,"In what ways does the organization documented, fair, and equitable pay practices strategic goals and initiatives?",NULL,9,167,50.0,1731
+3227,96,How is the Employee data defined and stored using a single system?,NULL,9,167,25.0,1733
+3228,97,Is the Employee data be easily updated by authorized individuals throughout the company as needed?,NULL,9,167,25.0,1733
+3229,98,"How is the HR equipped to handle disaster recovery situations through pre-planned contingency plans, availability of employee records, being the single focal point for all communications?",NULL,9,167,25.0,1733
+3230,99,What are the tools in place to enable compliance of HR processes with country-specific legal requirements?,NULL,9,167,50.0,1734
+3231,100,Paycheck errors in percentage,NULL,8,167,100.0,1735
+3232,101,"Does the organization controls labor costs by automating manual, error-prone timekeeping and payroll processes?",NULL,9,167,50.0,1734
+3233,102,HR headcount cost as percentage of total HR cost,NULL,8,167,100.0,1736
+3234,103,"Does the organization's current payroll processes support legal requirements, currencies, and languages for different locations and countries?",NULL,9,167,20.0,1737
+3235,104,HR data accuracy in percentage,NULL,8,167,100.0,1738
+3236,105,How is the organizations data management practices?,NULL,9,167,20.0,1737
+3237,106,HR data completeness in percentage,NULL,8,167,100.0,1739
+3238,107,Are there any written policies regarding ethical and moral use of employee data?,NULL,9,167,20.0,1737
+3239,108,Do the organization have all the capabilities needed to address data governance and comply with changing regulations?,NULL,9,167,20.0,1737
+3240,109,Do the organization has data retention management capabilities?,NULL,9,167,20.0,1737
+3241,110,HR shared services FTEs per 100 EEs,NULL,8,167,100.0,1740
+3242,111,How is the processes for hiring and managing contract and external workers' cycle?,NULL,9,167,100.0,1741
+3243,112,"How is the workflow approvals and everyday transactions, such as leave requests, expense approvals, pay slip requests?",NULL,9,167,100.0,1742
+3244,113,Is HR technology is synergistic with other new systems and capable of quickly integrating and scaling new innovations?,NULL,9,167,100.0,1743
+3245,114,How is HR equipped to handle major organizational changes?,NULL,9,167,25.0,1733
+"3887","1","How many new leads are there in the pipeline","NULL","9","175","100.0","2196"
+"3888","2","What is the conversion rate","NULL","9","175","100.0","2213"
+"3889","3","What is the average age of leads","NULL","9","175","100.0","2212"
+"3890","4","What percentage of customers have continued to use our products/services","NULL","9","175","100.0","2214"
+"3891","5","On Percentage how much time do users spend interacting with our platform.","NULL","9","175","100.0","2197"
+"3892","6","How can you optimize customer acquisition cost for maximum value","NULL","9","175","100.0","2198"
+"3893","7","What percentage of customers are satisfied to use our products/services","NULL","9","175","100.0","2199"
+"3894","8","Do we have automated responses for common queries to improve FRT","NULL","9","175","100.0","2200"
+"3895","9","what is the percentage of operation performed in one quarter","NULL","9","175","100.0","2201"
+"3896","10","what is the cost of supply chain","NULL","9","175","100.0","2202"
+"3897","11","Does the organization's current payroll processes support legal requirements, currencies, and languages for different locations and countries?","NULL","9","175","100.0","2203"
+"3898","12","Do you perform vendor reviews","NULL","9","175","11.0","2204"
+"3899","13","How much does your organisation spend on legal matters as % of Revenue","NULL","9","175","100.0","2205"
+"3900","14","How efficient is the Hiring process","NULL","9","175","100.0","2206"
+"3901","15","Was the training relevant to the job","NULL","9","175","100.0","2207"
+"3902","16","What is the percentage of products released  per month based on the last quarter","NULL","9","175","100.0","2208"
+"3903","17","is code review and automated scanning in place","NULL","9","175","100.0","2209"
+"3904","18","What percentage of revenue is used for designing process","NULL","9","175","100.0","2210"
+"3905","19","Is the quality of products verified","NULL","9","175","100.0","2211"
+"3938","3938","Is the compliance rate according to industry standards?","NULL","9","175","11.0","2223"
+"3939","3939","What % of products are defected?","NULL","9","175","11.0","2224"
+"3940","3940","What is the impact of an invoice to your business","NULL","9","175","11.0","2225"
+"3941","3941","What are the benefits of improving an emergency purchase ratio?","NULL","9","175","11.0","2226"
+"3942","3942","What does each lead time measure along the supply chain?","NULL","9","175","11.0","2227"
+"3943","3943","How do you calculate PO cycle time?","NULL","9","175","11.0","2228"
+"3944","3944","What are the four benefits of vendor availability","NULL","9","175","11.0","2229"
+"3945","3945","How can you improve cost per invoice?","NULL","9","175","11.0","2230"

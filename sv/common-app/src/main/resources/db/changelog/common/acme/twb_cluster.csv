@@ -1,0 +1,2 @@
+"id","cluster_name","cluster_act_ind","last_updated_by","last_updated_dts","cluster_manager_info","cluster_complete_dts","cluster_start_dts","cluster_signoff_ind","cluster_signoff_dts","lob_id","lob_name","wave_id","project_id","transition_id"
+"7","Cluster2","true","1","2020-04-14T09:59:58","NULL","2021-07-29","2019-01-03","true","NULL","4","NULL","4","2","2"

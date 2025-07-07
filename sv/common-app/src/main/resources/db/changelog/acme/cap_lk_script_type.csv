@@ -1,0 +1,7 @@
+"Script_Type_ID","Script_Type_Name","Rec_Active_Ind","Last_Updated_Dts","Script_Extension","Last_Updated_By"
+"1","Powershell","true","2019-04-14T17:56:20","PS1","1"
+"2","Selenium Script","true","2019-04-14T17:56:20","ZIP","1"
+"3","Batch File","true","2019-04-14T17:56:20","BAT","1"
+"4","Ifea File","true","2019-04-14T17:56:20","IFEA","1"
+"5","Python","true","2019-04-14T17:56:20","PY","1"
+"6","C Sharp","true","2019-04-14T17:56:20","CS","1"

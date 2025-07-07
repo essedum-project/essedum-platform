@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+	<changeSet author="Leap (generated)" id="1614785155891-17">
+	 <validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_app"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_app">
+			<column autoIncrement="true" name="application_id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="application_name" type="VARCHAR(250)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="VARCHAR(500)" />
+			<column name="last_updated" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="application_grp_id" type="INT" />
+			<column name="project_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-18">
+	<validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_app_grp"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_app_grp">
+			<column autoIncrement="true" name="application_grp_id"
+				type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="application_grp_name" type="VARCHAR(250)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="VARCHAR(500)" />
+			<column name="last_updated" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="project_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-19">
+	<validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_app_txn"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_app_txn">
+			<column autoIncrement="true" name="transaction_id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="application_name" type="VARCHAR(250)">
+				<constraints nullable="false" />
+			</column>
+			<column name="max_execution_time" type="FLOAT(12)" />
+			<column name="target_execution_time" type="FLOAT(12)" />
+			<column name="thirtydaystepavg" type="FLOAT(12)" />
+			<column name="transaction_description" type="TEXT" />
+			<column name="transaction_step_no" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="transaction_type" type="BIT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="application_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-21">
+	<validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_documents"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_documents">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="data" type="LONGBLOB" />
+			<column name="data_content_type" type="VARCHAR(255)" />
+			<column name="description" type="VARCHAR(500)" />
+			<column name="file_name" type="VARCHAR(255)" />
+			<column name="name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="status" type="VARCHAR(255)" />
+			<column name="transition_id" type="INT" />
+			<column name="upload_date" type="datetime(6)" />
+			<column name="upload_err" type="LONGTEXT" />
+			<column name="phase_id" type="INT" />
+			<column name="process_id" type="INT" />
+			<column name="project_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-22">
+	<validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_gamification"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_gamification">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="age" type="INT" />
+			<column name="created_date" type="datetime(6)" />
+			<column name="first_name" type="VARCHAR(150)" />
+			<column name="group_name" type="VARCHAR(150)" />
+			<column name="rank" type="INT" />
+			<column name="total_points" type="INT" />
+			<column name="user_id" type="INT" />
+			<column name="user_image_path" type="VARCHAR(250)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-23">
+	<validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_phase"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_phase">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="description" type="VARCHAR(500)" />
+			<column name="name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-24">
+	<validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_portf_severity"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_portf_severity">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="remarks" type="VARCHAR(150)" />
+			<column name="severity" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="context" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-25">
+	  <validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_process"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_process">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="description" type="VARCHAR(500)" />
+			<column name="name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="phase_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-26">
+	    <validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_project_quicklink"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_project_quicklink">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="description" type="VARCHAR(500)" />
+			<column name="name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="quick_links" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="project_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-27">
+	<validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_role_tools"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_role_tools">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="role_id" type="INT" />
+			<column name="tool_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-28">
+	<validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_sla_incident_detail"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_sla_incident_detail">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="end_time" type="time" />
+			<column name="expected_adherence" type="VARCHAR(50)" />
+			<column name="incident_priority" type="VARCHAR(50)" />
+			<column name="resolution_time" type="VARCHAR(255)" />
+			<column name="response_time" type="VARCHAR(255)" />
+			<column name="start_time" type="time" />
+			<column name="tear" type="VARCHAR(100)" />
+			<column name="project_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-29">
+	<validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_sla_non_working_days"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_sla_non_working_days">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="event_date" type="date" />
+			<column name="event_day" type="VARCHAR(50)" />
+			<column name="event_name" type="VARCHAR(100)" />
+			<column name="project_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-30">
+	<validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_tool_how_to"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_tool_how_to">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="data" type="LONGBLOB" />
+			<column name="description" type="VARCHAR(500)" />
+			<column name="name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="tool_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-31">
+	<validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_tool_instance"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_tool_instance">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="description" type="VARCHAR(500)" />
+			<column name="name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="url" type="TEXT">
+				<constraints nullable="false" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="tool_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-32">
+	<validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_tool_userproject"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_tool_userproject">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="role_id" type="INT" />
+			<column name="tool_id" type="INT" />
+			<column name="user_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-33">
+		<validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_tools"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_tools">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="data" type="LONGBLOB" />
+			<column name="data_content_type" type="VARCHAR(255)" />
+			<column name="description" type="VARCHAR(500)" />
+			<column name="file_name" type="VARCHAR(255)" />
+			<column name="flag" type="BIT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="image_data" type="LONGBLOB" />
+			<column name="image_name" type="TEXT" />
+			<column name="name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="tools_video" type="LONGBLOB" />
+			<column name="url" type="TEXT" />
+			<column name="video_name" type="TEXT" />
+			<column name="process_id" type="INT" />
+			<column name="project_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-34">
+	<validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_user_quicklink"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_user_quicklink">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="description" type="VARCHAR(500)" />
+			<column name="name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="quick_links" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="user" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-35">
+	 <validCheckSum>any</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="ccl_user_tasks"/>
+               </not>
+           </preConditions>
+		<createTable tableName="ccl_user_tasks">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="description" type="VARCHAR(500)" />
+			<column name="name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="user_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet  author="Leap"  id="3v0-ccl-1">
+		<sql dbms="postgresql" splitStatements="true" stripComments="true">
+			ALTER TABLE ccl_app_txn ALTER transaction_type TYPE boolean USING (transaction_type::int::boolean);
+		</sql>
+		<sql dbms="postgresql" splitStatements="true" stripComments="true">
+			ALTER TABLE ccl_tools ALTER flag TYPE boolean USING (flag::int::boolean);
+		</sql>
+	</changeSet>
+</databaseChangeLog>	

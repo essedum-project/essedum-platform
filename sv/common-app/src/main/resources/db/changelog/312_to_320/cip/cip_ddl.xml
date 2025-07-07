@@ -1,0 +1,243 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+						http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd
+						http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+	<changeSet author="Leap" id="3v2-cip-1">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="mldatasource" columnName="forendpoint" />
+			</not>
+		</preConditions>
+		<addColumn tableName="mldatasource">
+			<column name="forendpoint" defaultValue="0" type="TINYINT(1)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v2-cip-2">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="mlfederatedendpoints"
+					columnName="rest_provider" />
+			</not>
+			<not>
+				<columnExists tableName="mlfederatedendpoints"
+					columnName="swagger_data" />
+			</not>
+		</preConditions>
+		<addColumn tableName="mlfederatedendpoints">
+			<column name="rest_provider" type="VARCHAR(255)" />
+			<column name="swagger_data" type="TEXT" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="3v2-cip-3">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="mlprompts" columnName="providers" />
+			</not>
+		</preConditions>
+		<addColumn tableName="mlprompts">
+			<column name="providers" type="TEXT" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v2-cip-4">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlaiworkerconfig" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlaiworkerconfig">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)"> </column>
+			<column name="alias" type="VARCHAR(255)"> </column>
+			<column name="description" type="TEXT"> </column>
+			<column name="llm" type="VARCHAR(255)"> </column>
+			<column name="knowledge_base" type="VARCHAR(255)"> </column>
+			<column name="planner" type="VARCHAR(255)"> </column>
+			<column name="validator" type="VARCHAR(255)"> </column>
+			<column name="generator" type="VARCHAR(255)"> </column>
+			<column name="executor" type="VARCHAR(255)"> </column>
+			<column name="task" type="TEXT"> </column>
+			<column name="createdby" type="VARCHAR(255)"> </column>
+			<column name="createdon" type="TIMESTAMP"> </column>
+			<column name="lastmodifiedby" type="VARCHAR(255)"> </column>
+			<column name="lastmodifiedon" type="TIMESTAMP"> </column>
+			<column name="organization" type="VARCHAR(255)"> </column>
+			<column name="userinputs" type="TEXT"> </column>
+			<column name="bots" type="TEXT"> </column>
+			<column name="task_group" type="TEXT"> </column>
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v2-cip-5">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlaiworker" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlaiworker">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)"> </column>
+			<column name="alias" type="VARCHAR(255)"> </column>
+			<column name="organization" type="VARCHAR(255)"> </column>
+			<column name="description" type="TEXT"> </column>
+			<column name="createdon" type="TIMESTAMP"> </column>
+			<column name="createdby" type="VARCHAR(255)"> </column>
+			<column name="lastmodifiedon" type="TIMESTAMP"> </column>
+			<column name="lastmodifiedby" type="VARCHAR(255)"> </column>
+			<column name="task" type="TEXT"> </column>
+			<column name="inputsjson" type="TEXT"> </column>
+			<column name="sop" type="TEXT"> </column>
+			<column name="plan" type="TEXT"> </column>
+			<column name="validation_result" type="TEXT"> </column>
+			<column name="workflow_steps" type="TEXT"> </column>
+			<column name="bpm" type="TEXT"> </column>
+			<column name="navigate_url" type="TEXT"> </column>
+			<column name="configuration" type="TEXT"> </column>
+			<column name="versionname" type="VARCHAR(255)"> </column>
+			<column name="isdefault" defaultValue="0" type="TINYINT(1)"> </column>
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v2-cip-6">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlaiworkerlogs" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlaiworkerlogs">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="task" type="VARCHAR(255)"> </column>
+			<column name="worker" type="VARCHAR(255)"> </column>
+			<column name="runtime" type="VARCHAR(255)"> </column>
+			<column name="context" type="LONGTEXT"> </column>
+			<column name="userdetails" type="VARCHAR(255)"> </column>
+			<column name="organization" type="VARCHAR(255)"> </column>
+			<column name="submittedBy" type="VARCHAR(255)"> </column>
+			<column name="submittedOn" type="TIMESTAMP"> </column>
+			<column name="finishtime" type="TIMESTAMP"> </column>
+			<column name="jobStatus" type="VARCHAR(255)"> </column>
+			<column name="uid" type="VARCHAR(255)"> </column>
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v2-cip-7">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mltools" />
+			</not>
+		</preConditions>
+		<createTable tableName="mltools">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)"> </column>
+			<column name="alias" type="VARCHAR(255)"> </column>
+			<column name="description" type="VARCHAR(255)"> </column>
+			<column name="category" type="VARCHAR(255)"> </column>
+			<column name="toolType" type="VARCHAR(255)"> </column>
+			<column name="inputParams" type="VARCHAR(255)"> </column>
+			<column name="outputParams" type="VARCHAR(255)"> </column>
+			<column name="jsonContent" type="VARCHAR(255)"> </column>
+			<column name="organization" type="VARCHAR(255)"> </column>
+			<column name="createdBy" type="VARCHAR(255)"> </column>
+			<column name="createdOn" type="TIMESTAMP"> </column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="3v2-cip-8">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="mldatasource" columnName="forapp" />
+			</not>
+		</preConditions>
+		<addColumn tableName="mldatasource">
+			<column name="forapp" defaultValue="0" type="TINYINT(1)" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="3v2--320-240704-9">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlclusteringworkflow" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlclusteringworkflow">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)" />
+			<column name="alias" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="workflow_details" type="TEXT" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v2-cip-10">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlfederatedruntimes" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlfederatedruntimes">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="connid" type="INT">
+			</column>
+			<column name="connport" type="INT">
+			</column>
+			<column name="isExIPorts" type="TINYINT(1)">
+			</column>
+			<column name="exiPorts" type="INT">
+			</column>
+			<column name="pipelineid" type="INT">
+			</column>
+			<column name="appid" type="INT">
+			</column>
+			<column name="connendpoint" type="VARCHAR(255)">
+			</column>
+			<column name="isAssigned" type="TINYINT(1)" defaultValue="0">
+			</column>
+			<column name="isDefaultPorts" type="TINYINT(1)" defaultValue="0">
+			</column>
+
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="3v2-cip-11">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="mljobs" columnName="payload" />
+			</not>
+		</preConditions>
+		<addColumn tableName="mljobs">
+			<column name="payload" type="TEXT" />
+		</addColumn>
+	</changeSet>
+	
+		<changeSet author="Leap" id="3v2-cip-12">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="mljobs" columnName="executortaskid" />
+			</not>
+		</preConditions>
+		<addColumn tableName="mljobs">
+			<column name="executortaskid" type="VARCHAR(255)" />
+		</addColumn>
+	</changeSet>
+</databaseChangeLog>

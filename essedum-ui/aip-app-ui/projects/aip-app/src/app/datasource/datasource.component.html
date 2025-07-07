@@ -1,0 +1,204 @@
+<div class="aip-top">
+
+    <div *ngIf="cardToggled; else elseBlock" class="clearfix lfx-l-bodywrapper  js-bodywrapper"
+        style="background: var(--background-colour);" id="mainCtr">
+        <div class="clearfix lfx-l-bodywrapper  js-bodywrapper" id="mainCtr"
+            style="background: var(--background-colour);">
+            <div class="">
+                <div *ngIf="isExpanded" class="row aip-filter aip-filter-position aip-scroll-hover">
+                    <app-tagging-component [servicev1]="'connections'" (tagSelected)="tagSelectedEvent($event)"
+                        [tagrefresh]="tagrefresh"
+                        [selectedConnectionTypeList]="{ 
+                            selectedAdapterType: selectedAdapterType
+                          }"></app-tagging-component>
+                </div>
+                <div class="col-sm-12 col-md-12 col-lg-12" id="mainrightCnt" [ngStyle]="toggler(isExpanded)">
+                    <div>
+                        <!-- Header -->
+                        <div class="aip-header lfx-u-pad-lr-32 lfx-u-pad-t-16">
+                            <div class=" col-sm-12 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-center">
+                                <div style="padding: 4px 0px 0px 0px;">
+                                
+                                </div>
+                                <div class="lfx-u-pad-24 lfx-u-mar-r-30">
+                                    <h3 class="lfx-u-header-xl">{{cardTitle}}</h3>
+                                </div>
+                            </div>
+                            <div
+                                class="col-10 offset-1 offset-xs-1 offset-sm-1 offset-md-0 col-sm-6 col-md-6 col-lg-7 col-xl-6 aip-panel aip-panel-shadow d-flex align-items-center">
+                         
+                                <input type="text" name="" id="" placeholder="Search by Name" class="aip-panel-input"
+                                    [(ngModel)]="filt" (keyup)="filterz()">
+                                <span 
+                                    (mouseenter)="isSearchHovered = true" 
+                                    (mouseleave)="isSearchHovered = false">
+                                    <i 
+                                        class="fa fa-search lfx-u-mar-r-20 lfx-fs-16" 
+                                        [ngStyle]="{'color': isSearchHovered ? '#0056b3' : '#0a142f'}">
+                                    </i>
+                                </span>
+                            </div>
+                            <div
+                                class="d-flex justify-content-center col-sm-5 col-md-6 col-lg-5 col-xl-4 aip-header-icon">
+
+                                <div *ngIf="createAuth" class="">
+                                    <div class="lfx-u-mar-r-24 aip-cursor" (click)="open()">
+                                        <button mat-icon-button 
+                                            [ngStyle]="{'color': isHovered ? '#0056b3' : '#0a142f'}" 
+                                            (click)="open()" 
+                                            matTooltip="Add"
+                                            (mouseenter)="isHovered = true" 
+                                            (mouseleave)="isHovered = false">
+                                            <mat-icon>add</mat-icon>
+                                        </button>
+                                    </div>
+                                    <ng-template #lgContent1 let-modal>
+                                        <app-datasource-config> </app-datasource-config>
+                                    </ng-template>
+                                </div>
+                                <div class="aip-cursor">
+                                    <button mat-icon-button 
+                                        [ngStyle]="{'color': isHovered ? '#0056b3' : '#0a142f'}" 
+                                        (click)="refreshComplete()" 
+                                        matTooltip="Refresh" 
+                                        (mouseenter)="isHovered = true" 
+                                        (mouseleave)="isHovered = false">
+                                        <mat-icon>refresh</mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="lfx-c-card__action-ul aip-card-container">
+                        <!-- CARD -->
+                        <div class="col-md-8 col-lg-6 col-xl-5" style='min-width: -webkit-fill-available;padding: 0px;'
+                            *ngFor="let card of filteredCards  | slice: (pageNumber-1) * pageSize : (pageNumber-1) * pageSize + pageSize">
+                            <mat-card class="example-card card-shadow" appearance="outlined" style="padding-top: 0 !important;padding-bottom: 0 !important;padding: 0px !important;height: 163px;display: grid;" >
+                           <div class="d-flex align-items-center justify-content-between lfx-u-mar-l-18">
+                                    <div class="col d-flex align-items-center" style="overflow: hidden !important; border-right: none !important;">
+                                        <div class="lfx-u-header-sm lfx-u-text-primary-80">
+                                            {{card.type}}
+                                        </div>
+                                    </div>
+                              
+                                </div>
+                                <mat-card-header style="display: inline !important; width: 60%;padding-top: 0px !important;">
+                                    <mat-card-title class="lfx-c-card__container clearfix">
+                                        <div class="lfx-c-card__container-left w-100">
+                                            <h2 class="lfx-u-header-xl lfx-u-ellipsis" style="line-height: 2rem;">
+                                                {{card.alias | titlecase}}</h2>
+                                        </div>
+
+                                    </mat-card-title>
+                                    <mat-card-subtitle
+                                        class="lfx-u-body-sm lfx-u-text-neutral-80 lfx-u-ellipsis">{{card.lastmodifieddate}}</mat-card-subtitle>
+                                </mat-card-header>
+                             
+                                <div class="card-actions-container" style="position: relative;">
+                                    <mat-card-actions 
+                                        class="lfx-c-card__action-hover d-flex justify-content-between card-actions-hover"
+                                        style="transition: opacity 0.2s;width: 264px;"
+                                    >
+                                        <button mat-flat-button 
+                                             class="mat-action-button-s"
+                                            (click)="viewConnection(card.name)">
+                                            View Details
+                                        </button>
+                                        <!-- CreatedBy -->
+                                        <div class="aip-cursor">
+                                            <div class="lfx-c-avatar  lfx-c-avatar--sm aip-hover-avatar">
+                                                {{(card.lastmodifiedby?card.lastmodifiedby:'Name Not
+                                                Available')|firstCharacter}}</div>
+                                            <div class="aip-hover-detail">
+                                                <div class="lfx-u-header-md lfx-u-mar-8">
+                                                    {{card.lastmodifiedby?card.lastmodifiedby:'Name Not Available'}}</div>
+                                            </div>
+                                        </div>
+                                        <div class="dropdown d-inline-block float-end">
+                                                           <mat-icon class="aip-cursor" [matMenuTriggerFor]="menu"
+                  style="font-size: 22px; padding: 2px; color: #a5aaad; font-weight: 300;">more_vert</mat-icon>
+                                            <mat-menu #menu="matMenu">
+                                                <button mat-menu-item *ngIf="editAuth" (click)="editConnection(card.name)">
+                                                    Edit
+                                                </button>
+                                                <button mat-menu-item (click)="navigateTo(card.type)">
+                                                    View Datasets
+                                                </button>
+                                                <button mat-menu-item *ngIf="deleteAuth" (click)="deleteAdapter(card.name)">
+                                                    Delete
+                                                </button>                    
+                                            </mat-menu>
+                                        </div>
+                                    </mat-card-actions>
+                                    
+                                </div>
+                            <!-- </leds-card> -->
+                        </mat-card>
+                        </div>
+                    </div>
+                    <div *ngIf="!filteredCards || filteredCards.length==0">
+                        <div class="d-flex justify-content-center align-items-center flex-column">
+                            <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive"
+                                alt="aip_empty_state_leds" style="width:15rem" />
+                            No records found.
+                        </div>
+                    </div>
+                    <div *ngIf="filteredCards && filteredCards.length>0"
+                        class="inbox-table-footer table-paginator flex-row flex-space-between standard-margin bottom-padding-20">
+                        <div class="showing-entries d-flex justify-content-end my-3">
+                            <span class="grey-color font-size-12">Showing </span>
+                            &nbsp;&nbsp;
+                            <span class="black-color font-weight-600">
+                                {{ ((pageNumber - 1) * pageSize) + 1 }} -
+                                {{ (((pageNumber - 1) * pageSize) + pageSize) < noOfItems ? ((pageNumber - 1) *
+                                    pageSize) + pageSize : noOfItems }} of {{noOfItems}} </span>
+                                    &nbsp;&nbsp;
+                                    <span class="grey-color font-size-12">entries </span>
+                        </div>
+                        <div class="paginator-buttons d-flex w-60  flex-row" style="justify-content:flex-end">
+                            <div class="page-input go-to-input box-shadow standard-padding">
+                                <span class="grey-color">Go to: </span>
+                                <input class="right-margin" type="number" min="1" [max]="noOfPages"
+                                    (change)="changePage(pageNumberInput)" [(ngModel)]="pageNumberInput" />
+                            </div>
+                            <div class="mx-4">
+                                <span class="">Items per page</span>
+                                <select type="number" [(ngModel)]="pageSize">
+                                    <option *ngFor="let p of itemsPerPage" [ngValue]="p">{{p}}</option>
+                                </select>
+
+                            </div>
+                            <div class="pages-details d-flex">
+
+                                <div class="previous-page">
+                                    <button class="standard-padding table-button font-weight-600"
+                                        [disabled]="pageNumber == 1"
+                                        (click)="pageNumberInput=null;prevPage()">&lt;</button>
+                                </div>
+                                <div class="pages">
+                                    <button class="standard-padding table-button font-weight-600"
+                                        *ngFor="let i of pageArr | slice:startIndex:endIndex"
+                                        (click)="pageNumberInput=null;changePage(i+1)"
+                                        [class.selected-page]="(i + 1) == pageNumber" [ngStyle]="selectedButton(i+1)">
+                                        {{i + 1}}
+                                    </button>
+                                </div>
+                                <div class="next-page">
+                                    <button class="standard-padding table-button font-weight-600"
+                                        [disabled]="pageNumber == noOfPages"
+                                        (click)="pageNumberInput=null;nextPage()">&gt;</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #elseBlock>
+        <app-datasource-description [card]="selectedCard" (newItemEvent)="changedToogle($event)"
+            [cardToggled]="cardToggled" [datasourceAlias]="selectedCard.alias"></app-datasource-description>
+    </ng-template>
+</div>

@@ -1,0 +1,8 @@
+.classpath
+.project
+.settings
+.factorypath
+bin
+target
+target/*
+pom.xml.versionsBackup

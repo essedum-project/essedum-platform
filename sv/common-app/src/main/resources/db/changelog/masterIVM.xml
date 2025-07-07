@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+	
+	<property name="uuid_type" value="uuid" dbms="postgresql" />
+	<property name="uuid_type" value="uniqueidentifier"
+		dbms="mssql" />
+	<property name="uuid_type" value="RAW(16)" dbms="oracle" />
+	<property name="uuid_type" value="BINARY(16)" dbms="mysql" />
+	<property name="uuid_type" value="uuid" dbms="h2" />
+
+	<property name="uuid-property" value="UUID_TO_BIN(UUID())"
+		dbms="mysql" />
+	<property name="uuid-property" value="uid.uuid_generate_v4()"
+		dbms="postgresql" />
+	<property name="uuid-property" value="NEWID()" dbms="mssql" />
+	<property name="uuid-property" value="sys_guid()"
+		dbms="oracle" />
+	<property name="uuid-property" value="uuid()" dbms="h2" />
+	
+	<property name="timestamp-type"
+		value="TIMESTAMP WITHOUT TIME ZONE" dbms="postgresql" />
+	<property name="timestamp-type" value="[datetime]"
+		dbms="mssql" />
+	<property name="timestamp-type" value="TIMESTAMP"
+		dbms="oracle" />
+	<property name="timestamp-type" value="timestamp" dbms="mysql" />
+	<property name="timestamp-type" value="TIMESTAMP" dbms="h2" />
+	
+	<!--  <include file="db/changelog/bcc/bcc.xml" />-->
+	<!--  <include file="db/changelog/bjm/bjm.xml" />-->
+	<!-- <include file="db/changelog/ccl/ccl.xml" />
+	<include file="db/changelog/cfm/cfm.xml" /> -->
+	<!-- 	<include file="db/changelog/cip/cip.xml" /> -->
+	<!--  <include file="db/changelog/dbs/dbs.xml" />-->
+	<!-- 	<include file="db/changelog/icm/icm.xml" />
+	<include file="db/changelog/sre/sre.xml" />
+	<include file="db/changelog/twb/twb.xml" /> -->
+	<include file="db/changelog/ivm/usm-ivm.xml" />
+	<!-- <include file="db/changelog/sbx/deletesbx.xml" />
+	<include file="db/changelog/sbx/sbx.xml" />
+	<include file="db/changelog/cap/cap.xml" />
+	<include file="db/changelog/tad/tad.xml" />
+	<include file="db/changelog/grh/grh.xml" />
+	<include file="db/changelog/btm/btm.xml" />
+	<include file="db/changelog/svy/svy.xml" />
+	<include file="db/changelog/eda/eda.xml" />
+ -->
+	<include file="db/changelog/ivm/dataIVM.xml" />
+	<include file="db/changelog/ivm/acmeIVM.xml" />
+	<!--  <include file="db/changelog/data/3v0/usm/data.xml" />-->
+	<!-- <include file="db/changelog/acme/Leo-DT.xml" />
+	<include file="db/changelog/acme/Leo-appd.xml" /> -->
+	<!--  <include file="db/changelog/data/1312v0/usm/data.xml" /> 
+	<include file="db/changelog/data/2v0/masterdata.xml" />	-->
+	<!-- <include file="db/changelog/cip/constraint.xml" />
+	<include file="db/changelog/data/2v1/masterdata.xml" />
+	<include file="db/changelog/test/test.xml" context="test" />  -->
+
+	<!-- <include file="db/changelog/cap/constraint.xml" />
+	<include file="db/changelog/bcc/constraint.xml" />
+	<include file="db/changelog/bjm/constraint.xml" />
+	<include file="db/changelog/ccl/constraint.xml" />
+	<include file="db/changelog/cfm/constraint.xml" />
+	<include file="db/changelog/dbs/constraint.xml" />
+	<include file="db/changelog/icm/constraint.xml" />
+	<include file="db/changelog/sre/constraint.xml" />
+	<include file="db/changelog/twb/constraint.xml" /> -->
+	<!-- <include file="db/changelog/usm/constraint.xml" />  -->
+	<include file="db/changelog/ivm/usm-constraint.xml" />
+	<!-- <include file="db/changelog/sbx/constraint.xml" />
+	<include file="db/changelog/tad/constraint.xml" />
+	<include file="db/changelog/btm/constraint.xml" />
+	<include file="db/changelog/svy/constraint.xml" />
+	<include file="db/changelog/eda/constraint.xml" />
+	<include file="db/changelog/bjm/bjm1311.xml" /> 
+	<include file="db/changelog/data/2v2/masterdata.xml" />
+	<include file="db/changelog/data/3v0/masterdata.xml" /> -->
+
+</databaseChangeLog>

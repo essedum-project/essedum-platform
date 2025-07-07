@@ -1,0 +1,25 @@
+# Sample setup with keycloak
+security:
+  issuer-uri: https://victlptst-61:8443/realms/LEAP
+  jwk-set-uri: https://victlptst-61:8443/realms/LEAP/protocol/openid-connect/certs
+  clientId: leap32
+  scope: email
+  claim: email||leapaccount01
+  createUserIfNotExist: true
+  silentRefreshTimeoutFactor: 0.85
+ 
+# Sample setup with Azure AD [Note: setup proxy for java to access the external URL]
+#security:
+#  issuer-uri: https://sts.windows.net/2cebe3fd-5163-4cc1-ba75-b790920968e8/
+#  jwk-set-uri: https://login.microsoftonline.com/common/discovery/keys
+#  clientId: 4060aa17-e1b8-49c3-a667-996431b4428a
+#  scope: api://4060aa17-e1b8-49c3-a667-996431b4428a/app
+#  claim: email
+#  createUserIfNotExist: false
+spring:
+  security:
+    oauth2:       
+      resourceserver:
+        jwt:
+          issuer-uri: ${security.issuer-uri}
+          jwk-set-uri: ${security.jwk-set-uri}

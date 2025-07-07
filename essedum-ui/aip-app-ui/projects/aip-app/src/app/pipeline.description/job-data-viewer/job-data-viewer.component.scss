@@ -1,0 +1,90 @@
+.flexdivrow {
+    display: flex;
+    flex-flow: wrap;
+    flex-direction: row;
+    white-space: pre-wrap;
+}
+
+.space {
+    margin: 25px;
+}
+
+.mat-mdc-dialog-container {
+    padding: 0px !important;
+}
+
+.mat-expansion-panel-header{
+   // background-color: white !important;
+    height: 64px;
+}
+
+::ng-deep{
+   .h3,h3{
+    font-size: 1.28rem;
+    font-weight: 500;
+   }
+}
+
+.totheright {
+    display: flex;
+    justify-content: flex-end;
+    margin: 20px 4% 5px 0px;
+}
+
+.marginright {
+    margin-right: 15px !important;
+}
+
+
+.flexdivcolumn{
+    margin: auto;
+    width: 90%;
+}
+
+.hidden-details{
+    margin-top: 5px;
+    width: 95%;
+    margin: auto;
+}
+
+.icon{
+    font-size: xxx-large;
+    line-height: 0.8;
+}
+
+.content-group{
+    margin: 25px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.footer-content{
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+.id{
+    color:gray;
+    margin-bottom: 10px;
+}
+
+.content-width{
+    width: 200px;
+}
+
+.line-space{
+    line-height: 20px !important;
+}
+
+.line-wrap{
+    word-break: break-word;
+}
+
+i{
+    cursor: pointer;
+}
+
+.icon-data-wrap{
+    display: flex;
+}

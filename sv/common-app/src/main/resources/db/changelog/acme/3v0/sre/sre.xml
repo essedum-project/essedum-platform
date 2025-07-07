@@ -1,0 +1,92 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+	<changeSet author="Leap (generated)" id="1683622681475-4">
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT sre_ci_metadata ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/acme/3v0/sre/sre_ci_metadata.csv" quotchar="&quot;" separator="," tableName="sre_ci_metadata">
+		<column header="id" name="id" type="NUMERIC"/>
+		<column header="ci_id" name="ci_id" type="STRING"/>
+		<column header="ci_name" name="ci_name" type="STRING"/>
+		<column header="display_name" name="display_name" type="STRING"/>
+		<column header="ci_type" name="ci_type" type="STRING"/>
+		<column header="apm_type" name="apm_type" type="STRING"/>
+		<column header="ci_status" name="ci_status" type="STRING"/>
+		<column header="os_type" name="os_type" type="STRING"/>
+		<column header="cpu_cores" name="cpu_cores" type="NUMERIC"/>
+		<column header="ip_address" name="ip_address" type="STRING"/>
+		<column header="application_type" name="application_type" type="STRING"/>
+		<column header="service_type" name="service_type" type="STRING"/>
+		<column header="technology_type" name="technology_type" type="STRING"/>
+		<column header="ci_host_group" name="ci_host_group" type="STRING"/>
+		<column header="ci_last_updated" name="ci_last_updated" type="DATE"/>
+		<column header="project_id" name="project_id" type="NUMERIC"/>
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT sre_ci_metadata OFF;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="Leap (generated)" id="1683622681475-5">
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT sre_event ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/acme/3v0/sre/sre_event.csv" quotchar="&quot;" separator="," tableName="sre_event">
+		<column header="id" name="id" type="NUMERIC"/>
+		<column header="eventId" name="eventId" type="STRING"/>
+		<column header="displayId" name="displayId" type="STRING"/>
+		<column header="title" name="title" type="STRING"/>
+		<column header="eventType" name="eventType" type="STRING"/>
+		<column header="impactLevel" name="impactLevel" type="STRING"/>
+		<column header="severityLevel" name="severityLevel" type="STRING"/>
+		<column header="status" name="status" type="STRING"/>
+		<column header="rootCauseEntity" name="rootCauseEntity" type="STRING"/>
+		<column header="relatedEvents" name="relatedEvents" type="STRING"/>
+		<column header="startTime" name="startTime" type="STRING"/>
+		<column header="endTime" name="endTime" type="STRING"/>
+		<column header="lastUpdated" name="lastUpdated" type="skip"/>
+		<column header="lastCreated" name="lastCreated" type="skip"/>
+		<column header="apmType" name="apmType" type="STRING"/>
+		<column header="deepLinkUrl" name="deepLinkUrl" type="STRING"/>
+		<column header="incidentId" name="incidentId" type="STRING"/>
+		<column header="project_id" name="project_id" type="NUMERIC"/>
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT sre_event OFF;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="Leap (generated)" id="1683622681475-6">
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT sre_metrics ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/acme/3v0/sre/sre_metrics.csv" quotchar="&quot;" separator="," tableName="sre_metrics">
+		<column header="id" name="id" type="NUMERIC"/>
+		<column header="ci_name" name="ci_name" type="STRING"/>
+		<column header="ctype" name="ctype" type="STRING"/>
+		<column header="startTime" name="startTime" type="STRING"/>
+		<column header="endTime" name="endTime" type="STRING"/>
+		<column header="occurrences" name="occurrences" type="NUMERIC"/>
+		<column header="current" name="current" type="NUMERIC"/>
+		<column header="min" name="min" type="NUMERIC"/>
+		<column header="max" name="max" type="NUMERIC"/>
+		<column header="count" name="count" type="NUMERIC"/>
+		<column header="standardDeviation" name="standardDeviation" type="NUMERIC"/>
+		<column header="sum" name="sum" type="NUMERIC"/>
+		<column header="metricValueFinal" name="metricValueFinal" type="skip"/>
+		<column header="metricValue" name="metricValue" type="NUMERIC"/>
+		<column header="metricType" name="metricType" type="STRING"/>
+		<column header="project_id" name="project_id" type="NUMERIC"/>
+		<column header="metricPath" name="metricPath" type="STRING"/>
+		<column header="apiType" name="apiType" type="STRING"/>
+		<column header="dashboardType" name="dashboardType" type="STRING"/>
+		<column header="apmType" name="apmType" type="STRING"/>
+		<column header="description" name="description" type="STRING"/>
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT sre_metrics OFF;
+		</sql>
+	</changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,727 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="Leap (generated)" id="1620913468156-1">
+        <createTable tableName="btm_agent">
+            <column autoIncrement="true" name="agent_id" type="INT">
+                <constraints nullable="false" primaryKey="true" unique="true"/>
+            </column>
+            <column name="agent_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_act_ind" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="agent_status" type="VARCHAR(255)"/>
+            <column name="latest_agent_version" type="VARCHAR(45)"/>
+            <column name="last_updated_by" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tool_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="location" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-2">
+        <createTable tableName="btm_agent_node_mapping">
+            <column autoIncrement="true" name="agent_node_id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="agent_id" type="INT"/>
+            <column name="node_id" type="INT"/>
+            <column name="rec_act_ind" type="TINYINT(3)"/>
+            <column name="last_updated_dts" type="datetime"/>
+            <column name="mapping_name" type="VARCHAR(50)"/>
+            <column name="base_directory_path" type="VARCHAR(100)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-3">
+        <createTable tableName="btm_category">
+            <column autoIncrement="true" name="category_id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="category_name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_act_ind" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_created_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="auto_verification_pass_percentage" type="DOUBLE"/>
+            <column name="categorization_field" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="verification_required_ind" type="BIT(1)"/>
+            <column name="last_updated_by" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-4">
+        <createTable tableName="btm_category_regex">
+            <column autoIncrement="true" name="category_app_regex_id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="category_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="application_id" type="INT"/>
+            <column name="rec_act_ind" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category_regex" type="VARCHAR(300)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pattern" type="VARCHAR(300)"/>
+            <column name="resolver_workflow_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-5">
+        <createTable tableName="btm_lk_status_type">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-6">
+        <createTable tableName="btm_node">
+            <column autoIncrement="true" name="node_id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="node_name" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_act_ind" type="TINYINT(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_created_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="node_ip" type="VARCHAR(255)"/>
+            <column name="last_updated_by" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="architecture" type="VARCHAR(10)"/>
+            <column name="os" type="VARCHAR(45)"/>
+            <column name="tool_id" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-7">
+        <createTable tableName="btm_node_application_mapping">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="node_id" type="INT"/>
+            <column name="application_id" type="INT"/>
+            <column name="rect_act_ind" type="TINYINT(3)"/>
+            <column name="last_updated_dt" type="datetime"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-8">
+        <createTable tableName="btm_project_application">
+            <column autoIncrement="true" name="project_app_id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="application_id" type="INT"/>
+            <column name="project_id" type="INT"/>
+            <column name="rec_act_ind" type="TINYINT(3)"/>
+            <column name="last_updated_dts" type="datetime"/>
+            <column name="rec_created_dts" type="datetime"/>
+            <column name="last_updated_by" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-9">
+        <createTable tableName="btm_schedule">
+            <column name="schedule_id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="schedule_name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_act_ind" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_created_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="schedule_start_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="schedule_end_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="schedule_pattern" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="schedule_recurrence_ind" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="schedule_on_every" type="VARCHAR(50)"/>
+            <column name="schedule_instance" type="VARCHAR(50)"/>
+            <column name="schedule_time" type="time">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="INT"/>
+            <column name="weekly_data" type="VARCHAR(100)"/>
+            <column name="recur_every" type="SMALLINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-10">
+        <createTable tableName="btm_schedule_application">
+            <column name="schedule_application_id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="schedule_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="application_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_act_ind" type="TINYINT(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_created_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-11">
+        <createTable tableName="btm_status">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="type_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-12">
+        <createTable tableName="btm_workflow_agent">
+            <column autoIncrement="true" name="workflow_agent_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" unique="true"/>
+            </column>
+            <column name="workflow_input_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rel_act_ind" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="agent_id" type="INT"/>
+            <column name="agent_node_id" type="INT"/>
+            <column name="rec_created_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-13">
+        <createTable tableName="btm_workflow_detail">
+            <column autoIncrement="true" name="workflow_id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="workflow_name" type="VARCHAR(45)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_act_ind" type="TINYINT(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="workflow_type_id" type="INT"/>
+            <column name="workflow_location" type="VARCHAR(768)"/>
+            <column name="estimated_execution_minute" type="DECIMAL(11)"/>
+            <column name="last_updated_by" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tool_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="schedule_id" type="INT"/>
+            <column name="workflow_content" type="LONGTEXT"/>
+            <column name="bot_store_id" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-14">
+        <createTable tableName="btm_workflow_input">
+            <column autoIncrement="true" name="workflow_input_id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="rec_act_ind" type="TINYINT(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_created_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="INT"/>
+            <column name="incident_id" type="VARCHAR(100)"/>
+            <column name="category_id" type="INT"/>
+            <column name="node_id" type="INT"/>
+            <column name="estimated_execution_minute" type="INT"/>
+            <column name="workflow_input_json" type="VARCHAR(500)"/>
+            <column name="schedule_id" type="INT"/>
+            <column name="agent_node_id" type="INT"/>
+            <column name="tool_id" type="INT"/>
+            <column name="external_id" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-15">
+        <createTable tableName="btm_workflow_logs">
+            <column name="workflow_log_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="workflow_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="message" type="LONGTEXT"/>
+            <column name="timestamp" type="datetime"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-16">
+        <createTable tableName="btm_workflow_screenshots">
+            <column name="workflow_screenshot_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="workflow_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="timestamp" type="datetime"/>
+            <column name="screenshot" type="MEDIUMBLOB"/>
+            <column name="agent_node_mapping_id" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-17">
+        <createTable tableName="btm_workflow_steps">
+            <column autoIncrement="true" name="workflow_steps_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="workflow_execution_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_act_ind" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_created_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="node_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_name" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_variables" type="VARCHAR(500)"/>
+            <column name="activity_sequence_number" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_instance_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_parent_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="activity_message" type="VARCHAR(500)"/>
+            <column name="executing_agent_id" type="INT"/>
+            <column name="time_taken" type="DOUBLE"/>
+            <column name="agent_node_mapping_id" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-18">
+        <createTable tableName="btm_workflow_type">
+            <column autoIncrement="true" name="workflow_type_id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="workflow_type_name" type="VARCHAR(45)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_act_ind" type="TINYINT(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_created_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-19">
+        <createTable tableName="btm_workflowexecution">
+            <column autoIncrement="true" name="workflow_execution_id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="workflow_execution_status" type="VARCHAR(45)"/>
+            <column name="workflow_execution_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_by" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_act_ind" type="TINYINT(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="workflow_response_json" type="VARCHAR(500)"/>
+            <column name="workflow_id" type="INT"/>
+            <column name="workflow_input_id" type="INT"/>
+            <column name="schedule_id" type="INT"/>
+            <column name="response_json" type="LONGTEXT"/>
+            <column name="start_time" type="datetime"/>
+            <column name="end_time" type="datetime"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-20">
+        <createTable tableName="btm_xw_workflow_node_agent_schedule">
+            <column autoIncrement="true" name="workflow_node_agent_schedule_id" type="INT">
+                <constraints nullable="false" primaryKey="true" unique="true"/>
+            </column>
+            <column name="workflow_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="node_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rel_act_ind" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_updated_dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="agent_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="schedule_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="agent_workflow_download_status" type="VARCHAR(20)"/>
+            <column name="last_updated_by" type="INT"/>
+            <column name="agent_node_mapping_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1620913468156-21">
+        <createTable tableName="btm_xw_workflow_portfolio">
+            <column autoIncrement="true" name="Workflow_Application_ID" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="Workflow_ID" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="Portfolio_ID" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="Rel_Act_Ind" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="Last_Updated_Dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jay.thanki (generated)" id="1621858697746-2">
+    	<sql dbms="mssql">
+			SET IDENTITY_INSERT btm_workflow_type ON;
+		</sql>
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/btm/btm_workflow_type.csv" quotchar="&quot;" separator="," tableName="btm_workflow_type">
+            <column header="workflow_type_id" name="workflow_type_id" type="NUMERIC"/>
+            <column header="workflow_type_name" name="workflow_type_name" type="STRING"/>
+            <column header="rec_act_ind" name="rec_act_ind" type="NUMERIC"/>
+            <column header="last_updated_dts" name="last_updated_dts" type="DATE"/>
+            <column header="rec_created_dts" name="rec_created_dts" type="DATE"/>
+            <column header="last_updated_by" name="last_updated_by" type="NUMERIC"/>
+        </loadData>
+        <sql dbms="mssql">
+			SET IDENTITY_INSERT btm_workflow_type OFF;
+		</sql>
+    </changeSet>
+    
+    <!-- 1.3.12 changes -->
+    <changeSet author="Leap (generated)" id="1312v0-btm-1001">
+         <createTable tableName="btm_cases">
+            <column autoIncrement="false" name="case_id" type="VARCHAR(20)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="status" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="priority" type="INT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="source" type="VARCHAR(11)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="application_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_act_ind" type="TINYINT">
+			  <constraints nullable="false"/>
+            </column>
+			 <column name="last_updated_dts" type="datetime">
+			  <constraints nullable="false"/>
+            </column>
+			 <column name="rec_created_dts" type="datetime">
+			  <constraints nullable="false"/>
+            </column>
+			<column name="caseJson" type="TEXT">
+			  <constraints nullable="true"/>
+            </column>
+			<column name="external_id" type="VARCHAR(255)">
+			  <constraints nullable="true"/>
+            </column>
+			<column name="category" type="VARCHAR(50)">
+			  <constraints nullable="true"/>
+            </column>
+            <column name="short_description" type="VARCHAR(100)">
+			  <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    
+    <!-- 1.3.12 changes -->
+     <changeSet author="Leap (generated)" id="1312v0-btm-1002">
+         <createTable tableName="btm_classifier">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="workflow_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="application_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="case_id" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rec_act_ind" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+			 <column name="rec_created_dts" type="datetime">
+			  <constraints nullable="false"/>
+            </column>
+			 <column name="last_updated_dts" type="datetime">
+			  <constraints nullable="false"/>
+            </column>
+			<column name="external_id" type="VARCHAR(255)">
+			  <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+	
+	<!-- 1.3.12 changes -->
+     <changeSet author="Leap (generated)" id="1312v0-btm-1003">
+         <createTable tableName="btm_category_details">
+            <column autoIncrement="true" name="category_id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="category_name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category_regex_json" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="application_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resolver_workflow_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resolver_workflow_name" type="VARCHAR(50)">
+            	<constraints nullable="false"/>
+            </column>
+			 <column name="rec_act_ind" type="BIT(1)">
+			  <constraints nullable="false"/>
+            </column>
+			 <column name="last_updated_dts" type="datetime">
+			  <constraints nullable="false"/>
+            </column>
+			 <column name="rec_created_dts" type="datetime">
+			  <constraints nullable="false"/>
+            </column>
+			<column name="auto_verification_pass_percentage" type="DOUBLE">
+			  <constraints nullable="true"/>
+            </column>
+			<column name="verification_required_ind" type="BIT(1)">
+			  <constraints nullable="true"/>
+            </column>
+			<column name="selection" type="BIT(1)">
+			  <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+	
+	<!-- 1.3.12 changes -->
+	<changeSet author="Leap (generated)" id="1312v0-btm-1004">
+         <createTable tableName="btm_workflow_details">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="sop_id" type="INT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="workflow_name" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="tool_id" type="INT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="workflow_json" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+			 <column name="rec_act_ind" type="BIT(1)">
+			  <constraints nullable="true"/>
+            </column>
+			 <column name="last_updated_dts" type="datetime">
+			  <constraints nullable="true"/>
+            </column>
+			 <column name="rec_created_dts" type="datetime">
+			  <constraints nullable="true"/>
+            </column>
+			<column name="external_id" type="BIGINT">
+			  <constraints nullable="true"/>
+            </column>
+			<column name="workflow_type" type="VARCHAR(100)">
+			  <constraints nullable="true"/>
+            </column>
+			<column name="dependent_wf" type="BIGINT">
+			  <constraints nullable="true"/>
+            </column>
+        </createTable>
+        
+    </changeSet>
+    
+    <!-- 1.3.12 changes -->
+     <changeSet author="Leap (generated)" id="1312v0-btm-1005">
+    	
+         <createTable tableName="btm_schedules">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="schedule_unique_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cron_expression" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="enabled" type="TINYINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_date" type="datetime">
+                <constraints nullable="true"/>
+            </column>
+			 <column name="last_modified_date" type="datetime">
+			  <constraints nullable="true"/>
+            </column>
+        </createTable>
+        
+    </changeSet>
+    
+    <!-- 1.3.12 changes -->
+     <changeSet author="Leap (generated)" id="1312v0-btm-1006">
+    	
+         <createTable tableName="btm_xw_workflow_schedule_node_bot">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="workflow_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="schedule_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="bot_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="bot_name" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+			 <column name="node_id" type="BIGINT">
+			  <constraints nullable="true"/>
+            </column>
+			 <column name="node_name" type="VARCHAR(50)">
+			  <constraints nullable="true"/>
+            </column>
+        </createTable>
+        
+    </changeSet>
+    
+    <!-- 1.3.12 changes -->
+     <changeSet author="Leap (generated)" id="1312v0-btm-1007">
+    	
+         <createTable tableName="btm_resolver_workflow">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="Workflow_ID" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="Case_ID" type="VARCHAR(25)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="Rel_Act_Ind" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="Rec_Created_Dts" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+			 <column name="Last_Updated_Dts" type="datetime">
+			  <constraints nullable="false"/>
+            </column>
+			 <column name="Workflow_Status" type="VARCHAR(50)">
+			  <constraints nullable="true"/>
+            </column>
+			<column name="Bot_Mapping_ID" type="INT">
+			  <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+    </changeSet>
+    
+</databaseChangeLog>

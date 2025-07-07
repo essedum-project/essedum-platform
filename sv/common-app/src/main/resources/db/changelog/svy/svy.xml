@@ -1,0 +1,288 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+ 
+    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-22">
+        <createTable tableName="svy_answer">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="answer_text" type="VARCHAR(400)"/>
+            <column name="question_id" type="INT"/>
+            <column name="questionnaire_instance_id" type="INT"/>
+            <column name="project_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-23">
+        <createTable tableName="svy_answer_option">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="answer" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="question_option" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <!-- <changeSet author="sai.ragavendran (generated)" id="2v0-svy-24">
+        <createTable tableName="svy_box_plot">
+            <column name="company" type="VARCHAR(20)"/>
+            <column name="department" type="VARCHAR(20)"/>
+            <column name="OM" type="DOUBLE"/>
+            <column name="Automation" type="DOUBLE"/>
+            <column name="Resilience" type="DOUBLE"/>
+        </createTable>
+    </changeSet> -->
+    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-25">
+        <createTable tableName="svy_client_details">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="company_name" type="VARCHAR(500)"/>
+            <column name="region_id" type="INT"/>
+            <column name="region_name" type="VARCHAR(100)"/>
+            <column name="country_id" type="INT"/>
+            <column name="country" type="VARCHAR(100)"/>
+            <column name="aifunction" type="VARCHAR(500)"/>
+            <column name="questionnaire_type" type="VARCHAR(100)"/>
+            <column name="organization_name" type="VARCHAR(100)"/>
+            <column name="industry_id" type="INT"/>
+            <column name="industry_name" type="VARCHAR(100)"/>
+            <column name="user_name" type="VARCHAR(100)"/>
+            <column name="contactemail" type="VARCHAR(100)">
+                <constraints unique="true"/>
+            </column>
+            <column name="designation" type="VARCHAR(100)"/>
+            <column name="project_id" type="INT"/>
+            <column name="hostname" type="VARCHAR(100)"/>
+            <column name="ip" type="VARCHAR(50)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-26">
+        <createTable tableName="svy_client_score">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="client_id" type="INT">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="client_name" type="VARCHAR(100)"/>
+            <column name="aifunction" type="VARCHAR(100)"/>
+            <column name="client_score_percentage" type="DECIMAL(10, 2)"/>
+            <column name="maturity_level" type="INT"/>
+            <column name="project_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-27">
+        <createTable tableName="svy_client_score_per_question">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="client_id" type="INT"/>
+            <column name="slno" type="VARCHAR(50)"/>
+            <column name="company_name" type="VARCHAR(100)"/>
+            <column name="dimension_id" type="INT"/>
+            <column name="dimension" type="VARCHAR(100)"/>
+            <column name="question_id" type="INT"/>
+            <column name="question" type="VARCHAR(200)"/>
+            <column name="answer" type="VARCHAR(200)"/>
+            <column name="score" type="DECIMAL(10, 2)"/>
+            <column name="questionnaire_instance_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-28">
+        <createTable tableName="svy_country">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="country_name" type="VARCHAR(200)">
+                <constraints nullable="false" />
+            </column>
+            <column name="project_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-29">
+        <createTable tableName="svy_dimension">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="section" type="VARCHAR(100)"/>
+            <column name="project_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="questionnaire_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dimension_details" type="TEXT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-30">
+        <createTable tableName="svy_industry">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="industry_name" type="VARCHAR(100)"/>
+            <column name="operating_margin_increase" type="INT"/>
+            <column name="project_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="top_quartile" type="DECIMAL(10, 2)"/>
+            <column name="low_quartile" type="DECIMAL(10, 2)"/>
+        </createTable>
+    </changeSet>
+    <!-- <changeSet author="sai.ragavendran (generated)" id="2v0-svy-31">
+        <createTable tableName="svy_industry_maturity_percentage">
+            <column name="industry" type="VARCHAR(100)"/>
+            <column name="maturity" type="VARCHAR(100)"/>
+            <column name="percentage" type="INT"/>
+        </createTable>
+    </changeSet> -->
+    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-32">
+        <createTable tableName="svy_lk_question_type">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="question_type_name" type="VARCHAR(40)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-33">
+        <createTable tableName="svy_maturity_level">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="maturity_level" type="INT"/>
+            <column name="description" type="TEXT"/>
+            <column name="project_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <!-- <changeSet author="sai.ragavendran (generated)" id="2v0-svy-34">
+        <createTable tableName="svy_pie">
+            <column name="name" type="VARCHAR(20)"/>
+            <column name="value" type="INT"/>
+            <column name="type" type="VARCHAR(20)"/>
+        </createTable>
+    </changeSet> -->
+    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-35">
+        <createTable tableName="svy_post_your_query">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="first_name" type="VARCHAR(100)"/>
+            <column name="last_name" type="VARCHAR(100)"/>
+            <column name="email_id" type="VARCHAR(100)"/>
+            <column name="company" type="VARCHAR(100)"/>
+            <column name="job_title" type="VARCHAR(100)"/>
+            <column name="message" type="TEXT"/>
+            <column name="project_id" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-36">
+        <createTable tableName="svy_question">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="question_sl_no" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="question_text" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="use_in_score" type="BIT(1)"/>
+            <column name="question_type_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="questionnaire_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dimension_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-37">
+        <createTable tableName="svy_question_option">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="option_text" type="VARCHAR(1000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="question_id" type="INT"/>
+            <column name="project_id" type="INT"/>
+            <column name="score" type="DECIMAL(10, 2)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-38">
+        <createTable tableName="svy_questionnaire">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="questionnaire_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-39">
+        <createTable tableName="svy_questionnaire_instance">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="questionaire_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="questionnaire_status" type="VARCHAR(255)"/>
+            <column name="project_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-40">
+        <createTable tableName="svy_region">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="region_name" type="VARCHAR(100)"/>
+            <column name="project_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="top_quartile" type="DECIMAL(10, 2)"/>
+            <column name="low_quartile" type="DECIMAL(10, 2)"/>
+        </createTable>
+    </changeSet>
+
+   
+  
+    
+  
+  
+
+
+   
+</databaseChangeLog>

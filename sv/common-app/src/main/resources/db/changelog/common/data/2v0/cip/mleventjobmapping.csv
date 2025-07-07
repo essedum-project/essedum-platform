@@ -1,0 +1,4 @@
+"body","description","eventname","jobdetails","organization"
+"{}",NULL,"TicketsAssignment","[{\"name\":\"LEOTCKTS56442\",\"type\":\"pipeline\"}]","leo1311"
+"{}",NULL,"TechClassify","[{\"name\":\"LEOTCHCL17048\",\"type\":\"pipeline\"}]","leo1311"
+"{}",NULL,"NextShiftAssign","[{\"name\":\"LEONXTSH71215\",\"type\":\"pipeline\"}]","leo1311"

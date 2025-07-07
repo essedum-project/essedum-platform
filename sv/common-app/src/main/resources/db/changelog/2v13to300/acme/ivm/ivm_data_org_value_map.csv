@@ -1,0 +1,79 @@
+id,usm_project_id,initiative_id,initiative_name,metric_id,value_lever_id,cost,questionnaire_instance_id,target_level
+1,2,4530,NLP for performance evaluations for career development,1537,129,NULL,235,L4
+2,2,4533,AI powered Learning management system assistance for career development,1538,129,NULL,235,L4
+3,2,1569,No Recommendation,709,67,NULL,228,L4
+4,2,6946,Automated account dashboard generation,3740,58,NULL,238,L5
+5,2,6942,On-demand collective customer service(swarm),3739,58,NULL,238,L5
+6,2,6945,Auto-generated user guides and tutorials,3740,58,NULL,238,L4
+7,2,6941,product education and continuous learning,3739,58,NULL,238,L4
+8,2,6940,Customer support bots (external),3739,58,NULL,238,L3
+9,2,4581,"Utilize generative AI tools to assist in architectural design, automatically generating design proposals based on requirements and best practices.",1561,59,NULL,236,L5
+10,2,4582,Code Buddy - Implement AI-driven code generation tools to automate repetitive coding tasks and enhance code quality and consistency.,1561,59,NULL,236,L3
+11,2,4583,Leverage AI-powered testing frameworks to automatically generate test cases and identify potential areas for test automation.,1561,59,NULL,236,L3
+12,2,4580,Leverage AI-powered testing frameworks to automatically generate test cases and identify potential areas for test automation.,1558,59,NULL,236,L5
+13,2,4578,"Utilize generative AI tools to assist in architectural design, automatically generating design proposals based on requirements and best practices.",1558,59,NULL,236,L4
+14,2,4536,AI powered Learning management system assistance for career development,1539,129,NULL,235,L4
+15,2,4527,AI powered Learning management system assistance for career development,1536,129,NULL,235,L4
+16,2,4529,AI powered performance support tools for career development,1537,129,NULL,235,L3
+17,2,4532,Employee feedback and sentiment analysis for career development,1538,129,NULL,235,L3
+18,2,4535,AI powered engagement surveys for career development,1539,129,NULL,235,L3
+24,2,3172,Business priority driven change management,1059,44,NULL,231,L5
+25,2,3168,Implement CI/CD pipeline,1057,44,NULL,231,L5
+26,2,3159,Enhance test automation framework for full coverage,1055,44,NULL,231,L5
+27,2,3154,"Develop a ML model to propose similar changes, predict associated effort and impact Develop a ML model to identify recurring changes of similar nature and generate a problem ticket to eliminate/ automate the same",1054,44,NULL,231,L4
+28,2,3167,Implement CD pipeline for production with rollback feature,1057,44,NULL,231,L4
+29,2,6975,Advance Knowledge Management,3747,58,NULL,238,L5
+30,2,6958,GenAI enabled software applications,3743,58,NULL,238,L4
+31,2,6971,virtual assisstants for task and scheduled management,3746,58,NULL,238,L3
+32,2,6989,Optimised  design for 3D printing,3750,58,NULL,238,L5
+33,2,6956,Dynamic supply chain simulation and optimization,3742,58,NULL,238,L4
+34,2,6955,shop-floor /robot optimization based on digital twins,3742,58,NULL,238,L3
+35,2,4588,Implement AI-driven anomaly detection systems to identify deviations from normal operational patterns and trigger proactive remediation.,1567,59,NULL,236,L5
+36,2,4589,Leverage generative AI algorithms to automate incident response and suggest optimal solutions based on historical incident data.,1567,59,NULL,236,L4
+37,2,4590,"Ops Buddy - Operations team is assisted by Ops buddy to query on FAQs, help documents to address client queries.",1567,59,NULL,236,L4
+38,2,4591,"Transition Buddy - Transition team uses the Transition buddy to understand  legacy system, help with estimation for new development, help on design and debug issues.",1567,59,NULL,236,L4
+39,2,4577,Leverage AI-driven recommendation systems to identify potential conflicts or gaps in requirements and proactively involve stakeholders in resolving them.,1557,59,NULL,236,L4
+40,2,4575,Utilize generative AI algorithms to simulate user interactions and gather feedback on requirements prior to implementation.,1557,59,NULL,236,L4
+41,2,4570,Implement AI-driven recommendation systems to suggest potential enhancements or improvements based on requirements data.,1555,59,NULL,236,L3
+42,2,4531,Mentor matching platforms for career development,1538,129,NULL,235,L2
+43,2,4542,AI powered performance support tools for performance management,1541,129,NULL,235,L4
+44,2,4545,AI powered Learning management system assistance,1542,127,NULL,235,L4
+45,2,4541,Automated Reminders for performance management,1541,129,NULL,235,L3
+46,2,4466,AI powered recruitment advertising,1511,129,NULL,235,L3
+47,2,4547,AI powered virtual training programs for learning management,1543,129,NULL,235,L3
+48,2,4553,AI powered virtual training programs for learning management,1546,129,NULL,235,L3
+49,2,4550,AI powered virtual training programs for learning management,1545,129,NULL,235,L3
+50,2,3053,"Monitor and predict the SLA compliance, incident prioritization",1027,59,NULL,231,L4
+51,2,3054,Raise alerts for potential violations using ML models and automation,1027,59,NULL,231,L4
+52,2,3060,Predict user experience disruptions based on telemetry data,1028,60,NULL,231,L4
+53,2,3058,"Automated monitoring of Apps, Infra",1028,60,NULL,231,L3
+54,2,3059,Synthetic monitoring for end user transactions,1028,60,NULL,231,L3
+55,2,3057,"Monitor compliance with the defined SLAs using real time, full stack monitoring data",1028,60,NULL,231,L3
+56,2,3097,"Adopt DevSecOps practices to support agile build, changes",1038,66,NULL,231,L4
+57,2,3100,Adopt Agile processes for Dev and Kanban for queue driven support work,1039,60,NULL,231,L3
+58,2,3126,"Correlate incident with APM data, raise synthetic incidents, self-heal, reduce business metrics anomalies",1047,59,NULL,231,L5
+59,2,3115,Implement IIOC,1043,65,NULL,231,L2
+60,2,1694,"Ensure the DR failover process is regularly tested and aligned to HSBC SCOTT.,NULL
+DR failover testing guarantees that the service meet the RTO.",714,116,NULL,228,L3
+61,2,1654,"If the system is deemed as critical, plan for HOT/HOT implementation across separate infrastructure to achieve resilience and high availability.",714,116,NULL,228,L3
+62,2,1860,Explore the opportunities to implement synthetic monitoring.,751,116,NULL,228,L3
+63,2,1900,Monitoring & AlertingSilverRecom,751,116,NULL,228,L3
+64,2,1857,Risk register to be maintained.,746,67,NULL,228,L3
+65,2,1822,Service ManagementBronzeRecom,746,67,NULL,228,L3
+66,2,1838,Explore opportunities to implement proactive monitoring.,750,58,NULL,228,L3
+67,2,1842,Ensure the architects are involved in Incident reviews to have preventive measures implemented to avoid more incidents occurring.,741,116,NULL,228,L3
+68,2,1802,Explore the opportunities to automatically discover the technical components and linked to an IT Service.,741,116,NULL,228,L3
+69,2,1840,Check if supporting details given in the comments why the capability Service Management\\Service Management\\Proactive problem management   is not applicable.,750,58,NULL,228,L1
+70,2,1837,Explore opportunities to implement proactive monitoring.,750,58,NULL,228,L1
+71,2,1804,Check if supporting details given in the comments why the capability Service Management\\Service Management\\Automated component discovery  is not applicable.,741,116,NULL,228,L1
+72,2,1843,Check if supporting details given in the comments why the capability Service Management\\Service Management\\Proactive problem management   is not applicable.,741,116,NULL,228,L1
+73,2,1841,Ensure the architects are involved in Incident reviews to have preventive measures implemented to avoid more incidents occurring.,741,116,NULL,228,L1
+74,2,1801,Explore the opportunities to automatically discover the technical components and linked to an IT Service.,741,116,NULL,228,L1
+75,2,2821,"Integrated view of IT, App and business KPIs",907,58,NULL,229,L5
+76,2,2820,End to end DevSecOps adoption,907,58,NULL,229,L4
+77,2,2761,Build a command center view to show the ML driven insights,891,63,NULL,229,L5
+78,2,2791,Business service availability dashboards,900,59,NULL,229,L5
+79,2,2790,Develop ML models to predict disruptions based on past data,900,59,NULL,229,L4
+80,2,2786,Implement CI/CD pipeline,899,65,NULL,229,L5
+81,2,2966,"Self Service portals for business users (MW email address change 10+ incidents per month, SWAN data fixes around 60 incidents per month)",895,31,NULL,229,L3
+82,2,2816,Self-heal the business disruptions based on the event data,905,61,NULL,229,L5

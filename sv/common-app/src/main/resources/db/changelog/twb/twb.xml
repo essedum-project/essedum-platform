@@ -1,0 +1,1267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+
+	<changeSet author="Leap (generated)" id="1614785155891-105">
+		<createTable tableName="twb_action">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="action_area" type="VARCHAR(2000)" />
+			<column name="action_detailed_information"
+				type="VARCHAR(2000)" />
+			<column name="action_status" type="VARCHAR(2000)" />
+			<column name="action_title" type="VARCHAR(2000)" />
+			<column name="application_name" type="VARCHAR(100)" />
+			<column name="assigned_to" type="VARCHAR(100)" />
+			<column name="cluster_name" type="VARCHAR(100)" />
+			<column name="due_date" type="date" />
+			<column name="enablement" type="VARCHAR(255)" />
+			<column name="is_default" type="INT" />
+			<column name="is_unique" type="INT" />
+			<column name="raised_by" type="VARCHAR(100)" />
+			<column name="remarks" type="VARCHAR(2000)" />
+			<column name="start_date" type="date" />
+			<column name="wave_name" type="VARCHAR(100)" />
+			<column name="application_id" type="INT" />
+			<column name="cluster_id" type="INT" />
+			<column name="project_id" type="INT" />
+			<column name="transition_id" type="INT" />
+			<column name="transition_manager_id" type="INT" />
+			<column name="wave_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-106">
+		<createTable tableName="twb_answer">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="answer_text" type="VARCHAR(400)" />
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="question_id" type="SMALLINT(6)" />
+			<column name="questionnaire_instance_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-107">
+		<createTable tableName="twb_answer_option">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="answer" type="INT" />
+			<column name="question_option" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-108">
+		<createTable tableName="twb_application">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="application_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="application_area" type="VARCHAR(200)" />
+			<column name="application_complete_dts" type="datetime(6)" />
+			<column name="application_name" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="application_signoff_dts" type="datetime(6)" />
+			<column name="application_signoff_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="application_spoc_info" type="VARCHAR(200)" />
+			<column name="application_start_dts" type="datetime(6)" />
+			<column name="application_technology" type="VARCHAR(255)" />
+			<column name="cluster_name" type="VARCHAR(255)" />
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="wave_name" type="VARCHAR(255)" />
+			<column name="application_category_id" type="INT" />
+			<column name="cluster_id" type="INT" />
+			<column name="project_id" type="INT" />
+			<column name="transition_id" type="INT" />
+			<column name="wave_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-109">
+		<createTable tableName="twb_application_category">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="category_name" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-110">
+		<createTable tableName="twb_client">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="client_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="client_end_dts" type="CHAR(18)" />
+			<column name="client_name" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="client_relationship_info" type="VARCHAR(100)" />
+			<column name="client_signoff_dts" type="CHAR(18)" />
+			<column name="client_signoff_ind" type="CHAR(18)" />
+			<column name="client_start_dts" type="CHAR(18)" />
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-111">
+		<createTable tableName="twb_cluster">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="cluster_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="cluster_complete_dts" type="date" />
+			<column name="cluster_manager_info" type="VARCHAR(200)" />
+			<column name="cluster_name" type="VARCHAR(40)">
+				<constraints nullable="false" />
+			</column>
+			<column name="cluster_signoff_dts" type="datetime(6)" />
+			<column name="cluster_signoff_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="cluster_start_dts" type="date" />
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="lob_name" type="VARCHAR(255)" />
+			<column name="lob_id" type="INT" />
+			<column name="project_id" type="INT" />
+			<column name="transition_id" type="INT" />
+			<column name="wave_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-112">
+		<createTable tableName="twb_event">
+			<column autoIncrement="true" name="idalert" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="description" type="VARCHAR(45)" />
+			<column name="priority" type="VARCHAR(45)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-113">
+		<createTable tableName="twb_issue">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="application_name" type="VARCHAR(100)" />
+			<column name="closed_date" type="date" />
+			<column name="cluster_name" type="VARCHAR(100)" />
+			<column name="deliverable" type="VARCHAR(100)" />
+			<column name="details" type="VARCHAR(2000)" />
+			<column name="due_date" type="date" />
+			<column name="enablement" type="VARCHAR(255)" />
+			<column name="followup_mitigations" type="VARCHAR(100)" />
+			<column name="initiated_by" type="VARCHAR(100)" />
+			<column name="initiated_date" type="date" />
+			<column name="is_default" type="TINYINT(1)" />
+			<column name="is_unique" type="TINYINT(1)" />
+			<column name="issue_name" type="VARCHAR(2000)" />
+			<column name="owned_by" type="VARCHAR(100)" />
+			<column name="phase" type="VARCHAR(2000)" />
+			<column name="priority" type="VARCHAR(2000)" />
+			<column name="status" type="VARCHAR(100)" />
+			<column name="title" type="VARCHAR(2000)" />
+			<column name="track" type="VARCHAR(2000)" />
+			<column name="wave_name" type="VARCHAR(100)" />
+			<column name="workstream" type="VARCHAR(2000)" />
+			<column name="application_id" type="INT" />
+			<column name="cluster_id" type="INT" />
+			<column name="project_id" type="INT" />
+			<column name="transition_id" type="INT" />
+			<column name="transition_manager_id" type="INT" />
+			<column name="wave_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-114">
+		<createTable tableName="twb_lk_attachment_type">
+			<column autoIncrement="true" name="id" type="SMALLINT(6)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="attachment_type_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="attachment_type_name" type="VARCHAR(40)">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-115">
+		<createTable tableName="twb_lk_language">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="language_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="language_name" type="VARCHAR(40)">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="localization_needed_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="Unicode_needed_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-116">
+		<createTable tableName="twb_lk_question_type">
+			<column autoIncrement="true" name="id" type="SMALLINT(6)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="question_type_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="question_type_name" type="VARCHAR(40)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-117">
+		<createTable tableName="twb_lk_role">
+			<column autoIncrement="true" name="id" type="SMALLINT(6)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="role_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="role_Internal_ind" type="TINYINT(1)" />
+			<column name="role_name" type="VARCHAR(40)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-118">
+		<createTable tableName="twb_lk_scope_type">
+			<column autoIncrement="true" name="id" type="SMALLINT(6)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="scope_type_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="scope_type_name" type="VARCHAR(40)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-119">
+		<createTable tableName="twb_lk_task_type">
+			<column autoIncrement="true" name="id" type="SMALLINT(6)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="task_type_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="task_type_name" type="VARCHAR(40)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-120">
+		<createTable tableName="twb_lob">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="lob_act_ind" type="TINYINT(1)" />
+			<column name="lob_complete_dts" type="datetime(6)" />
+			<column name="lob_end_dt" type="date" />
+			<column name="lob_name" type="VARCHAR(40)">
+				<constraints nullable="false" />
+			</column>
+			<column name="lob_signoff_dts" type="datetime(6)" />
+			<column name="lob_signoff_ind" type="TINYINT(1)" />
+			<column name="lob_start_dt" type="date" />
+			<column name="lob_start_dts" type="datetime(6)" />
+			<column name="client_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-121">
+		<createTable tableName="twb_mapping">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="application_name" type="VARCHAR(200)" />
+			<column name="cluster_name" type="VARCHAR(40)" />
+			<column name="filter_field" type="VARCHAR(200)" />
+			<column name="transition_name" type="VARCHAR(45)" />
+			<column name="wave_name" type="VARCHAR(40)" />
+			<column name="application_id" type="INT" />
+			<column name="cluster_id" type="INT" />
+			<column name="project_id" type="INT" />
+			<column name="transition_id" type="INT" />
+			<column name="user_id" type="INT" />
+			<column name="wave_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-122">
+		<createTable tableName="twb_problem">
+			<column autoIncrement="true" name="idproblem" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="description" type="VARCHAR(45)" />
+			<column name="remarks" type="VARCHAR(250)" />
+			<column name="status" type="VARCHAR(45)" />
+			<column name="type" type="VARCHAR(20)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-123">
+		<createTable tableName="twb_question">
+			<column autoIncrement="true" name="id" type="SMALLINT(6)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="question_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="question_decision_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="question_mandatory_ind" type="TINYINT(1)" />
+			<column name="question_text" type="VARCHAR(250)">
+				<constraints nullable="false" />
+			</column>
+			<column name="document_id" type="INT" />
+			<column name="question_type_id" type="SMALLINT(6)" />
+			<column name="questionnaire_id" type="SMALLINT(6)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-124">
+		<createTable tableName="twb_question_option">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="option_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="option_navigation_link" type="SMALLINT(6)" />
+			<column name="option_text" type="VARCHAR(40)">
+				<constraints nullable="false" />
+			</column>
+			<column name="question_id" type="SMALLINT(6)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-125">
+		<createTable tableName="twb_questionnaire">
+			<column autoIncrement="true" name="id" type="SMALLINT(6)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="questionnaire_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="questionnaire_effective_dts" type="datetime(6)" />
+			<column name="questionnaire_end_dts" type="datetime(6)" />
+			<column name="questionnaire_master_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="questionnaire_name" type="VARCHAR(40)">
+				<constraints nullable="false" />
+			</column>
+			<column name="project_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-126">
+		<createTable tableName="twb_questionnaire_instance">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_by" type="INT" />
+			<column name="last_updated_dts" type="datetime(6)" />
+			<column name="questionnaire_status" type="VARCHAR(255)" />
+			<column name="application_id" type="INT" />
+			<column name="engineer_id" type="INT" />
+			<column name="questionaire_id" type="SMALLINT(6)" />
+			<column name="completed_percentage" type="FLOAT(12)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-127">
+		<createTable tableName="twb_request">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="remarks" type="VARCHAR(1000)" />
+			<column name="req_attachment" type="LONGBLOB" />
+			<column name="req_error" type="VARCHAR(2000)" />
+			<column name="req_input" type="VARCHAR(2000)" />
+			<column name="req_status" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="req_type" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="req_attachment_content_type" type="VARCHAR(255)" />
+			<column name="tag1" type="VARCHAR(500)" />
+			<column name="tag2" type="VARCHAR(500)" />
+			<column name="answer_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-128">
+		<createTable tableName="twb_risks">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="action_plan" type="VARCHAR(1000)" />
+			<column name="actions_post_review" type="VARCHAR(1000)" />
+			<column name="application_name" type="VARCHAR(100)" />
+			<column name="cluster_name" type="VARCHAR(100)" />
+			<column name="communication_category" type="VARCHAR(100)" />
+			<column name="contingency_plan" type="VARCHAR(1000)" />
+			<column name="current_status" type="VARCHAR(100)" />
+			<column name="date_identified" type="date" />
+			<column name="enablement" type="VARCHAR(255)" />
+			<column name="existing_controls" type="VARCHAR(1000)" />
+			<column name="identified_by" type="VARCHAR(255)" />
+			<column name="impact" type="VARCHAR(10)" />
+			<column name="impact_description" type="VARCHAR(2000)" />
+			<column name="is_default" type="TINYINT(1)" />
+			<column name="is_unique" type="TINYINT(1)" />
+			<column name="probability" type="VARCHAR(10)" />
+			<column name="responsible_party" type="VARCHAR(255)" />
+			<column name="risk_description" type="TEXT" />
+			<column name="risk_response" type="VARCHAR(100)" />
+			<column name="risk_title" type="VARCHAR(255)" />
+			<column name="sub_track_name" type="VARCHAR(255)" />
+			<column name="target_closure_date" type="date" />
+			<column name="track_name" type="VARCHAR(255)" />
+			<column name="wave_name" type="VARCHAR(100)" />
+			<column name="application_id" type="INT" />
+			<column name="cluster_id" type="INT" />
+			<column name="project_id" type="INT" />
+			<column name="transition_id" type="INT" />
+			<column name="transition_manager_id" type="INT" />
+			<column name="wave_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-129">
+		<createTable tableName="twb_scope_of_transition">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-130">
+		<createTable tableName="twb_service_request">
+			<column autoIncrement="true" name="idrequest" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="app_name" type="VARCHAR(45)" />
+			<column name="assignment_group" type="VARCHAR(45)" />
+			<column name="description" type="VARCHAR(45)" />
+			<column name="priority" type="VARCHAR(45)" />
+			<column name="status" type="VARCHAR(20)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-131">
+		<createTable tableName="twb_task">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="actual_duration" type="VARCHAR(255)" />
+			<column name="application_name" type="VARCHAR(255)" />
+			<column name="client_sign_off" type="VARCHAR(255)" />
+			<column name="cluster_id" type="INT" />
+			<column name="cluster_name" type="VARCHAR(255)" />
+			<column name="duration" type="VARCHAR(10)" />
+			<column name="feedback_comment" type="VARCHAR(255)" />
+			<column name="feedback_rating" type="FLOAT(12)" />
+			<column name="last_updated_by" type="INT" />
+			<column name="last_updated_dts" type="datetime(6)" />
+			<column name="lob_id" type="INT" />
+			<column name="lob_name" type="VARCHAR(255)" />
+			<column name="meeting_link" type="VARCHAR(255)" />
+			<column name="meeting_location" type="VARCHAR(255)" />
+			<column name="minutes_of_meeting_sent" type="VARCHAR(10)" />
+			<column name="remarks" type="VARCHAR(255)" />
+			<column name="reversekt_flag" type="INT" />
+			<column name="schedule_accepted_dts" type="datetime(6)" />
+			<column name="schedule_accepted_ind" type="BIT(1)" />
+			<column name="schedule_end_Date" type="date" />
+			<column name="schedule_end_day" type="VARCHAR(10)" />
+			<column name="schedule_end_time" type="time" />
+			<column name="schedule_sent_dts" type="datetime(6)" />
+			<column name="schedule_sent_ind" type="BIT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="schedule_start_Date" type="date" />
+			<column name="schedule_start_day" type="VARCHAR(10)" />
+			<column name="schedule_start_time" type="time" />
+			<column name="session_objective_met" type="VARCHAR(255)" />
+			<column name="status" type="VARCHAR(20)" />
+			<column name="task_description" type="TEXT" />
+			<column name="task_history_id" type="INT" />
+			<column name="task_name" type="VARCHAR(255)" />
+			<column name="task_planned_dts" type="datetime(6)" />
+			<column name="task_planned_ind" type="BIT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="wave_id" type="INT" />
+			<column name="wave_name" type="VARCHAR(255)" />
+			<column name="application_id" type="INT" />
+			<column name="project_id" type="INT" />
+			<column name="questionnaire_instance_id" type="INT" />
+			<column name="task_def_id" type="INT" />
+			<column name="task_group_instance_id" type="SMALLINT(6)" />
+			<column name="transition_id" type="INT" />
+			<column name="actual_start_Date" type="date" />
+			<column name="actual_start_time" type="time" />
+			<column name="actual_end_Date" type="date" />
+			<column name="actual_end_time" type="time" />
+			<column name="KT_Session_link" type="VARCHAR(200)" />
+			<column name="lead" type="INT(11)" />
+			<column name="sing_off_date" type="date" />
+			<column name="rkt_instance_id" type="INT(11)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-132">
+		<createTable tableName="twb_task_def">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="task_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="task_name" type="VARCHAR(1000)">
+				<constraints nullable="false" />
+			</column>
+			<column name="task_group_id" type="INT" />
+			<column name="task_type_id" type="SMALLINT(6)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-133">
+		<createTable tableName="twb_task_group">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="task_group_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="task_group_name" type="VARCHAR(1000)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-134">
+		<createTable tableName="twb_task_group_instance">
+			<column autoIncrement="true" name="id" type="SMALLINT(6)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="task_group_instance_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="application_id" type="INT" />
+			<column name="task_group_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-135">
+		<createTable tableName="twb_task_user_types">
+			<column autoIncrement="true" name="user_type_id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="user_type_name" type="VARCHAR(45)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-136">
+		<createTable tableName="twb_task_users">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)" />
+			<column name="last_updated_by" type="INT" />
+			<column name="project_id" type="INT" />
+			<column name="task_id" type="INT" />
+			<column name="transition_id" type="INT" />
+			<column name="user_id" type="INT" />
+			<column name="user_type" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-137">
+		<createTable tableName="twb_team">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="designation" type="TEXT" />
+			<column name="teammember" type="INT" />
+			<column name="owner" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-138">
+		<createTable tableName="twb_transition">
+			<column autoIncrement="true" name="idtransition" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="actual_end_date" type="date" />
+			<column name="actual_start_date" type="date" />
+			<column name="planned_end_date" type="date" />
+			<column name="planned_start_date" type="date" />
+			<column name="status" type="VARCHAR(45)" />
+			<column name="subprocess_name" type="VARCHAR(45)" />
+			<column name="transition_desc" type="VARCHAR(45)" />
+			<column name="transition_name" type="VARCHAR(45)" />
+			<column name="client_id" type="INT" />
+			<column name="project_id" type="INT" />
+			<column name="scope_of_transition_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-139">
+		<createTable tableName="twb_transition_plan">
+			<column autoIncrement="true" name="idtransitionPlan"
+				type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="fdomain" type="VARCHAR(45)" />
+			<column name="tdomain" type="VARCHAR(45)" />
+			<column name="vendorsize" type="VARCHAR(45)" />
+			<column name="appid" type="INT" />
+			<column name="idtransition" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-140">
+		<createTable tableName="twb_transition_risks">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="closed_date" type="TIMESTAMP" />
+			<column name="comments" type="VARCHAR(255)" />
+			<column name="created_date" type="TIMESTAMP" />
+			<column name="impact" type="VARCHAR(40)" />
+			<column name="last_updated_by" type="INT" />
+			<column name="last_updated_dts" type="TIMESTAMP" />
+			<column name="probability" type="INT" />
+			<column name="risk_owner_id" type="INT" />
+			<column name="risk_owner_name" type="VARCHAR(100)" />
+			<column name="short_description" type="VARCHAR(200)" />
+			<column name="status" type="VARCHAR(20)" />
+			<column name="transition_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-141">
+		<createTable tableName="twb_transition_users">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)" />
+			<column name="last_updated_by" type="INT" />
+			<column name="project_id" type="INT" />
+			<column name="role_id" type="INT" />
+			<column name="transition_id" type="INT" />
+			<column name="user_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-142">
+		<createTable tableName="twb_wave">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="wave_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="wave_complete_dts" type="datetime(6)" />
+			<column name="wave_end_Dt" type="date" />
+			<column name="wave_manager_info" type="VARCHAR(200)" />
+			<column name="wave_name" type="VARCHAR(40)">
+				<constraints nullable="false" />
+			</column>
+			<column name="wave_signoff_dts" type="datetime(6)" />
+			<column name="wave_signoff_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="wave_start_Dt" type="date" />
+			<column name="wave_start_dts" type="datetime(6)" />
+			<column name="project_id" type="INT" />
+			<column name="transition_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-143">
+		<createTable tableName="twb_xw_answer_attachment">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="attachment_Content" type="TINYBLOB" />
+			<column name="attachment_name" type="VARCHAR(100)" />
+			<column name="attachment_content_type" type="VARCHAR(255)" />
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="rel_act_ind" type="BIT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="transcript" type="VARCHAR(255)" />
+			<column name="transcript_status" type="VARCHAR(100)" />
+			<column name="answer_id" type="INT(20)" />
+			<column name="attachment_type_id" type="SMALLINT(6)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-144">
+		<createTable tableName="twb_xw_user_role_scope">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="last_updated_by" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="datetime(6)">
+				<constraints nullable="false" />
+			</column>
+			<column name="rel_act_ind" type="TINYINT(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="scope_Value" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="role_id" type="SMALLINT(6)" />
+			<column name="scope_type_id" type="SMALLINT(6)" />
+			<column name="user_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-145">
+		<createTable tableName="twb_xw_lead_scope_transition">
+			<column autoIncrement="true" name="id" type="INT(11)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="actual_start_date" type="DATE" />
+			<column name="actual_end_date" type="DATE" />
+			<column name="user_id" type="INT(11)">
+				<constraints nullable="false" />
+			</column>
+			<column name="scope_transition_id" type="INT(11)">
+				<constraints nullable="false" />
+			</column>
+			<column name="transition_id" type="INT(20)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-146">
+		<createTable tableName="twb_xw_user_task">
+			<column autoIncrement="true" name="id" type="INT(20)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="user_id" type="INT(11)">
+				<constraints nullable="false" />
+			</column>
+			<column name="task_id" type="INT(11)">
+				<constraints nullable="false" />
+			</column>
+			<column name="application_id" type="INT(11)" />
+			<column name="last_updated_by" type="INT(20)">
+				<constraints nullable="false" />
+			</column>
+			<column name="rel_act_ind" type="TINYINT(4)" />
+			<column name="last_updated_dts" type="DATETIME">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-147">
+		<createTable tableName="twb_vendor">
+			<column autoIncrement="true" name="id" type="INT(11)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="vendor_name" type="VARCHAR(40)">
+				<constraints nullable="false" />
+			</column>
+			<column name="start_date" type="DATETIME">
+				<constraints nullable="false" />
+			</column>
+			<column name="end_date" type="DATETIME">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_by" type="INT(20)">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_updated_dts" type="INT(20)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-148">
+		<createTable tableName="weeks">
+			<column autoIncrement="true" name="id" type="INT(11)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="weeknum" type="INT(11)">
+				<constraints nullable="false" />
+			</column>
+			<column name="yearweek" type="CHAR(18)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	
+	<!-- 1.3.12 changes -->
+	<changeSet author="Leap (generated)" id="1312v0-twb-149">
+		<createTable tableName="twb_rkt_instance">
+			<column autoIncrement="true" name="id" type="INT(11)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="rkt_template_id" type="INT(11)">
+				<constraints nullable="true" />
+			</column>
+			<column name="user_id" type="INT(11)">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	</changeSet>
+	
+	<!-- 1.3.12 changes -->
+	<changeSet author="Leap (generated)" id="1312v0-twb-150">
+		<createTable tableName="twb_rkt_template">
+			<column autoIncrement="true" name="id" type="INT(11)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="template_name" type="VARCHAR(500)">
+				<constraints nullable="true" />
+			</column>
+			<column name="project_id" type="INT(11)">
+				<constraints nullable="true" />
+			</column>
+			<column name="transition_id" type="INT">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	</changeSet>
+	
+	<!-- 1.3.12 changes -->
+	<changeSet author="Leap (generated)" id="1312v0-twb-151">
+		<createTable tableName="twb_rkt_feedback_description">
+			<column autoIncrement="true" name="id" type="INT(11)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="feedback_description" type="VARCHAR(1000)">
+				<constraints nullable="true" />
+			</column>
+			<column name="rkt_template_id" type="INT(11)">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	 </changeSet>
+	 
+	 <!-- 1.3.12 changes -->
+	 <changeSet author="Leap (generated)" id="1312v0-twb-152">
+		<createTable tableName="twb_rkt_feedback_description_answer">
+			<column autoIncrement="true" name="id" type="INT(11)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="applicable" type="INT(11)">
+				<constraints nullable="true" />
+			</column>
+			<column name="rating" type="FLOAT(12)">
+				<constraints nullable="true" />
+			</column>
+			<column name="comment" type="VARCHAR(300)">
+				<constraints nullable="true" />
+			</column>
+			<column name="rkt_feedback_description_id" type="INT(11)">
+				<constraints nullable="true" />
+			</column>
+			<column name="rkt_instance_id" type="INT(11)">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	 </changeSet>
+	 
+	 <!-- 1.3.12 changes -->
+	 <changeSet author="Leap (generated)" id="1312v0-twb-153">
+		<createTable tableName="twb_rkt_team_description">
+			<column autoIncrement="true" name="id" type="INT(11)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="team_description" type="VARCHAR(1000)">
+				<constraints nullable="true" />
+			</column>
+			<column name="rkt_template_id" type="INT(11)">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	 </changeSet>
+	 
+	 <!-- 1.3.12 changes -->
+	  <changeSet author="Leap (generated)" id="1312v0-twb-154">
+		<createTable tableName="twb_rkt_team_description_answer">
+			<column autoIncrement="true" name="id" type="INT(11)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="answer" type="VARCHAR(300)">
+				<constraints nullable="true" />
+			</column>
+			<column name="rkt_team_description_id" type="INT(11)">
+				<constraints nullable="true" />
+			</column>
+			<column name="rkt_instance_id" type="INT(11)">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	 </changeSet>
+	 
+	 <!-- 1.3.12 changes -->
+	 <changeSet author="Leap (generated)" id="1312v0-twb-155">
+		<createTable tableName="twb_custom_setting">
+			<column autoIncrement="true" name="id" type="INT(11)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="preference_type" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="preference_value" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="project_id" type="INT(11)">
+				<constraints nullable="false" />
+			</column>
+			<column name="transition_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="role_id" type="INT(11)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	 </changeSet>
+     
+     <!-- 1.3.12 changes -->
+	 <changeSet author="Leap (generated)" id="1312v0-twb-156">
+		<createTable tableName="twb_support_week">
+			<column autoIncrement="true" name="id" type="INT(11)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="start_date_week" type="VARCHAR(100)">
+				<constraints nullable="true" />
+			</column>
+			<column name="end_date_week" type="VARCHAR(100)">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	 </changeSet>
+	 
+	 <!-- 1.3.12 changes -->
+	 <changeSet author="Leap (generated)" id="1312v0-twb-157">
+		<createTable tableName="twb_support">
+			<column autoIncrement="true" name="id" type="INT(11)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="request_type_id" type="int(11)">
+				<constraints nullable="true" />
+			</column>
+			<column name="priority" type="INT(2)">
+				<constraints nullable="true" />
+			</column>
+			<column name="priority_level" type="VARCHAR(200)">
+				<constraints nullable="true" />
+			</column>
+			<column name="priority_type" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="start_date" type="DATETIME">
+				<constraints nullable="true" />
+			</column>
+			<column name="end_date" type="DATETIME">
+				<constraints nullable="true" />
+			</column>
+			<column name="is_primary_support" type="TINYINT(1)">
+				<constraints nullable="true" />
+			</column>
+			<column name="wave_id" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="wave_name" type="VARCHAR(40)">
+				<constraints nullable="true" />
+			</column>
+			<column name="cluster_id" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="cluster_name" type="VARCHAR(40)">
+				<constraints nullable="true" />
+			</column>
+			<column name="application_id" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="application_name" type="VARCHAR(200)">
+				<constraints nullable="true" />
+			</column>
+			<column name="transition_id" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="transition_name" type="VARCHAR(45)">
+				<constraints nullable="true" />
+			</column>
+			<column name="total_inflow" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="total_resolved" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="assigned_to_infosys" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="infosys_resolved" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="infy_independently_resolved" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="infy_resolved_with_help" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="infy_depenent_with_vendor" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="infy_independently_resolved_per" type="DOUBLE">
+				<constraints nullable="true" />
+			</column>
+			<column name="infy_resolved_with_help_per" type="DOUBLE">
+				<constraints nullable="true" />
+			</column>
+			<column name="infy_depenent_with_vendor_per" type="DOUBLE">
+				<constraints nullable="true" />
+			</column>
+			<column name="response_sla_adherence" type="DOUBLE">
+				<constraints nullable="true" />
+			</column>
+			<column name="resolution_sla_adherence" type="DOUBLE">
+				<constraints nullable="true" />
+			</column>
+			<column name="base_volume" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="infosys_assigned_target" type="DOUBLE">
+				<constraints nullable="true" />
+			</column>
+			<column name="independence_target" type="DOUBLE">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	 </changeSet>
+
+     <!-- 1.3.12 changes -->
+	 <changeSet author="Leap (generated)" id="1312v0-twb-158">
+		<createTable tableName="twb_support_priority">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="priority_value" type="VARCHAR(100)">
+				<constraints nullable="true" />
+			</column>
+			<column name="priority_type" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="support_request" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="target_percentage" type="FLOAT">
+				<constraints nullable="true" />
+			</column>
+			<column name="ss_target_percentage" type="FLOAT">
+				<constraints nullable="true" />
+			</column>
+			<column name="response_sla_adherence" type="FLOAT">
+				<constraints nullable="true" />
+			</column>
+			<column name="resolution_sla_adherence" type="FLOAT">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	 </changeSet>
+	 
+	 <!-- 1.3.12 changes -->
+	 <changeSet author="Leap (generated)" id="1312v0-twb-159">
+		<createTable tableName="twb_support_priority_type">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="priority_type" type="VARCHAR(500)">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	 </changeSet>
+	 
+	 <!-- 1.3.12 changes -->
+	 <changeSet author="Leap (generated)" id="1312v0-twb-160">
+		<createTable tableName="twb_support_request">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="true" />
+			</column>
+			<column name="request_name" type="VARCHAR(200)">
+				<constraints nullable="true" />
+			</column>
+			<column name="priority_list" type="VARCHAR(200)">
+				<constraints nullable="true" />
+			</column>
+			<column name="target_percentage" type="FLOAT">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	 </changeSet>
+	 
+	 <!-- 1.3.12 changes -->
+	 <changeSet author="Leap (generated)" id="1312v0-twb-161">
+		<createTable tableName="twb_label_mapping">
+			<column autoIncrement="true" name="id" type="INT(11)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="label_item" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="label_value" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	 </changeSet>
+	 
+	 <!-- 1.3.12 changes -->
+	 <changeSet author="Leap (generated)" id="1312v0-twb-162">
+		<createTable tableName="twb_enablement">
+			<column autoIncrement="true" name="id" type="INT(11)">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="level" type="VARCHAR(100)">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	 </changeSet>
+
+</databaseChangeLog>	

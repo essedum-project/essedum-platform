@@ -1,0 +1,5 @@
+"id","project_id","alias_type","created_by","created_by_date","description","details","flowchart_json","name","sop_doc","sop_doc_content_type","sop_doc_name","workflow_engine","workflow_name","alias_id"
+"2","2","NULL","admin","NULL"," This is procedure to describe how to do self healing of system","NULL","{}","Self Healing SOP","NULL","NULL","NULL","NULL","NULL","NULL"
+"3","2","NULL","admin","NULL"," Shipping cancellation procedure","NULL","{}","Shipping cancellation","NULL","NULL","NULL","NULL","CancelShipment","NULL"
+"4","2","NULL","admin","NULL"," This SOP describes invoice processing process for Oracle apps","NULL","{}","Process Invoice","NULL","NULL","NULL","NULL","ProcessInvoice","NULL"
+"34","2","NULL","admin","NULL"," This SOP describe on how to place order for shelf","NULL","{}","ShelfOrderPlacement","NULL","NULL","NULL","NULL","NULL","NULL"
