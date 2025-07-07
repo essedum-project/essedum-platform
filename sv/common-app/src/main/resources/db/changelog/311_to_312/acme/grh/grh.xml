@@ -78,7 +78,7 @@ insert into grh_node_details (user_id, project_id, node_name, node_color, node_s
 </sql>
 </changeSet>
 
-
+<!--
 <changeSet author="leap"  id="311To312-grh-004-1">
 <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
@@ -90,6 +90,7 @@ insert into grh_query (user_id, project_id, query_name, query_description, gql_q
 
 </sql>
 </changeSet>
+-->
 
 
 </databaseChangeLog>
