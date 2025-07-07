@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Jobs</title>
+    <style>
+#jobs {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#jobs td, #jobs th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#jobs tr:nth-child(even){background-color: #f2f2f2;}
+
+#jobs tr:hover {background-color: #ddd;}
+
+#jobs th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #04AA6D;
+  color: white;
+}
+</style>
+</head>
+<body>
+
+<h2>Job Details</h2>
+
+<table id="jobs">
+  <tr>
+    <th>JobId</th>
+    <th>Status</th>
+      <th>PID</th>
+      <th>LOG PATH</th>
+      <th>Submitted</th><th>Started</th>
+      <th>Finished</th>
+  </tr>
+     {% for item in data %}
+  <tr>
+
+    <td><a href="/execute/{{item.id}}/getLog">{{item.id}}</a></td>
+    <td>{{item.status}}</td>
+      <td>{{item.pid}}</td>
+      <td>{{item.logpath}}</td>
+      <td>{{item.submitted}}</td>
+      <td>{{item.started}}</td>
+       <td><a href="/execute/{{item.id}}/stop">{{item.finished}}</a></td>
+  </tr>
+{% endfor %}
+</table>
+
+
+</body>
+</html>

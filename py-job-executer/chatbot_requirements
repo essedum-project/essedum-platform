@@ -1,0 +1,13 @@
+langchain==0.1.7
+langchain-community==0.0.20
+langchain-core==0.1.23
+langchain-openai==0.0.6
+langsmith==0.0.87
+openai==1.12.0
+flask_cors
+qdrant-client==1.7.3
+mysql-connector-python
+pydantic==1.10.10
+chromadb==0.4.22
+chroma-hnswlib==0.7.3
+faiss-cpu

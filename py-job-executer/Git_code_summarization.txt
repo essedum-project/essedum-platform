@@ -1,0 +1,14 @@
+boto3
+PyPDF2
+langchain_openai
+requests
+shutil
+translatepy
+PyPDF2
+pptx
+docx
+base64
+mimetypes
+pydub
+pathlib
+urllib3

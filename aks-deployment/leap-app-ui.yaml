@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: leap-app-ui
+  namespace: aipns # Namespace where the deployment will run
+spec:
+  replicas: 1 # Number of replicas
+  selector:
+    matchLabels:
+      app: leap-app-ui
+  template:
+    metadata:
+      labels:
+        app: leap-app-ui
+    spec:
+      containers:
+      - name: leap-app-ui
+        image: acrreq0762935.azurecr.io/leap_app_ui:1 # Updated to use the ACR image
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8082
+        - containerPort: 8084
+      imagePullSecrets:
+      - name: acr-secret # Secret to authenticate with ACR

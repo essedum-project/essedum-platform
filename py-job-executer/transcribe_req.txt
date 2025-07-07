@@ -1,0 +1,6 @@
+translatepy
+audio_extract
+transformers
+PyPDF2
+python-docx
+python-pptx
