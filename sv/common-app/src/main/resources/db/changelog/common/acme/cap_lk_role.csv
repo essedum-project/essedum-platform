@@ -1,0 +1,4 @@
+"Role_ID","Role_Name","Rec_Act_Ind","Last_Updated_Dts","Rec_Created_Dts","Last_Updated_By"
+"1","SuperAdmin","true","2019-04-14T17:56:20","2019-04-14T17:56:20","1"
+"2","Admin","true","2019-04-14T17:56:20","2019-04-14T17:56:20","1"
+"3","User","true","2019-04-14T17:56:20","2019-04-14T17:56:20","1"

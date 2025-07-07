@@ -1,0 +1,5 @@
+"id","project_id","description","name","permission","project_admin","role_admin"
+"4","NULL","Transition Manager","Transition Manager","true","NULL","NULL"
+"5","NULL","Transition Engineer","Transition Engineer","false","NULL","NULL"
+"7","NULL","Transition Lead","Transition Lead","false","NULL","NULL"
+"9","NULL","Transition Admin","Transition Admin","true","NULL","NULL"

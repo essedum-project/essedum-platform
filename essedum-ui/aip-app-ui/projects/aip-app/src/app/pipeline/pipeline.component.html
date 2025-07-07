@@ -1,0 +1,192 @@
+<div class="aip-top">
+  <div class="clearfix aip-tranparent-backgroud js-bodywrapper" id="mainCtr">
+
+    <div *ngIf="isExpanded" class="row aip-filter aip-filter-position aip-scroll-hover row">
+      <i class="fa fa-sort-amount-desc"></i>
+      <app-tagging-component [servicev1]="'pipeline'" (tagSelected)="tagSelectedEvent($event)" [tagrefresh]="tagrefresh"
+        [selectedPipelineTypeList]="{
+            selectedAdapterType: selectedAdapterType
+          }"></app-tagging-component>
+    </div>
+    <div class="col-sm-12 col-md-12 col-lg-12">
+
+      <div>
+        <div class="aip-header lfx-u-pad-lr-32 lfx-u-pad-t-16">
+          <div class=" col-sm-12 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-center">
+            <div style="padding: 4px 0px 0px 0px;">
+   </div>
+            <div class="lfx-u-pad-24 lfx-u-mar-r-30">
+              <h3 class="lfx-u-header-xl">{{cardTitle}}</h3>
+            </div>
+          </div>
+          <div
+            class="col-10 offset-1 offset-xs-1 offset-sm-1 offset-md-0 col-sm-6 col-md-6 col-lg-7 col-xl-6 aip-panel aip-panel-shadow d-flex align-items-center">
+
+            <input type="text" name="" id="" placeholder="Search by Name" class="aip-panel-input padded-input"
+              [(ngModel)]="filt" (keyup)="filterz()">
+            <span (mouseenter)="isSearchHovered = true" (mouseleave)="isSearchHovered = false">
+              <i class="fa fa-search lfx-u-mar-r-20 lfx-fs-16 me-3"
+                [ngStyle]="{'color': isSearchHovered ? '#0056b3' : '#0a142f'}">
+              </i>
+            </span>
+            <!-- <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"> -->
+          </div>
+          <div class="d-flex justify-content-center col-sm-5 col-md-6 col-lg-5 col-xl-4 aip-header-icon">
+            <div *ngIf="true" class="">
+              <div class="lfx-u-mar-r-24 aip-cursor">
+                <button mat-icon-button [ngStyle]="{'color': isHovered ? '#0056b3' : '#0a142f'}"
+                  (click)="open()" matTooltip="Add" (mouseenter)="isHovered = true"
+                  (mouseleave)="isHovered = false">
+                  <mat-icon>add</mat-icon>
+                </button>
+              
+              <ng-template #content1 let-modal>
+                <div class="config-background">
+                  <app-pipeline-create [interfaceType]="'pipeline'" (modalClosed)="refreshComplete()">
+
+                  </app-pipeline-create>
+                </div>
+              </ng-template>
+              </div>
+            </div>
+            <div class="aip-cursor">
+              <button mat-icon-button [ngStyle]="{'color': isHovered ? '#0056b3' : '#0a142f'}"
+                (click)="refreshComplete()" matTooltip="Refresh" (mouseenter)="isHovered = true"
+                (mouseleave)="isHovered = false">
+                <mat-icon>refresh</mat-icon>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="aip-card-container row">
+        <div class="col-sm-6 col-md-4 col-lg-3" *ngFor="let card of filteredCards" style="padding: 15px; width: 23%">
+          <mat-card class="cardContainer">
+            <div class="lfx-u-header-sm lfx-u-text-primary-80 pt-2">
+              {{ card.type | uppercase }}
+            </div>
+            <mat-card-header>
+              <mat-card-title class="lfx-c-card__container clearfix card-title-wrapper">
+                <h2 class="lfx-u-header-xl card-title" style="line-height: 2rem">
+                  {{ card.alias | titlecase }}
+                </h2>
+              </mat-card-title>
+              <mat-card-subtitle class="card-subtitle">
+                {{ card.createdDate }}
+              </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-actions class="lfx-c-card__action-hover d-flex justify-content-between">
+              <button mat-button color="primary" (click)="redirection(card)" class="mat-action-button-s pe-3">
+                View Details
+              </button>
+
+
+              <div class="aip-cursor">
+                <div class="lfx-c-avatar  lfx-c-avatar--sm aip-hover-avatar">
+                  {{(card.target.created_by?card.target.created_by:'Name Not
+                  Available')|firstCharacter}}</div>
+                <div class="aip-hover-detail">
+                  <div class="lfx-u-header-md lfx-u-mar-8" style="padding: 7px">
+                    {{card.target.created_by?card.target.created_by:'Name Not Available'}}
+                  </div>
+                </div>
+              </div>
+
+              <!-- <div class="aip-cursor">
+                  <div class="lfx-c-avatar">
+                    <button
+                      class="matElevateButton"
+                      matButton="elevated" matTooltipClass="padded-tooltip"
+                      [matTooltip]="card.target.created_by"
+                      aria-label="Button that displays a tooltip when focused or hovered over"
+                    >
+                      {{
+                        (card.lastmodifiedby
+                          ? card.lastmodifiedby
+                          : "Name Not
+                                        Available"
+                        ) | firstCharacter
+                      }}
+                    </button>
+                  </div>
+                  <div class="aip-hover-detail py-3">
+                    <div class="lfx-u-header-md lfx-u-mar-8  hoverPadding">
+                      {{
+                        card.lastmodifiedby
+                          ? card.lastmodifiedby
+                          : "Name Not Available"
+                      }}
+                    </div>
+                  </div>
+                </div> -->
+              <div class="dropdown d-inline-block float-end">
+                <mat-icon class="aip-cursor" [matMenuTriggerFor]="menu"
+                  style="font-size: 22px; padding: 2px; color: #a5aaad; font-weight: 300;">more_vert</mat-icon>
+                <mat-menu #menu="matMenu">
+                  <button mat-menu-item *ngIf="editAuth" (click)="editPipeline(card.cid)">
+                    Edit
+                  </button>
+                  <button mat-menu-item *ngIf="deleteAuth" (click)="deletePipeline(card.cid)">
+                    Delete
+                  </button>
+                  <button mat-menu-item *ngIf="card.type == 'REMOTE'" (click)="jobConsole(card.name)">
+                    Job Console
+                  </button>
+                </mat-menu>
+              </div>
+              <!-- <ul class="float-end">
+                               
+                                <li><i class="icon x-32 delete-sm-icon"></i></li>
+                            </ul> -->
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </div>
+
+      <div *ngIf="records">
+        <div class="d-flex justify-content-center align-items-center flex-column">
+          <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive" alt="aip_empty_state_leds"
+            style="width: 15rem" />
+          No records found.
+        </div>
+      </div>
+
+      <div *ngIf="!records">
+        <app-pagination #pagination [noOfItems]="noOfItems" (pageAndSizeChanged)="handlePageAndSizeChange($event)">
+        </app-pagination>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- <ng-template #elseBlock>
+         <div *ngIf="streamItem.type === 'DragAndDrop'; else: binaryTemplate" class="selector-788-282">
+              <app-pipeline-description [card]="selectedCard" (newItemEvent)="changedToogle($event)"
+                  [cardToggled]="cardToggled" [pipelineAlias]="selectedCard.alias"
+                  [streamItem]="streamItem"></app-pipeline-description>
+          </div>
+          <ng-template #binaryTemplate="">
+              <div *ngIf="streamItem.type === 'Binary'; else: nativeTemplate" class="selector-788-286">
+              </div>
+          </ng-template>
+          <ng-template #nativeTemplate="">
+              <div *ngIf="streamItem.type === 'NativeScript'; else: rScriptTemplate" class="selector-788-288">
+                  <app-native-script [card]="selectedCard" (newItemEvent)="changedToogle($event)"
+                  [cardToggled]="cardToggled" [pipelineAlias]="selectedCard.alias"
+                  [streamItem]="streamItem"></app-native-script>
+              </div>
+          </ng-template>
+          <ng-template #rScriptTemplate="">
+              <div *ngIf="streamItem.type === 'RScript'; else: others" class="selector-788-288">
+              </div>
+          </ng-template>
+          <ng-template #others="">
+              <app-pipeline-description [card]="selectedCard" (newItemEvent)="changedToogle($event)"
+                  [cardToggled]="cardToggled" [pipelineAlias]="selectedCard.alias"
+                  [streamItem]="streamItem"></app-pipeline-description>
+          </ng-template>
+      </ng-template> -->
+</div>

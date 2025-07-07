@@ -1,0 +1,205 @@
+<div class="aip-top">
+    <div *ngIf="cardToggled; else elseBlock" class="clearfix lfx-l-bodywrapper aip-tranparent-backgroud js-bodywrapper"
+        id="mainCtr">
+        <div>
+            <div *ngIf="isExpanded" class="row aip-filter aip-filter-position aip-scroll-hover">
+                <app-tagging-component [servicev1]="servicev1" [tagrefresh]="tagrefresh" [selectedAdpImplCombinedLists]="{ 
+                    selectedInstanceConnectionList: selectedConnectionNamesList,
+                    selectedInstanceImplementationList: selectedAdapterList
+                  }" (tagSelected)="tagSelectedEvent($event)"></app-tagging-component>
+            </div>
+            <div class="col-sm-12 col-md-9 col-lg-9 lfx-u-pad-lr-16" id="mainrightCnt" [ngStyle]="toggler(isExpanded)">
+                <div>
+                    <!-- Header -->
+                    <div class="aip-header lfx-u-pad-lr-32 lfx-u-pad-t-16">
+                        <div class=" col-sm-12 col-md-2 col-lg-2 col-xl-2 flex justify-content-center">
+                            <div style="padding: 20px 0px 0px 0px;">
+                                <!-- <mat-icon class="x-24 filter-icon" (click)="toggleExpand()" matTooltip="{{
+                    isExpanded ? 'Collapse Filters' : 'Expand Filters'
+                  }}" [matTooltipPosition]="tooltip" style="cursor: pointer">
+                                    filter_list
+                                </mat-icon> -->
+                            </div>
+                            <div class="lfx-u-pad-24 lfx-u-mar-r-30">
+                                <h3 class="lfx-u-header-xl">{{cardTitle}}</h3>
+                            </div>
+                        </div>
+                        <div
+                            class="col-10 offset-1 offset-xs-1 offset-sm-1 offset-md-0 col-sm-6 col-md-6 col-lg-7 col-xl-6 aip-panel aip-panel-shadow flex align-items-center">
+                            <input type="text" name="" id="" placeholder="Search by Name" class="aip-panel-input"
+                                [(ngModel)]="filt" (keyup)="filterz()">
+                            <mat-icon [ngStyle]="{'color': isSearchHovered ? '#0094ff' : '#0a142f'}"
+                                (mouseenter)="isSearchHovered = true" (mouseleave)="isSearchHovered = false"
+                                class="lfx-u-mar-r-20">
+                                search
+                            </mat-icon>
+
+                        </div>
+                        <div class="flex justify-content-center col-sm-5 col-md-6 col-lg-5 col-xl-4 aip-header-icon">
+
+                            <div *ngIf="createAuth">
+                                <div class="lfx-u-mar-r-24 aip-cursor">
+                                    <mat-icon [ngStyle]="{'color': isAddHovered ? '#0094ff' : '#0a142f'}"
+                                        (click)="redirect()" matTooltip="Add" (mouseenter)="isAddHovered = true"
+                                        (mouseleave)="isAddHovered = false">add</mat-icon>
+                                </div>
+                                <ng-template #content2 let-modal>
+                                    <app-adapter-create-edit [action]="createAction"></app-adapter-create-edit>
+                                </ng-template>
+                            </div>
+                            <div class="aip-cursor">
+                                <mat-icon [ngStyle]="{'color': isRefreshHovered ? '#0094ff' : '#0a142f'}"
+                                    (click)="completeRefresh()" matTooltip="Refresh"
+                                    (mouseenter)="isRefreshHovered = true"
+                                    (mouseleave)="isRefreshHovered = false">refresh</mat-icon>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="lfx-c-card__action-ul aip-card-container">
+                    <!-- CARD -->
+                    <div class="col-md-8 col-lg-6 col-xl-5" style='min-width: -webkit-fill-available;padding: 0px;'
+                        *ngFor="let card of cards  | slice: (pageNumber-1) * pageSize : (pageNumber-1) * pageSize + pageSize">
+                        <div style="height: 170px;display: grid">
+                            <mat-card
+                                class="mat-mdc-card mdc-card lfx-c-card lfx-c-card--hover example-card card-shadow"
+                                appearance="outlined" (mouseenter)="card.hover = true"
+                                (mouseleave)="card.hover = false">
+
+                                <div class="lfx-u-header-sm lfx-u-text-primary-80 lfx-u-mar-b-8">{{card.adaptername}}
+                                </div>
+                                <mat-card-header style="padding: 0 !important; width: 95%;">
+                                    <div class="w-100">
+                                        <mat-card-title class="lfx-c-card__container clearfix">
+                                            <div class="lfx-c-card__container-left w-100">
+                                                <h2 class="lfx-u-header-xl lfx-u-ellipsis aip-fullname-card"
+                                                    style="line-height: 2rem;" [title]="card.name">
+                                                    {{ card.name }}</h2>
+                                            </div>
+
+                                        </mat-card-title>
+                                        <mat-card-subtitle
+                                            class="lfx-u-body-sm lfx-u-text-neutral-80 lfx-u-ellipsis ">{{
+                                            card.createdon
+                                            }}</mat-card-subtitle>
+                                    </div>
+                                </mat-card-header>
+                                <!-- <mat-card-content class="lfx-u-no-mar-b">
+                                <p class="lfx-u-body-md lfx-u-text-neutral-80  aip-desc-ellipsis">
+                                    {{card.description}}
+                                </p>
+                            </mat-card-content> -->
+
+                                <mat-card-actions
+                                    class="lfx-c-card__action-hover flex justify-content-between card-actions-hover"
+                                    style="transition: opacity 0.2s;width: 232px; padding: 0px !important;">
+                                    <button mat-flat-button class="mat-action-button-s" (click)="desc(card)">
+                                        View Details
+                                    </button>
+
+                                    <!-- CreatedBy -->
+                                    <div class="aip-cursor">
+                                        <div class="lfx-c-avatar  lfx-c-avatar--sm aip-hover-avatar">
+                                            {{
+                                            (card.createdby ? card.createdby : "Name Not Available")
+                                            | firstCharacter
+                                            }}</div>
+                                        <div class="aip-hover-detail">
+                                            <div class="lfx-u-header-md lfx-u-mar-8">
+                                                {{
+                                                card.createdby ? card.createdby : "Name Not Available"
+                                                }}</div>
+                                        </div>
+                                    </div>
+
+                                    <div *ngIf="editAuth || deployAuth || deleteAuth"
+                                        class="dropdown d-inline-block float-end">
+                                        <mat-icon class="aip-cursor" [matMenuTriggerFor]="menu"
+                                            style="font-size: 18px; padding: 8px; color: #a5aaad; font-weight: 300;"
+                                            [ngStyle]="{'color': isMenuHovered ? '#0094ff' : '#0a142f'}"
+                                            (mouseenter)="isMenuHovered = true" (mouseleave)="isMenuHovered = false">
+                                            more_vert
+                                        </mat-icon>
+                                        <mat-menu #menu="matMenu">
+                                            <button mat-menu-item *ngIf="editAuth" (click)="openedit(content3)">
+                                                Edit
+                                            </button>
+                                            <ng-template #content3 let-modal>
+                                                <app-instance-create-edit [data]="card" [action]="editAction"
+                                                    (triggereRefresh)="triggereRefresh($event)"></app-instance-create-edit>
+                                            </ng-template>
+
+                                            <button mat-menu-item *ngIf="deleteAuth" (click)="deleteInstance(card.name)">
+                                                Delete
+                                            </button>
+
+                                        </mat-menu>
+                                    </div>
+                                </mat-card-actions>
+
+                            </mat-card>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="records" class="flex justify-content-center align-items-center flex-column">
+                    <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive" alt="aip_empty_state_leds"
+                        style="width:15rem" />
+                    No records found.
+                </div>
+                <div *ngIf="records!=true"
+                    class="inbox-table-footer table-paginator flex-row flex-space-between standard-margin bottom-padding-20">
+                    <div class="showing-entries flex justify-content-end my-3">
+                        <span class="grey-color font-size-12">Showing </span>
+                        &nbsp;&nbsp;
+                        <span class="black-color font-weight-600">
+                            {{ ((pageNumber - 1) * pageSize) + 1 }} -
+                            {{ (((pageNumber - 1) * pageSize) + pageSize) < noOfItems ? ((pageNumber - 1) * pageSize) +
+                                pageSize : noOfItems }} of {{noOfItems}} </span>
+                                &nbsp;&nbsp;
+                                <span class="grey-color font-size-12">entries </span>
+                    </div>
+                    <div class="paginator-buttons flex w-60  flex-row" style="justify-content:flex-end">
+                        <div class="page-input go-to-input box-shadow standard-padding">
+                            <span class="grey-color">Go to: </span>
+                            <input class="right-margin" type="number" min="1" [max]="noOfPages"
+                                (change)="changePage(pageNumberInput)" [(ngModel)]="pageNumberInput" />
+                        </div>
+                        <div class="mx-4">
+                            <span class="">Items per page</span>
+                            <select type="number" [(ngModel)]="pageSize">
+                                <option *ngFor="let p of itemsPerPage" [ngValue]="p">{{p}}</option>
+                            </select>
+
+                        </div>
+                        <div class="pages-details flex">
+
+                            <div class="previous-page">
+                                <button class="standard-padding table-button font-weight-600"
+                                    [disabled]="pageNumber == 1" (click)="pageNumberInput=null;prevPage()">&lt;</button>
+                            </div>
+                            <div class="pages">
+                                <button class="standard-padding table-button font-weight-600"
+                                    *ngFor="let i of pageArr | slice:startIndex:endIndex"
+                                    (click)="pageNumberInput=null;changePage(i+1)"
+                                    [class.selected-page]="(i + 1) == pageNumber" [ngStyle]="selectedButton(i+1)">
+                                    {{i + 1}}
+                                </button>
+                            </div>
+                            <div class="next-page">
+                                <button class="standard-padding table-button font-weight-600"
+                                    [disabled]="pageNumber == noOfPages"
+                                    (click)="pageNumberInput=null;nextPage()">&gt;</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #elseBlock>
+        <app-instance-description [card]="selectedCard" (newItemEvent)="changedToogle($event)"
+            [cardToggled]="cardToggled"></app-instance-description>
+    </ng-template>
+</div>

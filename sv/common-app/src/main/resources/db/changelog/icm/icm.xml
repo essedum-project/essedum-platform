@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<changeSet author="Leap (generated)" id="1614785155891-53">
+		<createTable tableName="icm_clusters">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="description" type="VARCHAR(255)" />
+			<column name="name" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-54">
+		<createTable tableName="icm_problem_type">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="automate" type="BIT(1)" />
+			<column name="automate_assignee" type="VARCHAR(255)" />
+			<column name="automate_end_date" type="DATETIME" />
+			<column name="automate_start_date" type="DATETIME" />
+			<column name="description" type="VARCHAR(255)" />
+			<column name="eliminate" type="BIT(1)" />
+			<column name="eliminate_assignee" type="VARCHAR(255)" />
+			<column name="eliminate_end_date" type="DATETIME" />
+			<column name="eliminate_start_date" type="DATETIME" />
+			<column name="name" type="VARCHAR(255)" />
+			<column name="selfservice" type="BIT(1)" />
+			<column name="selfservice_assignee" type="VARCHAR(255)" />
+			<column name="selfservice_end_date" type="DATETIME" />
+			<column name="selfservice_start_date" type="DATETIME" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-55">
+		<createTable tableName="icm_rca">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="corrective_action" type="TEXT" />
+			<column name="description" type="VARCHAR(255)" />
+			<column name="name" type="VARCHAR(255)" />
+			<column name="rca_doc" type="LONGBLOB" />
+			<column name="rca_doc_content_type" type="VARCHAR(255)" />
+			<column name="rca_doc_name" type="VARCHAR(255)" />
+			<column name="techniques_used" type="TEXT" />
+			<column name="project_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-56">
+		<createTable tableName="icm_sops">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="alias_type" type="VARCHAR(255)" />
+			<column name="created_by" type="VARCHAR(255)" />
+			<column name="created_by_date" type="date" />
+			<column name="description" type="VARCHAR(255)" />
+			<column name="details" type="TEXT" />
+			<column name="flowchart_json" type="VARCHAR(255)" />
+			<column name="name" type="VARCHAR(255)" />
+			<column name="sop_doc" type="LONGBLOB" />
+			<column name="sop_doc_content_type" type="VARCHAR(255)" />
+			<column name="sop_doc_name" type="VARCHAR(255)" />
+			<column name="workflow_engine" type="VARCHAR(100)" />
+			<column name="workflow_name" type="VARCHAR(100)" />
+			<column name="alias_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-57">
+		<createTable tableName="icm_sops_alias">
+			<column autoIncrement="true" name="alias_id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="description" type="VARCHAR(255)" />
+			<column name="name" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="1312v0-icm-1001">
+		<sql dbms="mysql" splitStatements="true" stripComments="true">
+			ALTER TABLE icm_rca MODIFY COLUMN id INT AUTO_INCREMENT; 
+			ALTER TABLE icm_sops MODIFY COLUMN id INT AUTO_INCREMENT; 			
+		</sql>	
+	</changeSet>
+</databaseChangeLog>	

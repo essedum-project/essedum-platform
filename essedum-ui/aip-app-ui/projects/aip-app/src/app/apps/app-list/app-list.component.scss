@@ -1,0 +1,79 @@
+.appLogo {
+  border-radius: 15%;
+  height: 70%;
+  object-fit: contain;
+  width: 100%;
+}
+
+.config-background {
+  background-color: white !important;
+  border-radius: 1rem;
+}
+
+.appTitle {
+  font-size: 1em;
+  color: var(--base-color);
+}
+
+.appIcon {
+  color: var(--base-color);
+  height: auto;
+  width: auto;
+}
+
+.app-createBtn {
+  background-color: var(--base-color) !important;
+  color: white !important;
+}
+
+.icons {
+  float: right;
+  color: grey;
+  size: 7em;
+  padding: 2px;
+}
+
+.icons:hover {
+  color: var(--base-color);
+}
+
+::ng-deep.aip-app-hover-detail {
+  box-shadow: 0px 2px 25px rgba(0, 0, 0, 25%);
+  display: none;
+  cursor: pointer;
+  position: absolute;
+  top: -3rem;
+  z-index: 10000;
+  right: 2.2rem;
+  background-color: white;
+  text-wrap: balance;
+  border-radius: 1rem;
+  width: 23rem;
+  text-align: center;
+  word-break: break-all;
+}
+::ng-deep.aip-app-hover-avatar:hover ~ .aip-app-hover-detail {
+  display: block;
+  transition: display 1s ease-out 0.5s;
+}
+::ng-deep.aip-app-hover-detail::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 90%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 32px solid transparent;
+  border-right: 0 solid transparent;
+  border-top: 10px solid white;
+}
+
+::ng-deep .mat-mdc-menu-item:hover {
+  background-color: #e3f2fd !important; /* Light blue background */
+  color: #0094ff !important; /* Change text color */
+}
+
+::ng-deep .mat-mdc-menu-item {
+  font-size: 1.2rem !important; /* or any size you prefer */
+}

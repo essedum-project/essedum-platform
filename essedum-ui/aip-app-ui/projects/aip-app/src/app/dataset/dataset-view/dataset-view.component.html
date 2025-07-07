@@ -1,0 +1,50 @@
+<div class="selector-682-1">
+  <mat-card appearance="outlined" class="selector-682-2">
+    <mat-card-content class="selector-682-3">
+      <div class="selector-682-4">
+        <div *ngIf="viewtables else viewData" style="width: 100%; max-height: 400px;overflow: scroll"
+          class="selector-682-5">
+
+          <table class="table table-bordered selector-682-6" id="dset-view-table"
+            [ngBusy]="{busy:busy,message:'Loading...'}">
+            <tr class="selector-682-7">
+              <td *ngFor="let h of heading" id="dset-view-{{h}}" class="selector-682-8">
+                <h5 class="selector-682-9">{{h}}</h5>
+              </td>
+            </tr>
+            <tr *ngFor="let row of datasetData" class="selector-682-13">
+              <td *ngFor="let val of row" class="selector-682-14">
+                <pre style="border:none;white-space: pre;background-color: white;" id="dset-view-{{val}}"
+                  class="selector-682-15">{{val}}</pre>
+              </td>
+            </tr>
+            <tr *ngIf="!datasetData || datasetData.length==0" class="selector-682-16">
+              No records Found
+            </tr>
+          </table>
+        </div>
+        <ng-template #viewData="" class="selector-682-17">
+
+          <div id="dset-view-json" class="otherclass selector-682-18" style="background-color: white;"
+            *ngIf="viewjson else others">
+            <div style="width:100%; margin-top: 8px;" [ngBusy]="{busy:busy,message:'Loading...'}">
+              <json-editor [options]="editorOptions" [data]="schemaForm" style="max-height: 365px;" #formJsonEditor
+                class="cipJSONEditor"></json-editor>
+            </div>
+          </div>
+          <ng-template #others>
+            <div>
+              <pre id="dset-view-json" class="otherclass selector-682-18"
+                style="background-color: white; white-space: pre-wrap"
+                *ngIf="dataset &amp;&amp; datasource && datasource['category'] !='REST'">{{datasetData | json}}</pre>
+              <pre id="dset-view-json" class="otherclass selector-682-18"
+                style="background-color: white; white-space: pre-wrap"
+                *ngIf="dataset &amp;&amp; datasource && datasource['category'] =='REST'">{{datasetData }}</pre>
+            </div>
+          </ng-template>
+
+        </ng-template>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

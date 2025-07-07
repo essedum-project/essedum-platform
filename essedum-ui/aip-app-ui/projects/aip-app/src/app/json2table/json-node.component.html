@@ -1,0 +1,100 @@
+<div class="payload" [ngSwitch]="valueType">
+
+	<ng-template ngSwitchCase="Null">
+		<div (click)="toggle()" class="label is-null lfx-u-header-sm" [class.is-collapsed]="isCollapsed">
+			Null
+		</div>
+		<ng-template [ngIf]="( ! isCollapsed )">
+			<div class="lfx-u-header-sm value is-null">
+				null
+			</div>
+		</ng-template>
+	</ng-template>
+
+	<ng-template ngSwitchCase="String">
+		<div (click)="toggle()" class="label is-string lfx-u-header-sm" [class.is-collapsed]="isCollapsed">
+			String
+		</div>
+		<ng-template [ngIf]="( ! isCollapsed )">
+			<div class="value is-string lfx-u-header-sm" [style.cursor]="!pointer? 'pointer' : 'cell' ">
+				<a (click)="parseString()">
+					{{ value }}
+				</a>
+			</div>
+		</ng-template>
+	</ng-template>
+
+	<ng-template ngSwitchCase="Number">
+		<div (click)="toggle()" class="label is-number lfx-u-header-sm" [class.is-collapsed]="isCollapsed">
+			Number
+		</div>
+		<ng-template [ngIf]="( ! isCollapsed )">
+			<div class="value is-number lfx-u-header-sm">
+				{{ value }}
+			</div>
+		</ng-template>
+	</ng-template>
+
+	<ng-template ngSwitchCase="Boolean">
+		<div (click)="toggle()" class="label is-boolean lfx-u-header-sm" [class.is-collapsed]="isCollapsed">
+			Boolean
+		</div>
+		<ng-template [ngIf]="( ! isCollapsed )">
+			<div class="value is-boolean lfx-u-header-sm">
+				{{ value }}
+			</div>
+		</ng-template>
+	</ng-template>
+
+	<ng-template ngSwitchCase="Array">
+		<div (click)="toggle()" class="header is-array  lfx-u-header-sm" [class.is-collapsed]="isCollapsed">
+			<div class="type">
+				Array
+			</div>
+			<div class="entry-count  lfx-u-header-sm">
+				Entries: {{ entryCount }}
+			</div>
+		</div>
+		<ng-template [ngIf]="( ! isCollapsed )">
+			<ng-template ngFor let-subvalue let-index="index" [ngForOf]="value">
+				<div (click)="toggle( index )" class="label is-array  lfx-u-header-sm"
+					[class.is-collapsed]="collapsedEntries[ index ]">
+					{{ index }}
+				</div>
+				<ng-template [ngIf]="( ! collapsedEntries[ index ] )">
+					<div class="value is-array  lfx-u-header-sm">
+						<json-node [value]="subvalue"></json-node>
+					</div>
+				</ng-template>
+			</ng-template>
+		</ng-template>
+	</ng-template>
+
+	<ng-template ngSwitchCase="Object">
+		<div (click)="toggle()" class="header is-object  lfx-u-header-sm" [class.is-collapsed]="isCollapsed">
+			<div class="type lfx-u-header-sm">
+				Object
+			</div>
+			<div class="entry-count lfx-u-header-sm">
+				Entries: {{ entryCount }}
+			</div>
+		</div>
+		<ng-template [ngIf]="( ! isCollapsed )">
+			<div class="" style="padding: 0.2rem 0 0 1.6rem;display: grid;
+			gap: 1px;">
+				<ng-template ngFor let-subvalue [ngForOf]="value | keyvalue">
+					<div (click)="toggle( subvalue.key )" class="label is-object lfx-u-header-sm"
+						[class.is-collapsed]="collapsedEntries[ subvalue.key ]">
+						{{ subvalue.key }}
+					</div>
+					<ng-template [ngIf]="( ! collapsedEntries[ subvalue.key ] )">
+						<div class="value is-object lfx-u-header-sm">
+							<json-node [value]="subvalue.value"></json-node>
+						</div>
+					</ng-template>
+				</ng-template>
+			</div>
+		</ng-template>
+	</ng-template>
+
+</div>

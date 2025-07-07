@@ -1,0 +1,28 @@
+"id","created_date","demo_links","description","name","projectid","submitted_by","teamid","final_score"
+"1","2021-05-20","[{
+						\"name\": \"Clustering LDA\",\"link\": \"Leap/ACMCLSTR21224\",\"type\": \"Pipeline\"},{
+						\"name\": \"Ticket Analytics Dashboard\",\"link\": \"OCC/2\",\"type\": \"Dashboard\"},{
+						\"name\": \"Clustering Soundex\",\"link\": \"Leap/ACMCLSTR99942\",\"type\": \"Pipeline\"
+}]","The solution uses the interactive LEAP ticket dashboard that tracks ticketing information. This gives information about Total Tickets, Critical, High, Medium, Low Priority Tickets, Average duration for different types of tickets raised. It also gives information about Incidents by Top Clusters. 
+
+- About Latent Dirichlet Allocation (LDA)
+Clustering: is the task of grouping a set of objects in such a way that objects in the same group (called a cluster) are more similar (in some sense or another) to each other than to those in other groups (clusters). Eg. LDA Clustering
+Topic modeling: Topic modeling is a type of statistical modeling for discovering the abstract “topics” that occur in a collection of documents.
+LDA: LDA is an example of topic model and is used to classify text in a document to a particular topic. It builds a topic per document model and words per topic model, modeled as Dirichlet distributions.
+LDA Clustering Steps:
+Step 1 : Tell the algorithm how many topics we think there are. We can either use an informed estimate (e.g. results from a previous analysis), or simply trial-and-error.
+Step 2 : The algorithm will assign every word to a temporary topic. in analyzing actual documents, function words (e.g. the, and, my) are removed and not assigned to any topics.
+Step 3 :(iterative) The algorithm will check and update topic assignments, looping through each word in every document. For each word, its topic assignment is updated based on two criteria:
+How prevalent is that word across topics?
+How prevalent are topics in the document?
+It builds a topic per document model and words per topic model, modeled as Dirichlet distributions.
+	
+- About Soundex
+Soundex : Soundex is a phonetic algorithm for indexing names after English pronunciation of sound. SUBSTRING() is used on the result to get a standard soundex string. All nonalphabetic characters in str are ignored. All international alphabetic characters outside the A-Z range are treated as vowels.
+SOUNDEX() function : MySQL SOUNDEX() function returns soundex string of a string. If two words sound the same, they should have the same Soundex string. If two words sound similar, but not exactly the same, their Soundex string might look similar but not exactly the same.","Ticket Analytics","1","1","NULL","5"
+"2","2021-05-20","[]","The above problem is a clear classification problem as we need to classify whether the Loan_Status is yes or no. So this can be solved by any of the classification techniques like
+
+Logistic Regression .
+Decision Tree Algorithm.
+Random Forest Technique","Predicting the loan application status using ML","2","1","NULL","5"
+"3","2021-05-20","[{\"name\":\"Macrobase\",\"link\":\"https://myzul02o:9092/#/public/job/0098a1f2-e44a-4069-9ee6-011fa5cbd9db\",\"type\":\"Iframable\"}]","Exploratory Analysis of Order Management data to Speed Up the Procurement Timeline","Loan Applicant Prediction","3","1","NULL","5"

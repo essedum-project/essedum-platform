@@ -1,0 +1,74 @@
+<div class="selector-795-92">
+    <mat-card appearance="outlined" class="col-md-12 powermode-card selector-795-104" style=" margin: 1% 2% 2% 2%; width: 96%; display: flex;
+    justify-content: flex-start;">
+        <div style="padding: 0px; width: 30%;" class="selector-795-105">
+            <span class="col-md-5 selector-795-106" style="padding: 0px;">
+                <mat-form-field style="margin-top: 11px;margin-left: 15px;margin-right: 0px;">
+                    <mat-label class="selector-795-108">Search</mat-label>
+                    <input matInput class="selector-795-100" (keyup)="powerModeInput($event)"
+                        (keydown.enter)="powerModeSearch()">
+                </mat-form-field>
+
+            </span>
+            <span (click)="powerModeSearch()" class="col-md-1 selector-795-110" style="padding: 0px;">
+                <i class="pi pi-search selector-795-111"
+                    style="font-size: 2em; padding: 0px;margin-left: 0px;margin-top: 15px;"></i>
+            </span>
+            <span class="col-md-4 selector-795-112" style="padding: 0px;">
+                <mat-form-field class="powerModeform selector-795-113"
+                    style="width: 90%; margin-left: 10px;margin-top: 5px;">
+                    <mat-select name="Column" placeholder="select column" [(ngModel)]="selectedColumn"
+                        class="selector-795-114">
+                        <mat-option *ngFor="let value of cols" [value]="value.field" class="selector-795-115">
+                            {{value.header}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </span>
+
+            <cdk-virtual-scroll-viewport itemSize="2*rows" style="height:460px; width:100%; margin: 0px;"
+                (scroll)="onScroll($event)" class="selector-795-116">
+                <mat-card appearance="outlined" *ngFor="let incident of powerModeTicketList"
+                    class="hower-mat-card selector-795-117" (click)="updateDetails(incident)"
+                    style="margin: 1vw; padding: 1vh; width: 23rem; box-shadow: 0px 0px 6px 0px rgb(0 0 0 / 20%)">
+                    <mat-card-header class="selector-795-118" id="dtstflscrnvw-crd-hdr">
+                        <mat-card-title style="padding: 0px;" class="selector-795-119">
+                            <strong class="selector-795-120">{{incident[unqId]}}</strong>
+                        </mat-card-title>
+                        <mat-card-subtitle class="selector-795-121">
+                            <div class="selector-795-123">
+                                <div *ngFor="let col of cols" class="selector-795-136" style="width: 20rem;">
+                                    <!-- white-space: nowrap; overflow: hidden; text-overflow: ellipsis;-->
+                                    <span *ngIf="col.visible" class="selector-795-137" style="display: flex;"
+                                        id="dtstflscrnvwcrd-{{col.field}}-{{incident[unqId]}}">
+                                        <span
+                                            style="font-weight: bold; width: 50%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{col.header}}&nbsp;:</span>
+                                        <span (click)="adjustDataLength(col.field,incident[unqId])"
+                                            style="width: 50%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">&nbsp;{{incident[col.field]}}</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </mat-card-subtitle>
+                    </mat-card-header>
+                    <mat-card-content class="selector-795-124">
+                    </mat-card-content>
+                </mat-card>
+                <i *ngIf="powerModeTicketList.length==0 &amp;&amp; powerModeFetch"
+                    style="display: flex;justify-content: center;"
+                    class="fa fa-circle-notch fa-spin selector-795-125"></i>
+                <p *ngIf="powerModeTicketList.length == 0 &amp;&amp; !powerModeFetch"
+                    style="display: flex;justify-content: center; font-size: 1rem;" class="selector-795-126">No
+                    Entries
+                    Found.</p>
+            </cdk-virtual-scroll-viewport>
+        </div>
+        <div style="margin: 0px; padding: 0px; width: 70%;" class="selector-795-127">
+            <div style="height:550px; width:100%; padding: 0px; margin: 0px; overflow: auto;" class="selector-795-128">
+                <div class="selector-795-93" *ngIf="data">
+                    <app-dataset-form-view [dataset]="data" [action]="action" [rowObj]="rowObj" showTableViewBtn="no"
+                        class="selector-795-132" (result)="checkFormViewResult($event)"></app-dataset-form-view>
+                </div>
+
+            </div>
+        </div>
+    </mat-card>
+</div>

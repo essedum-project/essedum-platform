@@ -1,0 +1,49 @@
+<div class="mt-5 mx-5">
+  <div class="align-items-center justify-content-between d-flex">
+    <div class="selector-model-title-head d-flex align-items-center">
+      <span class="mx-2 aip-cursor">
+        <div style="cursor: pointer">
+
+          <i class="fa fa-long-arrow-left back-icon" aria-hidden="true" (click)="backToDatasets()"></i>
+          <span class="lfx-u-mar-l-8 lfx-u-header-xxl secondary-color">Edit Dataset</span>
+
+        </div>
+      </span>
+
+    </div>
+  </div>
+
+  <mat-card class="row d-flex justify-content-between align-items-center lfx-u-pad-tb-16">
+
+    <div class="" style="padding-left: 15px; height: 90%">
+      <mat-tab-group id="dset-reg-tab" *ngIf="!isSbx" [selectedIndex]="selectedTabIndex"
+        (selectedTabChange)="onTabChange($event)" class="selector-680-81">
+        <mat-tab label="{{tabList[0]}}" class="selector-680-81">
+          <div *ngIf="selectedTab == tabList[0]" class="tab-content selector-680-82">
+            <div *ngIf="selectedDataset.name" style="position: relative" class="selector-680-83">
+              <div *ngIf="showDetails && tableview == 'no'" class="selector-680-84">
+                <app-dataset-view [data]="selectedDataset" class="selector-680-85"></app-dataset-view>
+              </div>
+              <div *ngIf="showDetails && tableview == 'yes'" class="selector-680-86">
+                <app-dataset-fullscreen-view [data]="selectedDataset"
+                  class="selector-680-87"></app-dataset-fullscreen-view>
+              </div>
+              <app-dataset-view-wrapper *ngIf="!tableview" [dataset]="selectedDataset"></app-dataset-view-wrapper>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="{{tabList[1]}}" class="selector-680-89">
+          <div *ngIf="selectedTab == tabList[1]" class="col-md-12 tab-content selector-680-90">
+            <div style="position: relative" class="selector-680-91 lfx-u-mar-b-32 lfx-u-pad-b-16">
+              <app-dataset-config *ngIf="editData && !method" [dataset]="editData"
+                class="selector-680-92"></app-dataset-config>
+              <app-method-config *ngIf="editData && method" [dataset]="editData"></app-method-config>
+            </div>
+          </div>
+        </mat-tab>
+
+      </mat-tab-group>
+    </div>
+  </mat-card>
+</div>

@@ -1,0 +1,228 @@
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<property name="timestamp-type"
+		value="TIMESTAMP WITHOUT TIME ZONE" dbms="postgresql" />
+	<property name="timestamp-type" value="[datetime]"
+		dbms="mssql" />
+	<property name="timestamp-type" value="TIMESTAMP"
+		dbms="oracle" />
+	<property name="timestamp-type" value="timestamp" dbms="mysql" />
+	<property name="timestamp-type" value="TIMESTAMP" dbms="h2" />
+
+	<changeSet author="Leap (generated)" id="1312v0-grh-1">
+                <validCheckSum>any</validCheckSum>
+                <preConditions onFail="MARK_RAN">
+                   <not>
+                        <tableExists tableName="grh_edge_details"/>
+                   </not>
+                </preConditions>
+
+		<createTable tableName="grh_edge_details">
+			<column name="project_id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="user_id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="id" type="INT" autoIncrement="true">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="edge_name" type="VARCHAR(256)" >
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="edge_color" type="VARCHAR(256)" >
+				<constraints nullable="false" />
+			</column>
+			<column name="edge_width" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="font_size" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="font_stroke" type="VARCHAR(256)" >
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="${timestamp-type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="updatedAt" type="${timestamp-type}">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1312v0-grh-2">
+                <validCheckSum>any</validCheckSum>
+                <preConditions onFail="MARK_RAN">
+                   <not>
+                        <tableExists tableName="grh_node_details"/>
+                   </not>
+                </preConditions>
+		<createTable tableName="grh_node_details">
+			<column name="user_id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="false"  primaryKey="true" />
+			</column>
+			<column name="id" type="INT" autoIncrement="true">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="node_name" type="VARCHAR(256)">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="node_color" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="node_size" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="node_icon" type="VARCHAR(256)" />
+			<column name="node_shape" type="VARCHAR(256)" />
+			<column name="label_position" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="label_property" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="border_size" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="border_color" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="${timestamp-type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="updatedAt" type="${timestamp-type}">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1312v0-grh-3">
+                <validCheckSum>any</validCheckSum>
+                <preConditions onFail="MARK_RAN">
+                   <not>
+                        <tableExists tableName="grh_query"/>
+                   </not>
+                </preConditions>
+		<createTable tableName="grh_query">
+			<column name="user_id" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="query_name" type="VARCHAR(256)">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="query_description" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="gql_query" type="TEXT" >
+				<constraints nullable="false" />
+			</column>
+			<column name="query_filter" type="VARCHAR(500)" />
+		
+			<column name="is_private" type="BOOLEAN" >
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="${timestamp-type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="updatedAt" type="${timestamp-type}">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1312v0-grh-4">
+                <validCheckSum>any</validCheckSum>
+                <preConditions onFail="MARK_RAN">
+                   <not>
+                        <tableExists tableName="grh_rules"/>
+                   </not>
+                </preConditions>
+		<createTable tableName="grh_rules">
+			<column name="project_id" type="INT">
+				<constraints nullable="false"  primaryKey="true" />
+			</column>
+			<column name="user_id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="id" type="INT" autoIncrement="true">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="node_name" type="VARCHAR(45)">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="rule_name" type="VARCHAR(45)">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="is_id" type="BOOLEAN" >
+				<constraints nullable="false" />
+			</column>
+			<column name="is_string" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="property" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="operator" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="value" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="node_color" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="node_size" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="${timestamp-type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="updatedAt" type="${timestamp-type}">
+				<constraints nullable="true" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1312v0-grh-5">
+                <validCheckSum>any</validCheckSum>
+                <preConditions onFail="MARK_RAN">
+                   <not>
+                        <tableExists tableName="grh_schema"/>
+                   </not>
+                </preConditions>
+		<createTable tableName="grh_schema">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints nullable="false"  primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="grh_schema" type="MEDIUMTEXT" >
+				<constraints nullable="false" />
+			</column>
+			<column name="is_considered" type="INT" >
+				<constraints nullable="false" />
+			</column>
+			<column name="createdAt" type="${timestamp-type}">
+				<constraints nullable="false" />
+			</column>
+			<column name="updatedAt" type="${timestamp-type}">
+				<constraints nullable="true" />
+			</column>
+			<column name="errors" type="TEXT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	
+	<!-- After release 1.3.10 -->
+
+
+</databaseChangeLog>

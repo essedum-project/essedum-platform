@@ -1,0 +1,207 @@
+::ng-deep .my-select .mat-option-text {
+  font-size: 20px; /* Replace with the font size you want */
+}
+
+.lfx-l-middle-col {
+  margin-left: 16px;
+}
+
+.lfx-u-no-mar-l__mb {
+  margin-left: 0 !important;
+}
+
+@media screen and (min-width: 1367px) {
+  .lfx-l-base-layout-center {
+    width: 1216px;
+    margin: 0 auto;
+  }
+
+  .lfx-l-left-layout-center,
+  .lfx-l-right-layout-center {
+    width: 1001px;
+    margin: 0 auto;
+  }
+
+  .lfx-l-lr-layout-center {
+    width: 786px;
+    margin: 0 auto;
+  }
+}
+
+.lfx-u-pad-lr-16 {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+
+.lfx-u-mar-lr-24 {
+  margin-left: 24px !important;
+  margin-right: 24px !important;
+}
+
+.lfx-u-pad-32 {
+  padding: 32px !important;
+}
+
+.lfx-l-level2-middle-ctr {
+  display: block;
+  width: 100%;
+  table-layout: unset;
+}
+
+.lfx-l-level2-middle-col,
+.lfx-l-level2-right-col {
+  display: block;
+  height: auto;
+}
+
+.lfx-u-mar-b-24__mb {
+  margin-bottom: 24px !important;
+}
+
+.lfx-c-panel__content {
+  min-height: 100px;
+}
+
+.lfx-u-mar-tb-32 {
+  margin-top: 32px !important;
+  margin-bottom: 32px !important;
+}
+
+.lfx-u-body-md {
+  font-size: 1.4rem;
+  font-weight: 400;
+  font-family: roboto, Arial, sans-serif !important;
+  font-style: normal;
+}
+
+.lfx-u-bg-primary-80 {
+  background: #8626c3;
+  color: #fff;
+}
+
+.lfx-u-text-status-success {
+  color: #007a52;
+  background: #dff6dd;
+}
+
+.lfx-u-pad-16 {
+  padding: 16px !important;
+}
+
+.lfx-u-body-sm {
+  font-size: 1.2rem;
+  font-weight: 400;
+  font-family: roboto, Arial, sans-serif !important;
+  font-style: normal;
+}
+
+.lfx-u-text-neutral-80 {
+  color: #737373;
+}
+
+.lfx-u-no-mar-b {
+  margin-bottom: 0 !important;
+}
+.lfx-u-header-md {
+  font-size: 1.4rem;
+  font-weight: 600;
+  font-family: myriad-pro, Arial, sans-serif !important;
+  font-style: normal;
+}
+
+.lfx-u-pad-b-20 {
+  padding-bottom: 20px;
+}
+
+.lfx-u-pad-tb-8 {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+.mdc-button.lfx-c-btn--icon span.lfx-c-btn--icon__icon {
+  padding: 4px 8px;
+  background-position: center center;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.lfx-u-body-xl {
+  font-size: 1.6rem;
+  font-weight: 400;
+  font-family: roboto, Arial, sans-serif !important;
+  font-style: normal;
+}
+
+.lfx-c-card.mat-mdc-card {
+  padding: 24px;
+  min-height: 50px;
+  border-radius: 16px;
+  display: block;
+}
+
+::ng-deep .mat-mdc-select:not(.mat-mdc-select-disabled) .mat-mdc-select-arrow {
+  color: #0094ff !important;
+  fill: #0094ff !important;
+}
+
+input:focus,
+.txtInput:focus {
+  outline: none !important;
+  border-bottom: 1px solid #0094ff !important;
+}
+
+::ng-deep
+  .mdc-text-field--filled:not(.mdc-text-field--disabled).mdc-text-field--focused
+  .mdc-floating-label {
+  color: #0094ff !important;
+}
+
+::ng-deep .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: #0094ff !important;
+}
+
+::ng-deep .mat-mdc-tab-group {
+  --mdc-tab-indicator-active-indicator-color: #0094ff !important;
+  --mat-tab-header-active-label-text-color: #0094ff !important;
+  --mat-tab-header-active-ripple-color: #0094ff !important;
+  --mat-tab-header-inactive-ripple-color: #0094ff !important;
+  --mat-tab-header-active-focus-label-text-color: #0094ff !important;
+  --mat-tab-header-active-hover-label-text-color: #0094ff !important;
+  --mat-tab-header-active-focus-indicator-color: #0094ff !important;
+  --mat-tab-header-active-hover-indicator-color: #0094ff !important;
+  --mat-tab-header-disabled-ripple-color: #737373 !important;
+  --mat-tab-header-inactive-label-text-color: #737373 !important;
+  --mat-tab-header-inactive-focus-label-text-color: #737373 !important;
+  --mat-tab-header-inactive-hover-label-text-color: #737373 !important;
+}
+
+::ng-deep .mat-mdc-tab-group .mat-mdc-tab .mdc-tab__text-label {
+  font-size: 1.8rem !important;
+}
+
+.slider-toggle-width {
+  width: 24px !important;
+  min-width: 0 !important;
+  max-width: 64px !important;
+  padding: 0 !important;
+}
+
+::ng-deep .mdc-slider__thumb-knob {
+  border-color: #0094ff !important;
+  background-color: #0094ff !important;
+}
+
+::ng-deep .mat-mdc-slider .mdc-slider__track--active_fill {
+  background-color: #0094ff !important;
+  border-color: #0094ff !important;
+}
+
+::ng-deep .mat-mdc-slider .mdc-slider__track--inactive {
+  background-color: #0094ff !important;
+  border-color: #0094ff !important;
+}
+
+::ng-deep .mdc-slider__track--active {
+  height: 0px !important;
+  top: 0 !important;
+}

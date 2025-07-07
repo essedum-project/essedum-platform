@@ -1,0 +1,159 @@
+<div class="lfx-u-mar-tb-16 lfx-u-pad-8 container-fluid">
+  <mat-card style="width: 100%">
+    <table class="table table-striped lfx-u-mar-t-16">
+      <thead>
+        <tr>
+          <th class="col-md-3" scope="col">Key</th>
+          <th class="col-md-6" scope="col">Value</th>
+          <th class="col-md-3" scope="col">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let config of configData; let i = index">
+          <td>
+            <span *ngIf="editIndex != i">{{
+              config.name ? config.name : config.key
+            }}</span>
+            <input
+              *ngIf="editIndex == i && editMode"
+              [(ngModel)]="config.name"
+              class="form-control"
+              type="text"
+            />
+          </td>
+          <td>
+            <span *ngIf="editIndex != i">
+              <span>
+                <span>
+                  {{
+                    showPasswordIndex === i
+                      ? config.value
+                      : config.value
+                      ? "•".repeat(config.value.length)
+                      : ""
+                  }}
+                </span>
+                <i
+                  class="fa fa-eye"
+                  style="cursor: pointer; margin-left: 8px"
+                  (click)="
+                    showPasswordIndex === i
+                      ? (showPasswordIndex = -1)
+                      : (showPasswordIndex = i)
+                  "
+                >
+                </i>
+              </span>
+            </span>
+            <div
+              *ngIf="editIndex == i && editMode"
+              style="display: flex; align-items: center"
+            >
+              <input
+                [(ngModel)]="config.value"
+                class="form-control"
+                [type]="showPasswordIndex === i ? 'text' : 'password'"
+                style="flex: 1 1 auto; margin-right: 8px"
+              />
+              <i
+                class="fa fa-eye"
+                id="togglePassword"
+                style="cursor: pointer"
+                (click)="
+                  showPasswordIndex === i
+                    ? (showPasswordIndex = -1)
+                    : (showPasswordIndex = i)
+                "
+              >
+              </i>
+            </div>
+          </td>
+          <td>
+            <mat-icon
+              matTooltip="Edit"
+              style="
+                cursor: pointer;
+                vertical-align: middle;
+                color: gray;
+                margin-right: 4px;
+              "
+              [ngStyle]="{
+                opacity: isauth ? 0.5 : 1,
+                'pointer-events': isauth ? 'none' : 'auto'
+              }"
+              (click)="editConfig(i)"
+            >
+              edit
+            </mat-icon>
+            <mat-icon
+              *ngIf="editMode && editIndex == i"
+              matTooltip="Save"
+              style="
+                cursor: pointer;
+                vertical-align: middle;
+                color: gray;
+                margin-left: 8px;
+              "
+              [ngStyle]="{
+                opacity: isauth ? 0.5 : 1,
+                'pointer-events': isauth ? 'none' : 'auto'
+              }"
+              (click)="editMode = false; editIndex = -1"
+            >
+              save
+            </mat-icon>
+            <mat-icon
+              matTooltip="Delete"
+              class="delete-icon"
+              style="
+                cursor: pointer;
+                vertical-align: middle;
+                margin-left: 8px;
+                color: gray;
+              "
+              [ngStyle]="{
+                opacity: isauth ? 0.5 : 1,
+                'pointer-events': isauth ? 'none' : 'auto'
+              }"
+              (click)="deleteConfig(i)"
+            >
+              delete
+            </mat-icon>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="lfx-u-mar-16">
+      <button
+        mat-raised-button
+        style="background-color: #0a142f; color: white"
+        [disabled]="isauth"
+        (click)="addConfig()"
+        onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+        onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';"
+      >
+        <span
+          class="lfx-c-btn--icon__icon"
+          style="
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
+          "
+        >
+          <mat-icon>add</mat-icon>
+        </span>
+        <span
+          class="lfx-c-btn--icon__text"
+          style="
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
+            margin-left: 4px;
+          "
+        >
+          Add
+        </span>
+      </button>
+    </div>
+  </mat-card>
+</div>

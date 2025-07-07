@@ -1,0 +1,42 @@
+"id","allow_model_upload","created_by","created_date","description","end_date","is_featured","is_open","is_private","last_registration_date","name","orgid","participation","start_date","experiment_type"
+"1","0","1","2021-05-20","Analyze the tickets and report 
+
+- Summary of Tickets : Process alerts, errors and incidents through a stream processing pipeline that performs correlation, auto incident creation & assignment, assisted root cause analysis, provide recommendations and take remedial actions.
+
+- Ticket Clustering : Create table to store enriched data of the created clusters. Perform clean ticket tasks, algorithms like NGram, Soundex, LDA, Phrase Extraction and prioritize the clusters accordingly.
+
+- SLA Analytics : Gives information regarding pending tickets, closed incidents, failed incidents, resolved incidents, incidents based on priority and many more and populates the dashboard accordingly.
+
+- EASE Analytics : Build pipeline for keyword mapping to identify EASE. Build pipeline to train model on historical data. Build pipeline to predict EASE for new tickets using trained model.
+
+- Correlation Analysis for Tickets : Big data stack to correlate information from multiple tools like incidents from ticketing tool, error events from log monitoring tools, performance events from application performance monitoring tools, infra events from infra monitoring tools and enable faster root cause analysis.","2021-10-31","1","1","0","2021-08-31","Ticket Analytics","2","both","2021-05-20","3"
+"2","0","1","2023-05-20","Loans are the core business of banks. The main profit comes directly from the loan interest. The loan companies grant a loan after an intensive process of verification and validation. However, they still don have assurance if the applicant is able to repay the loan with no difficulties. Lending loans to 'risky' applicants is the largest source of financial loss (called credit loss). The credit loss is the amount of money lost by the lender when the borrower refuses to pay or runs away with the money owed. In other words, borrowers who default cause the largest amount of loss to the lenders. In this case, the customers labelled as 'charged-off' are the 'defaulters'. If one is able to identify these risky loan applicants, then such loans can be reduced thereby cutting down the amount of credit loss. Identification of such applicants is the aim exercise In other words, the company wants to understand the driving factors (or driver variables) behind loan default, i.e. the variables which are strong indicators of default. The company can utilize this knowledge for its portfolio and risk assessment.","2023-10-31","1","1","0","2023-08-31","Loan Applicant Prediction","2","both","2023-05-20","3"
+"3","0","1","2023-05-20","The order life cycle starts with the time the order is raised online to the time it is delivered to the customer. We want to find out the reasons for delays at the warehouse. Potential factors - Hold Type : Hold caused due to Order edit, Fraud Review Hold, Fraud Challenge Hold, Tax calculated Hold - Line type : Inline - Warehouse : Place from where order is being dispatched. Identified by Shipnode_Key - Time of day (T1) : Time the order is raised online to the time it is delivered to the warehouse - Time of day (T2) : Time spent in the warehouse - Time of day (T3) : Time the order took to go from warehouse to actual delivery location i,e; to the customer - Scac : Service by which orders are being delivered such as United States Postal Service(USPS), Delhivery etc. - Level Of Service : Order received by the customer on same day or within 'n' days - Payment methods : Orders placed by the customer using credit card, debit card, upi payments, cash on delivery etc. The objective is to find why T2 i.e; the time spent in warehouse is causing delay.","2023-10-31","1","1","0","2023-08-31","Exploratory Analysis of Order Management data","2","both","2023-05-20","3"
+"4","0","1","2023-05-20","Bot to answer employee queries with complete contextual answers based on multiple sites providing LEAP information. 
+
+Metrics: Manual Verification
+
+Input datasets
+https://victlpast02:7000/
+https://lex.infosysapps.com/web/en/app/toc/lex_auth_013221759970066432212/overview
+How to Submit
+Upload your solution to your repo in https://infygithub.ad.infosys.com/
+In the Solution tab of the Experiment, click on Add Solution
+Update the github link in the Description field
+Submit","2023-10-31","1","1","0","2023-08-31","LEAP BOT
+","2","both","2023-05-20","3"
+"5","0","1","2023-05-20","Aggregate log files in various format, analyse the data and provide the graphs and plots of following
+1. Top 10 errors with occurances
+2. Longest running error
+3. Criticality wise error distribution
+
+Input dataset 
+Zip file containing log files.
+
+How to submit
+Upload your solution to your GIT repo
+In the Solution tab of the Experiment, click on Add Solution
+Update the github link in the Description field
+Submit","2023-10-31","1","1","0","2023-08-31","Log Aggregation and Analysis","2","both","2023-05-20","3"
+"6","0","1","2023-05-20","Applications are black boxes for the support and maintenance teams. They are only aware of input and output data of an application, making them unaware processing logic and time taken at each of the processing steps. The crucial tools which can help them understand the flow of the application at high level is a tool which can provide application audit trail. It provides view of application data inside application, indicating the components of application, input/output of the components and time taken by each of the components etc. Submit ideas, PoV and Whitepaper on how to conduct effective and efficient Application audit trail without impacting application performance.","2023-10-31","1","1","0","2023-08-31","Application Audit Trail","2","both","2023-05-20","3"
+"7","0","1","2023-05-20","Application uptime is typically measured by application ping time. However, that does not ensure critical functionality is up and running for any application. There is need of application/product, in house or off the shelf to conduct sanity on behalf of organization to ensure working of critical functionality at regular intervals. This sanity should be omnipotent, non obtrusive and light on processing power. Submit PoV and whitepapers with application/products providing their feature details, merits, demerits and comparison","2023-10-31","1","1","0","2023-08-31","Automated Application Sanity","2","both","2023-05-20","3"

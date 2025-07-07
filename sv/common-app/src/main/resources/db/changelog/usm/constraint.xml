@@ -1,0 +1,998 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+	<changeSet author="Leap (generated)" id="1614785155891-174">
+		<addUniqueConstraint columnNames="name"
+			constraintName="UK_l3jrvi2ot0coommre9bh1w46g" tableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-176">
+		<addUniqueConstraint columnNames="user_login"
+			constraintName="UK_ole25gga1vg6anyratue2temq" tableName="usm_users" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-188">
+		<createIndex indexName="FK1j1bdnfw4r5lq8ujgl8yd08aj"
+			tableName="usm_user_unit">
+			<column name="context" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-189">
+		<createIndex indexName="FK1n5fe2ibbjsblv6vuafa74h8o"
+			tableName="usm_role_permissions">
+			<column name="role" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-200">
+		<createIndex indexName="FK3id0na9pcxknhxmm470b9eyfo"
+			tableName="usm_module_organisation">
+			<column name="organisation" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-236">
+		<createIndex indexName="FK8o7x2abgvg82uf3drox2t7r7r"
+			tableName="usm_project">
+			<column name="portfolio_id" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-248">
+		<createIndex indexName="FKauw4dj3cpt54veaypohgllhw8"
+			tableName="usm_unit">
+			<column name="context" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-253">
+		<createIndex indexName="FKb3u9id59d6x2sdxh38xmsiooc"
+			tableName="usm_users">
+			<column name="context" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-273">
+		<createIndex indexName="FKdysllnw4of9n7gdqywdce6q99"
+			tableName="usm_role_permissions">
+			<column name="permission" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-275">
+		<createIndex indexName="FKe3ic1ei1n867d6e91r953swpo"
+			tableName="usm_constant">
+			<column name="project_id" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-278">
+		<createIndex indexName="FKet79gn0150if3edlpbmr1wv5m"
+			tableName="usm_organisation">
+			<column name="context" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-303">
+		<createIndex indexName="FKhdxvog4j12bwp90se0rnb5w1n"
+			tableName="usm_user_project_role">
+			<column name="portfolio_id" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-307">
+		<createIndex indexName="FKhmvydgv4e4n0rms31ko0w42ul"
+			tableName="usm_user_project_role">
+			<column name="project_id" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-308">
+		<createIndex indexName="FKhu5khyf695o6m4h2dvv54b3xg"
+			tableName="usm_user_project_role">
+			<column name="role_id" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-327">
+		<createIndex indexName="FKjkmtmq7r3g7ofc37p7ims52be"
+			tableName="usm_user_unit">
+			<column name="user_cg" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-336">
+		<createIndex indexName="FKkaj4jc3redqwtffno7h6hveim"
+			tableName="usm_module_organisation">
+			<column name="module" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-338">
+		<createIndex indexName="FKkdeh9ceods5w3ilrclem5ixc1"
+			tableName="usm_user_unit">
+			<column name="unit" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-348">
+		<createIndex indexName="FKm10dx06k96mii7du226g5w1ny"
+			tableName="usm_unit">
+			<column name="organisation" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-389">
+		<createIndex indexName="FKrbl9k4ny9c30w1xcbm69qco5l"
+			tableName="usm_user_project_role">
+			<column name="user_id" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-418">
+		<addForeignKeyConstraint
+			baseColumnNames="context" baseTableName="usm_user_unit"
+			constraintName="FK1j1bdnfw4r5lq8ujgl8yd08aj" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_core_context" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-419">
+		<addForeignKeyConstraint
+			baseColumnNames="role" baseTableName="usm_role_permissions"
+			constraintName="FK1n5fe2ibbjsblv6vuafa74h8o" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_role" />
+	</changeSet>
+<!-- 	<changeSet author="Leap (generated)" id="1614785155891-425">
+		<addForeignKeyConstraint
+			baseColumnNames="context" baseTableName="dbs_dashboard_configuration"
+			constraintName="FK2po7kwxb95n674txpfpru00mj" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_core_context" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-429">
+		<addForeignKeyConstraint
+			baseColumnNames="context" baseTableName="dbs_charts"
+			constraintName="FK3f2lat36nxuchopeskevt3tyy" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_core_context" />
+	</changeSet>-->
+	<changeSet author="Leap (generated)" id="1614785155891-430">
+		<addForeignKeyConstraint
+			baseColumnNames="organisation"
+			baseTableName="usm_module_organisation"
+			constraintName="FK3id0na9pcxknhxmm470b9eyfo" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	
+	<!--<changeSet author="Leap (generated)" id="1614785155891-439"
+		dbms="!mssql">
+		<addForeignKeyConstraint
+			baseColumnNames="context" baseTableName="dbs_widget_configuration"
+			constraintName="FK4nvlfbwpvqqvosobj2nnsmr1y" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_core_context" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1615300415555-670"
+		dbms="mssql">
+		<addForeignKeyConstraint
+			baseColumnNames="context" baseTableName="dbs_widget_configuration"
+			constraintName="FK4nvlfbwpvqqvosobj2nnsmr1y" deferrable="false"
+			initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="usm_core_context" />
+	</changeSet> -->
+	
+	<changeSet author="Leap (generated)" id="1614785155891-466">
+		<addForeignKeyConstraint
+			baseColumnNames="portfolio_id" baseTableName="usm_project"
+			constraintName="FK8o7x2abgvg82uf3drox2t7r7r" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_portfolio" />
+	</changeSet>
+	<!-- <changeSet author="Leap (generated)" id="1614785155891-477">
+		<addForeignKeyConstraint
+			baseColumnNames="project" baseTableName="dbs_threshold_config"
+			constraintName="FKati9hxo8w5ibyfko4uty0auxq" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>-->
+	<changeSet author="Leap (generated)" id="1614785155891-478">
+		<addForeignKeyConstraint
+			baseColumnNames="context" baseTableName="usm_unit"
+			constraintName="FKauw4dj3cpt54veaypohgllhw8" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_core_context" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-483">
+		<addForeignKeyConstraint
+			baseColumnNames="context" baseTableName="usm_users"
+			constraintName="FKb3u9id59d6x2sdxh38xmsiooc" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_core_context" />
+	</changeSet>
+	<!-- <changeSet author="Leap (generated)" id="1614785155891-490">
+		<addForeignKeyConstraint
+			baseColumnNames="organisation" baseTableName="dbs_palette_config"
+			constraintName="FKc7qq4j2yge2pwumqj5racxb9k" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_organisation" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-493">
+		<addForeignKeyConstraint
+			baseColumnNames="role"
+			baseTableName="dbs_user_project_role_dashboard"
+			constraintName="FKcy2u3ipxjkgda8om0n4jjokq6" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_role" />
+	</changeSet>-->
+	
+<!--	<changeSet author="Leap (generated)" id="1614785155891-496">
+		<addForeignKeyConstraint
+			baseColumnNames="project" baseTableName="dbs_dashboard_configuration"
+			constraintName="FKd4yw691ye17nm6s4rkxr6006d" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet> -->
+	<changeSet author="Leap (generated)" id="1614785155891-503">
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="icm_rca"
+			constraintName="FKdwxrxywufrmaft33sa5terjti" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-504">
+		<addForeignKeyConstraint
+			baseColumnNames="permission" baseTableName="usm_role_permissions"
+			constraintName="FKdysllnw4of9n7gdqywdce6q99" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_permissions" />
+	</changeSet>
+<!--	<changeSet author="Leap (generated)" id="1614785155891-505">
+		<addForeignKeyConstraint
+			baseColumnNames="project"
+			baseTableName="dbs_user_project_role_dashboard"
+			constraintName="FKe20gkbsvc6lqrpev64eihlxvu" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet> -->
+	<changeSet author="Leap (generated)" id="1614785155891-506">
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="usm_constant"
+			constraintName="FKe3ic1ei1n867d6e91r953swpo" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-509">
+		<addForeignKeyConstraint
+			baseColumnNames="context" baseTableName="usm_organisation"
+			constraintName="FKet79gn0150if3edlpbmr1wv5m" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_core_context" />
+	</changeSet>
+	<!-- <changeSet author="Leap (generated)" id="1614785155891-525">
+		<addForeignKeyConstraint
+			baseColumnNames="user_id"
+			baseTableName="dbs_user_project_role_dashboard"
+			constraintName="FKga8oqctxc6mwhktw8o305169w" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_users" />
+	</changeSet>-->
+	<changeSet author="Leap (generated)" id="1614785155891-534">
+		<addForeignKeyConstraint
+			baseColumnNames="portfolio_id" baseTableName="usm_user_project_role"
+			constraintName="FKhdxvog4j12bwp90se0rnb5w1n" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_portfolio" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-538">
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="usm_user_project_role"
+			constraintName="FKhmvydgv4e4n0rms31ko0w42ul" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-539">
+		<addForeignKeyConstraint
+			baseColumnNames="role_id" baseTableName="usm_user_project_role"
+			constraintName="FKhu5khyf695o6m4h2dvv54b3xg" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_role" />
+	</changeSet>
+	
+	<changeSet author="Leap (generated)" id="1614785155891-558">
+		<addForeignKeyConstraint
+			baseColumnNames="user_cg" baseTableName="usm_user_unit"
+			constraintName="FKjkmtmq7r3g7ofc37p7ims52be" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_users" />
+	</changeSet>
+	<!-- <changeSet author="Leap (generated)" id="1614785155891-562">
+		<addForeignKeyConstraint
+			baseColumnNames="context" baseTableName="dbs_filter"
+			constraintName="FKjset54o4rorblliejt8rt6fg" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_core_context" />
+	</changeSet>-->
+	<changeSet author="Leap (generated)" id="1614785155891-567">
+		<addForeignKeyConstraint
+			baseColumnNames="module" baseTableName="usm_module_organisation"
+			constraintName="FKkaj4jc3redqwtffno7h6hveim" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_module" />
+	</changeSet>
+	
+	<changeSet author="Leap (generated)" id="1614785155891-569">
+		<addForeignKeyConstraint
+			baseColumnNames="unit" baseTableName="usm_user_unit"
+			constraintName="FKkdeh9ceods5w3ilrclem5ixc1" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_unit" />
+	</changeSet>
+	
+	<changeSet author="Leap (generated)" id="1614785155891-579">
+		<addForeignKeyConstraint
+			baseColumnNames="organisation" baseTableName="usm_unit"
+			constraintName="FKm10dx06k96mii7du226g5w1ny" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_organisation" />
+	</changeSet>
+	
+	
+	
+	<changeSet author="Leap (generated)" id="1614785155891-620">
+		<addForeignKeyConstraint
+			baseColumnNames="user_id" baseTableName="usm_user_project_role"
+			constraintName="FKrbl9k4ny9c30w1xcbm69qco5l" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_users" />
+	</changeSet>
+<!--	<changeSet author="sai.ragavendran" id="1615300415555-683"
+		dbms="!mssql">
+		<dropForeignKeyConstraint
+			baseTableName="dbs_widget_configuration"
+			constraintName="FK4nvlfbwpvqqvosobj2nnsmr1y" />
+		<addForeignKeyConstraint
+			baseColumnNames="context" baseTableName="dbs_widget_configuration"
+			constraintName="FK4nvlfbwpvqqvosobj2nnsmr1y" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_core_context" />
+	</changeSet>
+	<changeSet author="sai.ragavendran" id="1615300415555-693"
+		dbms="mssql">
+		<dropForeignKeyConstraint
+			baseTableName="dbs_widget_configuration"
+			constraintName="FK4nvlfbwpvqqvosobj2nnsmr1y" />
+		<addForeignKeyConstraint
+			baseColumnNames="context" baseTableName="dbs_widget_configuration"
+			constraintName="FK4nvlfbwpvqqvosobj2nnsmr1y" deferrable="false"
+			initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="usm_core_context" />
+	</changeSet> -->
+<!-- 	<changeSet author="sai.ragavendran" id="1615300415555-699"
+		dbms="!mssql">
+		<dropForeignKeyConstraint
+			baseTableName="dbs_dashboard_configuration"
+			constraintName="FKd4yw691ye17nm6s4rkxr6006d" />
+		<addForeignKeyConstraint
+			baseColumnNames="project" baseTableName="dbs_dashboard_configuration"
+			constraintName="FKd4yw691ye17nm6s4rkxr6006d" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>-->
+		<!-- <changeSet author="sai.ragavendran" id="1615300415555-70000"
+		dbms="mssql">
+		<dropForeignKeyConstraint
+			baseTableName="dbs_dashboard_configuration"
+			constraintName="FKd4yw691ye17nm6s4rkxr6006d" />
+	</changeSet>-->
+	<changeSet author="sai.ragavendran" id="1615300415555-710"
+		dbms="!mssql">
+		<dropForeignKeyConstraint
+			baseTableName="usm_user_project_role"
+			constraintName="FKhmvydgv4e4n0rms31ko0w42ul" />
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="usm_user_project_role"
+			constraintName="FKhmvydgv4e4n0rms31ko0w42ul" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="sai.ragavendran" id="1615300415555-711"
+		dbms="mssql">
+		<dropForeignKeyConstraint
+			baseTableName="usm_user_project_role"
+			constraintName="FKhmvydgv4e4n0rms31ko0w42ul" />
+	</changeSet>
+	<changeSet author="sai.ragavendran" id="1615300415555-714"
+		dbms="!mssql">
+		<dropForeignKeyConstraint
+			baseTableName="usm_user_unit"
+			constraintName="FKjkmtmq7r3g7ofc37p7ims52be" />
+		<addForeignKeyConstraint
+			baseColumnNames="user_cg" baseTableName="usm_user_unit"
+			constraintName="FKjkmtmq7r3g7ofc37p7ims52be" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_users" />
+	</changeSet>
+	<changeSet author="sai.ragavendran" id="1615300415555-715"
+		dbms="mssql">
+		<dropForeignKeyConstraint
+			baseTableName="usm_user_unit"
+			constraintName="FKjkmtmq7r3g7ofc37p7ims52be" />
+	</changeSet>
+<!-- 	<changeSet author="sai.ragavendran" id="1615300415555-718"
+		dbms="!mssql">
+		<dropForeignKeyConstraint
+			baseTableName="dbs_filter"
+			constraintName="FKjset54o4rorblliejt8rt6fg" />
+		<addForeignKeyConstraint
+			baseColumnNames="context" baseTableName="dbs_filter"
+			constraintName="FKjset54o4rorblliejt8rt6fg" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_core_context" />
+	</changeSet>
+	<changeSet author="sai.ragavendran" id="1615300415555-719"
+		dbms="mssql">
+		<dropForeignKeyConstraint
+			baseTableName="dbs_filter"
+			constraintName="FKjset54o4rorblliejt8rt6fg" />
+		<addForeignKeyConstraint
+			baseColumnNames="context" baseTableName="dbs_filter"
+			constraintName="FKjset54o4rorblliejt8rt6fg" deferrable="false"
+			initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="id" referencedTableName="usm_core_context" />
+	</changeSet>-->
+	<changeSet author="sai.ragavendran" id="1615300415555-722"
+		dbms="!mssql">
+		<dropForeignKeyConstraint
+			baseTableName="usm_user_unit"
+			constraintName="FKkdeh9ceods5w3ilrclem5ixc1" />
+		<addForeignKeyConstraint
+			baseColumnNames="unit" baseTableName="usm_user_unit"
+			constraintName="FKkdeh9ceods5w3ilrclem5ixc1" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_unit" />
+	</changeSet>
+	<changeSet author="sai.ragavendran" id="1615300415555-723"
+		dbms="mssql">
+		<dropForeignKeyConstraint
+			baseTableName="usm_user_unit"
+			constraintName="FKkdeh9ceods5w3ilrclem5ixc1" />
+	</changeSet>
+	<changeSet author="sai.ragavendran" id="1615300415555-726"
+		dbms="!mssql">
+		<dropForeignKeyConstraint
+			baseTableName="usm_unit" constraintName="FKm10dx06k96mii7du226g5w1ny" />
+		<addForeignKeyConstraint
+			baseColumnNames="organisation" baseTableName="usm_unit"
+			constraintName="FKm10dx06k96mii7du226g5w1ny" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_organisation" />
+	</changeSet>
+	<changeSet author="sai.ragavendran" id="1615300415555-727"
+		dbms="mssql">
+		<dropForeignKeyConstraint
+			baseTableName="usm_unit" constraintName="FKm10dx06k96mii7du226g5w1ny" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-747"
+		dbms="!mssql">
+		<createIndex indexName="FKusm_role" tableName="usm_role">
+			<column name="project_id" />
+		</createIndex>
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="usm_role"
+			constraintName="FKusm_role" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<!--<changeSet author="Leap (generated)" id="1614785155891-748">
+		<createIndex indexName="FKdbs_widget_configuration"
+			tableName="dbs_widget_configuration">
+			<column name="project_id" />
+		</createIndex>
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="dbs_widget_configuration"
+			constraintName="FKdbs_widget_configuration" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-749"
+		dbms="!mssql">
+		<createIndex indexName="FKdbs_widget_comment"
+			tableName="dbs_widget_comment">
+			<column name="project_id" />
+		</createIndex>
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="dbs_widget_comment"
+			constraintName="FKdbs_widget_comment" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-752">
+		<createIndex indexName="FKdbs_filter"
+			tableName="dbs_filter">
+			<column name="project_id" />
+		</createIndex>
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="dbs_filter"
+			constraintName="FKdbs_filter" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-753"
+		dbms="!mssql">
+		<createIndex indexName="FKdbs_threshold"
+			tableName="dbs_threshold">
+			<column name="project_id" />
+		</createIndex>
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="dbs_threshold"
+			constraintName="FKdbs_threshold" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-754"
+		dbms="!mssql">
+		<createIndex indexName="FKdbs_sequence_widget"
+			tableName="dbs_sequence_widget">
+			<column name="project_id" />
+		</createIndex>
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="dbs_sequence_widget"
+			constraintName="FKdbs_sequence_widget" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-756">
+		<createIndex indexName="FKdbs_palette_widget_sequence"
+			tableName="dbs_palette_widget_sequence">
+			<column name="project_id" />
+		</createIndex>
+		<addForeignKeyConstraint
+			baseColumnNames="project_id"
+			baseTableName="dbs_palette_widget_sequence"
+			constraintName="FKdbs_palette_widget_sequence" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-757">
+		<createIndex indexName="FKdbs_palette_config"
+			tableName="dbs_palette_config">
+			<column name="project_id" />
+		</createIndex>
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="dbs_palette_config"
+			constraintName="FKdbs_palette_config" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-758"
+		dbms="!mssql">
+		<createIndex indexName="FKdbs_palette"
+			tableName="dbs_palette">
+			<column name="project_id" />
+		</createIndex>
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="dbs_palette"
+			constraintName="FKdbs_palette" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-758"
+		dbms="!mssql">
+		<createIndex indexName="FKdbs_palette"
+			tableName="dbs_palette">
+			<column name="project_id" />
+		</createIndex>
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="dbs_palette"
+			constraintName="FKdbs_palette" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>-->
+	<changeSet author="Leap (generated)" id="1614785155891-773">
+		<createIndex indexName="FKicm_clusters"
+			tableName="icm_clusters">
+			<column name="project_id" />
+		</createIndex>
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="icm_clusters"
+			constraintName="FKicm_clusters" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-774">
+		<createIndex indexName="FKicm_problem_type"
+			tableName="icm_problem_type">
+			<column name="project_id" />
+		</createIndex>
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="icm_problem_type"
+			constraintName="FKicm_problem_type" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-775">
+		<createIndex indexName="FKicm_sops" tableName="icm_sops">
+			<column name="project_id" />
+		</createIndex>
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="icm_sops"
+			constraintName="FKicm_sops" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-776">
+		<createIndex indexName="FKicm_sops_alias"
+			tableName="icm_sops_alias">
+			<column name="project_id" />
+		</createIndex>
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="icm_sops_alias"
+			constraintName="FKicm_sops_alias" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="sai.ragavendran" id="1614785155891-890">
+		<addUniqueConstraint columnNames="user_email"
+			constraintName="email_unique" tableName="usm_users" />
+	</changeSet>
+	<changeSet author="sai.ragavendran" id="1614785155891-891">
+		<addUniqueConstraint columnNames="portfolio_name"
+			constraintName="portfolio_name_unique" tableName="usm_portfolio" />
+	</changeSet>
+	<!-- <changeSet author="Leap (generated)" id="1614785155891-892">
+		<createIndex indexName="usm_api_permissions_ibfk_1"
+			tableName="usm_api_permissions">
+			<column name="project_id" />
+		</createIndex>
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="usm_api_permissions"
+			constraintName="usm_api_permissions_ibfk_1" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-893">
+		<createIndex indexName="usm_api_permissions_ibfk_2"
+			tableName="usm_api_permissions">
+			<column name="role_id" />
+		</createIndex>
+		<addForeignKeyConstraint
+			baseColumnNames="role_id" baseTableName="usm_api_permissions"
+			constraintName="usm_api_permissions_ibfk_2" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_role" />
+	</changeSet> -->
+	<changeSet author="Leap (generated)" id="1614785155891-894">
+		<addNotNullConstraint columnDataType="VARCHAR(255)" columnName="project_display_name"
+			constraintName="UK_project_display" tableName="usm_project"/>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-895">
+		<addNotNullConstraint columnDataType="INT" columnName="project_id"
+			constraintName="UK_project_id" tableName="usm_user_project_role"/>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-896">
+		<addNotNullConstraint columnDataType="INT" columnName="role_id"
+			constraintName="UK_role_id" tableName="usm_user_project_role"/>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-897">
+		<addNotNullConstraint columnDataType="INT" columnName="user_id"
+			constraintName="UK_user_id" tableName="usm_user_project_role"/>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-901">
+		<addNotNullConstraint columnDataType="INT" columnName="portfolio_id"
+			constraintName="UK_portfolio_id" tableName="usm_user_project_role"/>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-898" dbms="!mssql">
+		<addNotNullConstraint columnDataType="INT" columnName="role"
+			constraintName="UK_role" tableName="usm_role_permissions"/>
+	</changeSet>
+	<!-- <changeSet author="Leap (generated)" id="1614785155891-899" dbms="!mssql">
+		<addNotNullConstraint columnDataType="INT" columnName="project_id"
+			constraintName="UK_project_api" tableName="usm_api_permissions"/>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-900" dbms="!mssql">
+		<addNotNullConstraint columnDataType="INT" columnName="role_id"
+			constraintName="UK_role_id_api" tableName="usm_api_permissions"/>
+	</changeSet> -->
+	<changeSet author="sai" id="1614785155891-910">
+		<dropForeignKeyConstraint baseTableName="usm_constant" constraintName="FKe3ic1ei1n867d6e91r953swpo"/>
+		<addForeignKeyConstraint baseColumnNames="project_id" baseTableName="usm_constant"
+			constraintName="FKe3ic1ei1n867d6e91r953swpo" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>	
+	<changeSet author="sai" id="1614785155891-911">
+		<dropForeignKeyConstraint
+			baseTableName="usm_project"
+			constraintName="FK8o7x2abgvg82uf3drox2t7r7r" />
+		<addForeignKeyConstraint
+			baseColumnNames="portfolio_id" baseTableName="usm_project"
+			constraintName="FK8o7x2abgvg82uf3drox2t7r7r" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_portfolio" />
+	</changeSet>
+	<changeSet author="sai" id="1614785155891-912">
+		<dropForeignKeyConstraint
+			baseTableName="usm_role_permissions"
+			constraintName="FK1n5fe2ibbjsblv6vuafa74h8o" />
+		<addForeignKeyConstraint
+			baseColumnNames="role" baseTableName="usm_role_permissions"
+			constraintName="FK1n5fe2ibbjsblv6vuafa74h8o" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_role" />
+	</changeSet>	
+	<changeSet author="sai" id="1614785155891-913">
+		<dropForeignKeyConstraint
+			baseTableName="usm_role_permissions"
+			constraintName="FKdysllnw4of9n7gdqywdce6q99" />
+		<addForeignKeyConstraint
+			baseColumnNames="permission" baseTableName="usm_role_permissions"
+			constraintName="FKdysllnw4of9n7gdqywdce6q99" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_permissions" />
+	</changeSet>	
+	<changeSet author="sai" id="1614785155891-914">
+		<dropForeignKeyConstraint
+			baseTableName="usm_user_project_role"
+			constraintName="FKhdxvog4j12bwp90se0rnb5w1n" />
+		<addForeignKeyConstraint
+			baseColumnNames="portfolio_id" baseTableName="usm_user_project_role"
+			constraintName="FKhdxvog4j12bwp90se0rnb5w1n" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_portfolio" />
+	</changeSet>
+	
+	
+	<changeSet author="sai" id="1614785155891-9115">
+		<dropForeignKeyConstraint
+			baseTableName="usm_user_project_role"
+			constraintName="FKhu5khyf695o6m4h2dvv54b3xg" />
+		<addForeignKeyConstraint
+			baseColumnNames="role_id" baseTableName="usm_user_project_role"
+			constraintName="FKhu5khyf695o6m4h2dvv54b3xg" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_role" />
+	</changeSet>	
+	<changeSet author="sai" id="1614785155891-916">
+		<dropForeignKeyConstraint
+			baseTableName="usm_user_project_role"
+			constraintName="FKrbl9k4ny9c30w1xcbm69qco5l" />
+		<addForeignKeyConstraint
+			baseColumnNames="user_id" baseTableName="usm_user_project_role"
+			constraintName="FKrbl9k4ny9c30w1xcbm69qco5l" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_users" />
+	</changeSet> 
+	<changeSet author="sai" id="1614785155891-917"
+		dbms="!mssql">
+		<dropForeignKeyConstraint
+			baseTableName="usm_module_organisation"
+			constraintName="FK3id0na9pcxknhxmm470b9eyfo" />
+		<addForeignKeyConstraint
+			baseColumnNames="organisation" baseTableName="usm_module_organisation"
+			constraintName="FK3id0na9pcxknhxmm470b9eyfo" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>	
+	<changeSet author="sai" id="1614785155891-918"
+		dbms="!mssql">
+		<dropForeignKeyConstraint
+			baseTableName="usm_module_organisation"
+			constraintName="FKkaj4jc3redqwtffno7h6hveim" />
+		<addForeignKeyConstraint
+			baseColumnNames="module" baseTableName="usm_module_organisation"
+			constraintName="FKkaj4jc3redqwtffno7h6hveim" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_module" />
+	</changeSet>	
+	<changeSet author="sai" id="1614785155891-919"
+		dbms="!mssql">
+		<dropForeignKeyConstraint
+			baseTableName="usm_organisation"
+			constraintName="FKet79gn0150if3edlpbmr1wv5m" />
+		<addForeignKeyConstraint
+			baseColumnNames="context" baseTableName="usm_organisation"
+			constraintName="FKet79gn0150if3edlpbmr1wv5m" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_core_context" />
+	</changeSet>	
+	<changeSet author="sai" id="1614785155891-920"
+		dbms="!mssql">
+		<dropForeignKeyConstraint
+			baseTableName="usm_unit"
+			constraintName="FKauw4dj3cpt54veaypohgllhw8" />
+		<addForeignKeyConstraint
+			baseColumnNames="context" baseTableName="usm_unit"
+			constraintName="FKauw4dj3cpt54veaypohgllhw8" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_core_context" />
+	</changeSet>	
+	<changeSet author="sai" id="1614785155891-921"
+		dbms="!mssql">
+		<dropForeignKeyConstraint
+			baseTableName="usm_user_unit"
+			constraintName="FK1j1bdnfw4r5lq8ujgl8yd08aj" />
+		<addForeignKeyConstraint
+			baseColumnNames="context" baseTableName="usm_user_unit"
+			constraintName="FK1j1bdnfw4r5lq8ujgl8yd08aj" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_core_context" />
+	</changeSet>	
+	<changeSet author="sai" id="1614785155891-922"
+		dbms="!mssql">
+		<dropForeignKeyConstraint
+			baseTableName="usm_users"
+			constraintName="FKb3u9id59d6x2sdxh38xmsiooc" />
+		<addForeignKeyConstraint
+			baseColumnNames="context" baseTableName="usm_users"
+			constraintName="FKb3u9id59d6x2sdxh38xmsiooc" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_core_context" />
+	</changeSet>
+	<!--<changeSet author="Leap (generated)" id="1614785155891-923" dbms="!mssql">
+		<dropForeignKeyConstraint
+			baseTableName="dbs_threshold_config"
+			constraintName="FKati9hxo8w5ibyfko4uty0auxq" />
+		<addForeignKeyConstraint
+			baseColumnNames="project" baseTableName="dbs_threshold_config"
+			constraintName="FKati9hxo8w5ibyfko4uty0auxq" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-923" dbms="mssql">
+		<dropForeignKeyConstraint
+			baseTableName="dbs_threshold_config"
+			constraintName="FKati9hxo8w5ibyfko4uty0auxq" />
+	</changeSet>-->
+		<changeSet id="1615300415555-780" author="sai.ragavendran"
+		dbms="mssql">
+		<sql>DROP TRIGGER IF EXISTS TR_Project</sql>
+		<sql>DROP TRIGGER IF EXISTS CI</sql>
+		<sql>DROP TRIGGER IF EXISTS DASHBOARD</sql>
+		<sql>DROP TRIGGER IF EXISTS TR_Organsation</sql>
+		<sql>DROP TRIGGER IF EXISTS TR_UNIT</sql>
+		<sql>DROP TRIGGER IF EXISTS TR_WIDGET</sql>
+		<sql>DROP TRIGGER IF EXISTS TR_Users</sql>
+		<sql>DROP TRIGGER IF EXISTS TR_threshold</sql>
+		<sql>DROP TRIGGER IF EXISTS TR_bcc_svg_dashboard</sql>
+		<sql>DROP TRIGGER IF EXISTS TR_dbs_palette</sql>
+		<sql>DROP TRIGGER IF EXISTS TR_dbs_palette_config</sql>
+		<sql>DROP TRIGGER IF EXISTS TR_ccl_phase</sql>
+		<sql>DROP TRIGGER IF EXISTS TR_ccl_tools</sql>
+		<sql>DROP TRIGGER IF EXISTS TR_bcc_svg</sql>
+		<sql>DROP TRIGGER IF EXISTS TR_bcc_metrics_master</sql>
+		<sql>DROP TRIGGER IF EXISTS TR_dbs_threshold_config</sql>
+		<sql>DROP TRIGGER IF EXISTS TR_dbs_sequence_widget</sql>
+		<sql>DROP TRIGGER IF EXISTS TR_cfm_configuration_item_type</sql>
+		<sql>DROP TRIGGER IF EXISTS TR_usm_process</sql>
+		<sql>DROP TRIGGER IF EXISTS TR_usm_role</sql>
+		<sqlFile dbms="mssql" endDelimiter="/" path="db/changelog/dbs/triggers.sql" splitStatements="true"/>
+	</changeSet>
+	<!-- 1.3.12 changes -->
+	<changeSet  author="Leap (generated)"  id="1312v0-1006">  
+	    <addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="usm_country_timezone"
+			constraintName="FK_USM_COUNTRY_TIMEZONE_PROJECTID" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+
+	<!-- 1.3.12 changes -->
+	<changeSet author="Leap (generated)" id="1312v0-1008">
+		<addDefaultValue columnDataType="BIT(1)"
+			columnName="is_processed" defaultValueBoolean="false"
+			tableName="usm_emails" />
+		<addDefaultValue columnDataType="BIT(1)"
+			columnName="is_active" defaultValueBoolean="true"
+			tableName="usm_emails" />
+		<addDefaultValue columnDataType="BIT(1)"
+			columnName="is_read" defaultValueBoolean="false"
+			tableName="usm_emails" />
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="usm_emails"
+			constraintName="FK_USM_EMAILS_PROJECTID" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+		<addUniqueConstraint columnNames="mail_id"
+			constraintName="UK_USM_EMAILS_MAILID" tableName="usm_emails" />
+	</changeSet>
+	<!-- 1.3.12 changes -->
+	<changeSet author="Leap (generated)" id="1312v0-1009">
+		<!-- <addForeignKeyConstraint
+			baseColumnNames="workflow_id" baseTableName="usm_process"
+			constraintName="FK_ICMS_PROCESS_ID_WORKFLOW_ID" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="workflow_id" referencedTableName="usm_workflow" /> -->
+		<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="usm_process"
+			constraintName="FK_USM_PROCESS_PROJECTID" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<!-- 1.3.12 changes -->
+	<changeSet author="Leap (generated)" id="1312v0-1010">
+        <addForeignKeyConstraint
+			baseColumnNames="process_id" baseTableName="usm_role_process"
+			constraintName="FK_USM_ROLE_PROCESS_PROCESSID" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="process_id" referencedTableName="usm_process" />
+		<addForeignKeyConstraint
+			baseColumnNames="role_id" baseTableName="usm_role_process"
+			constraintName="FK_USM_ROLE_PROCESS_ROLEID" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_role" />
+		
+	</changeSet>
+	<!-- 1.3.12 changes -->
+	<changeSet author="Leap (generated)" id="1312v0-1011">
+		<addForeignKeyConstraint
+			baseColumnNames="autologin_role" baseTableName="usm_project"
+			constraintName="FK_autologin_role" deferrable="false"
+			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+			referencedColumnNames="id" referencedTableName="usm_role" />
+	</changeSet>
+	<!-- 1.3.12 changes -->
+	<changeSet author="Leap (generated)" id="1312v0-1012">
+        <addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="usm_stage"
+			constraintName="FK_USM_STAGE_PROJECTID" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+		<addForeignKeyConstraint
+			baseColumnNames="user_id" baseTableName="usm_stage"
+			constraintName="FK_USM_STAGE_USERID" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_users" />
+		
+		<!-- <addForeignKeyConstraint
+			baseColumnNames="stage_id" baseTableName="usm_stage"
+			constraintName="FK_USM_STAGE_STAGEID" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="process_id" referencedTableName="usm_process" /> -->
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1312v0-1013">
+	<addForeignKeyConstraint
+			baseColumnNames="parent_role_id" baseTableName="usm_role_mapping"
+			constraintName="FK_USM_ROLE_PARENTROLEID" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_role" />
+	
+		
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1312v0-1014">
+	<addForeignKeyConstraint
+			baseColumnNames="parent_user_id" baseTableName="usm_user_mapping"
+			constraintName="FK_USM_USER_PARENTUSERID" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_users" />
+	
+		
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1312v0-1015">
+	<addUniqueConstraint
+			columnNames="parent_role_id,child_role_id"
+			constraintName="parent_role_child_role_constraint"
+			tableName="usm_role_mapping" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1312v0-1016">
+	<addUniqueConstraint
+			columnNames="parent_user_id,child_user_id"
+			constraintName="parent_user_child_user_constraint"
+			tableName="usm_user_mapping" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1312v0-1017" dbms="!mssql">
+	<addForeignKeyConstraint
+			baseColumnNames="project_id" baseTableName="usm_role_process"
+			constraintName="FK_USM_ROLE_PROCESS_PROJECTID" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_project" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1312v0-1018" dbms="!mssql">
+	<addForeignKeyConstraint
+			baseColumnNames="process_id" baseTableName="usm_stage"
+			constraintName="FK_USM_STAGE_PROCESSID" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="process_id" referencedTableName="usm_process" />
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1312v0-1019" dbms="!mssql">
+	<addForeignKeyConstraint
+			baseColumnNames="child_role_id" baseTableName="usm_role_mapping"
+			constraintName="FK_USM_ROLE_CHILDROLEID" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_role" />
+		
+		<addForeignKeyConstraint
+			baseColumnNames="child_user_id" baseTableName="usm_user_mapping"
+			constraintName="FK_USM_USER_CHILDUSERID" deferrable="false"
+			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+			referencedColumnNames="id" referencedTableName="usm_users" />
+		</changeSet>
+
+</databaseChangeLog>

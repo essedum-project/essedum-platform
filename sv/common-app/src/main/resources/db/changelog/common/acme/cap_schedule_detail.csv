@@ -1,0 +1,3 @@
+"Schedule_ID","Schedule_Name","Rec_Act_Ind","Last_Updated_Dts","Rec_Created_Dts","Schedule_Start_Dts","Schedule_End_Dts","Schedule_Pattern","Schedule_Recurrence_Ind","Schedule_On_Every","Schedule_Instance","Schedule_Time","Last_Updated_By","Weekly_Data","Recur_Every","On_Weekend","Monthly_Schedule_Date","Yearly_Schedule_Date"
+"1","RUN IMMEDIATELY","true","2019-03-15T17:56:20","2019-03-15T17:56:20","2019-03-15T17:56:20","2019-03-15T17:56:20","OneTime","true","","","16:00:00","1","NULL","NULL","false","NULL","NULL"
+"2","run_2min","true","2021-05-25T20:54:28","2021-05-25T20:54:28","2021-05-25T05:30:00","2021-07-25T05:30:00","DAILY","true","2","Minutes","20:55:00","1","sunday","1","false","NULL","NULL"

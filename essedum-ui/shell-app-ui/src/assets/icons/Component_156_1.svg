@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24.119 24" class="svg-component-156-icon"><defs><style>.a{fill:#fff;}
+       .svg-component-156-icon {
+        height: inherit;
+        width: inherit;
+       }
+	  <!-- @media screen and (min-width: 1300px) and (max-width: 3000px) {
+       .svg-component-156-icon {
+        height: 4vmin !important;
+        width: 4vmin !important;
+       }
+	  }
+	  @media screen and (max-width: 600px) {
+       .svg-component-156-icon {
+        height: 4vmin !important;
+        width: 4vmin !important;
+       }
+	  } -->
+      </style></defs><rect class="a" width="24" height="24"/><g transform="translate(-766.125 -442.513)"><path d="M778.184,461.643c-6.092,0-11.573-6.125-11.8-6.385a1.024,1.024,0,0,1,0-1.357c.229-.262,5.71-6.388,11.8-6.388s11.573,6.126,11.8,6.388a1.024,1.024,0,0,1,0,1.357C789.758,455.518,784.277,461.643,778.184,461.643Zm-9.61-7.064c1.538,1.511,5.54,5.015,9.61,5.015s8.073-3.5,9.61-5.015c-1.538-1.511-5.54-5.017-9.61-5.017S770.112,453.067,768.574,454.579Z" transform="translate(0 0)"/><path d="M2.386,0A2.386,2.386,0,1,1,0,2.386,2.386,2.386,0,0,1,2.386,0Z" transform="translate(775.799 452.193)"/></g></svg> 

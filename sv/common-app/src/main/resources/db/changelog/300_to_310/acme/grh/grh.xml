@@ -1,0 +1,222 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+ <changeSet author="leap"  id="30v0To3v10-grh-001">
+ <sql>
+
+  DELETE FROM mlschemaregistry WHERE name='Business_Process' and organization='leo1311';
+  DELETE FROM mlschemaregistry WHERE name='Endpoint' and organization='leo1311';
+  DELETE FROM mlschemaregistry WHERE name='BP_SP' and organization='leo1311';
+  DELETE FROM mlschemaregistry WHERE name='Application_Issue' and organization='leo1311';
+  DELETE FROM mlschemaregistry WHERE name='BP_L1' and organization='leo1311';
+  DELETE FROM mlschemaregistry WHERE name='Application_Data' and organization='leo1311';
+  DELETE FROM mlschemaregistry WHERE name=' Application_and_Middleware' and organization='leo1311';
+  DELETE FROM mlschemaregistry WHERE name='CIMapping' and organization='leo1311';
+  DELETE FROM mlschemaregistry WHERE name='BP_SSP' and organization='leo1311';
+  DELETE FROM mlschemaregistry WHERE name='Batch' and organization='leo1311';
+  DELETE FROM mlschemaregistry WHERE name='BP_L1' and organization='leo1311';
+  DELETE FROM mlschemaregistry WHERE name='Infrastructure' and organization='leo1311';
+  DELETE FROM mlschemaregistry WHERE name='Dataset' and organization='leo1311';
+  DELETE FROM mlschemaregistry WHERE name='Pipeline' and organization='leo1311';
+  DELETE FROM mlschemaregistry WHERE name='Model' and organization='leo1311';
+  </sql>
+ </changeSet>
+
+ <changeSet author="leap"  id="30v0To3v10-grh-002">
+ <sql>
+
+
+ 			Delete from mlrelationship WHERE name ='BP_CI' AND ORGANIZATION='leo1311'; 
+			Delete from mlrelationship WHERE name ='CI_AM' AND ORGANIZATION='leo1311'; 
+			Delete from mlrelationship WHERE name ='AM_CI' AND ORGANIZATION='leo1311';
+            Delete from mlrelationship WHERE name ='CI_Data' AND ORGANIZATION='leo1311'; 
+			Delete from mlrelationship WHERE name ='Data_CI' AND ORGANIZATION='leo1311'; 
+			Delete from mlrelationship WHERE name ='CI_Batch' AND ORGANIZATION='leo1311';
+            Delete from mlrelationship WHERE name ='Batch_CI' AND ORGANIZATION='leo1311'; 
+			Delete from mlrelationship WHERE name ='CI_Infra' AND ORGANIZATION='leo1311'; 
+			Delete from mlrelationship WHERE name ='Infra_CI' AND ORGANIZATION='leo1311';
+            Delete from mlrelationship WHERE name ='CI_AppIssue' AND ORGANIZATION='leo1311'; 
+			Delete from mlrelationship WHERE name ='BPSSP_CI' AND ORGANIZATION='leo1311'; 
+			Delete from mlrelationship WHERE name ='BPL1_CI' AND ORGANIZATION='leo1311';
+            Delete from mlrelationship WHERE name ='BPSP_CI' AND ORGANIZATION='leo1311'; 
+			Delete from mlrelationship WHERE name ='CI_BPSSP' AND ORGANIZATION='leo1311';
+            Delete from mlrelationship WHERE name ='CI_BPSP' AND ORGANIZATION='leo1311'; 
+			Delete from mlrelationship WHERE name ='Job_JobInstance' AND ORGANIZATION='leo1311'; 
+			Delete from mlrelationship WHERE name ='JobInstance_Group' AND ORGANIZATION='leo1311';
+ </sql>
+ </changeSet>
+
+ <changeSet author="leap"  id="30v0To3v10-grh-003">
+ <sql>
+ 
+  DELETE FROM mldatasetformmapping WHERE dataset='DEMDTSTC85094' AND ORGANIZATION='leo1311';
+  DELETE FROM mldatasetformmapping WHERE dataset='DEMENDPN81599' AND ORGANIZATION='leo1311';
+  DELETE FROM mldatasetformmapping WHERE dataset='DEMMDLCR36489' AND ORGANIZATION='leo1311';
+ </sql>
+ </changeSet>
+
+ <changeSet author="leap"  id="30v0To3v10-grh-004">
+ <sql>
+
+    DELETE FROM mldataset WHERE dataset_schema='Endpoint_Creation' AND organization='leo1311';
+    DELETE FROM mldataset WHERE dataset_schema='ModelCreation' AND organization='leo1311';
+    DELETE FROM mldataset WHERE dataset_schema='DatasetCreation' AND organization='leo1311';
+
+ </sql>
+ </changeSet>
+
+ <changeSet author="leap"  id="30v0To3v10-grh-005">
+ <sql>
+ DELETE FROM mlschemaregistry WHERE name='Endpoint_Creation' and organization='leo1311';
+DELETE FROM mlschemaregistry WHERE name='ModelCreation' and organization='leo1311';
+DELETE FROM mlschemaregistry WHERE name='DatasetCreation' and organization='leo1311';
+DELETE FROM mlschemaregistry WHERE name='PipelineCreation' and organization='leo1311';
+           
+
+ </sql>
+ </changeSet>
+ <changeSet author="Leap" id="30v0To3v10-grh-006">
+		<sql>
+             UPDATE mlschemaregistry SET
+			description='EdgeSchema',capability='Edge',type='KG' WHERE NAME ='ContainerCarrierMapping'
+			and organization='leo1311'; 
+
+             UPDATE mlschemaregistry SET
+			description='EdgeSchema',capability='Edge',type='KG' WHERE NAME ='OrderCarrierMapping'
+			and organization='leo1311'; 
+            
+             UPDATE mlschemaregistry SET
+			description='EdgeSchema',capability='Edge',type='KG' WHERE NAME ='OrderContainerMapping'
+			and organization='leo1311'; 
+            
+             UPDATE mlschemaregistry SET
+			description='EdgeSchema',capability='Edge',type='KG' WHERE NAME ='OrderSupplierMapping'
+			and organization='leo1311'; 
+            
+             UPDATE mlschemaregistry SET
+			description='EdgeSchema',capability='Edge',type='KG' WHERE NAME ='OrderVariantMapping'
+			and organization='leo1311'; 
+            
+             UPDATE mlschemaregistry SET
+			description='EdgeSchema',capability='Edge',type='KG' WHERE NAME ='VariantProductMapping'
+			and organization='leo1311'; 
+            
+             UPDATE mlschemaregistry SET
+			description='EdgeSchema',capability='Edge',type='KG' WHERE NAME ='SupplierOriginMapping'
+			and organization='leo1311'; 
+            
+             UPDATE mlschemaregistry SET
+			description='EdgeSchema',capability='Edge',type='KG' WHERE NAME ='OrderWarehouseMapping'
+			and organization='leo1311'; 
+            
+             UPDATE mlschemaregistry SET
+			description='EdgeSchema',capability='Edge',type='KG' WHERE NAME ='OriginDestinationMapping'
+			and organization='leo1311'; 
+
+             UPDATE mlschemaregistry SET
+			description='EdgeSchema',capability='Edge',type='KG' WHERE NAME ='ProductDepartmentMapping'
+			and organization='leo1311'; 
+            </sql>
+	</changeSet>
+
+    <changeSet author="leap"  id="30v0To3v10-grh-007">
+         <sql>
+              DELETE FROM grh_query WHERE query_name='RelationshipBetweenJobInstnces';
+              DELETE FROM grh_query WHERE query_name='InstanceGraph'; 
+              DELETE FROM grh_query WHERE query_name='FlowOfOrder';
+              DELETE FROM grh_query WHERE query_name='orderflow';
+              DELETE FROM grh_query WHERE query_name='StatusWiseJobInstances';
+              DELETE FROM grh_query WHERE query_name='CancelledJobInstances';
+              DELETE FROM grh_query WHERE query_name='GroupRelationship';
+              DELETE FROM grh_query WHERE query_name='ApplicationIssue';
+              DELETE FROM grh_query WHERE query_name='InstanceRelationship';
+              DELETE FROM grh_query WHERE query_name='ConfigurationItemToRelationToTicketNestedLevel';
+              DELETE FROM grh_node_details WHERE node_name='ConfigItem';
+
+        </sql>
+    </changeSet>
+
+    <changeSet author="leap"  id="30v0To3v10-grh-20">
+         <sql>
+             UPDATE mldataset SET attributes ='{\"filter\":\"\",\"mode\":\"query\",\"Query\":\"select distinct concat(department_name ,ProductID,OrderNumber) uniqueId, OrderNumber, ProductID, department_name from shipment_data_v5\",\"Cacheable\":false,\"isStreaming\":\"false\",\"defaultValues\":\"\",\"writeMode\":\"append\",\"params\":\"",\"tableName\":\"\",\"uniqueIdentifier\":\"\"}' where alias = 'ProductDepartmentMapping' and organization ='leo1311';
+        </sql>
+    </changeSet>
+
+    <changeSet author="leap"  id="30v0To3v10-grh-21">
+         <sql>
+           UPDATE mldataset SET attributes ='{\"filter\":\"\",\"mode\":\"query\",\"Query\":\"select distinct concat(OriginPort,ArrivalPort,OrderNumber ) uniqueId, OriginPort, ArrivalPort, FeederVesselEstimatedtimeofArrival, FeederVesselActualTimeOfArrivalDate, OrderNumber from shipment_data_v5\",\"Cacheable\":false,\"isStreaming\":\"false\",\"defaultValues\":\"\",\"writeMode\":\"append\",\"params\":\"",\"tableName\":\"\",\"uniqueIdentifier\":\"\"}' where alias = 'Origindestinationmapping' and organization ='leo1311';
+	
+        </sql>
+    </changeSet>
+
+     <changeSet author="leap"  id="30v0To3v10-grh-22">
+         <sql>
+    
+            UPDATE mldataset SET attributes ='{\"filter\":\"\",\"mode\":\"query\",\"Query\":\"select distinct concat(CarrierName, ContainerId, OrderNumber) uniqueId , OrderNumber, ContainerId, CarrierName from shipment_data_v5 group by uniqueId\",\"Cacheable\":false,\"isStreaming\":\"false\",\"defaultValues\":\"\",\"writeMode\":\"append\",\"params\":\"",\"tableName\":\"\",\"uniqueIdentifier\":\"\"}' where alias = 'ContainerCarrierMapping' and organization ='leo1311';
+ 
+    	
+        </sql>
+    </changeSet>
+
+
+      <changeSet author="leap"  id="30v0To3v10-grh-29">
+         <sql>
+           UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"select distinct OrderNumber, OrderNumber uniqueId,  Season, planningmarketcode, OrderPlacedDate from shipment_data_v5","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"","tableName":"","uniqueIdentifier":""}'  where alias = 'Order' and organization ='leo1311';	
+        </sql>
+    </changeSet>
+
+    
+
+    <changeSet author="leap"  id="30v0To3v10-grh-24">
+         <sql>
+          
+          UPDATE mldataset SET attributes ='{\"filter\":\"\",\"mode\":\"query\",\"Query\":\"select distinct CONCAT(OriginPort,SupplierID, OrderNumber) uniqueId, OrderNumber, OriginPort, SupplierID from shipment_data_v5\",\"Cacheable\":false,\"isStreaming\":\"false\",\"defaultValues\":\"\",\"writeMode\":\"append\",\"params\":\"",\"tableName\":\"\",\"uniqueIdentifier\":\"\"}' where alias = 'SupplierOriginMapping' and organization ='leo1311';
+        </sql>
+    </changeSet>
+
+     <changeSet author="leap" id="30v0To3v10-grh-008">   
+	     <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/300_to_310/acme/grh/grh_query.csv" quotchar="&quot;" separator="," tableName="grh_query">
+                <column header="user_id" name="user_id" type="STRING"/>
+                <column header="project_id" name="project_id" type="NUMERIC"/>
+                <column header="query_name" name="query_name" type="STRING"/>
+                <column header="query_description" name="query_description" type="STRING"/>
+                <column header="gql_query" name="gql_query" type="STRING"/>
+                <column header="query_filter" name="query_filter" type="STRING"/>
+                <column header="is_private" name="is_private" type="BOOLEAN"/>
+                <column header="createdAt" name="createdAt" type="DATE"/>
+                <column header="updatedAt" name="updatedAt" type="skip"/>
+         </loadData>   
+    </changeSet>
+
+    <changeSet author="leap"  id="30v0To3v10-grh-25">
+        <sql>
+         DELETE FROM grh_rules WHERE node_name='ConfigItem'
+
+        </sql>
+    </changeSet>
+    <changeSet author="leap"  id="30v0To3v10-grh-26">
+        <sql>
+          UPDATE  grh_node_details set label_property='ci_name' WHERE node_name='ConfigItem';
+          UPDATE  grh_node_details set node_shape='dot' WHERE node_name='Order';
+          
+        </sql>
+   </changeSet>
+    <changeSet author="leap" id="30v0To3v10-grh-28">   
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/300_to_310/acme/grh/grh_rules.csv" quotchar="&quot;" separator="," tableName="grh_rules">
+            <column header="project_id" name="project_id" type="NUMERIC"/>
+            <column header="user_id" name="user_id" type="NUMERIC"/>
+            <column header="node_name" name="node_name" type="STRING"/>
+            <column header="rule_name" name="rule_name" type="STRING"/>
+            <column header="is_id" name="is_id" type="BOOLEAN"/>
+            <column header="is_string" name="is_string" type="BOOLEAN"/>
+            <column header="property" name="property" type="STRING"/>
+            <column header="operator" name="operator" type="STRING"/>
+            <column header="value" name="value" type="STRING"/>
+            <column header="node_color" name="node_color" type="STRING"/>
+            <column header="node_size" name="node_size" type="STRING"/>
+            <column header="createdAt" name="createdAt" type="DATE"/>
+            <column header="updatedAt" name="updatedAt" type="DATE"/>
+        </loadData>   
+    </changeSet>
+    
+</databaseChangeLog>

@@ -1,0 +1,2 @@
+"Incident_Status_Field_Mapping_ID","App_Incident_Field_Mapping_ID","Rec_Act_Ind","Last_Updated_Dts","Status_Field_Name","Status_Field_Value"
+"1","3","true","2021-05-25T20:53:14","state","{\"Open\":[\"OPENED\"],\"Close\":[\"CLOSED\"]}"

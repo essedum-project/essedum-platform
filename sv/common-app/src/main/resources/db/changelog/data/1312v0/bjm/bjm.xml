@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+	
+	
+	<!-- 1.3.12 changes -->
+	<changeSet dbms="mysql" author="BJM-1.3.12.0" id="1312v0-bjm-20211216" runInTransaction="true">
+	<comment>updating queries for dashboards</comment>
+        <sqlFile relativeToChangelogFile="true" splitStatements="true" stripComments="true" path="bjm_mldatasets_mysql_changes.sql" />  
+    </changeSet>
+		<!-- 1.3.12 changes -->
+	<changeSet dbms="mssql" author="BJM-1.3.12.0" id="1312v0-bjm-202112162" runInTransaction="true">
+	<comment>updating queries for dashboards</comment>
+        <sqlFile relativeToChangelogFile="true" splitStatements="true" stripComments="true" path="bjm_mldatasets_mssql_changes.sql" />  
+    </changeSet>
+	
+	
+	
+</databaseChangeLog>
+
+

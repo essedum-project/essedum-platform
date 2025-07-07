@@ -1,0 +1,137 @@
+<div class="col-md-12" *ngIf="data?.category && !data?.category.toLowerCase().endsWith('rest') && !data?.category.toLowerCase().endsWith('git')">
+    <div>
+        <app-datasource-config [ConnectionEdit]="edit" [view]="view" [matData]="data"></app-datasource-config>
+    </div>
+</div> 
+<div *ngIf="data?.category.toLowerCase()=='rest'||data?.category.toLowerCase()=='git'" class="container-fluid backgroud-color">
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="lfx-l-level1-middle-col">
+                    <span *ngIf="initiativeView">
+                        <div *ngIf="view" class="align-items-center d-flex">
+                            <span class="" style="cursor: pointer;">                          
+                                <i class="fa fa-long-arrow-left back-icon" aria-hidden="true" (click)="routeBackToConnectionList()"></i>
+                            </span>
+                            <span class="lfx-u-mar-l-8 lfx-u-header-xxl secondary-color">View Connection</span>
+                        </div>
+                    </span>
+                    <span *ngIf="!initiativeView">
+                        <span class="lfx-u-mar-l-8 aip-desc-title lfx-u-header-xxl"><span
+                                style=" color: #737373;;">Connection:
+                            </span>{{data.alias | titlecase}} </span>
+
+                    </span>
+                    <div *ngIf="edit && !view" class="align-items-center d-flex">
+                        <span class="" style="cursor: pointer;">                          
+                             <i class="fa fa-long-arrow-left back-icon" aria-hidden="true" (click)="routeBackToConnectionList()"></i>
+                        </span>
+                        <span class="lfx-u-mar-l-8 lfx-u-header-xxl secondary-color">Edit Connection</span>
+                    </div>
+                    <div class="lfx-l-level2-middle-ctr">
+                        <div class="lfx-l-level2-middle-col ">
+                            <mat-card class="mat-elevation-z4">
+                                <div class="lfx-u-mar-tb-16 lfx-u-pad-16">
+                                    <div class="row">
+                                        <div class="lfx-l-level2-middle-col">
+                                            <div class="d-flex justify-content-between align-items-center px-4 lfx-u-mar-b-20">
+                                                <div class="align-items-center d-flex">
+                                                    <h2 class="base-color">Connection Properties</h2>
+                                                </div>
+                                            </div>
+                                            <div class="lfx-u-pad-t-32 lfx-u-pad-lr-24">
+                                                <div class="row">
+                                                    <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+                                                    <div>
+                                                        <mat-form-field appearance="fill" style="width: 100%;" floatLabel="always">
+                                                            <mat-label>Display Name</mat-label>
+                                                            <input matInput placeholder="Enter Name..." [(ngModel)]="data.alias" required>
+                                                            <mat-error *ngIf="!data.alias">This field is required</mat-error>
+                                                        </mat-form-field>
+                                                    </div>
+                                                    </div>
+                                                    <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+                                                        <mat-form-field appearance="fill" style="width: 100%;" floatLabel="always">
+                                                            <mat-label>Description</mat-label>
+                                                            <input matInput placeholder="Enter Description..." [(ngModel)]="data.description">
+                                                        </mat-form-field>
+                                                    </div>
+                                                    <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+                                                        <mat-form-field appearance="fill" style="width: 100%;">
+                                                            <mat-label>Connection Type</mat-label>
+                                                            <mat-select [(value)]="data.type" (selectionChange)="onTypeChange($event)">
+                                                                <mat-option *ngFor="let option of typeOptions" [value]="option.value">
+                                                                    {{ option.viewValue }}
+                                                                </mat-option>
+                                                            </mat-select>
+                                                            <mat-hint>Select Connection type</mat-hint>
+                                                        </mat-form-field>
+                                                    </div>
+                                                    <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+                                                        <mat-form-field appearance="fill" style="width: 100%;">
+                                                            <mat-label>Capability</mat-label>
+                                                            <mat-select [(value)]="capability" (selectionChange)="onCapbilityTypeChange($event)" multiple>
+                                                                <mat-option *ngFor="let option of capabilityOptions" [value]="option.value">
+                                                                    {{ option.viewValue }}
+                                                                </mat-option>
+                                                            </mat-select>
+                                                            <mat-hint>Select Capability</mat-hint>
+                                                        </mat-form-field>
+                                                    </div>
+                                                    <mat-accordion *ngIf="data.type.toLowerCase().endsWith('sql')"
+                                                        designType="3D" [hideToggle]="false" [multi]="false">
+                                                        <mat-expansion-panel style="margin-bottom: 10px !important">
+                                                            <mat-expansion-panel-header [collapsedHeight]="'40px'"   [ngStyle]="{'background-color': '#0094ff'}"                                                             [expandedHeight]="'40px'">
+                                                                <mat-panel-title  style="color: white; font-weight: 600;">Connection Details</mat-panel-title>
+                                                            </mat-expansion-panel-header>
+                                                            <div class="table-responsive selector-690-13"
+                                                                *ngIf="formData">
+                                                                <jsonforms *ngIf="attributes" [data]="formData"
+                                                                    [schema]="attributes" [uischema]="uischema"
+                                                                    [renderers]="renderers"
+                                                                    (dataChange)="showData($event)">
+                                                                </jsonforms>
+                                                            </div>
+                                                        </mat-expansion-panel>
+                                                    </mat-accordion>
+                                                    <div class="col-md-12">
+                                                        <div *ngIf="hideDetails">
+                                                            <modal-config-rest-datasource [matData]="data" [datasourcePortJson]="datasourceportsjson"
+                                                                (connectionDetails)='getConnectionDetails($event)'(portDetails)='getPortDetails($event)'
+                                                                [type]="type"
+                                                             [isVaultEnabled]="isVaultEnabled"
+                                                             [capability]= "capability"
+                                                                ></modal-config-rest-datasource>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div *ngIf="edit && !view"
+                                        class="col-lg-12 col-md-12 lfx-u-mar-b-16 d-flex justify-content-end">
+                                        <div *ngIf="hideDetails">
+                                            <button mat-raised-button style="background-color: #0a142f; color: white;"
+                                                [disabled]="false" (click)="testConnection()" 
+                                                onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';" 
+                                                onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                                Test
+                                            </button>
+                                        </div>&nbsp;
+                                        <button mat-raised-button style="background-color: #0a142f; color: white;"
+                                            [disabled]="false" (click)="updateConnection()" 
+                                            onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';" 
+                                            onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                            Update
+                                        </button>
+                                    </div>
+                                </div>
+                            </mat-card>
+                        </div>
+                      
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>

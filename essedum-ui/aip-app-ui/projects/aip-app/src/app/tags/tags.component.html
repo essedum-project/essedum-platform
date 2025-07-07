@@ -1,0 +1,29 @@
+<div class="mx-3 my-4" style="height: 50vh;">
+    <div style="overflow-y:overlay;height:80%;">
+        <div class="mb-4" *ngFor="let cat of category">
+            <div class="flex items-baseline mx-5 mb-3">
+                <h5 class="font-medium lfx-u-header-xl"><b>{{cat | titlecase}}</b></h5>
+            </div>
+            <div class="flex flex-wrap">
+                <a class="tagbrdr" style="height: fit-content;"
+                    [ngStyle]="{'background-color': (inc==selectedTag || tagStatus[inc.category+' - '+inc.label]) ? 'lightgrey' : 'white'}"
+                    *ngFor="let inc of tags[cat]">
+                    <span style="font-size:14px;cursor:pointer" (click)="filterByTag(inc)">{{inc.label}}
+                    </span> </a>&nbsp;&nbsp;
+                <a style="margin-top:5% " *ngIf="tagsBackup[cat]?.length>10" (click)="showMore(cat)"
+                    href="javascript:void(0)">
+                    <span [ngClass]="!catStatus[cat]?'fa fa-plus-square': 'fa fa-minus-square'"></span>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-end">
+        <button mat-raised-button style="background-color: #0a142f; color: white;" [disabled]="false"
+            (click)="updateTag()"
+            (mouseover)=" $event.target.style.backgroundColor='#0094ff'; $event.target.style.color='white';"
+            (mouseout)=" $event.target.style.backgroundColor='#0a142f'; $event.target.style.color='white';">
+            Add Tags to {{ componentType =='pipelines' ? 'Pipeline' : (componentType =='model' ? 'Model' : 'App')}}
+        </button>
+    </div>
+
+</div>

@@ -1,0 +1,7 @@
+Agent_ID,Agent_Name,Rec_Act_Ind,Last_Updated_Dts,Agent_Published_Dts,Agent_Status,Agent_Feature,Agent_Version,Last_Updated_By,UserID,RoleID,portfolioId
+1,Infybot,TRUE,2020-04-15T03:19:38,2020-04-15T03:19:38,Active,Test,V10.0,1,,,
+2,AcmeBot,TRUE,2020-04-15T03:19:39,2020-04-15T03:19:39,Active,ACME_Feature,1,1,,,
+3,ProccessInvoiceResolver,TRUE,2020-04-15T03:19:39,2020-04-15T03:19:39,Active,ACME_Feature,1,1,,,
+4,Extractor,TRUE,2020-04-15T03:19:39,2020-04-15T03:19:39,Active,ACME_Feature,1,1,,,
+5,Classifier,TRUE,2020-04-15T03:19:39,2020-04-15T03:19:39,Active,ACME_Feature,1,1,,,
+6,ITAFBot,TRUE,2021-06-08T17:05:27,2021-06-08T17:05:27,Active,Testing bot for 1311 ITAF,V1,1,,,

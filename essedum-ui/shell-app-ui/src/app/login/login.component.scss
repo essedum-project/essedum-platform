@@ -1,0 +1,93 @@
+.logo-common{
+    font-size: 58px;
+}
+
+.DSA_logoMid{
+    top: 20px !important;
+    margin-top: 0px !important;
+    right: 0px !important;
+    margin-left: 1%;
+    text-align: left;
+    position: relative;
+}
+
+.lfx-l-mainwrapper--login{
+    background: url(/assets/images/bg.webp) no-repeat !important;
+    background-size: cover !important;
+}
+
+.lfx-l-pageoverlay{
+    min-height: 551px;
+    height: 100vh;
+    background-color: rgba(0, 148, 255, 0.5);
+}
+
+.lfx-l-login-mid{
+    margin-right: 130px;
+}
+.lfx-l-login-ctr {
+    margin-top: auto !important;
+    position: relative;
+    height: 400px !important;
+    height: 100vh;
+}
+
+.lfx-l-login-mar{
+    margin-bottom:unset !important;
+}
+.demoButton{
+    margin: 28% 20%;
+}
+
+::ng-deep .le-l-login-ctr .mat-mdc-unelevated-button {
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+
+.lfx-u-text-black{
+    color:black !important;
+}
+
+.lfx-c-btn--hyperlink{
+    text-decoration: underline;
+    color: #0094ff;
+}
+
+a.lfx-c-btn--hyperlink {
+    font-family: roboto, Arial, sans-serif !important;
+    font-weight: 400;
+    font-style: normal;
+    color: #0094ff !important;;
+    font-size: 1.4rem;
+    background: none;
+    border: none;
+    outline: none;
+    text-decoration: underline;
+}
+
+.base-color{  
+    color: #0094ff !important;
+}
+
+
+.secondary-color{
+    color:#0a142f !important;
+}
+
+.lfx-u-text-black
+ {
+    color: #000;
+}
+
+.lfx-u-body-md {
+    font-size: 1.4rem;
+    font-weight: 400;
+    font-family: roboto, Arial, sans-serif !important;
+    font-style: normal;
+}
+
+::ng-deep .mat-mdc-tab-body-content {
+    height: 100%;
+    overflow: hidden !important; 
+  }

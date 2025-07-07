@@ -1,0 +1,307 @@
+<div class="container-fluid">
+    <div class="col-md-12 col-lg-12 col-xl-12"
+        style="display: inline-flex; align-items: self-start; padding-top: 1em; padding-bottom: 1em; padding-left: 0; padding-right: 0;justify-content: space-between;">
+        <div class="col-8" style="padding: 0; display:flex;">
+            <span class="mx-2 aip-cursor" *ngIf="initiativeView">
+                <mat-icon class="aip-led-icons" (click)="toggler()"
+                    [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
+                    matTooltipPosition="above" (mouseenter)="isBackHovered = true"
+                    (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
+            </span>
+            <h2 style="margin: 0%;">App : {{streamItem?.alias}}</h2>
+        </div>
+        <div class="icons-group" style="padding: 0;">
+            <mat-icon *ngIf="editAuth &&!isrunApp &&!isVideo && appData?.scope=='internal'" class="icons"
+                style="padding-right: 1.5em;" matTooltip="Configure" (click)="openWdModal(content2)">settings</mat-icon>
+            <span *ngIf="editAuth && !(appData?.scope==='video')" style="padding-right: 1.5em;">
+                <button mat-icon-button matTooltip="Try out link" (click)="open(content3)">
+                    <mat-icon style="transform: rotate(-45deg);">link</mat-icon>
+                </button>
+            </span>
+            <span *ngIf="isOverview" (click)="openModal(content4)">
+                <button mat-icon-button [matTooltip]="addTags" [matTooltipPosition]="tooltipPoition"
+                    class="aip-led-icons" type="button">
+                    <mat-icon>local_offer</mat-icon>
+                </button>
+                <ng-template #content4 let-modal>
+                    <app-tags [data]="appData" [entityType]="'apps'" [componentType]="'apps'"></app-tags>
+                </ng-template>
+            </span>
+        </div>
+    </div>
+    <div *ngIf="isrunApp">
+        <div *ngIf="showSpinner && !isVideo" class="loading" id="loading" style="position: relative; z-index: 1000;">
+            <div
+                style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px;">
+                <mat-progress-spinner color="primary" mode="indeterminate" diameter="48">
+                </mat-progress-spinner>
+                <img alt="Loading" src="https://surveys.infosysapps.com/assets/gifs/loading.svg"
+                    style="margin-top: 1em;" />
+                <span style="margin-top: 0.5em;">Loading ...</span>
+            </div>
+        </div>
+
+        <iframe id="iframe" *ngIf="!isVideo" width="100%" height="100%" style="height: 80vh;" frameBorder="0"
+            [src]="urlSafe"></iframe>
+
+
+        <div *ngIf="isVideo">
+            <app-viewer-video [VideoResponse]="datasetData" [videoViewDetails]="fileName"></app-viewer-video>
+        </div>
+    </div>
+
+    <mat-card *ngIf="isMfe" class="lfx-u-pad-16">
+        <ng-container #loadAppContainer></ng-container>
+        <ng-container *ngComponentOutlet="componentMfe"></ng-container>
+    </mat-card>
+
+    <div *ngIf="switchtoVideoView">
+        <app-viewer-video *ngIf="videoUrl" [VideoResponse]="videoUrl"></app-viewer-video>
+    </div>
+
+</div>
+<div *ngIf="isOverview">
+
+    <div class="lfx-l-level1-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="lfx-l-level1-middle-col lfx-l-base-layout-center" style="padding-top: 0px;">
+                    <div class="lfx-l-level2-middle-ctr">
+                        <div class="lfx-l-level2-middle-col lfx-u-mar-b-24__mb" style="width:75%;">
+                            <div
+                                class="col-md-12 col-lg-12 aip-desc lfx-u-pad-b-8 lfx-u-pad-tb-16 aip-panel-shadow">
+                                <div class="col-8" style="padding: 0; display:flex;">
+                                    <h3 style="margin: 0%;">Overview</h3>
+
+                                </div>
+
+                                <div class="ml-2 row col-md-12">
+
+                                    <div class="lfx-u-body-sm mt-3 aip-label-color">
+                                        Description
+                                    </div>
+                                    <div class="lfx-u-body-md mt-3" style="min-height: 4rem;">
+                                        <p class="lfx-u-body-md lfx-u-text-neutral-80 lfx-u-line-2">
+
+                                            {{appDescription}}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="ml-2 row col-md-12">
+                                    <div class="lfx-u-body-sm mt-3 aip-label-color">
+                                        App Tryout Link
+                                    </div>
+                                    <div class="lfx-u-body-md mt-3 flex" style="min-height: 4rem;">
+                                        <p class="lfx-u-body-md lfx-u-text-neutral-80 lfx-u-line-2 w-75">
+                                            {{apptryoutlink}}
+                                        </p>
+                                        <mat-icon class="icons lfx-u-mar-l-32 aip-cursor" matTooltip="Try out link"
+                                            (click)="openInNewTab()">launch</mat-icon>
+                                    </div>
+                                </div>
+
+                                <div class="ml-2 row col-md-12">
+
+                                    <div class="lfx-u-body-sm mt-3 aip-label-color">
+                                        App Type
+                                    </div>
+                                    <div class="lfx-u-body-md mt-3" style="min-height: 4rem;">
+                                        <p class="lfx-u-body-md lfx-u-text-neutral-80 lfx-u-line-2">
+
+                                            {{appType}}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div *ngIf="appType === 'pipeline' || appType === 'chain' || appType === 'video'"
+                                    class="ml-2 row col-md-12">
+                                    <div *ngIf="!(appType === 'video')" class="lfx-u-body-sm mt-3 aip-label-color">
+                                        Job Name
+                                    </div>
+                                    <div *ngIf="appType === 'video'" class="lfx-u-body-sm mt-3 aip-label-color">
+                                        Dataset Name
+                                    </div>
+                                    <div *ngIf="!(appType === 'video')" class="lfx-u-body-md mt-3"
+                                        style="min-height: 4rem;">
+                                        <p class="lfx-u-body-md lfx-u-text-neutral-80 lfx-u-line-2">
+
+                                            {{jobName}}
+                                        </p>
+                                    </div>
+                                    <div *ngIf="appType === 'video'" class="lfx-u-body-md mt-3"
+                                        style="min-height: 4rem;">
+                                        <p class="lfx-u-body-md lfx-u-text-neutral-80 lfx-u-line-2">
+
+                                            {{dataset.alias}}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="mt-5 lfx-u-mar-l-8">
+                                    <hr class="aip-line" />
+                                    <div class="row">
+                                        <div class="aip-createdBy col-md-6">
+                                            <div class="lfx-u-body-sm aip-label-color">Created By</div>
+                                            <div class="flex mt-2 align-items-center " *ngIf="createdBy">
+                                                <div class="lfx-c-avatar  lfx-c-avatar--sm" style="margin: 0 2rem 0 0;">
+                                                    {{getShortName(createdBy)}}</div>
+                                                <div class="lfx-u-body-md">{{createdBy}}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="lfx-u-body-sm aip-label-color">Created On</div>
+                                            <div class="lfx-u-body-md  mt-3">{{createdDate}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr class="aip-line" />
+                                <!-- <iframe #pdfIframe width="100%" height="500px"></iframe> -->
+                            </div>
+
+                        </div>
+                        <div class="lfx-l-level2-right-col" *ngIf="initiativeView">
+
+                            <mat-card class="mb-3">
+                                <div class="lfx-c-panel__content">
+                                    <div class="lfx-u-pad-16">
+                                        <div class="lfx-u-header-lg lfx-u-mar-b-16">Connected Artifacts</div>
+                                        <div *ngIf="component.length > 0; else noRelatedComponent">
+                                            <ul class="mat-list" style="padding-left: 0;">
+                                                <li class="aip-daa" *ngFor="let component of component">
+                                                    <app-related-component [component]="component"
+                                                        [childId]="this.appId" [parentType]="'APP'"
+                                                        (reload)="reload($event)">
+                                                    </app-related-component>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <ng-template #noRelatedComponent>
+                                            <div
+                                                class="lfx-u-body-md lfx-u-text-neutral-80 lfx-u-line-2 aip-desc-ellipsis">
+                                                <div class="flex justify-content-center align-items-center flex-column">
+                                                    <img src="assets/images/aip_empty_state_leds.svg"
+                                                        class="img-responsive img-color" alt="aip_empty_state_leds"
+                                                        style="width:15rem" />
+                                                    No connected artifacts for now!
+                                                </div>
+                                            </div>
+                                        </ng-template>
+                                    </div>
+                                </div>
+                                <div class="lfx-u-mar-t-8">
+                                    <li *ngIf="linkAuth" style="list-style: none;">
+                                        <div *ngIf="relatedloaded">
+                                            <div class="lds-ring">
+                                                <div></div>
+                                                <div></div>
+                                                <div></div>
+                                                <div></div>
+                                            </div>
+                                        </div>
+                                        <div class="aip-cursor lfx-u-pad-l-8 lfx-u-pad-b-8" *ngIf="!relatedloaded"
+                                            (click)="openModal(linker)">
+                                            <div class="flex aip-daa lfx-u-mar-8 lfx-u-pad-8 align-items-center"
+                                                style="width: max-content;">
+                                                <div class="lfx-u-mar-lr-8">
+                                                    <mat-icon
+                                                        style="color: #0094ff; transform: rotate(-45deg);">link</mat-icon>
+                                                </div>
+                                                <div class="lfx-u-body-md">Link Artifacts</div>
+                                            </div>
+                                        </div>
+                                        <ng-template #linker let-modal>
+                                            <app-create-linked [data]="this.streamItem.cid" [type]="'APP'"
+                                                (refeshrelated)="refeshrelated($event)" [component]="component">
+                                            </app-create-linked>
+                                        </ng-template>
+                                    </li>
+                                </div>
+                            </mat-card>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<ng-template #content3 let-modal>
+    <div style="padding: 1em;">
+        <div class="mat-dialog-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <h4 class="lfx-u-header-xl" id="modal-basic-title" style="margin: 0;">Try out link</h4>
+            <mat-icon mat-dialog-close>close</mat-icon>
+        </div>
+        <div class="mat-dialog-content" style="margin-top: 1em;">
+            <mat-form-field appearance="fill" class="w-100">
+                <mat-label>Link</mat-label>
+                <input matInput placeholder="Link" [(ngModel)]="appData.tryoutlink">
+            </mat-form-field>
+        </div>
+        <div class="mat-dialog-actions" style="justify-content: flex-end;">
+            <button mat-flat-button mat-dialog-close color="primary" class="lfx-u-mar-r-8" [disabled]="!editAuth"
+                type="button" (click)="updateUrl()">
+                Update
+            </button>
+        </div>
+
+    </div>
+</ng-template>
+<ng-template #content2 let-modal>
+    <div style="padding: 1em; height: 80vh; overflow: auto;">
+
+        <div class="mat-dialog-title" style="display: flex; justify-content: flex-end;">
+            <button mat-icon-button aria-label="Close" (click)="basicReqTab='overviewTab'">
+                <mat-icon mat-dialog-close>close</mat-icon>
+            </button>
+        </div>
+
+
+        <div class="mat-dialog-content">
+            <div class="row mt-4">
+                <mat-tab-group (selectedIndexChange)="basicReqTabChange($event)">
+
+                    <mat-tab class="apptab" label="Configuration">
+                        <ng-template mat-tab-label>Configuration</ng-template>
+                    </mat-tab>
+                    <mat-tab class="apptab" label="Script">
+                        <ng-template mat-tab-label>Script</ng-template>
+                    </mat-tab>
+                    <mat-tab class="apptab" label="Jobs">
+                        <ng-template mat-tab-label>Jobs</ng-template>
+                    </mat-tab>
+                </mat-tab-group>
+
+                <div *ngIf="basicReqTab=='configTab'" class="tab_content row" id="tabContent_1">
+                    <app-app-config [configData]="configData"></app-app-config>
+                </div>
+                <div *ngIf="basicReqTab=='scriptTab'" class="tab_content row" id="tabContent_2">
+                    <div class="flex">
+                        <div class="controls selector-764-44" style="margin-top: 5px">
+                            <mat-form-field appearance="fill" style="min-width: 200px;">
+                                <mat-label>Run Type</mat-label>
+                                <mat-select [(ngModel)]="selectedRunType" name="RunTypes">
+                                    <mat-option *ngFor="let j of runTypes" [value]="j">
+                                        {{j.type}}-{{j.dsAlias}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <button mat-icon-button matTooltip="Start" (click)="runPipeline()">
+                                <mat-icon>play_circle_filled</mat-icon>
+                            </button>
+                            <button mat-icon-button matTooltip="Save" (click)="saveScript()">
+                                <mat-icon>save</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                    <enl-code-editor [lang]="'python'" [script]="script" (scriptChange)="onScriptChange($event)"
+                        style="height:80vh;">
+                    </enl-code-editor>
+                </div>
+                <div *ngIf="basicReqTab=='jobsTab'" class="tab_content row" id="tabContent_3">
+                    <div style="position: relative" class="selector-773-34">
+                        <app-jobs [cname]="appname" style="height: 80vh;"></app-jobs>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>

@@ -1,0 +1,55 @@
+ <?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+
+<changeSet author="Leap" id="3v0-sre-10252024-1">
+                <sql dbms="mysql" splitStatements="true" stripComments="true"> 
+update mldataset set attributes ='{"filter":"","mode":"query","Query":"SELECT sre_app_availability.application_name  AS  ''APPLICATION NAME'',  sre_app_availability.application_grp_name AS ''APPLICATION GROUP NAME'',  sre_app_availability.probe_name AS ''PROBE NAME'' , sre_app_availability.location_name AS ''LOCATION NAME'',   sre_app_availability.perc_availability AS ''PERCENTAGE AVAILABILITY'' FROM sre_app_availability   INNER JOIN ccl_app ON  ccl_app.application_id=sre_app_availability.application_id  WHERE ccl_app.project_id=({projectId}) AND   sre_app_availability.application_name IN ({application_name})","Cacheable":"false","isStreaming":"false","defaultValues":"","writeMode":"append","params":"{''projectId'':''ccl_app.project_id'',''application_name'':''sre_app_availability.application_name''}","tableName":"","uniqueIdentifier":""}' where alias = 'allapplicationsperc' and organization = 'leo1311';
+
+                </sql> 
+                <sql dbms="mysql" splitStatements="true" stripComments="true">
+update mldataset set attributes ='{"filter":"","mode":"query","Query":"SELECT application_grp_name AS ''Application Group Name'',location_name AS ''Location Name'',run_start_time AS ''Run Start Time'',run_end_time AS ''Run End Time'',run_time AS ''Run Time''
+FROM sre_probe_run_app
+INNER JOIN ccl_app ON sre_probe_run_app.application_id = ccl_app.application_id
+INNER JOIN ccl_app_grp ON ccl_app.application_grp_id = ccl_app_grp.application_grp_id
+INNER JOIN sre_location ON sre_probe_run_app.location_id = sre_location.location_id
+WHERE run_result = 1
+AND ccl_app.project_id = ccl_app.project_id
+GROUP BY application_grp_name, location_name, run_start_time, run_end_time, run_time","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"" ,"tableName":"","uniqueIdentifier":""}' where alias = 'testapplicationgroupwithactiveprobe' and organization = 'leo1311';
+                </sql>
+                <sql dbms="mysql" splitStatements="true" stripComments="true">
+update mldataset set attributes ='{"filter":"","mode":"query","Query":"SELECT application_name AS ''Application Name'',
+       run_start_time AS ''Start Time'',
+       run_end_time AS ''End Time''
+FROM (
+    SELECT ccl_app.application_name,
+           sre_probe_run_app.run_start_time,
+           sre_probe_run_app.run_end_time,
+           ROW_NUMBER() OVER (PARTITION BY ccl_app.application_name ORDER BY sre_probe_run_app.run_start_time DESC) AS rn
+    FROM ccl_app
+    INNER JOIN sre_probe_run_app ON sre_probe_run_app.application_id = ccl_app.application_id
+    WHERE project_id = {projectId} AND run_result = 0
+) AS ranked
+WHERE rn =1","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"" ,"tableName":"","uniqueIdentifier":""}' where alias = 'Failed_Applications_Name' and organization = 'leo1311';
+              </sql>
+              <sql dbms="mysql" splitStatements="true" stripComments="true">
+
+update mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT SUM(counts) AS total_count
+FROM (
+    SELECT COUNT(*) AS counts
+    FROM sre_location
+    INNER JOIN sre_probe_run_app ON sre_probe_run_app.location_id = sre_location.location_id
+    INNER JOIN ccl_app ON sre_probe_run_app.application_id = ccl_app.application_id
+    INNER JOIN ccl_app_grp ON ccl_app_grp.application_grp_id = ccl_app.application_grp_id
+    WHERE location_name IN (location_name) 
+      AND application_name IN (application_name)
+      AND run_date BETWEEN '2019-09-01' AND '2023-12-30'
+      AND run_result IN ('0', '1') 
+      AND application_grp_name IN (application_grp_name)
+    GROUP BY probe_run_app_id, run_description, SUT, run_start_time, run_end_time, run_result
+) AS grouped_counts","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"" ,"tableName":"","uniqueIdentifier":""}' where alias = 'ApplicationDetails' and organization = 'leo1311';
+              </sql>
+
+
+       </changeSet>
+</databaseChangeLog>

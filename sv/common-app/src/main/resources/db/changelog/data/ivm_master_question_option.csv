@@ -1,0 +1,2110 @@
+id,option_text,question_id,score,impact
+3194,Not Met,777,1,"No DDoS protection implemented from multiple telcos/service providers and local appliance.\
+If a DDoS attack happens, and the load is increased, the system will be degraded as the resources are utilized at maximum."
+3195,Partial Met,777,3,"No DDoS protection implemented from multiple telcos/service providers and local appliance.\
+If a DDoS attack happens, and the load is increased, the system will be degraded as the resources are utilized at maximum."
+3196,Fully Met,777,5,No impact as system is matured.
+3197,Not Applicable,777,0,No impact as capability is not applicable.
+3198,Not Met,778,1,"No Lateral attack protection in place for inbound communication.\
+This attack compromises a trusted user to get access into the network and uses it to attack other trusted users.\
+This compromises on cyber resiliency for the systems."
+3199,Partial Met,778,3,"No Lateral attack protection in place for inbound communication.\
+This attack compromises a trusted user to get access into the network and uses it to attack other trusted users.\
+This compromises on cyber resiliency for the systems."
+3200,Fully Met,778,5,No impact as system is matured.
+3201,Not Applicable,778,0,No impact as capability is not applicable.
+3202,Not Met,779,1,"No DDoS protection implemented from both telco/service provider and local appliance.\
+If a DDoS attack happens, and the load is increased, the system will be degraded as the resources are utilized at maximum."
+3203,Partial Met,779,3,"No DDoS protection implemented from both telco/service provider and local appliance.\
+If a DDoS attack happens, and the load is increased, the system will be degraded as the resources are utilized at maximum."
+3204,Fully Met,779,5,No impact as system is matured.
+3205,Not Applicable,779,0,No impact as capability is not applicable.
+3206,Not Met,780,1,To be Updated
+3207,Partial Met,780,3,To be Updated
+3208,Fully Met,780,5,No impact as system is matured.
+3209,Not Applicable,780,0,No impact as capability is not applicable.
+3210,Not Met,781,1,"Certificate process is not fully automated.\
+Risk of service not working or behaving as expected as there is possibility of missing steps during the certificate renewal, if any manual steps present."
+3211,Partial Met,781,3,"Certificate process is not fully automated.\
+Risk of service not working or behaving as expected as there is possibility of missing steps during the certificate renewal, if any manual steps present."
+3212,Fully Met,781,5,No impact as system is matured.
+3213,Not Applicable,781,0,No impact as capability is not applicable.
+3214,Not Met,782,1,"No DDoS protection implemented.\
+If a DDoS attack happens, and the load is increased, the system will be degraded as the resources are utilized at maximum."
+3215,Partial Met,782,3,"No DDoS protection implemented.\
+If a DDoS attack happens, and the load is increased, the system will be degraded as the resources are utilized at maximum."
+3216,Fully Met,782,5,No impact as system is matured.
+3217,Not Applicable,782,0,No impact as capability is not applicable.
+3218,Not Met,783,1,"No Lateral attack protection in place either at device or service level both for inbound and outbound communication.\
+This attack compromises a trusted user to get access into the network and uses it to attack other trusted users.\
+This compromises on cyber resiliency for the systems."
+3219,Partial Met,783,3,"No Lateral attack protection in place either at device or service level both for inbound and outbound communication.\
+This attack compromises a trusted user to get access into the network and uses it to attack other trusted users.\
+This compromises on cyber resiliency for the systems."
+3220,Fully Met,783,5,No impact as system is matured.
+3221,Not Applicable,783,0,No impact as capability is not applicable.
+3222,Not Met,784,1,"The service is not capable enough of absorbing 10X capacity.\
+If a DoS attack happens, and the load is increased beyond 10X, the system will be degraded as the resources are utilized at maximum."
+3223,Partial Met,784,3,"The service is not capable enough of absorbing 10X capacity.\
+If a DoS attack happens, and the load is increased beyond 10X, the system will be degraded as the resources are utilized at maximum."
+3224,Fully Met,784,5,No impact as system is matured.
+3225,Not Applicable,784,0,No impact as capability is not applicable.
+3226,Not Met,785,1,"Certificate renewal process is not automated and manual steps are required to complete the renewal process.\
+Risk of service not working or behaving as expected as there is possibility of missing steps during the certificate renewal."
+3227,Partial Met,785,3,"Certificate renewal process is not automated and manual steps are required to complete the renewal process.\
+Risk of service not working or behaving as expected as there is possibility of missing steps during the certificate renewal."
+3228,Fully Met,785,5,No impact as system is matured.
+3229,Not Applicable,785,0,No impact as capability is not applicable.
+3230,Not Met,786,1,"No auto scaling capability in place for the service.\
+This makes the service degrade when there is a peak load of traffic as the system resources gets exhausted.\
+This impacts the availability of the service."
+3231,Partial Met,786,3,"No auto scaling capability in place for the service.\
+This makes the service degrade when there is a peak load of traffic as the system resources gets exhausted.\
+This impacts the availability of the service."
+3232,Fully Met,786,5,No impact as system is matured.
+3233,Not Applicable,786,0,No impact as capability is not applicable.
+3234,Not Met,787,1,"Mutli level DDoS protection in place but no automatic scaling implemented.\
+This makes the service degrade when there is a peak load of traffic as the system resources gets exhausted.\
+This impacts the availability of the service."
+3235,Partial Met,787,3,"Mutli level DDoS protection in place but no automatic scaling implemented.\
+This makes the service degrade when there is a peak load of traffic as the system resources gets exhausted.\
+This impacts the availability of the service."
+3236,Fully Met,787,5,No impact as system is matured.
+3237,Not Applicable,787,0,No impact as capability is not applicable.
+3238,Not Met,788,1,"No Lateral attack protection in place for inbound and outbound communication.\
+This attack compromises a trusted user to get access into the network and uses it to attack other trusted users.\
+This compromises on cyber resiliency for the systems."
+3239,Partial Met,788,3,"No Lateral attack protection in place for inbound and outbound communication.\
+This attack compromises a trusted user to get access into the network and uses it to attack other trusted users.\
+This compromises on cyber resiliency for the systems."
+3240,Fully Met,788,5,No impact as system is matured.
+3241,Not Applicable,788,0,No impact as capability is not applicable.
+3242,Not Met,789,1,"Certificate renewal process is not fully automated and issuing of CA/KPI service is not highly available.\
+Risk of service not working or behaving as expected as there is possibility of missing steps during the certificate renewal, if any manual steps present."
+3243,Partial Met,789,3,"Certificate renewal process is not fully automated and issuing of CA/KPI service is not highly available.\
+Risk of service not working or behaving as expected as there is possibility of missing steps during the certificate renewal, if any manual steps present."
+3244,Fully Met,789,5,No impact as system is matured.
+3245,Not Applicable,789,0,No impact as capability is not applicable.
+3246,Not Met,790,1,"No Lateral attack protection in place either at device or service level protection for inbound and network level protection outbound.\
+This attack compromises a trusted user to get access into the network and uses it to attack other trusted users.\
+This compromises on cyber resiliency for the systems."
+3247,Partial Met,790,3,"No Lateral attack protection in place either at device or service level protection for inbound and network level protection outbound.\
+This attack compromises a trusted user to get access into the network and uses it to attack other trusted users.\
+This compromises on cyber resiliency for the systems."
+3248,Fully Met,790,5,No impact as system is matured.
+3249,Not Applicable,790,0,No impact as capability is not applicable.
+3250,Not Met,791,1,Risk of service not working or behaving as expected as there is possibility of missing certificate renewal if there are no alerts
+3251,Partial Met,791,3,Risk of service not working or behaving as expected as there is possibility of missing certificate renewal if there are no alerts
+3252,Fully Met,791,5,No impact as system is matured.
+3253,Not Applicable,791,0,No impact as capability is not applicable.
+3254,Not Met,792,1,"The service is not capable enough of absorbing 5X capacity.\
+If a DoS attack happens, and the load is increased beyond 2X, the system will be degraded as the resources are utilized at maximum."
+3255,Partial Met,792,3,"The service is not capable enough of absorbing 5X capacity.\
+If a DoS attack happens, and the load is increased beyond 2X, the system will be degraded as the resources are utilized at maximum."
+3256,Fully Met,792,5,No impact as system is matured.
+3257,Not Applicable,792,0,No impact as capability is not applicable.
+3258,Not Met,793,1,"No signed contract(SLA) exist with the data owner.\
+If quality data is not produced by data owner or not produced within specified time, this impact the systems and affects the business operations."
+3259,Partial Met,793,3,"No signed contract(SLA) exist with the data owner.\
+If quality data is not produced by data owner or not produced within specified time, this impact the systems and affects the business operations."
+3260,Fully Met,793,5,No impact as system is matured.
+3261,Not Applicable,793,0,No impact as capability is not applicable.
+3262,Not Met,794,1,"Data transformation process is not documented.\
+This creates lack of understanding on how the data is transformed across the systems from source to target.\
+Difficult to analyze the data flows when an issue occurr across the systems."
+3263,Partial Met,794,3,"Data transformation process is not documented.\
+This creates lack of understanding on how the data is transformed across the systems from source to target.\
+Difficult to analyze the data flows when an issue occurr across the systems."
+3264,Fully Met,794,5,No impact as system is matured.
+3265,Not Applicable,794,0,No impact as capability is not applicable.
+3266,Not Met,795,1,"No data integrity checks implemented as part of data processing.\
+This causes to pass through the incomplete data or irrelevant data to the dependent or downstream systems for further processing, resulting in impacting the business operations.\
+For example: the data format may be different across the systems which are involved in processing."
+3267,Partial Met,795,3,"No data integrity checks implemented as part of data processing.\
+This causes to pass through the incomplete data or irrelevant data to the dependent or downstream systems for further processing, resulting in impacting the business operations.\
+For example: the data format may be different across the systems which are involved in processing."
+3268,Fully Met,795,5,No impact as system is matured.
+3269,Not Applicable,795,0,No impact as capability is not applicable.
+3270,Not Met,796,1,"User activity logging is not monitored/tracked.\
+In case, if there are any data inconsistency issues, it will be difficult to track to know who made the changes to the data.\
+This may lead to violate the regulatory requirement."
+3271,Partial Met,796,3,"User activity logging is not monitored/tracked.\
+In case, if there are any data inconsistency issues, it will be difficult to track to know who made the changes to the data.\
+This may lead to violate the regulatory requirement."
+3272,Fully Met,796,5,No impact as system is matured.
+3273,Not Applicable,796,0,No impact as capability is not applicable.
+3274,Not Met,797,1,"Proper access and views are not maintained for data based on the user role, location etc.\
+This may lead to data inconsistency if users update incorrect data.\
+Due to this incorrect data, application functionalities may not work as expected.\
+This also may arise data privacy issues."
+3275,Partial Met,797,3,"Proper access and views are not maintained for data based on the user role, location etc.\
+This may lead to data inconsistency if users update incorrect data.\
+Due to this incorrect data, application functionalities may not work as expected.\
+This also may arise data privacy issues."
+3276,Fully Met,797,5,No impact as system is matured.
+3277,Not Applicable,797,0,No impact as capability is not applicable.
+3278,Not Met,798,1,"No regular data quality checks in place for the data being processed.\
+This causes to pass through incorrect/incomplete data which results in unexpected application behaviour and impacts business operations."
+3279,Partial Met,798,3,"No regular data quality checks in place for the data being processed.\
+This causes to pass through incorrect/incomplete data which results in unexpected application behaviour and impacts business operations."
+3280,Fully Met,798,5,No impact as system is matured.
+3281,Not Applicable,798,0,No impact as capability is not applicable.
+3282,Not Met,799,1,"Either manual/no process in place to detect the data deletion and rolling back the data.\
+This leads to data inaccuracy and  inconsistency issues.\
+The service disruption can occur/service will not perform as expected."
+3283,Partial Met,799,3,"Either manual/no process in place to detect the data deletion and rolling back the data.\
+This leads to data inaccuracy and  inconsistency issues.\
+The service disruption can occur/service will not perform as expected."
+3284,Fully Met,799,5,No impact as system is matured.
+3285,Not Applicable,799,0,No impact as capability is not applicable.
+3286,Not Met,800,1,"No exit strategies are explored for data migration to another platform.\
+This will become expensive, time cosuming and could lead to data loss."
+3287,Partial Met,800,3,"No exit strategies are explored for data migration to another platform.\
+This will become expensive, time cosuming and could lead to data loss."
+3288,Fully Met,800,5,No impact as system is matured.
+3289,Not Applicable,800,0,No impact as capability is not applicable.
+3290,Not Met,801,1,"No test plan in place for the procedures used for data transformation workloads.\
+This may cause issues while the data is transformed from one format to another and the systems that use this data will get impacted.\
+This compromises data quality."
+3291,Partial Met,801,3,"No test plan in place for the procedures used for data transformation workloads.\
+This may cause issues while the data is transformed from one format to another and the systems that use this data will get impacted.\
+This compromises data quality."
+3292,Fully Met,801,5,No impact as system is matured.
+3293,Not Applicable,801,0,No impact as capability is not applicable.
+3294,Not Met,802,1,"No toll gate checks in place to validate prior to manual data deletion.\
+The users may delete the potential data which leads to data inaccuracy.\
+The active transactions might get interrupted."
+3295,Partial Met,802,3,"No toll gate checks in place to validate prior to manual data deletion.\
+The users may delete the potential data which leads to data inaccuracy.\
+The active transactions might get interrupted."
+3296,Fully Met,802,5,No impact as system is matured.
+3297,Not Applicable,802,0,No impact as capability is not applicable.
+3298,Not Met,803,1,"Automated tests does not include immediate systems consumig the data.\
+This makes to send incorrect data to the downstream systems and impact application behaviour and may cause data consistency issues."
+3299,Partial Met,803,3,"Automated tests does not include immediate systems consumig the data.\
+This makes to send incorrect data to the downstream systems and impact application behaviour and may cause data consistency issues."
+3300,Fully Met,803,5,No impact as system is matured.
+3301,Not Applicable,803,0,No impact as capability is not applicable.
+3302,Not Met,804,1,Process orchestration frameworks are not used.
+3303,Partial Met,804,3,Process orchestration frameworks are not used.
+3304,Fully Met,804,5,No impact as system is matured.
+3305,Not Applicable,804,0,No impact as capability is not applicable.
+3306,Not Met,805,1,"Either the ingestion process is not automatically recovered and re-run for failures OR is the process done manually.\
+This makes the business process not to work as expected, since the data is not available.\
+Incident may be raised for the same which impacts the other dependent systems as well."
+3307,Partial Met,805,3,"Either the ingestion process is not automatically recovered and re-run for failures OR is the process done manually.\
+This makes the business process not to work as expected, since the data is not available.\
+Incident may be raised for the same which impacts the other dependent systems as well."
+3308,Fully Met,805,5,No impact as system is matured.
+3309,Not Applicable,805,0,No impact as capability is not applicable.
+3310,Not Met,806,1,"Regular data synchronisation to another vendor platform is not implemented.\
+This will be an issue when a disaster event occur at the primary site and may cause data loss. \
+If the RPO is point of failure, then this cannot be met."
+3311,Partial Met,806,3,"Regular data synchronisation to another vendor platform is not implemented.\
+This will be an issue when a disaster event occur at the primary site and may cause data loss. \
+If the RPO is point of failure, then this cannot be met."
+3312,Fully Met,806,5,No impact as system is matured.
+3313,Not Applicable,806,0,No impact as capability is not applicable.
+3314,Not Met,807,1,"No notifications are generated when source system data is unavailable.\
+This makes the business process not to work as expected, since the data is not available.\
+Incident may be raised for the same which impacts the other dependent systems as well."
+3315,Partial Met,807,3,"No notifications are generated when source system data is unavailable.\
+This makes the business process not to work as expected, since the data is not available.\
+Incident may be raised for the same which impacts the other dependent systems as well."
+3316,Fully Met,807,5,No impact as system is matured.
+3317,Not Applicable,807,0,No impact as capability is not applicable.
+3318,Not Met,808,1,"Data consistency checks are not in place to check the fields completeness etc.\
+This causes to pass through the incomplete data or the unformatted data resulting in unexpected application behaviour and impacts business operations."
+3319,Partial Met,808,3,"Data consistency checks are not in place to check the fields completeness etc.\
+This causes to pass through the incomplete data or the unformatted data resulting in unexpected application behaviour and impacts business operations."
+3320,Fully Met,808,5,No impact as system is matured.
+3321,Not Applicable,808,0,No impact as capability is not applicable.
+3322,Not Met,809,1,"Real time data synchronisation to another vendor platform is not implemented.\
+This will be an issue when a disaster event occur at the site and may cause data loss. \
+If the RPO is point of failure, then this cannot be met."
+3323,Partial Met,809,3,"Real time data synchronisation to another vendor platform is not implemented.\
+This will be an issue when a disaster event occur at the site and may cause data loss. \
+If the RPO is point of failure, then this cannot be met."
+3324,Fully Met,809,5,No impact as system is matured.
+3325,Not Applicable,809,0,No impact as capability is not applicable.
+3326,Not Met,810,1,"Data ingestion process is not monitored for failures.\
+This leads to pass through the incorrect data to the downstream/dependent systems and makes the business process not to work as expected.\
+Also causes data inconsistency."
+3327,Partial Met,810,3,"Data ingestion process is not monitored for failures.\
+This leads to pass through the incorrect data to the downstream/dependent systems and makes the business process not to work as expected.\
+Also causes data inconsistency."
+3328,Fully Met,810,5,No impact as system is matured.
+3329,Not Applicable,810,0,No impact as capability is not applicable.
+3330,Not Met,811,1,"Application is not mapped to HSBC BIM model to deliver structured data.\
+This violates HSBC BIM model approach in determining the golden source for specific data.\
+This causes the systems to have incomplete, inconsistency and accuracy of the data."
+3331,Partial Met,811,3,"Application is not mapped to HSBC BIM model to deliver structured data.\
+This violates HSBC BIM model approach in determining the golden source for specific data.\
+This causes the systems to have incomplete, inconsistency and accuracy of the data."
+3332,Fully Met,811,5,No impact as system is matured.
+3333,Not Applicable,811,0,No impact as capability is not applicable.
+3334,Not Met,812,1,"No data integrity checks implemented as part of data processing.\
+This causes to pass through the incomplete data or irrelevant data  resulting in system behaviour and impacts business operations."
+3335,Partial Met,812,3,"No data integrity checks implemented as part of data processing.\
+This causes to pass through the incomplete data or irrelevant data  resulting in system behaviour and impacts business operations."
+3336,Fully Met,812,5,No impact as system is matured.
+3337,Not Applicable,812,0,No impact as capability is not applicable.
+3338,Not Met,813,1,"Data objects are not versioned which makes the recovery capability does not exist, in case of any issues with newer version.\
+Teams cannot track changes made to the data.\
+This leads the teams to put more efforts to determine the new changes for the data(if any).\
+In case of critical issues/disasters, its diffcult to find and rollback to the right version of the data, which leads to increase data recovery time."
+3339,Partial Met,813,3,"Data objects are not versioned which makes the recovery capability does not exist, in case of any issues with newer version.\
+Teams cannot track changes made to the data.\
+This leads the teams to put more efforts to determine the new changes for the data(if any).\
+In case of critical issues/disasters, its diffcult to find and rollback to the right version of the data, which leads to increase data recovery time."
+3340,Fully Met,813,5,No impact as system is matured.
+3341,Not Applicable,813,0,No impact as capability is not applicable.
+3342,Not Met,814,1,"Either the integration tests not performed OR integration tests manually performed to check the data.\
+Chances of missing the data validation scenarios while performing the tests manually.\
+Unsure whether the data being processed is relevant and secure."
+3343,Partial Met,814,3,"Either the integration tests not performed OR integration tests manually performed to check the data.\
+Chances of missing the data validation scenarios while performing the tests manually.\
+Unsure whether the data being processed is relevant and secure."
+3344,Fully Met,814,5,No impact as system is matured.
+3345,Not Applicable,814,0,No impact as capability is not applicable.
+3346,Not Met,815,1,"Auto healing routines not in place for the creation of missing references for the data.\
+This causes the data inconsistency issues and affects the business operations.\
+Efforts required to identify the missing refereces and to resolve the same."
+3347,Partial Met,815,3,"Auto healing routines not in place for the creation of missing references for the data.\
+This causes the data inconsistency issues and affects the business operations.\
+Efforts required to identify the missing refereces and to resolve the same."
+3348,Fully Met,815,5,No impact as system is matured.
+3349,Not Applicable,815,0,No impact as capability is not applicable.
+3350,Not Met,816,1,"Data backups are taken regularly as per the buisness requirement.\
+Restoration process with backups is not tested on alternative platform.\
+Lack of this process, does not ensure that the backups work in an expected manner when there is an event of database failure. This leads to service degradation."
+3351,Partial Met,816,3,"Data backups are taken regularly as per the buisness requirement.\
+Restoration process with backups is not tested on alternative platform.\
+Lack of this process, does not ensure that the backups work in an expected manner when there is an event of database failure. This leads to service degradation."
+3352,Fully Met,816,5,No impact as system is matured.
+3353,Not Applicable,816,0,No impact as capability is not applicable.
+3354,Not Met,817,1,"Data processing is not documented.\
+This creates lack of understanding on how the data is getting processed across the systems from source to target.\
+Difficult to analyze the data flows when an issue occurr across the systems."
+3355,Partial Met,817,3,"Data processing is not documented.\
+This creates lack of understanding on how the data is getting processed across the systems from source to target.\
+Difficult to analyze the data flows when an issue occurr across the systems."
+3356,Fully Met,817,5,No impact as system is matured.
+3357,Not Applicable,817,0,No impact as capability is not applicable.
+3358,Not Met,818,1,"Access rights to data is not getting regularly reviewed.\
+Risk of unauthorised access to data is high as access rights are not getting regularly reviewed."
+3359,Partial Met,818,3,"Access rights to data is not getting regularly reviewed.\
+Risk of unauthorised access to data is high as access rights are not getting regularly reviewed."
+3360,Fully Met,818,5,No impact as system is matured.
+3361,Not Applicable,818,0,No impact as capability is not applicable.
+3362,Not Met,819,1,"Regular data synchronisation to another vendor platform is not implemented.\
+This will be an issue when a disaster event occur at the primary site and may cause data loss. \
+If the RPO is point of failure, then this cannot be met."
+3363,Partial Met,819,3,"Regular data synchronisation to another vendor platform is not implemented.\
+This will be an issue when a disaster event occur at the primary site and may cause data loss. \
+If the RPO is point of failure, then this cannot be met."
+3364,Fully Met,819,5,No impact as system is matured.
+3365,Not Applicable,819,0,No impact as capability is not applicable.
+3366,Not Met,820,1,"No test plan in place for the procedures used for data processing workloads.\
+This will lead to induce data processing related incidents in production which will compromised data integrity."
+3367,Partial Met,820,3,"No test plan in place for the procedures used for data processing workloads.\
+This will lead to induce data processing related incidents in production which will compromised data integrity."
+3368,Fully Met,820,5,No impact as system is matured.
+3369,Not Applicable,820,0,No impact as capability is not applicable.
+3370,Not Met,821,1,"Data consistency checks are not in place to check the fields completeness etc.\
+This causes to pass through the incomplete data or the unformatted data resulting in unexpected application behaviour and impacts business operations."
+3371,Partial Met,821,3,"Data consistency checks are not in place to check the fields completeness etc.\
+This causes to pass through the incomplete data or the unformatted data resulting in unexpected application behaviour and impacts business operations."
+3372,Fully Met,821,5,No impact as system is matured.
+3373,Not Applicable,821,0,No impact as capability is not applicable.
+3374,Not Met,822,1,"Either the ingestion process is not automatically recovered and re-run for failures OR is the process done manually.\
+This makes the business process not to work as expected, since the data is not available.\
+Incident may be raised for the same which impacts the other dependent systems as well."
+3375,Partial Met,822,3,"Either the ingestion process is not automatically recovered and re-run for failures OR is the process done manually.\
+This makes the business process not to work as expected, since the data is not available.\
+Incident may be raised for the same which impacts the other dependent systems as well."
+3376,Fully Met,822,5,No impact as system is matured.
+3377,Not Applicable,822,0,No impact as capability is not applicable.
+3378,Not Met,823,1,"No signed contract(SLA) exist with the data owner.\
+If quality data is not produced by data owner or not produced within specified time, this impact the systems and affects the business operations."
+3379,Partial Met,823,3,"No signed contract(SLA) exist with the data owner.\
+If quality data is not produced by data owner or not produced within specified time, this impact the systems and affects the business operations."
+3380,Fully Met,823,5,No impact as system is matured.
+3381,Not Applicable,823,0,No impact as capability is not applicable.
+3382,Not Met,824,1,"Due to lack of automation to reprocess or resend the data in case of any issue risk of increased MTTR as data reprocessing is manual and also which may induce any human errors during processing. Business process will be impacted till the time issue data gets reprocessed. \
+In case if no proceudre is then silver level questions risk is applicable as well."
+3383,Partial Met,824,3,"Due to lack of automation to reprocess or resend the data in case of any issue risk of increased MTTR as data reprocessing is manual and also which may induce any human errors during processing. Business process will be impacted till the time issue data gets reprocessed. \
+In case if no proceudre is then silver level questions risk is applicable as well."
+3384,Fully Met,824,5,No impact as system is matured.
+3385,Not Applicable,824,0,No impact as capability is not applicable.
+3386,Not Met,825,1,"No step by step support procedures available for data maintenance for support team.\
+Due to lack of step by step support procedure there is risk of incorrect data update and or possiblility of increased maintenance time by new team member. Possibily data integrity will be compromised and increased MTTR in case of any data issue."
+3387,Partial Met,825,3,"No step by step support procedures available for data maintenance for support team.\
+Due to lack of step by step support procedure there is risk of incorrect data update and or possiblility of increased maintenance time by new team member. Possibily data integrity will be compromised and increased MTTR in case of any data issue."
+3388,Fully Met,825,5,No impact as system is matured.
+3389,Not Applicable,825,0,No impact as capability is not applicable.
+3390,Not Met,826,1,"Either the integration tests not performed OR integration tests manually performed to check the data.\
+Chances of missing the data validation scenarios while performing the tests manually.\
+Unsure whether the data being processed is relevant and secure."
+3391,Partial Met,826,3,"Either the integration tests not performed OR integration tests manually performed to check the data.\
+Chances of missing the data validation scenarios while performing the tests manually.\
+Unsure whether the data being processed is relevant and secure."
+3392,Fully Met,826,5,No impact as system is matured.
+3393,Not Applicable,826,0,No impact as capability is not applicable.
+3394,Not Met,827,1,"No toll gate checks in place to validate prior to manual data deletion.\
+The users may delete the potential data which leads to data inaccuracy.\
+The active transactions might get interrupted."
+3395,Partial Met,827,3,"No toll gate checks in place to validate prior to manual data deletion.\
+The users may delete the potential data which leads to data inaccuracy.\
+The active transactions might get interrupted."
+3396,Fully Met,827,5,No impact as system is matured.
+3397,Not Applicable,827,0,No impact as capability is not applicable.
+3398,Not Met,828,1,"No notifications are generated when source system data is unavailable.\
+This makes the business process not to work as expected, since the data is not available.\
+Incident may be raised for the same which impacts the other dependent systems as well."
+3399,Partial Met,828,3,"No notifications are generated when source system data is unavailable.\
+This makes the business process not to work as expected, since the data is not available.\
+Incident may be raised for the same which impacts the other dependent systems as well."
+3400,Fully Met,828,5,No impact as system is matured.
+3401,Not Applicable,828,0,No impact as capability is not applicable.
+3402,Not Met,829,1,"Data ingestion process is not monitored for failures.\
+This leads to pass through the incorrect data to the downstream/dependent systems and makes the business process not to work as expected.\
+Also causes data inconsistency."
+3403,Partial Met,829,3,"Data ingestion process is not monitored for failures.\
+This leads to pass through the incorrect data to the downstream/dependent systems and makes the business process not to work as expected.\
+Also causes data inconsistency."
+3404,Fully Met,829,5,No impact as system is matured.
+3405,Not Applicable,829,0,No impact as capability is not applicable.
+3406,Not Met,830,1,"User activity logging is not monitored/tracked.\
+In case, if there are any data inconsistency issues, it will be difficult to track to know who made the changes to the data.\
+This may lead to violate the regulatory requirement."
+3407,Partial Met,830,3,"User activity logging is not monitored/tracked.\
+In case, if there are any data inconsistency issues, it will be difficult to track to know who made the changes to the data.\
+This may lead to violate the regulatory requirement."
+3408,Fully Met,830,5,No impact as system is matured.
+3409,Not Applicable,830,0,No impact as capability is not applicable.
+3410,Not Met,831,1,No data consistency checks implemented as part of data processing. This causes to pass through the inconsitent data for processing resulting in incorrect data processed and which may produce wrong results or incident in the system. This may also result in impact on business operations.
+3411,Partial Met,831,3,No data consistency checks implemented as part of data processing. This causes to pass through the inconsitent data for processing resulting in incorrect data processed and which may produce wrong results or incident in the system. This may also result in impact on business operations.
+3412,Fully Met,831,5,No impact as system is matured.
+3413,Not Applicable,831,0,No impact as capability is not applicable.
+3414,Not Met,832,1,"As there is no procedure in place to reprocess/resend the data in case of incompatibility, process failure or any other error there is risk of data processsing not being carried out and business process will get impacted. In case if such issue occures then team doesnt have any procedure to be follow to recover from the situation and get the business process back to normal."
+3415,Partial Met,832,3,"As there is no procedure in place to reprocess/resend the data in case of incompatibility, process failure or any other error there is risk of data processsing not being carried out and business process will get impacted. In case if such issue occures then team doesnt have any procedure to be follow to recover from the situation and get the business process back to normal."
+3416,Fully Met,832,5,No impact as system is matured.
+3417,Not Applicable,832,0,No impact as capability is not applicable.
+3418,Not Met,833,1,"No data integrity checks implemented as part of data processing.\
+This causes to pass through the incomplete data or irrelevant data  resulting in system behaviour and impacts business operations."
+3419,Partial Met,833,3,"No data integrity checks implemented as part of data processing.\
+This causes to pass through the incomplete data or irrelevant data  resulting in system behaviour and impacts business operations."
+3420,Fully Met,833,5,No impact as system is matured.
+3421,Not Applicable,833,0,No impact as capability is not applicable.
+3422,Not Met,834,1,"Data backups are taken regularly as per the buisness requirement.\
+Restoration process with backups is not tested on alternative platform.\
+Lack of this process, does not ensure that the backups work in an expected manner when there is an event of database failure. This leads to service degradation."
+3423,Partial Met,834,3,"Data backups are taken regularly as per the buisness requirement.\
+Restoration process with backups is not tested on alternative platform.\
+Lack of this process, does not ensure that the backups work in an expected manner when there is an event of database failure. This leads to service degradation."
+3424,Fully Met,834,5,No impact as system is matured.
+3425,Not Applicable,834,0,No impact as capability is not applicable.
+3426,Not Met,835,1,"Real time data synchronisation to another vendor platform is not implemented.\
+This will be an issue when a disaster event occur at the site and may cause data loss. \
+If the RPO is point of failure, then this cannot be met."
+3427,Partial Met,835,3,"Real time data synchronisation to another vendor platform is not implemented.\
+This will be an issue when a disaster event occur at the site and may cause data loss. \
+If the RPO is point of failure, then this cannot be met."
+3428,Fully Met,835,5,No impact as system is matured.
+3429,Not Applicable,835,0,No impact as capability is not applicable.
+3430,Not Met,836,1,"Automated tests does not include immediate systems consumig the data.\
+This makes to send incorrect data to the downstream systems and impact application behaviour and may cause data consistency issues."
+3431,Partial Met,836,3,"Automated tests does not include immediate systems consumig the data.\
+This makes to send incorrect data to the downstream systems and impact application behaviour and may cause data consistency issues."
+3432,Fully Met,836,5,No impact as system is matured.
+3433,Not Applicable,836,0,No impact as capability is not applicable.
+3434,Not Met,837,1,Process orchestration frameworks are not used.
+3435,Partial Met,837,3,Process orchestration frameworks are not used.
+3436,Fully Met,837,5,No impact as system is matured.
+3437,Not Applicable,837,0,No impact as capability is not applicable.
+3438,Not Met,838,1,To be Updated
+3439,Partial Met,838,3,To be Updated
+3440,Fully Met,838,5,No impact as system is matured.
+3441,Not Applicable,838,0,No impact as capability is not applicable.
+3442,Not Met,839,1,"Code Build and code review process is manual, which is inefficient, prone to human errors and increase the deployment time. Rollback process too will be time consuming, in case the deployment fails. This affects the service and cause downtime."
+3443,Partial Met,839,3,"Code Build and code review process is manual, which is inefficient, prone to human errors and increase the deployment time. Rollback process too will be time consuming, in case the deployment fails. This affects the service and cause downtime."
+3444,Fully Met,839,5,No impact as system is matured.
+3445,Not Applicable,839,0,No impact as capability is not applicable.
+3446,Not Met,840,1,"Capacity measures are considered based on requirement.\
+This does not ensure the system can handle peak loads during certain point of time which cause server performance degradation OR slowness OR an outage too, as the resources might get exhuasted when handling the load."
+3447,Partial Met,840,3,"Capacity measures are considered based on requirement.\
+This does not ensure the system can handle peak loads during certain point of time which cause server performance degradation OR slowness OR an outage too, as the resources might get exhuasted when handling the load."
+3448,Fully Met,840,5,No impact as system is matured.
+3449,Not Applicable,840,0,No impact as capability is not applicable.
+3450,Not Met,841,1,"Application does not follow API/Microservies design OR the application is in different technology where these design principles are not required.\
+Legacy architecture may be unstable and posed to security risks.\
+Integration problems may arise when the system is required to communicate with any other systems."
+3451,Partial Met,841,3,"Application does not follow API/Microservies design OR the application is in different technology where these design principles are not required.\
+Legacy architecture may be unstable and posed to security risks.\
+Integration problems may arise when the system is required to communicate with any other systems."
+3452,Fully Met,841,5,No impact as system is matured.
+3453,Not Applicable,841,0,No impact as capability is not applicable.
+3454,Not Met,842,1,"The application does not have a deployment strategy to have zero downtime.\
+This may impact the service availability and impacts business operations.\
+The system may potentially impact the SLA.\
+Emergency releases to the service cannot be done, impacting the business, in case if needed."
+3455,Partial Met,842,3,"The application does not have a deployment strategy to have zero downtime.\
+This may impact the service availability and impacts business operations.\
+The system may potentially impact the SLA.\
+Emergency releases to the service cannot be done, impacting the business, in case if needed."
+3456,Fully Met,842,5,No impact as system is matured.
+3457,Not Applicable,842,0,No impact as capability is not applicable.
+3458,Not Met,843,1,"Automatic retry pattern not present for failed transactions.\
+This makes the active transactions processing incomplete and effects the business.\
+Extra efforts are required to understand the failed transactions and retrigger."
+3459,Partial Met,843,3,"Automatic retry pattern not present for failed transactions.\
+This makes the active transactions processing incomplete and effects the business.\
+Extra efforts are required to understand the failed transactions and retrigger."
+3460,Fully Met,843,5,No impact as system is matured.
+3461,Not Applicable,843,0,No impact as capability is not applicable.
+3462,Not Met,844,1,To be Updated
+3463,Partial Met,844,3,To be Updated
+3464,Fully Met,844,5,No impact as system is matured.
+3465,Not Applicable,844,0,No impact as capability is not applicable.
+3466,Not Met,845,1,"In the CI/CD pipeline the automated testing is present, but lack of pre-agreed metrics(like latency, throughput) provided makes the service degrade when there is an unpredictable load to the service."
+3467,Partial Met,845,3,"In the CI/CD pipeline the automated testing is present, but lack of pre-agreed metrics(like latency, throughput) provided makes the service degrade when there is an unpredictable load to the service."
+3468,Fully Met,845,5,No impact as system is matured.
+3469,Not Applicable,845,0,No impact as capability is not applicable.
+3470,Not Met,846,1,"The application does not use IaC tooling for deploying the resources. This makes a time consuming process for IT teams to spin up the resources/creating new environments when required. Ensuring the parity across the envionments(like, uat, prod etc.) may be compromised."
+3471,Partial Met,846,3,"The application does not use IaC tooling for deploying the resources. This makes a time consuming process for IT teams to spin up the resources/creating new environments when required. Ensuring the parity across the envionments(like, uat, prod etc.) may be compromised."
+3472,Fully Met,846,5,No impact as system is matured.
+3473,Not Applicable,846,0,No impact as capability is not applicable.
+3474,Not Met,847,1,Application needs to be restarted manually on failure and active user sessions are lost.
+3475,Partial Met,847,3,Application needs to be restarted manually on failure and active user sessions are lost.
+3476,Fully Met,847,5,No impact as system is matured.
+3477,Not Applicable,847,0,No impact as capability is not applicable.
+3478,Not Met,848,1,Application does not have an environment similar to production environment.
+3479,Partial Met,848,3,Application does not have an environment similar to production environment.
+3480,Fully Met,848,5,No impact as system is matured.
+3481,Not Applicable,848,0,No impact as capability is not applicable.
+3482,Not Met,849,1,"CI/CD/CT pipelines does not have gating criteria defined which includes tests and approvals.\
+Release quality is compromised."
+3483,Partial Met,849,3,"CI/CD/CT pipelines does not have gating criteria defined which includes tests and approvals.\
+Release quality is compromised."
+3484,Fully Met,849,5,No impact as system is matured.
+3485,Not Applicable,849,0,No impact as capability is not applicable.
+3486,Not Met,850,1,"Manual process to check the coding standards and vulnerabilities is time consuming, security issues are overlooked which affects the application functionalities and increases the MTTD for the errors and remediating the issues."
+3487,Partial Met,850,3,"Manual process to check the coding standards and vulnerabilities is time consuming, security issues are overlooked which affects the application functionalities and increases the MTTD for the errors and remediating the issues."
+3488,Fully Met,850,5,No impact as system is matured.
+3489,Not Applicable,850,0,No impact as capability is not applicable.
+3490,Not Met,851,1,"Code deployment process is semiautomated/not automated. \
+This could be error prone, time consuming and an overhead to maintain the deployment process steps.\
+Manual efforts required for deployment."
+3491,Partial Met,851,3,"Code deployment process is semiautomated/not automated. \
+This could be error prone, time consuming and an overhead to maintain the deployment process steps.\
+Manual efforts required for deployment."
+3492,Fully Met,851,5,No impact as system is matured.
+3493,Not Applicable,851,0,No impact as capability is not applicable.
+3494,Not Met,852,1,To be Updated
+3495,Partial Met,852,3,To be Updated
+3496,Fully Met,852,5,No impact as system is matured.
+3497,Not Applicable,852,0,No impact as capability is not applicable.
+3498,Not Met,853,1,"Manual/Semi automated process to check the coding standards and vulnerabilities is time consuming, security issues are overlooked which affects the application functionalities and increases the MTTD for the errors and remediating the issues."
+3499,Partial Met,853,3,"Manual/Semi automated process to check the coding standards and vulnerabilities is time consuming, security issues are overlooked which affects the application functionalities and increases the MTTD for the errors and remediating the issues."
+3500,Fully Met,853,5,No impact as system is matured.
+3501,Not Applicable,853,0,No impact as capability is not applicable.
+3502,Not Met,854,1,"Peformance tests are performed based on the business requirement.\
+This does not ensure the system can handle peak loads during certain point of time which cause server performance degradation OR slowness OR an outage too."
+3503,Partial Met,854,3,"Peformance tests are performed based on the business requirement.\
+This does not ensure the system can handle peak loads during certain point of time which cause server performance degradation OR slowness OR an outage too."
+3504,Fully Met,854,5,No impact as system is matured.
+3505,Not Applicable,854,0,No impact as capability is not applicable.
+3506,Not Met,855,1,"Tests are not automated.\
+Tests are not regularly perfomed.\
+Manual testing is error prone.\
+Chances of missing some of test cases execution may lead to defects in production and cause service disruption."
+3507,Partial Met,855,3,"Tests are not automated.\
+Tests are not regularly perfomed.\
+Manual testing is error prone.\
+Chances of missing some of test cases execution may lead to defects in production and cause service disruption."
+3508,Fully Met,855,5,No impact as system is matured.
+3509,Not Applicable,855,0,No impact as capability is not applicable.
+3510,Not Met,856,1,To be Updated
+3511,Partial Met,856,3,To be Updated
+3512,Fully Met,856,5,No impact as system is matured.
+3513,Not Applicable,856,0,No impact as capability is not applicable.
+3514,Not Met,857,1,To be Updated
+3515,Partial Met,857,3,To be Updated
+3516,Fully Met,857,5,No impact as system is matured.
+3517,Not Applicable,857,0,No impact as capability is not applicable.
+3518,Not Met,858,1,"Either automated testing is not in place or automated testing is not part of CI/CD. Manual rollback on failure. This increases the deployment time, in case if there is a failure."
+3519,Partial Met,858,3,"Either automated testing is not in place or automated testing is not part of CI/CD. Manual rollback on failure. This increases the deployment time, in case if there is a failure."
+3520,Fully Met,858,5,No impact as system is matured.
+3521,Not Applicable,858,0,No impact as capability is not applicable.
+3522,Not Met,859,1,"Application needs a scheduled time or maintenance window for new releases. If the team needs to push any critical issues to the production, this wil not be possible and impacts the application functionality."
+3523,Partial Met,859,3,"Application needs a scheduled time or maintenance window for new releases. If the team needs to push any critical issues to the production, this wil not be possible and impacts the application functionality."
+3524,Fully Met,859,5,No impact as system is matured.
+3525,Not Applicable,859,0,No impact as capability is not applicable.
+3526,Not Met,860,1,To be Updated
+3527,Partial Met,860,3,To be Updated
+3528,Fully Met,860,5,No impact as system is matured.
+3529,Not Applicable,860,0,No impact as capability is not applicable.
+3530,Not Met,861,1,To be Updated
+3531,Partial Met,861,3,To be Updated
+3532,Fully Met,861,5,No impact as system is matured.
+3533,Not Applicable,861,0,No impact as capability is not applicable.
+3534,Not Met,862,1,To be Updated
+3535,Partial Met,862,3,To be Updated
+3536,Fully Met,862,5,No impact as system is matured.
+3537,Not Applicable,862,0,No impact as capability is not applicable.
+3538,Not Met,863,1,To be Updated
+3539,Partial Met,863,3,To be Updated
+3540,Fully Met,863,5,No impact as system is matured.
+3541,Not Applicable,863,0,No impact as capability is not applicable.
+3542,Not Met,864,1,Application does not have an environment similar to production environment.
+3543,Partial Met,864,3,Application does not have an environment similar to production environment.
+3544,Fully Met,864,5,No impact as system is matured.
+3545,Not Applicable,864,0,No impact as capability is not applicable.
+3546,Not Met,865,1,To be Updated
+3547,Partial Met,865,3,To be Updated
+3548,Fully Met,865,5,No impact as system is matured.
+3549,Not Applicable,865,0,No impact as capability is not applicable.
+3550,Not Met,866,1,Peformance tests are performed based on the business requirement.
+3551,Partial Met,866,3,Peformance tests are performed based on the business requirement.
+3552,Fully Met,866,5,No impact as system is matured.
+3553,Not Applicable,866,0,No impact as capability is not applicable.
+3554,Not Met,867,1,Application does not have an environment similar to production environment.
+3555,Partial Met,867,3,Application does not have an environment similar to production environment.
+3556,Fully Met,867,5,No impact as system is matured.
+3557,Not Applicable,867,0,No impact as capability is not applicable.
+3558,Not Met,868,1,To be Updated
+3559,Partial Met,868,3,To be Updated
+3560,Fully Met,868,5,No impact as system is matured.
+3561,Not Applicable,868,0,No impact as capability is not applicable.
+3562,Not Met,869,1,To be Updated
+3563,Partial Met,869,3,To be Updated
+3564,Fully Met,869,5,No impact as system is matured.
+3565,Not Applicable,869,0,No impact as capability is not applicable.
+3566,Not Met,870,1,Capacity measures are considered based on requirement.
+3567,Partial Met,870,3,Capacity measures are considered based on requirement.
+3568,Fully Met,870,5,No impact as system is matured.
+3569,Not Applicable,870,0,No impact as capability is not applicable.
+3570,Not Met,871,1,"Tests are not automated.\
+Tests are not regularly perfomed.\
+Manual testing is error prone.\
+Chances of missing some of test cases execution may lead to defects in production and cause service disruption."
+3571,Partial Met,871,3,"Tests are not automated.\
+Tests are not regularly perfomed.\
+Manual testing is error prone.\
+Chances of missing some of test cases execution may lead to defects in production and cause service disruption."
+3572,Fully Met,871,5,No impact as system is matured.
+3573,Not Applicable,871,0,No impact as capability is not applicable.
+3574,Not Met,872,1,"As the system implementation is not HOT/HOT across separate infrastructure possibly if there is an issue with infra failure both the sites are not acceissible and leads to outages.\
+In case if the primary site fails it requires some time to switch to contingency site. System may not be available between switchover time."
+3575,Partial Met,872,3,"As the system implementation is not HOT/HOT across separate infrastructure possibly if there is an issue with infra failure both the sites are not acceissible and leads to outages.\
+In case if the primary site fails it requires some time to switch to contingency site. System may not be available between switchover time."
+3576,Fully Met,872,5,No impact as system is matured.
+3577,Not Applicable,872,0,No impact as capability is not applicable.
+3578,Not Met,873,1,"Failover process within the primary site is not being regularly tested. There is a risk that the application may fail  switching from failover node, in case when the active node in the primary site is down.\
+Which will lead to increased MTTR and possibly system not available until manually switched to failover site. Possibly consume error budget."
+3579,Partial Met,873,3,"Failover process within the primary site is not being regularly tested. There is a risk that the application may fail  switching from failover node, in case when the active node in the primary site is down.\
+Which will lead to increased MTTR and possibly system not available until manually switched to failover site. Possibly consume error budget."
+3580,Fully Met,873,5,No impact as system is matured.
+3581,Not Applicable,873,0,No impact as capability is not applicable.
+3582,Not Met,874,1,"Risk of system unavailability in case primary site fails as there is a manual switch to DR site. \
+This will lead in raising incidents related to service availablity. \
+Extra efforts are required to fix the issues. \
+Possibly consume error budget and increase toil."
+3583,Partial Met,874,3,"Risk of system unavailability in case primary site fails as there is a manual switch to DR site. \
+This will lead in raising incidents related to service availablity. \
+Extra efforts are required to fix the issues. \
+Possibly consume error budget and increase toil."
+3584,Fully Met,874,5,No impact as system is matured.
+3585,Not Applicable,874,0,No impact as capability is not applicable.
+3586,Not Met,875,1,"Platform is not regularly tested to ascertain availability after a component failure.\
+Platform will have disruption even whe a single component fails due to lack of testing on the internal redundancy.\
+This makes the service unavailable and impact the business operations."
+3587,Partial Met,875,3,"Platform is not regularly tested to ascertain availability after a component failure.\
+Platform will have disruption even whe a single component fails due to lack of testing on the internal redundancy.\
+This makes the service unavailable and impact the business operations."
+3588,Fully Met,875,5,No impact as system is matured.
+3589,Not Applicable,875,0,No impact as capability is not applicable.
+3590,Not Met,876,1,"Appropriate Internal redundancy is not in place.\
+Platform will have disruption when multiple infra or hardware component failures happen due to lack of high availability implementation like redundancy.\
+This makes the service unavailable."
+3591,Partial Met,876,3,"Appropriate Internal redundancy is not in place.\
+Platform will have disruption when multiple infra or hardware component failures happen due to lack of high availability implementation like redundancy.\
+This makes the service unavailable."
+3592,Fully Met,876,5,No impact as system is matured.
+3593,Not Applicable,876,0,No impact as capability is not applicable.
+3594,Not Met,877,1,Risk of system unavailable more than expected as it requires more hours of downtime build prod site or fix issue in primary site in case primary site fails
+3595,Partial Met,877,3,Risk of system unavailable more than expected as it requires more hours of downtime build prod site or fix issue in primary site in case primary site fails
+3596,Fully Met,877,5,No impact as system is matured.
+3597,Not Applicable,877,0,No impact as capability is not applicable.
+3598,Not Met,878,1,To be Updated
+3599,Partial Met,878,3,To be Updated
+3600,Fully Met,878,5,No impact as system is matured.
+3601,Not Applicable,878,0,No impact as capability is not applicable.
+3602,Not Met,879,1,"Hot/Hot implementation is not present across multiple sites on the same infra platform.\
+This does not ensure the application is highly available in the primary site.\
+This may also cause performance degradation for the service, if the active node goes down in the primary site.\
+Manual intervention is required to switch to DR."
+3603,Partial Met,879,3,"Hot/Hot implementation is not present across multiple sites on the same infra platform.\
+This does not ensure the application is highly available in the primary site.\
+This may also cause performance degradation for the service, if the active node goes down in the primary site.\
+Manual intervention is required to switch to DR."
+3604,Fully Met,879,5,No impact as system is matured.
+3605,Not Applicable,879,0,No impact as capability is not applicable.
+3606,Not Met,880,1,"The primary site implementation is not running Hot/Hot across seperate infrastructure.\
+Service will not be available in case if primary infrastructure fails which leads to increase in incidents and outages."
+3607,Partial Met,880,3,"The primary site implementation is not running Hot/Hot across seperate infrastructure.\
+Service will not be available in case if primary infrastructure fails which leads to increase in incidents and outages."
+3608,Fully Met,880,5,No impact as system is matured.
+3609,Not Applicable,880,0,No impact as capability is not applicable.
+3610,Not Met,881,1,"The failover process is manual.\
+This causes application downtime when there is an issue with running service components like database, app server etc. \
+Team has to put efforts to manually switch over to other node in same site."
+3611,Partial Met,881,3,"The failover process is manual.\
+This causes application downtime when there is an issue with running service components like database, app server etc. \
+Team has to put efforts to manually switch over to other node in same site."
+3612,Fully Met,881,5,No impact as system is matured.
+3613,Not Applicable,881,0,No impact as capability is not applicable.
+3614,Not Met,882,1,"DR failover process is not regularly tested.\
+This makes the service is not aligned to HSBC SCOTT process.\
+The service does not ensure its availability in switching over to DR site in case if primary site fails.\
+Chances of not meeting the RTO when there is a need to switch to DR site."
+3615,Partial Met,882,3,"DR failover process is not regularly tested.\
+This makes the service is not aligned to HSBC SCOTT process.\
+The service does not ensure its availability in switching over to DR site in case if primary site fails.\
+Chances of not meeting the RTO when there is a need to switch to DR site."
+3616,Fully Met,882,5,No impact as system is matured.
+3617,Not Applicable,882,0,No impact as capability is not applicable.
+3618,Not Met,883,1,"Either the internal redundancy failover of the component is manual or not implemented.\
+Platform will have disruption if there is a component failure, which involves the teams to replace it(if internal redundancy is manual).\
+This increases the MTTR, if the team is unable to replace within the available time causing service disruption."
+3619,Partial Met,883,3,"Either the internal redundancy failover of the component is manual or not implemented.\
+Platform will have disruption if there is a component failure, which involves the teams to replace it(if internal redundancy is manual).\
+This increases the MTTR, if the team is unable to replace within the available time causing service disruption."
+3620,Fully Met,883,5,No impact as system is matured.
+3621,Not Applicable,883,0,No impact as capability is not applicable.
+3622,Not Met,884,1,"Hot/Hot implementation is not available with different platforms or vendors.\
+Dependency on the infra platform will be increased, in case if the service is able to run only on specified infra platforms."
+3623,Partial Met,884,3,"Hot/Hot implementation is not available with different platforms or vendors.\
+Dependency on the infra platform will be increased, in case if the service is able to run only on specified infra platforms."
+3624,Fully Met,884,5,No impact as system is matured.
+3625,Not Applicable,884,0,No impact as capability is not applicable.
+3626,Not Met,885,1,"Either the failover process is manual or primary site resilience is not implemented.\
+This causes application downtime when there is an issue with running service components like database, app server etc. \
+Team has to put efforts to manually switch over to contingency site or bring back the primary site."
+3627,Partial Met,885,3,"Either the failover process is manual or primary site resilience is not implemented.\
+This causes application downtime when there is an issue with running service components like database, app server etc. \
+Team has to put efforts to manually switch over to contingency site or bring back the primary site."
+3628,Fully Met,885,5,No impact as system is matured.
+3629,Not Applicable,885,0,No impact as capability is not applicable.
+3630,Not Met,886,1,"Platform does not have multiple redundant components in Hot/Hot manner.\
+This makes the service unavailable in case if the primary component fails.\
+This increases the MTTR, if the team is unable to replace within the available time causing service disruption."
+3631,Partial Met,886,3,"Platform does not have multiple redundant components in Hot/Hot manner.\
+This makes the service unavailable in case if the primary component fails.\
+This increases the MTTR, if the team is unable to replace within the available time causing service disruption."
+3632,Fully Met,886,5,No impact as system is matured.
+3633,Not Applicable,886,0,No impact as capability is not applicable.
+3634,Not Met,887,1,Applications in Tier 0 and Tier 1 should be hosted in a Tier 0 GDC
+3635,Partial Met,887,3,Applications in Tier 0 and Tier 1 should be hosted in a Tier 0 GDC
+3636,Fully Met,887,5,No impact as system is matured.
+3637,Not Applicable,887,0,No impact as capability is not applicable.
+3638,Not Met,888,1,Hosted applications should use one of the corporate data centers.
+3639,Partial Met,888,3,Hosted applications should use one of the corporate data centers.
+3640,Fully Met,888,5,No impact as system is matured.
+3641,Not Applicable,888,0,No impact as capability is not applicable.
+3642,Not Met,889,1,Applications in Tier 0 and Tier 1 should be hosted in a Tier 0 GDC
+3643,Partial Met,889,3,Applications in Tier 0 and Tier 1 should be hosted in a Tier 0 GDC
+3644,Fully Met,889,5,No impact as system is matured.
+3645,Not Applicable,889,0,No impact as capability is not applicable.
+3646,Not Met,890,1,To be Updated
+3647,Partial Met,890,3,To be Updated
+3648,Fully Met,890,5,No impact as system is matured.
+3649,Not Applicable,890,0,No impact as capability is not applicable.
+3650,Not Met,891,1,To be Updated
+3651,Partial Met,891,3,To be Updated
+3652,Fully Met,891,5,No impact as system is matured.
+3653,Not Applicable,891,0,No impact as capability is not applicable.
+3654,Not Met,892,1,"Application or service is not hosted on Cloud Service platform.\
+High availability, auto scaling, reliability of the services might be compromised by using on premises data centers."
+3655,Partial Met,892,3,"Application or service is not hosted on Cloud Service platform.\
+High availability, auto scaling, reliability of the services might be compromised by using on premises data centers."
+3656,Fully Met,892,5,No impact as system is matured.
+3657,Not Applicable,892,0,No impact as capability is not applicable.
+3658,Not Met,893,1,To be Updated
+3659,Partial Met,893,3,To be Updated
+3660,Fully Met,893,5,No impact as system is matured.
+3661,Not Applicable,893,0,No impact as capability is not applicable.
+3662,Not Met,894,1,"IKP or ICP are internal scalable intrastructure, which can be used if the application has load fluctuations. Such platforms help save cost in the long run and can also be easily upgraded."
+3663,Partial Met,894,3,"IKP or ICP are internal scalable intrastructure, which can be used if the application has load fluctuations. Such platforms help save cost in the long run and can also be easily upgraded."
+3664,Fully Met,894,5,No impact as system is matured.
+3665,Not Applicable,894,0,No impact as capability is not applicable.
+3666,Not Met,895,1,Risk of system unavailability in case primary site fails till the time it switches to DR instance.
+3667,Partial Met,895,3,Risk of system unavailability in case primary site fails till the time it switches to DR instance.
+3668,Fully Met,895,5,No impact as system is matured.
+3669,Not Applicable,895,0,No impact as capability is not applicable.
+3670,Not Met,896,1,Risk of system unavailability or performance degradation in case components are running out of resources due to increased load. Due to lack of capacity planning no visiblity on current capacity load and future capacity requirement.
+3671,Partial Met,896,3,Risk of system unavailability or performance degradation in case components are running out of resources due to increased load. Due to lack of capacity planning no visiblity on current capacity load and future capacity requirement.
+3672,Fully Met,896,5,No impact as system is matured.
+3673,Not Applicable,896,0,No impact as capability is not applicable.
+3674,Not Met,897,1,Risk of loosing data in case if database or datastore crashed as not daily back ups are in place.
+3675,Partial Met,897,3,Risk of loosing data in case if database or datastore crashed as not daily back ups are in place.
+3676,Fully Met,897,5,No impact as system is matured.
+3677,Not Applicable,897,0,No impact as capability is not applicable.
+3678,Not Met,898,1,"Predictive capacity monitoring is not implemented.\
+Proactive alerts will not be generated for the resources usage of the system which will not provide a forecast measure for the future capacity needs.\
+This may degrade the service as there is not enough visibility to plan the capacity needs."
+3679,Partial Met,898,3,"Predictive capacity monitoring is not implemented.\
+Proactive alerts will not be generated for the resources usage of the system which will not provide a forecast measure for the future capacity needs.\
+This may degrade the service as there is not enough visibility to plan the capacity needs."
+3680,Fully Met,898,5,No impact as system is matured.
+3681,Not Applicable,898,0,No impact as capability is not applicable.
+3682,Not Met,899,1,"Service does not have Live/Live availability pattern.\
+This does not ensure the application is highly available in the primary site.\
+This may also cause performance degradation for the service, if the active node goes down in the primary site.\
+Manual intervention is required to switch to other node on primary or DR."
+3683,Partial Met,899,3,"Service does not have Live/Live availability pattern.\
+This does not ensure the application is highly available in the primary site.\
+This may also cause performance degradation for the service, if the active node goes down in the primary site.\
+Manual intervention is required to switch to other node on primary or DR."
+3684,Fully Met,899,5,No impact as system is matured.
+3685,Not Applicable,899,0,No impact as capability is not applicable.
+3686,Not Met,900,1,To be Updated
+3687,Partial Met,900,3,To be Updated
+3688,Fully Met,900,5,No impact as system is matured.
+3689,Not Applicable,900,0,No impact as capability is not applicable.
+3690,Not Met,901,1,"Failover to a local standby instance is not fully automated. The envionrment cannot be redepolyed automatically.\
+This causes service disruption when the primary instance fails.\
+In case, if the standby instance does not come to the active state within the RTO, leads to service degradation and availability too."
+3691,Partial Met,901,3,"Failover to a local standby instance is not fully automated. The envionrment cannot be redepolyed automatically.\
+This causes service disruption when the primary instance fails.\
+In case, if the standby instance does not come to the active state within the RTO, leads to service degradation and availability too."
+3692,Fully Met,901,5,No impact as system is matured.
+3693,Not Applicable,901,0,No impact as capability is not applicable.
+3694,Not Met,902,1,To be Updated
+3695,Partial Met,902,3,To be Updated
+3696,Fully Met,902,5,No impact as system is matured.
+3697,Not Applicable,902,0,No impact as capability is not applicable.
+3698,Not Met,903,1,"Workload distribution is not dynamically portable across different sites.\
+This may cause performance degradation when the site has increased load of the transactions as the distribution of the load is not dynamic."
+3699,Partial Met,903,3,"Workload distribution is not dynamically portable across different sites.\
+This may cause performance degradation when the site has increased load of the transactions as the distribution of the load is not dynamic."
+3700,Fully Met,903,5,No impact as system is matured.
+3701,Not Applicable,903,0,No impact as capability is not applicable.
+3702,Not Met,904,1,To be Updated
+3703,Partial Met,904,3,To be Updated
+3704,Fully Met,904,5,No impact as system is matured.
+3705,Not Applicable,904,0,No impact as capability is not applicable.
+3706,Not Met,905,1,To be Updated
+3707,Partial Met,905,3,To be Updated
+3708,Fully Met,905,5,No impact as system is matured.
+3709,Not Applicable,905,0,No impact as capability is not applicable.
+3710,Not Met,906,1,To be Updated
+3711,Partial Met,906,3,To be Updated
+3712,Fully Met,906,5,No impact as system is matured.
+3713,Not Applicable,906,0,No impact as capability is not applicable.
+3714,Not Met,907,1,"DR solution and process is not automated and manual inputs required.\
+This may cause service interruption if the any of the manual steps are missed or wrongly executed during a DR failover."
+3715,Partial Met,907,3,"DR solution and process is not automated and manual inputs required.\
+This may cause service interruption if the any of the manual steps are missed or wrongly executed during a DR failover."
+3716,Fully Met,907,5,No impact as system is matured.
+3717,Not Applicable,907,0,No impact as capability is not applicable.
+3718,Not Met,908,1,"Auto scaling is not in place w.r.t to increased load.\
+The service may degrade/crash when there is an increased load, as the system will use maximum usage of resources like cpu, memory etc.\
+This may also lead to outages, increase in the number of incidents."
+3719,Partial Met,908,3,"Auto scaling is not in place w.r.t to increased load.\
+The service may degrade/crash when there is an increased load, as the system will use maximum usage of resources like cpu, memory etc.\
+This may also lead to outages, increase in the number of incidents."
+3720,Fully Met,908,5,No impact as system is matured.
+3721,Not Applicable,908,0,No impact as capability is not applicable.
+3722,Not Met,909,1,"Workload distribution is not dynamically portable across independent local infrastructure.\
+This may cause performance degradation when the site has increased load of the transactions as the distribution of the load is not dynamic.\
+If  there is no same site resiliency in place across independent local infrastructue, this will lead to outages, in case if the infra failure happen."
+3723,Partial Met,909,3,"Workload distribution is not dynamically portable across independent local infrastructure.\
+This may cause performance degradation when the site has increased load of the transactions as the distribution of the load is not dynamic.\
+If  there is no same site resiliency in place across independent local infrastructue, this will lead to outages, in case if the infra failure happen."
+3724,Fully Met,909,5,No impact as system is matured.
+3725,Not Applicable,909,0,No impact as capability is not applicable.
+3726,Not Met,910,1,To be Updated
+3727,Partial Met,910,3,To be Updated
+3728,Fully Met,910,5,No impact as system is matured.
+3729,Not Applicable,910,0,No impact as capability is not applicable.
+3730,Not Met,911,1,Risk of loosing data in case if database or datastore crashed as not daily back ups are in place.
+3731,Partial Met,911,3,Risk of loosing data in case if database or datastore crashed as not daily back ups are in place.
+3732,Fully Met,911,5,No impact as system is matured.
+3733,Not Applicable,911,0,No impact as capability is not applicable.
+3734,Not Met,912,1,To be Updated
+3735,Partial Met,912,3,To be Updated
+3736,Fully Met,912,5,No impact as system is matured.
+3737,Not Applicable,912,0,No impact as capability is not applicable.
+3738,Not Met,913,1,To be Updated
+3739,Partial Met,913,3,To be Updated
+3740,Fully Met,913,5,No impact as system is matured.
+3741,Not Applicable,913,0,No impact as capability is not applicable.
+3742,Not Met,914,1,"Technical components are not automatically discovered and linked to an IT Service.\
+This makes some of the critical components mapping is missed which might not give a view of the applications involved in the important buisness services."
+3743,Partial Met,914,3,"Technical components are not automatically discovered and linked to an IT Service.\
+This makes some of the critical components mapping is missed which might not give a view of the applications involved in the important buisness services."
+3744,Fully Met,914,5,No impact as system is matured.
+3745,Not Applicable,914,0,No impact as capability is not applicable.
+3746,Not Met,915,1,"Manual intervention required to start or stop the components of the application stack.\
+This process may cause impact to the application service if components are started or stopped without understanding the dependencies."
+3747,Partial Met,915,3,"Manual intervention required to start or stop the components of the application stack.\
+This process may cause impact to the application service if components are started or stopped without understanding the dependencies."
+3748,Fully Met,915,5,No impact as system is matured.
+3749,Not Applicable,915,0,No impact as capability is not applicable.
+3750,Not Met,916,1,"Automated testing and gating is not implemented as part of release process and pipeline.\
+Implementing the CI/CD pipeline will not be possible if there is no automated testing and gating.\
+Possibly some test cases might get skipped which might leads to issues in production and also impacts the service.\
+Release process timelines gets impacted."
+3751,Partial Met,916,3,"Automated testing and gating is not implemented as part of release process and pipeline.\
+Implementing the CI/CD pipeline will not be possible if there is no automated testing and gating.\
+Possibly some test cases might get skipped which might leads to issues in production and also impacts the service.\
+Release process timelines gets impacted."
+3752,Fully Met,916,5,No impact as system is matured.
+3753,Not Applicable,916,0,No impact as capability is not applicable.
+3754,Not Met,917,1,To be Updated
+3755,Partial Met,917,3,To be Updated
+3756,Fully Met,917,5,No impact as system is matured.
+3757,Not Applicable,917,0,No impact as capability is not applicable.
+3758,Not Met,918,1,To be Updated
+3759,Partial Met,918,3,To be Updated
+3760,Fully Met,918,5,No impact as system is matured.
+3761,Not Applicable,918,0,No impact as capability is not applicable.
+3762,Not Met,919,1,To be Updated
+3763,Partial Met,919,3,To be Updated
+3764,Fully Met,919,5,No impact as system is matured.
+3765,Not Applicable,919,0,No impact as capability is not applicable.
+3774,Not Met,922,1,To be Updated
+3775,Partial Met,922,3,To be Updated
+3776,Fully Met,922,5,No impact as system is matured.
+3777,Not Applicable,922,0,No impact as capability is not applicable.
+3778,Not Met,923,1,"Proactive monitoring is not implemented.\
+Does not alert operations teams to address any memory issues before it causes an application or server to crash."
+3779,Partial Met,923,3,"Proactive monitoring is not implemented.\
+Does not alert operations teams to address any memory issues before it causes an application or server to crash."
+3780,Fully Met,923,5,No impact as system is matured.
+3781,Not Applicable,923,0,No impact as capability is not applicable.
+3782,Not Met,924,1,"Architects are not included in Incident Reviews.\
+This will make the team to understand the architecture in a different perspective when an incident occur, which might lead to more efforts in analysing the same.\
+This makes the teams to spend more time in analysing the incident and finding the root cause.\
+Chances of occurring more incidents, if the incident is wrongly analysed and fixed."
+3783,Partial Met,924,3,"Architects are not included in Incident Reviews.\
+This will make the team to understand the architecture in a different perspective when an incident occur, which might lead to more efforts in analysing the same.\
+This makes the teams to spend more time in analysing the incident and finding the root cause.\
+Chances of occurring more incidents, if the incident is wrongly analysed and fixed."
+3784,Fully Met,924,5,No impact as system is matured.
+3785,Not Applicable,924,0,No impact as capability is not applicable.
+3786,Not Met,925,1,"Capacity auto scaling is not in place based on telemetry feedback.\
+This makes the service degrade when there are peak loads, as the system will use maximun usage of cpu, memory etc."
+3787,Partial Met,925,3,"Capacity auto scaling is not in place based on telemetry feedback.\
+This makes the service degrade when there are peak loads, as the system will use maximun usage of cpu, memory etc."
+3788,Fully Met,925,5,No impact as system is matured.
+3789,Not Applicable,925,0,No impact as capability is not applicable.
+3790,Not Met,926,1,To be Updated
+3791,Partial Met,926,3,To be Updated
+3792,Fully Met,926,5,No impact as system is matured.
+3793,Not Applicable,926,0,No impact as capability is not applicable.
+3794,Not Met,927,1,"Either all the service components cannot be automatically redeployed OR manual intervention required.\
+This may cause impact to the application deployment process.\
+As the dependencies/the sequences of the components are maintained manually, chances of missing the steps in the deployment process may cause deployment failure.\
+Because of the deployment failure, the service also gets impacted, and needs to redeployed which add additional efforts and impacts SLA."
+3795,Partial Met,927,3,"Either all the service components cannot be automatically redeployed OR manual intervention required.\
+This may cause impact to the application deployment process.\
+As the dependencies/the sequences of the components are maintained manually, chances of missing the steps in the deployment process may cause deployment failure.\
+Because of the deployment failure, the service also gets impacted, and needs to redeployed which add additional efforts and impacts SLA."
+3796,Fully Met,927,5,No impact as system is matured.
+3797,Not Applicable,927,0,No impact as capability is not applicable.
+3798,Not Met,928,1,To be Updated
+3799,Partial Met,928,3,To be Updated
+3800,Fully Met,928,5,No impact as system is matured.
+3801,Not Applicable,928,0,No impact as capability is not applicable.
+3802,Not Met,929,1,To be Updated
+3803,Partial Met,929,3,To be Updated
+3804,Fully Met,929,5,No impact as system is matured.
+3805,Not Applicable,929,0,No impact as capability is not applicable.
+3806,Not Met,930,1,"No sufficient telemetry data is produced to monitor business level performance indicators like user experience.
+Missing of this performance monitoring practice, application teams cannot understand how the application behaves when there is more user load w.r.t to certain path in the application.
+Monitoring the ability of the service will not be known which in turn gives wrong estimates for baselining the application performance, identifying areas of improvement and improvement of performance strategies."
+3807,Partial Met,930,3,"No sufficient telemetry data is produced to monitor business level performance indicators like user experience.\
+Missing of this performance monitoring practice, application teams cannot understand how the application behaves when there is more user load w.r.t to certain path in the application.\
+Monitoring the ability of the service will not be known which in turn gives wrong estimates for baselining the application performance, identifying areas of improvement and improvement of performance strategies."
+3808,Fully Met,930,5,No impact as system is matured.
+3809,Not Applicable,930,0,No impact as capability is not applicable.
+3810,Not Met,931,1,To be Updated
+3811,Partial Met,931,3,To be Updated
+3812,Fully Met,931,5,No impact as system is matured.
+3813,Not Applicable,931,0,No impact as capability is not applicable.
+3814,Not Met,932,1,To be Updated
+3815,Partial Met,932,3,To be Updated
+3816,Fully Met,932,5,No impact as system is matured.
+3817,Not Applicable,932,0,No impact as capability is not applicable.
+3818,Not Met,933,1,"No automated recovery process in place for the service based on monitoring and telemetry data.\
+Bringing the system back to normal will be time consuming and may cause degradation when any critical issues occurr.\
+Impacts resiliency of the service.\
+Outage incidents may grow and impact the MTTR."
+3819,Partial Met,933,3,"No automated recovery process in place for the service based on monitoring and telemetry data.\
+Bringing the system back to normal will be time consuming and may cause degradation when any critical issues occurr.\
+Impacts resiliency of the service.\
+Outage incidents may grow and impact the MTTR."
+3820,Fully Met,933,5,No impact as system is matured.
+3821,Not Applicable,933,0,No impact as capability is not applicable.
+3822,Not Met,934,1,"Service level situational awareness is not established to understand the normal and peak loads that individual components can handle.\
+This gives incorrect forecast estimates in terms of resources requirement to allocate for the system.\
+Service performance may degrade/lead to an outage too, in case if any individual component is not capable enough of handling the load."
+3823,Partial Met,934,3,"Service level situational awareness is not established to understand the normal and peak loads that individual components can handle.\
+This gives incorrect forecast estimates in terms of resources requirement to allocate for the system.\
+Service performance may degrade/lead to an outage too, in case if any individual component is not capable enough of handling the load."
+3824,Fully Met,934,5,No impact as system is matured.
+3825,Not Applicable,934,0,No impact as capability is not applicable.
+3826,Not Met,935,1,"State and events of the application is not captured as part of logging.\
+This does not provide details to track if any security related events/any other events from other sources are present in the logs.\
+Chances of information leakage and leads to raise of incidents."
+3827,Partial Met,935,3,"State and events of the application is not captured as part of logging.\
+This does not provide details to track if any security related events/any other events from other sources are present in the logs.\
+Chances of information leakage and leads to raise of incidents."
+3828,Fully Met,935,5,No impact as system is matured.
+3829,Not Applicable,935,0,No impact as capability is not applicable.
+3830,Not Met,936,1,"Centralised processing of telemetry data is not in place for log analysis.\
+This makes the teams to check different places for the logs and find out the information when an incident occur.\
+Increases the MTTR of the incidents, may resulting in service disruption."
+3831,Partial Met,936,3,"Centralised processing of telemetry data is not in place for log analysis.\
+This makes the teams to check different places for the logs and find out the information when an incident occur.\
+Increases the MTTR of the incidents, may resulting in service disruption."
+3832,Fully Met,936,5,No impact as system is matured.
+3833,Not Applicable,936,0,No impact as capability is not applicable.
+3834,Not Met,937,1,"Heartbeat checking is not implemented to detect failure for critical components OR System health is manually checked at regular intervals.\
+Teams does not get alerted when there is a failure at the critcal components, due to lack of proper healthchecks.\
+Extra efforts are required to trace and understand the failure."
+3835,Partial Met,937,3,"Heartbeat checking is not implemented to detect failure for critical components OR System health is manually checked at regular intervals.\
+Teams does not get alerted when there is a failure at the critcal components, due to lack of proper healthchecks.\
+Extra efforts are required to trace and understand the failure."
+3836,Fully Met,937,5,No impact as system is matured.
+3837,Not Applicable,937,0,No impact as capability is not applicable.
+3838,Not Met,938,1,"Synthetic monitoring is not in place.\
+Missing of this performance monitoring practice, application teams cannot understand how the application behaves when there is more user load w.r.t to certain path in the application.\
+Monitoring the ability of the service will not be known which in turn gives wrong estimates for baselining the application performance, identifying areas of improvement and improvement of performance strategies."
+3839,Partial Met,938,3,"Synthetic monitoring is not in place.\
+Missing of this performance monitoring practice, application teams cannot understand how the application behaves when there is more user load w.r.t to certain path in the application.\
+Monitoring the ability of the service will not be known which in turn gives wrong estimates for baselining the application performance, identifying areas of improvement and improvement of performance strategies."
+3840,Fully Met,938,5,No impact as system is matured.
+3841,Not Applicable,938,0,No impact as capability is not applicable.
+3842,Not Met,939,1,"Standard logging tools are not used OR application logs are not available for centralised telemetry processing.\
+Teams spend more time in checking the logs to understand the issue, if the logs are segregated in different places. This leads to increase MTTR of the incidents and may impact the service availability."
+3843,Partial Met,939,3,"Standard logging tools are not used OR application logs are not available for centralised telemetry processing.\
+Teams spend more time in checking the logs to understand the issue, if the logs are segregated in different places. This leads to increase MTTR of the incidents and may impact the service availability."
+3844,Fully Met,939,5,No impact as system is matured.
+3845,Not Applicable,939,0,No impact as capability is not applicable.
+3846,Not Met,940,1,To be Updated
+3847,Partial Met,940,3,To be Updated
+3848,Fully Met,940,5,No impact as system is matured.
+3849,Not Applicable,940,0,No impact as capability is not applicable.
+3850,Not Met,941,1,To be Updated
+3851,Partial Met,941,3,To be Updated
+3852,Fully Met,941,5,No impact as system is matured.
+3853,Not Applicable,941,0,No impact as capability is not applicable.
+3854,Not Met,942,1,To be Updated
+3855,Partial Met,942,3,To be Updated
+3856,Fully Met,942,5,No impact as system is matured.
+3857,Not Applicable,942,0,No impact as capability is not applicable.
+3858,Not Met,943,1,To be Updated
+3859,Partial Met,943,3,To be Updated
+3860,Fully Met,943,5,No impact as system is matured.
+3861,Not Applicable,943,0,No impact as capability is not applicable.
+3862,Not Met,944,1,To be Updated
+3863,Partial Met,944,3,To be Updated
+3864,Fully Met,944,5,No impact as system is matured.
+3865,Not Applicable,944,0,No impact as capability is not applicable.
+5673,Workers/employees/vendors (a),1374,9,NULL
+5674,Consumers/customers (b),1374,9,NULL
+5675,Business/Organization (c),1374,7,NULL
+5676,Government agencies/regulators (d),1374,8,NULL
+5677,Society (e),1374,10,NULL
+5678,"e and a combination of a,b,c and d",1374,30,NULL
+5679,"A combination of a,b,c and d but not e",1374,20,NULL
+5680,Not Applicable,1374,0,NULL
+5681,Users cannot opt out of the AI systemâ€™s output,1375,10,NULL
+5682,Users can opt out of the AI systemâ€™s output,1375,0,NULL
+5683,Users can challenge or correct the AI systemâ€™s output,1375,5,NULL
+5684,Users can reverse the AI systemâ€™s output ex-post,1375,3,NULL
+5685,No risk identified,1376,10,NULL
+5686,Risk has been identified but no mitigation measures are taken,1376,5,NULL
+5687,Risk has been identified and mitigation measures are taken,1376,0,NULL
+5688,No process in place currently to ensure data quality,1377,10,NULL
+5689,There is regular process in place to ensure data quality is maintained,1377,0,NULL
+5690,Sensitive personal data is being processed by the tool and no separate controls implemented for protecting sensitive personal data,1377,10,NULL
+5691,No sensitive personal data being processed by the tool,1378,0,NULL
+5692,Sensitive personal data is being processed by the tool and separate controls implemented for protecting sensitive personal data,1378,5,NULL
+5696,"Purpose of the tool is not validated against human, societal well being",1378,10,NULL
+5697,"Purpose of the tool is aligned to human, societal well being and properly documented",1380,0,NULL
+5698,Tool doesnâ€™t have capabilities to handle DSR's,1380,10,NULL
+5699,Tool have DSR handling capabilities,1381,0,NULL
+5700,There is no plan to communicate to users about rolling out of AI solution to users as this tool is rolled out for business interest of company,1381,10,NULL
+5701,There is a plan to communicate to users about the rolling out of AI solution so that users can raise their feedback at any stages of tool rollout,1381,0,NULL
+5702,There is no provision provided in the tool to take acknowledgement/ consent from data subjects,1382,20,NULL
+5703,Adequate consent/ acknowledgement taken from data subjects before using their data for training the AI model but this is not recorded,1382,10,NULL
+5704,Adequate consent/ acknowledgement taken from data subjects before using their data for training the AI model and this is recorded,1382,5,NULL
+5706,"Liberty, safety, and security",1383,10,NULL
+5707,"Physical, psychological, and moral integrity",1383,10,NULL
+5708,"Rule of law, absence of arbitrary sentencing",1383,10,NULL
+5709,"Equality and non-discrimination (gender, race, religion)",1383,10,NULL
+5710,"Social and economic rights (e.g. health, education)",1384,10,NULL
+5711,Aggregate society-level risk,1384,10,NULL
+5712,More than one fundamental human rights are impacted,1384,20,NULL
+5713,Not Applicable,1384,0,NULL
+5714,Physical and mental health ( e.g. Fully automated candidate interviews),1384,10,NULL
+5715,"Income and wealth (e.g. Automated CnB Recommendations, Automation of Investment/Funding decisions.Automation of Loan from Employees/Sub-Cons/Vendors)",1384,10,NULL
+5716,"Quality of job (additional stress) / Job loss fear (CV screening, promotion recommendations, appraisal recommendations)",1384,10,NULL
+5717,Quality of environment (autonomous vehicles in smart campus),1384,10,NULL
+5718,Bad Social Connections,1385,10,NULL
+5719,"Civic engagement (Automation of HEAR, ASHI cases)",1385,10,NULL
+5720,"Education, knowledge, and skills",1385,10,NULL
+5721,Work-life balance,1385,10,NULL
+5722,Aggregate society-level impact,1385,10,NULL
+5723,More than one areas are impacted,1385,20,NULL
+5724,Not Applicable,1385,0,NULL
+5725,High Displacement Potential (>60%),1385,10,NULL
+5726,Medium Displacement Potential (30%-60%),1385,6,NULL
+5727,Low Displacement Potential (>30%),1385,3,NULL
+5728,No Displacement Potential,1385,0,NULL
+5729,Accommodation and food service activities,1386,0.5,NULL
+5730,Activities of extraterritorial organizations and bodies,1386,0.5,NULL
+5731,Activities of households as employers; undifferentiated goods- and services-producing activities of households for own use,1386,0.5,NULL
+5732,Administrative and support service activities,1386,0.5,NULL
+5733,"Agriculture, forestry, and fishing",1387,0.5,NULL
+5734,"Arts, entertainment, and recreation",1387,0.5,NULL
+5735,Construction,1387,0.5,NULL
+5736,Education,1387,0.5,NULL
+5737,"Electricity, gas, steam, and air conditioning supply",1387,0.5,NULL
+5738,Financial and insurance activities,1387,0.5,NULL
+5739,Human health and social work,1387,0.5,NULL
+5740,Information and communication,1387,0.5,NULL
+5741,Manufacturing,1387,0.5,NULL
+5742,Mining and quarrying,1387,0.5,NULL
+5743,"Professional, scientific, and technical activities",1387,0.5,NULL
+5744,Public administration and defense; compulsory social security,1387,0.5,NULL
+5745,Real estate activities,1387,0.5,NULL
+5746,Transportation and storage,1387,0.5,NULL
+5747,"Water supply; sewerage, waste management, and remediation activities",1387,0.5,NULL
+5748,Wholesale and retail trade; repair of motor vehicles and motorcycles,1387,0.5,NULL
+5749,Citizen/customer service,1387,0.5,NULL
+5750,Compliance and justice,1387,0.5,NULL
+5751,Employee Benefits & Well-being,1387,0.5,NULL
+5752,Finance & Accounting,1387,0.5,NULL
+5753,Human resource management,1387,0.5,NULL
+5754,ICT management and information security,1388,0.5,NULL
+5755,Logistics,1388,0.5,NULL
+5756,Maintenance,1388,0.5,NULL
+5757,Marketing and advertisement,1388,0.5,NULL
+5758,Monitoring and quality control,1388,0.5,NULL
+5759,Planning and budgeting,1388,0.5,NULL
+5760,Procurement,1388,0.5,NULL
+5761,Production,1388,0.5,NULL
+5762,Research and development,1388,0.5,NULL
+5763,Sales,1388,0.5,NULL
+5764,EU,1388,10,NULL
+5765,Multiple jurisdictions including EU where there are privacy laws,1388,8,NULL
+5766,Countries where no Data Privacy or Responsible AI guidelines applies,1388,5,NULL
+5767,India,1388,5,NULL
+5768,"A combination of a,b",1388,20,NULL
+5769,"Yes, it will impact the health, safety, and security of employees/workers/vendors",1389,5,NULL
+5770,"Yes, it will impact one or multiple critical business operations of the organization",1389,5,NULL
+5771,"Yes, it will impact both points one and two",1389,10,NULL
+5772,No,1389,0,NULL
+5773,"Vendor IP solutions are being used, but vendor is not ready to explain how the results are arrived",1389,10,NULL
+5774,Vendor IP soltions are being used and vendor has agreed to explain how the resuls are arrived during the entire lifecycle phase,1390,5,NULL
+5775,Not Applicable,1390,0,NULL
+5776,Privacy and data protection controls are currently not added in contract with vendors processing personal data,1390,10,NULL
+5777,Adequate privacy and data protection controls are added in contract with vendors processing personal data,1390,0,NULL
+5778,The technology elements/solution are at R&D level,1391,10,NULL
+5779,The technology elements/solution are piloted in multiple organizations,1391,5,NULL
+5780,The technology elements/solution are rolled out at scale in limited organizations,1391,3,NULL
+5781,The technology elements/solution are rolled out at scale in many organizations,1392,0,NULL
+5782,No validation mechanism available to ensure that training and testing data is obtained in a fair and lawful manner,1392,10,NULL
+5783,Proper validation is done to ensure that training and testing data is obtained in a fair and lawful manner,1392,0,NULL
+5784,Tool will have the functionality to implement data deletion automatically as per business & regulatory requirements,1393,10,NULL
+5785,Tool has been provided with functionality to implement data deletion automatically as per business & regulatory requirements,1393,0,NULL
+5786,Synthetic data,1393,5,NULL
+5787,Expert input,1393,2,NULL
+5788,Observer data/derived data,1394,0,NULL
+5789,Combination of all above,1394,10,NULL
+5790,"No, data can't be anonymized or pseudonymized",1394,10,NULL
+5791,Pseudonymized data,1395,5,NULL
+5792,Anonymized data or Aggregated data,1395,0,NULL
+5793,Not Applicable,1395,0,NULL
+5794,Discriminative model,1396,0,NULL
+5795,Generative model,1396,5,NULL
+5796,Models combining both discriminative and generative properties,1396,10,NULL
+5797,No evolution during operation,1396,0,NULL
+5798,Evolution during operation through active interaction (including uncontrolled learning),1397,10,NULL
+5799,Evolution during operation through passive interaction,1397,0,NULL
+5800,Documentation is not  available which explains how decision is arrived using AI model,1397,10,NULL
+5801,Documentation is available which explains how decision is arrived using AI model,1397,5,NULL
+5802,Documentation is available which explains how decision is arrived using AI model (living document),1398,0,NULL
+5805,Review is done on ad-hoc basis,1398,10,NULL
+5806,A cross-functional advisory committee reviews the AI model during development,1398,5,NULL
+5807,A cross-functional advisory committee reviews the AI model during operation,1399,3,NULL
+5808,A cross-functional advisory committee reviews the AI model during development and operation,1399,0,NULL
+5809,"Recognition: Identifying and categorizing data (e.g. image, video, audio, and text) into specific classifications as well as image segmentation and object detection",1399,0.5,NULL
+5810,"Event detection: Connecting data points to detect patterns, as well as outliers or anomalies",1400,0.5,NULL
+5811,Forecasting: Using past and existing behaviors to predict future outcomes,1400,0.5,NULL
+5812,Personalization: Developing a profile of an individual and learning and adapting its output to that individual over time,1400,0.5,NULL
+5813,"Interaction support: Interpreting and creating content to power conversational and other interactions between machines and humans (possibly involving multiple media such as voice, text, and images)",1402,0.5,NULL
+5814,Goal-driven optimization: Finding the optimal solution to a problem for a cost function or predefined goal,1402,0.5,NULL
+5815,"Reasoning with knowledge structures: Inferring new outcomes that are possible even if they are not present in existing data, through modeling and simulation",1402,0.5,NULL
+5816,"Content generation: Includes generating new images, video, text, assessment, and audio",1402,10,NULL
+5817,Autonomous systems: Robots and robotic systems increasingly embed different tasks â€“ such as recognition and goal-driven optimization,1403,10,NULL
+5818,"Monitoring and control systems: These systems manage, command, direct or regulate the behavior of other devices or systems using control loops",1403,5,NULL
+5819,None of the above,1403,0,NULL
+5820,No KPI's available for measuring output of tool,1403,10,NULL
+5821,KPI's are defined and available for tool for measuring output of tool,1403,0,NULL
+5822,No-action autonomy (also referred to as â€œhuman supportâ€�): System cannot act on its recommendations or output. The human uses or disregards the AI systemâ€™s recommendations or output at will.,1403,0,NULL
+5823,Low-action autonomy (also referred to as â€œhuman-in-the-loopâ€�): System evaluates input and acts upon its recommendations or output if the human agrees.,1403,5,NULL
+5824,Medium-action autonomy (also referred to as â€œhuman-on-the-loopâ€�): System evaluates input and acts upon its recommendations or output unless the human vetoes,1404,10,NULL
+5825,High-action autonomy (also referred to as â€œhuman-out-of-the-loopâ€�): System evaluates input and acts upon its recommendations or output without human involvement,1404,20,NULL
+5844,Not Applicable,1409,0,NULL
+5845,Tool is not provided with any functionality to capture feedback from differnt stakeholders,1409,10,NULL
+5846,"Tool is provided with functionality to ensure feedbacks from different stakeholders are duly captured, incorporated and appropriate mitigation measures are taken to ensure no biased outputs",1409,0,NULL
+5847,Not Applicable,1410,0,NULL
+5849,Data set is providing same result when executed multiple times on same dataset,1410,10,NULL
+5850,There are variations on the results when executed multiple times on same dataset,1410,5,NULL
+5851,Human intervention not available,1411,10,NULL
+5852,Human intervention available,1411,5,NULL
+5853,Not Applicable,1411,0,NULL
+5855,"Training data is not analysed every quarter for representiveness, only analysed if somebody raises concern on the tool output",1412,10,NULL
+5856,"Training data will be analysed every quarter for representiveness and the data used is diverse, relevant, error free and complete",1412,5,NULL
+5857,Not Applicable,1412,0,NULL
+5858,Not Applicable,1413,0,NULL
+5859,Not Applicable,1413,0,NULL
+5860,Not Applicable,1413,0,NULL
+5861,Not Applicable,1414,0,NULL
+5862,Not Applicable,1414,0,NULL
+5863,Not Applicable,1414,0,NULL
+5864,Not Applicable,1415,0,NULL
+5866,Not Applicable,1415,0,NULL
+5867,Not Applicable,1415,0,NULL
+5277,"Service group split by business functions, geographies with their own tools, processes, etc.",1285,1,NULL
+5278,"ITIL compliant service groups split by business functions, geographies",1285,2,NULL
+5279,"Shared services across various business functions, geographies with common tools across the organization",1285,3,NULL
+5280,DevSecOps centric for majority of the applications,1285,4,NULL
+5281,Product centric with org structures aligned to business value streams,1285,5,NULL
+5282,No Industry standard processes implemented across the enterprise,1288,1,NULL
+5283,Standard ITIL process implemented,1288,2,NULL
+5284,Kanban/Scrumban for support,1288,3,NULL
+5285,Full stack Devops model and SRE implementation with Agile/Scrum team,1288,4,NULL
+5286,Product centric organization,1288,5,NULL
+5287,<10%,1291,1,NULL
+5288,10%-20%,1291,2,NULL
+5289,20%-30%,1291,3,NULL
+5290,30%-40%,1291,4,NULL
+5291,>40%,1291,5,NULL
+5292,<10%,1292,1,NULL
+5293,10%-20%,1292,2,NULL
+5294,20%-30%,1292,3,NULL
+5295,30%-40%,1292,4,NULL
+5296,>40%,1292,5,NULL
+5327,0% - 20%,1302,1,NULL
+5328,20% - 40%,1302,2,NULL
+5329,40%- 60%,1302,3,NULL
+5330,60%-80%,1302,4,NULL
+5331,80%-100%,1302,5,NULL
+5297,No APM tool based monitoring,1293,1,NULL
+5298,<10%,1293,2,NULL
+5299,10%-30%,1293,3,NULL
+5300,30%-60%,1293,4,NULL
+5301,>60%,1293,5,NULL
+5302,Manual execution / No automation,1294,1,NULL
+5303,Deployed rule based automations,1294,2,NULL
+5304,"Implemented event, alert correlations to take decisions",1294,3,NULL
+5305,Implemented AI based predictive solutions to prevent disruptions,1294,4,NULL
+5306,Implemented solution for automated recommendations and actions based on AI led analytics,1294,5,NULL
+5307,None,1295,1,NULL
+5308,Yes - Basic - multiple dashboards,1295,2,NULL
+5309,Yes - Moderate - Single pane of glass across monitoring tools with actionable insights with correlations available in dashboards,1295,3,NULL
+5310,Yes - Advanced - Dashboards with preditive business KPI analytics along with the correlations,1295,4,NULL
+5311,Yes - Advanced - Business command center with visibility into impact of IT issues on business KPI metrics,1295,5,NULL
+5312,<10%,1296,1,NULL
+5313,10%-20%,1296,2,NULL
+5314,20%-30%,1296,3,NULL
+5315,30%-40%,1296,4,NULL
+5316,>40%,1296,5,NULL
+5317,Adhoc,1297,1,NULL
+5318,"Repeatable and followed for all P1 tickets, mostly manual",1297,2,NULL
+5319,"Repeatable and followed for all tickets, mostly manual",1297,3,NULL
+5320,"ITSM tool driven - regular problem management regime defined, implemeted, tracked and monitered",1297,4,NULL
+5321,"Advanced Problem Management Analytics (PMA) dashboard, auto identification, logging of problems, assisted triaging, followed by manual or automated resolutions",1297,5,NULL
+5322,Never,1298,1,NULL
+5323,"On need basis, infrequently",1298,2,NULL
+5324,On a annual basis,1298,3,NULL
+5325,On a quarterly basis,1298,4,NULL
+5326,"On a regular interval, planned manner e.g. every sprint or every month",1298,5,NULL
+5332,<5%,1303,1,NULL
+5333,5%-10%,1303,2,NULL
+5334,10%-15%,1303,3,NULL
+5335,15%-20%,1303,4,NULL
+5336,>20%,1303,5,NULL
+5337,Initial - Adhoc,1306,1,NULL
+5338,"Repeatable - process is defined and can be followed by new users, but is not standardised across the enterprise",1306,2,NULL
+5339,Defined - process well defined and standardized across the enterprise,1306,3,NULL
+5340,Managed - Implemented with high process compliance through enterprise level adoption,1306,4,NULL
+5341,"analyzed, continuously improved and highly automated",1306,5,NULL
+5342,Completely manual,1307,1,NULL
+5343,Partial with tool implemted in pockets,1307,2,NULL
+5344,Centralised with enterprise-wide tool,1307,3,NULL
+5345,Auotmated ticketing based on ML models,1307,4,NULL
+5346,Automated remediation in response to or proactive anomaly detection,1307,5,NULL
+5347,The KM processes are nascent and the knowledge is available as tribal knowledge.,1308,1,NULL
+5348,"KM processes established, along with the templates for different knowledge contribution",1308,2,NULL
+5349,"KM processes established, along with gating for project life cycle phases OR retrospection to mandate the documentation of KM",1308,3,NULL
+5350,"Knowledge artifacts are available with respective teams, but distributed through the shared reposities",1308,4,NULL
+5351,"Availability of central, digital platform for KM artifact management, search",1308,5,NULL
+5352,Manual analysis and remediation on case to case basis,1309,1,NULL
+5353,"Pre-defined rules, SOPs to resolve the issues",1309,2,NULL
+5354,Leverage insights derived using AI to identify and resolve the issues,1309,3,NULL
+5355,"Auto identification of resolution workflows, execute those proactively",1309,4,NULL
+5356,"App, Infra disruptions are predicted, prevented by executing automation to ensure systems are self-healed",1309,5,NULL
+5357,Analyze customer feedback through complaints logged,1310,1,NULL
+5358,Proactively conduct customer satisfaction survey at regular intervals,1310,2,NULL
+5359,Implement end user monitoring system to track and analyze user activities,1310,3,NULL
+5360,Monitor end to end customer journey  to understand customer behaviour,1310,4,NULL
+5361,"Continuously monitor customer journey, tweak business processes and monitor business KPI impact to assess effectiveness of the changes",1310,5,NULL
+5362,Only monitor IT KPIs and perform IT spend analysis,1311,1,NULL
+5363,"Monitor business services for their availability, performance",1311,2,NULL
+5364,Define and monitor business KPIs to understand impact of disruptions on the underlying business functions / processes,1311,3,NULL
+5365,Identify trends and patterns causing frictions and  adopt strategic changes to optimize the business KPIs,1311,4,NULL
+5366,"Define end to end value stream for the business, with its associated KPIs and monitor, optimize them in a continuous manner",1311,5,NULL
+5382,"The traceability of any disruption is completely manual, with ad-hoc processes",1315,1,NULL
+5383,Basic application level traceability present to map application level issues to the causes,1315,2,NULL
+5384,Correlation present to map business service level disruptions to IT causes,1315,3,NULL
+5385,All the process instrumentation data is utilized to track patterns and causes of disruptions at a business process level,1315,4,NULL
+5386,"End to end monitoring and mapping of failures, disruptions happening in other systems with the KPIs impacting your business value",1315,5,NULL
+5367,Events are analyzed manually on need basis,1312,1,NULL
+5368,"Sense strategy in place to acquire data from various sources of significance, including apps, infra and devices",1312,2,NULL
+5369,Event data stored in a central repository and made available for manual analysis on need basis,1312,3,NULL
+5370,"Automated event correlation in place to identify patterns, anomalies in the event data",1312,4,NULL
+5371,"Proactive event management in place that executes automation leveraging AI driven predictions based on event, alert data, correlations and trends",1312,5,NULL
+5387,<10%,1316,1,NULL
+5388,10%-20%,1316,2,NULL
+5389,20%-40%,1316,3,NULL
+5390,40%-60%,1316,4,NULL
+5391,>60%,1316,5,NULL
+5372,"Developed by users on need basis, using disparate technologies",1313,1,NULL
+5373,Developed using scripts with standard set of technologies,1313,2,NULL
+5374,Automated business service specific workflows using enterprise standard technology,1313,3,NULL
+5375,End to end business process automation using standardized RPA tools,1313,4,NULL
+5376,"Automatic assignment, enrichment, workflow execution of the tasks/ tickets using pre-defined workflows, making > 20% work pass through",1313,5,NULL
+5377,"Pre-dominantly individual heroism driven agility, not predictable",1314,1,NULL
+5378,"Agile practices are followed, but not uniformly",1314,2,NULL
+5379,"Processes are standardized, optimized to bring in process agility",1314,3,NULL
+5380,"IT provisioning is made responsive through code driven templates, automated provisioning",1314,4,NULL
+5381,"Business level agility through incorporation of automated app, infra provisioning, standardized processes, automation adoption",1314,5,NULL
+5951,Plan not baselined,1446,0.5,NULL
+5952,Project specific plan (not in line with service line catalogue),1446,1.5,NULL
+5953,"Plan in line with service line catalogue, but largely pointed tools identified",1446,2.5,NULL
+5954,Plan includes comprehensive platform based automation solutions,1446,3.5,NULL
+5955,Additionally plan also includes specific benefits for each opportunity and prioritised accordingly,1446,4.5,NULL
+5956,No,1447,1,NULL
+5957,Yes,1447,5,NULL
+5958,No team identified for implementation of automation roadmap,1448,1.25,NULL
+5959,"Team members identified, but they don't have the skill set to implement",1448,2.5,NULL
+5960,Team members identified and training plan for automation requirements in place,1448,3.75,NULL
+5961,Dedicated team members identified with required skillset and also KPIs towards completion of Automation roadmap,1448,5,NULL
+5962,Manual environment setup,1449,1.25,NULL
+5963,Script assisted environment setup,1449,2.5,NULL
+5964,Environment setup automated and integrated with automated build,1449,3.75,NULL
+5965,Automated on-demand environment provisioning,1449,5,NULL
+5966,NA,1449,0,NULL
+5967,Data from production is manually refreshed to lower environments,1450,1.66,NULL
+5968,Partial automation with Script assisted data refresh on lower environments,1450,3.32,NULL
+5969,Data refresh to lower environments fully automated,1450,4.98,NULL
+5970,NA,1450,0,NULL
+5971,Deployment package from production is manually setup on other environments,1451,1.25,NULL
+5972,Binaries are rebuilt from source configuration system for other environments using automated builds,1451,2.5,NULL
+5973,"Package repository used to maintain deployment packages, but deployment from repository not automated",1451,3.75,NULL
+5974,Replication of package from package repository and automated deployment,1451,5,NULL
+5975,NA,1451,0,NULL
+5976,All data archiving and purging requirements are handled manually,1452,2.5,NULL
+5977,Scripts have been implemented and scheduled to handle the Data archiving as per agreed schedule,1452,5,NULL
+5978,Data Archiving and Purging is not in scope,1452,0,NULL
+5979,Data profiling and cleaning is handled manually,1453,1.66,NULL
+5980,Data profiling and cleaning is handled using some scripts,1453,3.32,NULL
+5981,Comprehensive data management solution deployed to handle all Data profiling and cleaning requirements,1453,4.98,NULL
+5982,Data profiling and cleaning is not in scope,1453,0,NULL
+5983,All data migration requirements are addressed through custom scripting for specific needs,1454,1.66,NULL
+5984,Data migration is handled using some tools but still involves some manual efforts,1454,3.32,NULL
+5985,Comprehensive data migration solution deployed to address migrations through simple configurations,1454,4.98,NULL
+5986,Data migration is not in scope,1454,0,NULL
+5987,SLA tracking and reporting is manual,1455,1.25,NULL
+5988,"SLA reports are extracted out of ITSM manually, but report generation is automated",1455,2.5,NULL
+5989,SLA reports are generated manually but daily tracking is still manual,1455,3.75,NULL
+5990,SLA dashboard with real time performance is available and all tracking and reporting is through that,1455,5,NULL
+5991,There are no SLAs applicable,1455,0,NULL
+5992,All compliance reporting is manual,1456,1.66,NULL
+5993,Compliance reporting is partially automated,1456,3.32,NULL
+5994,A Reporting platform / tool is used to generate all required compliance reports,1456,4.98,NULL
+5995,No compliance reporting is required,1456,5,NULL
+5996,Regular status reporting is manual,1457,1.66,NULL
+5997,Required data is extracted using scripts but report is generated manually,1457,3.32,NULL
+5998,Required data is extracted manually and report generation is also largely automated,1457,4.98,NULL
+6018,Application capacity requirements are analysed manually based on data collected manually from logs etc,1461,1.66,NULL
+6301,Work load modeller is used to analyse the application performance and capacity requirements but correlated with Performance test results manually,1461,3.22,NULL
+6302,Work load modeller output is correlated with performance test results automatically to provide Capacity requirements and projections,1461,4.98,NULL
+6303,NA,1461,0,NULL
+6019,Low performing DB queries are identified manually based on performance issues reported by users etc. and optimised,1462,1.66,NULL
+6020,Low performing DB queries are identified through performance logs and optimised using relevant DB tools,1462,3.32,NULL
+6021,Performance monitoring is setup for ongoing feedback on low performing transactions and optimisation is driven through relevant tools,1462,4.98,NULL
+6022,Not in Scope,1462,0,NULL
+6028,No leverage of AI,1464,0.5,NULL
+6029,Deployed rule based automations,1464,1.5,NULL
+6030,"Implemented event, alert correlations to take decisions",1464,2.5,NULL
+6031,Implemented AI based predictive solutions to prevent disruptions,1464,3.5,NULL
+6032,Implemented solution for automated recommendations and actions based on AI led analytics,1464,4.5,NULL
+6033,Health check across applications is done manually,1465,0.5,NULL
+6034,Health check is assisted by scripts for some applications,1465,1.5,NULL
+6035,"Health check is script assisted for all applications, manual work is required in report generation",1465,2.5,NULL
+6036,"Health check is fully automated for some applications, reporting needs some manual interventions",1465,3.5,NULL
+6037,Health check and report generation is full automated for all applications,1465,4.5,NULL
+6038,NA,1465,0,NULL
+6039,There is no monitoring in place,1466,0.83,NULL
+6040,Basic monitoring through scripts is in place,1466,1.66,NULL
+6041,"Tool driven monitoring is done and alerts are sent to mail / ITSM, but not for all potential areas",1466,2.49,NULL
+6042,"Tool driven monitoring is done and alerts are sent to mail / ITSM and it is comprehensive covering Application, Infra, DBs, Interfaces, Batch jobs",1466,3.32,NULL
+6043,Tool driven monitoring is done and alerts are self healed to avoid incidents,1466,4.15,NULL
+6045,NA,1466,0,NULL
+6046,There is no Business process or transaction monitoring in place,1467,0.5,NULL
+6047,Business processes are monitored based on thresholds and alerts for business parameters,1467,1.5,NULL
+6048,Business processes are monitored through the process flow to display progress across process steps,1467,2.5,NULL
+6049,Business processes are monitored through the process flow to identify bottlenecks and alert users,1467,3.5,NULL
+6050,Business processes are monitored through the process flow to identify bottlenecks and self heal,1467,4.5,NULL
+6051,NA,1467,0,NULL
+6052,None,1468,0.5,NULL
+6053,Yes - Basic - multiple dashboards,1468,1.5,NULL
+6054,Yes - Moderate - Single pane of glass across monitoring tools with actionable insights with correlations available in dashboards,1468,2.5,NULL
+6055,Yes - Advanced - Dashboards with preditive business KPI analytics along with the correlations,1468,3.5,NULL
+6056,Yes - Advanced - Business command center with visibility into impact of IT issues on business KPI metrics,1468,4.5,NULL
+6057,"Disparate tools generate the logs and analysis is manual
+",1469,1,NULL
+6058,A central log server is available which gets frequent uploads of logs,1469,2.5,NULL
+6059,"Implementation of tools to provide search, processing of logs and insights/analytics",1469,3.75,NULL
+6060,Implementation of tools to alert support team based on analytics on Logs,1469,5,NULL
+7596,NA,1469,0,NULL
+6068,"The traceability of any disruption is completely manual, with ad-hoc processes",1471,0.5,NULL
+6069,Basic application level traceability present to map application level issues to the causes,1471,1.5,NULL
+6070,Correlation present to map business service level disruptions to IT causes,1471,2.5,NULL
+6071,All the process instrumentation data is utilized to track patterns and causes of disruptions at a business process level,1471,3.5,NULL
+6072,"End to end monitoring and mapping of failures, disruptions happening in other systems with the KPIs impacting your business value",1471,4.5,NULL
+6073,Only monitor IT KPIs and perform IT spend analysis,1472,0.5,NULL
+6074,"Monitor business services for their availability, performance",1472,1.5,NULL
+6075,Define and monitor business KPIs to understand impact of disruptions on the underlying business functions / processes,1472,2.5,NULL
+6076,Identify trends and patterns causing frictions and  adopt strategic changes to optimize the business KPIs,1472,3.5,NULL
+6077,"Define end to end value stream for the business, with its associated KPIs and monitor, optimize them in a continuous manner",1472,4.5,NULL
+6078,Analyze customer feedback through complaints logged,1473,0.5,NULL
+6079,Proactively conduct customer satisfaction survey at regular intervals,1473,1.5,NULL
+6080,Implement end user monitoring system to track and analyze user activities,1473,2.5,NULL
+6081,Monitor end to end customer journey  to understand customer behaviour,1473,3.5,NULL
+6082,"Continuously monitor customer journey, tweak business processes and monitor business KPI impact to assess effectiveness of the changes",1473,4.5,NULL
+6083,"Pre-dominantly individual heroism driven agility, not predictable",1474,0.5,NULL
+6084,"Agile practices are followed, but not uniformly",1474,1.5,NULL
+6085,"Processes are standardized, optimized to bring in process agility",1474,2.5,NULL
+6086,"IT provisioning is made responsive through code driven templates, automated provisioning",1474,3.5,NULL
+6087,"Business level agility through incorporation of automated app, infra provisioning, standardized processes, automation adoption",1474,4.5,NULL
+6088,Did not share any components outside project team / Did not create any reusable tools / components,1475,1.25,NULL
+6089,Shared across multiple projects within the account,1475,2.5,NULL
+6090,Shared within the Service line,1475,3.75,NULL
+6091,Shared at organisation level,1475,5,NULL
+6092,NA,1475,0,NULL
+6093,"Service group split by business functions, geographies with their own tools, processes, etc.",1476,0.5,NULL
+6094,"Centrally managed but independent App support, Infra support and Separate Development teams",1476,1.5,NULL
+6095,"Shared services across various business functions, geographies with common tools across the organization",1476,2.5,NULL
+6096,Development and Support teams work together in Agile and DevOps model,1476,3.5,NULL
+6097,Product centric with org structures aligned to business value streams,1476,4.5,NULL
+6098,No Industry standard processes implemented across the enterprise,1477,0.5,NULL
+6276,Standard ITIL process implemented,1477,1.5,NULL
+6277,Kanban/Scrumban for support,1477,2.5,NULL
+6278,Full stack Devops model and SRE implementation with Agile/Scrum team,1477,3.5,NULL
+6279,Product centric organization,1477,4.5,NULL
+6103,All reports / Data are provided manually,1478,0.5,NULL
+6104,Some scripts / pre defined queries are used for extracting data,1478,1.5,NULL
+6105,Data requests are configured for automated extraction and dispatch to users,1478,2.5,NULL
+6107,Self help portal is provided to users for extraction of data as needed,1478,4.5,NULL
+6108,NA,1478,0,NULL
+6109,All data update requests are handled manually,1479,1.66,NULL
+6110,"Data updates are done using scripts, but scripts are manually executed with parameters",1479,3.32,NULL
+6111,Data update requests are resolved by automatically invoking predetermined scripts,1479,4.98,NULL
+6112,Not in scope,1479,0,NULL
+6113,All user queries are addressed manually,1480,1.25,NULL
+6114,L1 team has been enabled to address most of the user queries and self help videos created to help in user training,1480,2.5,NULL
+6115,User queries are linked to FAQs and relevant videos through ITSM tool,1480,3.75,NULL
+6116,User queries are addressed automatically through Chatbot / digital assistants,1480,5,NULL
+6117,NA,1480,0,NULL
+6118,Batch job failure incidents are analysed and resolved manually all the times,1481,0.83,NULL
+6119,Batch job failures are analysed using tools and resolved manually all the times,1481,1.66,NULL
+6120,Batch job failures are detected before incidents are raised but resolved manually based on alerts,1481,2.49,NULL
+6121,Patterns of batch job failures have been analysed offline and automated fixes based on failures have been setup in most of the cases,1481,3.32,NULL
+6122,"Over and above auto fixes for most of the cases, additional patterns of batch job failures are also auto detected and based on configuration setup, auto resolved as well",1481,4.15,NULL
+6123,There are no batch jobs in our scope,1481,0,NULL
+6124,Incident response and triage is manually handled by the support team,1482,1.25,NULL
+6125,"Incident response is automated, allocation is handled centrally by a SPOC",1482,2.5,NULL
+6126,Incident allocation is automated for few portfolios across entire IT support (Infra and Apps together),1482,3.75,NULL
+6127,Incident response and routing is automated factoring the load balancing and leaves etc,1482,5,NULL
+6128,NA,1482,0,NULL
+6129,All security related queries are addressed manually,1483,1.66,NULL
+6130,User queries are linked to FAQs and relevant videos through ITSM tool,1483,3.32,NULL
+6131,"Usage of tools/best practices adopted specific to minimizing the risk of data breach, conflict of interest, fraud and coercion attempts",1483,4.98,NULL
+6132,NA,1483,0,NULL
+6133,All server and DB issues are analysed and resolved manually,1484,1.25,NULL
+6134,Individual scripts are used to analyse and resolve in certain cases,1484,2.5,NULL
+6135,All server and DB issues are detected before incidents are raised but resolved manually based on alerts,1484,3.75,NULL
+6136,All Server and DB issues are detected before incidents are raised and are also resolved automatically for most of the cases,1484,5,NULL
+6137,NA,1484,0,NULL
+6138,There is no historical incident resolution repository,1485,1.25,NULL
+6139,"Historical incident repository is used, but identifying similar historical incidents is offline",1485,2.5,NULL
+6140,Identification of similar historical incidents is automated with integration to ITSM tools,1485,3.75,NULL
+6141,Correlation with historical incidents and recommendation of the resolution is completely automated,1485,5,NULL
+6142,NA,1485,0,NULL
+6148,Verifying the SOP/FAQ documents manually,1487,2.5,NULL
+6149,Automated using scripts/custom tools,1487,3.75,NULL
+6150,Queries are addressed automatically through Chatbot / digital assistants,1487,5,NULL
+6151,NA,1487,0,NULL
+6152,Ticket details provided by user are not comprehensive and team tries to get more details by connecting with the user,1488,1.66,NULL
+6153,Required prompts have been placed in ITSM tool to ensure end users raise tickets with proper data,1488,3.32,NULL
+6154,Relevant details are captured behind the scenes using appropriate tools / utilities to enrich the ticket information,1488,4.98,NULL
+6155,NA,1488,0,NULL
+6156,"Requests like user creation, access requests, password resets are all handled manually",1489,1.25,NULL
+6157,Simple scripts are used for addressing such user life cycle related requests,1489,2.5,NULL
+6158,User life cycle mangement platform is used for centrally managing all such requests,1489,3.75,NULL
+6159,All user life cycle requests are automated end to end with no manual intervention,1489,5,NULL
+6160,Not in scope,1489,0,NULL
+6161,Shifts patterns are handled manually,1490,2.5,NULL
+6162,"Automated using scripts/custom tools, people on leave is handled manually",1490,3.75,NULL
+6163,Integrated Automation in place taking care of leaves and other contingencies,1490,5,NULL
+6164,NA,1490,0,NULL
+6170,Answer Option,1491,0,NULL
+6171,Collation of Change items and documentation is all done manually,1492,1.25,NULL
+6172,Collation and prioritisation of change items is managed through centralised repository,1492,2.5,NULL
+6173,Additionally change documentation is partially generated based on similar historical changes,1492,3.75,NULL
+6174,Additionally change related updates to ITSM are also automated based on similar historical changes,1492,5,NULL
+6175,NA,1492,0,NULL
+6182,Test cases maintained in documents and Regression Testing executed manually,1493,0.83,NULL
+6280,"Regression test cases repository maintained in a repository, but executed manually",1493,1.66,NULL
+6281,Regression test cases automated,1493,2.49,NULL
+6284,Risk-based prioritization and continuous management of the test suite; capability to test incremental builds,1493,4.98,NULL
+6285,NA,1493,0,NULL
+6183,"Performance testing - Workload modeling, data generation, Test execution - is largely manual",1494,0.5,NULL
+6184,Tools deployed for Workload modelling,1494,1.5,NULL
+6185,Additionally test data is generated through tools / scripts,1494,2.5,NULL
+6186,Additionally test execution is automated,1494,3.5,NULL
+6187,Test execution is automated and triggerred through the Continuous Integration server,1494,4.5,NULL
+6188,NA,1494,0,NULL
+6195,Manual deployments to production / stage environments,1495,0.83,NULL
+6286,Script assisted deployment to production / stage environment,1495,1.66,NULL
+6287,Deployment automated completely to staging environment,1495,2.49,NULL
+6288,Deployment autoamtion aligned with CD pipeline for forward deploy,1495,3.32,NULL
+6289,Deployment automation tool  in CD pipeline to support rollback,1495,4.15,NULL
+6290,Continuous deployments up to production for forward as well as rollback,1495,4.98,NULL
+6291,NA,1495,0,NULL
+6196,Application code is reviewed manually for identifying improvement opportunities and accordingly implemented,1496,1.66,NULL
+6197,Code review tools are used for code quality analysis and identification of opportunities,1496,3.32,NULL
+6198,Code review tools are integrated with Source control systems to perform the Code quality reviews as part of Build process,1496,4.98,NULL
+6199,NA,1496,0,NULL
+6200,Impact analysis is completely manual,1497,1.25,NULL
+6201,Impact analysis is assisted by scripts / tools,1497,2.5,NULL
+6202,Reverse engineered code models are used for identifying the impacted components,1497,3.75,NULL
+6203,Reverse engineered code models integrated with Application documentation for a comprehensive automated impact analysis,1497,5,NULL
+6204,NA,1497,0,NULL
+6205,Estimation is done completely manual,1498,1.66,NULL
+6206,SMC model has been used for the estimation,1498,3.32,NULL
+6207,Webbased estimation model has been used,1498,4.98,NULL
+6208,NA,1498,0,NULL
+6214,Source control system does not have branching. Code is maintained separately and is manually refactored with main code base,1499,0.5,NULL
+6292,"Source control system supports branching but not used across all applications
+",1499,1.5,NULL
+6293,"Several long-lived branches are maintained for new features or projects
+",1499,2.5,NULL
+6294,"A few short-lived branches for specific features
+",1499,3.5,NULL
+6295,Trunk development with branches only used for releases,1499,4.5,NULL
+6296,NA,1499,0,NULL
+6215,Code development done manually for all components,1500,1.66,NULL
+6216,"Code components generated from Design models, business logic needs to be added manually",1500,3.32,NULL
+6217,Code generated using automated code generators with very minimal manual edits required,1500,4.98,NULL
+6218,NA,1500,0,NULL
+6219,Manual DB Script execution. Manual review of DB scripts.,1501,0.5,NULL
+6220,Tools for code quality check and unit testing of DB scripts established and DB script executed using tool,1501,1.5,NULL
+6221,DB scripts packaged into the automated build  process and triggered by CI,1501,2.5,NULL
+6222,Database deployment tool further enhanced to provide feedback and reporting mechanism for DB execution workflow,1501,3.5,NULL
+6223,Additionally automated rollback in place,1501,4.5,NULL
+6224,NA,1501,0,NULL
+6225,Manual/Adhoc Unit testing,1502,0.83,NULL
+6226,Partial automated unit testing (Approx 50%),1502,1.66,NULL
+6227,Fully automated unit testing,1502,2.49,NULL
+6228,Unit testing scripts are invoked through CI,1502,3.32,NULL
+6230,Refactoring and optimization of unit test cases- capability to run incremental/ daily/ weekly as per build schedules,1502,4.98,NULL
+6231,NA,1502,0,NULL
+6232,Manual quality checks,1503,0.5,NULL
+6233,Code Quality checks through tool,1503,1.5,NULL
+6234,Code quality checks automatically invoked by CI,1503,2.5,NULL
+6235,Proper threshold defined for code quality check; hooked into version control for gated check-in; triggered   automatically by CI,1503,3.5,NULL
+6236,Managed code quality to ensure thresholds are not exceeded at any time. Results  analyzed continuously and addressed as part of iterations.,1503,4.5,NULL
+6237,NA,1503,0,NULL
+6238,Manual System Testing,1504,0.5,NULL
+6239,System testing automated and invoked by CI/CI automation tool,1504,1.5,NULL
+6242,Risk-based prioritization and continuous management of the test suite; capability to test incremental builds,1504,4.5,NULL
+6243,NA,1504,0,NULL
+6244,SOPs are not properly documented and largely across documents,1505,0.83,NULL
+6245,SOPs are documented and manually maintained regularly but not automated,1505,1.66,NULL
+6246,SOPs are digitised and progressively updated online but not automated,1505,2.49,NULL
+6247,SOPs are automated,1505,3.32,NULL
+6250,NA,1505,0,NULL
+6255,Team is not capable to develop any automations on their own,1506,1.25,NULL
+6297,Team can identify opportunities and develop some custom scripting scenarios,1506,2.5,NULL
+6298,Team is capable to implement and maintain tools like for CI / CD along with Custom scripting,1506,3.75,NULL
+6299,Team has capability for implementing automation platforms,1506,5,NULL
+6300,NA,1506,0,NULL
+6260,Answer Option,1507,0,NULL
+6261,Never,1508,0.5,NULL
+6262,"On need basis, infrequently",1508,1.5,NULL
+6263,On a annual basis,1508,2.5,NULL
+6264,On a quarterly basis,1508,3.5,NULL
+6265,"On a regular interval, planned manner e.g. every sprint or every month",1508,4.5,NULL
+6270,Answer Option,1509,0,NULL
+6271,Events and alret data are analyzed manually on a need basis,1510,0.5,NULL
+6272,"Sense strategy in place to acquire data from various sources of significance, including apps, infra and devices",1510,1.5,NULL
+6273,Event data stored in a central repository and made available for manual analysis on need basis,1510,2.5,NULL
+6274,"Automated event correlation in place to identify patterns, anomalies in the event and alert data",1510,3.5,NULL
+6275,"Proactive event management in place that executes automation leveraging AI driven predictions based on event, alert metric data, trends and correlations",1510,4.5,NULL
+7459,Adhoc,1827,1,NULL
+7460,"Repeatable and followed for all P1 tickets, mostly manual",1827,2,NULL
+7461,"Repeatable and followed for all tickets, mostly manual",1827,3,NULL
+7462,"ITSM tool driven - regular problem management regime defined, implemeted, tracked and monitered",1827,4,NULL
+7463,"Advanced Problem Management Analytics (PMA) dashboard, auto identification, logging of problems, assisted triaging, followed by manual or automated resolutions",1827,5,NULL
+7585,No Option,1904,0,NULL
+7591,Analysis and resolution is largely manual,1905,1,NULL
+7592,"Analysis of the service requests is assisted through scripts and tools, resolution is manual",1905,2,NULL
+7593,Analysis and resolution is automated for deterministic service requests,1905,3,NULL
+7594,Analysis and resolution is automated for the deterministic service requests and analysis based on Knowledge database and log correlation is available for non deterministic service requests,1905,4,NULL
+7595,NA,1905,0,NULL
+7586,Analysis and resolution is largely manual,1906,1,NULL
+7587,"Analysis of the incidents is assisted through scripts and tools, resolution is manual",1906,2,NULL
+7588,Analysis and resolution is automated for deterministic incidents,1906,3,NULL
+7589,Analysis and resolution is automated for the deterministic incidents and analysis based on Knowledge database and log correlation is available for non deterministic incidents,1906,4,NULL
+7590,NA,1906,0,NULL
+7597,No Option,2067,0,NULL
+"11851","Strongly Agree","3246","5","NULL"
+"11866","Agree","3246","4","NULL"
+"11881","Neutral","3246","3","NULL"
+"11895","Disagree","3246","2","NULL"
+"11909","Strongly Disagree","3246","1","NULL"
+"11852","Yes","3247","5","NULL"
+"11867","No","3247","0","NULL"
+"11853","Regularly reviewed","3248","5","NULL"
+"11868","Reviewed twice in a week","3248","4","NULL"
+"11882","Reviewed once in a week","3248","3","NULL"
+"11896","Reviewed once in a month","3248","2","NULL"
+"11910","Not reviewed","3248","0","NULL"
+"11854","Excellent","3249","5","NULL"
+"11869","Good","3249","4","NULL"
+"11883","Neutral","3249","3","NULL"
+"11897","Fair","3249","2","NULL"
+"11911","Poor","3249","1","NULL"
+"11855","Very Efficient","3250","5","NULL"
+"11870","Efficient","3250","4","NULL"
+"11884","Neutral","3250","3","NULL"
+"11898","Inefficient","3250","2","NULL"
+"11912","Very Inefficient","3250","1","NULL"
+"11856","Regularly reviewed","3251","5","NULL"
+"11871","Reviewed twice in a week","3251","4","NULL"
+"11885","Reviewed once in a week","3251","3","NULL"
+"11899","Reviewed once in a month","3251","2","NULL"
+"11913","Not reviewed","3251","0","NULL"
+"11857","Number of lines of code in a method, skipping comments and blank lines","3252","5","NULL"
+"11872","Number of statements, ignoring formatting and often counting a line as more than one statement","3252","3","NULL"
+"11886","Number of instructions that the code compiles to.","3252","1","NULL"
+"11900","None","3252","0","NULL"
+"11858","Excellent","3253","5","NULL"
+"11873","Good","3253","4","NULL"
+"11887","Neutral","3253","3","NULL"
+"11901","Fair","3253","2","NULL"
+"11914","Poor","3253","1","NULL"
+"11859","Strongly Agree","3254","5","NULL"
+"11874","Agree","3254","4","NULL"
+"11888","Neutral","3254","3","NULL"
+"11902","Disagree","3254","2","NULL"
+"11915","Strongly Disagree","3254","1","NULL"
+"11860","Very Efficient","3255","5","NULL"
+"11875","Efficient","3255","4","NULL"
+"11889","Neutral","3255","3","NULL"
+"11903","Inefficient","3255","2","NULL"
+"11916","Very Inefficient","3255","1","NULL"
+"11861","All","3256","5","NULL"
+"11876","Only System testing","3256","4","NULL"
+"11890","Only Integration testing","3256","3","NULL"
+"11904","Only Unit testing","3256","2","NULL"
+"11917","None","3256","0","NULL"
+"11862","Very Efficient","3257","5","NULL"
+"11877","Efficient","3257","4","NULL"
+"11891","Neutral","3257","3","NULL"
+"11905","Inefficient","3257","2","NULL"
+"11918","Very Inefficient","3257","1","NULL"
+"11863","Well defined","3258","5","NULL"
+"11878","Properly defined","3258","4","NULL"
+"11892","Neutral","3258","3","NULL"
+"11906","Fairly defined","3258","2","NULL"
+"11919","Poorly define","3258","1","NULL"
+"11864","Very Efficient","3259","5","NULL"
+"11879","Efficient","3259","4","NULL"
+"11893","Neutral","3259","3","NULL"
+"11907","Inefficient","3259","2","NULL"
+"11920","Very Inefficient","3259","1","NULL"
+"11865","Very Efficient","3260","5","NULL"
+"11880","Efficient","3260","4","NULL"
+"11894","Neutral","3260","3","NULL"
+"11908","Inefficient","3260","2","NULL"
+"11921","Very Inefficient","3260","1","NULL"
+"11509","The company web site talks about culture, but it is not measured","3132","1","NULL"
+"11510","Efforts are put in improving employee experience but no senior leader to own it","3132","2","NULL"
+"11511","Culture and employee experience are used as competitive differentiators but there is no continuous feedback","3132","3","NULL"
+"11512","Company measures success through regular pulse surveys,KPIs and employee engagement levels","3132","4","NULL"
+"11513","No efforts","3133","1","NULL"
+"11514","Standard advertisements","3133","2","NULL"
+"11515","Dedicated company portal for hiring. Engagements in social media","3133","3","NULL"
+"11516","Dedicated company portal for hiring. Engagements are done in social media.Customized ads for prospective candidates","3133","4","NULL"
+"11517","No Option","3134","1","NULL"
+"11518","Employee well-being viewed as a compliance topic","3135","1","NULL"
+"11519","Employee well-being focusing on one aspect of employee well-being (e.g., physical health)","3135","2","NULL"
+"11520","Employee well-being viewed as an executive leadership topic to achieve overall employee well-being","3135","3","NULL"
+"11521","Employee well-being viewed as a Board topic, proactive and personalized to an individual employee's current challenges","3135","4","NULL"
+"11522","No formal strategy in place","3136","1","NULL"
+"11523","Annual surveys conducted to collect employee feedback but minimal action is taken on the results","3136","2","NULL"
+"11524","Intelligent technologies predict characteristics of high-performing teams and suggest staffing models based on engagement results,role,tenure,etc","3136","3","NULL"
+"11525","Intelligent technologies predict characteristics of high-performing teams and suggest staffing models based on engagement,experience, tenure, job role, and the system intelligently guides workforce planning, hiring, employee communication, and development strategies","3136","4","NULL"
+"11526","Health and safety information is maintained separately for each work location through manual processes","3137","1","NULL"
+"11527","Health and safety information and employee training records are maintained in stand-alone tools","3137","2","NULL"
+"11528","Health and safety processes are aligned with other HR processes and data is stored in a common HR system","3137","3","NULL"
+"11529","The organization uses predictive analytics to identify potential health and safety issues and mitigate any risks","3137","4","NULL"
+"11530","There is no focus on diversity and inclusion","3138","1","NULL"
+"11531","Diversity and inclusion are promoted but no formal policies exist","3138","2","NULL"
+"11532","Formal policies in place to reduce bias and promote diversity and inclusion through KPI monitoring","3138","3","NULL"
+"11533","Latest technologies like machine learning are used to detect, prevent, and eradicate unconscious bias from hiring to promotion","3138","4","NULL"
+"11534","HR focuses reactively on transactional activities alone, without a digital strategy","3139","1","NULL"
+"11535","There is growing awareness of digital future of work, but fragmented systems and no defined strategy for adapting","3139","2","NULL"
+"11536","HR is executing on an aligned, organization-wide digital strategy to drive business decisions and outcomes","3139","3","NULL"
+"11537","HR is executing a strategic road map that constantly monitor, anticipate, and take advantage of digital innovations, such as artificial intelligence and machine learning","3139","4","NULL"
+"11538","The HR operating model is not based on a global vision","3140","1","NULL"
+"11539","The HR operating model is aligned with HR strategy in terms of the structure of the HR function and people capabilities","3140","2","NULL"
+"11540","Advanced analytics are used to measure potential demand for HR servicesand it is aligned with the predicted workload to ensure on-time delivery with the best quality","3140","3","NULL"
+"11541","The HR operating model is fully focused on efficiency, effectiveness, and the best employee experience; chatbots, AI, and machine learning are used to deliver high-quality service","3140","4","NULL"
+"11542","The organization does not track any well-being leading indicators","3141","1","NULL"
+"11543","The organization focuses on well-being program participation with no analysis of the impact","3141","2","NULL"
+"11544","The organization measures holistic employee well-being on an ongoing basis and progress towards company well-being goals shared with employees","3141","3","NULL"
+"11545","The organization treats employee well-being as a business KPI, incorporating implicit data sources and using predictive analytics to forecast the impact","3141","4","NULL"
+"11546","HR's focus is tactical and transactional","3142","1","NULL"
+"11547","HR provides information for strategic decisions but remains tactical in focus","3142","2","NULL"
+"11548","HR is focused on strategic initiatives, but is not critical for setting strategy and business decision making","3142","3","NULL"
+"11549","HR is a key part of the executive team and involved in setting business strategy and making decisions","3142","4","NULL"
+"11550","HR and finance data and processes are inconsistent, siloed, and largely manual","3143","1","NULL"
+"11551","HR and finance systems are fragmented and stand-alone, requiring manual effort to integrate data for reporting","3143","2","NULL"
+"11552","HR and finance teams collaborate to solve business challenges as they arise, optimize resources, and make data-driven decisions based on integrated HR and finance systems","3143","3","NULL"
+"11553","HR and finance collaborate proactively using integrated systems to inform strategic planning, anticipate potential impacts, and analyze scenarios","3143","4","NULL"
+"11554","NA","3144","1","NULL"
+"11555","No plans to do this","3144","2","NULL"
+"11556","Plan to do this","3144","3","NULL"
+"11557","Currently doing this","3144","4","NULL"
+"11558","No Option","3145","1","NULL"
+"11559","No Option","3146","1","NULL"
+"11560","There is no systematic process and no platform for connecting employees within the organization","3147","1","NULL"
+"11561","Social collaboration happens in parts of the organization on a case-by-case basis and is supported by one or more platforms","3147","2","NULL"
+"11562","Social collaboration is integrated into key, strategic talent outcomes (learning, development, and so on), and participation and contributions can be used to predict future focus areas","3147","3","NULL"
+"11563","Social collaboration content is used to suggest future innovations, projects, and people to be involved with use of the power of one cohesive collaboration platform","3147","4","NULL"
+"11564","Reactive and time consuming approach to skills and resource requirements; poor alignment across the organization","3148","1","NULL"
+"11565","Business and HR connect on future workforce requirements, but the focus is still on execution and ad hoc issues; employee data is available in silos","3148","2","NULL"
+"11566","Workforce requirements are based on real-time data; simulations and what-if scenarios and predictive analytics is used to predict workforce requirements","3148","3","NULL"
+"11567","Predictive analytics is used to predict workforce requirements for the entire company; gap and risk analysis are performed; actions are prescribed before the need presents itself","3148","4","NULL"
+"11568","Limited standard or automated processes to support talent management","3149","1","NULL"
+"11569","Disconnected processes with minimal automation are used across the organization, resulting in limited workforce insights","3149","2","NULL"
+"11570","Standardized integrated processes and a common platform to predict future talent developments and workforce needs","3149","3","NULL"
+"11571","Standardized integrated processes with a common platform to predict future talent developments and workforce needs, to guide employees with recommended actions","3149","4","NULL"
+"11572","No Option","3150","1","NULL"
+"11573","No Option","3151","1","NULL"
+"11574","Based on industry standards","3152","1","NULL"
+"11575","Past data trends studied manually and designed","3152","2","NULL"
+"11576","System analyzes past data trends. Policies are designed manually","3152","3","NULL"
+"11577","AI analyzes past data and calculates effectiveness of policies. It also benchmarks againsts industry standards","3152","4","NULL"
+"11578","No standardized process to report workforce patterns","3153","1","NULL"
+"11579","Standard processes in place to generate operational reports and compliance reports that focuses on data accuracy, consistency and timelines","3153","2","NULL"
+"11580","Solution in place for statistical analysis of workforce data to identify issues and actionable solutions","3153","3","NULL"
+"11581","Integrated workforce analysis and workforce planning solution to develop predictive scenario models to guide workforce planning; flight risk predictions","3153","4","NULL"
+"11582","No standardized recruitment process, and there is no reporting tool to report the recruitment activities","3154","1",""
+"11583","Manual process for reporting recruiting activities on ad hoc basis","3154","2",""
+"11584","Automated recruiting reports to generate insights on various recruitment activities","3154","3",""
+"11585","Recruiting solution generates real-time recruiting reports and also uses AI to generate recommendations","3154","4",""
+"11586","No Option","3155","1",""
+"11587","No Option","3156","1",""
+"11588","No Option","3157","1",""
+"11589","No Option","3158","1",""
+"11590","No Option","3159","1",""
+"11591","No reporting tool","3160","1",""
+"11592","Periodic process of reporting various recruiting metrics","3160","2",""
+"11593","Automated recruiting reports to generate insights","3160","3",""
+"11594","Real-time recruiting reports and also uses AI to generate recommendations","3160","4",""
+"11595","No","3161","1",""
+"11596","No, but considering it for future","3161","2",""
+"11597","Partially","3161","3",""
+"11598","Yes - Already in use","3161","4",""
+"11599","Limited or no processes in place to proactively trigger recruiting for critical roles","3162","1",""
+"11600","Recruiting process managed in a consistent manner to fill in vacancies as soon as possible but not aligned with recruiting processes","3162","2",""
+"11601","Advanced analytics and dashboards used to predict, qualify and prioritize risks related to staffing gaps","3162","3",""
+"11602","Recruiting uses AI and machine learning to provide recommended solutions to scenarios and used in proactive sourcing tactics to ensure risk mitigation","3162","4",""
+"11603","All data is retrieved manually from various sources","3163","1",""
+"11604","There is no 360-degree view of the workforce, and data resides in silos","3163","2",""
+"11605","Has simplified planning, reporting, and analytics in one solution and provides real-time workforce insight","3163","3",""
+"11606","Utilizes machine learning and predictive analytics which can prescribe recommendations on decisions on total workforce trends","3163","4",""
+"11607","Preparing and reviewing the JD manually without following a standard format","3164","1",""
+"11608","Preparing and reviewing the JD manually with a standard format","3164","2",""
+"11609","Semi Automation in drafting JD and reviewing it manually","3164","3",""
+"11610","Full Automation in drafting JD and reviewing it manually","3164","4",""
+"11611","No special efforts","3165","1",""
+"11612","Focus on basic data such as job requirements and characteristics","3165","2",""
+"11613","Focus on the key skills. Words and phrases that may communicate exclusivity","3165","3",""
+"11614","Machine learning prescriptions are used to guide recruiters and hiring managers in creating accurate and unbiased job descriptions","3165","4",""
+"11615","No Option","3166","1",""
+"11616","No Option","3167","1",""
+"11617","No standardized talent-screening process, and candidate screening is done manually","3168","1",""
+"11618","Manual standard talent-screening process","3168","2",""
+"11619","Recruiting solution in place that uses online tests, games and simulations to effectively screen candidates","3168","3",""
+"11620","Recruiting solution applies machine learning to resumes to auto-screen candidates, uses AI technology to recommend screening tests, analyzes tests, interviews","3168","4",""
+"11621","Manually through in person calling","3169","1",""
+"11622","Semi-automated with human in loop","3169","2",""
+"11623","Automated using chat bots","3169","3",""
+"11624","Automated using voice bots","3169","4",""
+"11625","No Option","3170","1",""
+"11626","Sourcing through job posting on website","3171","1",""
+"11627","Sourcing through job posting on website and referral program","3171","2",""
+"11628","Sourcing through website, referral and job portal. Use of social media for engagement. Analysis of sourcing effectiveness periodically","3171","3",""
+"11629","Sourcing through website, referral and job portal. Use of social media for engagement. Real-time visibility of sourcing spend and sourcing effectiveness","3171","4",""
+"11630","No Option","3172","1",""
+"11631","No Option","3173","1","NULL"
+"11632","No Option","3174","1","NULL"
+"11633","Manual talent screening","3175","1",""
+"11634","Applicant-tracking system","3175","2",""
+"11635","Recruiting solution with online tests & simulation games","3175","3",""
+"11636","Recruiting solution applies ML to screen resumes ; uses AI technology to recommend appropriate screening tests","3175","4",""
+"11637","No Option","3176","1",""
+"11638","No Option","3177","1",""
+"11639","No Option","3178","1",""
+"11640","No Option","3179","1",""
+"11641","No Option","3180","1",""
+"11642","No Option","3181","1",""
+"11643","No Option","3182","1",""
+"11644","No Option","3183","1",""
+"11645","No Option","3184","1",""
+"11646","No Option","3185","1",""
+"11647","No focus on promoting employer brand","3186","1",""
+"11648","There is a career portal on the Web site, but the portal is hardly promoted or updated","3186","2",""
+"11649","Career portal has chat functionality to enable two-way communication; a big community exists on various social media channels","3186","3",""
+"11650","Existing employees are advocates and brand ambassadors of the employer, social media engagement is high, candidates are treated as customers with personalized interactions","3186","4",""
+"11651","No standardized onboarding process","3187","1",""
+"11652"," Onboarding reports and feedback from new-hire surveys to analyze trends and measure the effectiveness","3187","2",""
+"11653","Automated onboarding reports and analysis on onboarding activities","3187","3",""
+"11654","AI based onboarding solution generates reports to measure new-hire productivity, analyze bad hires, and analyze new-hire feedback surveys","3187","4",""
+"11655","No Option","3188","1",""
+"11656","No Option","3189","1",""
+"11657","No Option","3190","1",""
+"11658","No","3191","1",""
+"11659","No, but considering it for future","3191","2",""
+"11660","No,  but is in the starting phase","3191","3",""
+"11661","Yes - Already in use","3191","4",""
+"11662","Onboarding is done primarily on ad hoc basis","3192","1","NULL"
+"11663","There is an onboarding process, but the rest of the employee or new-hire learning is done on the job","3192","2","NULL"
+"11664","Onboarding is strategic and fully linked to development and learning; engagement and assimilation practices are fully implemented","3192","3","NULL"
+"11665","There is focus on socialization, personalization and enculturation of new employees, connects them with the right information at the right time","3192","4","NULL"
+"11666","No milestones or concrete goals are set for new hires","3193","1",""
+"11667","Uses prehire assessment results  to determine appropriate career/development tracks","3193","2",""
+"11668","Understands the current and needed skills of new hires and links them to other talent processes","3193","3",""
+"11669"," milestones such as \"30-60-90 days on the job\" are used to set goals ensuring alignment and guaranteeing success","3193","4",""
+"11670","No","3194","1",""
+"11671","No, but considering it for future","3194","2",""
+"11672","No,  but is in the starting phase","3194","3",""
+"11673","Yes - Already in use","3194","4",""
+"11674","No Option","3195","1",""
+"11675","No Option","3196","1",""
+"11676","No Option","3197","1",""
+"11677","No Option","3198","1",""
+"11678","NA","3199","1",""
+"11679","No plans to do this","3199","2",""
+"11680","Plan to do this","3199","3",""
+"11681","Currently doing this","3199","4",""
+"11682","High-potential employees are identified using ad hoc processes ","3200","1",""
+"11683","A high-potential strategy is standardized and integrated with select talent processes","3200","2",""
+"11684","A high-potential strategy is consistently implemented across the enterprise with a long-term plan for key positions","3200","3",""
+"11685"," A high-potential strategy is implemented consistently across the enterprise for all key positions and is fully integrated with all talent processes","3200","4",""
+"11686","Limited to few employees","3201","1",""
+"11687","Career planning progresses  based on organizational needs","3201","2",""
+"11688","Career planning is standardized across the company","3201","3",""
+"11689","Intelligent technologies suggest personalized career paths based on organizational needs, employee interests, and past professional history","3201","4",""
+"11690","Managers assess employees using manual processes","3202","1",""
+"11691","Organization has established a consistent performance management process, but the process is not fully automated","3202","2",""
+"11692","The performance management process is consistent and fully automated; performance feedback is frequent, agile, and transparent","3202","3",""
+"11693","Managers are provided with calibration support to ensure consistent performance assessment, intelligent technologies are used to their coaching and feedback abilities","3202","4",""
+"11694","Process is adhoc","3203","1",""
+"11695","Consistent performance management process which is not fully automated","3203","2",""
+"11696","Performance management process is consistent and fully automated","3203","3",""
+"11697","Consistent process. Intelligent real-time technologies are used to guide managers in improving their coaching and feedback abilities","3203","4",""
+"11698","No Option","3204","1",""
+"11699","No Option","3205","1",""
+"11700","No Option","3206","1",""
+"11701","Not based on data analytics","3207","1",""
+"11702","Limited use of data analytics","3207","2",""
+"11703","Use of analytics to identify skill gaps and trainings needed","3207","3",""
+"11704","ML tools to identify the success of policies and frameworks. It also recommends improvements in the review process","3207","4",""
+"11705","No","3208","1",""
+"11706","No, but considering it for future","3208","2",""
+"11707","No,  but is in the starting phase","3208","3",""
+"11708","Yes - Already in place","3208","4",""
+"11709","No","3209","1",""
+"11710","No, but considering it for future","3209","2",""
+"11711","Currently some work enable by RPA, likely to increase in future","3209","3",""
+"11712","Optimized use of RPA","3209","4",""
+"11713","Performance management practices are underdeveloped and usually not documented","3210","1",""
+"11714","Performance management practices usually occur at the strategic and operational and is usually delivered on a semiannual basis","3210","2",""
+"11715","Employees are responsible for managing, reviewing, and updating goals continuousl while managers offer performance feedback on an periodic basis","3210","3",""
+"11716","Continuous performance management includes dynamic goals, ongoing check-in conversations, periodic performance conversations, ongoing feedback, frequent data collection, self-reflection with a focus on coaching and development","3210","4",""
+"11717","Employees goals are not linked to business and process is manual","3211","1",""
+"11718","Strategic goals of the company are aligned with some individual departments but not necessarily integrated with individual goals","3211","2",""
+"11719","Goal planning is flexible based on Organization Country, Division, Department, Subsidiary, Team, etc.","3211","3",""
+"11720","Goal planning is agile, flexible,transparent and recommendations are provided on better distribution and alignment of goals with strategic considerations","3211","4",""
+"11721","Not aligned","3212","1",""
+"11722","Slightly aligned","3212","2",""
+"11723","Mostly aligned","3212","3",""
+"11724","Strongly aligned","3212","4",""
+"11725","No learning management system","3213","1",""
+"11726","Learning management system in place","3213","2",""
+"11727","New set of learning tools are delivered that provide curated content","3213","3",""
+"11728","Digital learning tools used that enable employees to build their own learning and development plans;","3213","4",""
+"11729","No Option","3214","1",""
+"11730","No Option","3215","1",""
+"11731","No Option","3216","1",""
+"11732","No Option","3217","1",""
+"11733","No Option","3218","1",""
+"11734","No Option","3219","1",""
+"11735","No visibility","3220","1",""
+"11736","Tracking done digitally but not in real time","3220","2",""
+"11737","Tracking done digitally. Analysis done on adhoc basis","3220","3",""
+"11738","Real-time tracking using intelligent technologies which nudges employees for additional courses","3220","4",""
+"11739","No feedback mechanism","3221","1",""
+"11740","Portal to raise concern of training","3221","2",""
+"11741","Feedback taken digitally through survey.","3221","3",""
+"11742","Chatbots for conducting survey , analyzing answers & recommendations","3221","4",""
+"11743","Mandatory compliance training is offered but has no standardized process for customizing learning plan for employees","3222","1",""
+"11744","Learning system manages courses that an employee can choose for his/ her development according to each job or role","3222","2",""
+"11745","Learning solution recommends training courses to employees based on goals and generates insights for better learning mix","3222","3",""
+"11746","Integrated solution uses machine learning to provide personalized recommendations based on gaps, goals, aspirations, and company objectives","3222","4",""
+"11747","Mandatory training, licenses, and certifications are tracked manually; record keeping is mostly paper based","3223","1",""
+"11748","Dedicated time to running status reports of employee training, licensing, and certification; record keeping is digitalized, and HR initiates recertification requirements","3223","2",""
+"11749","Well-established learning and development strategy that captures the skills and certifications across all worker types; the strategy is flexible and permanent to alleviate risk","3223","3",""
+"11750","Learning and development is integrated with performance management and intelligent technologies are used to identify, suggest, and recommend tailored training, licensing, and certification courses","3223","4",""
+"11751","Manual succession planning occurs annually","3224","1",""
+"11752","Succession planning for top C-suite level.","3224","2",""
+"11753","Succession planning for top-three levels.","3224","3",""
+"11754","Proactive, strategic, and transparent succession planning occurs at all levels.","3224","4",""
+"11755","No Option","3225","1",""
+"11756","Limited visibility into pay decisions across the organization; budgets are tracked in tools such as Excel","3226","1",""
+"11757","A set of compensation practices are implemented that tie pay to performance with limited visibility into pay decision criteria","3226","2",""
+"11758","Pay-for-performance is calibrated across all teams and levels through talent compensation reviews that link results to strategic business goals and initiatives","3226","3",""
+"11759","A manager-led, transparent reward process used based on a variety of rewards, including salary, bonus, RSU, LTI, STI, \"spot\" awards, and variable pay, and it can model at the manager level based on team performance and link to business results","3226","4",""
+"11760","Excel or payroll system used to store key information on employees, such as their address, birthday, title, or position in the organization","3227","1",""
+"11761","Multiple fragmented sources of data","3227","2",""
+"11762","Human resource information system (HRIS) software provides a centralized repository of employee master data, enables employee self-service; also generates multiple workforce reports","3227","3",""
+"11763","Employee data stored using a single system and generates timely, accurate and actionable data from a single source of truth delivering meaningful, real-time workforce insight","3227","4",""
+"11764","Employee data is fragmented over multiple databases; there is no self-service","3228","1",""
+"11765","A common HCM platform is in place for employee data, additional talent applications, and analytics processes; employee and manager self-service is in partial use","3228","2",""
+"11766","Process integration is embedded in a single HR platform and employee data can be updated automatically by the system based on set of rules triggered by connected HR processes","3228","3",""
+"11767","Data is updated automatically based on enterprise-wide integration between processes and systems; the system notifies users whenever there is any need for update","3228","4",""
+"11768","No documentation of disaster recovery procedures. Occasional backups may be run but recovery is completely adhoc","3229","1",""
+"11769","Elements of disaster recovery are in place for ensuring business continuity; recovery planning consists of loosely sketched guidelines","3229","2",""
+"11770","Business resumption plans are documented and articulate the specific steps necessary to enable the respective process","3229","3",""
+"11771","There is a fully organized disaster recovery program to provide administrative oversight on all activities associated with disaster recovery","3229","4",""
+"11772","All HR legal compliance activities are performed locally and manually","3230","1",""
+"11773","There are multiple local systems across geographies and business units to manage local compliance requirements","3230","2",""
+"11774","One single system to manage and track local and global compliance and generate meaningful insights to support risk management","3230","3",""
+"11775","One single system enables dynamic update of new laws and regulatory changes and provides visibility into pending legislative changes","3230","4",""
+"11776","No Option","3231","1",""
+"11777","Dedicated payroll and timekeeping FTEs to manually manage employee time and payroll data","3232","1",""
+"11778","Multiple departments to manage timekeeping, payroll approval, payroll disbursement and payroll data record keeping","3232","2",""
+"11779","Integrated timekeeping and payroll software that generates reports and analysis for better decision making","3232","3",""
+"11780","Integrated solution for timekeeping and payroll management that uses AI to manage compliance and generates real-time reports","3232","4",""
+"11781","No Option","3233","1",""
+"11782","The payroll system supports only one currency, one language, and legal regulations for only one country, ensuring compliance with regulatory requirements for reporting purposes","3234","1",""
+"11783","The payroll system supports multiple currencies","3234","2",""
+"11784","The payroll system supports multiple currencies, multiple languages, and collective agreements","3234","3",""
+"11785","The payroll system supports multiple currencies, multiple languages, collective agreements, and reporting","3234","4",""
+"11786","No Option","3235","1",""
+"11787","Activities are informal, ad hoc, and highly dependent on one-off efforts and lots of data cleansing","3236","1",""
+"11788","Data management practices are documented and performed consistently and annually at the business-unit level","3236","2",""
+"11789","Data management practices are governed through quantitative measurements of process performance","3236","3",""
+"11790","Data management practices are improved and optimized based on changing organizational goals","3236","4",""
+"11791","No Option","3237","1",""
+"11792","No formal policies and procedures exist for handling employee data","3238","1",""
+"11793","Decisions about the ethical use of data is left up to the IT and marketing departments","3238","2",""
+"11794","HR has created expanded policies and serves as a moderator as an ethical monitor of modern-day communication tools and data","3238","3",""
+"11795","The organization has an information governance strategy that provides guidance on available solutions for protecting employee privacy while staying in line with corporate objectives","3238","4",""
+"11796","Data governance processes are mostly manual and ad hoc and are unpredictable, uncontrolled, and reactive","3239","1",""
+"11797","Data governance standards are being developed but are not yet being applied consistently in a uniform manner throughout the organization","3239","2",""
+"11798","Quantitative and qualitative goals are set for both process and maintenance; select processes are controlled using statistical and other quantitative techniques","3239","3",""
+"11799","Quantitative process improvement objectives are set and firmly established; based on machine learning insights, the objectives are continually revised to reflect changing regulatory conditions","3239","4",""
+"11800","Employee data is fragmented over multiple databases; there is no self-service","3240","1",""
+"11801","A common HCM platform is in place for personnel data and additional applications for talent; analytics processes, employee self-service","3240","2",""
+"11802","Process integration embedded into a single HR platform allows for fewer manual entries through self-service functionalities and data insights facilitate informed decision-making by managers when approving employee requests triggered through self-services","3240","3",""
+"11803","Data is updated automatically based on enterprise-wide integration between processes and systems; the system notifies users whenever there is any need for an update","3240","4",""
+"11804","No Option","3241","1",""
+"11805","No classification of contract and external workers; external worker strategy is typically unplanned and reactive","3242","1",""
+"11806","Partially defined contract and external worker strategy with a tactical focus on basic cost savings, efficiency, and compliance","3242","2",""
+"11807","Contract and external labor requirements are standardized and fully aligned with the short-term and long-term business goals","3242","3",""
+"11808","Formal process in place for planning long-term contract and external labor requirements and can modify the process to meet changes in permanent employee strategies and external market dynamics","3242","4",""
+"11809","Uses manual forms to process leave requests and expense approvals, which are forwarded to HR","3243","1",""
+"11810","Uses e-mail to process leave requests, expense approvals and pay slip requests","3243","2",""
+"11811","HR organization has quick and intuitive self-services for workflow approvals and everyday transactions, such as leave requests, expense approvals, pay slip requests, and so on","3243","3",""
+"11812","Has an integrated employee experience platform using digital apps and artificial intelligence to support ongoing employee needs","3243","4",""
+"11813","HR systems are not used or are siloed, out of date, and not scalable, requiring HR to manually capture and manipulate data for reporting and analysis","3244","1",""
+"11814","HR uses a suite of fragmented and stand-alone tools that are not fit for purpose, requiring many work-arounds and customizations","3244","2",""
+"11815","HR solutions are unified, mobile, and in the cloud; integrated reporting and analytics capabilities help drive and scale innovations and strategy","3244","3",""
+"11816","HR is a catalyst in the organization's digital transformation journey, providing mobile, consumer-grade user experiences in the cloud; governance processes are in place, and an open platform provides scalability, integrations, and extensibility to drive new innovations","3244","4",""
+"11817","HR is not involved in planning for major organizational changes","3245","1",""
+"11818","HR is focused primarily on administrative responses to organizational change and has basic workforce planning and management tools","3245","2",""
+"11819","HR provides predictive guidance and standardized approaches to prepare for and respond to major changes","3245","3",""
+"11820","HR is a key player in leading organizational changes and uses tools and data to proactively generate insights, evaluate options, and provide strategic guidance for major changes","3245","4",""
+11922,"NO KPI's available for measuring output of tool","1405",1.00,""
+11923,"KPI's are defined AND available FOR tool FOR measuring output OF tool",1405,2.00,""
+11924,"NO-ACTION autonomy (also referred TO AS “human support”): SYSTEM cannot act ON its recommendations OR output. The human uses OR disregards the AI system’s recommendations OR output AT will.",1406,1.00,""
+11925,"Low-ACTION autonomy (also referred TO AS “human-IN-the-loop”): SYSTEM evaluates input AND acts upon its recommendations OR output IF the human agrees.",1406,2.00,""
+11926,"MEDIUM-ACTION autonomy (also referred TO AS “human-ON-the-loop”): SYSTEM evaluates input AND acts upon its recommendations OR output unless the human vetoes",1406,3.00,""
+11927,"High-ACTION autonomy (also referred TO AS “human-OUT-OF-the-loop”): SYSTEM evaluates input AND acts upon its recommendations OR output WITHOUT human involvement",1406,4.00,""
+11928,Not Met,920,1.00,""
+11929,Partial Met,920,2.00,""
+11930,Fully Met,920,3.00,""
+11931,Not Applicable,920,4.00,""
+11932,Not Met,921,1.00,""
+11933,Partial Met,921,2.00,""
+11934,Fully Met,921,3.00,""
+11935,Not Applicable,921,4.00,""
+"13969","<10%","3887","1","NULL"
+"14036","20%-40%","3887","2","NULL"
+"14037","40%-60%","3887","3","NULL"
+"14038",">60%","3887","5","NULL"
+"13970","10-30%","3888","3","NULL"
+"14039","<10%","3888","1","NULL"
+"14040","30%-50%","3888","4","NULL"
+"14041",">60%","3888","5","NULL"
+"13971","30-60%","3889","3","NULL"
+"14042","<10%","3889","1","NULL"
+"14043",">60%","3889","5","NULL"
+"13972",">60%","3890","5","NULL"
+"14044","<10%","3890","1","NULL"
+"14045","10%-20%","3890","2","NULL"
+"14046","20%-30%","3890","3","NULL"
+"14047","30%-60%","3890","4","NULL"
+"13973","<20%","3891","1","NULL"
+"13974","20%-50%","3891","3","NULL"
+"13975",">50%","3891","5","NULL"
+"13976","Manual execution / No automation","3892","1","NULL"
+"13977","Deployed rule based automations","3892","2","NULL"
+"13978","Implemented event, alert correlations to take decisions","3892","3","NULL"
+"13979","Implemented AI based predictive solutions to prevent disruptions","3892","4","NULL"
+"13980","Implemented solution for automated recommendations and actions based on AI led analytics","3892","5","NULL"
+"13981","<20%","3893","1","NULL"
+"13982","20%-40%","3893","3","NULL"
+"13983","40%-70%","3893","4","NULL"
+"13984",">70%","3893","5","NULL"
+"13985","Not Applicable","3894","0","NULL"
+"13986","Not Met","3894","2","NULL"
+"13987","Partial Met","3894","4","NULL"
+"13988","Fully Met","3894","5","NULL"
+"13989","<10%","3895","1","NULL"
+"13990","10%-20%","3895","2","NULL"
+"13991","20%-30%","3895","3","NULL"
+"13992","30%-40%","3895","4","NULL"
+"13993",">40%","3895","5","NULL"
+"13994","NA","3896","0","NULL"
+"13995","Initial - Adhoc","3896","1","NULL"
+"13996","Repeatable - process is defined and can be followed by new users, but is not standardised across the enterprise","3896","2","NULL"
+"13997","Defined - process well defined and standardized across the enterprise","3896","3","NULL"
+"13998","Managed - Implemented with high process compliance through enterprise level adoption","3896","4","NULL"
+"13999","analyzed, continuously improved and highly automated","3896","5","NULL"
+"14000","The payroll system supports only one currency, one language, and legal regulations for only one country, ensuring compliance with regulatory requirements for reporting purposes","3897","1","NULL"
+"14001","The payroll system supports multiple currencies","3897","2","NULL"
+"14002","The payroll system supports multiple currencies, multiple languages, and collective agreements","3897","3","NULL"
+"14003","The payroll system supports multiple currencies, multiple languages, collective agreements, and reporting","3897","5","NULL"
+"14004","NA","3898","0","NULL"
+"14005","No","3898","1","NULL"
+"14006","Partially","3898","3","NULL"
+"14007","Yes","3898","5","NULL"
+"14008",">60%","3899","1","NULL"
+"14009","40%-60%","3899","2","NULL"
+"14010","20%-40%","3899","4","NULL"
+"14011","<20%","3899","5","NULL"
+"14012","Less Efficient","3900","1","NULL"
+"14013","Moderately Efficient","3900","3","NULL"
+"14014","Highly Efficient","3900","5","NULL"
+"14015","NA","3901","0","NULL"
+"14016","No","3901","1","NULL"
+"14017","Partially","3901","3","NULL"
+"14018","Yes","3901","5","NULL"
+"14019","<10%","3902","1","NULL"
+"14020","10%-20%","3902","2","NULL"
+"14021","20%-30%","3902","3","NULL"
+"14022","30%-40%","3902","4","NULL"
+"14023",">40%","3902","5","NULL"
+"14024","Code across applications is done manually","3903","1","NULL"
+"14025","Code is assisted by scripts for some applications","3903","2","NULL"
+"14026","Code is script assisted for all applications, manual work is required in report generation","3903","3","NULL"
+"14027","Code is fully automated for some applications, reporting needs some manual interventions","3903","4","NULL"
+"14028","Code and report generation is full automated for all applications","3903","5","NULL"
+"14029",">70%","3904","1","NULL"
+"14030","30-70%","3904","3","NULL"
+"14031","<30%","3904","5","NULL"
+"14032","NA","3905","0","NULL"
+"14033","No","3905","1","NULL"
+"14034","Partially","3905","3","NULL"
+"14035","Yes","3905","5","NULL"
+"14356","Not Applicable","3938","0","NULL"
+"14357","Not Met","3938","1","NULL"
+"14358","Partially Met","3938","3","NULL"
+"14359","Fully Met","3938","5","NULL"
+"14360","<10%","3939","0","NULL"
+"14361","10%-30%","3939","1","NULL"
+"14362","30&-60%","3939","3","NULL"
+"14363",">60%","3939","5","NULL"
+"14364","decreased customer satifaction","3940","0","NULL"
+"14365","increased ahing in accounts Receivables","3940","1","NULL"
+"14366","increased cost-of-rework","3940","3","NULL"
+"14367","engage your workforce","3940","5","NULL"
+"14368","lower supply chain risks","3941","0","NULL"
+"14369","cost reduction","3941","1","NULL"
+"14370","better procurement strategies","3941","3","NULL"
+"14371","guaranteed continuity of goods","3941","5","NULL"
+"14372","Sales and commercial management","3942","0","NULL"
+"14373","Purchasing or Procurement","3942","1","NULL"
+"14374","Manufacturing lead time","3942","3","NULL"
+"14375","Logistitcs and distribution","3942","5","NULL"
+"14376","Purchase Requisition Submission","3943","0","NULL"
+"14377","Purchase Requisition Approval","3943","1","NULL"
+"14378",",Issuing the Purchase order","3943","3","NULL"
+"14379","Vendors Approves","3943","5","NULL"
+"14380","Increase Efficiencies","3944","0","NULL"
+"14381","Cost Savings","3944","1","NULL"
+"14382","Increase Customer satisfaction","3944","3","NULL"
+"14383","Shipping Optimization","3944","5","NULL"
+"14384","Invest in AP Automation Software","3945","0","NULL"
+"14385","Ensure Invoices are Paid on Time","3945","1","NULL"
+"14386","Cost Reduction","3945","3","NULL"
+"14387","Supplier Defect Rate","3945","5","NULL"
+14392,"The traceability of any disruption is completely manual, with ad-hoc processes",1459,0.5,NULL
+14393,Basic application level traceability present to map application level issues to the causes,1459,1.5,NULL
+14394,Correlation present to map business service level disruptions to IT causes,1459,2.5,NULL
+14395,All the process instrumentation data is utilized to track patterns and causes of disruptions at a business process level,1459,3.5,NULL
+14396,"End to end monitoring and mapping of failures, disruptions happening in other systems with the KPIs impacting your business value",1459,4.5,NULL
+14397,Only monitor IT KPIs and perform IT spend analysis,1460,0.5,NULL
+14398,"Monitor business services for their availability, performance",1460,1.5,NULL
+14399,Define and monitor business KPIs to understand impact of disruptions on the underlying business functions / processes,1460,2.5,NULL
+14400,Identify trends and patterns causing frictions and  adopt strategic changes to optimize the business KPIs,1460,3.5,NULL
+14401,"Define end to end value stream for the business, with its associated KPIs and monitor, optimize them in a continuous manner",1460,4.5,NULL

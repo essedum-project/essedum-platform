@@ -1,0 +1,241 @@
+<div class="mt-3" style="position: relative">
+  <mat-card>
+    <div *ngIf="!upload" style="margin-bottom: 45px">
+      <div *ngIf="!formView">
+        <div class="container">
+          <div class="card-header" *ngIf="!pipelineData">
+            <mat-form-field appearance="fill" style="width: 200px">
+              <mat-label>Highlight</mat-label>
+              <input matInput placeholder="Highlight" [(ngModel)]="search" />
+            </mat-form-field>
+
+            <div title="Upload" *ngIf="dataset?.type == 'rw'" (click)="upload = true; selecteddataset = dataset"
+              designType="icon">
+              <span class="">
+                <i class="aip-led-icons icon x-24 upload-icon"></i>
+              </span>
+            </div>
+
+            <div (click)="refresh()" title="Click to Synchronize. Last Synced on {{ lastRefreshDate }}">
+              <mat-icon class="lfx-icon-hover">refresh</mat-icon>
+            </div>
+            <div class="d-flex lfx-u-header-xl aip-cursor" (click)="colSearch()" matTooltip="Filter">
+              <mat-icon class="lfx-icon-hover">filter_list</mat-icon>
+            </div>
+
+            <!-- <div (click)="createNew()" designType="icon" matTooltip="Add">
+              <span class="">
+                <mat-icon class="lfx-icon-hover">add</mat-icon>
+              </span>
+            </div> -->
+
+            <mat-menu #downloadMenu="matMenu">
+              <div style="padding: 8px 16px; max-height: 30vh; overflow: auto">
+                <mat-checkbox [(ngModel)]="selectAllColsToDwnld" (change)="toggleSelectAllColsToDwnld()"
+                  [id]="'colToDwnld-selectnoneall'" style="
+                    margin-bottom: 8px;
+                    font-weight: 500;
+                    font-size: 14px;
+                    color: #333333;
+                  ">
+                  {{
+                  colsToDownload.length == cols.length
+                  ? "Select None"
+                  : "Select All"
+                  }}
+                </mat-checkbox>
+                <div *ngFor="let col of cols">
+                  <mat-checkbox name="colsToDwnld" [value]="col.field" [checked]="col.selected"
+                    (change)="toggleSelectHeaderToDwnld(col.header)" [id]="'colToDwnld-' + col.field" style="
+                      margin-bottom: 8px;
+                      font-weight: 500;
+                      font-size: 14px;
+                      color: #333333;
+                    ">
+                    {{ col.header }}
+                  </mat-checkbox>
+                </div>
+                <div style="margin-top: 16px; text-align: right" [ngStyle]="{
+                    'pointer-events':
+                      colsToDownload.length == 0 ? 'none' : 'auto'
+                  }">
+                  <button mat-raised-button color="primary" [disabled]="colsToDownload.length == 0"
+                    (click)="download(); downloadMenu.closed.emit()">
+                    Download
+                  </button>
+                </div>
+              </div>
+            </mat-menu>
+            <button mat-icon-button [matMenuTriggerFor]="downloadMenu" [title]="
+                !ticketList || ticketList?.length <= 0
+                  ? 'No entries found to download'
+                  : 'Download Entries'
+              " style="display: inline-flex; align-items: center;" [disabled]="!ticketList || ticketList?.length <= 0">
+              <mat-icon class="lfx-icon-hover">download</mat-icon>
+            </button>
+
+            <button mat-mini-fab color="primary" *ngIf="downloading && !bsyGtngDwnldCnt" (click)="terminateDownload()"
+              title="Terminate Download">
+              <span style="color: white">{{ downloadPercentage }} %</span>
+            </button>
+            <div *ngIf="!isItsm" title="Display Details" (click)="displayDetails()" designType="icon">
+              <span class="">
+                <i class="aip-led-icons icon x-24 show-icon"></i>
+              </span>
+            </div>
+
+            <ng-template #content3 let-modal>
+              <!-- <div style="display: contents;"> -->
+              <div class="create-background">
+                <div style="padding: 15px">
+                  <span class="aip-desc-title lfx-u-header-xxl float-start"><span style="color: #737373">Create/Edit
+                      Recipe: </span>{{ alias | titlecase }}
+                  </span>
+                  <button type="button" class="btn-close" style="float: right" aria-label="Close"
+                    (click)="modal.dismiss('Cross click')">
+                    <i class="icon x-16 close-icon"></i>
+                  </button>
+                </div>
+                <div>
+                  <!-- </div> -->
+                </div>
+              </div>
+            </ng-template>
+            <mat-menu #overflowMenu="matMenu">
+              <div style="padding: 8px 16px; max-height: 30vh; overflow: auto">
+                <div style="
+                    margin-bottom: 8px;
+                    font-weight: 500;
+                    font-size: 14px;
+                    color: #333333;
+                  ">
+                  Choose Columns
+                </div>
+                <div *ngFor="let col of cols; trackBy: trackByField" class="selector-795-51">
+                  <mat-checkbox name="colsToShow" [value]="col.field" [checked]="col.visible"
+                    (change)="col.visible = !col.visible" [id]="'colToDwnld-' + col.field" style="
+                      margin-left: 8px;
+                      margin-bottom: 0px;
+                      font-weight: 500;
+                      font-size: 14px;
+                      color: #333333;
+                    ">
+                    {{ col.header }}
+                  </mat-checkbox>
+                </div>
+              </div>
+            </mat-menu>
+            <button mat-icon-button [matMenuTriggerFor]="overflowMenu" title="Choose Columns and Styles">
+              <mat-icon class="lfx-icon-hover">more_vert</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- <div *ngIf="!formView && !showPublicDataset"> -->
+
+        <div>
+          <div class="data-count" *ngIf="!itsm">
+            <span>Rows : {{ datasetsCount }}</span>
+            <span>Selected : {{ selectedDatasetsCount }}</span>
+          </div>
+          <div class="data-count" *ngIf="itsm">
+            <span>Incidents : {{ datasetsCount }}</span>
+            <span>Selected : {{ selectedDatasetsCount }}</span>
+          </div>
+          <div class="lfx-u-pad-t-32">
+            <div class="lfx-c-datagrid__title-area clearfix"></div>
+            <table dataGridTable>
+              <thead>
+                <tr>
+                  <th class="" scope="col" style="width: 24px">
+                    <mat-checkbox *ngIf="dataset.type == 'rw'" (click)="toggleHeaderChkbx()"
+                      [(ngModel)]="allIdsSelected">
+                    </mat-checkbox>
+                  </th>
+                  <th *ngFor="let col of cols" scope="col" [hidden]="!col.visible" (click)="sortData(col.field)"
+                    style="color:#0094ff; font-size: 16px;font-weight:500;">
+                    <!--pReorderableColumn="" -->
+                    {{ col.header | titlecase }}
+                    <i *ngIf="col.field == sortEvent &amp;&amp; sortorder == 1" class="icon x-16 up-arw-icon"
+                      style="float: inline-end"></i>
+                    <i *ngIf="col.field == sortEvent &amp;&amp; sortorder == -1" class="icon x-16 down-arw-icon"
+                      style="float: inline-end"></i>
+                  </th>
+
+                </tr>
+                <tr class="selector-795-82" *ngIf="searchToggle">
+                  <th class="selector-795-83"></th>
+                  <th *ngFor="let col of cols; trackBy: trackByField" [hidden]="!col.visible">
+                    <input [(ngModel)]="col.filterValue" style="width: 100%"
+                      (keyup)="searchValueAdder($event, col.field)" (keydown.enter)="searchOnInput()" type="text"
+                      placeholder="Search by {{ col.header }}" class="aip-dataset-table-view-input selector-795-85" />
+                  </th>
+                </tr>
+              </thead>
+              <tbody *ngIf="datasetsCount > 0">
+                <tr *ngFor="let ticket of ticketList; let i = index">
+                  <td>
+                    <mat-checkbox *ngIf="dataset.type == 'rw'" [value]="ticketList[i][unqId]" style="width: 24px"
+                      (click)="showTickets(ticketList[i][unqId])" [ngModel]="
+                        selectedTickets?.includes(ticketList[i][unqId])
+                      ">
+                    </mat-checkbox>
+                  </td>
+                  <td *ngFor="let col of cols" [hidden]="!col.visible" style="
+                      max-width: 90vh;
+                      min-width: 8vh;
+                      word-break: break-all;
+                    ">
+
+                    <span style="cursor: pointer; text-decoration: underline" *ngIf="col.field == unqId"
+                      (click)="edit(ticketList[i])" class="selector-795-91" innerHTML="{{
+                        ticket[col.field] | highlightSearch : search
+                      }}"></span>
+                    <span *ngIf="col.field != unqId" id="dtstflscrnvw-{{ col.field }}-{{ ticket[unqId] }}"
+                      (click)="adjustDataLength(col.field, ticket[unqId])" class="selector-795-95" innerHTML="{{
+                        ticket[col.field] | highlightSearch : search
+                      }}"></span>
+                  </td>
+                </tr>
+              </tbody>
+              <tbody *ngIf="datasetsCount == 0">
+                <tr>
+                  <td colspan="100%" style="text-align: center">
+                    No entries found
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="lfx-u-pad-b-16 d-flex justify-content-center">
+          <button mat-button [disabled]="page == 0" (click)="getPages('First')">
+            First
+          </button>
+          <button mat-button [disabled]="page == 0" (click)="getPages('Prev')">
+            &lt;&lt;&nbsp;Prev
+          </button>
+          <button mat-button [disabled]="page == lastPage" (click)="getPages('Next')">
+            Next&nbsp;&gt;&gt;
+          </button>
+          <button mat-button [disabled]="page == lastPage" (click)="getPages('Last')">
+            Last
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- <div *ngIf="formView" class="selector-795-131">
+      <app-dataset-form-view [dataset]="data" [initiativeDatasetName]="inpdataset" [action]="action" [rowObj]="rowObj"
+        (result)="checkResult($event)" class="selector-795-133"></app-dataset-form-view>
+    </div> -->
+
+    <div *ngIf="upload" style="margin-bottom: 45px">
+      <div class="lfx-u-mar-32; lfx-u-pad-16">
+        <a href="javascript:void(0);" class="lfx-u-header-lg" id="Datasets" (click)="upload = false">Datasets
+        </a><span>> {{ selecteddataset.alias }}</span>
+      </div>
+    </div>
+  </mat-card>
+</div>

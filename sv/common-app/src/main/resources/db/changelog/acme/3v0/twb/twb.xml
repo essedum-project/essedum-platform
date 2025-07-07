@@ -1,0 +1,81 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+                        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <!--<changeSet author="Leap (generated)" id="1617868010544-215">
+        <sql dbms="mssql"> SET IDENTITY_INSERT usm_role ON; </sql>
+        <loadData commentLineStartsWith="#" encoding="UTF-8"
+            file="db/changelog/twb/usm_role.csv" quotchar="&quot;" separator=","
+            tableName="usm_role">
+            <column header="id" name="id" type="NUMERIC" />
+                                <column header="project_id"
+                name="project_id" type="NUMERIC" />
+                                <column header="description" name="description"
+                type="STRING" />
+                                <column header="name" name="name" type="STRING" />
+                                <column
+                header="permission" name="permission" type="BOOLEAN" />
+                                <column
+                header="project_admin" name="project_admin"
+                type="skip" />
+                                <column header="role_admin" name="role_admin" type="skip" />
+        </loadData>
+        <sql dbms="mssql"> SET IDENTITY_INSERT usm_role OFF; </sql>
+    </changeSet>
+
+    
+    <changeSet author="Leap (generated)" id="1617868010544-218">
+        <sql dbms="mssql"> SET IDENTITY_INSERT usm_user_project_role ON; </sql>
+        <loadData commentLineStartsWith="#" encoding="UTF-8"
+            file="db/changelog/twb/usm_user_project_role.csv" quotchar="&quot;"
+            separator="," tableName="usm_user_project_role">
+            <column header="id" name="id" type="NUMERIC" />
+        <column header="portfolio_id"
+                name="portfolio_id"
+                type="NUMERIC" />
+        <column header="project_id" name="project_id" type="NUMERIC" />
+        <column
+                header="role_id" name="role_id" type="NUMERIC" />
+        <column header="user_id"
+                name="user_id" type="NUMERIC" />
+        </loadData>
+        <sql dbms="mssql"> SET IDENTITY_INSERT usm_user_project_role OFF; </sql>
+    </changeSet>
+    -->
+    <changeSet author="Leap (generated)" id="1617868010544-225">
+        <sql dbms="mssql"> SET IDENTITY_INSERT twb_support_priority_type ON; </sql>
+        <loadData commentLineStartsWith="#" encoding="UTF-8"
+            file="db/changelog/acme/3v0/twb/twb_support_priority_type.csv" quotchar="&quot;"
+            separator="," tableName="twb_support_priority_type">
+            <column header="id" name="id"
+                type="NUMERIC" />
+        <column header="project_id" name="project_id"
+                type="NUMERIC" />
+        <column header="priority_type" name="priority_type"
+                type="STRING" />
+        </loadData>
+        <sql dbms="mssql"> SET IDENTITY_INSERT twb_support_priority_type OFF; </sql>
+    </changeSet>
+
+    <changeSet author="Leap (generated)" id="1617868010544-226">
+        <sql dbms="mssql"> SET IDENTITY_INSERT twb_support_week ON; </sql>
+        <loadData commentLineStartsWith="#" encoding="UTF-8"
+            file="db/changelog/acme/3v0/twb/twb_support_week.csv" quotchar="&quot;"
+            separator="," tableName="twb_support_week">
+            <column header="id" name="id"
+                type="NUMERIC" />
+        <column header="project_id" name="project_id"
+                type="NUMERIC" />
+        <column header="start_date_week" name="start_date_week"
+                type="STRING" />
+        <column header="end_date_week" name="end_date_week"
+                type="STRING" />
+        </loadData>
+        <sql dbms="mssql"> SET IDENTITY_INSERT twb_support_week OFF; </sql>
+    </changeSet>
+</databaseChangeLog>

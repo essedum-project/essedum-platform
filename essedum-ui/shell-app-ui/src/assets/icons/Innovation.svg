@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="svg-innovation-icon">
+  <defs>
+    <style>
+    .svg-innovation-icon {
+        height: inherit;
+        width: inherit;
+      }
+	  <!-- @media screen and (min-width: 5000px) {
+       .svg-innovation-icon {
+        height: 4vmin !important;
+        width: 4vmin !important;
+       }
+	  }
+	  @media screen and (min-width: 1300px) and (max-width: 3000px) {
+       .svg-innovation-icon {
+        height: 4vmin !important;
+        width: 4vmin !important;
+       }
+	  }
+	  @media screen and (max-width: 600px) {
+       .svg-innovation-icon {
+        height: 4vmin !important;
+        width: 4vmin !important;
+       }
+	  } -->
+    </style>
+  </defs>
+  <g id="Innovation" transform="translate(-99.806 -26.358)">
+    <rect id="Rectangle_9" data-name="Rectangle 9" width="24" height="24" transform="translate(99.806 26.358)" fill="none"/>
+    <g id="Group_35" data-name="Group 35" transform="translate(6.32)">
+      <g id="Group_1" data-name="Group 1" transform="translate(106.157 46.494)">
+        <path id="Path_16" data-name="Path 16" d="M272.983,414.683l2.479,1.432-2.479,1.432Z" transform="translate(-272.983 -414.683)" stroke="currentColor" stroke-width="0.25"/>
+      </g>
+      <g id="Group_2" data-name="Group 2" transform="translate(101.361 46.494)">
+        <path id="Path_17" data-name="Path 17" d="M178.4,414.683l-2.479,1.432,2.479,1.432Z" transform="translate(-175.917 -414.683)" stroke="currentColor" stroke-width="0.25"/>
+      </g>
+      <g id="Group_3" data-name="Group 3" transform="translate(103.715 33.674)">
+        <path id="Path_18" data-name="Path 18" d="M231.038,161.683a.986.986,0,1,1-.985.985A.986.986,0,0,1,231.038,161.683Z" transform="translate(-229.733 -161.363)" stroke="currentColor" stroke-width="0.25"/>
+        <path id="Path_19" data-name="Path 19" d="M224.873,157.812a1.306,1.306,0,1,1,1.306-1.306A1.307,1.307,0,0,1,224.873,157.812Zm0-1.971a.665.665,0,1,0,.665.665A.666.666,0,0,0,224.873,155.841Z" transform="translate(-223.567 -155.2)" stroke="currentColor" stroke-width="0.25"/>
+      </g>
+      <g id="Group_4" data-name="Group 4" transform="translate(101.57 30.683)">
+        <path id="Path_20" data-name="Path 20" d="M187.622,101.132a.986.986,0,1,1-.985.985A.986.986,0,0,1,187.622,101.132Z" transform="translate(-186.317 -100.812)" stroke="currentColor" stroke-width="0.25"/>
+        <path id="Path_21" data-name="Path 21" d="M181.458,97.261a1.306,1.306,0,1,1,1.306-1.306A1.307,1.307,0,0,1,181.458,97.261Zm0-1.971a.665.665,0,1,0,.665.665A.666.666,0,0,0,181.458,95.29Z" transform="translate(-180.152 -94.649)" stroke="currentColor" stroke-width="0.25"/>
+      </g>
+      <g id="Group_5" data-name="Group 5" transform="translate(100.091 36.859)">
+        <path id="Path_22" data-name="Path 22" d="M157.673,226.152a.986.986,0,1,1-.985.985A.986.986,0,0,1,157.673,226.152Z" transform="translate(-156.368 -225.832)" stroke="currentColor" stroke-width="0.25"/>
+        <path id="Path_23" data-name="Path 23" d="M151.509,222.281a1.306,1.306,0,1,1,1.306-1.306A1.307,1.307,0,0,1,151.509,222.281Zm0-1.971a.665.665,0,1,0,.665.665A.666.666,0,0,0,151.509,220.31Z" transform="translate(-150.203 -219.669)" stroke="currentColor" stroke-width="0.25"/>
+      </g>
+      <g id="Group_6" data-name="Group 6" transform="translate(108.829 33.217)">
+        <path id="Path_24" data-name="Path 24" d="M334.543,152.44a.986.986,0,1,1-.985.985A.986.986,0,0,1,334.543,152.44Z" transform="translate(-333.238 -152.119)" stroke="currentColor" stroke-width="0.25"/>
+        <path id="Path_25" data-name="Path 25" d="M328.378,148.564a1.306,1.306,0,1,1,1.306-1.306A1.307,1.307,0,0,1,328.378,148.564Zm0-1.971a.665.665,0,1,0,.665.665A.666.666,0,0,0,328.378,146.593Z" transform="translate(-327.072 -145.952)" stroke="currentColor" stroke-width="0.25"/>
+      </g>
+      <g id="Group_12" data-name="Group 12" transform="translate(97.486 27.358)">
+        <g id="Group_7" data-name="Group 7">
+          <path id="Path_26" data-name="Path 26" d="M109.471,40.966h-8.9l-.086-.065a7.535,7.535,0,1,1,9.072,0Zm-8.684-.641h8.467a6.894,6.894,0,1,0-8.467,0Z" transform="translate(-97.486 -27.358)" stroke="currentColor" stroke-width="0.25"/>
+        </g>
+        <g id="Group_8" data-name="Group 8" transform="translate(3.377 14.989)">
+          <rect id="Rectangle_1" data-name="Rectangle 1" width="8.483" height="0.641" stroke="currentColor" stroke-width="0.25"/>
+        </g>
+        <g id="Group_9" data-name="Group 9" transform="translate(3.377 16.756)">
+          <rect id="Rectangle_2" data-name="Rectangle 2" width="8.483" height="0.641" stroke="currentColor" stroke-width="0.25"/>
+        </g>
+        <g id="Group_10" data-name="Group 10" transform="translate(3.377 18.522)">
+          <rect id="Rectangle_3" data-name="Rectangle 3" width="8.483" height="0.641" stroke="currentColor" stroke-width="0.25"/>
+        </g>
+        <g id="Group_11" data-name="Group 11" transform="translate(5.39 20.248)">
+          <rect id="Rectangle_4" data-name="Rectangle 4" width="4.456" height="0.641" stroke="currentColor" stroke-width="0.25"/>
+        </g>
+      </g>
+      <g id="Group_13" data-name="Group 13" transform="translate(103.172 32.611)">
+        <line id="Line_8" data-name="Line 8" x2="1.046" y2="1.356" transform="translate(0.254 0.196)" fill="#fff" stroke="currentColor" stroke-width="0.25"/>
+        <path id="Path_27" data-name="Path 27" d="M213.61,135.417l-1.046-1.356.507-.391,1.046,1.356Z" transform="translate(-212.564 -133.67)" stroke="currentColor" stroke-width="0.25"/>
+      </g>
+      <g id="Group_14" data-name="Group 14" transform="translate(101.955 35.422)">
+        <line id="Line_9" data-name="Line 9" x1="2.144" y2="1.891" transform="translate(0.213 0.241)" fill="#fff" stroke="currentColor" stroke-width="0.25"/>
+        <rect id="Rectangle_5" data-name="Rectangle 5" width="0.641" height="2.859" transform="translate(2.144 0) rotate(48.592)" stroke="currentColor" stroke-width="0.25"/>
+      </g>
+      <g id="Group_15" data-name="Group 15" transform="translate(105.984 34.335)">
+        <line id="Line_10" data-name="Line 10" y1="0.221" x2="3.143" transform="translate(0.023 0.32)" fill="#fff" stroke="currentColor" stroke-width="0.25"/>
+        <rect id="Rectangle_6" data-name="Rectangle 6" width="0.641" height="3.151" transform="translate(3.143 0) rotate(85.969)" stroke="currentColor" stroke-width="0.25"/>
+      </g>
+    </g>
+  </g>
+</svg>

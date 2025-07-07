@@ -1,0 +1,81 @@
+<!-- @ 2018 Infosys Limited, Bangalore, India. All Rights Reserved. Version: 
+	1.0 Except for any free or open source software components embedded in this 
+	Infosys proprietary software program (Program), this Program is protected 
+	by copyright laws, international treaties and other pending or existing intellectual 
+	property rights in India, the United States, and other countries. Except 
+	as expressly permitted, any unauthorized reproduction, storage, transmission 
+	in any form or by any means(including without limitation electronic, mechanical, 
+	printing, photocopying, recording, or otherwise), or any distribution of 
+	this program, or any portion of it, may result in severe civil and criminal 
+	penalties, and will be prosecuted to the maximum extent possible under the 
+	law. -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.infosys.icets.icip</groupId>
+	<artifactId>icip-lib-evt</artifactId>
+	<packaging>jar</packaging>
+	<name>icip-lib-evt</name>
+	<url>http://maven.apache.org</url>
+	<parent>
+		<groupId>com.infosys.icets.ai</groupId>
+		<artifactId>aip</artifactId>
+		<version>3.3-SNAPSHOT</version>
+	</parent>
+	<properties>
+	
+		<main.basedir>${project.parent.basedir}</main.basedir>
+	</properties>
+	<dependencies>
+		<dependency>
+		    <groupId>org.projectlombok</groupId>
+		    <artifactId>lombok</artifactId>
+		    <scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-quartz</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents.client5</groupId>
+			<artifactId>httpclient5</artifactId>
+			<version>5.2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.infosys.icets.ai</groupId>
+			<artifactId>comm-lib-util</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.infosys.icets.icip</groupId>
+			<artifactId>icip-lib-jobs</artifactId>
+			</dependency>
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

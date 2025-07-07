@@ -1,0 +1,134 @@
+<div class="lfx-l-mainwrapper--login">
+  <div class="lfx-l-pageoverlay">
+    <div class="lfx-l-login-mid">
+      <div id="DSA_logoMid" class="DSA_logoMid">
+        <div class="lfx-u-text-white logo-common">ESSEDUM</div>
+      </div>
+      <div class="lfx-l-login-ctr">
+        <h1 class="lfx-u-body-xxl lfx-l-login-mar">
+          Log In
+          <a
+            href="javascript:void(0)"
+            class="icon icon-inline x-16 close-icon float-end lfx-u-mar-t-16"
+            aria-label="close panel"
+          >
+            <!-- <i class="material-icons">close</i> -->
+          </a>
+        </h1>
+
+        <mat-tab-group #tabGroup>
+          <mat-tab label="Login As Guest User">
+            <div
+              style="
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-top: -16px;
+              "
+            >
+              <button
+                mat-raised-button
+                style="background-color: #0a142f; color: white"
+                [disabled]="false"
+                (click)="loginAsGuest()"
+                onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';"
+                class="demoButton"
+              >
+                Login as Guest User
+              </button>
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Login with Credentials">
+            <mat-form-field
+              appearance="outline"
+              style="width: 100%; margin-top: 6px"
+              floatLabel="always"
+            >
+              <mat-label>Username</mat-label>
+              <input
+                matInput
+                placeholder="Enter Username..."
+                [(ngModel)]="username"
+                required
+                class="lfx-fs-12"
+              />
+              <mat-error *ngIf="!username">This field is required</mat-error>
+            </mat-form-field>
+            <mat-form-field
+              appearance="outline"
+              style="width: 100%; margin-top: 6px"
+              floatLabel="always"
+            >
+              <mat-label>Password</mat-label>
+              <input
+                matInput
+                placeholder="Enter Password..."
+                type="password"
+                [(ngModel)]="psd"
+                required
+                class="lfx-fs-12"
+              />
+              <mat-error *ngIf="!psd">This field is required</mat-error>
+            </mat-form-field>
+            <div class="selector-6-18">
+              <!--Error messages can be added here if needed -->
+            </div>
+            <mat-divider></mat-divider>
+            <button
+              mat-raised-button
+              style="background-color: #0a142f; color: white"
+              class="full-width"
+              [disabled]="false"
+              (click)="dbAuthenticate()"
+              onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+              onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';"
+            >
+              Log In
+            </button>
+            <!-- <div class="clearfix">
+              <a
+                class="float-start lfx-u-body-md DSA_purpleLink lfx-c-btn--hyperlink"
+                (click)="showResetPopup()"
+                style="cursor: pointer"
+              >
+                Forgot Password?
+              </a>
+              <span class="float-end lfx-u-body-md lfx-u-text-black">
+                                New User?
+                                <a class="DSA_purpleLink lfx-c-btn--hyperlink" (click)="goToRegUser()" style="cursor: pointer;">Register</a>
+                            </span>
+            </div> -->
+          </mat-tab>
+        </mat-tab-group>
+      </div>
+      <div
+        class="row"
+        style="
+          position: fixed;
+          bottom: 0;
+          width: 100%;
+          z-index: 9;
+          left: 0;
+          background-color: #0a142f;
+          padding: 10px;
+          display: flex;
+          align-items: center;
+        "
+      >
+        <div class="col-3" style="text-align: center; margin-top: 5px; flex: 1">
+          <img
+            id="clientimage"
+            src="assets/images/LFN-Logo-White.svg"
+            style="margin-left: 1vh; width: 180px; height: 20px"
+            alt=""
+          />
+        </div>
+        <div class="col-9" style="text-align: center; flex: 3">
+          <lfx-footer style="padding: 12px"></lfx-footer>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

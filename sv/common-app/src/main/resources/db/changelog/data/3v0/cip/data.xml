@@ -1,0 +1,92 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    
+    
+    <!-- changeSet author="Leap (generated)" id="3v0-cip-1026">
+        <sql dbms="h2, mysql, mssql">
+          insert into mldataset (id,attributes, dataset_type, description, exp_status, name, organization, schemajson, type, backing_dataset, dataset_schema, datasource, lastmodifiedby, lastmodifieddate, alias, context, is_approval_required, is_permission_managed, is_inbox_required, is_audit_required, is_archival_enabled, archival_config, dashboard, metadata, modeltype, views, taskdetails, tags, interfacetype, adaptername, isadapteractive) values('851','{\"filter\":\"\",\"mode\":\"query\",\"Query\":\"SELECT CASE when Status =\'Completed\' then \'#7cfc00\' when Status =\'Running\' then  \'#FFFF00\' when Status =\'Cancelled\' then \'#FF6347\' when Status =\'Yet To Start\' then \'#eee8aa \' end as startNodeColor,CASE when Status =\'Completed\' then \'#7cfc00\' when Status =\'Running\' then  \'#FFFF00\' when Status =\'Cancelled\' then \'#FF6347\' when Status =\'Yet To Start\' then \'#eee8aa\' end as endNodeColor, startNode , endNode,CONCAT(startNode,\' to \',endNode) edgeLabel, \'Job_Instance-startNode\' AS startNodeType, \'Job_Instance-endNode\' AS endNodeType, STATUS AS SNPropStatus, STATUS AS ENPropStatus,  StartTime AS SNPropStartTime, EndTime AS SNPropEndTime, StartTime AS ENPropStartTime, EndTime AS ENPropEndTime,PredictedTime AS ENPropPredictedTime,PredictedTime AS SNPropPredictedTime, startNode AS startNodeLabel, endNode AS endNodeLabel FROM (WITH RECURSIVE child_jobs AS (   SELECT 1 AS Lvl,  j.running_instance2_id AS startNode , j.running_instance1_id AS endNode, ji.start_time AS StartTime, ji.end_time AS EndTime, CASE WHEN ji.Status IN (\'Failed\', \'Cancelled\') THEN TIMESTAMPADD(HOUR,-1,ji.End_time) ELSE ji.End_time END  AS  PredictedTime , ji.project_id Project, ji.Status  FROM bjm_ji_ji_mapping j ,bjm_job_instance ji      WHERE ji.running_job_instance_id = j.running_instance2_id   AND ji.project_id =({projectId})  AND j.running_instance2_id IN  (          SELECT DISTINCT ji_jig.running_instance_id          FROM  bjm_ji_jig_mapping ji_jig          WHERE job_instance_Group_name IN (              SELECT ji_jig.job_instance_Group_name              FROM bjm_job_instance ji , bjm_ji_jig_mapping ji_jig              WHERE ji_jig.running_instance_id  = ji.running_job_instance_id              AND ji.running_job_instance_id = ({running_job_instance_id})               AND ji.project_id =({projectId})) )  UNION DISTINCT      SELECT cj.Lvl + 1 AS Lvl, j2.running_instance2_id startNode ,j2.running_instance1_id endNode,    ji2.start_time AS StartTime,       ji2.end_time AS EndTime, CASE WHEN ji2.Status IN (\'Failed\', \'Cancelled\') THEN TIMESTAMPADD(HOUR,-1,ji2.End_time) ELSE ji2.End_time END  AS PredictedTime , ji2.project_id Project, ji2.Status  FROM bjm_ji_ji_mapping j2 , child_jobs cj, bjm_job_instance ji2     WHERE ji2.running_job_instance_id = j2.running_instance2_id   AND j2.running_instance2_id = cj.endNode   AND ji2.project_id=cj.Project )  SELECT DISTINCT  Lvl,  startNode , endNode,  StartTime,EndTime, PredictedTime,STATUS FROM child_jobs) AS dependency\",\"Cacheable\":false,\"isStreaming\":\"false\",\"Headers\":\"\",\"defaultValues\":\"\",\"QueryParams\":\"\",\"writeMode\":\"append\",\"params\":\"{\'running_job_instance_id\':\'running_job_instance_id\',\'projectId\':\'ji.project_id\'}\",\"tableName\":\"\",\"uniqueIdentifier\":\"\"}',NULL,'Dataset for Instance-Dependency',NULL,'LEOSQL-W77285','leo1311',NULL,'rw',NULL,NULL,'leapmaster','admin','2024-01-05 09:51:45.032799','Instance-Dependency',NULL,'','','','',NULL,NULL,NULL,NULL,NULL,'Table View','[]','[]',NULL,NULL,NULL);
+        </sql>
+      </changeSet -->
+    <changeSet author="Leap (generated)" id="3v0-cip-1026-67">  
+      <sql>
+        Delete from mldataset where id =851 and organization='leo1311';
+      </sql>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="3v0-cip-1033">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT mldatasource ON;
+		</sql>	
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/data/3v0/cip/mldatasource.csv" quotchar="&quot;" separator="," tableName="mldatasource">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="connectiondetails" name="connectiondetails" type="STRING"/>
+            <column header="description" name="description" type="STRING"/>
+            <column header="dshashcode" name="dshashcode" type="STRING"/>
+            <column header="name" name="name" type="STRING"/>
+            <column header="organization" name="organization" type="STRING"/>
+            <column header="salt" name="salt" type="STRING"/>
+            <column header="type" name="type" type="STRING"/>
+            <column header="category" name="category" type="STRING"/>
+            <column header="activetime" name="activetime" type="skip"/>
+            <column header="lastmodifiedby" name="lastmodifiedby" type="STRING"/>
+            <column header="lastmodifieddate" name="lastmodifieddate" type="DATE"/>
+            <column header="alias" name="alias" type="STRING"/>
+            <column header="extras" name="extras" type="STRING"/>
+            <column header="interfacetype" name="interfacetype" type="STRING"/>
+            <column header="fordataset" name="fordataset" type="NUMERIC"/>
+            <column header="foradapter" name="foradapter" type="NUMERIC"/>
+            <column header="forruntime" name="forruntime" type="NUMERIC"/>
+            <column header="formodel" name="formodel" type="NUMERIC"/>
+        </loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT mldatasource OFF;
+		</sql>
+    </changeSet>
+
+    
+<changeSet dbms="mysql,postgresql" author="Leap (generated)" id="3v0-cip-1034">
+		<!-- sql dbms="mssql">
+			SET IDENTITY_INSERT mldataset ON;
+		</sql -->	
+        <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/data/3v0/cip/mldataset.csv" quotchar="&quot;" separator="," tableName="mldataset">
+            <column header="id" name="id" type="NUMERIC"/>
+            <column header="attributes" name="attributes" type="STRING"/>
+            <column header="dataset_type" name="dataset_type" type="STRING"/>
+            <column header="description" name="description" type="STRING"/>
+            <column header="exp_status" name="exp_status" type="NUMERIC"/>
+            <column header="name" name="name" type="STRING"/>
+            <column header="organization" name="organization" type="STRING"/>
+            <column header="schemajson" name="schemajson" type="STRING"/>
+            <column header="type" name="type" type="STRING"/>
+            <column header="backing_dataset" name="backing_dataset" type="skip"/>
+            <column header="dataset_schema" name="dataset_schema" type="STRING"/>
+            <column header="datasource" name="datasource" type="STRING"/>
+            <column header="lastmodifiedby" name="lastmodifiedby" type="STRING"/>
+            <column header="lastmodifieddate" name="lastmodifieddate" type="DATE"/>
+            <column header="alias" name="alias" type="STRING"/>
+            <column header="context" name="context" type="STRING"/>
+            <column name="is_approval_required" defaultValueBoolean="false"
+				type="boolean" />
+            <column name="is_permission_managed" defaultValueBoolean="false"
+				type="boolean" />
+            <column name="is_inbox_required" defaultValueBoolean="false"
+				type="boolean" />
+			<column name="is_audit_required" defaultValueBoolean="false"
+				type="boolean" />
+            <column name="is_archival_enabled" defaultValueBoolean="false"
+				type="boolean" />
+            <column header="archival_config" name="archival_config" type="STRING"/>
+            <column header="dashboard" name="dashboard" type="NUMERIC"/>
+            <column header="metadata" name="metadata" type="STRING"/>
+            <column header="modeltype" name="modeltype" type="STRING"/>
+            <column header="views" name="views" type="STRING"/>
+            <column header="taskdetails" name="taskdetails" type="STRING"/>
+            <column header="tags" name="tags" type="STRING"/>
+            <column header="interfacetype" name="interfacetype" type="STRING"/>
+            <column header="adaptername" name="adaptername" type="STRING"/>
+            <column header="isadapteractive" name="isadapteractive" type="STRING"/>
+        </loadData>
+		<!-- sql dbms="mssql">
+			SET IDENTITY_INSERT mldataset OFF;
+		</sql -->
+    </changeSet>
+</databaseChangeLog>

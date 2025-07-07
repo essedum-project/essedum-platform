@@ -1,0 +1,147 @@
+"id","param_name","param_datatype","custom_action_id","default_value"
+"6","adapter_instance","string","26","NULL"
+"7","project","integer","26","NULL"
+"44","assignmentGroup","string","23","devTeam"
+"45","ticketAssignment","string","23","assignee23"
+"46","ticketCategory","string","23","severe"
+"49","unextractedTicketCategory","NULL","33","NULL"
+"79","ticketId","string","37","INC0040156"
+"104","adapter_instance","string","43","NULL"
+"105","project","string","43","NULL"
+"106","isInstance","boolean","43","NULL"
+"107","ticketDetails","string","43","NULL"
+"112","adapter_instance","string","44","NULL"
+"113","project","string","44","NULL"
+"114","isInstance","boolean","44","NULL"
+"115","ticketDetails","string","44","NULL"
+"120","adapter_instance","string","45","NULL"
+"121","project","string","45","NULL"
+"122","isInstance","boolean","45","NULL"
+"123","ticketDetails","string","45","NULL"
+"128","adapter_instance","string","46","NULL"
+"129","project","string","46","NULL"
+"130","isInstance","boolean","46","NULL"
+"131","ticketDetails","string","46","NULL"
+"138","applicationId","integer","36","2"
+"139","ticketId","string","36","TN123"
+"148","isInstance","boolean","47","true"
+"149","prompt","string","47","You are content creator . Generate content for {topic}"
+"150","promptParam1","string","47","Global Warming"
+"191","applicationId","integer","29","2"
+"192","ticketId","string","29","INC0065735"
+"199","ticketId","string","35","NULL"
+"206","code","string","5",""
+"207","code","string","6",""
+"208","product_features","string","7",""
+"209","ciInfoInputCi","string","12","AcmeApp"
+"210","ciInfoInputCIType","string","12","App"
+"211","ciInfoOutput","string","13",""
+"212","ciHealthOutput","string","14",""
+"213","suggestBotOutput","string","16",""
+"214","ciValidateHealthOutput","string","16",""
+"215","ciValidateHealthOutput","string","15",""
+"217","requirement_text","string","2","build a login component with angular front end and springboot backend using oauth based authentication for enterprise applications"
+"218","requirement_spec","string","3","**User Requirements**
+
+* The user shall be able to log in to the application using their enterprise credentials.
+* The user shall be able to see a list of all the applications they have access to.
+* The user shall be able to launch any of the applications they have access to.
+
+**Functional Requirements**
+
+* The login component shall be implemented using Angular.
+* The backend shall be implemented using Spring Boot.
+* The application shall use OAuth 2.0 for authentication.
+* The application shall use a centralized user directory for authentication.
+* The application shall support single sign-on (SSO).
+* The application shall support multi-factor authentication (MFA).
+
+**Non-Functional Requirements**
+
+* The application shall be scalable to support a large number of users.
+* The application shall be highly available.
+* The application shall be secure.
+* The application shall be easy to use.
+* The application shall be well-documented.
+
+**Additional Requirements**
+
+* The application shall be developed using agile development methodologies.
+* The application shall be tested using automated testing tools.
+* The application shall be deployed using continuous integration and continuous deployment (CI/CD) pipelines.
+* The application shall be monitored using a centralized monitoring system.
+* The application shall be supported by a dedicated support team."
+"233","product_features","string","4","Generate code using angular for front end and springboot for backend for a login module to be part of an enterprise application with the following product features
+Login:
+* Users can log in to the application using their enterprise credentials.
+* The login component is implemented using Angular.
+* The backend is implemented using Spring Boot.
+* The application uses OAuth 2.0 for authentication.
+* The application uses a centralized user directory for authentication.
+* The application supports single sign-on (SSO).
+* The application supports multi-factor authentication (MFA).
+* **Application List:**
+* Users can see a list of all the applications they have access to.
+* **Application Launch:**
+* Users can launch any of the applications they have access to.
+* **Scalability:**
+* The application is scalable to support a large number of users.
+* **High Availability:**
+* The application is highly available.
+* **Security:**
+* The application is secure.
+* **Ease of Use:**
+* The application is easy to use.
+* **Documentation:**
+* The application is well-documented.
+* **Agile Development:**
+* The application is developed using agile development methodologies.
+* **Automated Testing:**
+* The application is tested using automated testing tools.
+* **CI/CD Pipelines:**
+* The application is deployed using continuous integration and continuous deployment (CI/CD) pipelines.
+* **Centralized Monitoring:**
+* The application is monitored using a centralized monitoring system.
+* **Dedicated Support:**
+* The application is supported by a dedicated support team."
+"234","technology","string","4","java springboot, angular"
+"260","isInstance","boolean","79","true"
+"261","shortDescription","string","79","\"Process Invoice\""
+"281","applicationId","string","70","2"
+"282","ticketId","string","70","INC0065735"
+"283","org","string","77","leo1311"
+"284","param","string","77","%257B%257D"
+"285","datasourceName","string","77","LEALCLCL12132"
+"291","shortDescription","string","80","{\"content\":\"Process_Invoice_Id:19990\"}"
+"300","name","string","81","{
+    \"names\": [
+        \"Arun\",
+        \"Ajay\",
+        \"Krish\"
+    ]
+}"
+"301","shortDescriptionText","string","76","Process Invoice:19990"
+"302","ticketId","string","72","INC0066067"
+"303","isInstance","boolean","78","true"
+"304","shortDescriptionText","string","78","CPU Utilization issues"
+"305","ticketDetails","string","75","NULL"
+"309","shortDescriptionText","string","71","Process Invoice"
+"310","isInstance","boolean","71","true"
+"318","isInstance","boolean","69","true"
+"319","prompt","string","69","P1 - Critical: Critical issues are the highest priority issues and should be fixed as soon as possible. These issues cause a significant impact on the business or end-users, and the system is unusable or data is lost. The resolution time for critical issues should be within 24 hours.\\nP2 - High: High priority issues are those that are important but do not cause a significant impact on the business or end-users. These issues are important to fix but can wait for a few days.\\nP3 - Medium: Medium priority issues are those that are not critical or high priority but still need to be addressed. These issues do not have a significant impact on the business or end-users, and the system is still usable. The resolution time for medium priority issues should be within a week.\\nP4 - Low: Low priority issues are those that have a minor impact on the business or end-users. These issues are not critical and can be fixed later. The resolution time for low priority issues should be within a few weeks.\\nP5 - Lowest: Lowest priority issues are those that have the least impact on the business or end-users. These issues are not critical and can be fixed at a later time. The resolution time for lowest priority issues should be within a few months.\\nAnalyze the urgency of this issue: {ticketcontent}. What priority level(P1, P2, P3, P4 and P5) should it be assigned? Return the priority in the following template: ``` Priority: ___\\nExplanation: ____```"
+"320","promptParam1","string","69","\"Process Invoice No -113213 for customer id 23213\""
+"321","isInstance","boolean","53","true"
+"322","prompt","string","53","given the information {ticketcontent} about a ticket from I want you to generate :\\n    \\n1. Summary basing on the whole information given.\\n    \\n2. A short summary on SLA Timeline\\n    \\n3. A short summary on Resolution and worknotes\\n    \\n5. A short summary on Priority and urgency\\n    \\n6. A short summary on created_by, assignmentgroup and assignedto\\n    \\n7. A short summary on Current Status"
+"323","promptParam1","string","53","\"Process Invoice No -113213 for customer id 23213\""
+"324","isInstance","boolean","68","true"
+"325","prompt","string","68","Based on this customer message {ticketcontent}, draft a response. To assess the candidate's ability to draft a first response, we were looking for the following:\\n        An understanding of the issue raised by the customer\\n        A clear and concise response that addresses the issue\\n        A polite and professional tone\\n        A clear call to action.\\n        If the provided context doesn't provide enough information, you are allowed to use your knowledge and experience to offer you the best possible assistance."
+"326","promptParam1","string","68","\"Process Invoice No -113213 for customer id 23213\""
+"327","isInstance","boolean","51","true"
+"328","prompt","string","51","Categories are:        1. Data        2. Business Application & Databases        3. Consumer Solutions and Data        4. Customer Solutions        Categorize this support ticket: {ticketcontent}. Return the Category in the following template: ```Category: ___\\nExplanation: ____```"
+"329","promptParam1","string","51","\"Process Invoice No -113213 for customer id 23213\""
+"330","isInstance","boolean","52","true"
+"331","prompt","string","52","Determine the named entites of this customer message: {ticketcontent}. Return  'named_entities' as key value pairs.Do not add any additional messages, notes or explanations or formatting. If the provided context doesn't provide enough information, you are not allowed to use your knowledge hence write a best message to offer the best possible assistance."
+"332","promptParam1","string","52","\"Process Invoice No -113213 for customer id 23213\""
+"333","adapter_instance","string","17","AIOPS-Adapter"
+"334","project","string","17","leo1311"
+"335","ticketDetails","string","17","NULL"

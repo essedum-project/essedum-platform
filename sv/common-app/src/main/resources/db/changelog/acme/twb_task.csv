@@ -1,0 +1,117 @@
+"id","task_name","task_description","task_def_id","schedule_start_time","schedule_end_time","schedule_start_day","schedule_end_day","schedule_start_Date","schedule_end_Date","task_planned_ind","schedule_sent_ind","schedule_accepted_ind","schedule_sent_dts","task_planned_dts","schedule_accepted_dts","last_updated_by","last_updated_dts","task_group_instance_id","questionnaire_instance_id","application_id","application_name","cluster_id","cluster_name","wave_id","wave_name","lob_id","lob_name","lead","status","duration","minutes_of_meeting_sent","meeting_location","actual_duration","session_objective_met","remarks","project_id","reversekt_flag","transition_id","task_history_id","KT_Session_Link","feedback_rating","meeting_link","feedback_comment","client_sign_off","actual_start_Date","actual_end_Date","actual_start_time","actual_end_time"
+"33","WIN-KT-01","NULL","3","04:30:00","05:30:00","NULL","NULL","2021-06-01","2021-06-01","false","false","NULL","NULL","NULL","NULL","1","2021-04-12T10:21:02","NULL","4","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Scheduled","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","1","2","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL"
+"34","WIN-KT-02","NULL","3","04:30:00","05:30:00","NULL","NULL","2021-06-02","2021-06-02","false","false","NULL","NULL","NULL","NULL","1","2021-02-25T06:27:46","NULL","2","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Completed","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","0","2","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL"
+"35","WIN-KT-03","NULL","3","04:30:00","05:30:00","NULL","NULL","2021-06-03","2021-06-03","false","false","NULL","NULL","NULL","NULL","1","2021-02-24T12:48:03","NULL","3","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","In Progress","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","1","2","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL"
+"36","WIN-KT-04","NULL","3","04:30:00","05:30:00","NULL","NULL","2021-06-04","2021-06-04","true","true","NULL","NULL","NULL","NULL","1","2020-06-04T06:20:33","NULL","NULL","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Scheduled","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","0","2","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL"
+"37","WIN-KT-05","NULL","3","04:30:00","05:30:00","NULL","NULL","2021-06-05","2021-06-05","false","false","NULL","NULL","NULL","NULL","1","2021-02-24T12:48:05","NULL","5","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Completed","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","1","2","NULL","NULL","4.0","NULL","NULL","NULL","NULL","NULL","NULL","NULL"
+"38","WIN-KT-06","Understanding Microsft cluster configuration details (OS version, cluster version, node details, applications) 
+(Clusters/NLB/VIP) implemented in environement with Detailed inventory and dependancy
+Microsoft NLB Clustering details and configuration
+VIP configuration details for all the clusters","3","04:30:00","05:30:00","NULL","NULL","2021-06-06","2021-06-06","true","true","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Not Required","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","0","2","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL"
+"39","WIN-KT-07","Understanding Microsft cluster configuration details (OS version, cluster version, node details, applications) 
+(Clusters/NLB/VIP) implemented in environement with Detailed inventory and dependancy
+Microsoft NLB Clustering details and configuration
+VIP configuration details for all the clusters","3","04:30:00","05:30:00","NULL","NULL","2021-06-07","2021-06-07","false","false","NULL","NULL","NULL","NULL","1","2021-02-25T12:10:07","NULL","NULL","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Completed","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","0","2","NULL","NULL","3.5","NULL","NULL","NULL","NULL","NULL","NULL","NULL"
+"40","WIN-KT-08","Understanding Microsft cluster configuration details (OS version, cluster version, node details, applications) 
+(Clusters/NLB/VIP) implemented in environement with Detailed inventory and dependancy
+Microsoft NLB Clustering details and configuration
+VIP configuration details for all the clusters","3","04:30:00","05:30:00","NULL","NULL","2021-06-08","2021-06-08","false","false","NULL","NULL","NULL","NULL","1","2021-02-24T12:48:10","NULL","NULL","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Scheduled","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","0","2","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL"
+"41","WIN-KT-09","Understanding Microsft cluster configuration details (OS version, cluster version, node details, applications) 
+(Clusters/NLB/VIP) implemented in environement with Detailed inventory and dependancy
+Microsoft NLB Clustering details and configuration
+VIP configuration details for all the clusters","3","04:30:00","05:30:00","NULL","NULL","2021-06-09","2021-06-09","false","false","NULL","NULL","NULL","NULL","1","2021-02-24T12:48:11","NULL","NULL","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Completed","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","0","2","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL"
+"42","WIN-KT-10","NULL","3","04:30:00","05:30:00","NULL","NULL","2021-06-10","2021-06-10","false","false","NULL","NULL","NULL","NULL","1","2020-06-04T06:17:07","NULL","NULL","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Cancelled","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","0","2","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL"
+"43","WIN-KT-11","Understanding Microsft cluster configuration details (OS version, cluster version, node details, applications) 
+(Clusters/NLB/VIP) implemented in environement with Detailed inventory and dependancy
+Microsoft NLB Clustering details and configuration
+VIP configuration details for all the clusters","3","04:30:00","05:30:00","NULL","NULL","2021-06-11","2021-06-11","true","true","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Scheduled","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","0","2","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL"
+"44","WIN-KT-12","Understanding Microsft cluster configuration details (OS version, cluster version, node details, applications) 
+(Clusters/NLB/VIP) implemented in environement with Detailed inventory and dependancy
+Microsoft NLB Clustering details and configuration
+VIP configuration details for all the clusters","3","04:30:00","05:30:00","NULL","NULL","2021-06-12","2021-06-12","true","true","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Scheduled","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","0","2","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL"
+"45","WIN-KT-13","Understanding Microsft cluster configuration details (OS version, cluster version, node details, applications) 
+(Clusters/NLB/VIP) implemented in environement with Detailed inventory and dependancy
+Microsoft NLB Clustering details and configuration
+VIP configuration details for all the clusters","3","04:30:00","05:30:00","NULL","NULL","2021-06-13","2021-06-13","true","true","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Scheduled","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","0","2","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL"
+"46","WIN-KT-14","Understanding Microsft cluster configuration details (OS version, cluster version, node details, applications) 
+(Clusters/NLB/VIP) implemented in environement with Detailed inventory and dependancy
+Microsoft NLB Clustering details and configuration
+VIP configuration details for all the clusters","3","04:30:00","05:30:00","NULL","NULL","2021-06-14","2021-06-14","true","true","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Scheduled","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","0","2","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL"
+"47","WIN-KT-15","Understanding Microsft cluster configuration details (OS version, cluster version, node details, applications) 
+(Clusters/NLB/VIP) implemented in environement with Detailed inventory and dependancy
+Microsoft NLB Clustering details and configuration
+VIP configuration details for all the clusters","3","04:30:00","05:30:00","NULL","NULL","2021-06-15","2021-06-15","true","true","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Scheduled","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","0","2","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL"
+"48","WIN-KT-16","Understanding Microsft cluster configuration details (OS version, cluster version, node details, applications) 
+(Clusters/NLB/VIP) implemented in environement with Detailed inventory and dependancy
+Microsoft NLB Clustering details and configuration
+VIP configuration details for all the clusters","3","04:30:00","05:30:00","NULL","NULL","2021-06-16","2021-06-16","true","true","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Completed","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","1","2","NULL","NULL","NULL","NULL","NULL","NULL","NULL","2021-02-26","NULL","NULL"
+"49","WIN-KT-17","Understanding Microsft cluster configuration details (OS version, cluster version, node details, applications) 
+(Clusters/NLB/VIP) implemented in environement with Detailed inventory and dependancy
+Microsoft NLB Clustering details and configuration
+VIP configuration details for all the clusters","3","04:30:00","05:30:00","NULL","NULL","2021-06-17","2021-06-17","true","true","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Cancelled","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","0","2","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL"
+"50","WIN-KT-18","Understanding Microsft cluster configuration details (OS version, cluster version, node details, applications) 
+(Clusters/NLB/VIP) implemented in environement with Detailed inventory and dependancy
+Microsoft NLB Clustering details and configuration
+VIP configuration details for all the clusters","3","04:30:00","05:30:00","NULL","NULL","2021-06-18","2021-06-18","true","true","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Completed","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","0","2","NULL","NULL","5.0","NULL","NULL","NULL","NULL","NULL","NULL","NULL"
+"51","WIN-KT-19","Understanding Microsft cluster configuration details (OS version, cluster version, node details, applications) 
+(Clusters/NLB/VIP) implemented in environement with Detailed inventory and dependancy
+Microsoft NLB Clustering details and configuration
+VIP configuration details for all the clusters","3","04:30:00","05:30:00","NULL","NULL","2021-06-19","2021-06-19","true","true","NULL","NULL","NULL","NULL","NULL","NULL","NULL","NULL","2","application1","7","Cluster2","4","Wave2","NULL","NULL","NULL","Completed","NULL","NULL","Skip - CA
+Jan - CO 
+Abdul - IND
+David - OP,KS","","","","2","0","2","NULL","NULL","4.5","NULL","NULL","NULL","NULL","2021-02-26","NULL","NULL"
+"172","WIN_KT_UAT","NULL","1","06:49:00","07:49:00","NULL","NULL","2021-06-22","2021-06-22","false","false","NULL","NULL","NULL","NULL","1","2021-02-26T07:04:08","NULL","72","2","application1","7","Cluster2","4","Wave2","4","NULL","NULL","Completed","NULL","NULL","NULL","NULL","NULL","NULL","2","0","2","NULL","NULL","NULL","NULL","NULL","NULL","NULL","2021-02-26","NULL","NULL"

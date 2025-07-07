@@ -1,0 +1,4330 @@
+
+
+/*Main Color:var(--base-color) Hover color:#46D599 change from master to new ui branch->#007CC3 changed to
+var(--base-color)*/
+
+
+/*Apply CSS to Font Awesome */
+
+
+.bgcolor2 {
+    background-color: var(--contain-color);
+}
+
+
+/*Apply CSS to Angular Material */
+
+.mat-mdc-raised-button {
+    background-color: var(--base-color);
+    color: white;
+    margin: 3px;
+    font-family: var(--font-type) !important;
+    /* font-size: 2.25vmin; */
+}
+
+button:focus,
+button:active:focus,
+button.active:focus {
+    outline: none !important;
+    outline-style: none !important;
+}
+
+.mat-mdc-tab-header {
+    color: black !important;
+}
+
+::ng-deep .mat-mdc-card {
+    padding: 0px !important;
+}
+
+/* :host /deep/ .tabpad .mat-tab-group.mat-primary .mat-ink-bar,
+.mat-tab-nav-bar.mat-primary .mat-ink-bar {
+    width: 182px !important;
+    left: 9px !important;
+}
+
+ :host /deep/ .tabpad .mat-tab-label .mat-tab-label-content {
+    padding: 20px;
+} */
+
+::ng-deep .mat-expansion-panel .mat-expansion-panel-header.cdk-keyboard-focused:not([aria-disabled="true"]),
+.mat-expansion-panel .mat-expansion-panel-header.cdk-program-focused:not([aria-disabled="true"]),
+.mat-expansion-panel:not(.mat-expanded) .mat-expansion-panel-header:hover:not([aria-disabled="true"]) {
+    background: #46d599 !important;
+}
+
+::ng-deep .mat-expansion-panel .mat-expansion-panel-header.cdk-keyboard-focused:not([aria-disabled="true"]),
+.mat-expansion-panel .mat-expansion-panel-header.cdk-program-focused:not([aria-disabled="true"]),
+.mat-expansion-panel:not(.mat-expanded) .mat-expansion-panel-header:hover:not([aria-disabled="true"]) {
+    background: #46d599 !important;
+}
+
+::ng-deep .mat-expansion-panel:not(.mat-expanded) .mat-expansion-panel-header:hover:not([aria-disabled="true"]) {
+    background: #46d599 !important;
+}
+
+::ng-deep .mat-expansion-panel:not(.mat-expanded) .mat-expansion-panel-header:hover:not([aria-disabled="true"]) {
+    background: #46d599 !important;
+}
+
+::ng-deep .mat-expansion-panel-header.mat-expanded:focus,
+.mat-expansion-panel-header.mat-expanded:hover {
+    background: #46d599 !important;
+}
+
+::ng-deep .mat-expansion-panel-header.mat-expanded:focus,
+.mat-expansion-panel-header.mat-expanded:hover {
+    background: #46d599 !important;
+}
+
+.mat-expansion-panel-content>.mat-expansion-panel-body {
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+}
+
+::ng-deep .mat-expansion-indicator::after,
+.mat-expansion-panel-header-description {
+    color: #ddd;
+}
+
+::ng-deep .mat-content {
+    overflow: visible !important;
+}
+
+.expansionDropdown {
+    box-shadow: none !important;
+}
+
+.mat-ink-bar {
+    background-color: var(--base-color) !important;
+    position: absolute;
+    bottom: 0;
+    height: 0.4vmin !important;
+    transition: 0.5s cubic-bezier(0.35, 0, 0.25, 1);
+}
+
+.mat-expansion-indicator::after {
+    color: white;
+    border-style: solid;
+    border-width: 0 2px 2px 0;
+    content: "";
+    display: inline-block;
+    padding: 3px;
+    transform: rotate(45deg);
+    vertical-align: middle;
+}
+
+
+/* Login CSS*/
+
+.bgImg {
+    background-color: var(--base-color);
+    background-repeat: no-repeat;
+    background-position-y: center;
+    height: 100vh;
+}
+
+.example-container-login {
+    display: flex;
+    flex-direction: column;
+    /* height: 34vh; */
+    position: relative;
+    /* margin-top: -4%; */
+}
+
+.example-container-login>* {
+    width: 70%;
+    right: 15%;
+    left: 15%;
+}
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
+*/
+.mat-mdc-tab-labels {
+    margin-left: 4vh !important;
+}
+
+.demoBtnpos {
+    margin-left: 32% !important;
+    margin-top: 23% !important;
+}
+
+.fadeBGLogin {
+    /* background-color: white; */
+    /* height: 290px; */
+    width: 435px;
+    position: absolute;
+    top: 28vh;
+    left: 36vw;
+    display: flex;
+    flex-direction: column;
+}
+
+@media screen and (max-width: 600px) {
+    .fadeBGLogin {
+        height: 290px;
+        width: 90%;
+        left: 7vw !important;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .loginEmailButton {
+        margin-top: 10px !important;
+    }
+}
+
+@media screen and (min-width: 2000px) {
+    .fadeBGLogin {
+        width: unset !important;
+    }
+}
+
+@media screen and (min-width:601px) and (max-width: 1000px) {
+    .fadeBGLogin {
+        height: 290px;
+        width: 90%;
+        left: 7vw !important;
+    }
+}
+
+.loginBGColor {
+    background-color: white;
+}
+
+.loginTabGroup {
+    padding: 15px 10px;
+}
+
+.fadeBGBottom {
+    background-color: white;
+    height: auto;
+    width: 100vw;
+    opacity: 0.7;
+    position: absolute;
+    bottom: 0;
+    text-align: center;
+    color: #2f2e2e;
+}
+
+.bottom {
+    background-color: white;
+    height: auto;
+    /* width: 100vw; */
+    color: #2f2e2e;
+}
+
+.top {
+    /* height: 100vh; */
+    width: 100vw;
+}
+
+.botLabel {
+    font-size: 3.5vh;
+    height: 9vh;
+    margin-top: 1vh;
+    /* width:100vw; */
+    text-align: center;
+}
+
+.botContent {
+    height: auto;
+    /* width:100vw; */
+    display: flex;
+    justify-content: center;
+}
+
+.div1 {
+    height: 15vh;
+    width: 20vw;
+    display: flex;
+    flex-direction: column;
+    border-right-style: solid;
+    border-right-color: #2f2e2e;
+    border-right-width: 0.02vw;
+    text-align: center;
+    font-size: 1em;
+    padding: 0;
+}
+
+.div2 {
+    height: 15vh;
+    width: 20vw;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    font-size: 1em;
+    /* border-right-style: solid; */
+}
+
+.imgSty {
+    height: 12vh;
+    width: 12vh;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.head {
+    font-size: 3.5vh;
+    margin-top: 2vh;
+}
+
+.headLabel {
+    font-size: 2.5vh;
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+}
+
+.headDiv {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.logo {
+    padding: 0.4%;
+    /* background-image: var(--bg-logo); */
+    /* width: 80vw; */
+    /* height: 10vh; */
+    text-align: center;
+    background-repeat: no-repeat;
+    /* height: 100%; */
+    top: 145px;
+    left: 498px;
+    width: 550px;
+    height: 110px;
+    position: absolute;
+}
+
+.logoSpam {
+    height: 5vh;
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+}
+
+.logoSpam span {
+    font-size: 4vh;
+}
+
+#com {
+    font-size: 2.4vh;
+    color: var(--base-color);
+}
+
+.errorMsg {
+    height: 5vh;
+}
+
+.msg {
+    color: red;
+    /* width: 92%; margin: 2vh; border-radius: 0.9vh; */
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.errMar {
+    margin-top: 0.5vh;
+}
+
+.errMar1 {
+    margin-top: -3vh;
+}
+
+.blueText {
+    color: var(--base-color);
+}
+
+.forgot-pwd :hover {
+    color: #46d599;
+    text-decoration: underline;
+}
+
+.forgot-pwd {
+    position: relative;
+    flex: auto;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.marTop {
+    margin-top: 20px;
+}
+
+.back-btn {
+    background-color: white;
+    text-decoration-color: black;
+    text-transform: none;
+    font-weight: 400;
+}
+
+.fa-arrow-left {
+    -webkit-text-stroke: 1px rgb(75, 75, 75);
+    color: rgb(75, 75, 75);
+}
+
+
+/*Logout CSS*/
+
+.example-container-logout {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.example-container-logout .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-line-ripple::before{
+    border-bottom: none !important;
+}
+
+.example-container-logout .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-line-ripple::after{
+    border-bottom: none !important;
+}
+
+#parent {
+    background-color: #0094ff;
+    background-repeat: no-repeat;
+    background-position-y: center;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#child {
+    background: white;
+    padding: 5%;
+}
+
+#login-message {
+    padding-top: 10%;
+    text-align: center;
+    color: #0094ff;
+}
+
+#logout-message {
+    font-size: 2.6vmin;
+    color: #0094ff;
+}
+
+.button-color {
+    background-color: #0094ff;
+    color: white;
+}
+
+
+/*Portfolio Manager(Dashboard Component) CSS*/
+
+.breadcrumb-item+.breadcrumb-item::before {
+    display: inline-block;
+    padding-right: 0.5rem;
+    color: black;
+    content: "/";
+}
+
+.example-container {
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    height: 100vh;
+}
+
+.svg-example-container {
+    border: none;
+    height: auto;
+}
+
+.roleheading {
+    font-weight: 600;
+    padding-right: 1vh;
+    margin-top: -1vh;
+    color: grey;
+}
+
+.dropdownrole {
+    /* padding: 0; */
+    display: flex;
+    flex-direction: row;
+}
+
+.example-sidenav {
+    padding: 20px;
+}
+
+.parent-div {
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden !important;
+}
+
+.fChild {
+    /* background-color: var(--base-color); */
+    background-color: var(--header-color);
+    /* box-shadow: 0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12); */
+    /* border-radius: 4px; */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #c1c1c1;
+}
+
+
+:root {
+    --header-color: var(--base-color);
+}
+
+.sChild {
+    display: flex;
+    flex-direction: row;
+    height: 90vh;
+}
+
+.sfChild {
+    background-color: black;
+    height: 100%;
+    width: 73%;
+}
+
+.ssChild {
+    background-color: black;
+    height: 100%;
+    width: 27%;
+}
+
+
+/* .card-div {height: 100%; background-color: black;
+   } */
+
+.tabcard {
+    height: 100%;
+}
+
+.imgavt {
+    border-radius: 50%;
+    width: 15%;
+}
+
+.inputBorder {
+    display: flex;
+    border-radius: 5px;
+    border: 1px solid #e0dbdb80;
+}
+
+.inputBorder1 {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    width: 14vh;
+}
+
+.span1 {
+    padding-right: 1vw;
+    border-right: 2px #c1bcbc solid;
+}
+
+.div1 {
+    padding: 0;
+}
+
+.avatarimg {
+    border-radius: 50%;
+    width: 60%;
+    height: 60%;
+}
+
+.option1 {
+    font-family: sans-serif;
+}
+
+.search {
+    position: relative;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.search input {
+    text-indent: 0vw;
+    font-family: FontAwesome, sans-serif;
+}
+
+.searchi {
+    position: absolute;
+    top: 25%;
+    left: 86%;
+}
+
+.card-div1-mat2 {
+    width: 68%;
+    margin-top: 20px
+        /* margin: 2% !important; */
+}
+
+.card-div1-mat3 {
+    width: 28%;
+    /* margin: 2% 0% 2% 2% !important; */
+    margin: 25px 10px 0px 25px;
+    background-color: white;
+    color: black;
+    box-shadow: 0 0 0 0 !important;
+    border: 1px solid #e2e2e2;
+    border-radius: 1vh;
+}
+
+drag-scroll {
+    width: 100%;
+    margin-bottom: 1%;
+}
+
+.cardiv21 {
+    height: 98%;
+    margin-right: 1%;
+    width: 25%;
+    border-radius: 0.5vw;
+}
+
+.cardiv211 {
+    height: 89%;
+    margin-right: 1%;
+    width: 100%;
+    background-color: black;
+    border-radius: 0.5vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.cardiv212 {
+    text-align: center;
+}
+
+.parCaro {
+    display: flex;
+    height: 98%;
+    margin: 1%;
+    margin-top: 0%;
+}
+
+.cardchk {
+    margin: 1%;
+    margin-bottom: 2%;
+    width: 31%;
+}
+
+.cardchk1 {
+    background-color: #f9c982;
+}
+
+.cardchk2 {
+    background-color: #a2e2ad;
+}
+
+.cardchk3 {
+    background-color: #a38ee4;
+}
+
+.parcardchk {
+    display: flex;
+    height: 100%;
+    margin: 2%;
+    color: grey;
+}
+
+.cardchkmat {
+    height: 90%;
+    border: 1px solid #e2e2e2;
+    border-radius: 1vh;
+    background: #fff !important;
+    box-shadow: none !important;
+}
+
+.card-div1-mat1 {
+    width: 28%;
+    margin: 2% !important;
+}
+
+.matcard2-label {
+    padding-left: 5%;
+    padding-top: 1%;
+}
+
+.selectinput {
+    border-radius: 0px !important;
+    background-color: #d8d0d0;
+}
+
+.inputselect {
+    width: 12vw;
+    border-radius: 0px !important;
+    background-color: #f3f0f0;
+}
+
+.cardchk11 {
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.divclass1 {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    width: 50%;
+    color: var(--base-color);
+}
+
+.divclass2 {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    width: 50%;
+    font-size: 11vh;
+    color: #000;
+}
+
+.divclass11 {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    width: 50%;
+    color: var(--base-color);
+}
+
+.divclass21 {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    width: 50%;
+    font-size: 11vh;
+    color: #000;
+}
+
+.divclass12 {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    width: 50%;
+    color: var(--base-color);
+}
+
+.divclass22 {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    width: 50%;
+    font-size: 11vh;
+    color: #000;
+}
+
+.tickets {
+    font-size: 13px;
+    margin-top: -132px;
+    margin-left: 34%;
+    z-index: 2;
+    position: absolute;
+    font-family: var(--font-type) !important;
+}
+
+/* :host /deep/ .mat-tab-label {
+    width: 32%;
+}
+
+ :host /deep/ .mat-tab-label .mat-tab-label-content {
+    margin-left: 6%;
+} */
+
+.total {
+    position: absolute;
+    margin-left: 4px;
+    margin-top: -9px;
+}
+
+.total1 {
+    position: absolute;
+    margin-top: 10px;
+}
+
+.ticketLabel {
+    height: 25%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    color: #71767d;
+    border-top: 1px solid #dfe6f0;
+}
+
+/* Landing CSS*/
+
+.card-div1-land {
+    box-shadow: none !important;
+    background: #f5f5f5;
+    height: 32.3%;
+    margin-bottom: 0.3%;
+    display: flex !important;
+}
+
+.ssChild {
+    background-color: white;
+    height: 100%;
+    display: flex;
+    width: auto;
+    transition: width 2s, height 4s;
+}
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
+*/
+.tab .mat-mdc-tab-label {
+    padding: 0 !important;
+}
+
+.card-div {
+    height: 100%;
+    background-color: #f5f5f5;
+}
+
+.show {
+    width: 100%;
+}
+
+.borderClass {
+    border: 0px white;
+    background-color: white;
+}
+
+.inputBorder {
+    display: flex;
+    border-radius: 5px;
+    border: 1px solid #e0dbdb80;
+}
+
+.span1 {
+    padding-right: 1vw;
+    border-right: 2px #c1bcbc solid;
+}
+
+.div1 {
+    padding-left: 1vw;
+}
+
+.searchi {
+    position: absolute;
+    top: 25%;
+    left: 86%;
+}
+
+.card-div1 {
+    height: 32.3%;
+    background-color: #f5f5f5;
+    display: flex;
+    box-shadow: 0 0 0 0 !important;
+}
+
+.card-div1-mat1 {
+    width: 28%;
+    margin: 2% !important;
+    background-color: white;
+}
+
+.card-div1-mat2 {
+    width: 68%;
+    /* margin: 2% !important; */
+    box-shadow: 0 0 0 0 !important;
+    border: 1px solid #e2e2e2;
+    border-radius: 1vh;
+}
+
+.a {
+    content: "<i class=" fa fa-angle-right " ></i>";
+    /* display: flex; */
+    margin-right: 37%;
+    height: 100%;
+}
+
+.a:before,
+.a:after {
+    content: "<i class=" fa fa-angle-right " ></i>";
+    display: block;
+    position: absolute;
+    transition: transform 0.5s;
+}
+
+.a:before {
+    transform: rotate(0deg);
+}
+
+.a:after {
+    transform: rotate(180deg);
+}
+
+.a.active:before {
+    transform: rotate(180deg);
+}
+
+.a.active:after {
+    transform: rotate(0deg);
+}
+
+.sla {
+    display: flex;
+    flex-direction: column;
+    padding-left: 5%;
+    height: 100%;
+    cursor: pointer;
+    margin-top: 3% !important;
+}
+
+.slaCount {
+    font-size: -webkit-xxx-large;
+    margin-top: 8%;
+    margin-left: 40%;
+    font-family: var(--font-type) !important;
+}
+
+.slaLabel {
+    margin-top: 8%;
+    font-size: 16px;
+    margin-left: 15%;
+    color: #707070;
+    font-family: var(--font-type) !important;
+}
+
+.gameDash {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
+
+.imgDash {
+    font-family: Arial, sans-serif;
+    flex-direction: column;
+    width: 100%;
+    /* color: #707070; */
+    /* font-family: arial; */
+    background: var(--bg-color) !important;
+    color: var(--text-color);
+    overflow: auto;
+}
+
+.gamingDash {
+    /* font-family: Arial; */
+    flex-direction: column;
+    width: 100%;
+    color: #707070;
+    font-family: arial, sans-serif;
+    /* background: var(--bg-color) !important; */
+    /* color: var(--text-color); */
+}
+
+.gamLab {
+    text-align: center;
+    height: 15%;
+}
+
+.userLab {
+    display: flex;
+    margin-top: 2%;
+    flex-direction: row;
+    height: 70%;
+    padding: 1%;
+    text-align: center;
+    justify-content: space-around;
+}
+
+.gamLabel {
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font-type) !important;
+}
+
+#titleCss {
+    color: var(--lead-color);
+}
+
+#pointCss {
+    color: var(--lead-color);
+}
+
+.userrad {
+    display: flex;
+}
+
+.imageView {
+    border-radius: 50%;
+}
+
+.matcardNew {
+    transition: box-shadow 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    padding: 0px;
+    border-radius: 4px;
+}
+
+.gridviewchk {
+    width: 100%;
+    margin: 0;
+    text-align: left;
+    line-height: 3vh;
+    font-size: 3vh;
+    color: var(--base-color);
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.gridlabelchk {
+    width: 100%;
+    margin: 0;
+    text-align: left;
+    line-height: 3vh;
+    font-size: 2vh;
+    color: var(--base-color);
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.iframedime {
+    height: 88vh;
+    width: 100%;
+}
+
+.noGameUrl {
+    color: white;
+    text-align: center;
+    margin-top: 4%;
+}
+
+.divpadd {
+    background-color: #f5f5f5;
+}
+
+.tab {
+    margin-left: 2%;
+    margin-right: 2%;
+    background-color: white;
+}
+
+
+/* Sidebar CSS*/
+
+
+/*-------------------------------*/
+
+
+/*           Wrappers            */
+
+
+/*-------------------------------*/
+
+.sidebar-nav li a:active,
+.sidebar-nav li a:focus,
+.sidebar-nav li.open a:active {
+    text-decoration: none;
+    background: inherit;
+    color: var(--base-color);
+    overflow-x: hidden;
+}
+
+.sidebar-wrapper {
+    background: var(--header-color);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+}
+
+
+/*-------------------------------*/
+
+
+/*     Sidebar nav styles        
+     /*-------------------------------*/
+
+.navbar {
+    padding: 0;
+}
+
+.sidebar-nav {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background: inherit;
+}
+
+.sidebar-nav li {
+    position: relative;
+    /* line-height: 20px; */
+    display: inline-block;
+    width: 100%;
+}
+
+.sidebar-nav li:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    height: 100%;
+    /* width: 3px; */
+    background-color: #1c1c1c;
+    -webkit-transition: width 0.2s ease-in;
+    -moz-transition: width 0.2s ease-in;
+    -ms-transition: width 0.2s ease-in;
+    transition: width 0.2s ease-in;
+}
+
+.sidebar-nav li:hover:before,
+.sidebar-nav li.open:hover:before {
+    width: 100%;
+    -webkit-transition: width 0.2s ease-in;
+    -moz-transition: width 0.2s ease-in;
+    -ms-transition: width 0.2s ease-in;
+    transition: width 0.2s ease-in;
+}
+
+.sidebar-nav li a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 1.522vh 2.283vh 1.522vh 3.348vh;
+    cursor: pointer;
+    font-family: var(--font-type) !important;
+}
+
+.sidebar-nav li a:hover,
+.sidebar-nav li a:focus,
+.sidebar-nav li.open a:hover {
+    text-decoration: none;
+    color: white;
+}
+
+.sidebar-nav li.open a:focus {
+    text-decoration: none;
+    background: white;
+    color: var(--base-color);
+}
+
+.sidebar-header {
+    width: 13%;
+}
+
+.sidebar-brand {
+    text-align: center;
+    height: 9vh;
+    position: relative;
+    padding-top: 3vh;
+}
+
+.sidebar-brand a {
+    color: #ddd;
+}
+
+.sidebar-brand a:hover {
+    color: #fff;
+    text-decoration: none;
+}
+
+.dropdown-header {
+    text-align: center;
+    font-size: 1em;
+    color: #ddd;
+    background: #212531;
+    background: linear-gradient(to right bottom, #2f3441 50%, #212531 50%);
+}
+
+.sidebar-nav .dropdown-menu {
+    position: relative;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+    border: none;
+    background-color: #222;
+    box-shadow: none;
+}
+
+.dropdown-menu.show {
+    top: 0;
+}
+
+
+/*Fontawesome icons*/
+
+.nav.sidebar-nav div li a::before {
+    font-family: fontawesome, sans-serif;
+    vertical-align: baseline;
+    display: inline-block;
+    padding-right: 1vh;
+}
+
+.nav.sidebar-nav div li a i::before {
+    vertical-align: baseline;
+    display: inline-block;
+    padding-right: 1vh;
+}
+
+
+/*-------------------------------*/
+
+
+/*            Overlay            */
+
+
+/*-------------------------------*/
+
+.overlay {
+    position: fixed;
+    display: none;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(250, 250, 250, 0.8);
+    z-index: 1;
+}
+
+.expansionDropdown {
+    border-radius: 0;
+    background: inherit;
+    color: white;
+    display: block !important;
+    box-shadow: none !important;
+}
+
+.ams-text {
+    font-size: 1.5vh;
+    color: #fff;
+    text-align: left;
+}
+
+.active {
+    /* background: white; */
+    /* border-left: 0.5vh solid #fff; */
+    color: var(--base-color);
+}
+
+.active a {
+    color: black;
+}
+
+.expansion-ul {
+    padding-left: 0;
+}
+
+.menu-item {
+    width: 100%;
+    font-family: var(--font-type) !important;
+}
+
+.sidebar-nav li a:active,
+.sidebar-nav li a:focus,
+.sidebar-nav li.open a:active {
+    text-decoration: none;
+    background: white;
+    color: var(--base-color);
+}
+
+
+/*My applications CSS*/
+
+.flex-container {
+    display: flex;
+    flex-wrap: nowrap;
+    margin-left: 0.5%;
+    margin-right: -1.05%;
+    width: 100%;
+}
+
+.flex-container>div {
+    background-color: #fff;
+    width: 100%;
+    margin: 1% 1.5% 1% 1%;
+    text-align: center;
+    line-height: 4vw;
+    font-size: 30px;
+    border-radius: 1vh;
+}
+
+
+
+.background {
+    padding-top: 1vh;
+    overflow: hidden;
+    margin-left: 0% !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    border: 1px solid #e2e2e2;
+    border-radius: 1vh;
+}
+
+.fontSize {
+    font-size: 16px;
+    font-weight: 500;
+    font-family: var(--font-type) !important;
+}
+
+.font {
+    font-weight: bolder;
+    color: black;
+}
+
+.flex-container-vertical {
+    display: flex;
+    flex-direction: column;
+    margin-top: 4%;
+    margin-right: 2.1%;
+}
+
+.flex-container-vertical>div {
+    width: 99%;
+    margin: 1vh 1vh 1vh 0;
+    text-align: center;
+    line-height: 15vh;
+    font-size: 30px;
+    border-radius: 1vh;
+    color: var(--base-color);
+}
+
+.yellowBg {
+    background-color: #f5f5f5;
+    border: 1px solid #e2e2e2;
+    border-radius: 4px;
+}
+
+.fontw {
+    color: #707070;
+}
+
+.acquaBg {
+    background-color: #f5f5f5;
+    border: 1px solid #e2e2e2;
+    border-radius: 4px;
+}
+
+.topdocs {
+    font-family: var(--font-type) !important;
+    font-weight: 400 !important;
+    font-size: 16px !important;
+}
+
+.align {
+    height: 10vh;
+    text-align: left;
+    top: 6vh;
+    vertical-align: middle;
+    position: relative;
+    line-height: 4vh;
+    display: flex;
+    flex-direction: row;
+}
+
+.numberstyle {
+    font-size: 30px;
+    margin-right: 2vh;
+    font-weight: bold;
+    color: black;
+}
+
+.docmar {
+    margin-left: 20px;
+}
+
+.handPointer {
+    cursor: pointer;
+}
+
+.padd {
+    margin-left: -3.5% !important;
+    margin-right: -2.5% !important;
+}
+
+.greyBg {
+    background-color: #f5f5f5 !important;
+    border: 1px solid #e2e2e2;
+    border-radius: 4px;
+    margin-left: 0 !important;
+}
+
+.incidentgreyBg {
+    border: 1px solid #e2e2e2;
+    border-radius: 4px;
+    margin-left: 0 !important;
+    line-height: 0 !important;
+}
+
+.icon-size {
+    font-size: 30px;
+    color: var(--base-color);
+}
+
+.data {
+    border-bottom: solid rgb(223, 215, 215);
+    border-bottom-width: thin;
+}
+
+.name {
+    font-weight: bold;
+    margin-top: 3vh;
+    cursor: pointer;
+}
+
+.desc {
+    font-size: 12px;
+    margin: 0;
+    margin-top: 1vh;
+}
+
+
+/* Support Engineer*/
+
+.sChild {
+    display: flex;
+    flex-direction: row;
+    height: 90.7vh;
+}
+
+.sfChild {
+    background-color: white;
+    height: 100%;
+    width: 100%;
+}
+
+.tabcard {
+    height: 100%;
+    transition: all 0.5s ease;
+    width: 0;
+}
+
+.inputBorder2 {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    margin-right: 5px;
+}
+
+.mat-nav {
+    width: 66%;
+}
+
+/* :host /deep/ .mat-tab-label,
+.mat-tab-link {
+    padding: 1px !important;
+    min-width: 100px !important;
+    color: white !important;
+    opacity: 1 !important;
+} */
+
+.drag-scroll-content {
+    overflow: hidden !important;
+}
+
+.card-div2 {
+    height: 50%;
+    margin-bottom: 0.3%;
+    background-color: #fff;
+    display: -webkit-box;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    flex-direction: column;
+    color: grey;
+    margin-left: 2%;
+    margin-right: 2%;
+    box-shadow: none !important;
+    border: 1px solid #e2e2e2;
+    border-radius: 1vh;
+}
+
+.card-div3 {
+    height: 50%;
+    background-color: #fff;
+    box-shadow: none !important;
+    border: 1px solid #e2e2e2;
+    border-radius: 1vh !important;
+    margin: 2% 2% 0.3%;
+}
+
+drag-scroll {
+    width: 100%;
+    margin-bottom: 1%;
+    overflow: hidden;
+}
+
+.cardchk {
+    margin: 1%;
+    margin-bottom: 2%;
+    width: 50%;
+}
+
+.matcard2-label {
+    padding-left: 5%;
+    padding-top: 1%;
+    font-family: arial, sans-serif;
+    font-weight: 400 !important;
+    font-size: 16px;
+}
+
+.ticketdiv {
+    height: 100%;
+}
+
+.ticketdiv1 {
+    height: 70%;
+    display: flex;
+    flex-direction: row;
+}
+
+.ticketdiv11 {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    width: 30%;
+    color: var(--base-color);
+    border-right: 1px solid #dfe6f0;
+}
+
+.new {
+    height: 10%;
+    margin-top: 1%;
+    color: #02ee29;
+}
+
+.supportdiv {
+    height: 62%;
+}
+
+
+/* Portfolio Manager Tools Screen*/
+
+.toolsLabel {
+    font-weight: bold;
+    margin-top: 2vh;
+    font-family: var(--font-type) !important;
+}
+
+.buttonStyle {
+    background: #00acac;
+    color: #fff;
+    width: 16vh;
+}
+
+.cardiv212 {
+    text-align: center;
+    font-family: var(--font-type) !important;
+}
+
+.rightOffset {
+    margin-right: 1vh;
+    margin-bottom: 1vh;
+}
+
+.topMenu {
+    width: 100%;
+    background: #f3f0f0;
+    /* top: 14px; */
+    position: absolute;
+    top: 0;
+    height: 15%;
+    border-top-left-radius: 0.5em;
+    border-top-right-radius: 0.5em;
+    display: none;
+}
+
+.cardIcon {
+    color: #bbbaba;
+    float: right;
+    font-size: 2.6vh;
+    margin: 0.5vh;
+    margin-left: 2vh;
+}
+
+.cardIcon:active {
+    color: #3657a4;
+}
+
+.samplecard {
+    height: 100%;
+    border-radius: 0.5em;
+}
+
+.cardContainer {
+    height: 36vh;
+    padding-bottom: 9vh;
+}
+
+.cardContent {
+    padding-top: 8%;
+    height: 100%;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 19vh;
+}
+
+.buttonCol {
+    float: right;
+    padding-right: 18.5vh;
+}
+
+
+/* video POP UP */
+
+.fullscreen-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(90, 90, 90, 0.3);
+    z-index: 9999;
+}
+
+#popdiv {
+    height: 300px;
+    width: 420px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.close {
+    cursor: pointer;
+    border: 1px solid #444;
+    width: 25px;
+    height: 25px;
+    line-height: 24px;
+    border-radius: 20px;
+    text-align: center;
+    right: -8px;
+    top: -28px;
+    background: #e11;
+    color: rgb(0, 0, 0);
+}
+
+
+/* end of video pop up */
+
+
+/* custom tool tip*/
+
+.poppup {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+
+/* The actual popup */
+
+.poppup .popuptext {
+    visibility: hidden;
+    width: 40vh;
+    background-color: #696969;
+    color: #fff;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    font-weight: 100;
+    font-size: 13;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: -190%;
+    margin-left: -80px;
+}
+
+
+/* Popup arrow */
+
+.poppup .popuptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+
+/* Toggle this class - hide and show the popup */
+
+.poppup .show {
+    visibility: visible;
+    -webkit-animation: fadeIn 1s;
+    animation: fadeIn 1s;
+}
+
+
+/* Add animation (fade in the popup) */
+
+@-webkit-keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+
+/*end of custom tool tip*/
+
+
+/** DONUT CHART LEGEND - REMOVING LAST LEGEND ELEMENT */
+
+/* .donutLegendStying g.highcharts-legend-item:last-child {
+    visibility: hidden !important;
+} */
+
+.txteditor {
+    display: block;
+    border: 0;
+    border-radius: 8px;
+    box-shadow: none;
+    color: #231f20;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    overflow-wrap: break-word;
+    font-family: var(--font-type) !important;
+}
+
+.editor1 {
+    border: 1px solid #b8b8b8;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.gamificationst0 {
+    fill: var(--base-color);
+}
+
+.gamificationst1 {
+    opacity: 0.2;
+}
+
+.gamificationst2 {
+    fill: #ffffff;
+}
+
+.gamificationst3 {
+    font-family: var(--font-type) !important;
+}
+
+.gamificationst4 {
+    font-size: 16px;
+}
+
+.gamificationst5 {
+    font-family: var(--font-type) !important;
+}
+
+.gamificationst6 {
+    font-size: 12px;
+}
+
+.gamificationst7 {
+    fill: #ff9e03;
+}
+
+.gamificationst8 {
+    fill: #ffcf00;
+}
+
+.gamificationst9 {
+    enable-background: new;
+}
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version.
+*/
+.mat-mdc-radio-label-content,
+.mat-mdc-simple-snackbar,
+.mat-mdc-tab-label,
+.mat-mdc-form-field-label,
+.mat-mdc-expansion-panel-header,
+.mat-mdc-menu-item,
+.mat-mdc-tab-link,
+.mat-mdc-input-element,
+.mat-mdc-option,
+.mat-mdc-paginator,
+.mat-mdc-tab-group,
+.ngx-pagination,
+td.mat-mdc-cell,
+td.mat-mdc-footer-cell,
+th.mat-mdc-header-cell {
+    font-family: var(--font-type) !important;
+}
+
+.contain {
+    background: black;
+    height: 100vh;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+}
+
+.imgrow {
+    margin-top: 70px;
+}
+
+.colpad {
+    padding-left: 8px !important;
+    text-align: center;
+}
+
+.imgtxt {
+    color: white;
+    font-size: 16px;
+    font-family: var(--font-type) !important;
+}
+
+pre {
+    font-family: var(--font-type) !important;
+}
+
+.icap-ipbtn-outline,
+.totalIncidents,
+.ui-paginator-pages,
+mat-label,
+.mat-mdc-card {
+    font-family: var(--font-type) !important;
+}
+
+.btnmargin2 {
+    margin-top: 16vh !important;
+    margin-left: 2vh !important;
+    overflow: hidden;
+}
+
+
+/* USM tables ellipsis for description */
+
+.list-table {
+    table-layout: fixed;
+}
+
+.td-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.td-padding {
+    padding: 0 !important;
+    margin-top: 0.5rem;
+}
+
+
+/* Crud Screen Fa-FA Icons */
+
+.crudfa {
+    margin-left: 1.3rem !important;
+    margin-right: 5px !important;
+}
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version.
+*/
+.mat-mdc-form-field-ripple {
+    background-color: none !important;
+    display: none;
+}
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version.
+*/
+.mat-mdc-focused .mat-mdc-form-field-label {
+    color: var(--base-color) !important;
+}
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version.
+*/
+.mat-mdc-form-field-type-mat-mdc-input .mat-mdc-form-field-underline {
+    display: none !important;
+}
+
+.mat-mdc-input-element {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.42) !important;
+}
+
+.notifications-menu {
+    height: 10vh !important;
+    border: 0.1px solid #80808059 !important;
+    display: flex !important;
+}
+
+.ticketdiv {
+    height: 100%;
+}
+
+.ticketdiv1 {
+    height: 75%;
+    display: flex;
+    flex-direction: row;
+}
+
+.ticketdiv11 {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    width: 50%;
+    color: var(--base-color);
+}
+
+.ticketdiv12 {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    width: 50%;
+    color: var(--base-color);
+    font-size: 4vh;
+}
+
+/* Landing CSS*/
+
+.card-div1-land {
+    box-shadow: none !important;
+    background: #f5f5f5;
+    height: 200px;
+    margin-bottom: 0.3%;
+    display: flex !important;
+    flex-direction: row;
+}
+
+.parent-div {
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* .fChild {background-color: var(--base-color); height: 7.5vh; box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px
+       1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12); */
+
+
+/* margin: 0.2vw; */
+
+
+/* border-radius: 4px; */
+
+
+/* display: flex; align-items: center; justify-content: space-between;
+   } */
+
+.sChild {
+    display: flex;
+    flex-direction: row;
+    height: 91.7vh;
+}
+
+.sfChild {
+    background-color: white;
+    height: 96%;
+    width: 100%;
+}
+
+.ssChild {
+    background-color: white;
+    height: 100%;
+    display: flex;
+    width: auto;
+    transition: width 2s, height 4s;
+}
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
+*/
+.tab .mat-mdc-tab-label {
+    padding: 0 !important;
+}
+
+.card-div {
+    height: 100%;
+    background-color: #f5f5f5;
+}
+
+.tabcard {
+    height: 100%;
+    /* transition: 0.5s; */
+    /* display: none !important; */
+    /* opacity: 0; */
+    width: 0;
+}
+
+.show {
+    width: 100%;
+}
+
+.imgavt {
+    border-radius: 50%;
+    width: 15%;
+}
+
+.borderClass {
+    border: 0px white;
+    background-color: white;
+}
+
+.inputBorder {
+    display: flex;
+    border-radius: 5px;
+    border: 1px solid #e0dbdb80;
+}
+
+.span1 {
+    padding-right: 1vw;
+    border-right: 2px #c1bcbc solid;
+}
+
+.div1 {
+    padding-left: 1vw;
+}
+
+.search {
+    position: relative;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.search input {
+    text-indent: 0vw;
+    font-family: FontAwesome, sans-serif;
+}
+
+.searchi {
+    position: absolute;
+    top: 25%;
+    left: 86%;
+}
+
+.card-div1 {
+    height: 32.3%;
+    background-color: #f5f5f5;
+    display: flex;
+    box-shadow: 0 0 0 0 !important;
+}
+
+drag-scroll {
+    width: 100%;
+    margin-bottom: 1%;
+}
+
+.cardiv211 {
+    height: 89%;
+    margin-right: 1%;
+    width: 100%;
+    background-color: white;
+    border-radius: 0.5vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.cardiv212 {
+    text-align: center;
+}
+
+.parCaro {
+    display: flex;
+    height: 98%;
+    margin: 1%;
+    margin-top: 0%;
+}
+
+.cardchk {
+    margin: 1%;
+    margin-bottom: 2%;
+    width: 31%;
+}
+
+.parcardchk {
+    display: flex;
+    height: 100%;
+    margin: 2%;
+    color: grey;
+}
+
+.cardchkmat {
+    height: 90%;
+}
+
+.card-div1-mat1 {
+    width: 28%;
+    margin: 2% !important;
+    background-color: white;
+}
+
+.card-div1-mat2 {
+    width: 68%;
+    /* margin: 2% !important; */
+    /* background-image: url('../../../../../../src/assets/image/Game.png'); background-repeat: no-repeat;
+     background-position-y: center; */
+    box-shadow: 0 0 0 0 !important;
+    border: 1px solid #e2e2e2;
+    border-radius: 1vh;
+}
+
+.matcard2-label {
+    padding-left: 5%;
+    padding-top: 1%;
+}
+
+.selectinput {
+    border-radius: 0px !important;
+    background-color: #d8d0d0;
+}
+
+.inputselect {
+    width: 12vw;
+    border-radius: 0px !important;
+    background-color: #f3f0f0;
+}
+
+.cardchk11 {
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.ticketLabel {
+    border-top: 1px solid #dfe6f0;
+    color: #71767d;
+}
+
+.ticketdiv11 {
+    color: var(--base-color);
+    border-right: 1px solid #dfe6f0;
+}
+
+.ticketdiv12 {
+    color: var(--base-color);
+    font-size: 3vh;
+    margin-left: 0%;
+}
+
+.ticketdiv13 {
+    color: var(--base-color);
+    font-size: 3vh;
+    margin-left: 6%;
+}
+
+
+/* ------------------------------------------ */
+
+.example-sidenav-content {
+    display: flex;
+    height: 100%;
+}
+
+.new {
+    color: #02ee29;
+}
+
+.toggleButton {
+    min-width: 0px;
+    padding: 0px;
+    width: 2vw;
+}
+
+
+/* -------------------------------------------------------- */
+
+.a {
+    content: "<i class=" fa fa-angle-right " ></i>";
+    /* display: flex; */
+    margin-right: 37%;
+    height: 100%;
+}
+
+.a:before,
+.a:after {
+    content: "<i class=" fa fa-angle-right " ></i>";
+    display: block;
+    position: absolute;
+    transition: transform 0.5s;
+}
+
+.a:before {
+    transform: rotate(0deg);
+}
+
+.a:after {
+    transform: rotate(180deg);
+}
+
+.a.active:before {
+    transform: rotate(180deg);
+}
+
+.a.active:after {
+    transform: rotate(0deg);
+}
+
+.flex-container-vertical {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-container-vertical>div {
+    width: 100%;
+    margin: 0;
+    text-align: left;
+    line-height: 3vh;
+    font-size: 3vh;
+    color: var(--base-color);
+}
+
+.sla {
+    display: flex;
+    flex-direction: column;
+    padding-left: 5%;
+    height: 100%;
+    cursor: pointer;
+    margin-top: 3% !important;
+}
+
+.slaCount {
+    font-size: -webkit-xxx-large;
+    margin-top: 8%;
+    margin-left: 40%;
+    font-family: var(--font-type) !important;
+}
+
+.slaLabel {
+    margin-top: 8%;
+    font-size: 16px;
+    margin-left: 15%;
+    color: #707070;
+    font-family: var(--font-type) !important;
+}
+
+.gameDash {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
+
+.imgDash {
+    /* font-family: Arial; */
+    flex-direction: column;
+    width: 100%;
+    /* color: #707070; */
+    font-family: arial, sans-serif;
+    background: var(--bg-color) !important;
+    color: var(--text-color);
+}
+
+.gamingDash {
+    font-family: Arial, sans-serif;
+    flex-direction: column;
+    width: 100%;
+    color: #707070;
+    /* font-family: arial; */
+    /* background: var(--bg-color) !important; */
+    /* color: var(--text-color); */
+}
+
+.gamLab {
+    text-align: center;
+    height: 15%;
+}
+
+.userLab {
+    display: flex;
+    margin-top: 2%;
+    flex-direction: row;
+    height: 70%;
+    padding: 1%;
+    text-align: center;
+    justify-content: space-around;
+}
+
+.gamLabel {
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font-type) !important;
+}
+
+#leaderBoard {
+    margin-left: 10px;
+}
+
+#titleCss {
+    color: var(--lead-color);
+}
+
+#pointCss {
+    color: var(--lead-color);
+}
+
+.userrad {
+    display: flex;
+}
+
+.imageView {
+    border-radius: 50%;
+}
+
+.matcardNew {
+    transition: box-shadow 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    padding: 0px;
+    border-radius: 4px;
+}
+
+.gridviewchk {
+    width: 100%;
+    margin: 0;
+    text-align: left;
+    line-height: 3vh;
+    font-size: 3vh;
+    color: var(--base-color);
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.gridlabelchk {
+    width: 100%;
+    margin: 0;
+    text-align: left;
+    line-height: 3vh;
+    font-size: 2vh;
+    color: var(--base-color);
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.iframedime {
+    height: 88vh;
+    width: 100%;
+}
+
+.noGameUrl {
+    color: white;
+    text-align: center;
+    margin-top: 4%;
+}
+
+.divpadd {
+    background-color: #f5f5f5;
+}
+
+.tab {
+    margin-left: 2%;
+    margin-right: 2%;
+    background-color: white;
+}
+
+
+/* Sidebar CSS*/
+
+
+/*-------------------------------*/
+
+
+/*           Wrappers            */
+
+
+/*-------------------------------*/
+
+.sidebar-nav li a:active,
+.sidebar-nav li a:focus,
+.sidebar-nav li.open a:active {
+    text-decoration: none;
+    background: inherit;
+    color: var(--base-color);
+    overflow-x: hidden;
+}
+
+.sidebar-wrapper {
+    background: var(--header-color);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+}
+
+
+/*-------------------------------*/
+
+
+/*     Sidebar nav styles        
+     /*-------------------------------*/
+
+.navbar {
+    padding: 0;
+}
+
+.sidebar-nav {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background: inherit;
+}
+
+.sidebar-nav li {
+    position: relative;
+    /* line-height: 20px; */
+    display: inline-block;
+    width: 100%;
+}
+
+.sidebar-nav li:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    height: 100%;
+    /* width: 3px; */
+    background-color: #1c1c1c;
+    -webkit-transition: width 0.2s ease-in;
+    -moz-transition: width 0.2s ease-in;
+    -ms-transition: width 0.2s ease-in;
+    transition: width 0.2s ease-in;
+}
+
+.sidebar-nav li:hover:before,
+.sidebar-nav li.open:hover:before {
+    width: 100%;
+    -webkit-transition: width 0.2s ease-in;
+    -moz-transition: width 0.2s ease-in;
+    -ms-transition: width 0.2s ease-in;
+    transition: width 0.2s ease-in;
+}
+
+.sidebar-nav li a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 1.522vh 2.283vh 1.522vh 3.348vh;
+    cursor: pointer;
+    font-family: var(--font-type) !important;
+}
+
+.sidebar-nav li a:hover,
+.sidebar-nav li a:focus,
+.sidebar-nav li.open a:hover {
+    text-decoration: none;
+    /* background: var(--base-color) !important; */
+    color: white;
+}
+
+.sidebar-nav li.open a:focus {
+    text-decoration: none;
+    background: white;
+    color: var(--base-color);
+}
+
+.sidebar-header {
+    /* text-align: center; font-size: 20px; position: relative; */
+    width: 13%;
+    /* display: inline-block; */
+}
+
+.sidebar-brand {
+    text-align: center;
+    height: 9vh;
+    position: relative;
+    /* background: #212531; background: linear-gradient(to right bottom, #2f3441 50%, #212531 50%); */
+    padding-top: 3vh;
+}
+
+.sidebar-brand a {
+    color: #ddd;
+}
+
+.sidebar-brand a:hover {
+    color: #fff;
+    text-decoration: none;
+}
+
+.dropdown-header {
+    text-align: center;
+    font-size: 1em;
+    color: #ddd;
+    background: #212531;
+    background: linear-gradient(to right bottom, #2f3441 50%, #212531 50%);
+}
+
+.sidebar-nav .dropdown-menu {
+    position: relative;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+    border: none;
+    background-color: #222;
+    box-shadow: none;
+}
+
+.dropdown-menu.show {
+    top: 0;
+}
+
+
+/*Fontawesome icons*/
+
+.nav.sidebar-nav div li a::before {
+    font-family: fontawesome, sans-serif;
+    vertical-align: baseline;
+    display: inline-block;
+    padding-right: 1vh;
+}
+
+.nav.sidebar-nav div li a i::before {
+    vertical-align: baseline;
+    display: inline-block;
+    padding-right: 1vh;
+}
+
+
+/*-------------------------------*/
+
+
+/*            Overlay            */
+
+
+/*-------------------------------*/
+
+.overlay {
+    position: fixed;
+    display: none;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(250, 250, 250, 0.8);
+    z-index: 1;
+}
+
+.expansionDropdown {
+    border-radius: 0;
+    /* box-shadow: none; */
+    background: inherit;
+    color: white;
+    display: block !important;
+}
+
+.ams-text {
+    font-size: 1.5vh;
+    color: #fff;
+    text-align: left;
+}
+
+.active {
+    /* background: white; */
+    /* border-left: 0.5vh solid #fff; */
+    color: var(--base-color);
+}
+
+.active a {
+    color: black;
+}
+
+.expansion-ul {
+    padding-left: 0;
+}
+
+.menu-item {
+    width: 100%;
+    font-family: var(--font-type) !important;
+}
+
+.sidebar-nav li a:active,
+.sidebar-nav li a:focus,
+.sidebar-nav li.open a:active {
+    text-decoration: none;
+    background: white;
+    color: var(--base-color);
+}
+
+
+/* my-dashboard CSS*/
+
+.background {
+    border: 1px solid #e2e2e2;
+    border-radius: 1vh;
+}
+
+
+/*My applications CSS*/
+
+.flex-container {
+    display: flex;
+    flex-wrap: nowrap;
+    margin-left: 0.5%;
+    margin-right: -1.05%;
+    width: 100%;
+}
+
+.flex-container>div {
+    background-color: #fff;
+    width: 100%;
+    margin: 1% 1.5% 1% 1%;
+    text-align: center;
+    line-height: 4vw;
+    font-size: 30px;
+    border-radius: 1vh;
+}
+
+.background {
+    padding-top: 1vh;
+    overflow: hidden;
+    margin-left: 0% !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+}
+
+.fontSize {
+    font-size: 16px;
+    font-weight: 500;
+    font-family: var(--font-type) !important;
+}
+
+.hamburger {
+    color: #3657a4;
+    font-size: 4.3vh;
+}
+
+.font {
+    font-weight: bolder;
+    color: black;
+}
+
+.flex-container-vertical {
+    display: flex;
+    flex-direction: column;
+    margin-top: 4%;
+    margin-right: 2.1%;
+}
+
+.flex-container-vertical>div {
+    width: 99%;
+    margin: 1vh 1vh 1vh 0;
+    text-align: center;
+    line-height: 15vh;
+    font-size: 30px;
+    border-radius: 1vh;
+}
+
+.yellowBg {
+    background-color: #f5f5f5;
+    border: 1px solid #e2e2e2;
+    border-radius: 4px;
+}
+
+.fontw {
+    color: #707070;
+}
+
+.acquaBg {
+    background-color: #f5f5f5;
+    border: 1px solid #e2e2e2;
+    border-radius: 4px;
+}
+
+.purpleBg {
+    background-color: #b18cc1;
+}
+
+.topdocs {
+    font-family: var(--font-type) !important;
+    font-weight: 400 !important;
+    font-size: 16px !important;
+}
+
+.align {
+    height: 10vh;
+    text-align: left;
+    top: 6vh;
+    vertical-align: middle;
+    position: relative;
+    line-height: 4vh;
+    display: flex;
+    flex-direction: row;
+}
+
+.numberstyle {
+    font-size: 30px;
+    margin-right: 2vh;
+    font-weight: bold;
+    color: black;
+}
+
+.docmar {
+    margin-left: 20px;
+}
+
+
+/* 927B52 226251 766AB5 */
+
+.handPointer {
+    cursor: pointer;
+}
+
+.padd {
+    margin-left: -3.5% !important;
+    margin-right: -2.5% !important;
+}
+
+.greyBg {
+    background-color: #f5f5f5 !important;
+    border: 1px solid #e2e2e2;
+    border-radius: 4px;
+    margin-left: 0 !important;
+}
+
+.incidentgreyBg {
+    border: 1px solid #e2e2e2;
+    border-radius: 4px;
+    margin-left: 0 !important;
+    line-height: 0 !important;
+}
+
+.icon-size {
+    font-size: 30px;
+    color: var(--base-color);
+}
+
+
+/* Process CSS*/
+
+.stage-item {
+    transform: translate3d(0px, 0px, 0px);
+    transition: all 0s ease 0s;
+    width: 939px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.stage-item-in {
+    width: 238.667px;
+    margin-right: 64px;
+}
+
+.stage-item-in:hover {
+    cursor: pointer;
+}
+
+.bgColorHead {
+    background-color: var(--base-color) 94;
+}
+
+.shiftTop {
+    margin-top: -2%;
+}
+
+
+/* Quick Links CSS*/
+
+.addButton {
+    margin-left: 17vw;
+    background: none;
+}
+
+.data {
+    border-bottom: solid rgb(223, 215, 215);
+    border-bottom-width: thin;
+}
+
+.name {
+    font-weight: bold;
+    margin-top: 3vh;
+    cursor: pointer;
+}
+
+.desc {
+    font-size: 12px;
+    margin: 0;
+    margin-top: 1vh;
+}
+
+.iButton {
+    display: flex;
+    flex-direction: row-reverse;
+    margin-right: 1vw;
+}
+
+
+/* Support Engineer*/
+
+.example-sidenav {
+    padding: 20px;
+}
+
+.parent-div {
+    display: flex;
+    flex-direction: column;
+    height: inherit;
+}
+
+
+/* .fChild {background-color: white; height: 8vh; box-shadow: 0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0,
+       0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12); */
+
+
+/* margin: .2vw; */
+
+
+/* border-radius: 4px; */
+
+
+/* display: flex; align-items: center; justify-content: space-between;
+   } */
+
+.sChild {
+    display: flex;
+    flex-direction: row;
+    height: 90.7vh;
+}
+
+.sfChild {
+    background-color: white;
+    height: 100%;
+    width: 100%;
+}
+
+.ssChild {
+    background-color: white;
+    height: 100%;
+    display: flex;
+    /* transition: all .1s ease; */
+    width: auto;
+    /* width: 27%; */
+}
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
+*/
+::ng-deep .mat-mdc-tab-label {
+    /* min-width: 100px !important; */
+}
+
+
+/* .card-div {height: 100%; background-color: white;
+   } */
+
+.tabcard {
+    height: 100%;
+    transition: all 0.5s ease;
+    /* transition: 0.5s; */
+    /* display: none !important; */
+    /* opacity: 0; */
+    width: 0;
+}
+
+.show {
+    width: 100%;
+    /* display: block !important; */
+    /* opacity: 1; */
+}
+
+.imgavt {
+    border-radius: 50%;
+    width: 15%;
+}
+
+.borderClass {
+    border: 0px white;
+    background-color: white;
+}
+
+.inputBorder {
+    display: flex;
+    border-radius: 5px;
+    border: 1px solid #e0dbdb80;
+}
+
+.inputBorder2 {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    margin-right: 5px;
+    /* margin-left: 112; width: 10%; */
+}
+
+.mat-nav {
+    width: 66%;
+}
+
+/* :host /deep/ .mat-tab-label,
+.mat-tab-link {
+    padding: 1px !important;
+    min-width: 100px !important;
+    color: white !important;
+    opacity: 1 !important;
+} */
+
+.span1 {
+    padding-right: 1vw;
+    border-right: 2px #c1bcbc solid;
+}
+
+.div1 {
+    padding-left: 1vw;
+}
+
+.search {
+    position: relative;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.search input {
+    text-indent: 0vw;
+    font-family: FontAwesome, sans-serif;
+}
+
+.searchi {
+    position: absolute;
+    top: 25%;
+    left: 86%;
+}
+
+.card-div1 {
+    height: 32.3%;
+    margin-bottom: 0.3%;
+    display: flex;
+}
+
+.drag-scroll-content {
+    overflow: hidden !important;
+}
+
+.card-div2 {
+    height: 50%;
+    margin-bottom: 0.3%;
+    background-color: #fff;
+    display: -webkit-box;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    flex-direction: column;
+    color: grey;
+    margin-left: 2%;
+    margin-right: 2%;
+    box-shadow: none !important;
+    border: 1px solid #e2e2e2;
+    border-radius: 1vh;
+}
+
+.card-div3 {
+    height: 50%;
+    background-color: #fff;
+    box-shadow: none !important;
+    border: 1px solid #e2e2e2;
+    border-radius: 1vh !important;
+    margin: 2% 2% 0.3%;
+}
+
+
+/* ::ng-deep .mat-card{padding : 0px !important;
+   } */
+
+drag-scroll {
+    width: 100%;
+    margin-bottom: 1%;
+    overflow: hidden;
+}
+
+.cardiv211 {
+    height: 89%;
+    margin-right: 1%;
+    width: 100%;
+    background-color: white;
+    border-radius: 0.5vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.cardiv212 {
+    text-align: center;
+}
+
+.parCaro {
+    display: flex;
+    height: 80%;
+    margin: 1%;
+    margin-top: 0%;
+}
+
+.cardchk {
+    margin: 1%;
+    margin-bottom: 2%;
+    width: 50%;
+}
+
+.parcardchk {
+    display: flex;
+    height: 100%;
+    margin: 2%;
+    color: grey;
+}
+
+.cardchkmat {
+    height: 90%;
+}
+
+.card-div1-mat1 {
+    width: 28%;
+    margin: 2% !important;
+}
+
+.card-div1-mat2 {
+    width: 68%;
+    /* margin: 2% !important; */
+    /* background-image: url('../../../../../../src/assets/image/Game.png'); background-repeat: no-repeat;
+     background-position-y: center; */
+}
+
+.matcard2-label {
+    padding-left: 5%;
+    padding-top: 1%;
+    font-family: arial, sans-serif;
+    font-weight: 400 !important;
+    font-size: 16px;
+}
+
+.selectinput {
+    border-radius: 0px !important;
+    background-color: #d8d0d0;
+}
+
+.inputselect {
+    width: 12vw;
+    border-radius: 0px !important;
+    background-color: #f3f0f0;
+}
+
+.cardchk11 {
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.ticketLabel {
+    height: 25%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    color: #71767d;
+}
+
+.ticketdiv {
+    height: 100%;
+}
+
+.ticketdiv1 {
+    height: 70%;
+    display: flex;
+    flex-direction: row;
+}
+
+.ticketdiv11 {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    width: 30%;
+    color: var(--base-color);
+}
+
+.ticketdiv12 {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    width: 35%;
+    height: 100%;
+    color: var(--base-color);
+    font-size: 4vh;
+}
+
+.ticketdiv13 {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    margin-top: 7%;
+    width: 35%;
+    height: 50%;
+    color: #6868f9;
+    font-size: 4vh;
+}
+
+.new {
+    height: 10%;
+    margin-top: 1%;
+    color: #02ee29;
+}
+
+.supportdiv {
+    height: 62%;
+}
+
+
+/* IFrame CSS*/
+
+.iframedime {
+    height: 88vh;
+    width: 100%;
+}
+
+
+/* Portfolio Manager Tools Screen*/
+
+.toolsLabel {
+    font-weight: bold;
+    margin-top: 2vh;
+    font-family: var(--font-type) !important;
+}
+
+.inputselect {
+    width: 22vw;
+    border-radius: 3px !important;
+    background-color: #f3f0f0;
+}
+
+.alignment {
+    display: inline-flex;
+}
+
+.buttonStyle {
+    background: #00acac;
+    color: #fff;
+    width: 16vh;
+    /* border: none; height: 5vh; border-radius: 0.5vh; */
+}
+
+
+/* .cardiv21 {height: 104%; margin-right: 1%; width: 84%; position: absolute; left: 1vh; top: 1vh;
+         } */
+
+.cardiv211 {
+    height: 70%;
+    margin-right: 1%;
+    width: 100%;
+    background-color: white;
+    border-radius: 0.5em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.cardiv212 {
+    text-align: center;
+    font-family: var(--font-type) !important;
+}
+
+.rightOffset {
+    margin-right: 1vh;
+    margin-bottom: 1vh;
+}
+
+.topMenu {
+    width: 100%;
+    background: #f3f0f0;
+    /* top: 14px; */
+    position: absolute;
+    top: 0;
+    height: 15%;
+    border-top-left-radius: 0.5em;
+    border-top-right-radius: 0.5em;
+    display: none;
+}
+
+.topMenuHide {
+    display: none;
+}
+
+.topMenuShow {
+    display: block;
+}
+
+.cardIcon {
+    color: #bbbaba;
+    float: right;
+    font-size: 2.6vh;
+    margin: 0.5vh;
+    margin-left: 2vh;
+}
+
+.cardIcon:active {
+    color: #3657a4;
+}
+
+.samplecard {
+    height: 100%;
+    border-radius: 0.5em;
+}
+
+.cardContainer {
+    height: 36vh;
+    padding-bottom: 9vh;
+}
+
+.cardContent {
+    padding-top: 8%;
+    height: 100%;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 19vh;
+}
+
+.buttonCol {
+    float: right;
+    padding-right: 18.5vh;
+}
+
+
+/* video POP UP */
+
+.fullscreen-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(90, 90, 90, 0.3);
+    z-index: 9999;
+}
+
+#popdiv {
+    height: 300px;
+    width: 420px;
+    /* background-color: #97ceaa; */
+    /* position: fixed; top: 50px; left: 50px; */
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.close {
+    cursor: pointer;
+    border: 1px solid #444;
+    width: 25px;
+    height: 25px;
+    line-height: 24px;
+    border-radius: 20px;
+    text-align: center;
+    /* position: absolute; */
+    right: -8px;
+    top: -28px;
+    background: #e11;
+    color: rgb(0, 0, 0);
+}
+
+
+/* end of video pop up */
+
+
+/* custom tool tip*/
+
+.poppup {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+
+/* The actual popup */
+
+.poppup .popuptext {
+    visibility: hidden;
+    width: 40vh;
+    background-color: #696969;
+    color: #fff;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    font-weight: 100;
+    font-size: 13;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: -190%;
+    margin-left: -80px;
+}
+
+
+/* Popup arrow */
+
+.poppup .popuptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+
+/* Toggle this class - hide and show the popup */
+
+.poppup .show {
+    visibility: visible;
+    -webkit-animation: fadeIn 1s;
+    animation: fadeIn 1s;
+}
+
+
+/* Add animation (fade in the popup) */
+
+@-webkit-keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+
+/*end of custom tool tip*/
+
+
+/* User Task CSS */
+
+.taskButton {
+    margin-left: 17vw;
+    background: none;
+    color: var(--base-color);
+}
+
+.addButton {
+    margin-left: 17vw;
+    background: none;
+    color: var(--base-color);
+}
+
+.data {
+    border-bottom: solid rgb(223, 215, 215);
+    border-bottom-width: thin;
+}
+
+.name {
+    font-weight: bold;
+    margin-top: 3vh;
+    cursor: pointer;
+}
+
+.desc {
+    font-size: 12px;
+    margin: 0;
+}
+
+.iButton {
+    display: flex;
+    flex-direction: row-reverse;
+    margin-right: 1vw;
+}
+
+
+/** DONUT CHART LEGEND - REMOVING LAST LEGEND ELEMENT */
+
+/* .donutLegendStying g.highcharts-legend-item:last-child {
+    visibility: hidden !important;
+} */
+
+.txteditor {
+    display: block;
+    border: 0;
+    border-radius: 8px;
+    box-shadow: none;
+    color: #231f20;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    overflow-wrap: break-word;
+    font-family: var(--font-type) !important;
+}
+
+.editor1 {
+    border: 1px solid #b8b8b8;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.gamificationst0 {
+    fill: var(--base-color);
+}
+
+.gamificationst1 {
+    opacity: 0.2;
+}
+
+.gamificationst2 {
+    fill: #ffffff;
+}
+
+.gamificationst3 {
+    font-family: var(--font-type) !important;
+}
+
+.gamificationst4 {
+    font-size: 16px;
+}
+
+.gamificationst5 {
+    font-family: var(--font-type) !important;
+}
+
+.gamificationst6 {
+    font-size: 12px;
+}
+
+.gamificationst7 {
+    fill: #ff9e03;
+}
+
+.gamificationst8 {
+    fill: #ffcf00;
+}
+
+.gamificationst9 {
+    enable-background: new;
+}
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version.
+*/
+.mat-mdc-radio-label-content,
+.mat-mdc-simple-snackbar,
+.mat-mdc-tab-label,
+.mat-mdc-form-field-label,
+.mat-mdc-expansion-panel-header,
+.mat-mdc-menu-item,
+.mat-mdc-tab-link,
+.mat-mdc-input-element,
+.mat-mdc-option,
+.mat-mdc-paginator,
+.mat-mdc-tab-group,
+.ngx-pagination,
+td.mat-mdc-cell,
+td.mat-mdc-footer-cell,
+th.mat-mdc-header-cell {
+    font-family: var(--font-type) !important;
+}
+
+.contain {
+    background: black;
+    height: 100vh;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
+}
+
+.imgrow {
+    margin-top: 70px;
+}
+
+.colpad {
+    padding-left: 8px !important;
+    text-align: center;
+}
+
+.imgtxt {
+    color: white;
+    font-size: 16px;
+    font-family: var(--font-type) !important;
+}
+
+pre {
+    font-family: var(--font-type) !important;
+}
+
+.icap-ipbtn-outline,
+.totalIncidents,
+.ui-paginator-pages,
+mat-label,
+.mat-mdc-card {
+    font-family: var(--font-type) !important;
+}
+
+.btnmargin2 {
+    margin-top: 16vh !important;
+    margin-left: 2vh !important;
+    overflow: hidden;
+}
+
+
+/* USM tables ellipsis for description */
+
+.list-table {
+    table-layout: fixed;
+}
+
+.td-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* Crud Screen Fa-FA Icons */
+
+.crudfa {
+    margin-left: 1.3rem !important;
+    margin-right: 5px !important;
+}
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version.
+*/
+.mat-mdc-form-field-ripple {
+    background-color: none !important;
+    display: none;
+}
+
+.list-table .number-col-sort .mat-mdc-sort-header-container {
+    justify-content: left;
+    margin-left: 0rem;
+}
+
+.list-table .id-col-sort .mat-mdc-sort-header-container {
+    justify-content: flex-end;
+}
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of button that may no longer apply for the MDC version.
+*/
+.togglebtnwidth .mat-mdc-button-toggle-button {
+    max-width: 25vmin;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    background-color: inherit;
+}
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of button that may no longer apply for the MDC version.
+*/
+.togglebtnwidth .mat-mdc-button-toggle-button div {
+    max-width: 150px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version.
+*/
+.mat-mdc-focused .mat-mdc-form-field-label {
+    color: var(--base-color) !important;
+}
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version.
+*/
+.mat-mdc-form-field-type-mat-mdc-input .mat-mdc-form-field-underline {
+    display: none !important;
+}
+
+.mat-mdc-input-element {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.42) !important;
+}
+
+.notifications-menu {
+    height: 10vh !important;
+    border: 0.1px solid #80808059 !important;
+    display: flex !important;
+    flex-direction: row;
+    font-family: var(--font-type) !important;
+}
+
+.notifications-heading {
+    font-weight: 900 !important;
+    margin-left: 3%;
+    font-family: var(--font-type) !important;
+}
+
+.notifications {
+    display: block;
+    flex-direction: column;
+    font-family: var(--font-type) !important;
+}
+
+.notifyMenuWidth {
+    min-width: 250px !important;
+    font-family: var(--font-type) !important;
+}
+
+.notifications-msg {
+    height: 5.5vh;
+    width: 15vw;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: bold;
+    overflow: hidden;
+    font-family: var(--font-type) !important;
+    margin-bottom: 6px;
+}
+
+.forgotRegister {
+    width: 100%;
+    margin-top: 3.5vh;
+    color: rgba(0, 0, 0, 0.6);
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.forgotRegister a {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+#FP:hover {
+    color: var(--base-color);
+}
+
+#NU:hover {
+    color: var(--base-color);
+}
+
+
+/* Register New User Additional css Starts*/
+
+.example-container-register-new-user {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.fadeBGRegisterNewUser {
+    background-color: white;
+    height: 80vh;
+    width: 60vw;
+}
+
+app-register-new-user .registerFormConatinerPadding {
+    padding-left: 20vw;
+    padding-top: 10vh;
+}
+
+
+/* font soxe changes */
+
+app-register-new-user .fontSizeChange {
+    font-size: 2.25vmin;
+}
+
+
+/* mat form field css */
+
+app-register-new-user .matFormFieldGeneralCss {
+    width: -webkit-fill-available;
+    max-width: 85%;
+}
+
+
+/* mat card actions button */
+
+app-register-new-user .minimunHeightForButtonSection {
+    min-height: 4vmin;
+}
+
+
+/* main tab's label */
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
+*/
+app-register-new-user .mat-mdc-tab-label,
+.mat-mdc-tab-link {
+    font-size: 2.25vmin !important;
+}
+
+
+/* main tab's label */
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
+*/
+app-register-new-user .mat-mdc-tab-label {
+    height: 3vmin;
+}
+
+
+/* main tab's label section height */
+
+app-register-new-user .mat-mdc-tab-header {
+    height: 7.5vmin;
+}
+
+
+/* main tab's label section alignment */
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
+*/
+app-register-new-user .mat-mdc-tab-labels {
+    height: -webkit-fill-available;
+    align-items: center;
+}
+
+
+/* main tab's label section left and right arrows section */
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
+*/
+app-register-new-user .mat-mdc-tab-header-pagination {
+    width: 5%;
+}
+
+
+/* main tab's label section left and right arrows size */
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
+*/
+app-register-new-user .mat-mdc-tab-header-pagination-chevron {
+    height: 2.25vmin;
+    width: 2.25vmin;
+}
+
+app-register-new-user .mat-mdc-form-field {
+    line-height: normal !important
+}
+
+
+/* Register New User Additional css ends*/
+
+.loginback {
+    margin-top: 2vh;
+    text-align: center;
+    color: rgba(0, 0, 0, .6);
+    cursor: pointer;
+}
+
+.loginback:hover {
+    color: var(--base-color);
+}
+
+.pwdhide {
+    float: right;
+    color: black;
+    margin-right: -4vh;
+    margin-top: -0.5vh;
+}
+
+.pwdhidereg {
+    float: right;
+    color: black;
+    margin-right: -4vh;
+    margin-top: -2.6vh;
+}
+
+.exportDrop {
+    margin-top: 2vh;
+}
+
+.exportDropUp {
+    padding: 1vh;
+    border-bottom: 1px solid lightgray;
+    cursor: pointer;
+}
+
+.exportDropDown {
+    padding: 1vh;
+    cursor: pointer;
+    line-height: normal !important;
+    height: auto !important;
+}
+
+.incidenttickets {
+    width: 100%;
+    text-align: center;
+}
+
+.svyerrormsg {
+    min-width: 0 !important;
+}
+
+.newdashlabel {
+    width: 75%;
+    text-align: left;
+}
+
+.editdashlabel {
+    width: 55%;
+    text-align: left;
+}
+
+.yammerMenuWidth {
+    min-width: 100px !important;
+    font-family: var(--font-type) !important;
+}
+
+.yammer-menu {
+    height: 8vh !important;
+    border: 0.1px solid #80808059 !important;
+    display: flex !important;
+    flex-direction: row;
+    font-family: var(--font-type) !important;
+}
+
+.yammer-submenus {
+    height: 5.5vh;
+    width: 150px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: bold;
+    overflow: hidden;
+    font-family: var(--font-type) !important;
+    margin-bottom: 6px;
+    margin-left: 20px;
+}
+
+.tool-label {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 90%;
+}
+
+
+/* For alignment in CRUD screens */
+
+.list-table td.mat-mdc-cell,
+td.mat-mdc-footer-cell {
+    text-align: left;
+    padding-left: 20px;
+}
+
+.list-table .number-col,
+.list-table th.number-col {
+    text-align: right !important;
+    padding-right: 30px;
+}
+
+.list-table th {
+    text-align: left !important;
+    padding-left: 20px !important;
+}
+
+@media screen and (max-width:640px) {
+
+    .list-table .number-col,
+    .list-table th.number-col {
+        padding-right: 0px !important;
+    }
+
+    .mat-mdc-paginator-range-label {
+        margin: 0px !important;
+    }
+}
+
+@media screen and (max-width:780px) {
+    .list-table th {
+        padding-left: 0px !important;
+        width: 50px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+}
+
+@media screen and (max-width:550px) {
+    .mat-mdc-paginator-range-actions {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width:640px) {
+    .backIconcrud {
+        height: 15px !important;
+    }
+}
+
+@media screen and (max-width:279px) {
+    .imgDash {
+        padding-left: 38% !important;
+    }
+}
+
+@media screen and (max-width:340px) and (min-width: 280px) {
+    .imgDash {
+        padding-left: 25% !important;
+    }
+}
+
+@media screen and (max-width:490px) {
+    .crudMobileEditBack {
+        display: none !important;
+    }
+
+    .card-div1-mat3 {
+        margin: 20px 0px 0px 9px !important;
+    }
+
+    .card-div1-mat2 {
+        margin-left: 10px !important;
+    }
+}
+
+@media screen and (max-width:321px) {
+    .crudMobileFilter {
+        height: 60px !important;
+    }
+}
+
+.list-table .actions-col,
+.list-table th.actions-col {
+    text-align: center !important;
+}
+
+/* Documents Screen CSS */
+
+.doc-file-input {
+    margin-left: -0.10rem !important;
+    width: 96px;
+    border-bottom: none !important;
+    margin-top: -3px;
+    display: -webkit-box !important;
+    display: -moz-box !important;
+}
+
+.doc-file-label {
+    position: absolute;
+    top: 50%;
+    left: 112px;
+    max-width: 67%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+
+/* CRUD screen header CSS */
+
+.crud-header {
+    color: black !important;
+    font-weight: 700 !important;
+}
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of checkbox that may no longer apply for the MDC version.
+*/
+.mat-mdc-checkbox-indeterminate.mat-mdc-accent .mat-mdc-checkbox-background,
+.mat-mdc-checkbox-checked.mat-mdc-accent .mat-mdc-checkbox-background {
+    background-color: var(--base-color);
+}
+
+.mat-mdc-accent .mat-mdc-pseudo-checkbox-checked,
+.mat-mdc-accent .mat-mdc-pseudo-checkbox-indeterminate,
+.mat-mdc-pseudo-checkbox-checked {
+    background-color: var(--base-color) !important;
+}
+
+
+/* CSS for word wrap in mat tooltip */
+
+.crud-tooltip {
+    word-break: break-all !important;
+    white-space: normal !important;
+}
+
+.td-span.td-ellipsis {
+    /* padding: 14px 0; */
+    max-width: 100%;
+}
+
+.mat-step-header .mat-step-icon-selected,
+.mat-step-header .mat-step-icon-state-done,
+.mat-step-header .mat-step-icon-state-edit {
+    background-color: var(--base-color) !important;
+}
+
+.registerPage.mat-grid-tile .mat-figure {
+    margin-left: 5% !important;
+    justify-content: left !important;
+}
+
+.mat-nav a:hover {
+    color: var(--text-color);
+}
+
+@media screen and (max-width:780px) {
+    .responsive-my-applications {
+        flex-wrap: wrap !important
+    }
+
+    .my-applications-align-responsive {
+        line-height: 4vh !important;
+        justify-content: center;
+        height: 50px !important;
+    }
+
+    .my-applications-font-responsive {
+        font-size: 16px !important;
+    }
+
+    .card-div1-land {
+        flex-direction: column !important;
+        height: unset !important;
+    }
+
+    .card-div1-mat3 {
+        width: 95% !important
+    }
+
+    .card-div1-mat2 {
+        width: 95% !important;
+        margin-left: 25px !important;
+    }
+
+    .card-div1-mat1 {
+        width: 95% !important
+    }
+
+    .gamificationMobile {
+        width: 150px !important;
+        min-width: 114px !important;
+    }
+}
+
+.my-applications-align-responsive {
+    top: unset !important;
+    line-height: unset;
+}
+
+.gamificationMobile {
+    width: auto;
+}
+
+@media screen and (min-width: 2000px) {
+
+    .slaLabel {
+        margin: unset !important;
+        margin-top: 25px !important;
+        text-align: center;
+        font-size: 2.5vmin !important;
+    }
+
+    .slaCount {
+        margin: unset !important;
+        margin-top: 60px !important;
+        text-align: center;
+        font-size: 2.5vmin !important;
+    }
+
+    .sidebarTextFont {
+        height: 2vh !important;
+    }
+
+    .childsidebarText {
+        height: 30px !important;
+    }
+
+    .tabsBox {
+        height: 3vh !important;
+    }
+
+    .fontSize {
+        font-size: 2.5vmin !important;
+    }
+    /*
+TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
+*/
+    .tab .mat-mdc-tab-label {
+        font-size: 2.5vmin !important;
+    }
+
+    .topdocs {
+        font-size: 2.5vmin !important;
+    }
+
+    .numberstyle {
+        font-size: 2.5vmin !important;
+    }
+
+    .icon-size {
+        font-size: 2.5vmin !important;
+    }
+
+    .font {
+        font-size: 2.5vmin !important;
+    }
+
+    .card-div1-land {
+        height: 300px !important;
+    }
+
+    .imageView {
+        height: 100px !important;
+    }
+
+    #titleCss {
+        font-size: 2.5vmin !important;
+        padding-top: 20px !important;
+    }
+
+    #pointCss {
+        font-size: 2.5vmin !important;
+        padding-top: 20px !important;
+    }
+}
+
+
+@media screen and (max-width:5000px) and (min-width: 3000px) {
+
+    .card-div1-mat2 {
+        width: 70% !important;
+    }
+
+    .sla {
+        margin: unset !important;
+    }
+
+    .slaLabel {
+        margin: unset !important;
+        margin-top: 25px !important;
+        text-align: center;
+        font-size: 2.2vmin !important;
+    }
+
+    .slaCount {
+        margin: unset !important;
+        margin-top: 25px !important;
+        text-align: center;
+        font-size: 2.2vmin !important;
+    }
+
+    .sidebarTextFont {
+        height: 55px !important;
+    }
+
+    .childsidebarText {
+        height: 55px !important;
+    }
+
+    .tabsBox {
+        height: 75px !important;
+    }
+
+    .fontSize {
+        font-size: 2.5vmin !important;
+    }
+    /*
+TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.
+*/
+    .tab .mat-mdc-tab-label {
+        font-size: 2.5vmin !important;
+    }
+
+    .topdocs {
+        font-size: 2.5vmin !important;
+    }
+
+    .numberstyle {
+        font-size: 2.5vmin !important;
+    }
+
+    .icon-size {
+        font-size: 2.5vmin !important;
+    }
+
+    .font {
+        font-size: 2.5vmin !important;
+    }
+
+    .card-div1-land {
+        height: 400px !important;
+    }
+
+    .imageView {
+        height: 150px !important;
+    }
+
+    #titleCss {
+        font-size: 2.5vmin !important;
+        padding-top: 40px !important;
+    }
+
+    #pointCss {
+        font-size: 2.5vmin !important;
+        padding-top: 40px !important;
+    }
+
+    .tab {
+        height: calc(100vh - 650px) !important;
+        margin: 0px 25px !important;
+    }
+}
+
+
+/*
+TODO(mdc-migration): The following rule targets internal classes of select that may no longer apply for the MDC version.
+*/
+/* .mat-mdc-select-arrow {
+    border-left: 1vmin solid transparent !important;
+    border-right: 1vmin solid transparent !important;
+    border-top: 1vmin solid !important;
+} */
+
+lib-theme-mgmt .p-fieldset.p-fieldset-toggleable .p-fieldset-legend a .p-fieldset-toggler,
+lib-theme-mgmt .p-fieldset.p-fieldset-toggleable .p-fieldset-legend a {
+    font-size: 2vmin;
+}
+
+@media screen and (max-width: 550px) {
+
+    /* .sidebarbgcolordefault {
+        width: 10vw !important;
+    } */
+    /*
+TODO(mdc-migration): The following rule targets internal classes of card that may no longer apply for the MDC version.
+*/
+    .mat-mdc-card-header-text {
+        margin: unset !important;
+    }
+}
+
+.ui.visible[class*="very thin"].right.sidebar~.fixed,
+.ui.visible[class*="very thin"].right.sidebar~.pusher {
+    transform: translate3d(-8vmin, 0, 0) !important;
+}
+
+.ui[class*="very thin"].left.sidebar,
+.ui[class*="very thin"].right.sidebar {
+    width: 8vmin !important;
+}
+
+.dynamic-dashboard-icon {
+    font-size: 2.25vmin !important;
+}
+
+.sidebarTextFont {
+    /* font-family: UniversLTStd, Arial; */
+    font-family: var(--font-type) !important;
+}
+
+lib-dashboard .mat-drawer-inner-container {
+    overflow-x: hidden !important;
+}
+
+.mat-drawer::-webkit-scrollbar-track {
+    border: 1px solid var(--header-color);
+    padding: 2px 0;
+    background-color: var(--header-color);
+}
+
+.mat-drawer::-webkit-scrollbar {
+    width: 10px;
+}
+
+.mat-drawer::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+    background-color: var(--header-color);
+    border: 1px solid var(--header-color);
+}
+
+.mat-drawer-inner-container::-webkit-scrollbar-track {
+    border: 1px solid #dfdfdf;
+    padding: 2px 0;
+    background: #eee;
+}
+
+.mat-drawer-inner-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.mat-drawer-inner-container::-webkit-scrollbar-thumb {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+    background-color: #bebfbf;
+    border-radius: 10px;
+    border: 1px solid #bebfbf;
+}
+
+.sidebar-svg-itemImg svg {
+    height: inherit;
+    width: inherit;
+}
+
+.modal .modal-body::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.modal .modal-body::-webkit-scrollbar-thumb {
+    background-color: #bebfbf;
+}
+
+.paddingBottom {
+    padding-bottom: 45px;
+}
+
+lib-version-info .mat-mdc-tab{
+    font-size: 1vw !important;
+}
+
+.projectArrow{
+    font-size: var(--headerTextSize) !important;
+}
+.projectArrow .mat-mdc-form-field{
+    min-width: var(--projectDetailsDropdown) !important;
+}
+.option1.mat-mdc-option .mdc-list-item__primary-text{
+    font-size: var(--headerTextSize) !important;
+}
+.option1 .mat-mdc-select-arrow, .option1 svg{
+    font-size: 1.33em;
+    width: 1.33em;
+    height: 1.33em;
+}
+
+.matOptionPopup.mat-mdc-select-panel{
+    max-height: var(--popup-max-height);
+}

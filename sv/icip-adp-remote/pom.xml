@@ -1,0 +1,245 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.infosys.icets.ai</groupId>
+		<artifactId>aip</artifactId>
+		<version>3.3-SNAPSHOT</version>
+	</parent>
+	<groupId>com.infosys.icets.icip.plugins</groupId>
+	<artifactId>icip-adp-remote</artifactId>
+	<name>icip-adp-remote</name>
+	<properties>
+		<main.basedir>${project.parent.basedir}</main.basedir>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.infosys.icets.icip</groupId>
+			<artifactId>icip-lib-mod</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.infosys.icets.icip</groupId>
+			<artifactId>icip-lib-adp</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.infosys.icets.ai</groupId>
+			<artifactId>comm-lib-secrets</artifactId>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-actuator-autoconfigure -->
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-actuator-autoconfigure</artifactId>
+		    <version>3.0.6</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-config -->
+		<dependency>
+		    <groupId>org.springframework.security</groupId>
+		    <artifactId>spring-security-config</artifactId>
+		    <version>6.1.2</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.liquibase/liquibase-core -->
+		<dependency>
+		    <groupId>org.liquibase</groupId>
+		    <artifactId>liquibase-core</artifactId>
+		    <version>4.8.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/net.minidev/json-smart -->
+		<dependency>
+		    <groupId>net.minidev</groupId>
+		    <artifactId>json-smart</artifactId>
+		    <version>2.4.9</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.projectreactor.netty/reactor-netty-http -->
+		<dependency>
+		    <groupId>io.projectreactor.netty</groupId>
+		    <artifactId>reactor-netty-http</artifactId>
+		    <version>1.1.13</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+		    <groupId>org.json</groupId>
+		    <artifactId>json</artifactId>
+		    <version>20231013</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-core -->
+		<dependency>
+		    <groupId>org.apache.tomcat.embed</groupId>
+		    <artifactId>tomcat-embed-core</artifactId>
+		    <version>10.1.16</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.netty/netty-codec-http2 -->
+		<dependency>
+		    <groupId>io.netty</groupId>
+		    <artifactId>netty-codec-http2</artifactId>
+		    <version>4.1.100.Final</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/net.minidev/json-smart -->
+		<dependency>
+		    <groupId>net.minidev</groupId>
+		    <artifactId>json-smart</artifactId>
+		    <version>2.4.9</version>
+		</dependency>
+	
+		
+		<!-- https://mvnrepository.com/artifact/org.springframework/spring-webmvc -->
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-webmvc</artifactId>
+		    <version>6.0.14</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+		<dependency>
+		    <groupId>ch.qos.logback</groupId>
+		    <artifactId>logback-classic</artifactId>
+		    <version>1.4.12</version>
+		    <scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-core -->
+		<dependency>
+		    <groupId>ch.qos.logback</groupId>
+		    <artifactId>logback-core</artifactId>
+		    <version>1.4.12</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.nimbusds/nimbus-jose-jwt -->
+		<dependency>
+		    <groupId>com.nimbusds</groupId>
+		    <artifactId>nimbus-jose-jwt</artifactId>
+		    <version>9.37.2</version>
+		</dependency>
+		
+		
+		<!-- https://mvnrepository.com/artifact/io.netty/netty-codec-http -->
+		<dependency>
+		    <groupId>io.netty</groupId>
+		    <artifactId>netty-codec-http</artifactId>
+		    <version>4.1.86.Final</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.netty/netty-codec-http2 -->
+		<dependency>
+		    <groupId>io.netty</groupId>
+		    <artifactId>netty-codec-http2</artifactId>
+		    <version>4.1.100.Final</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.netty/netty-handler -->
+		<dependency>
+		    <groupId>io.netty</groupId>
+		    <artifactId>netty-handler</artifactId>
+		    <version>4.1.100.Final</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/io.projectreactor.netty/reactor-netty-http -->
+		<dependency>
+		    <groupId>io.projectreactor.netty</groupId>
+		    <artifactId>reactor-netty-http</artifactId>
+		    <version>1.1.13</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/net.minidev/json-smart -->
+		<dependency>
+		    <groupId>net.minidev</groupId>
+		    <artifactId>json-smart</artifactId>
+		    <version>2.4.9</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.james/apache-mime4j-core -->
+		<dependency>
+		    <groupId>org.apache.james</groupId>
+		    <artifactId>apache-mime4j-core</artifactId>
+		    <version>0.8.10</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-core -->
+		<dependency>
+		    <groupId>org.apache.tomcat.embed</groupId>
+		    <artifactId>tomcat-embed-core</artifactId>
+		    <version>11.0.0-M12</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-web</artifactId>
+		    <version>3.1.6</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-autoconfigure -->
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-autoconfigure</artifactId>
+		    <version>3.0.7</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework/spring-web -->
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-web</artifactId>
+		    <version>6.1.4</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-core -->
+		<dependency>
+		    <groupId>org.springframework.security</groupId>
+		    <artifactId>spring-security-core</artifactId>
+		    <version>6.0.3</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework/spring-expression -->
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-expression</artifactId>
+		    <version>6.0.8</version>
+		</dependency>
+
+	
+		
+
+
+
+
+
+	
+
+
+
+		
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<outputDirectory>${project.build.directory}/plugin</outputDirectory>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<finalName>mlflow-plugin-${project.version}</finalName>
+					<appendAssemblyId>false</appendAssemblyId>
+					<descriptors>
+						<descriptor>assembly.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

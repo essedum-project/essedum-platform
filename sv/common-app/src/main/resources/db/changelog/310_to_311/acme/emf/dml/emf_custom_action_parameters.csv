@@ -1,0 +1,66 @@
+"id","param_name","param_datatype","custom_action_id","default_value"
+"206","code","string","5",""
+"207","code","string","6",""
+"208","product_features","string","7",""
+"217","requirement_text","string","2","build a login component with angular front end and springboot backend using oauth based authentication for enterprise applications"
+"233","product_features","string","4","Generate code using angular for front end and springboot for backend for a login module to be part of an enterprise application with the following product features
+Login:
+* Users can log in to the application using their enterprise credentials.
+* The login component is implemented using Angular.
+* The backend is implemented using Spring Boot.
+* The application uses OAuth 2.0 for authentication.
+* The application uses a centralized user directory for authentication.
+* The application supports single sign-on (SSO).
+* The application supports multi-factor authentication (MFA).
+* **Application List:**
+* Users can see a list of all the applications they have access to.
+* **Application Launch:**
+* Users can launch any of the applications they have access to.
+* **Scalability:**
+* The application is scalable to support a large number of users.
+* **High Availability:**
+* The application is highly available.
+* **Security:**
+* The application is secure.
+* **Ease of Use:**
+* The application is easy to use.
+* **Documentation:**
+* The application is well-documented.
+* **Agile Development:**
+* The application is developed using agile development methodologies.
+* **Automated Testing:**
+* The application is tested using automated testing tools.
+* **CI/CD Pipelines:**
+* The application is deployed using continuous integration and continuous deployment (CI/CD) pipelines.
+* **Centralized Monitoring:**
+* The application is monitored using a centralized monitoring system.
+* **Dedicated Support:**
+* The application is supported by a dedicated support team."
+"234","technology","string","4","java springboot, angular"
+"291","shortDescription","string","80","{\"content\":\"Process_Invoice_Id:19990\"}"
+"300","name","string","81","{
+    \"names\": [
+        \"Arun\",
+        \"Ajay\",
+        \"Krish\"
+    ]
+}"
+"305","ticketDetails","string","75","NULL"
+"350","prompt","string","53","given the information {ticketcontent} about a ticket from I want you to generate :\\n    \\n1. Summary basing on the whole information given.\\n    \\n2. A short summary on SLA Timeline\\n    \\n3. A short summary on Resolution and worknotes\\n    \\n5. A short summary on Priority and urgency\\n    \\n6. A short summary on created_by, assignmentgroup and assignedto\\n    \\n7. A short summary on Current Status"
+"351","promptParam1","string","53","\"Process Invoice No -113213 for customer id 23213\""
+"361","ticketId","string","29","INC0065735"
+"362","shortDescriptionText","string","71","Process Invoice"
+"363","shortDescriptionText","string","78","CPU Utilization issues"
+"366","prompt","string","68","Based on this customer message {ticketcontent}, draft a response. To assess the candidate's ability to draft a first response, we were looking for the following:\\n        An understanding of the issue raised by the customer\\n        A clear and concise response that addresses the issue\\n        A polite and professional tone\\n        A clear call to action.\\n        If the provided context doesn't provide enough information, you are allowed to use your knowledge and experience to offer you the best possible assistance."
+"367","promptParam1","string","68","\"Process Invoice No -113213 for customer id 23213\""
+"368","prompt","string","51","Categories are:        1. Data        2. Business Application & Databases        3. Consumer Solutions and Data        4. Customer Solutions        Categorize this support ticket: {ticketcontent}. Return the Category in the following template: ```Category: ___\\nExplanation: ____```"
+"369","promptParam1","string","51","\"Process Invoice No -113213 for customer id 23213\""
+"370","prompt","string","69","P1 - Critical: Critical issues are the highest priority issues and should be fixed as soon as possible. These issues cause a significant impact on the business or end-users, and the system is unusable or data is lost. The resolution time for critical issues should be within 24 hours.\\nP2 - High: High priority issues are those that are important but do not cause a significant impact on the business or end-users. These issues are important to fix but can wait for a few days.\\nP3 - Medium: Medium priority issues are those that are not critical or high priority but still need to be addressed. These issues do not have a significant impact on the business or end-users, and the system is still usable. The resolution time for medium priority issues should be within a week.\\nP4 - Low: Low priority issues are those that have a minor impact on the business or end-users. These issues are not critical and can be fixed later. The resolution time for low priority issues should be within a few weeks.\\nP5 - Lowest: Lowest priority issues are those that have the least impact on the business or end-users. These issues are not critical and can be fixed at a later time. The resolution time for lowest priority issues should be within a few months.\\nAnalyze the urgency of this issue: {ticketcontent}. What priority level(P1, P2, P3, P4 and P5) should it be assigned? Return the priority in the following template: ``` Priority: ___\\nExplanation: ____```"
+"371","promptParam1","string","69","\"Process Invoice No -113213 for customer id 23213\""
+"374","id","integer","94","null"
+"375","ticketId","string","72","INC0066400"
+"376","prompt","string","52","Determine the named entites of this customer message: {ticketcontent}. Return  'named_entities' as key value pairs.Do not add any additional messages, notes or explanations or formatting. If the provided context doesn't provide enough information, you are not allowed to use your knowledge hence write a best message to offer the best possible assistance."
+"377","promptParam1","string","52","CPU utilization is high"
+"379","requirement_spec","string","3","**Age Calculator System Requirement Specification**\\n\\n**Document ID:** ACS-RS-001\\n**Version:** 1.0\\n**Date:** 26 Jul 2024\\n**Author:** [Your Name]\\n\\n**Introduction:**\\n\\nThe Age Calculator System is designed to calculate the age of an individual based on their birthdate and the current date. This system aims to provide an accurate and user-friendly age calculation experience.\\n\\n**User Requirements:**\\n\\n1. **Age Calculation**:\\n\\t* The system shall calculate the age of an individual in years, months, and days.\\n\\t* The system shall accept the birthdate as input from the user.\\n\\t* The system shall use the current date to calculate the age.\\n2. **User Interface**:\\n\\t* The system shall have a simple and intuitive user interface.\\n\\t* The system shall display the calculated age in a clear and concise manner.\\n3. **Input Validation**:\\n\\t* The system shall validate the input birthdate to ensure it is in the correct format (DD/MM/YYYY).\\n\\t* The system shall handle invalid input dates (e.g., February 30).\\n4. **Error Handling**:\\n\\t* The system shall display an error message when an invalid input date is entered.\\n\\t* The system shall provide a clear and concise error message.\\n\\n**Functional Requirements:**\\n\\n1. **Age Calculation Algorithm**:\\n\\t* The system shall use the following algorithm to calculate the age:\\n\\t\\t+ Calculate the difference between the current date and the birthdate in years.\\n\\t\\t+ Calculate the difference between the current date and the birthdate in months.\\n\\t\\t+ Calculate the difference between the current date and the birthdate in days.\\n2. **Input Processing**:\\n\\t* The system shall process the input birthdate and convert it into a date object.\\n\\t* The system shall use the date object to calculate the age.\\n3. **Output Generation**:\\n\\t* The system shall generate the calculated age in years, months, and days.\\n\\t* The system shall display the calculated age in a clear and concise manner.\\n\\n**Non-Functional Requirements:**\\n\\n1. **Performance**:\\n\\t* The system shall respond to user input within 2 seconds.\\n\\t* The system shall calculate the age accurately and efficiently.\\n2. **Security**:\\n\\t* The system shall not store any user data.\\n\\t* The system shall not transmit any user data over the network.\\n3. **Usability**:\\n\\t* The system shall be easy to use and navigate.\\n\\t* The system shall provide clear and concise instructions for user input.\\n4. **Compatibility**:\\n\\t* The system shall be compatible with modern web browsers (e.g., Google Chrome, Mozilla Firefox).\\n\\t* The system shall be compatible with different operating systems (e.g., Windows, macOS, Linux).\\n5. **Maintainability**:\\n\\t* The system shall be easy to maintain and update.\\n\\t* The system shall follow standard coding practices and conventions.\\n6. **Scalability**:\\n\\t* The system shall be able to handle a large number of users.\\n\\t* The system shall be able to handle a large number of calculations.\\n\\n**Assumptions and Dependencies:**\\n\\n1. **Date and Time Library**:\\n\\t* The system shall use a reliable date and time library to handle date calculations.\\n2. **User Input**:\\n\\t* The system shall assume that the user will enter a valid birthdate.\\n\\n**Acceptance Criteria:**\\n\\n1. **Age Calculation**:\\n\\t* The system calculates the age accurately in years, months, and days.\\n\\t* The system handles invalid input dates correctly.\\n2. **User Interface**:\\n\\t* The system displays the calculated age in a clear and concise manner.\\n\\t* The system provides a simple and intuitive user interface.\\n3. **Input Validation**:\\n\\t* The system validates the input birthdate correctly.\\n\\t* The system handles invalid input dates correctly.\\n\\n**"
+"380","shortDescriptionText","string","76","Application is down, not able to connect"
+"381","ticketId","string","70","INC0065735"

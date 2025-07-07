@@ -1,0 +1,472 @@
+<div class="row">
+    <div class="col-lg-12">
+        <div class="lfx-l-level1-middle-col">
+            <div class="lfx-l-level2-middle-ctr">
+                <div class="lfx-l-level2-middle-col">
+                    <div class="align-items-center justify-content-between d-flex">
+                        <div class="selector-model-title-head d-flex  align-items-center">
+                            <div class="d-flex justify-content-end" [hidden]="inGroupedJob" *ngIf="initiativeView">
+                                <span class="">
+                                    <i class="fa fa-long-arrow-left back-icon" aria-hidden="true"
+                                        (click)="navigateBack()"></i>
+                                </span>
+                            </div>
+                            <span class=" aip-desc-title lfx-u-header-xxl"><span style=" color: #737373;;">Pipeline:
+                                </span>{{pipelineAlias | titlecase}} </span>
+                        </div>
+                        <div class=" selector-model-title-tail">
+                            <ul class="d-flex justify-content-between align-items-center py-2 px-4">
+                                <li class="aip-cursor li-style" style="padding: 5px 13px 2px 0px;"
+                                    (click)="openModal(content4)">
+                                    <span matTooltip="{{addTags}}" [matTooltipPosition]="tooltipPoition"
+                                        class="aip-led-icons">                                    
+                                          
+                                            <svg style="color:black" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                fill="currentColor" class="bi bi-tag" viewBox="0 0 16 16">
+                                                <path
+                                                    d="M6 4.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm-1 0a.5.5 0 1 0-1 0 .5.5 0 0 0 1 0z" />
+                                                <path
+                                                    d="M2 1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 1 6.586V2a1 1 0 0 1 1-1zm0 5.586 7 7L13.586 9l-7-7H2v4.586z" />
+                                            </svg>
+                                        
+                                    </span>
+                                    <ng-template #content4 let-modal>
+                                        <app-tags [data]=card [entityType]="entity"
+                                            [componentType]="'pipelines'"></app-tags>
+                                    </ng-template>
+                                </li>
+                                <li class="li-style">
+                                    <span matTooltip="Save" [matTooltipPosition]="tooltipPoition">
+                                        <mat-icon class="lfx-u-mar-r-16 aip-led-icons" (click)="saveJson(true)">save</mat-icon>
+                                    </span>
+                                </li>
+                                <li class="li-style">
+                                    <span matTooltip="Duplicate" [matTooltipPosition]="tooltipPoition">
+                                      
+                                        <mat-icon class="lfx-u-mar-r-16 aip-led-icons" (click)="copyPipeline()">content_copy</mat-icon>
+                                    </span>
+                                </li>
+                    
+                                <li class="li-style">
+                                    <span matTooltip="Start" [matTooltipPosition]="tooltipPoition">
+                                        <mat-icon class="lfx-u-mar-r-16 aip-led-icons" (click)="runScript()">play_arrow</mat-icon>
+                                    </span>
+                                </li>
+                       
+                                <li class="li-style" (click)="expandCollapse()" *ngIf="!isExpand && initiativeView">
+                                    <span matTooltip="Maximize" [matTooltipPosition]="tooltipPoition">
+                                        <mat-icon class="lfx-u-mar-r-16 aip-led-icons" style="font-size: 24px;">fullscreen</mat-icon>
+                                    </span>
+                                </li>
+                                <li class="li-style" (click)="expandCollapse()" *ngIf="isExpand  && initiativeView">
+                                    <span matTooltip="Minimize" [matTooltipPosition]="tooltipPoition">
+                                        <mat-icon class="lfx-u-mar-r-16 aip-led-icons" style="font-size: 24px;">fullscreen_exit</mat-icon>
+                                    </span>
+                                </li>
+                    
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div ledsTabGroup class="lfx-u-mar-t-16 mx-4 px-5 my-4 mt-0 aip-panel-shadow"
+                        style="background-color: white;">
+                        <mat-tab-group disableRipple (selectedIndexChange)="basicReqTabChange($event)">
+                            <mat-tab class="lfx-u-header-xl" label="Model">
+                                <ng-template mat-tab-label>Canvas</ng-template>
+                            </mat-tab>
+                            <mat-tab class="lfx-u-header-xl" label="Pipeline Configuration">
+                                <ng-template mat-tab-label>Configuration</ng-template>
+                            </mat-tab>
+                            <mat-tab class="lfx-u-header-xl" label="Scripts">
+                                <ng-template mat-tab-label>Scripts</ng-template>
+                            </mat-tab>
+                            <mat-tab class="lfx-u-header-xl" label="Jobs">
+                                <ng-template mat-tab-label>Jobs</ng-template>
+                            </mat-tab>
+
+                        </mat-tab-group>
+                        <div *ngIf="basicReqTab == 'modelsTab'">
+                            <div *ngIf="!plugin || (plugin && plugin?.editortype=='jsplumb')" class="tab_content"
+                                id="tabContent_0">
+                                <br>
+                                <div class="selector-773-6">
+
+                                    <div class="jtk-demo-canvas jtk-droppable col-12 no-padd selector-773-7"
+                                        style="width:100%;height:100%;display: flex;flex-wrap: wrap;">
+                                        <div class="jtk-surface-canvas1 col-10 no-padd selector-773-8">
+                                            <span matTooltip="Pan Mode" [matTooltipPosition]="tooltipPoition">
+                                                <i class="fa fa-arrows x-16 aip-cursor mx-2"
+                                                    [ngClass]="{'selected-mode': canvasMode === 'pan'}"
+                                                    (click)="toggleCanvasMode()"></i>
+                                            </span>
+                                            <div class="position-relative selector-773-18"
+                                                style="width:100%;display: flex;flex-wrap: wrap;">
+                                                <div class="pipeline-canvas col-12 no-padd selector-773-19"
+                                                    (mousewheel)="canvasMode === 'pan' &amp;&amp; resizeContent($event)"
+                                                    (mousedown)="canvasMode === 'pan' &amp;&amp; mousedown($event)"
+                                                    (mousemove)="canvasMode === 'pan' &amp;&amp; mousemove($event)"
+                                                    (mouseup)="canvasMode === 'pan' &amp;&amp; mouseup($event)">
+                                                    <div id="canvas" class="dnd_panel selector-773-20"
+                                                        style="width:100%;"
+                                                        [style.cursor]="canvasMode === 'pan'?'-webkit-grab':''">
+                                                        <div dropTarget (treeDrop)="onDrop($event)" #currentDiv
+                                                            style="transform-origin: 0% 0% 0px; transform: scale(0.9);"
+                                                            class="mlCanvas jtk-demo-canvas canvas-wide flowchart-demo drop-target selector-773-21"
+                                                            style="position:relative;margin-left: -5em;scale: 0.9;"
+                                                            id="mlCanvasId">
+                                                            <div *ngFor="let element of newCanvas.elements"
+                                                                class="selector-773-22">
+                                                                <app-js-node [element]="element"
+                                                                    [pipelineArg]="pipeline_attributes"
+                                                                    [name]="element.name" (delete)="onDelete($event)"
+                                                                    (save)="onSave($event)" class="selector-773-23">
+                                                                </app-js-node>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-2 no-padd selector-773-24">
+                                            <div class="pipeline-filters selector-773-25"
+                                                style="height:70vh; overflow: scroll; padding: 10px; border:2px groove; box-shadow:5px #888888; border-radius: 10px;">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div class="Nodes1"><label>&nbsp;Nodes</label></div>
+
+                                                </div><br>
+                                                <div class="search-node selector-773-27" style="width:100%">
+                                                    <div class="input-group ">
+                                                        <input id="filter"
+                                                            class="form-control selector-773-28 pipeline-input"
+                                                            #filter=""
+                                                            (keyup)="tree.treeModel.filterNodes(filter.value)"
+                                                            placeholder="Search Nodes" />
+                                                        <div class="pipeline-search">
+                                                            <i class="fa fa-search"></i>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                <div class="selector-773-29 ">
+                                                    <tree-root #tree="" [focused]="true" [options]="options"
+                                                        [nodes]="nodes" class="selector-773-30 aip-fullname-card">
+                                                    </tree-root>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="backdrop" *ngIf="load == true" fxLayout="row" fxLayoutAlign="center center">
+
+                                    <mat-spinner></mat-spinner>
+                                </div>
+                            </div>
+                            <app-draw-flow *ngIf="plugin?.editortype=='drawflow' && streamItem.alias=='Drawflow'"
+                                [pipelineDetails]="streamItem"></app-draw-flow>
+                        </div>
+                        <div *ngIf="basicReqTab == 'pipelineConfigTab'">
+                            <div ledsTabGroup class="lfx-u-mar-t-16 mx-4 px-5 my-4 mt-0"
+                                style="background-color: white;">
+                                <mat-tab-group disableRipple>
+                                    <mat-tab label="Attributes" class="lfx-u-header-xl">
+                                        <div class="tab_content mb-5" id="tabContent_1">
+                                            <div class="config-container" style="margin-bottom: 6.6rem;">
+                                                <app-app-config [configData]="dynamicParamsArray" [isauth]="isAuth"
+                                                    (configDataChange)="onConfigDataChange($event)"></app-app-config>
+                                                <app-user-secrets [configData]="dynamicSecretsArray" [isauth]="isAuth"
+                                                    (configDataChange)="onSecretsDataChange($event)"></app-user-secrets>
+                                            </div>
+
+                                        </div>
+                                    </mat-tab>
+                                    <mat-tab label="Runtimes" class="lfx-u-header-xl">
+                                        <div class="col-md-12 lfx-u-mar-t-16 mb-5" *ngIf="pipelineType!='Apps'">
+                                            <span class="lfx-u-mar-t-24 lfx-u-mar-l-16">Choose default runtime</span>
+                                            <mat-radio-group
+                                                [disabled]="false"
+                                                [(ngModel)]="defaultRuntime"
+                                                (change)="defaultRuntimeChange($event)"
+                                                style="display: flex; flex-direction: column;"
+                                            >
+                                                <mat-radio-button
+                                                    *ngFor="let runtime of runTypes"
+                                                    [value]="runtime.viewValue"
+                                                    style="display: list-item; line-height: 4rem;"
+                                                >
+                                                    {{ runtime.viewValue }}
+                                                </mat-radio-button>
+                                            </mat-radio-group>
+                                        </div>
+                                        <div *ngIf="pipelineType =='Apps'">
+                                            <div class="col-md-12 col-lg-12 aip-desc lfx-u-pad-b-8 lfx-u-mar-t-24 lfx-u-pad-tb-16 row aip-panel-shadow"
+                                                style="align-items: start;width: 99%;margin-left: 4px;">
+                                                <div
+                                                    class="col-md-6 aip-panel-shadow lfx-u-pad-b-8 lfx-u-mar-t-24 lfx-u-pad-tb-16">
+                                                    <div class="flex-wrap justify-content-between"
+                                                        style="padding-top: 8px;display:flex;align-items: center;padding-bottom: 8px;">
+
+                                                        <div class="">
+                                                            <mat-checkbox (change)="onEventChangeIsApp($event)" [checked]="is_app">Is it an App ?</mat-checkbox>
+                                                        </div>
+
+
+                                                        <div *ngIf="is_app" class="">
+                                                            <button mat-raised-button
+                                                                style="background-color: #0a142f; color: white;"
+                                                                [disabled]="false"
+                                                                (click)="assignRuntime()"
+                                                                onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                                                                onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                                                Assign Port
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-12 lfx-u-mar-t-30 mb-20">
+
+                                                        <span class="lfx-u-mar-t-24 lfx-u-mar-l-16">Select
+                                                            Runtime</span>
+                                                        <div class=""
+                                                            style="height: 28vh;overflow: auto;margin-top: 1.5rem;">
+                                                            <mat-radio-group
+                                                                [disabled]="false"
+                                                                [(ngModel)]="defaultRuntime"
+                                                                (change)="defaultRuntimeChange($event)"
+                                                                style="display: flex; flex-direction: column;"
+                                                            >
+                                                                <mat-radio-button
+                                                                    *ngFor="let runtime of runTypes"
+                                                                    [value]="runtime.viewValue"
+                                                                    style="display: list-item; line-height: 4rem;"
+                                                                >
+                                                                    {{ runtime.viewValue }}
+                                                                </mat-radio-button>
+                                                            </mat-radio-group>
+                                                        </div>
+                                                    </div>
+
+
+                                                </div>
+
+                                                <div class="col-md-6"
+                                                    style="padding-top: 8px;display:flex;padding-bottom: 8px;">
+
+                                                    <div
+                                                        class="col-md-12 col-lg-12 aip-desc lfx-u-pad-b-8 lfx-u-mar-t-16 lfx-u-pad-tb-16 aip-panel-shadow">
+                                                        <div class="ml-2 row col-md-12">
+                                                            <div class="row mt-4" style="display: block;">
+                                                                <div class="flex-wrap justify-content-between"
+                                                                    style="padding-top: 8px;display:flex;align-items: center;padding-bottom: 8px;">
+                                                                    <span class="lfx-u-body-sm aip-label-color"
+                                                                        matTooltip="Refresh"
+                                                                        [matTooltipPosition]="tooltipPoition">
+                                                                        <i class="aip-led-icons icon icon_Refresh x-24"
+                                                                            (click)="refreshPipelineDataResponse()"></i>
+                                                                    </span>
+                                                               
+                                                                    <button mat-raised-button
+                                                                        style="background-color: #0a142f; color: white;"
+                                                                        [disabled]="false" (click)="releasePort()"
+                                                                        onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                                                                        onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                                                        Release Port
+                                                                    </button>
+                                                                </div>
+                                                                <div class="aip-model-type col-md-4">
+                                                                    <div class="lfx-u-body-sm aip-label-color">
+                                                                        Runtime
+                                                                    </div>
+                                                                    <div
+                                                                        class="lfx-u-body-md d-flex align-items-center mt-3">
+                                                                        <span
+                                                                            style="width: 90%;line-height: 1.9rem;letter-spacing: .1rem; word-wrap: break-word;background: var(--background-colour)  0% 0% no-repeat padding-box;">
+                                                                            {{pipelineDataResponse.runtime}} </span>
+                                                                        <span class="mx-4"><i
+                                                                                class="aip-led-icons icon x-32 copy-icon"
+                                                                                (click)="copyModel(card.artifacts)"></i></span>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="aip-model-type col-md-4">
+                                                                    <div class="lfx-u-body-sm aip-label-color">Assigned
+                                                                        Port
+                                                                    </div>
+                                                                    <div class="lfx-u-body-md mt-3">
+                                                                        {{pipelineDataResponse.assignedPort}}</div>
+                                                                </div>
+
+                                                                <div class="aip-model-type col-md-4">
+                                                                    <div class="lfx-u-body-sm aip-label-color">Endpoint
+                                                                        URL
+                                                                    </div>
+                                                                    <div class="lfx-u-body-md mt-3">
+                                                                        {{pipelineDataResponse.endpointUrl}}</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </mat-tab>
+                                    <mat-tab label="Environment" class="lfx-u-header-xl">
+                                        <div class="tab_content" id="tabContent_1">
+                                            <div class="config-container" style="margin-bottom: 6.6rem;">
+                                                <app-app-config [configData]="dynamicEnvArray" [isauth]="isAuth"
+                                                    (configDataChange)="onEnvDataChange($event)"></app-app-config>
+                                            </div>
+                                        </div>
+                                    </mat-tab>
+                                </mat-tab-group>
+                            </div>
+                        </div>
+
+                        <div *ngIf="basicReqTab == 'scriptsTab'">
+                            <div class="tab_content" id="tabContent_2">
+                                <div class="row" style="margin-bottom: 6.6rem;">
+                                    <mat-drawer-container class="example-container" autosize>
+                                        <div class="row col-md-12">
+                                            <div *ngIf="isScript" class="col-md-6 mt-2">
+                                                <div class="d-flex">
+                                                    <span class="lfx-u-mar-t-24 lfx-u-mar-l-16">Select run type</span>
+                                                    <mat-form-field appearance="fill" style="width: 100%;">
+                                                        <mat-label>Type</mat-label>
+                                                        <mat-select [(ngModel)]="selectedRunType" required>
+                                                            <mat-option *ngFor="let option of runTypes" [value]="option">
+                                                                {{ option.viewValue }}
+                                                            </mat-option>
+                                                        </mat-select>
+                                                        <mat-error *ngIf="errFlag && !selectedRunType">This field is required</mat-error>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+                                            <div [ngClass]="isScript ? 'col-md-6' : 'col-md-12' ">
+                                                <ul class="lfx-u-mar-t-16 d-flex align-items-center py-2 px-4"
+                                                    style="float:right">
+                                                    <li style="padding-right: 20px;" *ngIf="isScript">
+                                                        <span matTooltip="All Scripts" [matTooltipPosition]="tooltipPoition">
+                                                            <i (click)="drawer.toggle()"
+                                                                class="icon menu-icon x-24"></i>
+                                                        </span>
+                                                    </li>
+                                                    <li style="padding-right: 20px;" *ngIf="isScript">
+                                                        <mat-tooltip [matTooltip]="'Copy Script'" [matTooltipPosition]="tooltipPoition">
+                                                            <i class="icon copy-icon x-24" (click)="copyScript()"></i>
+                                                        </mat-tooltip>
+                                                    </li>
+                                                    <li>
+                                                        <span matTooltip="Go to logs" [matTooltipPosition]="tooltipPoition">
+                                                            <i class="lfx-u-mar-r-16 icon document-icon x-24" (click)="routeToLogs()"></i>
+                                                        </span>
+                                                    </li>
+                                                    <li>
+                                                        <span matTooltip="Refresh" [matTooltipPosition]="tooltipPoition">
+                                                            <i class="aip-led-icons icon icon_Refresh x-24" (click)="readScripts()"></i>
+                                                        </span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <mat-drawer #drawer mode="side">
+                                            <li *ngFor="let file of scriptsObj?.fileNames; let i=index">
+                                                <button (click)="onFileChange(file,i)" matTooltip="{{file}}"
+                                                    mat-flat-button>{{
+                                                    (file.length>13)? (file | slice:0:13) + '...' : (file)}}</button>
+                                            </li>
+                                        </mat-drawer>
+                                        <div class="example-sidenav-content">
+                                            <div *ngIf="isScript" class="code-editor">
+                                                <ng-container *ngIf="fileExtension === 'py'">
+                                                    <app-enl-code-editor id="ele" [script]="scriptSelected"
+                                                        lang="python">
+                                                    </app-enl-code-editor>
+                                                </ng-container>
+                                                <div *ngIf="fileExtension != 'py'" class="code-content">
+                                                    <ng-container *ngIf="fileExtension === 'json'">
+                                                        <pre><p id="code-box" class="code-color">{{ scriptSelected | json }}</p></pre>
+                                                    </ng-container>
+                                                    <ng-container *ngIf="fileExtension!= 'json'">
+                                                        <p id="code-box" class="code-color">{{ scriptSelected }}</p>
+                                                    </ng-container>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </mat-drawer-container>
+                                </div>
+                                <div class="lfx-u-mar-lr-16 lfx-u-mar-tb-16" *ngIf="!isScript">Script not generated
+                                </div>
+                            </div>
+                        </div>
+
+                        <div *ngIf="basicReqTab == 'jobsTab'">
+                            <div class="tab_content" id="tabContent_3">
+                                <app-jobs [cname]="streamItem.name"></app-jobs>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="!isExpand" class="lfx-l-level2-right-col lfx-u-pad-t-32">
+                    <mat-card>
+                        <div class="lfx-c-panel__content">
+                            <div class="lfx-u-pad-16">
+                                <div class="lfx-u-header-lg lfx-u-mar-b-16">Connected Artifacts</div>
+                                <div class="" *ngIf="component.length > 0; else noRelatedComponent">
+                                <mat-nav-list>
+                                    <mat-list-item *ngFor="let component of component" class="aip-daa">
+                                        <app-related-component [component]="component" [childId]="card.cid"
+                                            [parentType]="'PIPELINE'"
+                                            (reload)="reload($event)">
+                                        </app-related-component>
+                                    </mat-list-item>
+                                </mat-nav-list>
+                                </div>
+                                <ng-template #noRelatedComponent>
+                                    <div class="lfx-u-body-md lfx-u-text-neutral-80  aip-desc-ellipsis">
+                                        <div class="d-flex justify-content-center align-items-center flex-column">
+                                            <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive"
+                                                alt="aip_empty_state_leds" style="width:15rem" />
+                                            No connected artifacts for now!
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </div>
+                        </div>
+                        <div ledsPanelFooter class="lfx-u-mar-t-8">
+                            <li *ngIf="linkAuth">
+                                <div *ngIf="relatedloaded">
+                                    <div class="lds-ring">
+                                        <div></div>
+                                        <div></div>
+                                        <div></div>
+                                        <div></div>
+                                    </div>
+                                </div>
+                                <div class="aip-cursor lfx-u-pad-l-8 lfx-u-pad-b-8 " *ngIf="!relatedloaded"
+                                    (click)="openModal(linker)">
+                                    <div class="d-flex aip-daa lfx-u-mar-8 lfx-u-pad-8  align-items-center"
+                                        style="width: max-content;">
+                                        <div class="lfx-u-mar-lr-8"><i class=" icon x-16 icon_link"
+                                                style="color: #8626C3;"></i>
+                                        </div>
+                                        <div class="lfx-u-body-md">Link Artifacts</div>
+                                    </div>
+                                </div>
+                                <ng-template #linker let-modal>
+                                    <app-create-linked [data]=this.streamItem.cid [type]="'PIPELINE'"
+                                        (refeshrelated)="refeshrelated($event)"
+                                        [component]=component></app-create-linked>
+                                </ng-template>
+                            </li>
+                        </div>
+                    </mat-card>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

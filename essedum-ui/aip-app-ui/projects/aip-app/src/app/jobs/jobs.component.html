@@ -1,0 +1,102 @@
+<div class="mt-3">
+  <div class="title-jobs selector-757-3 fs">Total Jobs : {{totalJobs}}
+
+          <div class="aip-cursor">
+                                    <button  mat-icon-button style="float: right;" class="py-4" [ngStyle]="{'color': isHovered ? '#0056b3' : '#0a142f'}"
+                                        (click)="onRefresh()" matTooltip="Refresh" (mouseenter)="isHovered = true"
+                                        (mouseleave)="isHovered = false">
+                                        <mat-icon>refresh</mat-icon>
+                                    </button>
+                                </div>
+  </div>
+  <div>
+    <div class="lfx-c-datagrid__title-area clearfix">
+     
+    </div>
+    <table >
+      <thead>
+        <tr>
+          <th class=" " scope="col">
+            Job Id
+          </th>
+          <th scope="col-2">Submitted By</th>
+          <th scope="col-3">Submitted On</th>
+          <th scope="col-3">Completed On</th>
+          <th scope="col-2">Runtime</th>
+          <th scope="col-1" class="">
+            Status
+          </th>
+          <th scope="col-1">Action</th>
+          <th scope="col-1">Output Artifacts</th>
+
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let job of jobList; let i = index;">
+          <td class="kk">
+            {{job.id}}
+          </td>
+          <td style="width:15%">
+            <div>
+                <div class="lfx-u-body-md secondary-color">{{job.submittedBy}}</div>
+                <div *ngIf="job.jobmetadata &&  job.jobmetadata.tag == 'EVENT'"
+                  class="lfx-u-body-sm lfx-u-text-neutral-80 lfx-u-mar-t-4">
+                  Event triggered
+                </div>
+                <div *ngIf="job.jobmetadata &&  job.jobmetadata.tag != 'EVENT'"
+                  class="lfx-u-body-sm lfx-u-text-neutral-80 lfx-u-mar-t-4">
+                  User triggered
+                </div>
+            </div>
+          </td>
+          <td style="font-size: 15px; width: 270px;">{{job.submittedOn | date: 'MMM d, y, h:mm a'}}</td>
+          <td style="font-size: 15px; width: 270px;">{{job.finishtime | date: 'MMM d, y, h:mm a'}}</td>
+          <td class="kk">{{job.runtime}}</td>
+          <td>
+            <span class="lfx-c-badge float-end"
+              [ngClass]="[
+                job.jobStatus == 'ERROR' ? 'lfx-c-badge--error' : 
+                job.jobStatus == 'COMPLETED' ? 'lfx-c-badge--active' : 
+                job.jobStatus == 'RUNNING' ? 'lfx-c-badge--warning' : 
+                job.jobStatus == 'CANCELLED' ? 'lfx-c-badge--error' : 
+                job.jobStatus == 'OPEN' ? 'lfx-c-badge--warning' : 
+                'lfx-c-badge--active'
+              ]">{{job.jobStatus}}</span>
+               </td>
+          <td>
+            <mat-tooltip #logTooltip="matTooltip" matTooltip="Log" matTooltipPosition="above">
+              <button mat-icon-button name="logButton" id="logButton" (click)="showConsole(job.jobId, job.runtime, job.jobStatus, job.jobObj)"  matTooltipPosition="above">
+                <mat-icon>description</mat-icon>
+              </button>
+            </mat-tooltip>
+            <mat-tooltip #stopTooltip="matTooltip" matTooltip="Stop" matTooltipPosition="above">
+              <button mat-icon-button *ngIf="job.jobStatus=='RUNNING' && job.jobmetadata!='CHAIN'" name="actionButton"
+                id="actionButton" (click)="stopJob(job.jobId)" [matTooltip]="stopTooltip.message" matTooltipPosition="above">
+                <mat-icon>stop</mat-icon>
+              </button>
+            </mat-tooltip>
+          </td>
+          <td>
+            <button
+              *ngIf="job.runtime && (job.runtime.toLowerCase() == 'remote' || job.runtime.split('-')[0].toLowerCase() == 'remote')"
+              mat-icon-button
+              name="outputArtifactButton"
+              id="outputArtifactButton"
+              (click)="showOutputArtifact(job.jobId)"
+              matTooltip="Show Output Artifacts"
+            >
+              <mat-icon>article</mat-icon>
+            </button>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="lfx-u-pad-b-16 d-flex justify-content-center">
+    <button mat-button [disabled]="page==0" type="button" (click)="getJobs('First')">First</button>
+    <button mat-button [disabled]="page==0" type="button" (click)="getJobs('Prev')">&lt;&lt;&nbsp;Prev</button>
+    <button mat-button [disabled]="page==lastPage" type="button" (click)="getJobs('Next')">Next&nbsp;&gt;&gt;</button>
+    <button mat-button [disabled]="page==lastPage" type="button" (click)="getJobs('Last')">Last</button>
+  </div>
+</div>

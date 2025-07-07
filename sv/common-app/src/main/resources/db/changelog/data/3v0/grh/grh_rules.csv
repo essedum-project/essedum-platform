@@ -1,0 +1,2 @@
+"project_id","user_id","node_name","rule_name","is_id","is_string","property","operator","value","node_color","node_size","createdAt","updatedAt"
+"2","1","ConfigItem","statusofci","false","true","Status","contains","disrupted","#eb144c","1.0","2021-06-29T09:36:57","2021-06-29T09:36:57"

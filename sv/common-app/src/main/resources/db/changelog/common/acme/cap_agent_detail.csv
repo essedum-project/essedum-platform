@@ -1,0 +1,7 @@
+"Agent_ID","Agent_Name","Rec_Act_Ind","Last_Updated_Dts","Agent_Published_Dts","Agent_Status","Agent_Feature","Agent_Version","Last_Updated_By"
+"1","Infybot","true","2020-04-15T03:19:38","2020-04-15T03:19:38","Active","Test","V10.0","1"
+"2","AcmeBot","true","2020-04-15T03:19:39","2020-04-15T03:19:39","Active","ACME_Feature","1.0","1"
+"3","ProccessInvoiceResolver","true","2020-04-15T03:19:39","2020-04-15T03:19:39","Active","ACME_Feature","1.0","1"
+"4","Extractor","true","2020-04-15T03:19:39","2020-04-15T03:19:39","Active","ACME_Feature","1.0","1"
+"5","Classifier","true","2020-04-15T03:19:39","2020-04-15T03:19:39","Active","ACME_Feature","1.0","1"
+"6","ITAFBot","true","2021-06-08T17:05:27","2021-06-08T17:05:27","Active","Testing bot for 1311 ITAF","V1","1"

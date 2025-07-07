@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+	<include file="db/changelog/bcc/bcc.xml" />
+	<include file="db/changelog/bjm/bjm.xml" />
+	<include file="db/changelog/ccl/ccl.xml" />
+	<include file="db/changelog/cfm/cfm.xml" />
+	<include file="db/changelog/cip/cip.xml" />
+	<include file="db/changelog/dbs/dbs.xml" />
+	<include file="db/changelog/icm/icm.xml" />
+	<include file="db/changelog/usm/usm.xml" />
+	<include file="db/changelog/sre/sre.xml" />
+	<include file="db/changelog/iecp/twb.xml" />
+	<include file="db/changelog/sbx/deletesbx.xml" />
+	<include file="db/changelog/sbx/sbx.xml" />
+	<include file="db/changelog/cap/cap.xml" />
+	<include file="db/changelog/tad/tad.xml" />
+	<include file="db/changelog/grh/grh.xml" />
+	<include file="db/changelog/btm/btm.xml" />
+	<include file="db/changelog/svy/svy.xml" />
+
+	<include file="db/changelog/iecp/data.xml" />
+	<include file="db/changelog/iecp/masterdataIECP.xml" />
+	<include file="db/changelog/iecp/acme-iecp.xml" />
+	<include file="db/changelog/iecp/iecp.xml" />
+	<include file="db/changelog/test/test.xml" context="test" />
+	
+
+	<include file="db/changelog/cap/constraint.xml" />
+	<include file="db/changelog/bcc/constraint.xml" />
+	<include file="db/changelog/cip/constraint.xml" />
+	<include file="db/changelog/bjm/constraint.xml" />
+	<include file="db/changelog/ccl/constraint.xml" />
+	<include file="db/changelog/cfm/constraint.xml" />
+	<include file="db/changelog/dbs/constraint.xml" />
+	<include file="db/changelog/icm/constraint.xml" />
+	<include file="db/changelog/sre/constraint.xml" />
+	<include file="db/changelog/iecp/twb-constraint.xml" />
+	<include file="db/changelog/usm/constraint.xml" />
+	<include file="db/changelog/sbx/constraint.xml" />
+	<include file="db/changelog/tad/constraint.xml" />
+	<include file="db/changelog/btm/constraint.xml" />
+	<include file="db/changelog/svy/constraint.xml" />
+	<include file="db/changelog/bjm/bjm1311.xml" />
+
+</databaseChangeLog>

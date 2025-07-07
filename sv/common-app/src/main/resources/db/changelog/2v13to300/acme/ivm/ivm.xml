@@ -1,0 +1,257 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+	<!--<changeSet author="bivek.das (generated)"
+		id="1683222364377-2-3">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_data_org_dimension_score ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/2v13to300/acme/ivm/ivm_data_org_dimension_score.csv"
+			quotchar="&quot;" separator="," tableName="ivm_data_org_dimension_score">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="dimension_id" name="dimension_id" type="NUMERIC" />
+			<column header="usm_project_id" name="usm_project_id" type="NUMERIC" />
+			<column header="score" name="score" type="NUMERIC" />
+			<column header="last_updated_by" name="last_updated_by" type="STRING" />
+			<column header="last_updated_date" name="last_updated_date" type="DATE AND TIME" />
+			<column header="questionnaire_instance_id" name="questionnaire_instance_id" type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_data_org_dimension_score OFF;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="bivek.das (generated)"
+		id="1683222364377-2-6">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_data_org_metric_lever_initiative ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/2v13to300/acme/ivm/ivm_data_org_metric_lever_initiative.csv"
+			quotchar="&quot;" separator="," tableName="ivm_data_org_metric_lever_initiative">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="initiative_id" name="initiative_id" type="NUMERIC" />
+			<column header="milestone_id" name="milestone_id" type="NUMERIC" />
+			<column header="org_id" name="org_id" type="NUMERIC" />
+			<column header="usm_project_id" name="usm_project_id" type="NUMERIC" />
+			<column header="value_lever_id" name="value_lever_id" type="NUMERIC" />
+			<column header="project_sponsor" name="project_sponsor" type="STRING" />
+			<column header="business_champion" name="business_champion" type="STRING" />
+			<column header="tech_champion" name="tech_champion" type="STRING" />
+			<column header="owner" name="owner" type="STRING" />
+			<column header="start_date" name="start_date" type="DATE" />
+			<column header="end_date" name="end_date" type="DATE" />
+			<column header="status" name="status" type="STRING" />
+			<column header="priority" name="priority" type="STRING" />
+			<column header="target_score" name="target_score" type="NUMERIC" />
+			<column header="irr" name="irr" type="STRING" />
+			<column header="payback_period" name="payback_period" type="STRING" />
+			<column header="npv" name="npv" type="STRING" />
+			<column header="roi" name="roi" type="STRING" />
+			<column header="name" name="name" type="STRING" />
+			<column header="actual_start_date" name="actual_start_date" type="DATE" />
+			<column header="actual_end_date" name="actual_end_date" type="DATE" />
+			<column header="questionnaire_instance_id" name="questionnaire_instance_id" type="NUMERIC" />
+			<column header="tool_id" name="tool_id" type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_data_org_metric_lever_initiative OFF;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="bivek.das (generated)"
+		id="1683222364377-2-4">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_data_org_metric ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/2v13to300/acme/ivm/ivm_data_org_metric.csv"
+			quotchar="&quot;" separator="," tableName="ivm_data_org_metric">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="slno" name="slno" type="STRING" />
+			<column header="question_id" name="question_id" type="NUMERIC" />
+			<column header="question" name="question" type="STRING" />
+			<column header="usm_project_id" name="usm_project_id" type="NUMERIC" />
+			<column header="answer" name="answer" type="STRING" />
+			<column header="score" name="score" type="NUMERIC" />
+			<column header="questionnaire_instance_id" name="questionnaire_instance_id" type="NUMERIC" />
+			<column header="last_updated_date" name="last_updated_date" type="DATE AND TIME" />
+			<column header="last_updated_by" name="last_updated_by" type="STRING" />
+			<column header="metric_dimension_id" name="metric_dimension_id" type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_data_org_metric OFF;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="sachin.saddar (generated)"
+		id="1683214834893-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_data_org_questionnaire_instance ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/2v13to300/acme/ivm/ivm_data_org_questionnaire_instance.csv"
+			quotchar="&quot;" separator=","
+			tableName="ivm_data_org_questionnaire_instance">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="questionaire_id" name="questionaire_id"
+				type="NUMERIC" />
+			<column header="usm_project_id" name="usm_project_id"
+				type="NUMERIC" />
+			<column header="questionnaire_status"
+				name="questionnaire_status" type="STRING" />
+			<column header="project_name" name="project_name"
+				type="STRING" />
+			<column header="quarter" name="quarter" type="NUMERIC" />
+			<column header="year" name="year" type="NUMERIC" />
+			<column header="user_id" name="user_id" type="skip" />
+			<column header="use_case" name="use_case" type="skip" />
+			<column header="last_updated_date" name="last_updated_date"
+				type="skip" />
+			<column name="approval_date" type="skip" />
+			<column name="approved_rejected" type="STRING" />
+			<column name="approval_remarks" type="STRING" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_data_org_questionnaire_instance OFF;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="bivek.das (generated)"
+		id="1683222364377-2-7">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_data_org_value_map ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/2v13to300/acme/ivm/ivm_data_org_value_map.csv"
+			quotchar="&quot;" separator="," tableName="ivm_data_org_value_map">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="usm_project_id" name="usm_project_id" type="NUMERIC" />
+			<column header="initiative_id" name="initiative_id" type="NUMERIC" />
+			<column header="initiative_name" name="initiative_name" type="STRING" />
+			<column header="metric_id" name="metric_id" type="NUMERIC" />
+			<column header="value_lever_id" name="value_lever_id" type="NUMERIC" />
+			<column header="cost" name="cost" type="NUMERIC" />
+			<column header="questionnaire_instance_id" name="questionnaire_instance_id" type="NUMERIC" />
+			<column header="target_level" name="target_level" type="STRING" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_data_org_value_map OFF;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="sachin.saddar (generated)"
+		id="1683215945545-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_opq_score_level ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/2v13to300/acme/ivm/ivm_master_opq_score_level.csv"
+			quotchar="&quot;" separator=","
+			tableName="ivm_master_opq_score_level">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="usm_project_id" name="usm_project_id"
+				type="NUMERIC" />
+			<column header="level" name="level" type="NUMERIC" />
+			<column header="level_text" name="level_text" type="STRING" />
+			<column header="score_min" name="score_min" type="NUMERIC" />
+			<column header="score_max" name="score_max" type="NUMERIC" />
+			<column header="questionnaire_instance_id"
+				name="questionnaire_instance_id" type="NUMERIC" />
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT ivm_master_opq_score_level OFF;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="sachin.saddar (generated)"
+		id="1683214161029-2">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_master_questionnaire_home_page ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/2v13to300/acme/ivm/ivm_master_questionnaire_home_page.csv"
+			quotchar="&quot;" separator=","
+			tableName="ivm_master_questionnaire_home_page">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="route" name="route" type="STRING" />
+			<column header="page" name="page" type="STRING" />
+			<column header="questionnaire_id" name="questionnaire_id"
+				type="NUMERIC" />
+			<column header="summary_report" name="summary_report"
+				type="skip" />
+			<column header="default" name="default" type="skip" />
+			<column header="usm_project_id" name="usm_project_id"
+				type="NUMERIC" />
+			<column header="title" name="title" type="STRING" />
+			<column header="sub_title" name="sub_title" type="STRING" />
+			<column header="description" name="description" type="STRING" />
+			<column header="is_pre_defined_page"
+				name="is_pre_defined_page" type="BOOLEAN" />
+			<column header="is_active" name="is_active" type="BOOLEAN" />
+		</loadData>
+		<sql dbms="mssql">
+		            SET IDENTITY_INSERT ivm_master_questionnaire_home_page OFF;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="bivek.das (generated)"
+		id="1683222364377-2-5">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_org_metric_baseline ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/2v13to300/acme/ivm/ivm_org_metric_baseline.csv"
+			quotchar="&quot;" separator="," tableName="ivm_org_metric_baseline">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="metric_id" name="metric_id" type="NUMERIC" />
+			<column header="business_impact" name="business_impact" type="STRING" />
+			<column header="priority" name="priority" type="STRING" />
+			<column header="baseline_value" name="baseline_value" type="NUMERIC" />
+			<column header="baseline_date" name="baseline_date" type="DATE AND TIME" />
+			<column header="transformation_scope_id" name="transformation_scope_id" type="NUMERIC" />
+			<column header="transformation_scope_name" name="transformation_scope_name" type="STRING" />
+			<column header="dimension_id" name="dimension_id" type="NUMERIC" />
+			<column header="questionnaire_instance_id" name="questionnaire_instance_id" type="NUMERIC" />
+			<column header="project_id" name="project_id" type="NUMERIC" />
+			<column header="geo_id" name="geo_id" type="NUMERIC" />
+			<column header="geo_name" name="geo_name" type="STRING" />
+			<column header="country_id" name="country_id" type="NUMERIC" />
+			<column header="country_name" name="country_name" type="STRING" />
+			<column header="region_id" name="region_id" type="NUMERIC" />
+			<column header="region_name" name="region_name" type="STRING" />
+			<column header="last_updated_date" name="last_updated_date" type="DATE AND TIME" />
+			<column header="last_updated_by" name="last_updated_by" type="STRING" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_org_metric_baseline OFF;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="bivek.das (generated)"
+		id="1683222364377-2-10">
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_xw_org_transformation_scope ON;
+		</sql>
+		<loadData commentLineStartsWith="#" encoding="UTF-8"
+			file="db/changelog/2v13to300/acme/ivm/ivm_xw_org_transformation_scope.csv"
+			quotchar="&quot;" separator="," tableName="ivm_xw_org_transformation_scope">
+			<column header="id" name="id" type="NUMERIC" />
+			<column header="org_id" name="org_id" type="NUMERIC" />
+			<column header="transformation_type_id" name="transformation_type_id" type="NUMERIC" />
+			<column header="transformation_subtype" name="transformation_subtype" type="STRING" />
+			<column header="transformation_scope_name" name="transformation_scope_name" type="NUMERIC" />
+			<column header="key_stakeholder" name="key_stakeholder" type="STRING" />
+			<column header="start_date" name="start_date" type="DATE" />
+			<column header="end_date" name="end_date" type="DATE" />
+			<column header="usm_project_id" name="usm_project_id" type="NUMERIC" />
+			<column header="last_updated_date" name="last_updated_date" type="DATE" />
+			<column header="last_updated_by" name="last_updated_by" type="STRING" />
+		</loadData>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT ivm_xw_org_transformation_scope OFF;
+		</sql>
+	</changeSet>-->
+
+</databaseChangeLog>

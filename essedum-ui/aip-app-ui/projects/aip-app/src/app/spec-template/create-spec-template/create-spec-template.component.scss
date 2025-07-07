@@ -1,0 +1,51 @@
+.custom-hint {
+  color: black;
+  font-size: 12px;
+  padding-bottom: 5px;
+}
+
+.custom-hint-or-error {
+  font-size: 12px;
+  padding-bottom: 5px;
+}
+::ng-deep .jsoneditor {
+  border: thin solid #0094ff;
+}
+
+::ng-deep .jsoneditor-menu {
+  background: #0094ff;
+  border-bottom: 1px solid #0094ff;
+}
+
+::ng-deep .mat-mdc-floating-label {
+  line-height: 2.5rem !important;
+}
+
+::ng-deep
+  mat-form-field.no-subscript-space
+  .mat-mdc-form-field-subscript-wrapper {
+  height: 0 !important;
+  min-height: 0 !important;
+}
+
+::ng-deep mat-form-field.description-no-underline .mdc-line-ripple,
+::ng-deep mat-form-field.description-no-underline .mdc-notched-outline {
+  display: none !important;
+}
+
+::ng-deep .mat-mdc-select:not(.mat-mdc-select-disabled) .mat-mdc-select-arrow {
+  color: #0094ff !important;
+  fill: #0094ff !important;
+}
+
+input:focus,
+.txtInput:focus {
+  outline: none !important;
+  border-bottom: 1px solid #0094ff !important;
+}
+
+::ng-deep
+  .mdc-text-field--filled:not(.mdc-text-field--disabled).mdc-text-field--focused
+  .mdc-floating-label {
+  color: #0094ff !important;
+}

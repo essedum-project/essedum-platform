@@ -1,0 +1,191 @@
+
+// ::ng-deep .mat-mdc-form-field-infix {
+//     position: relative;
+//     top: 1rem;
+// }
+
+.lfx-u-mar-b-16 {
+    margin-bottom: 16px !important;
+}
+
+.lfx-u-header-xxl {
+    font-size: 2.4rem;
+    font-weight: 600;
+    font-family: "myriad-pro", Arial, sans-serif !important;
+    font-style: normal;
+}
+
+.lfx-u-mar-l-8
+ {
+    margin-left: 8px !important;
+}
+
+.lfx-u-pad-16
+ {
+    padding: 16px !important;
+}
+
+.lfx-u-mar-tb-16
+ {
+    margin-top: 16px !important;
+    margin-bottom: 16px !important;
+}
+
+.lfx-l-level2-middle-col
+{
+        display: table-cell;
+        vertical-align: top;
+        height: 100%;
+}
+
+.lfx-u-pad-t-32
+ {
+    padding-top: 32px !important;
+}
+
+.lfx-u-pad-lr-24
+ {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+}
+
+.lfx-u-mar-b-24__mb{
+  //  margin-bottom: 24px !important;
+}
+
+.lfx-l-level2-middle-ctr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+}
+
+.lfx-c-panel
+ {
+    border-radius: 16px;
+    background: #ffffff;
+    min-height: 100px;
+}
+.lfx-c-panel {
+    box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.16) !important;
+}
+
+.lfx-l-level1-middle-col
+ {
+    padding: 32px 16px 32px 16px;
+}
+
+.base-color{
+    color:#0094ff !important;
+}
+
+.secondary-color{
+    color:#0a142f !important;
+}
+
+.back-icon{
+  font-size:24px !important;
+  color: #0a142f !important;
+}
+/* Layout utilities */
+.lfx-field {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.lfx-mt-24 {
+  margin-top: 24px;
+}
+
+.lfx-mb-16 {
+  margin-bottom: 16px;
+}
+
+.lfx-button-right {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.lfx-half-col {
+  width: 100%;
+}
+
+  .lfx-half-col {
+    width: 48%;
+  }
+
+.lfx-flex-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.lfx-card {
+  margin-top: 24px;
+  padding: 16px;
+}
+.lfx-form-field {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.lfx-form-group {
+  margin-bottom: 16px;
+}
+
+.lfx-button-right {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.lfx-table {
+  margin-top: 1.5rem;
+}
+
+.lfx-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.lfx-textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--base-color);
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.lfx-section {
+  padding: 1rem 0;
+}
+
+.lfx-accordion {
+  margin-bottom: 1rem;
+}
+
+.lfx-panel-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.lfx-tab-area {
+  margin-top: 1rem;
+}
+
+.lfx-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.test-btn{
+ background-color: #0a142f; 
+ color: white;
+}
+.test-btn:hover{
+background:#0094ff; 
+color:white;
+}

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+	<changeSet author="Leap (generated)" id="1614785155891-36">
+	     <validCheckSum>any</validCheckSum>
+            <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cfm_configuration_item"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cfm_configuration_item">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="ci_image" type="LONGBLOB" />
+			<column name="ci_image_name" type="VARCHAR(255)" />
+			<column name="ci_name" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="dcount" type="INT" />
+			<column name="dtype" type="VARCHAR(100)" />
+			<column name="icon" type="TEXT" />
+			<column name="order_value" type="INT" />
+			<column name="ssp_color" type="VARCHAR(100)" />
+			<column name="url" type="VARCHAR(255)" />
+			<column name="views" type="VARCHAR(100)" />
+			<column name="ctype" type="INT" />
+			<column name="dashboard" type="INT" />
+			<column name="thershold_mapping" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-37">
+	<validCheckSum>any</validCheckSum>
+            <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cfm_configuration_item_type"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cfm_configuration_item_type">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="background_colour" type="VARCHAR(100)" />
+			<column name="ctype" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="order_value" type="INT" />
+			<column name="dashboard_id" type="INT" />
+			<column name="project_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-38">
+	<validCheckSum>any</validCheckSum>
+            <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="cfm_xw_ci_mapping"/>
+               </not>
+           </preConditions>
+		<createTable tableName="cfm_xw_ci_mapping">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="ci_item1_name" type="VARCHAR(100)" />
+			<column name="ci_item2_name" type="VARCHAR(100)" />
+			<column name="relation_type" type="VARCHAR(100)" />
+			<column name="ci_item1" type="INT" />
+			<column name="ci_item2" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="yamini.gupta" id="1614785155891-39">
+		<addColumn tableName="cfm_configuration_item_type">
+			<column name="active_color" type="VARCHAR(25)" />
+		</addColumn>
+	</changeSet>
+		<changeSet author="rishita.ari" id="1312v0-cfm-1">
+		<addColumn tableName="cfm_configuration_item_type">
+			<column name="row_count" type="INT" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="edlin.edwinjacob" id="2v1-cfm-1">
+	 <modifyDataType  
+            columnName="url"  
+            newDataType="VARCHAR(1000)"
+            tableName="cfm_configuration_item"/>  
+	</changeSet>
+</databaseChangeLog>

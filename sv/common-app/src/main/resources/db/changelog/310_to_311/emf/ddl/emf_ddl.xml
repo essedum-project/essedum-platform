@@ -1,0 +1,427 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+						http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd
+						http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    
+	<changeSet dbms="postgresql,h2,mysql" author="Leap (generated)"
+		id="1657624600382-0-10">
+		<preConditions onFail="MARK_RAN">
+		<not>
+		<tableExists tableName="emf_custom_actions"/>
+		</not>
+		</preConditions>
+		<createTable tableName="emf_custom_actions">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="action_name" type="VARCHAR(200)" />
+			<column name="action_type" type="VARCHAR(200)" />
+			<column name="script_code" type="TEXT" />
+			<column name="headers" type="JSON" />
+			<column name="result_param" type="VARCHAR(200)" />
+			<column name="restapi_param_type" type="VARCHAR(200)" />
+			<column name="restapi_method" type="VARCHAR(200)" />
+			<column name="url" type="VARCHAR(200)" />
+			<column name="body" type="VARCHAR(1400)" />
+		</createTable>
+		</changeSet>
+		
+			<changeSet dbms="mssql" author="Leap (generated)"
+		id="1657624600382-0-10-1">
+		<preConditions onFail="MARK_RAN">
+		<not>
+		<tableExists tableName="emf_custom_actions"/>
+		</not>
+		</preConditions>
+		<createTable tableName="emf_custom_actions">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="action_name" type="VARCHAR(200)" />
+			<column name="action_type" type="VARCHAR(200)" />
+			<column name="script_code" type="TEXT" />
+			<column name="headers" type="NVARCHAR(MAX)" />
+			<column name="result_param" type="VARCHAR(200)" />
+			<column name="restapi_param_type" type="VARCHAR(200)" />
+			<column name="restapi_method" type="VARCHAR(200)" />
+			<column name="url" type="VARCHAR(200)" />
+			<column name="body" type="VARCHAR(400)" />
+		</createTable>
+		</changeSet>
+		
+	<changeSet dbms="postgresql,h2,mysql" author="Leap (generated)"
+		id="1657624600382-1-10">
+		<preConditions onFail="MARK_RAN">
+		<not>
+		<tableExists tableName="emf_custom_action_parameters"/>
+		</not>
+		</preConditions>
+	    <createTable tableName="emf_custom_action_parameters">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="param_name" type="VARCHAR(200)" />
+			<column name="param_datatype" type="VARCHAR(200)" />
+			<column name="custom_action_id" type="INT" />
+			<!--<constraints>
+			<addForeignKeyConstraint baseColumnNames="custom_action_id" baseTableName="emf_custom_action_parameters" constraintName="custom_actions_id_fk" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="emf_custom_actions" validate="true"/>
+			</constraints>
+			</column>-->
+			
+			
+			
+			<!--<addForeignKeyConstraint baseColumnNames="custom_action_id" baseTableName="emf_custom_action_parameters" constraintName="custom_actions_id_fk" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="emf_custom_actions" validate="true"/>-->
+		</createTable>
+		<addForeignKeyConstraint
+			baseTableName="emf_custom_action_parameters"
+			constraintName="Custom_actions_id_fk"
+			baseColumnNames="custom_action_id"
+			referencedTableName="emf_custom_actions"
+			referencedColumnNames="id" />
+		</changeSet>
+		
+		<changeSet dbms="mssql" author="Leap (generated)"
+		id="1657624600382-1-10-2">
+		<preConditions onFail="MARK_RAN">
+		<not>
+		<tableExists tableName="emf_custom_action_parameters"/>
+		</not>
+		</preConditions>
+	    <createTable tableName="emf_custom_action_parameters">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="param_name" type="VARCHAR(200)" />
+			<column name="param_datatype" type="VARCHAR(200)" />
+			<column name="custom_action_id" type="INT" />
+			<!--<constraints>
+			<addForeignKeyConstraint baseColumnNames="custom_action_id" baseTableName="emf_custom_action_parameters" constraintName="custom_actions_id_fk" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="emf_custom_actions" validate="true"/>
+			</constraints>
+			</column>-->
+			
+			
+			
+			<!--<addForeignKeyConstraint baseColumnNames="custom_action_id" baseTableName="emf_custom_action_parameters" constraintName="custom_actions_id_fk" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="id" referencedTableName="emf_custom_actions" validate="true"/>-->
+		</createTable>
+		<addForeignKeyConstraint
+			baseTableName="emf_custom_action_parameters"
+			constraintName="Custom_actions_id_fk"
+			baseColumnNames="custom_action_id"
+			referencedTableName="emf_custom_actions"
+			referencedColumnNames="id" />
+		</changeSet>
+	
+	
+	<changeSet dbms="postgresql,h2,mysql" author="Leap (generated)"
+		id="1657624600382-10">
+		<preConditions onFail="MARK_RAN">
+		<not>
+		<columnExists tableName = "emf_workflow" columnName = "create_time"/>
+		<columnExists tableName = "emf_workflow" columnName = "end_time"/>
+		</not>
+		</preConditions>
+		<addColumn tableName="emf_workflow">
+			<column name="create_time" type="datetime(6)" />
+			<column name="end_time" type="datetime(6)" />
+		</addColumn>
+	</changeSet>
+	<changeSet dbms="mssql" author="Leap (generated)"
+		id="1657624600382-11">
+		<preConditions onFail="MARK_RAN">
+		<not>
+		<columnExists tableName = "emf_workflow" columnName = "create_time"/>
+		<columnExists tableName = "emf_workflow" columnName = "end_time"/>
+		</not>
+		</preConditions>
+		<addColumn tableName="emf_workflow">
+			<column name="create_time" type="datetime(6)" />
+			<column name="end_time" type="datetime(6)" />
+		</addColumn>
+	</changeSet>
+	
+		<changeSet dbms="postgresql,h2,mysql" author="Leap (generated)"
+		id="1657624600382-12">
+		<preConditions onFail="MARK_RAN">
+		<not>
+		<columnExists tableName = "emf_custom_action_parameters" columnName = "default_value"/>
+		</not>
+		</preConditions>
+		<addColumn tableName="emf_custom_action_parameters">
+		<column name="default_value" type="VARCHAR(4000)" />
+		</addColumn>
+	</changeSet>
+	<changeSet dbms="mssql" author="Leap (generated)"
+		id="1657624600382-13">
+		<preConditions onFail="MARK_RAN">
+		<not>
+		<columnExists tableName = "emf_custom_action_parameters" columnName = "default_value"/>
+		</not>
+		</preConditions>
+		<addColumn tableName="emf_custom_action_parameters">
+		<column name="default_value" type="NVARCHAR(MAX)" />
+		</addColumn>
+	</changeSet>
+	
+<changeSet dbms="postgresql,h2,mysql" author="Leap (generated)"
+		id="16832223644477-2-1-310-1-1">
+		<addColumn tableName="emf_event_type">
+		<column name="project_id" type="int" />
+		</addColumn>
+	</changeSet>
+	
+<changeSet dbms="mssql" author="Leap (generated)"
+		id="16832223644477-2-1-310-1">
+		<addColumn tableName="emf_event_type">
+		<column name="project_id" type="int" />
+		</addColumn>
+	</changeSet>	
+
+<changeSet dbms="postgresql,h2,mysql" author="Leap (generated)"
+		id="16832223644477-2-1-310-2-1">
+		<addColumn tableName="emf_workflow_type">
+		<column name="project_id" type="int" />
+		</addColumn>
+	</changeSet>
+	
+<changeSet dbms="mssql" author="Leap (generated)"
+		id="16832223644477-2-1-310-2">
+		<addColumn tableName="emf_workflow_type">
+		<column name="project_id" type="int" />
+		</addColumn>
+	</changeSet>	
+	
+	
+
+<changeSet dbms="postgresql,h2,mysql" author="Leap (generated)"
+		id="16832223644477-2-1-310-3-1">
+		<addColumn tableName="emf_event">
+		<column name="project_id" type="int" />
+		</addColumn>
+	</changeSet>
+	
+<changeSet dbms="mssql" author="Leap (generated)"
+		id="16832223644477-2-1-310-3">
+		<addColumn tableName="emf_event">
+		<column name="project_id" type="int" />
+		</addColumn>
+	</changeSet>	
+	
+	
+	
+<changeSet dbms="postgresql,h2,mysql" author="Leap (generated)"
+		id="16832223644477-2-1-310-4-1">
+		<addColumn tableName="emf_workflow">
+		<column name="project_id" type="int" />
+		</addColumn>
+	</changeSet>
+	
+<changeSet dbms="mssql" author="Leap (generated)"
+		id="16832223644477-2-1-310-4">
+		<addColumn tableName="emf_workflow">
+		<column name="project_id" type="int" />
+		</addColumn>
+	</changeSet>	
+
+<changeSet dbms="postgresql,h2,mysql" author="Leap (generated)"
+		id="16832223644477-2-1-310-5-1">
+		<addColumn tableName="emf_workflow_state">
+		<column name="project_id" type="int" />
+		</addColumn>
+	</changeSet>	
+	
+<changeSet dbms="mssql" author="Leap (generated)"
+		id="16832223644477-2-1-310-5">
+		<addColumn tableName="emf_workflow_state">
+		<column name="project_id" type="int" />
+		</addColumn>
+	</changeSet>	
+
+	
+	
+<changeSet dbms="postgresql,h2,mysql" author="Leap (generated)"
+		id="16832223644477-2-1-310-6-1">
+		<addColumn tableName="emf_custom_actions">
+		<column name="project_id" type="int" />
+		</addColumn>
+	</changeSet>
+
+<changeSet dbms="mssql" author="Leap (generated)"
+		id="16832223644477-2-1-310-6">
+		<addColumn tableName="emf_custom_actions">
+		<column name="project_id" type="int" />
+		</addColumn>
+	</changeSet>	
+		
+<changeSet dbms="postgresql,h2,mysql" author="Leap (generated)"
+		id="16832223644477-2-1-310-6-2">
+		<preConditions onFail="MARK_RAN">
+		<not>
+		<columnExists tableName = "emf_custom_actions" columnName = "body"/>
+		</not>
+		</preConditions>
+		<addColumn tableName="emf_custom_actions">
+		<column name="body" type="VARCHAR(4000)" />
+		</addColumn>
+	</changeSet>
+
+<changeSet dbms="mssql" author="Leap (generated)"
+		id="16832223644477-2-1-310-6-3">
+		<preConditions onFail="MARK_RAN">
+		<not>
+		<columnExists tableName = "emf_custom_actions" columnName = "body"/>
+		</not>
+		</preConditions>
+		<addColumn tableName="emf_custom_actions">
+		<column name="body" type="VARCHAR(4000)" />
+		</addColumn>
+	</changeSet>	
+
+
+	<changeSet dbms="mssql" author="Leap (generated)"
+		id="1657624600382-10-10-1">
+		<preConditions onFail="MARK_RAN">
+		<not>
+		<columnExists tableName = "emf_workflow_type" columnName = "cas_workflow_id"/>
+		</not>
+		</preConditions>
+		<addColumn tableName="emf_workflow_type">
+			<column name="cas_workflow_id" type="int" />
+			
+		</addColumn>
+	</changeSet>
+
+	<changeSet dbms="mssql" author="Leap (generated)"
+		id="1657624600382-10-10-2">
+		<preConditions onFail="MARK_RAN">
+		<not>
+		<columnExists tableName = "emf_event" columnName = "end_time"/>
+		</not>
+		</preConditions>
+		<addColumn tableName="emf_event">
+			<column name="end_time" type="datetime(6)" />
+			
+		</addColumn>
+	</changeSet>
+
+	<changeSet dbms="mssql" author="Leap (generated)"
+		id="1657624600382-10-10-3">
+		<preConditions onFail="MARK_RAN">
+		<sqlCheck expectedResult="varchar">
+		  SELECT DATA_TYPE  FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'emf_workflow_type' AND COLUMN_NAME = 'str_params'
+		  </sqlCheck>
+		  </preConditions>
+		  <sql>
+		  ALTER TABLE emf_workflow_type ALTER COLUMN str_params nvarchar(max)
+		  </sql>
+	</changeSet>	
+	
+	<changeSet dbms="mssql" author="Leap (generated)"
+		id="1657624600382-10-10-4">
+		<preConditions onFail="MARK_RAN">
+		<sqlCheck expectedResult="varchar">
+		  SELECT DATA_TYPE  FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'emf_workflow_type' AND COLUMN_NAME = 'str_eca_config'
+		  </sqlCheck>
+		  </preConditions>
+		  <sql>
+		  ALTER TABLE emf_workflow_type ALTER COLUMN str_eca_config nvarchar(max)
+		  </sql>
+	</changeSet>
+	
+	<changeSet dbms="mssql" author="Leap (generated)"
+		id="1657624600382-10-10-5">
+		<preConditions onFail="MARK_RAN">
+		<not>
+		<columnExists tableName = "emf_event" columnName = "server_host_address"/>
+		</not>
+		</preConditions>
+		<addColumn tableName="emf_event">
+			<column name="server_host_address" type="varchar(768)" />
+			
+		</addColumn>
+	</changeSet>
+	
+		<changeSet dbms="mssql" author="Leap (generated)"	id="1657624600382-10-10-5-1">
+		<preConditions onFail="MARK_RAN">
+		<not>
+		<columnExists tableName = "emf_event" columnName = "event_retry_counter"/>
+		</not>
+		</preConditions>
+		<addColumn tableName="emf_event">
+			<column name="event_retry_counter" type="int" />
+			
+		</addColumn>
+	</changeSet>
+	
+	<changeSet dbms="mssql" author="Leap (generated)"	id="1657624600382-10-10-5-1-2">
+		<preConditions onFail="MARK_RAN">
+		<not>
+		<columnExists tableName = "emf_event" columnName = "event_status"/>
+		</not>
+		</preConditions>
+		<addColumn tableName="emf_event">
+			<column name="event_status" type="varchar(500)" />
+			
+		</addColumn>
+	</changeSet>
+	
+	<changeSet dbms="mssql" author="Leap (generated)"
+		id="1657624600382-10-10-6">
+		<preConditions onFail="MARK_RAN">
+		<sqlCheck expectedResult="varchar">
+		  SELECT DATA_TYPE  FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'emf_event' AND COLUMN_NAME = 'str_params'
+		  </sqlCheck>
+		  </preConditions>
+		  <sql>
+		  ALTER TABLE emf_event ALTER COLUMN str_params nvarchar(max)
+		  </sql>
+	</changeSet>	
+	
+		<changeSet dbms="mssql" author="Leap (generated)"
+		id="1657624600382-10-10-7">
+		<preConditions onFail="MARK_RAN">
+		<sqlCheck expectedResult="varchar">
+		  SELECT DATA_TYPE  FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'emf_event' AND COLUMN_NAME = 'response'
+		  </sqlCheck>
+		  </preConditions>
+		  <sql>
+		  ALTER TABLE emf_event ALTER COLUMN response nvarchar(max)
+		  </sql>
+	</changeSet>
+	
+			<changeSet dbms="mssql" author="Leap (generated)"
+		id="1657624600382-10-10-8">
+		<preConditions onFail="MARK_RAN">
+		<sqlCheck expectedResult="varchar">
+		  SELECT DATA_TYPE  FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'emf_workflow' AND COLUMN_NAME = 'str_params'
+		  </sqlCheck>
+		  </preConditions>
+		  <sql>
+		  ALTER TABLE emf_workflow ALTER COLUMN str_params nvarchar(max)
+		  </sql>
+	</changeSet>
+
+
+
+		<changeSet dbms="mssql" author="Leap (generated)"
+		id="1657624600382-10-10-9">
+
+		  <sql>
+		  DECLARE @constraint_name nvarchar(250)
+		  Declare @Str NVARCHAR(800)
+		  select @constraint_name = TC.CONSTRAINT_NAME from information_schema.table_constraints TC inner join information_schema.constraint_column_usage CC on TC.Constraint_Name = CC.Constraint_Name where TC.constraint_type = 'Unique' and CC.Column_Name = 'source_event_id' and TC.TABLE_NAME = 'emf_event'
+		  
+		  IF @constraint_name IS NOT NULL
+		  
+		  SET @str = 'ALTER TABLE emf_event DROP CONSTRAINT ' + @constraint_name
+		  
+		  Exec(@str)
+		  
+		  </sql>
+	</changeSet>
+
+
+</databaseChangeLog>						

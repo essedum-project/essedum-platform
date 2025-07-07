@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <script>
+    const re = /^[a-zA-Z0-9/]+$/;
+    if(window.location.pathname && window.location.pathname.split('index.html').length > 0 && re.test(window.location.pathname.split('index.html')[0])){
+      document.write("<base href='" + window.location.pathname.split('index.html')[0] + "' />")
+    }
+    else document.write("<base href='/' />")
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.png">
+   <!-- Add Material Icons font -->
+   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+  <app-root></app-root>
+  <!-- <script src="./assets/js/cortex.core.js"></script>
+  <script src="./assets/js/virtual-assistant.js"></script> -->
+</body>
+</html>

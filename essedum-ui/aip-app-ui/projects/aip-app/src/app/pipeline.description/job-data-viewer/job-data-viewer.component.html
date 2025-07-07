@@ -1,0 +1,122 @@
+<!-- modal for console data -->
+<div *ngIf="data &amp;&amp; data.isConsole" class="selector-769-1">
+    <div class="totheright modal-header selector-769-2">
+        <mat-tooltip *ngIf="!isRemoteLog" matTooltip="copy to clipboard" matTooltipPosition="above">
+            <mat-icon *ngIf="!pi" class="lfx-u-mar-r-16 x-24 copy-icon" (click)="copyText()">content_copy</mat-icon>
+        </mat-tooltip>
+        <mat-tooltip *ngIf="pi" matTooltip="copied" matTooltipPosition="above">
+            <mat-icon class="lfx-u-mar-r-16 x-24 copy-icon">content_copy</mat-icon>
+        </mat-tooltip>
+        <mat-tooltip matTooltip="close" matTooltipPosition="above">
+            <mat-icon class="lfx-u-mar-r-16 x-24 close-icon" (click)="closeDialog()">close</mat-icon>
+        </mat-tooltip>
+    </div>
+    <div class="modal-body selector-769-7">
+        <div class="tabpadding selector-769-8">
+            <div class="flexdivcolumn selector-769-9">
+                <mat-accordion *ngIf="data &amp;&amp; !isRemoteLog" designType="3D" [hideToggle]="false" [multi]="false">
+                    <mat-expansion-panel>
+                        <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'" [ngStyle]="{'background-color': '#0094ff'}">
+                            <mat-panel-title style="color: white; font-weight: 600;"> Log Details</mat-panel-title>
+                        </mat-expansion-panel-header>
+
+                        <div class="lfx-u-mar-16">
+                            <div class="hidden-details">
+                                <div>
+                                    <div class="space">
+                                        <h3 class="id">Job ID</h3>
+                                        <h3 class="line-wrap">{{logContent.get('jobId')}}</h3>
+                                    </div>
+                                    <div class="space">
+                                        <h3 class="id">Correlation ID</h3>
+                                        <h3>{{logContent.get('correlationid')}}</h3>
+                                    </div>
+                                    <div class="content-group">
+                                        <div *ngIf="!isChain">
+                                            <h3 class="id content-width">Streaming Service</h3>
+                                            <h3>{{logContent.get('streamingService')}}</h3>
+                                        </div>
+                                        <div>
+                                            <h3 class="id content-width">Job Status</h3>
+                                            <h3>{{logContent.get('jobStatus')}}</h3>
+                                        </div>
+                                        <div *ngIf="!isChain">
+                                            <h3 class="id content-width">Version</h3>
+                                            <h3>{{logContent.get('version')}}</h3>
+                                        </div>
+                                    </div>
+                                    <div class="content-group">
+                                        <div *ngIf="!isChain">
+                                            <h3 class="id content-width">Type</h3>
+                                            <h3>{{logContent.get('type')}}</h3>
+                                        </div>
+                                        <div *ngIf="!isChain">
+                                            <h3 class="id content-width">Runtime</h3>
+                                            <h3>{{logContent.get('runtime')}}</h3>
+                                        </div>
+                                        <div>
+                                            <h3 class="id content-width">Finish Time</h3>
+                                            <h3>{{logContent.get('finishtime')}}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="footer-content">
+                                    <div class="icon-data-wrap">
+                                        <div>
+                                            <span class="lfx-c-avatar  lfx-c-avatar--sm aip-hover-avatar">
+                                                {{(logContent.get('submittedBy') ? logContent.get('submittedBy') : 'Name Not Available') | firstCharacter}}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <h3 class="id">Submitted By</h3>
+                                            <h3>{{logContent.get('submittedBy')}}</h3>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 class="id">Submitted On</h3>
+                                        <h3>{{logContent.get('submittedOn')}}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-expansion-panel>
+                </mat-accordion>
+                <br>
+                <mat-card class="example-card">
+                    <mat-card-header>
+                        <mat-card-title>Log :</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content class="line-space">
+                        <div class="" *ngIf="!isChain" style="white-space: pre-line;">
+                            <span style="word-break: break-all;">{{Logs}}</span>
+                        </div>
+                        <div class="" *ngIf="isChain">
+                            <div class="d-flex flex-wrap">
+                                <div *ngFor="let job of jobcollection">
+                                    <div class="d-flex lfx-u-mar-8">
+                                        <mat-card class="job-card" (click)="showLog(job.id, job.runtime)" style="cursor: pointer;">
+                                            <mat-card-content>
+                                                <h1 class="lfx-u-header-sm lfx-u-ellipsis">{{displayFn(job.name)}}</h1>
+                                            </mat-card-content>
+                                        </mat-card>
+                                    </div>
+                                </div>
+                            </div>
+                            <div *ngIf="displayLogEnabled" class="lfx-u-mar-8" style="white-space: pre-line">
+                                <mat-card>
+                                    <mat-card-content>
+                                        <pre>{{displayLog}}</pre>
+                                    </mat-card-content>
+                                </mat-card>
+                            </div>
+                        </div>
+                        <div *ngIf="isRemoteLog" style="word-break: break-word;">
+                            {{data.content}}
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+    </div>
+</div>

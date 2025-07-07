@@ -1,0 +1,830 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <!--  3v0 changes -->
+	<changeSet author="Leap" id="3v0-cip-1">
+		<addColumn tableName="mldataset">
+			<column name="tags" type="varchar(255)" />
+			<column name="interfacetype" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="3v0-cip-2">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mltags" />
+			</not>
+		</preConditions>
+		<createTable tableName="mltags">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="label" type="VARCHAR(255)">
+			</column>
+			<column name="category" type="VARCHAR(255)">
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="3v0-cip-3">
+		<addColumn tableName="mldatasource">
+			<column name="interfacetype" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="3v0-cip-4">
+		<addColumn tableName="mlplugin">
+			<column name="org" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="3v0-cip-5">
+		<addColumn tableName="mlpipeline">
+			<column name="tags" type="varchar(255)" />
+			<column name="interfacetype" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="3v0-cip-6">
+		<addColumn tableName="mlmashups">
+			<column name="interfacetype" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-cip-7">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlendpoints" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlendpoints">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="endpointname" type="VARCHAR(255)" />
+			<column name="description" type="TEXT" />
+			<column name="endpointtype" type="VARCHAR(255)" />
+			<column name="connectiondetails" type="VARCHAR(255)" />
+			<column name="apispec" type="VARCHAR(255)" />
+			<column name="lastmodifieddate" type="datetime(6)" />
+			<column name="sample" type="TEXT" />
+			<column name="createdBy" type="VARCHAR(255)" />
+			<column name="lastmodifiedby" type="VARCHAR(255)" />
+			<column name="modelname" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="3v0-cip-8">
+		<addColumn tableName="mlmodels">
+			<column name="tags" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="3v0-cip-9">
+		<renameColumn columnDataType="TEXT" tableName="mlmodels" oldColumnName="explanation" newColumnName="description"/>
+	</changeSet>
+	<changeSet author="Leap" id="3v0-cip-10">
+		<addColumn tableName="mlpipeline">
+			<column name="pipeline_metadata" type="TEXT" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-cip-11">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlplugindetails" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlplugindetails">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="type" type="VARCHAR(255)" />
+			<column name="org" type="VARCHAR(255)" />
+			<column name="plugindetails" type="longtext" />
+			<column name="pluginname" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet id="3v0-cip-12" author="Leap" >
+		<sql dbms="mysql" splitStatements="true" stripComments="true">
+	       ALTER TABLE mldatasource MODIFY extras LONGTEXT; 
+		</sql>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-cip-13">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlintstances" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlintstances">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)" />
+			<column name="alias" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="datasourcenameforconnection" type="VARCHAR(255)" />
+			<column name="datasourcealiasforconnection" type="VARCHAR(255)" />
+			<column name="adapaternameformethods" type="VARCHAR(255)" />
+			<column name="adapateraliasformethods" type="VARCHAR(255)" />
+			<column name="description" type="TEXT" />
+			<column name="interfacetype" type="VARCHAR(255)" />
+			<column name="type" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="3v0-cip-14">
+		<addColumn tableName="mleventjobmapping">
+			<column name="interfacetype" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v0-cip-15">
+		<addColumn tableName="mlendpoints">
+			<column name="tryoutlink" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap" id="3v0-cip-16">
+		<addColumn tableName="mlplugin">
+			<column name="editortype" type="varchar(255)" />
+		</addColumn>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-cip-17">
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlfederatedendpoints" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlfederatedendpoints">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="fed_id" type="VARCHAR(255)" />
+			<column name="adapter_id" type="VARCHAR(255)" />
+			<column name="app_name" type="VARCHAR(255)" />
+			<column name="fed_name" type="VARCHAR(255)" />
+			<column name="fed_org" type="VARCHAR(255)" />
+			<column name="app_org" type="VARCHAR(255)" />
+			<column name="status" type="VARCHAR(255)" />
+			<column name="deployed_models" type="TEXT" />
+			<column name="adapter_alias" type="VARCHAR(255)" />
+			<column name="created_by" type="VARCHAR(255)" />
+			<column name="created_on" type="datetime(6)" />
+			<column name="is_deleted" type="boolean" />
+			<column name="app_modified_by" type="VARCHAR(255)" />
+			<column name="fed_modified_by" type="VARCHAR(255)" />
+			<column name="app_modified_date" type="VARCHAR(255)" />
+			<column name="fed_modified_date" type="datetime(6)" />
+			<column name="sync_date" type="datetime(6)" />
+			<column name="endpoint_type" type="VARCHAR(255)" />
+			<column name="endpoint_likes" type="INT" />
+			<column name="endpoint_metadata" type="VARCHAR(255)" />
+			<column name="raw_payload" type="TEXT" />
+			<column name="context_uri" type="TEXT" />
+			<column name="app_application" type="TEXT" />
+			<column name="app_sample" type="TEXT" />
+			<column name="app_status" type="VARCHAR(255)" />
+			<column name="app_description" type="TEXT" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="3v0-cip-18" >
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlfederatedmodels" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlfederatedmodels">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="fed_id" type="VARCHAR(255)" />
+			<column name="adapter_id" type="VARCHAR(255)" />
+			<column name="app_name" type="VARCHAR(255)" />
+			<column name="fed_name" type="VARCHAR(255)" />
+			<column name="fed_org" type="VARCHAR(255)" />
+			<column name="app_org" type="VARCHAR(255)" />
+			<column name="status" type="VARCHAR(255)" />
+			<column name="adapter_alias" type="VARCHAR(255)" />
+			<column name="created_by" type="VARCHAR(255)" />
+			<column name="created_on" type="datetime(6)" />
+			<column name="is_deleted" type="boolean" />
+			<column name="app_modified_by" type="VARCHAR(255)" />
+			<column name="fed_modified_by" type="VARCHAR(255)" />
+			<column name="app_modified_date" type="VARCHAR(255)" />
+			<column name="fed_modified_date" type="datetime(6)" />
+			<column name="sync_date" type="datetime(6)" />
+			<column name="model_type" type="VARCHAR(255)" />
+			<column name="model_likes" type="INT" />
+			<column name="model_metadata" type="TEXT" />
+			<column name="raw_payload" type="TEXT" />
+			<column name="artifacts" type="TEXT" />
+			<column name="container" type="TEXT" />
+			<column name="app_description" type="TEXT" />
+			<column name="fed_description" type="TEXT" />
+			<column name="version" type="VARCHAR(255)" />
+			<column name="app_status" type="VARCHAR(255)" />
+			<column name="model_deployment" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="3v0-cip-19" >
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mltagsentity" />
+			</not>
+		</preConditions>
+		<createTable tableName="mltagsentity">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="tag_id" type="INT" />
+			<column name="entity_id" type="INT" />
+			<column name="entity_type" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="3v0-cip-20" >
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlspectemplates" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlspectemplates">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="domainname" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="capability" type="TEXT" />
+			<column name="description" type="TEXT" />
+			<column name="apispectemplate" type="TEXT" />
+			<column name="createdby" type="VARCHAR(255)" />
+			<column name="createdon" type="TIMESTAMP" />
+			<column name="lastmodifiedby" type="VARCHAR(255)" />
+			<column name="lastmodifiedon" type="TIMESTAMP" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="3v0-cip-21" >
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mladapters" />
+			</not>
+		</preConditions>
+		<createTable tableName="mladapters">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="connectionid" type="VARCHAR(255)" />
+			<column name="connectionname" type="VARCHAR(255)" />
+			<column name="spectemplatedomainname" type="VARCHAR(255)" />
+			<column name="description" type="TEXT" />
+			<column name="category" type="VARCHAR(255)" />
+			<column name="createdby" type="VARCHAR(255)" />
+			<column name="createdon" type="TIMESTAMP" />
+			<column name="lastmodifiedby" type="VARCHAR(255)" />
+			<column name="lastmodifiedon" type="TIMESTAMP" />
+			<column name="apispec" type="TEXT" />
+			<column name="isactive" type="VARCHAR(20)" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="3v0-cip-22" >
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlintstance" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlintstance">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)" />
+			<column name="adaptername" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="connectionid" type="VARCHAR(255)" />
+			<column name="connectionname" type="VARCHAR(255)" />
+			<column name="spectemplatedomainname" type="VARCHAR(255)" />
+			<column name="description" type="TEXT" />
+			<column name="category" type="VARCHAR(255)" />
+			<column name="createdby" type="VARCHAR(255)" />
+			<column name="createdon" type="TIMESTAMP" />
+			<column name="lastmodifiedby" type="VARCHAR(255)" />
+			<column name="lastmodifiedon" type="TIMESTAMP" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v0-cip-23" >
+		<addColumn tableName="mldataset">
+			<column name="adaptername" type="VARCHAR(255)" />
+			<column name="isadapteractive" type="VARCHAR(20)" />
+			<column name="indexname" type="VARCHAR(255)" />
+			<column name="summary" type="TEXT" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v0-cip-24" >
+		<addColumn tableName="mlpipeline">
+			<column name="is_template" defaultValueBoolean="false" type="boolean" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v0-cip-25" >
+		<addColumn tableName="mlchains">
+			<column name="flowjson" type="text" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v0-cip-26" >
+		<preConditions onFail="MARK_RAN">
+			<tableExists tableName="mlapps"/>
+		</preConditions>
+		<dropTable cascadeConstraints="true" tableName="mlapps"/>
+	</changeSet>
+
+
+	<changeSet author="Leap" id="3v0-cip-27" >
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlapps" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlapps">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)" />
+			<column name="tryoutlink" type="VARCHAR(255)" />
+			<column name="status" type="VARCHAR(255)" />
+			<column name="type" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="scope" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v0-cip-28" >
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlappimage" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlappimage">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="file_name" type="VARCHAR(255)" />
+			<column name="mime_type" type="VARCHAR(255)" />
+			<column name="url" type="LONGTEXT" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="app_alias" type="VARCHAR(255)" />
+			<column name="app_name" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v0-cip-29" >
+		<addColumn tableName="mldatasource">
+			<column name="fordataset" defaultValue="0" type="TINYINT(1)" />
+			<column name="foradapter" defaultValue="0" type="TINYINT(1)" />
+			<column name="forruntime" defaultValue="0" type="TINYINT(1)" />
+			<column name="formodel" defaultValue="0" type="TINYINT(1)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v0-cip-30" >
+		<addColumn tableName="mladapters">
+			<column name="executiontype" defaultValue="REST" type="VARCHAR(255)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v0-cip-31" >
+		<addColumn tableName="mlintstance">
+			<column name="executiontype" defaultValue="REST" type="VARCHAR(255)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v0-cip-32" >
+		<addColumn tableName="mlapps">
+			<column name="file" type="VARCHAR(255)" />
+			<column name="job_name" type="VARCHAR(255)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="3v0-cip-postgresql-0" author="Leap" >
+		<sql dbms="postgresql" splitStatements="true" stripComments="true">
+	        ALTER TABLE core.mlpipelinenativescriptentity ALTER COLUMN filescript TYPE bytea USING filescript::TEXT::BYTEA; 
+		</sql>
+	</changeSet>
+
+	<changeSet id="3v0-cip-postgresql-1" author="Leap" >
+		<sql dbms="postgresql" splitStatements="true" stripComments="true">
+	        ALTER TABLE core.mlpipeline ALTER COLUMN deleted TYPE boolean USING deleted::int::boolean; 
+		</sql>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="3v0-cip-33" >
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlfederatedentities" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlfederatedentities">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="pid" type="INT" />
+			<column name="cid" type="INT" />
+			<column name="ptype" type="VARCHAR(255)" />
+			<column name="ctype" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap" id="3v0-cip-34" >
+		<addColumn tableName="mladapters">
+			<column name="isChain" type="BOOLEAN" />
+			<column name="chainName" type="VARCHAR(255)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Leap" id="3v0-cip-35" >
+		<addColumn tableName="mlintstance">
+			<column name="jobid" type="VARCHAR(255)" />
+			<column name="status" type="VARCHAR(255)" />
+			<column name="runtimename" type="VARCHAR(255)" />
+		</addColumn>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="3v0-cip-36" >
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlfeaturestore" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlfeaturestore">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="fed_name" type="VARCHAR(255)" />
+			<column name="adapter_id" type="VARCHAR(255)" />
+			<column name="app_org" type="VARCHAR(255)" />
+			<column name="app_name" type="VARCHAR(255)" />
+			<column name="fed_org" type="VARCHAR(255)" />
+			<column name="adapter_alias" type="VARCHAR(255)" />
+			<column name="created_by" type="VARCHAR(255)" />
+			<column name="created_on" type="datetime(6)" />
+			<column name="modified_on" type="datetime(6)" />
+			<column name="sync_date" type="datetime(6)" />
+			<column name="project_description" type="TEXT" />
+			<column name="imp_library" type="VARCHAR(255)" />
+			<column name="scheduler" type="VARCHAR(255)" />
+			<column name="provider" type="VARCHAR(255)" />
+			<column name="keymanagement_host" type="TEXT" />
+			<column name="online_datacloud" type="TEXT" />
+			<column name="odc_database" type="TEXT" />
+			<column name="registry_type" type="TEXT" />
+			<column name="registry_dbpath" type="TEXT" />
+			<column name="additional_properties" type="TEXT" />
+			<column name="raw_payload" type="TEXT" />
+			<column name="features" type="TEXT" />
+			<column name="is_deleted" type="boolean" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="3v0-cip-37" >
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="usm_secrets" />
+			</not>
+		</preConditions>
+		<createTable tableName="usm_secrets">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="key_" type="VARCHAR(255)" />
+			<column name="value_" type="VARCHAR(255)" />
+			<column name="project_id" type="VARCHAR(255)" />
+			<column name="salt_" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+
+	<!--changeSet author="Leap (generated)" id="3v0-cip-38" >
+		<addUniqueConstraint columnNames="key_, project_id" constraintName="UK2g9h4pvhmhcxts8m2rxu566l83vo" tableName="usm_secrets" />
+	</changeSet-->
+
+	<changeSet author="Leap (generated)" id="3v0-cip-39" >
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="aip_activity" />
+			</not>
+		</preConditions>
+		<createTable tableName="aip_activity">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="activity_id" type="VARCHAR(255)" />
+			<column name="activity_name" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+
+
+	<changeSet author="Leap (generated)" id="3v0-cip-40" >
+		<validCheckSum>ANY</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="aip_artifact" />
+			</not>
+		</preConditions>
+		<createTable tableName="aip_artifact">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="type" type="VARCHAR(255)" />
+			<column name="mapping_id" type="INT" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="3v0-cip-41" >
+		<validCheckSum>ANY</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="aip_canvas" />
+			</not>
+		</preConditions>
+		<createTable tableName="aip_canvas">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="user_response" type="LONGTEXT" />
+			<column name="initiative_id" type="INT" />
+			<column name="canvas_id" type="INT" />
+			<column name="checklist_id" type="INT" />
+		</createTable>
+	</changeSet>
+
+
+	<changeSet author="Leap (generated)" id="3v0-cip-42" >
+		<validCheckSum>ANY</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="aip_canvastemplate" />
+			</not>
+		</preConditions>
+		<createTable tableName="aip_canvastemplate">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)"/>
+			<column name="content" type="LONGTEXT" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="activity_id" type="INT" />
+			<column name="mandatory" type="TINYINT(1)" />
+			<column name="approver_flow" type="TINYINT(1)" />
+			<column name="approver_role" type="INT" />
+		</createTable>
+	</changeSet>
+
+
+	<changeSet author="Leap (generated)" id="3v0-cip-43" >
+		<validCheckSum>ANY</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="aip_initiative" />
+			</not>
+		</preConditions>
+		<createTable tableName="aip_initiative">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)"/>
+			<column name="description" type="LONGTEXT" />
+			<column name="hasIvmLink" type="TINYINT(1)" />
+			<column name="IvmLinkid" type="INT" />
+			<column name="created_by" type="VARCHAR(255)" />
+			<column name="last_updated_by" type="VARCHAR(255)" />
+			<column name="created_ts" type="datetime(6)" />
+			<column name="last_updated_ts" type="datetime(6)" />
+			<column name="organization" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="3v0-cip-44" >
+		<validCheckSum>ANY</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="aip_initiative_checklist" />
+			</not>
+		</preConditions>
+		<createTable tableName="aip_initiative_checklist">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="initiative_id" type="INT"/>
+			<column name="task_type" type="VARCHAR(255)" />
+			<column name="task_id" type="INT" />
+			<column name="mandatory" type="TINYINT(1)" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="status" type="VARCHAR(255)" />
+			<column name="approver_flow" type="TINYINT(1)" />
+			<column name="approver_role" type="INT" />
+			<column name="approver_id" type="INT" />
+			<column name="raised_by" type="INT" />
+			<column name="approval_status" type="VARCHAR(255)" />
+			<column name="approval_comments" type="TEXT" />
+			<column name="approved_on" type="datetime(6)" />
+			<column name="artifact_link_type" type="VARCHAR(255)" />
+			<column name="artifact_link_id" type="INT" />
+			<column name="submitted_on" type="datetime(6)" />
+			<column name="is_deleted" type="TINYINT(1)" />
+		</createTable>
+	</changeSet>
+
+
+	<changeSet author="Leap (generated)" id="3v0-cip-45" >
+		<validCheckSum>ANY</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="aip_initiative_workgroup" />
+			</not>
+		</preConditions>
+		<createTable tableName="aip_initiative_workgroup">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="user_id" type="INT"/>
+			<column name="user_name" type="VARCHAR(255)" />
+			<column name="role_id" type="INT" />
+			<column name="role_name" type="VARCHAR(255)" />
+			<column name="user_email" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="3v0-cip-46" >
+		<validCheckSum>ANY</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="aip_questionnaire" />
+			</not>
+		</preConditions>
+		<createTable tableName="aip_questionnaire">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="user_response" type="LONGTEXT" />
+			<column name="initiative_id" type="INT" />
+			<column name="questionnaire_id" type="INT" />
+			<column name="checklist_id" type="INT" />
+		</createTable>
+	</changeSet>
+
+
+	<changeSet author="Leap (generated)" id="3v0-cip-47" >
+		<validCheckSum>ANY</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="aip_questionnairetemplate" />
+			</not>
+		</preConditions>
+		<createTable tableName="aip_questionnairetemplate">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)"/>
+			<column name="content" type="LONGTEXT" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="activity_id" type="INT" />
+			<column name="mandatory" type="TINYINT(1)" />
+			<column name="approver_flow" type="TINYINT(1)" />
+			<column name="approver_role" type="INT" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="3v0-cip-48" >
+		<validCheckSum>ANY</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="aip_termsnconditions" />
+			</not>
+		</preConditions>
+		<createTable tableName="aip_termsnconditions">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="user_response" type="LONGTEXT" />
+			<column name="initiative_id" type="INT" />
+			<column name="termsnconditions_id" type="INT" />
+			<column name="checklist_id" type="INT" />
+		</createTable>
+	</changeSet>
+
+
+	<changeSet author="Leap (generated)" id="3v0-cip-49" >
+		<validCheckSum>ANY</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="aip_termsnconditionstemplate" />
+			</not>
+		</preConditions>
+		<createTable tableName="aip_termsnconditionstemplate">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)"/>
+			<column name="content" type="LONGTEXT" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="activity_id" type="INT" />
+			<column name="mandatory" type="TINYINT(1)" />
+			<column name="approver_flow" type="TINYINT(1)" />
+			<column name="approver_role" type="INT" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="Leap (generated)" id="3v0-cip-50" >
+		<validCheckSum>ANY</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="aip_user_activity" />
+			</not>
+		</preConditions>
+		<createTable tableName="aip_user_activity">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="user_id" type="INT"/>
+			<column name="artifact" type="INT" />
+			<column name="last_updated_ts" type="datetime(6)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-cip-51" >
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mlsearchtopics" />
+			</not>
+		</preConditions>
+		<createTable tableName="mlsearchtopics">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="topicname" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="adapterinstance" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-cip-52" >
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="mldatasettopics" />
+			</not>
+		</preConditions>
+		<createTable tableName="mldatasettopics">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="datasetid" type="VARCHAR(255)" />
+			<column name="organization" type="VARCHAR(255)" />
+			<column name="topicname" type="VARCHAR(255)" />
+			<column name="status" type="VARCHAR(255)" />
+			<column name="log" type="TEXT" />
+			<column name="description" type="TEXT" />
+			<column name="starttime" type="datetime(6)" />
+			<column name="finishtime" type="datetime(6)" />
+			<column name="duration" type="VARCHAR(255)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-cip-53" >
+		<validCheckSum>any</validCheckSum>
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="usm_access_tokens" />
+			</not>
+		</preConditions>
+		<createTable tableName="usm_access_tokens">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="user_id" type="INT" />
+			<column name="access_token" type="VARCHAR(255)" />
+			<column name="last_modified_on" type="datetime(6)" />
+			<column name="created_on" type="datetime(6)" />
+			<column name="expires_on" type="datetime(6)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="3v0-cip-54" >
+		<addColumn tableName="mlapps">
+			<column name="video_file" type="VARCHAR(255)" />
+		</addColumn>
+	</changeSet>
+</databaseChangeLog>

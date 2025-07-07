@@ -1,0 +1,5 @@
+"body","description","eventname","organization","jobdetails"
+"{}","","generateScript_DragAndDrop","leo1311","[{\"name\":\"LEOCDGNR66088\",\"type\":\"pipeline\"}]"
+"{}","NULL","generateScript_DragNDropLite","leo1311","[{\"name\":\"LEACDGNR30505\",\"type\":\"pipeline\"}]"
+"{}","generateScript_SemanticSearch","generateScript_SemanticSearch","leo1311","[{""name"":""LEOCDGNR33831"",""type"":""pipeline"",""runtime"":{""dsAlias"":"""",""dsName"":"""",""type"":""Local""}}]"
+"{}","generateScript for chatbot","generateScript_Chatbot","leo1311","[{""name"":""CHACDGNR87605"",""type"":""pipeline"",""runtime"":{""dsAlias"":"""",""dsName"":"""",""type"":""Local""}}]"

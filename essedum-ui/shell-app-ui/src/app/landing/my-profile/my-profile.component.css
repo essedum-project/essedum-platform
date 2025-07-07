@@ -1,0 +1,71 @@
+.profile-wrapper {
+    display: flex; /* Use flexbox for layout */
+    margin: 20px; 
+  
+  }
+  .profile-image-container{
+    height: 100%;
+    width: 100%;
+  }
+  
+  
+  .matInput {
+    width: 100%;
+    display: block;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    border-bottom: 1px solid #D2D2D2;
+    padding: 5px 0px;
+    color: #231F20;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    overflow-wrap: break-word;
+    font-family: var(--font-type) !important;
+  }  
+  #drop-zone {
+    display: block;
+    padding: 10px;
+    border: 1px dashed #ccc;
+    cursor: pointer;
+    text-align: center;
+  }
+  
+  #file-input {
+    /* Hide the actual file input */
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .highlight{
+    text-decoration: underline;
+    color: var(--base-color);
+  }
+  .profile-actions {
+    text-align: center; /* Center buttons horizontally */
+  }
+  .button-container {
+    display: flex; /* Arrange buttons horizontally */
+    justify-content: flex-end; /* Align buttons to the right */
+  }
+  
+  .profile-container {
+    display: flex;
+    justify-content: space-between; /* Distribute space evenly */
+  }
+  .profile-left{
+    padding-right: 43px;
+    margin-top: 13px;
+  }
+  
+  
+  
+  
+  
+  
+  
+  

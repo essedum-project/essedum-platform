@@ -1,0 +1,78 @@
+::ng-deep .mat-mdc-floating-label {
+    line-height: 2.5rem !important;
+}
+
+.custom-hint {
+    color: black;
+    font-size: 12px;
+    padding-bottom: 5px;
+}
+
+.custom-hint-or-error {
+    font-size: 12px;
+    padding-bottom: 5px;
+}
+
+::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+}
+
+.aip-lnk-ellipsis {
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    
+}
+.aip-lnk-ellipsis:hover {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: inherit;
+    word-break: break-word;
+  }
+.aip-link-card{
+    display: grid;
+    grid-template-columns: repeat(4, 170px);
+    grid-template-rows: repeat(auto-fit, 87px);
+    grid-row-gap: 24px;
+    grid-column-gap: 24px;
+    overflow: auto;
+}
+.aip-link-card-mini{
+    display: grid;
+    grid-template-columns: repeat(2, 170px);
+    grid-template-rows: repeat(auto-fit, 87px);
+    grid-row-gap: 24px;
+    grid-column-gap: 24px;
+    width: 50%;
+    overflow: auto;
+}
+
+.aip-link-card-height{
+    min-height: 20rem;
+    height: 22rem;
+}
+.aip-link-card-containers{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 250px);
+    gap: 24px;
+
+}
+.aip-linked-search{
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translate(50%, -50%);
+    z-index: 4;
+}
+.aip-linked-load{
+    grid-column: 3;
+}
+
+::ng-deep .le-l-multicolumn__3-col {
+    background: none;
+}
+
+::ng-deep .le-l-multicolumn__header {
+    border-bottom: none;
+}

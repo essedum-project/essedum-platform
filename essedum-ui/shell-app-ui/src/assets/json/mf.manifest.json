@@ -1,0 +1,148 @@
+{
+	"mfe14": {
+		"remoteEntry": "http://localhost:5002/remoteEntry.js",
+		"exposedModule": "./FeatureModule",
+		"routePath": "mfe14",
+		"ngModuleName": "FeatureModule"
+	},
+	"ivm": {
+		"remoteEntry": "/ivm/remoteEntry.js",
+		"exposedModule": "./Component",
+		"routePath": "ivm",
+		"ngModuleName": "SvyLibModule",
+		"title": "Essedum"
+	},
+	"bjm": {
+		"remoteEntry": "/bjm/remoteEntry.js",
+		"exposedModule": "./Component",
+		"routePath": "iamp-bjm",
+		"ngModuleName": "IampBjmModule",
+		"title": "Essedum"
+	},
+	"grh": {
+		"remoteEntry": "/grh/remoteEntry.js",
+		"exposedModule": "./Component",
+		"routePath": "iamp-graph",
+		"ngModuleName": "IampGrhModule",
+		"title": "Essedum"
+	},
+	"cap": {
+		"remoteEntry": "/cap/remoteEntry.js",
+		"exposedModule": "./Component",
+		"routePath": "iamp-cap",
+		"ngModuleName": "IcapLibModule",
+		"title": "Essedum"
+	},
+	"dbs": {
+		"remoteEntry": "/dbs/remoteEntry.js",
+		"exposedModule": "./Component",
+		"routePath": "dynamicDashboard",
+		"ngModuleName": "IampDbsModule"
+	},
+	"bcc": {
+		"remoteEntry": "/bcc/remoteEntry.js",
+		"exposedModule": "./Component",
+		"routePath": "cc",
+		"ngModuleName": "IampBccModule",
+		"title": "Essedum"
+	},
+	"ccl": {
+		"remoteEntry": "/ccl/remoteEntry.js",
+		"exposedModule": "./Component",
+		"routePath": "iamp-ccl",
+		"ngModuleName": "IampCclModule",
+		"title": "Essedum"
+	},
+	"cas": {
+		"remoteEntry": "/cas/remoteEntry.js",
+		"exposedModule": "./Component",
+		"routePath": "iamp-btf",
+		"ngModuleName": "IampBtfModule",
+		"title": "Essedum"
+	},
+	"sandbox": {
+		"remoteEntry": "/sbxui/remoteEntry.js",
+		"exposedModule": "./Component",
+		"routePath": "sandbox",
+		"ngModuleName": "SbxModule"
+	},
+	"icip_app": {
+		"remoteEntry": "/cipui/remoteEntry.js",
+		"exposedModule": "./Component",
+		"routePath": "aibrain",
+		"ngModuleName": "MlstudioModule"
+	},
+	"aip_app": {
+		"remoteEntry": "/aipui/remoteEntry.js",
+		"exposedModule": "./Component",
+		"routePath": "aip",
+		"ngModuleName": "AipModule"
+	},
+	"cipwflw_app": {
+		"remoteEntry": "/cipui/remoteEntry-cipwflw.js",
+		"exposedModule": "./Component",
+		"routePath": "workflows",
+		"ngModuleName": "IcipWorkflowModule"
+	},
+	"codebot-mfe4": {
+		"remoteEntry": "http://localhost:8080/atgen/codegen/remoteEntry.js",
+		"exposedModule": "./Codegen",
+		"routePath": "atgen/codegen/featuregen",
+		"type": "script",
+		"remoteName": "codegen",
+		"elementName": "react-element",
+		"title": "Essedum"
+	},
+	"eda": {
+		"remoteEntry": "/eda/remoteEntry.js",
+		"exposedModule": "./Component",
+		"routePath": "iamp-eda",
+		"ngModuleName": "IampEdaModule",
+		"title": "Essedum"
+	},
+	"sre_app": {
+		"remoteEntry": "/sreui/remoteEntry.js",
+		"exposedModule": "./Component",
+		"routePath": "iamp-sre",
+		"ngModuleName": "IampSreModule",
+		"title": "Essedum"
+	},
+	"iegp-app": {
+		"remoteEntry": "/iegpui/remoteEntry.js",
+		"exposedModule": "./Component",
+		"routePath": "iamp-iegp",
+		"ngModuleName": "IampIegpModule",
+		"title": "Essedum"
+	},
+	"tad": {
+		"remoteEntry": "/cas/remoteEntry.js",
+		"exposedModule": "./Component",
+		"routePath": "iamp-tad",
+		"ngModuleName": "IampBtfModule",
+		"title": "Essedum"
+	},
+	"g20k_cyberscan": {
+		"remoteEntry": "https://localhost:8094/scan/remoteEntry.js",
+		"exposedModule": "./ScanModule",
+		"routePath": "cyberscan",
+		"ngModuleName": "CyberscanModule"
+	},
+	"cis": {
+		"remoteEntry": "/cis/remoteEntry.js",
+		"exposedModule": "./Component",
+		"routePath": "iamp-cis",
+		"ngModuleName": "IampCisModule"
+	},
+	"icm_app": {
+		"remoteEntry": "/icm-app/remoteEntryicm.js",
+		"exposedModule": "./Component",
+		"routePath": "tickets",
+		"ngModuleName": "IampIcmModule"
+	},
+	"adp_app": {
+		"remoteEntry": "/icm-app/remoteEntryadp.js",
+		"exposedModule": "./Component",
+		"routePath": "adapters",
+		"ngModuleName": "DatasetsModule"
+	}
+}

@@ -1,0 +1,97 @@
+.tagbrdr {
+  border-radius: 8px;
+  padding: 5px;
+  margin: 5px;
+  text-decoration: none;
+  box-shadow: 0 1px 4px 0 rgb(1 1 1 / 10%), 0 1px 1px 0 rgb(0 0 0 / 10%);
+}
+.items-baseline {
+  align-items: baseline;
+}
+
+.aip-fullname-card {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: all 0.2s;
+  cursor: pointer;
+  max-width: 100%;
+  display: block;
+}
+
+.aip-fullname-card:hover {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  color: #0094ff;
+  background: #fff;
+  z-index: 2;
+  position: relative;
+}
+
+.lfx-u-header-md {
+  font-size: 1.4rem;
+  font-weight: 600;
+  font-family: "myriad-pro", Arial, sans-serif !important;
+  font-style: normal;
+}
+
+.lfx-u-v-mid {
+  vertical-align: middle !important;
+}
+
+.lfx-l-bodywrapper {
+  padding-bottom: 40px;
+}
+
+.search-bar-container {
+  width: 100%;
+}
+
+.search-bar {
+  width: 100%;
+}
+
+.lfx-fs-16 {
+  font-size: 16px !important;
+}
+
+.lfx-u-mar-r-30 {
+  margin-right: 30px;
+}
+
+.lfx-u-mar-l-10 {
+  margin-left: 10px !important;
+}
+
+.lfx-u-mar-l-18 {
+  margin-left: 18px !important;
+}
+
+::ng-deep .mdc-button.mat-mdc-button.mat-mdc-button-base,
+.mdc-button.mat-mdc-raised-button.mat-mdc-button-base,
+.mdc-button.mat-mdc-unelevated-button.mat-mdc-button-base,
+.mdc-button.mat-mdc-outlined-button.mat-mdc-button-base {
+  height: auto;
+  letter-spacing: normal;
+  width: max-content;
+}
+
+.mat-action-button-s {
+  color: #0094ff !important;
+  background-color: #ebf1f6 !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+::ng-deep .mat-mdc-menu-item:hover {
+  background-color: #e3f2fd !important; /* Light blue background */
+  color: #0094ff !important; /* Change text color */
+}
+
+::ng-deep .mat-mdc-menu-item {
+  font-size: 1.2rem !important; /* or any size you prefer */
+}

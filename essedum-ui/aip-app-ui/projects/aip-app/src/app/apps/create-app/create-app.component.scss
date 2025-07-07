@@ -1,0 +1,45 @@
+img {
+  border: 1px solid #000;
+  max-width: 30%;
+  margin-left: 10%;
+}
+
+.upload-docs {
+  display: grid;
+  grid-template-columns: 33% 33% 33%;
+  column-gap: 20px;
+}
+
+.label-icon {
+  justify-content: space-between;
+  display: flex;
+}
+
+::ng-deep {
+  .le-c-progressbar-ctr {
+    width: 90% !important;
+    padding: 5px;
+  }
+}
+
+::ng-deep .mat-mdc-dialog-container {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+::ng-deep .mat-mdc-select:not(.mat-mdc-select-disabled) .mat-mdc-select-arrow {
+  color: #0094ff !important;
+  fill: #0094ff !important;
+}
+
+input:focus,
+.txtInput:focus {
+  outline: none !important;
+  border-bottom: 1px solid #0094ff !important;
+}
+
+::ng-deep
+  .mdc-text-field--filled:not(.mdc-text-field--disabled).mdc-text-field--focused
+  .mdc-floating-label {
+  color: #0094ff !important;
+}

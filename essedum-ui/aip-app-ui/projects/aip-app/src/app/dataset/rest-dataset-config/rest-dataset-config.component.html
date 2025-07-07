@@ -1,0 +1,408 @@
+<div *ngIf="dataset" class="container-fluid">
+
+  <mat-accordion *ngIf="formType === 'API'" multi="false" class="lfx-accordion">
+    <mat-expansion-panel>
+      <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+        <div (selectedIndexChange)="tabChange($event)">
+          <mat-panel-title><span style="text-transform: capitalize;">Connection Details
+            </span></mat-panel-title>
+        </div>
+      </mat-expansion-panel-header>
+
+      <mat-card-content>
+
+        <div style="margin: 1em 0 0 1em;" *ngIf="tab == 'connectionTab'">
+
+          <div class="row">
+            <div class="col-lg-3 col-md-3 lfx-u-mar-b-16">
+
+              <mat-form-field appearance="fill" class="lfx-form-field">
+                <mat-label>Request Method</mat-label>
+                <mat-select [(ngModel)]="dataset['attributes']['RequestMethod']">
+                  <mat-option *ngFor="let opt of requestMethods" [value]="opt.value">{{opt.value}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-9 col-md-9 lfx-u-mar-b-16">
+
+              <mat-form-field appearance="fill" class="lfx-form-field">
+                <mat-label>URL</mat-label>
+                <input matInput [(ngModel)]="dataset.attributes['Url']" />
+              </mat-form-field>
+            </div>
+          </div>
+
+          <mat-tab-group style="width: 100%;" (selectedIndexChange)="basicReqTabChange($event)">
+            <mat-tab>
+              <ng-template mat-tab-label>Query Parameters</ng-template>
+            </mat-tab>
+            <mat-tab>
+              <ng-template mat-tab-label>Headers</ng-template>
+            </mat-tab>
+            <mat-tab>
+              <ng-template mat-tab-label>Pre Transform Script</ng-template>
+            </mat-tab>
+            <mat-tab>
+              <ng-template mat-tab-label>Post Transform Script</ng-template>
+            </mat-tab>
+            <mat-tab>
+              <ng-template mat-tab-label>Path Variables</ng-template>
+            </mat-tab>
+            <mat-tab>
+              <ng-template mat-tab-label>Config Variables</ng-template>
+            </mat-tab>
+            <mat-tab
+              *ngIf="dataset['attributes']['RequestMethod'] && (((dataset['attributes']['RequestMethod']).toLowerCase()==='post') || ((dataset['attributes']['RequestMethod']).toLowerCase()==='put'))">
+              <ng-template mat-tab-label>Body</ng-template>
+            </mat-tab>
+          </mat-tab-group>
+
+          <div *ngIf="basicReqTab == 'queryParamsTab'">
+            <div [ngClass]="{'container' : isInEdit}" style="margin-top: 3%; margin-left: 0%;">
+              <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+                    <th class="base-color" style="width: 9%;">Action</th>
+                    <th class="base-color">Key</th>
+                    <th class="base-color">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let dynamic of dynamicParamsArray; let i = index;">
+                    <td style="text-align: center;" (click)="deleteParamsRow(i)">
+                      <mat-icon>delete</mat-icon>
+                    </td>
+                    <td>
+                      <input style="padding: 0.3em;" [(ngModel)]="dynamicParamsArray[i].key" class="form-control"
+                        type="text" />
+                    </td>
+                    <td>
+                      <input style="padding: 0.3em;" [(ngModel)]="dynamicParamsArray[i].value" class="form-control"
+                        type="text" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: center;" (click)="addParamsRow()">
+                      <mat-icon>add</mat-icon>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div *ngIf="basicReqTab == 'headersTab'">
+            <div [ngClass]="{'container' : isInEdit}" style="margin-top: 3%; margin-left: 0%;">
+              <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+                    <th class="base-color" style="width: 9%;">Action</th>
+                    <th class="base-color">Key</th>
+                    <th class="base-color">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let dynamic of dynamicHeadersArray; let i = index;">
+                    <td style="text-align: center;" (click)="deleteHeadersRow(i)">
+                      <mat-icon>delete</mat-icon>
+                    </td>
+                    <td>
+                      <input style="padding: 0.3em;" [(ngModel)]="dynamicHeadersArray[i].key" class="form-control"
+                        type="text" />
+                    </td>
+                    <td>
+                      <input style="padding: 0.3em;" [(ngModel)]="dynamicHeadersArray[i].value" class="form-control"
+                        type="text" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: center;" (click)="addHeadersRow()">
+                      <mat-icon>add</mat-icon>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div *ngIf="basicReqTab == 'preTransformScriptTab'">
+            <div [ngClass]="{'container' : isInEdit}" style="margin-left: 0px; padding-left: 0px;">
+              <mat-slide-toggle [(ngModel)]="pretransformData" (change)="presetValue($event)" style="margin-top: 1em;">
+                Transform data</mat-slide-toggle><br />
+              <textarea style="width: 100% !important; border-color: #0094ff;" rows="5" cols="30" pInputTextarea
+                autoResize="autoResize" [(ngModel)]="prescript"></textarea>
+            </div>
+          </div>
+          <div *ngIf="basicReqTab == 'postTransformScriptTab'">
+            <div [ngClass]="{'container' : isInEdit}" style="margin-left: 0px; padding-left: 0px;">
+              <mat-slide-toggle [(ngModel)]="transformData" (change)="setValue($event)" style="margin-top: 1em;">
+                Transform data</mat-slide-toggle><br />
+              <textarea style="width: 100% !important; border-color: #0094ff;" rows="5" cols="30" pInputTextarea
+                autoResize="autoResize" [(ngModel)]="script"></textarea>
+            </div>
+          </div>
+          <div *ngIf="basicReqTab == 'pathVariablesTab'">
+            <div [ngClass]="{'container' : isInEdit}" style="margin-top: 3%; margin-left: 0%;">
+              <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+                    <th class="base-color" style="width: 9%;">Action</th>
+                    <th class="base-color">Key</th>
+                    <th class="base-color">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let dynamic of dynamicPathVariablesArray; let i = index;">
+                    <td style="text-align: center;" (click)="deletePathVariablesRow(i)">
+                      <mat-icon>delete</mat-icon>
+                    </td>
+                    <td>
+                      <input style="padding: 0.3em;" [(ngModel)]="dynamicPathVariablesArray[i].key" class="form-control"
+                        type="text" />
+                    </td>
+                    <td>
+                      <input style="padding: 0.3em;" [(ngModel)]="dynamicPathVariablesArray[i].value"
+                        class="form-control" type="text" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: center;" (click)="addPathVariablesRow()">
+                      <mat-icon>add</mat-icon>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div *ngIf="basicReqTab == 'configVariablesTab'">
+            <div [ngClass]="{'container' : isInEdit}" style="margin-top: 3%; margin-left: 0%;">
+              <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+                    <th class="base-color" style="width: 9%;">Action</th>
+                    <th class="base-color">Key</th>
+                    <th class="base-color">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let dynamic of dynamicConfigVariablesArray; let i = index;">
+                    <td style="text-align: center;" (click)="deleteConfigVariablesRow(i)">
+                      <mat-icon>delete</mat-icon>
+                    </td>
+                    <td>
+                      <input style="padding: 0.3em;" [(ngModel)]="dynamicConfigVariablesArray[i].key"
+                        class="form-control" type="text" />
+                    </td>
+                    <td>
+                      <input style="padding: 0.3em;" [(ngModel)]="dynamicConfigVariablesArray[i].value"
+                        class="form-control" type="text" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: center;" (click)="addConfigVariablesRow()">
+                      <mat-icon>add</mat-icon>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div *ngIf="basicReqTab == 'bodyTab'">
+            <div class="row">
+              <div class="p-field-radiobutton col-md-6" style="margin-top: 1em;">
+                <mat-radio-group [value]="value" [disabled]="disabled" (change)="onOptionChange($event)">
+                  <mat-radio-button value="x-www-form-urlencoded">x-www-form-urlencoded</mat-radio-button>
+                  <mat-radio-button value="raw">raw</mat-radio-button>
+                </mat-radio-group>
+
+              </div>
+              <div *ngIf="bodyOption === 'raw'" class="col-md-3" style="margin-top: 0.5em;">
+                <mat-form-field appearance="fill" class="lfx-form-field">
+                  <mat-label>Select editor option</mat-label>
+                  <mat-select [(ngModel)]="selectedOption" (selectionChange)="optionChange($event)">
+                    <mat-option *ngFor="let opt of options" [value]="opt">{{opt}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+              </div>
+            </div>
+            <div *ngIf="bodyOption === 'x-www-form-urlencoded'">
+              <div [ngClass]="{'container' : isInEdit}" style="margin-top: 3%; margin-left: 0%;">
+                <table class="table table-striped table-bordered">
+                  <thead>
+                    <tr>
+                      <th class="base-color" style="width: 9%;">Action</th>
+                      <th class="base-color">Key</th>
+                      <th class="base-color">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let dynamic of urlEncodedArray; let i = index;">
+                      <td style="text-align: center;" (click)="deleteUrlEncodedRow(i)">
+                        <mat-icon>delete</mat-icon>
+                      </td>
+                      <td>
+                        <input style="padding: 0.3em;" [(ngModel)]="urlEncodedArray[i].key" class="form-control"
+                          type="text" />
+                      </td>
+                      <td>
+                        <input style="padding: 0.3em;" [(ngModel)]="urlEncodedArray[i].value" class="form-control"
+                          type="text" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="text-align: center;" (click)="addUrlEncodedRow()">
+                        <mat-icon>add</mat-icon>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div *ngIf="bodyOption === 'raw'">
+              <div style="width:100%; margin-top: 8px;" *ngIf="selectedOption === 'JSON'">
+                <json-editor [options]="editorOptions" [data]="schemaForm" style="max-height: 365px;" #formJsonEditor
+                  class="cipJSONEditor"></json-editor>
+              </div>
+              <div style="margin-top: 8px;" *ngIf="selectedOption != 'JSON'">
+                <textarea style="width: 100% !important; border-color: var(--base-color);" rows="5" cols="30"
+                  pInputTextarea autoResize="autoResize" [(ngModel)]="body"></textarea>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-expansion-panel>
+  </mat-accordion>
+
+  <mat-accordion *ngIf="formType === 'Script'" multi="false" class="lfx-accordion">
+    <mat-expansion-panel>
+      <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+        <mat-panel-title class="lfx-panel-title">Connection Details</mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <mat-card-content class="lfx-section">
+        <div class="row lfx-row">
+          <div class="col-md-4 lfx-form-group">
+            <mat-form-field appearance="fill" class="lfx-form-field">
+              <mat-label>Script Type</mat-label>
+              <mat-select [(ngModel)]="dataset['attributes']['ScriptType']">
+                <mat-option *ngFor="let opt of scriptTypeOpt" [value]="opt">{{ opt }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-tab-group (selectedIndexChange)="transformScriptbasicReqTabChange($event)" class="lfx-tab-area">
+          <mat-tab label="Transform Script"></mat-tab>
+          <mat-tab label="Config Variables"></mat-tab>
+        </mat-tab-group>
+
+        <div *ngIf="transformScriptbasicReqTab === 'transformScriptTab'" class="lfx-section">
+          <mat-slide-toggle [(ngModel)]="transformScriptData" (change)="transformScriptsetValue($event)">Transform
+            data</mat-slide-toggle>
+          <textarea class="lfx-textarea" [(ngModel)]="transformScript" rows="10"></textarea>
+        </div>
+
+      </mat-card-content>
+    </mat-expansion-panel>
+  </mat-accordion>
+  <mat-accordion *ngIf="formType == 'Script'" designType="3D" [hideToggle]="false" [multi]="false">
+    <mat-expansion-panel>
+      <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+        <div (selectedIndexChange)="tabChange($event)">
+          <mat-panel-title><span style="text-transform: capitalize;">Connection Details
+            </span></mat-panel-title>
+        </div>
+      </mat-expansion-panel-header>
+      <div style="margin: 1em 0 0 1em;" *ngIf="tab == 'connectionTab'">
+        <div class="row">
+          <div class="col-md-4">
+            <mat-form-field appearance="fill" class="lfx-form-field">
+              <mat-label>Script Type</mat-label>
+              <mat-select [(ngModel)]="dataset['attributes']['ScriptType']" required>
+                <mat-option *ngFor="let opt of scriptTypeOpt" [value]="opt.value">{{opt.value}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+          </div>
+          <mat-card>
+            <mat-card-content>
+              <mat-tab-group style="width: 100%;" (selectedIndexChange)="transformScriptbasicReqTabChange($event)">
+                <mat-tab>
+                  <ng-template mat-tab-label>Transform Script</ng-template>
+                </mat-tab>
+                <mat-tab>
+                  <ng-template mat-tab-label>Config Variables</ng-template>
+                </mat-tab>
+              </mat-tab-group>
+              <div *ngIf="transformScriptbasicReqTab == 'transformScriptTab'">
+                <div [ngClass]="{'container' : isInEdit}" style="margin-left: 0px; padding-left: 0px;">
+                  <mat-slide-toggle [(ngModel)]="transformScriptData" (change)="transformScriptsetValue($event)"
+                    style="margin-top: 1em;">
+                    Transform data</mat-slide-toggle><br />
+                  <textarea style="width: 100% !important; border-color: var(--base-color);" rows="10" cols="30"
+                    pInputTextarea autoResize="autoResize" [(ngModel)]="transformScript"></textarea>
+                </div>
+              </div>
+              <div *ngIf="transformScriptbasicReqTab == 'configVariablesTab'">
+                <div [ngClass]="{'container' : isInEdit}" style="margin-top: 3%; margin-left: 0%;">
+                  <table class="table table-striped table-bordered">
+                    <thead>
+                      <tr>
+                        <th class="base-color" style="width: 9%;">Action</th>
+                        <th class="base-color">Key</th>
+                        <th class="base-color">Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let dynamic of dynamicConfigVariablesArray; let i = index;">
+                        <td style="text-align: center;" (click)="deleteConfigVariablesRow(i)">
+                          <mat-icon>delete</mat-icon>
+                        </td>
+                        <td>
+                          <input style="padding: 0.3em;" [(ngModel)]="dynamicConfigVariablesArray[i].key"
+                            class="form-control" type="text" />
+                        </td>
+                        <td>
+                          <input style="padding: 0.3em;" [(ngModel)]="dynamicConfigVariablesArray[i].value"
+                            class="form-control" type="text" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="text-align: center;" (click)="addConfigVariablesRow()">
+                          <mat-icon>add</mat-icon>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+  <div *ngIf="formType == 'Script'">
+    <mat-card-content>
+      <mat-tab-group style="width: 100%;" (selectedIndexChange)="tabChange($event)">
+        <mat-tab class="active" label="Connection Details"></mat-tab>
+      </mat-tab-group>
+
+    </mat-card-content>
+  </div>
+
+  <div *ngIf="connectionType?.toLowerCase() === 'apispec'">
+    Connection type "APISpec"
+  </div>
+  <div class="lfx-button-right">
+    <button *ngIf="gitDataSource" mat-flat-button class="test-btn" (click)="testConnection()"
+      id="modalDef-TestConnection">Test</button>
+    <button *ngIf="!copyDataset" mat-flat-button class="test-btn" (click)="saveDataset()"
+      id="modalDef-SaveDataset">Save</button>
+    <button *ngIf="copyDataset" mat-flat-button class="test-btn" (click)="saveDataset()"
+      id="modalDef-SaveDataset">Create</button>
+  </div>
+</div>

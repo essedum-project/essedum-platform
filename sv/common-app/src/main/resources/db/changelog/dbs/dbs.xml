@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+	<changeSet author="Leap (generated)" id="1614785155891-39">
+	       <validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="dbs_charts"/>
+               </not>
+           </preConditions>
+		<createTable tableName="dbs_charts">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="chart_type" type="VARCHAR(150)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="VARCHAR(300)" />
+			<column name="context" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-40">
+	       <validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="dbs_dashboard_configuration"/>
+               </not>
+           </preConditions>
+		<createTable tableName="dbs_dashboard_configuration">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="app_name" type="VARCHAR(100)"/>
+			<column name="bg_image" type="LONGBLOB" />
+			<column name="category" type="VARCHAR(200)" />
+			<column name="created_by" type="VARCHAR(150)" />
+			<column name="created_on" type="date" />
+			<column name="dash_array" type="TEXT" />
+			<column name="dashboard_access" type="VARCHAR(255)" />
+			<column name="dash_floating_modal" type="TEXT" />
+			<column name="dash_json" type="TEXT" />
+			<column name="dependent_filter" type="BIT(1)" />
+			<column name="description" type="VARCHAR(500)" />
+			<column name="icon" type="TEXT" />
+			<column name="image" type="LONGBLOB" />
+			<column name="is_deleted" type="BIT(1)" />
+			<column name="landing_dash" type="BIT(1)" />
+			<column name="layout" type="INT" />
+			<column name="show_date" type="BIT(1)" />
+			<column name="context" type="INT" />
+			<column name="project" type="INT"/>
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-41">
+	       <validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="dbs_filter"/>
+               </not>
+           </preConditions>
+		<createTable tableName="dbs_filter">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="actual_value" type="VARCHAR(150)" />
+			<column name="column_name" type="VARCHAR(150)" />
+			<column name="column_to_value" type="VARCHAR(150)" />
+			<column name="column_value" type="VARCHAR(150)" />
+			<column name="default_value" type="VARCHAR(1000)" />
+			<column name="display_value" type="VARCHAR(150)" />
+			<column name="selection_type" type="INT" />
+			<column name="show_value" type="BIT(1)" />
+			<column name="context" type="INT" />
+			<column name="dashboard" type="INT" />
+			<column name="widget" type="INT" />
+			<column name="filter_json" type="TEXT" />
+		</createTable>
+	</changeSet>
+		<changeSet author="Leap (generated)" id="1614785155891-43">
+	       <validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="dbs_palette_config"/>
+               </not>
+           </preConditions>
+		<createTable tableName="dbs_palette_config">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="created_by" type="VARCHAR(150)" />
+			<column name="created_on" type="datetime(6)" />
+			<column name="is_deleted" type="BIT(1)" />
+			<column name="modified_by" type="VARCHAR(150)" />
+			<column name="modified_on" type="datetime(6)" />
+			<column name="palette_name" type="VARCHAR(150)" />
+			<column name="organisation" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-42">
+	       <validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="dbs_palette"/>
+               </not>
+           </preConditions>
+		<createTable tableName="dbs_palette">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="color" type="VARCHAR(150)" />
+			<column name="created_by" type="VARCHAR(150)" />
+			<column name="created_on" type="datetime(6)" />
+			<column name="is_deleted" type="BIT(1)" />
+			<column name="modified_by" type="VARCHAR(150)" />
+			<column name="modified_on" type="datetime(6)" />
+			<column name="series_name" type="VARCHAR(150)" />
+			<column name="palette_config" type="INT" />
+		</createTable>
+	</changeSet>
+		<changeSet author="Leap (generated)" id="1614785155891-52">
+	       <validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="dbs_widget_configuration"/>
+               </not>
+           </preConditions>
+		<createTable tableName="dbs_widget_configuration">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="add_to_summary" type="VARCHAR(255)" />
+			<column name="apply_on_category" type="BIT(1)" />
+			<column name="auto_refresh" type="BIT(1)" />
+			<column name="categorize_on" type="VARCHAR(200)" />
+			<column name="category" type="VARCHAR(100)" />
+			<column name="colour" type="VARCHAR(255)" />
+			<column name="count_category" type="VARCHAR(255)" />
+			<column name="count_category_column" type="VARCHAR(255)" />
+			<column name="count_column" type="VARCHAR(255)" />
+			<column name="data_label" type="BIT(1)" />
+			<column name="description" type="VARCHAR(1500)" />
+			<column name="drilldown" type="BIT(1)" />
+			<column name="dual_axis" type="BIT(1)" />
+			<column name="filters" type="VARCHAR(500)" />
+			<column name="from_date" type="date" />
+			<column name="img_src" type="VARCHAR(200)" />
+			<column name="is_cache_enabled" type="BIT(1)" />
+			<column name="is_deleted" type="VARCHAR(255)" />
+			<column name="legend" type="BIT(1)" />
+			<column name="legend_name" type="VARCHAR(50)" />
+			<column name="limit1" type="INT" />
+			<column name="operation" type="VARCHAR(150)" />
+			<column name="refresh_time" type="INT" />
+			<column name="remarks" type="VARCHAR(300)" />
+			<column name="sub_x_axis" type="VARCHAR(255)" />
+			<column name="sub_x_axis_alias" type="VARCHAR(255)" />
+			<column name="subtitle_alias" type="VARCHAR(255)" />
+			<column name="summary_subtitle_alias" type="VARCHAR(255)" />
+			<column name="summary_name" type="VARCHAR(255)" />
+			<column name="to_date" type="date" />
+			<column name="url" type="VARCHAR(255)" />
+			<column name="widget_json" type="TEXT" />
+			<column name="widget_name" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="x_axis_alias" type="VARCHAR(255)" />
+			<column name="x_axis_label" type="BIT(1)" />
+			<column name="x_param" type="VARCHAR(200)" />
+			<column name="x_param_value" type="VARCHAR(150)" />
+			<column name="y2_axis" type="VARCHAR(255)" />
+			<column name="y_axis_alias" type="VARCHAR(255)" />
+			<column name="y_axis_label" type="BIT(1)" />
+			<column name="y_param" type="VARCHAR(200)" />
+			<column name="y_param_value" type="VARCHAR(150)" />
+			<column name="chart_type" type="VARCHAR(150)" />
+			<column name="context" type="INT" />
+			<column name="dashboard" type="INT" />
+			<column name="navigate_to" type="INT" />
+			<column name="details" type="TEXT" />
+			<column name="wizard_data_limit" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-9">
+	 <modifyDataType  
+            columnName="count_category"  
+            newDataType="TEXT"
+            tableName="dbs_widget_configuration"/>  
+	</changeSet>
+		<changeSet author="Leap (generated)" id="1614785155891-46">
+	       <validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="dbs_sequence_widget"/>
+               </not>
+           </preConditions>
+		<createTable tableName="dbs_sequence_widget">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="color_type" type="VARCHAR(255)" />
+			<column name="colour" type="VARCHAR(255)" />
+			<column name="dataset_name" type="VARCHAR(250)">
+				<constraints nullable="false" />
+			</column>
+			<column name="datasource_name" type="VARCHAR(250)">
+				<constraints nullable="false" />
+			</column>
+			<column name="y_axis" type="INT" />
+			<column name="chart_type" type="INT" />
+			<column name="widget_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-44">
+	       <validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="dbs_palette_widget_sequence"/>
+               </not>
+           </preConditions>
+		<createTable tableName="dbs_palette_widget_sequence">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="palette_id" type="INT" />
+			<column name="palette_config" type="INT" />
+			<column name="widget_sequence_id" type="INT" />
+		</createTable>
+	</changeSet>
+		<changeSet author="Leap (generated)" id="1614785155891-48">
+	       <validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="dbs_threshold_config"/>
+               </not>
+           </preConditions>
+		<createTable tableName="dbs_threshold_config">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="created_by" type="VARCHAR(150)" />
+			<column name="created_on" type="datetime(6)" />
+			<column name="is_deleted" type="BIT(1)" />
+			<column name="modified_by" type="VARCHAR(150)" />
+			<column name="modified_date" type="datetime(6)" />
+			<column name="threshold_name" type="VARCHAR(150)" />
+			<column name="project" type="INT" />
+		</createTable>
+	</changeSet>	
+	<changeSet author="Leap (generated)" id="1614785155891-47">
+	       <validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="dbs_threshold"/>
+               </not>
+           </preConditions>
+		<createTable tableName="dbs_threshold">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="amber_lower_limit" type="DOUBLE" />
+			<column name="amber_upper_limit" type="DOUBLE" />
+			<column name="created_by" type="VARCHAR(150)" />
+			<column name="created_on" type="datetime(6)" />
+			<column name="from_date" type="date" />
+			<column name="green_lower_limit" type="DOUBLE" />
+			<column name="green_upper_limit" type="DOUBLE" />
+			<column name="is_deleted" type="BIT(1)" />
+			<column name="modified_by" type="VARCHAR(150)" />
+			<column name="modified_date" type="datetime(6)" />
+			<column name="red_lower_limit" type="DOUBLE" />
+			<column name="red_upper_limit" type="DOUBLE" />
+			<column name="threshold_date" type="VARCHAR(500)" />
+			<column name="to_date" type="date" />
+			<column name="threshold_config" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-49">
+	       <validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="dbs_threshold_widget_sequence"/>
+               </not>
+           </preConditions>
+		<createTable tableName="dbs_threshold_widget_sequence">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="threshold_config" type="INT" />
+			<column name="widget_sequence_id" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-50">
+	       <validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="dbs_user_project_role_dashboard"/>
+               </not>
+           </preConditions>
+		<createTable tableName="dbs_user_project_role_dashboard">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="dashboard" type="INT" />
+			<column name="project" type="INT" />
+			<column name="role" type="INT" />
+			<column name="user_id" type="INT" />
+			<column name="dashboard_permission" type="VARCHAR(10)" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-51">
+	       <validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="dbs_widget_comment"/>
+               </not>
+           </preConditions>
+		<createTable tableName="dbs_widget_comment">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="project_id" type="INT" />
+			<column name="comment" type="TEXT" />
+			<column name="created_by" type="VARCHAR(55)" />
+			<column name="created_on" type="date" />
+			<column name="is_deleted" type="BIT(1)" />
+			<column name="widget" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-10">
+	       <validCheckSum>any</validCheckSum>
+           <preConditions onFail="MARK_RAN">
+               <not>
+           <tableExists tableName="dbs_wizard_data"/>
+               </not>
+           </preConditions>
+		<createTable tableName="dbs_wizard_data">
+			<column autoIncrement="true" name="id" type="INT">
+				<constraints primaryKey="true" />
+			</column>
+			<column name="chart_display_name" type="VARCHAR(250)">
+				<constraints nullable="false" />
+			</column>
+			<column name="metadata_id" type="INT" />
+			<column name="metadata_json" type="TEXT" />
+			<column name="chart_id" type="INT"/>		
+		</createTable>
+	</changeSet>
+	<changeSet author="Leap (generated)" id="1614785155891-11">    
+	 <modifyDataType
+            columnName="categorize_on"
+            newDataType="TEXT"
+            tableName="dbs_widget_configuration"/>
+    </changeSet>
+	<!-- 1.3.12 changes -->
+	<changeSet author="Leap(generated)" id="1312v0-dbs-12">
+		<addColumn tableName="dbs_sequence_widget">
+			<column name="isThreshold" type="BIT(1)"/>
+		</addColumn>
+		<addColumn tableName="dbs_sequence_widget">
+			<column name="referenceConfigurations" type="TEXT"/>
+         </addColumn>
+    </changeSet>
+    <changeSet author="Leap(generated)" id="1312v0-dbs-13">
+		<addColumn tableName="dbs_dashboard_configuration">
+			<column name="apply_theme" type="BIT(1)"/>
+		</addColumn>
+		<addColumn tableName="dbs_widget_configuration">
+			<column name="apply_theme" type="BIT(1)"/>
+		</addColumn>
+    </changeSet>
+    <changeSet author="Leap(generated)" id="1312v0-dbs-16">
+		<comment>Delete query for duplicate dashboards in Same Project</comment>
+		<sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">  
+			DELETE FROM dbs_dashboard_configuration WHERE id IN(SELECT id FROM (SELECT id, ROW_NUMBER() OVER (PARTITION BY app_name, project ORDER BY id) AS row_num FROM dbs_dashboard_configuration ) t WHERE row_num> 1)   
+		</sql> 
+	</changeSet>
+	<changeSet author="Leap(generated)" id="1312v0-dbs-14">
+		<addUniqueConstraint
+			columnNames="app_name,project"
+			constraintName="app_name_project_constraint"
+			tableName="dbs_dashboard_configuration" />
+	</changeSet>
+	<changeSet author="Leap(generated)" id="1312v0-15">
+		<addColumn tableName="dbs_threshold">
+			<column name="amber_custom_color" type="VARCHAR(10)" />	
+		</addColumn>
+		<addColumn tableName="dbs_threshold">	
+			<column name="green_custom_color" type="VARCHAR(10)" />
+		</addColumn>
+		<addColumn tableName="dbs_threshold">
+			<column name="red_custom_color" type="VARCHAR(10)" />
+		</addColumn>
+    </changeSet>
+	<changeSet author="Leap(generated)" id="1312v0-16">
+		<addColumn tableName="dbs_filter">
+			<column name="widget_names" type="VARCHAR(1000)" />	
+		</addColumn>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="1312v0-dbs-17">    
+	 <modifyDataType
+            columnName="dash_json"
+            newDataType="LONGTEXT"
+            tableName="dbs_dashboard_configuration"/>
+    </changeSet>
+	<changeSet author="Leap (generated)" id="2v0-dbs-1">    
+	 <modifyDataType
+            columnName="widget_json"
+            newDataType="LONGTEXT"
+            tableName="dbs_widget_configuration"/>
+    </changeSet>
+    <changeSet author="Leap (generated)" id="2v1-dbs-1">    
+	 <addColumn tableName="dbs_filter">
+			<column name="neo_date_format" type="BIT(1)" />	
+		 </addColumn>
+    </changeSet>
+	<changeSet author="Leap (generated)" id="2v1-dbs-2">    
+	 <modifyDataType
+            columnName="details"
+            newDataType="LONGTEXT"
+            tableName="dbs_widget_configuration"/>
+    </changeSet>
+	<changeSet  author="Leap"  id="3v0-dbs-1">
+		<sql dbms="postgresql" splitStatements="true" stripComments="true">
+			ALTER TABLE dbs_dashboard_configuration ALTER is_deleted TYPE boolean USING (is_deleted::int::boolean), ALTER dependent_filter TYPE boolean USING (dependent_filter::int::boolean), ALTER landing_dash TYPE boolean USING (landing_dash::int::boolean), ALTER show_date TYPE boolean USING (show_date::int::boolean), ALTER apply_theme TYPE boolean USING (apply_theme::int::boolean),ALTER dash_json TYPE text;
+		</sql>
+		<sql dbms="postgresql" splitStatements="true" stripComments="true">
+			ALTER TABLE dbs_filter ALTER show_value TYPE boolean USING (show_value::int::boolean),
+			ALTER neo_date_format TYPE boolean USING (neo_date_format::int::boolean);
+		</sql>
+		<sql dbms="postgresql" splitStatements="true" stripComments="true">
+			ALTER TABLE dbs_palette ALTER is_deleted TYPE boolean USING (is_deleted::int::boolean);
+		</sql>
+		<sql dbms="postgresql" splitStatements="true" stripComments="true">
+			ALTER TABLE dbs_palette_config ALTER is_deleted TYPE boolean USING (is_deleted::int::boolean);
+		</sql>
+		<sql dbms="postgresql" splitStatements="true" stripComments="true">
+			ALTER TABLE dbs_threshold ALTER is_deleted TYPE boolean USING (is_deleted::int::boolean);
+		</sql>
+		<sql dbms="postgresql" splitStatements="true" stripComments="true">
+			ALTER TABLE dbs_threshold_config ALTER is_deleted TYPE boolean USING (is_deleted::int::boolean);
+		</sql>
+		<sql dbms="postgresql" splitStatements="true" stripComments="true">
+			ALTER TABLE dbs_widget_comment ALTER is_deleted TYPE boolean USING (is_deleted::int::boolean);
+		</sql>
+		<sql dbms="postgresql" splitStatements="true" stripComments="true">
+			ALTER TABLE dbs_widget_configuration ALTER apply_on_category TYPE boolean USING (apply_on_category::int::boolean), ALTER auto_refresh TYPE boolean USING (auto_refresh::int::boolean), ALTER data_label TYPE boolean USING (data_label::int::boolean), ALTER drilldown TYPE boolean USING (drilldown::int::boolean), ALTER dual_axis TYPE boolean USING (dual_axis::int::boolean), ALTER is_cache_enabled TYPE boolean USING (is_cache_enabled::int::boolean), ALTER legend TYPE boolean USING (legend::int::boolean), ALTER x_axis_label TYPE boolean USING (x_axis_label::int::boolean), ALTER y_axis_label TYPE boolean USING (y_axis_label::int::boolean), ALTER apply_theme TYPE boolean USING (apply_theme::int::boolean);
+		</sql>
+	</changeSet>
+</databaseChangeLog>
