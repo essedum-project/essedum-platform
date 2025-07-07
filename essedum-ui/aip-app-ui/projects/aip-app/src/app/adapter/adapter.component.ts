@@ -27,6 +27,7 @@ export class AdapterComponent implements OnInit, OnChanges {
   isAddHovered: boolean = false;
   isRefreshHovered: boolean = false;
   isMenuHovered: boolean = false;
+  isFilterHovered: boolean = false;
   createAction = 'create';
   editAction = 'edit';
   test: any;

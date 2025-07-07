@@ -40,10 +40,6 @@
   vertical-align: middle !important;
 }
 
-.lfx-l-bodywrapper {
-  padding-bottom: 40px;
-}
-
 .search-bar-container {
   width: 100%;
 }
@@ -94,4 +90,67 @@
 
 ::ng-deep .mat-mdc-menu-item {
   font-size: 1.2rem !important; /* or any size you prefer */
+}
+
+// Action Menu Styles
+.action-menu-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.action-menu-trigger {
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  color: #6c757d;
+  position: relative;
+
+  &:hover,
+  &.menu-trigger-hovered {
+    background-color: rgba(0, 148, 255, 0.1);
+    color: #0094ff;
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  &:focus {
+    outline: 2px solid rgba(0, 148, 255, 0.3);
+    outline-offset: 2px;
+  }
+}
+
+.menu-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+}
+
+// Custom Menu Panel Styles
+::ng-deep .custom-menu {
+  .mat-mdc-menu-panel {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    min-width: 140px;
+    max-width: 200px;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .mat-mdc-menu-content {
+    padding: 0 !important;
+    overflow-x: hidden;
+  }
 }

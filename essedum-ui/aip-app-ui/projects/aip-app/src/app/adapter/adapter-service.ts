@@ -4,6 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { encKey } from '../services/encKey';
+import { CustomSnackbarService } from '../sharedModule/services/custom-snackbar.service';
 
 @Injectable()
 export class AdapterServices {
@@ -12,7 +13,8 @@ export class AdapterServices {
     private https: HttpClient,
     @Inject('dataSets') private dataUrl: string,
     private matSnackbar: MatSnackBar,
-    private encKey: encKey
+    private encKey: encKey,
+    private customSnackbar: CustomSnackbarService
   ) {}
 
   private handleError(error: any) {
@@ -26,86 +28,9 @@ export class AdapterServices {
 
   messageService(resp: any, msg?: any) {
     console.log(resp);
-    if (resp.status == 200) {
-      if (
-        resp.body.status === 'FAILURE' ||
-        (resp.body[0] && resp.body[0].status === 'FAILURE')
-      ) {
-        let failmsg = '';
-        if (resp.body.status === 'FAILURE')
-          failmsg = resp.body.details[0].message;
-        else if (resp.body[0] && resp.body[0].status === 'FAILURE')
-          failmsg = resp.body[0].message;
-        else failmsg = 'FAILED';
-        let message = {
-          message: failmsg,
-          button: false,
-          type: 'error',
-          successButton: 'Ok',
-          errorButton: 'Cancel',
-        };
-        this.matSnackbar.open(message.message, 'Close', {
-          duration: 2500,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-          panelClass:
-            message.type === 'error'
-              ? 'mat-snack-bar-error'
-              : 'mat-snack-bar-success',
-        });
-      } else {
-        let message = {
-          message: msg ? msg : resp.body.status,
-          button: false,
-          type: 'success',
-          successButton: 'Ok',
-          errorButton: 'Cancel',
-        };
-        this.matSnackbar.open(message.message, 'Close', {
-          duration: 5000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-          panelClass:
-            message.type === 'error'
-              ? 'mat-snack-bar-error'
-              : 'mat-snack-bar-success',
-        });
-      }
-    } else if (resp.text == 'success') {
-      let message = {
-        message: 'Tags Updated Successfully',
-        button: false,
-        type: 'success',
-        successButton: 'Ok',
-        errorButton: 'Cancel',
-      };
-      this.matSnackbar.open(message.message, 'Close', {
-        duration: 5000,
-        horizontalPosition: 'center',
-        verticalPosition: 'top',
-        panelClass:
-          message.type === 'error'
-            ? 'mat-snack-bar-error'
-            : 'mat-snack-bar-success',
-      });
-    } else {
-      let message = {
-        message: resp.error ? resp.error : resp,
-        button: false,
-        type: 'error',
-        successButton: 'Ok',
-        errorButton: 'Cancel',
-      };
-      this.matSnackbar.open(message.message, 'Close', {
-        duration: 5000,
-        horizontalPosition: 'center',
-        verticalPosition: 'top',
-        panelClass:
-          message.type === 'error'
-            ? 'mat-snack-bar-error'
-            : 'mat-snack-bar-success',
-      });
-    }
+    
+    // Use the new custom snackbar service which handles all the styling and logic
+    this.customSnackbar.handleResponse(resp, msg);
   }
 
   getOCRDetails(formData: any): Observable<any> {
@@ -864,22 +789,18 @@ export class AdapterServices {
   }
 
   messageNotificaionService(type: string, msg: string) {
-    let message = {
-      message: msg,
-      button: false,
-      type: type,
-      successButton: 'Ok',
-      errorButton: 'Cancel',
-    };
-    this.matSnackbar.open(message.message, 'Close', {
-      duration: 2500,
-      horizontalPosition: 'center',
-      verticalPosition: 'top',
-      panelClass:
-        message.type === 'error'
-          ? 'mat-snack-bar-error'
-          : 'mat-snack-bar-success',
-    });
+    // Use the new custom snackbar service for better styling
+    const config = { duration: 2500 }; // Shorter duration for notifications
+    
+    if (type === 'success') {
+      this.customSnackbar.success(msg, undefined, config);
+    } else if (type === 'error') {
+      this.customSnackbar.error(msg, undefined, config);
+    } else if (type === 'warning') {
+      this.customSnackbar.warning(msg, undefined, config);
+    } else {
+      this.customSnackbar.info(msg, undefined, config);
+    }
   }
 
   getAdapterFilters(): Observable<any> {

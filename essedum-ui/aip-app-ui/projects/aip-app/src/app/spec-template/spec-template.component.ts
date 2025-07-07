@@ -29,6 +29,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
   isAddHovered: boolean = false;
   isRefreshHovered: boolean = false;
   isMenuHovered: boolean = false;
+  isFilterHovered: boolean = false;
   test: any;
   cards: any;
   options = [];

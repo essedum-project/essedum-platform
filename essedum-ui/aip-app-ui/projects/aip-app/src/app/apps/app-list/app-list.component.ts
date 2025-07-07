@@ -26,7 +26,7 @@ export class AppListComponent implements OnInit {
   isAddHovered: boolean = false;
   isRefreshHovered: boolean = false;
   isMenuHovered: boolean = false;
-  // isFilterHovered: boolean = false;
+  isFilterHovered: boolean = false;
   alias: any;
   filter: string = '';
   pageNumber = 1;
@@ -88,8 +88,8 @@ export class AppListComponent implements OnInit {
       this.pageSize = this.pageSize || 12; // lg
       this.getAllApps();
     } else if (window.innerWidth > 1024 && window.innerWidth <= 1440) {
-      this.itemsPerPage = [9, 18, 36, 54, 72, 90];
-      this.pageSize = this.pageSize || 9; //md
+      this.itemsPerPage = [6, 12, 24, 36, 48, 60];
+      this.pageSize = this.pageSize || 6; //md
       this.getAllApps();
     } else if (window.innerWidth >= 768 && window.innerWidth <= 1024) {
       this.itemsPerPage = [6, 9, 18, 36, 54, 72];

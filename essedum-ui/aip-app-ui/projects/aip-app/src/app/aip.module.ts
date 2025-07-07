@@ -129,6 +129,8 @@ import { QuillModule } from 'ngx-quill';
 import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-name.component';
 import { AdapterServices } from './adapter/adapter-service';
 import { MatIconModule } from '@angular/material/icon';
+import { CustomSnackbarComponent } from './sharedModule/custom-snackbar/custom-snackbar.component';
+import { CustomSnackbarService } from './sharedModule/services/custom-snackbar.service';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -227,6 +229,7 @@ const dbConfig: DBConfig = {
     PaginationComponent,
     PipelineDialogComponent,
     DatasetByNameComponent,
+    CustomSnackbarComponent,
     TaggingComponentComponent,
   ],
   imports: [
@@ -311,6 +314,7 @@ const dbConfig: DBConfig = {
     RaiservicesService,
     SemanticService,
     DynamicRemoteLoad,
+    CustomSnackbarService,
 
     { provide: MatDialogRef, useValue: {} },
     { provide: MAT_DIALOG_DATA, useValue: {} },
