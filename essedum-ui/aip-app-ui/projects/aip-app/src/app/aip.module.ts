@@ -142,6 +142,11 @@ import { HighlightSearchPipe } from './pipes/highlight.pipe';
 import { DynamicRemoteLoad } from './apps/view-app/remoteLoad';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatTabsModule } from '@angular/material/tabs';
+import { AipCardComponent } from './sharedModule/aip-card/aip-card.component';
+import { AipPaginationComponent } from './sharedModule/aip-pagination/aip-pagination.component';
+import { AipHeaderComponent } from './sharedModule/aip-header/aip-header.component';
+import { AipEmptyStateComponent } from './sharedModule/aip-empty-state/aip-empty-state.component';
+import { AipFilterComponent } from './sharedModule/aip-filter/aip-filter.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -230,7 +235,12 @@ const dbConfig: DBConfig = {
     PipelineDialogComponent,
     DatasetByNameComponent,
     CustomSnackbarComponent,
+    AipCardComponent,
+    AipPaginationComponent,
+    AipHeaderComponent,
+    AipEmptyStateComponent,
     TaggingComponentComponent,
+    AipFilterComponent,
   ],
   imports: [
     CommonModule,

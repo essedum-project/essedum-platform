@@ -1,0 +1,110 @@
+.card-wrapper {
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  mat-card {
+    padding: 16px;
+
+    .card-category {
+      overflow: hidden;
+      border-right: none !important;
+    }
+  }
+}
+
+// Card header styling
+.card-header {
+  padding: 0 !important;
+  width: 95%;
+
+  .aip-fullname-card {
+    line-height: 2rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+}
+
+.mat-action-button-s {
+  color: #ffffff !important;
+  background-color: #ebf1f6 !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 18px !important;
+  line-height: 2.4;
+  font-weight: 600;
+  letter-spacing: 0px;
+  font-family: "myriad-pro", Arial, sans-serif !important;
+  background: transparent
+    linear-gradient(90deg, var(---0052cc) 0%, #0094ff 100%) 0% 0% no-repeat
+    padding-box;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+    no-repeat padding-box;
+}
+
+// Card actions
+mat-card-actions.card-actions-hover {
+  transition: opacity 0.2s;
+  width: 95%;
+  padding: 0 0 22px 0 !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .view-details-btn {
+    margin-right: 50px;
+  }
+
+  .button-placeholder {
+    width: 140px;
+    margin-right: 50px;
+  }
+
+  .avatar-container {
+    position: relative;
+
+    .aip-hover-avatar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #e0e0e0;
+      color: #616161;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 14px;
+    }
+
+    .aip-hover-detail {
+      position: absolute;
+      display: none;
+      background-color: white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      padding: 8px;
+      border-radius: 4px;
+      z-index: 10;
+      min-width: 120px;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    &:hover .aip-hover-detail {
+      display: block;
+    }
+  }
+}
+
+.aip-more-actions-icon {
+  font-size: 24px;
+  padding: 0;
+  color: #a5aaad;
+  font-weight: 300;
+  transition: color 0.2s ease;
+
+  &.aip-icon-hover {
+    color: #0094ff;
+  }
+}

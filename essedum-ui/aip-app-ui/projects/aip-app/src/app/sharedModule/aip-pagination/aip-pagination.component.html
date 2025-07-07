@@ -1,0 +1,36 @@
+<!-- Pagination -->
+<div class="pagination-container d-flex justify-content-end lfx-u-mar-tb-16">
+    <div class="paginator-buttons d-flex justify-content-end">
+        <div class="pages-details d-flex">
+            <!-- Previous page button -->
+            <mat-icon class="pagination-arrow" [ngClass]="{
+                  'disabled': pageNumber == 1,
+                  'active': isPrevHovered && pageNumber != 1
+                }" (mouseenter)="isPrevHovered = true" (mouseleave)="isPrevHovered = false"
+                (click)="pageNumberInput=null; onPrevPage()">
+                keyboard_arrow_left
+            </mat-icon>
+
+            <!-- Page numbers -->
+            <div class="page-numbers">
+                <span *ngFor="let i of pageArr | slice:startIndex:endIndex; let idx = index" class="pg"
+                    (click)="pageNumberInput=null; onChangePage(i+1)"
+                    [ngClass]="{'selected-page': (i + 1) == pageNumber, 'hover': hoverStates[idx]}"
+                    [ngStyle]="getButtonStyle(i+1, idx)" (mouseenter)="hoverStates[idx] = true"
+                    (mouseleave)="hoverStates[idx] = false">
+                    {{i + 1}}
+                </span>
+            </div>
+
+            <!-- Next page button -->
+            <mat-icon class="pagination-arrow" [ngClass]="{
+                  'disabled': pageNumber == noOfPages,
+                  'active': isNextHovered && pageNumber != noOfPages
+                }" (mouseenter)="isNextHovered = true" (mouseleave)="isNextHovered = false"
+                (click)="pageNumberInput=null; onNextPage()">
+                keyboard_arrow_right
+            </mat-icon>
+        </div>
+
+    </div>
+</div>
