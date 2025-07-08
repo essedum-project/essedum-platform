@@ -1,5 +1,5 @@
 <div class="filter-panel">
-  <div class="filter-panel__header">
+  <div class="filter-panel__header" (click)="toggleFilterExpanded()">
     <div class="filter-panel__icon-container">
       <mat-icon class="filter-panel__icon" (click)="toggleExpand()"
         [matTooltip]="isFilterExpanded ? 'Collapse Filters' : 'Expand Filters'" [matTooltipPosition]="tooltip">
@@ -16,8 +16,9 @@
       </h3>
     </div>
 
-    <div class="filter-panel__toggle-container" (click)="toggleFilterExpanded()">
-      <mat-icon class="filter-panel__toggle-icon" [ngClass]="{'filter-panel__toggle-icon--rotated': isFilterExpanded}">
+    <div class="filter-panel__toggle-container">
+      <mat-icon class="filter-panel__toggle-icon" [ngClass]="{'filter-panel__toggle-icon--rotated': isFilterExpanded}"
+        [matTooltip]="isFilterExpanded ? 'Collapse Filters' : 'Expand Filters'" [matTooltipPosition]="tooltip">
         keyboard_arrow_down
       </mat-icon>
     </div>

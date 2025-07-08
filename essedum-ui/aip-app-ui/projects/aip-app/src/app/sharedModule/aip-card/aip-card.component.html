@@ -1,4 +1,4 @@
-<mat-card class="mat-mdc-card mdc-card lfx-c-card lfx-c-card--hover example-card h-100" appearance="outlined"
+<mat-card class="mat-mdc-card mdc-card lfx-c-card lfx-c-card--hover h-100" appearance="outlined"
     (mouseenter)="card.hover = true" (mouseleave)="card.hover = false">
 
     <!-- Card category header -->
@@ -21,7 +21,7 @@
             </mat-card-title>
 
             <mat-card-subtitle class="lfx-u-body-sm lfx-u-text-neutral-80 lfx-u-ellipsis">
-                {{ card.createdon }}
+                {{ card.createdon | date: 'fullDate' }}
             </mat-card-subtitle>
         </div>
     </mat-card-header>

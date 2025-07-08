@@ -4,6 +4,7 @@
   flex-direction: column;
   background-color: #ffffff;
   border-radius: 16px;
+  margin-top: 4px;
   margin-bottom: 20px;
   transition: all 0.3s ease;
   z-index: 10;
@@ -17,9 +18,10 @@
     display: flex;
     align-items: center;
     padding: 16px 24px;
-    height: 67px; /* Fixed height to match parent */
+    height: 47px;
     background-color: #ffffff;
     border-radius: 16px;
+    cursor: pointer;
     box-shadow: 0px 2px 4px #00000029;
     border: 0.5px solid #0000001f;
   }
@@ -63,10 +65,6 @@
     cursor: pointer;
     padding: 8px;
     border-radius: 50%;
-
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.04);
-    }
   }
 
   &__toggle-icon {
@@ -84,7 +82,7 @@
 
   &__content {
     position: absolute;
-    top: 55px; /* Position exactly at the bottom of header */
+    top: 35px;
     left: 0;
     width: 100%;
     background-color: #ffffff;
@@ -94,7 +92,7 @@
     border-left: 0.5px solid #0000001f;
     border-right: 0.5px solid #0000001f;
     border-bottom: 0.5px solid #0000001f;
-    z-index: 100; /* Higher than the panel but lower than header */
+    z-index: 100;
   }
 }
 
