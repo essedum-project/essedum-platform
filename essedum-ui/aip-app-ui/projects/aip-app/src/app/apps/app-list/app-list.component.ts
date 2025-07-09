@@ -14,11 +14,21 @@ import { MatDialog } from '@angular/material/dialog';
 import { StreamingServices } from '../../streaming-services/streaming-service';
 import { ChooseRuntimeComponent } from '../choose-runtime/choose-runtime.component';
 import { Location } from '@angular/common';
+import { animate, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'app-view-apps',
   templateUrl: './app-list.component.html',
-  styleUrls: ['./app-list.component.scss'],
+  styleUrl: './app-list.component.scss',
+  animations: [
+    trigger('fadeInOut', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('200ms', style({ opacity: 1 })),
+      ]),
+      transition(':leave', [animate('200ms', style({ opacity: 0 }))]),
+    ]),
+  ],
 })
 export class AppListComponent implements OnInit {
   editable: boolean = false;
@@ -62,6 +72,10 @@ export class AppListComponent implements OnInit {
   organization: any;
   appConstantsKey: string = 'icip.app.includeCore';
 
+   isRefreshing: boolean = false;
+  isPrevHovered = false;
+  isNextHovered = false;
+
   Authentications() {
     this.service.getPermission('cip').subscribe((cipAuthority) => {
       // update/edit-app permission
@@ -104,6 +118,7 @@ export class AppListComponent implements OnInit {
 
   ngOnInit(): void {
     this.records = false;
+    this.isRefreshing=true;
     this.Authentications();
     this.route.queryParams.subscribe((params) => {
       // Update this.pageNumber if the page query param is present
@@ -657,4 +672,8 @@ export class AppListComponent implements OnInit {
       }
     });
   }
+
+
+
+  
 }
