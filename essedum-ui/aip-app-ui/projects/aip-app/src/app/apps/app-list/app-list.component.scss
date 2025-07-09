@@ -87,15 +87,20 @@
 }
 
 .lfx-card-image {
-  /* Layout Properties */
-  width: 80px;
-  min-width: 60px;
+  width: 100px;
+  height: 80px;
+  min-width: 100px;
   max-width: 100px;
-  height: 60px;
-  /* UI Properties */
   background: transparent no-repeat padding-box;
-  border-radius: 37px;
+  border-radius: 20%; // Rectangle shape with more pronounced rounded corners
   opacity: 1;
+  transition: width 0.3s, height 0.3s, border-radius 0.3s;
+}
+
+.lfx-card-image:hover {
+  width: 100px;
+  height: 80px;
+  border-radius: 16px;
 }
 
 .lfx-main-card {
@@ -279,6 +284,33 @@ mat-card-actions.card-actions-hover {
 .lfx-u-mar-l-80{
 margin-left: 80px !important;
 }
+
+.card-content-wrapper {
+  position: relative;
+  height: 100%;
+}
+
+.card-actions-container {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(40px);
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 2;
+}
+
+// Show actions on hover of the card
+mat-card:hover .card-actions-container,
+.card-actions-container:hover {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+
 
 
 
