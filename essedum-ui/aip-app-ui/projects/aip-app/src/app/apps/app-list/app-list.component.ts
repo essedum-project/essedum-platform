@@ -75,6 +75,10 @@ export class AppListComponent implements OnInit {
    isRefreshing: boolean = false;
   isPrevHovered = false;
   isNextHovered = false;
+    lastRefreshedTime: Date | null = null;
+      cardTitle: String = 'Apps';
+        hasFilters = false;
+         selectedAppTypeList: string[] = [];
 
   Authentications() {
     this.service.getPermission('cip').subscribe((cipAuthority) => {
@@ -152,7 +156,8 @@ export class AppListComponent implements OnInit {
         }
         this.updatePageSize();
       });
-  }
+  this.lastRefreshTime();
+    }
   updateQueryParam(
     page: number = 1,
     search: string = '',
@@ -306,7 +311,12 @@ export class AppListComponent implements OnInit {
     });
   }
 
-  searchApp() {
+  searchApp(searchText?: string) {
+
+    if (searchText !== undefined) {
+      this.filter = searchText;
+    }
+
     let params: HttpParams = new HttpParams();
     if (this.filter.length >= 1) params = params.set('query', this.filter);
     params = params.set('page', (this.pageNumber = 1));
@@ -671,6 +681,17 @@ export class AppListComponent implements OnInit {
         );
       }
     });
+  }
+
+  lastRefreshTime() {
+    setTimeout(() => {
+      this.lastRefreshedTime = new Date();
+      console.log('Data refreshed!');
+    }, 1000);
+  }
+
+  onFilterStatusChange(hasActiveFilters: boolean) {
+    this.hasFilters = hasActiveFilters;
   }
 
 
