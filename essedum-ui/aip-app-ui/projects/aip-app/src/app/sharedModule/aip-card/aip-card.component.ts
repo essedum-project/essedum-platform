@@ -24,10 +24,10 @@ export class AipCardComponent {
   @Input() deleteAuth = false;
 
   // Output events
-  @Output() viewDetails = new EventEmitter<any>();
-  @Output() edit = new EventEmitter<any>();
-  @Output() delete = new EventEmitter<any>();
-
+  @Output() viewDetails: EventEmitter<any> = new EventEmitter<any>();
+  @Output() edit: EventEmitter<any> = new EventEmitter<any>();
+  @Output() delete: EventEmitter<any> = new EventEmitter<any>();
+  @Output() jobConsole?: EventEmitter<any> = new EventEmitter<any>();
   // UI state variables
   isMenuHovered = false;
 
@@ -87,7 +87,7 @@ export class AipCardComponent {
       return this.card.adaptername;
     } else if (this.servicev1 === 'schemas') {
       return this.card.name;
-    } else if (this.servicev1 === 'model') {
+    } else if (this.servicev1 === 'model' || this.servicev1 === 'pipelines') {
       return this.card.type;
     }
   }
@@ -97,7 +97,7 @@ export class AipCardComponent {
       return this.card.name;
     } else if (this.servicev1 === 'specs') {
       return this.card.domainname;
-    } else if (this.servicev1 === 'schemas') {
+    } else if (this.servicev1 === 'schemas' || this.servicev1 === 'pipelines') {
       return this.card.alias;
     } else if (this.servicev1 === 'model') {
       return this.card.name && this.card.name != ''
@@ -115,6 +115,8 @@ export class AipCardComponent {
       return this.card.lastmodifieddate;
     } else if (this.servicev1 === 'model') {
       return this.card.createdOn;
+    } else if (this.servicev1 === 'pipelines') {
+      return this.card.createdDate;
     }
   }
 
@@ -131,6 +133,10 @@ export class AipCardComponent {
         : 'Name Not Available';
     } else if (this.servicev1 === 'model') {
       return this.card.createdBy ? this.card.createdBy : 'Name Not Available';
+    } else if (this.servicev1 === 'pipelines') {
+      return this.card.target.created_by
+        ? this.card.target.created_by
+        : 'Name Not Available';
     }
   }
 }

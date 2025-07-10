@@ -74,6 +74,9 @@
                 <button mat-menu-item *ngIf="deleteAuth" (click)="onDelete()">
                     Delete
                 </button>
+                <button mat-menu-item *ngIf="servicev1 === 'pipelines' && card.type == 'REMOTE'" (click)="jobConsole()">
+                    Job Console
+                </button>
             </mat-menu>
         </div>
     </mat-card-actions>

@@ -368,6 +368,7 @@ export class AdapterComponent implements OnInit, OnChanges {
     this.pageArr = [...Array(this.noOfPages).keys()];
     this.hoverStates = new Array(this.pageArr.length).fill(false);
   }
+
   filterz(searchText?: string) {
     if (searchText !== undefined) {
       this.filt = searchText;
