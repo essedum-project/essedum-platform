@@ -3,7 +3,7 @@ $header-height: 45px;
 $icon-size: 24px;
 $icon-hover-color: #0094ff;
 $icon-default-color: #737373;
-$search-transition-duration: 0.3s;
+$search-transition-duration: 0.6s;
 $animation-duration: 0.5s;
 
 .lfx-header {
@@ -20,10 +20,10 @@ $animation-duration: 0.5s;
       font-size: 2.4rem;
       font-weight: 600;
       letter-spacing: 0px;
-      font-family: "myriad-pro", Arial, sans-serif !important;
+      font-family: "Myriad Pro", "Myriad Apple Text", "Open Sans", sans-serif !important;
       color: #000000;
       font-style: normal;
-      line-height: 30px;
+      line-height: 24px;
     }
   }
 
@@ -31,18 +31,58 @@ $animation-duration: 0.5s;
   .header-right {
     .header-actions {
       display: flex;
+      height: 24px;
       align-items: center;
 
       // Last refreshed text
       p {
         margin: 0 16px 0 0;
         font-size: 1.2rem;
-        line-height: 18px;
+        line-height: 16px;
         letter-spacing: 0px;
         font-weight: normal;
         font-family: "roboto", Arial, sans-serif !important;
         font-style: normal;
         color: #000000;
+      }
+
+      // Search panel
+      .lfx-panel {
+        background-color: #f0f0f0;
+        box-shadow: 0rem 0.2rem 0.4rem #00000029;
+        border: 0.05rem solid #0000001f;
+        border-radius: 1.6rem;
+        display: flex;
+        align-items: center;
+        height: 3rem;
+
+        .lfx-panel-input {
+          flex: 1;
+          border: none;
+          outline: none;
+          padding: 8px 0;
+          font-size: 14px;
+          width: 100%;
+          margin-left: 12px;
+          background: transparent;
+
+          &::placeholder {
+            color: #a5aaad;
+          }
+        }
+
+        mat-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+          color: #737373;
+          transition: color 0.2s ease;
+          cursor: pointer;
+
+          &.active {
+            color: #0094ff;
+          }
+        }
       }
 
       // Icon common styles
@@ -138,60 +178,6 @@ $animation-duration: 0.5s;
           width: 150px;
         }
       }
-    }
-  }
-}
-
-// Search panel
-.lfx-panel {
-  background-color: #f5f5f5;
-  box-shadow: 0rem 0.2rem 0.4rem #00000029;
-  border: 0.05rem solid #0000001f;
-  border-radius: 1.6rem;
-  display: flex;
-  align-items: center;
-  height: 3rem;
-
-  .lfx-panel-input {
-    flex: 1;
-    border: none;
-    outline: none;
-    padding: 8px 0;
-    font-size: 14px;
-    width: 100%;
-    margin-left: 12px;
-    background: transparent;
-
-    &::placeholder {
-      color: #a5aaad;
-    }
-  }
-
-  mat-icon {
-    font-size: 24px;
-    width: 24px;
-    height: 24px;
-    color: #737373;
-    transition: color 0.2s ease;
-    cursor: pointer;
-
-    &.active {
-      color: #0094ff;
-    }
-  }
-}
-
-.search-icon {
-  mat-icon {
-    font-size: 24px;
-    width: 24px;
-    height: 24px;
-    color: #737373;
-    transition: color 0.2s ease;
-    cursor: pointer;
-
-    &.active {
-      color: #0094ff;
     }
   }
 }

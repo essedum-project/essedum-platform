@@ -25,7 +25,9 @@ export class AdapterComponent implements OnInit, OnChanges {
   cardTitle: String = 'Implementations';
   isFilterHovered: boolean = false;
   hoverStates: boolean[] = [];
+  hasFilters = false;
   lastRefreshedTime: Date | null = null;
+  servicev1 = 'adapters';
   createAction = 'create';
   editAction = 'edit';
   test: any;
@@ -70,7 +72,6 @@ export class AdapterComponent implements OnInit, OnChanges {
   selectedCategoryList: string[] = [];
   selectedSpecList: string[] = [];
   records: boolean = false;
-  hasFilters = false;
   tooltip: string = 'above';
   filtbackup: any = '';
   tagrefresh: boolean = false;

@@ -1178,6 +1178,35 @@ export class AipFilterComponent {
     this.updateFilterStatus();
   }
 
+  clearAllFilters(filterType: 'category' | 'spec' | 'connection'): void {
+    switch (filterType) {
+      case 'category':
+        this.selectedMlAdapterCategoryType = [];
+        this.mlAdapterCategoryTypeList.forEach((element: any) => {
+          element.selected = false;
+        });
+        break;
+
+      case 'spec':
+        this.selectedMlAdapterSpecType = [];
+        this.mlAdapterSpecTypeList.forEach((element: any) => {
+          element.selected = false;
+        });
+        break;
+
+      case 'connection':
+        this.selectedMlAdapterConnectionType = [];
+        this.mlAdapterConnectionTypesList.forEach((element: any) => {
+          element.selected = false;
+        });
+        break;
+    }
+
+    // Emit the updated selection
+    this.tagSelected.emit(this.geteventtagsdto());
+    this.updateFilterStatus();
+  }
+
   removeCategory(category: string): void {
     const index = this.selectedMlAdapterCategoryType.indexOf(category);
     if (index !== -1) {

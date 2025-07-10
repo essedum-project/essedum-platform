@@ -3,7 +3,7 @@
   margin: 0;
 }
 
-.adapter-container {
+.aip-container {
   width: 100%;
   position: relative;
 }
@@ -13,20 +13,15 @@
   grid-template-columns: repeat(auto-fit, 29rem);
   grid-template-rows: repeat(auto-fit, 15.5rem);
   justify-content: center;
-  grid-row-gap: 2rem;
-  grid-column-gap: 2rem;
+  grid-row-gap: 2.4rem;
+  grid-column-gap: 2.4rem;
 }
 
-.adapter-card-wrapper {
+.aip-card-wrapper {
   min-width: 29rem;
   min-height: 15.5rem;
 
   @media (max-width: 576px) {
     width: 100%;
   }
-}
-
-.lfx-u-pad-lr-30 {
-  padding-left: 30px !important;
-  padding-right: 35px !important;
 }

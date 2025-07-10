@@ -1,5 +1,7 @@
 <div class="filter-panel">
-  <div class="filter-panel__header" (click)="toggleFilterExpanded()">
+  <div class="filter-panel__header"
+    [ngClass]="{'filter-panel__header--collapsed': !isFilterExpanded, 'filter-panel__header--expanded': isFilterExpanded}"
+    (click)="toggleFilterExpanded()">
     <div class="filter-panel__icon-container">
       <mat-icon class="filter-panel__icon" (click)="toggleExpand()"
         [matTooltip]="isFilterExpanded ? 'Collapse Filters' : 'Expand Filters'" [matTooltipPosition]="tooltip">
@@ -39,6 +41,9 @@
                 <label>Category</label>
                 <mat-select (selectionChange)="mlAdapterCategoryTypeSelected($event)" aria-labelledby="category-label"
                   placeholder="  All">
+                  <mat-option value="" (click)="clearAllFilters('category')">
+                    All
+                  </mat-option>
                   <mat-option *ngFor="let option of mlAdapterCategoryTypeList" [value]="option.label">
                     {{ option.label }}
                   </mat-option>
@@ -65,9 +70,14 @@
                 <label>Spec</label>
                 <mat-select (selectionChange)="mlAdapterScecTypeSelected($event)" aria-labelledby="spec-label"
                   placeholder="All">
-                  <mat-option *ngFor="let option of mlAdapterSpecTypeList" [value]="option.label">
-                    {{ option.label }}
+                  <mat-option value="" (click)="clearAllFilters('spec')">
+                    All
                   </mat-option>
+                  <ng-container *ngFor="let option of mlAdapterSpecTypeList">
+                    <mat-option *ngIf="!option.selected" [value]="option.label">
+                      {{ option.label }}
+                    </mat-option>
+                  </ng-container>
                 </mat-select>
               </mat-form-field>
             </div>
@@ -90,6 +100,9 @@
                 <label>Connection</label>
                 <mat-select (selectionChange)="mlAdapterConnectionTypeSelected($event)"
                   aria-labelledby="connection-label" placeholder="All">
+                  <mat-option value="" (click)="clearAllFilters('connection')">
+                    All
+                  </mat-option>
                   <mat-option *ngFor="let option of mlAdapterConnectionTypesList" [value]="option.label">
                     {{ option.label }}
                   </mat-option>

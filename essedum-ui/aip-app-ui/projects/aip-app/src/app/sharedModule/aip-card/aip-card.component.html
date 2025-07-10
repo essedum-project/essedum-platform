@@ -5,7 +5,7 @@
     <div class="d-flex align-items-center justify-content-between ">
         <div class="d-flex align-items-center card-category">
             <div class="lfx-u-header-sm lfx-u-text-primary-80 lfx-u-mar-b-8">
-                {{ card.category }}
+                {{ getCategory() | titlecase }}
             </div>
         </div>
     </div>
@@ -15,13 +15,13 @@
         <div class="w-100">
             <mat-card-title class="lfx-c-card__container clearfix">
                 <div class="lfx-c-card__container-left w-100">
-                    <h2 class="lfx-u-header-xl lfx-u-ellipsis aip-fullname-card" [title]="card.name">
-                        {{ card.name }}</h2>
+                    <h2 class="lfx-u-header-xl lfx-u-ellipsis aip-fullname-card">
+                        {{ getTitle() | titlecase }}</h2>
                 </div>
             </mat-card-title>
 
             <mat-card-subtitle class="lfx-u-body-sm lfx-u-text-neutral-80 lfx-u-ellipsis">
-                {{ card.createdon | date: 'fullDate' }}
+                {{ getDate()| date: 'fullDate' }}
             </mat-card-subtitle>
         </div>
     </mat-card-header>
@@ -35,17 +35,17 @@
     <!-- Card actions -->
     <mat-card-actions class="lfx-c-card__action-hover d-flex justify-content-between card-actions-hover">
 
-        <!-- View Details button with animation -->
-        <button mat-flat-button class="mat-action-button-s view-details-btn" *ngIf="card.hover"
-            (click)="onViewDetails(card)" [@fadeInOut]="'in'">
-            View Details
-        </button>
-        <!-- Empty space when button is hidden -->
-        <div *ngIf="!card.hover" class="button-placeholder"></div>
+        <div class="button-placeholder">
+            <button mat-raised-button class="view-details-btn" *ngIf="card.hover" (click)="onViewDetails(card)"
+                [@fadeInOut]="'in'">
+                View Details
+            </button>
+        </div>
 
         <!-- Created by avatar -->
         <div class="aip-cursor ">
-            <div class="lfx-c-avatar lfx-c-avatar--sm aip-hover-avatar">
+            <div class="lfx-c-avatar lfx-c-avatar--sm aip-hover-avatar"
+                [ngStyle]="{'--avatar-bg-color': getAvatarBackgroundColor(card.createdby)}">
                 {{ (card.createdby ? card.createdby : "Name Not Available") | firstCharacter }}
             </div>
             <div class="aip-hover-detail">

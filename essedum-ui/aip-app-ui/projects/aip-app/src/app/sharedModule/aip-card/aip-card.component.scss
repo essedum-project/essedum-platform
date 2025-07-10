@@ -1,5 +1,5 @@
 .lfx-c-card.mat-mdc-card {
-  padding: 16px;
+  padding: 24px;
   min-height: 50px;
   box-shadow: 0px 2px 4px #00000029;
   border: 0.5px solid #0000001f;
@@ -32,19 +32,16 @@
 
 .lfx-u-header-sm {
   font-size: 1rem;
+  line-height: 11px;
   font-weight: 600;
-  font-family: "myriad-pro", Arial, sans-serif !important;
+  font-family: "Myriad Pro", "Myriad Apple Text", "Open Sans", sans-serif !important;
   font-style: normal;
-}
-
-.lfx-u-text-primary-80 {
-  color: #0094ff;
 }
 
 .lfx-u-header-xl {
   font-size: 1.6rem;
   font-weight: 600;
-  font-family: "myriad-pro", Arial, sans-serif !important;
+  font-family: "Myriad Pro", "Myriad Apple Text", "Open Sans", sans-serif !important;
   font-style: normal;
 }
 
@@ -58,8 +55,13 @@
 .lfx-u-body-sm {
   font-size: 1.2rem;
   font-weight: 400;
+  line-height: 16px;
   font-family: "roboto", Arial, sans-serif !important;
   font-style: normal;
+}
+
+.lfx-u-text-primary-80 {
+  color: #0094ff;
 }
 
 .lfx-u-text-neutral-80 {
@@ -72,22 +74,28 @@
   width: 95%;
 
   .aip-fullname-card {
-    line-height: 2rem;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
+    line-height: 16px;
+    margin-bottom: 0px;
+  }
+
+  .aip-fullname-card:hover {
+    white-space: unset;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 }
 
-.mat-action-button-s {
+.view-details-btn {
   color: #ffffff !important;
   background-color: #ebf1f6 !important;
   height: 30px !important;
   min-height: 30px !important;
-  font-size: 16px !important;
-  line-height: 2.4;
-  font-weight: 600;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
   letter-spacing: 0px;
-  font-family: "myriad-pro", Arial, sans-serif !important;
+  font-family: "Myriad Pro", "Myriad Apple Text", "Open Sans", sans-serif !important;
+  border-radius: 16px;
   background: transparent
     linear-gradient(90deg, var(---0052cc) 0%, #0094ff 100%) 0% 0% no-repeat
     padding-box;
@@ -98,19 +106,14 @@
 // Card actions
 mat-card-actions.card-actions-hover {
   transition: opacity 0.2s;
-  width: 95%;
+  width: 86%;
   padding: 0 0 8px 0 !important;
   display: flex;
   justify-content: space-between;
   align-items: center;
 
-  .view-details-btn {
-    margin-right: 50px;
-  }
-
   .button-placeholder {
     width: 140px;
-    margin-right: 50px;
   }
 
   .avatar-container {
@@ -158,4 +161,74 @@ mat-card-actions.card-actions-hover {
   &.aip-icon-hover {
     color: #0094ff;
   }
+}
+
+.aip-cursor {
+  cursor: pointer;
+}
+
+.aip-hover-avatar {
+  position: relative;
+}
+
+.aip-hover-detail {
+  box-shadow: 0rem 0.2rem 2.5rem rgba(0, 0, 0, 25%);
+  display: none;
+  cursor: pointer;
+  position: absolute;
+  top: -3rem;
+  z-index: 10000;
+  left: 8%;
+  background-color: var(--background-colour);
+  text-wrap: balance;
+  border-radius: 1rem;
+  width: 23rem;
+  text-align: center;
+  word-break: break-all;
+}
+
+.lfx-u-mar-b-8 {
+  margin-bottom: 8px !important;
+}
+
+.lfx-u-header-md {
+  font-size: 1.4rem;
+  font-weight: 600;
+  font-family: "Myriad Pro", "Myriad Apple Text", "Open Sans", sans-serif !important;
+  font-style: normal;
+}
+
+.lfx-c-avatar {
+  background: var(--avatar-bg-color);
+  color: #0052cc;
+  border-radius: 50%;
+  text-align: center;
+  vertical-align: middle;
+  font-weight: 500;
+  font-family: "Roboto", Arial, sans-serif !important;
+  font-style: normal;
+  float: left;
+  width: 36px !important;
+  height: 36px !important;
+  font-size: 12px;
+  line-height: 36px;
+  padding: 0px;
+}
+
+.lfx-c-card__container-left {
+  float: left;
+  width: 80%;
+}
+
+.lfx-c-card__action-hover {
+  position: absolute;
+  width: 100%;
+  bottom: 0px;
+  transition: bottom 0.2s ease 0.2s;
+  background: var(--default-card-action-bg-color);
+}
+
+.lfx-c-card.mat-mdc-card:hover .lfx-u-body-xxl,
+.lfx-c-card.mat-mdc-card:hover .lfx-u-header-xl {
+  color: #000000;
 }
