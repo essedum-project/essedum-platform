@@ -2,11 +2,15 @@
     (mouseenter)="card.hover = true" (mouseleave)="card.hover = false">
 
     <!-- Card category header -->
-    <div class="d-flex align-items-center justify-content-between ">
+    <div class="d-flex align-items-center justify-content-between lfx-u-mar-b-8">
         <div class="d-flex align-items-center card-category">
-            <div class="lfx-u-header-sm lfx-u-text-primary-80 lfx-u-mar-b-8">
+            <div class="lfx-u-header-sm lfx-u-text-primary-80">
                 {{ getCategory() | titlecase }}
             </div>
+        </div>
+        <div *ngIf="servicev1 === 'model'" class="lfx-c-card__container-right">
+            <span class="lfx-c-badge float-end"
+                [ngClass]="[card.status=='Registered'?'lfx-c-badge--blue ':'lfx-c-badge--active',card.status=='Undeployed' || card.status == 'Failed'?'lfx-c-badge--warning ':'lfx-c-badge--active']">{{card.status}}</span>
         </div>
     </div>
 

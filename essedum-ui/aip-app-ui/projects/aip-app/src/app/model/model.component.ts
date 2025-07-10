@@ -25,6 +25,9 @@ import { PaginationComponent } from '../pagination/pagination.component';
   styleUrls: ['./model.component.scss'],
 })
 export class ModelComponent implements OnInit, OnChanges {
+  hoverStates: boolean[] = [];
+  hasFilters = false;
+  lastRefreshedTime: Date | null = null;
   test: any;
   cards: any;
   options = [];
@@ -60,16 +63,12 @@ export class ModelComponent implements OnInit, OnChanges {
   tagrefresh: boolean = false;
   records: boolean = false;
   cortexwindow: any;
-  isExpanded = false;
   tooltip: string = 'above';
-isSearchHovered=false;
-isHovered=false;
   pageNumber: number;
   pageSize: number;
   noOfItems: number;
- 
-  constructor(
 
+  constructor(
     private service: Services,
     private route: ActivatedRoute,
     private router: Router,
@@ -77,19 +76,15 @@ isHovered=false;
     public tagService: TagsService,
     private dialog: MatDialog,
     private location: Location
-  ) {
-
-  }
+  ) {}
   ngOnChanges(changes: SimpleChanges): void {
     this.refresh();
   }
   cardTitle: String = 'Model';
 
   ngOnInit(): void {
-
     this.records = false;
-  
-    this.route.queryParams.subscribe((params) => {      
+    this.route.queryParams.subscribe((params) => {
       if (params['page']) {
         this.pageNumber = params['page'];
         this.filter = params['search'];
@@ -107,13 +102,12 @@ isHovered=false;
     });
     this.updateQueryParam(this.pageNumber);
     this.getCountModels();
-    this.getCards();   
+    this.getCards();
     this.Authentications();
     this.fetchAdapters();
+    this.lastRefreshTime();
   }
 
-
- 
   updateQueryParam(
     page: number = 1,
     search: string = '',
@@ -138,7 +132,7 @@ isHovered=false;
 
     this.location.replaceState(url);
   }
-  
+
   Authentications() {
     this.service.getPermission('cip').subscribe((cipAuthority) => {
       if (cipAuthority.includes('model-create')) this.createAuth = true;
@@ -207,7 +201,6 @@ isHovered=false;
         this.records = false;
       }
       console.log('DATA', this.cards);
-
     });
 
     this.updateQueryParam(
@@ -248,7 +241,7 @@ isHovered=false;
       relativeTo: this.route,
     });
   }
-  redirection(card: any, type: string) {    
+  redirection(card: any, type: string) {
     this.router.navigate(['./' + type + '/' + card.sourceName], {
       queryParams: {
         page: this.pageNumber,
@@ -264,14 +257,13 @@ isHovered=false;
       },
       relativeTo: this.route,
     });
-    
   }
 
   selectChange(value: string): void {
     this.selectedInstance = value;
     this.redirect();
   }
-  
+
   editModel(card: any) {
     console.log(card);
     this.router.navigate(['./edit'], {
@@ -280,9 +272,7 @@ isHovered=false;
     });
   }
 
-  clickactive(eventObj: any) {
-   
-  }
+  clickactive(eventObj: any) {}
   refresh() {
     this.getCountModels();
     this.fetchAdapters();
@@ -296,26 +286,32 @@ isHovered=false;
     this.selectedTag = [];
     this.getCountModels();
     this.fetchAdapters();
-   
+
     this.getCards();
+    this.lastRefreshTime();
   }
-  filterz() {  
+
+  filterz(searchText?: string) {
+    if (searchText !== undefined) {
+      this.filter = searchText;
+    }
     this.refresh();
   }
   handlePageAndSizeChange(event: { pageNumber: number; pageSize: number }) {
     // Handle the updated pageNumber and pageSize here
     console.log('Page number:', event.pageNumber);
     console.log('Page size:', event.pageSize);
-    this.pageNumber = event.pageNumber?event.pageNumber:1;
-    this.pageSize = event.pageSize?event.pageSize:4;
-    this.cards= [];
+    this.pageNumber = event.pageNumber ? event.pageNumber : 1;
+    this.pageSize = event.pageSize ? event.pageSize : 4;
+    this.cards = [];
     this.getCards();
     this.getCountModels();
   }
+
   tagSelectedEvent(event) {
     this.selectedAdapterInstance = event.getSelectedAdapterInstance();
     this.selectedAdapterType = event.getSelectedAdapterType();
-    this.pageNumber = 1; 
+    this.pageNumber = 1;
     this.selectedTag = event.getSelectedTagList();
     this.tagrefresh = false;
     this.refresh();
@@ -347,7 +343,7 @@ isHovered=false;
       }
     });
   }
-  
+
   deleteModels(card) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
     dialogRef.afterClosed().subscribe((result) => {
@@ -369,19 +365,14 @@ isHovered=false;
       }
     });
   }
-  selectedButton(i) {
-    if (i == this.pageNumber) return { color: 'white', background: '#7b39b1' };
-    else return { color: 'black' };
-  }
-  toggleExpand() {
-    this.isExpanded = !this.isExpanded;
-  }
-  toggler(isExpanded: boolean) {
-    if (isExpanded) {
-      return { width: '80%', margin: '0 0 0 20%' };
-    } else {
-      return { width: '100%', margin: '0%' };
-    }
+
+  lastRefreshTime() {
+    setTimeout(() => {
+      this.lastRefreshedTime = new Date();
+    }, 1000);
   }
 
+  onFilterStatusChange(hasActiveFilters: boolean) {
+    this.hasFilters = hasActiveFilters;
+  }
 }

@@ -271,7 +271,10 @@ export class SchemaComponent implements OnInit, OnChanges {
     });
   }
 
-  filterz(event: any) {
+  filterz(searchText?: string) {
+    if (searchText !== undefined) {
+      this.filt = searchText;
+    }
     this.getCards((this.pageNumber = 1), this.pageSize, this.filt);
   }
 

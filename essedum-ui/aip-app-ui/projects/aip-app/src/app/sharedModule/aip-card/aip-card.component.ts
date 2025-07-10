@@ -87,6 +87,8 @@ export class AipCardComponent {
       return this.card.adaptername;
     } else if (this.servicev1 === 'schemas') {
       return this.card.name;
+    } else if (this.servicev1 === 'model') {
+      return this.card.type;
     }
   }
 
@@ -97,6 +99,10 @@ export class AipCardComponent {
       return this.card.domainname;
     } else if (this.servicev1 === 'schemas') {
       return this.card.alias;
+    } else if (this.servicev1 === 'model') {
+      return this.card.name && this.card.name != ''
+        ? this.card.name
+        : this.card.sourceName;
     }
   }
 
@@ -107,6 +113,8 @@ export class AipCardComponent {
       return this.card.lastmodifiedon;
     } else if (this.servicev1 === 'schemas') {
       return this.card.lastmodifieddate;
+    } else if (this.servicev1 === 'model') {
+      return this.card.createdOn;
     }
   }
 
@@ -121,6 +129,8 @@ export class AipCardComponent {
       return this.card.lastmodifiedby
         ? this.card.lastmodifiedby
         : 'Name Not Available';
+    } else if (this.servicev1 === 'model') {
+      return this.card.createdBy ? this.card.createdBy : 'Name Not Available';
     }
   }
 }
