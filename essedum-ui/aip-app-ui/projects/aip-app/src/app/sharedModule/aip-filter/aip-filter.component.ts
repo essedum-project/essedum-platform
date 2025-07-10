@@ -1178,35 +1178,6 @@ export class AipFilterComponent {
     this.updateFilterStatus();
   }
 
-  clearAllFilters(filterType: 'category' | 'spec' | 'connection'): void {
-    switch (filterType) {
-      case 'category':
-        this.selectedMlAdapterCategoryType = [];
-        this.mlAdapterCategoryTypeList.forEach((element: any) => {
-          element.selected = false;
-        });
-        break;
-
-      case 'spec':
-        this.selectedMlAdapterSpecType = [];
-        this.mlAdapterSpecTypeList.forEach((element: any) => {
-          element.selected = false;
-        });
-        break;
-
-      case 'connection':
-        this.selectedMlAdapterConnectionType = [];
-        this.mlAdapterConnectionTypesList.forEach((element: any) => {
-          element.selected = false;
-        });
-        break;
-    }
-
-    // Emit the updated selection
-    this.tagSelected.emit(this.geteventtagsdto());
-    this.updateFilterStatus();
-  }
-
   removeCategory(category: string): void {
     const index = this.selectedMlAdapterCategoryType.indexOf(category);
     if (index !== -1) {
@@ -1279,6 +1250,24 @@ export class AipFilterComponent {
     this.updateFilterStatus();
   }
 
+  removeSpecTemplateCapability(capability: string): void {
+    const index = this.selectedMlSpecTemplateCapabilityType.indexOf(capability);
+    if (index !== -1) {
+      this.selectedMlSpecTemplateCapabilityType.splice(index, 1);
+
+      // Update the UI selection state
+      this.mlSpecTemplateCapabilityTypeList.forEach((element) => {
+        if (element.value === capability) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+
   mlInstanceConnectionTypeSelected(value): void {
     if (!this.selectedMlInstancesConnectionType.includes(value.value)) {
       this.selectedMlInstancesConnectionType.push(value.value);
@@ -1297,6 +1286,24 @@ export class AipFilterComponent {
     this.updateFilterStatus();
   }
 
+  removeInstanceConnection(connection: string): void {
+    const index = this.selectedMlInstancesConnectionType.indexOf(connection);
+    if (index !== -1) {
+      this.selectedMlInstancesConnectionType.splice(index, 1);
+
+      // Update the UI selection state
+      this.mlInstanceConnectionTypeList.forEach((element) => {
+        if (element.value === connection) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+
   mlInstanceAdapterTypeSelected(value): void {
     if (!this.selectedMlInstancesAdapterType.includes(value.value)) {
       this.selectedMlInstancesAdapterType.push(value.value);
@@ -1312,6 +1319,24 @@ export class AipFilterComponent {
       }
     });
     this.tagSelected.emit(this.geteventtagsdto());
+    this.updateFilterStatus();
+  }
+
+  removeInstanceAdapter(instanceAdapter: string): void {
+    const index = this.selectedMlInstancesAdapterType.indexOf(instanceAdapter);
+    if (index !== -1) {
+      this.selectedMlInstancesAdapterType.splice(index, 1);
+
+      // Update the UI selection state
+      this.mlInstanceAdapterTypeList.forEach((element) => {
+        if (element.value === instanceAdapter) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
     this.updateFilterStatus();
   }
 
@@ -1437,6 +1462,65 @@ export class AipFilterComponent {
       this.tags[category] = this.allTags
         .filter((tag) => tag.category == category)
         .slice(0, 10);
+  }
+
+  clearAllFilters(
+    filterType:
+      | 'category'
+      | 'spec'
+      | 'connection'
+      | 'instanceAdapter'
+      | 'instanceConnection'
+      | 'specTemplateCapability'
+  ): void {
+    switch (filterType) {
+      case 'category':
+        this.selectedMlAdapterCategoryType = [];
+        this.mlAdapterCategoryTypeList.forEach((element: any) => {
+          element.selected = false;
+        });
+        break;
+
+      case 'spec':
+        this.selectedMlAdapterSpecType = [];
+        this.mlAdapterSpecTypeList.forEach((element: any) => {
+          element.selected = false;
+        });
+        break;
+
+      case 'connection':
+        this.selectedMlAdapterConnectionType = [];
+        this.mlAdapterConnectionTypesList.forEach((element: any) => {
+          element.selected = false;
+        });
+        break;
+
+      case 'instanceAdapter':
+        this.selectedMlInstancesAdapterType = [];
+        this.mlInstanceAdapterTypeList.forEach((element: any) => {
+          element.selected = false;
+        });
+        break;
+
+      case 'instanceConnection':
+        this.selectedMlInstancesConnectionType = [];
+        this.mlInstanceConnectionTypeList.forEach((element: any) => {
+          element.selected = false;
+        });
+        break;
+
+      case 'specTemplateCapability':
+        console.log(this.mlSpecTemplateCapabilityTypeList);
+        this.selectedMlSpecTemplateCapabilityType = [];
+        this.mlSpecTemplateCapabilityTypeList.forEach((element: any) => {
+          element.selected = false;
+        });
+        break;
+    }
+
+    // Emit the updated selection
+    this.tagSelected.emit(this.geteventtagsdto());
+    this.updateFilterStatus();
   }
 
   filterByTag(tag) {

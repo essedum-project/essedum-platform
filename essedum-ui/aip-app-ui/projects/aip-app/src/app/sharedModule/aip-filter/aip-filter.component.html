@@ -125,9 +125,103 @@
       </div>
       <ng-template #elseBlockNonAdp>
         <div *ngIf="servicev1 === 'specs'; else elseBlockNonSpecTemplate">
+          <div class="filter-options">
+
+            <!-- Capability -->
+            <div class="filter-group">
+              <div class="filter-control">
+                <mat-form-field appearance="fill" class="w-100">
+                  <label>Capability</label>
+                  <mat-select (selectionChange)="mlSpecTemplateCapabilityTypeSelected($event)"
+                    aria-labelledby="specTemplateCapability-label" placeholder="All">
+                    <mat-option value="" (click)="clearAllFilters('specTemplateCapability')">
+                      All
+                    </mat-option>
+                    <ng-container *ngFor="let option of mlSpecTemplateCapabilityTypeList">
+                      <mat-option *ngIf="!option.selected" [value]="option.label">
+                        {{ option.label }}
+                      </mat-option>
+                    </ng-container>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div class="selected-items" *ngIf="selectedMlSpecTemplateCapabilityType?.length > 0">
+                <mat-chip-set aria-label="Selected Capability">
+                  <mat-chip *ngFor="let capability of selectedMlSpecTemplateCapabilityType" removable="true"
+                    (removed)="removeSpecTemplateCapability(capability)">
+                    {{ capability}}
+                    <mat-icon matChipRemove>close</mat-icon>
+                  </mat-chip>
+                </mat-chip-set>
+              </div>
+            </div>
+
+
+          </div>
         </div>
         <ng-template #elseBlockNonSpecTemplate>
           <div *ngIf="servicev1 === 'instances'; else elseBlockNonIns">
+            <div class="filter-options">
+
+              <!-- Implementation -->
+              <div class="filter-group">
+                <div class="filter-control">
+                  <mat-form-field appearance="fill" class="w-100">
+                    <label>Implementation</label>
+                    <mat-select (selectionChange)="mlInstanceAdapterTypeSelected($event)"
+                      aria-labelledby="instanceAdapter-label" placeholder="All">
+                      <mat-option value="" (click)="clearAllFilters('instanceAdapter')">
+                        All
+                      </mat-option>
+                      <ng-container *ngFor="let option of mlInstanceAdapterTypeList">
+                        <mat-option *ngIf="!option.selected" [value]="option.label">
+                          {{ option.label }}
+                        </mat-option>
+                      </ng-container>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="selected-items" *ngIf="selectedMlInstancesAdapterType?.length > 0">
+                  <mat-chip-set aria-label="Selected instanceAdapter">
+                    <mat-chip *ngFor="let instanceAdapter of selectedMlInstancesAdapterType" removable="true"
+                      (removed)="removeInstanceAdapter(instanceAdapter)">
+                      {{ instanceAdapter}}
+                      <mat-icon matChipRemove>close</mat-icon>
+                    </mat-chip>
+                  </mat-chip-set>
+                </div>
+              </div>
+
+              <!-- Connection Filter -->
+              <div class="filter-group">
+                <div class="filter-control">
+                  <mat-form-field appearance="fill" class="w-100">
+                    <label>Connection</label>
+                    <mat-select (selectionChange)="mlInstanceConnectionTypeSelected($event)"
+                      aria-labelledby="connection-label" placeholder="All">
+                      <mat-option value="" (click)="clearAllFilters('instanceConnection')">
+                        All
+                      </mat-option>
+                      <mat-option *ngFor="let option of mlInstanceConnectionTypeList" [value]="option.label">
+                        {{ option.label }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="selected-items" *ngIf="selectedMlInstancesConnectionType?.length > 0">
+                  <mat-chip-set aria-label="Selected connections">
+                    <mat-chip *ngFor="let connection of selectedMlInstancesConnectionType" removable="true"
+                      (removed)="removeInstanceConnection(connection)">
+                      {{ connection }}
+                      <mat-icon matChipRemove>close</mat-icon>
+                    </mat-chip>
+                  </mat-chip-set>
+                </div>
+              </div>
+            </div>
           </div>
           <ng-template #elseBlockNonIns>
             <div *ngIf="servicev1 === 'connections'; else elseBlockNonCons">
