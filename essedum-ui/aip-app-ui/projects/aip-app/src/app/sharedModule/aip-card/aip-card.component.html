@@ -36,7 +36,7 @@
     <mat-card-actions class="lfx-c-card__action-hover d-flex justify-content-between card-actions-hover">
 
         <div class="button-placeholder">
-            <button mat-raised-button class="view-details-btn" *ngIf="card.hover" (click)="onViewDetails(card)"
+            <button mat-raised-button class="view-details-btn" *ngIf="card.hover" (click)="onViewDetails()"
                 [@fadeInOut]="'in'">
                 View Details
             </button>
@@ -45,12 +45,12 @@
         <!-- Created by avatar -->
         <div class="aip-cursor ">
             <div class="lfx-c-avatar lfx-c-avatar--sm aip-hover-avatar"
-                [ngStyle]="{'--avatar-bg-color': getAvatarBackgroundColor(card.createdby)}">
-                {{ (card.createdby ? card.createdby : "Name Not Available") | firstCharacter }}
+                [ngStyle]="{'--avatar-bg-color': getAvatarBackgroundColor()}">
+                {{ getAvatar() | firstCharacter }}
             </div>
             <div class="aip-hover-detail">
                 <div class="lfx-u-header-md lfx-u-mar-8">
-                    {{ card.createdby ? card.createdby : "Name Not Available" }}
+                    {{ getAvatar() }}
                 </div>
             </div>
         </div>
@@ -64,10 +64,10 @@
                 more_vert
             </mat-icon>
             <mat-menu #menu="matMenu">
-                <button mat-menu-item *ngIf="editAuth" (click)="onEdit(content3)">
+                <button mat-menu-item *ngIf="editAuth" (click)="onEdit()">
                     Edit
                 </button>
-                <button mat-menu-item *ngIf="deleteAuth" (click)="onDelete(card.name)">
+                <button mat-menu-item *ngIf="deleteAuth" (click)="onDelete()">
                     Delete
                 </button>
             </mat-menu>

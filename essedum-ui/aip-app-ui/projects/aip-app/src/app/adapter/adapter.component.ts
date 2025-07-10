@@ -514,7 +514,6 @@ export class AdapterComponent implements OnInit, OnChanges {
   lastRefreshTime() {
     setTimeout(() => {
       this.lastRefreshedTime = new Date();
-      console.log('Data refreshed!');
     }, 1000);
   }
 

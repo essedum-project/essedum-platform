@@ -23,10 +23,9 @@ import { Location } from '@angular/common';
 })
 export class SchemaComponent implements OnInit, OnChanges {
   cardTitle: String = 'Schemas';
-  isSearchHovered: boolean = false;
-  isAddHovered: boolean = false;
-  isRefreshHovered: boolean = false;
-  isMenuHovered: boolean = false;
+  servicev1 = 'schemas';
+  hoverStates: boolean[] = [];
+  lastRefreshedTime: Date | null = null;
   test: any;
   cards: any;
   options = [];
@@ -138,6 +137,7 @@ export class SchemaComponent implements OnInit, OnChanges {
       this.endIndex = 5;
     }
     this.Authentications();
+    this.lastRefreshTime();
   }
 
   nextPage() {
@@ -280,6 +280,7 @@ export class SchemaComponent implements OnInit, OnChanges {
     this.pageNumber = 1;
     this.updateQueryParam(this.pageNumber, this.filt);
     this.changePage(this.pageNumber);
+    this.lastRefreshTime();
   }
 
   deleteSchema(card: any) {
@@ -354,5 +355,11 @@ export class SchemaComponent implements OnInit, OnChanges {
     this.dropDown = drop;
 
     console.log('this is dropDown', this.dropDown);
+  }
+
+  lastRefreshTime() {
+    setTimeout(() => {
+      this.lastRefreshedTime = new Date();
+    }, 1000);
   }
 }

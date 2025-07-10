@@ -32,19 +32,21 @@ export class AipCardComponent {
   isMenuHovered = false;
 
   // Action handlers
-  onViewDetails(card: any): void {
-    this.viewDetails.emit(card);
+  onViewDetails(): void {
+    this.viewDetails.emit();
   }
 
   onEdit(): void {
     this.edit.emit();
   }
 
-  onDelete(cardName: any): void {
-    this.delete.emit(cardName);
+  onDelete(): void {
+    this.delete.emit();
   }
 
-  getAvatarBackgroundColor(character: string): string {
+  getAvatarBackgroundColor(): string {
+    const character = this.getAvatar();
+
     const backgroundColors = [
       '#E3F2FD', // Light blue
       '#F3E5F5', // Light purple
@@ -65,9 +67,6 @@ export class AipCardComponent {
     ];
 
     let hash = 0;
-    if (!character || character.length === 0) {
-      character = 'Name Not Available';
-    }
 
     for (let i = 0; i < character.length; i++) {
       const char = character.charCodeAt(i);
@@ -86,6 +85,8 @@ export class AipCardComponent {
       return this.card.domainname;
     } else if (this.servicev1 === 'instances') {
       return this.card.adaptername;
+    } else if (this.servicev1 === 'schemas') {
+      return this.card.name;
     }
   }
 
@@ -94,6 +95,8 @@ export class AipCardComponent {
       return this.card.name;
     } else if (this.servicev1 === 'specs') {
       return this.card.domainname;
+    } else if (this.servicev1 === 'schemas') {
+      return this.card.alias;
     }
   }
 
@@ -102,6 +105,22 @@ export class AipCardComponent {
       return this.card.createdon;
     } else if (this.servicev1 === 'specs') {
       return this.card.lastmodifiedon;
+    } else if (this.servicev1 === 'schemas') {
+      return this.card.lastmodifieddate;
+    }
+  }
+
+  getAvatar() {
+    if (
+      this.servicev1 === 'adapters' ||
+      this.servicev1 === 'instances' ||
+      this.servicev1 === 'specs'
+    ) {
+      return this.card.createdby ? this.card.createdby : 'Name Not Available';
+    } else if (this.servicev1 === 'schemas') {
+      return this.card.lastmodifiedby
+        ? this.card.lastmodifiedby
+        : 'Name Not Available';
     }
   }
 }
