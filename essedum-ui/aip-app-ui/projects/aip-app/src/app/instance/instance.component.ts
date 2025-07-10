@@ -24,11 +24,11 @@ import { Location } from '@angular/common';
 })
 export class InstanceComponent implements OnInit, OnChanges {
   cardTitle: String = 'Instances';
-  isSearchHovered: boolean = false;
-  isAddHovered: boolean = false;
-  isRefreshHovered: boolean = false;
-  isMenuHovered: boolean = false;
   isFilterHovered: boolean = false;
+  hoverStates: boolean[] = [];
+  hasFilters: boolean = false;
+  lastRefreshedTime: Date | null = null;
+  servicev1: string = 'instances';
   createAction = 'create';
   editAction = 'edit';
   test: any;
@@ -71,7 +71,6 @@ export class InstanceComponent implements OnInit, OnChanges {
   selectedTag = [];
   selectedConnectionNamesList: string[] = [];
   selectedAdapterList: string[] = [];
-  servicev1: string = 'instances';
   records: boolean = false;
   chainName: any;
   streamItem: StreamingServices;
@@ -79,7 +78,6 @@ export class InstanceComponent implements OnInit, OnChanges {
   startPipeline: boolean;
   newCanvas: any;
   latest_job: boolean;
-  isExpanded = false;
   tooltip: string = 'above';
   filtbackup: any = '';
   isTaggingVisible: boolean = true;
@@ -154,7 +152,7 @@ export class InstanceComponent implements OnInit, OnChanges {
           (this.selectedConnectionNamesList &&
             this.selectedConnectionNamesList.length > 0)
         ) {
-          this.isExpanded = true;
+          this.hasFilters = true;
         }
       } else {
         this.pageNumber = 1;
@@ -172,7 +170,7 @@ export class InstanceComponent implements OnInit, OnChanges {
       this.endIndex = 5;
     }
     this.Authentications();
-    // this.getTags();
+    this.lastRefreshTime();
   }
 
   nextPage() {
@@ -257,12 +255,6 @@ export class InstanceComponent implements OnInit, OnChanges {
   tagchange() {
     this.tagService.tags.forEach((element: any) => {});
   }
-
-  // desc() {
-  //   console.log("description");
-  //   // this.router.navigate(["View/:cardTitle"],{relativeTo:this.route,state:{data:this.cardTitle}});
-  //   this.router.navigate(["./view/" + this.cardTitle], { relativeTo: this.route });
-  // }
 
   numSequence(n: number): Array<number> {
     return Array(n);
@@ -380,8 +372,13 @@ export class InstanceComponent implements OnInit, OnChanges {
     this.noOfItems = this.cards.length;
     this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
     this.pageArr = [...Array(this.noOfPages).keys()];
+    this.hoverStates = new Array(this.pageArr.length).fill(false);
   }
-  filterz() {
+
+  filterz(searchText?: string) {
+    if (searchText !== undefined) {
+      this.filt = searchText;
+    }
     if (this.filt.length != this.filtbackup.length) {
       this.pageNumber = 1;
       this.filtbackup = this.filt;
@@ -402,6 +399,7 @@ export class InstanceComponent implements OnInit, OnChanges {
     this.noOfItems = this.cards.length;
     this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
     this.pageArr = [...Array(this.noOfPages).keys()];
+    this.hoverStates = new Array(this.pageArr.length).fill(false);
     // this.pageNumber=1;
 
     this.updateQueryParam(this.pageNumber, this.filt);
@@ -498,11 +496,6 @@ export class InstanceComponent implements OnInit, OnChanges {
         );
       }
     });
-  }
-
-  selectedButton(i) {
-    if (i == this.pageNumber) return { color: 'white', background: '#0094ff' };
-    else return { color: 'black' };
   }
 
   startChain(data) {
@@ -632,18 +625,6 @@ export class InstanceComponent implements OnInit, OnChanges {
     );
   }
 
-  toggleExpand() {
-    this.isExpanded = !this.isExpanded;
-  }
-
-  toggler(isExpanded: boolean) {
-    if (isExpanded) {
-      return { width: '80%', margin: '0 0 0 20%' };
-    } else {
-      return { width: '100%', margin: '0%' };
-    }
-  }
-
   triggereRefresh($event) {
     if ($event) this.ngOnInit();
   }
@@ -663,7 +644,7 @@ export class InstanceComponent implements OnInit, OnChanges {
   completeRefresh() {
     this.filt = '';
     this.tagrefresh = true;
-    if (!this.isExpanded) {
+    if (!this.hasFilters) {
       this.selectedAdapterList = [];
       this.selectedConnectionNamesList = [];
       this.updateQueryParam(1, '', '', '');
@@ -672,6 +653,17 @@ export class InstanceComponent implements OnInit, OnChanges {
       this.tagrefresh = true;
       this.updatePageSize();
     }
+    this.lastRefreshTime();
+  }
+
+  lastRefreshTime() {
+    setTimeout(() => {
+      this.lastRefreshedTime = new Date();
+    }, 1000);
+  }
+
+  onFilterStatusChange(hasActiveFilters: boolean) {
+    this.hasFilters = hasActiveFilters;
   }
 
   updatePageSizeOnly() {

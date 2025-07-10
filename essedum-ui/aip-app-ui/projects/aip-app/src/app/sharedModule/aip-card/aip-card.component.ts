@@ -84,11 +84,13 @@ export class AipCardComponent {
       return this.card.category;
     } else if (this.servicev1 === 'specs') {
       return this.card.domainname;
+    } else if (this.servicev1 === 'instances') {
+      return this.card.adaptername;
     }
   }
 
   getTitle() {
-    if (this.servicev1 === 'adapters') {
+    if (this.servicev1 === 'adapters' || this.servicev1 === 'instances') {
       return this.card.name;
     } else if (this.servicev1 === 'specs') {
       return this.card.domainname;
@@ -96,7 +98,7 @@ export class AipCardComponent {
   }
 
   getDate() {
-    if (this.servicev1 === 'adapters') {
+    if (this.servicev1 === 'adapters' || this.servicev1 === 'instances') {
       return this.card.createdon;
     } else if (this.servicev1 === 'specs') {
       return this.card.lastmodifiedon;

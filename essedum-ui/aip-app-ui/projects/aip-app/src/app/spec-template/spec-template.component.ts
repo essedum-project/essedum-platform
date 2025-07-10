@@ -349,7 +349,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
           // Calculate pagination
           this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
           this.pageArr = [...Array(this.noOfPages).keys()];
-
+          this.hoverStates = new Array(this.pageArr.length).fill(false);
           // Update pagination indexes
           if (this.pageNumber > 5) {
             this.endIndex = this.pageNumber;
