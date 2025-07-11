@@ -21,41 +21,44 @@
     </mat-drawer>
     <div class="parent-div selector-3-5">
       <div class="fChild selector-3-6 main-header-bg">
-        <div class="main-toggle">
-          <button
-            class="sidebarBtn sidebarBigScreen selector-3-17 main-toggle-btn"
-            *ngIf="
-              sidebar && selectedrole.name != currentrole && showSidebarMenu
-            "
-            mat-icon-button=""
-            [ngStyle]="{ height: headerHeight, width: headerHeight }"
-            (click)="isexpaned()"
-            id="sidebarexpand"
-          >
-            <span *ngIf="!isExpanded" class="main-toggle">
-              <img
-                src="assets/img/icon-waffle.png"
-                alt="Expand"
-                class="main-toggle-img"
-              />
-            </span>
-            <span *ngIf="isExpanded" class="main-toggle">
-              <img
-                src="assets/img/icon-waffle.png"
-                alt="Collapse"
-                class="main-toggle-img"
-              />
-            </span>
-          </button>
-          <img
-            id="clientimage"
-            *ngIf="!isimg"
-            src="assets/img/essedum_icon_small.png"
-            class="selector-3-8 essedum-logo"
-            alt="ESSEDUM Logo"
-          />
-          <span class="essedum-title">ESSEDUM</span>
-        </div>
+        <div class="main-toggle responsive-main-toggle">
+          <div  style="display: flex; align-items: center;">
+            <button
+              class="sidebarBtn sidebarBigScreen selector-3-17 main-toggle-btn mobileHeaderImg"
+              *ngIf="sidebar && selectedrole.name != currentrole && showSidebarMenu"
+              mat-icon-button=""
+              (click)="isexpaned()"
+              id="sidebarexpand"
+              aria-label="Toggle Sidebar"
+            >
+              <span *ngIf="!isExpanded" class="main-toggle">
+                <img
+                  src="assets/img/icon-waffle@2x.png"
+                  alt="Expand"
+                  class="responsive-toggle-img mobileHeaderImg"
+                />
+              </span>
+              <span *ngIf="isExpanded" class="main-toggle">
+                <img
+                  src="assets/img/icon-waffle@2x.png"
+                  alt="Collapse"
+                  class="responsive-toggle-img mobileHeaderImg"
+                />
+              </span>
+            </button>
+            
+            <img
+              id="clientimage"
+              *ngIf="!isimg"
+              src="assets/img/essedum_icon_small.png"
+              class="selector-3-8 essedum-logo responsive-logo-img mobileHeaderImg"
+              alt="ESSEDUM Logo"
+              style="margin-left: 8px;"
+            />
+            <span class="responsive-title mobileHeaderImg" style="margin-left: 8px;">ESSEDUM</span>
+         
+          </div>
+        </div>       
         <div
           class="example-container selector-3-19"
           *ngIf="sidebar && selectedrole.name != currentrole"
@@ -119,7 +122,7 @@
                 <div
                   *ngIf="showSidebarMenuList"
                   class="sidebar-menu-popup"
-                  style="margin-left: 130px; top: 48px"
+                  style="margin-left: 130px; margin-top: -5px;"
                   [ngStyle]="{
                     position: 'fixed',
                     left: sidebarMenuPopupPosition?.left + 'px',
@@ -130,7 +133,7 @@
                     minWidth: '130px',
                     borderRadius: '4px',
                     width: '130px',
-                    height: '800px',
+                    height: '100vh',
                     overflowY: 'auto',
                     overflowX: 'visible'
                   }"

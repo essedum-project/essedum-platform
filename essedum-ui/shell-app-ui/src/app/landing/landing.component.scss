@@ -466,7 +466,7 @@ mat-drawer-container {
 
   .mobileHeaderImg {
     flex-grow: 1;
-    width: 225px !important;
+    width: 50px !important;
   }
 }
 
@@ -484,7 +484,7 @@ mat-drawer-container {
 
 .fChild {
   background-color: var(--header-color);
-  height: 50px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1112,11 +1112,93 @@ li.leftpanel-item.disabled {
   justify-content: center;
   margin-left: 12px;
 }
+.lfx-u-mar-l-12 {
+  margin-left: 12px !important;
+}
 
 .main-header-bg {
-  height: headerHeight;
+  width: 100%;
   background: linear-gradient(90deg, #002966 0%, var(--0052cc, #0052cc) 100%) 0%
     0% no-repeat padding-box;
+
+  @media (max-width: 490px) {
+    height: 85px;
+  }
+
+  @media (min-width: 2000px) and (max-width: 2999px) {
+    height: 70px;
+  }
+
+  @media (min-width: 3000px) {
+    height: 120px;
+  }
+
+  transition: height 0.2s;
+}
+
+.responsive-main-toggle {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+  min-width: 0;
+}
+.responsive-main-toggle .main-toggle-btn {
+  min-width: 36px;
+  min-height: 36px;
+  width: 3vw;
+  height: 3vw;
+  max-width: 48px;
+  max-height: 48px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.responsive-toggle-img {
+  width: 2vw;
+  min-width: 24px;
+  max-width: 36px;
+  height: auto;
+}
+.responsive-logo-img {
+  width: 2.5vw;
+  min-width: 28px;
+  max-width: 40px;
+  height: auto;
+}
+.responsive-title {
+  font-size: 1.5vw;
+  min-width: 60px;
+  max-width: 120px;
+  white-space: nowrap;
+  font-weight: semibold;
+  letter-spacing: 0.05em;
+  color: white !important;
+}
+@media (max-width: 900px) {
+  .responsive-main-toggle .main-toggle-btn,
+  .responsive-toggle-img,
+  .responsive-logo-img {
+    width: 36px !important;
+    min-width: 24px !important;
+    max-width: 40px !important;
+    height: 36px !important;
+  }
+  .responsive-title {
+    font-size: 16px !important;
+    min-width: 40px;
+    max-width: 80px;
+  }
+}
+@media (max-width: 600px) {
+  .responsive-main-toggle {
+    gap: 8px;
+  }
+  .responsive-title {
+    font-size: 13px !important;
+    min-width: 30px;
+    max-width: 60px;
+  }
 }
 
 .user-profile-btn {
@@ -1124,4 +1206,100 @@ li.leftpanel-item.disabled {
   justify-content: center;
   align-items: center;
   padding: 0;
+}
+
+.logo-in-header {
+  margin-left: 8px;
+  margin-right: 8px;
+  object-fit: contain;
+  max-height: 100%;
+  max-width: 100%;
+}
+
+.header-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: 8px;
+  font-weight: bold;
+  flex-shrink: 1;
+}
+
+.header-flex {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  min-width: 0;
+}
+
+.mobileHeaderImg {
+  height: 36px;
+  min-height: 28px;
+  max-height: 40px;
+  width: auto;
+  min-width: 24px;
+  max-width: 120px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 1200px) {
+  .mobileHeaderImg {
+    height: 16px !important;
+    min-height: 14px !important;
+    max-height: 16px !important;
+    width: 16px !important;
+    min-width: 14px !important;
+    max-width: 16px !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .mobileHeaderImg {
+    height: 16px !important;
+    min-height: 14px !important;
+    max-height: 16px !important;
+    width: 16px !important;
+    min-width: 14px !important;
+    max-width: 16px !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .mobileHeaderImg {
+    height: 8px !important;
+    min-height: 6px !important;
+    max-height: 8px !important;
+    width: 8px !important;
+    min-width: 6px !important;
+    max-width: 8px !important;
+    font-size: 6px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .mobileHeaderImg.responsive-title {
+    margin-left: 30px !important;
+  }
+}
+@media (max-width: 600px) {
+  .mobileHeaderImg.responsive-title {
+    margin-left: 15px !important;
+  }
+}
+
+@media (max-width: 1200px) {
+  .mobileHeaderImg.responsive-title {
+    margin-left: 30px !important;
+  }
+}
+
+@media (max-width: 500px) {
+  .mobileHeaderImg.responsive-title {
+    margin-left: 15px !important;
+  }
 }
