@@ -55,7 +55,7 @@ export class PipelineComponent implements OnInit, OnChanges {
   editAuth: boolean;
   deleteAuth: boolean;
   streamItem: any;
-  servicev1 = 'pipelines';
+  servicev1 = 'pipeline';
   tagrefresh: boolean = false;
   selectedType: string[] = [];
   adapterTypes: any;

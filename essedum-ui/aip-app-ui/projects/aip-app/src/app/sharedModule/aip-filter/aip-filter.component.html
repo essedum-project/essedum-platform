@@ -27,7 +27,66 @@
   </div>
 
   <div class="filter-panel__content" *ngIf="isFilterExpanded" @slideToggle>
-    <div *ngIf="(servicev1 === 'pipeline' || servicev1 === 'chain'); else elseBlock"></div>
+    <div *ngIf="(servicev1 === 'pipeline' || servicev1 === 'chain'); else elseBlock">
+      <div class="filter-options">
+        <!-- Type Filter -->
+        <div class="filter-group">
+          <div class="filter-control">
+            <mat-form-field appearance="fill" class="w-100">
+              <label>Type</label>
+              <mat-select (selectionChange)="pipelineTypeSelected($event)" aria-labelledby="type-label"
+                placeholder="All">
+                <mat-option value="" (click)="clearAllFilters('pipelineType')">
+                  All
+                </mat-option>
+                <ng-container *ngFor="let option of pipelinesTypeList">
+                  <mat-option *ngIf="!option.selected" [value]="option.label">
+                    {{ option.label }}
+                  </mat-option>
+                </ng-container>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="selected-items" *ngIf="selectedAdapterType?.length > 0">
+            <mat-chip-set aria-label="Selected types">
+              <mat-chip *ngFor="let type of selectedAdapterType" removable="true" (removed)="removePipelineType(type)">
+                {{ type }}
+                <mat-icon matChipRemove>close</mat-icon>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
+
+        <!-- Tags Filter -->
+        <div class="filter-group" *ngFor="let cat of category">
+          <div class="filter-control">
+            <mat-form-field appearance="fill" class="w-100">
+              <label>{{ cat | titlecase }}</label>
+              <mat-select (selectionChange)="filterByTag($event)" aria-labelledby="tag-label" placeholder="All">
+                <mat-option value="" (click)="clearAllTagsForCategory(cat)">
+                  All
+                </mat-option>
+                <ng-container *ngFor="let tag of tags[cat]">
+                  <mat-option *ngIf="!tagStatus[tag.category + ' - ' + tag.label]" [value]="tag">
+                    {{ tag.label }}
+                  </mat-option>
+                </ng-container>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="selected-items" *ngIf="getSelectedTagsForCategory(cat).length > 0">
+            <mat-chip-set aria-label="Selected tags">
+              <mat-chip *ngFor="let tag of getSelectedTagsForCategory(cat)" removable="true" (removed)="removeTag(tag)">
+                {{ tag.label }}
+                <mat-icon matChipRemove>close</mat-icon>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
+      </div>
+    </div>
     <ng-template #elseBlock>
       <div *ngIf="(servicev1 === 'worker-tools')">
       </div>
@@ -231,6 +290,69 @@
               </div>
               <ng-template #elseBlockDefault>
                 <div class="mb-4" *ngIf="!((servicev1 === 'apps') || (servicev1 === 'worker-tools'))">
+                  <div class="filter-options">
+
+                    <!-- Type -->
+                    <div class="filter-group">
+                      <div class="filter-control">
+                        <mat-form-field appearance="fill" class="w-100">
+                          <label>Type</label>
+                          <mat-select (selectionChange)="adapterTypeSelected($event)"
+                            aria-labelledby="specTemplateCapability-label" placeholder="All">
+                            <mat-option value="" (click)="clearAllFilters('adapterType')">
+                              All
+                            </mat-option>
+                            <ng-container *ngFor="let option of adapterTypeList">
+                              <mat-option *ngIf="!option.selected" [value]="option.label">
+                                {{ option.label }}
+                              </mat-option>
+                            </ng-container>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+
+                      <div class="selected-items" *ngIf="selectedAdapterType?.length > 0">
+                        <mat-chip-set aria-label="Selected Type">
+                          <mat-chip *ngFor="let type of selectedAdapterType" removable="true"
+                            (removed)="removeAdapterType(type)">
+                            {{ type}}
+                            <mat-icon matChipRemove>close</mat-icon>
+                          </mat-chip>
+                        </mat-chip-set>
+                      </div>
+                    </div>
+                    <!-- Instance -->
+                    <div class="filter-group">
+                      <div class="filter-control">
+                        <mat-form-field appearance="fill" class="w-100">
+                          <label>Instance</label>
+                          <mat-select (selectionChange)="adapterInstanceSelected($event)"
+                            aria-labelledby="specTemplateCapability-label" placeholder="All">
+                            <mat-option value="" (click)="clearAllFilters('adapterInstance')">
+                              All
+                            </mat-option>
+                            <ng-container *ngFor="let option of adapterInstanceList">
+                              <mat-option *ngIf="!option.selected" [value]="option.label">
+                                {{ option.label }}
+                              </mat-option>
+                            </ng-container>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+
+                      <div class="selected-items" *ngIf="selectedAdapterInstance?.length > 0">
+                        <mat-chip-set aria-label="Selected AdapterInstance">
+                          <mat-chip *ngFor="let adapterInstance of selectedAdapterInstance" removable="true"
+                            (removed)="removeAdapterInstance(adapterInstance)">
+                            {{ adapterInstance}}
+                            <mat-icon matChipRemove>close</mat-icon>
+                          </mat-chip>
+                        </mat-chip-set>
+                      </div>
+                    </div>
+
+                  </div>
+
                 </div>
                 <div class="mb-4" *ngIf="!((servicev1 === 'apps') || (servicev1 === 'worker-tools'))">
                 </div>

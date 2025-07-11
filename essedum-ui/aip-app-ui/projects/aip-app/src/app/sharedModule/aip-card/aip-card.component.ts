@@ -87,7 +87,7 @@ export class AipCardComponent {
       return this.card.adaptername;
     } else if (this.servicev1 === 'schemas') {
       return this.card.name;
-    } else if (this.servicev1 === 'model' || this.servicev1 === 'pipelines') {
+    } else if (this.servicev1 === 'model' || this.servicev1 === 'pipeline') {
       return this.card.type;
     }
   }
@@ -97,7 +97,7 @@ export class AipCardComponent {
       return this.card.name;
     } else if (this.servicev1 === 'specs') {
       return this.card.domainname;
-    } else if (this.servicev1 === 'schemas' || this.servicev1 === 'pipelines') {
+    } else if (this.servicev1 === 'schemas' || this.servicev1 === 'pipeline') {
       return this.card.alias;
     } else if (this.servicev1 === 'model') {
       return this.card.name && this.card.name != ''
@@ -115,7 +115,7 @@ export class AipCardComponent {
       return this.card.lastmodifieddate;
     } else if (this.servicev1 === 'model') {
       return this.card.createdOn;
-    } else if (this.servicev1 === 'pipelines') {
+    } else if (this.servicev1 === 'pipeline') {
       return this.card.createdDate;
     }
   }
@@ -133,7 +133,7 @@ export class AipCardComponent {
         : 'Name Not Available';
     } else if (this.servicev1 === 'model') {
       return this.card.createdBy ? this.card.createdBy : 'Name Not Available';
-    } else if (this.servicev1 === 'pipelines') {
+    } else if (this.servicev1 === 'pipeline') {
       return this.card.target.created_by
         ? this.card.target.created_by
         : 'Name Not Available';

@@ -734,6 +734,7 @@ export class AipFilterComponent {
       });
     });
   }
+
   getMlSpecTemplateFilters() {
     this.adapterServices.getSpecTemplateFilters().subscribe((res) => {
       this.mlSpecTemplateCapabilityList = res.capability;
@@ -1023,6 +1024,24 @@ export class AipFilterComponent {
     this.tagSelected.emit(this.geteventtagsdto());
   }
 
+  removeAdapterType(type: string): void {
+    const index = this.selectedAdapterType.indexOf(type);
+    if (index !== -1) {
+      this.selectedAdapterType.splice(index, 1);
+
+      // Update the UI selection state
+      this.adapterTypeList.forEach((element) => {
+        if (element.value === type) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+
   pipelineTypeSelected(value): void {
     if (!this.selectedAdapterType.includes(value.value)) {
       this.selectedAdapterType.push(value.value);
@@ -1032,13 +1051,32 @@ export class AipFilterComponent {
         1
       );
     }
-    this.pipelinesTypeList.forEach((element: any) => {
+    this.pipelinesTypeList?.forEach((element: any) => {
       if (element.value === value.value) {
         element.selected = !element.selected;
       }
     });
 
     this.tagSelected.emit(this.geteventtagsdto());
+  }
+
+  // Method to remove individual pipeline type
+  removePipelineType(type: string): void {
+    const index = this.selectedAdapterType.indexOf(type);
+    if (index !== -1) {
+      this.selectedAdapterType.splice(index, 1);
+
+      // Update the UI selection state
+      this.pipelinesTypeList?.forEach((element) => {
+        if (element.value === type) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
   }
 
   toolsTypeSelected(value): void {
@@ -1357,6 +1395,24 @@ export class AipFilterComponent {
     this.tagSelected.emit(this.geteventtagsdto());
   }
 
+  removeAdapterInstance(adapterInstance: string): void {
+    const index = this.selectedAdapterInstance.indexOf(adapterInstance);
+    if (index !== -1) {
+      this.selectedAdapterInstance.splice(index, 1);
+
+      // Update the UI selection state
+      this.adapterInstanceList.forEach((element) => {
+        if (element.value === adapterInstance) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+
   refresh() {
     this.tagStatus = {};
     this.selectedTagList = [];
@@ -1464,6 +1520,53 @@ export class AipFilterComponent {
         .slice(0, 10);
   }
 
+  // Method to get selected tags for a specific category
+  getSelectedTagsForCategory(category: string): any[] {
+    return this.selectedTag.filter((tag) => tag.category === category);
+  }
+
+  // Method to clear all tags for a specific category
+  clearAllTagsForCategory(category: string): void {
+    // Remove all tags for this category
+    this.selectedTag = this.selectedTag.filter(
+      (tag) => tag.category !== category
+    );
+
+    // Update tag statuses for this category
+    this.allTags?.forEach((tag) => {
+      if (tag.category === category) {
+        this.tagStatus[tag.category + ' - ' + tag.label] = false;
+      }
+    });
+
+    // Update selectedTagList
+    this.selectedTagList = this.selectedTag.map((selectedTag) => {
+      return selectedTag.id;
+    });
+
+    // Emit the updated selection
+    this.tagSelected.emit(this.geteventtagsdto());
+    this.updateFilterStatus();
+  }
+
+  // Method to remove individual tag
+  removeTag(tag: any): void {
+    const index = this.selectedTag.indexOf(tag);
+    if (index !== -1) {
+      this.selectedTag.splice(index, 1);
+      this.tagStatus[tag.category + ' - ' + tag.label] = false;
+
+      // Update selectedTagList
+      this.selectedTagList = this.selectedTag.map((selectedTag) => {
+        return selectedTag.id;
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+
   clearAllFilters(
     filterType:
       | 'category'
@@ -1472,6 +1575,9 @@ export class AipFilterComponent {
       | 'instanceAdapter'
       | 'instanceConnection'
       | 'specTemplateCapability'
+      | 'adapterType'
+      | 'adapterInstance'
+      | 'pipelineType'
   ): void {
     switch (filterType) {
       case 'category':
@@ -1510,9 +1616,29 @@ export class AipFilterComponent {
         break;
 
       case 'specTemplateCapability':
-        console.log(this.mlSpecTemplateCapabilityTypeList);
         this.selectedMlSpecTemplateCapabilityType = [];
         this.mlSpecTemplateCapabilityTypeList.forEach((element: any) => {
+          element.selected = false;
+        });
+        break;
+
+      case 'adapterType':
+        this.selectedAdapterType = [];
+        this.adapterTypeList.forEach((element: any) => {
+          element.selected = false;
+        });
+        break;
+
+      case 'adapterInstance':
+        this.selectedAdapterInstance = [];
+        this.adapterInstanceList.forEach((element: any) => {
+          element.selected = false;
+        });
+        break;
+
+      case 'pipelineType':
+        this.selectedAdapterType = [];
+        this.pipelinesTypeList?.forEach((element: any) => {
           element.selected = false;
         });
         break;
