@@ -1,12 +1,12 @@
 <div class="aip-top">
-    <div class="clearfix lfx-l-bodywrapper  js-bodywrapper" id="mainCtr">
+    <div class="clearfix js-bodywrapper" id="mainCtr">
         <div class="col-sm-12 col-md-12 col-lg-12  lfx-u-pad-lr-30" id="mainrightCnt">
             <!-- Header Section -->
             <div class="aip-content">
                 <!-- Header -->
                 <app-aip-header [cardTitle]="cardTitle" [lastRefreshedTime]="lastRefreshedTime"
                     [showAddButton]="createAuth" (search)="filterz($event)" (refresh)="refreshComplete()"
-                    (add)="redirect()">
+                    (add)="selectChange('local')">
                 </app-aip-header>
 
                 <!-- Filter Section -->

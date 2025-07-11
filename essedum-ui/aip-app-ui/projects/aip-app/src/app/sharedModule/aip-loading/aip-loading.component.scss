@@ -1,0 +1,48 @@
+.aip-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  width: 100%;
+}
+
+.aip-spinner {
+  position: relative;
+  width: 60px;
+  height: 60px;
+}
+
+.spinner-circle {
+  position: absolute;
+  border: 3px solid transparent;
+  border-top-color: var(--primary-color, #0073e6);
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  animation: spin 1s cubic-bezier(0.17, 0.49, 0.96, 0.76) infinite;
+}
+
+.spinner-circle-outer {
+  border-top-color: transparent;
+  border-right-color: var(--primary-color, #0073e6);
+  animation-duration: 1.25s;
+  animation-direction: reverse;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .aip-spinner {
+    width: 40px;
+    height: 40px;
+  }
+}

@@ -26,6 +26,7 @@ export class AdapterComponent implements OnInit, OnChanges {
   isFilterHovered: boolean = false;
   hoverStates: boolean[] = [];
   hasFilters = false;
+  loading: boolean = true;
   lastRefreshedTime: Date | null = null;
   servicev1 = 'adapters';
   createAction = 'create';
@@ -160,16 +161,16 @@ export class AdapterComponent implements OnInit, OnChanges {
     this.lastRefreshTime();
   }
 
-  nextPage() {
+  onNextPage() {
     if (this.pageNumber + 1 <= this.noOfPages) {
       this.pageNumber += 1;
-      this.changePage();
+      this.onChangePage();
     }
   }
-  prevPage() {
+  onPrevPage() {
     if (this.pageNumber - 1 >= 1) {
       this.pageNumber -= 1;
-      this.changePage();
+      this.onChangePage();
     }
   }
 
@@ -199,7 +200,7 @@ export class AdapterComponent implements OnInit, OnChanges {
     this.location.replaceState(url);
   }
 
-  changePage(page?: number) {
+  onChangePage(page?: number) {
     if (page && page >= 1 && page <= this.noOfPages) this.pageNumber = page;
     if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
       this.pageChanged.emit(this.pageNumber);
@@ -266,9 +267,10 @@ export class AdapterComponent implements OnInit, OnChanges {
       this.allCardsFiltered = data;
       this.filterSelectedCards(page, size);
     });
+    this.loading = false;
   }
 
-  desc(card: any) {
+  onViewDetails(card: any) {
     this.router.navigate(['../implementations/' + card.name], {
       queryParams: {
         page: this.pageNumber,
@@ -282,7 +284,7 @@ export class AdapterComponent implements OnInit, OnChanges {
     });
   }
 
-  redirect() {
+  onAdd() {
     this.router.navigate(['./create'], {
       queryParams: {
         page: this.pageNumber,
@@ -351,7 +353,7 @@ export class AdapterComponent implements OnInit, OnChanges {
       this.records = false;
     }
     if (this.filt.length >= 1) {
-      this.filterz();
+      this.onSearch();
     } else {
       this.filt = '';
     }
@@ -369,7 +371,7 @@ export class AdapterComponent implements OnInit, OnChanges {
     this.hoverStates = new Array(this.pageArr.length).fill(false);
   }
 
-  filterz(searchText?: string) {
+  onSearch(searchText?: string) {
     if (searchText !== undefined) {
       this.filt = searchText;
     }
@@ -424,7 +426,7 @@ export class AdapterComponent implements OnInit, OnChanges {
     }
   }
 
-  tagSelectedEvent(event) {
+  onTagSelected(event) {
     this.pageNumber = 1;
     this.selectedConnectionNamesList =
       event.getSelectedMlAdapterConnectionType();
@@ -476,7 +478,7 @@ export class AdapterComponent implements OnInit, OnChanges {
   }
 
   triggereRefresh($event) {
-    if ($event) this.completeRefresh();
+    if ($event) this.onRefresh();
   }
 
   updatePageSizeOnly() {
@@ -496,7 +498,7 @@ export class AdapterComponent implements OnInit, OnChanges {
     }
   }
 
-  completeRefresh() {
+  onRefresh() {
     this.filt = '';
     this.tagrefresh = true;
     if (!this.hasFilters) {
@@ -520,5 +522,23 @@ export class AdapterComponent implements OnInit, OnChanges {
 
   onFilterStatusChange(hasActiveFilters: boolean) {
     this.hasFilters = hasActiveFilters;
+  }
+
+  get paginatedCards() {
+    const startIndex = (this.pageNumber - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    return this.cards.slice(startIndex, endIndex);
+  }
+
+  trackByCardId(index: number, card: any): any {
+    return card.id || card.name || index;
+  }
+
+  get shouldShowEmptyState(): boolean {
+    return this.cards.length === 0 && !this.loading;
+  }
+
+  get shouldShowPagination(): boolean {
+    return this.cards.length > 0 && this.noOfPages > 1;
   }
 }
