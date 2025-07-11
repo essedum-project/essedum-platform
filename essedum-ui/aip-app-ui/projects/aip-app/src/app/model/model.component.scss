@@ -1,16 +1,27 @@
-.tagbrdr {
-  border-radius: 8px;
-  padding: 5px;
-  margin: 5px;
-  text-decoration: none;
-  box-shadow: 0 1px 4px 0 rgb(1 1 1 / 10%), 0 1px 1px 0 rgb(0 0 0 / 10%);
+#mainrightCnt {
+  width: 100%;
+  margin: 0;
 }
-.items-baseline {
-  align-items: baseline;
+
+.aip-container {
+  width: 100%;
+  position: relative;
 }
-.flex-wrap {
-  flex-wrap: wrap;
+
+.aip-card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 29rem);
+  grid-template-rows: repeat(auto-fit, 15.5rem);
+  justify-content: center;
+  grid-row-gap: 2.4rem;
+  grid-column-gap: 2.4rem;
 }
-.flex {
-  display: flex;
+
+.aip-card-wrapper {
+  min-width: 29rem;
+  min-height: 15.5rem;
+
+  @media (max-width: 576px) {
+    width: 100%;
+  }
 }

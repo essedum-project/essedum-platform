@@ -25,11 +25,10 @@ import * as _ from 'lodash';
 })
 export class SpecTemplateComponent implements OnInit, OnChanges {
   cardTitle: String = 'Specs';
-  isSearchHovered: boolean = false;
-  isAddHovered: boolean = false;
-  isRefreshHovered: boolean = false;
-  isMenuHovered: boolean = false;
   isFilterHovered: boolean = false;
+  hoverStates: boolean[] = [];
+  hasFilters = false;
+  lastRefreshedTime: Date | null = null;
   test: any;
   cards: any;
   options = [];
@@ -71,7 +70,6 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
   tagrefresh: boolean = false;
   servicev1 = 'specs';
   records: boolean = false;
-  isExpanded = false;
   tooltip: string = 'above';
   filtbackup: any = '';
   allCardsFiltered: any;
@@ -133,7 +131,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
           this.selectedCapabilityType &&
           this.selectedCapabilityType.length > 0
         ) {
-          this.isExpanded = true;
+          this.hasFilters = true;
         }
       } else {
         this.pageNumber = 1;
@@ -151,6 +149,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
       this.endIndex = 5;
     }
     this.Authentications();
+    this.lastRefreshTime();
   }
 
   updateQueryParam(
@@ -350,7 +349,7 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
           // Calculate pagination
           this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
           this.pageArr = [...Array(this.noOfPages).keys()];
-
+          this.hoverStates = new Array(this.pageArr.length).fill(false);
           // Update pagination indexes
           if (this.pageNumber > 5) {
             this.endIndex = this.pageNumber;
@@ -382,7 +381,10 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
     });
   }
 
-  filterz() {
+  filterz(searchText?: string) {
+    if (searchText !== undefined) {
+      this.filt = searchText;
+    }
     if (this.filt.length != this.filtbackup.length) {
       this.pageNumber = 1;
       this.filtbackup = this.filt;
@@ -529,28 +531,11 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
     this.getCountSpecTemplates();
   }
 
-  selectedButton(i) {
-    if (i == this.pageNumber) return { color: 'white', background: '#0094ff' };
-    else return { color: 'black' };
-  }
-
-  toggleExpand() {
-    this.isExpanded = !this.isExpanded;
-  }
-
-  toggler(isExpanded: boolean) {
-    if (isExpanded) {
-      return { width: '80%', margin: '0 0 0 20%' };
-    } else {
-      return { width: '100%', margin: '0%' };
-    }
-  }
-
   completeRefresh() {
     this.filt = '';
     this.tagrefresh = true;
     this.changeDetectionRef.detectChanges();
-    if (!this.isExpanded) {
+    if (!this.hasFilters) {
       this.selectedCapabilityType = [];
       this.updateQueryParam(1, '', '', '');
       this.pageNumber = 1;
@@ -558,6 +543,17 @@ export class SpecTemplateComponent implements OnInit, OnChanges {
       this.tagrefresh = true;
       this.updatePageSize();
     }
+    this.lastRefreshTime();
+  }
+
+  lastRefreshTime() {
+    setTimeout(() => {
+      this.lastRefreshedTime = new Date();
+    }, 1000);
+  }
+
+  onFilterStatusChange(hasActiveFilters: boolean) {
+    this.hasFilters = hasActiveFilters;
   }
 
   updatePageSizeOnly() {

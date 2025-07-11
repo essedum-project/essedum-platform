@@ -23,11 +23,11 @@ import { Location } from '@angular/common';
 })
 export class AdapterComponent implements OnInit, OnChanges {
   cardTitle: String = 'Implementations';
-  isSearchHovered: boolean = false;
-  isAddHovered: boolean = false;
-  isRefreshHovered: boolean = false;
-  isMenuHovered: boolean = false;
   isFilterHovered: boolean = false;
+  hoverStates: boolean[] = [];
+  hasFilters = false;
+  lastRefreshedTime: Date | null = null;
+  servicev1 = 'adapters';
   createAction = 'create';
   editAction = 'edit';
   test: any;
@@ -72,7 +72,6 @@ export class AdapterComponent implements OnInit, OnChanges {
   selectedCategoryList: string[] = [];
   selectedSpecList: string[] = [];
   records: boolean = false;
-  isExpanded = false;
   tooltip: string = 'above';
   filtbackup: any = '';
   tagrefresh: boolean = false;
@@ -141,7 +140,7 @@ export class AdapterComponent implements OnInit, OnChanges {
             this.selectedConnectionNamesList.length > 0) ||
           (this.selectedCategoryList && this.selectedCategoryList.length > 0)
         ) {
-          this.isExpanded = true;
+          this.hasFilters = true;
         }
       } else {
         this.pageNumber = 1;
@@ -158,6 +157,7 @@ export class AdapterComponent implements OnInit, OnChanges {
       this.endIndex = 5;
     }
     this.Authentications();
+    this.lastRefreshTime();
   }
 
   nextPage() {
@@ -366,8 +366,13 @@ export class AdapterComponent implements OnInit, OnChanges {
     this.noOfItems = this.cards.length;
     this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
     this.pageArr = [...Array(this.noOfPages).keys()];
+    this.hoverStates = new Array(this.pageArr.length).fill(false);
   }
-  filterz() {
+
+  filterz(searchText?: string) {
+    if (searchText !== undefined) {
+      this.filt = searchText;
+    }
     if (this.filt.length != this.filtbackup.length) {
       this.pageNumber = 1;
       this.filtbackup = this.filt;
@@ -387,6 +392,7 @@ export class AdapterComponent implements OnInit, OnChanges {
     this.noOfItems = this.cards.length;
     this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
     this.pageArr = [...Array(this.noOfPages).keys()];
+    this.hoverStates = new Array(this.pageArr.length).fill(false);
     this.updateQueryParam(
       this.pageNumber,
       this.filt,
@@ -469,23 +475,6 @@ export class AdapterComponent implements OnInit, OnChanges {
     });
   }
 
-  selectedButton(i) {
-    if (i == this.pageNumber) return { color: 'white', background: '#0094ff' };
-    else return { color: 'black' };
-  }
-
-  toggleExpand() {
-    this.isExpanded = !this.isExpanded;
-  }
-
-  toggler(isExpanded: boolean) {
-    if (isExpanded) {
-      return { width: '80%', margin: '0 0 0 20%' };
-    } else {
-      return { width: '100%', margin: '0%' };
-    }
-  }
-
   triggereRefresh($event) {
     if ($event) this.completeRefresh();
   }
@@ -510,7 +499,7 @@ export class AdapterComponent implements OnInit, OnChanges {
   completeRefresh() {
     this.filt = '';
     this.tagrefresh = true;
-    if (!this.isExpanded) {
+    if (!this.hasFilters) {
       this.selectedConnectionNamesList = [];
       this.selectedSpecList = [];
       this.selectedCategoryList = [];
@@ -520,5 +509,16 @@ export class AdapterComponent implements OnInit, OnChanges {
       this.tagrefresh = true;
       this.updatePageSize();
     }
+    this.lastRefreshTime();
+  }
+
+  lastRefreshTime() {
+    setTimeout(() => {
+      this.lastRefreshedTime = new Date();
+    }, 1000);
+  }
+
+  onFilterStatusChange(hasActiveFilters: boolean) {
+    this.hasFilters = hasActiveFilters;
   }
 }
