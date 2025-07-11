@@ -24,6 +24,8 @@ import { PipelineCreateComponent } from './pipeline-create/pipeline-create.compo
 })
 export class PipelineComponent implements OnInit, OnChanges {
   cardTitle: String = 'Pipelines';
+  hasFilters = false;
+  lastRefreshedTime: Date | null = null;
   cardToggled: boolean = true;
   users: any = [];
   cards: any;
@@ -31,17 +33,16 @@ export class PipelineComponent implements OnInit, OnChanges {
   selectedInstance: any;
   toggle: boolean = false;
   filt: any;
-  isHovered: boolean =  false;
+  isHovered: boolean = false;
   pageSize: number;
   pageNumber: number;
   pageArr: number[] = [];
   pageNumberInput: number = 1;
   noOfPages: number = 0;
-
   noOfItems: number;
   isSearchHovered: boolean;
-  
-filteredCards: any[] = [];
+
+  filteredCards: any[] = [];
   category = [];
   tags;
   tagsBackup;
@@ -54,7 +55,7 @@ filteredCards: any[] = [];
   editAuth: boolean;
   deleteAuth: boolean;
   streamItem: any;
-  servicev1 = 'pipelines';
+  servicev1 = 'pipeline';
   tagrefresh: boolean = false;
   selectedType: string[] = [];
   adapterTypes: any;
@@ -133,12 +134,10 @@ filteredCards: any[] = [];
       this.updateQueryParam(this.pageNumber);
       this.getCountPipelines();
       this.getCards();
-     
     }
     this.Authentications();
+    this.lastRefreshTime();
   }
-
-
 
   Authentications() {
     this.service.getPermission('cip').subscribe((cipAuthority) => {
@@ -177,12 +176,11 @@ filteredCards: any[] = [];
       // test = test.filter(pipeline => (pipeline.target.type != 'App'));
       if (test.length) {
         test.forEach((element: any, index) => {
-   
           data.push(element);
           this.users.push(element.alias);
           if (index == test.length - 1) {
             this.cards = data;
-            this.filteredCards = data; 
+            this.filteredCards = data;
             if (this.cards.length == 0) {
               this.records = true;
             } else {
@@ -195,8 +193,6 @@ filteredCards: any[] = [];
         this.filteredCards = data;
         this.records = true;
       }
-
-     
     });
 
     this.updateQueryParam(
@@ -219,7 +215,6 @@ filteredCards: any[] = [];
       relativeTo: this.route,
     });
   }
- 
 
   tagSelectedEvent(event) {
     this.selectedAdapterInstance = event.getSelectedAdapterInstance();
@@ -257,11 +252,10 @@ filteredCards: any[] = [];
     this.getCountPipelines();
     this.getCards();
     // this.resetPage(1);
-    this.filt="";
-    this.ngOnInit()
+    this.filt = '';
+    this.ngOnInit();
   }
   handlePageAndSizeChange(event: { pageNumber: number; pageSize: number }) {
-
     this.service
       .getConstantByKey(this.pipelineConstantsKey)
       .subscribe((response) => {
@@ -297,9 +291,7 @@ filteredCards: any[] = [];
     this.records = false;
     this.getCards();
     this.getCountPipelines();
-
   }
-
 
   getCountPipelines() {
     let params: HttpParams = new HttpParams();
@@ -326,7 +318,6 @@ filteredCards: any[] = [];
           this.service.deletePipeline(cid).subscribe((res) => {
             this.service.message('Pipeline deleted!', 'success');
             this.refreshComplete();
-  
           });
         }
       });
@@ -359,7 +350,6 @@ filteredCards: any[] = [];
   }
 
   redirection(card: any) {
-
     this.service.getStreamingServicesByName(card.name).subscribe((res) => {
       this.streamItem = res;
       const navigationExtras: NavigationExtras = {
@@ -381,9 +371,8 @@ filteredCards: any[] = [];
       };
       if (this.streamItem.type === 'NativeScript') {
         this.router.navigate(['./view' + '/' + card.name], navigationExtras);
-      } 
+      }
     });
-   
   }
   toggleExpand() {
     this.isExpanded = !this.isExpanded;
@@ -406,39 +395,41 @@ filteredCards: any[] = [];
       });
   }
 
- 
-  filterz() {
+  filterz(searchText?: string) {
+    if (searchText !== undefined) {
+      this.filt = searchText;
+    }
     const search = (this.filt || '').toLowerCase().trim();
-  if (!search) {
-    this.filteredCards = this.cards;
-  } else {
-    this.filteredCards = this.cards.filter(card =>
-      (card.alias || '').toLowerCase().includes(search)
-    );
+    if (!search) {
+      this.filteredCards = this.cards;
+    } else {
+      this.filteredCards = this.cards.filter((card) =>
+        (card.alias || '').toLowerCase().includes(search)
+      );
+    }
   }
-  }
-  
-
 
   filterCards(page?: number) {
-    if (page)
-      this.pageNumber = page;
-    else
-      this.pageNumber = 1;
+    if (page) this.pageNumber = page;
+    else this.pageNumber = 1;
     if (this.selectedAdapterType.length > 0) {
       let multiFilter;
       this.finalDataList = [];
       this.records = true;
       for (let i = 0; i < this.selectedAdapterType.length; i++) {
         multiFilter = this.cards.filter((data) => {
-          const isAdapterTypeIncluded = data.type?.includes(this.selectedAdapterType[i]);
-          const isFiltIncluded = this.filt && this.filt.trim() !== '' ? (data.alias.toLowerCase().includes(this.filt.toLowerCase()) || data.name.toLowerCase().includes(this.filt.toLowerCase())) : true;
+          const isAdapterTypeIncluded = data.type?.includes(
+            this.selectedAdapterType[i]
+          );
+          const isFiltIncluded =
+            this.filt && this.filt.trim() !== ''
+              ? data.alias.toLowerCase().includes(this.filt.toLowerCase()) ||
+                data.name.toLowerCase().includes(this.filt.toLowerCase())
+              : true;
           if (this.records)
             this.records = !(isAdapterTypeIncluded && isFiltIncluded);
           return isAdapterTypeIncluded && isFiltIncluded;
-        }
-
-        );
+        });
         this.finalDataList.push(...multiFilter);
       }
       this.filteredCards = this.finalDataList;
@@ -450,7 +441,9 @@ filteredCards: any[] = [];
       if (this.filt && this.filt != '') {
         this.records = true;
         this.filteredCards = this.cards.filter((data) => {
-          const match = data.alias.toLowerCase().includes(this.filt.toLowerCase()) || data.name.toLowerCase().includes(this.filt.toLowerCase());
+          const match =
+            data.alias.toLowerCase().includes(this.filt.toLowerCase()) ||
+            data.name.toLowerCase().includes(this.filt.toLowerCase());
           if (match) {
             this.records = false;
           }
@@ -461,11 +454,23 @@ filteredCards: any[] = [];
         this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
         this.pageArr = [...Array(this.noOfPages).keys()];
       } else {
-        if (!page)
-          this.refreshComplete();
+        if (!page) this.refreshComplete();
       }
     }
-    this.updateQueryParam(this.pageNumber, this.filt, this.selectedAdapterType.toString());
+    this.updateQueryParam(
+      this.pageNumber,
+      this.filt,
+      this.selectedAdapterType.toString()
+    );
   }
-  
+
+  lastRefreshTime() {
+    setTimeout(() => {
+      this.lastRefreshedTime = new Date();
+    }, 1000);
+  }
+
+  onFilterStatusChange(hasActiveFilters: boolean) {
+    this.hasFilters = hasActiveFilters;
+  }
 }
