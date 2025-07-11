@@ -1,8 +1,6 @@
 <div *ngIf="cardToggled; else detailView" class="aip-container lfx-u-pad-lr-30" id="mainCtr">
 
   <!-- Header Section -->
-
-  <!-- Header -->
   <app-aip-header [cardTitle]="cardTitle" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createAuth"
     (search)="onSearch($event)" (refresh)="onRefresh()" (add)="onAdd()">
   </app-aip-header>
@@ -20,12 +18,14 @@
     <app-aip-loading></app-aip-loading>
   </div>
 
+  <!-- Content Area (only shown when not loading) -->
   <ng-container *ngIf="!loading">
 
     <!-- Cards container -->
-    <div *ngIf="paginatedCards.length > 0" class="aip-card-container">
+    <div *ngIf="paginatedCards.length > 0" class="aip-card-container" aria-label="Adapter cards">
       <div class="aip-card-wrapper" *ngFor="let card of paginatedCards; trackBy: trackByCardId">
 
+        <!-- Cards  -->
         <app-aip-card [servicev1]="servicev1" [card]="card" [editAuth]="editAuth" [deployAuth]="deployAuth"
           [deleteAuth]="deleteAuth" (viewDetails)="onViewDetails(card)" (edit)="openedit(editModal)"
           (delete)="deleteAdapter(card.name)">

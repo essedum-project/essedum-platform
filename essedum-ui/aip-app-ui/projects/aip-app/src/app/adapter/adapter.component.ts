@@ -1,12 +1,9 @@
 import {
-  ChangeDetectorRef,
   Component,
   EventEmitter,
   HostListener,
-  OnChanges,
   OnInit,
   Output,
-  SimpleChanges,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Services } from '../services/service';
@@ -21,133 +18,80 @@ import { Location } from '@angular/common';
   templateUrl: './adapter.component.html',
   styleUrls: ['./adapter.component.scss'],
 })
-export class AdapterComponent implements OnInit, OnChanges {
-  cardTitle: String = 'Implementations';
-  isFilterHovered: boolean = false;
+export class AdapterComponent implements OnInit {
+  // Constants
+  readonly cardTitle = 'Implementations';
+  readonly servicev1 = 'adapters';
+  readonly createAction = 'create';
+  readonly editAction = 'edit';
+  readonly tooltip = 'above';
+
+  // Component state
+  isFilterHovered = false;
   hoverStates: boolean[] = [];
   hasFilters = false;
-  loading: boolean = true;
+  loading = true;
   lastRefreshedTime: Date | null = null;
-  servicev1 = 'adapters';
-  createAction = 'create';
-  editAction = 'edit';
-  test: any;
-  cards: any;
-  allCards: any;
-  allCardsFiltered: any;
-  options = [];
-  alias = [];
-  datasetTypes = [];
-  OptionType: any;
-  selectedInstance: any;
-  keys: any = [];
-  users: any = [];
-  filt: any = '';
-  selectedCard: any = [];
-  cardToggled: boolean = true;
-  pageSize: number;
-  pageNumber: number;
-  pageArr: number[] = [];
-  pageNumberInput: number = 1;
-  noOfPages: number = 0;
-  prevRowsPerPageValue: number;
-  itemsPerPage: number[] = [];
-  noOfItems: number;
-  @Output() pageChanged = new EventEmitter<any>();
-  @Output() pageSizeChanged = new EventEmitter<any>();
-  endIndex: number;
-  startIndex: number;
-  pageNumberChanged: boolean = true;
-  createAuth: boolean;
-  editAuth: boolean;
-  deleteAuth: boolean;
-  deployAuth: boolean;
-  category = [];
-  tags;
-  tagsBackup;
-  allTags: any;
-  tagStatus = {};
-  catStatus = {};
-  selectedTag = [];
+  cardToggled = true;
+  records = false;
+  tagrefresh = false;
+
+  // Auth flags
+  createAuth = false;
+  editAuth = false;
+  deleteAuth = false;
+  deployAuth = false;
+
+  // Data collections
+  cards: any[] = [];
+  allCards: any[] = [];
+  allCardsFiltered: any[] = [];
+  users: string[] = [];
+
+  // Filter state
+  filt = '';
+  filtbackup = '';
   selectedConnectionNamesList: string[] = [];
   selectedCategoryList: string[] = [];
   selectedSpecList: string[] = [];
-  records: boolean = false;
-  tooltip: string = 'above';
-  filtbackup: any = '';
-  tagrefresh: boolean = false;
+
+  // Pagination
+  pageSize!: number;
+  pageNumber = 1;
+  pageArr: number[] = [];
+  pageNumberInput = 1;
+  noOfPages = 0;
+  prevRowsPerPageValue!: number;
+  itemsPerPage: number[] = [];
+  noOfItems = 0;
+  startIndex = 0;
+  endIndex = 5;
+  pageNumberChanged = true;
+
+  @Output() pageChanged = new EventEmitter<number>();
+  @Output() pageSizeChanged = new EventEmitter<number>();
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private service: Services,
     private adapterServices: AdapterServices,
-    private changeDetectionRef: ChangeDetectorRef,
     public tagService: TagsService,
     private dialog: MatDialog,
     private location: Location
   ) {}
 
-  ngOnChanges(changes: SimpleChanges): void {}
-
-  @HostListener('window:resize', ['$event'])
-  onResize(event) {}
-
-  updatePageSize() {
-    this.pageSize = 0;
-    if (window.innerWidth > 2500) {
-      this.itemsPerPage = [16, 32, 48, 64, 80, 96];
-      this.pageSize = this.pageSize || 16; // xl
-      this.getCards(this.pageNumber, this.pageSize);
-    } else if (window.innerWidth > 1440 && window.innerWidth <= 2500) {
-      this.itemsPerPage = [10, 20, 40, 60, 80, 100];
-      this.pageSize = this.pageSize || 10; // lg
-      this.getCards(this.pageNumber, this.pageSize);
-    } else if (window.innerWidth > 1024 && window.innerWidth <= 1440) {
-      this.itemsPerPage = [8, 16, 32, 48, 64, 80];
-      this.pageSize = this.pageSize || 8; //md
-      this.getCards(this.pageNumber, this.pageSize);
-    } else if (window.innerWidth >= 768 && window.innerWidth <= 1024) {
-      this.itemsPerPage = [6, 9, 18, 36, 54, 72];
-      this.pageSize = this.pageSize || 6; //sm
-      this.getCards(this.pageNumber, this.pageSize);
-    } else if (window.innerWidth < 768) {
-      this.itemsPerPage = [4, 8, 12, 16, 20, 24];
-      this.pageSize = this.pageSize || 4; //xs
-      this.getCards(this.pageNumber, this.pageSize);
-    }
+  @HostListener('window:resize')
+  onResize(): void {
+    this.updatePageSizeOnly();
   }
 
   ngOnInit(): void {
     this.updatePageSizeOnly();
     this.records = false;
-    this.route.queryParams.subscribe((params) => {
-      // Update this.pageNumber if the page query param is present
-      if (params['page']) {
-        this.pageNumber = params['page'];
-        this.filt = params['search'];
-        this.selectedSpecList = params['specList']
-          ? params['specList'].split(',')
-          : [];
-        this.selectedConnectionNamesList = params['connectionList']
-          ? params['connectionList'].split(',')
-          : [];
-        this.selectedCategoryList = params['categoryList']
-          ? params['categoryList'].split(',')
-          : [];
-        if (
-          (this.selectedSpecList && this.selectedSpecList.length > 0) ||
-          (this.selectedConnectionNamesList &&
-            this.selectedConnectionNamesList.length > 0) ||
-          (this.selectedCategoryList && this.selectedCategoryList.length > 0)
-        ) {
-          this.hasFilters = true;
-        }
-      } else {
-        this.pageNumber = 1;
-        this.filt = '';
-      }
-    });
+    this.route.queryParams.subscribe((params) =>
+      this.handleQueryParams(params)
+    );
     this.tagrefresh = false;
     this.updateQueryParam(this.pageNumber, this.filt);
     this.getCards(this.pageNumber, this.pageSize);
@@ -157,24 +101,118 @@ export class AdapterComponent implements OnInit, OnChanges {
       this.startIndex = 0;
       this.endIndex = 5;
     }
-    this.Authentications();
-    this.lastRefreshTime();
+    this.loadAuthentications();
+    this.updateLastRefreshTime();
   }
 
-  onNextPage() {
-    if (this.pageNumber + 1 <= this.noOfPages) {
-      this.pageNumber += 1;
-      this.onChangePage();
-    }
-  }
-  onPrevPage() {
-    if (this.pageNumber - 1 >= 1) {
-      this.pageNumber -= 1;
-      this.onChangePage();
+  private handleQueryParams(params: any): void {
+    if (params['page']) {
+      this.pageNumber = +params['page'];
+      this.filt = params['search'] || '';
+
+      this.selectedSpecList = params['specList']
+        ? params['specList'].split(',').filter(Boolean)
+        : [];
+
+      this.selectedConnectionNamesList = params['connectionList']
+        ? params['connectionList'].split(',').filter(Boolean)
+        : [];
+
+      this.selectedCategoryList = params['categoryList']
+        ? params['categoryList'].split(',').filter(Boolean)
+        : [];
+
+      this.hasFilters = !!(
+        this.selectedSpecList.length ||
+        this.selectedConnectionNamesList.length ||
+        this.selectedCategoryList.length
+      );
+    } else {
+      this.pageNumber = 1;
+      this.filt = '';
     }
   }
 
-  updateQueryParam(
+  private updatePageSize(): void {
+    const width = window.innerWidth;
+
+    if (width > 2500) {
+      this.itemsPerPage = [16, 32, 48, 64, 80, 96];
+      this.pageSize = this.pageSize || 16; // xl
+    } else if (width > 1440) {
+      this.itemsPerPage = [10, 20, 40, 60, 80, 100];
+      this.pageSize = this.pageSize || 10; // lg
+    } else if (width > 1024) {
+      this.itemsPerPage = [8, 16, 32, 48, 64, 80];
+      this.pageSize = this.pageSize || 8; // md
+    } else if (width >= 768) {
+      this.itemsPerPage = [6, 9, 18, 36, 54, 72];
+      this.pageSize = this.pageSize || 6; // sm
+    } else {
+      this.itemsPerPage = [4, 8, 12, 16, 20, 24];
+      this.pageSize = this.pageSize || 4; // xs
+    }
+
+    this.getCards(this.pageNumber, this.pageSize);
+  }
+
+  private updatePageSizeOnly(): void {
+    this.pageSize = 0;
+
+    const width = window.innerWidth;
+
+    if (width > 1440) {
+      this.itemsPerPage = [10, 20, 40, 60, 80, 100];
+      this.pageSize = 10; // lg
+    } else if (width > 1024 && width <= 1440) {
+      this.itemsPerPage = [8, 16, 32, 48, 64, 80];
+      this.pageSize = 8; // md
+    } else if (width >= 768 && width <= 1024) {
+      this.itemsPerPage = [6, 9, 18, 36, 54, 72];
+      this.pageSize = 6; // sm
+    } else {
+      this.itemsPerPage = [4, 8, 12, 16, 20, 24];
+      this.pageSize = 4; // xs
+    }
+  }
+
+  private getCards(page: number, size: number): void {
+    this.loading = true;
+
+    if (page) this.pageNumber = page;
+    if (size) this.pageSize = size || 8;
+
+    const timezoneOffset = new Date().getTimezoneOffset();
+    const org = sessionStorage.getItem('organization');
+
+    this.adapterServices.getAdapters(org).subscribe({
+      next: (res) => {
+        const data: any[] = [];
+
+        res.forEach((element: any) => {
+          element.createdon = new Date(
+            new Date(element.createdon).getTime() - timezoneOffset * 60 * 1000
+          );
+          data.push(element);
+          if (!this.users.includes(element.name)) {
+            this.users.push(element.name);
+          }
+        });
+
+        this.cards = data;
+        this.allCards = data;
+        this.allCardsFiltered = data;
+        this.filterSelectedCards(page, size);
+        this.loading = false;
+      },
+      error: (error) => {
+        this.service.messageService(error);
+        this.loading = false;
+      },
+    });
+  }
+
+  private updateQueryParam(
     page: number = 1,
     search: string = '',
     categoryList: string = '',
@@ -183,7 +221,7 @@ export class AdapterComponent implements OnInit, OnChanges {
     org: string | null = sessionStorage.getItem('organization'),
     roleId: string | null = JSON.parse(sessionStorage.getItem('role') || '{}')
       .id
-  ) {
+  ): void {
     const urlTree = this.router.createUrlTree([], {
       queryParams: {
         page: page,
@@ -200,10 +238,132 @@ export class AdapterComponent implements OnInit, OnChanges {
     this.location.replaceState(url);
   }
 
-  onChangePage(page?: number) {
-    if (page && page >= 1 && page <= this.noOfPages) this.pageNumber = page;
+  private filterSelectedCards(page: any, size?: any): void {
+    this.tagrefresh = false;
+    let filteredCards = this.allCards;
+
+    // Filter by category if needed
+    if (this.selectedCategoryList.length > 0) {
+      filteredCards = filteredCards.filter((card) =>
+        this.selectedCategoryList.includes(card.category)
+      );
+    }
+
+    // Filter by spec template if needed
+    if (this.selectedSpecList.length > 0) {
+      filteredCards = filteredCards.filter((card) =>
+        this.selectedSpecList.includes(card.spectemplatedomainname)
+      );
+    }
+
+    // Filter by connection name if needed
+    if (this.selectedConnectionNamesList.length > 0) {
+      filteredCards = filteredCards.filter((card) =>
+        this.selectedConnectionNamesList.includes(card.connectionname)
+      );
+    }
+
+    this.allCardsFiltered = filteredCards;
+    this.cards = filteredCards;
+
+    // Set records flag based on results
+    this.records = this.cards.length === 0;
+
+    // Apply text search if filter exists
+    if (this.filt.length >= 1) {
+      this.onSearch();
+    } else {
+      this.filt = '';
+    }
+
+    // Update pagination
+    if (page) this.pageNumber = page;
+    this.updateQueryParam(
+      this.pageNumber,
+      this.filt,
+      this.selectedCategoryList?.toString() ?? '',
+      this.selectedConnectionNamesList?.toString() ?? '',
+      this.selectedSpecList?.toString() ?? ''
+    );
+    this.noOfItems = this.cards.length;
+    this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
+    this.pageArr = Array.from({ length: this.noOfPages }, (_, i) => i);
+    this.hoverStates = new Array(this.pageArr.length).fill(false);
+  }
+
+  private refresh(): void {
+    this.filt = '';
+    this.records = false;
+    this.getCards(this.pageNumber, this.pageSize);
+  }
+
+  private updateLastRefreshTime(): void {
+    this.lastRefreshedTime = new Date();
+  }
+
+  private loadAuthentications(): void {
+    this.service.getPermission('cip').subscribe((cipAuthority) => {
+      this.createAuth = cipAuthority.includes('adapter-create');
+      this.editAuth = cipAuthority.includes('adapter-edit');
+      this.deleteAuth = cipAuthority.includes('adapter-delete');
+    });
+  }
+
+  // rowsPerPageChanged() {
+  //   if (this.pageSize == 0) {
+  //     this.pageSize = this.prevRowsPerPageValue;
+  //   } else {
+  //     this.pageSizeChanged.emit(this.pageSize);
+  //     this.prevRowsPerPageValue = this.pageSize;
+  //     this.changeDetectionRef.detectChanges();
+  //   }
+  // }
+
+  // showMore(category) {
+  //   this.catStatus[category] = !this.catStatus[category];
+  //   if (this.catStatus[category])
+  //     this.tags[category] = this.allTags.filter(
+  //       (tag) => tag.category == category
+  //     );
+  //   else
+  //     this.tags[category] = this.allTags
+  //       .filter((tag) => tag.category == category)
+  //       .slice(0, 10);
+  // }
+  // filterByTag(tag) {
+  //   this.tagStatus[tag.category + ' - ' + tag.label] =
+  //     !this.tagStatus[tag.category + ' - ' + tag.label];
+
+  //   if (!this.selectedTag.includes(tag)) {
+  //     this.selectedTag.push(tag);
+  //   } else {
+  //     this.selectedTag.splice(this.selectedTag.indexOf(tag), 1);
+  //   }
+  // }
+
+  onNextPage(): void {
+    if (this.pageNumber < this.noOfPages) {
+      this.pageNumber += 1;
+      this.onChangePage();
+    }
+  }
+
+  onPrevPage(): void {
+    if (this.pageNumber > 1) {
+      this.pageNumber -= 1;
+      this.onChangePage();
+    }
+  }
+
+  onChangePage(page?: number): void {
+    if (page !== undefined) {
+      this.pageNumber = Math.max(1, Math.min(page, this.noOfPages));
+    }
+
     if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
       this.pageChanged.emit(this.pageNumber);
+
+      // Calculate pagination window
       if (this.pageNumber > 5) {
         this.endIndex = this.pageNumber;
         this.startIndex = this.endIndex - 5;
@@ -211,66 +371,25 @@ export class AdapterComponent implements OnInit, OnChanges {
         this.startIndex = 0;
         this.endIndex = 5;
       }
+
+      this.getCards(this.pageNumber, this.pageSize);
+
+      this.updateQueryParam(
+        this.pageNumber,
+        this.filt,
+        this.selectedCategoryList.join(','),
+        this.selectedConnectionNamesList.join(','),
+        this.selectedSpecList.join(',')
+      );
     }
-    this.getCards(this.pageNumber, this.pageSize);
   }
 
-  rowsPerPageChanged() {
-    if (this.pageSize == 0) {
-      this.pageSize = this.prevRowsPerPageValue;
-    } else {
-      this.pageSizeChanged.emit(this.pageSize);
-      this.prevRowsPerPageValue = this.pageSize;
-      this.changeDetectionRef.detectChanges();
-    }
-  }
-
-  Authentications() {
-    this.service.getPermission('cip').subscribe((cipAuthority) => {
-      // adapter-create permission
-      if (cipAuthority.includes('adapter-create')) this.createAuth = true;
-      // adapter-edit/update permission
-      if (cipAuthority.includes('adapter-edit')) this.editAuth = true;
-      // adapter-delete permission
-      if (cipAuthority.includes('adapter-delete')) this.deleteAuth = true;
-    });
-  }
-
-  changedToogle(event: any) {
+  changedToogle(event: boolean): void {
     this.refresh();
     this.cardToggled = event;
   }
 
-  tagchange() {}
-
-  numSequence(n: number): Array<number> {
-    return Array(n);
-  }
-
-  getCards(page: any, size: any): void {
-    if (page) this.pageNumber = page;
-    if (size) this.pageSize = size || 8;
-    let timezoneOffset = new Date().getTimezoneOffset();
-    let org = sessionStorage.getItem('organization');
-    this.adapterServices.getAdapters(org).subscribe((res) => {
-      let data: any = [];
-      let test = res;
-      test.forEach((element: any) => {
-        element.createdon = new Date(
-          new Date(element.createdon).getTime() - timezoneOffset * 60 * 1000
-        );
-        data.push(element);
-        this.users.push(element.name);
-      });
-      this.cards = data;
-      this.allCards = data;
-      this.allCardsFiltered = data;
-      this.filterSelectedCards(page, size);
-    });
-    this.loading = false;
-  }
-
-  onViewDetails(card: any) {
+  onViewDetails(card: any): void {
     this.router.navigate(['../implementations/' + card.name], {
       queryParams: {
         page: this.pageNumber,
@@ -284,7 +403,7 @@ export class AdapterComponent implements OnInit, OnChanges {
     });
   }
 
-  onAdd() {
+  onAdd(): void {
     this.router.navigate(['./create'], {
       queryParams: {
         page: this.pageNumber,
@@ -300,101 +419,27 @@ export class AdapterComponent implements OnInit, OnChanges {
     });
   }
 
-  filterSelectedCards(page: any, size?: any) {
-    this.tagrefresh = false;
-    if (
-      this.selectedConnectionNamesList.length > 0 ||
-      this.selectedCategoryList.length > 0 ||
-      this.selectedSpecList.length > 0
-    ) {
-      if (this.selectedCategoryList.length > 0) {
-        let data: any = [];
-        this.selectedCategoryList.forEach((element: any) => {
-          this.allCards.forEach((ele: any) => {
-            if (ele.category == element) {
-              data.push(ele);
-            }
-          });
-        });
-        this.allCardsFiltered = data;
-      } else {
-        this.allCardsFiltered = this.allCards;
-      }
-      if (this.selectedSpecList.length > 0) {
-        let data: any = [];
-        this.selectedSpecList.forEach((element: any) => {
-          this.allCardsFiltered.forEach((ele: any) => {
-            if (ele.spectemplatedomainname == element) {
-              data.push(ele);
-            }
-          });
-        });
-        this.allCardsFiltered = data;
-      }
-      if (this.selectedConnectionNamesList.length > 0) {
-        let data: any = [];
-        this.selectedConnectionNamesList.forEach((element: any) => {
-          this.allCardsFiltered.forEach((ele: any) => {
-            if (ele.connectionname == element) {
-              data.push(ele);
-            }
-          });
-        });
-        this.allCardsFiltered = data;
-      }
-      this.cards = this.allCardsFiltered;
-    } else {
-      this.allCardsFiltered = this.allCards;
-      this.cards = this.allCards;
-    }
-    if (this.cards.length == 0) {
-      this.records = true;
-    } else {
-      this.records = false;
-    }
-    if (this.filt.length >= 1) {
-      this.onSearch();
-    } else {
-      this.filt = '';
-    }
-    if (page) this.pageNumber = page;
-    this.updateQueryParam(
-      this.pageNumber,
-      this.filt,
-      this.selectedCategoryList?.toString() ?? '',
-      this.selectedConnectionNamesList?.toString() ?? '',
-      this.selectedSpecList?.toString() ?? ''
-    );
-    this.noOfItems = this.cards.length;
-    this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
-    this.pageArr = [...Array(this.noOfPages).keys()];
-    this.hoverStates = new Array(this.pageArr.length).fill(false);
-  }
-
-  onSearch(searchText?: string) {
+  onSearch(searchText?: string): void {
     if (searchText !== undefined) {
       this.filt = searchText;
     }
-    if (this.filt.length != this.filtbackup.length) {
+
+    if (this.filt.length !== this.filtbackup.length) {
       this.pageNumber = 1;
       this.filtbackup = this.filt;
     }
-    let data: any = [];
-    this.allCardsFiltered.forEach((element: any) => {
-      if (element.name.toLowerCase().includes(this.filt.toLowerCase())) {
-        data.push(element);
-      }
-    });
-    this.cards = data;
-    if (this.cards.length == 0) {
-      this.records = true;
-    } else {
-      this.records = false;
-    }
+
+    const searchTerm = this.filt.toLowerCase();
+    this.cards = this.allCardsFiltered.filter((element) =>
+      element.name.toLowerCase().includes(searchTerm)
+    );
+
+    this.records = this.cards.length === 0;
     this.noOfItems = this.cards.length;
     this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
-    this.pageArr = [...Array(this.noOfPages).keys()];
+    this.pageArr = Array.from({ length: this.noOfPages }, (_, i) => i);
     this.hoverStates = new Array(this.pageArr.length).fill(false);
+
     this.updateQueryParam(
       this.pageNumber,
       this.filt,
@@ -404,29 +449,7 @@ export class AdapterComponent implements OnInit, OnChanges {
     );
   }
 
-  showMore(category) {
-    this.catStatus[category] = !this.catStatus[category];
-    if (this.catStatus[category])
-      this.tags[category] = this.allTags.filter(
-        (tag) => tag.category == category
-      );
-    else
-      this.tags[category] = this.allTags
-        .filter((tag) => tag.category == category)
-        .slice(0, 10);
-  }
-  filterByTag(tag) {
-    this.tagStatus[tag.category + ' - ' + tag.label] =
-      !this.tagStatus[tag.category + ' - ' + tag.label];
-
-    if (!this.selectedTag.includes(tag)) {
-      this.selectedTag.push(tag);
-    } else {
-      this.selectedTag.splice(this.selectedTag.indexOf(tag), 1);
-    }
-  }
-
-  onTagSelected(event) {
+  onTagSelected(event: any): void {
     this.pageNumber = 1;
     this.selectedConnectionNamesList =
       event.getSelectedMlAdapterConnectionType();
@@ -442,13 +465,7 @@ export class AdapterComponent implements OnInit, OnChanges {
     });
   }
 
-  refresh() {
-    this.filt = '';
-    this.records = false;
-    this.getCards(this.pageNumber, this.pageSize);
-  }
-
-  deleteAdapter(adapterName: string) {
+  deleteAdapter(adapterName: string): void {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'delete') {
@@ -477,68 +494,55 @@ export class AdapterComponent implements OnInit, OnChanges {
     });
   }
 
-  triggereRefresh($event) {
-    if ($event) this.onRefresh();
+  triggereRefresh(event: boolean): void {
+    if (event) this.onRefresh();
   }
 
-  updatePageSizeOnly() {
-    this.pageSize = 0;
-    if (window.innerWidth > 1440) {
-      this.itemsPerPage = [10, 20, 40, 60, 80, 100];
-      this.pageSize = this.pageSize || 10; // lg
-    } else if (window.innerWidth > 1024 && window.innerWidth <= 1440) {
-      this.itemsPerPage = [8, 16, 32, 48, 64, 80];
-      this.pageSize = this.pageSize || 8; //md
-    } else if (window.innerWidth >= 768 && window.innerWidth <= 1024) {
-      this.itemsPerPage = [6, 9, 18, 36, 54, 72];
-      this.pageSize = this.pageSize || 6; //sm
-    } else if (window.innerWidth < 768) {
-      this.itemsPerPage = [4, 8, 12, 16, 20, 24];
-      this.pageSize = this.pageSize || 4; //xs
-    }
-  }
-
-  onRefresh() {
+  onRefresh(): void {
     this.filt = '';
     this.tagrefresh = true;
+
     if (!this.hasFilters) {
+      // Reset filters
       this.selectedConnectionNamesList = [];
       this.selectedSpecList = [];
       this.selectedCategoryList = [];
-      this.updateQueryParam(1, '', '', '', '');
+
+      // Reset pagination
       this.pageNumber = 1;
-      this.filt = '';
-      this.tagrefresh = true;
+
+      // Update query params and refresh data
+      this.updateQueryParam(1, '', '', '', '');
       this.updatePageSize();
     }
-    this.lastRefreshTime();
+
+    // Update last refresh timestamp
+    this.updateLastRefreshTime();
   }
 
-  lastRefreshTime() {
-    setTimeout(() => {
-      this.lastRefreshedTime = new Date();
-    }, 1000);
-  }
-
-  onFilterStatusChange(hasActiveFilters: boolean) {
+  onFilterStatusChange(hasActiveFilters: boolean): void {
     this.hasFilters = hasActiveFilters;
   }
 
-  get paginatedCards() {
+  trackByCardId(index: number, card: any): string | number {
+    return card?.id || card?.name || index;
+  }
+
+  get paginatedCards(): any[] {
+    if (!this.cards || !this.pageSize) {
+      return [];
+    }
+
     const startIndex = (this.pageNumber - 1) * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
+    const endIndex = Math.min(startIndex + this.pageSize, this.cards.length);
     return this.cards.slice(startIndex, endIndex);
   }
 
-  trackByCardId(index: number, card: any): any {
-    return card.id || card.name || index;
-  }
-
   get shouldShowEmptyState(): boolean {
-    return this.cards.length === 0 && !this.loading;
+    return !this.loading && (!this.cards || this.cards.length === 0);
   }
 
   get shouldShowPagination(): boolean {
-    return this.cards.length > 0 && this.noOfPages > 1;
+    return this.cards && this.cards.length > 0 && this.noOfPages > 1;
   }
 }
