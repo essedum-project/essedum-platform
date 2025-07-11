@@ -122,17 +122,15 @@
                 <div
                   *ngIf="showSidebarMenuList"
                   class="sidebar-menu-popup"
-                  style="margin-left: 130px; margin-top: -5px;"
+                  style=" margin-top: -5px;"
                   [ngStyle]="{
                     position: 'fixed',
                     left: sidebarMenuPopupPosition?.left + 'px',
                     top: sidebarMenuPopupPosition?.top + 'px',
                     background: '#fff',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                    zIndex: 2000,
-                    minWidth: '130px',
-                    borderRadius: '4px',
-                    width: '130px',
+                    zIndex: 2000,                   
+                    borderRadius: '4px',                    
                     height: '100vh',
                     overflowY: 'auto',
                     overflowX: 'visible'
@@ -166,7 +164,7 @@
                     >
                       <span
                         [ngStyle]="{
-                          color: item.label == highlightedLabel ? '#0052cc' : ''
+                          color: item.label == highlightedLabel ? '#0052cc' : '#68696c'
                         }"
                       >
                         {{ item.label }}
@@ -313,7 +311,7 @@
                           'font-size': sideMenuIconSize,
                           height: sideMenuIconSize,
                           width: sideMenuIconSize,
-                          color: item.label == highlightedLabel ? '#0052cc' : ''
+                          color: item.label == highlightedLabel ? '#0052cc' : '#68696c'
                         }"
                         [ngClass]="{
                           sidebariconcolor: sidebariconcolor,

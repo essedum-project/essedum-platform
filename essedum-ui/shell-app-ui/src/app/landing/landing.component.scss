@@ -1055,6 +1055,24 @@ li.leftpanel-item.disabled {
   min-height: 28px;
 }
 
+@media (max-width: 900px) {
+.list-menu-close {
+  display: flex;
+  justify-content: flex-end;
+  height: 20px;
+  min-height: 20px;
+}
+}
+
+@media (max-width: 600px) {
+.list-menu-close {
+  display: flex;
+  justify-content: flex-end;
+  height: 14;
+  min-height: 14;
+}
+}
+
 .list-menu-close-btn {
   margin: 2px;
   width: 28px;
@@ -1064,12 +1082,44 @@ li.leftpanel-item.disabled {
   padding: 0;
 }
 
+@media (max-width: 900px) {
+  .list-menu-close-btn {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .list-menu-close-btn {
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    min-height: 14px;
+  }
+}
+
 .list-menu-close-btn:hover {
   color: #0052cc;
 }
 
 .lfx-fs-18 {
   font-size: 18px !important;
+}
+
+@media (max-width: 600px) {
+  .lfx-fs-18 {
+  font-size: 8px !important;
+  }
+
+}
+
+
+@media (max-width: 900px) {
+  .lfx-fs-18 {
+  font-size: 12px !important;
+  }
 }
 
 .list-menu-toggle {
@@ -1233,8 +1283,8 @@ li.leftpanel-item.disabled {
 }
 
 .mobileHeaderImg {
-  height: 36px;
-  min-height: 28px;
+  height: 24px;
+  min-height: 24px;
   max-height: 40px;
   width: auto;
   min-width: 24px;
@@ -1301,5 +1351,45 @@ li.leftpanel-item.disabled {
 @media (max-width: 500px) {
   .mobileHeaderImg.responsive-title {
     margin-left: 15px !important;
+  }
+}
+
+.sidebar-menu-popup {
+  width: 130px;
+  min-width: 100px;
+  max-width: 130px;
+  transition: width 0.2s;
+  margin-left: 130px;
+}
+
+@media (max-width: 900px) {
+  .sidebar-menu-popup {
+    width: 90px;
+    min-width: 70px;
+    max-width: 90px;
+    margin-left: 90px;
+  }
+}
+@media (max-width: 900px) {
+  .list-menu-div {
+    font-size: 8px;
+    font-weight: 500;
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar-menu-popup {
+    width: 60px;
+    min-width: 50px;
+    max-width: 60px;
+    margin-left: 60px;
+  }
+}
+@media (max-width: 600px) {
+  .list-menu-div {
+    font-size: 6px;
+    font-weight: 400;
+    width: 100%;
   }
 }
