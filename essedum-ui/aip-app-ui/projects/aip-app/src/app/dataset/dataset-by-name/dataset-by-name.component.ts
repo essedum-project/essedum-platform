@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, HostListener, Output } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe, Location } from '@angular/common';
 import { SemanticService } from '../../services/semantic.services';
@@ -19,10 +19,16 @@ import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.compon
 export class DatasetByNameComponent {
 
   cardTitle: String = "Datasets";
-  public isHovered: boolean = false;
+  public isAddHovered: boolean = false;
+  public isRefreshHovered: boolean = false;
   public isSearchHovered: boolean = false;
   public isFilterHovered: boolean = false;
   cardToggled: boolean = true;
+  openSearchField: boolean = false;
+    lastRefreshedTime: Date | null = null;
+        servicev1 = 'datasets';
+  hasFilters = false;
+  filtbackup: any = '';
   cards: any;
   filteredCards: any;
   finalDataList: any = [];
@@ -53,7 +59,7 @@ export class DatasetByNameComponent {
   @Output() pageSizeChanged = new EventEmitter<any>();
   endIndex: number;
   startIndex: number;
-
+  isSearchVisible: boolean = false;
   category = [];
   tags;
   tagsBackup;
@@ -86,6 +92,9 @@ export class DatasetByNameComponent {
   filteredTopics: any;
   status: any;
   ratingList: any;
+  selectedTab = 'datasets';
+    hoverStates: boolean[] = [];
+
   rateData: { selectedModule: string; selectedElement: any; selectedElementAlias: any, previousRating: any; previousFeedback: any; };
 
   constructor(
@@ -125,6 +134,9 @@ export class DatasetByNameComponent {
         this.selectedAdapterType = params['type']
           ? params['type'].split(',')
           : [];
+           if (this.selectedAdapterType && this.selectedAdapterType.length > 0) {
+          this.hasFilters = true;
+           }
         this.selectedAdapterInstance = params['adapterInstance']
           ? params['adapterInstance'].split(',')
           : [];
@@ -171,7 +183,7 @@ export class DatasetByNameComponent {
       }
 
       this.updateQueryParam(this.pageNumber, this.filt, this.selectedAdapterType.toString(), this.selectedIndexNames.toString(), sessionStorage.getItem('organization'), JSON.parse(sessionStorage.getItem('role')).id);
-   
+
       if (this.pageNumber && this.pageNumber > 5) {
         this.endIndex = this.pageNumber + 2;
         this.startIndex = this.endIndex - 5;
@@ -182,6 +194,7 @@ export class DatasetByNameComponent {
       this.getTags();
     });
     this.filterCards();
+    this.lastRefreshTime();
 
   }
 
@@ -246,7 +259,9 @@ export class DatasetByNameComponent {
   }
 
   refreshData() {
+    this.filt='';
     this.tagrefresh = true;
+       if (!this.hasFilters) {
     this.selectedAdapterType = [];
     this.selectedIndexNames = [];
     this.selectedTag = [];
@@ -254,6 +269,18 @@ export class DatasetByNameComponent {
     this.noOfPages = 0;
     this.noOfItems = 0;
     this.filterCards();
+       }
+        this.lastRefreshTime();
+
+  }
+   toggleSearch(): void {
+    this.isSearchVisible = true;
+  }
+
+  onInputBlur(): void {
+    if (!this.filt) {
+      this.isSearchVisible = false;
+    }
   }
 
   filterCards() {
@@ -281,6 +308,8 @@ export class DatasetByNameComponent {
       this.noOfItems = res;
       this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
       this.pageArr = [...Array(this.noOfPages).keys()];
+          this.hoverStates = new Array(this.pageArr.length).fill(false);
+
       this.pageSize = 8;
       // this.pageNumber = 1;
       param = param.set('page', this.pageNumber);
@@ -361,6 +390,8 @@ export class DatasetByNameComponent {
         this.noOfItems = this.noOfItems || data.length;
         this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
         this.pageArr = [...Array(this.noOfPages).keys()];
+            this.hoverStates = new Array(this.pageArr.length).fill(false);
+
         this.records = false;
       });
     }
@@ -459,8 +490,23 @@ export class DatasetByNameComponent {
     });
     this.updateQueryParam(this.pageNumber, this.filt, this.selectedAdapterType.toString(), this.selectedIndexNames.toString());
   }
-
-  filterz() {
+  searchCards() {
+    this.openSearchField = true;
+  }
+  handleSearch(){
+    if(!this.filt || this.filt.trim()=== ''){
+      this.openSearchField=false;
+    }
+  }
+  filterz(searchText?: string) {
+     if (searchText !== undefined) {
+      this.filt = searchText;
+    }
+      if (this.filt.length != this.filtbackup.length) {
+      this.pageNumber = 1;
+      this.filtbackup = this.filt;
+    }
+    
     this.records = false;
     this.filteredCards = [];
     let param: HttpParams = new HttpParams();
@@ -485,6 +531,8 @@ export class DatasetByNameComponent {
       this.noOfItems = res;
       this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
       this.pageArr = [...Array(this.noOfPages).keys()];
+          this.hoverStates = new Array(this.pageArr.length).fill(false);
+
       this.pageSize = 8;
       this.pageNumber = 1;
       param = param.set('page', this.pageNumber);
@@ -519,6 +567,8 @@ export class DatasetByNameComponent {
       this.filteredCards = resp;
       this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
       this.pageArr = [...Array(this.noOfPages).keys()];
+          this.hoverStates = new Array(this.pageArr.length).fill(false);
+
       this.records = false;
     });
   }
@@ -544,7 +594,7 @@ export class DatasetByNameComponent {
     if (this.type)
       this.router.navigate(["../view/" + card.name], { state: { card }, relativeTo: this.route });
     else
- 
+
       this.router.navigate(["./view/" + card.name], {
         queryParams: {
           page: this.pageNumber,
@@ -562,6 +612,12 @@ export class DatasetByNameComponent {
       });
   }
 
+  navigateToTab(tab: any) {
+    this.selectedTab = tab;
+
+    this.router.navigate([`../${tab}`], { relativeTo: this.route });
+
+  }
   navigateTo(card: any) {
     let selectedCard = card;
     if (this.type)
@@ -586,9 +642,9 @@ export class DatasetByNameComponent {
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'delete') {
         this.datasetService.deleteDatasets(name).subscribe((res) => {
-       
+
           this.ngOnInit();
-                  this.datasetService.message('Dataset deleted successfully');
+          this.datasetService.message('Dataset deleted successfully');
 
         },
           (error) => {
@@ -685,7 +741,7 @@ export class DatasetByNameComponent {
   openDatasetPreview(card) {
     let selectedReferenceObject = card;
     selectedReferenceObject["path"] = JSON.parse(card.attributes).path + '/' + JSON.parse(card.attributes).object;
-   
+
   }
   selectedButton(i) {
     if (i == this.pageNumber) return { color: 'white', background: '#0094ff' };
@@ -1036,5 +1092,29 @@ export class DatasetByNameComponent {
     else
       return false;
   }
+  /**
+   * Listens for clicks outside the search container to collapse the input field.
+   */
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    const isInsideSearch = target.closest('.header-search');
+    const isSearchIcon = target.closest('mat-icon'); // Check if the click is on the search icon
 
+    // Only collapse the input field if the click is outside the search container and not on the search icon
+    if (!isInsideSearch && !isSearchIcon && !this.filt) {
+      this.isSearchVisible = false;
+    }
+  }
+
+  lastRefreshTime() {
+    // Simulate data fetching
+    setTimeout(() => {
+      this.lastRefreshedTime = new Date();
+      console.log('Data refreshed!');
+    }, 1000);
+  }
+    onFilterStatusChange(hasActiveFilters: boolean) {
+    this.hasFilters = hasActiveFilters;
+  }
 }

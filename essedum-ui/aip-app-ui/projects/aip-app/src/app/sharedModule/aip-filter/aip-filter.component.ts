@@ -124,7 +124,7 @@ export class AipFilterComponent {
     private semanticService: SemanticService,
     private router: Router,
     private route: ActivatedRoute
-  ) {}
+  ) { }
   ngOnInit(): void {
     if (this.selectedAdpImplCombinedLists) {
       //for Adapter Implementations screen - preselected Filters
@@ -288,7 +288,7 @@ export class AipFilterComponent {
       }
     }
   }
-  getToolsTypes() {}
+  getToolsTypes() { }
 
   getTopicTypes() {
     this.semanticService.getAllTopics().subscribe((res) => {
@@ -793,7 +793,7 @@ export class AipFilterComponent {
     }
   }
 
-  refreshToolsTypes() {}
+  refreshToolsTypes() { }
 
   fetchAdapters(): boolean {
     let params: HttpParams = new HttpParams();
@@ -1578,6 +1578,7 @@ export class AipFilterComponent {
       | 'adapterType'
       | 'adapterInstance'
       | 'pipelineType'
+      | 'connectiontype'
   ): void {
     switch (filterType) {
       case 'category':
@@ -1642,6 +1643,14 @@ export class AipFilterComponent {
           element.selected = false;
         });
         break;
+      case 'connectiontype':
+        this.selectedAdapterType = [];
+        this.connectionsTypeList.forEach((element: any) => {
+          element.selected = false;
+        });
+        break;
+       
+        
     }
 
     // Emit the updated selection
@@ -1683,7 +1692,24 @@ export class AipFilterComponent {
     );
     return tagEventDTO;
   }
+  removeConnectionType(connection: string): void {
+    const index = this.selectedAdapterType.indexOf(connection);
+    if (index !== -1) {
+      this.selectedAdapterType.splice(index, 1);
 
+      // Update the UI selection state
+      this.connectionsTypeList.forEach((element) => {
+        if (element.value === connection) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+   
   toggleExpand() {
     this.isExpanded = !this.isExpanded;
   }
