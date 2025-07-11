@@ -1,12 +1,12 @@
 <div *ngIf="cardToggled; else detailView" class="aip-container lfx-u-pad-lr-30" id="mainCtr">
 
   <!-- Header Section -->
-  <app-aip-header [cardTitle]="cardTitle" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createAuth"
+  <app-aip-header [cardTitle]="CARD_TITLE" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createAuth"
     (search)="onSearch($event)" (refresh)="onRefresh()" (add)="onAdd()">
   </app-aip-header>
 
   <!-- Filter Section -->
-  <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="servicev1" [selectedAdpImplCombinedLists]="{ 
+  <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="SERVICE_V1" [selectedAdpImplCombinedLists]="{ 
                     selectedConnectionNamesList: selectedConnectionNamesList, 
                     selectedCategoryList: selectedCategoryList, 
                     selectedSpecList: selectedSpecList 
@@ -26,7 +26,7 @@
       <div class="aip-card-wrapper" *ngFor="let card of paginatedCards; trackBy: trackByCardId">
 
         <!-- Cards  -->
-        <app-aip-card [servicev1]="servicev1" [card]="card" [editAuth]="editAuth" [deployAuth]="deployAuth"
+        <app-aip-card [servicev1]="SERVICE_V1" [card]="card" [editAuth]="editAuth" [deployAuth]="deployAuth"
           [deleteAuth]="deleteAuth" (viewDetails)="onViewDetails(card)" (edit)="openedit(editModal)"
           (delete)="deleteAdapter(card.name)">
         </app-aip-card>
@@ -48,6 +48,7 @@
       [pageArr]="pageArr" [startIndex]="startIndex" [endIndex]="endIndex" [hoverStates]="hoverStates"
       (prevPage)="onPrevPage()" (nextPage)="onNextPage()" (changePage)="onChangePage($event)">
     </app-aip-pagination>
+
   </ng-container>
 </div>
 

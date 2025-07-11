@@ -20,27 +20,23 @@ import { Location } from '@angular/common';
 })
 export class AdapterComponent implements OnInit {
   // Constants
-  readonly cardTitle = 'Implementations';
-  readonly servicev1 = 'adapters';
-  readonly createAction = 'create';
-  readonly editAction = 'edit';
-  readonly tooltip = 'above';
+  readonly CARD_TITLE = 'Implementations';
+  readonly SERVICE_V1 = 'adapters';
 
   // Component state
-  isFilterHovered = false;
+  isFilterHovered: boolean = false;
   hoverStates: boolean[] = [];
-  hasFilters = false;
-  loading = true;
+  hasFilters: boolean = false;
+  loading: boolean = true;
   lastRefreshedTime: Date | null = null;
-  cardToggled = true;
-  records = false;
-  tagrefresh = false;
+  cardToggled: boolean = true;
+  tagrefresh: boolean = false;
 
   // Auth flags
-  createAuth = false;
-  editAuth = false;
-  deleteAuth = false;
-  deployAuth = false;
+  createAuth: boolean;
+  editAuth: boolean;
+  deleteAuth: boolean;
+  deployAuth: boolean;
 
   // Data collections
   cards: any[] = [];
@@ -49,24 +45,24 @@ export class AdapterComponent implements OnInit {
   users: string[] = [];
 
   // Filter state
-  filt = '';
-  filtbackup = '';
+  filt: any = '';
+  filtbackup: any = '';
   selectedConnectionNamesList: string[] = [];
   selectedCategoryList: string[] = [];
   selectedSpecList: string[] = [];
 
   // Pagination
   pageSize!: number;
-  pageNumber = 1;
+  pageNumber: number = 1;
   pageArr: number[] = [];
-  pageNumberInput = 1;
-  noOfPages = 0;
+  pageNumberInput: number = 1;
+  noOfPages: number = 0;
   prevRowsPerPageValue!: number;
   itemsPerPage: number[] = [];
-  noOfItems = 0;
-  startIndex = 0;
-  endIndex = 5;
-  pageNumberChanged = true;
+  noOfItems: number;
+  startIndex: number;
+  endIndex: number;
+  pageNumberChanged: boolean = true;
 
   @Output() pageChanged = new EventEmitter<number>();
   @Output() pageSizeChanged = new EventEmitter<number>();
@@ -88,7 +84,6 @@ export class AdapterComponent implements OnInit {
 
   ngOnInit(): void {
     this.updatePageSizeOnly();
-    this.records = false;
     this.route.queryParams.subscribe((params) =>
       this.handleQueryParams(params)
     );
@@ -266,9 +261,6 @@ export class AdapterComponent implements OnInit {
     this.allCardsFiltered = filteredCards;
     this.cards = filteredCards;
 
-    // Set records flag based on results
-    this.records = this.cards.length === 0;
-
     // Apply text search if filter exists
     if (this.filt.length >= 1) {
       this.onSearch();
@@ -293,7 +285,6 @@ export class AdapterComponent implements OnInit {
 
   private refresh(): void {
     this.filt = '';
-    this.records = false;
     this.getCards(this.pageNumber, this.pageSize);
   }
 
@@ -343,14 +334,14 @@ export class AdapterComponent implements OnInit {
 
   onNextPage(): void {
     if (this.pageNumber < this.noOfPages) {
-      this.pageNumber += 1;
+      this.pageNumber++;
       this.onChangePage();
     }
   }
 
   onPrevPage(): void {
     if (this.pageNumber > 1) {
-      this.pageNumber -= 1;
+      this.pageNumber--;
       this.onChangePage();
     }
   }
@@ -434,7 +425,6 @@ export class AdapterComponent implements OnInit {
       element.name.toLowerCase().includes(searchTerm)
     );
 
-    this.records = this.cards.length === 0;
     this.noOfItems = this.cards.length;
     this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
     this.pageArr = Array.from({ length: this.noOfPages }, (_, i) => i);
