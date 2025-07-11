@@ -26,7 +26,7 @@ export class DatasetByNameComponent {
   cardToggled: boolean = true;
   openSearchField: boolean = false;
     lastRefreshedTime: Date | null = null;
-        servicev1 = 'datasets';
+        servicev1 = 'Datasets';
   hasFilters = false;
   filtbackup: any = '';
   cards: any;
@@ -134,15 +134,20 @@ export class DatasetByNameComponent {
         this.selectedAdapterType = params['type']
           ? params['type'].split(',')
           : [];
-           if (this.selectedAdapterType && this.selectedAdapterType.length > 0) {
-          this.hasFilters = true;
-           }
         this.selectedAdapterInstance = params['adapterInstance']
           ? params['adapterInstance'].split(',')
           : [];
         this.selectedIndexNames = params['indexNames']
           ? params['indexNames'].split(',')
           : [];
+           if (
+          (this.selectedAdapterType && this.selectedAdapterType.length > 0) ||
+          (this.selectedAdapterInstance &&
+            this.selectedAdapterInstance.length > 0) ||
+          (this.selectedIndexNames && this.selectedIndexNames.length > 0)
+        ) {
+          this.hasFilters = true;
+        }
       } else {
         this.pageNumber = 1;
         this.pageSize = 4;

@@ -16,6 +16,7 @@
           <app-aip-filter  [servicev1]="servicev1" [tagrefresh]="tagrefresh"
                     [selectedDatasetTypeList]="{ 
                         selectedAdapterType: selectedAdapterType
+                        
                       }" (tagSelected)="tagSelectedEvent($event)"
             (filterStatusChange)="onFilterStatusChange($event)"></app-aip-filter>
         </div>

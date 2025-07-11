@@ -101,7 +101,7 @@ export class AipCardComponent {
       return this.card.name;
     } else if (this.servicev1 === 'model' || this.servicev1 === 'pipeline' || this.servicev1 === 'connections') {
       return this.card.type;
-    }else if (this.servicev1 === 'datasets') {
+    }else if (this.servicev1 === 'Datasets') {
        return `${this.card.datasource?.category} - ${this.card.datasource?.alias}`;
     }
   }
@@ -117,7 +117,7 @@ export class AipCardComponent {
       return this.card.name && this.card.name != ''
         ? this.card.name
         : this.card.sourceName;
-    }else if (this.servicev1 === 'datasets') {
+    }else if (this.servicev1 === 'Datasets') {
       return this.card.datasource?.alias ;
     }
   }
@@ -127,7 +127,7 @@ export class AipCardComponent {
       return this.card.createdon;
     } else if (this.servicev1 === 'specs') {
       return this.card.lastmodifiedon;
-    } else if (this.servicev1 === 'schemas' || this.servicev1 === 'connections' || this.servicev1 === 'datasets') {
+    } else if (this.servicev1 === 'schemas' || this.servicev1 === 'connections' || this.servicev1 === 'Datasets') {
       return this.card.lastmodifieddate;
     } else if (this.servicev1 === 'model') {
       return this.card.createdOn;

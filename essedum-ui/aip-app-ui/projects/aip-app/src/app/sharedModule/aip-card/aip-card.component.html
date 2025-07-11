@@ -12,7 +12,7 @@
             <span class="lfx-c-badge float-end"
                 [ngClass]="[card.status=='Registered'?'lfx-c-badge--blue ':'lfx-c-badge--active',card.status=='Undeployed' || card.status == 'Failed'?'lfx-c-badge--warning ':'lfx-c-badge--active']">{{card.status}}</span>
         </div>
-         <div *ngIf="servicev1 === 'datasets'" >
+         <div *ngIf="servicev1 === 'Datasets'" >
                     <mat-icon [matTooltip]="'View Details'" matTooltipPosition="above" (click)="onViewDetails(card)" class="header-action-icon" style="justify-content: flex-end; ">visibility</mat-icon>
                     <mat-icon [matTooltip]="'Download'" matTooltipPosition="above" (click)="onDownload(card)" class="header-action-icon" style="justify-content: flex-end; ">download</mat-icon>
             </div>
@@ -42,7 +42,7 @@
 
     <!-- Card actions -->
      
-    <mat-card-actions *ngIf="servicev1 !== 'datasets'" class="lfx-c-card__action-hover d-flex justify-content-between card-actions-hover">
+    <mat-card-actions *ngIf="servicev1 !== 'Datasets'" class="lfx-c-card__action-hover d-flex justify-content-between card-actions-hover">
 
         <div class="button-placeholder">
             <button mat-raised-button class="view-details-btn" *ngIf="card.hover" (click)="onViewDetails()"
@@ -90,7 +90,7 @@
     </mat-card-actions>
     
     <!-- Dataset Action icons -->
-    <mat-card-actions *ngIf="servicev1 === 'datasets'"
+    <mat-card-actions *ngIf="servicev1 === 'Datasets'"
         class="lfx-c-card__action-hover d-flex justify-content-between card-actions-hover">
        <button mat-icon-button [matTooltip]="'Copy'" matTooltipPosition="above" (click)="onCopy(card)">
             <mat-icon class="action-icon">content_copy</mat-icon>
