@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.backend.deploymentName }}
+  labels:
+    app: leap-app-backend
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      app: leap-app-backend
+  template:
+    metadata:
+      labels:
+        app: leap-app-backend
+    spec:
+      containers:
+        - name: leap-app-backend
+          image: {{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.backend.containerPort }}
+      imagePullSecrets:
+        - name: {{ .Values.imagePullSecret }}

@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.ingress.name }}
+  annotations:
+    appgw.ingress.kubernetes.io/health-probe: /
+    appgw.ingress.kubernetes.io/use-private-ip: "true"
+    kubectl.kubernetes.io/last-applied-configuration: ""
+    appgw.ingress.kubernetes.io/rewrite-rule-set: AddSecurity_Headers
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host }}
+      secretName: {{ .Values.ingress.tlsSecret }}
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: {{ .Values.ingress.serviceName }}
+                port:
+                  number: {{ .Values.ingress.servicePort }}
+            path: /
+            pathType: Prefix
