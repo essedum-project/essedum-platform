@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mysql-init-job
+spec:
+  template:
+    spec:
+      containers:
+        - name: mysql-client
+          image: mysql:8.0
+          command: ["sh", "-c", "mysql -h {{ .Values.mysql.serviceName }} -u root -p$MYSQL_ROOT_PASSWORD < /init/init.sql"]
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: {{ .Values.mysql.rootPassword | quote }}
+          volumeMounts:
+            - name: init-script
+              mountPath: /init
+      restartPolicy: OnFailure
+      volumes:
+        - name: init-script
+          configMap:
+            name: mysql-init-script
