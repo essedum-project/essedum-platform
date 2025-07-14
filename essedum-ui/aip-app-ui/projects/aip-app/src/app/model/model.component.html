@@ -33,16 +33,11 @@
             <app-aip-empty-state *ngIf="records"></app-aip-empty-state>
 
             <!-- Pagination -->
-            <!-- <app-aip-pagination *ngIf="records!=true" [pageNumber]="pageNumber" [noOfPages]="noOfPages"
+            <app-aip-pagination *ngIf="records!=true" [pageNumber]="pageNumber" [noOfPages]="noOfPages"
                 [pageArr]="pageArr" [startIndex]="startIndex" [endIndex]="endIndex" [hoverStates]="hoverStates"
-                (prevPage)="prevPage()" (nextPage)="nextPage()" (changePage)="changePage($event)">
-            </app-aip-pagination> -->
+                (prevPage)="onPrevPage()" (nextPage)="onNextPage()" (changePage)="onChangePage($event)">
+            </app-aip-pagination>
 
-            <div *ngIf="records!=true">
-                <app-pagination #pagination [noOfItems]="noOfItems"
-                    (pageAndSizeChanged)="handlePageAndSizeChange($event)">
-                </app-pagination>
-            </div>
         </div>
     </div>
 </div>

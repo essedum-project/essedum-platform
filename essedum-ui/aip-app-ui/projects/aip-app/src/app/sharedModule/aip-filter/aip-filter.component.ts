@@ -44,11 +44,10 @@ export class AipFilterComponent {
   @Input() selectedModelTypeLists: any;
   @Input() selectedEndpointTypeLists: any;
   @Input() selectedAppTypeList: any;
+  readonly TOOLTIP_POSITION = 'above';
   isFilterExpanded: boolean = false;
   isExpanded = false;
-  tooltip: string = 'above';
   category = [];
-  s;
   tags;
   tagsBackup;
   allTags: any;

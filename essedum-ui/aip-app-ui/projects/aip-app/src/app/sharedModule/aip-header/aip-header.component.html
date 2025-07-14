@@ -23,7 +23,7 @@
 
             <!-- Search icon with animation -->
             <div *ngIf="!isSearchVisible && !isAnimating" class="action-button">
-                <mat-icon [ngClass]="{'active': isSearchHovered}" matTooltip="Search" matTooltipPosition="above"
+                <mat-icon [ngClass]="{'active': isSearchHovered}" matTooltip="Search" [matTooltipPosition]="TOOLTIP_POSITION"
                     (mouseenter)="isSearchHovered = true" (mouseleave)="isSearchHovered = false"
                     (click)="toggleSearch($event)" aria-label="Toggle search">
                     search
@@ -33,7 +33,7 @@
             <!-- Add button (conditionally shown) -->
             <div *ngIf="showAddButton" class="action-button">
                 <mat-icon [ngClass]="{'active': isAddHovered}" (click)="onAddClick()" matTooltip="Add"
-                    matTooltipPosition="above" (mouseenter)="isAddHovered = true" (mouseleave)="isAddHovered = false"
+                    [matTooltipPosition]="TOOLTIP_POSITION" (mouseenter)="isAddHovered = true" (mouseleave)="isAddHovered = false"
                     aria-label="Add new item">
                     add
                 </mat-icon>
@@ -42,7 +42,7 @@
             <!-- Refresh button -->
             <div class="action-button">
                 <mat-icon [ngClass]="{'active': isRefreshHovered, 'rotate-icon': isRefreshing}"
-                    (click)="onRefreshClick()" matTooltip="Refresh" matTooltipPosition="above"
+                    (click)="onRefreshClick()" matTooltip="Refresh" [matTooltipPosition]="TOOLTIP_POSITION"
                     (mouseenter)="isRefreshHovered = true" (mouseleave)="isRefreshHovered = false"
                     aria-label="Refresh data">
                     autorenew
