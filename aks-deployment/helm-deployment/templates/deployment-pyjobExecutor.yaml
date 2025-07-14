@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.pyjobExecutor.deploymentName }}
+  labels:
+    app: pyjob-executor
+spec:
+  replicas: {{ .Values.pyjobExecutor.replicaCount }}
+  selector:
+    matchLabels:
+      app: pyjob-executor
+  template:
+    metadata:
+      labels:
+        app: pyjob-executor
+    spec:
+      containers:
+        - name: pyjob-executor-container
+          image: {{ .Values.pyjobExecutor.image.repository }}:{{ .Values.pyjobExecutor.image.tag }}
+          imagePullPolicy: {{ .Values.pyjobExecutor.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.pyjobExecutor.containerPort }}
+      imagePullSecrets:
+        - name: {{ .Values.imagePullSecret }}

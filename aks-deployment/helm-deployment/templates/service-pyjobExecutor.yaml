@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.pyjobExecutor.serviceName }}
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+spec:
+  selector:
+    app: pyjob-executor
+  ports:
+    - protocol: TCP
+      port: {{ .Values.pyjobExecutor.service.port }}
+      targetPort: {{ .Values.pyjobExecutor.containerPort }}
+  type: LoadBalancer
