@@ -36,16 +36,10 @@
     <app-aip-empty-state *ngIf="shouldShowEmptyState"></app-aip-empty-state>
 
     <!-- Pagination -->
-    <!-- <app-aip-pagination *ngIf="shouldShowPagination" [pageNumber]="pageNumber" [noOfPages]="noOfPages"
+    <app-aip-pagination *ngIf="shouldShowPagination" [pageNumber]="pageNumber" [noOfPages]="noOfPages"
       [pageArr]="pageArr" [startIndex]="startIndex" [endIndex]="endIndex" [hoverStates]="hoverStates"
       (prevPage)="onPrevPage()" (nextPage)="onNextPage()" (changePage)="onChangePage($event)">
-    </app-aip-pagination> -->
-
-
-    <div *ngIf="shouldShowPagination">
-      <app-pagination #pagination [noOfItems]="noOfItems" (pageAndSizeChanged)="handlePageAndSizeChange($event)">
-      </app-pagination>
-    </div>
+    </app-aip-pagination>
 
   </ng-container>
 </div>

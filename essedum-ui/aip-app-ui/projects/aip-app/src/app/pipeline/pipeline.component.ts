@@ -65,6 +65,9 @@ export class PipelineComponent implements OnInit, OnChanges {
   endIndex: number;
   pageNumberChanged: boolean = true;
 
+  @Output() pageChanged = new EventEmitter<number>();
+  @Output() pageSizeChanged = new EventEmitter<number>();
+
   selectedCard: any = [];
   selectedInstance: any;
   toggle: boolean = false;
@@ -156,6 +159,44 @@ export class PipelineComponent implements OnInit, OnChanges {
     this.location.replaceState(url);
   }
 
+  private initializePagination(): void {
+    // Define how many page numbers to show
+    const visiblePages = 5;
+    const halfVisible = Math.floor(visiblePages / 2);
+
+    if (!this.noOfPages) {
+      this.startIndex = 0;
+      this.endIndex = visiblePages;
+    } else if (this.noOfPages <= visiblePages) {
+      // If we have fewer pages than the visible count, show all
+      this.startIndex = 0;
+      this.endIndex = this.noOfPages;
+    } else if (this.pageNumber <= halfVisible + 1) {
+      // Near the beginning
+      this.startIndex = 0;
+      this.endIndex = visiblePages;
+    } else if (this.pageNumber >= this.noOfPages - halfVisible) {
+      // Near the end
+      this.startIndex = this.noOfPages - visiblePages;
+      this.endIndex = this.noOfPages;
+    } else {
+      // In the middle - center the current page
+      this.startIndex = this.pageNumber - halfVisible - 1;
+      this.endIndex = this.pageNumber + halfVisible;
+    }
+
+    // Ensure indexes are within valid bounds
+    this.startIndex = Math.max(0, this.startIndex);
+    this.endIndex = Math.min(this.noOfPages, this.endIndex);
+
+    console.log(
+      'Pagination initialized with startIndex:',
+      this.startIndex,
+      'endIndex:',
+      this.endIndex
+    );
+  }
+
   private loadAuthentications(): void {
     this.service.getPermission('cip').subscribe((cipAuthority) => {
       this.createAuth = cipAuthority.includes('pipeline-create');
@@ -230,6 +271,7 @@ export class PipelineComponent implements OnInit, OnChanges {
       this.noOfItems = res;
       this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
       this.pageArr = [...Array(this.noOfPages).keys()];
+      this.initializePagination();
     });
   }
 
@@ -478,21 +520,29 @@ export class PipelineComponent implements OnInit, OnChanges {
     }
   }
 
-  handlePageAndSizeChange(event: {
-    pageNumber: number;
-    pageSize: number;
-  }): void {
-    this.service
-      .getConstantByKey(this.pipelineConstantsKey)
-      .subscribe((response) => {
-        if (response.body == 'true')
-          this.organization = 'Core,' + sessionStorage.getItem('organization');
-        else this.organization = sessionStorage.getItem('organization');
+  onNextPage(): void {
+    if (this.pageNumber < this.noOfPages) {
+      this.pageNumber++;
+      this.onChangePage();
+    }
+  }
 
-        this.pageNumber = event.pageNumber ? event.pageNumber : 1;
-        this.pageSize = event.pageSize ? event.pageSize : 8;
-        this.getCountPipelines();
-        this.getCards();
-      });
+  onPrevPage(): void {
+    if (this.pageNumber > 1) {
+      this.pageNumber--;
+      this.onChangePage();
+    }
+  }
+
+  onChangePage(page?: number): void {
+    if (page !== undefined && page >= 1 && page <= this.noOfPages) {
+      this.pageNumber = page;
+    }
+
+    if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
+      this.pageChanged.emit(this.pageNumber);
+      this.initializePagination();
+      this.getCards();
+    }
   }
 }
