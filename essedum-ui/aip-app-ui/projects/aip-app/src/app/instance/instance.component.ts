@@ -97,7 +97,6 @@ export class InstanceComponent implements OnInit, OnChanges {
     this.updatePageSizeOnly();
     this.setupRouteParams();
     this.loadInitialData();
-    this.updatePageSizeOnly();
   }
 
   private setupRouteParams(): void {
@@ -123,19 +122,39 @@ export class InstanceComponent implements OnInit, OnChanges {
     this.tagrefresh = false;
     this.updateQueryParam(this.pageNumber, this.filt);
     this.getCards(this.pageNumber, this.pageSize);
-    this.setupPaginationIndexes();
     this.loadAuthentications();
     this.updateLastRefreshTime();
   }
 
-  private setupPaginationIndexes(): void {
-    if (this.pageNumber && this.pageNumber >= 5) {
-      this.endIndex = this.pageNumber + 2;
-      this.startIndex = this.endIndex - 5;
-    } else {
+  private initializePagination(): void {
+    // Define how many page numbers to show
+    const visiblePages = 5;
+    const halfVisible = Math.floor(visiblePages / 2);
+
+    if (!this.noOfPages) {
       this.startIndex = 0;
-      this.endIndex = 5;
+      this.endIndex = visiblePages;
+    } else if (this.noOfPages <= visiblePages) {
+      // If we have fewer pages than the visible count, show all
+      this.startIndex = 0;
+      this.endIndex = this.noOfPages;
+    } else if (this.pageNumber <= halfVisible + 1) {
+      // Near the beginning
+      this.startIndex = 0;
+      this.endIndex = visiblePages;
+    } else if (this.pageNumber >= this.noOfPages - halfVisible) {
+      // Near the end
+      this.startIndex = this.noOfPages - visiblePages;
+      this.endIndex = this.noOfPages;
+    } else {
+      // In the middle - center the current page
+      this.startIndex = this.pageNumber - halfVisible - 1;
+      this.endIndex = this.pageNumber + halfVisible;
     }
+
+    // Ensure indexes are within valid bounds
+    this.startIndex = Math.max(0, this.startIndex);
+    this.endIndex = Math.min(this.noOfPages, this.endIndex);
   }
 
   private updatePageSize(): void {
@@ -281,6 +300,7 @@ export class InstanceComponent implements OnInit, OnChanges {
       .fill(0)
       .map((_, i) => i);
     this.hoverStates = new Array(this.pageArr.length).fill(false);
+    this.initializePagination();
   }
 
   private hasActiveFilters(): boolean {
@@ -323,16 +343,6 @@ export class InstanceComponent implements OnInit, OnChanges {
     }
 
     this.allCardsFiltered = filtered;
-  }
-
-  private updatePaginationIndexes(): void {
-    if (this.pageNumber > 5) {
-      this.endIndex = this.pageNumber;
-      this.startIndex = this.endIndex - 5;
-    } else {
-      this.startIndex = this.startIndex || 0;
-      this.endIndex = this.endIndex || 5;
-    }
   }
 
   private refresh(): void {
@@ -474,7 +484,6 @@ export class InstanceComponent implements OnInit, OnChanges {
   //   delete data.lastmodifiedon;
 
   //   this.adapterServices.updateInstance(data).subscribe((resp) => {
-  //     console.log('Instance Updated');
   //   });
   //   this.service
   //     .runPipeline(
@@ -487,7 +496,6 @@ export class InstanceComponent implements OnInit, OnChanges {
   //     )
   //     .subscribe(
   //       (res) => {
-  //         console.log('Pipeline Started!!!! ');
   //         this.service.message('Pipeline has been Started!', 'success');
   //         var jobData = JSON.parse(res);
   //         let job_id = jobData.jobId;
@@ -495,7 +503,6 @@ export class InstanceComponent implements OnInit, OnChanges {
   //         data.status = jobData.status;
   //         data.status = 'RUNNING';
   //         this.adapterServices.updateInstance(data).subscribe((resp) => {
-  //           console.log('Instance Updated');
   //         });
   //         data.createdon = createdon;
   //         data.lastmodifiedon = lastmodifiedon;
@@ -529,7 +536,6 @@ export class InstanceComponent implements OnInit, OnChanges {
   //       delete data.lastmodifiedon;
 
   //       this.adapterServices.updateInstance(data).subscribe((resp) => {
-  //         console.log('Instance Updated');
   //       });
   //       data.createdon = createdon;
   //       data.lastmodifiedon = lastmodifiedon;
@@ -711,7 +717,7 @@ export class InstanceComponent implements OnInit, OnChanges {
 
     if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
       this.pageChanged.emit(this.pageNumber);
-      this.updatePaginationIndexes();
+      this.initializePagination();
       this.getCards(this.pageNumber, this.pageSize);
     }
   }

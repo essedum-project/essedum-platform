@@ -19,6 +19,8 @@
         <!-- Cards container -->
         <div *ngIf="paginatedCards.length > 0" class="aip-card-container" aria-label="Adapter cards">
             <div class="aip-card-wrapper" *ngFor="let card of paginatedCards; trackBy: trackByCardId">
+
+                <!-- Cards  -->
                 <app-aip-card [servicev1]="SERVICE_V1" [card]="card" [editAuth]="editAuth" [deployAuth]="deployAuth"
                     [deleteAuth]="'true'" (viewDetails)="details(card,'view')" (edit)="details(card,'edit',dropDown)"
                     (delete)="deleteSchema(card)">

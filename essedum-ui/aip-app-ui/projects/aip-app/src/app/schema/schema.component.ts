@@ -106,7 +106,7 @@ export class SchemaComponent implements OnInit, OnChanges {
     });
     this.updateQueryParam(this.pageNumber);
     this.getCards(this.pageNumber, this.pageSize, this.filt);
-    this.initializePagination();
+
     this.loadAuthentication();
     this.updateLastRefreshTime();
   }
@@ -135,13 +135,34 @@ export class SchemaComponent implements OnInit, OnChanges {
   }
 
   private initializePagination(): void {
-    if (this.pageNumber && this.pageNumber >= 5) {
-      this.endIndex = this.pageNumber + 2;
-      this.startIndex = this.endIndex - 5;
-    } else {
+    // Define how many page numbers to show
+    const visiblePages = 5;
+    const halfVisible = Math.floor(visiblePages / 2);
+
+    if (!this.noOfPages) {
       this.startIndex = 0;
-      this.endIndex = 5;
+      this.endIndex = visiblePages;
+    } else if (this.noOfPages <= visiblePages) {
+      // If we have fewer pages than the visible count, show all
+      this.startIndex = 0;
+      this.endIndex = this.noOfPages;
+    } else if (this.pageNumber <= halfVisible + 1) {
+      // Near the beginning
+      this.startIndex = 0;
+      this.endIndex = visiblePages;
+    } else if (this.pageNumber >= this.noOfPages - halfVisible) {
+      // Near the end
+      this.startIndex = this.noOfPages - visiblePages;
+      this.endIndex = this.noOfPages;
+    } else {
+      // In the middle - center the current page
+      this.startIndex = this.pageNumber - halfVisible - 1;
+      this.endIndex = this.pageNumber + halfVisible;
     }
+
+    // Ensure indexes are within valid bounds
+    this.startIndex = Math.max(0, this.startIndex);
+    this.endIndex = Math.min(this.noOfPages, this.endIndex);
   }
 
   private loadAuthentication(): void {
@@ -176,6 +197,7 @@ export class SchemaComponent implements OnInit, OnChanges {
       this.noOfItems = res.length;
       this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
       this.pageArr = Array.from({ length: this.noOfPages }, (_, i) => i);
+      this.initializePagination();
       this.loading = false;
     });
     this.updateQueryParam(this.pageNumber, this.filt);
@@ -369,15 +391,6 @@ export class SchemaComponent implements OnInit, OnChanges {
 
     if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
       this.pageChanged.emit(this.pageNumber);
-
-      if (this.pageNumber > 5) {
-        this.endIndex = this.pageNumber;
-        this.startIndex = this.endIndex - 5;
-      } else {
-        this.startIndex = 0;
-        this.endIndex = 5;
-      }
-
       this.getCards(this.pageNumber, this.pageSize, this.filt);
     }
   }

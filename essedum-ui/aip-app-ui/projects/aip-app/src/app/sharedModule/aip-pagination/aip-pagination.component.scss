@@ -1,7 +1,23 @@
+.pagination-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background-color: white;
+  padding-bottom: 35px;
+  padding-right: 30px;
+  z-index: 100;
+}
+
 .pagination-container {
   margin: 0.2rem 0;
+  display: flex;
+  justify-content: flex-end;
 
   .paginator-buttons {
+    display: flex;
+    justify-content: flex-end;
     width: 100%;
   }
 
