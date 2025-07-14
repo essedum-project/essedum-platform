@@ -26,7 +26,6 @@ export class InstanceComponent implements OnInit, OnChanges {
   readonly SERVICE_V1 = 'instances';
 
   // Component state
-  isFilterHovered: boolean = false;
   hoverStates: boolean[] = [];
   hasFilters: boolean = false;
   loading: boolean = true;
@@ -97,44 +96,6 @@ export class InstanceComponent implements OnInit, OnChanges {
     this.setupRouteParams();
     this.loadInitialData();
     this.updatePageSizeOnly();
-    // //this.updatePageSize();
-    // // this.pageSize=this.itemsPerPage[0];
-    // // this.pageNumber = 1;
-    // this.route.queryParams.subscribe((params) => {
-    //   // Update this.pageNumber if the page query param is present
-    //   if (params['page']) {
-    //     this.pageNumber = params['page'];
-    //     this.filt = params['search'];
-    //     this.selectedAdapterList = params['adapterList']
-    //       ? params['adapterList'].split(',')
-    //       : [];
-    //     this.selectedConnectionNamesList = params['connectionsList']
-    //       ? params['connectionsList'].split(',')
-    //       : [];
-    //     if (
-    //       (this.selectedAdapterList && this.selectedAdapterList.length > 0) ||
-    //       (this.selectedConnectionNamesList &&
-    //         this.selectedConnectionNamesList.length > 0)
-    //     ) {
-    //       this.hasFilters = true;
-    //     }
-    //   } else {
-    //     this.pageNumber = 1;
-    //     this.filt = '';
-    //   }
-    // });
-    // this.tagrefresh = false;
-    // this.updateQueryParam(this.pageNumber, this.filt);
-    // this.getCards(this.pageNumber, this.pageSize);
-    // if (this.pageNumber && this.pageNumber >= 5) {
-    //   this.endIndex = this.pageNumber + 2;
-    //   this.startIndex = this.endIndex - 5;
-    // } else {
-    //   this.startIndex = 0;
-    //   this.endIndex = 5;
-    // }
-    // this.loadAuthentications();
-    // this.updateLastRefreshTime();
   }
 
   private setupRouteParams(): void {
@@ -389,6 +350,10 @@ export class InstanceComponent implements OnInit, OnChanges {
     });
   }
 
+  private tagchange(): void {
+    this.tagService.tags.forEach((element: any) => {});
+  }
+
   // rowsPerPageChanged() {
   //   if (this.pageSize == 0) {
   //     this.pageSize = this.prevRowsPerPageValue;
@@ -583,69 +548,26 @@ export class InstanceComponent implements OnInit, OnChanges {
   //   this.ngOnInit();
   // }
 
-  onNextPage(): void {
-    if (this.pageNumber < this.noOfPages) {
-      this.pageNumber++;
-      this.onChangePage();
-    }
-  }
-
-  onPrevPage(): void {
-    if (this.pageNumber > 1) {
-      this.pageNumber--;
-      this.onChangePage();
-    }
-  }
-
-  onChangePage(page?: number): void {
-    if (page && page >= 1 && page <= this.noOfPages) {
-      this.pageNumber = page;
+  get paginatedCards(): any[] {
+    if (!this.cards || !this.pageSize) {
+      return [];
     }
 
-    if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
-      this.pageChanged.emit(this.pageNumber);
-      this.updatePaginationIndexes();
-      this.getCards(this.pageNumber, this.pageSize);
-    }
+    const startIndex = (this.pageNumber - 1) * this.pageSize;
+    const endIndex = Math.min(startIndex + this.pageSize, this.cards.length);
+    return this.cards.slice(startIndex, endIndex);
   }
 
-  changedToogle(event: any): void {
-    this.refresh();
-    this.cardToggled = event;
+  get shouldShowEmptyState(): boolean {
+    return !this.loading && (!this.cards || this.cards.length === 0);
   }
 
-  tagchange(): void {
-    this.tagService.tags.forEach((element: any) => {});
+  get shouldShowPagination(): boolean {
+    return this.cards && this.cards.length > 0 && this.noOfPages > 1;
   }
 
-  onViewDetails(card: any): void {
-    this.router.navigate(['../instances/' + card.name], {
-      queryParams: {
-        page: this.pageNumber,
-        search: this.filt,
-        adapterList: this.selectedAdapterList.toString(),
-        // adapterInstance: this.selectedAdapterInstance.toString(),
-        org: sessionStorage.getItem('organization'),
-        roleId: JSON.parse(sessionStorage.getItem('role')).id,
-      },
-      queryParamsHandling: 'merge',
-      relativeTo: this.route,
-    });
-  }
-
-  onAdd(): void {
-    this.router.navigate(['./create'], {
-      queryParams: {
-        page: this.pageNumber,
-        search: this.filt,
-        adapterList: this.selectedAdapterList.toString(),
-        // adapterInstance: this.selectedAdapterInstance.toString(),
-        org: sessionStorage.getItem('organization'),
-        roleId: JSON.parse(sessionStorage.getItem('role')).id,
-      },
-      queryParamsHandling: 'merge',
-      relativeTo: this.route,
-    });
+  trackByCardId(index: number, card: any): string | number {
+    return card?.id || card?.name || index;
   }
 
   onSearch(searchText?: string): void {
@@ -669,12 +591,61 @@ export class InstanceComponent implements OnInit, OnChanges {
     this.updateQueryParam(this.pageNumber, this.filt);
   }
 
+  onAdd(): void {
+    this.router.navigate(['./create'], {
+      queryParams: {
+        page: this.pageNumber,
+        search: this.filt,
+        adapterList: this.selectedAdapterList.toString(),
+        // adapterInstance: this.selectedAdapterInstance.toString(),
+        org: sessionStorage.getItem('organization'),
+        roleId: JSON.parse(sessionStorage.getItem('role')).id,
+      },
+      queryParamsHandling: 'merge',
+      relativeTo: this.route,
+    });
+  }
+
+  onRefresh(): void {
+    this.filt = '';
+    this.tagrefresh = true;
+
+    if (!this.hasFilters) {
+      this.selectedAdapterList = [];
+      this.selectedConnectionNamesList = [];
+      this.updateQueryParam(1, '', '', '');
+      this.pageNumber = 1;
+      this.updatePageSize();
+    }
+
+    this.updateLastRefreshTime();
+  }
+
   onTagSelected(event: any): void {
     this.pageNumber = 1;
     this.selectedConnectionNamesList =
       event.getSelectedMlInstanceConnectionType();
     this.selectedAdapterList = event.getSelectedMlInstanceAdapterType();
     this.filterSelectedCards(this.pageNumber);
+  }
+
+  onFilterStatusChange(hasActiveFilters: boolean) {
+    this.hasFilters = hasActiveFilters;
+  }
+
+  onViewDetails(card: any): void {
+    this.router.navigate(['../instances/' + card.name], {
+      queryParams: {
+        page: this.pageNumber,
+        search: this.filt,
+        adapterList: this.selectedAdapterList.toString(),
+        // adapterInstance: this.selectedAdapterInstance.toString(),
+        org: sessionStorage.getItem('organization'),
+        roleId: JSON.parse(sessionStorage.getItem('role')).id,
+      },
+      queryParamsHandling: 'merge',
+      relativeTo: this.route,
+    });
   }
 
   openedit(content: any): void {
@@ -717,44 +688,34 @@ export class InstanceComponent implements OnInit, OnChanges {
     if (event) this.ngOnInit();
   }
 
-  onRefresh(): void {
-    this.filt = '';
-    this.tagrefresh = true;
+  onNextPage(): void {
+    if (this.pageNumber < this.noOfPages) {
+      this.pageNumber++;
+      this.onChangePage();
+    }
+  }
 
-    if (!this.hasFilters) {
-      this.selectedAdapterList = [];
-      this.selectedConnectionNamesList = [];
-      this.updateQueryParam(1, '', '', '');
-      this.pageNumber = 1;
-      this.updatePageSize();
+  onPrevPage(): void {
+    if (this.pageNumber > 1) {
+      this.pageNumber--;
+      this.onChangePage();
+    }
+  }
+
+  onChangePage(page?: number): void {
+    if (page && page >= 1 && page <= this.noOfPages) {
+      this.pageNumber = page;
     }
 
-    this.updateLastRefreshTime();
-  }
-
-  onFilterStatusChange(hasActiveFilters: boolean) {
-    this.hasFilters = hasActiveFilters;
-  }
-
-  trackByCardId(index: number, card: any): string | number {
-    return card?.id || card?.name || index;
-  }
-
-  get paginatedCards(): any[] {
-    if (!this.cards || !this.pageSize) {
-      return [];
+    if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
+      this.pageChanged.emit(this.pageNumber);
+      this.updatePaginationIndexes();
+      this.getCards(this.pageNumber, this.pageSize);
     }
-
-    const startIndex = (this.pageNumber - 1) * this.pageSize;
-    const endIndex = Math.min(startIndex + this.pageSize, this.cards.length);
-    return this.cards.slice(startIndex, endIndex);
   }
 
-  get shouldShowEmptyState(): boolean {
-    return !this.loading && (!this.cards || this.cards.length === 0);
-  }
-
-  get shouldShowPagination(): boolean {
-    return this.cards && this.cards.length > 0 && this.noOfPages > 1;
+  changedToogle(event: any): void {
+    this.refresh();
+    this.cardToggled = event;
   }
 }

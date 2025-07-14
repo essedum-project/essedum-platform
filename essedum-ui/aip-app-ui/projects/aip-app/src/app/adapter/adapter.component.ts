@@ -24,7 +24,6 @@ export class AdapterComponent implements OnInit {
   readonly SERVICE_V1 = 'adapters';
 
   // Component state
-  isFilterHovered: boolean = false;
   hoverStates: boolean[] = [];
   hasFilters: boolean = false;
   loading: boolean = true;
@@ -332,6 +331,162 @@ export class AdapterComponent implements OnInit {
   //   }
   // }
 
+  get paginatedCards(): any[] {
+    if (!this.cards || !this.pageSize) {
+      return [];
+    }
+
+    const startIndex = (this.pageNumber - 1) * this.pageSize;
+    const endIndex = Math.min(startIndex + this.pageSize, this.cards.length);
+    return this.cards.slice(startIndex, endIndex);
+  }
+
+  get shouldShowEmptyState(): boolean {
+    return !this.loading && (!this.cards || this.cards.length === 0);
+  }
+
+  get shouldShowPagination(): boolean {
+    return this.cards && this.cards.length > 0 && this.noOfPages > 1;
+  }
+
+  trackByCardId(index: number, card: any): string | number {
+    return card?.id || card?.name || index;
+  }
+
+  onSearch(searchText?: string): void {
+    if (searchText !== undefined) {
+      this.filt = searchText;
+    }
+
+    if (this.filt.length !== this.filtbackup.length) {
+      this.pageNumber = 1;
+      this.filtbackup = this.filt;
+    }
+
+    const searchTerm = this.filt.toLowerCase();
+    this.cards = this.allCardsFiltered.filter((element) =>
+      element.name.toLowerCase().includes(searchTerm)
+    );
+
+    this.noOfItems = this.cards.length;
+    this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
+    this.pageArr = Array.from({ length: this.noOfPages }, (_, i) => i);
+    this.hoverStates = new Array(this.pageArr.length).fill(false);
+
+    this.updateQueryParam(
+      this.pageNumber,
+      this.filt,
+      this.selectedCategoryList?.toString() ?? '',
+      this.selectedConnectionNamesList?.toString() ?? '',
+      this.selectedSpecList?.toString() ?? ''
+    );
+  }
+
+  onAdd(): void {
+    this.router.navigate(['./create'], {
+      queryParams: {
+        page: this.pageNumber,
+        search: this.filt,
+
+        categoryList: this.selectedCategoryList.toString(),
+        org: sessionStorage.getItem('organization'),
+        roleId: JSON.parse(sessionStorage.getItem('role')).id,
+      },
+      queryParamsHandling: 'merge',
+
+      relativeTo: this.route,
+    });
+  }
+
+  onRefresh(): void {
+    this.filt = '';
+    this.tagrefresh = true;
+
+    if (!this.hasFilters) {
+      // Reset filters
+      this.selectedConnectionNamesList = [];
+      this.selectedSpecList = [];
+      this.selectedCategoryList = [];
+
+      // Reset pagination
+      this.pageNumber = 1;
+
+      // Update query params and refresh data
+      this.updateQueryParam(1, '', '', '', '');
+      this.updatePageSize();
+    }
+
+    // Update last refresh timestamp
+    this.updateLastRefreshTime();
+  }
+
+  onTagSelected(event: any): void {
+    this.pageNumber = 1;
+    this.selectedConnectionNamesList =
+      event.getSelectedMlAdapterConnectionType();
+    this.selectedCategoryList = event.getSelectedMlAdapterCategoryType();
+    this.selectedSpecList = event.getSelectedMlAdapterSpecType();
+    this.filterSelectedCards(this.pageNumber);
+  }
+
+  onFilterStatusChange(hasActiveFilters: boolean): void {
+    this.hasFilters = hasActiveFilters;
+  }
+
+  onViewDetails(card: any): void {
+    this.router.navigate(['../implementations/' + card.name], {
+      queryParams: {
+        page: this.pageNumber,
+        search: this.filt,
+        categoryList: this.selectedCategoryList.toString(),
+        org: sessionStorage.getItem('organization'),
+        roleId: JSON.parse(sessionStorage.getItem('role')).id,
+      },
+      queryParamsHandling: 'merge',
+      relativeTo: this.route,
+    });
+  }
+
+  openedit(content: any): void {
+    this.dialog.open(content, {
+      width: '830px',
+      panelClass: 'standard-dialog',
+    });
+  }
+
+  deleteAdapter(adapterName: string): void {
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === 'delete') {
+        this.adapterServices.deleteAdapter(adapterName).subscribe(
+          (res) => {
+            if (res) {
+              if (res.message == 'success') {
+                this.adapterServices.messageNotificaionService(
+                  'success',
+                  'Done!  Implementation Deleted Successfully'
+                );
+                this.refresh();
+              } else
+                this.adapterServices.messageNotificaionService(
+                  'warning',
+                  "Implementation Can't be Deleted, It's being used by instance(s)"
+                );
+            } else
+              this.adapterServices.messageNotificaionService('error', 'Error');
+          },
+          (error) => {
+            this.service.messageService(error);
+          }
+        );
+      }
+    });
+  }
+
+  triggereRefresh(event: boolean): void {
+    if (event) this.onRefresh();
+  }
+
   onNextPage(): void {
     if (this.pageNumber < this.noOfPages) {
       this.pageNumber++;
@@ -378,161 +533,5 @@ export class AdapterComponent implements OnInit {
   changedToogle(event: boolean): void {
     this.refresh();
     this.cardToggled = event;
-  }
-
-  onViewDetails(card: any): void {
-    this.router.navigate(['../implementations/' + card.name], {
-      queryParams: {
-        page: this.pageNumber,
-        search: this.filt,
-        categoryList: this.selectedCategoryList.toString(),
-        org: sessionStorage.getItem('organization'),
-        roleId: JSON.parse(sessionStorage.getItem('role')).id,
-      },
-      queryParamsHandling: 'merge',
-      relativeTo: this.route,
-    });
-  }
-
-  onAdd(): void {
-    this.router.navigate(['./create'], {
-      queryParams: {
-        page: this.pageNumber,
-        search: this.filt,
-
-        categoryList: this.selectedCategoryList.toString(),
-        org: sessionStorage.getItem('organization'),
-        roleId: JSON.parse(sessionStorage.getItem('role')).id,
-      },
-      queryParamsHandling: 'merge',
-
-      relativeTo: this.route,
-    });
-  }
-
-  onSearch(searchText?: string): void {
-    if (searchText !== undefined) {
-      this.filt = searchText;
-    }
-
-    if (this.filt.length !== this.filtbackup.length) {
-      this.pageNumber = 1;
-      this.filtbackup = this.filt;
-    }
-
-    const searchTerm = this.filt.toLowerCase();
-    this.cards = this.allCardsFiltered.filter((element) =>
-      element.name.toLowerCase().includes(searchTerm)
-    );
-
-    this.noOfItems = this.cards.length;
-    this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
-    this.pageArr = Array.from({ length: this.noOfPages }, (_, i) => i);
-    this.hoverStates = new Array(this.pageArr.length).fill(false);
-
-    this.updateQueryParam(
-      this.pageNumber,
-      this.filt,
-      this.selectedCategoryList?.toString() ?? '',
-      this.selectedConnectionNamesList?.toString() ?? '',
-      this.selectedSpecList?.toString() ?? ''
-    );
-  }
-
-  onTagSelected(event: any): void {
-    this.pageNumber = 1;
-    this.selectedConnectionNamesList =
-      event.getSelectedMlAdapterConnectionType();
-    this.selectedCategoryList = event.getSelectedMlAdapterCategoryType();
-    this.selectedSpecList = event.getSelectedMlAdapterSpecType();
-    this.filterSelectedCards(this.pageNumber);
-  }
-
-  openedit(content: any): void {
-    this.dialog.open(content, {
-      width: '830px',
-      panelClass: 'standard-dialog',
-    });
-  }
-
-  deleteAdapter(adapterName: string): void {
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result === 'delete') {
-        this.adapterServices.deleteAdapter(adapterName).subscribe(
-          (res) => {
-            if (res) {
-              if (res.message == 'success') {
-                this.adapterServices.messageNotificaionService(
-                  'success',
-                  'Done!  Implementation Deleted Successfully'
-                );
-                this.refresh();
-              } else
-                this.adapterServices.messageNotificaionService(
-                  'warning',
-                  "Implementation Can't be Deleted, It's being used by instance(s)"
-                );
-            } else
-              this.adapterServices.messageNotificaionService('error', 'Error');
-          },
-          (error) => {
-            this.service.messageService(error);
-          }
-        );
-      }
-    });
-  }
-
-  triggereRefresh(event: boolean): void {
-    if (event) this.onRefresh();
-  }
-
-  onRefresh(): void {
-    this.filt = '';
-    this.tagrefresh = true;
-
-    if (!this.hasFilters) {
-      // Reset filters
-      this.selectedConnectionNamesList = [];
-      this.selectedSpecList = [];
-      this.selectedCategoryList = [];
-
-      // Reset pagination
-      this.pageNumber = 1;
-
-      // Update query params and refresh data
-      this.updateQueryParam(1, '', '', '', '');
-      this.updatePageSize();
-    }
-
-    // Update last refresh timestamp
-    this.updateLastRefreshTime();
-  }
-
-  onFilterStatusChange(hasActiveFilters: boolean): void {
-    this.hasFilters = hasActiveFilters;
-  }
-
-  trackByCardId(index: number, card: any): string | number {
-    return card?.id || card?.name || index;
-  }
-
-  get paginatedCards(): any[] {
-    if (!this.cards || !this.pageSize) {
-      return [];
-    }
-
-    const startIndex = (this.pageNumber - 1) * this.pageSize;
-    const endIndex = Math.min(startIndex + this.pageSize, this.cards.length);
-    return this.cards.slice(startIndex, endIndex);
-  }
-
-  get shouldShowEmptyState(): boolean {
-    return !this.loading && (!this.cards || this.cards.length === 0);
-  }
-
-  get shouldShowPagination(): boolean {
-    return this.cards && this.cards.length > 0 && this.noOfPages > 1;
   }
 }
