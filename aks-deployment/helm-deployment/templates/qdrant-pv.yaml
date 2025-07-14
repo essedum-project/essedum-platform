@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.qdrant.pv.name }}
+spec:
+  capacity:
+    storage: {{ .Values.qdrant.pv.storage }}
+  accessModes:
+    - {{ .Values.qdrant.pv.accessMode }}
+  storageClassName: {{ .Values.qdrant.pv.storageClassName }}
+  azureFile:
+    secretName: {{ .Values.qdrant.pv.secretName }}
+    shareName: {{ .Values.qdrant.pv.shareName }}
+    readOnly: false

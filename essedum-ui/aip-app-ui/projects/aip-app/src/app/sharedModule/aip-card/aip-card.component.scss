@@ -232,3 +232,26 @@ mat-card-actions.card-actions-hover {
 .lfx-c-card.mat-mdc-card:hover .lfx-u-header-xl {
   color: #000000;
 }
+
+.header-action-icon {
+  font-size: 16px;
+  height: 16px;
+  color: grey;
+  cursor: pointer;
+  gap: 2rem;
+}
+
+.header-action-icon:hover {
+  color: #0094ff;
+}
+
+.action-icon {
+  font-size: 19px;
+  height: 19px;
+  color: grey;
+  cursor: pointer;
+}
+
+.action-icon:hover {
+  color: #0094ff;
+}
