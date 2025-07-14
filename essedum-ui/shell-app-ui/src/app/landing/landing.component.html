@@ -132,7 +132,7 @@
                     width: '130px',
                     height: '800px',
                     overflowY: 'auto',
-                    overflowX: 'visible'
+                    overflowX: 'visible',
                   }"
                   (click)="$event.stopPropagation()"
                 >
@@ -149,7 +149,7 @@
                     <div
                       *ngFor="let item of sidebarMenu; let i = index"
                       (click)="onSidebarMenuItemClick($event, item)"
-                      [routerLink]="item.url"
+                      [routerLink]="item.url" 
                       class="list-menu-item"
                       [ngClass]="{
                         'sidebar-menu-popup-item-active':
@@ -163,7 +163,7 @@
                     >
                       <span
                         [ngStyle]="{
-                          color: item.label == highlightedLabel ? '#0052cc' : ''
+                          color: item.label == highlightedLabel ? '#0052cc' : '#68696c'
                         }"
                       >
                         {{ item.label }}
@@ -310,7 +310,7 @@
                           'font-size': sideMenuIconSize,
                           height: sideMenuIconSize,
                           width: sideMenuIconSize,
-                          color: item.label == highlightedLabel ? '#0052cc' : ''
+                          color: item.label == highlightedLabel ? '#0052cc' : '#68696c'
                         }"
                         [ngClass]="{
                           sidebariconcolor: sidebariconcolor,
