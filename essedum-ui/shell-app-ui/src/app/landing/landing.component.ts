@@ -3455,8 +3455,32 @@ export class LandingComponent implements OnInit, AfterViewInit {
     this.sidebarmaxwidth = "260px";
   }
 
-  getContentMarginLeft(): string {
-    let mainSidebar = this.sidebarWidth;
+  // getContentMarginLeft(): string {
+  //   let constantSidebarWidth= "62px"; // Default width for the main sidebar
+  //   let mainSidebar = this.sidebarWidth;
+  //   let popupSidebar = this.sidebarMenuPopupWidth;
+
+  //   // Convert vw to px if needed
+  //   const toPx = (val: string) => {
+  //     if (val.endsWith("vw")) {
+  //       return (parseFloat(val) / 100) * window.innerWidth;
+  //     }
+  //     if (val.endsWith("px")) {
+  //       return parseFloat(val);
+  //     }
+  //     return parseFloat(val); // fallback
+  //   };
+
+  //   const mainSidebarPx = toPx(mainSidebar);
+  //   const popupSidebarPx = this.showSidebarMenuList ? toPx(popupSidebar) : 0;
+
+  //   return `${mainSidebarPx + popupSidebarPx}px`;
+  // }
+
+  getContentMarginLeftSimple(): string {
+    
+    let constantSidebarWidth= "62px"; // Default width for the main sidebar
+    let mainSidebar = constantSidebarWidth;
     let popupSidebar = this.sidebarMenuPopupWidth;
 
     // Convert vw to px if needed
