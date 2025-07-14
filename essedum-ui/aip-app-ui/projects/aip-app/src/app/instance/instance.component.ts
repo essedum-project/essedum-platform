@@ -24,6 +24,8 @@ export class InstanceComponent implements OnInit, OnChanges {
   // Constants
   readonly CARD_TITLE = 'Instances';
   readonly SERVICE_V1 = 'instances';
+  readonly CREATE_ACTION = 'create';
+  readonly EDIT_ACTION = 'edit';
 
   // Component state
   hoverStates: boolean[] = [];
