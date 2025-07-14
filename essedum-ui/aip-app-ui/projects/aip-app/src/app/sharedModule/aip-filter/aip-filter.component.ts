@@ -2,6 +2,8 @@ import {
   Component,
   EventEmitter,
   Input,
+  OnInit,
+  OnChanges,
   Output,
   SimpleChanges,
 } from '@angular/core';
@@ -14,6 +16,47 @@ import { DatasetServices } from '../../dataset/dataset-service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SemanticService } from '../../services/semantic.services';
 import { animate, style, transition, trigger } from '@angular/animations';
+import { of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+
+// Interface for filter items
+interface FilterItem {
+  category: string;
+  label: string;
+  value: string;
+  selected: boolean;
+}
+
+// Enum for service types
+enum ServiceType {
+  PIPELINE = 'pipeline',
+  CHAIN = 'chain',
+  CONNECTIONS = 'connections',
+  DATASETS = 'Datasets',
+  ADAPTERS = 'adapters',
+  APPS = 'apps',
+  SPECS = 'specs',
+  FEATURESTORE = 'featurestore',
+  DG_APP = 'dgApp',
+  INSTANCES = 'instances',
+  WORKER_TOOLS = 'worker-tools',
+}
+
+// Enum for filter types
+enum FilterType {
+  CATEGORY = 'category',
+  SPEC = 'spec',
+  CONNECTION = 'connection',
+  INSTANCE_ADAPTER = 'instanceAdapter',
+  INSTANCE_CONNECTION = 'instanceConnection',
+  SPEC_TEMPLATE_CAPABILITY = 'specTemplateCapability',
+  ADAPTER_TYPE = 'adapterType',
+  ADAPTER_INSTANCE = 'adapterInstance',
+  PIPELINE_TYPE = 'pipelineType',
+  TOPIC = 'topic',
+  TAG = 'tag',
+  TOOLS_TYPE = 'toolsType',
+}
 
 @Component({
   selector: 'app-aip-filter',
@@ -31,10 +74,11 @@ import { animate, style, transition, trigger } from '@angular/animations';
     ]),
   ],
 })
-export class AipFilterComponent {
-  @Input() tagrefresh: boolean;
-  @Input() servicev1: string;
-  @Input() preselectedtag: any;
+export class AipFilterComponent implements OnInit, OnChanges {
+  // Input properties
+  @Input() tagrefresh = false;
+  @Input() servicev1 = '';
+  @Input() preselectedtag: number[] = [];
   @Input() selectedAdpImplCombinedLists: any;
   @Input() selectedConnectionTypeList: any;
   @Input() selectedDatasetTypeList: any;
@@ -44,53 +88,39 @@ export class AipFilterComponent {
   @Input() selectedModelTypeLists: any;
   @Input() selectedEndpointTypeLists: any;
   @Input() selectedAppTypeList: any;
+
+  // Output properties
+  @Output() tagSelected = new EventEmitter<TagEventDTO>();
+  @Output() filterStatusChange = new EventEmitter<boolean>();
+
+  // Constants
   readonly TOOLTIP_POSITION = 'above';
-  isFilterExpanded: boolean = false;
+  readonly ServiceType = ServiceType;
+  readonly FilterType = FilterType;
+
+  // UI state
+  isFilterExpanded = false;
   isExpanded = false;
-  category = [];
-  tags;
-  tagsBackup;
-  allTags: any;
-  tagStatus = {};
-  catStatus = {};
-  selectedTag = [];
-  selectedTagList = [];
+  isLoading = false;
+
+  // Filter arrays and maps
+  category: string[] = [];
+  tags: Record<string, any[]> = {};
+  tagsBackup: Record<string, any[]> = {};
+  allTags: any[] = [];
+  tagStatus: Record<string, boolean> = {};
+  catStatus: Record<string, boolean> = {};
+
+  // Selected filters
+  selectedTag: any[] = [];
+  selectedTagList: number[] = [];
   selectedType: string[] = [];
-  adapterTypes: any;
   selectedAdapterType: string[] = [];
   selectedAdapterList: string[] = [];
   selectedAdapterInstance: string[] = [];
-  adapterTypeList: any[] = [];
-  appTypeList: any[] = [];
-  selectedAppType: string[] = [];
-  appTypes: any;
-  adapterInstanceList: any[] = [];
-  @Output() tagSelected = new EventEmitter<any>();
-  @Output() filterStatusChange = new EventEmitter<boolean>();
-  pipelinesTypeList: any[];
-  toolsTypeList: any[] = [];
-  connectionsTypeList: any[];
-  datasetTopicList: any[] = [];
-  datasetsTypes: any[];
-  pipelinesTypes: any[];
-  toolsTypes: any[];
-  connectionsTypes: any[];
-  datasetsTypeList: any[];
   selectedPipelineType: string[] = [];
   selectedToolsType: string[] = [];
   selectedconnectionType: string[] = [];
-  mlAdapterConnectionTypesList: any[];
-  mlAdapterCategoryTypeList: any[];
-  mlAdapterSpecTypeList: any[];
-  mlSpecTemplateCapabilityTypeList: any[];
-  mlInstanceAdapterTypeList: any[];
-  mlInstanceConnectionTypeList: any[];
-  mlAdapterConnectionNamesList: string[] = [];
-  mlAdapterCategoryList: string[] = [];
-  mlAdapterSpecTemplateList: string[] = [];
-  mlSpecTemplateCapabilityList: string[] = [];
-  mlInstancesAdapterList: string[] = [];
-  mlInstancesConnectionList: string[] = [];
   selectedMlAdapterConnectionType: string[] = [];
   selectedMlAdapterCategoryType: string[] = [];
   selectedMlAdapterSpecType: string[] = [];
@@ -98,45 +128,91 @@ export class AipFilterComponent {
   selectedMlInstancesConnectionType: string[] = [];
   selectedMlInstancesAdapterType: string[] = [];
   selectedDatasetTopicType: string[] = [];
-  datasetsTags: any[];
-  datasetsTagsList: any[];
-  selectedTagsType: any[];
-  type = [];
-  categoryList = [];
-  connectionList = [];
-  specList = [];
-  specCapabilityList = [];
-  instanceConnectionList = [];
-  instanceImplementationList = [];
-  instance = [];
-  pipelineType = [];
-  toolsType = [];
-  chainType = [];
-  instanceType = [];
-  appType = [];
-  preSelectedConnectionType = [];
+  selectedAppType: string[] = [];
+  selectedTagsType: any[] = [];
+
+  // Filter lists
+  adapterTypes: any[] = [];
+  adapterTypeList: FilterItem[] = [];
+  appTypeList: FilterItem[] = [];
+  appTypes: any[] = [];
+  adapterInstanceList: FilterItem[] = [];
+  pipelinesTypeList: FilterItem[] = [];
+  toolsTypeList: FilterItem[] = [];
+  connectionsTypeList: FilterItem[] = [];
+  datasetTopicList: FilterItem[] = [];
+  datasetsTypes: string[] = [];
+  pipelinesTypes: string[] = [];
+  toolsTypes: string[] = [];
+  connectionsTypes: string[] = [];
+  datasetsTypeList: FilterItem[] = [];
+  mlAdapterConnectionTypesList: FilterItem[] = [];
+  mlAdapterCategoryTypeList: FilterItem[] = [];
+  mlAdapterSpecTypeList: FilterItem[] = [];
+  mlSpecTemplateCapabilityTypeList: FilterItem[] = [];
+  mlInstanceAdapterTypeList: FilterItem[] = [];
+  mlInstanceConnectionTypeList: FilterItem[] = [];
+
+  // Raw data lists
+  mlAdapterConnectionNamesList: string[] = [];
+  mlAdapterCategoryList: string[] = [];
+  mlAdapterSpecTemplateList: string[] = [];
+  mlSpecTemplateCapabilityList: string[] = [];
+  mlInstancesAdapterList: string[] = [];
+  mlInstancesConnectionList: string[] = [];
+  datasetsTags: any[] = [];
+  datasetsTagsList: FilterItem[] = [];
+
+  // URL param lists
+  type: string[] = [];
+  categoryList: string[] = [];
+  connectionList: string[] = [];
+  specList: string[] = [];
+  specCapabilityList: string[] = [];
+  instanceConnectionList: string[] = [];
+  instanceImplementationList: string[] = [];
+  instance: string[] = [];
+  pipelineType: string[] = [];
+  toolsType: string[] = [];
+  chainType: string[] = [];
+  instanceType: string[] = [];
+  appType: string[] = [];
+
   constructor(
     private service: Services,
-    private DatasetServices: DatasetServices,
+    private datasetServices: DatasetServices,
     public tagService: TagsService,
     private adapterServices: AdapterServices,
     private semanticService: SemanticService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
+
   ngOnInit(): void {
+    this.loadPreselectedFilters();
+    this.loadQueryParams();
+    this.initializeSelectedLists();
+    this.initializeServiceBasedFilters();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.tagrefresh?.currentValue) {
+      this.handleTagRefreshChange();
+    }
+  }
+
+  /**
+   * Loads preselected filters from input properties
+   */
+  private loadPreselectedFilters(): void {
     if (this.selectedAdpImplCombinedLists) {
-      //for Adapter Implementations screen - preselected Filters
       this.categoryList =
         this.selectedAdpImplCombinedLists.selectedCategoryList ?? [];
       this.connectionList =
         this.selectedAdpImplCombinedLists.selectedConnectionNamesList ?? [];
       this.specList = this.selectedAdpImplCombinedLists.selectedSpecList ?? [];
-      //for Specs screen - preselected Filters
       this.specCapabilityList =
         this.selectedAdpImplCombinedLists.selectedCapabilityType ?? [];
-
-      //for Instances screen - preselected Filters
       this.instanceConnectionList =
         this.selectedAdpImplCombinedLists.selectedInstanceConnectionList ?? [];
       this.instanceImplementationList =
@@ -144,27 +220,7 @@ export class AipFilterComponent {
         [];
     }
 
-    this.route.queryParams.subscribe((params) => {
-      this.type = params['type'] ? params['type'].split(',') : [];
-      this.appType = params['type'] ? params['type'].split(',') : [];
-      this.pipelineType = params['pipelineType']
-        ? params['pipelineType'].split(',')
-        : [];
-      this.pipelineType = params['toolsType']
-        ? params['toolsType'].split(',')
-        : [];
-      this.instance = params['adapterInstance']
-        ? params['adapterInstance'].split(',')
-        : [];
-      this.chainType = params['chainType']
-        ? params['chainType'].split(',')
-        : [];
-      this.instanceType = params['adapterList']
-        ? params['adapterList'].split(',')
-        : [];
-    });
     if (this.selectedConnectionTypeList) {
-      //for Connection screen - preselected Filters
       this.type = this.selectedConnectionTypeList.selectedAdapterType ?? [];
     }
     if (this.selectedDatasetTypeList) {
@@ -192,1227 +248,1105 @@ export class AipFilterComponent {
     if (this.selectedAppTypeList) {
       this.appType = this.selectedAppTypeList.selectedTagType ?? [];
     }
-    this.type.forEach((types) => {
-      this.selectedAdapterType.push(types);
-    });
-    this.appType.forEach((types) => {
-      this.selectedAdapterType.push(types);
-    });
-    this.pipelineType.forEach((types) => {
-      this.selectedAdapterType.push(types);
-    });
-    this.toolsType.forEach((types) => {
-      this.selectedAdapterType.push(types);
-    });
-    this.chainType.forEach((types) => {
-      this.selectedAdapterType.push(types);
-    });
-    this.instanceType.forEach((types) => {
-      this.selectedAdapterList.push(types);
-    });
-    this.instance.forEach((instances) => {
-      this.selectedAdapterInstance.push(instances);
-    });
-    console.log('WE CALLED - ', this.servicev1);
-    if (this.servicev1 === 'pipeline' || this.servicev1 === 'chain') {
-      this.getPipelinesTypes();
-      this.getTags();
+  }
 
-      if (this.tagrefresh) {
-        this.refresh();
-      }
-    } else if (this.servicev1 === 'connections') {
-      this.getDatasourceTypes();
-      if (this.tagrefresh) {
-        this.refresh();
-      }
-    } else if (this.servicev1 === 'Datasets') {
-      this.getDatasetsTypes();
-      this.getTopicTypes();
-      if (this.tagrefresh) {
-        this.refresh();
-      }
-    } else if (this.servicev1 === 'adapters') {
-      this.getMlAdapterFilters();
-      this.selectedMlAdapterConnectionType = [];
-      this.selectedMlAdapterCategoryType = [];
-      this.selectedMlAdapterSpecType = [];
-      if (this.tagrefresh) {
-        this.refresh();
-      }
-    } else if (this.servicev1 === 'apps') {
-      this.fetchAppType();
-      this.getTags();
+  /**
+   * Loads filters from URL query parameters
+   */
+  private loadQueryParams(): void {
+    this.route.queryParams.subscribe((params) => {
+      this.type = params['type'] ? params['type'].split(',') : [];
+      this.appType = params['type'] ? params['type'].split(',') : [];
+      this.pipelineType = params['pipelineType']
+        ? params['pipelineType'].split(',')
+        : [];
 
-      if (this.tagrefresh) {
-        this.refresh();
-      }
-    } else if (this.servicev1 === 'specs') {
-      this.getMlSpecTemplateFilters();
-      this.selectedMlSpecTemplateCapabilityType = [];
-      if (this.tagrefresh) {
-        this.refresh();
-      }
-    } else if (this.servicev1 === 'featurestore') {
+      this.pipelineType = params['toolsType']
+        ? params['toolsType'].split(',')
+        : [];
+
+      this.instance = params['adapterInstance']
+        ? params['adapterInstance'].split(',')
+        : [];
+      this.chainType = params['chainType']
+        ? params['chainType'].split(',')
+        : [];
+      this.instanceType = params['adapterList']
+        ? params['adapterList'].split(',')
+        : [];
+    });
+  }
+
+  /**
+   * Initializes selected filter arrays from URL params
+   */
+  private initializeSelectedLists(): void {
+    this.selectedAdapterType = [
+      ...this.type,
+      ...this.appType,
+      ...this.pipelineType,
+      ...this.toolsType,
+      ...this.chainType,
+    ];
+
+    this.selectedAdapterList = [...this.instanceType];
+    this.selectedAdapterInstance = [...this.instance];
+  }
+
+  /**
+   * Initializes filters based on the service type
+   */
+  private initializeServiceBasedFilters(): void {
+    this.isLoading = true;
+
+    switch (this.servicev1) {
+      case ServiceType.PIPELINE:
+      case ServiceType.CHAIN:
+        this.getPipelinesTypes();
+        this.getTags();
+        break;
+      case ServiceType.CONNECTIONS:
+        this.getDatasourceTypes();
+        break;
+      case ServiceType.DATASETS:
+        this.getDatasetsTypes();
+        this.getTopicTypes();
+        break;
+      case ServiceType.ADAPTERS:
+        this.getMlAdapterFilters();
+        this.selectedMlAdapterConnectionType = [];
+        this.selectedMlAdapterCategoryType = [];
+        this.selectedMlAdapterSpecType = [];
+        break;
+      case ServiceType.APPS:
+        this.fetchAppType();
+        this.getTags();
+        break;
+      case ServiceType.SPECS:
+        this.getMlSpecTemplateFilters();
+        this.selectedMlSpecTemplateCapabilityType = [];
+        break;
+      case ServiceType.FEATURESTORE:
+        this.fetchFSAdapters();
+        this.fetchFSAdaptersTypes();
+        break;
+      case ServiceType.DG_APP:
+        this.fetchDGAdapters();
+        this.fetchDGAdaptersTypes();
+        break;
+      case ServiceType.INSTANCES:
+        this.getMlInstancesFilters();
+        this.selectedMlInstancesAdapterType = [];
+        this.selectedMlInstancesConnectionType = [];
+        break;
+      case ServiceType.WORKER_TOOLS:
+        this.getToolsTypes();
+        break;
+      default:
+        this.getTags();
+        this.fetchAdaptersTypes();
+        this.fetchAdapters();
+    }
+
+    // Apply refresh if needed
+    if (this.tagrefresh) {
+      this.refresh();
+    }
+
+    this.isLoading = false;
+  }
+
+  /**
+   * Handles changes to the tagrefresh input
+   */
+  private handleTagRefreshChange(): void {
+    if (this.servicev1 === ServiceType.FEATURESTORE) {
       this.fetchFSAdapters();
       this.fetchFSAdaptersTypes();
-      if (this.tagrefresh) {
-        this.refresh();
-      }
-    } else if (this.servicev1 === 'dgApp') {
+    } else if (this.servicev1 === ServiceType.DG_APP) {
       this.fetchDGAdapters();
       this.fetchDGAdaptersTypes();
-      if (this.tagrefresh) {
-        this.refresh();
-      }
-    } else if (this.servicev1 === 'instances') {
-      this.getMlInstancesFilters();
-      this.selectedMlInstancesAdapterType = [];
-      this.selectedMlInstancesConnectionType = [];
-      if (this.tagrefresh) {
-        this.refresh();
-      }
-    } else if (this.servicev1 === 'worker-tools') {
-      this.getToolsTypes();
-
-      if (this.tagrefresh) {
-        this.refresh();
-      }
+      this.refresh();
+    } else if (this.servicev1 === ServiceType.WORKER_TOOLS) {
+      this.refresh();
     } else {
-      this.getTags();
-      this.fetchAdaptersTypes();
-      this.fetchAdapters();
-      if (this.tagrefresh) {
-        this.refresh();
-      }
+      this.refresh();
     }
   }
-  getToolsTypes() {}
 
-  getTopicTypes() {
-    this.semanticService.getAllTopics().subscribe((res) => {
-      res.forEach((element: any) => {
-        console.log(element);
+  /**
+   * Gets tools types from API
+   */
+  getToolsTypes(): void {
+    // Implementation to be added
+  }
 
-        this.datasetTopicList.push({
+  /**
+   * Gets topic types from the semantic service
+   */
+  getTopicTypes(): void {
+    this.semanticService
+      .getAllTopics()
+      .pipe(
+        catchError((error) => {
+          console.error('Error fetching topics:', error);
+          return of([]);
+        })
+      )
+      .subscribe((res: any[]) => {
+        this.datasetTopicList = res.map((element) => ({
           category: 'Topic',
           label: element.topicname,
           value: element.topicname,
           selected: false,
-        });
+        }));
       });
-    });
   }
 
-  fetchAppType() {
+  /**
+   * Fetches application types
+   */
+  fetchAppType(): void {
     this.adapterTypeList = [];
     this.adapterTypes = [];
     this.selectedAdapterType = [];
+
+    // Get types from URL if available
     this.route.queryParams.subscribe((params) => {
-      // Update this.pageNumber if the page query param is present
       if (params['type']) {
         this.selectedAdapterType = params['type'].split(',');
       }
     });
+
     this.service.getAppTypes().subscribe((res) => {
       this.adapterTypes = res.body;
-      this.adapterTypes.forEach((element: any) => {
-        if (this.appType.length > 0) {
-          this.appType.forEach((type) => {
-            if (type === element) {
-              this.adapterTypeList.push({
-                category: 'Type',
-                label: element,
-                value: element,
-                selected: true,
-              });
-            }
-          });
-        }
-        if (
-          !this.adapterTypeList.some(
-            (obj) => obj.label === element && obj.value === element
-          )
-        ) {
-          if (element) {
-            this.adapterTypeList.push({
-              category: 'Type',
-              label: element,
-              value: element,
-              selected: false,
-            });
-          }
-        }
-      });
+
+      this.adapterTypeList = this.adapterTypes
+        .filter((element) => element) // Filter out null/undefined
+        .map((element) => {
+          const isSelected = this.appType.includes(element);
+          return {
+            category: 'Type',
+            label: element,
+            value: element,
+            selected: isSelected,
+          };
+        });
     });
   }
-  getMlInstancesFilters() {
+
+  /**
+   * Gets ML instance filters from adapter service
+   */
+  getMlInstancesFilters(): void {
     this.adapterServices.getInstancesFilters().subscribe((res: any) => {
       this.mlInstancesAdapterList = res.adapters;
       this.mlInstancesConnectionList = res.connections;
       this.mlInstanceConnectionTypeList = [];
       this.mlInstanceAdapterTypeList = [];
       this.selectedMlInstancesAdapterType = [];
-      this.mlInstancesConnectionList.forEach((element: any) => {
-        if (
+
+      // Process connection list
+      this.mlInstancesConnectionList.forEach((element) => {
+        const isPreselected =
           !this.tagrefresh &&
           this.instanceConnectionList &&
           this.instanceConnectionList.length > 0 &&
-          this.instanceConnectionList.includes(element)
+          this.instanceConnectionList.includes(element);
+
+        if (
+          !this.mlInstanceConnectionTypeList.some(
+            (item) => item.value === element
+          )
         ) {
-          const itemExists = this.mlInstanceConnectionTypeList.some(
-            (item) => item.value === element
-          );
-          if (!itemExists) {
-            this.mlInstanceConnectionTypeList.push({
-              category: 'Connections',
-              label: element,
-              value: element,
-              selected: true,
-            });
-          }
-          if (!this.selectedMlInstancesConnectionType.includes(element))
+          this.mlInstanceConnectionTypeList.push({
+            category: 'Connections',
+            label: element,
+            value: element,
+            selected: isPreselected,
+          });
+
+          if (
+            isPreselected &&
+            !this.selectedMlInstancesConnectionType.includes(element)
+          ) {
             this.selectedMlInstancesConnectionType.push(element);
-        } else {
-          const itemExists = this.mlInstanceConnectionTypeList.some(
-            (item) => item.value === element
-          );
-          if (!itemExists) {
-            this.mlInstanceConnectionTypeList.push({
-              category: 'Connections',
-              label: element,
-              value: element,
-              selected: false,
-            });
           }
         }
       });
 
-      this.mlInstancesAdapterList.forEach((element: any) => {
-        if (
+      // Process adapter list
+      this.mlInstancesAdapterList.forEach((element) => {
+        const isPreselected =
           !this.tagrefresh &&
           this.instanceImplementationList &&
           this.instanceImplementationList.length > 0 &&
-          this.instanceImplementationList.includes(element)
+          this.instanceImplementationList.includes(element);
+
+        if (
+          !this.mlInstanceAdapterTypeList.some((item) => item.value === element)
         ) {
-          const itemExists = this.mlInstanceAdapterTypeList.some(
-            (item) => item.value === element
-          );
-          if (!itemExists) {
-            this.mlInstanceAdapterTypeList.push({
-              category: 'Adapter',
-              label: element,
-              value: element,
-              selected: true,
-            });
-          }
-          if (!this.selectedMlInstancesAdapterType.includes(element))
+          this.mlInstanceAdapterTypeList.push({
+            category: 'Adapter',
+            label: element,
+            value: element,
+            selected: isPreselected,
+          });
+
+          if (
+            isPreselected &&
+            !this.selectedMlInstancesAdapterType.includes(element)
+          ) {
             this.selectedMlInstancesAdapterType.push(element);
-        } else {
-          const itemExists = this.mlInstanceAdapterTypeList.some(
-            (item) => item.value === element
-          );
-          if (!itemExists) {
-            this.mlInstanceAdapterTypeList.push({
-              category: 'Adapter',
-              label: element,
-              value: element,
-              selected: false,
-            });
           }
         }
       });
     });
   }
 
-  getPipelinesTypes() {
+  /**
+   * Gets pipeline types based on service type
+   */
+  getPipelinesTypes(): void {
     this.pipelinesTypeList = [];
     this.pipelinesTypes = [];
     this.selectedPipelineType = [];
-    this.pipelineType.forEach((types) => {
-      this.selectedAdapterType.push(types);
+
+    // Add pipeline types to selected types
+    this.pipelineType.forEach((type) => {
+      if (!this.selectedAdapterType.includes(type)) {
+        this.selectedAdapterType.push(type);
+      }
     });
-    if (this.servicev1 == 'chain') {
-      this.service.getPipelinesTypeByOrganization().subscribe((res) => {
-        this.pipelinesTypes = JSON.parse(res);
-        this.pipelinesTypes.forEach((element: any) => {
-          if (element && element != 'App') {
-            if (this.chainType.length > 0) {
-              this.chainType.forEach((type) => {
-                if (type === element) {
-                  this.pipelinesTypeList.push({
-                    category: 'Type',
-                    label: element,
-                    value: element,
-                    selected: true,
-                  });
-                }
-              });
-            }
-            if (
-              !this.pipelinesTypeList.some(
-                (obj) => obj.label === element && obj.value === element
-              )
-            ) {
-              this.pipelinesTypeList.push({
-                category: 'Type',
-                label: element,
-                value: element,
-                selected: false,
-              });
-            }
-          }
+
+    this.service.getPipelinesTypeByOrganization().subscribe((res) => {
+      this.pipelinesTypes = JSON.parse(res);
+
+      const excludedTypes =
+        this.servicev1 === ServiceType.CHAIN ? ['App'] : ['App', 'Langchain'];
+
+      this.pipelinesTypeList = this.pipelinesTypes
+        .filter((element) => element && !excludedTypes.includes(element))
+        .map((element) => {
+          const typesList =
+            this.servicev1 === ServiceType.CHAIN
+              ? this.chainType
+              : this.pipelineType;
+          const isSelected = typesList.includes(element);
+
+          return {
+            category: 'Type',
+            label: element,
+            value: element,
+            selected: isSelected,
+          };
         });
-      });
-    } else {
-      this.service.getPipelinesTypeByOrganization().subscribe((res) => {
-        this.pipelinesTypes = JSON.parse(res);
-        this.pipelinesTypes.forEach((element: any) => {
-          if (element && element != 'App' && element != 'Langchain') {
-            if (this.pipelineType.length > 0) {
-              this.pipelineType.forEach((type) => {
-                if (type === element) {
-                  this.pipelinesTypeList.push({
-                    category: 'Type',
-                    label: element,
-                    value: element,
-                    selected: true,
-                  });
-                }
-              });
-            }
-            if (
-              !this.pipelinesTypeList.some(
-                (obj) => obj.label === element && obj.value === element
-              )
-            ) {
-              this.pipelinesTypeList.push({
-                category: 'Type',
-                label: element,
-                value: element,
-                selected: false,
-              });
-            }
-          }
-        });
-      });
-    }
+    });
   }
-  getDatasourceTypes() {
+
+  /**
+   * Gets datasource types
+   */
+  getDatasourceTypes(): void {
     this.connectionsTypeList = [];
     this.connectionsTypes = [];
     this.selectedAdapterType = [];
     this.selectedconnectionType = [];
+
     this.service.getDatasourcesTypeByOrganization().subscribe((res) => {
       this.connectionsTypes = JSON.parse(res);
-      this.connectionsTypes.forEach((element: any) => {
-        if (
+
+      this.connectionsTypes.forEach((element) => {
+        const isPreselected =
           !this.tagrefresh &&
           this.type &&
           this.type.length > 0 &&
-          this.type.includes(element)
-        ) {
-          const itemExists = this.connectionsTypeList.some(
-            (item) => item.value === element
-          );
-          if (!itemExists) {
-            this.connectionsTypeList.push({
-              category: 'Type',
-              label: element,
-              value: element,
-              selected: true,
-            });
-          }
-          if (!this.selectedAdapterType.includes(element))
+          this.type.includes(element);
+
+        if (!this.connectionsTypeList.some((item) => item.value === element)) {
+          this.connectionsTypeList.push({
+            category: 'Type',
+            label: element,
+            value: element,
+            selected: isPreselected,
+          });
+
+          if (isPreselected && !this.selectedAdapterType.includes(element)) {
             this.selectedAdapterType.push(element);
-        } else {
-          const itemExists = this.connectionsTypeList.some(
-            (item) => item.value === element
-          );
-          if (!itemExists) {
-            this.connectionsTypeList.push({
-              category: 'Type',
-              label: element,
-              value: element,
-              selected: false,
-            });
           }
         }
       });
     });
   }
-  getDatasetsTypes() {
+
+  /**
+   * Gets dataset types and tags
+   */
+  getDatasetsTypes(): void {
     this.datasetsTypeList = [];
     this.datasetsTypes = [];
     this.selectedconnectionType = [];
     this.datasetsTagsList = [];
     this.datasetsTags = [];
     this.selectedTagsType = [];
-    this.DatasetServices.getDatasetsType().subscribe((res) => {
-      let data = JSON.parse(res);
-      data.forEach((element) => {
-        this.datasetsTypes.push(element.type);
-      });
-      this.datasetsTypes.forEach((element: any) => {
-        if (this.type.length > 0) {
-          this.type.forEach((type) => {
-            if (type === element) {
-              this.datasetsTypeList.push({
-                category: 'Type',
-                label: element,
-                value: element,
-                selected: true,
-              });
-            }
-          });
-        }
-        if (
-          !this.datasetsTypeList.some(
-            (obj) => obj.label === element && obj.value === element
-          )
-        ) {
-          this.datasetsTypeList.push({
-            category: 'Type',
-            label: element,
-            value: element,
-            selected: false,
-          });
-        }
-      });
-    });
-    this.service.getDatasetCards('', '', '', false).subscribe((res) => {
-      let datasetList = res;
-      datasetList.forEach((element) => {
-        if (element.tags) this.datasetsTags.push(JSON.parse(element.tags));
-      });
-      let tags: any;
-      let tagsList: any = [];
-      this.datasetsTags.forEach((element: any) => {
-        if (
-          element != null &&
-          element != '' &&
-          element != 'null' &&
-          element != ''
-        ) {
-          tags = element;
-          tags.forEach((tag) => {
-            tagsList.push({
-              category: 'Tags',
-              label: tag,
-              value: tag,
-              selected: false,
-            });
-          });
-        }
-      });
-      tagsList = [...new Set(tagsList.map((item) => item.value))];
-      tagsList.forEach((element) => {
-        this.datasetsTagsList.push({
-          category: 'Tags',
+
+    // Get dataset types
+    this.datasetServices.getDatasetsType().subscribe((res) => {
+      const data = JSON.parse(res);
+      this.datasetsTypes = data.map((element) => element.type);
+
+      this.datasetsTypeList = this.datasetsTypes.map((element) => {
+        const isSelected = this.type.includes(element);
+        return {
+          category: 'Type',
           label: element,
           value: element,
-          selected: false,
-        });
+          selected: isSelected,
+        };
       });
-      console.log('tagsList', tagsList);
+    });
+
+    // Get dataset tags
+    this.service.getDatasetCards('', '', '', false).subscribe((datasetList) => {
+      // Extract tags from datasets
+      this.datasetsTags = datasetList
+        .filter((element) => element.tags)
+        .map((element) => JSON.parse(element.tags));
+
+      // Create unique tags list
+      const uniqueTags = new Set<string>();
+      this.datasetsTags.forEach((tagArray) => {
+        if (tagArray && tagArray.length > 0) {
+          tagArray.forEach((tag) => uniqueTags.add(tag));
+        }
+      });
+
+      // Convert to filter items
+      this.datasetsTagsList = Array.from(uniqueTags).map((tag) => ({
+        category: 'Tags',
+        label: tag,
+        value: tag,
+        selected: false,
+      }));
     });
   }
 
-  getMlAdapterFilters() {
+  /**
+   * Gets ML adapter filters
+   */
+  getMlAdapterFilters(): void {
     this.adapterServices.getAdapterFilters().subscribe((res) => {
       this.mlAdapterConnectionNamesList = res.connections;
       this.mlAdapterSpecTemplateList = res.specTemplates;
       this.mlAdapterCategoryList = res.categories;
+
       this.mlAdapterConnectionTypesList = [];
       this.mlAdapterCategoryTypeList = [];
       this.mlAdapterSpecTypeList = [];
 
-      this.mlAdapterConnectionNamesList.forEach((element: any) => {
-        if (
-          !this.tagrefresh &&
-          this.connectionList &&
-          this.connectionList.length > 0 &&
-          this.connectionList.includes(element)
-        ) {
-          const itemExists = this.mlAdapterConnectionTypesList.some(
-            (item) => item.value === element
-          );
-          if (!itemExists) {
-            this.mlAdapterConnectionTypesList.push({
-              category: 'Connections',
-              label: element,
-              value: element,
-              selected: true,
-            });
-          }
-          if (!this.selectedMlAdapterConnectionType.includes(element))
-            this.selectedMlAdapterConnectionType.push(element);
-        } else {
-          const itemExists = this.mlAdapterConnectionTypesList.some(
-            (item) => item.value === element
-          );
-          if (!itemExists) {
-            this.mlAdapterConnectionTypesList.push({
-              category: 'Connections',
-              label: element,
-              value: element,
-              selected: false,
-            });
-          }
-        }
-      });
+      // Process connections
+      this.processFilterList(
+        this.mlAdapterConnectionNamesList,
+        'Connections',
+        this.connectionList,
+        this.mlAdapterConnectionTypesList,
+        this.selectedMlAdapterConnectionType
+      );
 
-      this.mlAdapterCategoryList.forEach((element: any) => {
-        if (
-          !this.tagrefresh &&
-          this.categoryList &&
-          this.categoryList.length > 0 &&
-          this.categoryList.includes(element)
-        ) {
-          const itemExists = this.mlAdapterCategoryTypeList.some(
-            (item) => item.value === element
-          );
-          if (!itemExists) {
-            this.mlAdapterCategoryTypeList.push({
-              category: 'Category',
-              label: element,
-              value: element,
-              selected: true,
-            });
-          }
-          if (!this.selectedMlAdapterCategoryType.includes(element))
-            this.selectedMlAdapterCategoryType.push(element);
-        } else {
-          const itemExists = this.mlAdapterCategoryTypeList.some(
-            (item) => item.value === element
-          );
-          if (!itemExists) {
-            this.mlAdapterCategoryTypeList.push({
-              category: 'Category',
-              label: element,
-              value: element,
-              selected: false,
-            });
-          }
-        }
-      });
+      // Process categories
+      this.processFilterList(
+        this.mlAdapterCategoryList,
+        'Category',
+        this.categoryList,
+        this.mlAdapterCategoryTypeList,
+        this.selectedMlAdapterCategoryType
+      );
 
-      this.mlAdapterSpecTemplateList.forEach((element: any) => {
-        if (
-          !this.tagrefresh &&
-          this.specList &&
-          this.specList.length > 0 &&
-          this.specList.includes(element)
-        ) {
-          const itemExists = this.mlAdapterSpecTypeList.some(
-            (item) => item.value === element
-          );
-          if (!itemExists) {
-            this.mlAdapterSpecTypeList.push({
-              category: 'Spec',
-              label: element,
-              value: element,
-              selected: true,
-            });
-          }
-          if (!this.selectedMlAdapterSpecType.includes(element))
-            this.selectedMlAdapterSpecType.push(element);
-        } else {
-          const itemExists = this.mlAdapterSpecTypeList.some(
-            (item) => item.value === element
-          );
-          if (!itemExists) {
-            this.mlAdapterSpecTypeList.push({
-              category: 'Spec',
-              label: element,
-              value: element,
-              selected: false,
-            });
-          }
-        }
-      });
+      // Process specs
+      this.processFilterList(
+        this.mlAdapterSpecTemplateList,
+        'Spec',
+        this.specList,
+        this.mlAdapterSpecTypeList,
+        this.selectedMlAdapterSpecType
+      );
     });
   }
 
-  getMlSpecTemplateFilters() {
+  /**
+   * Helper method to process filter lists
+   */
+  private processFilterList(
+    sourceList: string[],
+    category: string,
+    selectedFromInput: string[],
+    targetFilterList: FilterItem[],
+    targetSelectedList: string[]
+  ): void {
+    sourceList.forEach((element) => {
+      const isPreselected =
+        !this.tagrefresh &&
+        selectedFromInput &&
+        selectedFromInput.length > 0 &&
+        selectedFromInput.includes(element);
+
+      if (!targetFilterList.some((item) => item.value === element)) {
+        targetFilterList.push({
+          category,
+          label: element,
+          value: element,
+          selected: isPreselected,
+        });
+
+        if (isPreselected && !targetSelectedList.includes(element)) {
+          targetSelectedList.push(element);
+        }
+      }
+    });
+  }
+
+  /**
+   * Gets ML spec template filters
+   */
+  getMlSpecTemplateFilters(): void {
     this.adapterServices.getSpecTemplateFilters().subscribe((res) => {
       this.mlSpecTemplateCapabilityList = res.capability;
       this.mlSpecTemplateCapabilityTypeList = [];
-      this.mlSpecTemplateCapabilityList.forEach((element: any) => {
-        if (
-          !this.tagrefresh &&
-          this.specCapabilityList &&
-          this.specCapabilityList.length > 0 &&
-          this.specCapabilityList.includes(element)
-        ) {
-          const itemExists = this.mlSpecTemplateCapabilityTypeList.some(
-            (item) => item.value === element
-          );
-          if (!itemExists) {
-            this.mlSpecTemplateCapabilityTypeList.push({
-              category: 'Capability',
-              label: element,
-              value: element,
-              selected: true,
-            });
-          }
-          if (!this.selectedMlSpecTemplateCapabilityType.includes(element))
-            this.selectedMlSpecTemplateCapabilityType.push(element);
-        } else {
-          const itemExists = this.mlSpecTemplateCapabilityTypeList.some(
-            (item) => item.value === element
-          );
-          if (!itemExists) {
-            this.mlSpecTemplateCapabilityTypeList.push({
-              category: 'Capability',
-              label: element,
-              value: element,
-              selected: false,
-            });
-          }
-        }
-      });
+
+      this.processFilterList(
+        this.mlSpecTemplateCapabilityList,
+        'Capability',
+        this.specCapabilityList,
+        this.mlSpecTemplateCapabilityTypeList,
+        this.selectedMlSpecTemplateCapabilityType
+      );
     });
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes.tagrefresh?.currentValue) {
-      if (this.servicev1 === 'featurestore') {
-        this.fetchFSAdapters();
-        this.fetchFSAdaptersTypes();
-      } else if (this.servicev1 === 'dgApp') {
-        this.fetchDGAdapters();
-        this.fetchDGAdaptersTypes();
-        this.refresh();
-      } else this.refresh();
-    }
-    if (this.servicev1 === 'worker-tools' && this.tagrefresh) {
-      this.refreshToolsTypes();
-      this.refresh;
-    }
-  }
-
-  refreshToolsTypes() {}
-
+  /**
+   * Fetches adapters based on current adapter type selection
+   */
   fetchAdapters(): boolean {
-    let params: HttpParams = new HttpParams();
+    const params = new HttpParams().set(
+      'project',
+      sessionStorage.getItem('organization') || ''
+    );
+
     this.adapterInstanceList = [];
     this.selectedAdapterInstance = [];
-    if (this.selectedAdapterType.length >= 1)
-      params = params.set('adapterType', this.selectedAdapterType.toString());
-    params = params.set('project', sessionStorage.getItem('organization'));
     this.service.getModelListAdapters(params).subscribe((res) => {
-      let test = res.body;
-      let alias = test.map((item: any) => item.alias);
-      let options = test;
-      test.forEach((element: any) => {
-        if (this.instance.length > 0) {
-          this.instance.forEach((instance) => {
-            if (element.name === instance) {
-              this.adapterInstanceList.push({
-                category: 'Instance',
-                label: element.alias,
-                value: element.name,
-                selected: true,
-              });
-            }
-          });
-        }
+      const adapters = res.body;
+      adapters.forEach((element) => {
+        const isSelected = this.instance.includes(element.name);
+
         if (
-          !this.adapterInstanceList.some(
-            (obj) => obj.label === element.alias && obj.value === element.name
-          )
+          !this.adapterInstanceList.some((obj) => obj.value === element.name)
         ) {
           this.adapterInstanceList.push({
             category: 'Instance',
             label: element.alias,
             value: element.name,
-            selected: false,
+            selected: isSelected,
           });
         }
       });
     });
-    return true;
-  }
-  fetchFSAdapters(): boolean {
-    let params: HttpParams = new HttpParams();
-    this.adapterInstanceList = [];
-    this.selectedAdapterInstance = [];
-    if (this.selectedAdapterType.length >= 1)
-      params = params.set('adapterType', this.selectedAdapterType.toString());
-    params = params.set('project', sessionStorage.getItem('organization'));
-    this.service.getFeastAdapters(params).subscribe((res) => {
-      let test = res.body;
-      let alias = test.map((item: any) => item.alias);
-      let options = test;
-      test.forEach((element: any) => {
-        this.adapterInstanceList.push({
-          category: 'Instance',
-          label: element.alias,
-          value: element.name,
-          selected: false,
-        });
-      });
-    });
-    return true;
-  }
-  fetchDGAdapters(): boolean {
-    let params: HttpParams = new HttpParams();
-    this.adapterInstanceList = [];
-    this.selectedAdapterInstance = [];
-    if (this.selectedAdapterType.length >= 1)
-      params = params.set('adapterType', this.selectedAdapterType.toString());
-    params = params.set('project', sessionStorage.getItem('organization'));
-    this.service.getDGAdapters(params).subscribe((res) => {
-      let test = res.body;
-      let alias = test.map((item: any) => item.alias);
-      let options = test;
-      test.forEach((element: any) => {
-        this.adapterInstanceList.push({
-          category: 'Instance',
-          label: element.alias,
-          value: element.name,
-          selected: false,
-        });
-      });
-      console.log('dgInstanceList', this.adapterInstanceList);
-    });
+
     return true;
   }
 
-  fetchFSAdaptersTypes() {
+  /**
+   * Fetches feature store adapters
+   */
+  fetchFSAdapters(): boolean {
+    const params = new HttpParams()
+      .set('project', sessionStorage.getItem('organization') || '')
+      .set(
+        'adapterType',
+        this.selectedAdapterType.length >= 1
+          ? this.selectedAdapterType.toString()
+          : ''
+      );
+
+    this.adapterInstanceList = [];
+    this.selectedAdapterInstance = [];
+
+    this.service.getFeastAdapters(params).subscribe((res) => {
+      const adapters = res.body;
+
+      this.adapterInstanceList = adapters.map((element) => ({
+        category: 'Instance',
+        label: element.alias,
+        value: element.name,
+        selected: false,
+      }));
+    });
+
+    return true;
+  }
+
+  /**
+   * Fetches data governance adapters
+   */
+  fetchDGAdapters(): boolean {
+    const params = new HttpParams()
+      .set('project', sessionStorage.getItem('organization') || '')
+      .set(
+        'adapterType',
+        this.selectedAdapterType.length >= 1
+          ? this.selectedAdapterType.toString()
+          : ''
+      );
+
+    this.adapterInstanceList = [];
+    this.selectedAdapterInstance = [];
+
+    this.service.getDGAdapters(params).subscribe((res) => {
+      const adapters = res.body;
+
+      this.adapterInstanceList = adapters.map((element) => ({
+        category: 'Instance',
+        label: element.alias,
+        value: element.name,
+        selected: false,
+      }));
+    });
+
+    return true;
+  }
+
+  /**
+   * Fetches feature store adapter types
+   */
+  fetchFSAdaptersTypes(): void {
     this.adapterTypeList = [];
     this.adapterTypes = [];
     this.selectedAdapterType = [];
+
     this.service.getFeastAdaptersTypes().subscribe((res) => {
       this.adapterTypes = res.body;
-      this.adapterTypes.forEach((element: any) => {
-        this.adapterTypeList.push({
-          category: 'Type',
-          label: element.name,
-          value: element.name,
-          selected: false,
-        });
-      });
+
+      this.adapterTypeList = this.adapterTypes.map((element) => ({
+        category: 'Type',
+        label: element.name,
+        value: element.name,
+        selected: false,
+      }));
     });
   }
 
-  appTypeSelected(value): void {
-    if (!this.selectedAdapterType.includes(value.value)) {
-      this.selectedAdapterType.push(value.value);
-    } else {
-      this.selectedAdapterType.splice(
-        this.selectedAdapterType.indexOf(value.value),
-        1
-      );
-    }
-    this.adapterTypeList.forEach((element: any) => {
+  /**
+   * Handles selection of app type filter
+   */
+  appTypeSelected(value: FilterItem): void {
+    this.toggleFilterSelection(value.value, this.selectedAdapterType);
+
+    this.adapterTypeList.forEach((element) => {
       if (element.value === value.value) {
         element.selected = !element.selected;
       }
     });
-    this.tagSelected.emit(this.geteventtagsdto());
+
+    this.emitSelectionChanges();
   }
 
-  fetchDGAdaptersTypes() {
+  /**
+   * Fetches data governance adapter types
+   */
+  fetchDGAdaptersTypes(): void {
     this.adapterTypeList = [];
     this.adapterTypes = [];
     this.selectedAdapterType = [];
+
     this.service.getDGAdaptersTypes().subscribe((res) => {
       this.adapterTypes = res.body;
-      this.adapterTypes.forEach((element: any) => {
-        this.adapterTypeList.push({
-          category: 'Type',
-          label: element.name,
-          value: element.name,
-          selected: false,
-        });
-      });
+
+      this.adapterTypeList = this.adapterTypes.map((element) => ({
+        category: 'Type',
+        label: element.name,
+        value: element.name,
+        selected: false,
+      }));
     });
-    console.log('DGTypes', this.adapterTypeList);
   }
 
-  fetchAdaptersTypes() {
-    let params: HttpParams = new HttpParams();
+  /**
+   * Fetches adapter types
+   */
+  fetchAdaptersTypes(): void {
     this.adapterTypeList = [];
     this.adapterTypes = [];
     this.selectedAdapterType = [];
-    this.type.forEach((types) => {
-      this.selectedAdapterType.push(types);
+
+    // Add types to selected adapter types
+    this.type.forEach((type) => {
+      if (!this.selectedAdapterType.includes(type)) {
+        this.selectedAdapterType.push(type);
+      }
     });
-    if (this.selectedType.length >= 1)
-      params = params.set('adapterType', this.selectedType.toString());
-    params = params.set('project', sessionStorage.getItem('organization'));
+
+    const params = new HttpParams()
+      .set('project', sessionStorage.getItem('organization') || '')
+      .set(
+        'adapterType',
+        this.selectedType.length >= 1 ? this.selectedType.toString() : ''
+      );
+
     this.service.getModelListAdaptersTypes().subscribe((res) => {
       this.adapterTypes = res.body;
-      this.adapterTypes.forEach((element: any) => {
-        if (this.type.length > 0) {
-          this.type.forEach((type) => {
-            if (element.name === type) {
-              this.adapterTypeList.push({
-                category: 'Type',
-                label: element.name,
-                value: element.name,
-                selected: true,
-              });
-            }
-          });
-        }
-        if (
-          !this.adapterTypeList.some(
-            (obj) => obj.label === element.name && obj.value === element.name
-          )
-        ) {
-          this.adapterTypeList.push({
-            category: 'Type',
-            label: element.name,
-            value: element.name,
-            selected: false,
-          });
-        }
+      // Create adapter type list
+      this.adapterTypeList = this.adapterTypes.map((element) => {
+        const isSelected = this.type.includes(element.name);
+        return {
+          category: 'Type',
+          label: element.name,
+          value: element.name,
+          selected: isSelected,
+        };
       });
-      if (this.router.url.includes('model') && this.type.length > 0) {
-        this.adapterTypeList.push({
-          category: 'Type',
-          label: 'LOCAL',
-          value: 'LOCAL',
-          selected: true,
-        });
-      } else if (
-        this.router.url.includes('endpoints') &&
-        this.type.length > 0
-      ) {
-        this.adapterTypeList.push({
-          category: 'Type',
-          label: 'LOCAL',
-          value: 'LOCAL',
-          selected: true,
-        });
-      } else {
-        this.adapterTypeList.push({
-          category: 'Type',
-          label: 'LOCAL',
-          value: 'LOCAL',
-          selected: false,
-        });
-      }
+
+      // Add LOCAL type if applicable
+      const isModelOrEndpoint =
+        this.router.url.includes('model') ||
+        this.router.url.includes('endpoints');
+      const isLocal = this.type.length > 0 && isModelOrEndpoint;
+
+      this.adapterTypeList.push({
+        category: 'Type',
+        label: 'LOCAL',
+        value: 'LOCAL',
+        selected: isLocal,
+      });
     });
   }
 
-  adapterTypeSelected(value): void {
-    if (!this.selectedAdapterType.includes(value.value)) {
-      this.selectedAdapterType.push(value.value);
+  /**
+   * Toggles an item in a selection array
+   */
+  private toggleFilterSelection(value: string, selectionArray: string[]): void {
+    const index = selectionArray.indexOf(value);
+
+    if (index === -1) {
+      selectionArray.push(value);
     } else {
-      this.selectedAdapterType.splice(
-        this.selectedAdapterType.indexOf(value.value),
-        1
-      );
+      selectionArray.splice(index, 1);
     }
-    this.adapterTypeList.forEach((element: any) => {
+  }
+
+  /**
+   * Handles adapter type selection
+   */
+  adapterTypeSelected(value: FilterItem): void {
+    this.toggleFilterSelection(value.value, this.selectedAdapterType);
+
+    this.adapterTypeList.forEach((element) => {
       if (element.value === value.value) {
         element.selected = !element.selected;
       }
     });
-    if (this.servicev1 === 'featurestore') {
+
+    // Refresh adapters list based on service type
+    if (this.servicev1 === ServiceType.FEATURESTORE) {
       this.fetchFSAdapters();
-    } else if (this.servicev1 === 'dgApp') {
+    } else if (this.servicev1 === ServiceType.DG_APP) {
       this.fetchDGAdapters();
     } else {
       this.fetchAdapters();
     }
-    this.tagSelected.emit(this.geteventtagsdto());
+
+    this.emitSelectionChanges();
+    this.toggleFilterExpanded();
   }
 
+  /**
+   * Removes an adapter type from selection
+   */
   removeAdapterType(type: string): void {
-    const index = this.selectedAdapterType.indexOf(type);
-    if (index !== -1) {
-      this.selectedAdapterType.splice(index, 1);
+    this.removeFromSelection(
+      type,
+      this.selectedAdapterType,
+      this.adapterTypeList,
+      true
+    );
+  }
 
-      // Update the UI selection state
-      this.adapterTypeList.forEach((element) => {
-        if (element.value === type) {
+  /**
+   * Generic method to remove an item from a selection
+   */
+  private removeFromSelection(
+    value: string,
+    selectedArray: string[],
+    filterList: FilterItem[],
+    updateStatus = false
+  ): void {
+    const index = selectedArray.indexOf(value);
+
+    if (index !== -1) {
+      selectedArray.splice(index, 1);
+
+      // Update UI selection state
+      filterList.forEach((element) => {
+        if (element.value === value) {
           element.selected = false;
         }
       });
 
-      // Emit the updated selection
-      this.tagSelected.emit(this.geteventtagsdto());
+      // Emit updated selection
+      this.emitSelectionChanges();
     }
-    this.updateFilterStatus();
+
+    if (updateStatus) {
+      this.updateFilterStatus();
+    }
   }
 
-  pipelineTypeSelected(value): void {
-    if (!this.selectedAdapterType.includes(value.value)) {
-      this.selectedAdapterType.push(value.value);
-    } else {
-      this.selectedAdapterType.splice(
-        this.selectedAdapterType.indexOf(value.value),
-        1
-      );
-    }
-    this.pipelinesTypeList?.forEach((element: any) => {
+  /**
+   * Emits selection changes to parent component
+   */
+  private emitSelectionChanges(): void {
+    this.tagSelected.emit(this.geteventtagsdto());
+  }
+
+  /**
+   * Handles pipeline type selection
+   */
+  pipelineTypeSelected(value: FilterItem): void {
+    this.toggleFilterSelection(value.value, this.selectedAdapterType);
+
+    this.pipelinesTypeList?.forEach((element) => {
       if (element.value === value.value) {
         element.selected = !element.selected;
       }
     });
 
-    this.tagSelected.emit(this.geteventtagsdto());
+    this.emitSelectionChanges();
+    this.toggleFilterExpanded();
   }
 
-  // Method to remove individual pipeline type
+  /**
+   * Removes a pipeline type from selection
+   */
   removePipelineType(type: string): void {
-    const index = this.selectedAdapterType.indexOf(type);
-    if (index !== -1) {
-      this.selectedAdapterType.splice(index, 1);
-
-      // Update the UI selection state
-      this.pipelinesTypeList?.forEach((element) => {
-        if (element.value === type) {
-          element.selected = false;
-        }
-      });
-
-      // Emit the updated selection
-      this.tagSelected.emit(this.geteventtagsdto());
-    }
-    this.updateFilterStatus();
+    this.removeFromSelection(
+      type,
+      this.selectedAdapterType,
+      this.pipelinesTypeList || [],
+      true
+    );
   }
 
-  toolsTypeSelected(value): void {
-    if (!this.selectedAdapterType.includes(value.value)) {
-      this.selectedAdapterType.push(value.value);
-    } else {
-      this.selectedAdapterType.splice(
-        this.selectedAdapterType.indexOf(value.value),
-        1
-      );
-    }
-    this.toolsTypeList.forEach((element: any) => {
+  /**
+   * Handles tools type selection
+   */
+  toolsTypeSelected(value: FilterItem): void {
+    this.toggleFilterSelection(value.value, this.selectedAdapterType);
+
+    this.toolsTypeList.forEach((element) => {
       if (element.value === value.value) {
         element.selected = !element.selected;
       }
     });
-    this.tagSelected.emit(this.geteventtagsdto());
+
+    this.emitSelectionChanges();
   }
 
-  connectionTypeSelected(value): void {
-    if (!this.selectedAdapterType.includes(value.value)) {
-      this.selectedAdapterType.push(value.value);
-    } else {
-      this.selectedAdapterType.splice(
-        this.selectedAdapterType.indexOf(value.value),
-        1
-      );
-    }
-    this.connectionsTypeList.forEach((element: any) => {
+  /**
+   * Handles connection type selection
+   */
+  connectionTypeSelected(value: FilterItem): void {
+    this.toggleFilterSelection(value.value, this.selectedAdapterType);
+
+    this.connectionsTypeList.forEach((element) => {
       if (element.value === value.value) {
         element.selected = !element.selected;
       }
     });
-    this.tagSelected.emit(this.geteventtagsdto());
+
+    this.emitSelectionChanges();
   }
 
-  datasetTypeSelected(value): void {
+  /**
+   * Handles dataset type selection
+   */
+  datasetTypeSelected(value: FilterItem): void {
     if (value.category === 'Type') {
-      if (!this.selectedAdapterType.includes(value.value)) {
-        this.selectedAdapterType.push(value.value);
-      } else {
-        this.selectedAdapterType.splice(
-          this.selectedAdapterType.indexOf(value.value),
-          1
-        );
-      }
-      this.datasetsTypeList.forEach((element: any) => {
+      this.toggleFilterSelection(value.value, this.selectedAdapterType);
+
+      this.datasetsTypeList.forEach((element) => {
         if (element.value === value.value) {
           element.selected = !element.selected;
         }
       });
     } else if (value.category === 'Tags') {
-      if (!this.selectedTagList.includes(value.value)) {
-        this.selectedTagList.push(value.value);
-      } else {
-        this.selectedTagList.splice(
-          this.selectedTagList.indexOf(value.value),
-          1
-        );
-      }
-      this.datasetsTagsList.forEach((element: any) => {
+      this.toggleFilterSelection(
+        value.value,
+        this.selectedTagList as unknown as string[]
+      );
+
+      this.datasetsTagsList.forEach((element) => {
         if (element.value === value.value) {
           element.selected = !element.selected;
         }
       });
     }
-    this.tagSelected.emit(this.geteventtagsdto());
-  }
-  datasetTopicSelected(value): void {
-    if (!this.selectedDatasetTopicType.includes(value.value)) {
-      this.selectedDatasetTopicType.push(value.value);
-    } else {
-      this.selectedDatasetTopicType.splice(
-        this.selectedDatasetTopicType.indexOf(value.value),
-        1
-      );
-    }
-    this.datasetTopicList.forEach((element: any) => {
-      if (element.value === value.value) {
-        element.selected = !element.selected;
-      }
-    });
-    this.tagSelected.emit(this.geteventtagsdto());
+
+    this.emitSelectionChanges();
   }
 
-  mlAdapterConnectionTypeSelected(value): void {
-    if (!this.selectedMlAdapterConnectionType.includes(value.value)) {
-      this.selectedMlAdapterConnectionType.push(value.value);
-    } else {
-      this.selectedMlAdapterConnectionType.splice(
-        this.selectedMlAdapterConnectionType.indexOf(value.value),
-        1
-      );
-    }
-    this.mlAdapterConnectionTypesList.forEach((element: any) => {
+  /**
+   * Handles dataset topic selection
+   */
+  datasetTopicSelected(value: FilterItem): void {
+    this.toggleFilterSelection(value.value, this.selectedDatasetTopicType);
+
+    this.datasetTopicList.forEach((element) => {
       if (element.value === value.value) {
         element.selected = !element.selected;
       }
     });
-    this.tagSelected.emit(this.geteventtagsdto());
+
+    this.emitSelectionChanges();
+  }
+
+  /**
+   * Handles ML adapter connection type selection
+   */
+  mlAdapterConnectionTypeSelected(value: FilterItem): void {
+    this.toggleFilterSelection(
+      value.value,
+      this.selectedMlAdapterConnectionType
+    );
+
+    this.mlAdapterConnectionTypesList.forEach((element) => {
+      if (element.value === value.value) {
+        element.selected = !element.selected;
+      }
+    });
+
+    this.emitSelectionChanges();
     this.updateFilterStatus();
+    this.toggleFilterExpanded();
   }
 
+  /**
+   * Removes a connection from selection
+   */
   removeConnection(connection: string): void {
-    const index = this.selectedMlAdapterConnectionType.indexOf(connection);
-    if (index !== -1) {
-      this.selectedMlAdapterConnectionType.splice(index, 1);
-
-      // Update the UI selection state
-      this.mlAdapterConnectionTypesList.forEach((element) => {
-        if (element.value === connection) {
-          element.selected = false;
-        }
-      });
-
-      // Emit the updated selection
-      this.tagSelected.emit(this.geteventtagsdto());
-    }
-    this.updateFilterStatus();
+    this.removeFromSelection(
+      connection,
+      this.selectedMlAdapterConnectionType,
+      this.mlAdapterConnectionTypesList,
+      true
+    );
   }
 
-  mlAdapterCategoryTypeSelected(value): void {
-    if (!this.selectedMlAdapterCategoryType.includes(value.value)) {
-      this.selectedMlAdapterCategoryType.push(value.value);
-    } else {
-      this.selectedMlAdapterCategoryType.splice(
-        this.selectedMlAdapterCategoryType.indexOf(value.value),
-        1
-      );
-    }
-    this.mlAdapterCategoryTypeList.forEach((element: any) => {
+  /**
+   * Handles ML adapter category selection
+   */
+  mlAdapterCategoryTypeSelected(value: FilterItem): void {
+    this.toggleFilterSelection(value.value, this.selectedMlAdapterCategoryType);
+
+    this.mlAdapterCategoryTypeList.forEach((element) => {
       if (element.value === value.value) {
         element.selected = !element.selected;
       }
     });
-    this.tagSelected.emit(this.geteventtagsdto());
+
+    this.emitSelectionChanges();
     this.updateFilterStatus();
+    this.toggleFilterExpanded();
   }
 
+  /**
+   * Removes a category from selection
+   */
   removeCategory(category: string): void {
-    const index = this.selectedMlAdapterCategoryType.indexOf(category);
-    if (index !== -1) {
-      this.selectedMlAdapterCategoryType.splice(index, 1);
-
-      // Update the UI selection state
-      this.mlAdapterCategoryTypeList.forEach((element) => {
-        if (element.value === category) {
-          element.selected = false;
-        }
-      });
-
-      // Emit the updated selection
-      this.tagSelected.emit(this.geteventtagsdto());
-    }
-    this.updateFilterStatus();
+    this.removeFromSelection(
+      category,
+      this.selectedMlAdapterCategoryType,
+      this.mlAdapterCategoryTypeList,
+      true
+    );
   }
 
-  mlAdapterScecTypeSelected(value): void {
-    if (!this.selectedMlAdapterSpecType.includes(value.value)) {
-      this.selectedMlAdapterSpecType.push(value.value);
-    } else {
-      this.selectedMlAdapterSpecType.splice(
-        this.selectedMlAdapterSpecType.indexOf(value.value),
-        1
-      );
-    }
-    this.mlAdapterSpecTypeList.forEach((element: any) => {
+  /**
+   * Handles ML adapter spec selection
+   */
+  mlAdapterScecTypeSelected(value: FilterItem): void {
+    this.toggleFilterSelection(value.value, this.selectedMlAdapterSpecType);
+
+    this.mlAdapterSpecTypeList.forEach((element) => {
       if (element.value === value.value) {
         element.selected = !element.selected;
       }
     });
-    this.tagSelected.emit(this.geteventtagsdto());
+
+    this.emitSelectionChanges();
     this.updateFilterStatus();
+    this.toggleFilterExpanded();
   }
 
+  /**
+   * Removes a spec from selection
+   */
   removeSpec(spec: string): void {
-    const index = this.selectedMlAdapterSpecType.indexOf(spec);
-    if (index !== -1) {
-      this.selectedMlAdapterSpecType.splice(index, 1);
-
-      // Update the UI selection state
-      this.mlAdapterSpecTypeList.forEach((element) => {
-        if (element.value === spec) {
-          element.selected = false;
-        }
-      });
-
-      // Emit the updated selection
-      this.tagSelected.emit(this.geteventtagsdto());
-    }
-    this.updateFilterStatus();
+    this.removeFromSelection(
+      spec,
+      this.selectedMlAdapterSpecType,
+      this.mlAdapterSpecTypeList,
+      true
+    );
   }
 
-  mlSpecTemplateCapabilityTypeSelected(value): void {
-    if (!this.selectedMlSpecTemplateCapabilityType.includes(value.value)) {
-      this.selectedMlSpecTemplateCapabilityType.push(value.value);
-    } else {
-      this.selectedMlSpecTemplateCapabilityType.splice(
-        this.selectedMlSpecTemplateCapabilityType.indexOf(value.value),
-        1
-      );
-    }
-    this.mlSpecTemplateCapabilityTypeList.forEach((element: any) => {
+  /**
+   * Handles ML spec template capability selection
+   */
+  mlSpecTemplateCapabilityTypeSelected(value: FilterItem): void {
+    this.toggleFilterSelection(
+      value.value,
+      this.selectedMlSpecTemplateCapabilityType
+    );
+
+    this.mlSpecTemplateCapabilityTypeList.forEach((element) => {
       if (element.value === value.value) {
         element.selected = !element.selected;
       }
     });
-    this.tagSelected.emit(this.geteventtagsdto());
+
+    this.emitSelectionChanges();
     this.updateFilterStatus();
+    this.toggleFilterExpanded();
   }
 
+  /**
+   * Removes a spec template capability from selection
+   */
   removeSpecTemplateCapability(capability: string): void {
-    const index = this.selectedMlSpecTemplateCapabilityType.indexOf(capability);
-    if (index !== -1) {
-      this.selectedMlSpecTemplateCapabilityType.splice(index, 1);
-
-      // Update the UI selection state
-      this.mlSpecTemplateCapabilityTypeList.forEach((element) => {
-        if (element.value === capability) {
-          element.selected = false;
-        }
-      });
-
-      // Emit the updated selection
-      this.tagSelected.emit(this.geteventtagsdto());
-    }
-    this.updateFilterStatus();
+    this.removeFromSelection(
+      capability,
+      this.selectedMlSpecTemplateCapabilityType,
+      this.mlSpecTemplateCapabilityTypeList,
+      true
+    );
   }
 
-  mlInstanceConnectionTypeSelected(value): void {
-    if (!this.selectedMlInstancesConnectionType.includes(value.value)) {
-      this.selectedMlInstancesConnectionType.push(value.value);
-    } else {
-      this.selectedMlInstancesConnectionType.splice(
-        this.selectedMlInstancesConnectionType.indexOf(value.value),
-        1
-      );
-    }
-    this.mlInstanceConnectionTypeList.forEach((element: any) => {
+  /**
+   * Handles ML instance connection selection
+   */
+  mlInstanceConnectionTypeSelected(value: FilterItem): void {
+    this.toggleFilterSelection(
+      value.value,
+      this.selectedMlInstancesConnectionType
+    );
+
+    this.mlInstanceConnectionTypeList.forEach((element) => {
       if (element.value === value.value) {
         element.selected = !element.selected;
       }
     });
-    this.tagSelected.emit(this.geteventtagsdto());
+
+    this.emitSelectionChanges();
     this.updateFilterStatus();
+    this.toggleFilterExpanded();
   }
 
+  /**
+   * Removes an instance connection from selection
+   */
   removeInstanceConnection(connection: string): void {
-    const index = this.selectedMlInstancesConnectionType.indexOf(connection);
-    if (index !== -1) {
-      this.selectedMlInstancesConnectionType.splice(index, 1);
-
-      // Update the UI selection state
-      this.mlInstanceConnectionTypeList.forEach((element) => {
-        if (element.value === connection) {
-          element.selected = false;
-        }
-      });
-
-      // Emit the updated selection
-      this.tagSelected.emit(this.geteventtagsdto());
-    }
-    this.updateFilterStatus();
+    this.removeFromSelection(
+      connection,
+      this.selectedMlInstancesConnectionType,
+      this.mlInstanceConnectionTypeList,
+      true
+    );
   }
 
-  mlInstanceAdapterTypeSelected(value): void {
-    if (!this.selectedMlInstancesAdapterType.includes(value.value)) {
-      this.selectedMlInstancesAdapterType.push(value.value);
-    } else {
-      this.selectedMlInstancesAdapterType.splice(
-        this.selectedMlInstancesAdapterType.indexOf(value.value),
-        1
-      );
-    }
-    this.mlInstanceAdapterTypeList.forEach((element: any) => {
+  /**
+   * Handles ML instance adapter selection
+   */
+  mlInstanceAdapterTypeSelected(value: FilterItem): void {
+    this.toggleFilterSelection(
+      value.value,
+      this.selectedMlInstancesAdapterType
+    );
+
+    this.mlInstanceAdapterTypeList.forEach((element) => {
       if (element.value === value.value) {
         element.selected = !element.selected;
       }
     });
-    this.tagSelected.emit(this.geteventtagsdto());
+
+    this.emitSelectionChanges();
     this.updateFilterStatus();
+    this.toggleFilterExpanded();
   }
 
+  /**
+   * Removes an instance adapter from selection
+   */
   removeInstanceAdapter(instanceAdapter: string): void {
-    const index = this.selectedMlInstancesAdapterType.indexOf(instanceAdapter);
-    if (index !== -1) {
-      this.selectedMlInstancesAdapterType.splice(index, 1);
-
-      // Update the UI selection state
-      this.mlInstanceAdapterTypeList.forEach((element) => {
-        if (element.value === instanceAdapter) {
-          element.selected = false;
-        }
-      });
-
-      // Emit the updated selection
-      this.tagSelected.emit(this.geteventtagsdto());
-    }
-    this.updateFilterStatus();
+    this.removeFromSelection(
+      instanceAdapter,
+      this.selectedMlInstancesAdapterType,
+      this.mlInstanceAdapterTypeList,
+      true
+    );
   }
 
-  adapterInstanceSelected(value): void {
-    if (!this.selectedAdapterInstance.includes(value.value)) {
-      this.selectedAdapterInstance.push(value.value);
-    } else {
-      this.selectedAdapterInstance.splice(
-        this.selectedAdapterInstance.indexOf(value.value),
-        1
-      );
-    }
-    this.adapterInstanceList.forEach((element: any) => {
+  /**
+   * Handles adapter instance selection
+   */
+  adapterInstanceSelected(value: FilterItem): void {
+    this.toggleFilterSelection(value.value, this.selectedAdapterInstance);
+
+    this.adapterInstanceList.forEach((element) => {
       if (element.value === value.value) {
         element.selected = !element.selected;
       }
     });
-    this.tagSelected.emit(this.geteventtagsdto());
+
+    this.emitSelectionChanges();
+    // this.toggleFilterExpanded();
   }
 
+  /**
+   * Removes an adapter instance from selection
+   */
   removeAdapterInstance(adapterInstance: string): void {
-    const index = this.selectedAdapterInstance.indexOf(adapterInstance);
-    if (index !== -1) {
-      this.selectedAdapterInstance.splice(index, 1);
-
-      // Update the UI selection state
-      this.adapterInstanceList.forEach((element) => {
-        if (element.value === adapterInstance) {
-          element.selected = false;
-        }
-      });
-
-      // Emit the updated selection
-      this.tagSelected.emit(this.geteventtagsdto());
-    }
-    this.updateFilterStatus();
+    this.removeFromSelection(
+      adapterInstance,
+      this.selectedAdapterInstance,
+      this.adapterInstanceList,
+      true
+    );
   }
 
-  refresh() {
+  /**
+   * Refreshes all filters
+   */
+  refresh(): void {
+    // Reset all selection arrays
+    this.resetAllFilters();
+
+    // Emit empty selections
+    this.emitSelectionChanges();
+
+    // Reload data based on service type
+    if (this.servicev1 !== ServiceType.DG_APP) {
+      this.getTags();
+      this.fetchAdaptersTypes();
+      this.fetchAdapters();
+    }
+
+    // Initialize service-specific filters
+    this.initializeServiceSpecificFilters();
+  }
+
+  /**
+   * Resets all filter arrays
+   */
+  private resetAllFilters(): void {
     this.tagStatus = {};
     this.selectedTagList = [];
     this.selectedAdapterType = [];
@@ -1431,7 +1365,7 @@ export class AipFilterComponent {
     this.pipelineType = [];
     this.toolsType = [];
 
-    //for Adapter Implementations screen Complete Reset of Filters
+    // Reset adapter implementation filters
     this.selectedMlAdapterCategoryType = [];
     this.selectedMlAdapterConnectionType = [];
     this.selectedMlAdapterSpecType = [];
@@ -1442,233 +1376,265 @@ export class AipFilterComponent {
     this.mlAdapterCategoryTypeList = [];
     this.mlAdapterSpecTypeList = [];
 
-    //for Spec  screen Complete Reset of Filters
+    // Reset spec filters
     this.selectedMlSpecTemplateCapabilityType = [];
     this.mlSpecTemplateCapabilityTypeList = [];
     this.specCapabilityList = [];
 
-    //for Instance  screen Complete Reset of Filters
+    // Reset instance filters
     this.instanceConnectionList = [];
     this.instanceImplementationList = [];
     this.selectedMlInstancesAdapterType = [];
     this.selectedMlInstancesConnectionType = [];
+  }
 
-    this.tagSelected.emit(this.geteventtagsdto());
-    if (this.servicev1 !== 'dgApp') {
-      this.getTags();
-      this.fetchAdaptersTypes();
-      this.fetchAdapters();
-    }
-    if (this.servicev1 === 'pipeline' || this.servicev1 === 'chain')
+  /**
+   * Initializes service-specific filters
+   */
+  private initializeServiceSpecificFilters(): void {
+    if (
+      this.servicev1 === ServiceType.PIPELINE ||
+      this.servicev1 === ServiceType.CHAIN
+    ) {
       this.getPipelinesTypes();
-    if (this.servicev1 === 'worker-tools') this.getToolsTypes();
-    if (this.servicev1 === 'connections') this.getDatasourceTypes();
-    if (this.servicev1 === 'instances') this.getMlInstancesFilters();
-    if (this.servicev1 === 'Datasets') {
+    }
+
+    if (this.servicev1 === ServiceType.WORKER_TOOLS) {
+      this.getToolsTypes();
+    }
+
+    if (this.servicev1 === ServiceType.CONNECTIONS) {
+      this.getDatasourceTypes();
+    }
+
+    if (this.servicev1 === ServiceType.INSTANCES) {
+      this.getMlInstancesFilters();
+    }
+
+    if (this.servicev1 === ServiceType.DATASETS) {
       this.getTopicTypes();
       this.getDatasetsTypes();
     }
-    if (this.servicev1 === 'adapters') this.getMlAdapterFilters();
-    if (this.servicev1 === 'specs') this.getMlSpecTemplateFilters();
+
+    if (this.servicev1 === ServiceType.ADAPTERS) {
+      this.getMlAdapterFilters();
+    }
+
+    if (this.servicev1 === ServiceType.SPECS) {
+      this.getMlSpecTemplateFilters();
+    }
   }
-  getTags() {
+
+  /**
+   * Gets tags from API
+   */
+  getTags(): void {
     this.tags = {};
     this.tagsBackup = {};
-    let servicename = this.servicev1;
-    if (this.servicev1 === 'chain') servicename = 'pipeline';
-    let param = new HttpParams();
-    param = param.set('project', sessionStorage.getItem('organization'));
-    param = param.set('service', servicename);
+
+    const servicename =
+      this.servicev1 === ServiceType.CHAIN
+        ? ServiceType.PIPELINE
+        : this.servicev1;
+
+    const param = new HttpParams()
+      .set('project', sessionStorage.getItem('organization') || '')
+      .set('service', servicename);
 
     this.service.getMlTagswithparams(param).subscribe((resp) => {
       this.allTags = resp;
+
+      // Process tags
       this.allTags.forEach((tag) => {
-        if (this.category.indexOf(tag.category) == -1) {
+        if (!this.category.includes(tag.category)) {
           this.category.push(tag.category);
         }
-        if (
+
+        const tagKey = `${tag.category} - ${tag.label}`;
+        const isPreselected =
           this.preselectedtag?.length > 0 &&
-          this.preselectedtag.some((ele) => ele == tag.id)
-        ) {
-          this.tagStatus[tag.category + ' - ' + tag.label] = true;
+          this.preselectedtag.some((ele) => ele == tag.id);
+
+        this.tagStatus[tagKey] = isPreselected;
+
+        if (isPreselected) {
           this.selectedTag.push(tag);
-        } else {
-          this.tagStatus[tag.category + ' - ' + tag.label] = false;
         }
       });
+
+      // Group tags by category
       this.category.forEach((cat) => {
-        this.tags[cat] = this.allTags
-          .filter((tag) => tag.category == cat)
-          .slice(0, 10);
-        this.tagsBackup[cat] = this.allTags.filter(
-          (tag) => tag.category == cat
-        );
+        const categoryTags = this.allTags.filter((tag) => tag.category === cat);
+        this.tags[cat] = categoryTags.slice(0, 10);
+        this.tagsBackup[cat] = categoryTags;
         this.catStatus[cat] = false;
       });
     });
   }
-  showMore(category) {
+
+  /**
+   * Shows more tags for a category
+   */
+  showMore(category: string): void {
     this.catStatus[category] = !this.catStatus[category];
-    if (this.catStatus[category])
-      this.tags[category] = this.allTags.filter(
-        (tag) => tag.category == category
-      );
-    else
-      this.tags[category] = this.allTags
-        .filter((tag) => tag.category == category)
-        .slice(0, 10);
+
+    this.tags[category] = this.catStatus[category]
+      ? this.allTags.filter((tag) => tag.category === category)
+      : this.allTags.filter((tag) => tag.category === category).slice(0, 10);
   }
 
-  // Method to get selected tags for a specific category
+  /**
+   * Gets selected tags for a category
+   */
   getSelectedTagsForCategory(category: string): any[] {
     return this.selectedTag.filter((tag) => tag.category === category);
   }
 
-  // Method to clear all tags for a specific category
+  /**
+   * Clears all tags for a category
+   */
   clearAllTagsForCategory(category: string): void {
-    // Remove all tags for this category
+    // Remove tags for this category
     this.selectedTag = this.selectedTag.filter(
       (tag) => tag.category !== category
     );
 
-    // Update tag statuses for this category
+    // Update tag statuses
     this.allTags?.forEach((tag) => {
       if (tag.category === category) {
-        this.tagStatus[tag.category + ' - ' + tag.label] = false;
+        this.tagStatus[`${tag.category} - ${tag.label}`] = false;
       }
     });
 
-    // Update selectedTagList
-    this.selectedTagList = this.selectedTag.map((selectedTag) => {
-      return selectedTag.id;
-    });
+    // Update selected tag list
+    this.selectedTagList = this.selectedTag.map((tag) => tag.id);
 
-    // Emit the updated selection
-    this.tagSelected.emit(this.geteventtagsdto());
+    // Emit changes
+    this.emitSelectionChanges();
     this.updateFilterStatus();
   }
 
-  // Method to remove individual tag
+  /**
+   * Removes a tag from selection
+   */
   removeTag(tag: any): void {
     const index = this.selectedTag.indexOf(tag);
+
     if (index !== -1) {
       this.selectedTag.splice(index, 1);
-      this.tagStatus[tag.category + ' - ' + tag.label] = false;
+      this.tagStatus[`${tag.category} - ${tag.label}`] = false;
 
-      // Update selectedTagList
-      this.selectedTagList = this.selectedTag.map((selectedTag) => {
-        return selectedTag.id;
-      });
+      // Update selected tag list
+      this.selectedTagList = this.selectedTag.map((tag) => tag.id);
 
-      // Emit the updated selection
-      this.tagSelected.emit(this.geteventtagsdto());
+      // Emit changes
+      this.emitSelectionChanges();
     }
+
     this.updateFilterStatus();
   }
 
-  clearAllFilters(
-    filterType:
-      | 'category'
-      | 'spec'
-      | 'connection'
-      | 'instanceAdapter'
-      | 'instanceConnection'
-      | 'specTemplateCapability'
-      | 'adapterType'
-      | 'adapterInstance'
-      | 'pipelineType'
-  ): void {
+  /**
+   * Clears all filters of a specific type
+   */
+  clearAllFilters(filterType: FilterType): void {
     switch (filterType) {
-      case 'category':
-        this.selectedMlAdapterCategoryType = [];
-        this.mlAdapterCategoryTypeList.forEach((element: any) => {
-          element.selected = false;
-        });
+      case FilterType.CATEGORY:
+        this.clearFilterList(
+          this.selectedMlAdapterCategoryType,
+          this.mlAdapterCategoryTypeList
+        );
         break;
-
-      case 'spec':
-        this.selectedMlAdapterSpecType = [];
-        this.mlAdapterSpecTypeList.forEach((element: any) => {
-          element.selected = false;
-        });
+      case FilterType.SPEC:
+        this.clearFilterList(
+          this.selectedMlAdapterSpecType,
+          this.mlAdapterSpecTypeList
+        );
         break;
-
-      case 'connection':
-        this.selectedMlAdapterConnectionType = [];
-        this.mlAdapterConnectionTypesList.forEach((element: any) => {
-          element.selected = false;
-        });
+      case FilterType.CONNECTION:
+        this.clearFilterList(
+          this.selectedMlAdapterConnectionType,
+          this.mlAdapterConnectionTypesList
+        );
         break;
-
-      case 'instanceAdapter':
-        this.selectedMlInstancesAdapterType = [];
-        this.mlInstanceAdapterTypeList.forEach((element: any) => {
-          element.selected = false;
-        });
+      case FilterType.INSTANCE_ADAPTER:
+        this.clearFilterList(
+          this.selectedMlInstancesAdapterType,
+          this.mlInstanceAdapterTypeList
+        );
         break;
-
-      case 'instanceConnection':
-        this.selectedMlInstancesConnectionType = [];
-        this.mlInstanceConnectionTypeList.forEach((element: any) => {
-          element.selected = false;
-        });
+      case FilterType.INSTANCE_CONNECTION:
+        this.clearFilterList(
+          this.selectedMlInstancesConnectionType,
+          this.mlInstanceConnectionTypeList
+        );
         break;
-
-      case 'specTemplateCapability':
-        this.selectedMlSpecTemplateCapabilityType = [];
-        this.mlSpecTemplateCapabilityTypeList.forEach((element: any) => {
-          element.selected = false;
-        });
+      case FilterType.SPEC_TEMPLATE_CAPABILITY:
+        this.clearFilterList(
+          this.selectedMlSpecTemplateCapabilityType,
+          this.mlSpecTemplateCapabilityTypeList
+        );
         break;
-
-      case 'adapterType':
-        this.selectedAdapterType = [];
-        this.adapterTypeList.forEach((element: any) => {
-          element.selected = false;
-        });
+      case FilterType.ADAPTER_TYPE:
+        this.clearFilterList(this.selectedAdapterType, this.adapterTypeList);
         break;
-
-      case 'adapterInstance':
-        this.selectedAdapterInstance = [];
-        this.adapterInstanceList.forEach((element: any) => {
-          element.selected = false;
-        });
+      case FilterType.ADAPTER_INSTANCE:
+        this.clearFilterList(
+          this.selectedAdapterInstance,
+          this.adapterInstanceList
+        );
         break;
-
-      case 'pipelineType':
-        this.selectedAdapterType = [];
-        this.pipelinesTypeList?.forEach((element: any) => {
-          element.selected = false;
-        });
+      case FilterType.PIPELINE_TYPE:
+        this.clearFilterList(
+          this.selectedAdapterType,
+          this.pipelinesTypeList || []
+        );
         break;
     }
 
-    // Emit the updated selection
-    this.tagSelected.emit(this.geteventtagsdto());
+    // Emit changes
+    this.emitSelectionChanges();
     this.updateFilterStatus();
   }
 
-  filterByTag(tag) {
-    this.tagStatus[tag.category + ' - ' + tag.label] =
-      !this.tagStatus[tag.category + ' - ' + tag.label];
+  /**
+   * Helper method to clear a filter list
+   */
+  private clearFilterList(
+    selectedArray: string[],
+    filterList: FilterItem[]
+  ): void {
+    selectedArray.length = 0;
+    filterList.forEach((element) => {
+      element.selected = false;
+    });
+  }
+
+  /**
+   * Filters by tag
+   */
+  filterByTag(tag: any): void {
+    const tagKey = `${tag.category} - ${tag.label}`;
+    this.tagStatus[tagKey] = !this.tagStatus[tagKey];
 
     if (!this.selectedTag.includes(tag)) {
       this.selectedTag.push(tag);
     } else {
       this.selectedTag.splice(this.selectedTag.indexOf(tag), 1);
     }
-    console.log(this.selectedTag);
 
-    this.selectedTagList = this.selectedTag.map((tag) => {
-      return tag.id;
-    });
-    this.tagSelected.emit(this.geteventtagsdto());
+    // Update selected tag list
+    this.selectedTagList = this.selectedTag.map((tag) => tag.id);
 
-    console.log(this.selectedTagList);
+    // Emit changes
+    this.emitSelectionChanges();
   }
 
+  /**
+   * Creates a tag event DTO
+   */
   geteventtagsdto(): TagEventDTO {
-    let tagEventDTO = new TagEventDTO(
+    return new TagEventDTO(
       this.selectedTagList,
       this.selectedAdapterType,
       this.selectedAdapterInstance,
@@ -1680,31 +1646,60 @@ export class AipFilterComponent {
       this.selectedMlInstancesConnectionType,
       this.selectedDatasetTopicType
     );
-    return tagEventDTO;
   }
 
-  toggleExpand() {
+  /**
+   * Toggles expand state
+   */
+  toggleExpand(): void {
     this.isExpanded = !this.isExpanded;
   }
 
-  toggleFilterExpanded() {
+  /**
+   * Toggles filter expanded state
+   */
+  toggleFilterExpanded(): void {
     this.isFilterExpanded = !this.isFilterExpanded;
   }
 
+  /**
+   * Checks if there are active filters
+   */
   hasActiveFilters(): boolean {
-    if (this.servicev1 === 'adapters') {
+    if (this.servicev1 === ServiceType.ADAPTERS) {
       return (
         this.selectedMlAdapterCategoryType?.length > 0 ||
         this.selectedMlAdapterSpecType?.length > 0 ||
         this.selectedMlAdapterConnectionType?.length > 0
       );
     }
-    // Add conditions for other service types as needed
-    return false;
+
+    // Add conditions for other service types
+    if (this.servicev1 === ServiceType.INSTANCES) {
+      return (
+        this.selectedMlInstancesAdapterType?.length > 0 ||
+        this.selectedMlInstancesConnectionType?.length > 0
+      );
+    }
+
+    if (this.servicev1 === ServiceType.SPECS) {
+      return this.selectedMlSpecTemplateCapabilityType?.length > 0;
+    }
+
+    // Default case for other service types
+    return (
+      this.selectedAdapterType?.length > 0 ||
+      this.selectedAdapterInstance?.length > 0 ||
+      this.selectedTagList?.length > 0 ||
+      this.selectedDatasetTopicType?.length > 0
+    );
   }
 
+  /**
+   * Gets active filters summary
+   */
   getActiveFiltersSummary(): string {
-    if (this.servicev1 !== 'adapters') {
+    if (this.servicev1 !== ServiceType.ADAPTERS) {
       return '';
     }
 
@@ -1725,6 +1720,9 @@ export class AipFilterComponent {
     return activeFilters.join(' | ');
   }
 
+  /**
+   * Updates filter status
+   */
   private updateFilterStatus(): void {
     this.filterStatusChange.emit(this.hasActiveFilters());
   }
