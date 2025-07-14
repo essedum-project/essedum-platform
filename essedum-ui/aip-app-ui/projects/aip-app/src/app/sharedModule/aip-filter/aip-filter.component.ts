@@ -124,7 +124,7 @@ export class AipFilterComponent {
     private semanticService: SemanticService,
     private router: Router,
     private route: ActivatedRoute
-  ) {}
+  ) { }
   ngOnInit(): void {
     if (this.selectedAdpImplCombinedLists) {
       //for Adapter Implementations screen - preselected Filters
@@ -288,7 +288,7 @@ export class AipFilterComponent {
       }
     }
   }
-  getToolsTypes() {}
+  getToolsTypes() { }
 
   getTopicTypes() {
     this.semanticService.getAllTopics().subscribe((res) => {
@@ -793,7 +793,7 @@ export class AipFilterComponent {
     }
   }
 
-  refreshToolsTypes() {}
+  refreshToolsTypes() { }
 
   fetchAdapters(): boolean {
     let params: HttpParams = new HttpParams();
@@ -1113,8 +1113,8 @@ export class AipFilterComponent {
     this.tagSelected.emit(this.geteventtagsdto());
   }
 
-  datasetTypeSelected(value): void {
-    if (value.category === 'Type') {
+  datasetTypeSelected(value,category:string): void {
+    if (category === 'datasetType') {
       if (!this.selectedAdapterType.includes(value.value)) {
         this.selectedAdapterType.push(value.value);
       } else {
@@ -1128,7 +1128,7 @@ export class AipFilterComponent {
           element.selected = !element.selected;
         }
       });
-    } else if (value.category === 'Tags') {
+    } else if (category === 'datasetTag') {
       if (!this.selectedTagList.includes(value.value)) {
         this.selectedTagList.push(value.value);
       } else {
@@ -1578,6 +1578,10 @@ export class AipFilterComponent {
       | 'adapterType'
       | 'adapterInstance'
       | 'pipelineType'
+      | 'connectiontype'
+      |'datasetType'
+      | 'datasetKnowledge'
+      |'datasetTag'
   ): void {
     switch (filterType) {
       case 'category':
@@ -1642,6 +1646,33 @@ export class AipFilterComponent {
           element.selected = false;
         });
         break;
+      case 'connectiontype':
+        this.selectedAdapterType = [];
+        this.connectionsTypeList.forEach((element: any) => {
+          element.selected = false;
+        });
+        break;
+            case 'datasetType':
+        this.selectedAdapterType = [];
+        this.datasetsTypeList.forEach((element: any) => {
+          element.selected = false;
+        });
+        break;
+               case 'datasetKnowledge':
+        this.selectedDatasetTopicType = [];
+        this.datasetTopicList.forEach((element: any) => {
+          element.selected = false;
+        });
+        break;
+         case 'datasetTag':
+        this.selectedTagList = [];
+        this.datasetsTagsList.forEach((element: any) => {
+          element.selected = false;
+        });
+        
+        
+       
+        
     }
 
     // Emit the updated selection
@@ -1683,7 +1714,75 @@ export class AipFilterComponent {
     );
     return tagEventDTO;
   }
+  removeConnectionType(connection: string): void {
+    const index = this.selectedAdapterType.indexOf(connection);
+    if (index !== -1) {
+      this.selectedAdapterType.splice(index, 1);
 
+      // Update the UI selection state
+      this.connectionsTypeList.forEach((element) => {
+        if (element.value === connection) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+    removeDatasetType(connection: string): void {
+    const index = this.selectedAdapterType.indexOf(connection);
+    if (index !== -1) {
+      this.selectedAdapterType.splice(index, 1);
+
+      // Update the UI selection state
+      this.datasetsTypeList.forEach((element) => {
+        if (element.value === connection) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+     removeDatasetKnowledge(connection: string): void {
+    const index = this.selectedDatasetTopicType.indexOf(connection);
+    if (index !== -1) {
+      this.selectedDatasetTopicType.splice(index, 1);
+
+      // Update the UI selection state
+      this.datasetTopicList.forEach((element) => {
+        if (element.value === connection) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+    removeDatasetTag(connection: string): void {
+    const index = this.selectedTagList.indexOf(connection);
+    if (index !== -1) {
+      this.selectedTagList.splice(index, 1);
+
+      // Update the UI selection state
+      this.datasetsTagsList.forEach((element) => {
+        if (element.value === connection) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+   
   toggleExpand() {
     this.isExpanded = !this.isExpanded;
   }

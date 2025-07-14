@@ -148,7 +148,7 @@
               <thead>
                 <tr>
                   <th class="" scope="col" style="width: 24px">
-                    <mat-checkbox *ngIf="dataset.type == 'rw'" (click)="toggleHeaderChkbx()"
+                    <mat-checkbox *ngIf="dataset?.type == 'rw'" (click)="toggleHeaderChkbx()"
                       [(ngModel)]="allIdsSelected">
                     </mat-checkbox>
                   </th>
@@ -175,7 +175,7 @@
               <tbody *ngIf="datasetsCount > 0">
                 <tr *ngFor="let ticket of ticketList; let i = index">
                   <td>
-                    <mat-checkbox *ngIf="dataset.type == 'rw'" [value]="ticketList[i][unqId]" style="width: 24px"
+                    <mat-checkbox *ngIf="dataset?.type == 'rw'" [value]="ticketList[i][unqId]" style="width: 24px"
                       (click)="showTickets(ticketList[i][unqId])" [ngModel]="
                         selectedTickets?.includes(ticketList[i][unqId])
                       ">

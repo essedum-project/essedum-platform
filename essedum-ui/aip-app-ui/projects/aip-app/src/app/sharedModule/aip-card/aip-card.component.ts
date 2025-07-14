@@ -28,6 +28,9 @@ export class AipCardComponent {
   @Output() edit: EventEmitter<any> = new EventEmitter<any>();
   @Output() delete: EventEmitter<any> = new EventEmitter<any>();
   @Output() jobConsole?: EventEmitter<any> = new EventEmitter<any>();
+   @Output() viewDatasets = new EventEmitter<any>();
+  @Output() download = new EventEmitter<any>();
+  @Output() copy = new EventEmitter<any>();
   // UI state variables
   isMenuHovered = false;
 
@@ -42,6 +45,15 @@ export class AipCardComponent {
 
   onDelete(): void {
     this.delete.emit();
+  }
+  onViewDatasets(cardType: any): void {
+    this.viewDatasets.emit(cardType);
+  }
+   onDownload(card: any): void {
+    this.download.emit(card);
+  }
+  onCopy(card: any): void {
+    this.copy.emit(card);
   }
 
   getAvatarBackgroundColor(): string {
@@ -87,8 +99,10 @@ export class AipCardComponent {
       return this.card.adaptername;
     } else if (this.servicev1 === 'schemas') {
       return this.card.name;
-    } else if (this.servicev1 === 'model' || this.servicev1 === 'pipeline') {
+    } else if (this.servicev1 === 'model' || this.servicev1 === 'pipeline' || this.servicev1 === 'connections') {
       return this.card.type;
+    }else if (this.servicev1 === 'Datasets') {
+       return `${this.card.datasource?.category} - ${this.card.datasource?.alias}`;
     }
   }
 
@@ -97,12 +111,14 @@ export class AipCardComponent {
       return this.card.name;
     } else if (this.servicev1 === 'specs') {
       return this.card.domainname;
-    } else if (this.servicev1 === 'schemas' || this.servicev1 === 'pipeline') {
+    } else if (this.servicev1 === 'schemas' || this.servicev1 === 'pipeline'|| this.servicev1 === 'connections') {
       return this.card.alias;
     } else if (this.servicev1 === 'model') {
       return this.card.name && this.card.name != ''
         ? this.card.name
         : this.card.sourceName;
+    }else if (this.servicev1 === 'Datasets') {
+      return this.card.datasource?.alias ;
     }
   }
 
@@ -111,7 +127,7 @@ export class AipCardComponent {
       return this.card.createdon;
     } else if (this.servicev1 === 'specs') {
       return this.card.lastmodifiedon;
-    } else if (this.servicev1 === 'schemas') {
+    } else if (this.servicev1 === 'schemas' || this.servicev1 === 'connections' || this.servicev1 === 'Datasets') {
       return this.card.lastmodifieddate;
     } else if (this.servicev1 === 'model') {
       return this.card.createdOn;
@@ -127,7 +143,7 @@ export class AipCardComponent {
       this.servicev1 === 'specs'
     ) {
       return this.card.createdby ? this.card.createdby : 'Name Not Available';
-    } else if (this.servicev1 === 'schemas') {
+    } else if (this.servicev1 === 'schemas' || this.servicev1 === 'connections' ) {
       return this.card.lastmodifiedby
         ? this.card.lastmodifiedby
         : 'Name Not Available';
