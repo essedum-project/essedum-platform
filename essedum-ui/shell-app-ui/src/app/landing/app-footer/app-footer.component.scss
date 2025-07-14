@@ -1,5 +1,57 @@
 a {
-    color: inherit; 
-    text-decoration: underline; 
+  color: inherit;
+  text-decoration: underline;
 }
-    
+
+.lfn-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 44px;
+  z-index: 9;
+  left: 0;
+  background-color: #0a142f;
+  padding: 0px;
+  display: flex;
+  align-items: center;
+}
+.lfn-img {
+  margin-left: 2vh;
+  width: 180px;
+  height: 20px;
+}
+
+@media (max-width: 900px) {
+  .lfn-img {
+    width: 150px;
+    height: 18px;
+    margin-left: 1.5vh;
+  }
+}
+
+@media (max-width: 600px) {
+  .lfn-img {
+    width: 120px;
+    height: 16px;
+    margin-left: 1.2vh;
+  }
+}
+
+.lfn-img-div {
+  text-align: center;
+  margin-top: 5px;
+  flex: 1;
+}
+.lfn-text-div {
+  text-align: center;
+  flex: 3;
+}
+
+:host ::ng-deep .copyright {
+  font-size: 1.25rem;
+}
+
+
+lfx-footer::part(copyright) {
+  font-size: 1.5rem;
+}

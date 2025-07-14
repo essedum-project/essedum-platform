@@ -7,27 +7,31 @@
         class="selector-3-4"></app-sidebar>
     </mat-drawer>
     <div class="parent-div selector-3-5">
+      <!--main header starts-->
       <div class="fChild selector-3-6 main-header-bg">
+        <!--header starts -->
         <div class="main-toggle responsive-main-toggle">
           <div style="display: flex; align-items: center;">
-            <button class="sidebarBtn sidebarBigScreen selector-3-17 main-toggle-btn mobileHeaderImg"
+            <button class="sidebarBtn sidebarBigScreen selector-3-17 main-toggle-btn"
               *ngIf="sidebar && selectedrole.name != currentrole && showSidebarMenu" mat-icon-button=""
               (click)="isexpaned()" id="sidebarexpand" aria-label="Toggle Sidebar">
               <span *ngIf="!isExpanded" class="main-toggle">
-                <img src="assets/img/icon-waffle@2x.png" alt="Expand" class="responsive-toggle-img mobileHeaderImg" />
+                <img src="assets/img/icon-waffle@2x.png" alt="Expand" class="toggleIcon" />
               </span>
               <span *ngIf="isExpanded" class="main-toggle">
-                <img src="assets/img/icon-waffle@2x.png" alt="Collapse" class="responsive-toggle-img mobileHeaderImg" />
+                <img src="assets/img/icon-waffle@2x.png" alt="Collapse" class="toggleIcon" />
               </span>
             </button>
 
             <img id="clientimage" *ngIf="!isimg" src="assets/img/essedum_icon_small.png"
-              class="selector-3-8 essedum-logo responsive-logo-img mobileHeaderImg" alt="ESSEDUM Logo"
+              class="selector-3-8 essedum-logo responsive-logo-img" alt="ESSEDUM Logo"
               style="margin-left: 8px;" />
-            <span class="responsive-title mobileHeaderImg" style="margin-left: 8px;">ESSEDUM</span>
+            <span class="responsive-title" style="margin-left: 8px;">ESSEDUM</span>
 
           </div>
         </div>
+        <!--header ends -->
+        
         <div class="example-container selector-3-19" *ngIf="sidebar && selectedrole.name != currentrole">
           <mat-sidenav-container class="example-sidenav-container selector-3-20" autosize="">
             <mat-sidenav *ngIf="
@@ -121,9 +125,9 @@
                     matTooltipClass="widgettitletooltip" [class.collapsed]="!isExpanded"
                     [class.griddirection]="iconsidebarrole == selectedrole.name" [ngStyle]="{
                       'border-left-width':'9px',                      
-                      width: '-webkit-fill-available'
+                      width: '57.6px'
                     }">
-                    <div class="sidebar-itemIcon" style="width: fit-content; text-align: -webkit-center"
+                    <div class="sidebar-itemIcon" style="text-align: -webkit-center"
                       [class.iconmapping]="iconsidebarrole == selectedrole.name" [ngStyle]="{
                         'margin-left':
                           iconsidebarrole == selectedrole.name
@@ -220,6 +224,7 @@
                 </div>
               </mat-nav-list>
             </mat-sidenav>
+            <!-- righside container starts-->
             <mat-sidenav-content class="selector-3-47" id="containerDivForScroll"
               [style.margin-left]="getContentMarginLeftSimple()">
               <ng-container *ngIf="loadingRouteConfig" class="selector-3-48">
@@ -446,6 +451,7 @@
                 <!-- </div> -->
               </div>
             </mat-sidenav-content>
+            <!-- righside container ends-->
           </mat-sidenav-container>
         </div>
         <span *ngIf="bgColorType == 2" style="width: 100%" [ngStyle]="{
@@ -675,7 +681,7 @@
           </mat-menu>
         </div>
       </div>
-
+    <!--main header ends-->
       <button mat-icon-button="" draggable="true" (dragstart)="onDragStartChat($event)"
         (dragend)="onDragEndChat($event)" id="aipButton" *ngIf="aip_chatbot && !showChatBot" style="
           padding-left: 2.5vh;
