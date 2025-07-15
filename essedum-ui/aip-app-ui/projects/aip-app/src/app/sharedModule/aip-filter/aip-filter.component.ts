@@ -113,7 +113,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
 
   // Selected filters
   selectedTag: any[] = [];
-  selectedTagList: number[] = [];
+  selectedTagList: any[] = [];
   selectedType: string[] = [];
   selectedAdapterType: string[] = [];
   selectedAdapterList: string[] = [];
@@ -1098,6 +1098,77 @@ export class AipFilterComponent implements OnInit, OnChanges {
     this.emitSelectionChanges();
   }
 
+  removeConnectionType(connection: string): void {
+    const index = this.selectedAdapterType.indexOf(connection);
+    if (index !== -1) {
+      this.selectedAdapterType.splice(index, 1);
+
+      // Update the UI selection state
+      this.connectionsTypeList.forEach((element) => {
+        if (element.value === connection) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+
+  removeDatasetType(connection: string): void {
+    const index = this.selectedAdapterType.indexOf(connection);
+    if (index !== -1) {
+      this.selectedAdapterType.splice(index, 1);
+
+      // Update the UI selection state
+      this.datasetsTypeList.forEach((element) => {
+        if (element.value === connection) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+  removeDatasetKnowledge(connection: string): void {
+    const index = this.selectedDatasetTopicType.indexOf(connection);
+    if (index !== -1) {
+      this.selectedDatasetTopicType.splice(index, 1);
+
+      // Update the UI selection state
+      this.datasetTopicList.forEach((element) => {
+        if (element.value === connection) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+
+  removeDatasetTag(connection: string): void {
+    const index = this.selectedTagList.indexOf(connection);
+    if (index !== -1) {
+      this.selectedTagList.splice(index, 1);
+
+      // Update the UI selection state
+      this.datasetsTagsList.forEach((element) => {
+        if (element.value === connection) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+
   /**
    * Handles dataset topic selection
    */
@@ -1731,7 +1802,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
   private updateFilterStatus(): void {
     this.filterStatusChange.emit(this.hasActiveFilters());
   }
-removeAppFilter(app: string): void {
+  removeAppFilter(app: string): void {
     const index = this.selectedMlAppType.indexOf(app);
     if (index !== -1) {
       this.selectedMlAppType.splice(index, 1);
@@ -1768,9 +1839,9 @@ removeAppFilter(app: string): void {
   }
 
   removeAppTypeFilter(type: string): void {
-    const index = this.selectedMlType.indexOf(type);
+    const index = this.selectedAdapterType.indexOf(type);
     if (index !== -1) {
-      this.selectedMlType.splice(index, 1);
+      this.selectedAdapterType.splice(index, 1);
 
       // Update the UI selection state
       this.adapterTypeList.forEach((element) => {
@@ -1784,5 +1855,4 @@ removeAppFilter(app: string): void {
     }
     this.updateFilterStatus();
   }
-
 }
