@@ -15,24 +15,26 @@ import { LogoutComponent } from './logout/logout.component';
 import { MessageService } from '../services/message.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTabsModule } from '@angular/material/tabs';
+import { AppFooterModule } from "../landing/app-footer/app-footer.module";
 @NgModule({
 	declarations: [ LoginComponent, LogoutComponent ],
 	imports: [
-		CommonModule,
-		LoginRoutingModule,		
-		RouterModule,
-		FormsModule,
-		ReactiveFormsModule,
-		MatFormFieldModule,
-		MatInputModule,
-		NgbModule,
-		MatExpansionModule,
-		MatSnackBarModule,
-		MatDialogModule,
-		MatDividerModule,
-		MatButtonModule,
-		MatTabsModule
-	],
+    CommonModule,
+    LoginRoutingModule,
+    RouterModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    NgbModule,
+    MatExpansionModule,
+    MatSnackBarModule,
+    MatDialogModule,
+    MatDividerModule,
+    MatButtonModule,
+    MatTabsModule,
+    AppFooterModule
+],
 	providers: [ MessageService ],
 	schemas:[CUSTOM_ELEMENTS_SCHEMA]
 })

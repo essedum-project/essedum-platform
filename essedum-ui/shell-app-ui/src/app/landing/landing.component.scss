@@ -71,7 +71,12 @@ mat-drawer-container {
   bottom: 0;
   left: 0;
   right: 0;
-  height: calc(100vh - var(--footerHeight, 35px));
+  // height: calc(100vh - var(--footerHeight, 35px));
+  margin-top: 43px;
+  /* Same as header height */
+  height: calc(100vh - 44px);
+  /* Adjust main content height */
+  overflow: auto;
 }
 
 .is-active {
@@ -240,6 +245,7 @@ mat-drawer-container {
   .dash-icon-color {
     margin-top: unset !important;
   }
+
   .userMobile {
     // padding: 0;
     margin: 0 0.3vw 0 0vw !important;
@@ -323,6 +329,7 @@ mat-drawer-container {
 .sidebarhovercolor:hover {
   background-color: var(--sidebarhover-color);
 }
+
 .sidebartexticonhovercolor:hover {
   color: var(--sidebartexticonhover-color);
   fill: var(--sidebartexticonhover-color);
@@ -460,13 +467,13 @@ mat-drawer-container {
 
 @media screen and (max-width: 490px) {
   .fChild {
-    height: 85px !important;
+    height: 44px !important;
     flex-direction: column;
   }
 
   .mobileHeaderImg {
     flex-grow: 1;
-    width: 225px !important;
+    width: 50px !important;
   }
 }
 
@@ -484,11 +491,20 @@ mat-drawer-container {
 
 .fChild {
   background-color: var(--header-color);
-  height: 50px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid #c1c1c1;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 44px;
+  /* Fixed height in px */
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .sidebar-itemIcon {
@@ -900,6 +916,7 @@ li.leftpanel-item.disabled {
   line-height: 5px;
   justify-content: space-evenly;
 }
+
 .footer-support-content {
   padding: 10px 10px 10px 10px;
 }
@@ -951,6 +968,7 @@ li.leftpanel-item.disabled {
   transition: 0.5s;
   padding: 1rem;
 }
+
 .aip-chatbot-shadow {
   /* UI Properties */
   // background: #ffffff 0% 0% no-repeat padding-box;
@@ -973,6 +991,7 @@ li.leftpanel-item.disabled {
 .sidepanel a:hover {
   color: #f1f1f1;
 }
+
 .sidebar-chatbot-icons {
   // font-size: 2.38rem !important;
   font-size: 2rem !important;
@@ -1030,8 +1049,10 @@ li.leftpanel-item.disabled {
   width: 80px;
   transition: width 0.3s;
 }
+
 .sidebar-item-full-text {
-  width: 200px; /* or 100% or whatever fits your expanded sidebar */
+  width: 200px;
+  /* or 100% or whatever fits your expanded sidebar */
 }
 
 .list-menu-div {
@@ -1055,6 +1076,24 @@ li.leftpanel-item.disabled {
   min-height: 28px;
 }
 
+@media (max-width: 900px) {
+  .list-menu-close {
+    display: flex;
+    justify-content: flex-end;
+    height: 20px;
+    min-height: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .list-menu-close {
+    display: flex;
+    justify-content: flex-end;
+    height: 14;
+    min-height: 14;
+  }
+}
+
 .list-menu-close-btn {
   margin: 2px;
   width: 28px;
@@ -1062,6 +1101,24 @@ li.leftpanel-item.disabled {
   min-width: 28px;
   min-height: 28px;
   padding: 0;
+}
+
+@media (max-width: 900px) {
+  .list-menu-close-btn {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .list-menu-close-btn {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+  }
 }
 
 .list-menu-close-btn:hover {
@@ -1072,6 +1129,18 @@ li.leftpanel-item.disabled {
   font-size: 18px !important;
 }
 
+@media (max-width: 600px) {
+  .lfx-fs-18 {
+    font-size: 8px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .lfx-fs-18 {
+    font-size: 12px !important;
+  }
+}
+
 .list-menu-toggle {
   margin-bottom: 10px;
   cursor: pointer;
@@ -1079,10 +1148,17 @@ li.leftpanel-item.disabled {
 }
 
 .essedum-title {
-  color: white !important;
-  font-size: 16px !important;
-  font-weight: 500 !important;
-  margin-left: 12px !important;
+  height: 24px;
+  min-height: 24px;
+  max-height: 40px;
+  width: auto;
+  min-width: 24px;
+  max-width: 120px;
+  font-size: 18px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .essedum-logo {
@@ -1113,10 +1189,116 @@ li.leftpanel-item.disabled {
   margin-left: 12px;
 }
 
+.lfx-u-mar-l-12 {
+  margin-left: 12px !important;
+}
+
 .main-header-bg {
-  height: headerHeight;
+  width: 100%;
   background: linear-gradient(90deg, #002966 0%, var(--0052cc, #0052cc) 100%) 0%
     0% no-repeat padding-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 44px;
+  /* Fixed height in px */
+  z-index: 100;
+  background-color: var(--header-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+
+  transition: height 0.2s;
+}
+
+.responsive-main-toggle {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+  min-width: 0;
+}
+
+.responsive-main-toggle .main-toggle-btn {
+  min-width: 36px;
+  min-height: 36px;
+  width: 3vw;
+  height: 3vw;
+  max-width: 48px;
+  max-height: 48px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.responsive-toggle-img {
+  width: 2vw;
+  min-width: 24px;
+  max-width: 36px;
+  height: auto;
+}
+
+.responsive-logo-img {
+  width: 2.5vw;
+  min-width: 28px;
+  max-width: 40px;
+  height: auto;
+}
+
+.responsive-title {
+  font-size: 1.6vw;
+  min-width: 60px;
+  max-width: 120px;
+  white-space: nowrap;
+  font-weight: semibold;
+  letter-spacing: 0.05em;
+  color: white !important;
+}
+
+@media (max-width: 900px) {
+  .responsive-main-toggle .main-toggle-btn,
+  .responsive-toggle-img,
+  .responsive-logo-img {
+    width: 28px !important;
+    min-width: 28px !important;
+    max-width: 40px !important;
+    height: 28px !important;
+  }
+
+  .responsive-title {
+    font-size: 18px !important;
+    min-width: 40px;
+    max-width: 80px;
+  }
+}
+
+@media (max-width: 600px) {
+  .responsive-main-toggle {
+    gap: 8px;
+  }
+
+  .responsive-title {
+    font-size: 18px !important;
+    min-width: 30px;
+    max-width: 60px;
+  }
+}
+
+@media (max-width: 900px) {
+  .responsive-title {
+    font-size: 18px !important;
+    min-width: 40px;
+    max-width: 80px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .responsive-title {
+    font-size: 18px !important;
+    min-width: 40px;
+    max-width: 80px;
+  }
 }
 
 .user-profile-btn {
@@ -1124,4 +1306,125 @@ li.leftpanel-item.disabled {
   justify-content: center;
   align-items: center;
   padding: 0;
+}
+
+.logo-in-header {
+  margin-left: 8px;
+  margin-right: 8px;
+  object-fit: contain;
+  max-height: 100%;
+  max-width: 100%;
+}
+
+.header-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: 8px;
+  font-weight: bold;
+  flex-shrink: 1;
+}
+
+.header-flex {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  min-width: 0;
+}
+
+.toggleIcon {
+  height: 20px;
+  min-height: 20px;
+  max-height: 40px;
+  width: auto;
+  min-width: 20px;
+  max-width: 120px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobileHeaderImg {
+  height: 32px;
+  min-height: 32px;
+  max-height: 40px;
+  width: auto;
+  min-width: 26px;
+  max-width: 120px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 1200px) {
+  .mobileHeaderImg {
+    height: 16px !important;
+    min-height: 14px !important;
+    max-height: 16px !important;
+    width: 16px !important;
+    min-width: 14px !important;
+    max-width: 16px !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 1200px) {
+  .mobileHeaderImg.responsive-title {
+    margin-left: 30px !important;
+  }
+}
+
+.sidebar-menu-popup {
+  width: 130px;
+  min-width: 100px;
+  max-width: 130px;
+  transition: width 0.2s;
+  margin-left: 130px;
+}
+
+.user-btn-height {
+  height: 40px !important;
+  width: 40px !important;
+}
+
+.user-btn-span-height {
+  height: 22px !important;
+  width: 22px !important;
+  font-size: 12px !important;
+}
+
+@media (max-width: 600px) {
+  .user-btn-height {
+    height: 30px !important;
+    width: 30px !important;
+  }
+
+  .user-btn-span-height {
+    height: 18px !important;
+    width: 18px !important;
+    font-size: 10px !important;
+  }
+}
+
+.sidebar-Icons-list {
+  font-size: 20px !important;
+  height: 20px !important;
+  width: 20px !important;
+}
+
+@media (max-width: 600px) {
+  .toggleIcon {
+    height: 18px;
+    min-height: 18px;
+    max-height: 22px;
+    width: auto;
+    min-width: 18px;
+    max-width: 120px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
