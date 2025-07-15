@@ -2,7 +2,7 @@
 <div class="aip-container lfx-u-pad-lr-30" id="mainCtr">
     <!-- Header Section -->
     <app-aip-header [cardTitle]="cardTitle" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="editAuth"
-        (search)="searchApp($event)" (refresh)="ngOnInit()" (add)="openedit()">
+        (search)="searchApp($event)" (refresh)="ngOnInit()" (add)="openAddedit(false)">
     </app-aip-header>
 
     <!-- Filter Section -->
@@ -97,13 +97,9 @@
                                             (click)="navigate(app)">
                                             Navigate
                                         </button>
-                                        <button mat-menu-item *ngIf="editAuth" (click)="openedit(content2)">
+                                        <button mat-menu-item *ngIf="editAuth" (click)="openAddedit(true,app)">
                                             Edit
-                                        </button>
-                                        <ng-template #content2 let-modal>
-                                            <app-create-app [edit]="'true'" [appName]="app.name" [appcid]="app.cid">
-                                            </app-create-app>
-                                        </ng-template>
+                                        </button>            
                                         <button mat-menu-item (click)="deleteApp(index)">
                                             Delete
                                         </button>

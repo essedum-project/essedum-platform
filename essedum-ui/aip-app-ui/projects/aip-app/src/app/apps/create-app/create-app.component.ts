@@ -25,6 +25,7 @@ import { HttpParams } from '@angular/common/http';
 import { DatasetServices } from '../../dataset/dataset-service';
 import { Stomp } from '@stomp/stompjs';
 import * as SockJS from 'sockjs-client';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-create-app',
@@ -47,8 +48,8 @@ export class CreateAppComponent implements OnInit {
   isAuth: any = false;
   @Input() edit: boolean;
   @Input('dataset') matData: any;
-  @Input() appcid: any;
-  @Input() appName: any;
+  @Input() appcid?: any;
+  @Input() appName?: any;
   appEdit: any;
   editAlias: any;
   editCanvas: any = [];
@@ -101,6 +102,7 @@ export class CreateAppComponent implements OnInit {
   isApp: boolean = false;
 
   constructor(
+    @Inject(MAT_DIALOG_DATA) public inputDetails: any,
     private Services: Services,
     private dialogRef: MatDialogRef<CreateAppComponent>,
     private route: ActivatedRoute,
@@ -112,6 +114,9 @@ export class CreateAppComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.edit=this.inputDetails.edit;
+    this.appcid=this.inputDetails.appcid;
+    this.appName=this.inputDetails.appName;
     this.editApp();
     this.logoUploaded = false;
     this.uploader = new FileUploader({

@@ -264,22 +264,24 @@ export class AppListComponent implements OnInit {
     });
   }
 
-  openedit(): void {
-    const dialogRef = this.dialog.open(CreateAppComponent, {
-      height: '80%',
-      width: '60%',
-      minWidth: '60vw',
-      disableClose: true,
-      data: {
-        edit: false,
-      },
-    });
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.ngOnInit();
-      }
-    });
-  }
+openAddedit(edit: boolean = false, app?: any): void {
+  const dialogRef = this.dialog.open(CreateAppComponent, {
+    height: '80%',
+    width: '60%',
+    minWidth: '60vw',
+    disableClose: true,
+    data: {
+      edit: edit,
+      appName: app?.name,
+      appcid: app?.cid
+    },
+  });
+  dialogRef.afterClosed().subscribe((result) => {
+    if (result) {
+      this.ngOnInit();
+    }
+  });
+}
 
   tagSelectedEvent(event) {
     this.selectedTag = event.getSelectedTagList();
