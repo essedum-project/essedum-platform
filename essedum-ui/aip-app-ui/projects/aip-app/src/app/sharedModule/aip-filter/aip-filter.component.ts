@@ -178,6 +178,11 @@ export class AipFilterComponent implements OnInit, OnChanges {
   instanceType: string[] = [];
   appType: string[] = [];
 
+  selectedMlAppType: string[] = [];
+  selectedMlIncType: string[] = [];
+  selectedMlType: string[] = [];
+  appsTypeList = [];
+
   constructor(
     private service: Services,
     private datasetServices: DatasetServices,
@@ -1726,4 +1731,58 @@ export class AipFilterComponent implements OnInit, OnChanges {
   private updateFilterStatus(): void {
     this.filterStatusChange.emit(this.hasActiveFilters());
   }
+removeAppFilter(app: string): void {
+    const index = this.selectedMlAppType.indexOf(app);
+    if (index !== -1) {
+      this.selectedMlAppType.splice(index, 1);
+
+      // Update the UI selection state
+      this.adapterTypeList.forEach((element) => {
+        if (element.value === app) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+
+  removeAppIncFilter(inc: string): void {
+    const index = this.selectedMlIncType.indexOf(inc);
+    if (index !== -1) {
+      this.selectedMlIncType.splice(index, 1);
+
+      // Update the UI selection state
+      this.adapterInstanceList.forEach((element) => {
+        if (element.value === inc) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+
+  removeAppTypeFilter(type: string): void {
+    const index = this.selectedMlType.indexOf(type);
+    if (index !== -1) {
+      this.selectedMlType.splice(index, 1);
+
+      // Update the UI selection state
+      this.adapterTypeList.forEach((element) => {
+        if (element.value === type) {
+          element.selected = false;
+        }
+      });
+
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+
 }

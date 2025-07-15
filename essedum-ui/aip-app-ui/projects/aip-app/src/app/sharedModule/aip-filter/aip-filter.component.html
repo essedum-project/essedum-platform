@@ -402,6 +402,30 @@
                   </div>
                 </div>
                 <div class="mb-4" *ngIf="servicev1 === ServiceType.APPS">
+
+                  <div class="filter-group">
+                    <div class="filter-control">
+                      <mat-form-field appearance="fill" class="w-100">
+                        <label>Type</label>
+                        <mat-select (selectionChange)="appTypeSelected($event)" aria-labelledby="instances-label"
+                          placeholder="All">
+                          <mat-option *ngFor="let option of adapterTypeList" [value]="option.label">
+                            {{ option.label }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="selected-items" *ngIf="selectedMlType?.length > 0">
+                      <mat-chip-set aria-label="Selected Instances">
+                        <mat-chip *ngFor="let inc of selectedMlType" removable="true"
+                          (removed)="removeAppTypeFilter(inc)">
+                          {{ inc }}
+                          <mat-icon matChipRemove>close</mat-icon>
+                        </mat-chip>
+                      </mat-chip-set>
+                    </div>
+                  </div>
                 </div>
 
               </ng-template>
