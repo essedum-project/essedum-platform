@@ -1,60 +1,52 @@
-<div class="aip-top">
-  <div class="clearfix lfx-l-bodywrapper aip-tranparent-backgroud  js-bodywrapper" id="mainCtr">
-    <div class="aip-container">
+<div class="aip-container lfx-u-pad-lr-30" id="mainCtr">
 
-      <div class="col-sm-12 col-md-9 col-lg-9 lfx-u-pad-lr-30" id="mainrightCnt" [ngStyle]="toggler(isExpanded)">
+  <!-- Header Section -->
+  <app-aip-header [cardTitle]="CARD_TITLE" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createAuth"
+    (search)="onSearch($event)" (refresh)="onRefresh()" (add)="onAdd()">
+  </app-aip-header>
 
-        <!-- Header Section -->
-        <div class="aip-content">
-
-          <!-- Header -->
-          <app-aip-header [cardTitle]="cardTitle" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createAuth"
-            (search)="filterz($event)" (refresh)="refreshComplete()" (add)="open()">
-          </app-aip-header>
-
-          <!-- Filter Section -->
-          <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="servicev1" [selectedPipelineTypeList]="{ 
+  <!-- Filter Section -->
+  <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="SERVICE_V1" [selectedPipelineTypeList]="{ 
                         selectedAdapterType: selectedAdapterType
-                      }" (tagSelected)="tagSelectedEvent($event)"
-            (filterStatusChange)="onFilterStatusChange($event)"></app-aip-filter>
-        </div>
-
-        <!-- Cards container -->
-        <div class="lfx-c-card__action-ul aip-card-container">
-          <div class="col-md-8 col-lg-6 col-xl-5 aip-card-wrapper" *ngFor="let card of filteredCards">
-            <div class="card-wrapper h-100">
-              <app-aip-card [servicev1]="servicev1" [card]="card" [editAuth]="editAuth" [deployAuth]="deployAuth"
-                [deleteAuth]="deleteAuth" (viewDetails)="redirection(card)" (edit)="editPipeline(card.cid)"
-                (delete)="deletePipeline(card.cid)" (jobConsole)="jobConsole(card.name)">
-                <ng-template #content3 let-modal>
-                  <app-adapter-create-edit [data]="card" [action]="editAction"
-                    (triggereRefresh)="triggereRefresh($event)"></app-adapter-create-edit>
-                </ng-template>
-              </app-aip-card>
-            </div>
-          </div>
-        </div>
-
-        <!-- Empty state -->
-        <app-aip-empty-state *ngIf="records"></app-aip-empty-state>
-
-        <!-- Pagination -->
-        <!-- <app-aip-pagination *ngIf="records!=true" [pageNumber]="pageNumber" [noOfPages]="noOfPages" [pageArr]="pageArr"
-          [startIndex]="startIndex" [endIndex]="endIndex" [hoverStates]="hoverStates" (prevPage)="prevPage()"
-          (nextPage)="nextPage()" (changePage)="changePage($event)">
-        </app-aip-pagination> -->
+                      }" (tagSelected)="onTagSelected($event)"
+    (filterStatusChange)="onFilterStatusChange($event)"></app-aip-filter>
 
 
-        <div *ngIf="!records">
-          <app-pagination #pagination [noOfItems]="noOfItems" (pageAndSizeChanged)="handlePageAndSizeChange($event)">
-          </app-pagination>
-        </div>
-      </div>
-    </div>
+  <!-- Loading State -->
+  <div *ngIf="loading" role="status" aria-label="Loading cards">
+    <app-aip-loading></app-aip-loading>
   </div>
 
+  <!-- Content Area (only shown when not loading) -->
+  <ng-container *ngIf="!loading">
 
-  <!-- <ng-template #elseBlock>
+    <!-- Cards container -->
+    <div *ngIf="paginatedCards.length > 0" class="aip-card-container" aria-label="Pipeline cards">
+      <div class="aip-card-wrapper" *ngFor="let card of paginatedCards; trackBy: trackByCardId">
+
+        <!-- Cards  -->
+        <app-aip-card [servicev1]="SERVICE_V1" [card]="card" [editAuth]="editAuth" [deployAuth]="deployAuth"
+          [deleteAuth]="deleteAuth" (viewDetails)="redirection(card)" (edit)="editPipeline(card.cid)"
+          (delete)="deletePipeline(card.cid)" (jobConsole)="jobConsole(card.name)">
+        </app-aip-card>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <app-aip-empty-state *ngIf="shouldShowEmptyState"></app-aip-empty-state>
+
+    <!-- Pagination -->
+    <app-aip-pagination *ngIf="shouldShowPagination" [pageNumber]="pageNumber" [noOfPages]="noOfPages"
+      [pageArr]="pageArr" [startIndex]="startIndex" [endIndex]="endIndex" [hoverStates]="hoverStates"
+      (prevPage)="onPrevPage()" (nextPage)="onNextPage()" (changePage)="onChangePage($event)">
+    </app-aip-pagination>
+
+  </ng-container>
+</div>
+
+
+
+<!-- <ng-template #elseBlock>
          <div *ngIf="streamItem.type === 'DragAndDrop'; else: binaryTemplate" class="selector-788-282">
               <app-pipeline-description [card]="selectedCard" (newItemEvent)="changedToogle($event)"
                   [cardToggled]="cardToggled" [pipelineAlias]="selectedCard.alias"
@@ -81,4 +73,3 @@
                   [streamItem]="streamItem"></app-pipeline-description>
           </ng-template>
       </ng-template> -->
-</div>

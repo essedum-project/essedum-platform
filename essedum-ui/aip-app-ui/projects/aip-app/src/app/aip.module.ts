@@ -138,6 +138,7 @@ import { AipPaginationComponent } from './sharedModule/aip-pagination/aip-pagina
 import { AipHeaderComponent } from './sharedModule/aip-header/aip-header.component';
 import { AipEmptyStateComponent } from './sharedModule/aip-empty-state/aip-empty-state.component';
 import { AipFilterComponent } from './sharedModule/aip-filter/aip-filter.component';
+import { AipLoadingComponent } from './sharedModule/aip-loading/aip-loading.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -231,6 +232,7 @@ const dbConfig: DBConfig = {
     AipEmptyStateComponent,
     TaggingComponentComponent,
     AipFilterComponent,
+    AipLoadingComponent,
   ],
   imports: [
     CommonModule,

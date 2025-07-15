@@ -280,15 +280,6 @@
     display: contents;
   }
 
-  .aip-card-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, 29.5rem);
-    grid-template-rows: repeat(auto-fit, 15rem);
-    // justify-content: center;
-    grid-row-gap: 2.4rem;
-    grid-column-gap: 2.4rem;
-  }
-
   .aip-desc-ellipsis {
     white-space: nowrap;
     overflow: hidden;
@@ -688,12 +679,6 @@ div {
     // html {
     //   font-size: 100%; /* 1rem = 14px */
     // }
-    .aip-card-container {
-      grid-template-columns: repeat(4, 5fr);
-      grid-template-rows: repeat(4, 5fr);
-      grid-row-gap: 2.4rem;
-      grid-column-gap: 2.4rem;
-    }
 
     .aip-doc-container {
       grid-template-columns: repeat(4, 5fr);
@@ -770,11 +755,6 @@ div {
   .lfx-u-pad-lr-24 {
     padding-left: 24px !important;
     padding-right: 24px !important;
-  }
-
-  .lfx-u-pad-lr-30 {
-    padding-left: 30px !important;
-    padding-right: 30px !important;
   }
 
   .lfx-u-mar-tb-16 {
@@ -1338,110 +1318,44 @@ div {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
     border-radius: 16px !important;
   }
+}
 
-  @media (min-width: 1200px) {
-    .col-xl {
-      flex: 1 0 0%;
-    }
+::ng-deep {
+  // Dashboard Styles
+  #mainCtr {
+    width: 100%;
+    margin: 0;
+  }
 
-    .row-cols-xl-auto > * {
-      flex: 0 0 auto;
-      width: auto;
-    }
+  .aip-container {
+    width: 100%;
+    position: relative;
+  }
 
-    .row-cols-xl-1 > * {
-      flex: 0 0 auto;
+  .aip-card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 29rem);
+    grid-template-rows: repeat(auto-fit, 15rem);
+    justify-content: center;
+    grid-row-gap: 2.4rem;
+    grid-column-gap: 2.4rem;
+  }
+
+  .aip-card-wrapper {
+    min-width: 29rem;
+    min-height: 15rem;
+
+    @media (max-width: 576px) {
       width: 100%;
     }
+  }
 
-    .row-cols-xl-2 > * {
-      flex: 0 0 auto;
-      width: 50%;
-    }
+  .lfx-u-pad-lr-30 {
+    padding-left: 30px !important;
+    padding-right: 30px !important;
+  }
 
-    .row-cols-xl-3 > * {
-      flex: 0 0 auto;
-      width: 33.3333333333%;
-    }
-
-    .row-cols-xl-4 > * {
-      flex: 0 0 auto;
-      width: 25%;
-    }
-
-    .row-cols-xl-5 > * {
-      flex: 0 0 auto;
-      width: 20%;
-    }
-
-    .row-cols-xl-6 > * {
-      flex: 0 0 auto;
-      width: 16.6666666667%;
-    }
-
-    .col-xl-auto {
-      flex: 0 0 auto;
-      width: auto;
-    }
-
-    .col-xl-1 {
-      flex: 0 0 auto;
-      width: 8.33333333%;
-    }
-
-    .col-xl-2 {
-      flex: 0 0 auto;
-      width: 25%;
-    }
-
-    .col-xl-3 {
-      flex: 0 0 auto;
-      width: 25%;
-    }
-
-    .col-xl-4 {
-      flex: 0 0 auto;
-      width: 25%;
-    }
-
-    .col-xl-5 {
-      flex: 0 0 auto;
-      width: 41.66666667%;
-    }
-
-    .col-xl-6 {
-      flex: 0 0 auto;
-      width: 50%;
-    }
-
-    .col-xl-7 {
-      flex: 0 0 auto;
-      width: 58.33333333%;
-    }
-
-    .col-xl-8 {
-      flex: 0 0 auto;
-      width: 66.66666667%;
-    }
-
-    .col-xl-9 {
-      flex: 0 0 auto;
-      width: 75%;
-    }
-
-    .col-xl-10 {
-      flex: 0 0 auto;
-      width: 83.33333333%;
-    }
-
-    .col-xl-11 {
-      flex: 0 0 auto;
-      width: 91.66666667%;
-    }
-
-    .col-xl-12 {
-      flex: 0 0 auto;
-      width: 100%;
-    }
+  .lfx-u-mar-b-50 {
+    margin-bottom: 50px;
   }
 }

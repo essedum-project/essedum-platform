@@ -62,6 +62,7 @@ export class AipHeaderComponent {
   @Output() refresh = new EventEmitter<void>();
   @Output() add = new EventEmitter<void>();
 
+  readonly TOOLTIP_POSITION = 'above';
   isSearchHovered: boolean = false;
   isAddHovered: boolean = false;
   isRefreshHovered: boolean = false;

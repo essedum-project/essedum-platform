@@ -41,6 +41,22 @@ export class ModelComponent implements OnInit, OnChanges {
   selectedCard: any = [];
   cardToggled: boolean = true;
 
+  // Pagination
+  pageSize: number = 8;
+  pageNumber: number = 1;
+  pageArr: number[] = [];
+  pageNumberInput: number = 1;
+  noOfPages: number = 0;
+  prevRowsPerPageValue!: number;
+  itemsPerPage: number[] = [];
+  noOfItems: number;
+  startIndex: number;
+  endIndex: number;
+  pageNumberChanged: boolean = true;
+
+  @Output() pageChanged = new EventEmitter<number>();
+  @Output() pageSizeChanged = new EventEmitter<number>();
+
   createAuth: boolean;
   editAuth: boolean;
   deleteAuth: boolean;
@@ -64,9 +80,9 @@ export class ModelComponent implements OnInit, OnChanges {
   records: boolean = false;
   cortexwindow: any;
   tooltip: string = 'above';
-  pageNumber: number;
-  pageSize: number;
-  noOfItems: number;
+  // pageNumber: number;
+  // pageSize: number;
+  // noOfItems: number;
 
   constructor(
     private service: Services,
@@ -96,7 +112,7 @@ export class ModelComponent implements OnInit, OnChanges {
           : [];
       } else {
         this.pageNumber = 1;
-        this.pageSize = 4;
+        this.pageSize = 8;
         this.filter = '';
       }
     });
@@ -140,6 +156,44 @@ export class ModelComponent implements OnInit, OnChanges {
       if (cipAuthority.includes('model-delete')) this.deleteAuth = true;
       if (cipAuthority.includes('model-deploy')) this.deployAuth = true;
     });
+  }
+
+  private initializePagination(): void {
+    // Define how many page numbers to show
+    const visiblePages = 5;
+    const halfVisible = Math.floor(visiblePages / 2);
+
+    if (!this.noOfPages) {
+      this.startIndex = 0;
+      this.endIndex = visiblePages;
+    } else if (this.noOfPages <= visiblePages) {
+      // If we have fewer pages than the visible count, show all
+      this.startIndex = 0;
+      this.endIndex = this.noOfPages;
+    } else if (this.pageNumber <= halfVisible + 1) {
+      // Near the beginning
+      this.startIndex = 0;
+      this.endIndex = visiblePages;
+    } else if (this.pageNumber >= this.noOfPages - halfVisible) {
+      // Near the end
+      this.startIndex = this.noOfPages - visiblePages;
+      this.endIndex = this.noOfPages;
+    } else {
+      // In the middle - center the current page
+      this.startIndex = this.pageNumber - halfVisible - 1;
+      this.endIndex = this.pageNumber + halfVisible;
+    }
+
+    // Ensure indexes are within valid bounds
+    this.startIndex = Math.max(0, this.startIndex);
+    this.endIndex = Math.min(this.noOfPages, this.endIndex);
+
+    console.log(
+      'Pagination initialized with startIndex:',
+      this.startIndex,
+      'endIndex:',
+      this.endIndex
+    );
   }
 
   changedToogle(event: any) {
@@ -223,6 +277,9 @@ export class ModelComponent implements OnInit, OnChanges {
     params = params.set('isCached', false);
     this.service.getCountModels(params).subscribe((res) => {
       this.noOfItems = res;
+      this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
+      this.pageArr = [...Array(this.noOfPages).keys()];
+      this.initializePagination();
       if (res) {
         this.records = false;
       } else {
@@ -297,16 +354,6 @@ export class ModelComponent implements OnInit, OnChanges {
     }
     this.refresh();
   }
-  handlePageAndSizeChange(event: { pageNumber: number; pageSize: number }) {
-    // Handle the updated pageNumber and pageSize here
-    console.log('Page number:', event.pageNumber);
-    console.log('Page size:', event.pageSize);
-    this.pageNumber = event.pageNumber ? event.pageNumber : 1;
-    this.pageSize = event.pageSize ? event.pageSize : 4;
-    this.cards = [];
-    this.getCards();
-    this.getCountModels();
-  }
 
   tagSelectedEvent(event) {
     this.selectedAdapterInstance = event.getSelectedAdapterInstance();
@@ -316,6 +363,7 @@ export class ModelComponent implements OnInit, OnChanges {
     this.tagrefresh = false;
     this.refresh();
   }
+
   deleteDeployment(card) {
     console.log('deletecard', card);
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
@@ -374,5 +422,31 @@ export class ModelComponent implements OnInit, OnChanges {
 
   onFilterStatusChange(hasActiveFilters: boolean) {
     this.hasFilters = hasActiveFilters;
+  }
+
+  onNextPage(): void {
+    if (this.pageNumber < this.noOfPages) {
+      this.pageNumber++;
+      this.onChangePage();
+    }
+  }
+
+  onPrevPage(): void {
+    if (this.pageNumber > 1) {
+      this.pageNumber--;
+      this.onChangePage();
+    }
+  }
+
+  onChangePage(page?: number): void {
+    if (page !== undefined && page >= 1 && page <= this.noOfPages) {
+      this.pageNumber = page;
+    }
+
+    if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
+      this.pageChanged.emit(this.pageNumber);
+      this.initializePagination();
+      this.getCards();
+    }
   }
 }
