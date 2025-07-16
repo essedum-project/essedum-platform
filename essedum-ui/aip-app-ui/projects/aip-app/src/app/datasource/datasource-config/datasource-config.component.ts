@@ -72,7 +72,7 @@ export class DatasourceConfigComponent implements OnInit {
   edit: boolean = false;
   capability: string[] = [];
   initiativeView: boolean;
-
+  lastRefreshedTime: Date | null = null;
   modelTypeOptions: any = [];
   options: any = [];
   @Input() initiativeCreate: boolean;
@@ -173,8 +173,18 @@ export class DatasourceConfigComponent implements OnInit {
     catch (Exception: any) {
       this.Services.messageService("Some error occured")
     }
+
+    this.lastRefreshTime();
   }
 
+  lastRefreshTime() {
+    setTimeout(() => {
+      this.lastRefreshedTime = new Date();
+      console.log('Data refreshed!');
+    }, 1000);
+  }
+
+ 
   checkVaultStatus() {
     this.Services.isVaultEnabled().subscribe(resp => {
       this.isVaultEnabled = resp
