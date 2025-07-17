@@ -26,3 +26,37 @@ margin-bottom: 16px !important;
   font-size:24px !important;
   color: #0a142f !important;
 }
+
+
+// Add this to styles.scss or your component's SCSS file
+::ng-deep .mat-mdc-tab-group.mat-mdc-tab-group-stretch-tabs > .mat-mdc-tab-header .mat-mdc-tab {
+  flex-grow: 0 !important;
+}
+
+::ng-deep .mat-mdc-tab-list {
+  flex-grow: 0 !important;
+}
+
+.tab-header-title{
+text-align: left;
+font: normal normal 600 18px/24px 'Roboto',sans-serif !important;
+letter-spacing: 0px;
+color: #0052CC;
+opacity: 1;
+}
+
+.tab-header-title-normal{
+    text-align: left;
+font: normal normal normal 18px/24px 'Roboto',sans-serif !important;
+letter-spacing: 0px;
+color: #737373;
+opacity: 1;
+}
+
+.table-header-title{
+font: normal normal 600 16px/22px 'Roboto',sans-serif !important;
+letter-spacing: 0px;
+color: #000000;
+text-transform: capitalize;
+opacity: 1;
+}

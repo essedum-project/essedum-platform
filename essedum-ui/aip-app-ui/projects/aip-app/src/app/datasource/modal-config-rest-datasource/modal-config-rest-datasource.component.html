@@ -388,23 +388,28 @@
               </mat-form-field>
             </div>
           </div>
-          <mat-card class="row d-flex justify-content-between align-items-center lfx-u-pad-tb-16">
-            <div ledsTabGroup [type]="type" [headerBg]="headerBg">
-              <mat-tab-group style="width: 100%" (selectedIndexChange)="basicReqTabChange($event)">
+          <mat-card
+            class="row d-flex justify-content-between align-items-center lfx-u-pad-tb-16"
+          >
+            <div  [type]="type" [headerBg]="headerBg">
+              <mat-tab-group
+                style="width: 100%"
+                (selectedIndexChange)="basicReqTabChange($event)"
+              >
                 <mat-tab>
                   <ng-template mat-tab-label>
-                    <span class="header-text-label">Parameters</span>
+                    <span [ngClass]="basicReqTab === 'paramsTab' ? 'tab-header-title' : 'tab-header-title-normal'">Parameters</span>
                   </ng-template>
                 </mat-tab>
                 <mat-tab>
                   <ng-template mat-tab-label>
-                    <span class="header-text-label">Headers</span>
+                    <span [ngClass]="basicReqTab === 'headersTab' ? 'tab-header-title' : 'tab-header-title-normal'">Headers</span>
                   </ng-template>
                 </mat-tab>
 
                 <mat-tab>
                   <ng-template mat-tab-label>
-                    <span class="header-text-label">Storage</span>
+                    <span [ngClass]="basicReqTab === 'extrasTab' ? 'tab-header-title' : 'tab-header-title-normal'">Storage</span>
                   </ng-template>
                 </mat-tab>
                 <mat-tab *ngIf="
@@ -414,7 +419,8 @@
                       'put'
                   ">
                   <ng-template mat-tab-label>
-                    <span class="header-text-label">Body</span></ng-template>
+                    <span [ngClass]="basicReqTab === 'bodyTab' ? 'tab-header-title' : 'tab-header-title-normal'">Body</span></ng-template
+                  >
                 </mat-tab>
               </mat-tab-group>
             </div>
@@ -424,9 +430,9 @@
                 <table class="table table-striped table-bordered">
                   <thead>
                     <tr>
-                      <th class="base-color" style="width: 9%">Action</th>
-                      <th class="base-color">Key</th>
-                      <th class="base-color">Value</th>
+                      <th class="table-header-title" style="width: 9%">Action</th>
+                      <th class="table-header-title">Key</th>
+                      <th class="table-header-title">Value</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -458,9 +464,9 @@
                 <table class="table table-striped table-bordered">
                   <thead>
                     <tr>
-                      <th class="base-color" style="width: 9%">Action</th>
-                      <th class="base-color">Key</th>
-                      <th class="base-color">Value</th>
+                      <th class="table-header-title" style="width: 9%">Action</th>
+                      <th class="table-header-title">Key</th>
+                      <th class="table-header-title">Value</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -518,9 +524,9 @@
                 <table style="margin-top: 1em" class="table table-striped table-bordered">
                   <thead>
                     <tr>
-                      <th class="base-color" style="width: 9%">Action</th>
-                      <th class="base-color">Key</th>
-                      <th class="base-color">Value</th>
+                      <th class="table-header-title" style="width: 9%">Action</th>
+                      <th class="table-header-title">Key</th>
+                      <th class="table-header-title">Value</th>
                     </tr>
                   </thead>
                   <tbody>
