@@ -72,7 +72,7 @@
             </mat-form-field>
           </div>
         </div>
-        <div *ngIf="
+        <div class="p-20" *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'bigquery'
           ">
@@ -88,22 +88,22 @@
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'hmac'
           ">
-          <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
+          <mat-form-field appearance="fill" style="width: 50%" floatLabel="always">
             <mat-label>Authorization Prefix</mat-label>
             <input matInput placeholder="Enter Authorization Prefix..." [(ngModel)]="AuthDetails['authPrefix']" />
           </mat-form-field>
 
-          <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
+          <mat-form-field appearance="fill" style="width: 50%" floatLabel="always">
             <mat-label>Secret Key</mat-label>
             <input matInput placeholder="Enter Secret Key..." [(ngModel)]="AuthDetails['secretKey']" />
           </mat-form-field>
 
-          <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
+          <mat-form-field appearance="fill" style="width: 50%" floatLabel="always">
             <mat-label>Data</mat-label>
             <input matInput placeholder="Enter Data..." [(ngModel)]="AuthDetails['input']" />
           </mat-form-field>
         </div>
-        <div class="row" *ngIf="
+        <div class="row p-20" *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'oauth'
           ">
@@ -212,7 +212,7 @@
           </div>
         </div>
 
-        <div *ngIf="
+        <div class="p-20" *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'bearertoken'
           ">
@@ -229,11 +229,11 @@
           </div>
         </div>
 
-        <div class="row" *ngIf="
+        <div class="row p-20" *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'awssign'
           ">
-          <div class="col-lg-6 col-md-6 lfx-u-mar-b-16 p-20">
+          <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
             <mat-form-field appearance="fill" style="width: 60%" floatLabel="always">
               <mat-label>Access Key</mat-label>
               <input matInput placeholder="Enter Access Key" type="password" [(ngModel)]="AuthDetails['accesskey']" />
@@ -347,13 +347,13 @@
             <mat-hint>Select Execution</mat-hint>
           </mat-form-field>
         </div>
-        <div *ngIf="
+        <div class="p-20" *ngIf="
             sourceType.attributes['ConnectionType'] &&
             sourceType.attributes['ConnectionType'].toLowerCase() ==
               'apirequest'
           ">
           <div class="row">
-            <div class="col-lg-4 col-md-4 lfx-u-mar-b-16 p-20">
+            <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
               <mat-form-field appearance="fill" style="width: 80%">
                 <mat-label>Request Method</mat-label>
                 <mat-select [(value)]="testDataset['attributes']['RequestMethod']"
