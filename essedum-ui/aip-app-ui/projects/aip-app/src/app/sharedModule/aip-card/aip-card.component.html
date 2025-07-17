@@ -5,17 +5,19 @@
     <div class="d-flex align-items-center justify-content-between lfx-u-mar-b-8">
         <div class="d-flex align-items-center card-category">
             <div class="lfx-u-header-sm lfx-u-text-primary-80">
-                {{ getCategory() | titlecase }}
+                {{ getCategory() | uppercase }}
             </div>
         </div>
         <div *ngIf="servicev1 === 'model'" class="lfx-c-card__container-right">
             <span class="lfx-c-badge float-end"
                 [ngClass]="[card.status=='Registered'?'lfx-c-badge--blue ':'lfx-c-badge--active',card.status=='Undeployed' || card.status == 'Failed'?'lfx-c-badge--warning ':'lfx-c-badge--active']">{{card.status}}</span>
         </div>
-         <div *ngIf="servicev1 === 'Datasets'" >
-                    <mat-icon [matTooltip]="'View Details'" matTooltipPosition="above" (click)="onViewDetails(card)" class="header-action-icon" style="justify-content: flex-end; ">visibility</mat-icon>
-                    <mat-icon [matTooltip]="'Download'" matTooltipPosition="above" (click)="onDownload(card)" class="header-action-icon" style="justify-content: flex-end; ">download</mat-icon>
-            </div>
+        <div *ngIf="servicev1 === 'Datasets'">
+            <mat-icon [matTooltip]="'View Details'" matTooltipPosition="above" (click)="onViewDetails(card)"
+                class="header-action-icon" style="justify-content: flex-end; ">visibility</mat-icon>
+            <mat-icon [matTooltip]="'Download'" matTooltipPosition="above" (click)="onDownload(card)"
+                class="header-action-icon" style="justify-content: flex-end; ">download</mat-icon>
+        </div>
     </div>
 
     <!-- Card header with title and date -->
@@ -41,8 +43,9 @@
               </mat-card-content> -->
 
     <!-- Card actions -->
-     
-    <mat-card-actions *ngIf="servicev1 !== 'Datasets'" class="lfx-c-card__action-hover d-flex justify-content-between card-actions-hover">
+
+    <mat-card-actions *ngIf="servicev1 !== 'Datasets'"
+        class="lfx-c-card__action-hover d-flex justify-content-between card-actions-hover">
 
         <div class="button-placeholder">
             <button mat-raised-button class="view-details-btn" *ngIf="card.hover" (click)="onViewDetails()"
@@ -76,7 +79,7 @@
                 <button mat-menu-item *ngIf="editAuth" (click)="onEdit()">
                     Edit
                 </button>
-                  <button mat-menu-item *ngIf="servicev1 === 'connections'" (click)="onViewDatasets(card.type)">
+                <button mat-menu-item *ngIf="servicev1 === 'connections'" (click)="onViewDatasets(card.type)">
                     View Datasets
                 </button>
                 <button mat-menu-item *ngIf="deleteAuth" (click)="onDelete()">
@@ -88,11 +91,11 @@
             </mat-menu>
         </div>
     </mat-card-actions>
-    
+
     <!-- Dataset Action icons -->
     <mat-card-actions *ngIf="servicev1 === 'Datasets'"
         class="lfx-c-card__action-hover d-flex justify-content-between card-actions-hover">
-       <button mat-icon-button [matTooltip]="'Copy'" matTooltipPosition="above" (click)="onCopy(card)">
+        <button mat-icon-button [matTooltip]="'Copy'" matTooltipPosition="above" (click)="onCopy(card)">
             <mat-icon class="action-icon">content_copy</mat-icon>
         </button>
         <button *ngIf="editAuth" mat-icon-button [matTooltip]="'Edit'" matTooltipPosition="above"
@@ -103,6 +106,6 @@
             (click)="onDelete(card.name)">
             <mat-icon class="action-icon">delete</mat-icon>
         </button>
-        </mat-card-actions>
+    </mat-card-actions>
 
 </mat-card>

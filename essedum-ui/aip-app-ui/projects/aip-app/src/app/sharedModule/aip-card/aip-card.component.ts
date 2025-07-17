@@ -1,6 +1,38 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { animate, style, transition, trigger } from '@angular/animations';
 
+// Constants for service types
+const SERVICE_TYPES = {
+  ADAPTERS: 'adapters',
+  INSTANCES: 'instances',
+  SPECS: 'specs',
+  SCHEMAS: 'schemas',
+  MODEL: 'model',
+  PIPELINE: 'pipeline',
+  CONNECTIONS: 'connections',
+  DATASETS: 'Datasets',
+};
+
+// Background colors
+const BACKGROUND_COLORS = [
+  '#E3F2FD',
+  '#F3E5F5',
+  '#E8F5E8',
+  '#FFF3E0',
+  '#FCE4EC',
+  '#E0F2F1',
+  '#F9FBE7',
+  '#EFEBE9',
+  '#E8EAF6',
+  '#F1F8E9',
+  '#FFF8E1',
+  '#FAFAFA',
+  '#E0F7FA',
+  '#F3E5AB',
+  '#FFEBEE',
+  '#E8F5E8',
+];
+
 @Component({
   selector: 'app-aip-card',
   templateUrl: './aip-card.component.html',
@@ -28,9 +60,10 @@ export class AipCardComponent {
   @Output() edit: EventEmitter<any> = new EventEmitter<any>();
   @Output() delete: EventEmitter<any> = new EventEmitter<any>();
   @Output() jobConsole?: EventEmitter<any> = new EventEmitter<any>();
-   @Output() viewDatasets = new EventEmitter<any>();
+  @Output() viewDatasets = new EventEmitter<any>();
   @Output() download = new EventEmitter<any>();
   @Output() copy = new EventEmitter<any>();
+
   // UI state variables
   isMenuHovered = false;
 
@@ -46,38 +79,21 @@ export class AipCardComponent {
   onDelete(): void {
     this.delete.emit();
   }
+
   onViewDatasets(cardType: any): void {
     this.viewDatasets.emit(cardType);
   }
-   onDownload(card: any): void {
+
+  onDownload(card: any): void {
     this.download.emit(card);
   }
+
   onCopy(card: any): void {
     this.copy.emit(card);
   }
 
   getAvatarBackgroundColor(): string {
     const character = this.getAvatar();
-
-    const backgroundColors = [
-      '#E3F2FD', // Light blue
-      '#F3E5F5', // Light purple
-      '#E8F5E8', // Light green
-      '#FFF3E0', // Light orange
-      '#FCE4EC', // Light pink
-      '#E0F2F1', // Light teal
-      '#F9FBE7', // Light lime
-      '#EFEBE9', // Light brown
-      '#E8EAF6', // Light indigo
-      '#F1F8E9', // Light light green
-      '#FFF8E1', // Light amber
-      '#FAFAFA', // Light gray
-      '#E0F7FA', // Light cyan
-      '#F3E5AB', // Light yellow-green
-      '#FFEBEE', // Very light red
-      '#E8F5E8', // Another light green variant
-    ];
-
     let hash = 0;
 
     for (let i = 0; i < character.length; i++) {
@@ -85,74 +101,65 @@ export class AipCardComponent {
       hash = (hash << 5) - hash + char;
       hash = hash & hash;
     }
-
-    const colorIndex = Math.abs(hash) % backgroundColors.length;
-    return backgroundColors[colorIndex];
+    const colorIndex = Math.abs(hash) % BACKGROUND_COLORS.length;
+    return BACKGROUND_COLORS[colorIndex];
   }
 
-  getCategory() {
-    if (this.servicev1 === 'adapters') {
-      return this.card.category;
-    } else if (this.servicev1 === 'specs') {
-      return this.card.domainname;
-    } else if (this.servicev1 === 'instances') {
-      return this.card.adaptername;
-    } else if (this.servicev1 === 'schemas') {
-      return this.card.name;
-    } else if (this.servicev1 === 'model' || this.servicev1 === 'pipeline' || this.servicev1 === 'connections') {
-      return this.card.type;
-    }else if (this.servicev1 === 'Datasets') {
-       return `${this.card.datasource?.category} - ${this.card.datasource?.alias}`;
-    }
+  getCategory(): string | undefined {
+    const categoryMap = {
+      [SERVICE_TYPES.ADAPTERS]: this.card?.category,
+      [SERVICE_TYPES.SPECS]: this.card?.domainname,
+      [SERVICE_TYPES.INSTANCES]: this.card?.adaptername,
+      [SERVICE_TYPES.SCHEMAS]: this.card?.name,
+      [SERVICE_TYPES.MODEL]: this.card?.type,
+      [SERVICE_TYPES.PIPELINE]: this.card?.type,
+      [SERVICE_TYPES.CONNECTIONS]: this.card?.type,
+      [SERVICE_TYPES.DATASETS]: `${this.card?.datasource?.category} - ${this.card?.datasource?.alias}`,
+    };
+    return categoryMap[this.servicev1];
   }
 
-  getTitle() {
-    if (this.servicev1 === 'adapters' || this.servicev1 === 'instances') {
-      return this.card.name;
-    } else if (this.servicev1 === 'specs') {
-      return this.card.domainname;
-    } else if (this.servicev1 === 'schemas' || this.servicev1 === 'pipeline'|| this.servicev1 === 'connections') {
-      return this.card.alias;
-    } else if (this.servicev1 === 'model') {
-      return this.card.name && this.card.name != ''
-        ? this.card.name
-        : this.card.sourceName;
-    }else if (this.servicev1 === 'Datasets') {
-      return this.card?.alias ;
-    }
+  getTitle(): string | undefined {
+    const titleMap = {
+      [SERVICE_TYPES.ADAPTERS]: this.card?.name,
+      [SERVICE_TYPES.INSTANCES]: this.card?.name,
+      [SERVICE_TYPES.SPECS]: this.card?.domainname,
+      [SERVICE_TYPES.SCHEMAS]: this.card?.alias,
+      [SERVICE_TYPES.PIPELINE]: this.card?.alias,
+      [SERVICE_TYPES.CONNECTIONS]: this.card?.alias,
+      [SERVICE_TYPES.MODEL]: this.card?.name || this.card?.sourceName,
+      [SERVICE_TYPES.DATASETS]: this.card?.datasource?.alias,
+    };
+    return titleMap[this.servicev1];
   }
 
-  getDate() {
-    if (this.servicev1 === 'adapters' || this.servicev1 === 'instances') {
-      return this.card.createdon;
-    } else if (this.servicev1 === 'specs') {
-      return this.card.lastmodifiedon;
-    } else if (this.servicev1 === 'schemas' || this.servicev1 === 'connections' || this.servicev1 === 'Datasets') {
-      return this.card.lastmodifieddate;
-    } else if (this.servicev1 === 'model') {
-      return this.card.createdOn;
-    } else if (this.servicev1 === 'pipeline') {
-      return this.card.createdDate;
-    }
+  getDate(): string | undefined {
+    const dateMap = {
+      [SERVICE_TYPES.ADAPTERS]: this.card?.createdon,
+      [SERVICE_TYPES.INSTANCES]: this.card?.createdon,
+      [SERVICE_TYPES.SPECS]: this.card?.lastmodifiedon,
+      [SERVICE_TYPES.SCHEMAS]: this.card?.lastmodifieddate,
+      [SERVICE_TYPES.CONNECTIONS]: this.card?.lastmodifieddate,
+      [SERVICE_TYPES.DATASETS]: this.card?.lastmodifieddate,
+      [SERVICE_TYPES.MODEL]: this.card?.createdOn,
+      [SERVICE_TYPES.PIPELINE]: this.card?.createdDate,
+    };
+    return dateMap[this.servicev1];
   }
 
-  getAvatar() {
-    if (
-      this.servicev1 === 'adapters' ||
-      this.servicev1 === 'instances' ||
-      this.servicev1 === 'specs'
-    ) {
-      return this.card.createdby ? this.card.createdby : 'Name Not Available';
-    } else if (this.servicev1 === 'schemas' || this.servicev1 === 'connections' ) {
-      return this.card.lastmodifiedby
-        ? this.card.lastmodifiedby
-        : 'Name Not Available';
-    } else if (this.servicev1 === 'model') {
-      return this.card.createdBy ? this.card.createdBy : 'Name Not Available';
-    } else if (this.servicev1 === 'pipeline') {
-      return this.card.target.created_by
-        ? this.card.target.created_by
-        : 'Name Not Available';
-    }
+  getAvatar(): string {
+    const avatarMap = {
+      [SERVICE_TYPES.ADAPTERS]: this.card?.createdby || 'Name Not Available',
+      [SERVICE_TYPES.INSTANCES]: this.card?.createdby || 'Name Not Available',
+      [SERVICE_TYPES.SPECS]: this.card?.createdby || 'Name Not Available',
+      [SERVICE_TYPES.SCHEMAS]:
+        this.card?.lastmodifiedby || 'Name Not Available',
+      [SERVICE_TYPES.CONNECTIONS]:
+        this.card?.lastmodifiedby || 'Name Not Available',
+      [SERVICE_TYPES.MODEL]: this.card?.createdBy || 'Name Not Available',
+      [SERVICE_TYPES.PIPELINE]:
+        this.card?.target?.created_by || 'Name Not Available',
+    };
+    return avatarMap[this.servicev1];
   }
 }
