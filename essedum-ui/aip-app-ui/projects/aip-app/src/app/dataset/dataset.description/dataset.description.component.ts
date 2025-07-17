@@ -40,6 +40,7 @@ export class DatasetDescriptionComponent implements OnInit {
   description: any;
   isAuth: boolean;
   datasetUnlink: boolean;
+      appLoading: boolean = true;
   tableView: boolean;
   selectedDatasetName: string;
   mashupView: boolean;
@@ -216,6 +217,9 @@ export class DatasetDescriptionComponent implements OnInit {
     this.getknowledgebases();
    
   }
+     get shouldShowEmptyState(): boolean {
+    return !this.appLoading && (!this.datasetData || this.datasetData.length === 0);
+  }
   getDatasetByName(){
     this.datasetsService. getDatasetByNameAndOrg(this.datasetName).subscribe((res) => {
       console.log(res);
@@ -320,6 +324,8 @@ export class DatasetDescriptionComponent implements OnInit {
   }
 
   checkTableSupport() {
+          this.appLoading = true;
+
     this.service.checkVisualizeSupport(this.selectedDatasetName)
       .subscribe(res => {
         if (res && res.filter(ele => ele["Tabular View"]).length > 0) {
@@ -353,8 +359,10 @@ export class DatasetDescriptionComponent implements OnInit {
                   true
                 ).subscribe(resp => {
                   if(resp.length===0) {
+                    this.appLoading=false;
                     this.datasetDataErr = 'There is an application error, please contact the application admin';
                   } else {
+                    this.appLoading=false;
                     this.datasetDataErr=false;
                     this.datasetData = resp;
                     if(this.dataset.views=='Table view'){
@@ -377,6 +385,7 @@ export class DatasetDescriptionComponent implements OnInit {
                 }, err => {
                   console.log(err);
                   this.datasetDataErr = err;
+                  this.appLoading=false;
                 });
               }, err => { console.log(err) });
 
@@ -418,6 +427,7 @@ export class DatasetDescriptionComponent implements OnInit {
                   true
                 ).subscribe(resp => {
                   this.datasetData = resp
+                  this.appLoading=false;
                   if(this.dataset.views == 'Doc View'){
                     this.http.get(resp[0], { responseType: 'arraybuffer' }).subscribe(async (docxArray) => {
                       let docxHtml = mammoth.convertToHtml({ arrayBuffer: docxArray })
@@ -433,6 +443,7 @@ export class DatasetDescriptionComponent implements OnInit {
                 }, err => {
                   console.log(err);
                   this.datasetData = err.text;
+                  this.appLoading=false;
                 });
               }, err => { console.log(err) });
 

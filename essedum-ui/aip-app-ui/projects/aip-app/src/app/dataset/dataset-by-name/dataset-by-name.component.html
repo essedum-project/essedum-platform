@@ -1,56 +1,59 @@
-<div  *ngIf="!copyDataset"  class="aip-top">
-  <div *ngIf="cardToggled; else detailView" class="clearfix aip-tranparent-backgroud js-bodywrapper" id="mainCtr">
-    <div class="aip-container">
+<div *ngIf="!copyDataset">
+    <div *ngIf="cardToggled; else detailView" class="aip-container lfx-u-pad-lr-30">
 
-      <!-- Main content area -->
-      <div class="col-sm-12 col-md-9 col-lg-9 lfx-u-pad-lr-30" id="mainrightCnt">
+
         <!-- Header Section -->
-        <div class="aip-content">
 
-          <!-- Header -->
-          <app-aip-header [cardTitle]="cardTitle" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createAuth"
+        <!-- Header -->
+        <app-aip-header [cardTitle]="cardTitle" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createAuth"
             (search)="filterz($event)" (refresh)="refreshData()" (add)="open()">
-          </app-aip-header>
+        </app-aip-header>
 
-          <!-- Filter Section -->
-          <app-aip-filter  [servicev1]="servicev1" [tagrefresh]="tagrefresh"
-                    [selectedDatasetTypeList]="{ 
+        <!-- Filter Section -->
+        <app-aip-filter [servicev1]="servicev1" [tagrefresh]="tagrefresh" [selectedDatasetTypeList]="{ 
                         selectedAdapterType: selectedAdapterType
                         
                       }" (tagSelected)="tagSelectedEvent($event)"
             (filterStatusChange)="onFilterStatusChange($event)"></app-aip-filter>
+        <div *ngIf="loading" role="status" aria-label="Loading cards">
+            <app-aip-loading></app-aip-loading>
         </div>
 
-        <!-- Cards container -->
-        <div class="lfx-c-card__action-ul aip-card-container">
-          <div class="col-md-8 col-lg-6 col-xl-5 aip-card-wrapper"
-            *ngFor="let card of filteredCards">
-            <div class="card-wrapper h-100">
-              <app-aip-card [servicev1]="servicev1" [card]="card" [editAuth]="editAuth" [deployAuth]="deployAuth"
-                [deleteAuth]="deleteAuth" (viewDetails)="desc(card)" (edit)="navigateTo(card)" (download)="downloadSelectedFile(card)"
-                (delete)="deleteAdapter(card.name)" (copy)="navigate(card)">
-             <ng-template #lgContent1 let-modal>
-                                        <app-datasource-config> </app-datasource-config>
-                                    </ng-template>
-              </app-aip-card>
+        <!-- Content Area (only shown when not loading) -->
+        <ng-container *ngIf="!loading">
+
+            <!-- Cards container -->
+            <div *ngIf="filteredCards.length > 0" class="aip-card-container" aria-label="Adapter cards">
+                <div class="aip-card-wrapper" *ngFor="let card of filteredCards">
+                    <!-- Cards  -->
+                    <app-aip-card [servicev1]="servicev1" [card]="card" [editAuth]="editAuth" [deployAuth]="deployAuth"
+                        [deleteAuth]="deleteAuth" (viewDetails)="desc(card)" (edit)="navigateTo(card)"
+                        (download)="downloadSelectedFile(card)" (delete)="deleteAdapter(card.name)"
+                        (copy)="navigate(card)">
+                        <!-- Edit Modal Template -->
+                        <ng-template #lgContent1 let-modal>
+                            <app-datasource-config> </app-datasource-config>
+                        </ng-template>
+                    </app-aip-card>
+
+                </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Empty state -->
-        <app-aip-empty-state *ngIf="!filteredCards || filteredCards.length==0"></app-aip-empty-state>
+            <!-- Empty state -->
+            <app-aip-empty-state *ngIf="shouldShowEmptyState"></app-aip-empty-state>
 
-        <!-- Pagination -->
-        <app-aip-pagination *ngIf="filteredCards && filteredCards.length>0" [pageNumber]="pageNumber" [noOfPages]="noOfPages" [pageArr]="pageArr"
-          [startIndex]="startIndex" [endIndex]="endIndex" [hoverStates]="hoverStates" (prevPage)="prevPage()"
-          (nextPage)="nextPage()" (changePage)="changePage($event)">
-        </app-aip-pagination>
+            <!-- Pagination -->
+            <app-aip-pagination *ngIf="filteredCards && filteredCards.length>0" [pageNumber]="pageNumber"
+                [noOfPages]="noOfPages" [pageArr]="pageArr" [startIndex]="startIndex" [endIndex]="endIndex"
+                [hoverStates]="hoverStates" (prevPage)="prevPage()" (nextPage)="nextPage()"
+                (changePage)="changePage($event)">
+            </app-aip-pagination>
 
-      </div>
+
+        </ng-container>
     </div>
-  </div>
 
-  <!-- Detail view template -->
+    <!-- Detail view template -->
 
     <ng-template #elseBlock>
         <app-datasource-description [card]="selectedCard" (newItemEvent)="changedToogle($event)"

@@ -25,8 +25,8 @@ export class DatasetByNameComponent {
   public isFilterHovered: boolean = false;
   cardToggled: boolean = true;
   openSearchField: boolean = false;
-    lastRefreshedTime: Date | null = null;
-        servicev1 = 'Datasets';
+  lastRefreshedTime: Date | null = null;
+  servicev1 = 'Datasets';
   hasFilters = false;
   filtbackup: any = '';
   cards: any;
@@ -41,6 +41,8 @@ export class DatasetByNameComponent {
   deleteFilteredTag: boolean = false;
   deleteFilteredDataset: any;
   editData: any;
+  loading: boolean = true;
+
 
 
   type: any;
@@ -93,7 +95,7 @@ export class DatasetByNameComponent {
   status: any;
   ratingList: any;
   selectedTab = 'datasets';
-    hoverStates: boolean[] = [];
+  hoverStates: boolean[] = [];
 
   rateData: { selectedModule: string; selectedElement: any; selectedElementAlias: any, previousRating: any; previousFeedback: any; };
 
@@ -140,7 +142,7 @@ export class DatasetByNameComponent {
         this.selectedIndexNames = params['indexNames']
           ? params['indexNames'].split(',')
           : [];
-           if (
+        if (
           (this.selectedAdapterType && this.selectedAdapterType.length > 0) ||
           (this.selectedAdapterInstance &&
             this.selectedAdapterInstance.length > 0) ||
@@ -264,21 +266,21 @@ export class DatasetByNameComponent {
   }
 
   refreshData() {
-    this.filt='';
-    this.tagrefresh = true;
-       if (!this.hasFilters) {
-    this.selectedAdapterType = [];
-    this.selectedIndexNames = [];
-    this.selectedTag = [];
     this.filt = '';
-    this.noOfPages = 0;
-    this.noOfItems = 0;
-    this.filterCards();
-       }
-        this.lastRefreshTime();
+    this.tagrefresh = true;
+    if (!this.hasFilters) {
+      this.selectedAdapterType = [];
+      this.selectedIndexNames = [];
+      this.selectedTag = [];
+      this.filt = '';
+      this.noOfPages = 0;
+      this.noOfItems = 0;
+      this.filterCards();
+    }
+    this.lastRefreshTime();
 
   }
-   toggleSearch(): void {
+  toggleSearch(): void {
     this.isSearchVisible = true;
   }
 
@@ -290,6 +292,8 @@ export class DatasetByNameComponent {
 
   filterCards() {
     this.records = false;
+    this.loading = true;
+
     this.filteredCards = [];
     let param: HttpParams = new HttpParams();
     let organization = sessionStorage.getItem('organization')
@@ -313,7 +317,7 @@ export class DatasetByNameComponent {
       this.noOfItems = res;
       this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
       this.pageArr = [...Array(this.noOfPages).keys()];
-          this.hoverStates = new Array(this.pageArr.length).fill(false);
+      this.hoverStates = new Array(this.pageArr.length).fill(false);
 
       this.pageSize = 8;
       // this.pageNumber = 1;
@@ -328,6 +332,8 @@ export class DatasetByNameComponent {
           });
         }
         this.records = true;
+        this.loading = false;
+
         this.getIconStatus();
       });
     });
@@ -395,7 +401,7 @@ export class DatasetByNameComponent {
         this.noOfItems = this.noOfItems || data.length;
         this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
         this.pageArr = [...Array(this.noOfPages).keys()];
-            this.hoverStates = new Array(this.pageArr.length).fill(false);
+        this.hoverStates = new Array(this.pageArr.length).fill(false);
 
         this.records = false;
       });
@@ -498,20 +504,20 @@ export class DatasetByNameComponent {
   searchCards() {
     this.openSearchField = true;
   }
-  handleSearch(){
-    if(!this.filt || this.filt.trim()=== ''){
-      this.openSearchField=false;
+  handleSearch() {
+    if (!this.filt || this.filt.trim() === '') {
+      this.openSearchField = false;
     }
   }
   filterz(searchText?: string) {
-     if (searchText !== undefined) {
+    if (searchText !== undefined) {
       this.filt = searchText;
     }
-      if (this.filt.length != this.filtbackup.length) {
+    if (this.filt.length != this.filtbackup.length) {
       this.pageNumber = 1;
       this.filtbackup = this.filt;
     }
-    
+
     this.records = false;
     this.filteredCards = [];
     let param: HttpParams = new HttpParams();
@@ -536,7 +542,7 @@ export class DatasetByNameComponent {
       this.noOfItems = res;
       this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
       this.pageArr = [...Array(this.noOfPages).keys()];
-          this.hoverStates = new Array(this.pageArr.length).fill(false);
+      this.hoverStates = new Array(this.pageArr.length).fill(false);
 
       this.pageSize = 8;
       this.pageNumber = 1;
@@ -572,7 +578,7 @@ export class DatasetByNameComponent {
       this.filteredCards = resp;
       this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
       this.pageArr = [...Array(this.noOfPages).keys()];
-          this.hoverStates = new Array(this.pageArr.length).fill(false);
+      this.hoverStates = new Array(this.pageArr.length).fill(false);
 
       this.records = false;
     });
@@ -586,6 +592,9 @@ export class DatasetByNameComponent {
 
     this.tagrefresh = false;
     this.filterCards();
+  }
+  get shouldShowEmptyState(): boolean {
+    return !this.loading && (!this.filteredCards || this.filteredCards.length === 0);
   }
 
   open() {
@@ -1119,7 +1128,7 @@ export class DatasetByNameComponent {
       console.log('Data refreshed!');
     }, 1000);
   }
-    onFilterStatusChange(hasActiveFilters: boolean) {
+  onFilterStatusChange(hasActiveFilters: boolean) {
     this.hasFilters = hasActiveFilters;
   }
 }
