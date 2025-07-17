@@ -118,7 +118,7 @@ export class AipCardComponent {
         ? this.card.name
         : this.card.sourceName;
     }else if (this.servicev1 === 'Datasets') {
-      return this.card.datasource?.alias ;
+      return this.card?.alias ;
     }
   }
 
