@@ -11,7 +11,7 @@
 
       <div style="margin: 1em 0 0 1em" *ngIf="tab == 'authorizationTab'">
         <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-          <mat-form-field appearance="fill" style="width: 100%">
+          <mat-form-field appearance="fill" style="width: 30%">
             <mat-label>Auth Type</mat-label>
             <mat-select [(value)]="sourceType.attributes['AuthType']" (selectionChange)="onAuthTypeChange()">
               <mat-option *ngFor="let authType of authTypes" [value]="authType.value">
@@ -27,14 +27,14 @@
             sourceType.attributes['AuthType'].toLowerCase() == 'basicauth'
           ">
           <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+            <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
               <mat-label>Username</mat-label>
               <input matInput placeholder="Enter Username..." inputType="text" [(ngModel)]="AuthDetails['username']" />
             </mat-form-field>
           </div>
 
           <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+            <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
               <mat-label>Password</mat-label>
               <input matInput placeholder="Enter Password..." type="password" [(ngModel)]="AuthDetails['password']" />
             </mat-form-field>
@@ -50,7 +50,7 @@
             sourceType.attributes['AuthType'].toLowerCase() == 'token'
           ">
           <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-            <mat-form-field appearance="fill" style="width: 100%">
+            <mat-form-field appearance="fill" style="width: 30%">
               <mat-label>Select To Datasource</mat-label>
               <mat-select [(value)]="selectedDatasource" (selectionChange)="OnDatasourceChange($event)">
                 <mat-option *ngFor="let option of datasourceOptions" [value]="option.value">
@@ -61,7 +61,7 @@
             </mat-form-field>
           </div>
           <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-            <mat-form-field appearance="fill" style="width: 100%">
+            <mat-form-field appearance="fill" style="width: 30%">
               <mat-label>Select Datasets</mat-label>
               <mat-select [(value)]="selectedDataset" (selectionChange)="OnDatasetChange($event)">
                 <mat-option *ngFor="let option of datasetsoptions" [value]="option.value">
@@ -88,17 +88,17 @@
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'hmac'
           ">
-          <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+          <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
             <mat-label>Authorization Prefix</mat-label>
             <input matInput placeholder="Enter Authorization Prefix..." [(ngModel)]="AuthDetails['authPrefix']" />
           </mat-form-field>
 
-          <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+          <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
             <mat-label>Secret Key</mat-label>
             <input matInput placeholder="Enter Secret Key..." [(ngModel)]="AuthDetails['secretKey']" />
           </mat-form-field>
 
-          <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+          <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
             <mat-label>Data</mat-label>
             <input matInput placeholder="Enter Data..." [(ngModel)]="AuthDetails['input']" />
           </mat-form-field>
@@ -120,7 +120,7 @@
             </mat-form-field>
           </div>
           <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+            <mat-form-field appearance="fill" style="width: 60%" floatLabel="always">
               <mat-label>Scope</mat-label>
               <input matInput placeholder="Enter Scope..." [(ngModel)]="scope" />
             </mat-form-field>
@@ -145,7 +145,7 @@
             </mat-form-field>
           </div>
           <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+            <mat-form-field appearance="fill" style="width: 60%" floatLabel="always">
               <mat-label>Client ID</mat-label>
               <input matInput placeholder="Enter Client ID..." type="password" [(ngModel)]="client_id" />
             </mat-form-field>
@@ -160,7 +160,7 @@
             </mat-checkbox>
           </div>
           <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+            <mat-form-field appearance="fill" style="width: 60%" floatLabel="always">
               <mat-label>Client Secret</mat-label>
               <input matInput placeholder="Enter Client Secret..." type="password" [(ngModel)]="client_secret" />
             </mat-form-field>
@@ -217,7 +217,7 @@
             sourceType.attributes['AuthType'].toLowerCase() == 'bearertoken'
           ">
           <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+            <mat-form-field appearance="fill" style="width:60%" floatLabel="always">
               <mat-label>Token</mat-label>
               <input matInput placeholder="Enter Token..." type="password" [(ngModel)]="AuthDetails['authPrefix']" />
             </mat-form-field>
@@ -233,26 +233,26 @@
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'awssign'
           ">
-          <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+          <div class="col-lg-6 col-md-6 lfx-u-mar-b-16 p-20">
+            <mat-form-field appearance="fill" style="width: 60%" floatLabel="always">
               <mat-label>Access Key</mat-label>
               <input matInput placeholder="Enter Access Key" type="password" [(ngModel)]="AuthDetails['accesskey']" />
             </mat-form-field>
           </div>
           <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+            <mat-form-field appearance="fill" style="width: 60%" floatLabel="always">
               <mat-label>Secret Key</mat-label>
               <input matInput placeholder="Enter Secret Key" type="password" [(ngModel)]="AuthDetails['secretkey']" />
             </mat-form-field>
           </div>
           <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+            <mat-form-field appearance="fill" style="width: 60%" floatLabel="always">
               <mat-label>Region Name</mat-label>
               <input matInput placeholder="Enter Region Name" [(ngModel)]="AuthDetails['region']" />
             </mat-form-field>
           </div>
           <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+            <mat-form-field appearance="fill" style="width: 60%" floatLabel="always">
               <mat-label>Service Name</mat-label>
               <input matInput placeholder="Enter Service Name" [(ngModel)]="AuthDetails['service']" />
             </mat-form-field>
@@ -325,7 +325,7 @@
       </mat-expansion-panel-header>
       <div style="margin: 1em 0 0 1em">
         <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-          <mat-form-field appearance="fill" style="width: 100%">
+          <mat-form-field appearance="fill" style="width: 30%">
             <mat-label>Select Connection type</mat-label>
             <mat-select [(value)]="sourceType.attributes['ConnectionType']" required>
               <mat-option *ngFor="let option of connectionTypes" [value]="option.value">
@@ -336,7 +336,7 @@
           </mat-form-field>
         </div>
         <div *ngIf="sourceType.attributes['executionEnvironment']" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-          <mat-form-field appearance="fill" style="width: 100%">
+          <mat-form-field appearance="fill" style="width: 30%">
             <mat-label>Execution</mat-label>
             <mat-select [(value)]="sourceType.attributes['executionEnvironment']"
               (selectionChange)="onExecutionChange($event)">
@@ -353,8 +353,8 @@
               'apirequest'
           ">
           <div class="row">
-            <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-              <mat-form-field appearance="fill" style="width: 100%">
+            <div class="col-lg-4 col-md-4 lfx-u-mar-b-16 p-20">
+              <mat-form-field appearance="fill" style="width: 80%">
                 <mat-label>Request Method</mat-label>
                 <mat-select [(value)]="testDataset['attributes']['RequestMethod']"
                   (selectionChange)="onRequestMethodChange($event)">
@@ -367,7 +367,7 @@
             </div>
 
             <div class="col-lg-8 col-md-8 lfx-u-mar-b-16">
-              <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+              <mat-form-field appearance="fill" style="width: 80%" floatLabel="always">
                 <mat-label>URL</mat-label>
                 <input matInput placeholder="Enter URL..." [(ngModel)]="sourceType.attributes['Url']"
                   [disabled]="type === 'GIT'" />
@@ -377,7 +377,7 @@
 
           <div class="row">
             <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-              <mat-form-field appearance="fill" style="width: 100%">
+              <mat-form-field appearance="fill" style="width: 30%">
                 <mat-label>No Proxy</mat-label>
                 <mat-select [(value)]="sourceType.attributes['NoProxy']" (selectionChange)="onNoProxyChange($event)">
                   <mat-option *ngFor="let option of noProxyValues" [value]="option.value">
@@ -632,13 +632,13 @@
         </mat-slide-toggle>
         <div *ngIf="addCerts" class="lfx-u-mar-t-20">
           <div class="col-md-9">
-            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+            <mat-form-field appearance="fill" style="width: 50%" floatLabel="always">
               <mat-label>PEM Path</mat-label>
               <input matInput placeholder="Enter PEM Path" [(ngModel)]="sourceType.attributes['CertPath']" />
             </mat-form-field>
           </div>
           <div class="col-md-9">
-            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+            <mat-form-field appearance="fill" style="width: 50%" floatLabel="always">
               <mat-label>PEM KeyPass</mat-label>
               <input matInput placeholder="Enter PEM KeyPass" [(ngModel)]="sourceType.attributes['KeyPass']" />
             </mat-form-field>

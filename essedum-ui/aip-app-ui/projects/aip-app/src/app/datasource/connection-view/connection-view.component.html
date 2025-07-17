@@ -12,11 +12,22 @@
             <div class="lfx-l-level1-middle-col">
                 <span *ngIf="initiativeView">
                     <div *ngIf="view" class="align-items-center d-flex">
-                        <span class="" style="cursor: pointer;">
-                            <i class="fa fa-long-arrow-left back-icon" aria-hidden="true"
-                                (click)="routeBackToConnectionList()"></i>
-                        </span>
-                        <span class="lfx-u-mar-l-8 lfx-u-header-xxl secondary-color">View Connection</span>
+                        <div class="col-5">
+                            <span *ngIf="!customCreate" style="cursor: pointer;">
+                                <mat-icon class="aip-led-icons" (click)="routeBackToConnectionList()"
+                                    [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
+                                    matTooltipPosition="above" (mouseenter)="isBackHovered = true"
+                                    (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
+                            </span>
+                            <span class="lfx-u-mar-l-8 header-p-title">Connections: </span><span
+                                class="header-title">View
+                                Connection</span>
+                        </div>
+                        <div class="col-7">
+                            <app-aip-header [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="false"
+                                (refresh)="ngOnInit()">
+                            </app-aip-header>
+                        </div>
                     </div>
                 </span>
                 <span *ngIf="!initiativeView">
@@ -26,11 +37,22 @@
 
                 </span>
                 <div *ngIf="edit && !view" class="align-items-center d-flex">
-                    <span class="" style="cursor: pointer;">
-                        <i class="fa fa-long-arrow-left back-icon" aria-hidden="true"
-                            (click)="routeBackToConnectionList()"></i>
-                    </span>
-                    <span class="lfx-u-mar-l-8 lfx-u-header-xxl secondary-color">Edit Connection</span>
+                       <div class="col-5">
+                            <span *ngIf="!customCreate" style="cursor: pointer;">
+                                <mat-icon class="aip-led-icons" (click)="routeBackToConnectionList()"
+                                    [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
+                                    matTooltipPosition="above" (mouseenter)="isBackHovered = true"
+                                    (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
+                            </span>
+                            <span class="lfx-u-mar-l-8 header-p-title">Connections: </span><span
+                                class="header-title">Edit
+                                Connection</span>
+                        </div>
+                            <div class="col-7">
+                            <app-aip-header [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="false"
+                                (refresh)="ngOnInit()">
+                            </app-aip-header>
+                        </div>
                 </div>
                 <div class="lfx-l-level2-middle-ctr">
                     <div class="lfx-l-level2-middle-col ">
@@ -41,7 +63,7 @@
                                         <div
                                             class="d-flex justify-content-between align-items-center px-4 lfx-u-mar-b-20">
                                             <div class="align-items-center d-flex">
-                                                <h2 class="base-color">Connection Properties</h2>
+                                                <h2 class="sub-header">Connection Properties</h2>
                                             </div>
                                         </div>
                                         <div class="lfx-u-pad-t-32 lfx-u-pad-lr-24">
@@ -100,7 +122,9 @@
                                                             <mat-panel-title
                                                                 style="font-weight: 600; color: inherit; transition: color 0.3s, transform 0.3s;"
                                                                 [ngStyle]="{color: isHovered ? '#0052cc' : 'black',transform: isHovered ? 'translateX(12px)' : 'translateX(0)'
-                                                            }" (mouseenter)="isHovered = true" (mouseleave)="isHovered = false">Connection Details</mat-panel-title>
+                                                            }" (mouseenter)="isHovered = true"
+                                                                (mouseleave)="isHovered = false">Connection
+                                                                Details</mat-panel-title>
                                                         </mat-expansion-panel-header>
                                                         <div class="table-responsive selector-690-13" *ngIf="formData">
                                                             <jsonforms *ngIf="attributes" [data]="formData"
@@ -110,7 +134,7 @@
                                                         </div>
                                                     </mat-expansion-panel>
                                                 </mat-accordion>
-                                                <div class="col-md-12">
+                                                <div class="col-md-12 no-padding">
                                                     <div *ngIf="hideDetails">
                                                         <modal-config-rest-datasource [matData]="data"
                                                             [datasourcePortJson]="datasourceportsjson"
