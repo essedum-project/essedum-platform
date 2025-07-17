@@ -328,99 +328,98 @@
               </div>
             </div>
             <ng-template #elseBlockNonCons>
-              <div *ngIf="servicev1 === ServiceType.DATASETS; else elseBlockDefault">
+                       <div *ngIf="servicev1 === 'Datasets'; else elseBlockDefault">
                 <div class="filter-options">
-                  <!-- Type Filter -->
-                  <div class="filter-group">
-                    <div class="filter-control">
-                      <mat-form-field appearance="fill" class="w-100">
-                        <label>Type</label>
-                        <mat-select (selectionChange)="datasetTypeSelected($event, 'datasetType')"
-                          aria-labelledby="datasetType-Label" placeholder="All">
-                          <mat-option value="" (click)="clearAllFilters('datasetType')">
-                            All
-                          </mat-option>
-                          <ng-container *ngFor="let option of datasetsTypeList">
-                            <mat-option *ngIf="!option.selected" [value]="option.label">
-                              {{ option.label }}
-                            </mat-option>
-                          </ng-container>
-                        </mat-select>
-                      </mat-form-field>
-                    </div>
-
-                    <div class="selected-items" *ngIf="selectedAdapterType?.length > 0">
-                      <mat-chip-set aria-label="Selected datasetType">
-                        <mat-chip *ngFor="let datasetType of selectedAdapterType" removable="true"
-                          (removed)="removeDatasetType(datasetType)">
-                          {{datasetType}}
-                          <mat-icon matChipRemove>close</mat-icon>
-                        </mat-chip>
-                      </mat-chip-set>
-                    </div>
-                  </div>
-
-                  <!-- Knowledge Bases Filter -->
-                  <div class="filter-group">
-                    <div class="filter-control">
-                      <mat-form-field appearance="fill" class="w-100">
-                        <label>Knowledge Bases</label>
-                        <mat-select (selectionChange)="datasetTopicSelected($event)"
-                          aria-labelledby="datasetKnowledge-label" placeholder="All">
-                          <mat-option value="" (click)="clearAllFilters('datasetKnowledge')">
-                            All
-                          </mat-option>
-                          <ng-container *ngFor="let option of datasetTopicList">
-                            <mat-option *ngIf="!option.selected" [value]="option.label">
-                              {{ option.label }}
-                            </mat-option>
-                          </ng-container>
-                        </mat-select>
-                      </mat-form-field>
-                    </div>
-
-                    <div class="selected-items" *ngIf="selectedDatasetTopicType?.length > 0">
-                      <mat-chip-set aria-label="Selected datasetKnowledge">
-                        <mat-chip *ngFor="let datasetKnowledge of selectedDatasetTopicType" removable="true"
-                          (removed)="removeDatasetKnowledge(datasetKnowledge)">
-                          {{ datasetKnowledge}}
-                          <mat-icon matChipRemove>close</mat-icon>
-                        </mat-chip>
-                      </mat-chip-set>
-                    </div>
-                  </div>
-
-                  <!-- Tags Filter -->
-                  <div class="filter-group">
-
-                    <div class="filter-control">
-                      <mat-form-field appearance="fill" class="w-100">
-                        <label>Tags</label>
-                        <mat-select (selectionChange)="datasetTypeSelected($event, 'datasetTag')"
-                          aria-labelledby="datasetTag-label" placeholder="All">
-                          <mat-option value="" (click)="clearAllFilters('datasetTag')">
-                            All
-                          </mat-option>
-                          <mat-option *ngFor="let option of datasetsTagsList" [value]="option.label">
-                            {{ option.label }}
-                          </mat-option>
-                        </mat-select>
-                      </mat-form-field>
-                    </div>
-
-                    <div class="selected-items" *ngIf="selectedTagList?.length > 0">
-                      <mat-chip-set aria-label="Selected datasetTag">
-                        <mat-chip *ngFor="let datasetTag of selectedTagList" removable="true"
-                          (removed)="removeDatasetTag(datasetTag)">
-                          {{ datasetTag }}
-                          <mat-icon matChipRemove>close</mat-icon>
-                        </mat-chip>
-                      </mat-chip-set>
-                    </div>
-                  </div>
+          <!-- Type Filter -->
+             <div class="filter-group">
+                <div class="filter-control">
+                  <mat-form-field appearance="fill" class="w-100">
+                    <label>Type</label>
+                    <mat-select (selectionChange)="datasetTypeSelected($event, 'datasetType')"
+                      aria-labelledby="datasetType-Label" placeholder="All">
+                      <mat-option value="" (click)="clearAllFilters('datasetType')">
+                        All
+                      </mat-option>
+                      <ng-container *ngFor="let option of datasetsTypeList">
+                        <mat-option *ngIf="!option.selected" [value]="option.label">
+                          {{ option.label }}
+                        </mat-option>
+                      </ng-container>
+                    </mat-select>
+                  </mat-form-field>
                 </div>
 
+                <div class="selected-items" *ngIf="selectedAdapterType?.length > 0">
+                  <mat-chip-set aria-label="Selected datasetType">
+                    <mat-chip *ngFor="let datasetType of selectedAdapterType" removable="true"
+                      (removed)="removeDatasetType(datasetType)">
+                      {{datasetType}}
+                      <mat-icon matChipRemove>close</mat-icon>
+                    </mat-chip>
+                  </mat-chip-set>
+                </div>
               </div>
+
+          <!-- Knowledge Bases Filter -->
+          <div class="filter-group">
+                      <div class="filter-control">
+                        <mat-form-field appearance="fill" class="w-100">
+                          <label>Knowledge Bases</label>
+                          <mat-select (selectionChange)="datasetTopicSelected($event)"
+                            aria-labelledby="datasetKnowledge-label" placeholder="All">
+                            <mat-option value="" (click)="clearAllFilters('datasetKnowledge')">
+                              All
+                            </mat-option>
+                            <ng-container *ngFor="let option of datasetTopicList">
+                              <mat-option *ngIf="!option.selected" [value]="option.label">
+                                {{ option.label }}
+                              </mat-option>
+                            </ng-container>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+
+                      <div class="selected-items" *ngIf="selectedDatasetTopicType?.length > 0">
+                        <mat-chip-set aria-label="Selected datasetKnowledge">
+                          <mat-chip *ngFor="let datasetKnowledge of selectedDatasetTopicType" removable="true"
+                            (removed)="removeDatasetKnowledge(datasetKnowledge)">
+                            {{ datasetKnowledge}}
+                            <mat-icon matChipRemove>close</mat-icon>
+                          </mat-chip>
+                        </mat-chip-set>
+                      </div>
+                    </div>
+
+          <!-- Tags Filter -->
+          <div class="filter-group">
+
+            <div class="filter-control">
+              <mat-form-field appearance="fill" class="w-100">
+                <label>Tags</label>
+                <mat-select (selectionChange)="datasetTypeSelected($event, 'datasetTag')"
+                  aria-labelledby="datasetTag-label" placeholder="All">
+                  <mat-option value="" (click)="clearAllFilters('datasetTag')">
+                    All
+                  </mat-option>
+                  <mat-option *ngFor="let option of datasetsTagsList" [value]="option.label">
+                    {{ option.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="selected-items" *ngIf="selectedTagList?.length > 0">
+              <mat-chip-set aria-label="Selected datasetTag">
+                <mat-chip *ngFor="let datasetTag of selectedTagList" removable="true"
+                  (removed)="removeConnection(datasetTag)">
+                  {{ datasetTag }}
+                  <mat-icon matChipRemove>close</mat-icon>
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+          </div>
+        </div>
+        </div>
               <ng-template #elseBlockDefault>
                 <div class="mb-4"
                   *ngIf="!((servicev1 === ServiceType.APPS) || (servicev1 === ServiceType.WORKER_TOOLS))">
