@@ -54,7 +54,7 @@
                             </app-aip-header>
                         </div>
                 </div>
-                <div class="lfx-l-level2-middle-ctr">
+                <div class="lfx-l-level2-middle-ctr" id="main-content">
                     <div class="lfx-l-level2-middle-col ">
                         <mat-card class="mat-elevation-z4">
                             <div class="lfx-u-mar-tb-16 lfx-u-pad-16">
@@ -152,17 +152,14 @@
                                 <div *ngIf="edit && !view"
                                     class="col-lg-12 col-md-12 lfx-u-mar-b-16 d-flex justify-content-end">
                                     <div *ngIf="hideDetails">
-                                        <button mat-raised-button style="background-color: #0a142f; color: white;"
+                                        <button mat-raised-button class="cancel-btn"
                                             [disabled]="false" (click)="testConnection()"
-                                            onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
-                                            onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                            >
                                             Test
                                         </button>
                                     </div>&nbsp;
-                                    <button mat-raised-button style="background-color: #0a142f; color: white;"
-                                        [disabled]="false" (click)="updateConnection()"
-                                        onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
-                                        onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                    <button mat-raised-button class="save-btn"
+                                        [disabled]="false" (click)="updateConnection()">
                                         Update
                                     </button>
                                 </div>

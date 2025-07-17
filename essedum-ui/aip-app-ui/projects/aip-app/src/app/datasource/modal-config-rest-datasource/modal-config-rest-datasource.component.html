@@ -72,7 +72,7 @@
             </mat-form-field>
           </div>
         </div>
-        <div class="p-20" *ngIf="
+        <div class="ml-10" *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'bigquery'
           ">
@@ -84,26 +84,26 @@
               placeholder="Upload Service Key" />
           </td>
         </div>
-        <div *ngIf="
+        <div  *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'hmac'
           ">
-          <mat-form-field appearance="fill" style="width: 50%" floatLabel="always">
+          <mat-form-field appearance="fill" style="width: 32%" floatLabel="always" class="p-20">
             <mat-label>Authorization Prefix</mat-label>
             <input matInput placeholder="Enter Authorization Prefix..." [(ngModel)]="AuthDetails['authPrefix']" />
           </mat-form-field>
 
-          <mat-form-field appearance="fill" style="width: 50%" floatLabel="always">
+          <mat-form-field appearance="fill" style="width: 32%" floatLabel="always" class="p-20">
             <mat-label>Secret Key</mat-label>
             <input matInput placeholder="Enter Secret Key..." [(ngModel)]="AuthDetails['secretKey']" />
           </mat-form-field>
 
-          <mat-form-field appearance="fill" style="width: 50%" floatLabel="always">
+          <mat-form-field appearance="fill" style="width: 32%" floatLabel="always" class="p-20">
             <mat-label>Data</mat-label>
             <input matInput placeholder="Enter Data..." [(ngModel)]="AuthDetails['input']" />
           </mat-form-field>
         </div>
-        <div class="row p-20" *ngIf="
+        <div class="row ml-10" *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'oauth'
           ">
@@ -212,7 +212,7 @@
           </div>
         </div>
 
-        <div class="p-20" *ngIf="
+        <div class="ml-20" *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'bearertoken'
           ">
@@ -229,7 +229,7 @@
           </div>
         </div>
 
-        <div class="row p-20" *ngIf="
+        <div class="row ml-10" *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'awssign'
           ">
@@ -354,7 +354,7 @@
           ">
           <div class="row">
             <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-              <mat-form-field appearance="fill" style="width: 80%">
+              <mat-form-field appearance="fill" style="width: 100%">
                 <mat-label>Request Method</mat-label>
                 <mat-select [(value)]="testDataset['attributes']['RequestMethod']"
                   (selectionChange)="onRequestMethodChange($event)">
@@ -367,7 +367,7 @@
             </div>
 
             <div class="col-lg-8 col-md-8 lfx-u-mar-b-16">
-              <mat-form-field appearance="fill" style="width: 80%" floatLabel="always">
+              <mat-form-field appearance="fill" style="width: 80%; margin-top:8px" floatLabel="always">
                 <mat-label>URL</mat-label>
                 <input matInput placeholder="Enter URL..." [(ngModel)]="sourceType.attributes['Url']"
                   [disabled]="type === 'GIT'" />
@@ -583,7 +583,7 @@
                       <label>{{ sourceType.formats[key + "-dp"] }}</label>
                     </td>
                     <td class="col-8">
-                      <mat-form-field appearance="fill" style="width: 100%" *ngIf="sourceType.formats[key] == 'input'">
+                      <mat-form-field appearance="fill" style="width: 42%" *ngIf="sourceType.formats[key] == 'input'">
                         <mat-label>{{ key }}</mat-label>
                         <input matInput [(ngModel)]="sourceType.attributes[key]" placeholder="Enter {{ key }}" />
                       </mat-form-field>

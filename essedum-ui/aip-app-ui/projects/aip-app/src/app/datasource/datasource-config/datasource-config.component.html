@@ -211,9 +211,9 @@
                                                                 Details</mat-panel-title>
                                                         </mat-expansion-panel-header>
 
-                                                        <div>
+                                                        <div class="p-20">
                                                             <table class="">
-                                                                <thead class="selector-690-15">
+                                                                <thead class="selector-690-15" style="border-bottom: 2px solid #e0e0e0;">
                                                                     <tr class="d-flex selector-690-16">
                                                                         <th class="col-2 selector-690-17 base-color">
                                                                             Attribute</th>
@@ -352,47 +352,35 @@
                                     <div *ngIf="isGithub">
                                         <div *ngIf="!ConnectionEdit"
                                             class="col-lg-12 col-md-12 lfx-u-mar-b-16 d-flex justify-content-end">
-                                            <button mat-raised-button style="background-color: #0a142f; color: white;"
-                                                [disabled]="false" (click)="testConnection()"
-                                                onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
-                                                onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                            <button mat-raised-button class="cancel-btn"
+                                                [disabled]="false" (click)="testConnection()">
                                                 Test
                                             </button>
-                                            <button mat-raised-button style="background-color: #0a142f; color: white;"
-                                                [disabled]="false" (click)="saveDatasource()"
-                                                onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
-                                                onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                            <button mat-raised-button class="save-btn"
+                                                [disabled]="false" (click)="saveDatasource()">
                                                 Save
                                             </button>
                                         </div>
                                         <div *ngIf="ConnectionEdit"
                                             class="col-lg-12 col-md-12 lfx-u-mar-b-16 d-flex justify-content-end">
-                                            <button mat-raised-button style="background-color: #0a142f; color: white;"
-                                                [disabled]="false" (click)="testConnection()"
-                                                onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
-                                                onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                            <button mat-raised-button class="cancel-btn"
+                                                [disabled]="false" (click)="testConnection()">
                                                 Test
                                             </button>
-                                            <button mat-raised-button style="background-color: #0a142f; color: white;"
-                                                [disabled]="false" (click)="saveDatasource()"
-                                                onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
-                                                onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                            <button mat-raised-button class="save-btn"
+                                                [disabled]="false" (click)="saveDatasource()">
                                                 Update
                                             </button>
                                         </div>
                                     </div>
                                     <div *ngIf="!isGithub">
                                         <div class="col-lg-12 col-md-12 lfx-u-mar-b-16 d-flex justify-content-end">
-                                            <button mat-raised-button style="background-color: #0a142f; color: white;"
-                                                [disabled]="false" (click)="testConnection()"
-                                                onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
-                                                onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                            <button mat-raised-button class="cancel-btn"
+                                                [disabled]="false" (click)="testConnection()">
                                                 Test
                                             </button>
-                                            <button mat-raised-button style="background-color: #0a142f; color: white;"
-                                                [disabled]="false" (click)="saveDatasource()"
-                                                onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
-                                                onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                            <button mat-raised-button class="save-btn"
+                                                [disabled]="false" (click)="saveDatasource()">
                                                 Save
                                             </button>
                                         </div>
