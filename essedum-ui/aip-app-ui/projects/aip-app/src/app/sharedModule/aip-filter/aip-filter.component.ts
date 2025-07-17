@@ -180,7 +180,6 @@ export class AipFilterComponent implements OnInit, OnChanges {
 
   selectedMlAppType: string[] = [];
   selectedMlIncType: string[] = [];
-  selectedMlType: string[] = [];
   appsTypeList = [];
 
   constructor(

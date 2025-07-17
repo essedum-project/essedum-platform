@@ -114,9 +114,9 @@ export class CreateAppComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.edit=this.inputDetails.edit;
-    this.appcid=this.inputDetails.appcid;
-    this.appName=this.inputDetails.appName;
+    this.edit = this.inputDetails.edit;
+    this.appcid = this.inputDetails.appcid;
+    this.appName = this.inputDetails.appName;
     this.editApp();
     this.logoUploaded = false;
     this.uploader = new FileUploader({

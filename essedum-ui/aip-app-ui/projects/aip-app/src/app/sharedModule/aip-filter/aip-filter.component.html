@@ -411,7 +411,7 @@
                     <div class="selected-items" *ngIf="selectedTagList?.length > 0">
                       <mat-chip-set aria-label="Selected datasetTag">
                         <mat-chip *ngFor="let datasetTag of selectedTagList" removable="true"
-                          (removed)="removeConnection(datasetTag)">
+                          (removed)="removeDatasetTag(datasetTag)">
                           {{ datasetTag }}
                           <mat-icon matChipRemove>close</mat-icon>
                         </mat-chip>
