@@ -257,7 +257,7 @@ export class CreateAppComponent implements OnInit {
             });
             this.Services.message('Created Sucessfully.', 'success');
             this.Services.addGroupModelEntity(data.name, temp).subscribe();
-            this.dialogRef.close();
+            this.dialogRef.close('refresh');
             if (this.appListComponent) this.appListComponent.ngOnInit();
           },
           (error) => this.Services.message(error, 'error')
@@ -432,7 +432,7 @@ export class CreateAppComponent implements OnInit {
               newApp.mfeAppName = this.editCanvas.mfeAppName;
               this.Services.saveApp(newApp).subscribe((resp) => {
                 this.responseLink.emit(resp);
-                this.dialogRef.close();
+                this.dialogRef.close('refresh');
                 this.Services.message('Updated Sucessfully.', 'success');
                 if (this.appListComponent) this.appListComponent.ngOnInit();
               });

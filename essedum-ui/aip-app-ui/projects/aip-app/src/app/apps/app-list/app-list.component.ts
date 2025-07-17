@@ -277,7 +277,7 @@ openAddedit(edit: boolean = false, app?: any): void {
     },
   });
   dialogRef.afterClosed().subscribe((result) => {
-    if (result) {
+    if (result==="refresh") {
       this.ngOnInit();
     }
   });
