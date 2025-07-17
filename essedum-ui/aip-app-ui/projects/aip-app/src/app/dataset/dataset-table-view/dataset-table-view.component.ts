@@ -64,6 +64,7 @@ export class DatasetTableViewComponent implements OnInit {
   schemaName: any;
   datasetAlias: any;
   rowObj: any;
+   
   schemaFormTemplate: any = {};
   asChildView: boolean = false;
   actionsList: {}[] = [];
@@ -723,6 +724,7 @@ export class DatasetTableViewComponent implements OnInit {
     this.lastRefreshDate = this.datepipe.transform(new Date(), "dd-MMM-yyyy hh:mm:ss a");
     this.resetSelection();
     this.refreshTicket();
+
   }
 
   resetSelection() {
@@ -999,7 +1001,7 @@ export class DatasetTableViewComponent implements OnInit {
     }
   }
 
-  getPages(choice: String) {
+  navigatePage(choice: String) {
     switch (choice) {
       case 'Next':
         this.page += 1;
@@ -1089,7 +1091,34 @@ export class DatasetTableViewComponent implements OnInit {
     this.resetSelection();
     this.loadObjects(this.andObj);
   }
+getPageNumbers(): number[] {
+  const totalVisiblePages = 5;
+  const pages: number[] = [];
 
+  let start = Math.max(this.page - Math.floor(totalVisiblePages / 2), 0);
+  let end = start + totalVisiblePages;
+
+  if (end > this.lastPage + 1) {
+    end = this.lastPage + 1;
+    start = Math.max(end - totalVisiblePages, 0);
+  }
+
+  for (let i = start; i < end; i++) {
+    pages.push(i);
+
+  }
+
+  return pages;
+
+}
+
+changePage(p: number) {
+  if (p >= 0 && p <= this.lastPage) {
+    this.page = p;
+    this.getIncidentsByPage();
+  }
+}
+ 
   constructSearchIncidentObj(cols, ticketsObj) {
     this.searchIncidentObj = {};
     const defaultField = 'number';
