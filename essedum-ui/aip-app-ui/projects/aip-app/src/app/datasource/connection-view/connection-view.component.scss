@@ -1,3 +1,8 @@
+:host ::ng-deep body,
+:host ::ng-deep html {
+  font-family: 'Roboto', sans-serif !important;
+}
+
 .mat-mdc-form-field-infix {
   position: relative;
   top: 1rem;
@@ -179,9 +184,8 @@
   color: #0052cc !important;
 }
 
-.save-btn {
+::ng-deep .save-btn {
   color: #ffffff !important;
-  background-color: #ebf1f6 !important;
   height: 30px !important;
   min-height: 30px !important;
   font-size: 12px !important;
@@ -191,15 +195,14 @@
   font-family: "Roboto", sans-serif !important;
   border-radius: 16px;
   background: transparent
-    linear-gradient(90deg, var(---0052cc) 0%, #0094ff 100%) 0% 0% no-repeat
-    padding-box;
+    linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0% no-repeat, #0052cc
+    padding-box !important;
   background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
-    no-repeat padding-box;
+    no-repeat padding-box !important;
 }
 
-.cancel-btn {
+::ng-deep .cancel-btn {
   color: #002966 !important;
-  background-color: #dadada !important;
   height: 30px !important;
   min-height: 30px !important;
   font-size: 12px !important;
@@ -275,4 +278,8 @@
   letter-spacing: 0px;
   text-transform: capitalize;
   opacity: 1;
+}
+
+.ml-15m{
+    margin-left:-15px !important;
 }
