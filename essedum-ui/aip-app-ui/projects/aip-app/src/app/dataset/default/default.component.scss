@@ -19,12 +19,80 @@ input[type="file"] {
 .lfx-label {
   font-weight: 500;
   font-size: 0.95rem;
+  color: #00000099 !important;
 }
 .test-btn{
- background-color: #0a142f; 
- color: white;
+ background-color: #DADADA; 
+ color: #0a142f;
 }
 .test-btn:hover{
 background:#0094ff; 
 color:white;
+}
+
+:host {
+     font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+:host ::ng-deep {
+     font-family: "Roboto", "Segoe UI", sans-serif !important;
+
+  mat-form-field,
+  mat-select,
+  mat-option,
+  mat-label,
+  .mat-select-value,
+  .mat-option-text,
+  input,
+  textarea,
+  button,
+  .mat-button-wrapper,
+  .mat-select-placeholder {
+     font-family:  "Roboto", "Segoe UI", sans-serif !important;
+  }
+}
+::ng-deep
+  .mdc-text-field--filled:not(.mdc-text-field--disabled).mdc-text-field--focused
+  .mdc-floating-label {
+  color: #0094ff !important;
+}
+
+::ng-deep
+  .mdc-text-field--filled:not(.mdc-text-field--disabled).mdc-text-field--invalid
+  .mdc-floating-label {
+  color: grey !important;
+}
+::ng-deep .mat-mdc-form-field {
+  width: 100%;
+  background: transparent;
+  padding: 0;
+}
+
+::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+::ng-deep .mat-mdc-form-field-appearance-fill .mat-mdc-form-field-flex {
+  padding: 0 !important;
+}
+
+::ng-deep .mat-mdc-input-element {
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 0 !important;
+  color: #0a142f;
+  background: transparent !important;
+  border: none !important;
+}
+
+::ng-deep .mat-mdc-form-field-underline {
+  display: none !important;
+}
+
+::ng-deep .mdc-line-ripple {
+  display: none !important;
 }

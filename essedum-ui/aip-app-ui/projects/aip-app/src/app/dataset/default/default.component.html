@@ -1,11 +1,11 @@
 <div style="width:95%" class="selector-693-1 container-fluid">
-
+<br>
     <div class="table-responsive selector-693-2" style="position:relative">
         <table class="">
             <thead class="selector-693-4">
                 <tr class="d-flex selector-693-5">
-                    <th class="col-2 selector-693-6" style="color:  #0094ff; font-size: medium;">Attribute</th>
-                    <th class="col-10 selector-693-7" style="color:  #0094ff; font-size: medium;">Value</th>
+                    <th class="col-2 selector-693-6" style="font-size: small;">Attribute</th>
+                    <th class="col-10 selector-693-7" style="font-size: small;">Value</th>
                 </tr>
             </thead>
 
@@ -13,7 +13,7 @@
                 <tr *ngFor="let key of keys; let i = index" class="d-flex selector-693-9">
                     <td class="col-2 selector-693-10 aip-center-align">
                         <label class="selector-693-11 lfx-label"
-                            style="font-size: 15px; margin-bottom: 40px;">{{key}}:</label>
+                            style="font-size: 15px; margin-bottom: 40px;">{{key | titlecase}}:</label>
                     </td>
 
                     <td class="col-10 selector-693-12">

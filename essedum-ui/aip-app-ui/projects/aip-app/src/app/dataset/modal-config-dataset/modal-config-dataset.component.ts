@@ -101,6 +101,7 @@ export class ModalConfigDatasetComponent implements OnInit, OnDestroy {
   groups: any[] = [];
   schemaBol: any;
   isAuth = true
+  isDropdownOpen: { [key: string]: boolean } = {};
   testSuccessful: boolean = false;
   dataSourceFilterCtrl = new FormControl();
   schemaFilterCtrl = new FormControl();
@@ -889,6 +890,9 @@ else{
     }
 
   }
+onOpenedChange(key: string, isOpen: boolean): void {
+  this.isDropdownOpen[key] = isOpen;
+}
 
 
 

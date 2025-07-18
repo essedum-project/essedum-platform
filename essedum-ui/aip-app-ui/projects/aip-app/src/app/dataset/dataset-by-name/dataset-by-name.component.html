@@ -11,7 +11,9 @@
 
         <!-- Filter Section -->
         <app-aip-filter [servicev1]="servicev1" [tagrefresh]="tagrefresh" [selectedDatasetTypeList]="{ 
-                        selectedAdapterType: selectedAdapterType
+                        selectedAdapterType: selectedAdapterType,
+                        selectedAdapterInstance:selectedAdapterInstance,
+                        selectedIndexNames:selectedIndexNames
                         
                       }" (tagSelected)="tagSelectedEvent($event)"
             (filterStatusChange)="onFilterStatusChange($event)"></app-aip-filter>
