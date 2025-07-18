@@ -81,7 +81,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-                                                    <mat-form-field appearance="fill" style="width: 30%;"
+                                                    <mat-form-field appearance="fill" style="width: 100%;"
                                                         floatLabel="always">
                                                         <mat-label>Description</mat-label>
                                                         <input matInput placeholder="Enter Description..."
@@ -89,29 +89,27 @@
                                                     </mat-form-field>
                                                 </div>
                                                 <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-                                                    <mat-form-field appearance="fill" style="width: 30%;">
+                                                    <mat-form-field appearance="fill" style="width: 30%;" floatLabel="always">
                                                         <mat-label>Connection Type</mat-label>
                                                         <mat-select [(value)]="data.type"
-                                                            (selectionChange)="onTypeChange($event)">
+                                                            (selectionChange)="onTypeChange($event)" placeholder="Select Connection type">
                                                             <mat-option *ngFor="let option of typeOptions"
                                                                 [value]="option.value">
                                                                 {{ option.viewValue }}
                                                             </mat-option>
                                                         </mat-select>
-                                                        <mat-hint class="ml-15m">Select Connection type</mat-hint>
                                                     </mat-form-field>
                                                 </div>
                                                 <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-                                                    <mat-form-field appearance="fill" style="width: 30%;">
+                                                    <mat-form-field appearance="fill" style="width: 30%;" floatLabel="always">
                                                         <mat-label>Capability</mat-label>
                                                         <mat-select [(value)]="capability"
-                                                            (selectionChange)="onCapbilityTypeChange($event)" multiple>
+                                                            (selectionChange)="onCapbilityTypeChange($event)" multiple  placeholder="Select Capability">
                                                             <mat-option *ngFor="let option of capabilityOptions"
                                                                 [value]="option.value">
                                                                 {{ option.viewValue }}
                                                             </mat-option>
                                                         </mat-select>
-                                                        <mat-hint class="ml-15m">Select Capability</mat-hint>
                                                     </mat-form-field>
                                                 </div>
                                                 <mat-accordion *ngIf="data.type.toLowerCase().endsWith('sql')"
