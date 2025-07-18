@@ -454,7 +454,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
       dataset.views = this.firstForm.controls.Viewertype.value
       this.busy = this.datasetsService.createDataset(dataset).subscribe((res) => {
         let returnedName = res.name;
-        this.datasetsService.message('Saved! Copied successfully');
+        this.services.message('Saved! Copied successfully');
 
         if (this.data.datasource.category == "REST")
           this.modifyAPISpec(this.data, returnedName)
@@ -505,11 +505,11 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
         this.testSuccessful = true;
       },
         error => {
-          this.services.messageService('Error!', error);
+          this.services.message('Error!', 'error');
         });
     }
     catch (Exception) {
-      this.services.messageService("Some error occured")
+      this.services.message("Some error occured",'error')
     }
 
   }

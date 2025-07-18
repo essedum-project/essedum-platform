@@ -20,20 +20,20 @@
                         <mat-card-title style="color:#0a142f !important">Dataset Properties</mat-card-title>
                         <!-- <span class="lfx-u-mar-l-8 primary-color">Dataset Properties</span> -->
                     </div>
-
+<br>
                     <mat-card-content>
                         <form (ngSubmit)="onNext()" *ngIf="!proceed">
 
                             <mat-form-field appearance="fill" floatLabel="always" class="lfx-field">
                                 <mat-label>Display Name</mat-label>
-                                <input matInput placeholder="Enter Name" required [(ngModel)]="data_alias"
+                                <input matInput placeholder="Enter Name..." required [(ngModel)]="data_alias"
                                     name="displayName" />
                                 <mat-error>This field is required</mat-error>
                             </mat-form-field>
 
                             <mat-form-field appearance="fill" floatLabel="always" class="lfx-field">
                                 <mat-label>Description</mat-label>
-                                <input matInput placeholder="Enter Description" [(ngModel)]="data_description"
+                                <input matInput placeholder="Enter Description..." [(ngModel)]="data_description"
                                     name="description" />
                             </mat-form-field>
 
