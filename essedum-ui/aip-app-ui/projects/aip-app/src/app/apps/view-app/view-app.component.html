@@ -3,15 +3,16 @@
         style="display: inline-flex; align-items: self-start; padding-top: 1em; padding-bottom: 1em; padding-left: 0; padding-right: 0;justify-content: space-between;">
         <div class="col-8" style="padding: 0; display:flex;">
             <span class="mx-2 aip-cursor" *ngIf="initiativeView">
-                <mat-icon class="aip-led-icons" (click)="toggler()"
-                    [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
+                <mat-icon id="view-app-back-btn" data-icon-type="back-navigation" class="aip-led-icons"
+                    (click)="toggler()" [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
                     matTooltipPosition="above" (mouseenter)="isBackHovered = true"
                     (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
             </span>
             <h2 style="margin: 0%;">App : {{streamItem?.alias}}</h2>
         </div>
         <div class="icons-group" style="padding: 0;">
-            <mat-icon *ngIf="editAuth &&!isrunApp &&!isVideo && appData?.scope=='internal'" class="icons"
+            <mat-icon id="app-settings-btn" data-icon-type="settings-config"
+                *ngIf="editAuth &&!isrunApp &&!isVideo && appData?.scope=='internal'" class="icons"
                 style="padding-right: 1.5em;" matTooltip="Configure" (click)="openWdModal(content2)">settings</mat-icon>
             <span *ngIf="editAuth && !(appData?.scope==='video')" style="padding-right: 1.5em;">
                 <button mat-icon-button matTooltip="Try out link" (click)="open(content3)">
@@ -277,7 +278,7 @@
                         <div class="controls selector-764-44" style="margin-top: 5px">
                             <mat-form-field appearance="fill" style="min-width: 200px;">
                                 <mat-label>Run Type</mat-label>
-                                <mat-select [(ngModel)]="selectedRunType" name="RunTypes">
+                                <mat-select data-select-type="run-type" [(ngModel)]="selectedRunType" name="RunTypes">
                                     <mat-option *ngFor="let j of runTypes" [value]="j">
                                         {{j.type}}-{{j.dsAlias}}
                                     </mat-option>

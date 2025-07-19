@@ -4,7 +4,7 @@
         <div class="paginator-buttons">
             <div class="pages-details">
                 <!-- Previous page button -->
-                <mat-icon class="pagination-arrow" [ngClass]="{
+                <mat-icon id="prev-page-btn" data-icon-type="prev-button" class="pagination-arrow" [ngClass]="{
                       'disabled': pageNumber == 1,
                       'active': isPrevHovered && pageNumber != 1
                     }" (mouseenter)="isPrevHovered = true" (mouseleave)="isPrevHovered = false"
@@ -24,7 +24,7 @@
                 </div>
 
                 <!-- Next page button -->
-                <mat-icon class="pagination-arrow" [ngClass]="{
+                <mat-icon id="next-page-btn" data-icon-type="next-button" class="pagination-arrow" [ngClass]="{
                       'disabled': pageNumber == noOfPages,
                       'active': isNextHovered && pageNumber != noOfPages
                     }" (mouseenter)="isNextHovered = true" (mouseleave)="isNextHovered = false"
