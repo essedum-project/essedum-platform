@@ -457,20 +457,22 @@ export class DatasourceComponent implements OnInit, OnChanges {
     this.router.navigate(['create'], { relativeTo: this.route });
   }
 
-  deleteAdapter(name: string) {
+  deleteConnection(name: string) {
     this.deleteRuntimes(name);
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'delete') {
         this.service.deleteDatasource(name).subscribe(
-          (res) => {     
-            
-            this.service.messageService(               
-                'Done! Connection deleted Successfully'
-              );
-        this.refreshComplete();
+          (res: any) => {
+            if (res && res.status === 200) {
+              this.service.message('Done! Connection deleted Successfully');
+              this.refreshComplete();
+            } else {
+              this.service.messageService(res?.message || 'Failed to delete connection');
+            }
           },
           (error) => {
+            this.service.messageService(error?.error?.message || 'Error deleting connection');
           }
         );
       }
