@@ -13,7 +13,8 @@
         <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
           <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
             <mat-label>Auth Type</mat-label>
-            <mat-select [(value)]="sourceType.attributes['AuthType']" (selectionChange)="onAuthTypeChange()" placeholder="Select auth type">
+            <mat-select [(value)]="sourceType.attributes['AuthType']" (selectionChange)="onAuthTypeChange()"
+              placeholder="Select auth type">
               <mat-option *ngFor="let authType of authTypes" [value]="authType.value">
                 {{ authType.viewValue }}
               </mat-option>
@@ -51,7 +52,8 @@
           <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
             <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
               <mat-label>Select To Datasource</mat-label>
-              <mat-select [(value)]="selectedDatasource" (selectionChange)="OnDatasourceChange($event)" placeholder="Select Datasource">
+              <mat-select [(value)]="selectedDatasource" (selectionChange)="OnDatasourceChange($event)"
+                placeholder="Select Datasource">
                 <mat-option *ngFor="let option of datasourceOptions" [value]="option.value">
                   {{ option.viewValue }}
                 </mat-option>
@@ -61,7 +63,8 @@
           <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
             <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
               <mat-label>Select Datasets</mat-label>
-              <mat-select [(value)]="selectedDataset" (selectionChange)="OnDatasetChange($event)" placeholder="Select Dataset">
+              <mat-select [(value)]="selectedDataset" (selectionChange)="OnDatasetChange($event)"
+                placeholder="Select Dataset">
                 <mat-option *ngFor="let option of datasetsoptions" [value]="option.value">
                   {{ option.viewValue }}
                 </mat-option>
@@ -69,7 +72,7 @@
             </mat-form-field>
           </div>
         </div>
-        <div class="ml-10" *ngIf="
+        <div class="ml-20" *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'bigquery'
           ">
@@ -81,7 +84,7 @@
               placeholder="Upload Service Key" />
           </td>
         </div>
-        <div  *ngIf="
+        <div *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'hmac'
           ">
@@ -134,7 +137,7 @@
             <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
               <mat-label>Grant Type</mat-label>
               <mat-select [(value)]="grant_type" placeholder="Select Grant Type">
-                <mat-option *ngFor="let option of grantTypeOptions" [value]="option.value" >
+                <mat-option *ngFor="let option of grantTypeOptions" [value]="option.value">
                   {{ option.viewValue }}
                 </mat-option>
               </mat-select>
@@ -263,11 +266,10 @@
       capability.includes('app')
     " designType="3D" [hideToggle]="false" [multi]="false">
     <mat-expansion-panel style="margin-bottom: 10px !important">
-        <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+      <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
         <mat-panel-title style="font-weight: 600; color: inherit; transition: color 0.3s, transform 0.3s;" [ngStyle]="{color: isPortHovered ? '#0052cc' : 'black',transform: isPortHovered ? 'translateX(12px)' : 'translateX(0)'
                                                             }" (mouseenter)="isPortHovered = true"
-          (mouseleave)="isPortHovered = false"
-      >Ports</mat-panel-title>
+          (mouseleave)="isPortHovered = false">Ports</mat-panel-title>
       </mat-expansion-panel-header>
 
       <div class="col-md-6" style="margin: 2em 0 2em 1em">
@@ -325,7 +327,8 @@
         <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
           <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
             <mat-label>Select Connection type</mat-label>
-            <mat-select [(value)]="sourceType.attributes['ConnectionType']" required placeholder="Select Connection Type">
+            <mat-select [(value)]="sourceType.attributes['ConnectionType']" required
+              placeholder="Select Connection Type">
               <mat-option *ngFor="let option of connectionTypes" [value]="option.value">
                 {{ option.viewValue }}
               </mat-option>
@@ -374,7 +377,8 @@
             <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
               <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
                 <mat-label>No Proxy</mat-label>
-                <mat-select [(value)]="sourceType.attributes['NoProxy']" (selectionChange)="onNoProxyChange($event)" placeholder="Select No Proxy">
+                <mat-select [(value)]="sourceType.attributes['NoProxy']" (selectionChange)="onNoProxyChange($event)"
+                  placeholder="Select No Proxy">
                   <mat-option *ngFor="let option of noProxyValues" [value]="option.value">
                     {{ option.viewValue }}
                   </mat-option>
@@ -382,28 +386,26 @@
               </mat-form-field>
             </div>
           </div>
-          <mat-card
-            class="row d-flex justify-content-between align-items-center lfx-u-pad-tb-16"
-          >
-            <div  [type]="type" [headerBg]="headerBg">
-              <mat-tab-group
-                style="width: 100%"
-                (selectedIndexChange)="basicReqTabChange($event)"
-              >
+          <mat-card class="row d-flex justify-content-between align-items-center lfx-u-pad-tb-16">
+            <div [type]="type" [headerBg]="headerBg">
+              <mat-tab-group style="width: 100%" (selectedIndexChange)="basicReqTabChange($event)">
                 <mat-tab>
                   <ng-template mat-tab-label>
-                    <span [ngClass]="basicReqTab === 'paramsTab' ? 'tab-header-title' : 'tab-header-title-normal'">Parameters</span>
+                    <span
+                      [ngClass]="basicReqTab === 'paramsTab' ? 'tab-header-title' : 'tab-header-title-normal'">Parameters</span>
                   </ng-template>
                 </mat-tab>
                 <mat-tab>
                   <ng-template mat-tab-label>
-                    <span [ngClass]="basicReqTab === 'headersTab' ? 'tab-header-title' : 'tab-header-title-normal'">Headers</span>
+                    <span
+                      [ngClass]="basicReqTab === 'headersTab' ? 'tab-header-title' : 'tab-header-title-normal'">Headers</span>
                   </ng-template>
                 </mat-tab>
 
                 <mat-tab>
                   <ng-template mat-tab-label>
-                    <span [ngClass]="basicReqTab === 'extrasTab' ? 'tab-header-title' : 'tab-header-title-normal'">Storage</span>
+                    <span
+                      [ngClass]="basicReqTab === 'extrasTab' ? 'tab-header-title' : 'tab-header-title-normal'">Storage</span>
                   </ng-template>
                 </mat-tab>
                 <mat-tab *ngIf="
@@ -413,8 +415,8 @@
                       'put'
                   ">
                   <ng-template mat-tab-label>
-                    <span [ngClass]="basicReqTab === 'bodyTab' ? 'tab-header-title' : 'tab-header-title-normal'">Body</span></ng-template
-                  >
+                    <span
+                      [ngClass]="basicReqTab === 'bodyTab' ? 'tab-header-title' : 'tab-header-title-normal'">Body</span></ng-template>
                 </mat-tab>
               </mat-tab-group>
             </div>
@@ -504,7 +506,8 @@
                   " class="col-md-3" style="margin-top: 0.5em">
                   <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
                     <mat-label>Select editor option</mat-label>
-                    <mat-select [(value)]="selectedOption" (selectionChange)="optionChange($event)" placeholder="Select Editor Option">
+                    <mat-select [(value)]="selectedOption" (selectionChange)="optionChange($event)"
+                      placeholder="Select Editor Option">
                       <mat-option *ngFor="let option of options" [value]="option.value">
                         {{ option.viewValue }}
                       </mat-option>
@@ -573,18 +576,21 @@
                 <tbody>
                   <tr *ngFor="let key of formats; let i = index" class="d-flex">
                     <td class="col-3">
-                      <label>{{ sourceType.formats[key + "-dp"] }}</label>
+                      <div style="display: flex; align-items: flex-start; height: 100%;">
+                        <label style="margin: 0; padding: 0; line-height: 40px;">{{ sourceType.formats[key + "-dp"]
+                          }}</label>
+                      </div>
                     </td>
                     <td class="col-8">
-                      <mat-form-field appearance="fill" style="width: 42%" *ngIf="sourceType.formats[key] == 'input'">
-                        <mat-label>{{ key }}</mat-label>
-                        <input matInput [(ngModel)]="sourceType.attributes[key]" placeholder="Enter {{ key }}" />
+                      <mat-form-field appearance="fill" style="width: 42%" floatLabel="always"
+                        *ngIf="sourceType.formats[key] == 'input'">
+                        <input matInput class="text-field-placeholder mat-style-input" style="text-transform: none;"
+                          [(ngModel)]="sourceType.attributes[key]" placeholder="Enter {{ key }}" />
                       </mat-form-field>
 
                       <div class="col-lg-5 col-md-5 lfx-u-mar-b-16"
                         *ngIf="sourceType.formats[key] == 'datasourceDropdown'">
                         <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
-                          <mat-label>Select Connection</mat-label>
                           <mat-select [(value)]="sourceType.attributes[key]"
                             (selectionChange)="setDatasource(key, $event)" placeholder="Select Connection">
                             <mat-option *ngFor="let option of datasourceOptions" [value]="option.value">
@@ -595,7 +601,6 @@
                       </div>
                       <div class="col-lg-5 col-md-5 lfx-u-mar-b-16" *ngIf="key == 'instanceType'">
                         <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
-                          <mat-label>Select Instance Type</mat-label>
                           <mat-select [(value)]="sourceType.attributes[key]"
                             (selectionChange)="setDgInstanceType(key, $event)" placeholder="Select Instance Type">
                             <mat-option *ngFor="let option of instanceTypeOptions" [value]="option.value">

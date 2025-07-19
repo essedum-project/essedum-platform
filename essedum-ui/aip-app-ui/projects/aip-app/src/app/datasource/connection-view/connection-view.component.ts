@@ -431,7 +431,7 @@ export class ConnectionViewComponent implements OnInit {
           if (this.data.interfacetype === 'adapter') {
             this.Services.message('Success Adapter saved');
           } else {
-            this.Services.message('Success! Connection saved successfully');
+            this.Services.message('Connection updated successfully');
           }
           this._location.back();
         },

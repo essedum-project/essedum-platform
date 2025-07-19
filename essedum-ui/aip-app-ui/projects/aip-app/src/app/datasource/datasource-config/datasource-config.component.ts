@@ -79,6 +79,7 @@ export class DatasourceConfigComponent implements OnInit {
   capabilityPromise: Promise<boolean>;
   portDetails: any;
   portPayload: any;
+  showCustomIcon: boolean = true;
 
   constructor(
     private Services: Services,
@@ -344,6 +345,7 @@ export class DatasourceConfigComponent implements OnInit {
           }
           else {
             this.Services.message('Connection updated successfully ');
+            this._location.back();
           }
           if (this.router.url.includes('initiative')) {
             this.raiService.changeModalData(true);
@@ -358,7 +360,7 @@ export class DatasourceConfigComponent implements OnInit {
               this.Services.messageService('Error! Adapter not saved due to: ' + JSON.stringify(error));
             }
             else {
-              this.Services.messageService('Error! Connection not saved due to: ' + JSON.stringify(error));
+              this.Services.messageService('Error! Connection not updated due to: ' + JSON.stringify(error));
             }
           });
       }
@@ -565,5 +567,29 @@ export class DatasourceConfigComponent implements OnInit {
   closeModal() {
     //this.dialogRef.close();
   }
+
+shouldShowCustomIcon(): boolean {
+  // Check if the CSS pseudo-element is applying
+  const selectElement = document.querySelector('.mat-mdc-select-trigger');
+  if (selectElement) {
+    const computedStyle = window.getComputedStyle(selectElement, '::after');
+    const content = computedStyle.getPropertyValue('content');
+    // If content is not 'none' or empty, CSS is applying
+    return content === 'none' || content === '' || content === 'normal';
+  }
+  return true; // Default to showing custom icon
+}
+
+ngAfterViewInit() {
+  // Check after view initialization
+  setTimeout(() => {
+    const selectElement = document.querySelector('.mat-mdc-select-trigger');
+    if (selectElement) {
+      const computedStyle = window.getComputedStyle(selectElement, '::after');
+      const content = computedStyle.getPropertyValue('content');
+      this.showCustomIcon = content === 'none' || content === '' || content === 'normal';
+    }
+  }, 100);
+}
 
 }

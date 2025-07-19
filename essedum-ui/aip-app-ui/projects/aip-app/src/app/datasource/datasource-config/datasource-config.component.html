@@ -101,15 +101,15 @@
                                                 <h2 class="sub-header">Connection Properties</h2>
                                             </div>
                                         </div>
-                                        <div class="lfx-u-pad-t-32 lfx-u-pad-lr-24">
+                                        <div class="lfx-u-pad-lr-24">
                                             <div class="row">
                                                 <div *ngIf="!edit" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
                                                     <mat-form-field appearance="fill" style="width: 30%;"
                                                         floatLabel="always">
-                                                        <mat-label class="mat-style-label">Display Name add</mat-label>
+                                                        <mat-label class="mat-style-label">Display Name</mat-label>
                                                         <input matInput placeholder="Enter Name..." [(ngModel)]="alias"
                                                             required class="mat-style-input custom-placeholder-style"
-                                                            style="--placeholder-color: #737373; --placeholder-align: left; --placeholder-font: normal normal normal 16px/24px Roboto; --placeholder-letter-spacing: 0px; --placeholder-text-transform: capitalize; --placeholder-opacity: 1;">
+                                                            style="--placeholder-color: #737373; --placeholder-align: left; --placeholder-font: normal normal normal 16px/24px Roboto; --placeholder-letter-spacing: 0px; --placeholder-text-transform: capitalize; --placeholder-opacity: 1;text-transform: capitalize;">
 
                                                         <mat-error class="ml-15m" *ngIf="!alias">This field is
                                                             required</mat-error>
@@ -138,11 +138,11 @@
                                                 <div *ngIf="!edit" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
                                                     <mat-form-field appearance="fill" style="width: 100%;"
                                                         floatLabel="always">
-                                                        <mat-label class="mat-style-label">Description add</mat-label>
+                                                        <mat-label class="mat-style-label">Description</mat-label>
                                                         <input matInput placeholder="Enter Description..."
                                                             [(ngModel)]="description"
                                                             class="mat-style-input custom-placeholder-style"
-                                                            style="--placeholder-color: #737373; --placeholder-align: left; --placeholder-font: normal normal normal 16px/24px Roboto; --placeholder-letter-spacing: 0px; --placeholder-text-transform: capitalize; --placeholder-opacity: 1;">
+                                                            style="--placeholder-color: #737373; --placeholder-align: left; --placeholder-font: normal normal normal 16px/24px Roboto; --placeholder-letter-spacing: 0px; --placeholder-text-transform: capitalize; --placeholder-opacity: 1;text-transform: capitalize;">
                                                     </mat-form-field>
                                                 </div>
                                                 <div *ngIf="view" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
@@ -167,7 +167,7 @@
                                                             style="width: 100%; --mat-form-field-underline-color: transparent !important; --mdc-filled-text-field-active-indicator-color: transparent !important; --mdc-filled-text-field-focus-active-indicator-color: transparent !important; --mdc-filled-text-field-hover-active-indicator-color: transparent !important; --mat-form-field-ripple-color: transparent !important; --mat-form-field-hover-underline-color: transparent !important;"
                                                             floatLabel="always">
                                                             <mat-label class="mat-style-label">Connection Type
-                                                                add</mat-label>
+                                                                </mat-label>
                                                             <mat-select
                                                                 class="mat-style-select custom-placeholder-style"
                                                                 style="--placeholder-color: #737373; --placeholder-align: left; --placeholder-font: normal normal normal 16px/24px Roboto; --placeholder-letter-spacing: 0px; --placeholder-text-transform: capitalize; --placeholder-opacity: 1; appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important; background-color: #f7f7f7ed !important; border-radius: 4px !important; padding-right: 24px !important; margin-left: 4px !important; border-bottom: none !important; box-shadow: none !important; width: calc(100% + 30px) !important; margin-right: -30px !important;"
@@ -180,8 +180,8 @@
                                                                 </mat-option>
                                                             </mat-select>
                                                         </mat-form-field>
-                                                        <img src="/assets/images/Accordion_open.png"
-                                                            style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 12px; height: 8px; pointer-events: none; z-index: 1000;">
+                                                        <img *ngIf="shouldShowCustomIcon()" src="/assets/images/Accordion_open.png"
+                                                            style="position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 10px; height: 6px; pointer-events: none; z-index: 1000;">
                                                     </div>
                                                 </div>
                                                 <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
@@ -205,7 +205,7 @@
                                                             style="width: 100%; --mat-form-field-underline-color: transparent !important; --mdc-filled-text-field-active-indicator-color: transparent !important; --mdc-filled-text-field-focus-active-indicator-color: transparent !important; --mdc-filled-text-field-hover-active-indicator-color: transparent !important; --mat-form-field-ripple-color: transparent !important; --mat-form-field-hover-underline-color: transparent !important;"
                                                             floatLabel="always">
                                                             <mat-label class="mat-style-label">Capability
-                                                                add</mat-label>
+                                                                </mat-label>
                                                             <mat-select [(value)]="capability"
                                                                 class="mat-style-select custom-placeholder-style"
                                                                 style="--placeholder-color: #737373; --placeholder-align: left; --placeholder-font: normal normal normal 16px/24px Roboto; --placeholder-letter-spacing: 0px; --placeholder-text-transform: capitalize; --placeholder-opacity: 1; appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important; background-color: #f7f7f7ed !important; border-radius: 4px !important; padding-right: 24px !important; margin-left: 4px !important; border-bottom: none !important; box-shadow: none !important; width: calc(100% + 30px) !important; margin-right: -30px !important;"
@@ -217,8 +217,8 @@
                                                                 </mat-option>
                                                             </mat-select>
                                                         </mat-form-field>
-                                                        <img src="/assets/images/Accordion_open.png"
-                                                            style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 12px; height: 8px; pointer-events: none; z-index: 1000;">
+                                                        <img *ngIf="shouldShowCustomIcon()" src="/assets/images/Accordion_open.png"
+                                                            style="position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 10px; height: 6px; pointer-events: none; z-index: 1000;">
                                                     </div>
                                                 </div>
 
@@ -267,9 +267,8 @@
                                                                                     <div *ngIf="!obfuscate.includes(k);else other_content"
                                                                                         class="col-lg-12 col-md-12 lfx-u-mar-b-16">
                                                                                         <mat-form-field
-                                                                                            appearance="fill"
+                                                                                            appearance="fill"  floatLabel="always"
                                                                                             style="width: 70%;">
-                                                                                            <!-- <mat-label class="mat-style-label">{{k}}</mat-label> -->
                                                                                             <input matInput
                                                                                                 class="mat-style-input"
                                                                                                 *ngIf="type != 'AWSBedrock' || k != 'modelType'"
@@ -283,7 +282,7 @@
                                                                                             floatLabel="always">
                                                                                             <mat-label>Model
                                                                                                 Type</mat-label>
-                                                                                            <mat-select
+                                                                                            <mat-select class="mat-style-select"
                                                                                                 [(value)]="sourceType.attributes.modelType"
                                                                                                 id="mconf-dsrc-modelType-Input"
                                                                                                 placeholder="Select Model type">
@@ -310,10 +309,9 @@
                                                                                         <div *ngIf="k !== 'password';else password"
                                                                                             class="col-lg-12 col-md-12 lfx-u-mar-b-16">
 
-                                                                                            <mat-form-field
+                                                                                            <mat-form-field  floatLabel="always"
                                                                                                 appearance="fill"
                                                                                                 style="width: 70%;">
-                                                                                                <!-- <mat-label class="mat-style-label">{{k}}</mat-label> -->
                                                                                                 <input matInput
                                                                                                     class="mat-style-input"
                                                                                                     type="password"
@@ -336,10 +334,9 @@
                                                                                         class="selector-690-38">
                                                                                         <div
                                                                                             class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-                                                                                            <mat-form-field
+                                                                                            <mat-form-field  floatLabel="always"
                                                                                                 appearance="fill"
                                                                                                 style="width:70%;">
-                                                                                                <!-- <mat-label class="mat-style-label">{{k}}</mat-label> -->
                                                                                                 <input matInput
                                                                                                     class="mat-style-input"
                                                                                                     type="password"

@@ -172,3 +172,25 @@
   border-radius: 4px !important;
   margin-left: 4px !important;
 }
+
+.text-field-placeholder {
+  text-align: left;
+  font: normal normal normal 16px/24px Roboto;
+  letter-spacing: 0px;
+  color: #737373;
+  text-transform: capitalize;
+  opacity: 1;
+}
+
+
+.mat-style-input {
+  background-color: #f7f7f7ed !important;
+  border-bottom: 0px solid rgba(0, 0, 0, 0.42) !important;
+  text-align: left;
+  font: normal normal normal 16px/24px Roboto !important;
+  letter-spacing: 0px;
+  color: #000000 !important;
+  text-transform: capitalize;
+  opacity: 1;
+  margin-left: 4px !important;
+}
