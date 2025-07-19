@@ -7,7 +7,6 @@
   font-family: "Roboto", sans-serif !important;
 }
 
-
 :host ::ng-deep body,
 :host ::ng-deep html {
   font-family: "Roboto", sans-serif !important;
@@ -255,4 +254,99 @@
   background-color: #f7f7f7ed !important;
   border-radius: 4px !important;
   margin-left: 4px !important;
+}
+
+.mat-style-input {
+  background-color: #f7f7f7ed !important;
+  border-bottom: 0px solid rgba(0, 0, 0, 0.42) !important;
+
+  text-align: left;
+  font: normal normal normal 16px/24px Roboto !important;
+  letter-spacing: 0px;
+  color: #000000 !important;
+  text-transform: capitalize;
+  opacity: 1;
+  margin-left: 4px !important;
+}
+
+.mat-style-label {
+  text-align: left;
+  font: normal normal normal 12px/18px Roboto !important;
+  letter-spacing: 0px;
+  color: #555555;
+  opacity: 1;
+  text-transform: capitalize;
+}
+
+.mat-style-select {
+  background-color: #f7f7f7ed !important;
+  border-radius: 4px !important;
+  margin-left: 4px !important;
+}
+
+.mat-select-icon {
+  content: "";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background-image: url("/assets/images/Accordion_open.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+}
+
+.mat-select-arrow {
+  display: none !important;
+}
+
+.mat-select-trigger {
+  position: relative;
+}
+
+.mat-cancel-btn {
+  color: #002966 !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: #dadada 0% 0% no-repeat padding-box !important;
+  opacity: 1;
+}
+
+.mat-save-btn {
+  color: #ffffff !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+      no-repeat,
+    #0052cc padding-box !important;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+    no-repeat padding-box !important;
+}
+
+.custom-placeholder-style::placeholder {
+  color: #737373 !important;
+  text-align: left;
+  font: normal normal normal 16px/24px Roboto !important;
+  letter-spacing: 0px;
+  text-transform: capitalize;
+  opacity: 1;
+}
+
+.mat-button-radius {
+  border-radius: 16px !important;
 }

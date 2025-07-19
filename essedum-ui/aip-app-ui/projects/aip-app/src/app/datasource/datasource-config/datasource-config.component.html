@@ -106,10 +106,13 @@
                                                 <div *ngIf="!edit" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
                                                     <mat-form-field appearance="fill" style="width: 30%;"
                                                         floatLabel="always">
-                                                        <mat-label class="text-field-label">Display Name</mat-label>
+                                                        <mat-label class="mat-style-label">Display Name add</mat-label>
                                                         <input matInput placeholder="Enter Name..." [(ngModel)]="alias"
-                                                            required>
-                                                        <mat-error class="ml-15m" *ngIf="!alias">This field is required</mat-error>
+                                                            required class="mat-style-input custom-placeholder-style"
+                                                            style="--placeholder-color: #737373; --placeholder-align: left; --placeholder-font: normal normal normal 16px/24px Roboto; --placeholder-letter-spacing: 0px; --placeholder-text-transform: capitalize; --placeholder-opacity: 1;">
+
+                                                        <mat-error class="ml-15m" *ngIf="!alias">This field is
+                                                            required</mat-error>
                                                     </mat-form-field>
                                                 </div>
                                                 <div *ngIf="view" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
@@ -135,9 +138,11 @@
                                                 <div *ngIf="!edit" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
                                                     <mat-form-field appearance="fill" style="width: 100%;"
                                                         floatLabel="always">
-                                                        <mat-label>Description</mat-label>
+                                                        <mat-label class="mat-style-label">Description add</mat-label>
                                                         <input matInput placeholder="Enter Description..."
-                                                            [(ngModel)]="description">
+                                                            [(ngModel)]="description"
+                                                            class="mat-style-input custom-placeholder-style"
+                                                            style="--placeholder-color: #737373; --placeholder-align: left; --placeholder-font: normal normal normal 16px/24px Roboto; --placeholder-letter-spacing: 0px; --placeholder-text-transform: capitalize; --placeholder-opacity: 1;">
                                                     </mat-form-field>
                                                 </div>
                                                 <div *ngIf="view" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
@@ -157,23 +162,36 @@
                                                     </mat-form-field>
                                                 </div>
                                                 <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-                                                    <mat-form-field appearance="fill" style="width: 30%;" floatLabel="always">
-                                                        <mat-label>Connection Type</mat-label>
-                                                        <mat-select [(value)]="type"
-                                                            (selectionChange)="onTypeChange($event)" placeholder="Select Connection type">
-                                                            <mat-option *ngFor="let option of typeOptions"
-                                                                [value]="option.value">
-                                                                {{ option.viewValue }}
-                                                            </mat-option>
-                                                        </mat-select>
-                                                    </mat-form-field>
+                                                    <div style="position: relative; width: 30%; overflow: hidden;">
+                                                        <mat-form-field appearance="fill"
+                                                            style="width: 100%; --mat-form-field-underline-color: transparent !important; --mdc-filled-text-field-active-indicator-color: transparent !important; --mdc-filled-text-field-focus-active-indicator-color: transparent !important; --mdc-filled-text-field-hover-active-indicator-color: transparent !important; --mat-form-field-ripple-color: transparent !important; --mat-form-field-hover-underline-color: transparent !important;"
+                                                            floatLabel="always">
+                                                            <mat-label class="mat-style-label">Connection Type
+                                                                add</mat-label>
+                                                            <mat-select
+                                                                class="mat-style-select custom-placeholder-style"
+                                                                style="--placeholder-color: #737373; --placeholder-align: left; --placeholder-font: normal normal normal 16px/24px Roboto; --placeholder-letter-spacing: 0px; --placeholder-text-transform: capitalize; --placeholder-opacity: 1; appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important; background-color: #f7f7f7ed !important; border-radius: 4px !important; padding-right: 24px !important; margin-left: 4px !important; border-bottom: none !important; box-shadow: none !important; width: calc(100% + 30px) !important; margin-right: -30px !important;"
+                                                                [(value)]="type"
+                                                                (selectionChange)="onTypeChange($event)"
+                                                                placeholder="Select Connection type">
+                                                                <mat-option *ngFor="let option of typeOptions"
+                                                                    [value]="option.value">
+                                                                    {{ option.viewValue }}
+                                                                </mat-option>
+                                                            </mat-select>
+                                                        </mat-form-field>
+                                                        <img src="/assets/images/Accordion_open.png"
+                                                            style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 12px; height: 8px; pointer-events: none; z-index: 1000;">
+                                                    </div>
                                                 </div>
                                                 <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
                                                     <mat-form-field appearance="fill"
-                                                        *ngIf="edit && (capabilityPromise | async)" style="width: 30%;" floatLabel="always">
+                                                        *ngIf="edit && (capabilityPromise | async)" style="width: 30%;"
+                                                        floatLabel="always">
                                                         <mat-label>Capability</mat-label>
                                                         <mat-select [(value)]="capability"
-                                                            (selectionChange)="onCapbilityTypeChange($event)" multiple placeholder="Select Capability">
+                                                            (selectionChange)="onCapbilityTypeChange($event)" multiple
+                                                            placeholder="Select Capability">
                                                             <mat-option *ngFor="let option of capabilityOptions"
                                                                 [value]="option.value">
                                                                 {{ option.viewValue }}
@@ -181,16 +199,27 @@
                                                         </mat-select>
                                                     </mat-form-field>
 
-                                                    <mat-form-field appearance="fill" style="width: 30%;" *ngIf="!edit" floatLabel="always">
-                                                        <mat-label>Capability</mat-label>
-                                                        <mat-select [(value)]="capability"
-                                                            (selectionChange)="onCapbilityTypeChange($event)" multiple placeholder="Select Capability">
-                                                            <mat-option *ngFor="let option of capabilityOptions"
-                                                                [value]="option.value">
-                                                                {{ option.viewValue }}
-                                                            </mat-option>
-                                                        </mat-select>
-                                                    </mat-form-field>
+                                                    <div style="position: relative; width: 30%; overflow: hidden;"
+                                                        *ngIf="!edit">
+                                                        <mat-form-field appearance="fill"
+                                                            style="width: 100%; --mat-form-field-underline-color: transparent !important; --mdc-filled-text-field-active-indicator-color: transparent !important; --mdc-filled-text-field-focus-active-indicator-color: transparent !important; --mdc-filled-text-field-hover-active-indicator-color: transparent !important; --mat-form-field-ripple-color: transparent !important; --mat-form-field-hover-underline-color: transparent !important;"
+                                                            floatLabel="always">
+                                                            <mat-label class="mat-style-label">Capability
+                                                                add</mat-label>
+                                                            <mat-select [(value)]="capability"
+                                                                class="mat-style-select custom-placeholder-style"
+                                                                style="--placeholder-color: #737373; --placeholder-align: left; --placeholder-font: normal normal normal 16px/24px Roboto; --placeholder-letter-spacing: 0px; --placeholder-text-transform: capitalize; --placeholder-opacity: 1; appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important; background-color: #f7f7f7ed !important; border-radius: 4px !important; padding-right: 24px !important; margin-left: 4px !important; border-bottom: none !important; box-shadow: none !important; width: calc(100% + 30px) !important; margin-right: -30px !important;"
+                                                                (selectionChange)="onCapbilityTypeChange($event)"
+                                                                multiple placeholder="Select Capability">
+                                                                <mat-option *ngFor="let option of capabilityOptions"
+                                                                    [value]="option.value">
+                                                                    {{ option.viewValue }}
+                                                                </mat-option>
+                                                            </mat-select>
+                                                        </mat-form-field>
+                                                        <img src="/assets/images/Accordion_open.png"
+                                                            style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 12px; height: 8px; pointer-events: none; z-index: 1000;">
+                                                    </div>
                                                 </div>
 
 
@@ -210,7 +239,8 @@
 
                                                         <div class="p-20">
                                                             <table class="">
-                                                                <thead class="selector-690-15" style="border-bottom: 2px solid #e0e0e0;">
+                                                                <thead class="selector-690-15"
+                                                                    style="border-bottom: 2px solid #e0e0e0;">
                                                                     <tr class="d-flex selector-690-16">
                                                                         <th class="col-2 selector-690-17 base-color">
                                                                             Attribute</th>
@@ -228,18 +258,20 @@
                                                                             <div *ngIf="!k.includes('_vault')"
                                                                                 class="d-flex selector-690-28"
                                                                                 style="width: 60%;">
-                                                                                <td class="col-2 selector-690-29">
-                                                                                    <mat-label>{{k}}:</mat-label>
+                                                                                <td class="col-3 selector-690-29">
+                                                                                    <mat-label
+                                                                                        class="mat-style-label">{{k}}:</mat-label>
                                                                                 </td>
-                                                                                <td class="col-10 selector-690-31">
+                                                                                <td class="col-9 selector-690-31">
 
                                                                                     <div *ngIf="!obfuscate.includes(k);else other_content"
-                                                                                        class="col-lg-9 col-md-9 lfx-u-mar-b-16">
+                                                                                        class="col-lg-12 col-md-12 lfx-u-mar-b-16">
                                                                                         <mat-form-field
                                                                                             appearance="fill"
-                                                                                            style="width: 60%;">
-                                                                                            <mat-label>{{k}}</mat-label>
+                                                                                            style="width: 70%;">
+                                                                                            <!-- <mat-label class="mat-style-label">{{k}}</mat-label> -->
                                                                                             <input matInput
+                                                                                                class="mat-style-input"
                                                                                                 *ngIf="type != 'AWSBedrock' || k != 'modelType'"
                                                                                                 [(ngModel)]="sourceType.attributes[k]"
                                                                                                 id="mconf-dsrc-{{k}}-Input">
@@ -247,12 +279,14 @@
                                                                                         <mat-form-field
                                                                                             *ngIf="type === 'AWSBedrock' && k === 'modelType'"
                                                                                             appearance="fill"
-                                                                                            style="width: 60%;" floatLabel="always">
+                                                                                            style="width: 70%;"
+                                                                                            floatLabel="always">
                                                                                             <mat-label>Model
                                                                                                 Type</mat-label>
                                                                                             <mat-select
                                                                                                 [(value)]="sourceType.attributes.modelType"
-                                                                                                id="mconf-dsrc-modelType-Input" placeholder="Select Model type">
+                                                                                                id="mconf-dsrc-modelType-Input"
+                                                                                                placeholder="Select Model type">
                                                                                                 <mat-option
                                                                                                     *ngFor="let option of modelTypeOptions"
                                                                                                     [value]="option.value">
@@ -274,13 +308,14 @@
                                                                                     <ng-template #other_content=""
                                                                                         class="">
                                                                                         <div *ngIf="k !== 'password';else password"
-                                                                                            class="col-lg-9 col-md-9 lfx-u-mar-b-16">
+                                                                                            class="col-lg-12 col-md-12 lfx-u-mar-b-16">
 
                                                                                             <mat-form-field
                                                                                                 appearance="fill"
-                                                                                                style="width: 60%;">
-                                                                                                <mat-label>{{k}}</mat-label>
+                                                                                                style="width: 70%;">
+                                                                                                <!-- <mat-label class="mat-style-label">{{k}}</mat-label> -->
                                                                                                 <input matInput
+                                                                                                    class="mat-style-input"
                                                                                                     type="password"
                                                                                                     [(ngModel)]="sourceType.attributes[k]"
                                                                                                     id="mconf-dsrc-{{k}}-Input">
@@ -300,12 +335,13 @@
                                                                                     <ng-template #password=""
                                                                                         class="selector-690-38">
                                                                                         <div
-                                                                                            class="col-lg-9 col-md-9 lfx-u-mar-b-16">
+                                                                                            class="col-lg-12 col-md-12 lfx-u-mar-b-16">
                                                                                             <mat-form-field
                                                                                                 appearance="fill"
-                                                                                                style="width:60%;">
-                                                                                                <mat-label>{{k}}</mat-label>
+                                                                                                style="width:70%;">
+                                                                                                <!-- <mat-label class="mat-style-label">{{k}}</mat-label> -->
                                                                                                 <input matInput
+                                                                                                    class="mat-style-input"
                                                                                                     type="password"
                                                                                                     [(ngModel)]="keypass"
                                                                                                     (ngModelChange)="onPasswordChange()"
@@ -349,22 +385,22 @@
                                     <div *ngIf="isGithub">
                                         <div *ngIf="!ConnectionEdit"
                                             class="col-lg-12 col-md-12 lfx-u-mar-b-16 d-flex justify-content-end">
-                                            <button mat-raised-button class="cancel-btn"
+                                            <button mat-raised-button class="mat-cancel-btn mat-button-radius"
                                                 [disabled]="false" (click)="testConnection()">
                                                 Test
                                             </button>
-                                            <button mat-raised-button class="save-btn"
+                                            <button mat-raised-button class="mat-save-btn mat-button-radius"
                                                 [disabled]="false" (click)="saveDatasource()">
                                                 Save
                                             </button>
                                         </div>
                                         <div *ngIf="ConnectionEdit"
                                             class="col-lg-12 col-md-12 lfx-u-mar-b-16 d-flex justify-content-end">
-                                            <button mat-raised-button class="cancel-btn"
+                                            <button mat-raised-button class="cancel-btn mat-button-radius"
                                                 [disabled]="false" (click)="testConnection()">
                                                 Test
                                             </button>
-                                            <button mat-raised-button class="save-btn"
+                                            <button mat-raised-button class="save-btn mat-button-radius"
                                                 [disabled]="false" (click)="saveDatasource()">
                                                 Update
                                             </button>
@@ -372,11 +408,11 @@
                                     </div>
                                     <div *ngIf="!isGithub">
                                         <div class="col-lg-12 col-md-12 lfx-u-mar-b-16 d-flex justify-content-end">
-                                            <button mat-raised-button class="cancel-btn"
+                                            <button mat-raised-button class="cancel-btn mat-button-radius"
                                                 [disabled]="false" (click)="testConnection()">
                                                 Test
                                             </button>
-                                            <button mat-raised-button class="save-btn"
+                                            <button mat-raised-button class="save-btn mat-button-radius"
                                                 [disabled]="false" (click)="saveDatasource()">
                                                 Save
                                             </button>
