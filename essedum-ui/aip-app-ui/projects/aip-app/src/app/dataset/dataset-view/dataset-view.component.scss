@@ -22,3 +22,24 @@
     }
   }
   
+:host {
+     font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+:host ::ng-deep {
+     font-family: "Roboto", "Segoe UI", sans-serif !important;
+
+  mat-form-field,
+  mat-select,
+  mat-option,
+  mat-label,
+  .mat-select-value,
+  .mat-option-text,
+  input,
+  textarea,
+  button,
+  .mat-button-wrapper,
+  .mat-select-placeholder {
+     font-family:  "Roboto", "Segoe UI", sans-serif !important;
+  }
+}

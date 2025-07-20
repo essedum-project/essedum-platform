@@ -43,7 +43,13 @@
 
           <mat-menu #downloadMenu="matMenu">
             <div style="padding: 8px 16px; max-height: 30vh; overflow: auto">
-              <mat-checkbox [(ngModel)]="selectAllColsToDwnld" (change)="toggleSelectAllColsToDwnld()"
+              <div>
+                <button mat-raised-button color="primary" [disabled]="colsToDownload.length == 0"
+                  (click)="download(); downloadMenu.closed.emit()">
+                  Download
+                </button>
+                </div>
+              <mat-checkbox color="primary" [(ngModel)]="selectAllColsToDwnld" (change)="toggleSelectAllColsToDwnld()"
                 [id]="'colToDwnld-selectnoneall'" style="
                     margin-bottom: 8px;
                     font-weight: 500;
@@ -56,7 +62,7 @@
                 }}
               </mat-checkbox>
               <div *ngFor="let col of cols">
-                <mat-checkbox name="colsToDwnld" [value]="col.field" [checked]="col.selected"
+                <mat-checkbox color="primary" name="colsToDwnld" [value]="col.field" [checked]="col.selected"
                   (change)="toggleSelectHeaderToDwnld(col.header)" [id]="'colToDwnld-' + col.field" style="
                       margin-bottom: 8px;
                       font-weight: 500;
@@ -69,10 +75,10 @@
                     'pointer-events':
                       colsToDownload.length == 0 ? 'none' : 'auto'
                   }">
-                <button mat-raised-button color="primary" [disabled]="colsToDownload.length == 0"
+                <!-- <button mat-raised-button color="primary" [disabled]="colsToDownload.length == 0"
                   (click)="download(); downloadMenu.closed.emit()">
                   Download
-                </button>
+                </button> -->
               </div>
             </div>
           </mat-menu>
@@ -121,14 +127,12 @@
                 Choose Columns
               </div>
               <div *ngFor="let col of cols; trackBy: trackByField" class="selector-795-51">
-                <mat-checkbox name="colsToShow" [value]="col.field" [checked]="col.visible"
+                <mat-checkbox color="primary" name="colsToShow" [value]="col.field" [checked]="col.visible"
                   (change)="col.visible = !col.visible" [id]="'colToDwnld-' + col.field" style="
                       margin-left: 8px;
                       margin-bottom: 0px;
                       font-weight: 500;
-                      font-size: 14px;
-                      color: blue;
-                    ">
+                      font-size: 14px;">
                   {{ col.header }}
                 </mat-checkbox>
               </div>
@@ -209,17 +213,23 @@
                 </td>
               </tr>
             </tbody>
-            <tbody *ngIf="datasetsCount == 0">
+            <tbody *ngIf="dataset===undefined">
               <tr>
-                <td colspan="100%" style="text-align: center">
-                  No entries found
-                </td>
+              <div *ngIf="datasetsCount===0" class="d-flex justify-content-center align-items-center flex-column">
+                            <b>{{ datasetDataErr }}</b>
+                          </div>
+                <app-aip-empty-state *ngIf="dataset===undefined && !appLoading"></app-aip-empty-state>
+
               </tr>
             </tbody>
           </table>
+
         </div>
       </div>
       <!-- </div> -->
+       <div *ngIf="appLoading" role="status" aria-label="Loading cards">
+                    <app-aip-loading></app-aip-loading>
+                  </div>
 
       <div class="pagination-wrapper d-flex justify-content-end">
         <ul class="custom-pagination">

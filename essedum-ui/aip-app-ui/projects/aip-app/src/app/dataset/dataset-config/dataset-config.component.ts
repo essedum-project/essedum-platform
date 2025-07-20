@@ -104,6 +104,8 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
   filepath: string;
   fileData: any;
   fileToUpload: File;
+    isDropdownOpen: { [key: string]: boolean } = {};
+
   keys: any = [];
   schemaBol: any;
   groups: any[] = [];
@@ -917,6 +919,9 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
     this.refreshcards.emit(true);
 
   }
+onOpenedChange(key: string, isOpen: boolean): void {
+  this.isDropdownOpen[key] = isOpen;
+}
 
 }
 function importedSaveAs(templateBlob: Blob, arg1: string) {
