@@ -247,7 +247,7 @@ export class DatasourceConfigComponent implements OnInit {
       this.testSuccessful = true;
     },
       error => {
-        this.Services.messageService('Error! Please check connection details: ' + error);
+        this.Services.message('Error! Please check connection details: ' + error);
       }
     );
   }

@@ -4,8 +4,8 @@
         <table class="">
             <thead class="selector-693-4">
                 <tr class="d-flex selector-693-5">
-                    <th class="col-2 selector-693-6" style="font-size: 16px; color:#0094ff">Attribute</th>
-                    <th class="col-10 selector-693-7" style="font-size: 16px; color:#0094ff">Value</th>
+                    <th class="col-2 selector-693-6 list-header" >Attribute</th>
+                    <th class="col-10 selector-693-7 list-header">Value</th>
                 </tr>
             </thead>
 
@@ -16,12 +16,12 @@
                             style="font-size: 15px; margin-bottom: 40px;">{{key | titlecase}}:</label>
                     </td>
 
-                    <td class="col-10 selector-693-12">
+                    <td class="col-10 " style="width: 30%;">
                         <ng-container
                             *ngIf="key != 'file' &amp;&amp; key!= 'type' &amp;&amp; key!='Request Body' &amp;&amp; key!='Cacheable' &amp;&amp;key!= 'uploadFile' &amp;&amp;key!='API Type';else file_content"
-                            class="selector-693-13">
+                            >
 
-                            <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+                            <div class="col-lg-12 col-md-12">
 
                                 <mat-form-field appearance="fill" *ngIf="key !== 'Query'" class="lfx-form-field"
                                     style="width: 85%; margin-bottom: 1rem;">

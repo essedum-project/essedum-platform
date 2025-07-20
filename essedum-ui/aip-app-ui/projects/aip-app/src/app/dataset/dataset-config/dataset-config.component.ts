@@ -643,6 +643,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
   }
 
   onSchemaChange(schemaAlias?) {
+    console.log("CAME IN 2")
     if (schemaAlias == "None") {
       this.isSchema = false;
       this.schemaName = null;
@@ -676,6 +677,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
         this.services.getSchemaFormsByName(schema.name).subscribe(
           resp => {
             if (resp) {
+              console.log("GETTTIMG THIS SCHEMAAA--", resp)
               this.originalSchemaTemplateAlias = [];
               this.originalSchemaTemplates = resp;
               this.originalSchemaTemplates.forEach((opt) => {
@@ -798,6 +800,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
   }
 
   findallschema(): Promise<string> {
+
     return new Promise(resolve => {
       this.services.getAllSchemas()
         .subscribe(res => {
@@ -825,6 +828,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
           })
           resolve("Schema informtion updated");
           if (this.matData.schema != null && this.originalSchemas.length >= 1) this.onSchemaChange(this.matData.schema.alias)
+            else this.originalSchemaTemplateAlias=this.originalSchemasOpt;
         });
     })
   }
