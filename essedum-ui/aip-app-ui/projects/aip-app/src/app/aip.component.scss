@@ -714,18 +714,6 @@ div {
     padding: 8px !important;
   }
 
-  .lfx-l-level2-middle-ctr {
-    display: table;
-    width: 100%;
-    //table-layout: fixed;
-  }
-
-  .lfx-l-level2-middle-col {
-    display: table-cell;
-    vertical-align: top;
-    height: 100%;
-  }
-
   .back-icon {
     font-size: 24px !important;
     color: #0a142f !important;
@@ -745,13 +733,6 @@ div {
     margin-left: 32px !important;
   }
 
-  .lfx-u-header-xxl {
-    font-size: 2.4rem;
-    font-weight: 600;
-    font-family: "myriad-pro", Arial, sans-serif !important;
-    font-style: normal;
-  }
-
   .lfx-u-pad-lr-24 {
     padding-left: 24px !important;
     padding-right: 24px !important;
@@ -769,10 +750,6 @@ div {
   .lfx-u-pad-tb-16 {
     padding-top: 16px !important;
     padding-bottom: 16px !important;
-  }
-
-  .lfx-c-panel__content {
-    min-height: 100px !important;
   }
 
   .lfx-u-mar-t-24 {
@@ -916,10 +893,6 @@ div {
 
   .lfx-u-text-primary-80 {
     color: #0094ff;
-  }
-
-  .lfx-u-mar-8 {
-    margin: 8px !important;
   }
 
   .lfx-u-header-md {
@@ -1109,13 +1082,6 @@ div {
     padding-left: 8px !important;
   }
 
-  .lfx-u-header-lg {
-    font-size: 1.6rem;
-    font-weight: 600;
-    font-family: "myriad-pro", Arial, sans-serif !important;
-    font-style: normal;
-  }
-
   .lfx-l-level2-right-col {
     width: 350px !important;
     padding-left: 32px !important;
@@ -1180,23 +1146,8 @@ div {
     margin-top: 30px !important;
   }
 
-  .lfx-l-level1-wrapper .lfx-l-level1-middle-col {
-    padding: 16px 16px;
-  }
-
   .lfx-u-pad-l-32 {
     padding-left: 32px !important;
-  }
-
-  .container,
-  .container-fluid {
-    padding-right: 16px;
-    padding-left: 16px;
-  }
-
-  .col-lg-12 {
-    flex: 0 0 auto;
-    width: 100%;
   }
 
   .lfx-u-mar-b-32 {
@@ -1335,15 +1286,16 @@ div {
 
   .aip-card-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, 29rem);
+    grid-template-columns: repeat(auto-fit, 28.9rem);
     grid-template-rows: repeat(auto-fit, 15rem);
     justify-content: center;
     grid-row-gap: 2.4rem;
     grid-column-gap: 2.4rem;
+    // padding-bottom: 56px;
   }
 
   .aip-card-wrapper {
-    min-width: 29rem;
+    min-width: 28.9rem;
     min-height: 15rem;
 
     @media (max-width: 576px) {
@@ -1357,6 +1309,64 @@ div {
   }
 
   .lfx-u-mar-b-50 {
-    margin-bottom: 50px;
+    margin-bottom: 50px !important;
+  }
+
+  .lfx-u-pad-b-90 {
+    padding-bottom: 90px !important;
+  }
+}
+
+::ng-deep {
+  .container,
+  .container-fluid {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .col-lg-12 {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .lfx-l-level1-wrapper .lfx-l-level1-middle-col {
+    padding: 16px 16px;
+  }
+
+  .lfx-u-mar-8 {
+    margin: 8px !important;
+  }
+
+  .lfx-u-header-xxl {
+    font-size: 2.4rem;
+    font-weight: 600;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
+
+    font-style: normal;
+  }
+
+  .lfx-u-header-lg {
+    font-size: 1.6rem;
+    font-weight: 600;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
+    font-style: normal;
+    line-height: 22px;
+    color: #000000;
+  }
+
+  .lfx-l-level2-middle-ctr {
+    display: table;
+    width: 100%;
+    //table-layout: fixed;
+  }
+
+  .lfx-l-level2-middle-col {
+    display: table-cell;
+    vertical-align: top;
+    height: 100%;
+  }
+
+  .lfx-c-panel__content {
+    min-height: 100px !important;
   }
 }

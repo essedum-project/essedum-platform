@@ -20,6 +20,8 @@ import { Location } from '@angular/common';
 })
 export class AdapterComponent implements OnInit {
   // Constants
+  readonly CARD_TITLE = 'Implementations';
+  readonly SERVICE_V1 = 'adapters';
   readonly CREATE_ACTION = 'create';
   readonly EDIT_ACTION = 'edit';
 

@@ -17,8 +17,9 @@
             </div>
 
             <!-- Cards container -->
-            <div class="lfx-c-card__action-ul aip-card-container">
-                <div class="col-md-8 col-lg-6 col-xl-5 aip-card-wrapper" *ngFor="let card of cards">
+            <div class="lfx-c-card__action-ul aip-card-container lfx-u-pad-b-90">
+                <div class="col-md-8 col-lg-6 col-xl-5 aip-card-wrapper" 
+                    *ngFor="let card of cards">
                     <div class="card-wrapper h-100">
                         <app-aip-card [servicev1]="servicev1" [card]="card" [editAuth]="editAuth"
                             [deployAuth]="deployAuth" [deleteAuth]="deleteAuth"

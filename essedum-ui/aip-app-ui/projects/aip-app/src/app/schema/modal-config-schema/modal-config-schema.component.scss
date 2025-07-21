@@ -2,14 +2,6 @@
   font-size: 20px; /* Replace with the font size you want */
 }
 
-.lfx-l-middle-col {
-  margin-left: 16px;
-}
-
-.lfx-u-no-mar-l__mb {
-  margin-left: 0 !important;
-}
-
 @media screen and (min-width: 1367px) {
   .lfx-l-base-layout-center {
     width: 1216px;
@@ -28,52 +20,6 @@
   }
 }
 
-.lfx-u-pad-lr-16 {
-  padding-left: 16px !important;
-  padding-right: 16px !important;
-}
-
-.lfx-u-mar-lr-24 {
-  margin-left: 24px !important;
-  margin-right: 24px !important;
-}
-
-.lfx-u-pad-32 {
-  padding: 32px !important;
-}
-
-.lfx-l-level2-middle-ctr {
-  display: block;
-  width: 100%;
-  table-layout: unset;
-}
-
-.lfx-l-level2-middle-col,
-.lfx-l-level2-right-col {
-  display: block;
-  height: auto;
-}
-
-.lfx-u-mar-b-24__mb {
-  margin-bottom: 24px !important;
-}
-
-.lfx-c-panel__content {
-  min-height: 100px;
-}
-
-.lfx-u-mar-tb-32 {
-  margin-top: 32px !important;
-  margin-bottom: 32px !important;
-}
-
-.lfx-u-body-md {
-  font-size: 1.4rem;
-  font-weight: 400;
-  font-family: roboto, Arial, sans-serif !important;
-  font-style: normal;
-}
-
 .lfx-u-bg-primary-80 {
   background: #8626c3;
   color: #fff;
@@ -82,10 +28,6 @@
 .lfx-u-text-status-success {
   color: #007a52;
   background: #dff6dd;
-}
-
-.lfx-u-pad-16 {
-  padding: 16px !important;
 }
 
 .lfx-u-body-sm {
@@ -99,25 +41,6 @@
   color: #737373;
 }
 
-.lfx-u-no-mar-b {
-  margin-bottom: 0 !important;
-}
-.lfx-u-header-md {
-  font-size: 1.4rem;
-  font-weight: 600;
-  font-family: myriad-pro, Arial, sans-serif !important;
-  font-style: normal;
-}
-
-.lfx-u-pad-b-20 {
-  padding-bottom: 20px;
-}
-
-.lfx-u-pad-tb-8 {
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-}
-
 .mdc-button.lfx-c-btn--icon span.lfx-c-btn--icon__icon {
   padding: 4px 8px;
   background-position: center center;
@@ -128,12 +51,23 @@
 .lfx-u-body-xl {
   font-size: 1.6rem;
   font-weight: 400;
-  font-family: roboto, Arial, sans-serif !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
   font-style: normal;
+  line-height: 22px;
+  color: #000000;
+}
+
+.lfx-u-header-xl {
+  font-size: 1.8rem;
+  font-weight: 600;
+  line-height: 24px;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-style: normal;
+  margin-bottom: 0px;
 }
 
 .lfx-c-card.mat-mdc-card {
-  padding: 24px;
+  padding: 16px;
   min-height: 50px;
   border-radius: 16px;
   display: block;
@@ -179,29 +113,316 @@ input:focus,
   font-size: 1.8rem !important;
 }
 
-.slider-toggle-width {
-  width: 24px !important;
-  min-width: 0 !important;
-  max-width: 64px !important;
-  padding: 0 !important;
+.lfx-schema-card {
+  width: 100%;
+  // height: 320px;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 2px 4px #00000029;
+  border: 1px solid #efefef;
+  padding: 8px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  margin-top: 20px;
 }
 
-::ng-deep .mdc-slider__thumb-knob {
-  border-color: #0094ff !important;
-  background-color: #0094ff !important;
+// Left align tab labels and prevent them from stretching full width
+::ng-deep .tabs-left-aligned .mat-mdc-tab-header {
+  justify-content: flex-start !important;
 }
 
-::ng-deep .mat-mdc-slider .mdc-slider__track--active_fill {
-  background-color: #0094ff !important;
-  border-color: #0094ff !important;
+::ng-deep .tabs-left-aligned .mat-mdc-tab-list {
+  justify-content: flex-start !important;
+  width: auto !important;
 }
 
-::ng-deep .mat-mdc-slider .mdc-slider__track--inactive {
-  background-color: #0094ff !important;
-  border-color: #0094ff !important;
+::ng-deep .tabs-left-aligned .mdc-tab-scroller__scroll-area {
+  justify-content: flex-start !important;
 }
 
-::ng-deep .mdc-slider__track--active {
-  height: 0px !important;
-  top: 0 !important;
+::ng-deep .tabs-left-aligned .mdc-tab-scroller__scroll-content {
+  justify-content: flex-start !important;
+  width: auto !important;
+}
+
+::ng-deep .tabs-left-aligned .mdc-tab {
+  flex-grow: 0 !important;
+  flex-shrink: 0 !important;
+  width: auto !important;
+  min-width: auto !important;
+  padding-left: 28px;
+  padding-right: 28px;
+  border-radius: 8px;
+  height: 37px !important;
+}
+
+::ng-deep .mat-mdc-tab-group {
+  margin: 0px;
+  height: 100%;
+}
+
+::ng-deep .mat-mdc-tab-header {
+  height: 39px !important;
+  border-bottom: 2px solid #efefef !important;
+  margin-bottom: 4px !important;
+}
+
+::ng-deep .mat-mdc-tab-labels {
+  border-bottom: 2px solid #efefef !important;
+}
+
+::ng-deep .mdc-tab__content {
+  height: 36px !important;
+}
+
+::ng-deep
+  .mdc-tab
+  .mat-mdc-tab
+  .mat-mdc-focus-indicator
+  .mdc-tab--active
+  .ng-star-inserted
+  .mdc-tab-indicator--active {
+  height: 32px !important;
+}
+
+.lfx-u-sub-header-alias {
+  font-size: 1.2rem;
+  font-weight: 400;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-style: normal;
+  line-height: 18px;
+  color: #555555;
+}
+
+// Custom styling for alias field
+::ng-deep .custom-alias-field {
+  .mat-mdc-form-field-flex {
+    height: 21px !important;
+    background-color: #fafafa !important;
+    padding: 0px !important;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    height: 21px !important;
+    background-color: #fafafa !important;
+    padding: 0px !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    padding: 0px !important;
+  }
+}
+
+::ng-deep .custom-alias-input {
+  text-align: left !important;
+  font-size: 1.6rem;
+  font-weight: 400;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-style: normal;
+  line-height: 24px;
+  letter-spacing: 0px !important;
+  color: #737373 !important;
+
+  background-color: #fafafa !important;
+  height: 21px !important;
+  line-height: 21px !important;
+  padding: 8px;
+
+  // Placeholder styling
+  &::placeholder {
+    text-align: left !important;
+    font-size: 1.6rem;
+    font-weight: 400;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
+    font-style: normal;
+    line-height: 24px;
+    letter-spacing: 0px !important;
+    color: #737373 !important;
+
+    opacity: 0.7 !important;
+  }
+
+  // Browser-specific placeholder styling
+  &::-webkit-input-placeholder {
+    text-align: left !important;
+    font-size: 1.6rem;
+    font-weight: 400;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
+    font-style: normal;
+    line-height: 24px;
+    letter-spacing: 0px !important;
+    color: #737373 !important;
+    opacity: 0.7 !important;
+  }
+
+  &::-moz-placeholder {
+    text-align: left !important;
+    font-size: 1.6rem;
+    font-weight: 400;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
+    font-style: normal;
+    line-height: 24px;
+    letter-spacing: 0px !important;
+    color: #737373 !important;
+    opacity: 0.7 !important;
+  }
+
+  &:-ms-input-placeholder {
+    text-align: left !important;
+    font-size: 1.6rem;
+    font-weight: 400;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
+    font-style: normal;
+    line-height: 24px;
+    letter-spacing: 0px !important;
+    color: #737373 !important;
+    opacity: 0.7 !important;
+  }
+}
+
+.lfx-t-head-row {
+  background: #ffffff;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 400;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-style: normal;
+  line-height: 20px;
+  letter-spacing: 0px !important;
+  color: #000000 !important;
+  text-transform: capitalize !important;
+}
+.lfx-t-body-row {
+  background: #faf2ff;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 400;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-style: normal;
+  line-height: 20px;
+  letter-spacing: 0px !important;
+  color: #000000 !important;
+}
+
+.lfx-table-action {
+  display: flex;
+  justify-content: space-between;
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: #737373;
+    transition: color 0.2s ease, transform 0.2s ease;
+    cursor: pointer;
+
+    &:hover {
+      color: #0094ff;
+      transform: scale(1.1);
+    }
+
+    &.active {
+      color: #0094ff;
+    }
+
+    // Enhanced accessibility and visual feedback
+    &:focus {
+      outline: 2px solid #0094ff;
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+}
+
+.add-row-button {
+  display: flex;
+  justify-content: end;
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: #737373;
+    transition: color 0.2s ease, transform 0.2s ease;
+    cursor: pointer;
+
+    &:hover {
+      color: #0094ff;
+      transform: scale(1.1);
+    }
+
+    &.active {
+      color: #0094ff;
+    }
+  }
+}
+
+.schema-form-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: #000000;
+    transition: color 0.2s ease, transform 0.2s ease;
+    cursor: pointer;
+
+    &:hover {
+      color: #0094ff;
+      transform: scale(1.1);
+    }
+
+    &.active {
+      color: #0094ff;
+    }
+  }
+}
+
+// JSON Editor Container Styles
+.json-editor-container {
+  height: 55vh;
+  overflow-y: auto;
+  margin: 2rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fafafa;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  // Responsive design
+  @media (max-width: 768px) {
+    height: 45vh;
+    margin: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    height: 40vh;
+    margin: 0.5rem;
+  }
+}
+
+.json-editor-wrapper {
+  width: 100%;
+  padding: 1rem;
+
+  // Ensure the editor takes full width
+  .cipJSONEditor {
+    width: 100%;
+    min-height: 300px;
+    border: none;
+    background: transparent;
+
+    // Focus styles for accessibility
+    &:focus-within {
+      outline: 2px solid #0094ff;
+      outline-offset: 2px;
+    }
+  }
 }
