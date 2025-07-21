@@ -128,7 +128,7 @@ export class AipCardComponent {
       [SERVICE_TYPES.PIPELINE]: this.card?.alias,
       [SERVICE_TYPES.CONNECTIONS]: this.card?.alias,
       [SERVICE_TYPES.MODEL]: this.card?.name || this.card?.sourceName,
-      [SERVICE_TYPES.DATASETS]: this.card?.datasource?.alias,
+      [SERVICE_TYPES.DATASETS]: this.card?.alias,
     };
     return titleMap[this.servicev1];
   }
