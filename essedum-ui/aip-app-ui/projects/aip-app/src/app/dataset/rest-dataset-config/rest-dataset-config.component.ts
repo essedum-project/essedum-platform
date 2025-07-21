@@ -197,7 +197,7 @@ export class RestDatasetConfigComponent implements OnInit {
         .subscribe(resp => {
 
           this.datasetTypes = resp;
-          this.datasetTypes.forEach(dType => {
+          this.datasetTypes?.forEach(dType => {
             if (dType === 'SPLUNK')
               this.splunkTypes = dType[0]['splunkTypes'];
           });
@@ -246,12 +246,21 @@ export class RestDatasetConfigComponent implements OnInit {
               row.type.toLocaleLowerCase() === this.dataset.datasource.type.toLocaleLowerCase())[0];
           }
 
-          if (this.dataset.attributes && this.dataset.attributes.TransformationScript != "")
-            this.script = JSON.parse(this.dataset.attributes.TransformationScript);
+          if (this.dataset.attributes && this.dataset.attributes.TransformationScript != ""){
+              let script= this.dataset.attributes.TransformationScript;
+         
+          this.prescript= script? JSON.parse(script) : null;
+          }
           this.transformData = this.dataset.attributes?.transformData;
 
-          if (this.dataset.attributes && this.dataset.attributes.preTransformationScript != "")
-            this.prescript = JSON.parse(this.dataset.attributes.preTransformationScript);
+          if (this.dataset.attributes && this.dataset.attributes.preTransformationScript != ""){
+          let script= this.dataset.attributes.preTransformationScript;
+         
+          this.prescript= script? JSON.parse(script) : null;
+          
+
+          
+        }
           this.pretransformData = this.dataset.attributes?.pretransformData;
 
         });
@@ -326,7 +335,7 @@ export class RestDatasetConfigComponent implements OnInit {
   }
 
   addHeadersRow() {
-    if (this.dynamicHeadersArray.length == 0) {
+    if (this.dynamicHeadersArray?.length == 0) {
       this.dynamicHeadersArray = [];
     }
     this.headersDynamic = { key: "", value: "" };
