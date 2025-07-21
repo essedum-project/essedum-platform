@@ -1286,7 +1286,7 @@ div {
 
   .aip-card-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, 28.9rem);
+    grid-template-columns: repeat(auto-fit, 28.8rem);
     grid-template-rows: repeat(auto-fit, 15rem);
     justify-content: center;
     grid-row-gap: 2.4rem;
@@ -1295,7 +1295,7 @@ div {
   }
 
   .aip-card-wrapper {
-    min-width: 28.9rem;
+    min-width: 28.8rem;
     min-height: 15rem;
 
     @media (max-width: 576px) {
@@ -1314,6 +1314,10 @@ div {
 
   .lfx-u-pad-b-90 {
     padding-bottom: 90px !important;
+  }
+
+  .lfx-u-pad-b-85 {
+    padding-bottom: 85px !important;
   }
 }
 
