@@ -394,7 +394,7 @@ else{
           this.returnedName = res.name;
           if(this.router.url.includes('knowledge')){
           }
-          this.service.message('Saved! Created successfully');
+          this.service.messageService('Saved! Created successfully');
           if (this.data.datasource.category == "REST")
             this.modifyAPISpec(this.data,this.returnedName)
           if (JSON.parse(res.expStatus) != 0) {
@@ -435,7 +435,7 @@ else{
           this.busy = this.datasetsService.createDataset(this.data).subscribe((res) => {
             this.responseLink.emit(res);
             this.returnedName = res.name;
-            this.service.message('Saved! Created successfully','success');
+            this.service.messageService('Saved! Created successfully','success');
             if (this.data.datasource.category == "REST")
               this.modifyAPISpec(this.data,this.returnedName)
             if (JSON.parse(res.expStatus) != 0) {
@@ -554,7 +554,7 @@ else{
         editCanvas.taskdetails = JSON.parse(editCanvas.taskdetails)
       }
       this.busy = this.datasetsService.testConnection(editCanvas).subscribe((response) => {
-        this.service.message('Tested! Connected successfully');
+        this.service.messageService('Tested! Connected successfully');
         this.testSuccessful = true;
       },
         error => {
