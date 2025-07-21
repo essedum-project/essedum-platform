@@ -72,7 +72,7 @@
                                                         <mat-form-field appearance="fill" style="width: 30%;"
                                                             floatLabel="always">
                                                             <mat-label>Display Name</mat-label>
-                                                            <input matInput placeholder="Enter Name..."
+                                                            <input matInput class="text-transform" placeholder="Enter Name..." 
                                                                 [(ngModel)]="data.alias" required>
                                                             <mat-error class="ml-15m" *ngIf="!data.alias">This field is
                                                                 required</mat-error>
@@ -83,7 +83,7 @@
                                                     <mat-form-field appearance="fill" style="width: 100%;"
                                                         floatLabel="always">
                                                         <mat-label>Description</mat-label>
-                                                        <input matInput placeholder="Enter Description..."
+                                                        <input matInput class="text-transform" placeholder="Enter Description..."
                                                             [(ngModel)]="data.description">
                                                     </mat-form-field>
                                                 </div>
