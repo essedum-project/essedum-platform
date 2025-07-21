@@ -36,6 +36,8 @@ import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.compon
 export class ModalConfigSchemaComponent
   implements OnInit, OnChanges, AfterViewInit
 {
+  readonly CARD_TITLE = 'Schema Registry Details';
+  readonly TOOLTIP_POSITION = 'above';
   @Input('searchText') searchText;
   @Input('isGridView') isGridView;
   schemaJson: any;
@@ -147,6 +149,7 @@ export class ModalConfigSchemaComponent
         break;
     }
   }
+
   Authentications() {
     this.services.getPermission('cip').subscribe((cipAuthority) => {
       if (cipAuthority.includes('schema-create')) this.createAuth = true;
@@ -1003,4 +1006,8 @@ export class ModalConfigSchemaComponent
       .default as string;
     this.capabilities = this.dropDownVauleCapbility.get(event).value;
   }
+
+  onSearch(event: any) {}
+
+  onRefresh() {}
 }
