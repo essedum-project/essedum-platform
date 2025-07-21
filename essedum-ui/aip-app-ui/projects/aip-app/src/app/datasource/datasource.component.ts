@@ -464,8 +464,7 @@ export class DatasourceComponent implements OnInit, OnChanges {
       if (result === 'delete') {
         this.service.deleteDatasource(name).subscribe(
           (res) => {     
-            
-            this.service.messageService(               
+            this.service.message(               
                 'Done! Connection deleted Successfully'
               );
         this.refreshComplete();

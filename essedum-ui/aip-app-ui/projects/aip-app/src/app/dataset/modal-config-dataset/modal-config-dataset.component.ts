@@ -101,6 +101,7 @@ export class ModalConfigDatasetComponent implements OnInit, OnDestroy {
   groups: any[] = [];
   schemaBol: any;
   isAuth = true
+  isDropdownOpen: { [key: string]: boolean } = {};
   testSuccessful: boolean = false;
   dataSourceFilterCtrl = new FormControl();
   schemaFilterCtrl = new FormControl();
@@ -393,7 +394,7 @@ else{
           this.returnedName = res.name;
           if(this.router.url.includes('knowledge')){
           }
-          this.datasetsService.message('Saved! Created successfully');
+          this.service.message('Saved! Created successfully');
           if (this.data.datasource.category == "REST")
             this.modifyAPISpec(this.data,this.returnedName)
           if (JSON.parse(res.expStatus) != 0) {
@@ -434,7 +435,7 @@ else{
           this.busy = this.datasetsService.createDataset(this.data).subscribe((res) => {
             this.responseLink.emit(res);
             this.returnedName = res.name;
-            this.datasetsService.message('Saved! Created successfully','success');
+            this.service.message('Saved! Created successfully','success');
             if (this.data.datasource.category == "REST")
               this.modifyAPISpec(this.data,this.returnedName)
             if (JSON.parse(res.expStatus) != 0) {
@@ -553,15 +554,15 @@ else{
         editCanvas.taskdetails = JSON.parse(editCanvas.taskdetails)
       }
       this.busy = this.datasetsService.testConnection(editCanvas).subscribe((response) => {
-        this.datasetsService.message('Tested! Connected successfully');
+        this.service.message('Tested! Connected successfully');
         this.testSuccessful = true;
       },
         error => {
-          this.datasetsService.message('Error!', 'error');
+          this.service.message('Error!', 'error');
         });
     }
     catch (Exception) {
-      this.datasetsService.message("Some error occured", "Error")
+      this.service.message("Some error occured", 'error')
     }
 
   }
@@ -889,6 +890,9 @@ else{
     }
 
   }
+onOpenedChange(key: string, isOpen: boolean): void {
+  this.isDropdownOpen[key] = isOpen;
+}
 
 
 

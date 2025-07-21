@@ -124,6 +124,8 @@ export class DatasetTableViewComponent implements OnInit {
   WranglingFileData;
   recipeList: any[] = [{ viewValue: 'w1', value: 'w1' }, { viewValue: 'Test', value: 'Test' }];
   showSpinner: boolean = false;
+        appLoading: boolean = true;
+
 
   constructor(
     private datepipe: DatePipe,
@@ -154,6 +156,8 @@ export class DatasetTableViewComponent implements OnInit {
 
 
   getSourceApiParameters() {
+              this.appLoading = true;
+
     try {
       try {
         if (this.router.url.includes("/workflows/")) throw '';
@@ -185,10 +189,20 @@ export class DatasetTableViewComponent implements OnInit {
                 actionToBeCompared = this.rowObj['action']
               else actionToBeCompared = "update";
               this.getDatasetFormTemplate()
+                        this.appLoading = false;
+                        let response: number = +resp;
+                this.datasetsCount = response;
+
             }
-            else { this.service.messageService("Dataset details not found", "error") }
+            else { this.service.messageService("Dataset details not found", "error") 
+                                      this.appLoading = false;
+
+            }
           },
-            error => { this.service.messageService("Error in fetching dataset details", "error") })
+            error => { this.service.messageService("Error in fetching dataset details", "error")
+                                      this.appLoading = false;
+
+             })
       }
     }
     catch (Exception) {
@@ -352,6 +366,8 @@ export class DatasetTableViewComponent implements OnInit {
   }
 
   refreshTicket(decodedSPrList?: any[], decodedSValList?: any[]) {
+                            this.appLoading = true;
+
     try {
 
       if (sessionStorage.getItem("failureDashboardToTickets") == "True") {
@@ -418,9 +434,12 @@ export class DatasetTableViewComponent implements OnInit {
             if (resp) {
 
               if (resp.startsWith("Error: ")) {
+                        this.appLoading = false;
 
               }
               else {
+                                        this.appLoading = false;
+
                 let response: number = +resp;
                 this.datasetsCount = response;
                 // this.analyticsDatas(this.searchIncidentObj,finalAndObj,paramObj,this.datasetsCount);
@@ -428,7 +447,10 @@ export class DatasetTableViewComponent implements OnInit {
               }
             }
           },
-            error => { console.log(error) }
+            error => { console.log(error)
+                                      this.appLoading = false;
+
+             }
           )
       }
       let paramObj;
@@ -449,6 +471,8 @@ export class DatasetTableViewComponent implements OnInit {
               if (typeof pageResponse == "string") {
                 this.service.messageService(pageResponse, "error");
                 this.ticketList = this.ticketListBackup;
+                                        this.appLoading = false;
+
               }
               else {
                 this.ticketList = [];
@@ -466,15 +490,21 @@ export class DatasetTableViewComponent implements OnInit {
                 else {
                   this.ticketListBackup = this.ticketList;
                 }
+                                        this.appLoading = false;
+
               }
             },
             (error) => {
               this.service.messageService("Could not get the results", "error");
               this.ticketList = this.ticketListBackup;
+                                      this.appLoading = false;
+
             }
           );
       } else if (this.tickets) {
         this.searchOnInputForSemanticSearchResult(this.tickets)
+                                this.appLoading = false;
+
       } else {
         let queryParams: any = { number: this.id }
         let queryParamsJson = JSON.stringify(queryParams);
@@ -500,10 +530,14 @@ export class DatasetTableViewComponent implements OnInit {
                 });
                 this.datasetsCount = this.ticketList.length;
                 this.ticketListBackup = this.ticketList;
+                                        this.appLoading = false;
+
               }
             },
             (error) => {
               this.ticketList = this.ticketListBackup;
+                                      this.appLoading = false;
+
             }
           );
       }
@@ -511,6 +545,8 @@ export class DatasetTableViewComponent implements OnInit {
     }
     catch (Exception: any) {
       this.service.messageService(Exception, "error")
+                              this.appLoading = false;
+
     }
 
   }

@@ -104,6 +104,8 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
   filepath: string;
   fileData: any;
   fileToUpload: File;
+    isDropdownOpen: { [key: string]: boolean } = {};
+
   keys: any = [];
   schemaBol: any;
   groups: any[] = [];
@@ -454,7 +456,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
       dataset.views = this.firstForm.controls.Viewertype.value
       this.busy = this.datasetsService.createDataset(dataset).subscribe((res) => {
         let returnedName = res.name;
-        this.datasetsService.message('Saved! Copied successfully');
+        this.services.message('Saved! Copied successfully');
 
         if (this.data.datasource.category == "REST")
           this.modifyAPISpec(this.data, returnedName)
@@ -505,11 +507,11 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
         this.testSuccessful = true;
       },
         error => {
-          this.services.messageService('Error!', error);
+          this.services.message('Error!', 'error');
         });
     }
     catch (Exception) {
-      this.services.messageService("Some error occured")
+      this.services.message("Some error occured",'error')
     }
 
   }
@@ -641,6 +643,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
   }
 
   onSchemaChange(schemaAlias?) {
+    console.log("CAME IN 2")
     if (schemaAlias == "None") {
       this.isSchema = false;
       this.schemaName = null;
@@ -674,6 +677,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
         this.services.getSchemaFormsByName(schema.name).subscribe(
           resp => {
             if (resp) {
+              console.log("GETTTIMG THIS SCHEMAAA--", resp)
               this.originalSchemaTemplateAlias = [];
               this.originalSchemaTemplates = resp;
               this.originalSchemaTemplates.forEach((opt) => {
@@ -796,6 +800,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
   }
 
   findallschema(): Promise<string> {
+
     return new Promise(resolve => {
       this.services.getAllSchemas()
         .subscribe(res => {
@@ -823,6 +828,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
           })
           resolve("Schema informtion updated");
           if (this.matData.schema != null && this.originalSchemas.length >= 1) this.onSchemaChange(this.matData.schema.alias)
+            else this.originalSchemaTemplateAlias=this.originalSchemasOpt;
         });
     })
   }
@@ -917,6 +923,9 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
     this.refreshcards.emit(true);
 
   }
+onOpenedChange(key: string, isOpen: boolean): void {
+  this.isDropdownOpen[key] = isOpen;
+}
 
 }
 function importedSaveAs(templateBlob: Blob, arg1: string) {

@@ -393,14 +393,28 @@ export class AipFilterComponent implements OnInit, OnChanges {
    * Gets topic types from the semantic service
    */
   getTopicTypes(): void {
-    this.semanticService
-      .getAllTopics()
-      .pipe(
-        catchError((error) => {
-          console.error('Error fetching topics:', error);
-          return of([]);
-        })
-      )
+    // this.semanticService
+    //   .getAllTopics()
+    //   .pipe(
+    //     catchError((error) => {
+    //       console.error('Error fetching topics:', error);
+    //       return of([]);
+    //     })
+    //   )
+    //   .subscribe((res: any[]) => {
+    //     this.datasetTopicList = res.map((element) => ({
+    //       category: 'Topic',
+    //       label: element.topicname,
+    //       value: element.topicname,
+    //       selected: false,
+    //     }));
+    //   });
+    this.datasetServices.getIndexNamesByOrg(sessionStorage.getItem('organization')).pipe(
+      catchError((error) => {
+        console.error('Error fetching topics:', error);
+        return of([]);
+      })
+    )
       .subscribe((res: any[]) => {
         this.datasetTopicList = res.map((element) => ({
           category: 'Topic',
@@ -1077,7 +1091,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
   /**
    * Handles dataset type selection
    */
- datasetTypeSelected(value,category:string): void {
+  datasetTypeSelected(value, category: string): void {
     if (category === 'datasetType') {
       if (!this.selectedAdapterType.includes(value.value)) {
         this.selectedAdapterType.push(value.value);
@@ -1107,7 +1121,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
         }
       });
     }
-     this.emitSelectionChanges();
+    this.emitSelectionChanges();
     this.toggleFilterExpanded();
   }
   removeConnectionType(connection: string): void {
@@ -1128,7 +1142,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
     this.updateFilterStatus();
   }
 
-   removeDatasetType(connection: string): void {
+  removeDatasetType(connection: string): void {
     const index = this.selectedAdapterType.indexOf(connection);
     if (index !== -1) {
       this.selectedAdapterType.splice(index, 1);
@@ -1145,7 +1159,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
     }
     this.updateFilterStatus();
   }
-     removeDatasetKnowledge(connection: string): void {
+  removeDatasetKnowledge(connection: string): void {
     const index = this.selectedDatasetTopicType.indexOf(connection);
     if (index !== -1) {
       this.selectedDatasetTopicType.splice(index, 1);
@@ -1162,7 +1176,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
     }
     this.updateFilterStatus();
   }
-    removeDatasetTag(connection: string): void {
+  removeDatasetTag(connection: string): void {
     const index = this.selectedTagList.indexOf(connection);
     if (index !== -1) {
       this.selectedTagList.splice(index, 1);
@@ -1676,6 +1690,12 @@ export class AipFilterComponent implements OnInit, OnChanges {
         this.clearFilterList(
           this.selectedAdapterType,
           this.pipelinesTypeList || []
+        );
+        break;
+      case FilterType.CONNECTION_TYPE:
+        this.clearFilterList(
+          this.selectedAdapterType,
+          this.connectionsTypeList || []
         );
         break;
       case FilterType.DATASET_TYPE:
