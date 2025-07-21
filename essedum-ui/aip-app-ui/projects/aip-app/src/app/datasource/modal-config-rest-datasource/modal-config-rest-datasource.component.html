@@ -1,612 +1,310 @@
 <div>
-  <mat-accordion
-    *ngIf="category && category.toLowerCase().endsWith('rest')"
-    designType="3D"
-    [hideToggle]="false"
-    [multi]="false"
-  >
+  <mat-accordion *ngIf="category && category.toLowerCase().endsWith('rest')" designType="3D" [hideToggle]="false"
+    [multi]="false">
     <mat-expansion-panel style="margin-bottom: 10px !important">
-      <mat-expansion-panel-header
-        [collapsedHeight]="'40px'"
-        [expandedHeight]="'40px'"
-        [ngStyle]="{ 'background-color': '#0094ff' }"
-      >
-        <mat-panel-title style="color: white; font-weight: 600">
-          Authorization</mat-panel-title
-        >
+      <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+        <mat-panel-title style="font-weight: 600; color: inherit; transition: color 0.3s, transform 0.3s;" [ngStyle]="{color: isAuthHovered ? '#0052cc' : 'black',transform: isAuthHovered ? 'translateX(12px)' : 'translateX(0)'
+                                                            }" (mouseenter)="isAuthHovered = true"
+          (mouseleave)="isAuthHovered = false">
+          Authorization</mat-panel-title>
       </mat-expansion-panel-header>
 
       <div style="margin: 1em 0 0 1em" *ngIf="tab == 'authorizationTab'">
         <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-          <mat-form-field appearance="fill" style="width: 100%">
+          <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
             <mat-label>Auth Type</mat-label>
-            <mat-select
-              [(value)]="sourceType.attributes['AuthType']"
-              (selectionChange)="onAuthTypeChange()"
-            >
-              <mat-option
-                *ngFor="let authType of authTypes"
-                [value]="authType.value"
-              >
+            <mat-select [(value)]="sourceType.attributes['AuthType']" (selectionChange)="onAuthTypeChange()"
+              placeholder="Select auth type">
+              <mat-option *ngFor="let authType of authTypes" [value]="authType.value">
                 {{ authType.viewValue }}
               </mat-option>
             </mat-select>
-            <mat-hint>Select Auth type</mat-hint>
           </mat-form-field>
         </div>
 
-        <div
-          *ngIf="
+        <div *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'basicauth'
-          "
-        >
+          ">
           <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
               <mat-label>Username</mat-label>
-              <input
-                matInput
-                placeholder="Enter Username..."
-                inputType="text"
-                [(ngModel)]="AuthDetails['username']"
-              />
+              <input matInput placeholder="Enter Username..." inputType="text" [(ngModel)]="AuthDetails['username']" />
             </mat-form-field>
           </div>
 
           <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
               <mat-label>Password</mat-label>
-              <input
-                matInput
-                placeholder="Enter Password..."
-                type="password"
-                [(ngModel)]="AuthDetails['password']"
-              />
+              <input matInput placeholder="Enter Password..." type="password" [(ngModel)]="AuthDetails['password']" />
             </mat-form-field>
-            <mat-checkbox
-              *ngIf="isVaultEnabled"
-              [checked]="AuthDetails['password_vault']"
-              [(ngModel)]="AuthDetails['password_vault']"
-              id="authDetails-password-vault"
-              class="selector-690-35"
-              (ngModelChange)="onPasswordChange($event)"
-            >
+            <mat-checkbox *ngIf="isVaultEnabled" [checked]="AuthDetails['password_vault']"
+              [(ngModel)]="AuthDetails['password_vault']" id="authDetails-password-vault" class="selector-690-35"
+              (ngModelChange)="onPasswordChange($event)">
               Vault-Key
             </mat-checkbox>
           </div>
         </div>
-        <div
-          *ngIf="
+        <div *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'token'
-          "
-        >
+          ">
           <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-            <mat-form-field appearance="fill" style="width: 100%">
+            <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
               <mat-label>Select To Datasource</mat-label>
-              <mat-select
-                [(value)]="selectedDatasource"
-                (selectionChange)="OnDatasourceChange($event)"
-              >
-                <mat-option
-                  *ngFor="let option of datasourceOptions"
-                  [value]="option.value"
-                >
+              <mat-select [(value)]="selectedDatasource" (selectionChange)="OnDatasourceChange($event)"
+                placeholder="Select Datasource">
+                <mat-option *ngFor="let option of datasourceOptions" [value]="option.value">
                   {{ option.viewValue }}
                 </mat-option>
               </mat-select>
-              <mat-hint>Select a Datasource</mat-hint>
             </mat-form-field>
           </div>
           <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-            <mat-form-field appearance="fill" style="width: 100%">
+            <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
               <mat-label>Select Datasets</mat-label>
-              <mat-select
-                [(value)]="selectedDataset"
-                (selectionChange)="OnDatasetChange($event)"
-              >
-                <mat-option
-                  *ngFor="let option of datasetsoptions"
-                  [value]="option.value"
-                >
+              <mat-select [(value)]="selectedDataset" (selectionChange)="OnDatasetChange($event)"
+                placeholder="Select Dataset">
+                <mat-option *ngFor="let option of datasetsoptions" [value]="option.value">
                   {{ option.viewValue }}
                 </mat-option>
               </mat-select>
-              <mat-hint>Select a Dataset</mat-hint>
             </mat-form-field>
           </div>
         </div>
-        <div
-          *ngIf="
+        <div class="ml-20" *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'bigquery'
-          "
-        >
+          ">
           <td class="col-2 selector-690-29">
             <label class="selector-690-30">Upload Service Key</label>
           </td>
           <td class="col-10 selector-690-31">
-            <input
-              style="height: 3rem"
-              (change)="addfile($event)"
-              accept=".json"
-              type="file"
-              placeholder="Upload Service Key"
-            />
+            <input style="height: 3rem" (change)="addfile($event)" accept=".json" type="file"
+              placeholder="Upload Service Key" />
           </td>
         </div>
-        <div
-          *ngIf="
+        <div *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'hmac'
-          "
-        >
-          <mat-form-field
-            appearance="fill"
-            style="width: 100%"
-            floatLabel="always"
-          >
+          ">
+          <mat-form-field appearance="fill" style="width: 32%" floatLabel="always" class="p-20">
             <mat-label>Authorization Prefix</mat-label>
-            <input
-              matInput
-              placeholder="Enter Authorization Prefix..."
-              [(ngModel)]="AuthDetails['authPrefix']"
-            />
+            <input matInput placeholder="Enter Authorization Prefix..." [(ngModel)]="AuthDetails['authPrefix']" />
           </mat-form-field>
 
-          <mat-form-field
-            appearance="fill"
-            style="width: 100%"
-            floatLabel="always"
-          >
+          <mat-form-field appearance="fill" style="width: 32%" floatLabel="always" class="p-20">
             <mat-label>Secret Key</mat-label>
-            <input
-              matInput
-              placeholder="Enter Secret Key..."
-              [(ngModel)]="AuthDetails['secretKey']"
-            />
+            <input matInput placeholder="Enter Secret Key..." [(ngModel)]="AuthDetails['secretKey']" />
           </mat-form-field>
 
-          <mat-form-field
-            appearance="fill"
-            style="width: 100%"
-            floatLabel="always"
-          >
+          <mat-form-field appearance="fill" style="width: 32%" floatLabel="always" class="p-20">
             <mat-label>Data</mat-label>
-            <input
-              matInput
-              placeholder="Enter Data..."
-              [(ngModel)]="AuthDetails['input']"
-            />
+            <input matInput placeholder="Enter Data..." [(ngModel)]="AuthDetails['input']" />
           </mat-form-field>
         </div>
-        <div
-          class="row"
-          *ngIf="
+        <div class="row ml-10" *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'oauth'
-          "
-        >
+          ">
           <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
               <mat-label>Header Prefix</mat-label>
-              <input
-                matInput
-                placeholder="Enter Header Prefix..."
-                [(ngModel)]="AuthDetails['HeaderPrefix']"
-              />
+              <input matInput placeholder="Enter Header Prefix..." [(ngModel)]="AuthDetails['HeaderPrefix']" />
             </mat-form-field>
           </div>
           <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
               <mat-label>Token URL</mat-label>
-              <input
-                matInput
-                placeholder="Enter Token URL..."
-                [(ngModel)]="AuthDetails['tokenUrl']"
-              />
+              <input matInput placeholder="Enter Token URL..." [(ngModel)]="AuthDetails['tokenUrl']" />
             </mat-form-field>
           </div>
           <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 60%" floatLabel="always">
               <mat-label>Scope</mat-label>
-              <input
-                matInput
-                placeholder="Enter Scope..."
-                [(ngModel)]="scope"
-              />
+              <input matInput placeholder="Enter Scope..." [(ngModel)]="scope" />
             </mat-form-field>
-            <mat-checkbox
-              *ngIf="isVaultEnabled"
-              [checked]="
+            <mat-checkbox *ngIf="isVaultEnabled" [checked]="
                 AuthDetails['authParams']
                   ? AuthDetails['authParams']['scope_vault']
                   : false
-              "
-              [(ngModel)]="AuthDetails['authParams']['scope_vault']"
-              id="authParams-scope-vault"
-              class="selector-690-35"
-              (ngModelChange)="onScopeChange($event)"
-            >
+              " [(ngModel)]="AuthDetails['authParams']['scope_vault']" id="authParams-scope-vault"
+              class="selector-690-35" (ngModelChange)="onScopeChange($event)">
               Vault-Key
             </mat-checkbox>
           </div>
           <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-            <mat-form-field appearance="fill" style="width: 100%">
+            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
               <mat-label>Grant Type</mat-label>
-              <mat-select [(value)]="grant_type">
-                <mat-option
-                  *ngFor="let option of grantTypeOptions"
-                  [value]="option.value"
-                >
+              <mat-select [(value)]="grant_type" placeholder="Select Grant Type">
+                <mat-option *ngFor="let option of grantTypeOptions" [value]="option.value">
                   {{ option.viewValue }}
                 </mat-option>
               </mat-select>
-              <mat-hint>Select Grant Type</mat-hint>
             </mat-form-field>
           </div>
           <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 60%" floatLabel="always">
               <mat-label>Client ID</mat-label>
-              <input
-                matInput
-                placeholder="Enter Client ID..."
-                type="password"
-                [(ngModel)]="client_id"
-              />
+              <input matInput placeholder="Enter Client ID..." type="password" [(ngModel)]="client_id" />
             </mat-form-field>
 
-            <mat-checkbox
-              *ngIf="isVaultEnabled"
-              [checked]="
+            <mat-checkbox *ngIf="isVaultEnabled" [checked]="
                 AuthDetails['authParams']
                   ? AuthDetails['authParams']['client_id_vault']
                   : false
-              "
-              [(ngModel)]="AuthDetails['authParams']['client_id_vault']"
-              id="authParams-client-id-vault"
-              class="selector-690-35"
-              (ngModelChange)="onClientIdChange($event)"
-            >
+              " [(ngModel)]="AuthDetails['authParams']['client_id_vault']" id="authParams-client-id-vault"
+              class="selector-690-35" (ngModelChange)="onClientIdChange($event)">
               Vault-Key
             </mat-checkbox>
           </div>
           <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 60%" floatLabel="always">
               <mat-label>Client Secret</mat-label>
-              <input
-                matInput
-                placeholder="Enter Client Secret..."
-                type="password"
-                [(ngModel)]="client_secret"
-              />
+              <input matInput placeholder="Enter Client Secret..." type="password" [(ngModel)]="client_secret" />
             </mat-form-field>
-            <mat-checkbox
-              *ngIf="isVaultEnabled"
-              [checked]="
+            <mat-checkbox *ngIf="isVaultEnabled" [checked]="
                 AuthDetails['authParams']
                   ? AuthDetails['authParams']['client_secret_vault']
                   : false
-              "
-              [(ngModel)]="AuthDetails['authParams']['client_secret_vault']"
-              id="authParams-client-secret-vault"
-              class="selector-690-35"
-              (ngModelChange)="onClientSecretChange($event)"
-            >
+              " [(ngModel)]="AuthDetails['authParams']['client_secret_vault']" id="authParams-client-secret-vault"
+              class="selector-690-35" (ngModelChange)="onClientSecretChange($event)">
               Vault-Key
             </mat-checkbox>
           </div>
           <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
               <mat-label>Username</mat-label>
-              <input
-                matInput
-                placeholder="Enter Username..."
-                [(ngModel)]="username"
-              />
+              <input matInput placeholder="Enter Username..." [(ngModel)]="username" />
             </mat-form-field>
           </div>
           <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
               <mat-label>Password</mat-label>
-              <input
-                matInput
-                placeholder="Enter Password..."
-                type="password"
-                [(ngModel)]="pswd"
-              />
+              <input matInput placeholder="Enter Password..." type="password" [(ngModel)]="pswd" />
             </mat-form-field>
           </div>
           <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
               <mat-label>Auth Method</mat-label>
-              <input
-                matInput
-                placeholder="Enter Auth Method..."
-                [(ngModel)]="AuthDetails['authMethod']"
-              />
+              <input matInput placeholder="Enter Auth Method..." [(ngModel)]="AuthDetails['authMethod']" />
             </mat-form-field>
           </div>
           <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
               <mat-label>Token Element</mat-label>
-              <input
-                matInput
-                placeholder="Enter Token Element..."
-                [(ngModel)]="AuthDetails['tokenElement']"
-              />
+              <input matInput placeholder="Enter Token Element..." [(ngModel)]="AuthDetails['tokenElement']" />
             </mat-form-field>
           </div>
           <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
               <mat-label>Auth Headers</mat-label>
-              <input
-                matInput
-                placeholder="Enter Auth Headers..."
-                [(ngModel)]="AuthDetails['authHeaders']"
-              />
+              <input matInput placeholder="Enter Auth Headers..." [(ngModel)]="AuthDetails['authHeaders']" />
             </mat-form-field>
           </div>
           <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
               <mat-label>Client Authentication</mat-label>
-              <input
-                matInput
-                placeholder="Enter Client Authentication..."
-                [(ngModel)]="AuthDetails['ClientAuthentication']"
-              />
+              <input matInput placeholder="Enter Client Authentication..."
+                [(ngModel)]="AuthDetails['ClientAuthentication']" />
             </mat-form-field>
           </div>
         </div>
 
-        <div
-          *ngIf="
+        <div class="ml-20" *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'bearertoken'
-          "
-        >
+          ">
           <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width:60%" floatLabel="always">
               <mat-label>Token</mat-label>
-              <input
-                matInput
-                placeholder="Enter Token..."
-                type="password"
-                [(ngModel)]="AuthDetails['authPrefix']"
-              />
+              <input matInput placeholder="Enter Token..." type="password" [(ngModel)]="AuthDetails['authPrefix']" />
             </mat-form-field>
-            <mat-checkbox
-              *ngIf="isVaultEnabled"
-              [checked]="AuthDetails['authToken_vault']"
-              [(ngModel)]="AuthDetails['authToken_vault']"
-              id="authDetails-authToken-vault"
-              class="selector-690-35"
-              (ngModelChange)="onAuthTokenChange($event)"
-            >
+            <mat-checkbox *ngIf="isVaultEnabled" [checked]="AuthDetails['authToken_vault']"
+              [(ngModel)]="AuthDetails['authToken_vault']" id="authDetails-authToken-vault" class="selector-690-35"
+              (ngModelChange)="onAuthTokenChange($event)">
               Vault-Key
             </mat-checkbox>
           </div>
         </div>
 
-        <div
-          class="row"
-          *ngIf="
+        <div class="row ml-10" *ngIf="
             sourceType.attributes['AuthType'] &&
             sourceType.attributes['AuthType'].toLowerCase() == 'awssign'
-          "
-        >
+          ">
           <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 60%" floatLabel="always">
               <mat-label>Access Key</mat-label>
-              <input
-                matInput
-                placeholder="Enter Access Key"
-                type="password"
-                [(ngModel)]="AuthDetails['accesskey']"
-              />
+              <input matInput placeholder="Enter Access Key" type="password" [(ngModel)]="AuthDetails['accesskey']" />
             </mat-form-field>
           </div>
           <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 60%" floatLabel="always">
               <mat-label>Secret Key</mat-label>
-              <input
-                matInput
-                placeholder="Enter Secret Key"
-                type="password"
-                [(ngModel)]="AuthDetails['secretkey']"
-              />
+              <input matInput placeholder="Enter Secret Key" type="password" [(ngModel)]="AuthDetails['secretkey']" />
             </mat-form-field>
           </div>
           <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 60%" floatLabel="always">
               <mat-label>Region Name</mat-label>
-              <input
-                matInput
-                placeholder="Enter Region Name"
-                [(ngModel)]="AuthDetails['region']"
-              />
+              <input matInput placeholder="Enter Region Name" [(ngModel)]="AuthDetails['region']" />
             </mat-form-field>
           </div>
           <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 60%" floatLabel="always">
               <mat-label>Service Name</mat-label>
-              <input
-                matInput
-                placeholder="Enter Service Name"
-                [(ngModel)]="AuthDetails['service']"
-              />
+              <input matInput placeholder="Enter Service Name" [(ngModel)]="AuthDetails['service']" />
             </mat-form-field>
           </div>
         </div>
       </div>
     </mat-expansion-panel>
   </mat-accordion>
-  <mat-accordion
-    *ngIf="
+  <mat-accordion *ngIf="
       category &&
       category.toLowerCase().endsWith('rest') &&
       capability.includes('app')
-    "
-    designType="3D"
-    [hideToggle]="false"
-    [multi]="false"
-  >
+    " designType="3D" [hideToggle]="false" [multi]="false">
     <mat-expansion-panel style="margin-bottom: 10px !important">
-      <mat-expansion-panel-header
-        [collapsedHeight]="'40px'"
-        [expandedHeight]="'40px'"
-        [ngStyle]="{ 'background-color': '#0094ff' }"
-      >
-        <mat-panel-title style="color: white; font-weight: 600"
-          >Ports</mat-panel-title
-        >
+      <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+        <mat-panel-title style="font-weight: 600; color: inherit; transition: color 0.3s, transform 0.3s;" [ngStyle]="{color: isPortHovered ? '#0052cc' : 'black',transform: isPortHovered ? 'translateX(12px)' : 'translateX(0)'
+                                                            }" (mouseenter)="isPortHovered = true"
+          (mouseleave)="isPortHovered = false">Ports</mat-panel-title>
       </mat-expansion-panel-header>
 
       <div class="col-md-6" style="margin: 2em 0 2em 1em">
-        <mat-slide-toggle
-          style="margin-top: 1em"
-          [(ngModel)]="isExiPorts"
-          (change)="setIsExiPort($event)"
-        >
+        <mat-slide-toggle style="margin-top: 1em" [(ngModel)]="isExiPorts" (change)="setIsExiPort($event)">
           ExiPorts
         </mat-slide-toggle>
 
-        <mat-slide-toggle
-          style="margin-top: 1em"
-          [(ngModel)]="isDefaultPorts"
-          (change)="setIsDefaultPort($event)"
-        >
+        <mat-slide-toggle style="margin-top: 1em" [(ngModel)]="isDefaultPorts" (change)="setIsDefaultPort($event)">
           DefaultPorts
         </mat-slide-toggle>
         <div>
           <div class="col-md-9">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
               <mat-label>Start Port</mat-label>
-              <input
-                matInput
-                placeholder="Enter Start Port"
-                [(ngModel)]="addPorts['startport']"
-              />
+              <input matInput placeholder="Enter Start Port" [(ngModel)]="addPorts['startport']" />
             </mat-form-field>
           </div>
           <div class="col-md-9">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
               <mat-label>End Port</mat-label>
-              <input
-                matInput
-                placeholder="Enter End Port"
-                [(ngModel)]="addPorts['endport']"
-              />
+              <input matInput placeholder="Enter End Port" [(ngModel)]="addPorts['endport']" />
             </mat-form-field>
           </div>
 
           <div *ngIf="isExiPorts">
             <div class="col-md-9">
-              <mat-form-field
-                appearance="fill"
-                style="width: 100%"
-                floatLabel="always"
-              >
+              <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
                 <mat-label>Exi Start Port</mat-label>
-                <input
-                  matInput
-                  placeholder="Enter Exi Start Port"
-                  [(ngModel)]="addPorts['existartport']"
-                />
+                <input matInput placeholder="Enter Exi Start Port" [(ngModel)]="addPorts['existartport']" />
               </mat-form-field>
             </div>
             <div class="col-md-9">
-              <mat-form-field
-                appearance="fill"
-                style="width: 100%"
-                floatLabel="always"
-              >
+              <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
                 <mat-label>Exi End Port</mat-label>
-                <input
-                  matInput
-                  placeholder="Enter Exi End Port"
-                  [(ngModel)]="addPorts['exiendport']"
-                />
+                <input matInput placeholder="Enter Exi End Port" [(ngModel)]="addPorts['exiendport']" />
               </mat-form-field>
             </div>
           </div>
@@ -614,157 +312,111 @@
       </div>
     </mat-expansion-panel>
   </mat-accordion>
-  <mat-accordion
-    *ngIf="category && category.toLowerCase().endsWith('rest')"
-    designType="3D"
-    [hideToggle]="false"
-    [multi]="false"
-  >
+  <mat-accordion *ngIf="category && category.toLowerCase().endsWith('rest')" designType="3D" [hideToggle]="false"
+    [multi]="false">
     <mat-expansion-panel style="margin-bottom: 10px !important">
-      <mat-expansion-panel-header
-        [collapsedHeight]="'40px'"
-        [expandedHeight]="'40px'"
-        [ngStyle]="{ 'background-color': '#0094ff' }"
-      >
-        <mat-panel-title style="color: white; font-weight: 600"
-          >Connection Details
+      <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+        <mat-panel-title style="font-weight: 600; color: inherit; transition: color 0.3s, transform 0.3s;" [ngStyle]="{
+            color: isHovered ? '#0052cc' : 'black',
+            transform: isHovered ? 'translateX(12px)' : 'translateX(0)'
+          }" (mouseenter)="isHovered = true" (mouseleave)="isHovered = false">
+          Connection Details
         </mat-panel-title>
       </mat-expansion-panel-header>
       <div style="margin: 1em 0 0 1em">
         <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-          <mat-form-field appearance="fill" style="width: 100%">
+          <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
             <mat-label>Select Connection type</mat-label>
-            <mat-select
-              [(value)]="sourceType.attributes['ConnectionType']"
-              required
-            >
-              <mat-option
-                *ngFor="let option of connectionTypes"
-                [value]="option.value"
-              >
+            <mat-select [(value)]="sourceType.attributes['ConnectionType']" required
+              placeholder="Select Connection Type">
+              <mat-option *ngFor="let option of connectionTypes" [value]="option.value">
                 {{ option.viewValue }}
               </mat-option>
             </mat-select>
-            <mat-hint>Select Connection type</mat-hint>
           </mat-form-field>
         </div>
-        <div
-          *ngIf="sourceType.attributes['executionEnvironment']"
-          class="col-lg-12 col-md-12 lfx-u-mar-b-16"
-        >
-          <mat-form-field appearance="fill" style="width: 100%">
+        <div *ngIf="sourceType.attributes['executionEnvironment']" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+          <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
             <mat-label>Execution</mat-label>
-            <mat-select
-              [(value)]="sourceType.attributes['executionEnvironment']"
-              (selectionChange)="onExecutionChange($event)"
-            >
-              <mat-option
-                *ngFor="let option of executionOptions"
-                [value]="option.value"
-              >
+            <mat-select [(value)]="sourceType.attributes['executionEnvironment']"
+              (selectionChange)="onExecutionChange($event)" placeholder="Select Execution Environment">
+              <mat-option *ngFor="let option of executionOptions" [value]="option.value">
                 {{ option.viewValue }}
               </mat-option>
             </mat-select>
-            <mat-hint>Select Execution</mat-hint>
           </mat-form-field>
         </div>
-        <div
-          *ngIf="
+        <div class="p-20" *ngIf="
             sourceType.attributes['ConnectionType'] &&
             sourceType.attributes['ConnectionType'].toLowerCase() ==
               'apirequest'
-          "
-        >
+          ">
           <div class="row">
             <div class="col-lg-4 col-md-4 lfx-u-mar-b-16">
-              <mat-form-field appearance="fill" style="width: 100%">
+              <mat-form-field appearance="fill" style="width: 93%" floatLabel="always">
                 <mat-label>Request Method</mat-label>
-                <mat-select
-                  [(value)]="testDataset['attributes']['RequestMethod']"
-                  (selectionChange)="onRequestMethodChange($event)"
-                >
-                  <mat-option
-                    *ngFor="let method of requestMethods"
-                    [value]="method.value"
-                  >
+                <mat-select [(value)]="testDataset['attributes']['RequestMethod']"
+                  (selectionChange)="onRequestMethodChange($event)" placeholder="Select Request Method">
+                  <mat-option *ngFor="let method of requestMethods" [value]="method.value">
                     {{ method.viewValue }}
                   </mat-option>
                 </mat-select>
-                <mat-hint>Select Request Method</mat-hint>
               </mat-form-field>
             </div>
 
             <div class="col-lg-8 col-md-8 lfx-u-mar-b-16">
-              <mat-form-field
-                appearance="fill"
-                style="width: 100%"
-                floatLabel="always"
-              >
+              <mat-form-field appearance="fill" style="width: 80%; margin-top:8px" floatLabel="always">
                 <mat-label>URL</mat-label>
-                <input
-                  matInput
-                  placeholder="Enter URL..."
-                  [(ngModel)]="sourceType.attributes['Url']"
-                  [disabled]="type === 'GIT'"
-                />
+                <input matInput placeholder="Enter URL..." [(ngModel)]="sourceType.attributes['Url']"
+                  [disabled]="type === 'GIT'" />
               </mat-form-field>
             </div>
           </div>
 
           <div class="row">
             <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-              <mat-form-field appearance="fill" style="width: 100%">
+              <mat-form-field appearance="fill" style="width: 30%" floatLabel="always">
                 <mat-label>No Proxy</mat-label>
-                <mat-select
-                  [(value)]="sourceType.attributes['NoProxy']"
-                  (selectionChange)="onNoProxyChange($event)"
-                >
-                  <mat-option
-                    *ngFor="let option of noProxyValues"
-                    [value]="option.value"
-                  >
+                <mat-select [(value)]="sourceType.attributes['NoProxy']" (selectionChange)="onNoProxyChange($event)"
+                  placeholder="Select No Proxy">
+                  <mat-option *ngFor="let option of noProxyValues" [value]="option.value">
                     {{ option.viewValue }}
                   </mat-option>
                 </mat-select>
-                <mat-hint>Select No Proxy</mat-hint>
               </mat-form-field>
             </div>
           </div>
-          <mat-card
-            class="row d-flex justify-content-between align-items-center lfx-u-pad-tb-16"
-          >
-            <div ledsTabGroup [type]="type" [headerBg]="headerBg">
-              <mat-tab-group
-                style="width: 100%"
-                (selectedIndexChange)="basicReqTabChange($event)"
-              >
+          <mat-card class="row d-flex justify-content-between align-items-center lfx-u-pad-tb-16">
+            <div [type]="type" [headerBg]="headerBg">
+              <mat-tab-group style="width: 100%" (selectedIndexChange)="basicReqTabChange($event)">
                 <mat-tab>
                   <ng-template mat-tab-label>
-                    <span class="header-text-label">Parameters</span>
+                    <span
+                      [ngClass]="basicReqTab === 'paramsTab' ? 'tab-header-title' : 'tab-header-title-normal'">Parameters</span>
                   </ng-template>
                 </mat-tab>
                 <mat-tab>
                   <ng-template mat-tab-label>
-                    <span class="header-text-label">Headers</span>
+                    <span
+                      [ngClass]="basicReqTab === 'headersTab' ? 'tab-header-title' : 'tab-header-title-normal'">Headers</span>
                   </ng-template>
                 </mat-tab>
 
                 <mat-tab>
                   <ng-template mat-tab-label>
-                    <span class="header-text-label">Storage</span>
+                    <span
+                      [ngClass]="basicReqTab === 'extrasTab' ? 'tab-header-title' : 'tab-header-title-normal'">Storage</span>
                   </ng-template>
                 </mat-tab>
-                <mat-tab
-                  *ngIf="
+                <mat-tab *ngIf="
                     testDataset['attributes']['RequestMethod'].toLowerCase() ===
                       'post' ||
                     testDataset['attributes']['RequestMethod'].toLowerCase() ===
                       'put'
-                  "
-                >
+                  ">
                   <ng-template mat-tab-label>
-                    <span class="header-text-label">Body</span></ng-template
-                  >
+                    <span
+                      [ngClass]="basicReqTab === 'bodyTab' ? 'tab-header-title' : 'tab-header-title-normal'">Body</span></ng-template>
                 </mat-tab>
               </mat-tab-group>
             </div>
@@ -774,47 +426,28 @@
                 <table class="table table-striped table-bordered">
                   <thead>
                     <tr>
-                      <th class="base-color" style="width: 9%">Action</th>
-                      <th class="base-color">Key</th>
-                      <th class="base-color">Value</th>
+                      <th class="table-header-title" style="width: 9%">Action</th>
+                      <th class="table-header-title">Key</th>
+                      <th class="table-header-title">Value</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr
-                      *ngFor="let dynamic of dynamicParamsArray; let i = index"
-                    >
-                      <td
-                        style="text-align: center"
-                        (click)="deleteParamsRow(i)"
-                      >
-                        <i
-                          class="fa fa-trash fa-2x"
-                          style="font-size: large"
-                        ></i>
+                    <tr *ngFor="let dynamic of dynamicParamsArray; let i = index">
+                      <td style="text-align: center" (click)="deleteParamsRow(i)">
+                        <i class="fa fa-trash fa-2x" style="font-size: large"></i>
                       </td>
                       <td>
-                        <input
-                          style="height: 3rem"
-                          [(ngModel)]="dynamicParamsArray[i].key"
-                          class="form-control"
-                          type="text"
-                        />
+                        <input style="height: 3rem" [(ngModel)]="dynamicParamsArray[i].key" class="form-control"
+                          type="text" />
                       </td>
                       <td>
-                        <input
-                          style="height: 3rem"
-                          [(ngModel)]="dynamicParamsArray[i].value"
-                          class="form-control"
-                          type="text"
-                        />
+                        <input style="height: 3rem" [(ngModel)]="dynamicParamsArray[i].value" class="form-control"
+                          type="text" />
                       </td>
                     </tr>
                     <tr>
                       <td style="text-align: center" (click)="addParamsRow()">
-                        <i
-                          class="fa fa-plus fa-2x"
-                          style="font-size: large"
-                        ></i>
+                        <i class="fa fa-plus fa-2x" style="font-size: large"></i>
                       </td>
                     </tr>
                   </tbody>
@@ -827,47 +460,28 @@
                 <table class="table table-striped table-bordered">
                   <thead>
                     <tr>
-                      <th class="base-color" style="width: 9%">Action</th>
-                      <th class="base-color">Key</th>
-                      <th class="base-color">Value</th>
+                      <th class="table-header-title" style="width: 9%">Action</th>
+                      <th class="table-header-title">Key</th>
+                      <th class="table-header-title">Value</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr
-                      *ngFor="let dynamic of dynamicHeadersArray; let i = index"
-                    >
-                      <td
-                        style="text-align: center"
-                        (click)="deleteHeadersRow(i)"
-                      >
-                        <i
-                          class="fa fa-trash fa-2x"
-                          style="font-size: large"
-                        ></i>
+                    <tr *ngFor="let dynamic of dynamicHeadersArray; let i = index">
+                      <td style="text-align: center" (click)="deleteHeadersRow(i)">
+                        <i class="fa fa-trash fa-2x" style="font-size: large"></i>
                       </td>
                       <td>
-                        <input
-                          style="height: 3rem"
-                          [(ngModel)]="dynamicHeadersArray[i].key"
-                          class="form-control"
-                          type="text"
-                        />
+                        <input style="height: 3rem" [(ngModel)]="dynamicHeadersArray[i].key" class="form-control"
+                          type="text" />
                       </td>
                       <td>
-                        <input
-                          style="height: 3rem"
-                          [(ngModel)]="dynamicHeadersArray[i].value"
-                          class="form-control"
-                          type="text"
-                        />
+                        <input style="height: 3rem" [(ngModel)]="dynamicHeadersArray[i].value" class="form-control"
+                          type="text" />
                       </td>
                     </tr>
                     <tr>
                       <td style="text-align: center" (click)="addHeadersRow()">
-                        <i
-                          class="fa fa-plus fa-2x"
-                          style="font-size: large"
-                        ></i>
+                        <i class="fa fa-plus fa-2x" style="font-size: large"></i>
                       </td>
                     </tr>
                   </tbody>
@@ -877,135 +491,77 @@
 
             <div *ngIf="basicReqTab == 'bodyTab'">
               <div class="row">
-                <div
-                  class="p-field-radiobutton col-md-6"
-                  style="margin-top: 1em"
-                >
-                  <mat-radio-group
-                    [(ngModel)]="value"
-                    (change)="onOptionChange($event)"
-                  >
-                    <mat-radio-button value="x-www-form-urlencoded"
-                      >x-www-form-urlencoded</mat-radio-button
-                    >
+                <div class="p-field-radiobutton col-md-6" style="margin-top: 1em">
+                  <mat-radio-group [(ngModel)]="value" (change)="onOptionChange($event)">
+                    <mat-radio-button value="x-www-form-urlencoded">x-www-form-urlencoded</mat-radio-button>
                     <mat-radio-button value="raw">raw</mat-radio-button>
                   </mat-radio-group>
                 </div>
 
-                <div
-                  *ngIf="
+                <div *ngIf="
                     bodyOption === 'raw' ||
                     bodyOption === 'Text' ||
                     bodyOption === 'JSON' ||
                     bodyOption === 'XML'
-                  "
-                  class="col-md-3"
-                  style="margin-top: 0.5em"
-                >
-                  <mat-form-field appearance="fill" style="width: 100%">
+                  " class="col-md-3" style="margin-top: 0.5em">
+                  <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
                     <mat-label>Select editor option</mat-label>
-                    <mat-select
-                      [(value)]="selectedOption"
-                      (selectionChange)="optionChange($event)"
-                    >
-                      <mat-option
-                        *ngFor="let option of options"
-                        [value]="option.value"
-                      >
+                    <mat-select [(value)]="selectedOption" (selectionChange)="optionChange($event)"
+                      placeholder="Select Editor Option">
+                      <mat-option *ngFor="let option of options" [value]="option.value">
                         {{ option.viewValue }}
                       </mat-option>
                     </mat-select>
-                    <mat-hint>Select an option</mat-hint>
                   </mat-form-field>
                 </div>
               </div>
 
               <div *ngIf="bodyOption === 'x-www-form-urlencoded'">
-                <table
-                  style="margin-top: 1em"
-                  class="table table-striped table-bordered"
-                >
+                <table style="margin-top: 1em" class="table table-striped table-bordered">
                   <thead>
                     <tr>
-                      <th class="base-color" style="width: 9%">Action</th>
-                      <th class="base-color">Key</th>
-                      <th class="base-color">Value</th>
+                      <th class="table-header-title" style="width: 9%">Action</th>
+                      <th class="table-header-title">Key</th>
+                      <th class="table-header-title">Value</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr *ngFor="let dynamic of urlEncodedArray; let i = index">
-                      <td
-                        style="text-align: center"
-                        (click)="deleteUrlEncodedRow(i)"
-                      >
-                        <i
-                          class="fa fa-trash fa-2x"
-                          style="font-size: large"
-                        ></i>
+                      <td style="text-align: center" (click)="deleteUrlEncodedRow(i)">
+                        <i class="fa fa-trash fa-2x" style="font-size: large"></i>
                       </td>
                       <td>
-                        <input
-                          style="height: 3rem"
-                          [(ngModel)]="urlEncodedArray[i].key"
-                          class="form-control"
-                          type="text"
-                        />
+                        <input style="height: 3rem" [(ngModel)]="urlEncodedArray[i].key" class="form-control"
+                          type="text" />
                       </td>
                       <td>
-                        <input
-                          style="height: 3rem"
-                          [(ngModel)]="urlEncodedArray[i].value"
-                          class="form-control"
-                          type="text"
-                        />
+                        <input style="height: 3rem" [(ngModel)]="urlEncodedArray[i].value" class="form-control"
+                          type="text" />
                       </td>
                     </tr>
                     <tr>
-                      <td
-                        style="text-align: center"
-                        (click)="addUrlEncodedRow()"
-                      >
-                        <i
-                          class="fa fa-plus fa-2x"
-                          style="font-size: large"
-                        ></i>
+                      <td style="text-align: center" (click)="addUrlEncodedRow()">
+                        <i class="fa fa-plus fa-2x" style="font-size: large"></i>
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
-              <div
-                *ngIf="
+              <div *ngIf="
                   bodyOption === 'raw' ||
                   bodyOption === 'Text' ||
                   bodyOption === 'JSON' ||
                   bodyOption === 'XML'
-                "
-              >
-                <div
-                  style="width: 96%; margin-top: 8px"
-                  *ngIf="selectedOption === 'JSON'"
-                >
-                  <json-editor
-                    [options]="editorOptions"
-                    [data]="schemaForm"
-                    style="max-height: 365px"
-                    #formJsonEditor
-                    class="cipJSONEditor"
-                  >
+                ">
+                <div style="width: 96%; margin-top: 8px" *ngIf="selectedOption === 'JSON'">
+                  <json-editor [options]="editorOptions" [data]="schemaForm" style="max-height: 365px" #formJsonEditor
+                    class="cipJSONEditor">
                   </json-editor>
                 </div>
                 <div style="margin-top: 8px" *ngIf="selectedOption != 'JSON'">
-                  <textarea
-                    style="width: 96% !important"
-                    class="base-color"
-                    rows="5"
-                    cols="30"
-                    pInputTextarea
-                    autoResize="autoResize"
-                    [(ngModel)]="body"
-                  ></textarea>
+                  <textarea style="width: 96% !important" class="base-color" rows="5" cols="30" pInputTextarea
+                    autoResize="autoResize" [(ngModel)]="body"></textarea>
                 </div>
               </div>
             </div>
@@ -1020,60 +576,37 @@
                 <tbody>
                   <tr *ngFor="let key of formats; let i = index" class="d-flex">
                     <td class="col-3">
-                      <label>{{ sourceType.formats[key + "-dp"] }}</label>
+                      <div style="display: flex; align-items: flex-start; height: 100%;">
+                        <label style="margin: 0; padding: 0; line-height: 40px;">{{ sourceType.formats[key + "-dp"]
+                          }}</label>
+                      </div>
                     </td>
                     <td class="col-8">
-                      <mat-form-field
-                        appearance="fill"
-                        style="width: 100%"
-                        *ngIf="sourceType.formats[key] == 'input'"
-                      >
-                        <mat-label>{{ key }}</mat-label>
-                        <input
-                          matInput
-                          [(ngModel)]="sourceType.attributes[key]"
-                          placeholder="Enter {{ key }}"
-                        />
+                      <mat-form-field appearance="fill" style="width: 42%" floatLabel="always"
+                        *ngIf="sourceType.formats[key] == 'input'">
+                        <input matInput class="text-field-placeholder mat-style-input" style="text-transform: none;"
+                          [(ngModel)]="sourceType.attributes[key]" placeholder="Enter {{ key }}" />
                       </mat-form-field>
 
-                      <div
-                        class="col-lg-5 col-md-5 lfx-u-mar-b-16"
-                        *ngIf="sourceType.formats[key] == 'datasourceDropdown'"
-                      >
-                        <mat-form-field appearance="fill" style="width: 100%">
-                          <mat-label>Select Connection</mat-label>
-                          <mat-select
-                            [(value)]="sourceType.attributes[key]"
-                            (selectionChange)="setDatasource(key, $event)"
-                          >
-                            <mat-option
-                              *ngFor="let option of datasourceOptions"
-                              [value]="option.value"
-                            >
+                      <div class="col-lg-5 col-md-5 lfx-u-mar-b-16"
+                        *ngIf="sourceType.formats[key] == 'datasourceDropdown'">
+                        <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+                          <mat-select [(value)]="sourceType.attributes[key]"
+                            (selectionChange)="setDatasource(key, $event)" placeholder="Select Connection">
+                            <mat-option *ngFor="let option of datasourceOptions" [value]="option.value">
                               {{ option.viewValue }}
                             </mat-option>
                           </mat-select>
-                          <mat-hint>Select a connection</mat-hint>
                         </mat-form-field>
                       </div>
-                      <div
-                        class="col-lg-5 col-md-5 lfx-u-mar-b-16"
-                        *ngIf="key == 'instanceType'"
-                      >
-                        <mat-form-field appearance="fill" style="width: 100%">
-                          <mat-label>Select Instance Type</mat-label>
-                          <mat-select
-                            [(value)]="sourceType.attributes[key]"
-                            (selectionChange)="setDgInstanceType(key, $event)"
-                          >
-                            <mat-option
-                              *ngFor="let option of instanceTypeOptions"
-                              [value]="option.value"
-                            >
+                      <div class="col-lg-5 col-md-5 lfx-u-mar-b-16" *ngIf="key == 'instanceType'">
+                        <mat-form-field appearance="fill" style="width: 100%" floatLabel="always">
+                          <mat-select [(value)]="sourceType.attributes[key]"
+                            (selectionChange)="setDgInstanceType(key, $event)" placeholder="Select Instance Type">
+                            <mat-option *ngFor="let option of instanceTypeOptions" [value]="option.value">
                               {{ option.viewValue }}
                             </mat-option>
                           </mat-select>
-                          <mat-hint>Select an instance type</mat-hint>
                         </mat-form-field>
                       </div>
                     </td>
@@ -1087,57 +620,29 @@
       </div>
     </mat-expansion-panel>
   </mat-accordion>
-  <mat-accordion
-    *ngIf="category && category.toLowerCase().endsWith('rest')"
-    designType="3D"
-    [hideToggle]="false"
-    [multi]="false"
-  >
+  <mat-accordion *ngIf="category && category.toLowerCase().endsWith('rest')" designType="3D" [hideToggle]="false"
+    [multi]="false">
     <mat-expansion-panel style="margin-bottom: 10px !important">
-      <mat-expansion-panel-header
-        [collapsedHeight]="'40px'"
-        [expandedHeight]="'40px'"
-        [ngStyle]="{ 'background-color': '#0094ff' }"
-      >
-        <mat-panel-title style="color: white; font-weight: 600"
-          >Settings</mat-panel-title
-        >
+      <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+        <mat-panel-title style="font-weight: 600; color: inherit; transition: color 0.3s, transform 0.3s;" [ngStyle]="{color: isSettingHovered ? '#0052cc' : 'black',transform: isSettingHovered ? 'translateX(12px)' : 'translateX(0)'
+                                                            }" (mouseenter)="isSettingHovered = true"
+          (mouseleave)="isSettingHovered = false">Settings</mat-panel-title>
       </mat-expansion-panel-header>
       <div style="margin: 2em 0 2em 1em">
-        <mat-slide-toggle
-          style="margin-top: 1em"
-          [(ngModel)]="addCerts"
-          (change)="setValue($event)"
-        >
+        <mat-slide-toggle style="margin-top: 1em" [(ngModel)]="addCerts" (change)="setValue($event)">
           Add Client Certificate
         </mat-slide-toggle>
         <div *ngIf="addCerts" class="lfx-u-mar-t-20">
           <div class="col-md-9">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 50%" floatLabel="always">
               <mat-label>PEM Path</mat-label>
-              <input
-                matInput
-                placeholder="Enter PEM Path"
-                [(ngModel)]="sourceType.attributes['CertPath']"
-              />
+              <input matInput placeholder="Enter PEM Path" [(ngModel)]="sourceType.attributes['CertPath']" />
             </mat-form-field>
           </div>
           <div class="col-md-9">
-            <mat-form-field
-              appearance="fill"
-              style="width: 100%"
-              floatLabel="always"
-            >
+            <mat-form-field appearance="fill" style="width: 50%" floatLabel="always">
               <mat-label>PEM KeyPass</mat-label>
-              <input
-                matInput
-                placeholder="Enter PEM KeyPass"
-                [(ngModel)]="sourceType.attributes['KeyPass']"
-              />
+              <input matInput placeholder="Enter PEM KeyPass" [(ngModel)]="sourceType.attributes['KeyPass']" />
             </mat-form-field>
           </div>
         </div>
