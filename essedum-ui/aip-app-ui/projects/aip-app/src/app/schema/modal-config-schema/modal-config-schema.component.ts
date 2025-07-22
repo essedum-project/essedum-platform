@@ -1079,11 +1079,6 @@ export class ModalConfigSchemaComponent
     const capabilityData = this.dropDownValueCapability.get(event);
 
     if (capabilityData) {
-      console.log(
-        'Values to be shown:',
-        capabilityData.value,
-        capabilityData.default
-      );
       this.selectedCapability = capabilityData.default;
       this.capabilities = capabilityData.value || [];
     }
@@ -1162,7 +1157,6 @@ export class ModalConfigSchemaComponent
 
   selectedz(data: any): string {
     try {
-      console.log(data);
       return JSON.stringify(data);
     } catch (error) {
       this.handleError('Error serializing data', error);

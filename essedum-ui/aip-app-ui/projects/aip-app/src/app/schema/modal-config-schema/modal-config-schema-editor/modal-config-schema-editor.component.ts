@@ -93,13 +93,10 @@ export class ModalConfigSchemaEditorComponent {
   }
 
   private deepClone<T>(obj: T): T {
-    console.log('Deep cloning object:', obj);
-    console.log(JSON.parse(JSON.stringify(obj)));
     return JSON.parse(JSON.stringify(obj));
   }
 
   doAction(): void {
-    console.log(this.localData);
     this.dialogRef.close({
       event: this.action,
       data: this.localData,
