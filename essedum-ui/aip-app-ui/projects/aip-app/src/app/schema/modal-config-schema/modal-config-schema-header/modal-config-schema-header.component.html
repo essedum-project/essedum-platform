@@ -16,7 +16,7 @@
                 class="flex justify-content-end lfx-u-mar-8 align-items-center">
                 <div class="lfx-u-mar-8" [ngClass]="isRawData?'':'lfx-u-header-lg'"
                     [ngStyle]="{'color': (isRawData) ? 'grey' : '#0094ff'}">
-                    Table View
+                    TABLE VIEW
                 </div>
                 <mat-slider class="example-margin selector-691-21 slider-toggle-width" min="0" max="1" step="1">
                     <input matSliderThumb [value]="isRawData ? 1 : 0" (input)="onToggleView($event.target.value == 1)"
@@ -24,7 +24,7 @@
                 </mat-slider>
                 <div class="lfx-u-mar-8" [ngClass]="isRawData?'lfx-u-header-lg':''"
                     [ngStyle]="{'color': (!isRawData) ? 'grey' : '#0094ff'}">
-                    JSON View
+                    JSON VIEW
                 </div>
             </div>
 

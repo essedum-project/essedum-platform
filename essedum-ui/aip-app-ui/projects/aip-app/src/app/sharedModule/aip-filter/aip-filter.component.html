@@ -36,7 +36,8 @@
           <div class="filter-control">
             <mat-form-field appearance="fill" class="w-100">
               <label>Type</label>
-              <mat-select data-select-type="pipeline-type" (selectionChange)="pipelineTypeSelected($event)"
+              <mat-select [id]="'pipeline-type-select-' + (servicev1 || 'default') + '-pipeline'"
+                data-select-type="pipeline-type" (selectionChange)="pipelineTypeSelected($event)"
                 aria-labelledby="type-label" placeholder="All">
                 <mat-option *ngIf="selectedAdapterType?.length > 0" value="" (click)="clearAllFilters('pipelineType')">
                   All
@@ -51,8 +52,10 @@
           </div>
 
           <div class="selected-items" *ngIf="selectedAdapterType?.length > 0">
-            <mat-chip-set aria-label="Selected types">
-              <mat-chip data-chip-type="adapter-type" *ngFor="let type of selectedAdapterType" removable="true"
+            <mat-chip-set [id]="'adapter-types-chip-set-' + (servicev1 || 'default') + '-pipeline'"
+              aria-label="Selected types">
+              <mat-chip [id]="'adapter-type-chip-' + (servicev1 || 'default') + '-' + i" data-chip-type="adapter-type"
+                *ngFor="let type of selectedAdapterType; let i = index" removable="true"
                 (removed)="removePipelineType(type)">
                 {{ type }}
                 <mat-icon data-icon-type="chip-remove-adapter-type" matChipRemove>close</mat-icon>
@@ -66,8 +69,10 @@
           <div class="filter-control">
             <mat-form-field appearance="fill" class="w-100">
               <label>{{ cat | titlecase }}</label>
-              <mat-select data-select-type="tag-filter" (selectionChange)="filterByTag($event)"
-                aria-labelledby="tag-label" placeholder="All">
+              <mat-select
+                [id]="'tag-filter-select-' + (servicev1 || 'default') + '-' + (cat || 'category') + '-pipeline'"
+                data-select-type="tag-filter" (selectionChange)="filterByTag($event)" aria-labelledby="tag-label"
+                placeholder="All">
                 <!-- <mat-option *ngIf="getSelectedTagsForCategory(cat).length > 0" value=""
                   (click)="clearAllTagsForCategory(cat)">
                   All
@@ -82,7 +87,9 @@
           </div>
 
           <div class="selected-items" *ngIf="getSelectedTagsForCategory(cat).length > 0">
-            <mat-chip-set aria-label="Selected tags">
+            <mat-chip-set
+              [id]="'tags-chip-set-' + (servicev1 || 'default') + '-' + (cat?.name || 'category') + '-pipeline'"
+              aria-label="Selected tags">
               <mat-chip data-chip-type="tag" *ngFor="let tag of getSelectedTagsForCategory(cat)" removable="true"
                 (removed)="removeTag(tag)">
                 {{ tag.label }}
@@ -104,7 +111,8 @@
             <div class="filter-control">
               <mat-form-field appearance="fill" class="w-100">
                 <label>Category</label>
-                <mat-select data-select-type="ml-category" (selectionChange)="mlAdapterCategoryTypeSelected($event)"
+                <mat-select [id]="'ml-category-select-' + (servicev1 || 'default') + '-adapters'"
+                  data-select-type="ml-category" (selectionChange)="mlAdapterCategoryTypeSelected($event)"
                   aria-labelledby="category-label" placeholder="  All">
                   <mat-option *ngIf="selectedMlAdapterCategoryType?.length > 0" value=""
                     (click)="clearAllFilters('category')">
@@ -120,7 +128,8 @@
             </div>
 
             <div class="selected-items" *ngIf="selectedMlAdapterCategoryType?.length > 0">
-              <mat-chip-set aria-label="Selected categories">
+              <mat-chip-set [id]="'categories-chip-set-' + (servicev1 || 'default') + '-adapters'"
+                aria-label="Selected categories">
                 <mat-chip data-chip-type="category" *ngFor="let category of selectedMlAdapterCategoryType"
                   removable="true" (removed)="removeCategory(category)">
                   {{ category }}
@@ -136,8 +145,8 @@
             <div class="filter-control">
               <mat-form-field appearance="fill" class="w-100">
                 <label>Spec</label>
-                <mat-select data-select-type="ml-spec" (selectionChange)="mlAdapterScecTypeSelected($event)"
-                  aria-labelledby="spec-label" placeholder="All">
+                <mat-select [id]="'ml-spec-select-' + (servicev1 || 'default') + '-adapters'" data-select-type="ml-spec"
+                  (selectionChange)="mlAdapterScecTypeSelected($event)" aria-labelledby="spec-label" placeholder="All">
                   <mat-option *ngIf="selectedMlAdapterSpecType?.length > 0" value="" (click)="clearAllFilters('spec')">
                     All
                   </mat-option>
@@ -151,7 +160,8 @@
             </div>
 
             <div class="selected-items" *ngIf="selectedMlAdapterSpecType?.length > 0">
-              <mat-chip-set aria-label="Selected specs">
+              <mat-chip-set [id]="'specs-chip-set-' + (servicev1 || 'default') + '-adapters'"
+                aria-label="Selected specs">
                 <mat-chip data-chip-type="spec" *ngFor="let spec of selectedMlAdapterSpecType" removable="true"
                   (removed)="removeSpec(spec)">
                   {{ spec }}
@@ -167,7 +177,8 @@
             <div class="filter-control">
               <mat-form-field appearance="fill" class="w-100">
                 <label>Connection</label>
-                <mat-select data-select-type="ml-connection" (selectionChange)="mlAdapterConnectionTypeSelected($event)"
+                <mat-select [id]="'ml-connection-select-' + (servicev1 || 'default') + '-adapters'"
+                  data-select-type="ml-connection" (selectionChange)="mlAdapterConnectionTypeSelected($event)"
                   aria-labelledby="connection-label" placeholder="All">
                   <mat-option *ngIf="selectedMlAdapterConnectionType?.length > 0" value=""
                     (click)="clearAllFilters('connection')">
@@ -183,7 +194,8 @@
             </div>
 
             <div class="selected-items" *ngIf="selectedMlAdapterConnectionType?.length > 0">
-              <mat-chip-set aria-label="Selected connections">
+              <mat-chip-set [id]="'connections-chip-set-' + (servicev1 || 'default') + '-adapters'"
+                aria-label="Selected connections">
                 <mat-chip data-chip-type="connection" *ngFor="let connection of selectedMlAdapterConnectionType"
                   removable="true" (removed)="removeConnection(connection)">
                   {{ connection }}
@@ -204,8 +216,8 @@
               <div class="filter-control">
                 <mat-form-field appearance="fill" class="w-100">
                   <label>Capability</label>
-                  <mat-select data-select-type="spec-capability"
-                    (selectionChange)="mlSpecTemplateCapabilityTypeSelected($event)"
+                  <mat-select [id]="'spec-capability-select-' + (servicev1 || 'default') + '-specs'"
+                    data-select-type="spec-capability" (selectionChange)="mlSpecTemplateCapabilityTypeSelected($event)"
                     aria-labelledby="specTemplateCapability-label" placeholder="All">
                     <mat-option *ngIf="selectedMlSpecTemplateCapabilityType?.length > 0" value=""
                       (click)="clearAllFilters('specTemplateCapability')">
@@ -221,7 +233,8 @@
               </div>
 
               <div class="selected-items" *ngIf="selectedMlSpecTemplateCapabilityType?.length > 0">
-                <mat-chip-set aria-label="Selected Capability">
+                <mat-chip-set [id]="'capability-chip-set-' + (servicev1 || 'default') + '-specs'"
+                  aria-label="Selected Capability">
                   <mat-chip *ngFor="let capability of selectedMlSpecTemplateCapabilityType" removable="true"
                     (removed)="removeSpecTemplateCapability(capability)">
                     {{ capability}}
@@ -243,9 +256,9 @@
                 <div class="filter-control">
                   <mat-form-field appearance="fill" class="w-100">
                     <label>Implementation</label>
-                    <mat-select data-select-type="instance-adapter"
-                      (selectionChange)="mlInstanceAdapterTypeSelected($event)" aria-labelledby="instanceAdapter-label"
-                      placeholder="All">
+                    <mat-select [id]="'instance-adapter-select-' + (servicev1 || 'default') + '-instances'"
+                      data-select-type="instance-adapter" (selectionChange)="mlInstanceAdapterTypeSelected($event)"
+                      aria-labelledby="instanceAdapter-label" placeholder="All">
                       <mat-option *ngIf="selectedMlInstancesAdapterType?.length > 0" value=""
                         (click)="clearAllFilters('instanceAdapter')">
                         All
@@ -260,7 +273,8 @@
                 </div>
 
                 <div class="selected-items" *ngIf="selectedMlInstancesAdapterType?.length > 0">
-                  <mat-chip-set aria-label="Selected instanceAdapter">
+                  <mat-chip-set [id]="'instance-adapter-chip-set-' + (servicev1 || 'default') + '-instances'"
+                    aria-label="Selected instanceAdapter">
                     <mat-chip *ngFor="let instanceAdapter of selectedMlInstancesAdapterType" removable="true"
                       (removed)="removeInstanceAdapter(instanceAdapter)">
                       {{ instanceAdapter}}
@@ -275,7 +289,8 @@
                 <div class="filter-control">
                   <mat-form-field appearance="fill" class="w-100">
                     <label>Connection</label>
-                    <mat-select data-select-type="instance-connection"
+                    <mat-select [id]="'instance-connection-select-' + (servicev1 || 'default') + '-instances'"
+                      data-select-type="instance-connection"
                       (selectionChange)="mlInstanceConnectionTypeSelected($event)" aria-labelledby="connection-label"
                       placeholder="All">
                       <mat-option *ngIf="selectedMlInstancesConnectionType?.length > 0" value=""
@@ -292,7 +307,8 @@
                 </div>
 
                 <div class="selected-items" *ngIf="selectedMlInstancesConnectionType?.length > 0">
-                  <mat-chip-set aria-label="Selected connections">
+                  <mat-chip-set [id]="'instance-connections-chip-set-' + (servicev1 || 'default') + '-instances'"
+                    aria-label="Selected connections">
                     <mat-chip *ngFor="let connection of selectedMlInstancesConnectionType" removable="true"
                       (removed)="removeInstanceConnection(connection)">
                       {{ connection }}
@@ -310,8 +326,9 @@
                   <div class="filter-control">
                     <mat-form-field appearance="fill" class="w-100">
                       <label>Type</label>
-                      <mat-select (selectionChange)="connectionTypeSelected($event)"
-                        aria-labelledby="connectionType-Label" placeholder="All">
+                      <mat-select [id]="'connection-type-select-' + (servicev1 || 'default') + '-connections'"
+                        (selectionChange)="connectionTypeSelected($event)" aria-labelledby="connectionType-Label"
+                        placeholder="All">
                         <mat-option value="" (click)="clearAllFilters('connectiontype')">
                           All
                         </mat-option>
@@ -325,7 +342,8 @@
                   </div>
 
                   <div class="selected-items" *ngIf="selectedAdapterType?.length > 0">
-                    <mat-chip-set aria-label="Selected connectionType">
+                    <mat-chip-set [id]="'connection-type-chip-set-' + (servicev1 || 'default') + '-connections'"
+                      aria-label="Selected connectionType">
                       <mat-chip *ngFor="let inc of selectedAdapterType" removable="true"
                         (removed)="removeConnectionType(inc)">
                         {{inc}}
@@ -344,7 +362,8 @@
                     <div class="filter-control">
                       <mat-form-field appearance="fill" class="w-100">
                         <label>Type</label>
-                        <mat-select (selectionChange)="datasetTypeSelected($event, 'datasetType')"
+                        <mat-select [id]="'dataset-type-select-' + (servicev1 || 'default') + '-datasets'"
+                          (selectionChange)="datasetTypeSelected($event, 'datasetType')"
                           aria-labelledby="datasetType-Label" placeholder="All">
                           <mat-option value="" (click)="clearAllFilters('datasetType')">
                             All
@@ -359,7 +378,8 @@
                     </div>
 
                     <div class="selected-items" *ngIf="selectedAdapterType?.length > 0">
-                      <mat-chip-set aria-label="Selected datasetType">
+                      <mat-chip-set [id]="'dataset-type-chip-set-' + (servicev1 || 'default') + '-datasets'"
+                        aria-label="Selected datasetType">
                         <mat-chip *ngFor="let datasetType of selectedAdapterType" removable="true"
                           (removed)="removeDatasetType(datasetType)">
                           {{datasetType}}
@@ -374,8 +394,9 @@
                     <div class="filter-control">
                       <mat-form-field appearance="fill" class="w-100">
                         <label>Knowledge Bases</label>
-                        <mat-select (selectionChange)="datasetTopicSelected($event)"
-                          aria-labelledby="datasetKnowledge-label" placeholder="All">
+                        <mat-select [id]="'dataset-topic-select-' + (servicev1 || 'default') + '-datasets'"
+                          (selectionChange)="datasetTopicSelected($event)" aria-labelledby="datasetKnowledge-label"
+                          placeholder="All">
                           <mat-option value="" (click)="clearAllFilters('datasetKnowledge')">
                             All
                           </mat-option>
@@ -389,7 +410,8 @@
                     </div>
 
                     <div class="selected-items" *ngIf="selectedDatasetTopicType?.length > 0">
-                      <mat-chip-set aria-label="Selected datasetKnowledge">
+                      <mat-chip-set [id]="'dataset-knowledge-chip-set-' + (servicev1 || 'default') + '-datasets'"
+                        aria-label="Selected datasetKnowledge">
                         <mat-chip *ngFor="let datasetKnowledge of selectedDatasetTopicType" removable="true"
                           (removed)="removeDatasetKnowledge(datasetKnowledge)">
                           {{ datasetKnowledge}}
@@ -405,7 +427,8 @@
                     <div class="filter-control">
                       <mat-form-field appearance="fill" class="w-100">
                         <label>Tags</label>
-                        <mat-select (selectionChange)="datasetTypeSelected($event, 'datasetTag')"
+                        <mat-select [id]="'dataset-tag-select-' + (servicev1 || 'default') + '-datasets'"
+                          (selectionChange)="datasetTypeSelected($event, 'datasetTag')"
                           aria-labelledby="datasetTag-label" placeholder="All">
                           <mat-option value="" (click)="clearAllFilters('datasetTag')">
                             All
@@ -418,7 +441,8 @@
                     </div>
 
                     <div class="selected-items" *ngIf="selectedTagList?.length > 0">
-                      <mat-chip-set aria-label="Selected datasetTag">
+                      <mat-chip-set [id]="'dataset-tag-chip-set-' + (servicev1 || 'default') + '-datasets'"
+                        aria-label="Selected datasetTag">
                         <mat-chip *ngFor="let datasetTag of selectedTagList" removable="true"
                           (removed)="removeConnection(datasetTag)">
                           {{ datasetTag }}
@@ -439,8 +463,8 @@
                       <div class="filter-control">
                         <mat-form-field appearance="fill" class="w-100">
                           <label>Type</label>
-                          <mat-select data-select-type="adapter-type-filter"
-                            (selectionChange)="adapterTypeSelected($event)"
+                          <mat-select [id]="'adapter-type-filter-select-' + (servicev1 || 'default') + '-default'"
+                            data-select-type="adapter-type-filter" (selectionChange)="adapterTypeSelected($event)"
                             aria-labelledby="specTemplateCapability-label" placeholder="All">
                             <mat-option *ngIf="selectedAdapterType?.length > 0" value=""
                               (click)="clearAllFilters('adapterType')">
@@ -456,7 +480,8 @@
                       </div>
 
                       <div class="selected-items" *ngIf="selectedAdapterType?.length > 0">
-                        <mat-chip-set aria-label="Selected Type">
+                        <mat-chip-set [id]="'adapter-type-filter-chip-set-' + (servicev1 || 'default') + '-default'"
+                          aria-label="Selected Type">
                           <mat-chip *ngFor="let type of selectedAdapterType" removable="true"
                             (removed)="removeAdapterType(type)">
                             {{ type}}
@@ -470,8 +495,8 @@
                       <div class="filter-control">
                         <mat-form-field appearance="fill" class="w-100">
                           <label>Instance</label>
-                          <mat-select data-select-type="adapter-instance"
-                            (selectionChange)="adapterInstanceSelected($event)"
+                          <mat-select [id]="'adapter-instance-select-' + (servicev1 || 'default') + '-default'"
+                            data-select-type="adapter-instance" (selectionChange)="adapterInstanceSelected($event)"
                             aria-labelledby="specTemplateCapability-label" placeholder="All">
                             <mat-option *ngIf="selectedAdapterInstance?.length > 0" value=""
                               (click)="clearAllFilters('adapterInstance')">
@@ -487,7 +512,8 @@
                       </div>
 
                       <div class="selected-items" *ngIf="selectedAdapterInstance?.length > 0">
-                        <mat-chip-set aria-label="Selected AdapterInstance">
+                        <mat-chip-set [id]="'adapter-instance-chip-set-' + (servicev1 || 'default') + '-default'"
+                          aria-label="Selected AdapterInstance">
                           <mat-chip *ngFor="let adapterInstance of selectedAdapterInstance" removable="true"
                             (removed)="removeAdapterInstance(adapterInstance)">
                             {{ adapterInstance}}
@@ -501,7 +527,9 @@
                       <div class="filter-control">
                         <mat-form-field appearance="fill" class="w-100">
                           <label>{{ cat | titlecase }}</label>
-                          <mat-select data-select-type="category-tag-filter" (selectionChange)="filterByTag($event)"
+                          <mat-select
+                            [id]="'category-tag-filter-select-' + (servicev1 || 'default') + '-' + (cat || 'category') + '-default'"
+                            data-select-type="category-tag-filter" (selectionChange)="filterByTag($event)"
                             aria-labelledby="{{cat}}-label" placeholder="All">
                             <!-- <mat-option *ngIf="selectedTag.length > 0" value="" (click)="clearAllTagsForCategory(cat)">
                               All
@@ -522,7 +550,9 @@
                       </div>
 
                       <div class="selected-items" *ngIf="selectedTag.length > 0">
-                        <mat-chip-set aria-label="Selected {{cat}}">
+                        <mat-chip-set
+                          [id]="'category-tags-chip-set-' + (servicev1 || 'default') + '-' + (cat || 'category') + '-default'"
+                          aria-label="Selected {{cat}}">
                           <mat-chip *ngFor="let tag of selectedTag" removable="true" (removed)="removeTag(tag)">
                             {{ tag.value.label}}
                             <mat-icon data-icon-type="chip-remove-selected-tag" matChipRemove>close</mat-icon>
@@ -538,7 +568,8 @@
                     <div class="filter-control">
                       <mat-form-field appearance="fill" class="w-100">
                         <label>Type</label>
-                        <mat-select (selectionChange)="appTypeSelected($event)" aria-labelledby="instances-label"
+                        <mat-select [id]="'app-type-select-' + (servicev1 || 'default') + '-apps'"
+                          (selectionChange)="appTypeSelected($event)" aria-labelledby="instances-label"
                           placeholder="All">
                           <mat-option *ngFor="let option of adapterTypeList" [value]="option.label">
                             {{ option.label }}
@@ -548,7 +579,8 @@
                     </div>
 
                     <div class="selected-items" *ngIf="selectedAdapterType?.length > 0">
-                      <mat-chip-set aria-label="Selected Instances">
+                      <mat-chip-set [id]="'app-instances-chip-set-' + (servicev1 || 'default') + '-apps'"
+                        aria-label="Selected Instances">
                         <mat-chip *ngFor="let inc of selectedAdapterType" removable="true"
                           (removed)="removeAppTypeFilter(inc)">
                           {{ inc }}
