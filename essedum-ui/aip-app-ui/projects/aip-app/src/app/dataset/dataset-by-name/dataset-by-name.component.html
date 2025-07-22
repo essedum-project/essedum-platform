@@ -62,35 +62,25 @@
             [cardToggled]="cardToggled" [datasourceAlias]="selectedCard.alias"></app-datasource-description>
     </ng-template>
 </div>
-<div class="mt-5 mx-5">
+<div *ngIf="copyDataset" class="mt-5 mx-5">
 
-    <div *ngIf="copyDataset" class="align-items-center justify-content-between d-flex">
-        <div class="selector-model-title-head d-flex align-items-center">
-            <span class="mx-2 aip-cursor">
-                <div style="cursor: pointer">
-
-                    <i class="fa fa-long-arrow-left back-icon" aria-hidden="true" (click)="routeBackToList()"></i>
-                    <span class="lfx-u-mar-l-8 lfx-u-header-xxl secondary-color">Copy Dataset</span>
-
+     <div class="col-5">
+                    <span *ngIf="!customCreate" style="cursor: pointer;">
+                        <mat-icon class="aip-led-icons" (click)="routeBackToList()"
+                            [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
+                            matTooltipPosition="above" (mouseenter)="isBackHovered = true"
+                            (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
+                    </span>
+                    <span class="lfx-u-mar-l-8 header-p-title">Datasets: </span><span class="header-title">Copy
+                        Dataset
+                    </span>
                 </div>
-            </span>
-
-        </div>
-    </div>
-    <div *ngIf="copyDataset" class="container-fluid backgroud-color">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="lfx-l-level1-middle-col">
-
-                    <mat-card class="lfx-card">
+                    <mat-card  *ngIf="copyDataset" class="lfx-card">
                         <mat-card-content>
                             <app-dataset-config *ngIf="copyDataset" [dataset]="selectedCard" [copyDataset]="copyDataset"
                                 class="selector-680-92"></app-dataset-config>
 
                         </mat-card-content>
                     </mat-card>
-                </div>
-            </div>
-        </div>
-    </div>
+            
 </div>

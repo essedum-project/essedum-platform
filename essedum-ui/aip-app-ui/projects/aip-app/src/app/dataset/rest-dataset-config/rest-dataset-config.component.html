@@ -1,12 +1,14 @@
 <div *ngIf="dataset" class="container-fluid">
 
-  <mat-accordion *ngIf="formType === 'API'" multi="false" class="lfx-accordion">
-    <mat-expansion-panel>
+  <mat-accordion *ngIf="formType === 'API'" multi="false" designType="3D" [hideToggle]="false" [multi]="false">
+    <mat-expansion-panel style="margin-bottom: 10px !important">
       <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
-        <div (selectedIndexChange)="tabChange($event)">
-          <mat-panel-title><span style="text-transform: capitalize;">Connection Details
-            </span></mat-panel-title>
-        </div>
+        <!-- <div (selectedIndexChange)="tabChange($event)"> -->
+
+          <mat-panel-title style="font-weight: 600; color: inherit; transition: color 0.3s, transform 0.3s;" [ngStyle]="{color: isHovered ? '#0052cc' : 'black',transform: isHovered ? 'translateX(12px)' : 'translateX(0)'}" (mouseenter)="isHovered = true"
+            (mouseleave)="isHovered = false">Connection
+            Details</mat-panel-title>
+        <!-- </div> -->
       </mat-expansion-panel-header>
 
       <mat-card-content>
@@ -16,9 +18,9 @@
           <div class="row">
             <div class="col-lg-3 col-md-3 lfx-u-mar-b-16">
 
-              <mat-form-field appearance="fill" class="lfx-form-field">
+              <mat-form-field appearance="fill" class="lfx-form-field" floatLabel="always">
                 <mat-label>Request Method</mat-label>
-                <mat-select [(ngModel)]="dataset['attributes']['RequestMethod']">
+                <mat-select [(ngModel)]="dataset['attributes']['RequestMethod']" placeholder="Select Request Method">
                   <mat-option *ngFor="let opt of requestMethods" [value]="opt.value">{{opt.value}}</mat-option>
                 </mat-select>
               </mat-form-field>
@@ -26,9 +28,9 @@
 
             <div class="col-lg-9 col-md-9 lfx-u-mar-b-16">
 
-              <mat-form-field appearance="fill" class="lfx-form-field">
+              <mat-form-field appearance="fill" class="lfx-form-field" floatLabel="always">
                 <mat-label>URL</mat-label>
-                <input matInput [(ngModel)]="dataset.attributes['Url']" />
+                <input  placeholder="Enter URL" matInput [(ngModel)]="dataset.attributes['Url']" />
               </mat-form-field>
             </div>
           </div>
@@ -71,7 +73,7 @@
                 <tbody>
                   <tr *ngFor="let dynamic of dynamicParamsArray; let i = index;">
                     <td style="text-align: center;" (click)="deleteParamsRow(i)">
-                      <mat-icon>delete</mat-icon>
+                      <mat-icon style="color: grey">delete</mat-icon>
                     </td>
                     <td>
                       <input style="padding: 0.3em;" [(ngModel)]="dynamicParamsArray[i].key" class="form-control"
@@ -104,7 +106,7 @@
                 <tbody>
                   <tr *ngFor="let dynamic of dynamicHeadersArray; let i = index;">
                     <td style="text-align: center;" (click)="deleteHeadersRow(i)">
-                      <mat-icon>delete</mat-icon>
+                      <mat-icon style="color: grey">delete</mat-icon>
                     </td>
                     <td>
                       <input style="padding: 0.3em;" [(ngModel)]="dynamicHeadersArray[i].key" class="form-control"
@@ -127,7 +129,7 @@
 
           <div *ngIf="basicReqTab == 'preTransformScriptTab'">
             <div [ngClass]="{'container' : isInEdit}" style="margin-left: 0px; padding-left: 0px;">
-              <mat-slide-toggle [(ngModel)]="pretransformData" (change)="presetValue($event)" style="margin-top: 1em;">
+              <mat-slide-toggle color="primary" [(ngModel)]="pretransformData" (change)="presetValue($event)" style="margin-top: 1em;">
                 Transform data</mat-slide-toggle><br />
               <textarea style="width: 100% !important; border-color: #0094ff;" rows="5" cols="30" pInputTextarea
                 autoResize="autoResize" [(ngModel)]="prescript"></textarea>
@@ -135,7 +137,7 @@
           </div>
           <div *ngIf="basicReqTab == 'postTransformScriptTab'">
             <div [ngClass]="{'container' : isInEdit}" style="margin-left: 0px; padding-left: 0px;">
-              <mat-slide-toggle [(ngModel)]="transformData" (change)="setValue($event)" style="margin-top: 1em;">
+              <mat-slide-toggle color="primary" [(ngModel)]="transformData" (change)="setValue($event)" style="margin-top: 1em;">
                 Transform data</mat-slide-toggle><br />
               <textarea style="width: 100% !important; border-color: #0094ff;" rows="5" cols="30" pInputTextarea
                 autoResize="autoResize" [(ngModel)]="script"></textarea>
@@ -154,7 +156,7 @@
                 <tbody>
                   <tr *ngFor="let dynamic of dynamicPathVariablesArray; let i = index;">
                     <td style="text-align: center;" (click)="deletePathVariablesRow(i)">
-                      <mat-icon>delete</mat-icon>
+                      <mat-icon style="color: grey">delete</mat-icon>
                     </td>
                     <td>
                       <input style="padding: 0.3em;" [(ngModel)]="dynamicPathVariablesArray[i].key" class="form-control"
@@ -187,7 +189,7 @@
                 <tbody>
                   <tr *ngFor="let dynamic of dynamicConfigVariablesArray; let i = index;">
                     <td style="text-align: center;" (click)="deleteConfigVariablesRow(i)">
-                      <mat-icon>delete</mat-icon>
+                      <mat-icon style="color: grey">delete</mat-icon>
                     </td>
                     <td>
                       <input style="padding: 0.3em;" [(ngModel)]="dynamicConfigVariablesArray[i].key"
@@ -211,8 +213,8 @@
             <div class="row">
               <div class="p-field-radiobutton col-md-6" style="margin-top: 1em;">
                 <mat-radio-group [value]="value" [disabled]="disabled" (change)="onOptionChange($event)">
-                  <mat-radio-button value="x-www-form-urlencoded">x-www-form-urlencoded</mat-radio-button>
-                  <mat-radio-button value="raw">raw</mat-radio-button>
+                  <mat-radio-button value="x-www-form-urlencoded" color="primary">x-www-form-urlencoded</mat-radio-button>
+                  <mat-radio-button value="raw" color="primary">raw</mat-radio-button>
                 </mat-radio-group>
 
               </div>
@@ -220,10 +222,9 @@
                 <mat-form-field appearance="fill" class="lfx-form-field">
                   <mat-label>Select editor option</mat-label>
                   <mat-select [(ngModel)]="selectedOption" (selectionChange)="optionChange($event)">
-                    <mat-option *ngFor="let opt of options" [value]="opt">{{opt}}</mat-option>
+                    <mat-option *ngFor="let opt of options" [value]="opt.value">{{ opt.viewValue }}</mat-option>
                   </mat-select>
                 </mat-form-field>
-
               </div>
             </div>
             <div *ngIf="bodyOption === 'x-www-form-urlencoded'">
@@ -239,7 +240,7 @@
                   <tbody>
                     <tr *ngFor="let dynamic of urlEncodedArray; let i = index;">
                       <td style="text-align: center;" (click)="deleteUrlEncodedRow(i)">
-                        <mat-icon>delete</mat-icon>
+                        <mat-icon style="color: grey">delete</mat-icon>
                       </td>
                       <td>
                         <input style="padding: 0.3em;" [(ngModel)]="urlEncodedArray[i].key" class="form-control"
@@ -359,7 +360,7 @@
                     <tbody>
                       <tr *ngFor="let dynamic of dynamicConfigVariablesArray; let i = index;">
                         <td style="text-align: center;" (click)="deleteConfigVariablesRow(i)">
-                          <mat-icon>delete</mat-icon>
+                          <mat-icon style="color: grey">delete</mat-icon>
                         </td>
                         <td>
                           <input style="padding: 0.3em;" [(ngModel)]="dynamicConfigVariablesArray[i].key"
