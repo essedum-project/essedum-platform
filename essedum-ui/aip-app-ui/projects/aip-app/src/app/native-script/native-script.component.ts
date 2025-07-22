@@ -563,8 +563,7 @@ export class NativeScriptComponent implements OnInit, OnChanges {
   displayDialog(button, name, value, type, index, alias) {
     const dialogRef = this.dialog.open(NativeScriptDialogComponent, {
       height: '50%',
-      width: '50%',
-      // maxWidth: '50%',
+      width: '60%',
       disableClose: false,
       data: {
         button: button,
