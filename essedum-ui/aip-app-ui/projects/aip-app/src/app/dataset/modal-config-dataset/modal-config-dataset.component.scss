@@ -273,12 +273,6 @@
       opacity: 1 !important;
     }
   }
-
-  .custom-mat-select.compact-select{
-    width: 60% !important;
-    min-width: unset;
-    max-width: unset;
-  }
   .custom-arrow {
     position: absolute;
     top: 50%;
@@ -312,25 +306,6 @@
 
 ::ng-deep .mat-mdc-select-arrow {
   display: none !important; // Hide default arrow
-}
-
-::ng-deep .mat-mdc-select-trigger {
-  position: relative;
-}
-
-::ng-deep .mat-mdc-select-trigger::after {
-  content: "";
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 12px;
-  height: 12px;
-  background-image: url("/assets/images/Accordion_open.png");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  pointer-events: none;
 }
 
 ::ng-deep mat-label {
@@ -380,3 +355,43 @@
 .mat-button-radius {
   border-radius: 16px !important;
 }
+
+.custom-select-wrapper,
+mat-form-field.custom-mat-select {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+::ng-deep .mat-mdc-select-trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+::ng-deep .mat-mdc-select-trigger::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  background-image: url("/assets/images/Accordion_open.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+  display: block;
+  z-index: 2;
+}
+
+
+::ng-deep .mat-mdc-form-field-flex {
+  overflow: visible !important;
+  position: relative;
+}
+

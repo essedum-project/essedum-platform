@@ -13,7 +13,7 @@
         </div>
         <div class="lfx-flex-row lfx-mb-16">
             <div class="lfx-field lfx-half-col">
-                <div *ngIf="!copyDataset" class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+                <div *ngIf="!copyDataset" class="col-lg-6 col-md-6">
                     <mat-form-field appearance="fill" class="w-100" floatLabel="always">
                         <mat-label>Alias</mat-label>
                         <input placeholder="Enter Alias" matInput formControlName="alias" [(ngModel)]="data.alias"
@@ -21,7 +21,7 @@
                         <mat-error>This field is required</mat-error>
                     </mat-form-field>
                 </div>
-                <div *ngIf="copyDataset" class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+                <div *ngIf="copyDataset" class="col-lg-6 col-md-6">
                     <mat-form-field appearance="fill" class="w-100" floatLabel="always">
                         <mat-label>Alias</mat-label>
                         <input placeholder="Enter Alias" matInput formControlName="alias" [(ngModel)]="data.alias"
@@ -32,7 +32,7 @@
             </div>
             <div class="lfx-field lfx-half-col">
 
-                <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+                <div class="col-lg-6 col-md-6">
                     <mat-form-field appearance="fill" class="w-100" floatLabel="always">
                         <mat-label>Description</mat-label>
                         <input placeholder="Enter Description" matInput formControlName="description">
