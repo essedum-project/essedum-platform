@@ -263,7 +263,7 @@ export class CreateAppComponent implements OnInit {
           (error) => this.Services.message(error, 'error')
         );
       } catch (Exception) {
-        this.Services.messageService('Some error occured');
+        this.Services.message('Some error occured '+ Exception, 'error');
       }
     }
   }
@@ -278,7 +278,7 @@ export class CreateAppComponent implements OnInit {
     try {
       return JSON.stringify(data);
     } catch (Exception) {
-      this.Services.messageService('Some error occured');
+      this.Services.message('Some error occured '+ Exception, 'error');
     }
   }
 
@@ -402,7 +402,7 @@ export class CreateAppComponent implements OnInit {
       }
     }
     if (valid == false) {
-      this.Services.messageService('Select jobName', 'error');
+      this.Services.message('Select jobName ', 'error');
     } else {
       this.Services.getStreamingServicesByName(this.appName).subscribe(
         (resp) => {
@@ -437,7 +437,7 @@ export class CreateAppComponent implements OnInit {
                 if (this.appListComponent) this.appListComponent.ngOnInit();
               });
             },
-            (error) => this.Services.messageService('Some error occured')
+            (error) => this.Services.message('Some error occured '+error, 'error')
           );
         }
       );
@@ -567,7 +567,7 @@ export class CreateAppComponent implements OnInit {
         .catch((err) => {
           this.disableSave = false;
           console.log('An error occured');
-          this.Services.messageService('Error! while uploading file');
+          this.Services.message('Error! while uploading file '+ err, 'error');
           this.uploading = false;
         });
     }
@@ -588,12 +588,12 @@ export class CreateAppComponent implements OnInit {
         },
         (err) => {
           this.disableSave = false;
-          this.Services.messageService('some error occured');
+          this.Services.message('some error occured ' + err, 'error');
         }
       );
     } catch (Exception) {
       this.disableSave = false;
-      this.Services.messageService('Some error occured');
+      this.Services.message('Some error occured '+ Exception, 'error');
     }
   }
 

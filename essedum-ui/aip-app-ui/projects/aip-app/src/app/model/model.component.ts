@@ -365,14 +365,14 @@ export class ModelComponent implements OnInit, OnChanges {
           )
           .subscribe(
             (res) => {
-              this.service.messageService(
-                res,
-                'Done!  Model Un-deployed Successfully'
+              this.service.message(
+                'Done!  Model Un-deployed Successfully '+ res,
+                'success'
               );
               this.refresh();
             },
             (error) => {
-              this.service.messageService(error);
+              this.service.message('Error '+error, 'error');
             }
           );
       }
@@ -387,14 +387,14 @@ export class ModelComponent implements OnInit, OnChanges {
           .deleteModels(card.sourceId, card.adapterId, card.version)
           .subscribe(
             (res) => {
-              this.service.messageService(
-                res,
+              this.service.message(
+               
                 'Done!  Model deleted Successfully'
               );
               this.refresh();
             },
             (error) => {
-              this.service.messageService(error);
+              this.service.message('Error ', 'error');
             }
           );
       }

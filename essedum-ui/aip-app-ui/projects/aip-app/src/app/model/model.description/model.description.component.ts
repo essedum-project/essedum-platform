@@ -164,14 +164,13 @@ export class ModelDescriptionComponent implements OnInit {
           .deleteModels(card.sourceId, card.adapterId, card.version)
           .subscribe(
             (res) => {
-              this.service.messageService(
-                res,
-                'Done!  Model deleted Successfully'
+              this.service.message(
+                'Done!  Model deleted Successfully '
               );
       
             },
             (error) => {
-              this.service.messageService(error);
+              this.service.message('Error deleting model '+ error, 'error');
             }
           );
       }
