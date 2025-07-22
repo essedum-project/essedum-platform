@@ -1,5 +1,5 @@
 <div class="mt-5 mx-5">
-  <div class="align-items-center justify-content-between d-flex">
+  <!-- <div class="align-items-center justify-content-between d-flex">
     <div class="selector-model-title-head d-flex align-items-center">
       <span class="mx-2 aip-cursor">
         <div style="cursor: pointer">
@@ -11,7 +11,18 @@
       </span>
 
     </div>
-  </div>
+  </div> -->
+ <div class="col-5">
+                    <span style="cursor: pointer;">
+                        <mat-icon class="aip-led-icons" (click)="backToDatasets()"
+                            [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
+                            matTooltipPosition="above" (mouseenter)="isBackHovered = true"
+                            (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
+                    </span>
+                    <span class="lfx-u-mar-l-8 header-p-title">Datasets: </span><span class="header-title">Edit
+                        Dataset
+                    </span>
+                </div>
 
   <mat-card class="row d-flex justify-content-between align-items-center lfx-u-pad-tb-16">
 

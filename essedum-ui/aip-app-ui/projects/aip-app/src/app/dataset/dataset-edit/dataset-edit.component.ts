@@ -47,6 +47,7 @@ export class DatasetEditComponent implements OnInit {
   exp_type;
   chosenDataset: string[] = [];
   showBackButton: Boolean = false;
+  isBackHovered: boolean=false;
   tableview;
   isSbx = false;
   dash: any;
