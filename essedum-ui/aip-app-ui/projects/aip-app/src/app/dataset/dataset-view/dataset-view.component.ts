@@ -178,7 +178,7 @@ export class DatasetViewComponent {
       }
     }
     catch (Exception: any) {
-      this.service.messageService("Some error occured", "Error")
+      this.service.message("Some error occured", "error")
     }
 
   }
@@ -242,7 +242,7 @@ export class DatasetViewComponent {
 
     }
     catch (Exception: any) {
-      this.service.messageService("Some error occured", "Error")
+      this.service.message("Some error occured", "error")
     }
 
   }

@@ -164,7 +164,7 @@ export class DatasetEditComponent implements OnInit {
       this.checkTableViewSupport()
     }
     catch (Exception) {
-      this.datasetService.message("Some error occured", "Error")
+      this.datasetService.message("Some error occured", "error")
     }
 
   }
@@ -299,7 +299,7 @@ export class DatasetEditComponent implements OnInit {
 
     }
     catch (Exception) {
-      this.datasetService.message("Some error occured", "Error")
+      this.datasetService.message("Some error occured", "error")
     }
 
   }

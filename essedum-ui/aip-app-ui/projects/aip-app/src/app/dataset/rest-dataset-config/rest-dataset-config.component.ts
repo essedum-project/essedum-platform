@@ -220,7 +220,7 @@ export class RestDatasetConfigComponent implements OnInit {
         });
     }
     catch (Exception) {
-      this.messageService.error("Some error occured", "Error")
+      this.datasetsService.message("Some error occured", "error")
     }
   }
 
@@ -266,7 +266,7 @@ export class RestDatasetConfigComponent implements OnInit {
         });
     }
     catch (Exception) {
-      this.messageService.error("Some error occured", "Error")
+      this.datasetsService.message("Some error occured", "error")
     }
   }
 
@@ -477,7 +477,7 @@ export class RestDatasetConfigComponent implements OnInit {
       }
     }
     catch (Exception) {
-      this.messageService.error("Some error occured", "Error")
+      this.datasetsService.message("Some error occured", "error")
     }
 
 
@@ -508,7 +508,7 @@ export class RestDatasetConfigComponent implements OnInit {
       }
     }
     catch (Exception) {
-      this.messageService.error("Some error occured", "Error")
+      this.datasetsService.message("Some error occured", "error")
     }
 
   }
@@ -528,7 +528,7 @@ export class RestDatasetConfigComponent implements OnInit {
 
     }
     catch (Exception) {
-      this.messageService.error("Some error occured", "Error")
+      this.datasetsService.message("Some error occured", "error")
     }
 
 
@@ -547,7 +547,7 @@ export class RestDatasetConfigComponent implements OnInit {
 
     }
     catch (Exception) {
-      this.messageService.error("Some error occured", "Error")
+      this.datasetsService.message("Some error occured", "error")
     }
 
 
@@ -566,7 +566,7 @@ export class RestDatasetConfigComponent implements OnInit {
 
     }
     catch (Exception) {
-      this.messageService.error("Some error occured", "Error")
+      this.datasetsService.message("Some error occured", "error")
     }
 
 
