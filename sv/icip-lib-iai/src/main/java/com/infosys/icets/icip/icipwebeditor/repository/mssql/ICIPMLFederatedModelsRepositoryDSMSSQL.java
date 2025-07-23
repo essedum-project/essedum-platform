@@ -1,12 +1,12 @@
 package com.infosys.icets.icip.icipwebeditor.repository.mssql;
+
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
-import com.infosys.icets.icip.icipwebeditor.repository.ICIPMLFederatedModelsRepository;
+import com.infosys.icets.icip.icipwebeditor.repository.ICPMLFederatedModelsDSRepository;
 
 @Profile("mssql")
 @Repository
-public interface ICIPMLFederatedModelsRepositoryMSSQL  extends ICIPMLFederatedModelsRepository{
+public interface ICIPMLFederatedModelsRepositoryDSMSSQL extends ICPMLFederatedModelsDSRepository {
 
-	
 }

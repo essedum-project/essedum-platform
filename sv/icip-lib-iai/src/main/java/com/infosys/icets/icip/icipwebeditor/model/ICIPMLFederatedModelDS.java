@@ -1,34 +1,31 @@
 package com.infosys.icets.icip.icipwebeditor.model;
+
 import java.sql.Timestamp;
 
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Cascade;
 
-import com.infosys.icets.ai.comm.lib.util.listener.AuditListener;
+import com.infosys.icets.icip.dataset.model.ICIPDatasource;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@DynamicInsert
-@DynamicUpdate
-@Entity
-@EntityListeners(AuditListener.class)
-@Table(name = "mlfederatedmodels")
+@Entity@Table(name = "mlfederatedmodels")
 @Data
 @Getter
 @Setter
 @NoArgsConstructor
-public class ICIPMLFederatedModel {
-
+public class ICIPMLFederatedModelDS {
+		
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
@@ -40,8 +37,11 @@ public class ICIPMLFederatedModel {
 	
 	private String version;
 	
-	@Column(name = "data_source")
-	private String datasource;
+	@OneToOne
+	@JoinColumn(updatable = false, insertable = false, name = "datasource", referencedColumnName = "name")
+	@JoinColumn(updatable = false, insertable = false, name = "organization", referencedColumnName = "organization")
+	@Cascade(value = org.hibernate.annotations.CascadeType.SAVE_UPDATE)
+	private ICIPDatasource datasource;
 	
 	private String attributes;
 	
@@ -60,7 +60,6 @@ public class ICIPMLFederatedModel {
     
     @Column(name="app_modified_by")
 	String modifiedBy;
-    
     
 	
 }
