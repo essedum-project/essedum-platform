@@ -104,3 +104,20 @@ ingress:
   tlsSecret: essedum-secret
   serviceName: leap-app-ui-service-1
   servicePort: 8084
+
+keycloak:
+  name: keycloak
+  replicaCount: 1
+  image: quay.io/keycloak/keycloak:26.2.3
+  adminUser: admin
+  adminPassword: admin
+  httpPort: 8180
+  httpsPort: 8443
+  proxy: edge
+  hostnameStrict: "false"
+  httpsEnabled: "true"
+  hostname: aiplatform.az.ad.idemo-ppc.com
+  hostnameStrictHttps: "true"
+  tlsCrtPath: /etc/keycloak/certs/tls.crt
+  tlsKeyPath: /etc/keycloak/certs/tls.key
+  tlsSecretName: aiplatform-secret
