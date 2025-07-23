@@ -387,10 +387,7 @@ export class ModelComponent implements OnInit, OnChanges {
           .deleteModels(card.sourceId, card.adapterId, card.version)
           .subscribe(
             (res) => {
-              this.service.message(
-               
-                'Done!  Model deleted Successfully'
-              );
+              this.service.message('Done!  Model deleted Successfully');
               this.refresh();
             },
             (error) => {

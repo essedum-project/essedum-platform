@@ -459,11 +459,11 @@ export class ConnectionViewComponent implements OnInit {
         },
         (error) => {
           if (this.data.interfacetype === 'adapter') {
-            this.Services.messageService(
+            this.Services.message(
               'Error! Adapter not created due to: ' + JSON.stringify(error),'error'
             );
           } else {
-            this.Services.messageService(
+            this.Services.message(
               'Error! Connection not created due to: ' + JSON.stringify(error), 'error'
             );
           }

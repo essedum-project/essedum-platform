@@ -207,7 +207,7 @@ export class PipelineCreateComponent implements OnInit {
  
         },
           error => {
-            this.Services.message('Error '+error,'error');
+              this.Services.message(`Error: ${error}`, 'error');
           }
 
         );

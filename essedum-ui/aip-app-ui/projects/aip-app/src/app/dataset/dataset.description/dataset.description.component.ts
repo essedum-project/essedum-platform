@@ -578,7 +578,7 @@ export class DatasetDescriptionComponent implements OnInit {
           })
           .catch((err)=>{
             console.log('An error occured');
-            this.service.messageService('Error! while uploading file','error');
+            this.service.message('Error! while uploading file','error');
             this.uploading=false;
           });
         }
