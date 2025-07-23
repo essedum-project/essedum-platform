@@ -870,7 +870,7 @@ public class ICIPMlopsController {
 			return ResponseEntity.status(200).body(response);
 }
 	
-	@GetMapping("/models/list/{org}")
+	@GetMapping("/models/count/{org}")
 	public ResponseEntity<Long> getAllModelsCount(@PathVariable(name = "org") String org,
 			@RequestParam(name = "modelname", required = false) String modelName,
 			@RequestParam(name = "version", required = false) String version,
