@@ -362,7 +362,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
               this.filteredSchemaTemplates.next(this.schemaTemplates);
             },
               error => {
-                this.services.messageService("Error while fetching Form Templates")
+                this.services.message("Error while fetching Form Templates",'error')
               }
             );
 
@@ -375,7 +375,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
       }
     }
     catch (Exception) {
-      this.services.messageService("Some error occured")
+      this.services.message("Some error occured",'error')
     }
 
   }
@@ -425,12 +425,12 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
           this.location.back();
         },
           error => {
-            this.services.messageService('Error! Dataset not created due to' + error);
+            this.services.message('Error! Dataset not created due to ' + error,'error');
           });
       }
     }
     catch (Exception) {
-      this.services.messageService("Some error occured")
+      this.services.message("Some error occured",'error')
     }
 
   }
@@ -475,11 +475,11 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
 
       },
         error => {
-          this.datasetsService.message('Error!', 'Dataset not created due to  ' + error);
+          this.datasetsService.message('Error! Dataset not created due to  ' + error,'error');
         });
     }
     catch (Exception) {
-      this.datasetsService.message("Some error occured", "Error")
+      this.datasetsService.message("Some error occured", "error")
     }
 
   }
@@ -603,7 +603,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
       }
     }
     catch (Exception) {
-      this.services.messageService("Some error occured")
+      this.services.message("Some error occured",'error')
     }
 
 
@@ -627,7 +627,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
       this.data.datasource = JSON.parse(JSON.stringify(datasource));
     }
     catch (Exception) {
-      this.datasetsService.messageService("Some error occured", "Error")
+      this.datasetsService.message("Some error occured", "error")
     }
 
     if (this.type === "GIT") {
@@ -691,7 +691,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
                 this.filteredSchemaTemplates.next(this.schemaTemplates);
               },
                 error => {
-                  this.services.messageService("Error while fetching Form Templates")
+                  this.services.message("Error while fetching Form Templates",'error')
                 }
               );
             }
@@ -701,7 +701,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
       }
     }
     catch (Exception) {
-      this.services.messageService("Some error occured")
+      this.services.message("Some error occured",'error')
     }
 
   }
@@ -733,7 +733,7 @@ export class DatasetConfigComponent implements OnInit, OnDestroy {
       }
     }
     catch (Exception) {
-      this.services.messageService("Some error occured")
+      this.services.message("Some error occured",'error')
     }
 
   }

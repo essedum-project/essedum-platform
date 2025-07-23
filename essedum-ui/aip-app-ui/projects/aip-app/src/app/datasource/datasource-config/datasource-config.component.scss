@@ -124,7 +124,6 @@
   font: normal normal normal 16px/24px Roboto !important;
   letter-spacing: 0px !important;
   color: #000000 !important;
-  text-transform: capitalize !important;
   opacity: 1 !important;
 }
 
@@ -133,7 +132,6 @@
   font: normal normal normal 16px/24px Roboto;
   letter-spacing: 0px;
   color: #000000;
-  text-transform: capitalize;
   opacity: 1;
 }
 
@@ -233,7 +231,6 @@
   font: normal normal normal 16px/24px Roboto !important;
   letter-spacing: 0px;
   color: #000000 !important;
-  text-transform: capitalize;
   opacity: 1;
   margin-left: 4px !important;
 }
@@ -263,10 +260,13 @@
   text-align: left;
   font: normal normal normal 16px/24px Roboto !important;
   letter-spacing: 0px;
-  color: #000000 !important;
-  text-transform: capitalize;
+  color: #000000 !important; 
   opacity: 1;
   margin-left: 4px !important;
+}
+
+.text-transform{
+ text-transform: capitalize !important;
 }
 
 .mat-style-label {

@@ -500,7 +500,7 @@ export class PipelineComponent implements OnInit, OnChanges {
         });
       },
       (error) =>
-        this.service.messageService('Could not get the results', 'error')
+        this.service.message('Could not get the results', 'error')
     );
   }
 

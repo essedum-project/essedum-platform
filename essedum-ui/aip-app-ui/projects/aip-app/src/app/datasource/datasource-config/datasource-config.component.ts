@@ -172,7 +172,7 @@ export class DatasourceConfigComponent implements OnInit {
       },);
     }
     catch (Exception: any) {
-      this.Services.messageService("Some error occured")
+      this.Services.message("Some error occured" ,'error')
     }
 
     this.lastRefreshTime();
@@ -258,7 +258,7 @@ export class DatasourceConfigComponent implements OnInit {
       this.testSuccessful = true;
     },
       error => {
-        this.Services.message('Error! Please check connection details: ' + error);
+        this.Services.message('Error! Please check connection details: ' + error,'error');
       }
     );
   }
@@ -271,7 +271,7 @@ export class DatasourceConfigComponent implements OnInit {
     }, error => {
 
       setTimeout(() => {
-        this.Services.messageService('Please Provide a different Port Range');
+        this.Services.message('Please Provide a different Port Range','error');
         // Place your code here that you want to execute after 2 seconds  
       }, 2000); // 2000 milliseconds = 2 seconds  
     });
@@ -357,10 +357,10 @@ export class DatasourceConfigComponent implements OnInit {
         },
           error => {
             if (this.data.interfacetype === "adapter") {
-              this.Services.messageService('Error! Adapter not saved due to: ' + JSON.stringify(error));
+              this.Services.message('Error! Adapter not saved due to: ' + JSON.stringify(error),'error');
             }
             else {
-              this.Services.messageService('Error! Connection not updated due to: ' + JSON.stringify(error));
+              this.Services.message('Error! Connection not updated due to: ' + JSON.stringify(error),'error');
             }
           });
       }
@@ -398,9 +398,9 @@ export class DatasourceConfigComponent implements OnInit {
         },
           error => {
             if (this.data.interfacetype === "adapter") {
-              this.Services.messageService('Error! Adapter not created due to: ' + JSON.stringify(error));
+              this.Services.message('Error! Adapter not created due to: ' + JSON.stringify(error),'error');
             } else {
-              this.Services.messageService('Error! Connection not created due to: ' + JSON.stringify(error));
+              this.Services.message('Error! Connection not created due to: ' + JSON.stringify(error),'error');
             }
           });
       }
@@ -419,7 +419,7 @@ export class DatasourceConfigComponent implements OnInit {
             let s = new Number(response)
             size = s.valueOf()
             // size = response
-          }, err => { this.Services.messageService("Unable to fetch Connection types") },
+          }, err => { this.Services.message("Unable to fetch Connection types",'error' ) },
           () => {
             //console.log("Modal-config")
             this.Services.getDatasourceJson(0, size)
@@ -448,12 +448,12 @@ export class DatasourceConfigComponent implements OnInit {
                     this.keys.push(keyValue);
                   });
               }, error => {
-                this.Services.messageService("Unable to fetch Connection types")
+                this.Services.message("Unable to fetch Connection types ","error")
               });
           });
     }
     catch (Exception) {
-      this.Services.messageService("Some error occured", "Error")
+      this.Services.message("Some error occured", "error")
     }
   }
 
@@ -526,7 +526,7 @@ export class DatasourceConfigComponent implements OnInit {
       return JSON.stringify(data);
     }
     catch (Exception) {
-      this.Services.messageService("Some error occured", "Error")
+      this.Services.message("Some error occured", "error")
     }
 
   }

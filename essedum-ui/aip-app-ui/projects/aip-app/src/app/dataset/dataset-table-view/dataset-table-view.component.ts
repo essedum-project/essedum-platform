@@ -173,7 +173,7 @@ export class DatasetTableViewComponent implements OnInit {
       }
       if (this.inpdataset) this.datasetName = this.inpdataset
       if (!this.datasetName || this.datasetName.replace(/\s/g, "").length < 1) {
-        if (sessionStorage.getItem("isSbx") != "true") this.service.messageService("Dataset name not found", "error");
+        if (sessionStorage.getItem("isSbx") != "true") this.service.message("Dataset name not found ", "error");
       }
       else {
         this.busy = this.datasetsService.getDataset(this.datasetName)
@@ -194,19 +194,19 @@ export class DatasetTableViewComponent implements OnInit {
                 this.datasetsCount = response;
 
             }
-            else { this.service.messageService("Dataset details not found", "error") 
+            else { this.service.message("Dataset details not found", "error") 
                                       this.appLoading = false;
 
             }
           },
-            error => { this.service.messageService("Error in fetching dataset details", "error")
+            error => { this.service.message("Error in fetching dataset details", "error")
                                       this.appLoading = false;
 
              })
       }
     }
     catch (Exception) {
-      this.service.messageService("Some error occured", "error")
+      this.service.message("Some error occured", "error")
     }
 
   }
@@ -262,12 +262,12 @@ export class DatasetTableViewComponent implements OnInit {
         this.busy = this.service.getSchemaByName(this.schemaName)
           .subscribe(resp => {
             if (typeof (resp) != "object") {
-              this.service.messageService(resp, "error");
+              this.service.message('Error! '+resp, "error");
             }
             else {
               let schemaContents: any[] = resp ? resp.schemavalue ? JSON.parse(resp.schemavalue) : [] : [];
               if (schemaContents && schemaContents.length < 1) {
-                this.service.messageService("Error: Linked schema is empty", "error");
+                this.service.message("Error: Linked schema is empty", "error");
               }
               else {
                 schemaContents.sort((a, b) => a['columnorder'] - b['columnorder']);
@@ -304,12 +304,12 @@ export class DatasetTableViewComponent implements OnInit {
             this.checkRouteQueryParams();
           }
           else {
-            this.service.messageService("Dataset query returned no results", "error");
+            this.service.message("Dataset query returned no results", "error");
           }
         },
           error => {
             if (this.asChildView) {
-              this.service.messageService(error, "error");
+              this.service.message('Error! '+error, "error");
               this.columnNamesList = [];
               this.columnHeadersList = [];
               this.ticketList = [];
@@ -320,14 +320,14 @@ export class DatasetTableViewComponent implements OnInit {
       }
     }
     catch (Exception: any) {
-      this.service.messageService(Exception, "error")
+      this.service.message("Error "+Exception, "error")
     }
 
   }
 
   checkRouteQueryParams() {
     if (this.columnNamesList && this.columnNamesList.length < 1) {
-      this.service.messageService("Received empty list of columns names", "error");
+      this.service.message("Received empty list of columns names", "error");
     }
     else {
       if (!(this.sortEvent?.trim().length > 0))
@@ -469,7 +469,7 @@ export class DatasetTableViewComponent implements OnInit {
           .subscribe(
             (pageResponse: any) => {
               if (typeof pageResponse == "string") {
-                this.service.messageService(pageResponse, "error");
+                this.service.message("Error "+pageResponse, "error");
                 this.ticketList = this.ticketListBackup;
                                         this.appLoading = false;
 
@@ -495,7 +495,7 @@ export class DatasetTableViewComponent implements OnInit {
               }
             },
             (error) => {
-              this.service.messageService("Could not get the results", "error");
+              this.service.message("Could not get the results", "error");
               this.ticketList = this.ticketListBackup;
                                       this.appLoading = false;
 
@@ -516,7 +516,7 @@ export class DatasetTableViewComponent implements OnInit {
           .subscribe(
             (pageResponse: any) => {
               if (typeof pageResponse == "string") {
-                this.service.messageService(pageResponse, "error");
+                this.service.message("Error "+pageResponse, "error");
                 this.ticketList = this.ticketListBackup;
               }
               else {
@@ -544,7 +544,7 @@ export class DatasetTableViewComponent implements OnInit {
 
     }
     catch (Exception: any) {
-      this.service.messageService(Exception, "error")
+      this.service.message("Error "+Exception, "error")
                               this.appLoading = false;
 
     }
@@ -642,7 +642,7 @@ export class DatasetTableViewComponent implements OnInit {
         this.busy = this.service.searchTicketsUsingDataset(this.datasetName, projName, pagination, exampleIncident)
           .subscribe(res => {
             if (typeof res == "string") {
-              this.service.messageService(res, "error");
+              this.service.message("Error "+res, "error");
               this.ticketList = this.ticketListBackup;
             }
             else {
@@ -669,7 +669,7 @@ export class DatasetTableViewComponent implements OnInit {
 
           },
             error => {
-              this.service.messageService("Some error occurred while fetching data", "error");
+              this.service.message("Some error occurred while fetching data", "error");
               this.ticketList = this.ticketListBackup;
             });
       } else {
@@ -683,7 +683,7 @@ export class DatasetTableViewComponent implements OnInit {
           .subscribe(
             (pageResponse: any) => {
               if (typeof pageResponse == "string") {
-                this.service.messageService(pageResponse, "error");
+                this.service.message("Error "+pageResponse, "error");
                 this.ticketList = this.ticketListBackup;
               }
               else {
@@ -724,7 +724,7 @@ export class DatasetTableViewComponent implements OnInit {
         )
     }
     catch (Exception: any) {
-      this.service.messageService(Exception, "error")
+      this.service.message("Error "+Exception, "error")
     }
 
   }
@@ -899,7 +899,7 @@ export class DatasetTableViewComponent implements OnInit {
         subscribe(resp => {
           if (resp) {
             if (resp.startsWith("Error: ")) {
-              this.service.messageService("Error while fetching data count is " + resp.substring(resp.indexOf(": ")), "Dataset View");
+              this.service.message("Error while fetching data count is " + resp.substring(resp.indexOf(": ")), "Dataset View");
               this.bsyGtngDwnldCnt = false;
             }
             else {
@@ -909,18 +909,18 @@ export class DatasetTableViewComponent implements OnInit {
             }
           }
           else {
-            this.service.messageService("Data count returned null", "Dataset View");
+            this.service.message("Data count returned null", "Dataset View");
             this.bsyGtngDwnldCnt = false;
           }
         },
           error => {
-            this.service.messageService("Error while fetching data count is " + error, "Dataset View");
+            this.service.message("Error while fetching data count is " + error, "Dataset View");
             this.bsyGtngDwnldCnt = false;
           }
         )
     }
     catch (Exception: any) {
-      this.service.messageService("Some error occured", Exception)
+      this.service.message("Some error occured "+ Exception, 'error')
     }
 
   }
@@ -1077,7 +1077,7 @@ export class DatasetTableViewComponent implements OnInit {
 
   terminateDownload() {
     this.cancelDownload = true;
-    this.service.messageService("Download Terminated", "Dataset View");
+    this.service.message("Download Terminated", "Dataset View");
   }
   colSearch() {
     this.searchToggle = !this.searchToggle

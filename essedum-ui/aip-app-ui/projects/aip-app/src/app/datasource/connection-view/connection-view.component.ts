@@ -276,7 +276,7 @@ export class ConnectionViewComponent implements OnInit {
           // size = response
         },
         (err) => {
-          this.Services.messageService('Unable to fetch Connection types');
+          this.Services.message('Unable to fetch Connection types','error');
         },
         () => {
           this.Services.getDatasourceJson(0, size).subscribe(
@@ -294,13 +294,13 @@ export class ConnectionViewComponent implements OnInit {
               });
             },
             (error) => {
-              this.Services.messageService('Unable to fetch Connection types');
+              this.Services.message('Unable to fetch Connection types','error');
             }
           );
         }
       );
     } catch (Exception) {
-      this.Services.messageService('Some error occured', 'Error');
+      this.Services.message('Some error occured', 'error');
     }
   }
 
@@ -372,9 +372,8 @@ export class ConnectionViewComponent implements OnInit {
         this.testSuccessful = true;
       },
       (error) => {
-        this.Services.messageService(
-          'Error!',
-          'Please check connection details: ' + error
+        this.Services.message(
+          'Error! Please check connection details: ' + error,'error'
         );
       }
     );
@@ -437,14 +436,12 @@ export class ConnectionViewComponent implements OnInit {
         },
         (error) => {
           if (this.data.interfacetype === 'adapter') {
-            this.Services.messageService(
-              'Error!',
-              'Adapter not saved due to: ' + JSON.stringify(error)
+            this.Services.message(
+              'Error! Adapter not saved due to: ' + JSON.stringify(error),'error'
             );
           } else {
-            this.Services.messageService(
-              'Error!',
-              'Connection not saved due to: ' + JSON.stringify(error)
+            this.Services.message(
+              'Error! Connection not saved due to: ' + JSON.stringify(error),'error'
             );
           }
         }
@@ -462,14 +459,12 @@ export class ConnectionViewComponent implements OnInit {
         },
         (error) => {
           if (this.data.interfacetype === 'adapter') {
-            this.Services.messageService(
-              'Error!',
-              'Adapter not created due to: ' + JSON.stringify(error)
+            this.Services.message(
+              'Error! Adapter not created due to: ' + JSON.stringify(error),'error'
             );
           } else {
-            this.Services.messageService(
-              'Error!',
-              'Connection not created due to: ' + JSON.stringify(error)
+            this.Services.message(
+              'Error! Connection not created due to: ' + JSON.stringify(error), 'error'
             );
           }
         }

@@ -416,7 +416,7 @@ else{
             }
         },
           error => {
-            this.datasetsService.message('Error!', 'Dataset not created due to  ' + error);
+            this.datasetsService.message('Error! Dataset not created due to ', 'error');
           });
 
       } else {
@@ -604,7 +604,7 @@ else{
       }
     }
     catch (Exception) {
-      this.datasetsService.message("Some error occured", "Error")
+      this.datasetsService.message("Some error occured", "error")
     }
 
   }
@@ -698,7 +698,7 @@ else{
                 this.filteredSchemaTemplates.next(this.schemaTemplates);
               },
                 error => {
-                  this.datasetsService.messageService("Error while fetching Form Templates", "IAMP")
+                  this.datasetsService.message("Error while fetching Form Templates", 'error')
                 }
               );
             }
@@ -711,7 +711,7 @@ else{
       }
     }
     catch (Exception) {
-      this.datasetsService.messageService("Some error occured", "Error")
+      this.datasetsService.message("Some error occured", 'error')
     }
 
 
@@ -730,7 +730,7 @@ else{
       }
     }
     catch (Exception) {
-      this.datasetsService.messageService("Some error occured", "Error")
+      this.datasetsService.message("Some error occured", 'error')
     }
 
   }
@@ -769,7 +769,7 @@ else{
       return JSON.stringify(data);
     }
     catch (Exception) {
-      this.datasetsService.messageService("Some error occured", "Error")
+      this.datasetsService.message("Some error occured", 'error')
     }
 
   }
@@ -788,7 +788,7 @@ else{
       });
     }
     catch (Exception) {
-      this.datasetsService.messageService("Some error occured", "Error")
+      this.datasetsService.message("Some error occured", 'error')
     }
 
   }
@@ -881,7 +881,7 @@ else{
       this.selectChange()
     }
     catch (Exception) {
-      this.datasetsService.messageService("Some error occured", "Error")
+      this.datasetsService.message("Some error occured", 'error')
     }
     if(this.type == "S3"){
       this.viewType.push({viewValue:'Code View',value:'Code View'},{viewValue:'Log View',value:'Log View'},

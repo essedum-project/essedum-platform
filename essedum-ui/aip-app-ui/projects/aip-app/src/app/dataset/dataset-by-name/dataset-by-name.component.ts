@@ -774,7 +774,7 @@ export class DatasetByNameComponent {
     let data = this.getFileData(card.name, obj, card.organization)
     let extension = (obj).split('.').pop()
     if (extension.match('mkv')) {
-      this.service.messageService('This file cannot be downloaded currently');
+      this.service.message('This file cannot be downloaded currently','warning');
     }
     else {
       data.then((res) => {
@@ -827,7 +827,7 @@ export class DatasetByNameComponent {
 
   getFileData(datasetName, fileName, org) {
     return this.service.getNutanixFileData(datasetName, [fileName], org).toPromise()
-      .catch(err => this.service.messageService('Some error occured while fetching file'));
+      .catch(err => this.service.message('Some error occured while fetching file ','error'));
   }
 
   downloadSelectedFiles(filename: string, data: any, extension: string, card?: any) {
@@ -909,7 +909,7 @@ export class DatasetByNameComponent {
                     linkB.click();
                     return;
                   },
-                    (err) => this.service.messageService('Some error occured while downloading media file:', err));
+                    (err) => this.service.message('Some error occured while downloading media file: '+err,'error'));
                 }
               });
             }
@@ -994,7 +994,7 @@ export class DatasetByNameComponent {
       }
     }
     else {
-      this.service.messageService('This file cannot be downloaded currently');
+      this.service.message('This file cannot be downloaded currently ','warning');
       return;
     }
   }
