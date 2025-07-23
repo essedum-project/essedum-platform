@@ -26,11 +26,10 @@
                 <div style="height: 150px;display: grid">
                     <mat-card class="mat-mdc-card mdc-card lfx-c-card lfx-c-card--hover example-card card-shadow"
                         appearance="outlined" (mouseenter)="app.hover = true" (mouseleave)="app.hover = false">
-                        <div class="row" style="margin-bottom: 2%; height: 100%;">
+                        <div class="row main-card-div" >
                             <div class="col-md-8"
                                 [ngStyle]="{'height': app.hover ? '100px' : '110px', 'transition': 'height 0.2s'}">
-                                <mat-card-header
-                                    style="padding: 0 !important; width: 95%; height: 100%;height:30% ;transition: height 0.2s;">
+                                <mat-card-header class="mat-card-header-transition">
                                     <mat-card-title class="lfx-card-header">{{app?.alias}}</mat-card-title>
                                 </mat-card-header>
                                 <mat-card-content class="lfx-app-description" [ngStyle]="{
@@ -57,7 +56,7 @@
                             </div>
                         </div>
 
-                        <div class="card-actions-container" [ngStyle]="{
+                         <div class="card-actions-container" [ngStyle]="{
                                    'position': 'relative',
                                    'opacity': app.hover || menuOpenIndex === index ? '1' : '0',
                                    'pointer-events': app.hover || menuOpenIndex === index ? 'auto' : 'none',
@@ -66,14 +65,18 @@
                                 }">
                             <mat-card-actions
                                 class="lfx-c-card__action-hover d-flex justify-content-between card-actions-hover"
-                                style="width: 300px;margin-bottom: -20px;">
-                                <button mat-flat-button class="mat-action-button-s view-details-btn"
-                                    style="height: 30px !important; width: 130px !important;"
+                               >
+                                <button mat-flat-button class="mat-action-button-s view-details-btn overview"
                                     (click)="openApp(app, 'overview')">
                                     Overview
                                 </button>
+                                <button mat-menu-item  class="button-hover"  (click)="openApp(app, 'runApp')">
+                                    <mat-icon class="embed_option" matTooltip="Open App" [matTooltipPosition]="'below'">
+                                        pan_tool_alt
+                                    </mat-icon>
+                                </button>
 
-                                <div class="aip-cursor  lfx-u-mar-l-80">
+                                <div class="aip-cursor w-15">
                                     <div class="lfx-c-avatar  aip-hover-avatar">
                                         {{(app.target.created_by)|firstCharacter}}
                                     </div>
@@ -82,13 +85,12 @@
                                     </div>
                                 </div>
 
-                                <div class="dropdown d-inline-block">
-                                    <mat-icon class="aip-cursor" [matMenuTriggerFor]="menu"
-                                        style="font-size: 22px; padding: 3px; color: #a5aaad; font-weight: 300;"
+                                <div class="dropdown d-inline-block w-15">
+                                    <mat-icon class="aip-cursor action-icon" [matMenuTriggerFor]="menu"                                       
                                         (menuOpened)="menuOpenIndex = index" (menuClosed)="menuOpenIndex = null">
                                         more_vert
                                     </mat-icon>
-                                    <mat-menu #menu="matMenu">
+                                    <mat-menu #menu="matMenu">                                
                                         <button mat-menu-item *ngIf="app.isvideoPresent"
                                             (click)="openApp(app, 'video')">
                                             Open Video
@@ -107,11 +109,9 @@
                                 </div>
                             </mat-card-actions>
                         </div>
-
                     </mat-card>
                 </div>
             </div>
-
         </div>
 
         <!-- Empty state -->
