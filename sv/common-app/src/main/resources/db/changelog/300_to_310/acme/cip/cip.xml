@@ -1,6 +1,7 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-
+    
+    <!--
 	<changeSet author="Leap" id="3v1-cip-241029-1">
 		<sql>
 			Delete from mlschemaregistry WHERE NAME ='ConfigItemRelation' AND ORGANIZATION='leo1311'; 
@@ -20,11 +21,11 @@
 			Delete from mlrelationship WHERE name ='ConfigItemTicket' AND ORGANIZATION='leo1311'; 
 		</sql>
 	</changeSet>
-	<!-- <changeSet author="Leap" id="3v1-cip-240918">
+	 <changeSet author="Leap" id="3v1-cip-240918">
 	<sql splitStatements="true" stripComments="true">
 		UPDATE mlschemaregistry SET NAME='Application_and_Middleware' WHERE NAME=' Application_and_Middleware' and organization='leo1311';
 	</sql>
- </changeSet> -->
+ </changeSet>
 
  <changeSet author="Leap" id="3v1-cip-241022-2">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
@@ -106,14 +107,17 @@
             <sqlCheck expectedResult="0">
                             SELECT COUNT(*) FROM mldataset WHERE name='AlertAndIncident' and Organization='leo1311';
             </sqlCheck>
-        </preConditions>        
+        </preConditions>  
+             
         <sql dbms="h2, mysql" splitStatements="true" stripComments="true">
              insert into mldataset ( attributes, dataset_type, description, exp_status, name, organization, schemajson, type, backing_dataset, dataset_schema, datasource, lastmodifiedby, lastmodifieddate, alias, context, is_approval_required, is_permission_managed, is_inbox_required, is_audit_required, is_archival_enabled, archival_config, dashboard, metadata, modeltype, views, taskdetails, tags, interfacetype, adaptername, isadapteractive, indexname, summary, event_details) values('{\"filter\":\"\",\"mode\":\"query\",\"Query\":\"SELECT  cmdb_ci_sys_id AS uniqueId, cmdb_ci_sys_id AS sysId,priority,type,number,SHORTDESCRIPTION Description ,state,location,  openedDate FROM leapmaster_ref_data.leo1311_tickets WHERE cmdb_ci_sys_id!=\'\' AND state IN (\'Open\',\'On Hold\',\'New\',\'In Progress\',\'Re-Warn\',\'Re-Triggered\',\'Triggered\',\'Warn\'); ; \",\"Cacheable\":false,\"isStreaming\":\"false\",\"Headers\":\"\",\"defaultValues\":\"\",\"QueryParams\":\"\",\"writeMode\":\"append\",\"params\":\"{}\",\"tableName\":\"\",\"uniqueIdentifier\":\"\"}',NULL,'AlertAndIncidentDataset','0','AlertAndIncident','leo1311',NULL,'rw',NULL,'AlertAndIncident','leo1311','admin','2023-08-28 12:21:15.378375','AlertAndIncidentDataset',NULL,'','','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
         </sql>
+        
         <sql dbms="mssql" splitStatements="true" stripComments="true">
              insert into mldataset ( attributes, dataset_type, description, exp_status, name, organization, schemajson, type, backing_dataset, dataset_schema, datasource, lastmodifiedby, lastmodifieddate, alias, context, is_approval_required, is_permission_managed, is_inbox_required, is_audit_required, is_archival_enabled, archival_config, dashboard, metadata, modeltype, views, taskdetails, tags, interfacetype, adaptername, isadapteractive, indexname, summary, event_details) values('{"filter":"","mode":"query","Query":"SELECT  cmdb_ci_sys_id AS uniqueId, cmdb_ci_sys_id AS sysId,priority,type,number,SHORTDESCRIPTION Description ,state,location,  openedDate FROM @projectname_tickets WHERE cmdb_ci_sys_id!='''' AND state IN (''Open'',''On Hold'',''New'',''In Progress'',''Re-Warn'',''Re-Triggered'',''Triggered'',''Warn''); ","Cacheable":false,"isStreaming":"false","Headers":"","defaultValues":"","QueryParams":"","writeMode":"append","params":"{}","tableName":"","uniqueIdentifier":""}',NULL,'AlertAndIncidentDataset','0','AlertAndIncident','leo1311',NULL,'rw',NULL,'AlertAndIncident','leo1311','admin',NULL,'AlertAndIncidentDataset',NULL,'','','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
 </sql>
+
 </changeSet>
 
 
@@ -155,9 +159,11 @@
                             SELECT COUNT(*) FROM mldataset WHERE name='TicketsData' and Organization='leo1311';
             </sqlCheck>
         </preConditions>
+        
 		<sql dbms="h2, mysql" splitStatements="true" stripComments="true">
 		INSERT INTO mldataset (attributes,NAME,ORGANIZATION,alias,datasource) VALUES('{\"filter\":\"\",\"mode\":\"query\",\"Query\":\"SELECT t1.number,t1.cmdb_ci_sys_id,t1.configurationItem as ci_name,t1.shortdescription,t1.createdDate,t1.priority,t1.type,t1.sysId  FROM  leo1311_tickets t1 join leapmaster.cfm_configuration_item ci on t1.cmdb_ci_sys_id=ci.cmdb_ci_sys_id WHERE t1.state IN (\'\Open\'\,\'\On Hold\'\,\'\New\'\,\'\In Progress\'\,\'\Re-Warn\'\,\'\Re-Triggered\'\,\'\Triggered\'\,\'\Warn\'\) and ci.cmdb_ci_sys_id in ({cmdb_ci_sys_id})  and ci.project_id= {project_id} and ci.location IN ({location}) and t1.type IN ({ticketstype}) and (ci.alert_count>0 OR ci.incident_count >0 OR ci.log_count >0) AND t1.severity in ({severity}) AND ci.sys_class_name = ({sys_class_name}) and ({searchKey} IS NULL OR (configurationItem LIKE {searchKey} OR NUMBER LIKE {searchKey})) union all SELECT t1.id AS NUMBER,t1.cmdb_ci_sys_id ,t1.ci_name,t1.logs AS shortdescription, t1.createdDate,t1.priority,t1.type,NULL AS sysId FROM leo1311_tickets_logs t1 WHERE t1.type IN ({ticketstype}) AND t1.ci_type IN ({ci_type}) AND ({searchKey} IS NULL OR (ci_name LIKE {searchKey} OR id LIKE {searchKey})) AND t1.cmdb_ci_sys_id IN ({cmdb_ci_sys_id_log}) \",\"Cacheable\":false,\"isStreaming\":\"false\",\"Headers\":\"\",\"defaultValues\":\"\",\"QueryParams\":\"\",\"writeMode\":\"append\",\"params\":\"{\'\cmdb_ci_sys_id\'\:\'\ci.cmdb_ci_sys_id\'\,\'ticketstype\'\:\'t1.type\'\,\'\location\'\:\'\ci.location\'\,\'\project_id\'\:\'\2\'\,\'\ci_type\'\:\'t1.ci_type\'\,\'\cmdb_ci_sys_id_log\'\:\'t1.cmdb_ci_sys_id\'\,\'\severity\'\:\'t1.severity\'\,\'\sys_class_name\'\:\'\ci.sys_class_name\'\,\'\searchKey\'\:\'\NULL\'\}\",\"tableName\":\"\",\"uniqueIdentifier\":\"priority,createdDate\"}','TicketsData','leo1311','TicketsData','leo1311');
         </sql>	
+        
 	</changeSet>
     <changeSet author="Leap" id="3v1-cip-20241023-1-2">
         <validCheckSum>any</validCheckSum>
@@ -170,7 +176,7 @@
 		INSERT INTO mldataset (attributes,NAME,ORGANIZATION,alias,datasource) VALUES('{\"filter\":\"\",\"mode\":\"query\",\"Query\":\"SELECT t1.number,t1.cmdb_ci_sys_id,t1.configurationItem as ci_name,t1.shortdescription,t1.createdDate,t1.priority,t1.type,t1.sysId  FROM leo1311_tickets t1 join [leapmaster].[dbo].[cfm_configuration_item] ci on t1.cmdb_ci_sys_id=ci.cmdb_ci_sys_id  WHERE t1.[state] IN (''Open'',''On Hold'',''New'',''In Progress'',''Re-Warn'',''Re-Triggered'',''Triggered'',''Warn'') and ci.cmdb_ci_sys_id in ({cmdb_ci_sys_id}) and ({searchKey} IS NULL OR (configurationItem LIKE {searchKey} OR NUMBER LIKE {searchKey})) and ci.project_id= {project_id} and ci.location IN ({location}) and t1.type IN ({ticketstype}) and (ci.alert_count>0 OR ci.incident_count >0 OR ci.log_count >0) AND t1.severity in ({severity}) AND ci.sys_class_name = ({sys_class_name}) union all SELECT t1.id AS NUMBER,t1.cmdb_ci_sys_id ,t1.ci_name,t1.logs AS shortdescription, t1.createdDate,t1.priority, t1.type,NULL AS sysId FROM leo1311_tickets_logs t1 WHERE t1.type IN ({ticketstype}) AND t1.ci_type IN ({ci_type}) AND t1.cmdb_ci_sys_id IN ({cmdb_ci_sys_id_log}) and ({searchKey} IS NULL OR (ci_name LIKE {searchKey} OR id LIKE {searchKey})) \",\"Cacheable\":false,\"isStreaming\":\"false\",\"Headers\":\"\",\"defaultValues\":\"\",\"QueryParams\":\"\",\"writeMode\":\"append\",\"params\":\"{''cmdb_ci_sys_id'':''ci.cmdb_ci_sys_id'',''ticketstype'':''t1.type'',''location'':''ci.location'',''project_id'':''2'',''ci_type'':''t1.ci_type'',''cmdb_ci_sys_id_log'':''t1.cmdb_ci_sys_id'',''severity'':''t1.severity'',''sys_class_name'':''ci.sys_class_name'',''searchKey'':''NULL''}\",\"tableName\":\"\",\"uniqueIdentifier\":\"priority,createdDate\"}','TicketsData','leo1311','TicketsData','leo1311');
         </sql>  
 	</changeSet>
-
+     
     <changeSet author="Leap" id="3v1-cip-20241023-2">
         <preConditions onFail="MARK_RAN">
              <sqlCheck expectedResult="0">
@@ -193,6 +199,7 @@
 		INSERT INTO mldataset (attributes,NAME,ORGANIZATION,alias,datasource) VALUES('{\"filter\":\"\",\"mode\":\"query\",\"Query\":\"SELECT t1.number,t1.cmdb_ci_sys_id,t1.configurationItem as ci_name,t1.shortdescription,t1.createdDate,t1.priority,t1.type,t1.sysId  FROM  leo1311_tickets t1 join [leapmaster].[dbo].[cfm_configuration_item] ci on t1.cmdb_ci_sys_id=ci.cmdb_ci_sys_id  WHERE t1.[state] IN (''Open'',''On Hold'',''New'',''In Progress'',''Re-Warn'',''Re-Triggered'',''Triggered'',''Warn'',''Closed'') and ci.cmdb_ci_sys_id in ({cmdb_ci_sys_id}) and ({searchKey} IS NULL OR (configurationItem LIKE {searchKey} OR NUMBER LIKE {searchKey})) and ci.project_id= {project_id} and ci.location IN ({location}) and t1.type IN ({ticketstype}) AND t1.severity in ({severity}) AND ci.sys_class_name = ({sys_class_name}) union all SELECT t1.id AS NUMBER,t1.cmdb_ci_sys_id ,t1.ci_name,t1.logs AS shortdescription, t1.createdDate,t1.priority, t1.type,NULL AS sysId FROM leo1311_tickets_logs t1 WHERE t1.type IN ({ticketstype}) AND t1.ci_type IN ({ci_type}) AND t1.cmdb_ci_sys_id IN ({cmdb_ci_sys_id_log}) and ({searchKey} IS NULL OR (ci_name LIKE {searchKey} OR id LIKE {searchKey})) \",\"Cacheable\":false,\"isStreaming\":\"false\",\"Headers\":\"\",\"defaultValues\":\"\",\"QueryParams\":\"\",\"writeMode\":\"append\",\"params\":\"{''cmdb_ci_sys_id'':''ci.cmdb_ci_sys_id'',''ticketstype'':''t1.type'',''location'':''ci.location'',''project_id'':''2'',''ci_type'':''t1.ci_type'',''cmdb_ci_sys_id_log'':''t1.cmdb_ci_sys_id'',''severity'':''t1.severity'',''sys_class_name'':''ci.sys_class_name'',''searchKey'':''NULL''}\",\"tableName\":\"\",\"uniqueIdentifier\":\"priority,createdDate\"}','TicketsDataAllCis','leo1311','TicketsDataAllCis','leo1311');
         </sql> 
 	</changeSet>
+	
 
 	<changeSet author="Leap" id="3v0-sre-102520245-1">
                 <sql dbms="mysql" splitStatements="true" stripComments="true"> 
@@ -271,9 +278,11 @@ insert into `mldataset` ( `attributes`, `dataset_type`, `description`, `exp_stat
 </sql>
 
 
+
 <sql dbms="mysql" splitStatements="true" stripComments="true">
 insert into `mldataset` ( `attributes`, `dataset_type`, `description`, `exp_status`, `name`, `organization`, `schemajson`, `type`, `backing_dataset`, `dataset_schema`, `datasource`, `lastmodifiedby`, `lastmodifieddate`, `alias`, `context`, `is_approval_required`, `is_permission_managed`, `is_inbox_required`, `is_audit_required`, `is_archival_enabled`, `archival_config`, `dashboard`, `metadata`, `modeltype`, `views`, `taskdetails`, `tags`, `interfacetype`, `adaptername`, `isadapteractive`, `indexname`, `summary`, `event_details`) values('{\"filter\":\"\",\"mode\":\"query\",\"Query\":\"SELECT application_name AS \'Application Name\',\\n       run_start_time AS \'Start Time\',\\n       run_end_time AS \'End Time\'\\nFROM (\\n    SELECT ccl_app.application_name,\\n           sre_probe_run_app.run_start_time,\\n           sre_probe_run_app.run_end_time,\\n           ROW_NUMBER() OVER (PARTITION BY ccl_app.application_name ORDER BY sre_probe_run_app.run_start_time DESC) AS rn\\n    FROM ccl_app\\n    INNER JOIN sre_probe_run_app ON sre_probe_run_app.application_id = ccl_app.application_id\\n    WHERE project_id = 2 AND run_result = 0\\n) AS ranked\\nWHERE rn =1\",\"Cacheable\":false,\"isStreaming\":\"false\",\"Headers\":\"\",\"defaultValues\":\"\",\"QueryParams\":\"\",\"writeMode\":\"append\",\"params\":\"{}\",\"tableName\":\"\",\"uniqueIdentifier\":\"\"}',NULL,NULL,NULL,'LEOFLD_P91666','leo1311',NULL,'r',NULL,NULL,'leapmaster','nirmal.sebastian@infosys.com','2024-11-07 05:45:20.398849','failed_appname',NULL,'','','','',NULL,NULL,NULL,NULL,NULL,'Table View','[]','[]',NULL,NULL,NULL,NULL,NULL,NULL);
 </sql>
+
 
 
 
@@ -281,6 +290,7 @@ insert into `mldataset` ( `attributes`, `dataset_type`, `description`, `exp_stat
 insert into `mldataset` ( `attributes`, `dataset_type`, `description`, `exp_status`, `name`, `organization`, `schemajson`, `type`, `backing_dataset`, `dataset_schema`, `datasource`, `lastmodifiedby`, `lastmodifieddate`, `alias`, `context`, `is_approval_required`, `is_permission_managed`, `is_inbox_required`, `is_audit_required`, `is_archival_enabled`, `archival_config`, `dashboard`, `metadata`, `modeltype`, `views`, `taskdetails`, `tags`, `interfacetype`, `adaptername`, `isadapteractive`, `indexname`, `summary`, `event_details`) values('{\"filter\":\"\",\"mode\":\"query\",\"Query\":\"SELECT SUM(counts) AS total_count\\nFROM (\\n    SELECT COUNT(*) AS \\\"counts\\\"\\n    FROM sre_location\\n    INNER JOIN sre_probe_run_app ON sre_probe_run_app.location_id = sre_location.location_id\\n    INNER JOIN ccl_app ON sre_probe_run_app.application_id = ccl_app.application_id\\n    INNER JOIN ccl_app_grp ON ccl_app_grp.application_grp_id = ccl_app.application_grp_id\\n    WHERE location_name IN (location_name) \\n      AND application_name IN (application_name)\\n      AND run_date BETWEEN \\\"2019-09-01\\\" AND \\\"2023-12-30\\\"\\n      AND run_result IN (\\\"0\\\", \\\"1\\\") \\n      AND application_grp_name IN (application_grp_name)\\n    GROUP BY probe_run_app_id, run_description, SUT, run_start_time, run_end_time, run_result\\n) AS grouped_counts\",\"Cacheable\":false,\"isStreaming\":\"false\",\"Headers\":\"\",\"defaultValues\":\"\",\"QueryParams\":\"\",\"writeMode\":\"append\",\"params\":\"{}\",\"tableName\":\"\",\"uniqueIdentifier\":\"\"}',NULL,NULL,NULL,'LEOAP_DT48363','leo1311',NULL,'r',NULL,NULL,'leapmaster','nirmal.sebastian@infosys.com','2024-11-07 05:53:07.900863','app_details',NULL,'','','','',NULL,NULL,NULL,NULL,NULL,'Table View','[]','[]',NULL,NULL,NULL,NULL,NULL,NULL);
 
 </sql>
+
 
 
 <sql dbms="mysql" splitStatements="true" stripComments="true">
@@ -567,9 +577,9 @@ update mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT D
     </changeSet>
 
 	<changeSet dbms="mysql,postgresql,mssql" author="Leap (generated)" id="3v0-cip-012">
-	 <!--sql dbms="mssql">
+	 sql dbms="mssql">
             SET IDENTITY_INSERT mlpipelinenativescriptentity ON;
-         </sql-->
+         </sql>
         <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/300_to_310/acme/cip/mlpipelinenativescriptentity.csv" quotchar="&quot;" separator="," tableName="mlpipelinenativescriptentity">
             <column header="id" name="id" type="NUMERIC"/>
             <column header="cname" name="cname" type="STRING"/>
@@ -577,9 +587,9 @@ update mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT D
             <column header="filescript" name="filescript" type="BLOB"/>
             <column header="organization" name="organization" type="STRING"/>
         </loadData>
-	 <!--sql dbms="mssql">
+	 <sql dbms="mssql">
             SET IDENTITY_INSERT mlpipelinenativescriptentity OFF;
-         </sql-->
+         </sql>
      </changeSet>
 
 	 <changeSet author="Leap (generated)" id="3v00To3v10-cip-013">
@@ -673,9 +683,9 @@ update mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT D
     </changeSet>
     
 	 <changeSet author="Leap (generated)" id="3v00To3v10-cip-010-acme">
-	<!-- <sql dbms="mssql">
+	<sql dbms="mssql">
             SET IDENTITY_INSERT mldataset ON;
-        </sql> -->
+        </sql> 
         <loadUpdateData primaryKey="name,organization" encoding="UTF-8" file="db/changelog/300_to_310/acme/cip/mldataset_cip.csv" quotchar="&quot;" separator="," tableName="mldataset">
             <column header="id" name="id" type="NUMERIC"/>
             <column header="attributes" name="attributes" type="STRING"/>
@@ -707,8 +717,9 @@ update mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT D
 		    <column header="tags" name="tags" type="STRING" />
 		    <column header="interfacetype" name="interfacetype" type="STRING"/>
         </loadUpdateData>
-	<!-- <sql dbms="mssql">
+	 <sql dbms="mssql">
             SET IDENTITY_INSERT mldataset OFF;
-        </sql> -->
+        </sql> 
     </changeSet>
+    -->
 </databaseChangeLog>

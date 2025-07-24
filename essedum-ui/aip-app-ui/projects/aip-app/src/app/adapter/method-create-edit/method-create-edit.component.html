@@ -83,14 +83,21 @@
                         </div>
                       </div>
                       <div style="width: 100%;">
-                        <mat-tab-group (selectedIndexChange)="basicReqTabChange($event)">
-                          <mat-tab class="active lfx-u-header-xl" label="Query Parameters"></mat-tab>
-                          <mat-tab class="lfx-u-header-xl" label="Headers"></mat-tab>
-                          <mat-tab class="lfx-u-header-xl" label="Pre Transform Script"></mat-tab>
-                          <mat-tab class="lfx-u-header-xl" label="Post Transform Script"></mat-tab>
-                          <mat-tab class="lfx-u-header-xl" label="Path Variables"></mat-tab>
-                          <mat-tab class="lfx-u-header-xl" label="Config Variables"></mat-tab>
-                          <mat-tab class="lfx-u-header-xl"
+                        <mat-tab-group id="adapter-method-create-edit-tabs"
+                          (selectedIndexChange)="basicReqTabChange($event)">
+                          <mat-tab class="active lfx-u-header-xl" label="Query Parameters"
+                            data-tab-id="adapter-method-query-params"></mat-tab>
+                          <mat-tab class="lfx-u-header-xl" label="Headers"
+                            data-tab-id="adapter-method-headers"></mat-tab>
+                          <mat-tab class="lfx-u-header-xl" label="Pre Transform Script"
+                            data-tab-id="adapter-method-pre-transform"></mat-tab>
+                          <mat-tab class="lfx-u-header-xl" label="Post Transform Script"
+                            data-tab-id="adapter-method-post-transform"></mat-tab>
+                          <mat-tab class="lfx-u-header-xl" label="Path Variables"
+                            data-tab-id="adapter-method-path-vars"></mat-tab>
+                          <mat-tab class="lfx-u-header-xl" label="Config Variables"
+                            data-tab-id="adapter-method-config-vars"></mat-tab>
+                          <mat-tab class="lfx-u-header-xl" data-tab-id="adapter-method-body"
                             *ngIf="dataset['attributes']['RequestMethod'] && (((dataset['attributes']['RequestMethod']).toLowerCase()==='post') || ((dataset['attributes']['RequestMethod']).toLowerCase()==='put'))"
                             label="Body"></mat-tab>
                         </mat-tab-group>

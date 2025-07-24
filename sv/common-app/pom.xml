@@ -45,10 +45,6 @@
 			<artifactId>comm-lib-util</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.ai</groupId>
-			<artifactId>comm-lib-licval</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.infosys</groupId>
 			<artifactId>iamp-lib-usm</artifactId>
 		</dependency>

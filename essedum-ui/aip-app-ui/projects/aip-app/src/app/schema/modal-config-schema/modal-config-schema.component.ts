@@ -14,19 +14,66 @@ import {
   MAT_DIALOG_DATA,
 } from '@angular/material/dialog';
 import { MatTable } from '@angular/material/table';
-import { FormControl } from '@angular/forms';
-
-import { ModalConfigSchemaEditorComponent } from '../modal-config-schema-editor/modal-config-schema-editor.component';
-// import { SelectItem } from 'primeng/api';
-import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
-import * as _ from 'lodash';
+import { FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Location } from '@angular/common';
+import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
+import { ModalConfigSchemaEditorComponent } from './modal-config-schema-editor/modal-config-schema-editor.component';
+import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.component/confirm-delete-dialog.component';
 import { Services } from '../../services/service';
 import { SchemaRelationshipService } from '../schema-relationship.service';
-import { MessageService } from '../message.service';
 import { SchemaRegistryService } from '../../services/schema-registry.service';
-import { Location } from '@angular/common';
-import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.component/confirm-delete-dialog.component';
+
+// Interfaces
+interface FormTemplate {
+  alias: string;
+  name: string;
+  organization: string;
+  schemaname: string;
+  formtemplate: string;
+  type: string;
+  capability: string;
+  id?: string;
+  templateName?: string;
+  templateTags?: string[];
+}
+
+interface SchemaColumn {
+  columntype: string;
+  columnorder: number;
+  recordcolumnname: string;
+  recordcolumndisplayname: string;
+  isprimarykey: boolean;
+  isunique: boolean;
+  isrequired: boolean;
+  isencrypted: boolean;
+  isvisible: boolean;
+}
+
+interface DropdownOption {
+  value: string;
+  viewValue: string;
+}
+
+interface ComponentData {
+  type: string;
+  key: string;
+  custom?: string;
+  storage?: string;
+  url?: string;
+  options?: string;
+  dataSrc?: string;
+  data?: any;
+  filter?: string;
+  disableLimit?: boolean;
+  limit?: string;
+}
+
+enum TabValues {
+  CONFIGURE = 'Configure',
+  SCHEMA_COLUMNS = 'Schema Columns',
+  SCHEMA_FORM = 'Schema Form',
+}
 
 @Component({
   selector: 'modal-config-schema',
@@ -36,54 +83,55 @@ import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.compon
 export class ModalConfigSchemaComponent
   implements OnInit, OnChanges, AfterViewInit
 {
-  @Input('searchText') searchText;
-  @Input('isGridView') isGridView;
-  schemaJson: any;
-  selectedFormTemplate: any = {
-    alias: '',
-    name: '',
-    organization: sessionStorage.getItem('organization'),
-    schemaname: '',
-    formtemplate: '',
-    type: '',
-    capability: '',
-  };
-  attributes: any;
-  // @Input('directInputs') directInputs;
-  // @Input('indirectInputs') indirectInputs;
-  // @Output('formScriptOutput') formScriptOutput = new EventEmitter<any>();
+  // Constants
+  readonly CARD_TITLE = 'Schema Registry Details';
+  readonly TOOLTIP_POSITION = 'above';
+  readonly DEFAULT_FORM_STRUCTURE = { components: [] };
+  readonly DEFAULT_LIMIT = 100;
+  readonly MAX_LIMIT = 2000;
 
-  constructor(
-    private schemaService: SchemaRegistryService,
-    private messageService: MessageService,
-    private schemaRelService: SchemaRelationshipService,
-    private dialog: MatDialog,
-    @Inject(MAT_DIALOG_DATA) public data: any,
-    public dialogRef: MatDialogRef<ModalConfigSchemaComponent>,
-    private router: Router,
-    private services: Services,
-    private location: Location
-  ) {}
+  // Inputs
+  @Input() searchText: string;
+  @Input() isGridView: boolean;
 
-  schemaAlias: any = '';
-  schemaName: any = '';
-  schemaExists: any;
-  schemaValue: any = {};
-  schemaValueArray: any[] = [];
-  schemaDescription: string;
-  groups: any[] = [];
-  dataSource: any[] = [];
-  display: boolean = false;
-  isBackHovered: boolean = false;
-  isAuth = true;
-  inputColumns = new FormControl();
-  groupsOptions = [];
-  @ViewChild('mytable', { static: false }) columnsTable: MatTable<any>;
+  // ViewChild references
+  @ViewChild('mytable', { static: false }) columnsTable: MatTable<SchemaColumn>;
   @ViewChild('formTable', { static: false }) formTable: MatTable<any>;
   @ViewChild('columnJsonEditor', { static: false })
   columnJsonEditor: JsonEditorComponent;
   @ViewChild('formJsonEditor', { static: false })
   formJsonEditor: JsonEditorComponent;
+
+  schemaJson: any;
+  selectedFormTemplate: FormTemplate = this.createEmptyFormTemplate();
+  attributes: any;
+
+  // Schema properties
+  schemaAlias = '';
+  schemaName = '';
+  schemaExists: any;
+  schemaValue: any = {};
+  schemaValueArray: any[] = [];
+  schemaDescription = '';
+
+  // Data and display
+  groups: any[] = [];
+  dataSource: SchemaColumn[] = [];
+  display = false;
+  isBackHovered = false;
+
+  // Permissions and states
+  isAuth = true;
+  createAuth = false;
+  isRawData = false;
+  isInEdit = false;
+  isInView = false;
+
+  // Form controls and options
+  inputColumns = new FormControl(null, Validators.required);
+  groupsOptions: DropdownOption[] = [];
+
+  // Table configuration
   displayedColumns: string[] = [
     'columnorder',
     'columntype',
@@ -93,557 +141,782 @@ export class ModalConfigSchemaComponent
     'required',
     'primarykey',
     'encrypted',
-  ]; //primarykey
-  isRawData: boolean = false;
-  isInEdit: boolean = false;
-  isInView: boolean = false;
-  // tabValue: string = 'Schema Columns';
-  tabValue: string = 'Configure';
-  // formTabColumns: string[] = ['position', 'type', 'property', 'title', 'widget'];
+  ];
+
+  // Tab and form management
+  tabValue = TabValues.CONFIGURE;
   propertiesList: string[] = [];
   displaynameList: string[] = [];
-  // titleList: SelectItem[] = [];
   formSchemaJson: any = { type: 'object', properties: {} };
-  // formDataSource: any[] = [];
-  schemaForm: any = {};
-  schemaFormCpy: any = {};
+  schemaForm: any = this.DEFAULT_FORM_STRUCTURE;
+  schemaFormCpy: any = this.DEFAULT_FORM_STRUCTURE;
   reqdPropsList: any[] = [];
+
+  // Editor and view states
   editorOptions = new JsonEditorOptions();
-  viewForm: boolean = false;
-  columnJEContents: any[] = [];
+  viewForm = false;
+  columnJEContents: any = [];
   value: any;
   error: string;
-  formTemplateList = [];
-  formTemplateListBackup = [];
-  // originalFormTemplateList:any[] = [];
-  formNameList = [];
-  formListView: boolean = true;
-  formName: string;
-  formDesc: string;
-  updateFlag: boolean = false;
-  createFlag: boolean = false;
+
+  // Template management
+  formTemplateList: FormTemplate[] = [];
+  formTemplateListBackup: FormTemplate[] = [];
+  formNameList: string[] = [];
+  formListView = true;
+  formName = '';
+  formDesc = '';
+  updateFlag = false;
+  createFlag = false;
   templateTags: string[] = [];
-  createAuth: boolean = false;
-  // positionList: any[] = [];
+
+  // Dropdown data
   colsList: any[] = [];
-  types = [];
-  capabilities = [];
-  selectedtype: string = '';
-  selectedCapability: string = '';
-  dropDownVauleCapbility: Map<string, any> = new Map<string, any>();
-  // positionEle:any;
-  // prevPose: any;
-  public form: Object = { components: [] };
-  basicReqTabChange(index: any) {
-    switch (index) {
-      case 0:
-        this.tabValue = 'Configure';
-        break;
-      case 1:
-        this.tabValue = 'Schema Columns';
-        break;
-      case 2:
-        this.tabValue = 'Schema Form';
-        break;
-    }
+  types: DropdownOption[] = [];
+  capabilities: DropdownOption[] = [];
+  selectedtype = '';
+  selectedCapability = '';
+  dropDownValueCapability = new Map<string, any>();
+
+  // Form structure
+  form: Object = this.DEFAULT_FORM_STRUCTURE;
+
+  constructor(
+    private schemaService: SchemaRegistryService,
+    private schemaRelService: SchemaRelationshipService,
+    private dialog: MatDialog,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    public dialogRef: MatDialogRef<ModalConfigSchemaComponent>,
+    private router: Router,
+    private services: Services,
+    private location: Location
+  ) {
+    this.initializeEditorOptions();
   }
-  Authentications() {
-    this.services.getPermission('cip').subscribe((cipAuthority) => {
-      if (cipAuthority.includes('schema-create')) this.createAuth = true;
-      if (cipAuthority.includes('schema-edit')) {
-        this.isAuth = false;
-        this.displayedColumns = [
-          'columnorder',
-          'columntype',
-          'recordcolumnname',
-          'recordcolumndisplayname',
-          'unique',
-          'required',
-          'primarykey',
-          'encrypted',
-          'action',
-          'visible',
-          'action',
-        ];
-        //primarykey
-        // this.formTabColumns = ['position', 'type', 'property', 'title', 'widget', 'action'];
-        this.editorOptions.modes = ['text', 'tree', 'view'];
-      } else {
-        this.editorOptions.mode = 'view';
-      }
+
+  ngOnInit(): void {
+    this.initializeComponent();
+  }
+
+  ngAfterViewInit(): void {
+    // Placeholder for after view init logic
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Handle input changes if needed
+  }
+
+  // Initialization methods
+  private initializeComponent(): void {
+    this.loadAuthentications();
+    this.checkViewMode();
+    this.handleHistoryState();
+    this.handleDataInitialization();
+  }
+
+  private initializeEditorOptions(): void {
+    this.editorOptions.statusBar = true;
+    this.editorOptions.enableSort = false;
+    this.editorOptions.enableTransform = false;
+    this.editorOptions.onChange = () => this.handleEditorChange();
+  }
+
+  private createEmptyFormTemplate(): FormTemplate {
+    return {
+      alias: '',
+      name: '',
+      organization: sessionStorage.getItem('organization') || '',
+      schemaname: '',
+      formtemplate: '',
+      type: '',
+      capability: '',
+    };
+  }
+
+  // Authentication and permissions
+  private loadAuthentications(): void {
+    this.services.getPermission('cip').subscribe({
+      next: (cipAuthority: string[]) => this.handlePermissions(cipAuthority),
+      error: (error) => this.handleError('Failed to load permissions', error),
     });
   }
 
-  ngOnInit() {
-    this.Authentications();
-    if (this.router.url.includes('view')) {
-      this.isInView = true;
+  private handlePermissions(cipAuthority: string[]): void {
+    this.createAuth = cipAuthority.includes('schema-create');
+
+    if (cipAuthority.includes('schema-edit')) {
+      this.isAuth = false;
+      this.displayedColumns = [
+        ...this.displayedColumns,
+        'action',
+        'visible',
+        'action',
+      ];
+      this.editorOptions.modes = ['text', 'tree', 'view'];
+    } else {
+      this.editorOptions.mode = 'view';
     }
-    if (history.state.drop) {
-      let cards = this.location.getState();
-      this.setdropDown(cards['drop']);
+  }
+
+  // Navigation and state management
+  private checkViewMode(): void {
+    this.isInView = this.router.url.includes('view');
+  }
+
+  private handleHistoryState(): void {
+    const state = this.location.getState() as any;
+
+    if (state?.drop) {
+      this.setDropDown(state.drop);
     }
-    if (history.state.card) {
-      let cards = this.location.getState();
-      this.data = cards['card'];
+
+    if (state?.card) {
+      this.data = state.card;
     }
+  }
+
+  private handleDataInitialization(): void {
     try {
-      this.editorOptions.statusBar = true;
-      this.editorOptions.enableSort = false;
-      this.editorOptions.enableTransform = false;
-      this.editorOptions.onChange = () => {
-        if (this.tabValue == 'Schema Form') {
-          let formJEContents = this.formJsonEditor.get();
-          this.schemaForm = formJEContents;
-          // this.rendererObj = formJEContents;
-          // this.schemaForm['properties'] = formJEContents['properties'];
-          // this.schemaForm['required'] = formJEContents['required'];
-        } else if (this.tabValue == 'Schema Columns') {
-          this.setColumnJEContents(this.columnJsonEditor.get());
-        }
-      };
-      // this.loadGroups();
       if (this.data) {
         if (this.data.isAutoExtract) {
-          this.dataSource = Array.isArray(this.data.schemavalue)
-            ? this.data.schemavalue
-            : JSON.parse(this.data.schemavalue);
-          this.schemaValue = this.data.schemavalue;
-        } else {
-          if (!this.router.url.includes('create')) {
-            this.onRowSelect(this.data.name);
-          }
+          this.initializeAutoExtractData();
+        } else if (!this.router.url.includes('create')) {
+          this.onRowSelect(this.data.name);
         }
         this.isInEdit = true;
       }
-      // }
-    } catch (Exception) {
-      // this.messageService.error('Some error occured', 'Error');
-      this.services.message('Some error occured', 'error');
+    } catch (error) {
+      this.handleError('Error during initialization', error);
     }
   }
 
-  ngAfterViewInit() {}
+  private initializeAutoExtractData(): void {
+    this.dataSource = Array.isArray(this.data.schemavalue)
+      ? this.data.schemavalue
+      : JSON.parse(this.data.schemavalue || '[]');
+    this.schemaValue = this.data.schemavalue;
+  }
 
-  navigateBack() {
+  // Tab management
+  basicReqTabChange(index: number): void {
+    const tabMap = {
+      0: TabValues.CONFIGURE,
+      1: TabValues.SCHEMA_COLUMNS,
+      2: TabValues.SCHEMA_FORM,
+    };
+
+    this.tabValue = tabMap[index] || TabValues.CONFIGURE;
+  }
+
+  // Editor change handling
+  private handleEditorChange(): void {
+    switch (this.tabValue) {
+      case TabValues.SCHEMA_FORM:
+        if (this.formJsonEditor) {
+          const formJEContents = this.formJsonEditor.get();
+          this.schemaForm = formJEContents;
+        }
+        break;
+      case TabValues.SCHEMA_COLUMNS:
+        if (this.columnJsonEditor) {
+          this.setColumnJEContents(this.columnJsonEditor.get());
+        }
+        break;
+    }
+  }
+
+  // Navigation methods
+  navigateBack(): void {
     this.location.back();
   }
-  onCancel(from?: string) {
-    if (from == 'form') {
-      // this.formSchemaJson['properties'] = {};
-      // this.formSchemaJson['required'] = [];
-      // this.formDataSource = [];
-      this.formListView = true;
-      this.findByName(this.data.name);
-      this.formTemplateList = this.formTemplateListBackup;
+
+  onCancel(from?: string): void {
+    if (from === 'form') {
+      this.resetFormView();
     } else {
       this.closeDialog();
     }
   }
 
-  onRowSelect(name) {
-    this.findByName(name);
+  private resetFormView(): void {
+    this.formListView = true;
+    this.findByName(this.data.name);
+    this.formTemplateList = [...this.formTemplateListBackup];
   }
 
-  saveFormTemplateChanges() {
-    this.schemaForm = JSON.parse(
-      JSON.stringify(this.schemaForm, (_, nestedValue1) => {
-        nestedValue1?.components?.forEach((nestedValue) => {
-          if (nestedValue && nestedValue['type'] == 'button') {
-            if (
-              !nestedValue['custom'] ||
-              !nestedValue['custom'].includes(
-                'let clickCount' + nestedValue['key']
-              )
-            ) {
-              nestedValue['custom']?.length > 0
-                ? !nestedValue['custom'].endsWith(';')
-                  ? (nestedValue['custom'] += '; ')
-                  : (nestedValue['custom'] += ' ')
-                : (nestedValue['custom'] = '');
-              nestedValue['custom'] +=
-                'let clickCount' +
-                nestedValue['key'] +
-                " = Number(document.getElementById('formio-btnclk-" +
-                nestedValue['key'] +
-                "').innerHTML); document.getElementById('formio-btnclk-" +
-                nestedValue['key'] +
-                "').innerHTML=(clickCount" +
-                nestedValue['key'] +
-                '+1);';
-            }
-          }
-          if (nestedValue && nestedValue['type'] == 'file') {
-            if (
-              nestedValue['storage'] == 'url' &&
-              (!nestedValue['url'] ||
-                nestedValue['url'].replace(/\s/g, '').length == 0)
-            ) {
-              if (nestedValue['options']) {
-                try {
-                  nestedValue['url'] =
-                    window.location.origin +
-                    '/api/aip/datasets/attachmentupload?org=' +
-                    sessionStorage.getItem('organization') +
-                    '&&process=' +
-                    JSON.parse(nestedValue['options']).process;
-                } catch (exception) {
-                  console.log('Error while saving file component ' + exception);
-                }
-              } else {
-                nestedValue['url'] =
-                  window.location.origin +
-                  '/api/aip/datasets/attachmentupload?org=' +
-                  sessionStorage.getItem('organization');
-              }
-            }
-          }
-          if (nestedValue && nestedValue['type'] == 'select') {
-            if (
-              nestedValue.hasOwnProperty('data') &&
-              nestedValue['dataSrc']?.localeCompare('url') == 0 &&
-              !nestedValue['data']['url']
-            ) {
-              var url: String =
-                window.location.origin +
-                '/api/aip/datasets/getDataFromDatasets?org=' +
-                sessionStorage.getItem('organization');
-              var token = true;
+  // Data operations
+  onRowSelect(name: string): void {
+    if (name) {
+      this.findByName(name);
+    }
+  }
 
-              if (
-                nestedValue['data'].hasOwnProperty('headers') &&
-                nestedValue['data']['headers'].length > 0 &&
-                !nestedValue['data']['url']
-              ) {
-                var datasetName: String = '';
-                var api = nestedValue['key'];
-                var tokenIndex;
+  findByName(name: string): void {
+    if (!name) return;
 
-                for (
-                  var i = 0;
-                  i < nestedValue['data']['headers'].length;
-                  i++
-                ) {
-                  if (
-                    nestedValue['data']['headers'][i]['key'].localeCompare(
-                      'datasetName'
-                    ) == 0
-                  ) {
-                    datasetName = nestedValue['data']['headers'][i]['value'];
-                  }
-                  if (
-                    nestedValue['data']['headers'][i]['key'].localeCompare(
-                      'Authorization'
-                    ) == 0
-                  ) {
-                    token = false;
-                    tokenIndex = i;
-                  }
-                }
-                if (token)
-                  nestedValue['data']['headers'].push({
-                    key: 'Authorization',
-                    value: "Bearer {{localStorage['jwtToken']}}",
-                  });
-                else
-                  nestedValue['data']['headers'][tokenIndex] = {
-                    key: 'Authorization',
-                    value: "Bearer {{localStorage['jwtToken']}}",
-                  };
+    this.services.getSchemaByName(name).subscribe({
+      next: (res) => this.handleSchemaResponse(res, name),
+      error: (error) => this.handleError('Could not get the results', error),
+    });
+  }
 
-                if (datasetName) url += '&datasetName=' + datasetName;
+  private handleSchemaResponse(res: any, name: string): void {
+    if (!res) {
+      this.services.message('Could not get the results', 'error');
+      return;
+    }
 
-                if (api) url += '&api=' + api;
+    this.processSchemaData(res);
+    this.loadSchemaForms(name);
+  }
 
-                if (nestedValue['disableLimit'] == true) {
-                  url += '&limit=' + 2000;
-                } else {
-                  if (
-                    !nestedValue['limit'] ||
-                    nestedValue['limit'].replace(/\s/g, '').length == 0
-                  ) {
-                    url += '&limit=' + 100;
-                  }
-                }
+  private processSchemaData(res: any): void {
+    this.colsList =
+      res.schemavalue?.length > 0 ? JSON.parse(res.schemavalue) : [];
+    this.schemaAlias = res.alias;
+    this.schemaDescription = res.description;
+    this.schemaName = res.name;
+    this.schemaValue =
+      res.schemavalue?.length > 0 ? JSON.parse(res.schemavalue) : [];
+    this.dataSource = [...this.schemaValue];
 
-                nestedValue['data']['url'] = url;
-              }
-              if (
-                nestedValue.hasOwnProperty('data') &&
-                nestedValue['dataSrc']?.localeCompare('url') == 0 &&
-                nestedValue['data']['url']
-              ) {
-                nestedValue['url'] =
-                  window.location.origin + nestedValue['url'];
-                nestedValue['data']['headers'].push({
-                  key: 'Authorization',
-                  value: "Bearer {{localStorage['jwtToken']}}",
-                });
-              }
+    this.dataSource.forEach((ele: any) => {
+      if (ele.isvisible === undefined) {
+        ele.isvisible = true;
+      }
+    });
 
-              if (
-                nestedValue.hasOwnProperty('filter') &&
-                nestedValue['filter']
-              ) {
-                var filter = '';
-                var filtersArray = nestedValue['filter'].split(',');
-                for (let i = 0; i < filtersArray.length; i++) {
-                  filter +=
-                    filtersArray[i].trim() +
-                    ':{{data.' +
-                    filtersArray[i].trim() +
-                    '}},';
-                }
-                if (!nestedValue['filter'].includes('searchParams='))
-                  nestedValue['filter'] = 'searchParams=' + filter.slice(0, -1);
-              }
-            }
-          }
+    this.handleTypeAndCapability(res);
+    this.schemaValueArray = res;
+  }
+
+  private handleTypeAndCapability(res: any): void {
+    if (!this.isInView) {
+      this.selectedtype = res.type;
+      this.capabilities =
+        this.dropDownValueCapability.get(this.selectedtype)?.value || [];
+      this.selectedCapability = res.capability;
+    } else {
+      this.types = [{ value: res.type, viewValue: res.type }];
+      this.selectedtype = res.type;
+      this.capabilities = [
+        { value: res.capability, viewValue: res.capability },
+      ];
+      this.selectedCapability = res.capability;
+    }
+  }
+
+  private loadSchemaForms(name: string): void {
+    this.services.getSchemaFormsByName(name).subscribe({
+      next: (resp) => this.handleSchemaFormsResponse(resp, name),
+      error: (error) => this.handleError('Could not get form template', error),
+    });
+  }
+
+  private handleSchemaFormsResponse(resp: FormTemplate[], name: string): void {
+    if (resp && resp.length > 0) {
+      this.form = resp[0].formtemplate;
+      this.schemaForm = resp[0].formtemplate;
+      this.formTemplateList = resp;
+    } else {
+      this.form = { ...this.DEFAULT_FORM_STRUCTURE };
+      this.schemaForm = { ...this.DEFAULT_FORM_STRUCTURE };
+    }
+
+    this.loadGroupsForEntity(name);
+    this.services.message('Fetched Successfully', 'success');
+  }
+
+  private loadGroupsForEntity(name: string): void {
+    this.services.getGroupsForEntity(name).subscribe({
+      next: (res1) => this.handleGroupsResponse(res1),
+      error: (error) => console.error('Error loading groups:', error),
+    });
+  }
+
+  private handleGroupsResponse(res1: any[]): void {
+    const temp: string[] = [];
+    res1.forEach((element) => {
+      const index = this.groups.findIndex((i) => i.name === element.name);
+      if (index !== -1) {
+        temp.push(JSON.stringify(this.groups[index]));
+      }
+    });
+    this.inputColumns.setValue(temp);
+  }
+
+  // Save operations
+  onSave(): void {
+    if (!this.validateSchemaAlias()) return;
+
+    try {
+      const { schemaJson, formJson } = this.prepareDataForSave();
+      this.updateFormTemplateList(formJson);
+      this.normalizeSchemaDescription();
+      this.saveSchema(schemaJson);
+    } catch (error) {
+      this.handleError('Some error occurred', error);
+    }
+  }
+
+  private validateSchemaAlias(): boolean {
+    if (!this.isWordValid(this.schemaAlias)) {
+      this.services.message('Invalid Schema Name', 'error');
+      return false;
+    }
+    return true;
+  }
+
+  private prepareDataForSave(): { schemaJson: any; formJson: any } {
+    let schemaJson = [{}];
+    const formJson = { ...this.schemaForm };
+
+    if (this.isRawData) {
+      const contents = this.getColumnJEContents();
+      if (contents?.length > 0) {
+        this.schemaValue = contents;
+      }
+      schemaJson = this.schemaValue;
+    } else {
+      schemaJson = this.dataSource;
+      formJson.templateName = this.formName;
+      formJson.templateTags = this.templateTags;
+    }
+
+    return { schemaJson, formJson };
+  }
+
+  private updateFormTemplateList(formJson: any): void {
+    if (this.updateFlag) {
+      const index = this.formTemplateList.findIndex(
+        (ele) => this.schemaForm.templateName === ele.templateName
+      );
+      if (index > -1) {
+        this.formTemplateList.splice(index, 1, formJson);
+      }
+    }
+  }
+
+  private normalizeSchemaDescription(): void {
+    if (this.schemaDescription?.trim().length === 0) {
+      this.schemaDescription = null;
+    }
+  }
+
+  private saveSchema(schemaJson: any): void {
+    this.services
+      .updateSchema(
+        this.schemaName,
+        this.schemaAlias,
+        schemaJson,
+        this.schemaDescription,
+        this.formTemplateList,
+        this.selectedtype,
+        this.selectedCapability
+      )
+      .subscribe({
+        next: (res) => this.handleSaveSuccess(res),
+        error: (error) => this.handleError('Could not save the schema', error),
+      });
+  }
+
+  private handleSaveSuccess(res: any): void {
+    this.isInEdit = true;
+    this.schemaName = res?.name;
+    this.colsList =
+      res?.schemavalue?.length > 0 ? JSON.parse(res.schemavalue) : [];
+
+    if (this.inputColumns.value) {
+      this.handleGroupModelEntity(res);
+    }
+
+    this.services.message('Saved Successfully', 'success');
+    this.location.back();
+  }
+
+  private handleGroupModelEntity(res: any): void {
+    const temp: string[] = [];
+    this.inputColumns.value.forEach((element: string) => {
+      temp.push(JSON.parse(element).name);
+    });
+
+    this.schemaService
+      .addGroupModelEntity(res.name, temp, res.organization)
+      .subscribe();
+  }
+
+  // Form operations
+  saveFormTemplateChanges(): void {
+    this.schemaForm = this.processFormComponents(this.schemaForm);
+    this.onFormSave();
+  }
+
+  private processFormComponents(schemaForm: any): any {
+    return JSON.parse(
+      JSON.stringify(schemaForm, (_, nestedValue1) => {
+        nestedValue1?.components?.forEach((component: ComponentData) => {
+          this.processButtonComponent(component);
+          this.processFileComponent(component);
+          this.processSelectComponent(component);
         });
         return nestedValue1;
       })
     );
-
-    this.onFormSave();
   }
 
-  onSave() {
-    try {
-      if (this.isWordValid(this.schemaAlias)) {
-        let schemaJson = [{}];
-        let formJson = Object.assign({}, this.schemaForm);
-        if (this.isRawData === true) {
-          if (this.getColumnJEContents()?.length > 0)
-            this.schemaValue = this.getColumnJEContents();
-          schemaJson = this.schemaValue;
-        } else {
-          schemaJson = this.dataSource;
-          formJson['templateName'] = this.formName;
-          formJson['templateTags'] = this.templateTags;
-        }
-        if (this.updateFlag) {
-          let index = this.formTemplateList.findIndex(
-            (ele) => this.schemaForm.templateName == ele.templateName
-          );
-          if (index > -1) this.formTemplateList.splice(index, 1, formJson);
-        }
-        if (this.schemaDescription?.trim().length == 0)
-          this.schemaDescription = null;
-        this.services
-          .updateSchema(
-            this.schemaName,
-            this.schemaAlias,
-            schemaJson,
-            this.schemaDescription,
-            this.formTemplateList,
-            this.selectedtype,
-            this.selectedCapability
-          )
-          .subscribe(
-            (res) => {
-              const temp = [];
-              this.isInEdit = true;
-              this.schemaName = res?.name;
-              this.colsList =
-                res?.schemavalue?.length > 0 ? JSON.parse(res.schemavalue) : [];
-              if (this.inputColumns.value != null) {
-                this.inputColumns.value.forEach((element) => {
-                  temp.push(JSON.parse(element).name);
-                });
-                this.services.message('Updated Sucessfully', 'success');
-                this.formListView = true;
-                this.location.back();
-                this.schemaService
-                  .addGroupModelEntity(res.name, temp, res.organization)
-                  .subscribe();
-                // this.messageService.info('Saved', 'Saved Sucessfully');
-              }
-              this.services.message('Saved Sucessfully', 'success');
-              this.location.back();
-            },
-            (error) => {
-              this.services.message(
-                'Could not get the results' + error,
-                'error'
-              );
-            }
-          );
-      } else {
-        this.services.message('Invalid Schema Name', 'error');
+  private processButtonComponent(component: ComponentData): void {
+    if (component.type !== 'button') return;
+
+    const clickCountScript = `let clickCount${component.key}`;
+
+    if (!component.custom || !component.custom.includes(clickCountScript)) {
+      component.custom = component.custom || '';
+
+      if (component.custom.length > 0) {
+        component.custom += component.custom.endsWith(';') ? ' ' : '; ';
       }
-    } catch (Exception) {
-      this.services.message('Some error occured', 'error');
+
+      component.custom += this.generateButtonClickScript(component.key);
     }
   }
 
-  onFormSave() {
+  private generateButtonClickScript(key: string): string {
+    return `let clickCount${key} = Number(document.getElementById('formio-btnclk-${key}').innerHTML); document.getElementById('formio-btnclk-${key}').innerHTML=(clickCount${key}+1);`;
+  }
+
+  private processFileComponent(component: ComponentData): void {
+    if (component.type !== 'file' || component.storage !== 'url') return;
+
+    if (!component.url || component.url.replace(/\s/g, '').length === 0) {
+      component.url = this.generateFileUploadUrl(component);
+    }
+  }
+
+  private generateFileUploadUrl(component: ComponentData): string {
+    const baseUrl = `${
+      window.location.origin
+    }/api/aip/datasets/attachmentupload?org=${sessionStorage.getItem(
+      'organization'
+    )}`;
+
+    if (component.options) {
+      try {
+        const process = JSON.parse(component.options).process;
+        return `${baseUrl}&&process=${process}`;
+      } catch (exception) {
+        console.error('Error while saving file component:', exception);
+      }
+    }
+
+    return baseUrl;
+  }
+
+  private processSelectComponent(component: ComponentData): void {
+    if (component.type !== 'select') return;
+
+    if (component.data && component.dataSrc === 'url' && !component.data.url) {
+      this.setupSelectComponentUrl(component);
+    }
+
+    if (component.filter) {
+      this.setupSelectComponentFilter(component);
+    }
+  }
+
+  private setupSelectComponentUrl(component: ComponentData): void {
+    let url = `${
+      window.location.origin
+    }/api/aip/datasets/getDataFromDatasets?org=${sessionStorage.getItem(
+      'organization'
+    )}`;
+
+    this.processSelectHeaders(component, url);
+    this.processSelectLimits(component, url);
+
+    component.data.url = url;
+  }
+
+  private processSelectHeaders(
+    component: ComponentData,
+    baseUrl: string
+  ): string {
+    if (!component.data.headers?.length) return baseUrl;
+
+    let url = baseUrl;
+    let datasetName = '';
+    let token = true;
+    let tokenIndex = -1;
+
+    component.data.headers.forEach((header: any, i: number) => {
+      if (header.key === 'datasetName') {
+        datasetName = header.value;
+      }
+      if (header.key === 'Authorization') {
+        token = false;
+        tokenIndex = i;
+      }
+    });
+
+    // Add or update Authorization header
+    const authHeader = {
+      key: 'Authorization',
+      value: "Bearer {{localStorage['jwtToken']}}",
+    };
+
+    if (token) {
+      component.data.headers.push(authHeader);
+    } else {
+      component.data.headers[tokenIndex] = authHeader;
+    }
+
+    if (datasetName) url += `&datasetName=${datasetName}`;
+    if (component.key) url += `&api=${component.key}`;
+
+    return url;
+  }
+
+  private processSelectLimits(component: ComponentData, url: string): string {
+    if (component.disableLimit) {
+      return `${url}&limit=${this.MAX_LIMIT}`;
+    }
+
+    if (!component.limit || component.limit.replace(/\s/g, '').length === 0) {
+      return `${url}&limit=${this.DEFAULT_LIMIT}`;
+    }
+
+    return url;
+  }
+
+  private setupSelectComponentFilter(component: ComponentData): void {
+    if (!component.filter.includes('searchParams=')) {
+      const filtersArray = component.filter.split(',');
+      const filter = filtersArray
+        .map((f) => `${f.trim()}:{{data.${f.trim()}}}`)
+        .join(',');
+
+      component.filter = `searchParams=${filter}`;
+    }
+  }
+
+  onFormSave(): void {
+    if (!this.validateFormSave()) return;
+
     try {
-      if (
-        (this.selectedFormTemplate.alias == undefined ||
-          this.selectedFormTemplate.alias.length < 1) &&
-        !this.formListView
-      ) {
-        // this.messageService.error('Form name cannot be empty', 'IAMP');
+      this.prepareFormTemplateForSave();
+      this.saveFormTemplate();
+    } catch (error) {
+      this.handleError('Some error occurred', error);
+    }
+  }
+
+  private validateFormSave(): boolean {
+    if (!this.formListView) {
+      if (!this.selectedFormTemplate.alias?.length) {
         this.services.message('Form name cannot be empty - IAMP', 'error');
-      } else if (
-        ((this.formNameList.includes(this.selectedFormTemplate.alias) &&
-          this.updateFlag == false) ||
-          (this.updateFlag == true &&
-            this.selectedFormTemplate.alias != this.schemaForm.templateName &&
-            this.formNameList.includes(this.selectedFormTemplate.alias))) &&
-        !this.formListView
-      ) {
-        // this.messageService.error('Form Name already exist', 'IAMP');
-        this.services.message('Form Name already exist - IAMP', 'error');
-      } else {
-        if (this.isWordValid(this.schemaAlias)) {
-          if (this.schemaDescription?.trim().length == 0)
-            this.schemaDescription = null;
-          this.selectedFormTemplate.schemaname = this.schemaName;
-          this.selectedFormTemplate.formtemplate = JSON.stringify(
-            this.schemaForm
-          );
-          this.selectedFormTemplate.type = this.selectedtype;
-          this.selectedFormTemplate.capability = this.selectedCapability;
+        return false;
+      }
 
-          this.services.saveSchemaForm(this.selectedFormTemplate).subscribe(
-            (resp) => {
-              this.selectedFormTemplate = resp;
-              // this.messageService.info('Saved successfully', 'CIP');
-              this.services.message('Saved successfully -CIP', 'success');
-              if (!this.updateFlag)
-                this.formTemplateList.push(this.selectedFormTemplate);
-              this.formListView = true;
-            },
-            (err) => {
-              // this.messageService.error(err, 'Error');
-              this.services.message(err, 'error');
-            }
+      if (this.isFormNameDuplicate()) {
+        this.services.message('Form Name already exists - IAMP', 'error');
+        return false;
+      }
+    }
+
+    if (!this.isWordValid(this.schemaAlias)) {
+      this.services.message('Invalid Schema Name', 'error');
+      return false;
+    }
+
+    return true;
+  }
+
+  private isFormNameDuplicate(): boolean {
+    const isDuplicateOnCreate =
+      !this.updateFlag &&
+      this.formNameList.includes(this.selectedFormTemplate.alias);
+
+    const isDuplicateOnUpdate =
+      this.updateFlag &&
+      this.selectedFormTemplate.alias !== this.schemaForm.templateName &&
+      this.formNameList.includes(this.selectedFormTemplate.alias);
+
+    return isDuplicateOnCreate || isDuplicateOnUpdate;
+  }
+
+  private prepareFormTemplateForSave(): void {
+    this.normalizeSchemaDescription();
+
+    this.selectedFormTemplate.schemaname = this.schemaName;
+    this.selectedFormTemplate.formtemplate = JSON.stringify(this.schemaForm);
+    this.selectedFormTemplate.type = this.selectedtype;
+    this.selectedFormTemplate.capability = this.selectedCapability;
+  }
+
+  private saveFormTemplate(): void {
+    this.services.saveSchemaForm(this.selectedFormTemplate).subscribe({
+      next: (resp) => this.handleFormSaveSuccess(resp),
+      error: (error) => this.handleError('Failed to save form template', error),
+    });
+  }
+
+  private handleFormSaveSuccess(resp: FormTemplate): void {
+    this.selectedFormTemplate = resp;
+    this.services.message('Saved successfully - CIP', 'success');
+
+    if (!this.updateFlag) {
+      this.formTemplateList.push(this.selectedFormTemplate);
+    }
+
+    this.formListView = true;
+  }
+
+  // Row operations
+  addRowData(rowObj: Partial<SchemaColumn>): void {
+    if (!Array.isArray(this.dataSource)) {
+      this.dataSource = [];
+    }
+
+    const newRow: SchemaColumn = {
+      columntype: rowObj.columntype || '',
+      columnorder: this.dataSource.length + 1,
+      recordcolumnname: rowObj.recordcolumnname || '',
+      recordcolumndisplayname: rowObj.recordcolumndisplayname || '',
+      isprimarykey: Boolean(rowObj.isprimarykey),
+      isunique: Boolean(rowObj.isunique),
+      isrequired: Boolean(rowObj.isrequired),
+      isencrypted: Boolean(rowObj.isencrypted),
+      isvisible: Boolean(rowObj.isvisible),
+    };
+
+    this.dataSource.push(newRow);
+    this.display = true;
+
+    this.columnsTable?.renderRows();
+  }
+
+  updateRowData(rowObj: Partial<SchemaColumn> & { columnorder: number }): void {
+    this.dataSource = this.dataSource.map((item) => {
+      if (item.columnorder === rowObj.columnorder) {
+        return {
+          ...item,
+          columntype: rowObj.columntype || item.columntype,
+          recordcolumnname: rowObj.recordcolumnname || item.recordcolumnname,
+          recordcolumndisplayname:
+            rowObj.recordcolumndisplayname || item.recordcolumndisplayname,
+          isprimarykey: Boolean(rowObj.isprimarykey),
+          isunique: Boolean(rowObj.isunique),
+          isrequired: Boolean(rowObj.isrequired),
+          isencrypted: Boolean(rowObj.isencrypted),
+          isvisible: Boolean(rowObj.isvisible),
+        };
+      }
+      return item;
+    });
+  }
+
+  deleteRowData(rowObj: { columnorder: number }): void {
+    this.dataSource = this.dataSource
+      .filter((item) => item.columnorder !== rowObj.columnorder)
+      .map((item, index) => ({ ...item, columnorder: index + 1 }));
+
+    this.display = this.dataSource.length > 0;
+  }
+
+  // Dialog operations
+  openDialog(action: string, obj: any): void {
+    this.checkSchemaRelationships(obj);
+    this.prepareDialogData(obj);
+    this.openEditorDialog(action, obj);
+  }
+
+  private checkSchemaRelationships(obj: any): void {
+    const org = sessionStorage.getItem('organization');
+    if (!org) return;
+
+    this.schemaRelService.getAllRelationships(org).subscribe({
+      next: (relationships) => this.validateRelationships(relationships, obj),
+      error: (error) => console.error('Error checking relationships:', error),
+    });
+  }
+
+  private validateRelationships(relationships: any[], obj: any): void {
+    relationships.forEach((r) => {
+      const isRelatedSchema =
+        r.schemaA === this.data.name ||
+        r.schemaB === this.data.name ||
+        r.schemaA === this.data.alias ||
+        r.schemaB === this.data.alias;
+
+      if (isRelatedSchema) {
+        const relation = JSON.parse(r.schema_relation);
+        const hasColumnRelation =
+          relation.pCol?.includes(obj.recordcolumnname) ||
+          relation.cCol?.includes(obj.recordcolumnname);
+
+        if (hasColumnRelation) {
+          this.services.message(
+            'This action will cause inconsistent relationship' + r.name,
+            'error'
           );
-        } else {
-          // this.messageService.error('Error', 'Invalid Schema Name');
-          this.services.message('Invalid Schema Name', 'error');
         }
       }
-    } catch (Exception) {
-      // this.messageService.error('Some error occured', 'Error');
-      this.services.message('Some error occured', 'error');
+    });
+  }
+
+  private prepareDialogData(obj: any): void {
+    this.propertiesList = this.dataSource
+      .filter((ele) => ele.recordcolumnname !== obj.recordcolumnname)
+      .map((ele) => ele.recordcolumnname);
+
+    this.displaynameList = this.dataSource
+      .filter(
+        (ele) => ele.recordcolumndisplayname !== obj.recordcolumndisplayname
+      )
+      .map((ele) => ele.recordcolumndisplayname);
+  }
+
+  private openEditorDialog(action: string, obj: any): void {
+    const dialogWidth =
+      this.tabValue === TabValues.SCHEMA_FORM && action !== 'Delete'
+        ? '75vw'
+        : '25vw';
+    const dialogMaxWidth = action === 'Delete' ? '80vw' : '85vw';
+
+    const dialogRef = this.dialog.open(ModalConfigSchemaEditorComponent, {
+      minWidth: dialogWidth,
+      maxWidth: dialogMaxWidth,
+      data: {
+        obj,
+        action,
+        tabValue: this.tabValue,
+        propertiesList: this.propertiesList,
+        displaynameList: this.displaynameList,
+        colsList: this.colsList,
+      },
+    });
+
+    dialogRef
+      .afterClosed()
+      .subscribe((result) => this.handleDialogResult(result));
+  }
+
+  private handleDialogResult(result: any): void {
+    if (!result) return;
+
+    switch (result.event) {
+      case 'Add':
+        this.addRowData(result.data);
+        break;
+      case 'Update':
+        this.updateRowData(result.data);
+        break;
+      case 'Delete':
+        this.deleteRowData(result.data);
+        break;
     }
   }
 
-  findByName(name) {
-    try {
-      this.services.getSchemaByName(name).subscribe(
-        (res) => {
-          if (res) {
-            this.colsList =
-              res.schemavalue?.length > 0 ? JSON.parse(res.schemavalue) : [];
-            this.services.getSchemaFormsByName(name).subscribe(
-              (resp) => {
-                if (resp && resp.length > 0) {
-                  this.form = resp[0].formtemplate;
-                  this.schemaForm = resp[0].formtemplate;
-                } else {
-                  this.form = { components: [] };
-                  this.schemaForm = { components: [] };
-                }
-                this.services.getGroupsForEntity(name).subscribe((res1) => {
-                  const temp = [];
-                  res1.forEach((element) => {
-                    const index = this.groups.findIndex(
-                      (i) => i.name === element.name
-                    );
-                    if (index !== -1) {
-                      temp.push(JSON.stringify(this.groups[index]));
-                    }
-                  });
-                  this.inputColumns.setValue(temp);
-                });
-                this.schemaAlias = res.alias;
-                this.schemaDescription = res.description;
-                this.schemaName = name;
-                this.schemaValue =
-                  res.schemavalue?.length > 0
-                    ? JSON.parse(res.schemavalue)
-                    : [];
-                this.dataSource =
-                  res.schemavalue?.length > 0
-                    ? JSON.parse(res.schemavalue)
-                    : [];
-                this.dataSource.forEach((ele: any) => {
-                  if (ele.isvisible == undefined) ele.isvisible = true;
-                });
-                if (resp) {
-                  this.formTemplateList = resp;
-                }
-                if (!this.isInView) {
-                  this.selectedtype = res.type;
-                  this.capabilities = this.dropDownVauleCapbility.get(
-                    this.selectedtype
-                  )?.value;
-                  this.selectedCapability = res.capability;
-                } else {
-                  this.types = [{ value: res.type, viewValue: res.type }];
-                  this.selectedtype = res.type;
-                  this.capabilities = [
-                    { value: res.capability, viewValue: res.capability },
-                  ];
-                  this.selectedCapability = res.capability;
-                }
-                this.schemaValueArray = res;
-                // this.messageService.info('Fetched', 'Fetched Sucessfully');
-                this.services.message('Fetched Sucessfully', 'success');
-              },
-              (error) => {
-                // this.messageService.error('Could not get form template', error);
-                this.services.message('Could not get form template', 'error');
-              }
-            );
-          } else {
-            // this.messageService.error('Could not get the results', 'CIP');
-            this.services.message('Could not get the results', 'error');
-          }
-        },
-        (error) => {
-          this.services.message('Could not get the results', 'error');
-        }
-      );
-    } catch (Exception) {
-      this.services.message('Some error occured', 'error');
-    }
-  }
-
-  // loadGroups() {
-  //   var length: any = 0;
-  //   this.groupService.getGroupsLength().subscribe(
-  //     (resp) => {
-  //       length = resp;
-  //     },
-  //     (err) => {},
-  //     () => {
-  //       this.services.getSchemaGroups(0, length).subscribe((res) => {
-  //         let data = res;
-  //         data.forEach((res) => {
-  //           let val = { viewValue: res.alias, value: res.alias };
-  //           this.groupsOptions.push(val);
-  //           // this.groups = res;
-  //         });
-  //       });
-  //     }
-  //   );
-  // }
-
-  selectedz(data) {
-    try {
-      console.log(data);
-      return JSON.stringify(data);
-    } catch (Exception) {
-      // this.messageService.error('Some error occured', 'Error');
-      this.services.message('Some error occured', 'error');
-    }
-  }
-
-  closeDialog() {
+  closeDialog(): void {
     this.dialogRef.close({
       data: {
         schema: this.schemaValue,
@@ -652,322 +925,122 @@ export class ModalConfigSchemaComponent
     });
   }
 
-  openDialog(action, obj) {
-    let org = sessionStorage.getItem('organization');
-    this.schemaRelService.getAllRelationships(org).subscribe((resp) => {
-      let relts = resp;
-      relts.forEach((r) => {
-        if (
-          r.schemaA == this.data.name ||
-          r.schemaB == this.data.name ||
-          r.schemaA == this.data.alias ||
-          r.schemaB == this.data.alias
-        ) {
-          let relation = JSON.parse(r.schema_relation);
-          if (
-            relation['pCol'].includes(obj.recordcolumnname) ||
-            relation['cCol'].includes(obj.recordcolumnname)
-          ) {
-            this.messageService.error(
-              'This action will cause inconsistent relationsip',
-              r.name
-            );
-          }
-        }
-      });
-    });
+  // Form template operations
+  getFormTemplate(template: FormTemplate): void {
+    if (this.router.url.includes('view')) return;
 
-    this.propertiesList = [];
-    this.displaynameList = [];
-    let propsList: string[] = Object.keys(this.formSchemaJson.properties);
-    const dialogRef = this.dialog.open(ModalConfigSchemaEditorComponent, {
-      minWidth:
-        this.tabValue == 'Schema Form' && action != 'Delete' ? '75vw' : '25vw',
-      maxWidth: action == 'Delete' ? '80vw' : '25vw',
-      data: {
-        obj: obj,
-        action: action,
-        tabValue: this.tabValue,
-        propertiesList: this.propertiesList,
-        displaynameList: this.displaynameList,
-        // titleList: this.titleList,
-        // positionList: poseList,
-        colsList: this.colsList,
-        // message:message
-      },
-    });
+    this.selectedFormTemplate = template;
+    this.updateFlag = true;
+
+    const group = { ...JSON.parse(template.formtemplate) };
+    this.form = { ...group };
+    this.schemaForm = { ...group };
+
+    if (this.isRawData) {
+      this.schemaFormCpy = { ...this.schemaForm };
+    }
+
+    this.formName = group.templateName;
+    this.templateTags = group.templateTags || [];
+    this.formListView = false;
+
+    this.updateFormNameList();
+    this.formTemplateListBackup = [...this.formTemplateList];
+  }
+
+  private updateFormNameList(): void {
+    this.formNameList = this.formTemplateList
+      .filter((data) => this.formName !== data.templateName)
+      .map((data) => data.templateName);
+  }
+
+  createForm(): void {
+    this.selectedFormTemplate = this.createEmptyFormTemplate();
+    this.resetFormCreation();
+  }
+
+  private resetFormCreation(): void {
+    this.updateFlag = false;
+    this.formListView = false;
+    this.formName = '';
+    this.templateTags = [];
+    this.createFlag = true;
+
+    this.formNameList = this.formTemplateList.map((data) => data.templateName);
+    this.form = { ...this.DEFAULT_FORM_STRUCTURE };
+    this.schemaForm = { ...this.DEFAULT_FORM_STRUCTURE };
+  }
+
+  delete(template: FormTemplate): void {
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
+
     dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        let poseVal;
-        if (result && result.data && result.data.details)
-          poseVal = result.data.details.position;
-
-        if (result.event === 'Add') {
-          // if(this.positionList.find(val=>val==poseVal)){
-
-          // }
-          // else{
-          //   this.positionList.push(poseVal);
-          // }
-          this.addRowData(result.data);
-        } else if (result.event === 'Update') {
-          // let poseValList=this.positionList;
-          // if(this.positionList.find(val=>val==poseVal)){
-          //   if(this.prevPose){
-          //     poseValList=this.positionList.filter(val=>val!=this.prevPose);
-          //   }
-
-          // }
-          // else{
-          //   poseValList=this.positionList.filter(val=>val!=this.prevPose);
-          //   poseValList.push(poseVal);
-          // }
-          // this.positionList=poseValList;
-          this.updateRowData(result.data); //, oldObjProperty, oldObjIndex
-        } else if (result.event === 'Delete') {
-          // let poseValList=this.positionList;
-          // if(this.positionList.find(val=>val==poseVal)){
-          //   if(this.prevPose){
-          //     poseValList=this.positionList.filter(val=>val!=this.prevPose);
-          //   }
-
-          // }
-          // this.positionList=poseValList;
-          this.deleteRowData(result.data);
-        } else {
-          // this.positionList.push(this.prevPose);
-        }
+      if (result === 'delete') {
+        this.deleteFormTemplate(template);
       }
     });
-    this.dataSource.forEach((ele) => {
-      if (obj.recordcolumnname != ele.recordcolumnname)
-        this.propertiesList.push(ele.recordcolumnname);
-    });
-    this.dataSource.forEach((ele) => {
-      if (obj.recordcolumndisplayname != ele.recordcolumndisplayname)
-        this.displaynameList.push(ele.recordcolumndisplayname);
-    });
   }
 
-  addRowData(row_obj) {
-    if (!Array.isArray(this.dataSource)) {
-      this.dataSource = [];
-    }
-    if (!this.display) {
-      this.display = true;
-    }
-    // if(this.tabValue == "Schema Form"){
-    //   this.updateObj(row_obj);
-    //   let obj = this.formatTableObjects([row_obj.property,row_obj.details]);
-    //   this.formDataSource.push(obj);
-    //   // this.formSchemaJson[row_obj.property] = row_obj.details;
-    //   this.refreshTableData();
-    //   // this.formScriptOutput.emit(this.formSchemaJson);
-    // }
-    // else{
-    this.dataSource.push({
-      columntype: row_obj.columntype,
-      columnorder: this.dataSource.length + 1,
-      recordcolumnname: row_obj.recordcolumnname,
-      recordcolumndisplayname: row_obj.recordcolumndisplayname,
-      isprimarykey: row_obj.isprimarykey ? true : false,
-      // isautoincrement: row_obj.isautoincrement?true:false,
-      isunique: row_obj.isunique ? true : false,
-      isrequired: row_obj.isrequired ? true : false,
-      isencrypted: row_obj.isencrypted ? true : false,
-      isvisible: row_obj.isvisible ? true : false,
-    });
-    if (this.columnsTable) this.columnsTable.renderRows();
-  }
+  private deleteFormTemplate(template: FormTemplate): void {
+    if (!template.id) return;
 
-  updateRowData(row_obj) {
-    this.dataSource = this.dataSource.filter((value, key) => {
-      if (value.columnorder === row_obj.columnorder) {
-        value.columntype = row_obj.columntype;
-        value.recordcolumnname = row_obj.recordcolumnname;
-        value.recordcolumndisplayname = row_obj.recordcolumndisplayname;
-        value.isprimarykey = row_obj.isprimarykey ? true : false;
-        // value.isautoincrement = row_obj.isautoincrement?true:false;
-        value.isunique = row_obj.isunique ? true : false;
-        value.isrequired = row_obj.isrequired ? true : false;
-        value.isencrypted = row_obj.isencrypted ? true : false;
-        value.isvisible = row_obj.isvisible ? true : false;
-      }
-      return true;
+    this.services.deleteFormTemplate(template.id).subscribe({
+      next: () => {
+        this.services.message('Deleted Successfully - CIP', 'success');
+        this.ngOnInit();
+      },
+      error: (error) => this.handleError('Error in Deleting Schema', error),
     });
   }
 
-  deleteRowData(row_obj) {
-    let count = 1;
-    this.dataSource = this.dataSource.filter((value, key) => {
-      return value.columnorder !== row_obj.columnorder;
-    });
-    if (this.dataSource.length !== 0) {
-      this.dataSource.forEach((element) => {
-        element.columnorder = count;
-        count += 1;
-      });
-    } else {
-      this.display = false;
-    }
-    // }
-  }
-
-  omit_special_char(event) {
-    var k = event.charCode;
-    return this.isValidLetter(k);
-  }
-
-  isValidLetter(k) {
-    return (
-      (k >= 65 && k <= 90) ||
-      (k >= 97 && k <= 122) ||
-      (k >= 48 && k <= 57) ||
-      [8, 9, 13, 16, 17, 20, 95].indexOf(k) > -1
-    );
-  }
-
-  isWordValid(word) {
-    word = word.toString();
-    return true;
-  }
-
-  toggleView(isRaw?: boolean) {
+  // Utility methods
+  toggleView(isRaw?: boolean): void {
     if (typeof isRaw === 'boolean') {
       this.isRawData = isRaw;
     } else {
       this.isRawData = !this.isRawData;
     }
 
-    if (this.tabValue === 'Schema Form') {
-      if (this.isRawData) {
-        this.form = { ...this.schemaForm };
-      } else {
-        this.schemaFormCpy = { ...this.schemaForm };
-      }
-      this.ngAfterViewInit();
-      return;
-    }
-
-    if (this.tabValue === 'Schema Columns') {
-      if (this.isRawData) {
-        const value = this.getColumnJEContents();
-        if (value && value.length > 0) {
-          this.dataSource = value;
-          this.schemaValue = value;
-        } else {
-          this.dataSource = this.schemaValue;
-        }
-      } else {
-        this.schemaValue = this.dataSource;
-      }
-      this.ngAfterViewInit();
-      return;
-    }
-
-    // For other tab values, just refresh the view
+    this.handleToggleView();
     this.ngAfterViewInit();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {}
-  openFormView(content: any) {
-    this.viewForm = true;
-    this.dialog.open(content, {
-      width: '830px',
-      panelClass: 'wide-dialog',
-    });
-  }
+  private handleToggleView(): void {
+    switch (this.tabValue) {
+      case TabValues.SCHEMA_FORM:
+        if (this.isRawData) {
+          this.form = { ...this.schemaForm };
+        } else {
+          this.schemaFormCpy = { ...this.schemaForm };
+        }
+        break;
 
-  closeFormView() {
-    this.viewForm = false;
-    this.dialogRef.close('close the modal');
-  }
-
-  setColumnJEContents(columnJEContents) {
-    this.columnJEContents = columnJEContents;
-  }
-
-  getColumnJEContents() {
-    return this.columnJEContents;
-  }
-  getFormTemplate(template) {
-    if (!this.router.url.includes('view')) {
-      this.selectedFormTemplate = template;
-      this.updateFlag = true;
-      let group = Object.assign({}, JSON.parse(template.formtemplate));
-      // this.positionEle= group["properties"];
-
-      //     for (let pose in this.positionEle){
-
-      //       this.positionList.push(this.positionEle[pose].position);
-      // }
-      this.form = Object.assign({}, group);
-      this.schemaForm = Object.assign({}, group);
-      if (this.isRawData)
-        this.schemaFormCpy = Object.assign({}, this.schemaForm);
-      this.formName = group.templateName;
-      this.templateTags = group.templateTags;
-      this.formListView = false;
-      this.formNameList = [];
-      this.formTemplateList.forEach((data) => {
-        if (this.formName != data.templateName)
-          this.formNameList.push(data.templateName);
-      });
-      this.formTemplateListBackup = this.formTemplateList;
+      case TabValues.SCHEMA_COLUMNS:
+        if (this.isRawData) {
+          const value = this.getColumnJEContents();
+          if (value?.length > 0) {
+            this.dataSource = value;
+            this.schemaValue = value;
+          } else {
+            this.dataSource = this.schemaValue;
+          }
+        } else {
+          this.schemaValue = this.dataSource;
+        }
+        break;
     }
   }
 
-  createForm() {
-    this.selectedFormTemplate = {
-      name: '',
-      organization: sessionStorage.getItem('organization'),
-      schemaname: '',
-      formtemplate: '',
-    };
-    this.updateFlag = false;
-    this.formListView = false;
-    // this.formDataSource = [];
-    this.formName = '';
-    this.templateTags = [];
-    // this.formSchemaJson['properties'] = {};
-    // this.formSchemaJson['required'] = [];
-    // this.positionList = [];
-    this.createFlag = true;
-    this.formNameList = [];
-    this.formTemplateList.forEach((data) => {
-      // if(this.formName!=data.templateName)
-      this.formNameList.push(data.templateName);
-    });
-    this.form = { components: [] };
-    this.schemaForm = { components: [] };
-  }
-  delete(template) {
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result === 'delete') {
-        this.services.deleteFormTemplate(template.id).subscribe(
-          (resp) => {
-            // this.messageService.info('Deleted Successfully', 'CIP');
-            this.services.message('Deleted Successfully -CIP', 'success');
-            this.ngOnInit();
-          },
-          (error) => {
-            this.services.message('Error in Deleting Schema' + error, 'error');
-          }
-        );
-      }
-    });
+  checkUniqueIdColumn(): boolean {
+    if (!this.dataSource?.length) return false;
+
+    return this.dataSource.some((row) => row.recordcolumnname === 'uniqueId');
   }
 
-  onChange(event) {
-    this.schemaForm = event.form;
-  }
-
-  navigateToSchema() {
+  navigateToSchema(): void {
     if (this.checkUniqueIdColumn()) {
-      // this.closeDialog();
       this.router.navigateByUrl(
-        '/landing/iamp-graph/main/schema/' + this.schemaAlias
+        `/landing/iamp-graph/main/schema/${this.schemaAlias}`
       );
     } else {
       this.services.message(
@@ -977,30 +1050,123 @@ export class ModalConfigSchemaComponent
     }
   }
 
-  checkUniqueIdColumn() {
-    let uniqueIdFlag = false;
-    if (this.dataSource?.length <= 0) return false;
-    this.dataSource?.forEach((row) => {
-      if (row.recordcolumnname === 'uniqueId') {
-        uniqueIdFlag = true;
-      }
-    });
-    return uniqueIdFlag;
+  // Validation methods
+  omit_special_char(event: KeyboardEvent): boolean {
+    return this.isValidLetter(event.charCode);
   }
 
-  setdropDown(data: any) {
-    this.types = data.types;
-    this.dropDownVauleCapbility = data.capabilities;
-  }
-
-  onSelectionType(event: any) {
-    console.log(
-      'values to be shown ',
-      this.dropDownVauleCapbility.get(event).value,
-      this.dropDownVauleCapbility.get(event).default
+  isValidLetter(charCode: number): boolean {
+    return (
+      (charCode >= 65 && charCode <= 90) || // A-Z
+      (charCode >= 97 && charCode <= 122) || // a-z
+      (charCode >= 48 && charCode <= 57) || // 0-9
+      [8, 9, 13, 16, 17, 20, 95].includes(charCode) // Special keys
     );
-    this.selectedCapability = this.dropDownVauleCapbility.get(event)
-      .default as string;
-    this.capabilities = this.dropDownVauleCapbility.get(event).value;
+  }
+
+  isWordValid(word: string): boolean {
+    // Add proper validation logic here
+    return Boolean(word?.toString().trim());
+  }
+
+  // Dropdown operations
+  setDropDown(data: any): void {
+    this.types = data.types || [];
+    this.dropDownValueCapability = data.capabilities || new Map();
+  }
+
+  onSelectionType(event: string): void {
+    const capabilityData = this.dropDownValueCapability.get(event);
+
+    if (capabilityData) {
+      this.selectedCapability = capabilityData.default;
+      this.capabilities = capabilityData.value || [];
+    }
+  }
+
+  // JSON Editor operations
+  setColumnJEContents(contents: any): void {
+    this.columnJEContents = contents;
+  }
+
+  getColumnJEContents(): any {
+    return this.columnJEContents;
+  }
+
+  // Form view operations
+  openFormView(content: any): void {
+    this.viewForm = true;
+    this.dialog.open(content, {
+      width: '830px',
+      panelClass: 'wide-dialog',
+    });
+  }
+
+  closeFormView(): void {
+    this.viewForm = false;
+    this.dialogRef.close('close the modal');
+  }
+
+  // Event handlers
+  onChange(event: any): void {
+    if (event?.form) {
+      this.schemaForm = event.form;
+    }
+  }
+
+  onSearch(event: any): void {
+    // Implement search functionality
+  }
+
+  onRefresh(): void {
+    // Implement refresh functionality
+  }
+
+  get isValidSchemaAlias(): boolean {
+    return this.schemaAlias && this.schemaAlias.length > 3;
+  }
+
+  get isValidSchemaForForm(): boolean {
+    return (
+      this.schemaName &&
+      this.schemaName.trim() !== '' &&
+      this.schemaName !== 'new' &&
+      this.isInEdit
+    );
+  }
+
+  get canAddRows(): boolean {
+    return !this.isInView && !this.isAuth;
+  }
+
+  get hasDataSource(): boolean {
+    return this.dataSource && this.dataSource.length > 0;
+  }
+
+  get canCreateForm(): boolean {
+    return this.formListView && !this.isAuth && !this.isInView;
+  }
+
+  trackByColumnOrder(index: number, item: any): any {
+    return item.columnorder || index;
+  }
+
+  trackByFormAlias(index: number, item: any): any {
+    return item.alias || index;
+  }
+
+  selectedz(data: any): string {
+    try {
+      return JSON.stringify(data);
+    } catch (error) {
+      this.handleError('Error serializing data', error);
+      return '';
+    }
+  }
+
+  // Error handling
+  private handleError(message: string, error?: any): void {
+    console.error(message, error);
+    this.services.message(message, 'error');
   }
 }

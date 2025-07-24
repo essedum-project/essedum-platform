@@ -1,546 +1,720 @@
-
 <div class="selector-3-1">
-    <mat-drawer-container style="overflow: hidden;" class="example-container bgcolor2 selector-3-2 " autosize="">
-        <mat-drawer #drawerLeft="" class="example-sidenav selector-3-3 "
-            [ngStyle]="{'background-color':bgColorType==2?'#8626C3':'var(--header-color)'}" mode="side"
-            style="padding:0;width:14%">
-            <app-sidebar *ngIf="navhide && selectedrole.name==currentrole" [alerts]="totalTicket"
-                class="selector-3-4"></app-sidebar>
-        </mat-drawer>
-        <div class="parent-div selector-3-5">
-            <div class="fChild selector-3-6"
-                style="background-color:#0094ff; height: headerHeight">
-                <div style="display: flex; justify-content: space-between; flex-direction: row-reverse; z-index: 5; align-items: center;"
-                    class="headericonsMobile selector-3-7 lfx-u-mar-l-16">
-                    <span *ngIf="showPortfolioHeader" style="padding-top:15px;padding-left: 10px;color: white;">
-                        {{portfolioName?.portfolioName}} - {{projectvalue?.name}}</span>
-                    <img id="clientimage" *ngIf="isimg!=null" src="{{projectimg}}"
-                        (click)="homeToDash();removeFilters();clearonlanding()"
-                        style="margin-left:1vh;width: auto" class=" mobileHeaderImg selector-3-8" alt="" [ngStyle]="{'height': headerHeight}">
-                    <span id="clientimage" class="mobileHeaderImg selector-3-9"
-                        style="display: flex; justify-content: center; align-items: center;">
-                    </span>
-          
-                    <img id="clientimage" *ngIf="!isimg" src="assets/images/LFN-Essedum-colour.svg" 
-                    style="margin-left:1vh;width: 234px; height: 40px;" (click)="homeToDash();removeFilters();clearonlanding()" class=" mobileHeaderImg selector-3-8" alt="" 
-                    [ngStyle]="{'height': headerHeight}">
-                 
-
-                    <button *ngIf="sidebar && selectedrole.name==currentrole && showSidebarMenu" mat-icon-button=""
-                        (click)="toggleLeft()" style="margin-top: 1vh" class="selector-3-15">
-                        <i class="fa fa-bars selector-3-16" [ngStyle]="{'color':headericoncolor}"></i>
-                    </button>
-                    <button class="sidebarBtn sidebarBigScreen selector-3-17"
-                        *ngIf="sidebar && selectedrole.name!=currentrole && showSidebarMenu" mat-icon-button="" [ngStyle]="{'height': headerHeight, 'width': headerHeight}" style="padding: 0; display: flex; align-items: center; justify-content: center;"
-                        (click)="isexpaned()"
-                        id="sidebarexpand">
-                        <i *ngIf="!isExpanded" id="sidebarexpandicon" class="fa fa-th" aria-hidden="true"
-                           [ngStyle]="{'color': headericoncolor, 'font-size': sideMenuIconSize, 'width': sideMenuIconSize, 'height': sideMenuIconSize}"></i>
-                        <i *ngIf="isExpanded" id="sidebarexpandicon" class="fa fa-th" aria-hidden="true"
-                           [ngStyle]="{'color': headericoncolor, 'font-size': sideMenuIconSize, 'width': sideMenuIconSize, 'height': sideMenuIconSize}"></i>
-                    </button>
-
-                 
-
-                </div>
-                <div class="example-container selector-3-19" *ngIf="sidebar && selectedrole.name!=currentrole">
-                    <mat-sidenav-container class="example-sidenav-container selector-3-20 " autosize="" [ngStyle]="{'margin-top': headerHeight}">
-        
-                        <mat-sidenav
-                            *ngIf="(showSidebarMenu && !isExpanded) ||(iconsidebarrole==selectedrole.name &&showSidebarMenu)"
-                            #sidenav="" class="width parentsidenav selector-3-21"
-                            [ngStyle]="{'max-width':sidebarmaxwidth}" mode="side" opened="true"
-                            style="overflow-x:hidden; height: 100%;"
-                            [ngClass]="{'enableSidebarShadow':enableSidebarShadow==true,'sidebarbgcolor':sidebarbgcolor== true,'sidebarbgcolordefault':sidebarbgcolor!=true,'sidebartextcolordefault':sidebartextcolor!= true}">
-
-
-                            <mat-nav-list class="dashboard sidebarlineheight"
-                                style="display: flex; flex-direction: column; overflow-x: hidden; padding-top: 1.3vh; height: inherit; align-items: center;">
-                                <div class="a-height sidebar-item-container"
-                                    [class.sidebar-border]="item.label == highlightedLabel && sidebarhighlightcolor!=true"
-                                    [class.sidebar-borderconfig]="item.label == highlightedLabel && sidebarhighlightcolor==true"
-                                    [ngClass]="{'sidebarhovercolor':sidebarhovercolor==true}"
-                                    [ngStyle]="{'margin-top':i!=0?sidebarItemMarginTop:'','width':iconsidebarrole!=selectedrole.name ? (sidebarWidth):'','height':iconsidebarrole==selectedrole.name ? (sidebarMenuHeight):''}"
-                                    [class.iconsidebarheight]="iconsidebarrole==selectedrole.name"
-                                    *ngFor="let item of sidebarMenu;let i= index"
-                                    (click)="toggleActive($event,item.label);(item.children && item.children.length) ? showTabs(item) : viewtabsonload()"
-                                    [routerLink]="item.url">
-                                    <div class="" [matTooltip]="item.altText? item.altText: item.label"
-                                        matTooltipClass="widgettitletooltip" [class.collapsed]="!isExpanded"
-                                        [class.griddirection]="iconsidebarrole==selectedrole.name"
-                                        [ngStyle]="{'border-left-width':(item.label == highlightedLabel && sidebarhighlightcolor!=true)? (sidebarBorderWidth):'','width':'-webkit-fill-available'}">
-                                        <div class="sidebar-itemIcon"
-                                            style="    width: fit-content;
-                                                                                                    text-align: -webkit-center;"
-                                            [class.iconmapping]="iconsidebarrole==selectedrole.name"
-                                            [ngStyle]="{'margin-left':(iconsidebarrole==selectedrole.name)? (iconSideBarMarginLeft):'','margin-right':(iconsidebarrole==selectedrole.name)? (iconSideBarMarginRight):''}">
-                                            <div id="svgid"
-                                                [ngStyle]="{'height':sideMenuIconSize,'width':sideMenuIconSize}"
-                                                *ngIf="item.icon && item.icon.endsWith('.svg')"
-                                                [ngClass]="{'sidebar-svg-iconcolor':sidebartextcolor== true,'sidebar-svg-iconcolordefault':sidebartextcolor!= true,'sidebartexticonhovercolor':sidebartexticonhovercolor}"
-                                                [inlineSVG]="item.icon">{{item.icon}}
-                                            </div>
-                                            <img id="imgid" class="sidebar-itemImg" alt="No image"
-                                                *ngIf="item.icon && item.icon.startsWith('assets/icons/') && !item.icon.endsWith('.svg')"
-                                                [src]="item.icon" />
-                                            <img id="imgid"
-                                                [ngStyle]="{'font-size': sideMenuIconSize,'height':sideMenuIconSize,'width':sideMenuIconSize}"
-                                                class="sidebar-itemImg"
-                                                *ngIf="item.icon && item.icon.includes('data:image/svg')"
-                                                [ngClass]="{'sidebar-svg-iconcolor':sidebartextcolor== true,'sidebar-svg-iconcolordefault':sidebartextcolor!= true}"
-                                                [src]="cleanSVG(item.icon)" alt=""/>
-                                            <img id="imgid"
-                                                [ngStyle]="{'font-size': sideMenuIconSize,'height':sideMenuIconSize,'width':sideMenuIconSize}"
-                                                class="sidebar-itemImg"
-                                                *ngIf="item.icon && (item.icon.includes('data:image/png')||item.icon.includes('data:image/jpg')||item.icon.includes('data:image/jpeg'))"
-                                                [src]="item.icon" alt=""/>
-                                            <i *ngIf="item.icon && !item.icon.startsWith('assets/icons/') && !item.icon.startsWith('fa-') && !item.icon.startsWith('icon')"
-                                                class="fa fa-{{item.icon}} fa-2x"
-                                                [ngStyle]="{'font-size': sideMenuIconSize,'height':sideMenuIconSize,'width':sideMenuIconSize}"
-                                                [ngClass]="{'sidebariconcolor':sidebariconcolor,'sidebartexticonhovercolor':sidebartexticonhovercolor}"></i>
-                                            <i *ngIf="item.icon && !item.icon.startsWith('assets/icons/') && !item.icon.endsWith('.svg') && item.icon.includes('icon')"
-                                                class="icon fa-2x {{item.icon}}"
-                                                [ngStyle]="{'font-size': sideMenuIconSize}"
-                                                [ngClass]="{'sidebariconcolor':sidebariconcolor,'sidebartexticonhovercolor':sidebartexticonhovercolor}"></i>
-                                            <i *ngIf="!item.icon" class="fa fa-folder fa-2x"
-                                                [ngClass]="{'sidebariconcolor':sidebariconcolor}"></i>
-                                            <div [ngStyle]="{'font-size':sidebarMenuTextSize,'line-height': sidebarTextLineHeight,'width':iconsidebarrole!=selectedrole.name ? (sidebarWidth):'','padding-right':(iconsidebarrole==selectedrole.name)? (iconSideBarMarginLeft):'','padding-left':(iconsidebarrole==selectedrole.name)? (iconsidebarpadding):''}"
-                                                style="margin:unset"
-                                                [class.outlooksidebarfontsize]="iconsidebarrole==selectedrole.name"
-                                                *ngIf="!(iconsidebarrole==selectedrole.name && !isExpanded)"
-                                                [ngClass]="{'sidebar-item-full-text' : show_sidebar_full_text==true, 'sidebar-item-text' : show_sidebar_full_text!=true, 'sidebartextcolor':sidebartextcolor== true,'sidebartextcolordefault':sidebartextcolor!= true,'sidebartexticonhovercolor':sidebartexticonhovercolor}"
-                                                [class.collapsed]="!isExpanded">{{item.label}}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </mat-nav-list>
-                            <!-- </leds-navigation-list> -->
-
-                        </mat-sidenav>
-                        <mat-sidenav-content class="selector-3-47" id="containerDivForScroll">
-                            <ng-container *ngIf="loadingRouteConfig" class="selector-3-48">
-                                <div style="font-size: 5vmin; margin-left: 100vh;margin-top: 45vh"
-                                    class="selector-3-49">
-                                    Loading
-                                    <div class="spinner-border selector-3-50" style="color:#0094ff"></div>
-                                </div>
-                            </ng-container>
-                            <div *ngIf="!loadingRouteConfig" id="bcc-dashboard-content" class="selector-3-51">
-                       <div *ngIf="displayDialog">
-                                    <p-dialog header="Declaration" [modal]="true"
-                                        [style]="{'height':'80vh','width':'90vw'}" [(visible)]="displayDialog"
-                                        [closable]="false">
-                                        <div id="sample"></div>
-                                        <br>
-                                        <label style="font-size: 15px; line-height: 1.3px;">
-                                            <input type="checkbox" [(ngModel)]="isCheckboxChecked">
-                                            I agree to the terms and conditions as set out by the user agreement.
-                                        </label>
-                                        <br><br>
-                                        <div class="d-flex justify-content-center">
-                                            <button type="submit" (click)="submitDeclaration()"
-                                                [disabled]="!isCheckboxChecked" class="btn btn-primary"
-                                                style="background-color: var(--base-color); color:white;">Submit</button>
-                                            <button type="submit" (click)="logout()" class="btn btn-primary ml-4"
-                                                style="background-color: var(--base-color); color:white;">Cancel</button>
-                                        </div>
-                                    </p-dialog>
-                                </div>
-                                <div id="tabsContainer overlay"
-                                    style="background-color: var(--bg-color);display: unset;"
-                                    class="tabsContainer selector-3-52" *ngIf="tabs.length>0">
-                                    <div *ngIf="!hidesidebar" style="display:flex;" class="selector-3-171"
-                                        [ngClass]="{'sidebarbgcolor':sidebarbgcolor== true, 'sidebarbgcolordefault':sidebarbgcolor!=true,'sidebartextcolor':sidebartextcolor== true,'sidebartextcolordefault':sidebartextcolor!= true}">
-                                        <div class="selector-3-53" style="margin-right:5px">
-                                            <!-- <button >Left</button> -->
-                                            <i *ngIf="!hideTabLeftBtn"
-                                                [ngClass]="sidebartextcolor?'sidebartextcolor':'sidebartextdefault'"
-                                                style="padding-top: 10px;padding-left: 10px;" (click)="clickOnLeftBtn()"
-                                                class="fa fa-angle-double-left selector-3-54" aria-hidden="true"></i>
-
-                                        </div>
-                                        <div #tabsBox id="tabsBox" class="tabsBox selector-3-55"
-                                            style="width: 95%;height: 25px;">
-                                            <span *ngFor="let item of tabs; let tabIndex=index" class="selector-3-56">
-                                                <div class="selector-3-172"
-                                                    [ngClass]="{'highlight':sidebarhovercolor!= true, 'sidebarhovercolor':sidebarhovercolor==true}">
-                                                    <!-- Handle branch node buttons here -->
-                                                    <span *ngIf="item.children && item.children.length > 0"
-                                                        class="childsidebarText selector-3-57"
-                                                        style="display: flex;height: 17px;margin-top: 5px; margin-right: 2vmin">
-                                                        <button style="font-size: 1vw;" mat-button="" color="primary"
-                                                            class="selector-3-58"
-                                                            (mouseover)="createSubHeader(item.children)"
-                                                            (click)="createSubHeader(item.children)" (dblclick)=test()
-                                                            [ngClass]="{'sidebarTextColor':sidebartextcolor== true,'sidebartextcolordefault':sidebartextcolor!= true,'sidebartexticonhovercolor':sidebartexticonhovercolor}">
-                                                            <span class="sidebarTextFont selector-3-173"
-                                                                style="align-items: center;display: flex;height: 17px;"
-                                                                [class.sidebar-background]="item.label == seclevelhighlighted && sidebarhighlightcolor!=true"
-                                                                [class.sidebar-backgroundconfig]="item.label == seclevelhighlighted && sidebarhighlightcolor==true">
-                                                                {{item.label}}
-                                                            </span>
-                                                        </button>
-                                                    </span>
-                                                    <!-- Leaf node buttons here -->
-                                                    <span
-                                                        *ngIf="item.type === 'external' && (!item.children || item.children.length === 0)"
-                                                        class="childsidebarText selector-3-61"
-                                                        style="display: flex;height: 17px;margin-top: 5px;">
-                                                        <button (mouseover)="createSubHeader(null)"
-                                                            (click)="Highlight(item);checkAndOpenExtLink(item.url)"
-                                                            style="font-size: 1vw;" mat-button="" color="primary"
-                                                            class="selector-3-62"
-                                                            [ngClass]="{'sidebartextcolor':sidebartextcolor== true,'sidebartextcolordefault':sidebartextcolor!= true,'sidebartexticonhovercolor':sidebartexticonhovercolor}">
-                                                            <span
-                                                                style="align-items: center;display: flex;height: 17px;"
-                                                                class="childsidebarText sidebarTextFont"
-                                                                [class.sidebar-background]="item.label == seclevelhighlighted && sidebarhighlightcolor!=true"
-                                                                [class.sidebar-backgroundconfig]="item.label == seclevelhighlighted && sidebarhighlightcolor==true">
-                                                                {{item.label}}
-                                                            </span>
-                                                        </button>
-                                                    </span>
-                                                    <span
-                                                        *ngIf="item.type === 'iframable' && (!item.children || item.children.length === 0)"
-                                                        class="childsidebarText selector-3-61"
-                                                        style="display: flex;height: 17px;margin-top: 5px;">
-                                                        <button (mouseover)="createSubHeader(null)"
-                                                            (click)="Highlight(item);openIframableLink(item.url, item.stateUrl, tabIndex)"
-                                                            style="font-size: 1vw;" mat-button="" color="primary"
-                                                            class="selector-3-62"
-                                                            [ngClass]="{'sidebartextcolor':sidebartextcolor== true,'sidebartextcolordefault':sidebartextcolor!= true,'sidebartexticonhovercolor':sidebartexticonhovercolor}">
-                                                            <span
-                                                                style="align-items: center;display: flex;height: 17px;"
-                                                                class="sidebarTextFont"
-                                                                [class.sidebar-background]="item.label == seclevelhighlighted && sidebarhighlightcolor!=true"
-                                                                [class.sidebar-backgroundconfig]="item.label == seclevelhighlighted && sidebarhighlightcolor==true">
-                                                                {{item.label}}
-                                                            </span>
-                                                        </button>
-                                                    </span>
-                                                    <span
-                                                        *ngIf="(!item.children || item.children.length === 0) && !(item.type === 'external') && !(item.type === 'iframable')"
-                                                        class="childsidebarText selector-3-61"
-                                                        style="display: flex;height: 17px;margin-top: 5px;margin-right: 2vmin;">
-                                                        <button (mouseover)="createSubHeader(null)"
-                                                            (click)="Highlight(item)" style="font-size: 1vw;"
-                                                            mat-button="" color="primary" [routerLink]="item.url"
-                                                            class="selector-3-62"
-                                                            [ngClass]="{'sidebartextcolor':sidebartextcolor== true,'sidebartextcolordefault':sidebartextcolor!= true,'sidebartexticonhovercolor':sidebartexticonhovercolor}">
-                                                            <span
-                                                                style="align-items: center;display: flex;height: 17px;"
-                                                                class="sidebarTextFont"
-                                                                [class.sidebar-background]="item.label == seclevelhighlighted && sidebarhighlightcolor!=true"
-                                                                [class.sidebar-backgroundconfig]="item.label == seclevelhighlighted && sidebarhighlightcolor==true">
-                                                                {{item.label}}
-                                                            </span>
-                                                        </button>
-                                                    </span>
-                                                </div>
-                                            </span>
-                                        </div>
-                                        <div class="selector-3-63" style="margin-left:5px">
-                                            <!-- <button   >Right</button> -->
-                                            <i *ngIf="!hideTabRightBtn"
-                                                [ngClass]="sidebartextcolor?'sidebartextcolor':'sidebartextdefault'"
-                                                style="padding-top: 10px;padding-right: 10px; font-size: 1vw;"
-                                                class="fa fa-angle-double-right selector-3-64"
-                                                (click)="clickOnRightBtn()" aria-hidden="true"></i>
-                                        </div>
-                                    </div>
-                                    <app-menu-item *ngIf="showSubHeader" (breadcrumb)="displayBreadCrumb($event)"
-                                        [items]="subHeaderItems" class="selector-3-60"></app-menu-item>
-                                </div>
-                                <!-- bccbreadcrumb -->
-                                <ol style="background-color: white;"
-                                    *ngIf="bccbreadcrumbs && bccbreadcrumbs.length>1 && enablebreadcrumb"
-                                    class="breadcrumb">
-                                    <li style="cursor: pointer;" class="breadcrumb-item"
-                                        *ngFor="let bccbreadcrumb of bccbreadcrumbs;let i = index">
-                                        <span style="color: var(--breadcrumbtext-color);"
-                                            (click)="bccbreadcrumbroute(bccbreadcrumb,i)">
-                                            {{ bccbreadcrumb }}
-                                        </span>
-                                    </li>
-                                </ol>
-                                <router-outlet class="selector-3-65"></router-outlet>
-                                <!-- </div> -->
-                            </div>
-                        </mat-sidenav-content>
-                    </mat-sidenav-container>
-                </div>
-                <span *ngIf="bgColorType==2" style="width:100%"
-                    [ngStyle]="{'background-color':!backgroundcolor?'#8626C3':'black'}"
-                    class="selector-3-66">{{currentDashboard}}</span>
-                <nav *ngIf="!sidebar && !navhide" class="mat-nav selector-3-67" mat-tab-nav-bar="">
-                    <a mat-tab-link="" *ngFor="let link of navLinks;trackBy: trackByMethod;" [routerLink]="link.path"
-                        routerLinkActive="" #rla="routerLinkActive" [active]="rla.isActive" class="selector-3-68">
-                        {{link.labels}}
-                    </a>
-                </nav>
-
-                <div *ngIf="selectedrole.name" class="headerMobile selector-3-69 lfx-u-mar-r-24" style="display: flex; align-items: center; justify-content: center;">
-                    <span class="myDIV">
-                        <span [matBadge]="" matBadgeColor="warn" matBadgeSize="small" class="selector-3-72">
-                            <button *ngIf="tabs.length>0 && hidesidebar" style="padding-left: 2.5vh;cursor: pointer;"
-                                (click)="hideandshowup()"
-                                [ngStyle]="{'color':!backgroundcolor?bgColorType==2?'#8626C3':'white':'white'}"
-                                mat-button="">
-                                <i [ngClass]="sidebartextcolor?'sidebartextcolor':''"
-                                    class="fa fa-angle-double-down selector-3-73" aria-hidden="true"></i>
-                            </button>
-                        </span>
-                        <span [matBadge]="" matBadgeColor="warn" matBadgeSize="small" class="selector-3-72">
-                            <button *ngIf="tabs.length>0 && !hidesidebar" style="padding-left: 2.5vh;cursor: pointer;"
-                                (click)="hideandshowdown()"
-                                [ngStyle]="{'color':!backgroundcolor?bgColorType==2?'#8626C3':'white':'white'}"
-                                mat-button="">
-                                <i [ngClass]="sidebartextcolor?'sidebartextcolor':''"
-                                    class="fa fa-angle-double-up selector-3-73" aria-hidden="true"></i>
-                            </button>
-                        </span>
-
-                    </span>
-                    <span
-                        *ngIf="calendar!=false && selectedrole.name.toLowerCase() != 'survey admin' && selectedrole.name.toLowerCase() != 'survey client'"
-                        style="cursor: pointer; height: inherit; display: flex; align-items: center;"
-                        (click)="getMeetingLinks()"
-                        [ngStyle]="{'color':!backgroundcolor?bgColorType==2?'#8626C3':'white':'white', 'font-size':hamburgerIconSize}"
-                        matBadgeColor="warn" matBadgeSize="small" class="selector-3-70">
-                        <i [ngStyle]="{'color':headericoncolor}" class="fa fa-calendar-alt selector-3-71"
-                            aria-hidden="true"></i>
-                    </span>
-
-                    <span
-                        *ngIf="notification!=false && selectedrole.name.toLowerCase() != 'survey admin' && selectedrole.name.toLowerCase() != 'survey client'"
-                        (click)="getNotifications()" [matBadgeHidden]="notificationslength == '0'"
-                        [matMenuTriggerFor]="notifymenu" style="padding-left: 2.5vh;cursor: pointer;"
-                        matTooltip="Notifications"
-                        [ngStyle]="{'color':!backgroundcolor?bgColorType==2?'#8626C3':'white':'white'}"
-                        [matBadge]="notificationslength" matBadgeColor="warn" matBadgeSize="small"
-                        class="selector-3-74">
-                        <i [ngStyle]="{'color':headericoncolor}" class="fa fa-bell selector-3-75"
-                            aria-hidden="true"></i>
-                    </span>
-                    <span
-                        *ngIf="yammer && selectedrole.name.toLowerCase() != 'survey admin' && selectedrole.name.toLowerCase() != 'survey client'"
-                        [matBadgeHidden]="yammerNotifications == '0'" style="padding-left: 2.5vh; cursor: pointer;"
-                        [matMenuTriggerFor]="yammermenu" matTooltip="Yammer"
-                        [ngStyle]="{'color':!backgroundcolor?bgColorType==2?'#8626C3':'white':'white'}"
-                        [matBadge]="yammerNotifications" matBadgeColor="warn" matBadgeSize="small"
-                        class="selector-3-76">
-                        <i [ngStyle]="{'color':headericoncolor}" class="fa fa-jpy fa-lg selector-3-77"
-                            aria-hidden="true"></i>
-                    </span>
-                    <!-- chatbot -->
-                    <button mat-icon-button=""
-                        *ngIf="showHeaderChatbotIcon && !aip_chatbot && (selectedrole.name.toLowerCase() == 'admin' || selectedrole.name.toLowerCase() == 'project manager' || selectedrole.name.toLowerCase() == 'project admin' || selectedrole.name.toLowerCase() == 'project client')"
-                        style="padding-left: 2.5vh;cursor: pointer;" (click)="getNewChatBot()"
-                        [matBadgeHidden]="notificationslength >= '0'"
-                        [ngStyle]="{'color':!backgroundcolor?'white':'white'}" [matBadge]="notificationslength"
-                        matBadgeColor="warn" matBadgeSize="small" mat-icon-button=""
-                        [ngStyle]="{'color':!backgroundcolor?'white':'white', 'width': headerHeight, 'height': headerHeight}">
-                        <i [ngStyle]="{'color':headericoncolor, 'font-size': sideMenuIconSize, 'width': sideMenuIconSize, 'height': sideMenuIconSize}" 
-                        class="fa fa-comments selector-3-73" aria-hidden="true"></i>
-                    </button>
-         
-                    <button *ngIf="isDemoProject"
-                        style="cursor: pointer; font-size: 14px; color: white; padding: 8px;
-                     font-weight: bolder; text-decoration: underline; width: fit-content; height: fit-content; border-radius: 0; border: 2px solid white;"
-                        [ngStyle]="{'color':!backgroundcolor?bgColorType==2?'#8626C3':'white':'white'}"
-                        mat-icon-button="" (click)="showAlert()" class="selector-3-78">
-                        Demo Project
-                    </button>
-                    <!-- search -->
-                    <span *ngIf="selectedrole.name.toLowerCase() == 'admin' "
-                        style="cursor: pointer; display: flex; align-items: center;" matTooltip="search"
-                        [ngStyle]="{'color':!backgroundcolor?bgColorType==2?'#8626C3':'white':'white'}"
-                        class="selector-3-78 header-search-icon">
-                        <i [ngStyle]="{'color':headericoncolor, 'font-size': sideMenuIconSize, 'width': sideMenuIconSize, 'height': sideMenuIconSize}" class="fa fa-search selector-3-78" aria-hidden="true"></i>
-                    </span>
-                 
-                    <button mat-icon-button="" [matMenuTriggerFor]="menu" (click)="getSession()"
-                        [matTooltip]="user.user_f_name" class="userMobile selector-3-80" style="display: flex; justify-content: center; align-items: center; padding: 0;" [ngStyle]="{height: headerHeight, width: headerHeight}">
-                            <span *ngIf="!profileimage" style="background-color: white; padding: 0.4em;" [ngClass]="umargin?'uname1':'uname2'"
-                                [ngStyle]="{'color':bgColorType==2?'#8626C3':headercolor?headercolor:'var(--base-color)', 'font-size': headerTextSize, height: sideMenuIconSize, width: sideMenuIconSize}"
-                                class="selector-3-82 dash-icon-color">{{uname | uppercase}}
-                            </span>
-                        <img *ngIf="profileimage" class="imageView img-responsive selector-3-83" [src]="profileimage"
-                            alt="userimg" />
-                    </button>
-
-
-                    <mat-menu #menu="matMenu" class="projectArrow selector-3-84 overflow-hidden">
-                        <div mat-menu-item="" style="cursor:default" class="selector-3-85" 
-                        [style.height]="detailsPopupHeight">
-                            <span class="selector-3-86"> Welcome </span>
-                            <span class="selector-3-87">
-                                <b class="selector-3-88">{{ user && user.user_f_name }}</b>
-                            </span>
-                        </div>
-                        <div mat-menu-item="" *ngIf="portfoliodata?.length>=1" (click)="$event.stopPropagation()" [style.height]="detailsPopupHeight"
-                            class="selector-3-89">
-                            <div class="dropdownrole selector-3-90" *ngIf="portfoliodata.length>=1">
-                                <span class="dropdownrole roleheading selector-3-91"> Portfolio: </span>
-                                <mat-form-field class="selector-3-92">
-                                    <mat-select id="Portfolio1" [compareWith]="compareObjects"
-                                        (ngModelChange)="onSelection($event)" [(ngModel)]="selectedportfolio"
-                                        name="Portfolio" #Portfolio="ngModel" class="option1 selector-3-93">
-                                        <mat-option class="option1 selector-3-94"
-                                            *ngFor="let item of portfoliodata;trackBy: trackByMethod;" [value]="item" [style.height]="matOptionHeight">
-                                            {{item.portfolioName}}</mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                            </div>
-                        </div>
-                        <div mat-menu-item="" *ngIf="projectList.length>=1" (click)="$event.stopPropagation()" [style.height]="detailsPopupHeight"
-                            class="selector-3-95">
-                            <div class="dropdownrole selector-3-96" *ngIf="projectList.length>=1">
-                                <span *ngIf="role1" class="dropdownrole roleheading selector-3-97"> Customer: </span>
-                                <span *ngIf="!role1" class="dropdownrole roleheading selector-3-98"> Project:
-                                </span>
-                                <mat-form-field class="selector-3-100">
-                                    <mat-select id="project" [compareWith]="compareObjects"
-                                        (ngModelChange)="valuechangeproject1($event)" [(ngModel)]="selectedproject"
-                                        name="role" #role="ngModel" class="option1 selector-3-101">
-                                        <mat-option class="option1 selector-3-102"
-                                            *ngFor="let item of projectList;trackBy: trackByMethod;" [value]="item" [style.height]="matOptionHeight">
-                                            {{item.projectdisplayname}}</mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                            </div>
-                        </div>
-                        <div mat-menu-item="" *ngIf=" roleList?.length>=1" (click)="$event.stopPropagation()" [style.height]="detailsPopupHeight"
-                            class="selector-3-103">
-                            <div class="dropdownrole selector-3-104" *ngIf="roleList.length>=1">
-                                <span class="dropdownrole roleheading selector-3-105"> Role: </span>
-                                <mat-form-field class="selector-3-106">
-                                    <mat-select id="role" [compareWith]="compareObjects"
-                                        (ngModelChange)="valuechangerole($event);clearsession()"
-                                        [(ngModel)]="selectedrole" name="role" #role="ngModel"
-                                        class="option1 selector-3-107" panelClass="matOptionPopup">
-                                        <mat-option class="option1 selector-3-108"
-                                            *ngFor="let item of roleList;trackBy: trackByMethod;" [value]="item" [style.height]="matOptionHeight"
-                                            id="role-{{ item.name }}">
-                                            {{item.name}}</mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                            </div>
-                        </div>
-                        <button *ngIf="profileCheck && demouserFlag && logout_status" mat-menu-item="" [style.height]="detailsPopupHeight"
-                            (click)="resetPassword()" class="selector-3-109">
-                            <i class="fa fa-key selector-3-110" aria-hidden="true"></i>
-                            <span class="selector-3-111">&nbsp;Reset Password</span>
-                        </button>
-
-                        <div class="button-container" style="display: flex;">
-                            <button id="home-btn-logout" mat-menu-item="" (click)="logout()" class="selector-3-112" [style.height]="detailsPopupHeight">
-                                <i class="fa fa-power-off selector-3-113" aria-hidden="true"></i>
-                                <span class="selector-3-114">&nbsp;Logout</span>
-                            </button>
-
-                            <button *ngIf="showProfilePresent()" mat-menu-item (click)="toggleProfileInfo()" [style.height]="detailsPopupHeight"
-                                style="color:  var(--base-color);">
-                                <i class="fa fa-user" aria-hidden="true" style="color: var(--base-color);"></i>
-                                <span style="color: var(--base-color);">&nbsp;Profile</span>
-                            </button>
-                        </div>
-                        <hr style="margin: 0px;" class="selector-3-115" />
-                 
-                    </mat-menu>
-                    <mat-menu #notifymenu="matMenu" class="notifyMenuWidth selector-3-117">
-                        <div class="selector-3-118">
-                            <h3 class="notifications-heading selector-3-119">Notifications</h3>
-                        </div>
-                        <div class="selector-3-120">
-                            <h6 *ngIf="notifications.length==0" class="notifications-heading selector-3-121">No unread
-                                notifications
-                            </h6>
-                        </div>
-                        <div *ngFor="let notify of notifications;trackBy: trackByMethod;"
-                            class="notifications-menu selector-3-122" mat-menu-item=""
-                            [ngStyle]="{'cursor':notify.source?'pointer':'none'}" (click)="notifyLink(notify)">
-                            <div class="notifications selector-3-123">
-                                <div class="notifications-msg selector-3-124" [matTooltip]="notify.message">
-                                    {{getNotificationsMessage(notify)}}
-                                </div>
-                                <div class="selector-3-125"><span style="float:right;margin-top: -17px;font-size: 12px;"
-                                        class="selector-3-126">{{getNotificationsDate(notify)
-                                        | date:'longDate'}}</span>
-                                    <span class="selector-3-127"><i class="fa fa-exclamation-triangle selector-3-128"
-                                            style="float:left;" [style.color]="notify.color"
-                                            aria-hidden="true"></i></span>
-                                </div>
-                            </div>
-                        </div>
-                    </mat-menu>
-                    <mat-menu #yammermenu="matMenu" class="yammerMenuWidth selector-3-129">
-                        <div *ngFor="let yammer of yammerList;trackBy: trackByMethod;"
-                            class="yammer-menu selector-3-130">
-                            <div *ngIf="yammer.count>0" class="notifications row selector-3-131" style="margin-left:0px"
-                                mat-menu-item="" [matMenuTriggerData]="{'sublist': yammer.subList}"
-                                [matMenuTriggerFor]="subyammermenu" #trigger="matMenuTrigger">
-                                <div class="notifications-msg col-md-8 selector-3-132" [matTooltip]="yammer.name">
-                                    {{ yammer.name }}
-                                </div>
-                                <div (click)="$event.stopPropagation();" class="col-md-4 selector-3-133"
-                                    style="margin-top:25px;text-align:end">
-                                    <span [matBadgeHidden]="yammer.count == 0"
-                                        [ngStyle]="{'color':!backgroundcolor?bgColorType==2?'#8626C3':'white':'white'}"
-                                        [matBadge]="yammer.count" matBadgeColor="warn" matBadgeSize="small"
-                                        class="selector-3-134">
-                                    </span>
-                                </div>
-                            </div>
-                            <div *ngIf="yammer.count==0" mat-menu-item="" class="selector-3-135">
-                                <div class="notifications-msg col-md-12 selector-3-136" [matTooltip]="yammer.name">
-                                    {{ yammer.name }}
-                                </div>
-                            </div>
-                        </div>
-                    </mat-menu>
-                    <mat-menu #subyammermenu="matMenu" class="selector-3-137">
-                        <ng-template matMenuContent="" let-lst="sublist" class="selector-3-138">
-                            <ng-container *ngFor="let yammersub of lst" class="selector-3-139">
-                                <div (click)="openUrl(yammersub.url)" class="notifications selector-3-140"
-                                    mat-menu-item="">
-                                    <div class="yammer-submenus selector-3-141" [matTooltip]="yammersub.description">
-                                        {{ yammersub.description }}
-                                    </div>
-                                </div>
-                            </ng-container>
-
-                        </ng-template>
-                    </mat-menu>
-                </div>
-            </div>
-            <button mat-icon-button="" draggable="true" (dragstart)="onDragStartChat($event)" (dragend)="onDragEndChat($event)"
-                id="aipButton" *ngIf="aip_chatbot && !showChatBot" style="padding-left: 2.5vh;cursor: pointer; font-size: 16px;
-                position: fixed;;border-radius: 40%;z-index:100;
-                background: #c0c0c080 url(assets/images/Chatbot.png)no-repeat center center;"
-                [style.right]="iconPosition.right" [style.bottom]="iconPosition.bottom" (click)="loadAipChatbot()"
-                [matBadgeHidden]="notificationslength >= '0'" [ngStyle]="{'color':!backgroundcolor?'white':'white'}"
-                [matBadge]="notificationslength" matBadgeColor="warn" matBadgeSize="small" mat-icon-button="">
-                <i [ngStyle]="{'color':headericoncolor}" aria-hidden="true"></i>
+  <mat-drawer-container style="overflow: hidden" class="example-container bgcolor2 selector-3-2" autosize="">
+    <mat-drawer #drawerLeft="" class="example-sidenav selector-3-3" [ngStyle]="{
+        'background-color': bgColorType == 2 ? '#8626C3' : 'var(--header-color)'
+      }" mode="side" style="padding: 0; width: 14%">
+      <app-sidebar *ngIf="navhide && selectedrole.name == currentrole" [alerts]="totalTicket"
+        class="selector-3-4"></app-sidebar>
+    </mat-drawer>
+    <div class="parent-div selector-3-5">
+      <!--main header starts-->
+      <div class="fChild selector-3-6 main-header-bg">
+        <!--header starts -->
+        <div class="main-toggle responsive-main-toggle">
+          <div style="display: flex; align-items: center;">
+            <button class="sidebarBtn sidebarBigScreen selector-3-17 main-toggle-btn"
+              *ngIf="sidebar && selectedrole.name != currentrole && showSidebarMenu" mat-icon-button=""
+              (click)="isexpaned()" id="sidebarexpand" aria-label="Toggle Sidebar">
+              <span *ngIf="!isExpanded" class="main-toggle">
+                <img src="assets/img/icon-waffle@2x.png" alt="Expand" class="toggleIcon" />
+              </span>
+              <span *ngIf="isExpanded" class="main-toggle">
+                <img src="assets/img/icon-waffle@2x.png" alt="Collapse" class="toggleIcon" />
+              </span>
             </button>
-            <app-chat-aip *ngIf="showChatBot" [chat_title]="chat_title" [selectedInstance]="selectedInstance"
-                (closeChatbot)="closeChatbot($event)"></app-chat-aip>
-            <span *ngIf="cortex_chatbot">
-                <virtual-assistant style="z-index:99" [language]="'en'" [suggestionBackendUrl]="suggestionBackendUrl"
-                    [backendUrl]="backendUrl" [appNameInput]="appNameInput"></virtual-assistant></span>
-            <ng-container *ngIf="load" class="selector-3-150">
-                <div style="font-size: 2.5vmin; margin-left: 100vh;margin-top: 45vh" class="selector-3-151">Loading
-                    <div class="spinner-border selector-3-152" style="color:#0094ff"></div>
-                </div>
-            </ng-container>
-            <div *ngIf="!load && selectedrole.name==currentrole" style="height: 100%;" class="selector-3-153">
-                <router-outlet class="selector-3-154"></router-outlet>
-            </div>
-            <div *ngIf="!sidebar && !load" class="selector-3-155">
-                <router-outlet class="selector-3-156"></router-outlet>
-            </div>
+
+            <img id="clientimage" *ngIf="!isimg" src="assets/img/essedum_icon_small.png"
+              class="selector-3-8 essedum-logo responsive-logo-img" alt="ESSEDUM Logo"
+              style="margin-left: 8px;" />
+            <span class="responsive-title" style="margin-left: 8px;">ESSEDUM</span>
+
+          </div>
         </div>
-    </mat-drawer-container>
+        <!--header ends -->
+        
+        <div class="example-container selector-3-19" *ngIf="sidebar && selectedrole.name != currentrole">
+          <mat-sidenav-container class="example-sidenav-container selector-3-20" autosize="">
+            <mat-sidenav *ngIf="
+                (showSidebarMenu && !isExpanded) ||
+                (iconsidebarrole == selectedrole.name && showSidebarMenu)
+              " #sidenav="" class="width parentsidenav selector-3-21" mode="side" opened="true"
+              style="overflow-x: hidden; height: 100% ;width: 62px;" [ngClass]="{
+                enableSidebarShadow: enableSidebarShadow == true,
+                sidebarbgcolor: sidebarbgcolor == true,
+                sidebarbgcolordefault: sidebarbgcolor != true,
+                sidebartextcolordefault: sidebartextcolor != true
+              }">
+              <mat-nav-list class="selector-3-47" [class.sidebar-menu-open]="showSidebarMenuList"
+                class="dashboard sidebarlineheight" style="
+                  display: flex;
+                  flex-direction: column;
+                  overflow-x: hidden;
+                  padding-top: 1.3vh;
+                  height: inherit;
+                  align-items: center;
+                ">
+                <span class="list-menu-toggle" (click)="toggleSidebarMenu()" #sidebarMenuTrigger>
+                  <i class="fa fa-bars fa-2x sidebar-Icons-list" aria-hidden="true" [ngStyle]="{                    
+                      color: !showSidebarMenuList ? '#0052cc' : ''
+                    }" [ngClass]="{
+                      sidebariconcolor: sidebariconcolor,
+                      sidebartexticonhovercolor: sidebartexticonhovercolor
+                    }"></i>
+                </span>
+                <!-- Sidebar menu popup -->
+                <div *ngIf="showSidebarMenuList" class="sidebar-menu-popup" style=" margin-top: -5px;" [ngStyle]="{
+                    position: 'fixed',
+                    left: sidebarMenuPopupPosition?.left + 'px',
+                    top: sidebarMenuPopupPosition?.top + 'px',
+                    background: '#fff',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    zIndex: 2000,                   
+                    borderRadius: '4px',                    
+                    height: '100vh',
+                    overflowY: 'auto',
+                    overflowX: 'visible'
+                  }" (click)="$event.stopPropagation()">
+                  <div class="list-menu-close">
+                    <button mat-icon-button class="list-menu-close-btn" (click)="closeSidebarMenuPopup()">
+                      <mat-icon class="lfx-fs-18">close</mat-icon>
+                    </button>
+                  </div>
+                  <div class="list-menu-div">
+                    <div *ngFor="let item of sidebarMenu; let i = index" (click)="onSidebarMenuItemClick($event, item)"
+                      [routerLink]="item.url" class="list-menu-item" [ngClass]="{
+                        'sidebar-menu-popup-item-active':
+                          item.label == highlightedLabel
+                      }" [style.borderLeft]="
+                        item.label == highlightedLabel
+                          ? '5px solid #0052cc'
+                          : 'none'
+                      ">
+                      <span [ngStyle]="{
+                          color: item.label == highlightedLabel ? '#0052cc' : '#68696c'
+                        }">
+                        {{ item.label }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <!-- Sidebar menu popup closed -->
+
+                <!-- Sidenav Icons menu bar -->
+                <div class="a-height sidebar-item-container" [class.sidebar-border]="
+                    item.label == highlightedLabel &&
+                    sidebarhighlightcolor != true
+                  " [class.config]="
+                    item.label == highlightedLabel &&
+                    sidebarhighlightcolor == true
+                  " [ngClass]="{ sidebarhovercolor: sidebarhovercolor == true }" [ngStyle]="{
+                    'margin-top': i != 0 ? sidebarItemMarginTop : '',
+                
+                    height:
+                      iconsidebarrole == selectedrole.name
+                        ? sidebarMenuHeight
+                        : ''
+                  }" [class.iconsidebarheight]="
+                    iconsidebarrole == selectedrole.name
+                  " *ngFor="let item of sidebarMenu; let i = index" (click)="
+                    toggleActive($event, item.label);
+                    item.children && item.children.length
+                      ? showTabs(item)
+                      : viewtabsonload()
+                  " [routerLink]="item.url">
+                  <div class="" [matTooltip]="item.altText ? item.altText : item.label"
+                    matTooltipClass="widgettitletooltip" [class.collapsed]="!isExpanded"
+                    [class.griddirection]="iconsidebarrole == selectedrole.name" [ngStyle]="{
+                      'border-left-width':'9px',                      
+                      width: '57.6px'
+                    }">
+                    <div class="sidebar-itemIcon" style="text-align: -webkit-center"
+                      [class.iconmapping]="iconsidebarrole == selectedrole.name" [ngStyle]="{
+                        'margin-left':
+                          iconsidebarrole == selectedrole.name
+                            ? iconSideBarMarginLeft
+                            : '',
+                        'margin-right':
+                          iconsidebarrole == selectedrole.name
+                            ? iconSideBarMarginRight
+                            : ''
+                      }">
+                      <div id="svgid" [ngStyle]="{
+                          height: sideMenuIconSize,
+                          width: sideMenuIconSize
+                        }" *ngIf="item.icon && item.icon.endsWith('.svg')" [ngClass]="{
+                          'sidebar-svg-iconcolor': sidebartextcolor == true,
+                          'sidebar-svg-iconcolordefault':
+                            sidebartextcolor != true,
+                          sidebartexticonhovercolor: sidebartexticonhovercolor
+                        }" [inlineSVG]="item.icon">
+                        {{ item.icon }}
+                      </div>
+
+                      <img id="imgid" class="sidebar-itemImg" alt="No image" *ngIf="
+                          item.icon &&
+                          item.icon.startsWith('assets/icons/') &&
+                          !item.icon.endsWith('.svg')
+                        " [src]="item.icon" />
+                      <img id="imgid" class="sidebar-itemImg sidebar-Icons-list" *ngIf="
+                          item.icon && item.icon.includes('data:image/svg')
+                        " [ngClass]="{
+                          'sidebar-svg-iconcolor': sidebartextcolor == true,
+                          'sidebar-svg-iconcolordefault':
+                            sidebartextcolor != true
+                        }" [src]="cleanSVG(item.icon)" alt="" />
+                      <img id="imgid" class="sidebar-itemImg sidebar-Icons-list" *ngIf="
+                          item.icon &&
+                          (item.icon.includes('data:image/png') ||
+                            item.icon.includes('data:image/jpg') ||
+                            item.icon.includes('data:image/jpeg'))
+                        " [src]="item.icon" alt="" />
+                      <i *ngIf="
+                          item.icon &&
+                          !item.icon.startsWith('assets/icons/') &&
+                          !item.icon.startsWith('fa-') &&
+                          !item.icon.startsWith('icon')
+                        " class="fa fa-{{ item.icon }} fa-2x" [ngStyle]="{
+                          color: item.label == highlightedLabel ? '#0052cc' : '#68696c'
+                        }" [ngClass]="{
+                          sidebariconcolor: sidebariconcolor,
+                          sidebartexticonhovercolor: sidebartexticonhovercolor
+                        }" class="sidebar-Icons-list"></i>
+                      <i *ngIf="
+                          item.icon &&
+                          !item.icon.startsWith('assets/icons/') &&
+                          !item.icon.endsWith('.svg') &&
+                          item.icon.includes('icon')
+                        " class="icon fa-2x {{ item.icon }}" [ngStyle]="{ 'font-size': sideMenuIconSize }" [ngClass]="{
+                          sidebariconcolor: sidebariconcolor,
+                          sidebartexticonhovercolor: sidebartexticonhovercolor
+                        }"></i>
+                      <i *ngIf="!item.icon" class="fa fa-folder fa-2x"
+                        [ngClass]="{ sidebariconcolor: sidebariconcolor }"></i>
+                      <div [ngStyle]="{
+                          'font-size': sidebarMenuTextSize,
+                          'line-height': sidebarTextLineHeight,
+                          width:
+                            iconsidebarrole != selectedrole.name
+                              ? sidebarWidth
+                              : '',
+                          'padding-right':
+                            iconsidebarrole == selectedrole.name
+                              ? iconSideBarMarginLeft
+                              : '',
+                          'padding-left':
+                            iconsidebarrole == selectedrole.name
+                              ? iconsidebarpadding
+                              : ''
+                        }" style="margin: unset" [class.outlooksidebarfontsize]="
+                          iconsidebarrole == selectedrole.name
+                        " *ngIf="
+                          !(iconsidebarrole == selectedrole.name && !isExpanded)
+                        " [ngClass]="{
+                          'sidebar-item-full-text':
+                            show_sidebar_full_text == true,
+                          'sidebar-item-text': show_sidebar_full_text != true,
+                          sidebartextcolor: sidebartextcolor == true,
+                          sidebartextcolordefault: sidebartextcolor != true,
+                          sidebartexticonhovercolor: sidebartexticonhovercolor
+                        }" [class.collapsed]="!isExpanded">
+                        <!-- {{ item.label }} -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </mat-nav-list>
+            </mat-sidenav>
+            <!-- righside container starts-->
+            <mat-sidenav-content class="selector-3-47" id="containerDivForScroll"
+              [style.margin-left]="getContentMarginLeft()">
+              <ng-container *ngIf="loadingRouteConfig" class="selector-3-48">
+                <div style="font-size: 5vmin; margin-left: 100vh; margin-top: 45vh" class="selector-3-49">
+                  Loading
+                  <div class="spinner-border selector-3-50" style="color: #0094ff"></div>
+                </div>
+              </ng-container>
+              <div *ngIf="!loadingRouteConfig" id="bcc-dashboard-content" class="selector-3-51">
+                <div *ngIf="displayDialog">
+                  <p-dialog header="Declaration" [modal]="true" [style]="{ height: '80vh', width: '90vw' }"
+                    [(visible)]="displayDialog" [closable]="false">
+                    <div id="sample"></div>
+                    <br />
+                    <label style="font-size: 15px; line-height: 1.3px">
+                      <input type="checkbox" [(ngModel)]="isCheckboxChecked" />
+                      I agree to the terms and conditions as set out by the user
+                      agreement.
+                    </label>
+                    <br /><br />
+                    <div class="d-flex justify-content-center">
+                      <button type="submit" (click)="submitDeclaration()" [disabled]="!isCheckboxChecked"
+                        class="btn btn-primary" style="
+                          background-color: var(--base-color);
+                          color: white;
+                        ">
+                        Submit
+                      </button>
+                      <button type="submit" (click)="logout()" class="btn btn-primary ml-4" style="
+                          background-color: var(--base-color);
+                          color: white;
+                        ">
+                        Cancel
+                      </button>
+                    </div>
+                  </p-dialog>
+                </div>
+                <div id="tabsContainer overlay" style="background-color: var(--bg-color); display: unset"
+                  class="tabsContainer selector-3-52" *ngIf="tabs.length > 0">
+                  <div *ngIf="!hidesidebar" style="display: flex" class="selector-3-171" [ngClass]="{
+                      sidebarbgcolor: sidebarbgcolor == true,
+                      sidebarbgcolordefault: sidebarbgcolor != true,
+                      sidebartextcolor: sidebartextcolor == true,
+                      sidebartextcolordefault: sidebartextcolor != true
+                    }">
+                    <div class="selector-3-53" style="margin-right: 5px">
+                      <!-- <button >Left</button> -->
+                      <i *ngIf="!hideTabLeftBtn" [ngClass]="
+                          sidebartextcolor
+                            ? 'sidebartextcolor'
+                            : 'sidebartextdefault'
+                        " style="padding-top: 10px; padding-left: 10px" (click)="clickOnLeftBtn()"
+                        class="fa fa-angle-double-left selector-3-54" aria-hidden="true"></i>
+                    </div>
+                    <div #tabsBox id="tabsBox" class="tabsBox selector-3-55" style="width: 95%; height: 25px">
+                      <span *ngFor="let item of tabs; let tabIndex = index" class="selector-3-56">
+                        <div class="selector-3-172" [ngClass]="{
+                            highlight: sidebarhovercolor != true,
+                            sidebarhovercolor: sidebarhovercolor == true
+                          }">
+                          <!-- Handle branch node buttons here -->
+                          <span *ngIf="item.children && item.children.length > 0" class="childsidebarText selector-3-57"
+                            style="
+                              display: flex;
+                              height: 17px;
+                              margin-top: 5px;
+                              margin-right: 2vmin;
+                            ">
+                            <button style="font-size: 1vw" mat-button="" color="primary" class="selector-3-58"
+                              (mouseover)="createSubHeader(item.children)" (click)="createSubHeader(item.children)"
+                              (dblclick)="test()" [ngClass]="{
+                                sidebarTextColor: sidebartextcolor == true,
+                                sidebartextcolordefault:
+                                  sidebartextcolor != true,
+                                sidebartexticonhovercolor:
+                                  sidebartexticonhovercolor
+                              }">
+                              <span class="sidebarTextFont selector-3-173" style="
+                                  align-items: center;
+                                  display: flex;
+                                  height: 17px;
+                                " [class.sidebar-background]="
+                                  item.label == seclevelhighlighted &&
+                                  sidebarhighlightcolor != true
+                                " [class.sidebar-backgroundconfig]="
+                                  item.label == seclevelhighlighted &&
+                                  sidebarhighlightcolor == true
+                                ">
+                                {{ item.label }}
+                              </span>
+                            </button>
+                          </span>
+                          <!-- Leaf node buttons here -->
+                          <span *ngIf="
+                              item.type === 'external' &&
+                              (!item.children || item.children.length === 0)
+                            " class="childsidebarText selector-3-61"
+                            style="display: flex; height: 17px; margin-top: 5px">
+                            <button (mouseover)="createSubHeader(null)" (click)="
+                                Highlight(item); checkAndOpenExtLink(item.url)
+                              " style="font-size: 1vw" mat-button="" color="primary" class="selector-3-62" [ngClass]="{
+                                sidebartextcolor: sidebartextcolor == true,
+                                sidebartextcolordefault:
+                                  sidebartextcolor != true,
+                                sidebartexticonhovercolor:
+                                  sidebartexticonhovercolor
+                              }">
+                              <span style="
+                                  align-items: center;
+                                  display: flex;
+                                  height: 17px;
+                                " class="childsidebarText sidebarTextFont" [class.sidebar-background]="
+                                  item.label == seclevelhighlighted &&
+                                  sidebarhighlightcolor != true
+                                " [class.sidebar-backgroundconfig]="
+                                  item.label == seclevelhighlighted &&
+                                  sidebarhighlightcolor == true
+                                ">
+                                {{ item.label }}
+                              </span>
+                            </button>
+                          </span>
+                          <span *ngIf="
+                              item.type === 'iframable' &&
+                              (!item.children || item.children.length === 0)
+                            " class="childsidebarText selector-3-61"
+                            style="display: flex; height: 17px; margin-top: 5px">
+                            <button (mouseover)="createSubHeader(null)" (click)="
+                                Highlight(item);
+                                openIframableLink(
+                                  item.url,
+                                  item.stateUrl,
+                                  tabIndex
+                                )
+                              " style="font-size: 1vw" mat-button="" color="primary" class="selector-3-62" [ngClass]="{
+                                sidebartextcolor: sidebartextcolor == true,
+                                sidebartextcolordefault:
+                                  sidebartextcolor != true,
+                                sidebartexticonhovercolor:
+                                  sidebartexticonhovercolor
+                              }">
+                              <span style="
+                                  align-items: center;
+                                  display: flex;
+                                  height: 17px;
+                                " class="sidebarTextFont" [class.sidebar-background]="
+                                  item.label == seclevelhighlighted &&
+                                  sidebarhighlightcolor != true
+                                " [class.sidebar-backgroundconfig]="
+                                  item.label == seclevelhighlighted &&
+                                  sidebarhighlightcolor == true
+                                ">
+                                {{ item.label }}
+                              </span>
+                            </button>
+                          </span>
+                          <span *ngIf="
+                              (!item.children || item.children.length === 0) &&
+                              !(item.type === 'external') &&
+                              !(item.type === 'iframable')
+                            " class="childsidebarText selector-3-61" style="
+                              display: flex;
+                              height: 17px;
+                              margin-top: 5px;
+                              margin-right: 2vmin;
+                            ">
+                            <button (mouseover)="createSubHeader(null)" (click)="Highlight(item)" style="font-size: 1vw"
+                              mat-button="" color="primary" [routerLink]="item.url" class="selector-3-62" [ngClass]="{
+                                sidebartextcolor: sidebartextcolor == true,
+                                sidebartextcolordefault:
+                                  sidebartextcolor != true,
+                                sidebartexticonhovercolor:
+                                  sidebartexticonhovercolor
+                              }">
+                              <span style="
+                                  align-items: center;
+                                  display: flex;
+                                  height: 17px;
+                                " class="sidebarTextFont" [class.sidebar-background]="
+                                  item.label == seclevelhighlighted &&
+                                  sidebarhighlightcolor != true
+                                " [class.sidebar-backgroundconfig]="
+                                  item.label == seclevelhighlighted &&
+                                  sidebarhighlightcolor == true
+                                ">
+                                {{ item.label }}
+                              </span>
+                            </button>
+                          </span>
+                        </div>
+                      </span>
+                    </div>
+                    <div class="selector-3-63" style="margin-left: 5px">
+                      <!-- <button   >Right</button> -->
+                      <i *ngIf="!hideTabRightBtn" [ngClass]="
+                          sidebartextcolor
+                            ? 'sidebartextcolor'
+                            : 'sidebartextdefault'
+                        " style="
+                          padding-top: 10px;
+                          padding-right: 10px;
+                          font-size: 1vw;
+                        " class="fa fa-angle-double-right selector-3-64" (click)="clickOnRightBtn()"
+                        aria-hidden="true"></i>
+                    </div>
+                  </div>
+                  <app-menu-item *ngIf="showSubHeader" (breadcrumb)="displayBreadCrumb($event)" [items]="subHeaderItems"
+                    class="selector-3-60"></app-menu-item>
+                </div>
+                <!-- bccbreadcrumb -->
+                <ol style="background-color: white" *ngIf="
+                    bccbreadcrumbs &&
+                    bccbreadcrumbs.length > 1 &&
+                    enablebreadcrumb
+                  " class="breadcrumb">
+                  <li style="cursor: pointer" class="breadcrumb-item"
+                    *ngFor="let bccbreadcrumb of bccbreadcrumbs; let i = index">
+                    <span style="color: var(--breadcrumbtext-color)" (click)="bccbreadcrumbroute(bccbreadcrumb, i)">
+                      {{ bccbreadcrumb }}
+                    </span>
+                  </li>
+                </ol>
+                <router-outlet class="selector-3-65"></router-outlet>
+                <!-- </div> -->
+              </div>
+            </mat-sidenav-content>
+            <!-- righside container ends-->
+          </mat-sidenav-container>
+        </div>
+        <span *ngIf="bgColorType == 2" style="width: 100%" [ngStyle]="{
+            'background-color': !backgroundcolor ? '#8626C3' : 'black'
+          }" class="selector-3-66">{{ currentDashboard }}</span>
+        <nav *ngIf="!sidebar && !navhide" class="mat-nav selector-3-67" mat-tab-nav-bar="">
+          <a mat-tab-link="" *ngFor="let link of navLinks; trackBy: trackByMethod" [routerLink]="link.path"
+            routerLinkActive="" #rla="routerLinkActive" [active]="rla.isActive" class="selector-3-68">
+            {{ link.labels }}
+          </a>
+        </nav>
+
+        <div style="
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-right: 15px;
+          ">
+          <div *ngIf="selectedrole.name" class="headerMobile selector-3-69 lfx-u-mar-r-24"
+            style="display: flex; align-items: center; justify-content: center">
+            <span class="myDIV">
+              <span [matBadge]="" matBadgeColor="warn" matBadgeSize="small" class="selector-3-72">
+                <button *ngIf="tabs.length > 0 && hidesidebar" style="padding-left: 2.5vh; cursor: pointer"
+                  (click)="hideandshowup()" [ngStyle]="{
+                    color: !backgroundcolor
+                      ? bgColorType == 2
+                        ? '#8626C3'
+                        : 'white'
+                      : 'white'
+                  }" mat-button="">
+                  <i [ngClass]="sidebartextcolor ? 'sidebartextcolor' : ''"
+                    class="fa fa-angle-double-down selector-3-73" aria-hidden="true"></i>
+                </button>
+              </span>
+              <span [matBadge]="" matBadgeColor="warn" matBadgeSize="small" class="selector-3-72">
+                <button *ngIf="tabs.length > 0 && !hidesidebar" style="padding-left: 2.5vh; cursor: pointer"
+                  (click)="hideandshowdown()" [ngStyle]="{
+                    color: !backgroundcolor
+                      ? bgColorType == 2
+                        ? '#8626C3'
+                        : 'white'
+                      : 'white'
+                  }" mat-button="">
+                  <i [ngClass]="sidebartextcolor ? 'sidebartextcolor' : ''" class="fa fa-angle-double-up selector-3-73"
+                    aria-hidden="true"></i>
+                </button>
+              </span>
+            </span>
+            <span *ngIf="
+                calendar != false &&
+                selectedrole.name.toLowerCase() != 'survey admin' &&
+                selectedrole.name.toLowerCase() != 'survey client'
+              " style="
+                cursor: pointer;
+                height: inherit;
+                display: flex;
+                align-items: center;
+              " (click)="getMeetingLinks()" [ngStyle]="{
+                color: !backgroundcolor
+                  ? bgColorType == 2
+                    ? '#8626C3'
+                    : 'white'
+                  : 'white',
+                'font-size': hamburgerIconSize
+              }" matBadgeColor="warn" matBadgeSize="small" class="selector-3-70">
+              <i [ngStyle]="{ color: headericoncolor }" class="fa fa-calendar-alt selector-3-71" aria-hidden="true"></i>
+            </span>
+
+            <span *ngIf="
+                notification != false &&
+                selectedrole.name.toLowerCase() != 'survey admin' &&
+                selectedrole.name.toLowerCase() != 'survey client'
+              " (click)="getNotifications()" [matBadgeHidden]="notificationslength == '0'"
+              [matMenuTriggerFor]="notifymenu" style="padding-left: 2.5vh; cursor: pointer" matTooltip="Notifications"
+              [ngStyle]="{
+                color: !backgroundcolor
+                  ? bgColorType == 2
+                    ? '#8626C3'
+                    : 'white'
+                  : 'white'
+              }" [matBadge]="notificationslength" matBadgeColor="warn" matBadgeSize="small" class="selector-3-74">
+              <i [ngStyle]="{ color: headericoncolor }" class="fa fa-bell selector-3-75" aria-hidden="true"></i>
+            </span>
+            <span *ngIf="
+                yammer &&
+                selectedrole.name.toLowerCase() != 'survey admin' &&
+                selectedrole.name.toLowerCase() != 'survey client'
+              " [matBadgeHidden]="yammerNotifications == '0'" style="padding-left: 2.5vh; cursor: pointer"
+              [matMenuTriggerFor]="yammermenu" matTooltip="Yammer" [ngStyle]="{
+                color: !backgroundcolor
+                  ? bgColorType == 2
+                    ? '#8626C3'
+                    : 'white'
+                  : 'white'
+              }" [matBadge]="yammerNotifications" matBadgeColor="warn" matBadgeSize="small" class="selector-3-76">
+              <i [ngStyle]="{ color: headericoncolor }" class="fa fa-jpy fa-lg selector-3-77" aria-hidden="true"></i>
+            </span>
+
+            <button *ngIf="isDemoProject" style="
+                cursor: pointer;
+                font-size: 14px;
+                color: white;
+                padding: 8px;
+                font-weight: bolder;
+                text-decoration: underline;
+                width: fit-content;
+                height: fit-content;
+                border-radius: 0;
+                border: 2px solid white;
+              " [ngStyle]="{
+                color: !backgroundcolor
+                  ? bgColorType == 2
+                    ? '#8626C3'
+                    : 'white'
+                  : 'white'
+              }" mat-icon-button="" (click)="showAlert()" class="selector-3-78">
+              Demo Project
+            </button>
+
+
+          </div>
+
+          <!--main menus-->
+
+          <!-- <span style="cursor: pointer;">
+            <img src="assets/img/icon-FAQ.svg" alt="faq" style="height: 22px; width: 22px;">
+          </span>
+          <span style="cursor: pointer;">
+            <img src="assets/img/notifications.svg" alt="notifications" style="height: 22px; width: 22px;">
+          </span> -->
+          <button mat-icon-button="" [matMenuTriggerFor]="menu" (click)="getSession()" [matTooltip]="user.user_f_name"
+            class="userMobile selector-3-80 user-profile-btn
+            user-btn-height">
+            <span *ngIf="!profileimage" style="background-color: white; padding: 0.4em"
+              [ngClass]="umargin ? 'uname1' : 'uname2'" [ngStyle]="{
+                color:
+                  bgColorType == 2
+                    ? '#8626C3'
+                    : headercolor
+                    ? headercolor
+                    : 'var(--base-color)',
+              }" class="selector-3-82 dash-icon-color user-btn-span-height">{{ uname | uppercase }}
+            </span>
+            <img *ngIf="profileimage" class="imageView img-responsive selector-3-83" [src]="profileimage"
+              alt="userimg" />
+          </button>
+          <mat-menu #menu="matMenu" class="projectArrow selector-3-84 overflow-hidden">
+            <div mat-menu-item="" style="cursor: default" class="selector-3-85" [style.height]="detailsPopupHeight">
+              <span class="selector-3-86"> Welcome </span>
+              <span class="selector-3-87">
+                <b class="selector-3-88">{{ user && user.user_f_name }}</b>
+              </span>
+            </div>
+            <div mat-menu-item="" *ngIf="portfoliodata?.length >= 1" (click)="$event.stopPropagation()"
+              [style.height]="detailsPopupHeight" class="selector-3-89">
+              <div class="dropdownrole selector-3-90" *ngIf="portfoliodata.length >= 1">
+                <span class="dropdownrole roleheading selector-3-91">
+                  Portfolio:
+                </span>
+                <mat-form-field class="selector-3-92">
+                  <mat-select id="Portfolio1" [compareWith]="compareObjects" (ngModelChange)="onSelection($event)"
+                    [(ngModel)]="selectedportfolio" name="Portfolio" #Portfolio="ngModel" class="option1 selector-3-93">
+                    <mat-option class="option1 selector-3-94" *ngFor="let item of portfoliodata; trackBy: trackByMethod"
+                      [value]="item" [style.height]="matOptionHeight">
+                      {{ item.portfolioName }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+            <div mat-menu-item="" *ngIf="projectList.length >= 1" (click)="$event.stopPropagation()"
+              [style.height]="detailsPopupHeight" class="selector-3-95">
+              <div class="dropdownrole selector-3-96" *ngIf="projectList.length >= 1">
+                <span *ngIf="role1" class="dropdownrole roleheading selector-3-97">
+                  Customer:
+                </span>
+                <span *ngIf="!role1" class="dropdownrole roleheading selector-3-98">
+                  Project:
+                </span>
+                <mat-form-field class="selector-3-100">
+                  <mat-select id="project" [compareWith]="compareObjects" (ngModelChange)="valuechangeproject1($event)"
+                    [(ngModel)]="selectedproject" name="role" #role="ngModel" class="option1 selector-3-101">
+                    <mat-option class="option1 selector-3-102" *ngFor="let item of projectList; trackBy: trackByMethod"
+                      [value]="item" [style.height]="matOptionHeight">
+                      {{ item.projectdisplayname }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+            <div mat-menu-item="" *ngIf="roleList?.length >= 1" (click)="$event.stopPropagation()"
+              [style.height]="detailsPopupHeight" class="selector-3-103">
+              <div class="dropdownrole selector-3-104" *ngIf="roleList.length >= 1">
+                <span class="dropdownrole roleheading selector-3-105">
+                  Role:
+                </span>
+                <mat-form-field class="selector-3-106">
+                  <mat-select id="role" [compareWith]="compareObjects"
+                    (ngModelChange)="valuechangerole($event); clearsession()" [(ngModel)]="selectedrole" name="role"
+                    #role="ngModel" class="option1 selector-3-107" panelClass="matOptionPopup">
+                    <mat-option class="option1 selector-3-108" *ngFor="let item of roleList; trackBy: trackByMethod"
+                      [value]="item" [style.height]="matOptionHeight" id="role-{{ item.name }}">
+                      {{ item.name }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+            <button *ngIf="profileCheck && demouserFlag && logout_status" mat-menu-item=""
+              [style.height]="detailsPopupHeight" (click)="resetPassword()" class="selector-3-109">
+              <i class="fa fa-key selector-3-110" aria-hidden="true"></i>
+              <span class="selector-3-111">&nbsp;Reset Password</span>
+            </button>
+
+            <div class="button-container" style="display: flex">
+              <button id="home-btn-logout" mat-menu-item="" (click)="logout()" class="selector-3-112"
+                [style.height]="detailsPopupHeight">
+                <i class="fa fa-power-off selector-3-113" aria-hidden="true"></i>
+                <span class="selector-3-114">&nbsp;Logout</span>
+              </button>
+
+              <button *ngIf="showProfilePresent()" mat-menu-item (click)="toggleProfileInfo()"
+                [style.height]="detailsPopupHeight" style="color: var(--base-color)">
+                <i class="fa fa-user" aria-hidden="true" style="color: var(--base-color)"></i>
+                <span style="color: var(--base-color)">&nbsp;Profile</span>
+              </button>
+            </div>
+            <hr style="margin: 0px" class="selector-3-115" />
+          </mat-menu>
+        </div>
+      </div>
+    <!--main header ends-->
+      <button mat-icon-button="" draggable="true" (dragstart)="onDragStartChat($event)"
+        (dragend)="onDragEndChat($event)" id="aipButton" *ngIf="aip_chatbot && !showChatBot" style="
+          padding-left: 2.5vh;
+          cursor: pointer;
+          font-size: 16px;
+          position: fixed;
+          border-radius: 40%;
+          z-index: 100;
+          background: #c0c0c080 url(assets/images/Chatbot.png) no-repeat center
+            center;
+        " [style.right]="iconPosition.right" [style.bottom]="iconPosition.bottom" (click)="loadAipChatbot()"
+        [matBadgeHidden]="notificationslength >= '0'" [ngStyle]="{ color: !backgroundcolor ? 'white' : 'white' }"
+        [matBadge]="notificationslength" matBadgeColor="warn" matBadgeSize="small" mat-icon-button="">
+        <i [ngStyle]="{ color: headericoncolor }" aria-hidden="true"></i>
+      </button>
+      <app-chat-aip *ngIf="showChatBot" [chat_title]="chat_title" [selectedInstance]="selectedInstance"
+        (closeChatbot)="closeChatbot($event)"></app-chat-aip>
+      <span *ngIf="cortex_chatbot">
+        <virtual-assistant style="z-index: 99" [language]="'en'" [suggestionBackendUrl]="suggestionBackendUrl"
+          [backendUrl]="backendUrl" [appNameInput]="appNameInput"></virtual-assistant></span>
+      <ng-container *ngIf="load" class="selector-3-150">
+        <div style="font-size: 2.5vmin; margin-left: 100vh; margin-top: 45vh" class="selector-3-151">
+          Loading
+          <div class="spinner-border selector-3-152" style="color: #0094ff"></div>
+        </div>
+      </ng-container>
+      <div *ngIf="!load && selectedrole.name == currentrole" style="height: 100%" class="selector-3-153">
+        <router-outlet class="selector-3-154"></router-outlet>
+      </div>
+      <div *ngIf="!sidebar && !load" class="selector-3-155">
+        <router-outlet class="selector-3-156"></router-outlet>
+      </div>
+    </div>
+  </mat-drawer-container>
 </div>
- <app-footer></app-footer>
+<app-footer></app-footer>

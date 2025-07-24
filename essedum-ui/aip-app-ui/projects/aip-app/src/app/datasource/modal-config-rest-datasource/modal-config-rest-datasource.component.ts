@@ -264,7 +264,7 @@ export class ModalConfigRestDatasourceComponent
       }
     }),
       (err) => {
-        this.Services.messageService('Error : ', 'Enclose body in STRING');
+        this.Services.message('Error! Enclose body in STRING ','error');
       };
   }
 
@@ -361,7 +361,7 @@ export class ModalConfigRestDatasourceComponent
       this.connectionDetails.emit(this.data.connectionDetails);
       this.portDetails.emit(this.addPorts);
     } else {
-      this.Services.messageService('Error!', 'Invalid Connection Name');
+      this.Services.message('Error! Invalid Connection Name ','error');
     }
   }
 
@@ -374,9 +374,8 @@ export class ModalConfigRestDatasourceComponent
         // size = response
       },
       (err) => {
-        this.Services.messageService(
-          'Error : ',
-          'Unable to fetch Connection types'
+        this.Services.message(
+          'Error Unable to fetch Connection types ','error'
         );
       },
       () => {
@@ -432,9 +431,8 @@ export class ModalConfigRestDatasourceComponent
             }
           },
           (error) => {
-            this.Services.messageService(
-              'Error : ',
-              'Unable to fetch Connection types'
+            this.Services.message(
+              'Error Unable to fetch Connection types ','error'
             );
           }
         );
@@ -691,9 +689,9 @@ export class ModalConfigRestDatasourceComponent
           }
         );
       } catch (Exception) {
-        this.Services.messageService('Some error occured', 'Error');
+        this.Services.message('Some error occured ', 'error');
       }
-    } else this.Services.messageService('File format not supported', 'Error');
+    } else this.Services.message('File format not supported ', 'error');
   }
 
   makeRandom(lengthOfCode: number, possible: string) {

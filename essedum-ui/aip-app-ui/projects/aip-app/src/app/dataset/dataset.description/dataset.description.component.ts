@@ -40,6 +40,7 @@ export class DatasetDescriptionComponent implements OnInit {
   description: any;
   isAuth: boolean;
   datasetUnlink: boolean;
+      appLoading: boolean = true;
   tableView: boolean;
   selectedDatasetName: string;
   mashupView: boolean;
@@ -216,6 +217,9 @@ export class DatasetDescriptionComponent implements OnInit {
     this.getknowledgebases();
    
   }
+     get shouldShowEmptyState(): boolean {
+    return !this.appLoading && (!this.datasetData || this.datasetData.length === 0);
+  }
   getDatasetByName(){
     this.datasetsService. getDatasetByNameAndOrg(this.datasetName).subscribe((res) => {
       console.log(res);
@@ -320,6 +324,8 @@ export class DatasetDescriptionComponent implements OnInit {
   }
 
   checkTableSupport() {
+          this.appLoading = true;
+
     this.service.checkVisualizeSupport(this.selectedDatasetName)
       .subscribe(res => {
         if (res && res.filter(ele => ele["Tabular View"]).length > 0) {
@@ -353,8 +359,10 @@ export class DatasetDescriptionComponent implements OnInit {
                   true
                 ).subscribe(resp => {
                   if(resp.length===0) {
+                    this.appLoading=false;
                     this.datasetDataErr = 'There is an application error, please contact the application admin';
                   } else {
+                    this.appLoading=false;
                     this.datasetDataErr=false;
                     this.datasetData = resp;
                     if(this.dataset.views=='Table view'){
@@ -377,6 +385,7 @@ export class DatasetDescriptionComponent implements OnInit {
                 }, err => {
                   console.log(err);
                   this.datasetDataErr = err;
+                  this.appLoading=false;
                 });
               }, err => { console.log(err) });
 
@@ -418,6 +427,7 @@ export class DatasetDescriptionComponent implements OnInit {
                   true
                 ).subscribe(resp => {
                   this.datasetData = resp
+                  this.appLoading=false;
                   if(this.dataset.views == 'Doc View'){
                     this.http.get(resp[0], { responseType: 'arraybuffer' }).subscribe(async (docxArray) => {
                       let docxHtml = mammoth.convertToHtml({ arrayBuffer: docxArray })
@@ -433,6 +443,7 @@ export class DatasetDescriptionComponent implements OnInit {
                 }, err => {
                   console.log(err);
                   this.datasetData = err.text;
+                  this.appLoading=false;
                 });
               }, err => { console.log(err) });
 
@@ -479,14 +490,14 @@ export class DatasetDescriptionComponent implements OnInit {
       }
       ,
       (err)=>{
-        this.service.messageService("some error occured");
+        this.service.message("some error occured",'error');
       })
     }
       this.fileNamePlaceholder=''
       this.tempDatasetArray=[];
     }
     catch(Exception){
-    this.service.messageService("Some error occured")
+    this.service.message("Some error occured",'error')
     }
   }
  
@@ -503,7 +514,7 @@ export class DatasetDescriptionComponent implements OnInit {
         if(message.body=="Success") {
           this.service.message("File Uploaded Successfully!");
       } else {
-          this.service.messageService("Error in file upload");
+          this.service.message("Error in file upload",'error');
       }
 
           this.stompClient.disconnect(() => {
@@ -567,7 +578,7 @@ export class DatasetDescriptionComponent implements OnInit {
           })
           .catch((err)=>{
             console.log('An error occured');
-            this.service.messageService('Error! while uploading file',);
+            this.service.message('Error! while uploading file','error');
             this.uploading=false;
           });
         }
@@ -1052,7 +1063,7 @@ export class DatasetDescriptionComponent implements OnInit {
 
   getFileData(fileName){
     return this.service.getNutanixFileData(this.datasetName,[fileName],localStorage.getItem('organization')).toPromise()
-    .catch(err=>this.service.messageService('Some error occured while fetching file'));
+    .catch(err=>this.service.message('Some error occured while fetching file','error'));
   }
 
   getTranslation(){
@@ -1159,7 +1170,7 @@ export class DatasetDescriptionComponent implements OnInit {
   createSummary() {
     this.datasetsService.createSummary(this.datasetName,this.datasetData[0]).subscribe((res) => {
       if(res.length>0){
-        this.service.messageService('Summary created successfully');
+        this.service.message('Summary created successfully');
         console.log(res);
       }
     });
@@ -1228,7 +1239,7 @@ export class DatasetDescriptionComponent implements OnInit {
     this.datasetsService.savecorelId(dstid, corelid, name).subscribe((res) => {
       let dataset = res;
     }, error => {
-      this.service.message('Error in corelId! ' + error)
+      this.service.message('Error in corelId! ' + error,'error')
     }
     );
   }

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.qdrant.service.name }}
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+spec:
+  selector:
+    app: qdrant
+  ports:
+    - protocol: TCP
+      port: {{ .Values.qdrant.service.port }}
+      targetPort: {{ .Values.qdrant.service.targetPort }}
+  type: LoadBalancer

@@ -1,114 +1,126 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
-import { Relationship } from './relationship';
-import { map } from 'rxjs/operators';
-import { catchError } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SchemaRelationshipService {
+  private readonly apiPath = '/relationship';
+
   constructor(
-    private https: HttpClient,
-    @Inject('envi') private baseUrl: string
+    private readonly http: HttpClient,
+    @Inject('envi') private readonly baseUrl: string
   ) {}
 
-  getAllRelationships(org): Observable<any> {
-    return this.https
-      .get(this.baseUrl + '/relationship/' + org)
+  getAllRelationships(org: string): Observable<Relationship[]> {
+    return this.http
+      .get<Relationship[]>(`${this.baseUrl}${this.apiPath}/${org}`)
+      .pipe(catchError(this.handleError));
+  }
+
+  getRelationshipById(rid: string | number): Observable<Relationship> {
+    return this.http
+      .get<Relationship>(`${this.baseUrl}${this.apiPath}/id/${rid}`)
       .pipe(
-        map((response) => {
-          return response;
-        })
-      )
-      .pipe(
-        catchError((err) => {
-          return this.handleError(err);
-        })
+        map((response) => new Relationship(response)),
+        catchError(this.handleError)
       );
   }
 
-  getRelationshipById(rid: any): Observable<any> {
-    return this.https
-      .get(this.baseUrl + '/relationship/id/' + rid, { observe: 'response' })
-      .pipe(
-        map((response) => {
-          return new Relationship(response.body);
-        })
+  create(rel: Partial<Relationship>): Observable<Relationship> {
+    const relationshipData = this.addOrganization(rel);
+    return this.http
+      .post<Relationship>(
+        `${this.baseUrl}${this.apiPath}/add`,
+        relationshipData
       )
       .pipe(
-        catchError((err) => {
-          return this.handleError(err);
-        })
+        map((response) => new Relationship(response)),
+        catchError(this.handleError)
       );
   }
 
-  create(rel: any): Observable<Relationship> {
-    const copy = this.convert(rel);
-    return this.https
-      .post(this.baseUrl + '/relationship/add', copy, { observe: 'response' })
-      .pipe(
-        map((res) => {
-          return new Relationship(res.body);
-        })
+  update(rel: Relationship): Observable<Relationship> {
+    const relationshipData = this.addOrganization(rel);
+    return this.http
+      .put<Relationship>(
+        `${this.baseUrl}${this.apiPath}/update`,
+        relationshipData
       )
-      .pipe(
-        catchError((err) => {
-          return this.handleError(err);
-        })
-      );
+      .pipe(catchError(this.handleError));
   }
 
-  update(rel: any): Observable<any> {
-    const copy = this.convert(rel);
-    return this.https
-      .put(this.baseUrl + '/relationship/update', rel, { observe: 'response' })
-      .pipe(
-        map((res) => {
-          return res.body;
-        })
-      )
-      .pipe(
-        catchError((err) => {
-          return this.handleError(err);
-        })
-      );
+  delete(rid: string | number): Observable<void> {
+    return this.http
+      .delete<void>(`${this.baseUrl}${this.apiPath}/delete/${rid}`)
+      .pipe(catchError(this.handleError));
   }
 
-  deleteR(rid: any) {
-    return this.https
-      .delete(this.baseUrl + '/relationship/delete/' + rid)
-      .pipe(
-        map((response) => {
-          return response;
-        })
-      )
-      .pipe(
-        catchError((err) => {
-          return this.handleError(err);
-        })
-      );
+  private addOrganization(rel: Partial<Relationship>): Partial<Relationship> {
+    return {
+      ...rel,
+      organization: sessionStorage.getItem('organization') || '',
+    };
   }
 
-  private convert(rel: Relationship): Relationship {
-    const copy: Relationship = Object.assign({}, rel, {
-      organization: sessionStorage.getItem('organization'),
-    });
-    return copy;
-  }
+  private readonly handleError = (
+    error: HttpErrorResponse
+  ): Observable<never> => {
+    let errorMessage: string;
 
-  private handleError(error: any) {
-    // TODO: seems we cannot use messageService from here...
-    const errMsg = error.error
-      ? error.error
-      : error.status
-      ? `Status: ${error.status} - Text: ${error.statusText}`
-      : 'Server error';
-    console.error(errMsg); // log to console instead
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = `Client error: ${error.error.message}`;
+    } else {
+      // Server-side error
+      errorMessage =
+        error.error?.message ||
+        `Server error: ${error.status} - ${error.statusText}`;
+    }
+
+    console.error('SchemaRelationshipService Error:', errorMessage);
+
+    // Handle unauthorized access
     if (error.status === 401) {
       window.location.href = '/';
     }
-    return throwError(errMsg);
+
+    return throwError(() => new Error(errorMessage));
+  };
+}
+
+export class Relationship {
+  id: number;
+  name: string;
+  organization: string;
+  schema_relation: string;
+  schemaA: string;
+  schemaB: string;
+  relationship_template?: string;
+
+  constructor(json?: any) {
+    if (json != null) {
+      this.id = json.id;
+      this.name = json.name;
+      this.schemaA = json.schemaA;
+      this.schemaB = json.schemaB;
+      this.organization = json.organization;
+      this.schema_relation = json.schema_relation;
+      this.relationship_template = json.relationship_template;
+    }
+  }
+
+  // Utils
+
+  static toArray(jsons: any[]): Relationship[] {
+    const rel: Relationship[] = [];
+    if (jsons != null) {
+      for (const json of jsons) {
+        rel.push(new Relationship(json));
+      }
+    }
+    return rel;
   }
 }

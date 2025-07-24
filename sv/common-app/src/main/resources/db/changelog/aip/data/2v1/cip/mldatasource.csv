@@ -1,3 +1,1 @@
 "connectiondetails","description","dshashcode","name","organization","salt","type","category","activetime","lastmodifiedby","lastmodifieddate","alias"
-"{\"password\":\"encXBMQTzlGIi3Yb7hSxFGwnKrnSjUB4cAY00I=\",\"userName\":\"leapadmin\",\"url\":\"jdbc:mysql://10.85.12.134:3306/loreal\"}","","51b7c477588442713763d470c7f29561e7cd76dc5693a40535e4a3259c06f9e4","LEOLRLLL53151","leo1311","tZpXQC8VPe7P+X8RKE8ISIbnRNH3mL+aeb1X8fAeZxzKzaYwQ3Bxm9Es0j3ghINzfbHuWYppDIaXpTdatQQ7cQ==","MYSQL","SQL","2021-11-11 09:45:23.292640","admin","2021-11-11 09:45:23","Shift Roster"
-"{}","","NULL","LEOLRLFL33294","leo1311","NULL","FILE","FILE","2021-11-11 09:52:57.255724","admin","2021-11-11 09:52:57","Roster File"

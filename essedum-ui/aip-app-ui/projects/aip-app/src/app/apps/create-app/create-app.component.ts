@@ -25,6 +25,7 @@ import { HttpParams } from '@angular/common/http';
 import { DatasetServices } from '../../dataset/dataset-service';
 import { Stomp } from '@stomp/stompjs';
 import * as SockJS from 'sockjs-client';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-create-app',
@@ -47,14 +48,14 @@ export class CreateAppComponent implements OnInit {
   isAuth: any = false;
   @Input() edit: boolean;
   @Input('dataset') matData: any;
-  @Input() appcid: any;
-  @Input() appName: any;
+  @Input() appcid?: any;
+  @Input() appName?: any;
   appEdit: any;
   editAlias: any;
   editCanvas: any = [];
   videoFile: string;
   isTemplate: boolean = false;
-  isCloseHovered: boolean = false; 
+  isCloseHovered: boolean = false;
   public data: any;
   logoUploaded: boolean = false;
   chunkMetadata = {};
@@ -101,6 +102,7 @@ export class CreateAppComponent implements OnInit {
   isApp: boolean = false;
 
   constructor(
+    @Inject(MAT_DIALOG_DATA) public inputDetails: any,
     private Services: Services,
     private dialogRef: MatDialogRef<CreateAppComponent>,
     private route: ActivatedRoute,
@@ -112,6 +114,9 @@ export class CreateAppComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.edit = this.inputDetails.edit;
+    this.appcid = this.inputDetails.appcid;
+    this.appName = this.inputDetails.appName;
     this.editApp();
     this.logoUploaded = false;
     this.uploader = new FileUploader({
@@ -194,10 +199,7 @@ export class CreateAppComponent implements OnInit {
           this.apptype == 'pipeline' ||
           this.apptype == 'chain'))
     ) {
-      this.Services.messageService(
-        'Please fill all the mandatory details',
-        'error'
-      );
+      this.Services.message('Please fill all the mandatory details', 'error');
     } else {
       try {
         const newCanvas = new StreamingServices();
@@ -255,13 +257,13 @@ export class CreateAppComponent implements OnInit {
             });
             this.Services.message('Created Sucessfully.', 'success');
             this.Services.addGroupModelEntity(data.name, temp).subscribe();
-            this.dialogRef.close();
+            this.dialogRef.close('refresh');
             if (this.appListComponent) this.appListComponent.ngOnInit();
           },
-          (error) => this.Services.messageService(error)
+          (error) => this.Services.message(error, 'error')
         );
       } catch (Exception) {
-        this.Services.messageService('Some error occured');
+        this.Services.message('Some error occured '+ Exception, 'error');
       }
     }
   }
@@ -276,7 +278,7 @@ export class CreateAppComponent implements OnInit {
     try {
       return JSON.stringify(data);
     } catch (Exception) {
-      this.Services.messageService('Some error occured');
+      this.Services.message('Some error occured '+ Exception, 'error');
     }
   }
 
@@ -310,7 +312,7 @@ export class CreateAppComponent implements OnInit {
       this.exceededSize = false;
       this.editCanvas.url = '';
       var reader = new FileReader();
-      if (!this.edit) {
+      if (!this.edit && this.myImage?.nativeElement) {
         var image = this.myImage.nativeElement;
         reader.onload = (e: any) => {
           var src = e.target.result;
@@ -400,7 +402,7 @@ export class CreateAppComponent implements OnInit {
       }
     }
     if (valid == false) {
-      this.Services.messageService('Select jobName', 'error');
+      this.Services.message('Select jobName ', 'error');
     } else {
       this.Services.getStreamingServicesByName(this.appName).subscribe(
         (resp) => {
@@ -430,12 +432,12 @@ export class CreateAppComponent implements OnInit {
               newApp.mfeAppName = this.editCanvas.mfeAppName;
               this.Services.saveApp(newApp).subscribe((resp) => {
                 this.responseLink.emit(resp);
-                this.dialogRef.close();
+                this.dialogRef.close('refresh');
                 this.Services.message('Updated Sucessfully.', 'success');
                 if (this.appListComponent) this.appListComponent.ngOnInit();
               });
             },
-            (error) => this.Services.messageService('Some error occured')
+            (error) => this.Services.message('Some error occured '+error, 'error')
           );
         }
       );
@@ -565,7 +567,7 @@ export class CreateAppComponent implements OnInit {
         .catch((err) => {
           this.disableSave = false;
           console.log('An error occured');
-          this.Services.messageService('Error! while uploading file');
+          this.Services.message('Error! while uploading file '+ err, 'error');
           this.uploading = false;
         });
     }
@@ -586,12 +588,12 @@ export class CreateAppComponent implements OnInit {
         },
         (err) => {
           this.disableSave = false;
-          this.Services.messageService('some error occured');
+          this.Services.message('some error occured ' + err, 'error');
         }
       );
     } catch (Exception) {
       this.disableSave = false;
-      this.Services.messageService('Some error occured');
+      this.Services.message('Some error occured '+ Exception, 'error');
     }
   }
 

@@ -1,116 +1,140 @@
-
 <div *ngIf="data" class="le-u-pad-tb-16 col-md-12 selector-678-1" style="position: relative;">
     <div class="col-md-1 selector-678-3" *ngIf="proceed" style="text-align: center">
         <i id="dset-conf-back" class="icon x-24 back-icon" style="cursor:pointer" (click)="proceed = false"></i>
     </div>
     <form [formGroup]="firstForm" (ngSubmit)="onNext()" style="padding-left: 15px" *ngIf="!proceed"
         class="col-md-12 selector-678-5">
-        <div *ngIf="!copyDataset" class="col-lg-6 col-md-12 le-u-mar-b-16 le-u-header-xxl">
-            <h4 *ngIf="data.name" class="selector-678-6-name">Name: {{data.name}}</h4>
+        <div *ngIf="!copyDataset" class="lfx-flex-row lfx-mb-16">
+            <div class="lfx-field lfx-half-col">
+                <div class="col-lg-6 col-md-12 le-u-mar-b-16 le-u-header-xxl">
+                    <h4 *ngIf="data.name" class="selector-678-6-name name-label">Name: {{data.name}}</h4>
+                </div>
+            </div>
         </div>
-        <div class="row col-lg-12 col-md-12">
-            <div *ngIf="!copyDataset" class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-                <mat-form-field appearance="fill" class="w-100">
-                    <mat-label>Alias</mat-label>
-                    <input matInput formControlName="alias" [(ngModel)]="data.alias" required>
-                </mat-form-field>
+        <div class="lfx-flex-row lfx-mb-16">
+            <div class="lfx-field lfx-half-col">
+                <div *ngIf="!copyDataset" class="col-lg-6 col-md-6">
+                    <mat-form-field appearance="fill" class="w-100" floatLabel="always">
+                        <mat-label>Alias</mat-label>
+                        <input placeholder="Enter Alias" matInput formControlName="alias" [(ngModel)]="data.alias"
+                            required>
+                        <mat-error>This field is required</mat-error>
+                    </mat-form-field>
+                </div>
+                <div *ngIf="copyDataset" class="col-lg-6 col-md-6">
+                    <mat-form-field appearance="fill" class="w-100" floatLabel="always">
+                        <mat-label>Alias</mat-label>
+                        <input placeholder="Enter Alias" matInput formControlName="alias" [(ngModel)]="data.alias"
+                            required>
+                        <mat-error>This field is required</mat-error>
+                    </mat-form-field>
+                </div>
             </div>
-            <div *ngIf="copyDataset" class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-                <mat-form-field appearance="fill" class="w-100">
-                    <mat-label>Alias</mat-label>
-                    <input matInput formControlName="alias" [(ngModel)]="data.alias" required>
-                </mat-form-field>
-            </div>
-            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-                <mat-form-field appearance="fill" class="w-100">
-                    <mat-label>Description</mat-label>
-                    <input matInput formControlName="description">
-                </mat-form-field>
+            <div class="lfx-field lfx-half-col">
+
+                <div class="col-lg-6 col-md-6">
+                    <mat-form-field appearance="fill" class="w-100" floatLabel="always">
+                        <mat-label>Description</mat-label>
+                        <input placeholder="Enter Description" matInput formControlName="description">
+                    </mat-form-field>
+                </div>
             </div>
 
-
-        </div><br class="selector-678-13" />
-
-
-        <div class="row col-lg-12 col-md-12">
-
-            <div *ngIf="data.datasource" class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-                <mat-form-field appearance="fill" class="w-100">
-                    <mat-label>Select datasource</mat-label>
-                    <input matInput [matAutocomplete]="autoDS" formControlName="datasourceAliasCtrl"
-                        placeholder="Enter Datasource Name">
-                    <mat-autocomplete #autoDS="matAutocomplete"
-                        (optionSelected)="onDatasourceChange($event.option.value)">
-                        <mat-option *ngFor="let opt of datasourcesOpt" [value]="opt">{{ opt }}</mat-option>
-                    </mat-autocomplete>
-                </mat-form-field>
-            </div>
-            <div *ngIf="!data.datasource" class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-                <mat-form-field appearance="fill" class="w-100">
-                    <mat-label>Select datasource</mat-label>
-                    <mat-select formControlName="datasourceCtrl" (selectionChange)="onDatasourceChange($event.value)">
-                        <mat-option *ngFor="let opt of filteredDataSourcesOpt" [value]="opt.name">{{ opt.name
-                            }}</mat-option>
-                    </mat-select>
-                </mat-form-field>
-            </div>
-            <div class="col-lg-6 col-md-6 le-u-mar-b-16">
-                <mat-form-field appearance="fill" class="w-100">
-                    <mat-label>Select Dataset Usage Type</mat-label>
-                    <mat-select formControlName="Usagetype">
-                        <mat-option *ngFor="let opt of rwOptions" [value]="opt.value">{{opt.viewValue}}</mat-option>
-                    </mat-select>
-                </mat-form-field>
-            </div>
-            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-                <mat-form-field appearance="fill" class="w-100">
-                    <mat-label>Choose View type</mat-label>
-                    <mat-select [disabled]="type === 'GIT'" formControlName="Viewertype">
-                        <mat-option *ngFor="let opt of viewType" [value]="opt.value">{{opt.viewValue}}</mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <mat-error *ngIf="firstForm.controls['Viewertype'].hasError('required')" class="selector-678-30">
-                    Please select viewType
-                </mat-error>
-            </div>
-            <div class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-                <mat-form-field appearance="fill" class="w-100">
-                    <mat-label>Select Tags</mat-label>
-                    <mat-select formControlName="tagsDisp" [multiple]="true">
-                        <mat-option *ngFor="let opt of fetchedtagsOptions"
-                            [value]="opt.value">{{opt.value}}</mat-option>
-                    </mat-select>
-                </mat-form-field>
-            </div>
 
         </div>
-        <br class="selector-678-23" />
+        <br class="selector-678-13" />
+
+
+        <div class="lfx-flex-row lfx-mb-16">
+            <div *ngIf="data.datasource" class="lfx-field lfx-half-col">
+                <!-- <div *ngIf="data.datasource" class="col-lg-6 col-md-6 lfx-u-mar-b-16"> -->
+                <div class="custom-select-wrapper">
+                    <mat-form-field appearance="fill" class="w-100 custom-mat-select" floatLabel="always">
+                        <mat-label>Datasource</mat-label>
+
+                        <mat-select formControlName="datasourceAliasCtrl" placeholder="Select Datasource"
+                            (selectionChange)="onDatasourceChange($event.value)">
+                            <mat-option *ngFor="let opt of datasourcesOpt" [value]="opt">{{ opt }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+            <!-- <div *ngIf="!data.datasource" class="col-lg-6 col-md-6 lfx-u-mar-b-16"> -->
+            <div *ngIf="!data.datasource" class="lfx-field lfx-half-col">
+
+                <div class="custom-select-wrapper">
+                    <mat-form-field appearance="fill" class="w-100 custom-mat-select" floatLabel="always">
+                        <mat-label>Datasource</mat-label>
+
+                        <mat-select formControlName="datasourceAliasCtrl" placeholder="Select Datasource"
+                            (selectionChange)="onDatasourceChange($event.value)">
+                            <mat-option *ngFor="let opt of datasourcesOpt" [value]="opt">{{ opt }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="lfx-field lfx-half-col">
+                <div class="custom-select-wrapper">
+
+                    <mat-form-field appearance="fill" class="w-100 custom-mat-select" floatLabel="always">
+                        <mat-label>Dataset Usage Type</mat-label>
+
+                        <mat-select formControlName="Usagetype" placeholder="Select Dataset Usage Type">
+                            <mat-option *ngFor="let opt of rwOptions" [value]="opt.value">{{opt.viewValue}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+        </div>
+        <div class="lfx-flex-row lfx-mb-16">
+            <div class="lfx-field lfx-half-col">
+                <div class="custom-select-wrapper">
+
+                    <mat-form-field appearance="fill" class="w-100 custom-mat-select" floatLabel="always">
+                        <mat-label>View type</mat-label>
+
+                        <mat-select [disabled]="type === 'GIT'" formControlName="Viewertype"
+                            placeholder="Select View Type">
+                            <mat-option *ngFor="let opt of viewType" [value]="opt.value">{{opt.viewValue}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-error *ngIf="firstForm.controls['Viewertype'].hasError('required')" class="selector-678-30">
+                        Please select viewType
+                    </mat-error>
+                </div>
+            </div>
+            <div class="lfx-field lfx-half-col">
+                <div class="custom-select-wrapper">
+
+                    <mat-form-field appearance="fill" class="w-100" custom-mat-select floatLabel="always">
+                        <mat-label>Tags</mat-label>
+
+                        <mat-select formControlName="tagsDisp" [multiple]="true" placeholder="Select Tags">
+                            <mat-option *ngFor="let opt of fetchedtagsOptions"
+                                [value]="opt.value">{{opt.value}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+        </div>
+
 
 
         <div class="row selector-678-24 ">
             <div class="col-md-6" style="padding-left: 1rem;">
 
                 <div *ngIf="data.schema" class="col-lg-12 col-md-12 le-u-mar-b-16">
+                    <div class="custom-select-wrapper">
+                        <mat-form-field appearance="fill" class="lfx-field lfx-half-col custom-mat-select"
+                            floatLabel="always">
+                            <mat-label>Schema Type</mat-label>
 
-                    <mat-form-field appearance="fill" class="lfx-field lfx-half-col">
-                        <mat-label>Select Schema Type</mat-label>
-                        <input type="text" matInput [matAutocomplete]="schemaAuto" placeholder="Enter Schema Type"
-                            name="schema" [disabled]="isAuth" />
-                        <mat-autocomplete #schemaAuto="matAutocomplete"
-                            (optionSelected)="onSchemaChange($event.option.value)">
-                            <mat-option *ngFor="let opt of originalSchemasOpt" [value]="opt">{{opt}}</mat-option>
-                        </mat-autocomplete>
-                    </mat-form-field>
-                    <div *ngIf="!data.schema" class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-                        <mat-form-field appearance="fill" class="w-100">
-                            <mat-label>Choose Schema</mat-label>
-                            <input matInput placeholder="Choose Schema">
-                            <mat-autocomplete (optionSelected)="onSchemaChange($event.option.value)">
+                            <mat-select [disabled]="isAuth" name="schema" placeholder="Select Schema Type"
+                                (selectionChange)="onSchemaChange($event.value)">
                                 <mat-option *ngFor="let opt of originalSchemasOpt" [value]="opt">{{ opt }}</mat-option>
-                            </mat-autocomplete>
+                            </mat-select>
                         </mat-form-field>
                     </div>
-
                 </div>
                 <p-overlayPanel #cipDtstColsToDwnld id="cipDtstColsToDownload" [dismissable]="true">
                     <ng-template pTemplate>
@@ -127,37 +151,53 @@
                     </ng-template>
                 </p-overlayPanel>
             </div>
-            <div class="col-md-6 d-flex flex-column" style="justify-content: space-evenly;">
-                <div class="d-flex justify-content-between">
-                    <mat-checkbox color="primary" style="width: 16rem;" formControlName="isExperiment">For
-                        Experiments</mat-checkbox>
-                    <mat-checkbox color="primary" *ngIf="!copyDataset" style="position: relative; right: 20rem;"
-                        (change)="alterInterfaceType($event)" >isTemplate?</mat-checkbox>
-                    <mat-checkbox color="primary" *ngIf="copyDataset" style="position: relative; right: 5rem;"
-                        (change)="alterInterfaceType($event)" >isTemplate?</mat-checkbox>
+
+
+
+            <div *ngIf="schemajsonAlias" class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+                <div class="custom-select-wrapper">
+                    <mat-form-field appearance="fill" class="w-100 custom-mat-select" floatLabel="always">
+                        <mat-label>Form template</mat-label>
+
+                        <mat-select formControlName="schemajsonAliasCtrl" placeholder="Select Form Template"
+                            (selectionChange)="onTemplateChange($event.value)">
+                            <mat-option *ngFor="let opt of originalSchemaTemplateAlias" [value]="opt">{{ opt
+                                }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row col-lg-12 col-md-12 align-items-center">
+
+                <div *ngIf="!schemajsonAlias" class="col-lg-6 col-md-6 lfx-u-mar-b-16">
+                    <div class="custom-select-wrapper">
+                        <mat-form-field appearance="fill" class="w-100 custom-mat-select" floatLabel="always">
+                            <mat-label>Schema Form Template</mat-label>
+
+                            <mat-select (selectionChange)="onTemplateChange($event.value)"
+                                placeholder="Select Schema Form Template">
+                                <mat-option *ngFor="let opt of originalSchemaTemplateAlias" [value]="opt">{{ opt
+                                    }}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 d-flex align-items-center justify-content-start gap-4 lfx-u-mar-b-16"
+                    style="padding-bottom: 19px;">
+                    <mat-checkbox color="primary" formControlName="isExperiment">
+                        For Experiments
+                    </mat-checkbox>
+
+                    <mat-checkbox color="primary" *ngIf="!copyDataset" (change)="alterInterfaceType($event)">
+                        isTemplate?
+                    </mat-checkbox>
+
+                    <mat-checkbox color="primary" *ngIf="copyDataset" (change)="alterInterfaceType($event)">
+                        isTemplate?
+                    </mat-checkbox>
                 </div>
             </div>
 
-            <div *ngIf="schemajsonAlias" class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-                <mat-form-field appearance="fill" class="w-100">
-                    <mat-label>Select form template</mat-label>
-                    <input matInput formControlName="schemajsonAliasCtrl" [matAutocomplete]="autoTMP">
-                    <mat-autocomplete #autoTMP="matAutocomplete"
-                        (optionSelected)="onTemplateChange($event.option.value)">
-                        <mat-option *ngFor="let opt of originalSchemaTemplateAlias" [value]="opt">{{ opt }}</mat-option>
-                    </mat-autocomplete>
-                </mat-form-field>
-            </div>
-            <div *ngIf="!schemajsonAlias" class="col-lg-6 col-md-6 lfx-u-mar-b-16">
-                <mat-form-field appearance="fill" class="w-100">
-                    <mat-label>Choose Schema Form Template</mat-label>
-                    <input matInput placeholder="Choose Schema Form Template" [matAutocomplete]="autoTMP2">
-                    <mat-autocomplete #autoTMP2="matAutocomplete"
-                        (optionSelected)="onTemplateChange($event.option.value)">
-                        <mat-option *ngFor="let opt of originalSchemaTemplateAlias" [value]="opt">{{ opt }}</mat-option>
-                    </mat-autocomplete>
-                </mat-form-field>
-            </div>
         </div>
         <div id="nxt-btn" class="d-flex justify-content-end">
             <button mat-flat-button class="next-btn" type="submit" id="dset-conf-nxt">
@@ -187,6 +227,6 @@
     </div>
 </div>
 <div class="" *ngIf="testLoaderBoolean">
-    <mat-progress-spinner mode="indeterminate" diameter="40" color="primary"></mat-progress-spinner>
-    <p style="font-size: 21px; color:#0094ff;">Testing...</p>
+    <app-aip-loading></app-aip-loading>
+
 </div>

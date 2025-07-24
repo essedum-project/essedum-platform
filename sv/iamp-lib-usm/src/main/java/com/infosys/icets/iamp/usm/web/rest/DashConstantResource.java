@@ -388,7 +388,7 @@ public class DashConstantResource {
 	}
 
 	@GetMapping("/get-startup-constants")
-	public ResponseEntity<?> getDashConstantsByKeys(@RequestParam List<String> keys, @RequestHeader("ProjectName") String project) {
+	public ResponseEntity<?> getDashConstantsByKeys(@RequestParam("keys") List<String> keys, @RequestHeader("ProjectName") String project) {
     try {
 //        log.info("getDashConstants : REST request to get dash constants : {}", keys);
         Map<String, Object> result = new HashMap<>();

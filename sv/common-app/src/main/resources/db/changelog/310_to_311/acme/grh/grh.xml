@@ -166,10 +166,13 @@ DELETE FROM mlschemaregistry WHERE name='PipelineCreation' and organization='leo
     
 
     <changeSet author="leap"  id="3v10To3V11-grh-12">
+         <!--
          <sql>
+         
           
           UPDATE mldataset SET attributes ='{\"filter\":\"\",\"mode\":\"query\",\"Query\":\"select distinct CONCAT(OriginPort,SupplierID, OrderNumber) uniqueId, OrderNumber, OriginPort, SupplierID from shipment_data_v5\",\"Cacheable\":false,\"isStreaming\":\"false\",\"defaultValues\":\"\",\"writeMode\":\"append\",\"params\":\"",\"tableName\":\"\",\"uniqueIdentifier\":\"\"}' where alias = 'SupplierOriginMapping' and organization ='leo1311';
         </sql>
+        -->
     </changeSet>
 
      <!-- <changeSet author="leap" id="3v10To3V11-grh-13">   

@@ -1,28 +1,198 @@
-.lfx-u-mar-b-16{
-margin-bottom: 16px !important;
+:host ::ng-deep body,
+:host ::ng-deep html {
+  font-family: "Roboto", sans-serif !important;
 }
 
-.lfx-u-pad-tb-16
- {
-    padding-top: 16px !important;
-    padding-bottom: 16px !important;
+.lfx-u-mar-b-16 {
+  margin-bottom: 16px !important;
 }
 
-.base-color{
-    color:#0094ff !important;
+.lfx-u-pad-tb-16 {
+  padding-top: 16px !important;
+  padding-bottom: 16px !important;
 }
 
-.secondary-color{
-    color:#0a142f !important;
+.base-color {
+  color: #0094ff !important;
 }
 
-.header-text-label
- {
-    color: #0094ff;
-    font-weight: 600;
-}
-
-.back-icon{
-  font-size:24px !important;
+.secondary-color {
   color: #0a142f !important;
+}
+
+.header-text-label {
+  color: #0094ff;
+  font-weight: 600;
+}
+
+.back-icon {
+  font-size: 24px !important;
+  color: #0a142f !important;
+}
+
+// Add this to styles.scss or your component's SCSS file
+::ng-deep
+  .mat-mdc-tab-group.mat-mdc-tab-group-stretch-tabs
+  > .mat-mdc-tab-header
+  .mat-mdc-tab {
+  flex-grow: 0 !important;
+}
+
+::ng-deep .mat-mdc-tab-list {
+  flex-grow: 0 !important;
+}
+
+.tab-header-title {
+  text-align: left;
+  font: normal normal 600 18px/24px "Roboto", sans-serif !important;
+  letter-spacing: 0px;
+  color: #0052cc;
+  opacity: 1;
+}
+
+.tab-header-title-normal {
+  text-align: left;
+  font: normal normal normal 18px/24px "Roboto", sans-serif !important;
+  letter-spacing: 0px;
+  color: #737373;
+  opacity: 1;
+}
+
+.table-header-title {
+  font: normal normal 600 16px/22px "Roboto", sans-serif !important;
+  letter-spacing: 0px;
+  color: #000000;
+  text-transform: capitalize;
+  opacity: 1;
+}
+
+::ng-deep .mat-mdc-input-element {
+  background-color: #f7f7f7ed !important;
+  border-bottom: 0px solid rgba(0, 0, 0, 0.42) !important;
+}
+
+::ng-deep .mdc-text-field {
+  border-bottom: 0px solid rgba(0, 0, 0, 0.42) !important;
+}
+
+::ng-deep .mdc-text-field {
+  all: unset;
+  /* or use display: none; if you want to hide it completely */
+  /* display: none; */
+}
+
+::ng-deep .mat-mdc-select-arrow {
+  display: none !important; // Hide default arrow
+}
+
+::ng-deep .mat-mdc-select-trigger {
+  position: relative;
+}
+
+::ng-deep .mat-mdc-select-trigger::after {
+  content: "";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background-image: url("/assets/images/Accordion_open.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+}
+
+::ng-deep mat-label {
+  text-align: left;
+  font: normal normal normal 12px/18px Roboto !important;
+  letter-spacing: 0px;
+  color: #555555;
+  opacity: 1;
+}
+
+::ng-deep .mat-mdc-form-field input.mat-mdc-input-element {
+  text-align: left;
+  font: normal normal normal 16px/24px Roboto !important;
+  letter-spacing: 0px;
+  color: #000000 !important;
+  opacity: 1;
+  margin-left: 4px !important;
+}
+
+::ng-deep .mat-mdc-form-field input.mat-mdc-input-element::placeholder {
+  color: #737373 !important;
+  text-align: left;
+  font: normal normal normal 16px/24px Roboto !important;
+  letter-spacing: 0px;
+  text-transform: capitalize;
+  opacity: 1;
+}
+
+.ml-15m {
+  margin-left: -11px !important;
+}
+
+::ng-deep .save-btn {
+  color: #ffffff !important;
+  background-color: #ebf1f6 !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+    no-repeat padding-box !important;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+    no-repeat padding-box !important;
+}
+
+::ng-deep .cancel-btn {
+  color: #002966 !important;
+  background-color: #dadada !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: #dadada 0% 0% no-repeat padding-box !important;
+  opacity: 1;
+}
+
+::ng-deep .mat-mdc-select {
+  background-color: #f7f7f7ed !important;
+  border-radius: 4px !important;
+  margin-left: 4px !important;
+}
+
+.text-field-placeholder {
+  text-align: left;
+  font: normal normal normal 16px/24px Roboto;
+  letter-spacing: 0px;
+  color: #737373;
+  text-transform: capitalize;
+  opacity: 1;
+}
+
+
+.mat-style-input {
+  background-color: #f7f7f7ed !important;
+  border-bottom: 0px solid rgba(0, 0, 0, 0.42) !important;
+  text-align: left;
+  font: normal normal normal 16px/24px Roboto !important;
+  letter-spacing: 0px;
+  color: #000000 !important;
+  opacity: 1;
+  margin-left: 4px !important;
+}
+
+.text-transform{
+ text-transform: capitalize !important;
 }

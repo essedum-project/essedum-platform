@@ -424,10 +424,6 @@ TODO(mdc-migration): The following rule targets internal classes of tabs that ma
     content: "/";
 }
 
-.example-container {
-    border: 1px solid rgba(0, 0, 0, 0.5);
-    height: 100vh;
-}
 
 .svg-example-container {
     border: none;

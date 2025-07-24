@@ -1,18 +1,18 @@
 <!-- modal for console data -->
 <div *ngIf="data &amp;&amp; data.isConsole" class="selector-769-1">
     <div class="totheright modal-header selector-769-2">
-        <mat-tooltip *ngIf="!isRemoteLog" matTooltip="copy to clipboard" matTooltipPosition="above">
+        <mat-tooltip *ngIf="!isRemoteLog" matTooltip="copy to clipboard" matTooltipPosition="above" style="cursor: pointer;">
             <mat-icon *ngIf="!pi" class="lfx-u-mar-r-16 x-24 copy-icon" (click)="copyText()">content_copy</mat-icon>
         </mat-tooltip>
-        <mat-tooltip *ngIf="pi" matTooltip="copied" matTooltipPosition="above">
+        <mat-tooltip *ngIf="pi" matTooltip="copied" matTooltipPosition="above" style="cursor: pointer;">
             <mat-icon class="lfx-u-mar-r-16 x-24 copy-icon">content_copy</mat-icon>
         </mat-tooltip>
-        <mat-tooltip matTooltip="close" matTooltipPosition="above">
+        <mat-tooltip matTooltip="close" matTooltipPosition="above" style="cursor: pointer;">
             <mat-icon class="lfx-u-mar-r-16 x-24 close-icon" (click)="closeDialog()">close</mat-icon>
         </mat-tooltip>
     </div>
     <div class="modal-body selector-769-7">
-        <div class="tabpadding selector-769-8">
+        <div class="tabpadding selector-769-8 lfx-u-mar-b-10">
             <div class="flexdivcolumn selector-769-9">
                 <mat-accordion *ngIf="data &amp;&amp; !isRemoteLog" designType="3D" [hideToggle]="false" [multi]="false">
                     <mat-expansion-panel>

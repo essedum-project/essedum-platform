@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.qdrant.pvc.name }}
+spec:
+  accessModes:
+    - {{ .Values.qdrant.pvc.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.qdrant.pvc.storage }}
+  storageClassName: {{ .Values.qdrant.pvc.storageClassName }}
+  volumeName: {{ .Values.qdrant.pv.name }}

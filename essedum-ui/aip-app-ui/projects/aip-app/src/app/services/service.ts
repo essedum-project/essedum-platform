@@ -1,8 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Inject, Injectable, NgZone } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { from, Observable, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 import { Datasource } from '../datasource/datasource';
 import { Manifest, RemoteConfig } from '@angular-architects/module-federation';
@@ -11,6 +10,7 @@ import { Dataset } from '../dataset/datasets';
 import { StreamingServices } from '../streaming-services/streaming-service';
 import { DashConstant } from '../DTO/dash-constant';
 import { App } from '../apps/app';
+import { CustomSnackbarService } from '../sharedModule/services/custom-snackbar.service';
 
 @Injectable()
 export class Services {
@@ -24,9 +24,8 @@ export class Services {
     private https: HttpClient,
     @Inject('dataSets') private dataUrl: string,
     @Inject('envi') private baseUrl: string,
-    private matSnackbar: MatSnackBar,
-    private zone: NgZone,
-    private encKey: encKey
+    private encKey: encKey,
+    private customSnackbar: CustomSnackbarService
   ) {}
 
   getMlTags(): Observable<any> {
@@ -53,7 +52,7 @@ export class Services {
       })
       .pipe(
         map((response) => {
-          return response.body;
+          return response;
         })
       )
       .pipe(
@@ -426,89 +425,7 @@ export class Services {
   }
 
   messageService(resp: any, msg?: any) {
-    console.log(resp);
-    if (resp?.status == 200) {
-      if (resp.body.length === 0) {
-        let message = {
-          message: msg,
-          button: false,
-          type: 'success',
-          successButton: 'Ok',
-          errorButton: 'Cancel',
-        };
-        this.matSnackbar.open(message.message, 'Ok', {
-          duration: 5000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-          panelClass: message.type === 'error' ? 'mat-warn' : '',
-        });
-      } else if (
-        resp.body.status === 'FAILURE' ||
-        (resp.body[0] && resp.body[0].status === 'FAILURE')
-      ) {
-        let failmsg = '';
-        if (resp.body.status === 'FAILURE')
-          failmsg = resp.body.details[0].message;
-        else if (resp.body[0] && resp.body[0].status === 'FAILURE')
-          failmsg = resp.body[0].message;
-        else failmsg = 'FAILED';
-        let message = {
-          message: failmsg,
-          button: false,
-          type: 'error',
-          successButton: 'Ok',
-          errorButton: 'Cancel',
-        };
-        this.matSnackbar.open(message.message, 'Ok', {
-          duration: 5000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-          panelClass: message.type === 'error' ? 'mat-warn' : '',
-        });
-      } else {
-        let message = {
-          message: msg ? msg : resp.body.status,
-          button: false,
-          type: 'success',
-          successButton: 'Ok',
-          errorButton: 'Cancel',
-        };
-        this.matSnackbar.open(message.message, 'Ok', {
-          duration: 5000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-          panelClass: message.type === 'error' ? 'mat-warn' : '',
-        });
-      }
-    } else if (resp.text == 'success') {
-      let message = {
-        message: 'Tags Updated Successfully',
-        button: false,
-        type: 'success',
-        successButton: 'Ok',
-        errorButton: 'Cancel',
-      };
-      this.matSnackbar.open(message.message, 'Ok', {
-        duration: 5000,
-        horizontalPosition: 'center',
-        verticalPosition: 'top',
-        panelClass: message.type === 'error' ? 'mat-warn' : '',
-      });
-    } else {
-      let message = {
-        message: resp.error ? resp.error : resp,
-        button: false,
-        type: 'error',
-        successButton: 'Ok',
-        errorButton: 'Cancel',
-      };
-      this.matSnackbar.open(message.message, 'Ok', {
-        duration: 5000,
-        horizontalPosition: 'center',
-        verticalPosition: 'top',
-        panelClass: message.type === 'error' ? 'mat-warn' : '',
-      });
-    }
+    this.customSnackbar.handleResponse(resp, msg);
   }
 
   isVaultEnabled(): Observable<any> {
@@ -578,19 +495,16 @@ export class Services {
   }
 
   message(msg: any, msgtype: any = 'success') {
-    let message = {
-      message: msg,
-      button: false,
-      type: msgtype,
-      successButton: 'Ok',
-      errorButton: 'Cancel',
-    };
-    this.matSnackbar.open(message.message, 'Ok', {
-      duration: 5000,
-      horizontalPosition: 'center',
-      verticalPosition: 'top',
-      panelClass: message.type === 'error' ? 'mat-warn' : '',
-    });
+    // Use the new custom snackbar service for better styling
+    if (msgtype === 'success') {
+      this.customSnackbar.success(msg);
+    } else if (msgtype === 'error') {
+      this.customSnackbar.error(msg);
+    } else if (msgtype === 'warning') {
+      this.customSnackbar.warning(msg);
+    } else {
+      this.customSnackbar.info(msg);
+    }
   }
 
   async encryptgcm(plaintext, password) {
@@ -953,19 +867,18 @@ export class Services {
   }
 
   messageNotificaionService(type: string, msg: string) {
-    let message = {
-      message: msg,
-      button: false,
-      type: type,
-      successButton: 'Ok',
-      errorButton: 'Cancel',
-    };
-    this.matSnackbar.open(message.message, 'Ok', {
-      duration: 2500,
-      horizontalPosition: 'center',
-      verticalPosition: 'top',
-      panelClass: '',
-    });
+    // Use the new custom snackbar service for better styling
+    const config = { duration: 2500 }; // Shorter duration for notifications
+
+    if (type === 'success') {
+      this.customSnackbar.success(msg, undefined, config);
+    } else if (type === 'error') {
+      this.customSnackbar.error(msg, undefined, config);
+    } else if (type === 'warning') {
+      this.customSnackbar.warning(msg, undefined, config);
+    } else {
+      this.customSnackbar.info(msg, undefined, config);
+    }
   }
 
   getConstantByKey(key: string): Observable<any> {
@@ -3269,23 +3182,17 @@ export class Services {
     }
   }
 
-
   errorMessage(msg: any, msgtype: any = 'error') {
-  let message = {
-    message: msg,
-    button: false,
-    type: msgtype,
-    // successButton: 'Ok',
-    errorButton: 'Cancel',
-  };
-  this.matSnackbar.open(message.message, 'Ok', {
-    duration: 5000,
-    horizontalPosition: 'center',
-    verticalPosition: 'top',
-    panelClass: message.type === 'error' ? 'mat-warn' : '',
-  });
-}
- createDashConstant(dash_constant: DashConstant): Observable<DashConstant> {
+    // Use the new custom snackbar service for better styling
+    if (msgtype === 'error') {
+      this.customSnackbar.error(msg);
+    } else if (msgtype === 'warning') {
+      this.customSnackbar.warning(msg);
+    } else {
+      this.customSnackbar.info(msg);
+    }
+  }
+  createDashConstant(dash_constant: DashConstant): Observable<DashConstant> {
     const copy = this.convertDashConstant(dash_constant);
     return this.https
       .post('/api/dash-constants', copy, { observe: 'response' })
@@ -3319,12 +3226,10 @@ export class Services {
       );
   }
 
-
-   private convertDashConstant(dash_constant: DashConstant): DashConstant {
+  private convertDashConstant(dash_constant: DashConstant): DashConstant {
     const copy: DashConstant = Object.assign({}, dash_constant);
     return copy;
   }
-
 
   getImage(name: string): Observable<any> {
     const org = sessionStorage.getItem('organization');
@@ -3690,6 +3595,157 @@ export class Services {
         })
       )
       .pipe(catchError(this.handleError));
+  }
+  getAppTypes(): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/getAppsType', {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+  getPipelinesTypeByOrganization(): Observable<any> {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .get(this.dataUrl + '/service/v1/streamingServices/getTypes/' + org, {
+        observe: 'response',
+        responseType: 'text',
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+  getDatasourcesTypeByOrganization(): Observable<any> {
+    const org = sessionStorage.getItem('organization');
+    return this.https
+      .get(this.dataUrl + '/service/v1/datasources/getTypes/' + org, {
+        observe: 'response',
+        responseType: 'text',
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+  getFeastAdaptersTypes(): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/features/listAdapterTypes', {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+  getFeastAdapters(param: HttpParams): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/features/feast/listAdapters', {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+  getDGAdapters(param: HttpParams): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/dgbrain/listAdapters', {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+  getDGAdaptersTypes(): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/dgbrain/listAdapterTypes', {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+  getModelListAdaptersTypes(): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/models/listAdapterTypes', {
+        observe: 'response',
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+  getMlTagswithparams(param: HttpParams): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/service/v1/tags/fetchAll', {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
   }
 }
 

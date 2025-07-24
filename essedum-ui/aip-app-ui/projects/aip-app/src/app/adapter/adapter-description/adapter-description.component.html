@@ -23,12 +23,12 @@
                                     <ul class="flex justify-content-between align-items-center">
                                         <li>
                                             <mat-icon *ngIf="editAuth" class="aip-led-icons  aip-cursor mx-2"
-                                                (click)="openModal(content3)" matTooltip="Edit"
+                                                (click)="openModal(adapterContent3)" matTooltip="Edit"
                                                 [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
                                                 edit
                                             </mat-icon>
 
-                                            <ng-template #content3 let-modal>
+                                            <ng-template #adapterContent3 let-modal>
                                                 <app-adapter-create-edit [data]=card
                                                     [action]="editAction"></app-adapter-create-edit>
                                             </ng-template>
@@ -61,13 +61,15 @@
                             </div>
                             <div class="col-md-12 col-lg-12 aip-desc lfx-u-mar-tb-16 lfx-u-pad-tb-16 aip-panel-shadow">
                                 <div matTabGroup>
-                                    <mat-tab-group (selectedIndexChange)="basicReqTabChange($event)"
-                                        style="height:50px;">
-                                        <mat-tab class="lfx-u-header-xl" label="Details">
+                                    <mat-tab-group id="adapter-description-tabs"
+                                        (selectedIndexChange)="basicReqTabChange($event)" style="height:50px;">
+                                        <mat-tab class="lfx-u-header-xl" label="Details"
+                                            data-tab-id="adapter-description-details">
 
                                             <ng-template mat-tab-label>Details</ng-template>
                                         </mat-tab>
-                                        <mat-tab class="lfx-u-header-xl" label="API Spec">
+                                        <mat-tab class="lfx-u-header-xl" label="API Spec"
+                                            data-tab-id="adapter-description-api-spec">
 
                                             <ng-template mat-tab-label>API Spec</ng-template>
                                         </mat-tab>

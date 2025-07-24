@@ -88,3 +88,18 @@ i{
 .icon-data-wrap{
     display: flex;
 }
+
+.selector-769-1 {
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-header.selector-769-2 {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #fff;
+  padding: 6px;
+  
+}

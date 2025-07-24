@@ -1,78 +1,89 @@
-.text-view{
-    overflow-y: hidden;
-    overflow-x: auto;
-    border-radius: 10px;
-    padding: 10px;
-    margin: 5px;
+.text-view {
+  overflow-y: hidden;
+  overflow-x: auto;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 5px;
 }
 
 
-.lfx-u-pad-t-32{
-    padding: 3%;
+.lfx-u-pad-t-32 {
+  padding: 3%;
 }
 
-b{
-    color: gray;
+.data_header {
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  color: #0a142f
 }
 
-.data-container{
-    border-radius: 8px;
-    margin: 3%;
+b {
+  color: gray;
 }
 
-.metadata{
-    display: flex;
-    flex-wrap: wrap;
-    row-gap: 12px;
+.data-container {
+  border-radius: 8px;
+  margin: 3%;
 }
 
-.meta-val{
-    background-color: #EFEFEF;
-    padding: 5px 8px 5px 8px;
-    border-radius: 8px;
-    margin: 0px 10px 0px 5px;
-    line-height: 2;
-    word-break: break-all;
+.metadata {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 12px;
+
 }
 
-.meta-key{
-    color: #737373;
+.meta-val {
+  background-color: #EFEFEF;
+  padding: 5px 8px 5px 8px;
+  border-radius: 8px;
+  margin: 0px 10px 0px 5px;
+  line-height: 2;
+  word-break: break-all;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+
 }
 
-::ng-deep  .ngx-spinner-overlay{
-    position: relative !important;
+.meta-key {
+  color: #0094ff;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+
+}
+
+::ng-deep .ngx-spinner-overlay {
+  position: relative !important;
 }
 
 ::ng-deep .le-c-card.mat-mdc-card .mat-mdc-card-content {
-    margin-bottom: 0px;
+  margin-bottom: 0px;
 }
 
 ::ng-deep .aip-initiative-desc {
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  ::ng-deep .le-c-tab .mat-mdc-tab.mdc-tab{
-    text-transform: none;
-  }
+::ng-deep .le-c-tab .mat-mdc-tab.mdc-tab {
+  text-transform: none;
+}
 
-  .txt-cont{
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-  }
+.txt-cont {
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
 
-.msg-banner{
-    padding: 10px;
-    border-radius: 5px;
-    background-color: rgb(255, 255, 255);
-    // width: 730px;
-    text-align: justify;
-    overflow-wrap: break-word !important;;
-    // display: block;
-    line-height: 1.2;
+.msg-banner {
+  padding: 10px;
+  border-radius: 5px;
+  background-color: rgb(255, 255, 255);
+  // width: 730px;
+  text-align: justify;
+  overflow-wrap: break-word !important;
+  ;
+  // display: block;
+  line-height: 1.2;
 }
 
 @media screen and (min-width: 1367px) {
@@ -92,4 +103,3 @@ b{
     margin: 0 auto;
   }
 }
-

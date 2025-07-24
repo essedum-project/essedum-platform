@@ -207,7 +207,7 @@ export class PipelineCreateComponent implements OnInit {
  
         },
           error => {
-            this.Services.messageService(error);
+              this.Services.message(`Error: ${error}`, 'error');
           }
 
         );
@@ -216,7 +216,7 @@ export class PipelineCreateComponent implements OnInit {
       }
     }
     catch (Exception) {
-      this.Services.messageService("Some error occured")
+      this.Services.message("Some error occured",'error');
     }
 
 
@@ -237,9 +237,10 @@ export class PipelineCreateComponent implements OnInit {
               this.options.push(val);
             }
           })
+          this.type=this.options[0].value;
         },
           error => {
-            this.Services.messageService(error);
+            this.Services.message('Error '+error,'error');
           }
         );
       }
@@ -253,9 +254,10 @@ export class PipelineCreateComponent implements OnInit {
               this.options.push(val);
             }
           })
+          this.type=this.options[0].value;
         },
           error => {
-            this.Services.messageService(error);
+            this.Services.message('Error '+error,'error');
           }
         )
       }
@@ -303,7 +305,7 @@ export class PipelineCreateComponent implements OnInit {
       };
     }
     catch (Exception) {
-      this.Services.messageService("Some error occured")
+      this.Services.message("Some error occured",'error')
     }
 
 

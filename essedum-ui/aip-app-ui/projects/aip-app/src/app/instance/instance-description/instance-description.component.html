@@ -22,12 +22,12 @@
                                     <ul class="flex justify-content-between align-items-center">
                                         <li>
                                             <mat-icon *ngIf="editAuth" class="aip-led-icons  aip-cursor mx-2"
-                                                (click)="openModal(content3)" matTooltip="Edit"
+                                                (click)="openModal(instanceContent3)" matTooltip="Edit"
                                                 [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
                                                 edit
                                             </mat-icon>
 
-                                            <ng-template #content3 let-modal>
+                                            <ng-template #instanceContent3 let-modal>
                                                 <app-instance-create-edit [data]=card
                                                     [action]="editAction"></app-instance-create-edit>
                                             </ng-template>
@@ -58,11 +58,13 @@
                             </div>
                             <div class="col-md-12 col-lg-12 aip-desc lfx-u-mar-tb-16 lfx-u-pad-tb-16 aip-panel-shadow">
                                 <div matTabGroup>
-                                    <mat-tab-group disableRipple (selectedIndexChange)="basicReqTabChange($event)">
-                                        <mat-tab class="lfx-u-header-xl" label="Details">
+                                    <mat-tab-group id="instance-description-tabs" disableRipple
+                                        (selectedIndexChange)="basicReqTabChange($event)">
+                                        <mat-tab class="lfx-u-header-xl" label="Details" data-tab-id="instance-details">
                                             <ng-template mat-tab-label>Details</ng-template>
                                         </mat-tab>
-                                        <mat-tab class="lfx-u-header-xl" label="API Spec">
+                                        <mat-tab class="lfx-u-header-xl" label="API Spec"
+                                            data-tab-id="instance-api-spec">
                                             <ng-template mat-tab-label>API Spec</ng-template>
                                         </mat-tab>
                                     </mat-tab-group>

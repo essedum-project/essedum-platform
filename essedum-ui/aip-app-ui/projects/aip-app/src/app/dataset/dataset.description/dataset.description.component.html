@@ -5,77 +5,56 @@
         <div class="lfx-l-level1-middle-col lfx-l-base-layout-center">
           <div class="lfx-l-level2-middle-ctr">
             <div class="lfx-l-level2-middle-col">
-              <div
-                class="align-items-center d-flex justify-content-between d-flex"
-              >
-                <div
-                  class="selector-model-title-head d-flex align-items-center"
-                >
+              <div class="align-items-center d-flex justify-content-between d-flex">
+                <div class="selector-model-title-head d-flex align-items-center">
                   <span *ngIf="initiativeView">
                     <mat-tooltip [matTooltipPosition]="tooltipPoition">
-                          <span class="" style="cursor: pointer;">                          
-                                <i class="fa fa-long-arrow-left back-icon" aria-hidden="true" (click)="toggler()"></i>
-                            </span>
+                      <span class="" style="cursor: pointer;">
+                        <i class="fa fa-long-arrow-left back-icon" aria-hidden="true" (click)="toggler()"></i>
+                      </span>
                     </mat-tooltip>
                   </span>
-                  <span class="lfx-u-mar-l-8 aip-desc-title lfx-u-header-xxl"
-                    ><span style="color: #737373">Dataset: </span
-                    >{{ datasetAlias | titlecase }}
+                  <span class="lfx-u-mar-l-8 aip-desc-title lfx-u-header-xxl"><span style="color: #737373">Dataset:
+                    </span>{{ datasetAlias | titlecase }}
                   </span>
                 </div>
                 <span *ngIf="initiativeView">
                   <div class="selector-model-title-tail">
-                    <ul
-                      class="d-flex justify-content-between align-items-center py-2 px-4"
-                      id="aip-dataset-desc-icon"
-                    >
+                    <ul class="d-flex justify-content-between align-items-center py-2 px-4" id="aip-dataset-desc-icon">
                       <li *ngIf="!isGitUrl">
                         <mat-menu #overflowMenu="matMenu">
-                           
-                           
-                          
-                            <button mat-menu-item *ngIf="type" (click)="pipelineDialog(pipelines)">
-                                <span class="lfx-u-mar-l-8">Dataset Enrichments</span>
-                            </button>
-                            <ng-template #pipelines let-modal>
-                                <app-pipeline-dialog
-                                    [data]="card"
-                                    [dstName]="datasetName"
-                                    [dstId]="datasetId"
-                                    [event]="eventData"
-                                ></app-pipeline-dialog>
-                            </ng-template>
+
+
+
+                          <button mat-menu-item *ngIf="type" (click)="pipelineDialog(pipelines)">
+                            <span class="lfx-u-mar-l-8">Dataset Enrichments</span>
+                          </button>
+                          <ng-template #pipelines let-modal>
+                            <app-pipeline-dialog [data]="card" [dstName]="datasetName" [dstId]="datasetId"
+                              [event]="eventData"></app-pipeline-dialog>
+                          </ng-template>
                         </mat-menu>
                         <button mat-icon-button [matMenuTriggerFor]="overflowMenu" aria-label="menu">
-                            <i class="lfx-u-mar-r-16 icon x-24 icon_setting"></i>
+                          <i class="lfx-u-mar-r-16 icon x-24 icon_setting"></i>
                         </button>
                       </li>
 
-                      <li
-                        *ngIf="isGitUrl"
-                        class="aip-cursor"
-                        (click)="triggerGitFilesSummaryGenetationEvent()"
-                      >
-                        <mat-tooltip
-                          [matTooltip]="'Generate Summary'"
-                          [matTooltipPosition]="tooltipPoition"
-                          class="lfx-u-pad-16"
-                        >
+                      <li *ngIf="isGitUrl" class="aip-cursor" (click)="triggerGitFilesSummaryGenetationEvent()">
+                        <mat-tooltip [matTooltip]="'Generate Summary'" [matTooltipPosition]="tooltipPoition"
+                          class="lfx-u-pad-16">
                           <span style="font-size: large">
-                            <i
-                              class="lfx-u-mar-r-16 icon x-24 document-icon aip-led-icons"
-                            ></i>
+                            <i class="lfx-u-mar-r-16 icon x-24 document-icon aip-led-icons"></i>
                           </span>
                         </mat-tooltip>
                       </li>
-                   
-                     
+
+
                     </ul>
                   </div>
                 </span>
               </div>
               <div class="data-container">
-               
+
                 <div *ngIf="semanticSearchActive">
                   <div>
                     <div>
@@ -83,66 +62,52 @@
                         <div *ngIf="loadingPage">
                           <mat-card-content>
                             <mat-card class="lfx-u-pad-tb-8 lfx-u-pad-lr-16">
-                            <mat-progress-spinner
-                                color="primary"
-                                mode="indeterminate"
-                                [diameter]="40"
-                                [strokeWidth]="4"
-                                *ngIf="loadingPage"
-                            ></mat-progress-spinner>
+                              <mat-progress-spinner color="primary" mode="indeterminate" [diameter]="40"
+                                [strokeWidth]="4" *ngIf="loadingPage"></mat-progress-spinner>
                             </mat-card>
                           </mat-card-content>
                         </div>
                         <div *ngIf="!loadingPage && !isInstanceNameConfigured">
-                        <mat-card style="width: 100% !important">
+                          <mat-card style="width: 100% !important">
                             <mat-card-header>
-                                <mat-card-title class="lfx-card__container clearfix">
-                                    <div class="lfxe-c-card__container-left w-100">
-                                        <h2 class="lfx-u-header-md" style="line-height: 2rem">
-                                            Please Configure Adapter Instance Name
-                                        </h2>
-                                    </div>
-                                </mat-card-title>
+                              <mat-card-title class="lfx-card__container clearfix">
+                                <div class="lfxe-c-card__container-left w-100">
+                                  <h2 class="lfx-u-header-md" style="line-height: 2rem">
+                                    Please Configure Adapter Instance Name
+                                  </h2>
+                                </div>
+                              </mat-card-title>
                             </mat-card-header>
                             <mat-card-content>
-                                <div class="lfx-u-body-md mt-3" style="min-height: 4rem">
-                                    <mat-form-field appearance="fill" style="width: 100%;">
-                                        <mat-label>Select Adapter Instance</mat-label>
-                                        <mat-select [(value)]="adapterInstanceName" (selectionChange)="adapterNameChangesOccur($event)">
-                                            <mat-option *ngFor="let option of adaptersOptions" [value]="option.value">
-                                                {{ option.viewValue }}
-                                            </mat-option>
-                                        </mat-select>
-                                        <mat-hint>Select Adapter Instance</mat-hint>
-                                    </mat-form-field>
-                                    <button
-                                        mat-raised-button
-                                        style="background-color: #0a142f; color: white;"
-                                        [disabled]="!adapterInstanceName"
-                                        (click)="configureAdapterInstance()"
-                                        onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
-                                        onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';"
-                                    >
-                                        Configure
-                                    </button>
-                                </div>
+                              <div class="lfx-u-body-md mt-3" style="min-height: 4rem">
+                                <mat-form-field appearance="fill" style="width: 100%;">
+                                  <mat-label>Select Adapter Instance</mat-label>
+                                  <mat-select [(value)]="adapterInstanceName"
+                                    (selectionChange)="adapterNameChangesOccur($event)">
+                                    <mat-option *ngFor="let option of adaptersOptions" [value]="option.value">
+                                      {{ option.viewValue }}
+                                    </mat-option>
+                                  </mat-select>
+                                  <mat-hint>Select Adapter Instance</mat-hint>
+                                </mat-form-field>
+                                <button mat-raised-button style="background-color: #0a142f; color: white;"
+                                  [disabled]="!adapterInstanceName" (click)="configureAdapterInstance()"
+                                  onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                                  onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                                  Configure
+                                </button>
+                              </div>
                             </mat-card-content>
-                        </mat-card>
+                          </mat-card>
                         </div>
-                        <div
-                          *ngIf="!loadingPage && isInstanceNameConfigured"
-                          class=""
-                        >
+                        <div *ngIf="!loadingPage && isInstanceNameConfigured" class="">
                           <div *ngIf="!isInstanceExist">
-                            <mat-card
-                              designType="simple"
-                              style="width: 100% !important"
-                            >
-                            <div class="alert alert-danger" role="alert" style="margin: 16px 0;">
+                            <mat-card designType="simple" style="width: 100% !important">
+                              <div class="alert alert-danger" role="alert" style="margin: 16px 0;">
                                 <strong>Adapter Instance :</strong>
                                 <a class="lfx-u-text-primary-80 lfx-u-mar-b-8">{{ instanceName }}</a>
                                 is unavailable, Please try after adding Adapter Instance from Adapters tab.
-                            </div>
+                              </div>
                             </mat-card>
                           </div>
                           <div *ngIf="isInstanceExist">
@@ -150,91 +115,51 @@
                               <div class="">
                                 <div class="row lfx-c-panel__content">
                                   <div class="lfx-u-pad-lr-16">
-                                    <mat-card
-                                      designType="simple"
-                                      style="width: 100% !important"
-                                    >
+                                    <mat-card designType="simple" style="width: 100% !important">
                                       <mat-card-header>
-                                        <mat-card-title
-                                          class="lfx-c-card__container clearfix"
-                                        >
-                                          <div
-                                            class="lfx-c-card__container-left w-100"
-                                          >
-                                            <h2
-                                              class="lfx-u-header-md lfx-u-ellipsis"
-                                            >
+                                        <mat-card-title class="lfx-c-card__container clearfix">
+                                          <div class="lfx-c-card__container-left w-100">
+                                            <h2 class="lfx-u-header-md lfx-u-ellipsis">
                                               Search Result
                                             </h2>
                                           </div>
                                         </mat-card-title>
                                       </mat-card-header>
-                                      <div
-                                        ledsTabGroup
-                                        class="aip-height-tab"
-                                        *ngIf="!loading"
-                                      >
-                                        <mat-tab-group
-                                          disableRipple
-                                          (selectedIndexChange)="
+                                      <div ledsTabGroup class="aip-height-tab" *ngIf="!loading">
+                                        <mat-tab-group disableRipple (selectedIndexChange)="
                                             tabChangeForIndexes($event)
-                                          "
-                                        >
-                                          <mat-tab
-                                            *ngFor="
+                                          ">
+                                          <mat-tab *ngFor="
                                               let index of semanticSearchResult
-                                            "
-                                          >
+                                            ">
                                             <ng-template mat-tab-label>{{
                                               index.index
-                                            }}</ng-template>
+                                              }}</ng-template>
                                           </mat-tab>
                                         </mat-tab-group>
                                       </div>
-                                      <mat-card-content
-                                        *ngIf="answer"
-                                        class="lfx-u-no-mar-b"
-                                      >
-                                        <div
-                                          class="lfx-u-body-md"
-                                          style="min-height: 4rem"
-                                        >
-                                          <div
-                                            class="txt-cont"
-                                            [ngStyle]="{
+                                      <mat-card-content *ngIf="answer" class="lfx-u-no-mar-b">
+                                        <div class="lfx-u-body-md" style="min-height: 4rem">
+                                          <div class="txt-cont" [ngStyle]="{
                                               'max-height': summaryShowMore
                                                 ? '80px'
                                                 : none
-                                            }"
-                                          >
-                                            <p
-                                              style="white-space: pre-line"
-                                              class=""
-                                            >
+                                            }">
+                                            <p style="white-space: pre-line" class="">
                                               {{ answer }}
                                             </p>
                                           </div>
-                                          <a
-                                            *ngIf="answer"
-                                            href="#"
-                                            (click)="showOrHideMore()"
-                                          >
+                                          <a *ngIf="answer" href="#" (click)="showOrHideMore()">
                                             {{
-                                              summaryShowMore
-                                                ? "Show more"
-                                                : "Show less"
-                                            }}</a
-                                          >
+                                            summaryShowMore
+                                            ? "Show more"
+                                            : "Show less"
+                                            }}</a>
                                         </div>
                                       </mat-card-content>
                                       <mat-card-content *ngIf="loading">
-                                        <mat-progress-spinner
-                                            color="primary"
-                                            mode="indeterminate"
-                                            [diameter]="40"
-                                            [strokeWidth]="4"
-                                            *ngIf="loading"
-                                        ></mat-progress-spinner>
+                                        <mat-progress-spinner color="primary" mode="indeterminate" [diameter]="40"
+                                          [strokeWidth]="4" *ngIf="loading"></mat-progress-spinner>
                                       </mat-card-content>
                                     </mat-card>
                                   </div>
@@ -249,56 +174,34 @@
                 </div>
                 <mat-card *ngIf="!semanticSearchActive">
                   <div class="metadata">
-                    <div
-                      *ngFor="let ele of metaDataValues; index as i"
-                      class="lfx-u-body-lg  d-block lfx-u-mar-b-4"
-                    >
+                    <div *ngFor="let ele of metaDataValues; index as i" class="lfx-u-body-lg  d-block lfx-u-mar-b-4">
                       <div *ngIf="isShortString(ele)">
                         <div *ngIf="!isGitUrl">
-                          <span class="meta-key"
-                            >{{ metaDataKeys[i] | titlecase }} :</span
-                          ><span class="meta-val">{{ metaDataValues[i] }}</span>
+                          <span class="meta-key">{{ metaDataKeys[i] | titlecase }} :</span><span class="meta-val">{{
+                            metaDataValues[i] }}</span>
                         </div>
                       </div>
                     </div>
-                    <div
-                      class="lfx-u-body-lg  d-block lfx-u-mar-b-4"
-                    >
-                      <span
-                        class="meta-key"
-                        *ngIf="statusnew && statusnew.indexOf('COMPLETED') > -1"
-                        >Knowledge Bases :</span
-                      >
-                      <span
-                        class="meta-val"
-                        *ngIf="statusnew && statusnew.indexOf('COMPLETED') > -1"
-                        >{{ topicnamenew.join(", ") }}</span
-                      >
+                    <div class="lfx-u-body-lg  d-block lfx-u-mar-b-4">
+                      <span class="meta-key" *ngIf="statusnew && statusnew.indexOf('COMPLETED') > -1">Knowledge Bases
+                        :</span>
+                      <span class="meta-val" *ngIf="statusnew && statusnew.indexOf('COMPLETED') > -1">{{
+                        topicnamenew.join(", ") }}</span>
                     </div>
-                    <div
-                      *ngIf="isGitUrl && metaData.description"
-                      class="lfx-u-body-lg  d-block lfx-u-mar-b-4"
-                    >
+                    <div *ngIf="isGitUrl && metaData.description" class="lfx-u-body-lg  d-block lfx-u-mar-b-4">
                       <span class="meta-key"> Description :</span>
                       <span class="meta-val">{{ metaData.description }}</span>
                     </div>
-                    <div
-                      *ngIf="isGitUrl && metaData.branch"
-                      class="lfx-u-body-lg  d-block lfx-u-mar-b-4"
-                    >
+                    <div *ngIf="isGitUrl && metaData.branch" class="lfx-u-body-lg  d-block lfx-u-mar-b-4">
                       <span class="meta-key">Branch :</span>
                       <span class="meta-val">{{ metaData.branch }}</span>
                     </div>
                   </div>
                   <div *ngIf="isGitUrl && metaData.url">
                     Please click on the below link to access the url portal
-                    <div
-                      *ngIf="isShortStringURL('url')"
-                      class="lfx-u-body-lg  d-block lfx-u-mar-b-4"
-                    >
+                    <div *ngIf="isShortStringURL('url')" class="lfx-u-body-lg  d-block lfx-u-mar-b-4">
                       <span *ngIf="isGitUrl">
-                        <a href="{{ metaData.url }}" target="_blank"
-                          ><span class="meta-key">Url:</span>
+                        <a href="{{ metaData.url }}" target="_blank"><span class="meta-key">Url:</span>
                           <span class="meta-val">{{ metaData.url }}</span>
                         </a>
                       </span>
@@ -307,7 +210,7 @@
                 </mat-card>
                 <br />
                 <div *ngIf="!datasetData && !datasetDataErr && !isGitUrl">
-                  <mat-card>
+                  <!-- <mat-card>
                     <div
                       class="d-flex justify-content-center align-items-center flex-column"
                     >
@@ -327,250 +230,179 @@
                         style="margin-top: 16px;"
                     ></mat-progress-spinner>
                     </div>
-                  </mat-card>
+                  </mat-card> -->
+                  <div *ngIf="appLoading" role="status" aria-label="Loading cards">
+                    <app-aip-loading></app-aip-loading>
+                  </div>
+                  <app-aip-empty-state *ngIf="shouldShowEmptyState"></app-aip-empty-state>
                 </div>
                 <div *ngIf="datasetDataErr">
                   <mat-card>
-                    <div
-                      class="d-flex justify-content-center align-items-center flex-column"
-                    >
-                      <b>{{ datasetDataErr }}</b>
+                    <div class="d-flex justify-content-center align-items-center flex-column">
+                      <b>There is an application error, please contact the application admin</b>
                     </div>
                   </mat-card>
                 </div>
                 <div *ngIf="dataset.views && !isGitUrl">
-                <mat-card *ngIf="datasetData" class="lfx-u-mar-b-16">
+                  <mat-card *ngIf="datasetData" class="lfx-u-mar-b-16">
                     <mat-card-header>
-                        <mat-card-title>
-                            <h2 class="lfx-u-header-xl  float-start">
-                                Data preview
-                            </h2>
-                        </mat-card-title>
-                        <mat-card-actions *ngIf="views == 'Folder View'" class="d-flex gap-4">
-                            <div class="d-flex">
-                                <span
-                                    class="d-flex align-items-center"
-                                    *ngIf="fileNamePlaceholder"
-                                    >{{ fileNamePlaceholder }}</span
-                                >
-                                <input
-                                    class="aip-led-icons icon x-24 upload-icon d-flex"
-                                    accept=".csv, .xlsx ,.zip,.mp4,.pdf,.mp3"
-                                    type="file"
-                                    (change)="addFile($event)"
-                                    multiple
-                                />
-                                <span
-                                    class="d-flex align-items-center fw-bold"
-                                    *ngIf="!fileNamePlaceholder"
-                                >
-                                    Upload
-                                </span>
-                            </div>
-                            <div *ngIf="fileNamePlaceholder">
-                                <button
-                                    mat-raised-button
-                                    style="background-color: #0a142f; color: white"
-                                    [disabled]="false"
-                                    (click)="uploadFile()"
-                                    onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
-                                    onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';"
-                                >
-                                    Upload
-                                </button>
-                            </div>
-                            <div
-                                (click)="getActions()"
-                                class="d-flex"
-                                title="Refresh"
-                                designType="icon"
-                            >
-                                <span class="lfx-c-btn--icon__icon d-flex align-items-center">
-                                    <i class="aip-led-icons icon x-24 icon_Refresh"></i>
-                                </span>
-                            </div>
-                            <button
-                                mat-raised-button
-                                style="background-color: #0a142f; color: white;"
-                                [disabled]="false"
-                                *ngIf="uploading"
-                                (click)="terminateDownload()"
-                                title="Terminate Download"
-                                onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
-                                onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';"
-                            >
-                                {{ uploadPercentage }} %
-                            </button>
-                        </mat-card-actions>
+                      <mat-card-title>
+                        <h2 class="lfx-u-header-xl  float-start data_header">
+                          Data Preview
+                        </h2>
+                      </mat-card-title>
+                      <mat-card-actions *ngIf="views == 'Folder View'" class="d-flex gap-4">
+                        <div class="d-flex">
+                          <span class="d-flex align-items-center" *ngIf="fileNamePlaceholder">{{ fileNamePlaceholder
+                            }}</span>
+                          <input class="aip-led-icons icon x-24 upload-icon d-flex"
+                            accept=".csv, .xlsx ,.zip,.mp4,.pdf,.mp3" type="file" (change)="addFile($event)" multiple />
+                          <span class="d-flex align-items-center fw-bold" *ngIf="!fileNamePlaceholder">
+                            Upload
+                          </span>
+                        </div>
+                        <div *ngIf="fileNamePlaceholder">
+                          <button mat-raised-button style="background-color: #0a142f; color: white" [disabled]="false"
+                            (click)="uploadFile()"
+                            onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                            onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                            Upload
+                          </button>
+                        </div>
+                        <div (click)="getActions()" class="d-flex" title="Refresh" designType="icon">
+                          <span class="lfx-c-btn--icon__icon d-flex align-items-center">
+                            <i class="aip-led-icons icon x-24 icon_Refresh"></i>
+                          </span>
+                        </div>
+                        <button mat-raised-button style="background-color: #0a142f; color: white;" [disabled]="false"
+                          *ngIf="uploading" (click)="terminateDownload()" title="Terminate Download"
+                          onmouseover="this.style.backgroundColor='#0094ff'; this.style.color='white';"
+                          onmouseout="this.style.backgroundColor='#0a142f'; this.style.color='white';">
+                          {{ uploadPercentage }} %
+                        </button>
+                      </mat-card-actions>
                     </mat-card-header>
                     <mat-card-content>
-                       
-                        <app-dataset-view
-                            [data]="selectedDataset"
-                            *ngIf="views == 'Json View'"
-                        ></app-dataset-view>
-                        <app-enl-code-editor
-                            *ngIf="views == 'Code View'"
-                            [dataset]="true"
-                            [script]="datasetData"
-                            id="ele"
-                        ></app-enl-code-editor>
-                        <app-dataset-table-view
-                            [datasetname]="selectedDatasetName"
-                            [datasetAlias]="datasetAlias"
-                            *ngIf="views == 'Table View'"
-                        ></app-dataset-table-view>
-                        <pre *ngIf="views == 'Log View'" class="text-view">
+
+                      <app-dataset-view [data]="selectedDataset" *ngIf="views == 'Json View'"></app-dataset-view>
+                      <app-enl-code-editor *ngIf="views == 'Code View'" [dataset]="true" [script]="datasetData"
+                        id="ele"></app-enl-code-editor>
+                      <app-dataset-table-view [datasetname]="selectedDatasetName" [datasetAlias]="datasetAlias"
+                        *ngIf="views == 'Table View'"></app-dataset-table-view>
+                      <pre *ngIf="views == 'Log View'" class="text-view">
                 {{ datasetData }} </pre>
-                        <div
-                            *ngIf="views == 'Text View' || views == 'Email View'"
-                            class="text-view"
-                        >
-                            <mat-tab-group (selectedIndexChange)="basicReqTabChange($event)">
-                                <mat-tab label="File Preview"></mat-tab>
-                                <mat-tab label="Translation"></mat-tab>
-                                <mat-tab label="Summary"></mat-tab>
-                                <mat-tab label="FAQ"></mat-tab>
-                            </mat-tab-group>
-                            <div *ngIf="tabReq === 'filePreview'">
-                                <div class="tab_content" id="tabContent_0">
-                                    <div class="row mt-4 lfx-u-mar-16">
-                                        {{ datasetData }}
-                                    </div>
-                                </div>
+                      <div *ngIf="views == 'Text View' || views == 'Email View'" class="text-view">
+                        <mat-tab-group (selectedIndexChange)="basicReqTabChange($event)">
+                          <mat-tab label="File Preview"></mat-tab>
+                          <mat-tab label="Translation"></mat-tab>
+                          <mat-tab label="Summary"></mat-tab>
+                          <mat-tab label="FAQ"></mat-tab>
+                        </mat-tab-group>
+                        <div *ngIf="tabReq === 'filePreview'">
+                          <div class="tab_content" id="tabContent_0">
+                            <div class="row mt-4 lfx-u-mar-16">
+                              {{ datasetData }}
                             </div>
-                            <div *ngIf="tabReq === 'translation'">
-                                <div class="tab_content" id="tabContent_1">
-                                    <div class="row mt-4 lfx-u-mar-16">
-                                        <div
-                                            *ngIf="fileData && fileData[0] !== null"
-                                            class="lfx-c-panel__content lfx-u-pad-16 msg-banner"
-                                        >
-                                            {{ fileData }}
-                                        </div>
-                                        <div *ngIf="fileData[0] === null">
-                                            <h4>
-                                                Please generate translation file or contact the application admin
-                                            </h4>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div *ngIf="tabReq === 'fileSummary'">
-                                <div class="tab_content" id="tabContent_2">
-                                    <div class="row mt-4 lfx-u-mar-16">
-                                        <div
-                                            *ngIf="fileData && fileData[0] !== null"
-                                            class="lfx-c-panel__content lfx-u-pad-16 msg-banner"
-                                        >
-                                            {{ fileData }}
-                                        </div>
-                                        <div *ngIf="fileData[0] === null">
-                                            <h4>
-                                                Please generate Summary file or contact the application admin
-                                            </h4>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div *ngIf="tabReq === 'faq'">
-                                <div class="tab_content" id="tabContent_3">
-                                    <div class="row mt-4 lfx-u-mar-16">
-                                        <div
-                                            *ngIf="fileData && fileData[0] !== null"
-                                            class="lfx-c-panel__content lfx-u-pad-16"
-                                        >
-                                            <div *ngFor="let ele of answers; index as i">
-                                                <mat-accordion>
-                                                    <mat-expansion-panel>
-                                                        <mat-expansion-panel-header
-                                                            [collapsedHeight]="'40px'"
-                                                            [expandedHeight]="'40px'"
-                                                        >
-                                                            <mat-panel-title>{{
-                                                                questions[i] | titlecase
-                                                            }}</mat-panel-title>
-                                                        </mat-expansion-panel-header>
-                                                        <div class="lfx-u-mar-16">
-                                                            <h5 class="lfx-u-header-lg">
-                                                                {{ answers[i] }}
-                                                            </h5>
-                                                        </div>
-                                                    </mat-expansion-panel>
-                                                </mat-accordion>
-                                            </div>
-                                        </div>
-                                        <div *ngIf="fileData[0] === null">
-                                            <h4>
-                                                Please generate FAQ file or contact the application admin
-                                            </h4>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                          </div>
                         </div>
-                        <div *ngIf="views == 'Doc View'">
-                            <mat-card *ngIf="dataDoc">
-                                <quill-view-html
-                                    [content]="htmlstring"
-                                    theme="snow"
-                                ></quill-view-html>
-                            </mat-card>
+                        <div *ngIf="tabReq === 'translation'">
+                          <div class="tab_content" id="tabContent_1">
+                            <div class="row mt-4 lfx-u-mar-16">
+                              <div *ngIf="fileData && fileData[0] !== null"
+                                class="lfx-c-panel__content lfx-u-pad-16 msg-banner">
+                                {{ fileData }}
+                              </div>
+                              <div *ngIf="fileData[0] === null">
+                                <h4>
+                                  Please generate translation file or contact the application admin
+                                </h4>
+                              </div>
+                            </div>
+                          </div>
                         </div>
+                        <div *ngIf="tabReq === 'fileSummary'">
+                          <div class="tab_content" id="tabContent_2">
+                            <div class="row mt-4 lfx-u-mar-16">
+                              <div *ngIf="fileData && fileData[0] !== null"
+                                class="lfx-c-panel__content lfx-u-pad-16 msg-banner">
+                                {{ fileData }}
+                              </div>
+                              <div *ngIf="fileData[0] === null">
+                                <h4>
+                                  Please generate Summary file or contact the application admin
+                                </h4>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div *ngIf="tabReq === 'faq'">
+                          <div class="tab_content" id="tabContent_3">
+                            <div class="row mt-4 lfx-u-mar-16">
+                              <div *ngIf="fileData && fileData[0] !== null" class="lfx-c-panel__content lfx-u-pad-16">
+                                <div *ngFor="let ele of answers; index as i">
+                                  <mat-accordion>
+                                    <mat-expansion-panel>
+                                      <mat-expansion-panel-header [collapsedHeight]="'40px'" [expandedHeight]="'40px'">
+                                        <mat-panel-title>{{
+                                          questions[i] | titlecase
+                                          }}</mat-panel-title>
+                                      </mat-expansion-panel-header>
+                                      <div class="lfx-u-mar-16">
+                                        <h5 class="lfx-u-header-lg">
+                                          {{ answers[i] }}
+                                        </h5>
+                                      </div>
+                                    </mat-expansion-panel>
+                                  </mat-accordion>
+                                </div>
+                              </div>
+                              <div *ngIf="fileData[0] === null">
+                                <h4>
+                                  Please generate FAQ file or contact the application admin
+                                </h4>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div *ngIf="views == 'Doc View'">
+                        <mat-card *ngIf="dataDoc">
+                          <quill-view-html [content]="htmlstring" theme="snow"></quill-view-html>
+                        </mat-card>
+                      </div>
                     </mat-card-content>
-                </mat-card>
+                  </mat-card>
                 </div>
                 <div *ngIf="!dataset.views">
                   <ng-container *ngIf="tableviews !== ''">
-                    <app-dataset-view
-                      [data]="selectedDataset"
-                      *ngIf="tableviews === 'no'"
-                    ></app-dataset-view>
-                    <app-dataset-table-view
-                      [datasetname]="selectedDatasetName"
-                      *ngIf="tableviews === 'yes'"
-                    ></app-dataset-table-view>
+                    <app-dataset-view [data]="selectedDataset" *ngIf="tableviews === 'no'"></app-dataset-view>
+                    <app-dataset-table-view [datasetname]="selectedDatasetName"
+                      *ngIf="tableviews === 'yes'"></app-dataset-table-view>
                   </ng-container>
                 </div>
                 <div *ngIf="isGitUrl">
                   <div panel panelRounded panelBorder class="lfx-u-mar-b-16">
                     <div panelHeader class="d-flex justify-content-between">
-                      <h2 class="lfx-u-header-xl  float-start">
-                        Data preview
+                      <h2 class="lfx-u-header-xl  float-start data_header">
+                        Data Preview
                       </h2>
                       <div class="d-flex gap-4">
-                        <div
-                          (click)="cloneRepoToS3()"
-                          class="d-flex aip-cursor"
-                          title="Clone Repo"
-                          designType="icon"
-                        >
-                          <span
-                            class="lfx-c-btn--icon__icon d-flex align-items-center"
-                          >
-                            <i
-                              class="aip-led-icons icon x-24 icon_ServiceStore"
-                            ></i>
+                        <div (click)="cloneRepoToS3()" class="d-flex aip-cursor" title="Clone Repo" designType="icon">
+                          <span class="lfx-c-btn--icon__icon d-flex align-items-center">
+                            <i class="aip-led-icons icon x-24 icon_ServiceStore"></i>
                           </span>
                         </div>
-                        <div
-                          (click)="getActions()"
-                          class="d-flex aip-cursor"
-                          title="Refresh"
-                          designType="icon"
-                        >
-                          <span
-                            class="lfx-c-btn--icon__icon d-flex align-items-center"
-                          >
+                        <div (click)="getActions()" class="d-flex aip-cursor" title="Refresh" designType="icon">
+                          <span class="lfx-c-btn--icon__icon d-flex align-items-center">
                             <i class="aip-led-icons icon x-24 icon_Refresh"></i>
                           </span>
                         </div>
                       </div>
                     </div>
                     <div panelBody>
-                   
+
                       <div *ngIf="!datasetData && !datasetDataErr">
-                        <mat-card>
+                        <!-- <mat-card>
                           <div
                             class="d-flex justify-content-center align-items-center flex-column"
                           >
@@ -590,28 +422,23 @@
                                 style="margin-top: 16px;"
                             ></mat-progress-spinner>
                           </div>
-                        </mat-card>
+                        </mat-card> -->
+                        <div *ngIf="appLoading" role="status" aria-label="Loading cards">
+                          <app-aip-loading></app-aip-loading>
+                        </div>
+                        <app-aip-empty-state *ngIf="shouldShowEmptyState"></app-aip-empty-state>
                       </div>
                       <div *ngIf="datasetDataErr">
                         <mat-card>
-                          <div
-                            class="d-flex justify-content-center align-items-center flex-column"
-                          >
+                          <div class="d-flex justify-content-center align-items-center flex-column">
                             <b>{{ datasetDataErr }}</b>
                           </div>
                         </mat-card>
                       </div>
-                      <div
-                        class="row mt-4 lfx-u-mar-16"
-                        *ngIf="datasetData && isEmptyArray(datasetData)"
-                      >
-                        <div
-                          class="d-flex justify-content-center align-items-center flex-column"
-                        >
-                          <b
-                            >No data available. Please click on “Clone Repo” to
-                            clone the repository.</b
-                          >
+                      <div class="row mt-4 lfx-u-mar-16" *ngIf="datasetData && isEmptyArray(datasetData)">
+                        <div class="d-flex justify-content-center align-items-center flex-column">
+                          <b>No data available. Please click on “Clone Repo” to
+                            clone the repository.</b>
                         </div>
                       </div>
                     </div>
