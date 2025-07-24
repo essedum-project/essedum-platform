@@ -1141,6 +1141,35 @@ public class ICIPMlopsController {
 		});
 		return ResponseEntity.status(200).body(adapterTypeList.toString());
 	}
+	
+	/**
+	 * Gets the searched objects.
+	 *
+	 * @param datasetName        the dataset name
+	 * @param projectName        the project name
+	 * @param size               the size
+	 * @param page               the page
+	 * @param sortEvent          the sort event
+	 * @param sortOrder          the sort order
+	 * @param searchParams       the search params
+	 * @param selectClauseParams the select clause params
+	 * @return the searched objects
+	 */
+	@GetMapping(path = "models/fileData")
+	public ResponseEntity<?> getfileData(@RequestParam(required = true, name = "modelName") String modelName,
+			@RequestParam(required = true, name = "fileName") String fileName,
+	        @RequestParam(required = true, name = "org") String org)
+			 {
+		ResponseEntity<?> resp;
+		try {
+			return iCIPMlOpsRestAdapterService.getS3FileData(modelName,fileName,org);
+			
+		} catch (Exception e) {
+			resp = new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+			logger.error("EXCEPTION:", e.getMessage());
+		}
+		return resp;
+	}
 
 	@GetMapping("endpoints/listAdapters")
 	public ResponseEntity<String> listEndpointAdapters(@RequestParam(name = "project", required = true) String project,

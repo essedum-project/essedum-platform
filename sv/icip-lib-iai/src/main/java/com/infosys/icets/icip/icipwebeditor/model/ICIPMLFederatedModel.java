@@ -47,9 +47,11 @@ public class ICIPMLFederatedModel {
 	
 	private String organisation;
 	
+	@Column(name = "model_type")
 	private String modelType;
+	
+	
     @Column(name = "created_on", unique = false, nullable = false, insertable = true, updatable = false)
-    
 	Timestamp createdOn;
     @Column(name="created_by")
     
