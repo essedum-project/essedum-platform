@@ -74,17 +74,24 @@ export class JobsComponent implements OnInit {
           }
         },
         error => this.service.message('Could not fetch jobs!', 'error')
-      );
-      this.service.fetchInternalJobByName(this.cname,this.page,this.row).subscribe(resp=>{
-        this.jobList =  resp
-      })
+      );      
 
      }
 
   
  
     this.jobList.forEach((job,index)=>{
-      this.jobList[index].jobmetadata = JSON.parse(this.jobList[index].jobmetadata)
+      // Check if jobmetadata exists and is a string before parsing
+      if(this.jobList[index].jobmetadata && typeof this.jobList[index].jobmetadata === 'string') {
+        try {
+          this.jobList[index].jobmetadata = JSON.parse(this.jobList[index].jobmetadata);
+        } catch (error) {
+          console.error('Error parsing jobmetadata for job at index', index, ':', error);
+          // Keep the original value if parsing fails
+        }
+      }
+      // If jobmetadata is already an object or null/undefined, leave it as is
+      
       if(this.jobList[index].submittedOn!=null)
       this.jobList[index].submittedOn = this.jobList[index].submittedOn.split('+')[0]
       if(this.jobList[index].finishtime!=null)
@@ -99,8 +106,21 @@ onRefresh() {
 }
 
 sortByLatest(jobData){
-  this.jobList=jobData.sort((a,b)=>new Date(b.submittedOn).getTime()-new Date(a.submittedOn).getTime())
-  this.status.emit(this.jobList[0].jobStatus);
+  if (!jobData || !Array.isArray(jobData) || jobData.length === 0) {
+    console.warn('Invalid or empty job data provided to sortByLatest');
+    this.jobList = [];
+    return;
+  }
+  
+  this.jobList = jobData.sort((a,b) => {   
+    const dateA = a.submittedOn ? new Date(a.submittedOn).getTime() : 0;
+    const dateB = b.submittedOn ? new Date(b.submittedOn).getTime() : 0;
+    return dateB - dateA;
+  });
+  
+  if (this.jobList.length > 0 && this.jobList[0].jobStatus) {
+    this.status.emit(this.jobList[0].jobStatus);
+  }
 }
 
 getJobs(choice: String) {
@@ -131,19 +151,44 @@ getJobs(choice: String) {
 
      
   if(this.cname){
-    this.service.fetchInternalJobByName(this.cname,this.page,this.row).subscribe(resp=>{
-      const filteredJobs = this.jobList.filter(job => 
-        job.agenttaskname?.toLowerCase() === job.jobmetadata?.taskName?.toLowerCase());
-      this.sortByLatest(filteredJobs);
-     });
+    this.service.fetchInternalJobByName(this.cname,this.page,this.row).subscribe({
+      next: (resp) => {
+        if (resp && Array.isArray(resp)) {
+          this.jobList = resp;
+          const filteredJobs = this.jobList.filter(job => 
+            job.agenttaskname?.toLowerCase() === job.jobmetadata?.taskName?.toLowerCase());
+          this.sortByLatest(filteredJobs);
+        } else {
+          console.warn('Invalid response format:', resp);
+          this.jobList = [];
+          this.service.message('No jobs found or invalid data format', 'warning');
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching jobs by name:', error);
+        this.jobList = [];
+        this.service.message('Failed to fetch jobs. Server error occurred.', 'error');
+      }
+    });
   }else{
-    this.service.fetchInternalJobByName2(this.internalJob,this.page,this.row).subscribe(resp=>{
-      this.jobList = resp;
-      this.sortByLatest(this.jobList);
+    this.service.fetchInternalJobByName2(this.internalJob,this.page,this.row).subscribe({
+      next: (resp) => {
+        if (resp && Array.isArray(resp)) {
+          this.jobList = resp;
+          this.sortByLatest(this.jobList);
+        } else {
+          console.warn('Invalid response format:', resp);
+          this.jobList = [];
+          this.service.message('No jobs found or invalid data format', 'warning');
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching internal jobs:', error);
+        this.jobList = [];
+        this.service.message('Failed to fetch internal jobs. Server error occurred.', 'error');
+      }
     });
   }
-
-  // }
 }
 
 fetchJob(jobId: string, runtime: string, status) {
@@ -212,7 +257,6 @@ showOutputArtifact(jobId:string){
       disableClose: true,
       data: {
         isConsole: true,
-        // content: this.datas,
         jobID: jobId,
        
         outputData: response,
@@ -244,17 +288,14 @@ showConsole(jobId: string, runtime: string, status, job) {
           }
         }
         this.jobData = this.currentJob;
-        // this.openJobLog(this.jobData, false, job.jobid, jobtype, job.jobstatus);
         this.datas = [];
-        // if (Object.keys(this.jobData).length !== 0 && this.jobData.constructor === Object) {
         if(this.jobData){
           for (var i in this.jobData) {
             let a = { 'name': i, 'value': this.jobData[i] };
             this.datas.push(a);
           }
         }
-        this.logsdata = this.datas
-        // this.ngOnChanges();
+        this.logsdata = this.datas      
         this.openDialog(jobId, "internal jobs", this.currentJob.jobStatus,this.logsdata);
       }
     },error=>{
@@ -284,17 +325,14 @@ showConsole(jobId: string, runtime: string, status, job) {
           }
         }
         this.jobData = this.currentJob;
-        // this.openJobLog(this.jobData, false, job.jobid, jobtype, job.jobstatus);
         this.datas = [];
-        // if (Object.keys(this.jobData).length !== 0 && this.jobData.constructor === Object) {
         if(this.jobData){
           for (var i in this.jobData) {
             let a = { 'name': i, 'value': this.jobData[i] };
             this.datas.push(a);
           }
         }
-        this.logsdata = this.datas
-        // this.ngOnChanges();
+        this.logsdata = this.datas    
         this.openDialog(jobId, "pipeline", this.currentJob.jobStatus,this.logsdata);
       }
     },
@@ -314,8 +352,7 @@ showConsole(jobId: string, runtime: string, status, job) {
       width: '90%',
       disableClose: true,
       data: {
-        isConsole: true,
-        // content: this.datas,
+        isConsole: true,      
         content: this.jobData,
         isChain: false,
         jobid: jobid,
@@ -334,6 +371,7 @@ showConsole(jobId: string, runtime: string, status, job) {
       response => {
         this.service.message('Stop Event Triggered!','success');
         console.log(response , 'stopjob response ');
+        this.onRefresh();
       }, error => {
         this.service.message('Error!', 'error');
       });
