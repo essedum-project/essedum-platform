@@ -86,6 +86,7 @@ public class ICIPRemoteStopJobService implements IICIPStopJobService {
 		logger.info("terminate job request " + requestokHttp);
 		try {
 			Response response = client.newCall(requestokHttp).execute();
+			logger.info("response: "+response);			
 			logger.info("terminatejob response " + response);
 			logger.info("terminate job response code " + response.code());
 			if (response.code() == 200) {
@@ -97,7 +98,9 @@ public class ICIPRemoteStopJobService implements IICIPStopJobService {
 
 					return responsebody;
 				} else {
-					JSONObject responsebody = new JSONObject(response.body().toString());
+					String responseString = response.body().string();
+					logger.info("else string body :"+responseString);
+					JSONObject responsebody = new JSONObject(responseString);
 					logger.info("JOBS TERMINATED SUCCESSFULLY");
 					return responsebody;
 				}
