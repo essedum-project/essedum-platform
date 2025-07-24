@@ -14,7 +14,8 @@
         <div style="flex-shrink: 0; margin-left: 30px; margin-right: 10px; color: #737373;">Rest Provider:</div>
         <div style="flex-shrink: 0; margin-right: 300px; color: '#000'">{{restProviderData.alias}}</div>
         <span *ngIf="swaggerView" style="cursor: pointer; margin-right: 10px;">
-            <mat-icon class="aip-led-icons" (click)="backToEditor()">arrow_back</mat-icon>
+            <mat-icon id="swagger-back-btn" data-icon-type="swagger-back" class="aip-led-icons"
+                (click)="backToEditor()">arrow_back</mat-icon>
         </span>
         <ng-container *ngIf="!swaggerView && !isToggle; else swaggerViewTemplate">
             <button [ngStyle]="{
@@ -76,8 +77,8 @@
                     <div class="lfx-u-mar-tb-8">
                         <mat-form-field appearance="fill" style="width: 100%;">
                             <mat-label>Servers</mat-label>
-                            <mat-select [(value)]="serverUrl" (selectionChange)="selectChange($event)"
-                                (openChange)="onServerUrlChange($event)">
+                            <mat-select data-select-type="server-url" [(value)]="serverUrl"
+                                (selectionChange)="selectChange($event)" (openChange)="onServerUrlChange($event)">
                                 <mat-option *ngFor="let option of serverUrls" [value]="option.value">
                                     {{ option.value }}
                                 </mat-option>

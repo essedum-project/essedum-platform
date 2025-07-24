@@ -55,7 +55,7 @@ export class DatasetFullscreenViewComponent implements OnInit, OnChanges, DoChec
         this.datasetName = this.inpdataset
       }
       if (!this.datasetName || this.datasetName.replace(/\s/g, "").length < 1) {
-        if (sessionStorage.getItem("isSbx") != "true") this.datasetsService.message("Dataset name not found", "Dataset View");
+        if (sessionStorage.getItem("isSbx") != "true") this.datasetsService.message("Dataset name not found", 'error');
       }
       else {
         this.busy = this.datasetsService.getDataset(this.datasetName)
@@ -69,14 +69,14 @@ export class DatasetFullscreenViewComponent implements OnInit, OnChanges, DoChec
                 this.unqId = JSON.parse(this.dataset.attributes)['uniqueIdentifier'] :
                 this.unqId = undefined;
             }
-            else { this.datasetsService.message("Dataset details not found", "Dataset View"); }
+            else { this.datasetsService.message("Dataset details not found", 'error'); }
           },
-            error => { this.datasetsService.message("Error in fetching dataset details " + error, "Dataset View"); })
+            error => { this.datasetsService.message("Error in fetching dataset details " + error,'error'); })
       }
 
     }
     catch (Exception) {
-      this.datasetsService.message("Some error occured", "Error")
+      this.datasetsService.message("Some error occured", "error")
     }
 
   }

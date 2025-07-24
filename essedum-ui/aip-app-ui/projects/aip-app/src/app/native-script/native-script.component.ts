@@ -207,11 +207,11 @@ export class NativeScriptComponent implements OnInit, OnChanges {
         if(this.data.usedSecrets){
           this.dynamicSecretsArray=this.data.usedSecrets;
         }
-        
-         else {
+        if(this.data.files==null || this.data.files==undefined){
           this.data['files'] = [];
           this.loadScript = true;
         }
+     
       } catch (e) {
         this.loadScript = true;
         console.error('no attribute found in json[element0]');
@@ -354,25 +354,35 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     this.uploadingError = true;
   }
 
-  readFile(filename) {
+  readFile(filename: string) {
     this.service
       .readNativeFile(
         this.streamItem.name,
         this.streamItem.organization,
         filename
       )
-      .subscribe(
-        (resp) => {
-          //script file to list
-
-          const textDecoder = new TextDecoder('utf-8');
-
-          this.script = textDecoder.decode(resp).split('\n');
-
-          this.loadScript = true;
+      .subscribe({
+        next: (resp) => {
+          // script file to list
+          console.log('File read response:', resp);
+            this.service.message('Reading file done', resp);
+          try {
+            const textDecoder = new TextDecoder('utf-8');
+            this.script = textDecoder.decode(resp).split('\n');
+            this.loadScript = true;
+          } catch (e) {
+            console.error('Error decoding file:', e);
+            this.service.message('Error decoding file', 'error');
+          }
         },
-        (error) => {}
-      );
+        error: (err) => {
+          console.error('Error while reading file:', err);
+          this.service.message('Error! While reading file', 'error');
+        },
+        complete: () => {
+          console.log('readNativeFile observable completed');
+        }
+      });
   }
   showDatasets(dataset) {
     
@@ -553,8 +563,7 @@ export class NativeScriptComponent implements OnInit, OnChanges {
   displayDialog(button, name, value, type, index, alias) {
     const dialogRef = this.dialog.open(NativeScriptDialogComponent, {
       height: '50%',
-      width: '50%',
-      // maxWidth: '50%',
+      width: '60%',
       disableClose: false,
       data: {
         button: button,

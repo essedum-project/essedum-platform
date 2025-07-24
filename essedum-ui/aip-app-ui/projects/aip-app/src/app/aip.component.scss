@@ -4,10 +4,20 @@
 @import url("https://cdn.quilljs.com/1.3.7/quill.snow.css");
 @import url("https://cdn.quilljs.com/1.3.7/quill.bubble.css");
 @import url("https://cdn.quilljs.com/1.3.7/quill.core.css");
+@import url("https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap");
+
+body,
+html {
+  font-family: "Roboto", Arial, Helvetica, sans-serif;
+}
 
 ::ng-deep {
   body {
     background-color: var(--background-colour) !important;
+  }
+  body,
+  html {
+    font-family: "Roboto", Arial, Helvetica, sans-serif !important;
   }
 
   .le-c-dropdown__list li > a,
@@ -280,15 +290,6 @@
     display: contents;
   }
 
-  .aip-card-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, 27.4rem);
-    grid-template-rows: repeat(auto-fit, 16.3rem);
-    // justify-content: center;
-    grid-row-gap: 2.4rem;
-    grid-column-gap: 2.4rem;
-  }
-
   .aip-desc-ellipsis {
     white-space: nowrap;
     overflow: hidden;
@@ -459,6 +460,8 @@
   .aip-panel-input {
     border: none;
     width: 100%;
+    margin-left: 20px;
+    font-size: 14px;
   }
 
   .aip-panel-input:focus {
@@ -686,12 +689,6 @@ div {
     // html {
     //   font-size: 100%; /* 1rem = 14px */
     // }
-    .aip-card-container {
-      grid-template-columns: repeat(4, 5fr);
-      grid-template-rows: repeat(4, 5fr);
-      grid-row-gap: 2.4rem;
-      grid-column-gap: 2.4rem;
-    }
 
     .aip-doc-container {
       grid-template-columns: repeat(4, 5fr);
@@ -727,18 +724,6 @@ div {
     padding: 8px !important;
   }
 
-  .lfx-l-level2-middle-ctr {
-    display: table;
-    width: 100%;
-    //table-layout: fixed;
-  }
-
-  .lfx-l-level2-middle-col {
-    display: table-cell;
-    vertical-align: top;
-    height: 100%;
-  }
-
   .back-icon {
     font-size: 24px !important;
     color: #0a142f !important;
@@ -758,13 +743,6 @@ div {
     margin-left: 32px !important;
   }
 
-  .lfx-u-header-xxl {
-    font-size: 2.4rem;
-    font-weight: 600;
-    font-family: "myriad-pro", Arial, sans-serif !important;
-    font-style: normal;
-  }
-
   .lfx-u-pad-lr-24 {
     padding-left: 24px !important;
     padding-right: 24px !important;
@@ -782,10 +760,6 @@ div {
   .lfx-u-pad-tb-16 {
     padding-top: 16px !important;
     padding-bottom: 16px !important;
-  }
-
-  .lfx-c-panel__content {
-    min-height: 100px !important;
   }
 
   .lfx-u-mar-t-24 {
@@ -855,7 +829,6 @@ div {
   .lfx-u-header-xl {
     font-size: 1.8rem;
     font-weight: 600;
-    font-family: "myriad-pro", Arial, sans-serif !important;
     font-style: normal;
   }
 
@@ -874,7 +847,6 @@ div {
   .lfx-u-header-sm {
     font-size: 1.2rem;
     font-weight: 600;
-    font-family: "myriad-pro", Arial, sans-serif !important;
     font-style: normal;
   }
 
@@ -891,6 +863,7 @@ div {
     display: inline-block;
     text-transform: uppercase;
     font-weight: 700;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
   }
 
   .lfx-c-badge--active {
@@ -928,10 +901,6 @@ div {
 
   .lfx-u-text-primary-80 {
     color: #0094ff;
-  }
-
-  .lfx-u-mar-8 {
-    margin: 8px !important;
   }
 
   .lfx-u-header-md {
@@ -1121,13 +1090,6 @@ div {
     padding-left: 8px !important;
   }
 
-  .lfx-u-header-lg {
-    font-size: 1.6rem;
-    font-weight: 600;
-    font-family: "myriad-pro", Arial, sans-serif !important;
-    font-style: normal;
-  }
-
   .lfx-l-level2-right-col {
     width: 350px !important;
     padding-left: 32px !important;
@@ -1192,23 +1154,8 @@ div {
     margin-top: 30px !important;
   }
 
-  .lfx-l-level1-wrapper .lfx-l-level1-middle-col {
-    padding: 32px 16px;
-  }
-
   .lfx-u-pad-l-32 {
     padding-left: 32px !important;
-  }
-
-  .container,
-  .container-fluid {
-    padding-right: 16px;
-    padding-left: 16px;
-  }
-
-  .col-lg-12 {
-    flex: 0 0 auto;
-    width: 100%;
   }
 
   .lfx-u-mar-b-32 {
@@ -1329,6 +1276,121 @@ div {
 
   .card-shadow {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
-    border-radius: 8px !important;
+    border-radius: 16px !important;
+  }
+}
+
+::ng-deep {
+  // Dashboard Styles
+  #mainCtr {
+    width: 100%;
+    margin: 0 0 12px 0;
+  }
+
+  .aip-container {
+    width: 100%;
+    position: relative;
+  }
+
+  .aip-card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 28.8rem);
+    grid-template-rows: repeat(auto-fit, 15rem);
+    justify-content: center;
+    grid-row-gap: 2.4rem;
+    grid-column-gap: 2.4rem;
+    // padding-bottom: 56px;
+  }
+
+  .aip-card-wrapper {
+    min-width: 28.8rem;
+    min-height: 15rem;
+
+    @media (max-width: 576px) {
+      width: 100%;
+    }
+  }
+
+  .lfx-u-pad-lr-30 {
+    padding-left: 30px !important;
+    padding-right: 30px !important;
+  }
+
+  .lfx-u-mar-b-50 {
+    margin-bottom: 50px !important;
+  }
+
+.lfx-u-mar-b-10{
+  margin-bottom: 10px !important;
+}
+
+}
+
+::ng-deep {
+  .container,
+  .container-fluid {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .col-lg-12 {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .lfx-l-level1-wrapper .lfx-l-level1-middle-col {
+    padding: 16px 16px;
+  }
+
+  .lfx-u-mar-8 {
+    margin: 8px !important;
+  }
+
+  .lfx-u-header-xxl {
+    font-size: 2.4rem;
+    font-weight: 600;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
+
+    font-style: normal;
+  }
+
+  .lfx-u-header-lg {
+    font-size: 1.6rem;
+    font-weight: 600;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
+    font-style: normal;
+    line-height: 22px;
+    color: #000000;
+  }
+
+  .lfx-l-level2-middle-ctr {
+    display: table;
+    width: 100%;
+    //table-layout: fixed;
+  }
+
+  .lfx-l-level2-middle-col {
+    display: table-cell;
+    vertical-align: top;
+    height: 100%;
+  }
+
+  .lfx-c-panel__content {
+    min-height: 100px !important;
+  }
+
+  .no-padding {
+    padding: 0px !important;
+  }
+
+  .p-20 {
+    padding: 20px !important;
+  }
+
+  .ml-10 {
+    margin-left: 10px !important;
+  }
+  .ml-20 {
+    margin-left: 20px !important;
   }
 }

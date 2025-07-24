@@ -40,7 +40,6 @@
 		<module>comm-lib-util</module>
 		<module>icip-lib-fsvr</module>
 		<module>icip-lib-jobs</module>
-		<module>comm-lib-lic</module>
 		<module>iamp-lib-usm</module>
 		<module>icip-lib-search</module>
 		<module>comm-lib-secrets</module>
@@ -353,16 +352,6 @@
 			<dependency>
 				<groupId>com.infosys.icets.ai</groupId>
 				<artifactId>comm-lib-util</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.infosys.icets.ai</groupId>
-				<artifactId>comm-lib-licval</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.infosys.icets.ai</groupId>
-				<artifactId>comm-lib-lic</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

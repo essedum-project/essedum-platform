@@ -1,0 +1,28 @@
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 0;
+  text-align: center;
+
+  img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 1rem;
+    filter: brightness(0) saturate(100%) invert(19%) sepia(94%) saturate(3485%)
+      hue-rotate(212deg) brightness(96%) contrast(101%);
+  }
+
+  p {
+    text-align: center;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 19px;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
+    letter-spacing: 0px;
+    color: #999999;
+  }
+}

@@ -188,7 +188,7 @@ export class PipelineDialogComponent {
           this.avail_refresh = true;
         });
       } else {
-        this.service.errorMessage('Please check event '+updateEventName)
+        this.service.message('Please check event '+updateEventName,'error')
       }
     }, error => {
         this.service.message('Job not triggered due to error: ' + error, 'error')
@@ -293,7 +293,7 @@ export class PipelineDialogComponent {
       this.service.message('Checking Transcribe pipeline status')
       const corlId = this.getCorelid('Transcribe');
       if(corlId===0){
-        this.service.errorMessage('No Transcribe event found! Trigerring','error')
+        this.service.message('No Transcribe event found! Trigerring','error')
         this.transcribe()
       } else {
         let corelationId = this.getCorelid('Transcribe');
@@ -304,12 +304,12 @@ export class PipelineDialogComponent {
           if(jobStat==="ERROR"){
             this.errCount=this.errCount+1
             if(this.errCount===1){
-              this.service.errorMessage('Retriggering Transcribe Pipeline',"error")
+              this.service.message('Retriggering Transcribe Pipeline',"error")
               this.transcribe()
               console.log("Job status in transcribe",jobStat)
             } else {
               // clearInterval(checkInterval);
-              this.service.errorMessage('Error in Transcribe Pipeline',"error")
+              this.service.message('Error in Transcribe Pipeline',"error")
             }
           }
         });
@@ -330,16 +330,16 @@ export class PipelineDialogComponent {
           else if(jobStat==="CANCELLED"){
             this.count=this.count+1
             if(this.count===1){
-              this.service.errorMessage('Retriggering Transcribe Pipeline',"error")
+              this.service.message('Retriggering Transcribe Pipeline',"error")
               this.transcribe()
             } else {
               clearInterval(checkInterval);
-              this.service.errorMessage('Pipeline cancelled!',"error")
+              this.service.message('Pipeline cancelled!',"error")
             }
           } 
           else if(jobStat==="ERROR"){
             clearInterval(checkInterval);
-            this.service.errorMessage('Error in Transcribe Pipeline',"error")
+            this.service.message('Error in Transcribe Pipeline',"error")
             this.ngOnInit()
           }
         });
@@ -355,7 +355,7 @@ export class PipelineDialogComponent {
     this.service.message('Checking Translation pipeline status')
     const corlId = this.getCorelid('Translation');
     if(corlId===0){
-      this.service.errorMessage('No Translation event found! Trigerring','error')
+      this.service.message('No Translation event found! Trigerring','error')
       this.translationn()
     } else {
       let corelationId = this.getCorelid('Translation');
@@ -366,12 +366,12 @@ export class PipelineDialogComponent {
         if(jobStat==="ERROR"){
           this.errCount=this.errCount+1
           if(this.errCount===1){
-            this.service.errorMessage('Retriggering Translation Pipeline',"error")
+            this.service.message('Retriggering Translation Pipeline',"error")
             this.translationn()
             console.log("Job status in translationn",jobStat)
           } else {
             clearInterval(checkInterval);
-            this.service.errorMessage('Error in Translation Pipeline',"error")
+            this.service.message('Error in Translation Pipeline',"error")
           }
         }
       });
@@ -392,16 +392,16 @@ export class PipelineDialogComponent {
         else if(jobStat==="CANCELLED"){
           this.count=this.count+1
           if(this.count===1){
-            this.service.errorMessage('Retriggering Translation Pipeline',"error")
+            this.service.message('Retriggering Translation Pipeline',"error")
             this.translationn()
           } else {
             clearInterval(checkInterval);
-            this.service.errorMessage('Pipeline cancelled!',"error")
+            this.service.message('Pipeline cancelled!',"error")
           }
         } 
         else if(jobStat==="ERROR"){
           clearInterval(checkInterval);
-          this.service.errorMessage('Error in Translation Pipeline',"error")
+          this.service.message('Error in Translation Pipeline',"error")
           this.ngOnInit()
         }
       });
@@ -414,7 +414,7 @@ export class PipelineDialogComponent {
     this.service.message('Checking Translation pipeline status')
     const corlId = this.getCorelid('Translation');
     if(corlId===0){
-      this.service.errorMessage('No Translation event found! Trigerring','error')
+      this.service.message('No Translation event found! Trigerring','error')
       this.translationn()
     } else {
       let corelationId = this.getCorelid('Translation');
@@ -424,11 +424,11 @@ export class PipelineDialogComponent {
         if(jobStat==="ERROR"){
           this.errCount=this.errCount+1
           if(this.errCount===1){
-            this.service.errorMessage('Retriggering Translation Pipeline',"error")
+            this.service.message('Retriggering Translation Pipeline',"error")
             this.translationn()
           } else {
             clearInterval(checkInterval);
-            this.service.errorMessage('Error in Translation Pipeline',"error")
+            this.service.message('Error in Translation Pipeline',"error")
           }
         }
       });
@@ -448,16 +448,16 @@ export class PipelineDialogComponent {
         else if(jobStat==="CANCELLED"){
           this.count=this.count+1
           if(this.count===1){
-            this.service.errorMessage('Retriggering Translation Pipeline',"error")
+            this.service.message('Retriggering Translation Pipeline',"error")
             this.translationn()
           } else {
             clearInterval(checkInterval);
-            this.service.errorMessage('Pipeline cancelled!',"error")
+            this.service.message('Pipeline cancelled!',"error")
           }
         } 
         else if(jobStat==="ERROR"){
           clearInterval(checkInterval);
-          this.service.errorMessage('Error in Translation Pipeline',"error")
+          this.service.message('Error in Translation Pipeline',"error")
           this.ngOnInit()
         }
       });
@@ -529,7 +529,7 @@ export class PipelineDialogComponent {
         this.questions()
         break;
       default:
-        this.service.messageService('Failed to trigger! Please check events')
+        this.service.message('Failed to trigger! Please check events', 'error');
         break;
     }
   }

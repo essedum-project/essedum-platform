@@ -1,0 +1,123 @@
+backend:
+  deploymentName: leap-app-backend
+  serviceName: leap-app-backend-service
+  replicaCount: 1
+  image:
+    repository: acrreq0762935.azurecr.io/leap_app_backend
+    tag: latest
+    pullPolicy: Always
+  containerPort: 8082
+  service:
+    port: 8080
+    targetPort: 8082
+
+frontend:
+  deploymentName: leap-app-ui
+  serviceName: leap-app-ui-service-1
+  replicaCount: 1
+  image:
+    repository: acrreq0762935.azurecr.io/leap_app_ui
+    tag: "1"
+    pullPolicy: Always
+  containerPorts:
+    - 8082
+    - 8084
+  service:
+    ports:
+      - port: 8082
+        targetPort: 8082
+        name: port-8082
+      - port: 8084
+        targetPort: 8084
+        name: port-8084
+
+pyjobExecutor:
+  deploymentName: pyjob-executor
+  serviceName: pyjob-executor-service
+  replicaCount: 1
+  image:
+    repository: acrreq0762935.azurecr.io/pyjob-excecutor
+    tag: latest
+    pullPolicy: Always
+  containerPort: 5000
+  service:
+    port: 80
+ 
+qdrant:
+  pv:
+    name: qdrant-leap-pv
+    storage: 5Gi
+    accessMode: ReadWriteMany
+    storageClassName: azurefile
+    secretName: azure-secret
+    shareName: qdrant-leap-fileshare
+  pvc:
+    name: qdrant-pvc
+    accessMode: ReadWriteMany
+    storage: 5Gi
+    storageClassName: azurefile
+  service:
+    name: qdrant
+    port: 6333
+    targetPort: 6333
+  deployment:
+    name: qdrant
+    replicas: 1
+    image: qdrant/qdrant:latest
+
+mysql:
+  deploymentName: mysql
+  serviceName: mysql
+  replicaCount: 1
+  image:
+    repository: mysql
+    tag: "8.0"
+  rootPassword: password
+  dataDir: /var/lib/mysqldata
+  containerPort: 3306
+  mountPath: /var/lib/mysql
+  service:
+    port: 3306
+  pv:
+    name: mysql-leap-pv
+    storage: 5Gi
+    accessMode: ReadWriteMany
+    storageClassName: azurefile
+    secretName: azure-secret
+    shareName: azure-leap-mysql-fileshare
+  pvc:
+    name: mysql-pvc
+    accessMode: ReadWriteMany
+    storage: 5Gi
+    storageClassName: azurefile
+  initdb:
+    databases:
+      - core_dbb
+      - leap2_8000_quartz
+      - telemetrydb
+
+imagePullSecret: acr-secret
+
+ingress:
+  name: leap-app-ingress2
+  host: test.az.ad.idemo-ppc.com
+  tlsSecret: essedum-secret
+  serviceName: leap-app-ui-service-1
+  servicePort: 8084
+
+keycloak:
+  name: keycloak
+  replicaCount: 1
+  image: quay.io/keycloak/keycloak:26.2.3
+  adminUser: admin
+  adminPassword: admin
+  httpPort: 8180
+  httpsPort: 8443
+  proxy: edge
+  hostnameStrict: "false"
+  httpsEnabled: "true"
+  hostname: aiplatform.az.ad.idemo-ppc.com
+  hostnameStrictHttps: "true"
+  tlsCrtPath: /etc/keycloak/certs/tls.crt
+  tlsKeyPath: /etc/keycloak/certs/tls.key
+  tlsSecretName: aiplatform-secret

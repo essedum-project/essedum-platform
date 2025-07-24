@@ -1,0 +1,259 @@
+.lfx-c-card.mat-mdc-card {
+  padding: 24px;
+  min-height: 50px;
+  box-shadow: 0px 2px 4px #00000029;
+  border: 0.5px solid #0000001f;
+  border-radius: 16px;
+  display: block;
+  background: #ffffff;
+  color: #000000;
+}
+
+.lfx-c-card--hover {
+  overflow: hidden;
+}
+
+.card-wrapper {
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  mat-card {
+    padding: 16px;
+
+    .card-category {
+      overflow: hidden;
+      border-right: none !important;
+    }
+  }
+}
+
+.lfx-u-header-sm {
+  font-size: 1rem;
+  line-height: 11px;
+  font-weight: 600;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+
+  font-style: normal;
+}
+
+.lfx-u-header-xl {
+  font-size: 1.6rem;
+  font-weight: 600;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+
+  font-style: normal;
+}
+
+.lfx-u-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.lfx-u-body-sm {
+  font-size: 1.2rem;
+  font-weight: 400;
+  line-height: 16px;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-style: normal;
+}
+
+.lfx-u-text-primary-80 {
+  color: #0094ff;
+}
+
+.lfx-u-text-neutral-80 {
+  color: #737373;
+}
+
+// Card header styling
+.card-header {
+  padding: 0 !important;
+  width: 95%;
+
+  .aip-fullname-card {
+    line-height: 16px;
+    margin-bottom: 0px;
+  }
+
+  .aip-fullname-card:hover {
+    white-space: unset;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+}
+
+.view-details-btn {
+  color: #ffffff !important;
+  background-color: #ebf1f6 !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  border-radius: 16px;
+  background: transparent
+    linear-gradient(90deg, var(---0052cc) 0%, #0094ff 100%) 0% 0% no-repeat
+    padding-box;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+    no-repeat padding-box;
+}
+
+// Card actions
+mat-card-actions.card-actions-hover {
+  transition: opacity 0.2s;
+  width: 86%;
+  padding: 0 0 8px 0 !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .button-placeholder {
+    width: 140px;
+  }
+
+  .avatar-container {
+    position: relative;
+
+    .aip-hover-avatar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #e0e0e0;
+      color: #616161;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 14px;
+    }
+
+    .aip-hover-detail {
+      position: absolute;
+      display: none;
+      background-color: white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      padding: 8px;
+      border-radius: 4px;
+      z-index: 10;
+      min-width: 120px;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    &:hover .aip-hover-detail {
+      display: block;
+    }
+  }
+}
+
+.aip-more-actions-icon {
+  font-size: 24px;
+  padding: 0;
+  color: #a5aaad;
+  font-weight: 300;
+  transition: color 0.2s ease;
+
+  &.aip-icon-hover {
+    color: #0094ff;
+  }
+}
+
+.aip-cursor {
+  cursor: pointer;
+}
+
+.aip-hover-avatar {
+  position: relative;
+}
+
+.aip-hover-detail {
+  box-shadow: 0rem 0.2rem 2.5rem rgba(0, 0, 0, 25%);
+  display: none;
+  cursor: pointer;
+  position: absolute;
+  top: -3rem;
+  z-index: 10000;
+  left: 8%;
+  background-color: var(--background-colour);
+  text-wrap: balance;
+  border-radius: 1rem;
+  width: 23rem;
+  text-align: center;
+  word-break: break-all;
+}
+
+.lfx-u-mar-b-8 {
+  margin-bottom: 8px !important;
+}
+
+.lfx-u-header-md {
+  font-size: 1.4rem;
+  font-weight: 600;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-style: normal;
+}
+
+.lfx-c-avatar {
+  background: var(--avatar-bg-color);
+  color: #0052cc;
+  border-radius: 50%;
+  text-align: center;
+  vertical-align: middle;
+  font-weight: 500;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-style: normal;
+  float: left;
+  width: 36px !important;
+  height: 36px !important;
+  font-size: 12px;
+  line-height: 36px;
+  padding: 0px;
+}
+
+.lfx-c-card__container-left {
+  float: left;
+  width: 80%;
+}
+
+.lfx-c-card__action-hover {
+  position: absolute;
+  width: 100%;
+  bottom: 0px;
+  transition: bottom 0.2s ease 0.2s;
+  background: var(--default-card-action-bg-color);
+}
+
+.lfx-c-card.mat-mdc-card:hover .lfx-u-body-xxl,
+.lfx-c-card.mat-mdc-card:hover .lfx-u-header-xl {
+  color: #000000;
+}
+
+.header-action-icon {
+  font-size: 16px;
+  height: 16px;
+  color: grey;
+  cursor: pointer;
+  gap: 2rem;
+}
+
+.header-action-icon:hover {
+  color: #0094ff;
+}
+
+.action-icon {
+  font-size: 19px;
+  height: 19px;
+  color: grey;
+  cursor: pointer;
+}
+
+.action-icon:hover {
+  color: #0094ff;
+}

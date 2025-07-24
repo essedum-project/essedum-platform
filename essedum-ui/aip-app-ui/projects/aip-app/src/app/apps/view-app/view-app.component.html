@@ -3,15 +3,16 @@
         style="display: inline-flex; align-items: self-start; padding-top: 1em; padding-bottom: 1em; padding-left: 0; padding-right: 0;justify-content: space-between;">
         <div class="col-8" style="padding: 0; display:flex;">
             <span class="mx-2 aip-cursor" *ngIf="initiativeView">
-                <mat-icon class="aip-led-icons" (click)="toggler()"
-                    [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
+                <mat-icon id="view-app-back-btn" data-icon-type="back-navigation" class="aip-led-icons"
+                    (click)="toggler()" [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
                     matTooltipPosition="above" (mouseenter)="isBackHovered = true"
                     (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
             </span>
             <h2 style="margin: 0%;">App : {{streamItem?.alias}}</h2>
         </div>
         <div class="icons-group" style="padding: 0;">
-            <mat-icon *ngIf="editAuth &&!isrunApp &&!isVideo && appData?.scope=='internal'" class="icons"
+            <mat-icon id="app-settings-btn" data-icon-type="settings-config"
+                *ngIf="editAuth &&!isrunApp &&!isVideo && appData?.scope=='internal'" class="icons"
                 style="padding-right: 1.5em;" matTooltip="Configure" (click)="openWdModal(content2)">settings</mat-icon>
             <span *ngIf="editAuth && !(appData?.scope==='video')" style="padding-right: 1.5em;">
                 <button mat-icon-button matTooltip="Try out link" (click)="open(content3)">
@@ -41,7 +42,7 @@
             </div>
         </div>
 
-        <iframe id="iframe" *ngIf="!isVideo" width="100%" height="100%" style="height: 80vh;" frameBorder="0"
+        <iframe id="iframe" *ngIf="!isVideo" width="100%" height="100%" style="height: 70vh;" frameBorder="0"
             [src]="urlSafe"></iframe>
 
 
@@ -63,13 +64,12 @@
 <div *ngIf="isOverview">
 
     <div class="lfx-l-level1-wrapper">
-        <div class="row">
+        <div>
             <div class="col-lg-12">
                 <div class="lfx-l-level1-middle-col lfx-l-base-layout-center" style="padding-top: 0px;">
                     <div class="lfx-l-level2-middle-ctr">
                         <div class="lfx-l-level2-middle-col lfx-u-mar-b-24__mb" style="width:75%;">
-                            <div
-                                class="col-md-12 col-lg-12 aip-desc lfx-u-pad-b-8 lfx-u-pad-tb-16 aip-panel-shadow">
+                            <div class="col-md-12 col-lg-12 aip-desc lfx-u-pad-b-8 lfx-u-pad-tb-16 aip-panel-shadow">
                                 <div class="col-8" style="padding: 0; display:flex;">
                                     <h3 style="margin: 0%;">Overview</h3>
 
@@ -278,7 +278,7 @@
                         <div class="controls selector-764-44" style="margin-top: 5px">
                             <mat-form-field appearance="fill" style="min-width: 200px;">
                                 <mat-label>Run Type</mat-label>
-                                <mat-select [(ngModel)]="selectedRunType" name="RunTypes">
+                                <mat-select data-select-type="run-type" [(ngModel)]="selectedRunType" name="RunTypes">
                                     <mat-option *ngFor="let j of runTypes" [value]="j">
                                         {{j.type}}-{{j.dsAlias}}
                                     </mat-option>

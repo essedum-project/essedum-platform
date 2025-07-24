@@ -11,7 +11,7 @@
 .lfx-u-header-xxl {
     font-size: 2.4rem;
     font-weight: 600;
-    font-family: "myriad-pro", Arial, sans-serif !important;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
     font-style: normal;
 }
 
@@ -181,11 +181,83 @@
   flex-wrap: wrap;
   gap: 16px;
 }
-.test-btn{
- background-color: #0a142f; 
- color: white;
+.test-btn:hover {
+  color: #ffffff !important;
+  background-color: #ebf1f6 !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: transparent
+    linear-gradient(90deg, var(---0052cc) 0%, #0094ff 100%) 0% 0% no-repeat
+    padding-box;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+    no-repeat padding-box;
 }
-.test-btn:hover{
-background:#0094ff; 
-color:white;
+
+.test-btn {
+  color: #002966 !important;
+  background-color: #dadada !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: #dadada 0% 0% no-repeat padding-box;
+  opacity: 1;
 }
+
+.test-btn:disabled {
+  color: grey !important;
+  background-color: #dadada !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: #dadada 0% 0% no-repeat padding-box;
+  opacity: 1;
+}
+
+::ng-deep .mat-mdc-select-trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+::ng-deep .mat-mdc-select-trigger::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  background-image: url("/assets/images/Accordion_open.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+  display: block;
+  z-index: 2;
+}
+
+
+::ng-deep .mat-mdc-form-field-flex {
+  overflow: visible !important;
+  position: relative;
+}
+

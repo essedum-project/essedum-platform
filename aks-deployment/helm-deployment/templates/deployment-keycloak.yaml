@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.keycloak.name }}
+  labels:
+    app: keycloak
+spec:
+  replicas: {{ .Values.keycloak.replicaCount }}
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: {{ .Values.keycloak.image }}
+          args:
+            - "start-dev"
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: {{ .Values.keycloak.adminUser }}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: {{ .Values.keycloak.adminPassword }}
+            - name: KC_HTTP_PORT
+              value: "{{ .Values.keycloak.httpPort }}"
+            - name: KC_HTTPS_PORT
+              value: "{{ .Values.keycloak.httpsPort }}"
+            - name: KC_PROXY
+              value: "{{ .Values.keycloak.proxy }}"
+            - name: KC_HOSTNAME_STRICT
+              value: "{{ .Values.keycloak.hostnameStrict }}"
+            - name: KC_HTTPS_ENABLED
+              value: "{{ .Values.keycloak.httpsEnabled }}"
+            - name: KC_HOSTNAME
+              value: "{{ .Values.keycloak.hostname }}"
+            - name: KC_HOSTNAME_STRICT_HTTPS
+              value: "{{ .Values.keycloak.hostnameStrictHttps }}"
+            - name: KC_HTTPS_CERTIFICATE_FILE
+              value: "{{ .Values.keycloak.tlsCrtPath }}"
+            - name: KC_HTTPS_CERTIFICATE_KEY_FILE
+              value: "{{ .Values.keycloak.tlsKeyPath }}"
+          ports:
+            - containerPort: {{ .Values.keycloak.httpsPort }}
+              protocol: TCP
+          volumeMounts:
+            - name: tls-cert
+              mountPath: /etc/keycloak/certs
+              readOnly: true
+      volumes:
+        - name: tls-cert
+          secret:
+            secretName: {{ .Values.keycloak.tlsSecretName }}

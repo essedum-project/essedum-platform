@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.mysql.pv.name }}
+spec:
+  capacity:
+    storage: {{ .Values.mysql.pv.storage }}
+  accessModes:
+    - {{ .Values.mysql.pv.accessMode }}
+  storageClassName: {{ .Values.mysql.pv.storageClassName }}
+  azureFile:
+    secretName: {{ .Values.mysql.pv.secretName }}
+    shareName: {{ .Values.mysql.pv.shareName }}
+    readOnly: false

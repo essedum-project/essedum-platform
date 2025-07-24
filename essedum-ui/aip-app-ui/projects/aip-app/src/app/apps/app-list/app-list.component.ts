@@ -14,11 +14,22 @@ import { MatDialog } from '@angular/material/dialog';
 import { StreamingServices } from '../../streaming-services/streaming-service';
 import { ChooseRuntimeComponent } from '../choose-runtime/choose-runtime.component';
 import { Location } from '@angular/common';
+import { animate, style, transition, trigger } from '@angular/animations';
+import { CreateAppComponent } from '../create-app/create-app.component';
 
 @Component({
   selector: 'app-view-apps',
   templateUrl: './app-list.component.html',
-  styleUrls: ['./app-list.component.scss'],
+  styleUrl: './app-list.component.scss',
+  animations: [
+    trigger('fadeInOut', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('200ms', style({ opacity: 1 })),
+      ]),
+      transition(':leave', [animate('200ms', style({ opacity: 0 }))]),
+    ]),
+  ],
 })
 export class AppListComponent implements OnInit {
   editable: boolean = false;
@@ -26,7 +37,8 @@ export class AppListComponent implements OnInit {
   isAddHovered: boolean = false;
   isRefreshHovered: boolean = false;
   isMenuHovered: boolean = false;
-  // isFilterHovered: boolean = false;
+  isFilterHovered: boolean = false;
+  loading: boolean = true;
   alias: any;
   filter: string = '';
   pageNumber = 1;
@@ -61,6 +73,14 @@ export class AppListComponent implements OnInit {
   idealTimeout: any;
   organization: any;
   appConstantsKey: string = 'icip.app.includeCore';
+  hoverStates: boolean[] = [];
+  isRefreshing: boolean = false;
+  isPrevHovered = false;
+  isNextHovered = false;
+  lastRefreshedTime: Date | null = null;
+  cardTitle: String = 'Apps';
+  hasFilters = false;
+  selectedAppTypeList: string[] = [];
 
   Authentications() {
     this.service.getPermission('cip').subscribe((cipAuthority) => {
@@ -88,8 +108,8 @@ export class AppListComponent implements OnInit {
       this.pageSize = this.pageSize || 12; // lg
       this.getAllApps();
     } else if (window.innerWidth > 1024 && window.innerWidth <= 1440) {
-      this.itemsPerPage = [9, 18, 36, 54, 72, 90];
-      this.pageSize = this.pageSize || 9; //md
+      this.itemsPerPage = [6, 12, 24, 36, 48, 60];
+      this.pageSize = this.pageSize || 6; //md
       this.getAllApps();
     } else if (window.innerWidth >= 768 && window.innerWidth <= 1024) {
       this.itemsPerPage = [6, 9, 18, 36, 54, 72];
@@ -104,6 +124,8 @@ export class AppListComponent implements OnInit {
 
   ngOnInit(): void {
     this.records = false;
+    this.loading = true;
+    this.isRefreshing = true;
     this.Authentications();
     this.route.queryParams.subscribe((params) => {
       // Update this.pageNumber if the page query param is present
@@ -137,6 +159,7 @@ export class AppListComponent implements OnInit {
         }
         this.updatePageSize();
       });
+    this.lastRefreshTime();
   }
   updateQueryParam(
     page: number = 1,
@@ -191,6 +214,7 @@ export class AppListComponent implements OnInit {
       params = params.set('tags', this.selectedTag.toString());
     this.service.getPipelinesCards(params).subscribe((res) => {
       this.appData = res.filter((res) => res.type == 'App');
+      this.loading = false;
       this.appData.forEach((app, index) => {
         this.service.getAppByName(app.name).subscribe((resp) => {
           this.appData[index]['scope'] = resp.scope;
@@ -240,13 +264,24 @@ export class AppListComponent implements OnInit {
     });
   }
 
-  openedit(content: any): void {
-    this.dialog.open(content, {
-      width: '760px',
-      panelClass: 'standard-dialog',
-    });
-    this.editable = true;
-  }
+openAddedit(edit: boolean = false, app?: any): void {
+  const dialogRef = this.dialog.open(CreateAppComponent, {
+    height: '80%',
+    width: '60%',
+    minWidth: '60vw',
+    disableClose: true,
+    data: {
+      edit: edit,
+      appName: app?.name,
+      appcid: app?.cid
+    },
+  });
+  dialogRef.afterClosed().subscribe((result) => {
+    if (result==="refresh") {
+      this.ngOnInit();
+    }
+  });
+}
 
   tagSelectedEvent(event) {
     this.selectedTag = event.getSelectedTagList();
@@ -291,7 +326,11 @@ export class AppListComponent implements OnInit {
     });
   }
 
-  searchApp() {
+  searchApp(searchText?: string) {
+    if (searchText !== undefined) {
+      this.filter = searchText;
+    }
+
     let params: HttpParams = new HttpParams();
     if (this.filter.length >= 1) params = params.set('query', this.filter);
     params = params.set('page', (this.pageNumber = 1));
@@ -307,6 +346,7 @@ export class AppListComponent implements OnInit {
 
     this.service.getPipelinesCards(params).subscribe((res) => {
       this.appData = res.filter((res) => res.type == 'App');
+      this.loading = false;
       this.appData.forEach((app, index) => {
         this.service.getImage(app['name']).subscribe((image) => {
           this.appData[index]['image'] = image['url'];
@@ -656,5 +696,24 @@ export class AppListComponent implements OnInit {
         );
       }
     });
+  }
+
+  lastRefreshTime() {
+    setTimeout(() => {
+      this.lastRefreshedTime = new Date();
+      console.log('Data refreshed!');
+    }, 1000);
+  }
+
+  onFilterStatusChange(hasActiveFilters: boolean) {
+    this.hasFilters = hasActiveFilters;
+  }
+
+  get shouldShowEmptyState(): boolean {
+    return !this.loading && (!this.appData || this.appData.length === 0);
+  }
+
+  get shouldShowPagination(): boolean {
+    return this.appData && this.appData.length > 0;
   }
 }

@@ -2,106 +2,149 @@
     <div class="row">
         <div class="col-lg-12">
             <div class="lfx-l-level1-middle-col">
-
-                <div *ngIf="!editdialog" class="align-items-center d-flex">
+                <div class="col-5">
                     <span *ngIf="!customCreate" style="cursor: pointer;">
-                        <i class="fa fa-long-arrow-left back-icon" aria-hidden="true" (click)="routeBackToList()"></i>
+                        <mat-icon class="aip-led-icons" (click)="routeBackToList()"
+                            [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
+                            matTooltipPosition="above" (mouseenter)="isBackHovered = true"
+                            (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
                     </span>
-                    <span class="lfx-u-mar-l-8 lfx-u-header-xxl secondary-color">Create Datasets</span>
+                    <span class="lfx-u-mar-l-8 header-p-title">Datasets: </span><span class="header-title">Create
+                        Dataset
+                    </span>
                 </div>
-
                 <mat-card class="lfx-card">
-                    <mat-card-title class="lfx-card">Dataset Properties</mat-card-title>
-                     <div class="col-md-1" *ngIf="proceed" style="text-align: center">
-                <i class="fa fa-long-arrow-left back-icon" style="cursor:pointer" (click)="proceed = false"></i>
-            </div>
+                    <div class="align-items-center d-flex">
+                        <span *ngIf="proceed" style="cursor: pointer;">
+                            <mat-icon class="aip-led-icons" (click)="proceed = false"
+                                [ngStyle]="{'color': isPropBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
+                                matTooltipPosition="above" (mouseenter)="isPropBackHovered = true"
+                                (mouseleave)="isPropBackHovered = false">arrow_back</mat-icon>
+                        </span>
+                        <span class="lfx-u-mar-l-8 header-p-title">Datasets Properties </span>
+                    </div>
+                    <br>
                     <mat-card-content>
                         <form (ngSubmit)="onNext()" *ngIf="!proceed">
 
-                            <mat-form-field appearance="fill" class="lfx-field">
+                            <mat-form-field appearance="fill" floatLabel="always" class="lfx-field" style="width: 30%;">
                                 <mat-label>Display Name</mat-label>
                                 <input matInput placeholder="Enter Name..." required [(ngModel)]="data_alias"
                                     name="displayName" />
                                 <mat-error>This field is required</mat-error>
                             </mat-form-field>
 
-                            <mat-form-field appearance="fill" class="lfx-field">
+                            <mat-form-field appearance="fill" floatLabel="always" class="lfx-field">
                                 <mat-label>Description</mat-label>
                                 <input matInput placeholder="Enter Description..." [(ngModel)]="data_description"
                                     name="description" />
                             </mat-form-field>
 
                             <div class="lfx-flex-row lfx-mb-16">
-                                <mat-form-field appearance="fill" class="lfx-field lfx-half-col">
-                                    <mat-label>Select Dataset Usage Type</mat-label>
-                                    <mat-select [(ngModel)]="data_type" name="usageType" required
-                                        (selectionChange)="selectChange()">
-                                        <mat-option *ngFor="let opt of datasetUsageType"
-                                            [value]="opt.value">{{opt.viewValue}}</mat-option>
-                                    </mat-select>
-                                    <mat-error>Please select data usage type</mat-error>
-                                </mat-form-field>
+                                <div class="lfx-field lfx-half-col">
+                                    <div class="custom-select-wrapper">
+                                        <mat-form-field appearance="fill" class="custom-mat-select" floatLabel="always">
+                                            <mat-label>Dataset Usage Type</mat-label>
+                                            <mat-select [(ngModel)]="data_type" name="usageType" required
+                                                (selectionChange)="selectChange()"
+                                                placeholder="Select Dataset Usage Type">
+                                                <mat-option *ngFor="let opt of datasetUsageType" [value]="opt.value">
+                                                    {{ opt.viewValue }}
+                                                </mat-option>
+                                            </mat-select>
+                                            <mat-error>Please select data usage type</mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
 
-                                <mat-form-field appearance="fill" class="lfx-field lfx-half-col">
-                                    <mat-label>Select Datasource</mat-label>
-                                    <input type="text" matInput [matAutocomplete]="dsAuto"
-                                        placeholder="Enter Datasource Name" [(ngModel)]="data_datasource"
-                                        name="datasource" required [disabled]="isAuth" />
-                                    <mat-autocomplete #dsAuto="matAutocomplete"
-                                        (optionSelected)="onChanginDatasource($event.option.value)">
-                                        <mat-option *ngFor="let opt of datasourcesOpt"
-                                            [value]="opt">{{opt}}</mat-option>
-                                    </mat-autocomplete>
-                                    <mat-error>This field is required</mat-error>
-                                </mat-form-field>
+                                <div class="lfx-field lfx-half-col">
+                                    <div class="custom-select-wrapper">
+                                        <mat-form-field appearance="fill" class="custom-mat-select" floatLabel="always">
+                                            <mat-label>Datasource</mat-label>
+
+                                            <mat-select [(ngModel)]="data_datasource" name="datasource" required
+                                                [disabled]="isAuth" placeholder="Select Datasource"
+                                                (selectionChange)="onChanginDatasource($event.value)">
+                                                <mat-option *ngFor="let opt of datasourcesOpt" [value]="opt">
+                                                    {{ opt }}
+                                                </mat-option>
+                                            </mat-select>
+                                            <mat-error>This field is required</mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="lfx-flex-row lfx-mb-16">
-                                <mat-form-field appearance="fill" class="lfx-field lfx-half-col">
-                                    <mat-label>Select Schema Type</mat-label>
-                                    <input type="text" matInput [matAutocomplete]="schemaAuto"
-                                        placeholder="Enter Schema Type" [(ngModel)]="data_schema" name="schema"
-                                        [disabled]="isAuth" />
-                                    <mat-autocomplete #schemaAuto="matAutocomplete"
-                                        (optionSelected)="onSchemaChange($event.option.value)">
-                                        <mat-option *ngFor="let opt of originalSchemasOpt"
-                                            [value]="opt">{{opt}}</mat-option>
-                                    </mat-autocomplete>
-                                </mat-form-field>
+                                <div class="lfx-field lfx-half-col">
+                                    <div class="custom-select-wrapper">
 
-                                <mat-form-field appearance="fill" class="lfx-field lfx-half-col">
-                                    <mat-label>Select Form Template</mat-label>
-                                    <mat-select (selectionChange)="onTemplateChange($event)"
-                                        [disabled]="!isAuth && !isSchema">
-                                        <mat-option *ngFor="let opt of originalSchemaTemplatesOpt"
-                                            [value]="opt.value">{{opt.viewValue}}</mat-option>
-                                    </mat-select>
-                                </mat-form-field>
+                                        <mat-form-field appearance="fill" class="custom-mat-select" floatLabel="always">
+                                            <mat-label>Schema Type</mat-label>
+                                            <mat-select [(ngModel)]="data_schema" name="schema" [disabled]="isAuth"
+                                                (selectionChange)="onSchemaChange($event.value)"
+                                                placeholder="Select Schema Type">
+                                                <mat-option *ngFor="let opt of originalSchemasOpt" [value]="opt">{{ opt
+                                                    }}</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+
+                                    </div>
+                                </div>
+                                <div class="lfx-field lfx-half-col">
+                                    <div class="custom-select-wrapper">
+                                        <mat-form-field appearance="fill" class="custom-mat-select" floatLabel="always">
+                                            <mat-label>Form Template</mat-label>
+
+                                            <mat-select (selectionChange)="onTemplateChange($event)"
+                                                [disabled]="!isAuth && !isSchema" placeholder="Select Form Template">
+
+                                                <mat-option *ngFor="let opt of originalSchemaTemplatesOpt"
+                                                    [value]="opt.value">{{opt.viewValue}}</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="lfx-flex-row lfx-mb-16">
-                                <mat-form-field appearance="fill" class="lfx-field lfx-half-col">
-                                    <mat-label>Select Tags</mat-label>
-                                    <mat-select multiple (selectionChange)="onTagChange($event)" [disabled]="isAuth"
-                                        [(ngModel)]="selectedTags" name="tags">
-                                        <mat-option *ngFor="let tag of tagsOptions" [value]="tag.value">
-                                            {{tag.viewValue}}</mat-option>
-                                    </mat-select>
-                                </mat-form-field>
 
-                                <mat-form-field appearance="fill" class="lfx-field lfx-half-col">
-                                    <mat-label>Select View for Datasets</mat-label>
-                                    <mat-select required [(ngModel)]="data_views" name="views"
-                                        (selectionChange)="selectChange($event)" [disabled]="isAuth || type === 'GIT'">
-                                        <mat-option *ngFor="let view of viewType" [value]="view.value">{{view.value}}</mat-option>
-                                    </mat-select>
-                                    <mat-error>Please select viewType</mat-error>
-                                </mat-form-field>
+                            <div class="lfx-flex-row lfx-mb-16">
+                                <div class="lfx-field lfx-half-col">
+                                    <div class="custom-select-wrapper">
+                                        <mat-form-field appearance="fill" class="custom-mat-select" floatLabel="always">
+                                            <mat-label>Tags</mat-label>
+
+                                            <mat-select multiple (selectionChange)="onTagChange($event)"
+                                                [disabled]="isAuth" [(ngModel)]="selectedTags" name="tags"
+                                                placeholder="Select Tags">
+
+                                                <mat-option *ngFor="let tag of tagsOptions" [value]="tag.value">
+                                                    {{tag.viewValue}}</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+
+                                    </div>
+                                </div>
+                                <div class="lfx-field lfx-half-col">
+                                    <div class="custom-select-wrapper">
+                                        <mat-form-field appearance="fill" class="custom-mat-select" floatLabel="always">
+                                            <mat-label>View for Datasets</mat-label>
+                                            <mat-select required [(ngModel)]="data_views" name="views"
+                                                (selectionChange)="selectChange($event)"
+                                                placeholder="Select View for Datasets"
+                                                [disabled]="isAuth || type === 'GIT'">
+                                                <mat-option *ngFor="let view of viewType"
+                                                    [value]="view.value">{{view.value}}</mat-option>
+                                            </mat-select>
+                                            <mat-error>Please select viewType</mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="lfx-button-right">
                                 <button mat-flat-button class="next-btn" [disabled]="nextbtn"
-                                    [ngStyle]="{'pointer-events': (data_views!=null && data_datasource!=null && data_type!= null ) ? 'auto' : 'none'}" 
+                                    [ngStyle]="{'pointer-events': (data_views!=null && data_datasource!=null && data_type!= null ) ? 'auto' : 'none'}"
                                     type="submit">
                                     Next
                                 </button>

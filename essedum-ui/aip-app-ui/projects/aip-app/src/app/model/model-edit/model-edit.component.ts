@@ -62,11 +62,11 @@ export class ModelEditsComponent implements OnInit {
       (resp) => {
 
         this.routeBackToModelList();
-        this.service.messageService(resp, 'Done! Model is updated.');
+        this.service.message('Done! Model is updated.');
    
       },
       (error) => {
-        this.service.messageService(error);
+        this.service.message('Error while update model '+ error, 'error');
       }
     );
   }

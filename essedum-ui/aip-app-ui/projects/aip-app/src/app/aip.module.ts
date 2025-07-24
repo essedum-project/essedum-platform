@@ -1,7 +1,6 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { AipRouting } from './aip-routing';
 import { AipComponent } from './aip.component';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatCardModule } from '@angular/material/card';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -38,6 +37,7 @@ import { ModelDeployComponent } from './model/model-deploy/model-deploy.componen
 import { JsonFormsModule } from '@jsonforms/angular';
 import { JsonFormsAngularMaterialModule } from '@jsonforms/angular-material';
 import { TagsComponent } from './tags/tags.component';
+import { TaggingComponentComponent } from './tagging-component/tagging-component.component';
 import { SchemaComponent } from './schema/schema.component';
 import { AdapterComponent } from './adapter/adapter.component';
 import { InstanceComponent } from './instance/instance.component';
@@ -49,7 +49,6 @@ import { AppListComponent } from './apps/app-list/app-list.component';
 import { ViewAppComponent } from './apps/view-app/view-app.component';
 import { AppConfigComponent } from './app-config/app-config.component';
 import { FileUploadModule } from 'ng2-file-upload';
-
 import { CreateAppComponent } from './apps/create-app/create-app.component';
 import { AdapterCreateEditComponent } from './adapter/adapter-create-edit/adapter-create-edit.component';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component/confirm-delete-dialog.component';
@@ -89,24 +88,17 @@ import { DefaultComponent } from './dataset/default/default.component';
 import { DatasetEditComponent } from './dataset/dataset-edit/dataset-edit.component';
 import { DatasetFullscreenViewComponent } from './dataset/dataset-fullscreen-view/dataset-fullscreen-view.component';
 import { DatasetPowerModeViewComponent } from './dataset/dataset-power-mode-view/dataset-power-mode-view.component';
-//import { DatasetFormViewComponent } from './dataset/dataset-form-view/dataset-form-view.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-imports: [ScrollingModule];
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { ModalConfigSchemaComponent } from './schema/modal-config-schema/modal-config-schema.component';
-import { ModalConfigSchemaEditorComponent } from './schema/modal-config-schema-editor/modal-config-schema-editor.component';
+import { ModalConfigSchemaEditorComponent } from './schema/modal-config-schema/modal-config-schema-editor/modal-config-schema-editor.component';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { CarouselModule as CModule } from 'ngx-owl-carousel-o';
 import { MatNativeDateModule } from '@angular/material/core';
 import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
 import { UserSecretsComponent } from './pipeline.description/user-secrets/user-secrets.component';
-import {
-  FilterPipe,
-  FirstCharacterPipe,
-  StringToJSON,
-} from './services/pipes/stringtojson.pipe';
-
+import { FirstCharacterPipe } from './services/pipes/stringtojson.pipe';
 import { ShowOutputArtifactsComponent } from './pipeline.description/show-output-artifacts/show-output-artifacts.component';
 import { NgxIndexedDBModule, DBConfig } from 'ngx-indexed-db';
 import { ChooseRuntimeComponent } from './apps/choose-runtime/choose-runtime.component';
@@ -117,9 +109,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { PlotlyModule } from 'angular-plotly.js';
 import * as PlotlyJS from 'plotly.js-dist-min';
 import { NgBusyModule } from 'ng-busy';
-
 import { PipelineDialogComponent } from './pipeline-dialog/pipeline-dialog.component';
-
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { MarkdownModule } from 'ngx-markdown';
 import { DragDropModule as CdkDragDropModule } from '@angular/cdk/drag-drop';
@@ -128,6 +118,8 @@ import { QuillModule } from 'ngx-quill';
 import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-name.component';
 import { AdapterServices } from './adapter/adapter-service';
 import { MatIconModule } from '@angular/material/icon';
+import { CustomSnackbarComponent } from './sharedModule/custom-snackbar/custom-snackbar.component';
+import { CustomSnackbarService } from './sharedModule/services/custom-snackbar.service';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -139,6 +131,13 @@ import { HighlightSearchPipe } from './pipes/highlight.pipe';
 import { DynamicRemoteLoad } from './apps/view-app/remoteLoad';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatTabsModule } from '@angular/material/tabs';
+import { AipCardComponent } from './sharedModule/aip-card/aip-card.component';
+import { AipPaginationComponent } from './sharedModule/aip-pagination/aip-pagination.component';
+import { AipHeaderComponent } from './sharedModule/aip-header/aip-header.component';
+import { AipEmptyStateComponent } from './sharedModule/aip-empty-state/aip-empty-state.component';
+import { AipFilterComponent } from './sharedModule/aip-filter/aip-filter.component';
+import { AipLoadingComponent } from './sharedModule/aip-loading/aip-loading.component';
+import { ModalConfigSchemaHeaderComponent } from './schema/modal-config-schema/modal-config-schema-header/modal-config-schema-header.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -161,12 +160,12 @@ const dbConfig: DBConfig = {
     },
   ],
 };
+
 @NgModule({
   declarations: [
     AipComponent,
     ModelComponent,
     DatasourceConfigComponent,
-
     ModelCreateComponent,
     PipelineComponent,
     PipelineCreateComponent,
@@ -216,7 +215,6 @@ const dbConfig: DBConfig = {
     DatasetEditComponent,
     DatasetFullscreenViewComponent,
     DatasetPowerModeViewComponent,
-    // DatasetFormViewComponent,
     ModalConfigSchemaComponent,
     ModalConfigSchemaEditorComponent,
     UserSecretsComponent,
@@ -226,6 +224,15 @@ const dbConfig: DBConfig = {
     PaginationComponent,
     PipelineDialogComponent,
     DatasetByNameComponent,
+    CustomSnackbarComponent,
+    AipCardComponent,
+    AipPaginationComponent,
+    AipHeaderComponent,
+    AipEmptyStateComponent,
+    TaggingComponentComponent,
+    AipFilterComponent,
+    AipLoadingComponent,
+    ModalConfigSchemaHeaderComponent,
   ],
   imports: [
     CommonModule,
@@ -233,7 +240,6 @@ const dbConfig: DBConfig = {
     MatCardModule,
     MatToolbarModule,
     MatGridListModule,
-    MatDatepickerModule,
     MatIconModule,
     FormsModule,
     ReactiveFormsModule,
@@ -244,7 +250,6 @@ const dbConfig: DBConfig = {
     MatError,
     MatHint,
     MatCheckboxModule,
-    MatSelectModule,
     MatInputModule,
     MatFormFieldModule,
     MatSlideToggle,
@@ -268,7 +273,7 @@ const dbConfig: DBConfig = {
     MatNativeDateModule,
     NgxMaterialTimepickerModule,
     NgxIndexedDBModule.forRoot(dbConfig),
-    MarkdownModule.forRoot(), // Add this line
+    MarkdownModule.forRoot(),
     NgxMatSelectSearchModule,
     AngularDualListBoxModule,
     MatMenuModule,
@@ -290,12 +295,10 @@ const dbConfig: DBConfig = {
       useClass: AipInterceptorService,
       multi: true,
     },
-
     {
       provide: 'sbx',
       useValue: '/api/exp',
     },
-
     Services,
     AdapterServices,
     PipelineService,
@@ -309,7 +312,7 @@ const dbConfig: DBConfig = {
     RaiservicesService,
     SemanticService,
     DynamicRemoteLoad,
-
+    CustomSnackbarService,
     { provide: MatDialogRef, useValue: {} },
     { provide: MAT_DIALOG_DATA, useValue: {} },
   ],

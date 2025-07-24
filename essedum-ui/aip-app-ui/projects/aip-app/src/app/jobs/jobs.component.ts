@@ -333,6 +333,7 @@ showConsole(jobId: string, runtime: string, status, job) {
     this.service.stopPipeline(id).subscribe(
       response => {
         this.service.message('Stop Event Triggered!','success');
+        console.log(response , 'stopjob response ');
       }, error => {
         this.service.message('Error!', 'error');
       });

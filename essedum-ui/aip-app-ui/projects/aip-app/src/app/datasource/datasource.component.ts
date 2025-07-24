@@ -23,6 +23,11 @@ import { Location } from '@angular/common';
 })
 export class DatasourceComponent implements OnInit, OnChanges {
   cardTitle: String = 'Connections';
+    hoverStates: boolean[] = [];
+  lastRefreshedTime: Date | null = null;
+    servicev1 = 'connections';
+      hasFilters = false;
+
   test: any;
   cards: any;
   filteredCards: any;
@@ -73,6 +78,7 @@ export class DatasourceComponent implements OnInit, OnChanges {
   filtbackup: any="";
   tagSelected: boolean = false;
   datasourceName:any;
+  private hasRefreshed = false;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -82,13 +88,8 @@ export class DatasourceComponent implements OnInit, OnChanges {
     private dialog: MatDialog,
     private location: Location
   ) {}
-  ngOnChanges(changes: SimpleChanges): void {
-    this.getCards(this.pageNumber, this.pageSize);
-    console.log(this.tagService.tags, 'tags');
-    this.tagchange();
-    this.updatePageSize();
-    console.log(this.tagService.tags, 'tags');
-  }
+  ngOnChanges(changes: SimpleChanges): void {}
+
   @HostListener('window:resize', ['$event'])
   onResize(event) {
     this.updatePageSize();
@@ -135,6 +136,13 @@ export class DatasourceComponent implements OnInit, OnChanges {
         this.selectedAdapterType = params['type']
           ? params['type'].split(',')
           : [];
+           if (this.selectedAdapterType && this.selectedAdapterType.length > 0) {
+          this.hasFilters = true;
+        }
+       else {
+        this.pageNumber = 1;
+        this.filt = '';
+      }
       } else {
         this.pageNumber = 1;
         this.filt = '';
@@ -159,6 +167,8 @@ export class DatasourceComponent implements OnInit, OnChanges {
       this.Authentications();
     }
     this.getTags();
+        this.lastRefreshTime();
+
   }
   updateQueryParam(
     page: number = 1,
@@ -247,8 +257,7 @@ export class DatasourceComponent implements OnInit, OnChanges {
       org = 'Core';
     else org = sessionStorage.getItem('organization');
       if(this.cards==undefined || this.cards==null || this.cards.length==0)
-      this.service.getDatasourceCards(org).subscribe((res) => {
-        console.log('iffffffffffffffff');
+      this.service.getDatasourceCards(org).subscribe((res) => {        
         let data: any = [];
         let test = res;
         test.forEach((element: any) => {
@@ -269,6 +278,8 @@ export class DatasourceComponent implements OnInit, OnChanges {
         this.noOfItems = this.noOfItems || data.length;
         this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
         this.pageArr = [...Array(this.noOfPages).keys()];
+            this.hoverStates = new Array(this.pageArr.length).fill(false);
+
         if(page)
           this.filterCards(page);
 
@@ -308,10 +319,21 @@ export class DatasourceComponent implements OnInit, OnChanges {
     this.selectedTag = event.getSelectedTagList();
     this.tagrefresh = false;
     this.tagSelected = true;
+          this.hasRefreshed=false;
+
     this.filterCards();
   }
 
-  filterCards(page?: number) {
+  filterCards(searchText?:string, page?: number) {
+     if (searchText !== undefined) {
+      this.filt = searchText;
+    }
+      const filtStr = typeof this.filt === 'string' ? this.filt.trim() : '';
+
+      if (filtStr.length != this.filtbackup.length) {
+      this.pageNumber = 1;
+      this.filtbackup = this.filt;
+    }
     if (page)
       this.pageNumber = page;
     else
@@ -323,7 +345,7 @@ export class DatasourceComponent implements OnInit, OnChanges {
       for (let i = 0; i < this.selectedAdapterType.length; i++) {
         multiFilter = this.cards.filter((data) => {
           const isAdapterTypeIncluded = data.type?.includes(this.selectedAdapterType[i]);
-          const isFiltIncluded = this.filt && this.filt.trim() !== '' ? (data.alias.toLowerCase().includes(this.filt.toLowerCase()) || data.name.toLowerCase().includes(this.filt.toLowerCase())) : true;
+          const isFiltIncluded = filtStr && filtStr.trim() !== '' ? (data.alias.toLowerCase().includes(filtStr.toLowerCase()) || data.name.toLowerCase().includes(filtStr.toLowerCase())) : true;
           if (this.records)
             this.records = !(isAdapterTypeIncluded && isFiltIncluded);
           return isAdapterTypeIncluded && isFiltIncluded;
@@ -337,11 +359,13 @@ export class DatasourceComponent implements OnInit, OnChanges {
       this.noOfItems = this.noOfItems || this.filteredCards.length;
       this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
       this.pageArr = [...Array(this.noOfPages).keys()];
+          this.hoverStates = new Array(this.pageArr.length).fill(false);
+
     } else {
-      if (this.filt && this.filt != '') {
+      if (filtStr && filtStr != '') {
         this.records = true;
         this.filteredCards = this.cards.filter((data) => {
-          const match = data.alias.toLowerCase().includes(this.filt.toLowerCase()) || data.name.toLowerCase().includes(this.filt.toLowerCase());
+          const match = data.alias.toLowerCase().includes(filtStr?.toLowerCase()) || data.name.toLowerCase().includes(filtStr?.toLowerCase());
           if (match) {
             this.records = false;
           }
@@ -351,18 +375,19 @@ export class DatasourceComponent implements OnInit, OnChanges {
         this.noOfItems = this.noOfItems || this.filteredCards.length;
         this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
         this.pageArr = [...Array(this.noOfPages).keys()];
-      } else {
-        if (!page)
+            this.hoverStates = new Array(this.pageArr.length).fill(false);
+
+      }
+       else {
+        if (!page && !this.hasRefreshed){
+          this.hasRefreshed=true;
           this.refreshComplete();
       }
     }
+    }
     this.updateQueryParam(this.pageNumber, this.filt, this.selectedAdapterType.toString());
   }
-  refresh() {
-    this.getCards(this.pageNumber, this.pageSize);
-    this.getCountPipelines();
-    this.changePage(1);
-  }
+
 
   getCountPipelines() {
     let params: HttpParams = new HttpParams();
@@ -380,8 +405,8 @@ export class DatasourceComponent implements OnInit, OnChanges {
     });
   }
 
-  filterz() {
-    this.filterCards();
+  filterz(searchText?: string) {
+    this.filterCards(searchText);
   }
   getTags() {
     this.tags = {};
@@ -431,20 +456,22 @@ export class DatasourceComponent implements OnInit, OnChanges {
     this.router.navigate(['create'], { relativeTo: this.route });
   }
 
-  deleteAdapter(name: string) {
+  deleteConnection(name: string) {
     this.deleteRuntimes(name);
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'delete') {
         this.service.deleteDatasource(name).subscribe(
-          (res) => {     
-            
-            this.service.messageService(               
-                'Done! Connection deleted Successfully'
-              );
-        this.refreshComplete();
+          (res: any) => {
+            if (res && res.status === 200) {
+              this.service.message('Done! Connection deleted Successfully');
+              this.refreshComplete();
+            } else {
+              this.service.message('Failed to delete connection ', 'error');
+            }
           },
           (error) => {
+            this.service.message('Error deleting connection '+error?.error?.message ,'error');
           }
         );
       }
@@ -474,12 +501,27 @@ export class DatasourceComponent implements OnInit, OnChanges {
   }
   refreshComplete() {
     this.filt = '';
+        this.tagrefresh = true;
+        if (!this.hasFilters) {
     this.updateQueryParam(1, "", "");
     this.cards = [];
     this.tagrefresh = true;
     this.selectedAdapterType = [];
     this.getCards(1, this.pageSize);
+         this.filt = '';
+      this.tagrefresh = true;
+        }
+        this.lastRefreshTime();
+
   }
- 
+   lastRefreshTime() {
+    setTimeout(() => {
+      this.lastRefreshedTime = new Date();
+      console.log('Data refreshed!');
+    }, 1000);
+  }
+  onFilterStatusChange(hasActiveFilters: boolean) {
+    this.hasFilters = hasActiveFilters;
+  }
 }
 

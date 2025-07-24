@@ -1,3 +1,7 @@
+:host {
+  font-family: "Roboto", "Segoe UI", sans-serif;
+}
+
 .appLogo {
   border-radius: 15%;
   height: 70%;
@@ -77,3 +81,292 @@
 ::ng-deep .mat-mdc-menu-item {
   font-size: 1.2rem !important; /* or any size you prefer */
 }
+
+.lfx-card-header {
+  text-align: left;
+  font: normal normal 600 14px/20px "Roboto", "Segoe UI", sans-serif !important;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+}
+
+.lfx-card-image {
+  width: 100px;
+  height: 80px;
+  min-width: 100px;
+  max-width: 100px;
+  background: transparent no-repeat padding-box;
+  border-radius: 20%; // Rectangle shape with more pronounced rounded corners
+  opacity: 1;
+  transition: width 0.3s, height 0.3s, border-radius 0.3s;
+}
+
+.lfx-card-image:hover {
+  width: 100px;
+  height: 80px;
+  border-radius: 16px;
+}
+
+.lfx-main-card {
+  top: 255px;
+  left: 86px;
+  width: 364px;
+  height: 199px;
+  border: 1px solid var(---efefef);
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 2px 4px #00000029;
+  border: 1px solid #efefef;
+  border-radius: 16px;
+  opacity: 1;
+}
+
+.lfx-app-description {
+ color: #737373;
+text-align: left;
+font: normal normal normal 12px/20px "Roboto", "Segoe UI", sans-serif !important;
+letter-spacing: 0px;
+color: #737373;
+opacity: 1;
+margin-left: -12px !important;
+}
+
+.mat-action-button-s {
+  color: #ffffff !important;
+  background-color: #ebf1f6 !important;
+  height: 26px !important;
+  min-height: 26px !important;
+  font-size: 14px !important;
+  line-height: 2.2;
+  font-weight: 500;
+  letter-spacing: 0px;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  background: transparent
+    linear-gradient(90deg, var(---0052cc) 0%, #0094ff 100%) 0% 0% no-repeat
+    padding-box;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+    no-repeat padding-box;
+}
+
+// Card actions
+mat-card-actions.card-actions-hover {
+  transition: opacity 0.2s;
+  padding: 0 0 22px 0 !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  width: 100% !important;margin-bottom: -20px;
+
+  .overview-btn {
+    margin-right: 50px;    
+  }
+
+  .button-placeholder {
+    width: 140px;
+    margin-right: 50px;
+  }
+
+  .avatar-container {
+    position: relative;
+
+
+    .aip-hover-detail {
+      position: absolute;
+      display: none;
+      background-color: white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      padding: 8px;
+      border-radius: 4px;
+      z-index: 10;
+      min-width: 120px;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    &:hover .aip-hover-detail {
+      display: block;
+    }
+  }
+}
+
+.aip-more-actions-icon {
+  font-size: 24px;
+  padding: 0;
+  color: #a5aaad;
+  font-weight: 300;
+  transition: color 0.2s ease;
+
+  &.aip-icon-hover {
+    color: #0094ff;
+  }
+}
+
+
+  .lfx-c-avatar {
+    background: #d1ecff;
+    color: #0094ff;
+    border-radius: 50%;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 500;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
+    font-style: normal;
+    float: left;
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 14px;
+    padding-top: 5px;
+  }
+
+
+
+
+  .pagination-container {
+  margin: 0.5rem 0;
+
+  .paginator-buttons {
+    width: 100%;
+  }
+
+  .pages-details {
+    display: flex;
+  }
+
+  .pagination-arrow {
+    cursor: pointer;
+    padding: 4px;
+    color: #737373;
+
+    &.disabled {
+      color: #cccccc;
+      cursor: unset;
+    }
+
+    &.active {
+      color: #0094ff;
+    }
+  }
+
+  .page-numbers {
+    display: flex;
+
+    .pg {
+      margin: 4px;
+      width: 24px !important;
+      height: 24px !important;
+      padding-left: 8px !important;
+      padding-right: 8px !important;
+      padding-top: 2px !important;
+      padding-bottom: 3px !important;
+      font-size: 1.4rem;
+      font-weight: 400;
+      font-family: "Roboto", "Segoe UI", sans-serif !important;
+      font-style: normal;
+      box-shadow: 0px 2px 4px #00000029;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+
+      &.selected-page {
+        background-color: #0052cc;
+        color: white;
+      }
+
+      &.hover:not(.selected-page) {
+        background-color: #f0f0f0;
+      }
+    }
+  }
+}
+
+
+.apps-container {
+  width: 100%;
+  position: relative;
+}
+
+.lfx-u-mar-l-80{
+margin-left: 80px !important;
+}
+
+.card-content-wrapper {
+  position: relative;
+  height: 100%;
+}
+
+.card-actions-container {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(40px);
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 2;
+}
+
+// Show actions on hover of the card
+mat-card:hover .card-actions-container,
+.card-actions-container:hover {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  margin-left: 5px !important;
+}
+
+.embed_option {
+  color: #5b99f6;
+  background-color: none !important;
+}
+
+.button-hover {
+   width: 20% !important;
+  cursor: pointer;
+  width: auto;
+  height: auto;
+  background-color: transparent !important; color: inherit !important;
+}
+
+::ng-deep .mat-mdc-tooltip {
+  margin-bottom: 12px !important;
+}
+
+::ng-deep .button-hover .mat-mdc-tooltip {
+  margin-bottom: -10px !important;
+}
+
+.action-icon{
+  font-size: 22px !important; padding: 3px !important; color: #a5aaad !important; font-weight: 300 !important;
+}
+
+.w-30{
+  width: 30% !important;
+}
+
+.w-15{
+  width: 15% !important;
+}
+
+.w-20{
+  width: 20% !important;
+}
+
+.overview{
+  height: 28px !important; width: 34% !important;
+}
+
+.mat-card-header-transition{
+  padding: 0 !important; width: 95%; height: 100%;height:30% ;transition: height 0.2s;
+}
+
+.main-card-div{
+  margin-bottom: 2% !important; height: 100% !important
+}
+
+.mat-button-radius {
+  border-radius: 16px !important;
+}
+
+

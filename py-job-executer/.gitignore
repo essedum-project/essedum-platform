@@ -1,0 +1,6 @@
+pyjob/
+**/__pycache__/
+__pycache__/
+logfile.log
+leaputils-2.0.0-py3-none-any.whl
+/venvs

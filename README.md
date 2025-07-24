@@ -89,7 +89,7 @@
                
       •	Right click on common-app->click on run-> select run configuration->select java application 
       •	Provide “com.infosys.Common” as input in Main Class.
-      •	Provide “-Dencryption.key=leap$123## -Dencryption.salt=salt-token -Dspring.config.location=../common-app/src/main/resources/application.yml -DLOG_PATH=/app/log -Dlicense=licence-token -Dpublickey=public-token -Dlogging.config=../common-app/src/main/resources/logback-spring.xml” as input in the VM arguments.
+      •	Provide “-Dencryption.key=leap$123## -Dencryption.salt=salt-token -Dspring.config.location=../common-app/src/main/resources/application.yml -DLOG_PATH=/app/log -Dlogging.config=../common-app/src/main/resources/logback-spring.xml” as input in the VM arguments.
                            
       •	Click on run to start the application
       •	Application startup will take some time if we are doing it for the first time it will create all the required tables and populate data within it.

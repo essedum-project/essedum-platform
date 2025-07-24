@@ -80,7 +80,6 @@ import com.infosys.icets.ai.comm.lib.util.annotation.LeapProperty;
 import com.infosys.icets.ai.comm.lib.util.exceptions.LeapException;
 import com.infosys.icets.ai.comm.lib.util.service.dto.support.PageRequestByExample;
 import com.infosys.icets.ai.comm.lib.util.service.dto.support.PageResponse;
-import com.infosys.icets.ai.comm.licenseValidator.LicenseValidator;
 import com.infosys.icets.iamp.usm.config.Constants;
 import com.infosys.icets.iamp.usm.config.Messages;
 import com.infosys.icets.iamp.usm.domain.Users;
@@ -220,16 +219,7 @@ public class UsersResource {
 						HeaderUtil.createFailureAlert(ENTITY_NAME, "Id exists", "A new users cannot already have a Id"))
 						.body(null);
 			}
-			List<Users> activeUsers = usersService.findAll().stream().filter(user -> user.getActivated())
-					.collect(Collectors.toList());
-			if(null != LicenseValidator.license) {
-			if (!LicenseValidator.license.getNoOfUsers().equals("")
-					&& activeUsers.size() >= Integer.parseInt(LicenseValidator.license.getNoOfUsers())) {
-				return ResponseEntity.badRequest().headers(
-						HeaderUtil.createFailureAlert(ENTITY_NAME, "User exceeded", "Exceeded maximum number of allowed users"))
-						.body("Exceeded maximum number of allowed users");
-			}
-			}
+
 			ModelMapper modelMapper = new ModelMapper();
 			Users users = modelMapper.map(users_dto, Users.class);
 			boolean validatedUserName = users_dto.getUser_f_name().matches("^(\\w*[-_.]?[a-zA-Z]\\w*)$");

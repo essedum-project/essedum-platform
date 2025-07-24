@@ -1,0 +1,183 @@
+// Variables
+$header-height: 45px;
+$icon-size: 24px;
+$icon-hover-color: #0094ff;
+$icon-default-color: #737373;
+$search-transition-duration: 0.6s;
+$animation-duration: 0.5s;
+
+.lfx-header {
+  display: flex;
+  align-items: center !important;
+  justify-content: space-between !important;
+  height: $header-height;
+  background-color: #fff;
+
+  // Title section
+  .header-left {
+    h3 {
+      margin: 0;
+      font-size: 2.4rem;
+      font-weight: 600;
+      letter-spacing: 0px;
+      font-family: "Roboto", "Segoe UI", sans-serif !important;
+      color: #000000;
+      font-style: normal;
+      line-height: 24px;
+    }
+  }
+
+  // Right section with actions
+  .header-right {
+    .header-actions {
+      display: flex;
+      height: 24px;
+      align-items: center;
+
+      // Last refreshed text
+      p {
+        margin: 0 16px 0 0;
+        font-size: 1.2rem;
+        line-height: 16px;
+        letter-spacing: 0px;
+        font-weight: normal;
+        font-family: "Roboto", "Segoe UI", sans-serif !important;
+        font-style: normal;
+        color: #000000;
+      }
+
+      // Search panel
+      .lfx-panel {
+        background-color: #f0f0f0;
+        box-shadow: 0rem 0.2rem 0.4rem #00000029;
+        border: 0.05rem solid #0000001f;
+        border-radius: 1.6rem;
+        display: flex;
+        align-items: center;
+        height: 3rem;
+
+        .lfx-panel-input {
+          flex: 1;
+          border: none;
+          outline: none;
+          padding: 8px 0;
+          font-size: 14px;
+          width: 100%;
+          margin-left: 12px;
+          background: transparent;
+
+          &::placeholder {
+            color: #a5aaad;
+          }
+        }
+
+        mat-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+          color: #737373;
+          transition: color 0.2s ease;
+          cursor: pointer;
+
+          &.active {
+            color: #0094ff;
+          }
+        }
+      }
+
+      // Icon common styles
+      .action-button {
+        margin: 0 8px;
+        height: $icon-size;
+        position: relative;
+
+        mat-icon {
+          font-size: $icon-size;
+          height: $icon-size;
+          width: $icon-size;
+          cursor: pointer;
+          font-weight: 400;
+          color: $icon-default-color;
+          transition: color 0.2s ease, transform 0.2s ease;
+
+          &.active {
+            color: $icon-hover-color;
+          }
+
+          &.rotate-icon {
+            animation: rotate $animation-duration linear infinite;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Animation keyframes
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Search animation
+:host {
+  .header-search {
+    overflow: hidden;
+
+    &.ng-enter,
+    &.ng-leave {
+      transition: all $search-transition-duration ease;
+    }
+
+    &.ng-enter {
+      max-width: 0;
+      opacity: 0;
+
+      &.ng-enter-active {
+        max-width: 250px;
+        opacity: 1;
+      }
+    }
+
+    &.ng-leave {
+      max-width: 250px;
+      opacity: 1;
+
+      &.ng-leave-active {
+        max-width: 0;
+        opacity: 0;
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .lfx-header {
+    flex-direction: column;
+    height: auto;
+    padding: 12px 0;
+
+    .header-right {
+      width: 100%;
+      margin-top: 12px;
+
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+
+        p {
+          display: none; // Hide last refreshed time on mobile
+        }
+
+        .header-search .lfx-panel-input {
+          width: 150px;
+        }
+      }
+    }
+  }
+}
