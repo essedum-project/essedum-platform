@@ -152,8 +152,576 @@
     0, 1, 0, 0, 0
 );
 
+INSERT INTO mladapters (
+    name, organization, connectionid, connectionname, spectemplatedomainname,
+    description, category, createdby, createdon, lastmodifiedby, lastmodifiedon,
+    apispec, isactive, executiontype, isChain, chainName
+) VALUES (
+    "linear_regression", "leo1311", "LEOSMPL-36919", "Sample-Infer-Rest", "Linear_Regression",
+    "", "DYNAMIC", "demouser", "2025-07-22 05:22:01", "demouser", "2025-07-22 06:43:34",
+    "{\"openapi\":\"3.0.2\",\"info\":{\"version\":1,\"title\":\"linear_regression\",\"description\":\"\"},\"servers\":[{\"url\":\"http://localhost:8087\"}],\"paths\":{\"/api/aip/adapters/Linear_regression/infer/leo1311\":{\"post\":{\"dataset\":\"LEOINFRG28279\",\"parameters\":[{\"name\":\"accept\",\"value\":\"application/json\",\"description\":\"accept\",\"required\":\"true\",\"type\":\"string\",\"in\":\"header\"},{\"name\":\"Content-Type\",\"value\":\"application/json\",\"description\":\"Content-Type\",\"required\":\"true\",\"type\":\"string\",\"in\":\"header\"}],\"requestBody\":{\"description\":\"request\",\"required\":true,\"content\":{\"application/json\":{\"schema\":{\"$ref\":\"#/components/schemas/input\",\"properties\":{\"example\":\"{\\\"years_of_experiance\\\":[5,2.5]}\"}}}},\"value\":\"{\\\"years_of_experiance\\\":[5,2.5]}\"},\"responses\":{\"200\":{\"description\":\"response\",\"content\":{\"application/json\":{\"schema\":{\"type\":\"string\"}}}},\"default\":{\"description\":\"error\",\"content\":{\"application/json\":{\"schema\":{\"type\":\"string\"}}}}}}},\"/api/aip/adapters/Linear_regression/test/{org}\":{\"get\":{\"dataset\":\"LEOTSTML11731\",\"parameters\":[{\"name\":\"accept\",\"value\":\"application/json\",\"description\":\"accept\",\"required\":\"true\",\"type\":\"string\",\"in\":\"header\"},{\"name\":\"Content-Type\",\"value\":\"application/json\",\"description\":\"Content-Type\",\"required\":\"true\",\"type\":\"string\",\"in\":\"header\"}],\"responses\":{\"200\":{\"description\":\"response\",\"content\":{\"application/json\":{\"schema\":{\"type\":\"string\"}}}},\"default\":{\"description\":\"error\",\"content\":{\"application/json\":{\"schema\":{\"type\":\"string\"}}}}}}}},\"components\":{\"schemas\":{\"input\":{\"properties\":{}}},\"securitySchemes\":{\"bearerAuth\":{\"type\":\"http\",\"scheme\":\"bearer\",\"bearerFormat\":\"JWT\"},\"basicAuth\":{\"type\":\"http\",\"scheme\":\"basic\"}},\"security\":[{\"bearerAuth\":[],\"basicAuth\":[]}]}}", "Y", "REST", NULL, NULL
+);
+
+INSERT INTO mladapters (
+    name,
+    organization,
+    connectionid,
+    connectionname,
+    spectemplatedomainname,
+    description,
+    category,
+    createdby,
+    createdon,
+    lastmodifiedby,
+    lastmodifiedon,
+    apispec,
+    isactive,
+    executiontype,
+    isChain,
+    chainName
+)
+VALUES (
+    'classification',
+    'leo1311',
+    'LEOSMPL-36919',
+    'Sample-Infer-Rest',
+    'classification',
+    '',
+    'DYNAMIC',
+    'demouser',
+    '2025-07-22 07:10:10',
+    'demouser',
+    '2025-07-22 07:20:57',
+    '{
+        \"openapi\": \"3.0.2\",
+        \"info\": {
+            \"version\": 1,
+            \"title\": \"classification\",
+            \"description\": \"\"
+        },
+        \"servers\": [
+            {
+                \"url\": \"http://localhost:8087\"
+            }
+        ],
+        \"paths\": {
+            \"/api/aip/adapters/Classification/infer/leo1311\": {
+                \"post\": {
+                    \"dataset\": \"LEOINFRR75259\",
+                    \"parameters\": [
+                        {
+                            \"name\": \"accept\",
+                            \"description\": \"accept\",
+                            \"required\": true,
+                            \"in\": \"header\",
+                            \"schema\": {
+                                \"type\": \"string\",
+                                \"default\": \"application/json\"
+                            }
+                        },
+                        {
+                            \"name\": \"Content-Type\",
+                            \"description\": \"Content-Type\",
+                            \"required\": true,
+                            \"in\": \"header\",
+                            \"schema\": {
+                                \"type\": \"string\",
+                                \"default\": \"application/json\"
+                            }
+                        }
+                    ],
+                    \"requestBody\": {
+                        \"description\": \"request\",
+                        \"required\": true,
+                        \"content\": {
+                            \"application/json\": {
+                                \"schema\": {
+                                    \"$ref\": \"#/components/schemas/input\"
+                                },
+                                \"example\": {
+                                    \"Subject_Length\": 35,
+                                    \"Num_Links\": 1,
+                                    \"Num_Attachments\": 0,
+                                    \"Sender_Reputation\": \"Low\",
+                                    \"Contains_Spam_Words\": \"No\"
+                                }
+                            }
+                        }
+                    },
+                    \"responses\": {
+                        \"200\": {
+                            \"description\": \"response\",
+                            \"content\": {
+                                \"application/json\": {
+                                    \"schema\": {
+                                        \"type\": \"string\"
+                                    }
+                                }
+                            }
+                        },
+                        \"default\": {
+                            \"description\": \"error\",
+                            \"content\": {
+                                \"application/json\": {
+                                    \"schema\": {
+                                        \"type\": \"string\"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            \"/api/aip/adapters/Classification/infer/{org}\": {
+                \"post\": {
+                    \"dataset\": \"LEOINFRR75259\",
+                    \"parameters\": [
+                        {
+                            \"name\": \"accept\",
+                            \"description\": \"accept\",
+                            \"required\": true,
+                            \"in\": \"header\",
+                            \"schema\": {
+                                \"type\": \"string\",
+                                \"default\": \"application/json\"
+                            }
+                        },
+                        {
+                            \"name\": \"Content-Type\",
+                            \"description\": \"Content-Type\",
+                            \"required\": true,
+                            \"in\": \"header\",
+                            \"schema\": {
+                                \"type\": \"string\",
+                                \"default\": \"application/json\"
+                            }
+                        }
+                    ],
+                    \"requestBody\": {
+                        \"description\": \"request\",
+                        \"required\": true,
+                        \"content\": {
+                            \"application/json\": {
+                                \"schema\": {
+                                    \"$ref\": \"#/components/schemas/input\"
+                                },
+                                \"example\": {
+                                    \"Subject_Length\": 35,
+                                    \"Num_Links\": 1,
+                                    \"Num_Attachments\": 0,
+                                    \"Sender_Reputation\": \"Low\",
+                                    \"Contains_Spam_Words\": \"No\"
+                                }
+                            }
+                        }
+                    },
+                    \"responses\": {
+                        \"200\": {
+                            \"description\": \"response\",
+                            \"content\": {
+                                \"application/json\": {
+                                    \"schema\": {
+                                        \"type\": \"string\"
+                                    }
+                                }
+                            }
+                        },
+                        \"default\": {
+                            \"description\": \"error\",
+                            \"content\": {
+                                \"application/json\": {
+                                    \"schema\": {
+                                        \"type\": \"string\"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        \"components\": {
+            \"schemas\": {
+                \"input\": {
+                    \"type\": \"object\",
+                    \"properties\": {
+                        \"Subject_Length\": { \"type\": \"integer\" },
+                        \"Num_Links\": { \"type\": \"integer\" },
+                        \"Num_Attachments\": { \"type\": \"integer\" },
+                        \"Sender_Reputation\": { \"type\": \"string\" },
+                        \"Contains_Spam_Words\": { \"type\": \"string\" }
+                    }
+                }
+            },
+            \"securitySchemes\": {
+                \"bearerAuth\": {
+                    \"type\": \"http\",
+                    \"scheme\": \"bearer\",
+                    \"bearerFormat\": \"JWT\"
+                },
+                \"basicAuth\": {
+                    \"type\": \"http\",
+                    \"scheme\": \"basic\"
+                }
+            }
+        },
+        \"security\": [
+            {
+                \"bearerAuth\": [],
+                \"basicAuth\": []
+            }
+        ]
+    }',
+    'Y',
+    'REST',
+    NULL,
+    NULL
+);
+
+insert into mlintstance (name,adaptername,organization,connectionid,connectionname,spectemplatedomainname,description,category,createdby,createdon,lastmodifiedby,lastmodifiedon,executiontype) values("linear_regression","linear_regression","leo1311","LEOSMPL-36919","Sample-Infer-Rest","Linear_Regression","","DYNAMIC","demouser","2025-07-22 05:22:32",NULL,"2025-07-22 05:22:32","REST");
+insert into mlintstance (name,adaptername,organization,connectionid,connectionname,spectemplatedomainname,description,category,createdby,createdon,lastmodifiedby,lastmodifiedon,executiontype) values("classification","classification","leo1311","LEOSMPL-36919","Sample-Infer-Rest","classification","","DYNAMIC","demouser","2025-07-22 07:10:34","NULL","2025-07-22 07:10:34","REST");
+INSERT INTO mlspectemplates (
+    domainname,
+    organization,
+    capability,
+    description,
+    apispectemplate,
+    createdby,
+    createdon,
+    lastmodifiedby,
+    lastmodifiedon
+)
+VALUES (
+    'Linear_Regression',
+    'leo1311',
+    'custom',
+    NULL,
+    '{
+        \"openapi\": \"3.0.1\",
+        \"info\": {
+            \"title\": \"Infosys AI Platform - Custom API Spec - Linear Regression\",
+            \"description\": \"API documentation for Infosys AI Platform - Linear Regression\",
+            \"version\": \"v1\"
+        },
+        \"servers\": [
+            {
+                \"url\": \"https://essedum.az.ad.idemo-ppc.com/\"
+            }
+        ],
+        \"security\": [
+            {
+                \"Basic\": []
+            }
+        ],
+        \"paths\": {
+            \"/api/aip/adapters/Linear_regression/infer/leo1311\": {
+                \"post\": {
+                    \"description\": \"Get the results for Custom POST API Configuration\",
+                    \"parameters\": [
+                        {
+                            \"name\": \"accept\",
+                            \"value\": \"application/json\",
+                            \"description\": \"accept\",
+                            \"required\": true,
+                            \"type\": \"string\",
+                            \"in\": \"header\"
+                        },
+                        {
+                            \"name\": \"Content-Type\",
+                            \"value\": \"application/json\",
+                            \"description\": \"Content-Type\",
+                            \"required\": true,
+                            \"type\": \"string\",
+                            \"in\": \"header\"
+                        }
+                    ],
+                    \"requestBody\": {
+                        \"description\": \"request\",
+                        \"required\": true,
+                        \"content\": {
+                            \"application/json\": {
+                                \"schema\": {
+                                    \"$ref\": \"#/components/schemas/input\"
+                                },
+                                \"example\": {
+                                    \"inputText\": \"You are a dummy\"
+                                }
+                            }
+                        }
+                    },
+                    \"responses\": {
+                        \"200\": {
+                            \"description\": \"response\",
+                            \"content\": {
+                                \"application/json\": {
+                                    \"schema\": {
+                                        \"type\": \"string\"
+                                    }
+                                }
+                            }
+                        },
+                        \"default\": {
+                            \"description\": \"error\",
+                            \"content\": {
+                                \"application/json\": {
+                                    \"schema\": {
+                                        \"type\": \"string\"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            \"/api/aip/adapters/Linear_regression/test/leo1311\": {
+                \"get\": {
+                    \"description\": \"Get the results for Custom POST API Configuration\",
+                    \"parameters\": [
+                        {
+                            \"name\": \"accept\",
+                            \"value\": \"application/json\",
+                            \"description\": \"accept\",
+                            \"required\": true,
+                            \"type\": \"string\",
+                            \"in\": \"header\"
+                        },
+                        {
+                            \"name\": \"Content-Type\",
+                            \"value\": \"application/json\",
+                            \"description\": \"Content-Type\",
+                            \"required\": true,
+                            \"type\": \"string\",
+                            \"in\": \"header\"
+                        }
+                    ],
+                    \"responses\": {
+                        \"200\": {
+                            \"description\": \"response\",
+                            \"content\": {
+                                \"application/json\": {
+                                    \"schema\": {
+                                        \"type\": \"string\"
+                                    }
+                                }
+                            }
+                        },
+                        \"default\": {
+                            \"description\": \"error\",
+                            \"content\": {
+                                \"application/json\": {
+                                    \"schema\": {
+                                        \"type\": \"string\"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        \"components\": {
+            \"schemas\": {
+                \"input\": {
+                    \"properties\": {
+                        \"inputText\": {
+                            \"type\": \"string\"
+                        }
+                    }
+                }
+            },
+            \"securitySchemes\": {
+                \"bearerAuth\": {
+                    \"type\": \"http\",
+                    \"scheme\": \"bearer\",
+                    \"bearerFormat\": \"JWT\"
+                },
+                \"basicAuth\": {
+                    \"type\": \"http\",
+                    \"scheme\": \"basic\"
+                }
+            }
+        }
+    }',
+    'leo1311',
+    NOW(),
+    'leo1311',
+    NOW()
+);
+
+
+INSERT INTO mlspectemplates (
+    domainname,
+    organization,
+    capability,
+    description,
+    apispectemplate,
+    createdby,
+    createdon,
+    lastmodifiedby,
+    lastmodifiedon
+)
+VALUES (
+    'classification',
+    'leo1311',
+    'custom',
+    NULL,
+    '{
+        \"openapi\": \"3.0.1\",
+        \"info\": {
+            \"title\": \"Infosys AI Platform - Custom API Spec - Classification\",
+            \"description\": \"API documentation for Infosys AI Platform - Classification\",
+            \"version\": \"v1\"
+        },
+        \"servers\": [
+            {
+                \"url\": \"https://essedum.az.ad.idemo-ppc.com/\"
+            }
+        ],
+        \"security\": [
+            {
+                \"Basic\": []
+            }
+        ],
+        \"paths\": {
+            \"/api/aip/adapters/Classification/infer/leo1311\": {
+                \"post\": {
+                    \"description\": \"Get the results for Custom POST API Configuration\",
+                    \"parameters\": [
+                        {
+                            \"name\": \"accept\",
+                            \"value\": \"application/json\",
+                            \"description\": \"accept\",
+                            \"required\": true,
+                            \"type\": \"string\",
+                            \"in\": \"header\"
+                        },
+                        {
+                            \"name\": \"Content-Type\",
+                            \"value\": \"application/json\",
+                            \"description\": \"Content-Type\",
+                            \"required\": true,
+                            \"type\": \"string\",
+                            \"in\": \"header\"
+                        }
+                    ],
+                    \"requestBody\": {
+                        \"description\": \"request\",
+                        \"required\": true,
+                        \"content\": {
+                            \"application/json\": {
+                                \"schema\": {
+                                    \"$ref\": \"#/components/schemas/input\"
+                                },
+                                \"example\": {
+                                    \"inputText\": \"You are a dummy\"
+                                }
+                            }
+                        }
+                    },
+                    \"responses\": {
+                        \"200\": {
+                            \"description\": \"response\",
+                            \"content\": {
+                                \"application/json\": {
+                                    \"schema\": {
+                                        \"type\": \"string\"
+                                    }
+                                }
+                            }
+                        },
+                        \"default\": {
+                            \"description\": \"error\",
+                            \"content\": {
+                                \"application/json\": {
+                                    \"schema\": {
+                                        \"type\": \"string\"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            \"/api/aip/adapters/Classification/test/leo1311\": {
+                \"get\": {
+                    \"description\": \"Get the results for Custom POST API Configuration\",
+                    \"parameters\": [
+                        {
+                            \"name\": \"accept\",
+                            \"value\": \"application/json\",
+                            \"description\": \"accept\",
+                            \"required\": true,
+                            \"type\": \"string\",
+                            \"in\": \"header\"
+                        },
+                        {
+                            \"name\": \"Content-Type\",
+                            \"value\": \"application/json\",
+                            \"description\": \"Content-Type\",
+                            \"required\": true,
+                            \"type\": \"string\",
+                            \"in\": \"header\"
+                        }
+                    ],
+                    \"responses\": {
+                        \"200\": {
+                            \"description\": \"response\",
+                            \"content\": {
+                                \"application/json\": {
+                                    \"schema\": {
+                                        \"type\": \"string\"
+                                    }
+                                }
+                            }
+                        },
+                        \"default\": {
+                            \"description\": \"error\",
+                            \"content\": {
+                                \"application/json\": {
+                                    \"schema\": {
+                                        \"type\": \"string\"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        \"components\": {
+            \"schemas\": {
+                \"input\": {
+                    \"properties\": {
+                        \"inputText\": {
+                            \"type\": \"string\"
+                        }
+                    }
+                }
+            },
+            \"securitySchemes\": {
+                \"bearerAuth\": {
+                    \"type\": \"http\",
+                    \"scheme\": \"bearer\",
+                    \"bearerFormat\": \"JWT\"
+                },
+                \"basicAuth\": {
+                    \"type\": \"http\",
+                    \"scheme\": \"basic\"
+                }
+            }
+        }
+    }',
+    'leo1311',
+    NOW(),
+    'leo1311',
+    NOW()
+);
+
+
+
 
 	</sql> 
+	
 </changeSet>
 		<changeSet author="Leap" id="24-cip-20250211-02">
     <sql dbms="mssql" splitStatements="true" stripComments="true"> 
