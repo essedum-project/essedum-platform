@@ -598,7 +598,6 @@ export class LandingComponent implements OnInit, AfterViewInit {
       sessionStorage.removeItem("needRouting");
       // this.doroute = true;
     }
-   
 
     let profiles;
     profiles = JSON.parse(sessionStorage.getItem("activeProfiles") || "");
@@ -3363,12 +3362,14 @@ export class LandingComponent implements OnInit, AfterViewInit {
     event.dataTransfer.setData("text/plain", "aipButton");
     const data = event.dataTransfer.getData("text/plain");
     const element = document.getElementById(data);
-    if (element.offsetLeft == 0 && element.offsetTop == 50) {
-      this.offsetX = 160;
-      this.offsetY = 10;
-    } else {
-      this.offsetX = event.clientX - element.offsetLeft;
-      this.offsetY = event.clientY - element.offsetTop;
+    if (element) {
+      if (element.offsetLeft == 0 && element.offsetTop == 50) {
+        this.offsetX = 160;
+        this.offsetY = 10;
+      } else {
+        this.offsetX = event.clientX - element.offsetLeft;
+        this.offsetY = event.clientY - element.offsetTop;
+      }
     }
   }
 
@@ -3404,11 +3405,17 @@ export class LandingComponent implements OnInit, AfterViewInit {
     event.preventDefault();
     const data = event.dataTransfer.getData("text/plain");
     if (!this.showChatBot) {
-      document.getElementById("aipButton").style.position = "relative";
+      const aipButton = document.getElementById("aipButton");
+      if (aipButton) {
+        aipButton.style.position = "relative";
+      }
+
       const element = document.getElementById(data);
-      element.style.position = "absolute";
-      element.style.left = event.clientX - this.offsetX + "px";
-      element.style.top = event.clientY - this.offsetY + "px";
+      if (element) {
+        element.style.position = "absolute";
+        element.style.left = event.clientX - this.offsetX + "px";
+        element.style.top = event.clientY - this.offsetY + "px";
+      }
     }
   }
 
@@ -3455,13 +3462,11 @@ export class LandingComponent implements OnInit, AfterViewInit {
     this.sidebarmaxwidth = "260px";
   }
 
-  getContentMarginLeft(): string {   
+  getContentMarginLeft(): string {
     if (this.showSidebarMenuList) {
       return "150px";
     } else {
       return "65px";
     }
   }
-
-
 }
