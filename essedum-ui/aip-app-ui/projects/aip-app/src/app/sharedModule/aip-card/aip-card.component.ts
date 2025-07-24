@@ -36,7 +36,7 @@ const BACKGROUND_COLORS = [
 @Component({
   selector: 'app-aip-card',
   templateUrl: './aip-card.component.html',
-  styleUrl: './aip-card.component.scss',
+  styleUrls: ['./aip-card.component.scss'],
   animations: [
     trigger('fadeInOut', [
       transition(':enter', [

@@ -1,5 +1,35 @@
-::ng-deep .my-select .mat-option-text {
-  font-size: 20px; /* Replace with the font size you want */
+.create-form-button {
+  cursor: pointer;
+  float: right;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.form-card-header {
+  padding: 0;
+  display: block;
+}
+
+.schema-form-card {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.schema-form-card.disabled {
+  pointer-events: none;
+}
+
+.form-editor-container {
+  max-height: 400px;
+  overflow: auto;
+}
+
+.form-json-editor {
+  max-height: 365px;
 }
 
 @media screen and (min-width: 1367px) {
@@ -20,6 +50,44 @@
   }
 }
 
+.lfx-u-body-sm {
+  font-size: 1.2rem;
+  font-weight: 400;
+  font-family: "Roboto", "Segoe UI", sans-serif;
+  font-style: normal;
+}
+
+.lfx-u-body-xl {
+  font-size: 1.6rem;
+  font-weight: 400;
+  font-family: "Roboto", "Segoe UI", sans-serif;
+  font-style: normal;
+  line-height: 22px;
+  color: #000000;
+}
+
+.lfx-u-header-xl {
+  font-size: 1.8rem;
+  font-weight: 600;
+  line-height: 24px;
+  font-family: "Roboto", "Segoe UI", sans-serif;
+  font-style: normal;
+  margin-bottom: 0;
+}
+
+.lfx-u-sub-header-alias {
+  font-size: 1.2rem;
+  font-weight: 400;
+  font-family: "Roboto", "Segoe UI", sans-serif;
+  font-style: normal;
+  line-height: 18px;
+  color: #555555;
+}
+
+.lfx-u-text-neutral-80 {
+  color: #737373;
+}
+
 .lfx-u-bg-primary-80 {
   background: #8626c3;
   color: #fff;
@@ -30,42 +98,6 @@
   background: #dff6dd;
 }
 
-.lfx-u-body-sm {
-  font-size: 1.2rem;
-  font-weight: 400;
-  font-family: roboto, Arial, sans-serif !important;
-  font-style: normal;
-}
-
-.lfx-u-text-neutral-80 {
-  color: #737373;
-}
-
-.mdc-button.lfx-c-btn--icon span.lfx-c-btn--icon__icon {
-  padding: 4px 8px;
-  background-position: center center;
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.lfx-u-body-xl {
-  font-size: 1.6rem;
-  font-weight: 400;
-  font-family: "Roboto", "Segoe UI", sans-serif !important;
-  font-style: normal;
-  line-height: 22px;
-  color: #000000;
-}
-
-.lfx-u-header-xl {
-  font-size: 1.8rem;
-  font-weight: 600;
-  line-height: 24px;
-  font-family: "Roboto", "Segoe UI", sans-serif !important;
-  font-style: normal;
-  margin-bottom: 0px;
-}
-
 .lfx-c-card.mat-mdc-card {
   padding: 16px;
   min-height: 50px;
@@ -73,25 +105,121 @@
   display: block;
 }
 
-::ng-deep .mat-mdc-select:not(.mat-mdc-select-disabled) .mat-mdc-select-arrow {
-  color: #0094ff !important;
-  fill: #0094ff !important;
+.lfx-schema-card {
+  width: 100%;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 2px 4px #00000029;
+  border: 1px solid #efefef;
+  padding: 8px;
+  border-radius: 16px;
+  margin: 20px 0;
 }
 
+::ng-deep .custom-alias-field {
+  .mat-mdc-form-field-flex {
+    height: 21px !important;
+    background-color: #fafafa !important;
+    padding: 0px !important;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    height: 21px !important;
+    background-color: #fafafa !important;
+    padding: 12px 0 !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    padding: 0px !important;
+  }
+}
+
+::ng-deep .mdc-button.mat-mdc-raised-button.mat-mdc-button-base {
+  padding-left: 16px !important;
+}
+
+// Input element global override
+::ng-deep .mat-mdc-input-element {
+  border-bottom: none !important;
+}
+
+::ng-deep .mat-mdc-form-field {
+  .mat-mdc-form-field-hint-wrapper,
+  .mat-mdc-form-field-error-wrapper {
+    position: absolute !important;
+    padding: 0px !important;
+  }
+}
+
+::ng-deep .custom-alias-input {
+  text-align: left;
+  font-size: 1.6rem;
+  font-weight: 400;
+  font-family: "Roboto", "Segoe UI", sans-serif;
+  font-style: normal;
+  line-height: 21px;
+  color: #737373;
+
+  background-color: #fafafa;
+  height: 21px;
+
+  &::placeholder,
+  &::-webkit-input-placeholder,
+  &::-moz-placeholder,
+  &:-ms-input-placeholder {
+    text-align: left;
+    font-size: 1.6rem;
+    font-weight: 400;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
+    font-style: normal;
+    line-height: 24px;
+    color: #737373;
+    opacity: 0.7;
+  }
+}
+
+::ng-deep .mat-mdc-input-element {
+  text-align: left !important;
+  font-size: 1.6rem !important;
+  font-weight: 400 !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-style: normal !important;
+  line-height: 24px !important  ;
+  color: #000000 !important;
+  opacity: 0.7 !important;
+}
+
+::ng-deep .mat-mdc-form-field {
+  height: 40px !important;
+}
+
+// Focus styles for inputs
 input:focus,
 .txtInput:focus {
   outline: none !important;
   border-bottom: 1px solid #0094ff !important;
 }
 
+// Select dropdown
+::ng-deep .my-select .mat-option-text {
+  font-size: 20px;
+}
+
+::ng-deep .mat-mdc-select:not(.mat-mdc-select-disabled) .mat-mdc-select-arrow {
+  color: #0094ff !important;
+  fill: #0094ff !important;
+}
+
+// Form field focus states
 ::ng-deep
   .mdc-text-field--filled:not(.mdc-text-field--disabled).mdc-text-field--focused
   .mdc-floating-label {
   color: #0094ff !important;
 }
 
-::ng-deep .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
-  color: #0094ff !important;
+// Dialog surface
+::ng-deep .mat-mdc-dialog-surface {
+  border-radius: 16px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 1.5px 4px rgba(0, 0, 0, 0.08) !important;
 }
 
 ::ng-deep .mat-mdc-tab-group {
@@ -107,57 +235,17 @@ input:focus,
   --mat-tab-header-inactive-label-text-color: #737373 !important;
   --mat-tab-header-inactive-focus-label-text-color: #737373 !important;
   --mat-tab-header-inactive-hover-label-text-color: #737373 !important;
-}
 
-::ng-deep .mat-mdc-tab-group .mat-mdc-tab .mdc-tab__text-label {
-  font-size: 1.8rem !important;
-}
-
-.lfx-schema-card {
-  width: 100%;
-  // height: 320px;
-  background: #ffffff 0% 0% no-repeat padding-box;
-  box-shadow: 0px 2px 4px #00000029;
-  border: 1px solid #efefef;
-  padding: 8px;
-  border-radius: 16px;
-  margin-bottom: 20px;
-  margin-top: 20px;
-}
-
-// Left align tab labels and prevent them from stretching full width
-::ng-deep .tabs-left-aligned .mat-mdc-tab-header {
-  justify-content: flex-start !important;
-}
-
-::ng-deep .tabs-left-aligned .mat-mdc-tab-list {
-  justify-content: flex-start !important;
-  width: auto !important;
-}
-
-::ng-deep .tabs-left-aligned .mdc-tab-scroller__scroll-area {
-  justify-content: flex-start !important;
-}
-
-::ng-deep .tabs-left-aligned .mdc-tab-scroller__scroll-content {
-  justify-content: flex-start !important;
-  width: auto !important;
-}
-
-::ng-deep .tabs-left-aligned .mdc-tab {
-  flex-grow: 0 !important;
-  flex-shrink: 0 !important;
-  width: auto !important;
-  min-width: auto !important;
-  padding-left: 28px;
-  padding-right: 28px;
-  border-radius: 8px;
-  height: 37px !important;
-}
-
-::ng-deep .mat-mdc-tab-group {
-  margin: 0px;
+  margin: 0;
   height: 100%;
+
+  .mat-mdc-tab .mdc-tab__text-label {
+    font-size: 1.8rem !important;
+  }
+}
+
+::ng-deep .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: #0094ff !important;
 }
 
 ::ng-deep .mat-mdc-tab-header {
@@ -174,108 +262,31 @@ input:focus,
   height: 36px !important;
 }
 
-::ng-deep
-  .mdc-tab
-  .mat-mdc-tab
-  .mat-mdc-focus-indicator
-  .mdc-tab--active
-  .ng-star-inserted
-  .mdc-tab-indicator--active {
-  height: 32px !important;
-}
-
-.lfx-u-sub-header-alias {
-  font-size: 1.2rem;
-  font-weight: 400;
-  font-family: "Roboto", "Segoe UI", sans-serif !important;
-  font-style: normal;
-  line-height: 18px;
-  color: #555555;
-}
-
-// Custom styling for alias field
-::ng-deep .custom-alias-field {
-  .mat-mdc-form-field-flex {
-    height: 21px !important;
-    background-color: #fafafa !important;
-    padding: 0px !important;
+// Left-aligned tabs
+::ng-deep .tabs-left-aligned {
+  .mat-mdc-tab-header {
+    justify-content: flex-start !important;
   }
 
-  .mat-mdc-text-field-wrapper {
-    height: 21px !important;
-    background-color: #fafafa !important;
-    padding: 0px !important;
+  .mat-mdc-tab-list {
+    justify-content: flex-start !important;
+    width: auto !important;
   }
 
-  .mat-mdc-form-field-infix {
-    padding: 0px !important;
-  }
-}
-
-::ng-deep .custom-alias-input {
-  text-align: left !important;
-  font-size: 1.6rem;
-  font-weight: 400;
-  font-family: "Roboto", "Segoe UI", sans-serif !important;
-  font-style: normal;
-  line-height: 24px;
-  letter-spacing: 0px !important;
-  color: #737373 !important;
-
-  background-color: #fafafa !important;
-  height: 21px !important;
-  line-height: 21px !important;
-  padding: 8px;
-
-  // Placeholder styling
-  &::placeholder {
-    text-align: left !important;
-    font-size: 1.6rem;
-    font-weight: 400;
-    font-family: "Roboto", "Segoe UI", sans-serif !important;
-    font-style: normal;
-    line-height: 24px;
-    letter-spacing: 0px !important;
-    color: #737373 !important;
-
-    opacity: 0.7 !important;
+  .mdc-tab-scroller__scroll-area,
+  .mdc-tab-scroller__scroll-content {
+    justify-content: flex-start !important;
+    width: auto !important;
   }
 
-  // Browser-specific placeholder styling
-  &::-webkit-input-placeholder {
-    text-align: left !important;
-    font-size: 1.6rem;
-    font-weight: 400;
-    font-family: "Roboto", "Segoe UI", sans-serif !important;
-    font-style: normal;
-    line-height: 24px;
-    letter-spacing: 0px !important;
-    color: #737373 !important;
-    opacity: 0.7 !important;
-  }
-
-  &::-moz-placeholder {
-    text-align: left !important;
-    font-size: 1.6rem;
-    font-weight: 400;
-    font-family: "Roboto", "Segoe UI", sans-serif !important;
-    font-style: normal;
-    line-height: 24px;
-    letter-spacing: 0px !important;
-    color: #737373 !important;
-    opacity: 0.7 !important;
-  }
-
-  &:-ms-input-placeholder {
-    text-align: left !important;
-    font-size: 1.6rem;
-    font-weight: 400;
-    font-family: "Roboto", "Segoe UI", sans-serif !important;
-    font-style: normal;
-    line-height: 24px;
-    letter-spacing: 0px !important;
-    color: #737373 !important;
-    opacity: 0.7 !important;
+  .mdc-tab {
+    flex-grow: 0 !important;
+    flex-shrink: 0 !important;
+    width: auto !important;
+    min-width: auto !important;
+    padding: 0 28px;
+    border-radius: 8px;
+    height: 37px !important;
   }
 }
 
@@ -285,29 +296,30 @@ input:focus,
   text-align: center;
   font-size: 1.4rem;
   font-weight: 400;
-  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-family: "Roboto", "Segoe UI", sans-serif;
   font-style: normal;
   line-height: 20px;
-  letter-spacing: 0px !important;
-  color: #000000 !important;
-  text-transform: capitalize !important;
+  color: #000000;
+  text-transform: capitalize;
 }
+
 .lfx-t-body-row {
   background: #faf2ff;
   border-radius: 4px;
   text-align: center;
   font-size: 1.4rem;
   font-weight: 400;
-  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-family: "Roboto", "Segoe UI", sans-serif;
   font-style: normal;
   line-height: 20px;
-  letter-spacing: 0px !important;
-  color: #000000 !important;
+  color: #000000;
 }
 
-.lfx-table-action {
+// Icon buttons
+.lfx-table-action,
+.add-row-button,
+.schema-form-card {
   display: flex;
-  justify-content: space-between;
 
   mat-icon {
     font-size: 24px;
@@ -326,7 +338,6 @@ input:focus,
       color: #0094ff;
     }
 
-    // Enhanced accessibility and visual feedback
     &:focus {
       outline: 2px solid #0094ff;
       outline-offset: 2px;
@@ -339,54 +350,88 @@ input:focus,
   }
 }
 
+.lfx-table-action {
+  justify-content: space-between;
+}
+
 .add-row-button {
-  display: flex;
-  justify-content: end;
-
-  mat-icon {
-    font-size: 24px;
-    width: 24px;
-    height: 24px;
-    color: #737373;
-    transition: color 0.2s ease, transform 0.2s ease;
-    cursor: pointer;
-
-    &:hover {
-      color: #0094ff;
-      transform: scale(1.1);
-    }
-
-    &.active {
-      color: #0094ff;
-    }
-  }
+  justify-content: flex-end;
 }
 
 .schema-form-card {
-  display: flex;
   align-items: center;
   justify-content: space-between;
 
   mat-icon {
-    font-size: 24px;
-    width: 24px;
-    height: 24px;
     color: #000000;
-    transition: color 0.2s ease, transform 0.2s ease;
-    cursor: pointer;
-
-    &:hover {
-      color: #0094ff;
-      transform: scale(1.1);
-    }
-
-    &.active {
-      color: #0094ff;
-    }
   }
 }
 
-// JSON Editor Container Styles
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 2.4rem;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 1.5rem;
+}
+
+.action-button {
+  color: #ffffff;
+  background-color: #238636;
+  height: 36px;
+  min-height: 36px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  border-radius: 6px;
+  border: 1px solid #1a7f37;
+  transition: all 0.2s ease-in-out;
+  min-width: 80px;
+
+  &:hover:not(:disabled) {
+    background-color: #2ea043;
+    border-color: #238636;
+  }
+
+  &:active:not(:disabled) {
+    background-color: #1a7f37;
+    border-color: #166534;
+  }
+
+  &:disabled {
+    background-color: #94a3b8;
+    border-color: #64748b;
+    cursor: not-allowed;
+  }
+}
+
+.cancel-button {
+  color: #333;
+  background-color: #ffffff;
+  height: 36px;
+  min-height: 36px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  border-radius: 6px;
+  border: 1px solid #d0d7de;
+  transition: all 0.2s ease-in-out;
+  min-width: 80px;
+
+  &:hover {
+    background-color: #f6f8fa;
+    border-color: #8c959f;
+  }
+
+  &:active {
+    background-color: #e9ecef;
+    border-color: #6c757d;
+  }
+}
+
 .json-editor-container {
   height: 55vh;
   overflow-y: auto;
@@ -396,7 +441,6 @@ input:focus,
   background-color: #fafafa;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
-  // Responsive design
   @media (max-width: 768px) {
     height: 45vh;
     margin: 1rem;
@@ -412,14 +456,12 @@ input:focus,
   width: 100%;
   padding: 1rem;
 
-  // Ensure the editor takes full width
   .cipJSONEditor {
     width: 100%;
     min-height: 300px;
     border: none;
     background: transparent;
 
-    // Focus styles for accessibility
     &:focus-within {
       outline: 2px solid #0094ff;
       outline-offset: 2px;

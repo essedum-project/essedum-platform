@@ -236,7 +236,7 @@ export class SchemaComponent implements OnInit, OnChanges {
               if (key1 == 'Capability' && value1 != null && value1 != '')
                 capabilityList.push({ value: value1, viewValue: value1 });
               if (!isdef && key1 != 'default') def = value1;
-              console.log('this is default value', def);
+              // console.log('this is default value', def);
               if (key1 == 'default' && !isdef) isdef = value1 as boolean;
             });
           });
@@ -253,7 +253,7 @@ export class SchemaComponent implements OnInit, OnChanges {
     };
     this.dropDown = drop;
 
-    console.log('this is dropDown', this.dropDown);
+    // console.log('this is dropDown', this.dropDown);
   }
 
   private updateLastRefreshTime(): void {

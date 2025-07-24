@@ -1,50 +1,52 @@
 <div class="aip-container lfx-u-pad-lr-30" id="mainCtr">
-
     <app-modal-config-schema-header [cardTitle]="CARD_TITLE" [tabValue]="tabValue" [formListView]="formListView"
         [isRawData]="isRawData" (search)="onSearch($event)" (refresh)="onRefresh()" (navigateBack)="navigateBack()"
         (toggleView)="toggleView($event)">
     </app-modal-config-schema-header>
 
     <mat-card class="lfx-schema-card">
-        <mat-tab-group class="tabs-left-aligned" (selectedIndexChange)="basicReqTabChange($event)">
-            <mat-tab label="Configure">
-                <div class="lfx-u-pad-16">
+        <mat-tab-group id="schema-modal-tabs" class="tabs-left-aligned"
+            (selectedIndexChange)="basicReqTabChange($event)">
 
-                    <!-- NAME -->
+            <!-- Configure Tab -->
+            <mat-tab label="Configure" data-tab-id="schema-configure">
+                <div class="lfx-u-pad-16">
+                    <!-- Name Section -->
                     <div *ngIf="isInEdit" class="flex align-items-center lfx-u-pad-b-16">
                         <div class="lfx-u-header-lg">Name</div>
-                        <div class="lfx-u-body-xl lfx-u-mar-lr-16">
-                            {{schemaName}}</div>
+                        <div class="lfx-u-body-xl lfx-u-mar-lr-16">{{ schemaName }}</div>
                     </div>
 
-                    <!-- ALIAS -->
-                    <div class="lfx-u-mar-t-16  lfx-u-pad-b-16">
+                    <!-- Alias Section -->
+                    <div class="lfx-u-mar-t-16 lfx-u-pad-b-16">
                         <div class="lfx-u-sub-header-alias">Alias*</div>
                         <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
                             <input matInput id="schm-modal-alias" [disabled]="isInView" [(ngModel)]="schemaAlias"
-                                required placeholder="Alias length should be greater than 4" #name="ngModel"
-                                class="custom-alias-input">
-                            <mat-error *ngIf="name.invalid && name.touched">
-                                Alias is required and should be
-                                longer than 4 characters.
+                                required minlength="4" placeholder="Alias length should be greater than 4"
+                                #aliasRef="ngModel" class="custom-alias-input">
+                            <mat-error *ngIf="aliasRef.invalid && aliasRef.touched">
+                                Alias is required and should be longer than 4 characters.
                             </mat-error>
                         </mat-form-field>
                     </div>
 
-                    <!-- DESCRIPTION -->
-                    <div class="lfx-u-mar-t-16  lfx-u-pad-b-16">
+                    <!-- Description Section -->
+                    <div class="lfx-u-mar-t-16 lfx-u-pad-b-16">
                         <div class="lfx-u-sub-header-alias">Description</div>
                         <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
-                            <input matInput id="schm-modal-description" [disabled]="isAuth"
-                                [(ngModel)]="schemaDescription" required placeholder="Enter Description..."
-                                #name="ngModel" class="custom-alias-input">
+                            <input matInput id="schm-modal-description" [disabled]="isInView"
+                                [(ngModel)]="schemaDescription" placeholder="Enter Description..."
+                                class="custom-alias-input">
                         </mat-form-field>
                     </div>
                 </div>
             </mat-tab>
-            <mat-tab *ngIf="schemaAlias.length>3" label="Schema Columns">
+
+            <!-- Schema Columns Tab -->
+            <mat-tab *ngIf="isValidSchemaAlias" label="Schema Columns" data-tab-id="schema-columns">
                 <div class="lfx-u-pad-16">
-                    <div *ngIf="isRawData === true" class="json-editor-container">
+                    <!-- Raw Data View -->
+                    <div *ngIf="isRawData" class="json-editor-container">
                         <div class="json-editor-wrapper">
                             <json-editor id="json-editor-schema" [options]="editorOptions" [data]="schemaValue"
                                 #columnJsonEditor class="cipJSONEditor" role="textbox" aria-label="Schema JSON editor"
@@ -52,50 +54,47 @@
                             </json-editor>
                         </div>
                     </div>
-                    <div *ngIf="isRawData === false">
-                        <div class="add-row-button lfx-u-pad-8" *ngIf="!isInView && !isAuth">
+
+                    <!-- Table View -->
+                    <div *ngIf="!isRawData">
+                        <!-- Add Row Button -->
+                        <div *ngIf="canAddRows" class="add-row-button lfx-u-pad-8">
                             <mat-icon id="schm-modal-addrow" (click)="openDialog('Add', {})" matTooltip="Add Row"
                                 matTooltipPosition="left" aria-label="Add new schema row">
                                 add
                             </mat-icon>
                         </div>
-                        <div *ngIf="dataSource?.length > 0 ;else noDatasource">
+
+                        <!-- Data Table -->
+                        <div *ngIf="hasDataSource; else noDatasource">
                             <mat-table>
                                 <table class="table">
                                     <thead>
                                         <tr class="lfx-t-head-row">
                                             <th>Column order</th>
-                                            <th> Column type</th>
-                                            <th> Record Column Name</th>
-                                            <th> Record Column Display-Name</th>
+                                            <th>Column type</th>
+                                            <th>Record Column Name</th>
+                                            <th>Record Column Display-Name</th>
                                             <th>Unique Key</th>
-                                            <th> Required</th>
-                                            <th> Primary Key</th>
-                                            <th> Encrypted</th>
+                                            <th>Required</th>
+                                            <th>Primary Key</th>
+                                            <th>Encrypted</th>
                                             <th>Visible</th>
                                             <th *ngIf="!isInView">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr class="lfx-t-body-row" *ngFor="let element of dataSource">
-                                            <td id="schm-modal-{{element.columnorder}}"> {{element.columnorder}}
-                                            </td>
-                                            <td id="schm-modal-{{element.columntype}}"> {{element.columntype}}
-                                            </td>
-                                            <td id="schm-modal-{{element.recordcolumnname}}">
-                                                {{element.recordcolumnname}}</td>
-                                            <td id="schm-modal-{{element.recordcolumndisplayname}}">
-                                                {{element.recordcolumndisplayname}}</td>
-                                            <td id="schm-modal-{{element.isunique}}">
-                                                {{element.isunique?element.isunique:false}}</td>
-                                            <td id="schm-modal-{{element.isrequired}}">
-                                                {{element.isrequired?element.isrequired:false}}</td>
-                                            <td id="schm-modal-{{element.isprimarykey}}">
-                                                {{element.isprimarykey?element.isprimarykey:false}}</td>
-                                            <td id="schm-modal-{{element.isencrypted}}">
-                                                {{element.isencrypted?element.isencrypted:false}}</td>
-                                            <td id="schm-modal-{{element.isvisible}}">
-                                                {{element.isvisible?element.isvisible:false}}</td>
+                                        <tr class="lfx-t-body-row"
+                                            *ngFor="let element of dataSource; trackBy: trackByColumnOrder">
+                                            <td>{{ element.columnorder }}</td>
+                                            <td>{{ element.columntype }}</td>
+                                            <td>{{ element.recordcolumnname }}</td>
+                                            <td>{{ element.recordcolumndisplayname }}</td>
+                                            <td>{{ element.isunique || false }}</td>
+                                            <td>{{ element.isrequired || false }}</td>
+                                            <td>{{ element.isprimarykey || false }}</td>
+                                            <td>{{ element.isencrypted || false }}</td>
+                                            <td>{{ element.isvisible || false }}</td>
                                             <td *ngIf="!isInView">
                                                 <div class="lfx-table-action">
                                                     <mat-icon (click)="openDialog('Update', element)"
@@ -111,52 +110,56 @@
                                                 </div>
                                             </td>
                                         </tr>
-
                                     </tbody>
                                 </table>
                             </mat-table>
                         </div>
+
                         <ng-template #noDatasource>
-                            <div class="lfx-u-header-xl flex justify-content-center ">
+                            <div class="lfx-u-header-xl flex justify-content-center">
                                 Schema Columns not available
                             </div>
                         </ng-template>
                     </div>
-                    <div class="flex justify-content-end" *ngIf="!isInView">
-                        <button mat-stroked-button color="primary" class="lfx-u-bg-primary-80 DSA_wb_Btn_normal"
-                            (click)="onCancel()" id="schm-modal-form-table-cancel" style="border-radius: 1rem;">
+
+                    <!-- Dialog Actions -->
+                    <div *ngIf="!isInView" mat-dialog-actions class="dialog-actions">
+                        <button mat-raised-button class="cancel-button" (click)="onCancel()">
                             Cancel
                         </button>
-                        <button mat-stroked-button color="accent"
-                            class="lfx-u-mar-lr-16 lfx-u-text-status-success DSA_wb_Btn_normal" *ngIf="!isAuth"
-                            (click)="onSave()" id="schm-modal-form-table-save" style="border-radius: 1rem;">
+                        <button *ngIf="!isAuth" mat-raised-button color="primary" class="action-button"
+                            (click)="onSave()">
                             Save
                         </button>
                     </div>
                 </div>
             </mat-tab>
-            <mat-tab *ngIf="schemaName.trim() != '' && schemaName != 'new' && isInEdit" label="Schema Form">
+
+            <!-- Schema Form Tab -->
+            <mat-tab *ngIf="isValidSchemaForForm" label="Schema Form" data-tab-id="schema-form">
                 <div class="lfx-u-pad-16">
-                    <div *ngIf="formListView " class="grid-view selector-698-221">
-                        <span *ngIf="formListView && !isAuth && !isInView" style="cursor: pointer; float: right;"
-                            (click)="createForm()" class="selector-547-151">
-                            <i class="fa fa-plus-square-o create-icon-color selector-547-14"></i>
-                            Create Form</span>
-                        <div class=" row selector-698-231" style="display: grid;grid-template-columns: repeat(4, 1fr);">
-                            <div class="selector-698-241" *ngFor="let group of formTemplateList">
+                    <!-- Form List View -->
+                    <div *ngIf="formListView" class="grid-view">
+                        <span *ngIf="canCreateForm" class="create-form-button" (click)="createForm()">
+                            <i class="fa fa-plus-square-o create-icon-color"></i>
+                            Create Form
+                        </span>
+
+                        <div class="form-grid">
+                            <div *ngFor="let group of formTemplateList; trackBy: trackByFormAlias">
                                 <mat-card class="lfx-c-card">
-                                    <mat-card-header style="padding: 0px; display: block;">
+                                    <mat-card-header class="form-card-header">
                                         <mat-card-title>
-                                            <div class="schema-form-card" style="width: 100%; margin-bottom: 24px;"
-                                                [ngStyle]="{'pointer-events': (isInView) ? 'none' : 'auto'}">
+                                            <div class="schema-form-card" [class.disabled]="isInView">
                                                 <h2 class="lfx-u-header-xl lfx-u-ellipsis aip-cursor"
                                                     (click)="getFormTemplate(group)">
                                                     {{ group.alias }}
                                                 </h2>
                                                 <mat-icon *ngIf="!isAuth" class="delete-form-button"
                                                     matTooltip="Delete Form" matTooltipPosition="left"
-                                                    (click)="delete(group)"
-                                                    aria-label="Delete form template">close</mat-icon>
+                                                    (click)="delete(group)" aria-label="Delete form template">
+                                                    close
+                                                </mat-icon>
                                             </div>
                                         </mat-card-title>
                                         <mat-card-subtitle
@@ -168,45 +171,44 @@
                             </div>
                         </div>
                     </div>
-                    <div *ngIf="formListView == false && isRawData === true &amp;&amp; !viewForm"
-                        class="selector-691-61">
-                        <div id="schm-modal-view" class="selector-691-62">
-                            <json-editor [options]="editorOptions" [data]="schemaFormCpy" style="max-height: 365px;"
-                                #formJsonEditor="" class="cipJSONEditor selector-691-63"></json-editor>
-                        </div>
-                    </div>
-                    <div class="selector-691-64"
-                        *ngIf="formListView == false && isRawData === false &amp;&amp; !viewForm">
-                        <div class="lfx-u-pad-16 selector-691-69">
-                            <div class="lfx-u-header-md">
-                                Form Name
-                            </div>
-                            <mat-form-field appearance="fill" class="w-100" subscriptSizing="dynamic">
 
-                                <input matInput type="text" id="schm-modal-name" name="formname" [disabled]="isAuth"
-                                    [(ngModel)]="selectedFormTemplate.alias" required>
-                            </mat-form-field>
+                    <!-- Form Editor View -->
+                    <ng-container *ngIf="!formListView">
+                        <!-- Raw Data Form Editor -->
+                        <div *ngIf="isRawData && !viewForm" class="form-editor-container">
+                            <div id="schm-modal-view" class="form-editor-wrapper">
+                                <json-editor [options]="editorOptions" [data]="schemaFormCpy" #formJsonEditor
+                                    class="cipJSONEditor form-json-editor">
+                                </json-editor>
+                            </div>
                         </div>
-                        <div class="lfx-u-pad-8">
-                            <form-builder [form]="form" (change)="onChange($event)"
-                                class="selector-691-115"></form-builder>
+
+                        <!-- Form Builder View -->
+                        <div *ngIf="!isRawData && !viewForm" class="form-builder-container">
+                            <div class="lfx-u-pad-16">
+                                <div class="lfx-u-header-md">Form Name</div>
+                                <mat-form-field appearance="fill" class="w-100" subscriptSizing="dynamic">
+                                    <input matInput type="text" id="schm-modal-name" name="formname" [disabled]="isAuth"
+                                        [(ngModel)]="selectedFormTemplate.alias" required>
+                                </mat-form-field>
+                            </div>
+                            <div class="lfx-u-pad-8">
+                                <form-builder [form]="form" (change)="onChange($event)">
+                                </form-builder>
+                            </div>
                         </div>
-                    </div>
-                    <div *ngIf="!formListView" class="selector-691-96 flex justify-content-end">
-                        <div *ngIf="!isInView">
-                            <button mat-stroked-button color="primary" class="lfx-u-bg-primary-80 DSA_wb_Btn_normal"
-                                (click)="onCancel('form')" id="schm-modal-form-table-cancel"
-                                style="border-radius: 1rem;">
+
+                        <!-- Form Dialog Actions -->
+                        <div *ngIf="!isInView" class="dialog-actions flex justify-content-end" mat-dialog-actions>
+                            <button mat-raised-button class="cancel-button" (click)="onCancel('form')">
                                 Cancel
                             </button>
-                            <button mat-stroked-button color="accent"
-                                class="lfx-u-mar-lr-16 lfx-u-text-status-success DSA_wb_Btn_normal" *ngIf="!isAuth"
-                                (click)="saveFormTemplateChanges()" id="schm-modal-form-table-save"
-                                style="border-radius: 1rem;">
+                            <button *ngIf="!isAuth" mat-raised-button color="primary" class="action-button"
+                                (click)="saveFormTemplateChanges()">
                                 Save
                             </button>
                         </div>
-                    </div>
+                    </ng-container>
                 </div>
             </mat-tab>
         </mat-tab-group>

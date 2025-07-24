@@ -1,0 +1,103 @@
+<div class="modal-dialog-container">
+  <h1 mat-dialog-title>
+    <strong>{{ action }}</strong>&nbsp;Row
+  </h1>
+
+  <div mat-dialog-content *ngIf="tabValue === 'Schema Columns'" class="dialog-content">
+    <div *ngIf="action !== 'Delete'; else deleteTemplate" class="form-container">
+
+      <!-- Column Type Selection -->
+      <div class="lfx-u-mar-t-16 lfx-u-pad-b-16">
+        <div class="lfx-u-sub-header-alias">
+          Column Type
+          <span class="required-indicator">*</span>
+        </div>
+        <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
+          <mat-select id="column-type-select" [(ngModel)]="localData.columntype" (selectionChange)="validateForm()"
+            [disabled]="action === 'Update' && originalColumnType">
+            <mat-option *ngFor="let type of columnTypeOptions" [value]="type">
+              {{ type }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Record Column Name -->
+      <div class="lfx-u-mar-t-16 lfx-u-pad-b-16">
+        <div class="lfx-u-sub-header-alias">
+          Record Column Name
+          <span class="required-indicator">*</span>
+        </div>
+        <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
+          <input matInput id="column-name-input" [(ngModel)]="localData.recordcolumnname" (input)="validateForm()"
+            placeholder="Enter column name" required #columnName="ngModel" class="custom-alias-input">
+        </mat-form-field>
+      </div>
+
+      <!-- Record Column Display Name -->
+      <div class="lfx-u-mar-t-16 lfx-u-pad-b-16">
+        <div class="lfx-u-sub-header-alias">
+          Record Column Display Name
+          <span class="required-indicator">*</span>
+        </div>
+        <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
+          <input matInput id="display-name-input" [(ngModel)]="localData.recordcolumndisplayname"
+            (input)="validateForm()" placeholder="Enter display name" required #displayName="ngModel"
+            class="custom-alias-input">
+        </mat-form-field>
+      </div>
+
+      <!-- Validation Message -->
+      <mat-error *ngIf="validationMessage">{{ validationMessage }}</mat-error>
+
+      <!-- Checkbox Options -->
+      <div class="flex">
+        <div>
+          <mat-checkbox [(ngModel)]="localData.isunique" (change)="validateForm()" labelPosition="after">
+            Unique
+          </mat-checkbox>
+        </div>
+        <div>
+          <mat-checkbox [(ngModel)]="localData.isrequired" (change)="validateForm()" labelPosition="after">
+            Required
+          </mat-checkbox>
+        </div>
+        <div>
+          <mat-checkbox [(ngModel)]="localData.isprimarykey" (change)="validateForm()" labelPosition="after">
+            Primary Key
+          </mat-checkbox>
+        </div>
+        <div>
+          <mat-checkbox [(ngModel)]="localData.isencrypted" (change)="validateForm()" labelPosition="after">
+            Encrypted
+          </mat-checkbox>
+        </div>
+        <div>
+          <mat-checkbox [(ngModel)]="localData.isvisible" (change)="validateForm()" labelPosition="after">
+            Visible
+          </mat-checkbox>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Template -->
+    <ng-template #deleteTemplate>
+      <div class="delete-confirmation">
+        Sure to delete
+        <b>{{ localData.recordcolumnname }}</b>?
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Dialog Actions -->
+  <div mat-dialog-actions class="dialog-actions">
+    <button mat-raised-button color="primary" class="action-button" (click)="doAction()"
+      [disabled]="tabValue === 'Schema Columns' && disableSave">
+      {{ action }}
+    </button>
+
+    <button mat-raised-button class="cancel-button" (click)="closeDialog()">
+      Cancel
+    </button>
+  </div>
+</div>

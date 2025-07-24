@@ -53,12 +53,12 @@
                                     <div class="lfx-u-mar-tb-8 lfx-u-pad-16">
                                         <!-- Tabs -->
                                         <div matTabGroup class=" aip-height-tab">
-                                            <mat-tab-group disableRipple
+                                            <mat-tab-group id="spec-template-tabs" disableRipple
                                                 (selectedIndexChange)="basicReqTabChange($event)">
-                                                <mat-tab label="Details">
+                                                <mat-tab label="Details" data-tab-id="spec-template-details">
                                                     <ng-template mat-tab-label>Details</ng-template>
                                                 </mat-tab>
-                                                <mat-tab label="API Spec">
+                                                <mat-tab label="API Spec" data-tab-id="spec-template-api-spec">
                                                     <ng-template mat-tab-label>API Spec</ng-template>
                                                 </mat-tab>
                                             </mat-tab-group>

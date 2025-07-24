@@ -65,7 +65,7 @@ enum FilterType {
 @Component({
   selector: 'app-aip-filter',
   templateUrl: './aip-filter.component.html',
-  styleUrl: './aip-filter.component.scss',
+  styleUrls: ['./aip-filter.component.scss'],
   animations: [
     trigger('slideToggle', [
       transition(':enter', [
@@ -194,7 +194,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
     private semanticService: SemanticService,
     private router: Router,
     private route: ActivatedRoute
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.loadPreselectedFilters();
@@ -409,12 +409,14 @@ export class AipFilterComponent implements OnInit, OnChanges {
     //       selected: false,
     //     }));
     //   });
-    this.datasetServices.getIndexNamesByOrg(sessionStorage.getItem('organization')).pipe(
-      catchError((error) => {
-        console.error('Error fetching topics:', error);
-        return of([]);
-      })
-    )
+    this.datasetServices
+      .getIndexNamesByOrg(sessionStorage.getItem('organization'))
+      .pipe(
+        catchError((error) => {
+          console.error('Error fetching topics:', error);
+          return of([]);
+        })
+      )
       .subscribe((res: any[]) => {
         this.datasetTopicList = res.map((element) => ({
           category: 'Topic',
@@ -1711,12 +1713,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
         );
         break;
       case FilterType.DATASET_TAG:
-        this.clearFilterList(
-          this.selectedTagList,
-          this.datasetsTagsList || []
-        );
-
-
+        this.clearFilterList(this.selectedTagList, this.datasetsTagsList || []);
     }
 
     // Emit changes

@@ -10,7 +10,7 @@ import {
 @Component({
   selector: 'app-modal-config-schema-header',
   templateUrl: './modal-config-schema-header.component.html',
-  styleUrl: './modal-config-schema-header.component.scss',
+  styleUrls: ['./modal-config-schema-header.component.scss'],
   animations: [
     trigger('searchAnimation', [
       state(
