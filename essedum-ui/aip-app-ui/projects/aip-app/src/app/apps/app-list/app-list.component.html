@@ -66,7 +66,7 @@
                             <mat-card-actions
                                 class="lfx-c-card__action-hover d-flex justify-content-between card-actions-hover"
                                >
-                                <button mat-flat-button class="mat-action-button-s view-details-btn overview"
+                                <button style="height: 32px !important;" mat-flat-button class="mat-action-button-s view-details-btn overview mat-button-radius"
                                     (click)="openApp(app, 'overview')">
                                     Overview
                                 </button>
@@ -76,7 +76,7 @@
                                     </mat-icon>
                                 </button>
 
-                                <div class="aip-cursor w-15">
+                                <div class="aip-cursor w-20">
                                     <div class="lfx-c-avatar  aip-hover-avatar">
                                         {{(app.target.created_by)|firstCharacter}}
                                     </div>
@@ -85,7 +85,7 @@
                                     </div>
                                 </div>
 
-                                <div class="dropdown d-inline-block w-15">
+                                <div class="dropdown d-inline-block w-20">
                                     <mat-icon class="aip-cursor action-icon" [matMenuTriggerFor]="menu"                                       
                                         (menuOpened)="menuOpenIndex = index" (menuClosed)="menuOpenIndex = null">
                                         more_vert

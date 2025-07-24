@@ -349,8 +349,12 @@ mat-card:hover .card-actions-container,
   width: 15% !important;
 }
 
+.w-20{
+  width: 20% !important;
+}
+
 .overview{
-  height: 28px !important; width: 36% !important;
+  height: 28px !important; width: 34% !important;
 }
 
 .mat-card-header-transition{
@@ -359,6 +363,10 @@ mat-card:hover .card-actions-container,
 
 .main-card-div{
   margin-bottom: 2% !important; height: 100% !important
+}
+
+.mat-button-radius {
+  border-radius: 16px !important;
 }
 
 
