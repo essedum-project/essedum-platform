@@ -20,9 +20,7 @@ export class InactivityPopupComponent {
     private appOAuthService: AppOAuthService,
     @Inject(MAT_DIALOG_DATA) public data: { countDownTime: number }) {
     if (sessionStorage.getItem('theme') && sessionStorage.getItem('theme') !== '') {
-      this.themeColor = sessionStorage.getItem('theme');
-    } else {
-      this.themeColor = '#7B39B1'; //setting to default theme color
+      this.themeColor = '#0052cc'; //setting to default theme color
     }
     this.countdown = data.countDownTime;
     this.startCountdown();
