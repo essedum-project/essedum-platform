@@ -104,7 +104,7 @@ export class ModelComponent implements OnInit, OnChanges {
       if (params['page']) {
         this.pageNumber = params['page'];
         this.filter = params['search'];
-        this.selectedAdapterType = params['type']
+        this.selectedAdapterType = params['modelType']
           ? params['type'].split(',')
           : [];
         this.selectedAdapterInstance = params['adapterInstance']
@@ -229,15 +229,19 @@ export class ModelComponent implements OnInit, OnChanges {
   }
   getCards(): void {
     let params: HttpParams = new HttpParams();
-    if (this.selectedTag.length >= 1)
-      params = params.set('tags', this.selectedTag.toString());
-    if (this.filter.length >= 1) params = params.set('query', this.filter);
-    if (this.selectedAdapterType.length >= 1)
+
+    if (this.filter && this.filter.length > 0) {
+      params = params.set('modelname', this.filter);
+    }
+
+    if (this.selectedAdapterType && this.selectedAdapterType.length > 0) {
       params = params.set('type', this.selectedAdapterType.toString());
-    if (this.selectedAdapterInstance.length >= 1)
-      params = params.set('instance', this.selectedAdapterInstance.toString());
+    }
+
+    // Set page and size
     params = params.set('page', this.pageNumber);
     params = params.set('size', this.pageSize);
+
     params = params.set('project', sessionStorage.getItem('organization'));
     params = params.set('isCached', true);
 
@@ -299,7 +303,7 @@ export class ModelComponent implements OnInit, OnChanges {
     });
   }
   redirection(card: any, type: string) {
-    this.router.navigate(['./' + type + '/' + card.sourceName], {
+    this.router.navigate(['./' + type + '/' + card.id], {
       queryParams: {
         page: this.pageNumber,
         search: this.filter,
@@ -397,7 +401,7 @@ export class ModelComponent implements OnInit, OnChanges {
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'delete') {
         this.service
-          .deleteModels(card.sourceId, card.adapterId, card.version)
+          .deleteModels(card.id, card.adapterId, card.version)
           .subscribe(
             (res) => {
               this.service.messageService(

@@ -42,7 +42,7 @@ export class ModelDescriptionComponent implements OnInit {
   relatedloaded: boolean = false;
   organisation: string;
   initiativeView: boolean ;
-  sourceName: string = this.route.snapshot.paramMap.get('name');
+  id: string = this.route.snapshot.paramMap.get('id');
   constructor(
     private clipboard: Clipboard,
     private route: ActivatedRoute,
@@ -92,12 +92,12 @@ export class ModelDescriptionComponent implements OnInit {
   ngOnInit() {
     this.router.url.includes('initiative')?this.initiativeView=false:this.initiativeView=true;
     this.getpermissions();
-    if(!this.sourceName){
-      this.sourceName = this.initiativeData.sourceName;
+    if(!this.id){
+      this.id = this.initiativeData.sourceName;
     }
     let params: HttpParams = new HttpParams();
-    params = params.set('fed_Name', this.sourceName);
-    params = params.set('org', this.organisation);
+    params = params.set('modelid', this.id);
+    params = params.set('project', this.organisation);
     this.service.getModelBySourceId(params).subscribe((res) => {
       this.card = res[0];
       this.getRelatedComponent();

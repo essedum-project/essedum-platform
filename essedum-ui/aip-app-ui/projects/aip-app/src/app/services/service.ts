@@ -1224,8 +1224,9 @@ export class Services {
 
   // CRADS
   getModelCards(param: HttpParams): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
     return this.https
-      .get(this.dataUrl + '/service/v1/models/list', {
+      .get(this.dataUrl + '/service/v1/models/list/' + session, {
         observe: 'response',
         params: param,
       })
@@ -1242,10 +1243,12 @@ export class Services {
   }
 
   getCountModels(param: HttpParams): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let updatedParam = param.set('project', session);
     return this.https
-      .get(this.dataUrl + '/service/v1/models/list/count', {
+      .get(this.dataUrl + '/service/v1/models/count/' + session, {
         observe: 'response',
-        params: param,
+        params: updatedParam, // Use updatedParam instead of param
       })
       .pipe(
         map((response) => {
@@ -1424,7 +1427,7 @@ export class Services {
 
   getModelBySourceId(param: HttpParams): Observable<any> {
     return this.https
-      .get(this.dataUrl + '/service/v1/fetchmodels', {
+      .get(this.dataUrl + '/service/v1/models/getModel', {
         observe: 'response',
         params: param,
       })
@@ -2697,7 +2700,7 @@ export class Services {
             page: pagination.page,
             size: pagination.size,
             sortEvent: pagination.sortEvent,
-            sortOrder: pagination.sortOrder,
+                       sortOrder: pagination.sortOrder,
           }
         : {
             datasetName: datasetName,

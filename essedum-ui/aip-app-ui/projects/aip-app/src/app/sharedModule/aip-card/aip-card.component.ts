@@ -99,10 +99,13 @@ export class AipCardComponent {
       return this.card.adaptername;
     } else if (this.servicev1 === 'schemas') {
       return this.card.name;
-    } else if (this.servicev1 === 'model' || this.servicev1 === 'pipeline' || this.servicev1 === 'connections') {
+    } else if ( this.servicev1 === 'pipeline' || this.servicev1 === 'connections') {
       return this.card.type;
     }else if (this.servicev1 === 'Datasets') {
        return `${this.card.datasource?.category} - ${this.card.datasource?.alias}`;
+    }
+    else if (this.servicev1 === 'model') {
+       return this.card.modelType;
     }
   }
 
@@ -116,12 +119,11 @@ export class AipCardComponent {
     } else if (this.servicev1 === 'model') {
       return this.card.name && this.card.name != ''
         ? this.card.name
-        : this.card.sourceName;
+        : this.card.modelName;
     }else if (this.servicev1 === 'Datasets') {
       return this.card?.alias ;
     }
   }
-
   getDate() {
     if (this.servicev1 === 'adapters' || this.servicev1 === 'instances') {
       return this.card.createdon;
