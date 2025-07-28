@@ -4,7 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AdapterServices } from '../adapter-service';
 import { OptionsDTO } from '../../DTO/OptionsDTO';
 import { Services } from '../../services/service';
-import { PipelineService } from '../../services/pipeline.service';
 import { Location } from '@angular/common';
 import { MatDialogRef } from '@angular/material/dialog';
 
@@ -14,24 +13,17 @@ import { MatDialogRef } from '@angular/material/dialog';
   styleUrls: ['./adapter-create-edit.component.scss'],
 })
 export class AdapterCreateEditComponent {
-  @Output() triggereRefresh = new EventEmitter<any>();
-
-  constructor(
-    private dialogRef: MatDialogRef<AdapterCreateEditComponent>,
-    private router: Router,
-    private route: ActivatedRoute,
-    private adapterServices: AdapterServices,
-    private service: Services,
-    private location: Location,
-    private pipelineService: PipelineService
-  ) {}
-
   @Input('data') data: any;
   @Input('action') action: any;
+  @Output() triggereRefresh = new EventEmitter<any>();
 
-  cardTitle: String = 'Implementation';
-  createAuth = false;
-  isBackHovered: boolean = false;
+  readonly CARD_TITLE = 'Implementation ';
+  readonly TOOLTIP_POSITION = 'above';
+
+  createAuth: boolean = false;
+  nameFlag: boolean = false;
+  errMsgFlag: boolean = true;
+  routeToHome: boolean = false;
   listOfNames: string[] = [];
   regexPattern = `^(?!REX)[a-zA-Z0-9\_\-]+$`;
   regexPatterForEmptyNames = `^(?!www$)[a-zA-Z0-9\_\-]+$`;
@@ -43,8 +35,7 @@ export class AdapterCreateEditComponent {
   regexPatternForValidAlphabets = `^[a-zA-Z0-9\_\-]+$`;
   regexPatternForExistingNamesObj: any;
   regexPatternForValidAlphabetsObj: any;
-  nameFlag: boolean = false;
-  errMsgFlag: boolean = true;
+
   datasourcesForConnection: any;
   specTemplates: any;
   mlAdapters: any;
@@ -52,9 +43,17 @@ export class AdapterCreateEditComponent {
   specTemplatesOptions: OptionsDTO[] = [];
   errMsg: string = 'Name is required filed.';
   selectedConnection: any;
-  routeToHome: boolean = false;
   connectionPromise: Promise<boolean>;
   org: any;
+
+  constructor(
+    private dialogRef: MatDialogRef<AdapterCreateEditComponent>,
+    private router: Router,
+    private route: ActivatedRoute,
+    private adapterServices: AdapterServices,
+    private service: Services,
+    private location: Location
+  ) {}
 
   ngOnInit(): void {
     this.org = sessionStorage.getItem('organization');
@@ -81,14 +80,14 @@ export class AdapterCreateEditComponent {
     }
   }
 
-  authentications() {
+  authentications(): void {
     this.service.getPermission('cip').subscribe((cipAuthority) => {
       if (cipAuthority.includes('adapter-create')) this.createAuth = true;
       else if (!this.data || this.routeToHome) this.routeBackToAdapters();
     });
   }
 
-  createAdapter() {
+  createAdapter(): void {
     if (this.data.executiontype == 'REMOTE') {
       this.data.apispec = this.specTemplates.filter(
         (spec) => spec.domainname == this.data.spectemplatedomainname
@@ -109,7 +108,7 @@ export class AdapterCreateEditComponent {
     );
   }
 
-  updateAdapter() {
+  updateAdapter(): void {
     delete this.data.createdon;
     delete this.data.lastmodifiedon;
     this.adapterServices.updateAdapter(this.data).subscribe(
@@ -126,20 +125,20 @@ export class AdapterCreateEditComponent {
     );
   }
 
-  closeAdapterPopup() {
+  closeAdapterPopup(): void {
     this.dialogRef.close();
     this.triggereRefresh.emit(true);
   }
 
-  routeBackToAdapters() {
+  routeBackToAdapters(): void {
     this.location.back();
   }
 
-  routeBackToAdaptersAndRefresh() {
+  routeBackToAdaptersAndRefresh(): void {
     this.router.navigate(['../'], { relativeTo: this.route });
   }
 
-  adapterNameChangesOccur(adpName: string) {
+  adapterNameChangesOccur(adpName: string): void {
     this.errMsg = 'Name is required filed.';
     if (this.regexPatternObj.test(adpName)) {
       this.nameFlag = true;
@@ -158,10 +157,10 @@ export class AdapterCreateEditComponent {
     }
   }
 
-  connectionNameSelectChange(connectionNameSelectd: any) {
-    this.data.connectionname = connectionNameSelectd.value;
+  connectionNameSelectChange(connectionNameSelected: any): void {
+    this.data.connectionname = connectionNameSelected.value;
     this.selectedConnection = this.datasourcesForConnection.filter(
-      (datasource) => datasource.alias == connectionNameSelectd.value
+      (datasource) => datasource.alias == connectionNameSelected.value
     )[0];
     this.data.connectionid = this.selectedConnection.name;
     if (this.selectedConnection.type == 'REST')
@@ -169,11 +168,11 @@ export class AdapterCreateEditComponent {
     else this.data.executiontype = 'REMOTE';
   }
 
-  resolvePromise() {
+  resolvePromise(): void {
     this.connectionPromise = Promise.resolve(true);
   }
 
-  findalldatasourcesForConnection() {
+  findalldatasourcesForConnection(): void {
     this.adapterServices.getDatasources().subscribe(
       (res) => {
         this.datasourcesForConnection = res;
@@ -229,7 +228,7 @@ export class AdapterCreateEditComponent {
     );
   }
 
-  findAllSpecTemplates() {
+  findAllSpecTemplates(): void {
     this.adapterServices.getMlSpecTemplatesCards(this.org).subscribe((res) => {
       this.specTemplates = res;
       this.specTemplates.forEach((specTem) => {
@@ -240,7 +239,7 @@ export class AdapterCreateEditComponent {
     });
   }
 
-  findAllAdapters() {
+  findAllAdapters(): void {
     this.adapterServices.getAdapters(this.org).subscribe((res) => {
       this.mlAdapters = res;
       this.mlAdapters.forEach((adp) => {
