@@ -92,7 +92,7 @@ export class ModelComponent implements OnInit, OnChanges {
     public tagService: TagsService,
     private dialog: MatDialog,
     private location: Location
-  ) {}
+  ) { }
   ngOnChanges(changes: SimpleChanges): void {
     this.refresh();
   }
@@ -258,7 +258,6 @@ export class ModelComponent implements OnInit, OnChanges {
       } else {
         this.records = false;
       }
-      console.log('DATA', this.cards);
     });
 
     this.updateQueryParam(
@@ -302,6 +301,53 @@ export class ModelComponent implements OnInit, OnChanges {
       relativeTo: this.route,
     });
   }
+  downloadModel(card: any) {
+    let obj = JSON.parse(card.attributes).object;
+    let extension = (obj).split('.').pop();
+    let fileName = obj.split('/').toString();
+    if (extension.match('mkv')) {
+      this.service.messageService('This file cannot be downloaded currently');
+    }
+    else {
+      this.service.messageNotificaionService('success', "Download initiated");
+
+      this.service.getModelFileData(card.modelName, `${fileName}`, card.organisation).subscribe((res: any) => {
+        if (res && res[0]) {
+          const fileData = res[0];
+          let downloadData = fileData[0].data;
+          const contentType = fileData[0].contentType;
+
+          try {
+
+            const decode = atob(downloadData);
+            // const blob = new Blob([decode], { type: 'text/csv;charset=utf-8;' })
+            
+
+            const byteArray = new Uint8Array(decode.length);
+            for (let i = 0; i < decode.length; i++) {
+              byteArray[i] = decode.charCodeAt(i);
+            }
+            const blob = new Blob([byteArray], { type: contentType });
+
+            const linkA = document.createElement('a');
+            linkA.href = window.URL.createObjectURL(blob);
+            linkA.download = fileName;
+            linkA.click();
+            URL.revokeObjectURL(linkA.href);
+          }
+          catch (e) {
+            this.service.message("Download Failed. Invalid Data", 'error')
+          }
+        } else {
+          this.service.message("Download Failed. Data does not exist", 'error')
+
+        }
+
+      });
+    }
+
+
+  }
   redirection(card: any, type: string) {
     this.router.navigate(['./' + type + '/' + card.id], {
       queryParams: {
@@ -333,7 +379,7 @@ export class ModelComponent implements OnInit, OnChanges {
     });
   }
 
-  clickactive(eventObj: any) {}
+  clickactive(eventObj: any) { }
   refresh() {
     this.getCountModels();
     this.fetchAdapters();

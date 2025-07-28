@@ -16,6 +16,7 @@
                     (filterStatusChange)="onFilterStatusChange($event)"></app-aip-filter>
             </div>
 
+
             <!-- Cards container -->
             <div class="lfx-c-card__action-ul aip-card-container">
                 <div class="col-md-8 col-lg-6 col-xl-5 aip-card-wrapper" *ngFor="let card of cards">
@@ -23,7 +24,7 @@
                         <app-aip-card [servicev1]="servicev1" [card]="card" [editAuth]="editAuth"
                             [deployAuth]="deployAuth" [deleteAuth]="deleteAuth"
                             (viewDetails)="redirection(card,'preview')" (edit)="redirection(card,'edit')"
-                            (delete)="deleteModels(card)">
+                            (delete)="deleteModels(card)" (downloadModel)="downloadModel(card)">
                         </app-aip-card>
                     </div>
                 </div>

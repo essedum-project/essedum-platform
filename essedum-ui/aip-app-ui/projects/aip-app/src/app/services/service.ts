@@ -1111,6 +1111,16 @@ export class Services {
       },
     });
   }
+    getModelFileData(datasetName, fileList, org): Observable<any> {
+    return this.https.get('/api/aip/service/v1/models/fileData', {
+      params: {
+        modelName: datasetName,
+        fileName: fileList,
+        org: org,
+      },
+    });
+  }
+  
 
   getRatingByUserAndModule(module: String): Observable<any> {
     let org = sessionStorage.getItem('organization');

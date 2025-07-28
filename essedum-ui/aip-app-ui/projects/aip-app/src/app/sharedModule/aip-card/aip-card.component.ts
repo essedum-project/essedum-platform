@@ -30,6 +30,7 @@ export class AipCardComponent {
   @Output() jobConsole?: EventEmitter<any> = new EventEmitter<any>();
    @Output() viewDatasets = new EventEmitter<any>();
   @Output() download = new EventEmitter<any>();
+    @Output() downloadModel = new EventEmitter<any>();
   @Output() copy = new EventEmitter<any>();
   // UI state variables
   isMenuHovered = false;
@@ -51,6 +52,9 @@ export class AipCardComponent {
   }
    onDownload(card: any): void {
     this.download.emit(card);
+  }
+  onModelDownload(card:any): void {
+    this.downloadModel.emit(card);
   }
   onCopy(card: any): void {
     this.copy.emit(card);
