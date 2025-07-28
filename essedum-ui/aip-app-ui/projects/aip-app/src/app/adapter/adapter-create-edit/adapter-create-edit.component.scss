@@ -1,38 +1,277 @@
-.custom-hint {
-  color: black;
-  font-size: 12px;
-  padding-bottom: 5px;
+// Variables
+$header-height: 45px;
+$icon-size: 24px;
+$icon-hover-color: #0094ff;
+$icon-default-color: #737373;
+$search-transition-duration: 0.6s;
+$animation-duration: 0.5s;
+
+.lfx-header {
+  display: flex;
+  align-items: center !important;
+  justify-content: space-between !important;
+  height: $header-height;
+  background-color: #fff;
+
+  // Title section
+  .header-left {
+    display: flex;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      color: #737373;
+      transition: color 0.2s ease;
+      cursor: pointer;
+      margin-right: 8px !important;
+
+      &.active {
+        color: #0094ff;
+      }
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 2.4rem;
+      font-weight: 600;
+      letter-spacing: 0px;
+      font-family: "Roboto", "Segoe UI", sans-serif !important;
+      color: #000000;
+      font-style: normal;
+      line-height: 24px;
+    }
+  }
+
+  // Right section with actions
+  .header-right {
+    .header-actions {
+      display: flex;
+      height: 24px;
+      align-items: center;
+
+      // Last refreshed text
+      p {
+        margin: 0 16px 0 0;
+        font-size: 1.2rem;
+        line-height: 16px;
+        letter-spacing: 0px;
+        font-weight: normal;
+        font-family: "Roboto", "Segoe UI", sans-serif !important;
+        font-style: normal;
+        color: #000000;
+      }
+
+      // Search panel
+      .lfx-panel {
+        background-color: #f0f0f0;
+        box-shadow: 0rem 0.2rem 0.4rem #00000029;
+        border: 0.05rem solid #0000001f;
+        border-radius: 1.6rem;
+        display: flex;
+        align-items: center;
+        height: 3rem;
+
+        .lfx-panel-input {
+          flex: 1;
+          border: none;
+          outline: none;
+          padding: 8px 0;
+          font-size: 14px;
+          width: 100%;
+          margin-left: 12px;
+          background: transparent;
+
+          &::placeholder {
+            color: #a5aaad;
+          }
+        }
+
+        mat-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+          color: #737373 !important;
+          transition: color 0.2s ease;
+          cursor: pointer;
+
+          &.active {
+            color: #0094ff !important;
+          }
+        }
+      }
+
+      // Icon common styles
+      .action-button {
+        margin: 0 8px;
+        height: $icon-size;
+        position: relative;
+
+        mat-icon {
+          font-size: $icon-size;
+          height: $icon-size;
+          width: $icon-size;
+          cursor: pointer;
+          font-weight: 400;
+          color: $icon-default-color;
+          transition: color 0.2s ease, transform 0.2s ease;
+
+          &.active {
+            color: $icon-hover-color;
+          }
+
+          &.rotate-icon {
+            animation: rotate $animation-duration linear infinite;
+          }
+        }
+      }
+    }
+  }
 }
 
-.custom-hint-or-error {
-  font-size: 12px;
-  padding-bottom: 5px;
+.lfx-u-sub-header-alias {
+  font-size: 1.6rem;
+  font-weight: 400;
+  font-family: "Roboto", "Segoe UI", sans-serif;
+  line-height: 22px;
+  color: #000000;
 }
 
-::ng-deep .mat-mdc-floating-label {
-  line-height: 2.5rem !important;
+.required-indicator {
+  color: red;
+  margin-left: 2px;
 }
 
-::ng-deep
-  mat-form-field.no-subscript-space
-  .mat-mdc-form-field-subscript-wrapper {
-  height: 0 !important;
-  min-height: 0 !important;
+::ng-deep .custom-alias-field {
+  .mat-mdc-form-field-flex {
+    height: 21px !important;
+    background-color: #fafafa !important;
+    padding: 0px !important;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    height: 21px !important;
+    background-color: #fafafa !important;
+    padding: 12px 0 !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    padding: 0px !important;
+  }
 }
 
-::ng-deep mat-form-field.subscript-space .mat-mdc-form-field-subscript-wrapper {
-  height: 8px !important;
-  min-height: 8px !important;
+::ng-deep .custom-alias-input {
+  text-align: left;
+  font-size: 1.6rem;
+  font-weight: 400;
+  font-family: "Roboto", "Segoe UI", sans-serif;
+  font-style: normal;
+  line-height: 21px;
+  color: #737373;
+
+  background-color: #fafafa;
+  height: 21px;
+
+  &::placeholder,
+  &::-webkit-input-placeholder,
+  &::-moz-placeholder,
+  &:-ms-input-placeholder {
+    text-align: left;
+    font-size: 1.6rem;
+    font-weight: 400;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
+    font-style: normal;
+    line-height: 24px;
+    color: #737373;
+    opacity: 0.7;
+  }
 }
 
-::ng-deep mat-form-field.description-no-underline .mdc-line-ripple,
-::ng-deep mat-form-field.description-no-underline .mdc-notched-outline {
-  display: none !important;
+::ng-deep .mat-mdc-form-field {
+  .mat-mdc-form-field-hint-wrapper,
+  .mat-mdc-form-field-error-wrapper {
+    position: absolute !important;
+    padding: 1px !important;
+  }
 }
 
-::ng-deep .mat-mdc-select:not(.mat-mdc-select-disabled) .mat-mdc-select-arrow {
-  color: #0094ff !important;
-  fill: #0094ff !important;
+::ng-deep .mat-mdc-form-field {
+  height: 40px !important;
+}
+
+// Input element global override
+::ng-deep .mat-mdc-input-element {
+  border-bottom: none !important;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 0rem;
+}
+
+.action-button {
+  color: #ffffff;
+  background-color: #238636;
+  height: 36px;
+  min-height: 36px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  border-radius: 6px;
+  border: 1px solid #1a7f37;
+  transition: all 0.2s ease-in-out;
+  min-width: 80px;
+
+  &:hover:not(:disabled) {
+    background-color: #2ea043;
+    border-color: #238636;
+  }
+
+  &:active:not(:disabled) {
+    background-color: #1a7f37;
+    border-color: #166534;
+  }
+
+  &:disabled {
+    // background-color: #94a3b8;
+    background-color: #04aa6d;
+    border-color: #64748b;
+    cursor: not-allowed;
+  }
+}
+
+.cancel-button {
+  color: #333;
+  background-color: #ffffff;
+  height: 36px;
+  min-height: 36px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  border-radius: 6px;
+  border: 1px solid #d0d7de;
+  transition: all 0.2s ease-in-out;
+  min-width: 80px;
+
+  &:hover {
+    background-color: #f6f8fa;
+    border-color: #8c959f;
+  }
+
+  &:active {
+    background-color: #e9ecef;
+    border-color: #6c757d;
+  }
+}
+
+// Remove default underlines
+.mdc-line-ripple::before,
+.mdc-line-ripple::after {
+  border-bottom: none !important;
 }
 
 input:focus,
@@ -41,8 +280,20 @@ input:focus,
   border-bottom: 1px solid #0094ff !important;
 }
 
-::ng-deep
-  .mdc-text-field--filled:not(.mdc-text-field--disabled).mdc-text-field--focused
-  .mdc-floating-label {
-  color: #0094ff !important;
+input:-internal-autofill-selected {
+  background-color: #f44336 !important;
+}
+
+::ng-deep .mat-mdc-form-field-error {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: -4px;
+  font-family: "Roboto", "Segoe UI", sans-serif;
+}
+
+::ng-deep .mat-mdc-form-field-hint {
+  color: #757575;
+  font-size: 12px;
+  margin-top: -4px;
+  font-family: "Roboto", "Segoe UI", sans-serif;
 }

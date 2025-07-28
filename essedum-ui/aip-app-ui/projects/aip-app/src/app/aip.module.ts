@@ -138,6 +138,7 @@ import { AipEmptyStateComponent } from './sharedModule/aip-empty-state/aip-empty
 import { AipFilterComponent } from './sharedModule/aip-filter/aip-filter.component';
 import { AipLoadingComponent } from './sharedModule/aip-loading/aip-loading.component';
 import { ModalConfigSchemaHeaderComponent } from './schema/modal-config-schema/modal-config-schema-header/modal-config-schema-header.component';
+import { AipDeleteConfirmationComponent } from './sharedModule/aip-delete-confirmation/aip-delete-confirmation.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -232,6 +233,7 @@ const dbConfig: DBConfig = {
     TaggingComponentComponent,
     AipFilterComponent,
     AipLoadingComponent,
+    AipDeleteConfirmationComponent,
     ModalConfigSchemaHeaderComponent,
   ],
   imports: [

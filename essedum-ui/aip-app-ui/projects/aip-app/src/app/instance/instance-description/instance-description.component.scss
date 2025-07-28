@@ -1,5 +1,5 @@
 ::ng-deep .aip-filter {
-  height: 65vh;
+  height: 66vh;
 }
 
 .customHeader {
@@ -172,4 +172,13 @@ li {
 
 ::ng-deep .mat-mdc-tab-group .mat-mdc-tab .mdc-tab__text-label {
   font-size: 1.8rem !important;
+}
+
+// Dialog surface
+::ng-deep .mat-mdc-dialog-surface {
+  background: #ffffff 0% 0% no-repeat padding-box !important;
+  box-shadow: 0rem 0.2rem 0.4rem #00000029 !important;
+  border: 0.05rem solid #0000001f !important;
+  border-radius: 1.6rem !important;
+  opacity: 1 !important;
 }

@@ -218,8 +218,11 @@ input:focus,
 
 // Dialog surface
 ::ng-deep .mat-mdc-dialog-surface {
-  border-radius: 16px !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 1.5px 4px rgba(0, 0, 0, 0.08) !important;
+  background: #ffffff 0% 0% no-repeat padding-box !important;
+  box-shadow: 0rem 0.2rem 0.4rem #00000029 !important;
+  border: 0.05rem solid #0000001f !important;
+  border-radius: 1.6rem !important;
+  opacity: 1 !important;
 }
 
 ::ng-deep .mat-mdc-tab-group {

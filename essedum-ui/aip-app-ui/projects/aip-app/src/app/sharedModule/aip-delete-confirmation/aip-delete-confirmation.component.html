@@ -1,0 +1,15 @@
+<h2 mat-dialog-title>Delete Confirmation</h2>
+<mat-divider></mat-divider>
+<mat-dialog-content>
+    Do you want to delete?
+</mat-dialog-content>
+
+<div mat-dialog-actions class="dialog-actions">
+    <button mat-raised-button class="cancel-button" (click)="dialogRef.close('cancel')">
+        Cancel
+    </button>
+
+    <button mat-raised-button color="primary" class="delete-button" (click)="dialogRef.close('delete')">
+        Delete
+    </button>
+</div>

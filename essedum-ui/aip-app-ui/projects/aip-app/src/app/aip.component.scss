@@ -1039,19 +1039,6 @@ div {
     font-weight: 500;
   }
 
-  // .card-title-wrapper {
-  //   display: block;
-  //   overflow: hidden;
-  // }
-  // .card-title {
-  //   line-height: 1.4em;
-  //   display: -webkit-box;
-  //   -webkit-box-orient: vertical;
-  //   overflow: hidden;
-  //   text-overflow: ellipsis;
-  //   -webkit-line-clamp: 1;
-  //   transition: -webkit-line-clamp 0.3s ease;
-  // }
 
   .card-title-wrapper:hover .card-title {
     -webkit-line-clamp: 2;
@@ -1320,10 +1307,9 @@ div {
     margin-bottom: 50px !important;
   }
 
-.lfx-u-mar-b-10{
-  margin-bottom: 10px !important;
-}
-
+  .lfx-u-mar-b-10 {
+    margin-bottom: 10px !important;
+  }
 }
 
 ::ng-deep {
@@ -1344,6 +1330,10 @@ div {
 
   .lfx-u-mar-8 {
     margin: 8px !important;
+  }
+
+  .lfx-u-pad-t-10 {
+    padding-top: 10px;
   }
 
   .lfx-u-header-xxl {
