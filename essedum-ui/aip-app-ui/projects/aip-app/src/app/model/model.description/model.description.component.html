@@ -9,19 +9,23 @@
                             <div class=" selector-model-title-head d-flex  align-items-center">
                                 <span *ngIf="initiativeView">
                                     <span class="">
-                                        <i class="fa fa-long-arrow-left back-icon" aria-hidden="true"
-                                            (click)="navigateBack()"></i>
+                                        <mat-icon class="aip-led-icons" (click)="navigateBack()"
+                                            [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}"
+                                            matTooltip="Back" matTooltipPosition="above"
+                                            (mouseenter)="isBackHovered = true"
+                                            (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
                                     </span>
+
                                 </span>
                                 <span class="lfx-u-mar-l-8  aip-desc-title lfx-u-header-xxl"><span
                                         style=" color: #737373;;">Model:
-                                    </span>{{card.name | titlecase}} </span>
+                                    </span>{{card.modelName | titlecase}} </span>
                                 <span class="lfx-u-mar-l-16 lfx-c-badge float-end"
                                     [ngClass]="[card.status=='Registered'?'lfx-c-badge--blue ':'lfx-c-badge--active',card.status=='Undeployed' || card.status == 'Failed' ?'lfx-c-badge--warning ':'lfx-c-badge--active']">{{card.status}}</span>
                             </div>
                             <div class=" selector-model-title-tail" *ngIf="initiativeView">
                                 <ul class="d-flex justify-content-between align-items-center">
-                                    <li *ngIf="tagAuth" class="li-style aip-cursor lfx-u-mar-r-8 mb-1"
+                                    <!-- <li *ngIf="tagAuth" class="li-style aip-cursor lfx-u-mar-r-8 mb-1"
                                         style="transform: rotateY(180deg)" (click)="openModal(content4)">
                                         <span [tooltip]="addTags" [position]="tooltipPoition"
                                             class="aip-led-icons">
@@ -37,14 +41,16 @@
                                         <ng-template #content4 let-modal>
                                             <app-tags [data]=card [entityType]="entity"></app-tags>
                                         </ng-template>
-                                    </li>
+                                    </li> -->
                                     <li class="li-style lfx-u-mar-lr-8">
-                                        <span *ngIf="editAuth" matTooltip="{{edit}}" [matTooltipPosition]="tooltipPoition">
-                                            <mat-icon  (click)="redirection(card,'edit')">edit</mat-icon>
+                                        <span *ngIf="editAuth" matTooltip="{{edit}}"
+                                            [matTooltipPosition]="tooltipPoition">
+                                            <mat-icon (click)="editModel(card)">edit</mat-icon>
                                         </span>
                                     </li>
                                     <li *ngIf="card.status=='Deployed'" class="li-style lfx-u-mar-lr-8">
-                                        <span *ngIf="deleteAuth" matTooltip="{{delete}}" [matTooltipPosition]="tooltipPoition">
+                                        <span *ngIf="deleteAuth" matTooltip="{{delete}}"
+                                            [matTooltipPosition]="tooltipPoition">
                                             <mat-icon (click)="deleteModel(card)">delete</mat-icon>
                                         </span>
                                     </li>
@@ -74,14 +80,15 @@
                                     </div>
                                     <div class="lfx-u-body-md d-flex align-items-center mt-3">
                                         <span
-                                            style="width: 90%;line-height: 1.9rem;letter-spacing: .1rem; word-wrap: break-word;background: var(--background-colour)  0% 0% no-repeat padding-box;">{{card.artifacts}}</span>
-                                        <span class="mx-4"><mat-icon (click)="copyModel(card.artifacts)">content_copy</mat-icon></span>
+                                            style="width: 90%;line-height: 1.9rem;letter-spacing: .1rem; word-wrap: break-word;background: var(--background-colour)  0% 0% no-repeat padding-box;">{{getFormattedModelPath(card)}}</span>
+                                        <span class="mx-4"><mat-icon
+                                                (click)="copyModel(getFormattedModelPath(card))">content_copy</mat-icon></span>
                                     </div>
                                 </div>
                                 <div class="row mt-4">
                                     <div class="aip-model-type col-md-4">
                                         <div class="lfx-u-body-sm aip-label-color">Model Type</div>
-                                        <div class="lfx-u-body-md mt-3">{{card.type}}</div>
+                                        <div class="lfx-u-body-md mt-3">{{card.modelType}}</div>
                                     </div>
                                     <div class="aip-model-type col-md-4">
                                         <div class="lfx-u-body-sm aip-label-color">Version</div>
@@ -89,7 +96,7 @@
                                     </div>
                                     <div class="aip-model-type col-md-4">
                                         <div class="lfx-u-body-sm aip-label-color">App Organisation</div>
-                                        <div class="lfx-u-body-md mt-3">{{card.appOrg}}</div>
+                                        <div class="lfx-u-body-md mt-3">{{card.organisation}}</div>
                                     </div>
                                 </div>
                             </div>
@@ -109,7 +116,6 @@
                                         <div class="lfx-u-body-md  mt-3">{{card.createdOn}}</div>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>

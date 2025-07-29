@@ -46,10 +46,8 @@ const routes: Routes = [
           { path: '', component: ModelComponent },
           { path: 'create', component: ModalConfigComponent },
           { path: 'edit-model/:id', component: ModalConfigComponent },
-          { path: 'preview/:cname/:name', component: ModelCreateComponent },
-          { path: 'edit/:name', component: ModelEditsComponent },
-          { path: 'deploy/:name', component: ModelDeployComponent },
-          { path: 'preview/:name', component: ModelDescriptionComponent },
+          { path: 'preview/:cname/:name', component: ModelCreateComponent }, 
+          { path: 'preview/:id', component: ModelDescriptionComponent },
         ],
       },
       

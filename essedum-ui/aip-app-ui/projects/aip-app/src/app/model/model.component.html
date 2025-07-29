@@ -6,7 +6,7 @@
                 <!-- Header -->
                 <app-aip-header [cardTitle]="cardTitle" [lastRefreshedTime]="lastRefreshedTime"
                     [showAddButton]="createAuth" (search)="filterz($event)" (refresh)="refreshComplete()"
-                    (add)="selectChange('local')">
+                    (add)="createModel()">
                 </app-aip-header>
 
                 <!-- Filter Section -->
@@ -23,7 +23,7 @@
                     <div class="card-wrapper h-100">
                         <app-aip-card [servicev1]="servicev1" [card]="card" [editAuth]="editAuth"
                             [deployAuth]="deployAuth" [deleteAuth]="deleteAuth"
-                            (viewDetails)="redirection(card,'preview')" (edit)="redirection(card,'edit')"
+                            (viewDetails)="viewDetails(card,'preview')" (edit)="editModel(card)"
                             (delete)="deleteModels(card)" (downloadModel)="downloadModel(card)">
                         </app-aip-card>
                     </div>

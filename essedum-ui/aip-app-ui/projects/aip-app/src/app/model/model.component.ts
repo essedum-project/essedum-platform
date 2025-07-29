@@ -371,10 +371,21 @@ export class ModelComponent implements OnInit, OnChanges {
     this.redirect();
   }
 
+  createModel(){
+    this.router.navigate(['./create'], {
+      relativeTo: this.route
+    });
+  }
+
   editModel(card: any) {
     console.log(card);
-    this.router.navigate(['./edit'], {
-      queryParams: { data: card },
+    this.router.navigate(['./edit-model', card.id], {
+      relativeTo: this.route,
+    });
+  }
+
+  viewDetails(card: any, type: string){
+     this.router.navigate(['./' + type + '/' + card.id], {
       relativeTo: this.route,
     });
   }
