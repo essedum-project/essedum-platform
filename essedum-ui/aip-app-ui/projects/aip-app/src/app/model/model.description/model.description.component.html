@@ -81,8 +81,8 @@
                                     <div class="lfx-u-body-md d-flex align-items-center mt-3">
                                         <span
                                             style="width: 90%;line-height: 1.9rem;letter-spacing: .1rem; word-wrap: break-word;background: var(--background-colour)  0% 0% no-repeat padding-box;">{{getFormattedModelPath(card)}}</span>
-                                        <span class="mx-4"><mat-icon
-                                                (click)="copyModel(getFormattedModelPath(card))">content_copy</mat-icon></span>
+                                        <span class="mx-4"><mat-icon style="cursor: pointer;"
+                                                (click)="downloadModel(card)">download</mat-icon></span>
                                     </div>
                                 </div>
                                 <div class="row mt-4">
