@@ -46,7 +46,7 @@ export class AdapterCreateEditComponent {
   mlAdapters: any;
   connectionOptions: OptionsDTO[] = [];
   specTemplatesOptions: OptionsDTO[] = [];
-  errMsg: string = 'Name is required filed.';
+  errMsg: string = 'Name is required field.';
   selectedConnection: any;
   connectionPromise: Promise<boolean>;
   org: any;
@@ -265,7 +265,7 @@ export class AdapterCreateEditComponent {
       this.nameFlag = false;
       this.errMsgFlag = true;
       if (adpName.length == 0) {
-        this.errMsg = 'Name is required filed.';
+        this.errMsg = 'Name is required field.';
       } else if (adpName.match(this.regexPatternForExistingNamesObj) == null) {
         this.errMsg = 'Name already exists';
       } else if (adpName.match(this.regexPatternForValidAlphabetsObj) == null) {
