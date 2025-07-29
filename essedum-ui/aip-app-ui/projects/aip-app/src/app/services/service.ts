@@ -1351,7 +1351,7 @@ export class Services {
   }
 
   // REGISTER MODEL
-  registerModel(regBody: any, adapter: any): Observable<any> {
+  registerModel(regBody: any, adapter?: any): Observable<any> {
     let session: any = sessionStorage.getItem('organization');
     let param = new HttpParams()
       .set('project', session)
@@ -3766,6 +3766,46 @@ export class Services {
         })
       );
   }
+
+  testConnectionForModels(model: any, uploadFileName: any): Observable<any> {
+    let params = new HttpParams();
+    if (uploadFileName) {
+      params = params.set('fileUploaded', uploadFileName);
+    }
+    return this.https.post(this.dataUrl + '/service/v1/models/upload', model, {
+      observe: 'response',
+      responseType: 'text',
+      params: params
+    })
+      .pipe(map(response => {
+        return response.body;
+      }))
+      .pipe(catchError(err => {
+        return this.handleError(err);
+      }));
+  }
+
+  fetchModelDetails(id: any): Observable<any> {
+    let param = new HttpParams()
+      .set('modelid', id)
+      .set('project', sessionStorage.getItem('organization'));
+    return this.https
+      .get(this.dataUrl + '/service/v1/models/getModel', {
+        observe: 'response',
+        params: param
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
 }
 
 export type CustomRemoteConfig = RemoteConfig & {
