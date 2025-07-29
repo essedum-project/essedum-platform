@@ -1,5 +1,11 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Validators } from '@angular/forms';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+} from '@angular/core';
+import { NgModel, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdapterServices } from '../adapter-service';
 import { OptionsDTO } from '../../DTO/OptionsDTO';
@@ -16,7 +22,7 @@ export class AdapterCreateEditComponent {
   @Input('data') data: any;
   @Input('action') action: any;
   @Output() triggereRefresh = new EventEmitter<any>();
-
+  @ViewChild('nameRef') nameRef: NgModel;
   readonly CARD_TITLE = 'Implementation ';
   readonly TOOLTIP_POSITION = 'above';
 
@@ -139,10 +145,12 @@ export class AdapterCreateEditComponent {
   }
 
   adapterNameChangesOccur(adpName: string): void {
-    this.errMsg = 'Name is required filed.';
     if (this.regexPatternObj.test(adpName)) {
       this.nameFlag = true;
       this.errMsgFlag = false;
+      if (this.nameRef && this.nameRef.control) {
+        this.nameRef.control.setErrors(null);
+      }
     } else {
       this.nameFlag = false;
       this.errMsgFlag = true;
@@ -151,8 +159,12 @@ export class AdapterCreateEditComponent {
       } else if (adpName.match(this.regexPatternForExistingNamesObj) == null) {
         this.errMsg = 'Name already exists';
       } else if (adpName.match(this.regexPatternForValidAlphabetsObj) == null) {
+        this.errMsgFlag = true;
         this.errMsg =
           'Name should not contain special characters, accepted special characters are _ and -';
+      }
+      if (this.nameRef && this.nameRef.control) {
+        this.nameRef.control.setErrors({ custom: true });
       }
     }
   }
