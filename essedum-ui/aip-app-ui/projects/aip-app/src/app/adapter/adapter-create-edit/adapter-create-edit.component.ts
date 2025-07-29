@@ -41,7 +41,6 @@ export class AdapterCreateEditComponent {
   regexPatternForValidAlphabets = `^[a-zA-Z0-9\_\-]+$`;
   regexPatternForExistingNamesObj: any;
   regexPatternForValidAlphabetsObj: any;
-
   datasourcesForConnection: any;
   specTemplates: any;
   mlAdapters: any;
@@ -64,7 +63,7 @@ export class AdapterCreateEditComponent {
   ngOnInit(): void {
     this.org = sessionStorage.getItem('organization');
     this.authentications();
-    this.findalldatasourcesForConnection();
+    this.findAllDatasourcesForConnection();
     this.findAllSpecTemplates();
 
     if (!this.data) {
@@ -86,105 +85,14 @@ export class AdapterCreateEditComponent {
     }
   }
 
-  authentications(): void {
+  private authentications(): void {
     this.service.getPermission('cip').subscribe((cipAuthority) => {
       if (cipAuthority.includes('adapter-create')) this.createAuth = true;
       else if (!this.data || this.routeToHome) this.routeBackToAdapters();
     });
   }
 
-  createAdapter(): void {
-    if (this.data.executiontype == 'REMOTE') {
-      this.data.apispec = this.specTemplates.filter(
-        (spec) => spec.domainname == this.data.spectemplatedomainname
-      )[0].apispectemplate;
-      this.data.category = 'REMOTE';
-    }
-    this.adapterServices.createAdapter(this.data).subscribe(
-      (res) => {
-        this.service.messageService(
-          res,
-          'Done!  Implementation Created Successfully'
-        );
-        this.routeBackToAdaptersAndRefresh();
-      },
-      (error) => {
-        this.service.messageService(error);
-      }
-    );
-  }
-
-  updateAdapter(): void {
-    delete this.data.createdon;
-    delete this.data.lastmodifiedon;
-    this.adapterServices.updateAdapter(this.data).subscribe(
-      (res) => {
-        this.service.messageService(
-          res,
-          'Done!  Implementation Updated Successfully'
-        );
-        this.closeAdapterPopup();
-      },
-      (error) => {
-        this.service.messageService(error);
-      }
-    );
-  }
-
-  closeAdapterPopup(): void {
-    this.dialogRef.close();
-    this.triggereRefresh.emit(true);
-  }
-
-  routeBackToAdapters(): void {
-    this.location.back();
-  }
-
-  routeBackToAdaptersAndRefresh(): void {
-    this.router.navigate(['../'], { relativeTo: this.route });
-  }
-
-  adapterNameChangesOccur(adpName: string): void {
-    if (this.regexPatternObj.test(adpName)) {
-      this.nameFlag = true;
-      this.errMsgFlag = false;
-      if (this.nameRef && this.nameRef.control) {
-        this.nameRef.control.setErrors(null);
-      }
-    } else {
-      this.nameFlag = false;
-      this.errMsgFlag = true;
-      if (adpName.length == 0) {
-        this.errMsg = 'Name is required filed.';
-      } else if (adpName.match(this.regexPatternForExistingNamesObj) == null) {
-        this.errMsg = 'Name already exists';
-      } else if (adpName.match(this.regexPatternForValidAlphabetsObj) == null) {
-        this.errMsgFlag = true;
-        this.errMsg =
-          'Name should not contain special characters, accepted special characters are _ and -';
-      }
-      if (this.nameRef && this.nameRef.control) {
-        this.nameRef.control.setErrors({ custom: true });
-      }
-    }
-  }
-
-  connectionNameSelectChange(connectionNameSelected: any): void {
-    this.data.connectionname = connectionNameSelected.value;
-    this.selectedConnection = this.datasourcesForConnection.filter(
-      (datasource) => datasource.alias == connectionNameSelected.value
-    )[0];
-    this.data.connectionid = this.selectedConnection.name;
-    if (this.selectedConnection.type == 'REST')
-      this.data.executiontype = 'REST';
-    else this.data.executiontype = 'REMOTE';
-  }
-
-  resolvePromise(): void {
-    this.connectionPromise = Promise.resolve(true);
-  }
-
-  findalldatasourcesForConnection(): void {
+  private findAllDatasourcesForConnection(): void {
     this.adapterServices.getDatasources().subscribe(
       (res) => {
         this.datasourcesForConnection = res;
@@ -240,7 +148,7 @@ export class AdapterCreateEditComponent {
     );
   }
 
-  findAllSpecTemplates(): void {
+  private findAllSpecTemplates(): void {
     this.adapterServices.getMlSpecTemplatesCards(this.org).subscribe((res) => {
       this.specTemplates = res;
       this.specTemplates.forEach((specTem) => {
@@ -251,7 +159,7 @@ export class AdapterCreateEditComponent {
     });
   }
 
-  findAllAdapters(): void {
+  private findAllAdapters(): void {
     this.adapterServices.getAdapters(this.org).subscribe((res) => {
       this.mlAdapters = res;
       this.mlAdapters.forEach((adp) => {
@@ -293,5 +201,92 @@ export class AdapterCreateEditComponent {
         Validators.pattern(this.regexPatternObj),
       ];
     });
+  }
+
+  private routeBackToAdaptersAndRefresh(): void {
+    this.router.navigate(['../'], { relativeTo: this.route });
+  }
+
+  createAdapter(): void {
+    if (this.data.executiontype == 'REMOTE') {
+      this.data.apispec = this.specTemplates.filter(
+        (spec) => spec.domainname == this.data.spectemplatedomainname
+      )[0].apispectemplate;
+      this.data.category = 'REMOTE';
+    }
+    this.adapterServices.createAdapter(this.data).subscribe(
+      (res) => {
+        this.service.messageService(
+          res,
+          'Done!  Implementation Created Successfully'
+        );
+        this.routeBackToAdaptersAndRefresh();
+      },
+      (error) => {
+        this.service.messageService(error);
+      }
+    );
+  }
+
+  updateAdapter(): void {
+    delete this.data.createdon;
+    delete this.data.lastmodifiedon;
+    this.adapterServices.updateAdapter(this.data).subscribe(
+      (res) => {
+        this.service.messageService(
+          res,
+          'Done!  Implementation Updated Successfully'
+        );
+        this.closeAdapterPopup();
+      },
+      (error) => {
+        this.service.messageService(error);
+      }
+    );
+  }
+
+  closeAdapterPopup(): void {
+    this.dialogRef.close();
+    this.triggereRefresh.emit(true);
+  }
+
+  routeBackToAdapters(): void {
+    this.location.back();
+  }
+
+  adapterNameChangesOccur(adpName: string): void {
+    if (this.regexPatternObj.test(adpName)) {
+      this.nameFlag = true;
+      this.errMsgFlag = false;
+      if (this.nameRef && this.nameRef.control) {
+        this.nameRef.control.setErrors(null);
+      }
+    } else {
+      this.nameFlag = false;
+      this.errMsgFlag = true;
+      if (adpName.length == 0) {
+        this.errMsg = 'Name is required filed.';
+      } else if (adpName.match(this.regexPatternForExistingNamesObj) == null) {
+        this.errMsg = 'Name already exists';
+      } else if (adpName.match(this.regexPatternForValidAlphabetsObj) == null) {
+        this.errMsgFlag = true;
+        this.errMsg =
+          'Name should not contain special characters, accepted special characters are _ and -';
+      }
+      if (this.nameRef && this.nameRef.control) {
+        this.nameRef.control.setErrors({ custom: true });
+      }
+    }
+  }
+
+  connectionNameSelectChange(connectionNameSelected: any): void {
+    this.data.connectionname = connectionNameSelected.value;
+    this.selectedConnection = this.datasourcesForConnection.filter(
+      (datasource: any) => datasource.alias == connectionNameSelected.value
+    )[0];
+    this.data.connectionid = this.selectedConnection.name;
+    if (this.selectedConnection.type == 'REST')
+      this.data.executiontype = 'REST';
+    else this.data.executiontype = 'REMOTE';
   }
 }
