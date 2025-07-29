@@ -24,15 +24,14 @@
   .mat-mdc-form-field-flex {
     background-color: #f5f5f5;
     border-radius: 4px 4px 0 0;
-    padding: 8px 12px 0 12px;
-    height: 56px;
     align-items: flex-end;
   }
 
   .mat-mdc-text-field-wrapper {
-    background-color: transparent;
-    border-radius: 4px 4px 0 0;
-    padding: 12px;
+    height: 21px !important;
+    border-radius: 4px 4px 0 0 !important;
+    background-color: #fafafa !important;
+    padding: 12px 0 !important;
   }
 
   .mat-mdc-form-field-infix {
@@ -208,7 +207,7 @@ input:focus,
   }
 
   &:disabled {
-    background-color: #04AA6D;
+    background-color: #04aa6d;
     border-color: #64748b;
     cursor: not-allowed;
   }
