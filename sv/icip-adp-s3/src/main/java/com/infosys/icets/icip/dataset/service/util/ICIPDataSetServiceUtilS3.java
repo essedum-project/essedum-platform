@@ -183,7 +183,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 			);
 
 	@Override
-	public boolean testConnection(ICIPDataset dataset) {
+	public boolean testConnection(ICIPDataset dataset) throws LeapException {
 
 		try {
 			boolean response;
@@ -208,7 +208,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 		return false;
 	}
 
-	private boolean connectMinio(ICIPDataset dataset) {
+	private boolean connectMinio(ICIPDataset dataset) throws LeapException {
 
 		JSONObject connectionDetails = new JSONObject(dataset.getDatasource().getConnectionDetails());
 		String accessKey = connectionDetails.optString(ACCESS_KEY);
@@ -237,6 +237,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 	       }
 		} catch (Exception e) {
 			logger.info(e.getMessage());
+			throw new LeapException(e.getMessage());
 		}
 		return true;
 	}

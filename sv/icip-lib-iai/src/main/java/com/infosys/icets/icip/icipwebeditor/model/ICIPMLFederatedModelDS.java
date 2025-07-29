@@ -38,8 +38,8 @@ public class ICIPMLFederatedModelDS {
 	private String version;
 	
 	@OneToOne
-	@JoinColumn(updatable = false, insertable = false, name = "datasource", referencedColumnName = "name")
-	@JoinColumn(updatable = false, insertable = false, name = "organization", referencedColumnName = "organization")
+	@JoinColumn(updatable = false, insertable = false, name = "data_source", referencedColumnName = "name")
+	@JoinColumn(updatable = false, insertable = false, name = "organisation", referencedColumnName = "organization")
 	@Cascade(value = org.hibernate.annotations.CascadeType.SAVE_UPDATE)
 	private ICIPDatasource datasource;
 	
@@ -47,15 +47,16 @@ public class ICIPMLFederatedModelDS {
 	
 	private String organisation;
 	
+	@Column(name="model_type")
 	private String modelType;
+	
     @Column(name = "created_on", unique = false, nullable = false, insertable = true, updatable = false)
-    
 	Timestamp createdOn;
+    
     @Column(name="created_by")
-    
 	String createdBy;
-    @Column(name="app_modified_date")
     
+    @Column(name="app_modified_date")
 	Timestamp modifiedDate;
     
     @Column(name="app_modified_by")

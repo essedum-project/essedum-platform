@@ -91,7 +91,7 @@ public class ICIPMLFederatedModelService implements IICIPMLFederatedModelService
 
 	@Override
 	public List<ICIPMLFederatedModelDS> getAllOptionalModelsByOrg(
-	        String modelName, String version, String modelType, String organization, Pageable page) {
+	        String modelName, String version, String modelType, String organisation, Pageable page) {
 	    List<String> modelNames = null;
 	    List<String> versions = null;
 	    List<String> modelTypes = null;
@@ -109,14 +109,14 @@ public class ICIPMLFederatedModelService implements IICIPMLFederatedModelService
 	    }
 
 	    Page<ICIPMLFederatedModelDS> modelsPage = mlfedmodeldsRepo.findByOrganisationAndOptionalParams(
-	            organization, modelNames, versions, modelTypes, page);
+	            organisation, modelNames, versions, modelTypes, page);
 	   return modelsPage.toList();
 	
 	}
 
 
 	@Override
-	public Long getAllModelsCountByOrganisationOptionals(String modelName, String version, String modelType, String organization) {
+	public Long getAllModelsCountByOrganisationOptionals(String modelName, String version, String modelType, String organisation) {
 		
 		 List<String> modelNames = null;
 		    List<String> versions = null;
@@ -134,14 +134,14 @@ public class ICIPMLFederatedModelService implements IICIPMLFederatedModelService
 		        modelTypes = Arrays.asList(modelType.split(","));
 		    }
 
-		    return  mlfedmodeldsRepo.countByOrganisationAndOptionalParams(organization, modelNames, versions, modelTypes);
+		    return  mlfedmodeldsRepo.countByOrganisationAndOptionalParams(organisation, modelNames, versions, modelTypes);
 
 		
 	}
 
-	public Flux<BaseEntity> getObjectByIDTypeAndOrganization(String type, Integer id, String organization) {
+	public Flux<BaseEntity> getObjectByIDTypeAndorganisation(String type, Integer id, String organisation) {
 
-		return Flux.just(mlfedmodelRepo.findByIdAndOrg(id, organization)).defaultIfEmpty(new ICIPMLFederatedModel())
+		return Flux.just(mlfedmodelRepo.findByIdAndOrg(id, organisation)).defaultIfEmpty(new ICIPMLFederatedModel())
 				.map(s -> {
 					BaseEntity entity = new BaseEntity();
 					entity.setAlias(s.getModelName());
@@ -155,7 +155,8 @@ public class ICIPMLFederatedModelService implements IICIPMLFederatedModelService
 
 	@Override
 	public Flux<BaseEntity> getAllObjectsByOrganization(String organization, String search, Pageable page) {
-		try {
+		try
+		{
 		List<ICIPMLFederatedModel> modeList = mlfedmodelRepo.getAllDistinctModelsByOrganisation(organization, search, page);
 		return Flux.fromIterable(modeList).defaultIfEmpty(new ICIPMLFederatedModel()).parallel().map(s -> {
 			BaseEntity entity = new BaseEntity();
@@ -266,5 +267,12 @@ public class ICIPMLFederatedModelService implements IICIPMLFederatedModelService
 		return mlfedmodeldsRepo.findByIdAndOrg(fedId, project);
 
 	}
+
+	@Override
+	public Flux<BaseEntity> getObjectByIDTypeAndOrganization(String type, Integer id, String organization) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 }

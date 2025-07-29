@@ -974,17 +974,36 @@ public class ICIPMlopsController {
 	@PostMapping("/models/register")
 	public ResponseEntity<String> registerModels(@RequestBody ICIPMLFederatedModelDTO fedModeldto,
 			@RequestParam(name = "project", required = true) String project) throws IOException, NoSuchFieldException {
-		       fedModeldto.setCreatedBy(ICIPUtils.getUser(claim));
-		       fedModeldto.setOrganisation(project);
-		       ICIPMLFederatedModel federatedModetToAdd = ICIPFedModelUtil.MapDtoToModel(fedModeldto);
-			logger.info("Request for RegisterModel: ");
-			try {
-				ICIPMLFederatedModel  response =fedModelService.savemodel(federatedModetToAdd);
-				return ResponseEntity.status(201).body(new JSONObject(response).toString());
-			} catch (Exception e) {
-				logger.error(e.getMessage());
-				return ResponseEntity.status(500).body(e.getMessage());
-	
+		if (fedModeldto.getId() != null) {
+			fedModeldto.setCreatedBy(ICIPUtils.getUser(claim));
+			fedModeldto.setCreatedOn(Timestamp.from(Instant.now()));
+
+		} else {
+			fedModeldto.setModifiedBy(ICIPUtils.getUser(claim));
+			fedModeldto.setModifiedDate(Timestamp.from(Instant.now()));
+		}
+		fedModeldto.setOrganisation(project);
+		ICIPMLFederatedModel federatedModetToAdd = ICIPFedModelUtil.MapDtoToModel(fedModeldto);
+		logger.info("Request for RegisterModel: ");
+		try {
+			List<ICIPMLFederatedModelDTO> fedModels = fedModelService
+					.getModelByFedModelNameAndOrg(fedModeldto.getName(), project);
+			if (fedModels != null && fedModels.size() > 0) {
+				if ((fedModeldto.getId() != null && fedModels.size() > 1) || (fedModeldto.getId() == null))
+					return new ResponseEntity<>("Model with name '" + fedModeldto.getName() + "' already exists",
+							HttpStatus.BAD_REQUEST);
+				else if (fedModeldto.getId() != null && fedModels.size() == 1
+						&& !fedModels.getFirst().getId().equals(fedModeldto.getId())) {
+					return new ResponseEntity<>(
+							"Another Model with name '" + fedModeldto.getName() + "' already exists",
+							HttpStatus.BAD_REQUEST);
+				}
+			}
+			ICIPMLFederatedModel response = fedModelService.savemodel(federatedModetToAdd);
+			return ResponseEntity.status(201).body(new JSONObject(response).toString());
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return ResponseEntity.status(500).body(e.getMessage());
 		}
 	}
 
@@ -1166,6 +1185,19 @@ public class ICIPMlopsController {
 			
 		} catch (Exception e) {
 			resp = new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+			logger.error("EXCEPTION:", e.getMessage());
+		}
+		return resp;
+	}
+	
+	@PostMapping(path = "models/upload")
+	public ResponseEntity<?> uploadModel(@RequestBody ICIPMLFederatedModel requestBody,
+			@RequestParam(required = false, name = "fileUploaded") String fileUploaded){
+		ResponseEntity<?> resp;
+		try {
+			return iCIPMlOpsRestAdapterService.uploadModel(requestBody,fileUploaded);	
+		} catch (Exception e) {
+			resp = new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 			logger.error("EXCEPTION:", e.getMessage());
 		}
 		return resp;

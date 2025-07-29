@@ -27,6 +27,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -191,14 +192,12 @@ public class ICIPMlOpsRestAdapterService {
 	}
 
 	public ResponseEntity<?> getS3FileData(String modelName, String fileName, String org) {
-		ResponseEntity<?> resp;
 		try {
 			ICIPDataset datasetForModel = new ICIPDataset();
 			ICIPDatasource datasource = new ICIPDatasource();
-			List<ICIPMLFederatedModel> iCIPMLFederatedModels=fedModelRepo.getModelByModelNameAndOrganisation(modelName, org);
-			//List<ICIPMLFederatedModelDTO> iCIPMLFederatedModelDTOs=fedModelService.getModelByFedModelNameAndOrg(modelName, org);
-			ICIPMLFederatedModel iCIPMLFederatedModel=iCIPMLFederatedModels.getFirst();
-			datasource=datasourceService.getDatasource(iCIPMLFederatedModel.getDatasource(), org);
+			List<ICIPMLFederatedModel> iCIPMLFederatedModels = fedModelRepo.getModelByModelNameAndOrganisation(modelName, org);
+			ICIPMLFederatedModel iCIPMLFederatedModel = iCIPMLFederatedModels.getFirst();
+			datasource = datasourceService.getDatasource(iCIPMLFederatedModel.getDatasource(), org);
 			datasetForModel.setDatasource(datasource);
 			datasetForModel.setOrganization(org);
 			datasetForModel.setAttributes(iCIPMLFederatedModel.getAttributes());
@@ -206,8 +205,49 @@ public class ICIPMlOpsRestAdapterService {
 					HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error("EXCEPTION:", e);
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
+	public ResponseEntity<?> uploadModel(ICIPMLFederatedModel requestBody, String fileUploaded) {
+		try {
+			ICIPDataset datasetForModel = new ICIPDataset();
+			ICIPDatasource datasource = datasourceService.getDatasource(requestBody.getDatasource(),
+					requestBody.getOrganisation());
+			datasetForModel.setDatasource(datasource);
+			datasetForModel.setOrganization(requestBody.getOrganisation());
+			datasetForModel.setAttributes(requestBody.getAttributes());
+			Boolean fileAttached = false;
+			List<Object> data = new ArrayList<>();
+			if (fileUploaded != null && !fileUploaded.isBlank()) {
+				try {
+					data = pluginService.getS3FileData(datasetForModel, fileUploaded);
+					fileAttached = true;
+				} catch (Exception exc) {
+					return new ResponseEntity<>("FAILED", HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+			}
+
+			if (!fileAttached || data.get(0) == null) {
+				Boolean testSuccess = false;
+				try {
+					testSuccess = pluginService.getDataSetService(datasetForModel).testConnection(datasetForModel);
+				} catch (Exception e) {
+					return new ResponseEntity<>("FAILED", HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+				if (testSuccess)
+					return new ResponseEntity<>("SUCCESS", new HttpHeaders(), HttpStatus.OK);
+				else
+					return new ResponseEntity<>("FAILED", HttpStatus.INTERNAL_SERVER_ERROR);
+			} else {
+				return new ResponseEntity<>(
+						"Model already present in the specified path, Please upload a different file",
+						HttpStatus.BAD_REQUEST);
+			}
+		} catch (Exception e) {
+			logger.error("EXCEPTION:", e);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
 }
