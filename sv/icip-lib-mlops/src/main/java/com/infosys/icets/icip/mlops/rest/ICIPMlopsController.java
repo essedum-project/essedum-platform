@@ -394,12 +394,15 @@ public class ICIPMlopsController {
 	public ResponseEntity<String> deleteModel(@PathVariable(name = "model_id", required = true) int modelId,
 			@RequestParam(name = "project", required = true) String project,
 			@RequestHeader Map<String, String> headers) throws IOException {
+		     JSONObject jsonObject =  new JSONObject();
 			try {
 			fedModelService.deleteModel(modelId, project);
-			return ResponseEntity.status(200).body("Model is deleted");
+			jsonObject.put("status", "Model is deleted");
+			return ResponseEntity.status(200).body(jsonObject.toString());
 			} catch (Exception e) {
-				logger.error(e.getMessage());
-				return ResponseEntity.status(500).body(e.getMessage());
+				log.error("Error occured while deleting the model either model not found: "+ e.getMessage());
+				jsonObject.put("status", "Model deletion failed");
+				return ResponseEntity.status(500).body(jsonObject.toString());
 			}
 	}
 
