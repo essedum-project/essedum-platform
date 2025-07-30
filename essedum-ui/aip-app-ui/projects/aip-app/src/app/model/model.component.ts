@@ -99,7 +99,7 @@ export class ModelComponent implements OnInit, OnChanges {
         this.pageNumber = params['page'];
         this.filter = params['search'];
         this.selectedAdapterType = params['modelType']
-          ? params['type'].split(',')
+          ? params['modelType'].split(',')
           : [];
         this.selectedAdapterInstance = params['adapterInstance']
           ? params['adapterInstance'].split(',')
