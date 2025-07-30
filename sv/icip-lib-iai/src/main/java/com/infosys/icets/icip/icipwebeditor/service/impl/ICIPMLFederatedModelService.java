@@ -179,16 +179,14 @@ public class ICIPMLFederatedModelService implements IICIPMLFederatedModelService
 	}
 	
 	@Override
-	public void deleteModel(int modelId,String organisation){
-	 try {
+	public void deleteModel(int modelId,String organisation) throws RuntimeException{
+		
 		    ICIPMLFederatedModel modelToDelete = mlfedmodelRepo.findByIdAndOrg(modelId, organisation);
 		    log.info("Deleting model");
 	        mlfedmodelRepo.delete(modelToDelete);
-		 } catch(Exception e) {
-			 log.error("Error occured while deleting the model: "+ e.getMessage());	
-		}
-
+			 
 	}
+
 	
 	public boolean copy(String fromProjectName, String toProjectId) {
 		List<ICIPMLFederatedModel> modelList = mlfedmodelRepo.findByOrganisation(fromProjectName);
