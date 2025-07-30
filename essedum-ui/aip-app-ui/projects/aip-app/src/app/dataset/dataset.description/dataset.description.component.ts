@@ -490,14 +490,14 @@ export class DatasetDescriptionComponent implements OnInit {
       }
       ,
       (err)=>{
-        this.service.messageService("some error occured");
+        this.service.message("some error occured",'error');
       })
     }
       this.fileNamePlaceholder=''
       this.tempDatasetArray=[];
     }
     catch(Exception){
-    this.service.messageService("Some error occured")
+    this.service.message("Some error occured",'error')
     }
   }
  
@@ -514,7 +514,7 @@ export class DatasetDescriptionComponent implements OnInit {
         if(message.body=="Success") {
           this.service.message("File Uploaded Successfully!");
       } else {
-          this.service.messageService("Error in file upload");
+          this.service.message("Error in file upload",'error');
       }
 
           this.stompClient.disconnect(() => {
@@ -578,7 +578,7 @@ export class DatasetDescriptionComponent implements OnInit {
           })
           .catch((err)=>{
             console.log('An error occured');
-            this.service.messageService('Error! while uploading file',);
+            this.service.message('Error! while uploading file','error');
             this.uploading=false;
           });
         }
@@ -1063,7 +1063,7 @@ export class DatasetDescriptionComponent implements OnInit {
 
   getFileData(fileName){
     return this.service.getNutanixFileData(this.datasetName,[fileName],localStorage.getItem('organization')).toPromise()
-    .catch(err=>this.service.messageService('Some error occured while fetching file'));
+    .catch(err=>this.service.message('Some error occured while fetching file','error'));
   }
 
   getTranslation(){
@@ -1170,7 +1170,7 @@ export class DatasetDescriptionComponent implements OnInit {
   createSummary() {
     this.datasetsService.createSummary(this.datasetName,this.datasetData[0]).subscribe((res) => {
       if(res.length>0){
-        this.service.messageService('Summary created successfully');
+        this.service.message('Summary created successfully');
         console.log(res);
       }
     });
@@ -1239,7 +1239,7 @@ export class DatasetDescriptionComponent implements OnInit {
     this.datasetsService.savecorelId(dstid, corelid, name).subscribe((res) => {
       let dataset = res;
     }, error => {
-      this.service.message('Error in corelId! ' + error)
+      this.service.message('Error in corelId! ' + error,'error')
     }
     );
   }

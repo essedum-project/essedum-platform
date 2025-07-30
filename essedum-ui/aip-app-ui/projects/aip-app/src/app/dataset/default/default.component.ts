@@ -142,7 +142,7 @@ export class DefaultComponent {
       this.action.emit('test');
       this.testLoaderBoolean.emit(true);
     }else{
-     this.service.messageService('Please enter unique identifier', 'Error');
+     this.service.message('Please enter unique identifier', 'error');
     }
     }
     else{

@@ -93,7 +93,6 @@ export class SchemaComponent implements OnInit, OnChanges {
     this.service.getConstantByKey('icip.schema.system').subscribe((res) => {
       this.createDropdown(JSON.parse(res.body));
     });
-    // this.pageSize = this.itemsPerPage[0];
     this.route.queryParams.subscribe((params) => {
       // Update this.pageNumber if the page query param is present
       if (params['page']) {
@@ -236,7 +235,7 @@ export class SchemaComponent implements OnInit, OnChanges {
               if (key1 == 'Capability' && value1 != null && value1 != '')
                 capabilityList.push({ value: value1, viewValue: value1 });
               if (!isdef && key1 != 'default') def = value1;
-              console.log('this is default value', def);
+              // console.log('this is default value', def);
               if (key1 == 'default' && !isdef) isdef = value1 as boolean;
             });
           });
@@ -253,46 +252,12 @@ export class SchemaComponent implements OnInit, OnChanges {
     };
     this.dropDown = drop;
 
-    console.log('this is dropDown', this.dropDown);
+    // console.log('this is dropDown', this.dropDown);
   }
 
   private updateLastRefreshTime(): void {
     this.lastRefreshedTime = new Date();
   }
-
-  // desc(card: any) {
-  //   this.cardToggled = !this.cardToggled;
-  //   this.selectedCard = card;
-  // }
-
-  // changedToogle(event: any) {
-  //   this.cardToggled = event;
-  // }
-
-  // tagchange() {
-  //   this.tagService.tags.forEach((element: any) => {});
-  // }
-
-  // rowsPerPageChanged() {
-  //   if (this.pageSize == 0) {
-  //     this.pageSize = this.prevRowsPerPageValue;
-  //   } else {
-  //     this.pageSizeChanged.emit(this.pageSize);
-  //     this.prevRowsPerPageValue = this.pageSize;
-  //     this.changeDetectionRef.detectChanges();
-  //   }
-  // }
-
-  // numSequence(n: number): Array<number> {
-  //   return Array(n);
-  // }
-
-  // redirect() {
-  //   this.selectedInstance = this.selectedCard.name;
-  //   this.router.navigate(['./view', this.CARD_TITLE, this.selectedInstance], {
-  //     relativeTo: this.route,
-  //   });
-  // }
 
   get paginatedCards(): any[] {
     if (!this.cards || !this.pageSize) {

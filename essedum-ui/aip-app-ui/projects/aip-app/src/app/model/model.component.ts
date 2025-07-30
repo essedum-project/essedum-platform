@@ -2,7 +2,6 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
-  HostListener,
   OnChanges,
   OnInit,
   Output,
@@ -10,15 +9,13 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
-
 import { Services } from '../services/service';
 import { TagsService } from '../services/tags.service';
 import { HttpParams } from '@angular/common/http';
-import { TagEventDTO } from '../DTO/tagEventDTO.model';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog.component/confirm-delete-dialog.component';
 import { Location } from '@angular/common';
-import { PaginationComponent } from '../pagination/pagination.component';
+
 @Component({
   selector: 'app-model',
   templateUrl: './model.component.html',
@@ -80,9 +77,6 @@ export class ModelComponent implements OnInit, OnChanges {
   records: boolean = false;
   cortexwindow: any;
   tooltip: string = 'above';
-  // pageNumber: number;
-  // pageSize: number;
-  // noOfItems: number;
 
   constructor(
     private service: Services,
@@ -96,7 +90,7 @@ export class ModelComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     this.refresh();
   }
-  cardTitle: String = 'Model';
+  cardTitle: String = 'Models';
 
   ngOnInit(): void {
     this.records = false;
@@ -187,13 +181,6 @@ export class ModelComponent implements OnInit, OnChanges {
     // Ensure indexes are within valid bounds
     this.startIndex = Math.max(0, this.startIndex);
     this.endIndex = Math.min(this.noOfPages, this.endIndex);
-
-    console.log(
-      'Pagination initialized with startIndex:',
-      this.startIndex,
-      'endIndex:',
-      this.endIndex
-    );
   }
 
   changedToogle(event: any) {
@@ -224,7 +211,7 @@ export class ModelComponent implements OnInit, OnChanges {
   }
   tagchange() {
     this.tagService.tags.forEach((element: any) => {
-      console.log(element, 'element');
+      // console.log(element, 'element');
     });
   }
   getCards(): void {
@@ -258,6 +245,7 @@ export class ModelComponent implements OnInit, OnChanges {
       } else {
         this.records = false;
       }
+      // console.log('DATA', this.cards);
     });
 
     this.updateQueryParam(
@@ -426,7 +414,7 @@ export class ModelComponent implements OnInit, OnChanges {
   }
 
   deleteDeployment(card) {
-    console.log('deletecard', card);
+    // console.log('deletecard', card);
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'delete') {
@@ -439,14 +427,14 @@ export class ModelComponent implements OnInit, OnChanges {
           )
           .subscribe(
             (res) => {
-              this.service.messageService(
-                res,
-                'Done!  Model Un-deployed Successfully'
+              this.service.message(
+                'Done!  Model Un-deployed Successfully '+ res,
+                'success'
               );
               this.refresh();
             },
             (error) => {
-              this.service.messageService(error);
+              this.service.message('Error '+error, 'error');
             }
           );
       }
@@ -461,14 +449,11 @@ export class ModelComponent implements OnInit, OnChanges {
           .deleteModels(card.id, card.adapterId, card.version)
           .subscribe(
             (res) => {
-              this.service.messageService(
-                res,
-                'Done!  Model deleted Successfully'
-              );
+              this.service.message('Done!  Model deleted Successfully');
               this.refresh();
             },
             (error) => {
-              this.service.messageService(error);
+              this.service.message('Error ', 'error');
             }
           );
       }

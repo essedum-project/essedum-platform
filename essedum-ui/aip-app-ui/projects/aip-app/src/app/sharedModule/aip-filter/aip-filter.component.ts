@@ -56,12 +56,16 @@ enum FilterType {
   TOPIC = 'topic',
   TAG = 'tag',
   TOOLS_TYPE = 'toolsType',
+  DATASET_TYPE = 'datasetType',
+  DATASET_KNOWLEDGE = 'datasetKnowledge',
+  DATASET_TAG = 'datasetTag',
+  CONNECTION_TYPE = 'connectiontype',
 }
 
 @Component({
   selector: 'app-aip-filter',
   templateUrl: './aip-filter.component.html',
-  styleUrl: './aip-filter.component.scss',
+  styleUrls: ['./aip-filter.component.scss'],
   animations: [
     trigger('slideToggle', [
       transition(':enter', [
@@ -389,8 +393,24 @@ export class AipFilterComponent implements OnInit, OnChanges {
    * Gets topic types from the semantic service
    */
   getTopicTypes(): void {
-    this.semanticService
-      .getAllTopics()
+    // this.semanticService
+    //   .getAllTopics()
+    //   .pipe(
+    //     catchError((error) => {
+    //       console.error('Error fetching topics:', error);
+    //       return of([]);
+    //     })
+    //   )
+    //   .subscribe((res: any[]) => {
+    //     this.datasetTopicList = res.map((element) => ({
+    //       category: 'Topic',
+    //       label: element.topicname,
+    //       value: element.topicname,
+    //       selected: false,
+    //     }));
+    //   });
+    this.datasetServices
+      .getIndexNamesByOrg(sessionStorage.getItem('organization'))
       .pipe(
         catchError((error) => {
           console.error('Error fetching topics:', error);
@@ -1067,36 +1087,45 @@ export class AipFilterComponent implements OnInit, OnChanges {
     });
 
     this.emitSelectionChanges();
+    this.toggleFilterExpanded();
   }
 
   /**
    * Handles dataset type selection
    */
-  datasetTypeSelected(value: FilterItem): void {
-    if (value.category === 'Type') {
-      this.toggleFilterSelection(value.value, this.selectedAdapterType);
-
-      this.datasetsTypeList.forEach((element) => {
+  datasetTypeSelected(value, category: string): void {
+    if (category === 'datasetType') {
+      if (!this.selectedAdapterType.includes(value.value)) {
+        this.selectedAdapterType.push(value.value);
+      } else {
+        this.selectedAdapterType.splice(
+          this.selectedAdapterType.indexOf(value.value),
+          1
+        );
+      }
+      this.datasetsTypeList.forEach((element: any) => {
         if (element.value === value.value) {
           element.selected = !element.selected;
         }
       });
-    } else if (value.category === 'Tags') {
-      this.toggleFilterSelection(
-        value.value,
-        this.selectedTagList as unknown as string[]
-      );
-
-      this.datasetsTagsList.forEach((element) => {
+    } else if (category === 'datasetTag') {
+      if (!this.selectedTagList.includes(value.value)) {
+        this.selectedTagList.push(value.value);
+      } else {
+        this.selectedTagList.splice(
+          this.selectedTagList.indexOf(value.value),
+          1
+        );
+      }
+      this.datasetsTagsList.forEach((element: any) => {
         if (element.value === value.value) {
           element.selected = !element.selected;
         }
       });
     }
-
     this.emitSelectionChanges();
+    this.toggleFilterExpanded();
   }
-
   removeConnectionType(connection: string): void {
     const index = this.selectedAdapterType.indexOf(connection);
     if (index !== -1) {
@@ -1149,7 +1178,6 @@ export class AipFilterComponent implements OnInit, OnChanges {
     }
     this.updateFilterStatus();
   }
-
   removeDatasetTag(connection: string): void {
     const index = this.selectedTagList.indexOf(connection);
     if (index !== -1) {
@@ -1181,6 +1209,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
     });
 
     this.emitSelectionChanges();
+    this.toggleFilterExpanded();
   }
 
   /**
@@ -1665,6 +1694,26 @@ export class AipFilterComponent implements OnInit, OnChanges {
           this.pipelinesTypeList || []
         );
         break;
+      case FilterType.CONNECTION_TYPE:
+        this.clearFilterList(
+          this.selectedAdapterType,
+          this.connectionsTypeList || []
+        );
+        break;
+      case FilterType.DATASET_TYPE:
+        this.clearFilterList(
+          this.selectedAdapterType,
+          this.datasetsTypeList || []
+        );
+        break;
+      case FilterType.DATASET_KNOWLEDGE:
+        this.clearFilterList(
+          this.selectedDatasetTopicType,
+          this.datasetTopicList || []
+        );
+        break;
+      case FilterType.DATASET_TAG:
+        this.clearFilterList(this.selectedTagList, this.datasetsTagsList || []);
     }
 
     // Emit changes

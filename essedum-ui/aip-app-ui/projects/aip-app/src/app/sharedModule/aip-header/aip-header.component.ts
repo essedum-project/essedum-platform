@@ -16,7 +16,7 @@ import {
 @Component({
   selector: 'app-aip-header',
   templateUrl: './aip-header.component.html',
-  styleUrl: './aip-header.component.scss',
+  styleUrls: ['./aip-header.component.scss'],
   animations: [
     trigger('searchAnimation', [
       state(

@@ -22,7 +22,7 @@
   <ng-container *ngIf="!loading">
 
     <!-- Cards container -->
-    <div *ngIf="paginatedCards.length > 0" class="aip-card-container" aria-label="Adapter cards">
+    <div *ngIf="paginatedCards.length > 0" class="aip-card-container lfx-u-pad-b-85"  id="containerDivForScroll" aria-label="Adapter cards">
       <div class="aip-card-wrapper" *ngFor="let card of paginatedCards; trackBy: trackByCardId">
 
         <!-- Cards  -->
@@ -33,7 +33,7 @@
 
         <!-- Edit Modal Template -->
         <ng-template #editModal let-modal>
-          <app-adapter-create-edit [data]="card" [action]="editAction"
+          <app-adapter-create-edit [data]="card" [action]="EDIT_ACTION"
             (triggereRefresh)="triggereRefresh($event)"></app-adapter-create-edit>
         </ng-template>
 

@@ -21,7 +21,8 @@
     <ng-container *ngIf="!loading">
 
         <!-- Cards container -->
-        <div *ngIf="paginatedCards.length > 0" class="aip-card-container" aria-label="Adapter cards">
+        <div *ngIf="paginatedCards.length > 0" class="aip-card-container lfx-u-pad-b-85" id="containerDivForScroll"
+            aria-label="Adapter cards">
             <div class="aip-card-wrapper" *ngFor="let card of paginatedCards; trackBy: trackByCardId">
 
                 <app-aip-card [servicev1]="SERVICE_V1" [card]="card" [editAuth]="editAuth" [deployAuth]="deployAuth"

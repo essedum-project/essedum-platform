@@ -1,8 +1,8 @@
-<div style="width:100%" class="selector-785-1">
+<div style="width:98%" class="selector-785-1">
     <div class="row selector-785-2">
-        <h2 class="col-md-11 selector-785-3" style="color:#3f51b5" mat-dialog-title="">Argument</h2>
-        <div class="col-md-1 selector-785-4" style="text-align: right">
-            <i class="fa fa-close selector-785-5" style="right: top; cursor:pointer" (click)="close()"></i>
+        <h2 class="col-md-11 selector-785-3 header-title" mat-dialog-title="">Argument</h2>
+        <div class="col-md-1 selector-785-4 lfx-u-pad-16">
+            <i class="fa fa-close selector-785-5 close-btn" (click)="close()"></i>
         </div>
     </div>
     <mat-dialog-content style="display:inline-flex;width:100%;padding-left:2rem;" class="selector-785-6">
@@ -94,7 +94,7 @@ class="selector-785-9">
         </mat-form-field>
         
     </mat-dialog-content>
-    <mat-dialog-actions class="selector-785-29">
-        <button mat-button="" (click)="addOrModify()" class="selector-785-30">{{buttonName}}</button>
+    <mat-dialog-actions class="selector-785-29 lfx-u-pad-r-22" style="justify-content: flex-end;">
+        <button mat-button="" (click)="addOrModify()" class="selector-785-30 save-btn">{{(buttonName ) | titlecase}}  </button>
     </mat-dialog-actions>
 </div>

@@ -257,8 +257,7 @@ export class DatasourceComponent implements OnInit, OnChanges {
       org = 'Core';
     else org = sessionStorage.getItem('organization');
       if(this.cards==undefined || this.cards==null || this.cards.length==0)
-      this.service.getDatasourceCards(org).subscribe((res) => {
-        console.log('iffffffffffffffff');
+      this.service.getDatasourceCards(org).subscribe((res) => {        
         let data: any = [];
         let test = res;
         test.forEach((element: any) => {
@@ -457,20 +456,22 @@ export class DatasourceComponent implements OnInit, OnChanges {
     this.router.navigate(['create'], { relativeTo: this.route });
   }
 
-  deleteAdapter(name: string) {
+  deleteConnection(name: string) {
     this.deleteRuntimes(name);
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'delete') {
         this.service.deleteDatasource(name).subscribe(
-          (res) => {     
-            
-            this.service.messageService(               
-                'Done! Connection deleted Successfully'
-              );
-        this.refreshComplete();
+          (res: any) => {
+            if (res && res.status === 200) {
+              this.service.message('Done! Connection deleted Successfully');
+              this.refreshComplete();
+            } else {
+              this.service.message('Failed to delete connection ', 'error');
+            }
           },
           (error) => {
+            this.service.message('Error deleting connection '+error?.error?.message ,'error');
           }
         );
       }

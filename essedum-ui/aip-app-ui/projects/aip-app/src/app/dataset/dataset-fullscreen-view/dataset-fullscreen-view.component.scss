@@ -11,7 +11,7 @@
 .lfx-u-header-xxl {
     font-size: 2.4rem;
     font-weight: 600;
-    font-family: "myriad-pro", Arial, sans-serif !important;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
     font-style: normal;
 }
 
@@ -103,6 +103,7 @@
   margin-top: 16px;
 }
 
+
 .lfx-half-col {
   width: 100%;
 }
@@ -120,4 +121,26 @@
 .lfx-card {
   margin-top: 24px;
   padding: 16px;
+}
+
+:host {
+     font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+:host ::ng-deep {
+     font-family: "Roboto", "Segoe UI", sans-serif !important;
+
+  mat-form-field,
+  mat-select,
+  mat-option,
+  mat-label,
+  .mat-select-value,
+  .mat-option-text,
+  input,
+  textarea,
+  button,
+  .mat-button-wrapper,
+  .mat-select-placeholder {
+     font-family:  "Roboto", "Segoe UI", sans-serif !important;
+  }
 }

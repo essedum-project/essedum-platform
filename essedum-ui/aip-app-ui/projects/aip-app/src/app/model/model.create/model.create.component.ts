@@ -95,7 +95,7 @@ export class ModelCreateComponent {
         }
       },
       (error) => {
-        this.service.messageService(error);
+        this.service.message('Error '+error, 'error');
       }
     );
   }

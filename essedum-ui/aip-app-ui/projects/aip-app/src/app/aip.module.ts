@@ -1,7 +1,6 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { AipRouting } from './aip-routing';
 import { AipComponent } from './aip.component';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatCardModule } from '@angular/material/card';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -90,11 +89,10 @@ import { DatasetEditComponent } from './dataset/dataset-edit/dataset-edit.compon
 import { DatasetFullscreenViewComponent } from './dataset/dataset-fullscreen-view/dataset-fullscreen-view.component';
 import { DatasetPowerModeViewComponent } from './dataset/dataset-power-mode-view/dataset-power-mode-view.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-imports: [ScrollingModule];
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { ModalConfigSchemaComponent } from './schema/modal-config-schema/modal-config-schema.component';
-import { ModalConfigSchemaEditorComponent } from './schema/modal-config-schema-editor/modal-config-schema-editor.component';
+import { ModalConfigSchemaEditorComponent } from './schema/modal-config-schema/modal-config-schema-editor/modal-config-schema-editor.component';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { CarouselModule as CModule } from 'ngx-owl-carousel-o';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -140,6 +138,7 @@ import { AipEmptyStateComponent } from './sharedModule/aip-empty-state/aip-empty
 import { AipFilterComponent } from './sharedModule/aip-filter/aip-filter.component';
 import { AipLoadingComponent } from './sharedModule/aip-loading/aip-loading.component';
 import { ModalConfigComponent } from './model/modal-config/modal-config.component';
+import { ModalConfigSchemaHeaderComponent } from './schema/modal-config-schema/modal-config-schema-header/modal-config-schema-header.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -235,14 +234,13 @@ const dbConfig: DBConfig = {
     AipFilterComponent,
     AipLoadingComponent,
     ModalConfigComponent,
+ModalConfigSchemaHeaderComponent
   ],
   imports: [
-    CommonModule,
     AipRouting,
     MatCardModule,
     MatToolbarModule,
     MatGridListModule,
-    MatDatepickerModule,
     MatIconModule,
     FormsModule,
     ReactiveFormsModule,
@@ -253,7 +251,6 @@ const dbConfig: DBConfig = {
     MatError,
     MatHint,
     MatCheckboxModule,
-    MatSelectModule,
     MatInputModule,
     MatFormFieldModule,
     MatSlideToggle,

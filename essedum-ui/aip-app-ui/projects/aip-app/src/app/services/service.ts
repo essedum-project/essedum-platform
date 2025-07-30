@@ -1,8 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Inject, Injectable, NgZone } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { from, Observable, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 import { Datasource } from '../datasource/datasource';
 import { Manifest, RemoteConfig } from '@angular-architects/module-federation';
@@ -25,8 +24,6 @@ export class Services {
     private https: HttpClient,
     @Inject('dataSets') private dataUrl: string,
     @Inject('envi') private baseUrl: string,
-    private matSnackbar: MatSnackBar,
-    private zone: NgZone,
     private encKey: encKey,
     private customSnackbar: CustomSnackbarService
   ) {}
@@ -55,7 +52,7 @@ export class Services {
       })
       .pipe(
         map((response) => {
-          return response.body;
+          return response;
         })
       )
       .pipe(
@@ -872,7 +869,7 @@ export class Services {
   messageNotificaionService(type: string, msg: string) {
     // Use the new custom snackbar service for better styling
     const config = { duration: 2500 }; // Shorter duration for notifications
-    
+
     if (type === 'success') {
       this.customSnackbar.success(msg, undefined, config);
     } else if (type === 'error') {
@@ -3198,7 +3195,6 @@ export class Services {
     }
   }
 
-
   errorMessage(msg: any, msgtype: any = 'error') {
     // Use the new custom snackbar service for better styling
     if (msgtype === 'error') {
@@ -3209,7 +3205,7 @@ export class Services {
       this.customSnackbar.info(msg);
     }
   }
- createDashConstant(dash_constant: DashConstant): Observable<DashConstant> {
+  createDashConstant(dash_constant: DashConstant): Observable<DashConstant> {
     const copy = this.convertDashConstant(dash_constant);
     return this.https
       .post('/api/dash-constants', copy, { observe: 'response' })
@@ -3243,12 +3239,10 @@ export class Services {
       );
   }
 
-
-   private convertDashConstant(dash_constant: DashConstant): DashConstant {
+  private convertDashConstant(dash_constant: DashConstant): DashConstant {
     const copy: DashConstant = Object.assign({}, dash_constant);
     return copy;
   }
-
 
   getImage(name: string): Observable<any> {
     const org = sessionStorage.getItem('organization');
@@ -3615,7 +3609,7 @@ export class Services {
       )
       .pipe(catchError(this.handleError));
   }
-    getAppTypes(): Observable<any> {
+  getAppTypes(): Observable<any> {
     return this.https
       .get(this.dataUrl + '/service/v1/getAppsType', {
         observe: 'response',
@@ -3631,7 +3625,7 @@ export class Services {
         })
       );
   }
-    getPipelinesTypeByOrganization(): Observable<any> {
+  getPipelinesTypeByOrganization(): Observable<any> {
     const org = sessionStorage.getItem('organization');
     return this.https
       .get(this.dataUrl + '/service/v1/streamingServices/getTypes/' + org, {
@@ -3649,7 +3643,7 @@ export class Services {
         })
       );
   }
-   getDatasourcesTypeByOrganization(): Observable<any> {
+  getDatasourcesTypeByOrganization(): Observable<any> {
     const org = sessionStorage.getItem('organization');
     return this.https
       .get(this.dataUrl + '/service/v1/datasources/getTypes/' + org, {
@@ -3667,7 +3661,7 @@ export class Services {
         })
       );
   }
-   getFeastAdaptersTypes(): Observable<any> {
+  getFeastAdaptersTypes(): Observable<any> {
     return this.https
       .get(this.dataUrl + '/service/v1/features/listAdapterTypes', {
         observe: 'response',
@@ -3683,7 +3677,7 @@ export class Services {
         })
       );
   }
-   getFeastAdapters(param: HttpParams): Observable<any> {
+  getFeastAdapters(param: HttpParams): Observable<any> {
     return this.https
       .get(this.dataUrl + '/service/v1/features/feast/listAdapters', {
         observe: 'response',
@@ -3700,7 +3694,7 @@ export class Services {
         })
       );
   }
-   getDGAdapters(param: HttpParams): Observable<any> {
+  getDGAdapters(param: HttpParams): Observable<any> {
     return this.https
       .get(this.dataUrl + '/service/v1/dgbrain/listAdapters', {
         observe: 'response',
@@ -3717,7 +3711,7 @@ export class Services {
         })
       );
   }
-   getDGAdaptersTypes(): Observable<any> {
+  getDGAdaptersTypes(): Observable<any> {
     return this.https
       .get(this.dataUrl + '/service/v1/dgbrain/listAdapterTypes', {
         observe: 'response',
@@ -3733,7 +3727,7 @@ export class Services {
         })
       );
   }
-    getModelListAdaptersTypes(): Observable<any> {
+  getModelListAdaptersTypes(): Observable<any> {
     return this.https
       .get(this.dataUrl + '/service/v1/models/listAdapterTypes', {
         observe: 'response',
@@ -3749,7 +3743,7 @@ export class Services {
         })
       );
   }
-   getMlTagswithparams(param: HttpParams): Observable<any> {
+  getMlTagswithparams(param: HttpParams): Observable<any> {
     return this.https
       .get(this.dataUrl + '/service/v1/tags/fetchAll', {
         observe: 'response',
