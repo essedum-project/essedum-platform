@@ -12,7 +12,7 @@
                         <span *ngIf="isInEdit">Edit Model</span>
                     </span>
                 </div>
-                <mat-card class="lfx-card">
+                <mat-card class="lfx-card ml-12">
                     <div class="align-items-center d-flex">
                         <span class="lfx-u-mar-l-8 header-p-title">Models Properties </span>
                     </div>
@@ -24,9 +24,9 @@
                                 <mat-form-field appearance="fill" floatLabel="always" class="lfx-field"
                                     style="flex: 1;">
                                     <mat-label>Model Name</mat-label>
-                                    <input matInput placeholder="Enter Name..." required [(ngModel)]="data.modelName"
+                                    <input class="text-transform" matInput placeholder="Enter Name..." required [(ngModel)]="data.modelName"
                                         name="displayName" />
-                                    <mat-error>This field is required</mat-error>
+                                    <mat-error class="ml-10">This field is required</mat-error>
                                 </mat-form-field>
 
                                 <mat-form-field appearance="fill" floatLabel="always" class="lfx-field"
@@ -34,12 +34,12 @@
                                     <mat-label>Version</mat-label>
                                     <input matInput type="number" placeholder="Enter Version..." required
                                         [(ngModel)]="data.version" name="version" min="1" />
-                                    <mat-error>This field is required</mat-error>
+                                    <mat-error class="ml-10">This field is required</mat-error>
                                 </mat-form-field>
                             </div>
                             <mat-form-field appearance="fill" floatLabel="always" class="lfx-field">
                                 <mat-label>Description</mat-label>
-                                <input matInput placeholder="Enter Description..." [(ngModel)]="data.description"
+                                <input class="text-transform" matInput placeholder="Enter Description..." [(ngModel)]="data.description"
                                     name="description" />
                             </mat-form-field>
                             <div class="lfx-flex-row lfx-mb-16">
@@ -54,7 +54,7 @@
                                                     {{ opt }}
                                                 </mat-option>
                                             </mat-select>
-                                            <mat-error>This field is required</mat-error>
+                                            <mat-error class="ml-10">This field is required</mat-error>
                                         </mat-form-field>
                                     </div>
                                 </div>
