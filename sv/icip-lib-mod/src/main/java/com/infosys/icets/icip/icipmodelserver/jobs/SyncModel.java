@@ -176,7 +176,7 @@ public class SyncModel implements InternalJob {
 	private void syncModelsOfRemoteDS(Marker marker,ICIPDatasource ds, List<ICIPMLFederatedModel> modelsFromAWSRemote) {
 		try {
 			List<ICIPMLFederatedModel> modelsFromDB = fedModelRepo
-					.getAllModelsByAppOrgandAdapterId(ds.getOrganization(), ds.getName(), null);
+					.findByDatasourceNameAndOrganisaton(ds.getOrganization(), ds.getName());
 			List<String> modelsNamesPresentInAWS = new ArrayList<>();
 			if (modelsFromAWSRemote != null && !modelsFromAWSRemote.isEmpty() && modelsFromAWSRemote.size() > 0) {
 				String responseSyncModels = syncModels(modelsFromAWSRemote);
@@ -184,15 +184,14 @@ public class SyncModel implements InternalJob {
 					logger.error(marker,"Error in syncing models for datasource{}", ds.getName());
 				}
 				modelsFromAWSRemote.stream().forEach(model -> {
-					modelsNamesPresentInAWS.add(model.getName());
+					modelsNamesPresentInAWS.add(model.getModelName());
 				});
 				if (modelsNamesPresentInAWS != null && !modelsNamesPresentInAWS.isEmpty()) {
 					List<ICIPMLFederatedModel> modelsToBeUpdatedAsDelete = new ArrayList<>();
 					if (modelsFromDB != null && !modelsFromDB.isEmpty()) {
 						modelsFromDB.stream().forEach(modelDB -> {
-							if (!modelsNamesPresentInAWS.contains(modelDB.getName())) {
+							if (!modelsNamesPresentInAWS.contains(modelDB.getModelName())) {
 								ICIPMLFederatedModel modelToBeUpdatedAsDelete = modelDB;
-								modelToBeUpdatedAsDelete.setIsDeleted(true);
 								modelsToBeUpdatedAsDelete.add(modelToBeUpdatedAsDelete);
 							}
 						});

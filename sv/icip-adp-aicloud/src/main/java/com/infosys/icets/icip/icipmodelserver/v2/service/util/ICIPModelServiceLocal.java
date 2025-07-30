@@ -308,52 +308,22 @@ public class ICIPModelServiceLocal implements IICIPModelServiceUtil {
 			throws ParseException {
 		ICIPMLFederatedModel dto = new ICIPMLFederatedModel();
 		FedModelsID fedmodid = new FedModelsID();
-		fedmodid.setAdapterId(dsource);
-		fedmodid.setSourceId(jsonObject.getString(MODEL_NAME));
 		fedmodid.setOrganisation(org);
-		dto.setSourceModelId(fedmodid);
-		Optional<ICIPMLFederatedModel> modObj = fedModelRepo.findById(fedmodid);
-		if (modObj.isPresent()) {
-			dto = modObj.get();	
+		ICIPMLFederatedModel  modObj = fedModelRepo.findByDatasourceNameModelNameAndOrganisaton(jsonObject.getString(MODEL_NAME), dsource, org);
+		if (modObj !=null) {
+			dto = modObj;	
 		}
 		else {
-			dto.setLikes(0);
-			dto.setName(jsonObject.getString(MODEL_NAME));
+			dto.setModelName(jsonObject.getString(MODEL_NAME));
 			dto.setDescription(jsonObject.has(DESCRIPTION)?jsonObject.getString(DESCRIPTION):"");
-			dto.setSourceDescription(jsonObject.has(DESCRIPTION)?jsonObject.getString(DESCRIPTION):"");
-		}
-        
-		if((jsonObject.has(STORAGE_URI)) && (jsonObject.has(STORAGE_TYPE))){
-			JSONObject artifacts = new JSONObject();
-			artifacts.put(STORAGE_URI, jsonObject.getString(STORAGE_URI));
-			artifacts.put(STORAGE_TYPE, jsonObject.getString(STORAGE_TYPE));
-			dto.setArtifacts(artifacts.toString());
-		}else if(jsonObject.has(STORAGE_URI)) {
-			dto.setArtifacts(jsonObject.getString(STORAGE_URI));
-		}else if(jsonObject.has(STORAGE_TYPE)) {
-			dto.setArtifacts(jsonObject.getString(STORAGE_TYPE));
-		}
-		else {
-			dto.setArtifacts("");
-		}
-		
-		dto.setContainer(jsonObject.has(CONTAINER_IMAGEURI)?jsonObject.getString(CONTAINER_IMAGEURI):"");
+		}	
 		dto.setCreatedBy("");
 		Date createdOn = new Date();
 		Timestamp createdOnts = new Timestamp(createdOn.getTime());
-		dto.setSyncDate(createdOnts);
 		dto.setCreatedOn(createdOnts);
-		dto.setSourceModifiedBy("");
-		dto.setSourceModifiedDate(createdOnts);
-		dto.setSourceName(jsonObject.getString(MODEL_NAME));
-		dto.setSourceOrg("");
-		dto.setIsDeleted(false);
-		dto.setRawPayload(jsonObject.toString());
-		dto.setStatus(REGISTERED);
-		dto.setSourceStatus(REGISTERED);
+		dto.setModifiedBy("");
 		Date date1 = new Date();
 		Timestamp ts1 = new Timestamp(date1.getTime());
-		dto.setSyncDate(ts1);
 		if(jsonObject.has(VERSION)) {
 			Integer version = jsonObject.getInt(VERSION);
 			dto.setVersion(Integer.toString(version));
@@ -361,8 +331,6 @@ public class ICIPModelServiceLocal implements IICIPModelServiceUtil {
 			dto.setVersion("1");
 		}
 		
-		dto.setType(LOCAL);
-		dto.setAdapter(dsrcAlias);
 		return dto;
 	}
 	private ICIPMLFederatedEndpoint parseMLFedEndpoint(JSONObject jsonObject, String dsource, String dsrcAlias, String org)
