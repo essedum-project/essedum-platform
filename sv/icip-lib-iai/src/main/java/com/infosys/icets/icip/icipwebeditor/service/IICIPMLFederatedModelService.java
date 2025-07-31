@@ -17,9 +17,9 @@ public interface IICIPMLFederatedModelService {
 
     ICIPMLFederatedModelDTO  updateModel(ICIPMLFederatedModelDTO fedModeDTO);
 
-	List<ICIPMLFederatedModelDS> getAllOptionalModelsByOrg(String modelName, String version, String modelType, String organization, Pageable paginate);
+	List<ICIPMLFederatedModelDS> getAllOptionalModelsByOrg(String org, String dataSources, String searchInput, Pageable paginate);
 
-	Long getAllModelsCountByOrganisationOptionals(String modelName, String version, String modelType, String organization);
+	Long getAllModelsCountByOrganisationOptionals(String org, String dataSources, String searchInput);
 
 	ICIPMLFederatedModel savemodel(ICIPMLFederatedModel model);
 
