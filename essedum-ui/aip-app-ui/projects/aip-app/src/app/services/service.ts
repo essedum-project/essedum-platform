@@ -1108,6 +1108,16 @@ export class Services {
       },
     });
   }
+    getModelFileData(datasetName, fileList, org): Observable<any> {
+    return this.https.get('/api/aip/service/v1/models/fileData', {
+      params: {
+        modelName: datasetName,
+        fileName: fileList,
+        org: org,
+      },
+    });
+  }
+  
 
   getRatingByUserAndModule(module: String): Observable<any> {
     let org = sessionStorage.getItem('organization');
@@ -1221,8 +1231,9 @@ export class Services {
 
   // CRADS
   getModelCards(param: HttpParams): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
     return this.https
-      .get(this.dataUrl + '/service/v1/models/list', {
+      .get(this.dataUrl + '/service/v1/models/list/' + session, {
         observe: 'response',
         params: param,
       })
@@ -1239,10 +1250,12 @@ export class Services {
   }
 
   getCountModels(param: HttpParams): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let updatedParam = param.set('project', session);
     return this.https
-      .get(this.dataUrl + '/service/v1/models/list/count', {
+      .get(this.dataUrl + '/service/v1/models/count/' + session, {
         observe: 'response',
-        params: param,
+        params: updatedParam, // Use updatedParam instead of param
       })
       .pipe(
         map((response) => {
@@ -1335,7 +1348,7 @@ export class Services {
   }
 
   // REGISTER MODEL
-  registerModel(regBody: any, adapter: any): Observable<any> {
+  registerModel(regBody: any, adapter?: any): Observable<any> {
     let session: any = sessionStorage.getItem('organization');
     let param = new HttpParams()
       .set('project', session)
@@ -1421,7 +1434,7 @@ export class Services {
 
   getModelBySourceId(param: HttpParams): Observable<any> {
     return this.https
-      .get(this.dataUrl + '/service/v1/fetchmodels', {
+      .get(this.dataUrl + '/service/v1/models/getModel', {
         observe: 'response',
         params: param,
       })
@@ -2694,7 +2707,7 @@ export class Services {
             page: pagination.page,
             size: pagination.size,
             sortEvent: pagination.sortEvent,
-            sortOrder: pagination.sortOrder,
+                       sortOrder: pagination.sortOrder,
           }
         : {
             datasetName: datasetName,
@@ -3747,6 +3760,46 @@ export class Services {
         })
       );
   }
+
+  testConnectionForModels(model: any, uploadFileName: any): Observable<any> {
+    let params = new HttpParams();
+    if (uploadFileName) {
+      params = params.set('fileUploaded', uploadFileName);
+    }
+    return this.https.post(this.dataUrl + '/service/v1/models/upload', model, {
+      observe: 'response',
+      responseType: 'text',
+      params: params
+    })
+      .pipe(map(response => {
+        return response.body;
+      }))
+      .pipe(catchError(err => {
+        return this.handleError(err);
+      }));
+  }
+
+  fetchModelDetails(id: any): Observable<any> {
+    let param = new HttpParams()
+      .set('modelid', id)
+      .set('project', sessionStorage.getItem('organization'));
+    return this.https
+      .get(this.dataUrl + '/service/v1/models/getModel', {
+        observe: 'response',
+        params: param
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+
 }
 
 export type CustomRemoteConfig = RemoteConfig & {

@@ -41,8 +41,8 @@ export class ModelDescriptionComponent implements OnInit {
   component: any = [];
   relatedloaded: boolean = false;
   organisation: string;
-  initiativeView: boolean ;
-  sourceName: string = this.route.snapshot.paramMap.get('name');
+  initiativeView: boolean;
+  id: string = this.route.snapshot.paramMap.get('id');
   constructor(
     private clipboard: Clipboard,
     private route: ActivatedRoute,
@@ -90,20 +90,21 @@ export class ModelDescriptionComponent implements OnInit {
     );
   }
   ngOnInit() {
-    this.router.url.includes('initiative')?this.initiativeView=false:this.initiativeView=true;
+    this.router.url.includes('initiative')
+      ? (this.initiativeView = false)
+      : (this.initiativeView = true);
     this.getpermissions();
-    if(!this.sourceName){
-      this.sourceName = this.initiativeData.sourceName;
+    if (!this.id) {
+      this.id = this.initiativeData.sourceName;
     }
     let params: HttpParams = new HttpParams();
-    params = params.set('fed_Name', this.sourceName);
-    params = params.set('org', this.organisation);
+    params = params.set('modelid', this.id);
+    params = params.set('project', this.organisation);
     this.service.getModelBySourceId(params).subscribe((res) => {
-      this.card = res[0];
+      this.card = res;
       this.getRelatedComponent();
     });
 
- 
     if (this.card.createdBy) {
       this.cardCreator = this.card.createdBy.split('@')[0];
       this.avatar = this.cardCreator.charAt(0).toUpperCase();
@@ -113,13 +114,10 @@ export class ModelDescriptionComponent implements OnInit {
     this.component = [];
     this.service.getRelatedComponent(this.card.id, 'MODEL').subscribe({
       next: (res) => {
- 
         this.relatedComponent = res[0];
         this.relatedComponent.data = JSON.parse(this.relatedComponent.data);
         this.component.push(this.relatedComponent);
         this.cdRef.detectChanges();
-
-
       },
       complete() {
         console.log('completed');
@@ -139,7 +137,7 @@ export class ModelDescriptionComponent implements OnInit {
     });
   }
   openModal(content: any): void {
-       this.dialog.open(content, { width: '600px', disableClose: false });
+    this.dialog.open(content, { width: '600px', disableClose: false });
   }
   navigateBack() {
     this.location.back();
@@ -167,7 +165,6 @@ export class ModelDescriptionComponent implements OnInit {
               this.service.message(
                 'Done!  Model deleted Successfully '
               );
-      
             },
             (error) => {
               this.service.message('Error deleting model '+ error, 'error');
@@ -186,5 +183,77 @@ export class ModelDescriptionComponent implements OnInit {
         this.ngOnInit();
       }, 2000);
     }
+  }
+  downloadModel(card: any) {
+    let obj = JSON.parse(card.attributes).object;
+    let extension = (obj).split('.').pop();
+    let fileName = obj.split('/').toString();
+    if (extension.match('mkv')) {
+      this.service.messageService('This file cannot be downloaded currently');
+    }
+    else {
+      this.service.messageNotificaionService('success', "Download initiated");
+
+      this.service.getModelFileData(card.modelName, `${fileName}`, card.organisation).subscribe((res: any) => {
+        if (res && res[0]) {
+          const fileData = res[0];
+          let downloadData = fileData[0].data;
+          const contentType = fileData[0].contentType;
+
+          try {
+
+            const decode = atob(downloadData);
+            // const blob = new Blob([decode], { type: 'text/csv;charset=utf-8;' })
+            
+
+            const byteArray = new Uint8Array(decode.length);
+            for (let i = 0; i < decode.length; i++) {
+              byteArray[i] = decode.charCodeAt(i);
+            }
+            const blob = new Blob([byteArray], { type: contentType });
+
+            const linkA = document.createElement('a');
+            linkA.href = window.URL.createObjectURL(blob);
+            linkA.download = fileName;
+            linkA.click();
+            URL.revokeObjectURL(linkA.href);
+          }
+          catch (e) {
+            this.service.message("Download Failed. Invalid Data", 'error')
+          }
+        } else {
+          this.service.message("Download Failed. Data does not exist", 'error')
+
+        }
+
+      });
+    }
+
+
+  }
+  getFormattedModelPath(card: any): string {
+    try {
+      if (card.attributes) {
+        const attributes =
+          typeof card.attributes === 'string'
+            ? JSON.parse(card.attributes)
+            : card.attributes;
+
+        if (attributes.bucket && attributes.path && attributes.object) {
+          return `${attributes.bucket}/${attributes.path}/${attributes.object}`;
+        }
+      }
+
+      return card.artifacts || 'N/A';
+    } catch (error) {
+      console.error('Error parsing attributes:', error);
+      return card.artifacts || 'N/A';
+    }
+  }
+
+  editModel(card: any) {
+    this.router.navigate(['/model/edit-model', card.id], {
+      queryParams: { org: this.organisation }
+    });
   }
 }

@@ -86,7 +86,7 @@ export class ModelComponent implements OnInit, OnChanges {
     public tagService: TagsService,
     private dialog: MatDialog,
     private location: Location
-  ) {}
+  ) { }
   ngOnChanges(changes: SimpleChanges): void {
     this.refresh();
   }
@@ -98,8 +98,8 @@ export class ModelComponent implements OnInit, OnChanges {
       if (params['page']) {
         this.pageNumber = params['page'];
         this.filter = params['search'];
-        this.selectedAdapterType = params['type']
-          ? params['type'].split(',')
+        this.selectedAdapterType = params['modelType']
+          ? params['modelType'].split(',')
           : [];
         this.selectedAdapterInstance = params['adapterInstance']
           ? params['adapterInstance'].split(',')
@@ -216,15 +216,19 @@ export class ModelComponent implements OnInit, OnChanges {
   }
   getCards(): void {
     let params: HttpParams = new HttpParams();
-    if (this.selectedTag.length >= 1)
-      params = params.set('tags', this.selectedTag.toString());
-    if (this.filter.length >= 1) params = params.set('query', this.filter);
-    if (this.selectedAdapterType.length >= 1)
+
+    if (this.filter && this.filter.length > 0) {
+      params = params.set('modelname', this.filter);
+    }
+
+    if (this.selectedAdapterType && this.selectedAdapterType.length > 0) {
       params = params.set('type', this.selectedAdapterType.toString());
-    if (this.selectedAdapterInstance.length >= 1)
-      params = params.set('instance', this.selectedAdapterInstance.toString());
+    }
+
+    // Set page and size
     params = params.set('page', this.pageNumber);
     params = params.set('size', this.pageSize);
+
     params = params.set('project', sessionStorage.getItem('organization'));
     params = params.set('isCached', true);
 
@@ -285,8 +289,55 @@ export class ModelComponent implements OnInit, OnChanges {
       relativeTo: this.route,
     });
   }
+  downloadModel(card: any) {
+    let obj = JSON.parse(card.attributes).object;
+    let extension = (obj).split('.').pop();
+    let fileName = obj.split('/').toString();
+    if (extension.match('mkv')) {
+      this.service.messageService('This file cannot be downloaded currently');
+    }
+    else {
+      this.service.messageNotificaionService('success', "Download initiated");
+
+      this.service.getModelFileData(card.modelName, `${fileName}`, card.organisation).subscribe((res: any) => {
+        if (res && res[0]) {
+          const fileData = res[0];
+          let downloadData = fileData[0].data;
+          const contentType = fileData[0].contentType;
+
+          try {
+
+            const decode = atob(downloadData);
+            // const blob = new Blob([decode], { type: 'text/csv;charset=utf-8;' })
+            
+
+            const byteArray = new Uint8Array(decode.length);
+            for (let i = 0; i < decode.length; i++) {
+              byteArray[i] = decode.charCodeAt(i);
+            }
+            const blob = new Blob([byteArray], { type: contentType });
+
+            const linkA = document.createElement('a');
+            linkA.href = window.URL.createObjectURL(blob);
+            linkA.download = fileName;
+            linkA.click();
+            URL.revokeObjectURL(linkA.href);
+          }
+          catch (e) {
+            this.service.message("Download Failed. Invalid Data", 'error')
+          }
+        } else {
+          this.service.message("Download Failed. Data does not exist", 'error')
+
+        }
+
+      });
+    }
+
+
+  }
   redirection(card: any, type: string) {
-    this.router.navigate(['./' + type + '/' + card.sourceName], {
+    this.router.navigate(['./' + type + '/' + card.id], {
       queryParams: {
         page: this.pageNumber,
         search: this.filter,
@@ -308,15 +359,26 @@ export class ModelComponent implements OnInit, OnChanges {
     this.redirect();
   }
 
+  createModel(){
+    this.router.navigate(['./create'], {
+      relativeTo: this.route
+    });
+  }
+
   editModel(card: any) {
-    // console.log(card);
-    this.router.navigate(['./edit'], {
-      queryParams: { data: card },
+    console.log(card);
+    this.router.navigate(['./edit-model', card.id], {
       relativeTo: this.route,
     });
   }
 
-  clickactive(eventObj: any) {}
+  viewDetails(card: any, type: string){
+     this.router.navigate(['./' + type + '/' + card.id], {
+      relativeTo: this.route,
+    });
+  }
+
+  clickactive(eventObj: any) { }
   refresh() {
     this.getCountModels();
     this.fetchAdapters();
@@ -384,7 +446,7 @@ export class ModelComponent implements OnInit, OnChanges {
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'delete') {
         this.service
-          .deleteModels(card.sourceId, card.adapterId, card.version)
+          .deleteModels(card.id, card.adapterId, card.version)
           .subscribe(
             (res) => {
               this.service.message('Done!  Model deleted Successfully');

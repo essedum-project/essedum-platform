@@ -183,7 +183,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 			);
 
 	@Override
-	public boolean testConnection(ICIPDataset dataset) {
+	public boolean testConnection(ICIPDataset dataset) throws LeapException {
 
 		try {
 			boolean response;
@@ -208,7 +208,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 		return false;
 	}
 
-	private boolean connectMinio(ICIPDataset dataset) {
+	private boolean connectMinio(ICIPDataset dataset) throws LeapException {
 
 		JSONObject connectionDetails = new JSONObject(dataset.getDatasource().getConnectionDetails());
 		String accessKey = connectionDetails.optString(ACCESS_KEY);
@@ -237,6 +237,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 	       }
 		} catch (Exception e) {
 			logger.info(e.getMessage());
+			throw new LeapException(e.getMessage());
 		}
 		return true;
 	}
@@ -948,6 +949,24 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 								records = new JSONArray(res);
 						}
 						break;
+						
+					case "pkl":
+					case "joblib":
+					case "h5":
+					case "pt":
+					case "pth":
+					case "ckpt":
+					case "model":
+						// Handle model files - return as base64 encoded data
+						String base64Model = Base64.getEncoder().encodeToString(byteArray);
+						JSONObject modelData = new JSONObject();
+						modelData.put("data", base64Model);
+						modelData.put("fileName", objectKey.substring(objectKey.lastIndexOf("/") + 1));
+						modelData.put("fileType", extension);
+						modelData.put("contentType", getContentTypeForModelFile(extension));
+						records.put(modelData);
+						break;
+						
 					default:
 						throw new UnsupportedMediaTypeStatusException(
 								String.format(UNSUPPORTED_TYPE_MESSAGE, attributes.optString(OBJECT_KEY)));
@@ -981,6 +1000,29 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 
 		}
 
+	}
+	
+	/**
+	 * Helper method to get appropriate content type for model files
+	 */
+	private String getContentTypeForModelFile(String extension) {
+		switch (extension.toLowerCase()) {
+			case "pkl":
+				return "application/octet-stream";
+			case "joblib":
+				return "application/octet-stream";
+			case "h5":
+				return "application/x-hdf5";
+			case "pt":
+			case "pth":
+				return "application/octet-stream";
+			case "ckpt":
+				return "application/octet-stream";
+			case "model":
+				return "application/octet-stream";
+			default:
+				return "application/octet-stream";
+		}
 	}
 
 	/**

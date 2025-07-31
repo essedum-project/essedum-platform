@@ -137,6 +137,7 @@ import { AipHeaderComponent } from './sharedModule/aip-header/aip-header.compone
 import { AipEmptyStateComponent } from './sharedModule/aip-empty-state/aip-empty-state.component';
 import { AipFilterComponent } from './sharedModule/aip-filter/aip-filter.component';
 import { AipLoadingComponent } from './sharedModule/aip-loading/aip-loading.component';
+import { ModalConfigComponent } from './model/modal-config/modal-config.component';
 import { ModalConfigSchemaHeaderComponent } from './schema/modal-config-schema/modal-config-schema-header/modal-config-schema-header.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
@@ -232,10 +233,10 @@ const dbConfig: DBConfig = {
     TaggingComponentComponent,
     AipFilterComponent,
     AipLoadingComponent,
-    ModalConfigSchemaHeaderComponent,
+    ModalConfigComponent,
+ModalConfigSchemaHeaderComponent
   ],
   imports: [
-    CommonModule,
     AipRouting,
     MatCardModule,
     MatToolbarModule,
