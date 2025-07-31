@@ -9,9 +9,9 @@ telemetry:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
-    jdbcurl: jdbc:mysql://localhost:3306/telemetrydb
+    jdbcurl: jdbc:mysql://mysql:3306/telemetrydb
     username: root
-    password: root
+    password: password
  
 config:
   active-profiles: mysql,dbjwt,btf,dbconstants,vault
@@ -19,10 +19,10 @@ config:
   #static-locations: file:/D:/common-app/
   static-locations: file:/C:/Users/mohan.peta/Documents/AIP_2024_March28/common-app-mar-14/
   
-  datasourceurl: jdbc:mysql://localhost:3306
+  datasourceurl: jdbc:mysql://mysql:3306
   datasourceuser: root
-  datasourcepass: root
-  leapcoredb: leap_8000_coredb_m116
+  datasourcepass: password
+  leapcoredb: core_dbb
   leapquartzdb: leap2_8000_quartz
   
   leapbtfdb: leapmaster_btf
@@ -75,7 +75,7 @@ spring:
     resources:
       static-locations: ${config.static-locations}
   liquibase:
-    enabled: false
+    enabled: true
     contexts: test,fresh,qa,2v13to300,acme,300to310,300to310-acme,acme_2v13to300,311to312
  
     change-log: "classpath:db/changelog/master.xml"
@@ -286,7 +286,7 @@ model:
         idleTimeout: 60000
 quartz:
     liquibase:
-        enabled: false
+        enabled: true
         change-log: "classpath:db/changelog/quartz.xml"
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
