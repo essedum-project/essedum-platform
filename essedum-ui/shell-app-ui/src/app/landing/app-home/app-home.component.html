@@ -1,63 +1,61 @@
 <div style="padding: 16px 25px; ">
-    <h1 class="le-u-header-xxl le-u-mar-b-24">Apps Configured</h1>
+    <h1 class="lfx-u-header-xxl lfx-u-mar-b-24">Apps Configured</h1>
     <hr>
     <div class="row">
         <div class="col-md-6 col-lg-5 col-xl-4" *ngFor="let array1 of instArr"
             style='min-width: 384px ;height: 30%;padding-bottom: 20px;'>
-            <leds-card designType='simple'>
-                <div class="le-u-overline le-u-text-primary-80 le-u-mar-b-8">{{array1.module_type}}</div>
+            <mat-card>
+                <div class="lfx-u-text-primary-80 lfx-u-mar-b-8">{{array1.module_type}}</div>
                 <mat-card-header >
-                    <mat-card-title class="le-c-card__container clearfix">
-                        <div class="le-c-card__container-left">
-                            <h2 class="le-u-header-xl">{{array1.name}} {{array1.display_name}}</h2>
+                    <mat-card-title class="lfx-c-card__container clearfix">
+                        <div class="lfx-c-card__container-left">
+                            <h2 class="lfx-u-header-xl">{{array1.name}} {{array1.display_name}}</h2>
                         </div>
                     </mat-card-title>
-                    <!-- <mat-card-subtitle class="le-u-body-sm le-u-text-neutral-80 le-u-ellipsis">Users:
-                        {{array1.users_count}}</mat-card-subtitle> -->
+             
                 </mat-card-header>
                 <mat-card-content>
-                    <p class="le-u-body-md le-u-text-neutral-80 le-u-line-3">
+                    <p class="lfx-u-body-md lfx-u-text-neutral-80">
                         {{array1.descriptions}}
                     </p>
                 </mat-card-content>
                 <mat-card-actions>
                     <div (mouseover)="array1.changeText=true" (mouseout)="array1.changeText=false">
-                        <leds-button *ngIf="!array1.changeText" buttonType="button" designType="text">Open App
-                        </leds-button>
-                        <leds-button *ngIf="array1.changeText" buttonType="button" designType="text"
-                            (click)="navigateUrl(array1.url)">Ok</leds-button>
+                        <button mat-raised-button *ngIf="!array1.changeText" buttonType="button" designType="text">Open App
+                        </button>
+                        <button mat-raised-button *ngIf="array1.changeText" buttonType="button" designType="text"
+                            (click)="navigateUrl(array1.url)">Ok</button>
                     </div>
                 </mat-card-actions>
-            </leds-card>
+            </mat-card>
         </div>
     </div>
-    <h1 class="le-u-header-xxl le-u-mar-b-24">Apps Not Configured</h1>
+    <h1 class="lfx-u-header-xxl lfx-u-mar-b-24">Apps Not Configured</h1>
     <hr>
     <div class="row">
         <div class="col-md-6 col-lg-5 col-xl-4" *ngFor="let array11 of uninstArr"
             style='min-width: 384px ;height: 30%;padding-bottom: 20px;'>
-            <leds-card designType='simple'>
-                <div class="le-u-overline le-u-text-primary-80 le-u-mar-b-8">{{array11.module_type}}</div>
-                <mat-card-header >
-                    <mat-card-title class="le-c-card__container clearfix">
-                        <div class="le-c-card__container-left">
-                            <h2 class="le-u-header-xl ">{{array11.name}} {{array11.display_name}}</h2>
+            <mat-card>
+                <div class="lfx-u-text-primary-80 lfx-u-mar-b-8">{{array11.module_type}}</div>
+                <mat-card-header>
+                    <mat-card-title class="lfx-c-card__container clearfix">
+                        <div class="lfx-c-card__container-left">
+                            <h2 class="lfx-u-header-xl ">{{array11.name}} {{array11.display_name}}</h2>
                         </div>
                     </mat-card-title>
-                    <!-- <mat-card-subtitle class="le-u-body-sm le-u-text-neutral-80 le-u-ellipsis">Users:
-                        {{array11.users_count}}</mat-card-subtitle> -->
+                  
                 </mat-card-header>
                 <mat-card-content>
-                    <p class="le-u-body-md le-u-text-neutral-80 le-u-line-3">
+                    <p class="lfx-u-body-md lfx-u-text-neutral-80">
                         {{array11.descriptions}}
                     </p>
                 </mat-card-content>
                 <mat-card-actions (mouseover)="array11.changeText3=false" (mouseout)="array11.changeText3=false">
-                    <leds-button *ngIf="!array11.changeText3" buttonType="button" designType="text">Install Now
-                    </leds-button>
-                    <leds-button *ngIf="array11.changeText3" buttonType="button" designType="text">Ok</leds-button>
+                    <button mat-raised-button *ngIf="!array11.changeText3" buttonType="button" designType="text">Install Now
+                    </button>
+                    <button mat-raised-button *ngIf="array11.changeText3" buttonType="button" designType="text">Ok</button>
                 </mat-card-actions>
-            </leds-card>
+            </mat-card>
         </div>
 
     </div>

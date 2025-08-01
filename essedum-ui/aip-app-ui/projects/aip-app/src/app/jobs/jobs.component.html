@@ -63,19 +63,22 @@
                 'lfx-c-badge--active'
               ]">{{job.jobStatus}}</span>
                </td>
-          <td>
-            <mat-tooltip #logTooltip="matTooltip" matTooltip="Log" matTooltipPosition="above">
-              <button mat-icon-button name="logButton" id="logButton" (click)="showConsole(job.jobId, job.runtime, job.jobStatus, job.jobObj)"  matTooltipPosition="above">
+            <td class="cancel-div">
+            <span class="cancel-btn">
+              <button mat-icon-button name="logButton" id="logButton"
+                (click)="showConsole(job.jobId, job.runtime, job.jobStatus, job.jobObj)"
+                matTooltip="Log" matTooltipPosition="above">
                 <mat-icon>description</mat-icon>
               </button>
-            </mat-tooltip>
-            <mat-tooltip #stopTooltip="matTooltip" matTooltip="Stop" matTooltipPosition="above">
-              <button mat-icon-button *ngIf="job.jobStatus=='RUNNING' && job.jobmetadata!='CHAIN'" name="actionButton"
-                id="actionButton" (click)="stopJob(job.jobId)" [matTooltip]="stopTooltip.message" matTooltipPosition="above">
+            </span>
+            <span *ngIf="job.jobStatus=='RUNNING' && job.jobmetadata!='CHAIN'" class="cancel-btn">
+              <button mat-icon-button name="actionButton" id="actionButton"
+                (click)="stopJob(job.jobId)"
+                matTooltip="Stop" matTooltipPosition="above">
                 <mat-icon>stop</mat-icon>
               </button>
-            </mat-tooltip>
-          </td>
+            </span>
+            </td>
           <td>
             <button
               *ngIf="job.runtime && (job.runtime.toLowerCase() == 'remote' || job.runtime.split('-')[0].toLowerCase() == 'remote')"

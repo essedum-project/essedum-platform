@@ -34,7 +34,7 @@ const cookieConfig: NgcCookieConsentConfig = {
       "text": "#ffffff",
     },
     "button": {
-      "background": "rgb(123, 57, 177);",
+      "background": "#0052cc",
       "text": "#ffffff",
       "border": "transparent"
     }
@@ -73,7 +73,6 @@ const cookieConfig: NgcCookieConsentConfig = {
     ApisService,
     AuthGuardService,
     AppInitService,
-    // MessageService,
     MatSnackBar,
     { provide: APP_INITIALIZER, useFactory: initializeApp, deps: [AppInitService], multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: CommonAppInterceptorService, multi: true },
