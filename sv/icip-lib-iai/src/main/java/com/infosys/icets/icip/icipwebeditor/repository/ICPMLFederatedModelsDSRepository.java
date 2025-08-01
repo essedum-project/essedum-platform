@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedModel;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedModelDS;
+import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPDatasourceFilterDTO;
 
 @NoRepositoryBean
 public interface ICPMLFederatedModelsDSRepository extends JpaRepository<ICIPMLFederatedModelDS, Integer> {
@@ -79,5 +80,15 @@ public interface ICPMLFederatedModelsDSRepository extends JpaRepository<ICIPMLFe
 		    @Param("datasourceNames") List<String> datasourceNames,
 		    @Param("searchValue") String searchValue
 		);
+
+	@Query("SELECT new com.infosys.icets.icip.icipwebeditor.model.dto.ICIPDatasourceFilterDTO(model.datasource.name, model.datasource.alias) " +
+		       "FROM ICIPMLFederatedModelDS model " +
+		       "WHERE model.datasource.organization = :organisation " +
+		       "GROUP BY model.datasource.name, model.datasource.alias")
+		List<ICIPDatasourceFilterDTO> findDistinctDatasourceNameAndAliasByOrganisation(
+		    @Param("organisation") String organisation
+		);
+
+
 
 }

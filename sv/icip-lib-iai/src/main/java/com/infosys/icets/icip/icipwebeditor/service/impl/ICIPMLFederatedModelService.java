@@ -22,6 +22,7 @@ import com.google.gson.JsonObject;
 import com.infosys.icets.ai.comm.lib.util.logger.JobLogger;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedModel;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedModelDS;
+import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPDatasourceFilterDTO;
 import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPMLFederatedModelDTO;
 import com.infosys.icets.icip.icipwebeditor.repository.ICIPMLFederatedModelsRepository;
 import com.infosys.icets.icip.icipwebeditor.repository.ICPMLFederatedModelsDSRepository;
@@ -40,7 +41,6 @@ public class ICIPMLFederatedModelService implements IICIPMLFederatedModelService
 
 	@Autowired 
 	private ICPMLFederatedModelsDSRepository mlfedmodeldsRepo;
-	
 	
 
 	@Autowired
@@ -101,6 +101,13 @@ public class ICIPMLFederatedModelService implements IICIPMLFederatedModelService
 	            organisation, dataSourceList, query, page);
 	   return modelsPage.toList();
 	
+	}
+	
+	@Override
+	public List<ICIPDatasourceFilterDTO> getModelFilters(String org){
+		
+		return mlfedmodeldsRepo.findDistinctDatasourceNameAndAliasByOrganisation(org);
+		
 	}
 
 

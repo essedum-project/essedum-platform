@@ -105,6 +105,7 @@ import com.infosys.icets.icip.icipwebeditor.model.ICIPPartialGroups;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPPlugin;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPPluginScript;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPStreamingServices;
+import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPDatasourceFilterDTO;
 import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPMLFederatedEndpointDTO;
 import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPMLFederatedModelDTO;
 import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPStreamingServices2DTO;
@@ -870,7 +871,15 @@ public class ICIPMlopsController {
 			List<ICIPMLFederatedModelDS> results = fedModelService.getAllOptionalModelsByOrg(org,connectionName, searchQuery, pageable);
 			String response = new JSONArray(results).toString();
 			return ResponseEntity.status(200).body(response);
-}
+    }
+	
+	@GetMapping("models/getfilters/{org}")
+	public ResponseEntity<String> getModelFilters(@PathVariable("org") String org)
+	{
+		List<ICIPDatasourceFilterDTO> results = fedModelService.getModelFilters(org);
+		String response = new JSONArray(results).toString();
+		return ResponseEntity.status(200).body(response);
+	}
 	
 	@GetMapping("/models/count/{org}")
 	public ResponseEntity<Long> getAllModelsCount(@PathVariable(name = "org") String org,
