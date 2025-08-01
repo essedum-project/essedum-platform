@@ -1,24 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: leap-app-ui
+  name: essedum-ui
   namespace: aipns # Namespace where the deployment will run
 spec:
   replicas: 1 # Number of replicas
   selector:
     matchLabels:
-      app: leap-app-ui
+      app: essedum-ui
   template:
     metadata:
       labels:
-        app: leap-app-ui
+        app: essedum-ui
     spec:
       containers:
-      - name: leap-app-ui
-        image: acrreq0762935.azurecr.io/leap_app_ui:1 # Updated to use the ACR image
+      - name: essedum-ui
+        image: 10.200.111.174:5000/essedum_ui:latest 
         imagePullPolicy: Always
         ports:
         - containerPort: 8082
         - containerPort: 8084
-      imagePullSecrets:
-      - name: acr-secret # Secret to authenticate with ACR
