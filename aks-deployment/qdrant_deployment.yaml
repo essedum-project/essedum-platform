@@ -31,8 +31,6 @@ kind: Service
 metadata:
   name: qdrant
   namespace: aipns
-  annotations:
-    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 spec:
   selector:
     app: qdrant
@@ -54,5 +52,5 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: azurefile
+  storageClassName: ""
   volumeName: qdrantfile-pv

@@ -8,11 +8,10 @@ spec:
     storage: 5Gi
   accessModes:
     - ReadWriteMany
-  storageClassName: azurefile
-  azureFile:
-    secretName: azure-secret
-    shareName: azure-mysql-fileshare
-    readOnly: false
+  storageClassName: ""
+  hostPath:
+    path: /mnt/mysql-data
+    type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -25,5 +24,5 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: azurefile
+  storageClassName: ""
   volumeName: mysqlfile-pv

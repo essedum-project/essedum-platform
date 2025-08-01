@@ -8,8 +8,7 @@ spec:
     storage: 5Gi
   accessModes:
     - ReadWriteMany
-  storageClassName: azurefile
-  azureFile:
-    secretName: azure-secret
-    shareName: qdrant-fileshare
-    readOnly: false
+  storageClassName: ""
+  hostPath:
+    path: /mnt/qdrant-data
+    type: DirectoryOrCreate
