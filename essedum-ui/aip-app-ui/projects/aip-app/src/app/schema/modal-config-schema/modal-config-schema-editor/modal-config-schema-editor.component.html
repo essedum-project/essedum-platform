@@ -13,8 +13,8 @@
           <span class="required-indicator">*</span>
         </div>
         <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
-          <mat-select id="column-type-select" [(ngModel)]="localData.columntype" (selectionChange)="validateForm()"
-            [disabled]="action === 'Update' && originalColumnType">
+          <mat-select id="column-type-select" placeholder="Select Column Type" [(ngModel)]="localData.columntype"
+            (selectionChange)="validateForm()" [disabled]="action === 'Update' && originalColumnType">
             <mat-option *ngFor="let type of columnTypeOptions" [value]="type">
               {{ type }}
             </mat-option>
@@ -30,7 +30,7 @@
         </div>
         <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
           <input matInput id="column-name-input" [(ngModel)]="localData.recordcolumnname" (input)="validateForm()"
-            placeholder="Enter column name" required #columnName="ngModel" class="custom-alias-input">
+            placeholder="Enter Column Name" required #columnName="ngModel" class="custom-alias-input">
         </mat-form-field>
       </div>
 
@@ -42,7 +42,7 @@
         </div>
         <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
           <input matInput id="display-name-input" [(ngModel)]="localData.recordcolumndisplayname"
-            (input)="validateForm()" placeholder="Enter display name" required #displayName="ngModel"
+            (input)="validateForm()" placeholder="Enter Column Display Name" required #displayName="ngModel"
             class="custom-alias-input">
         </mat-form-field>
       </div>
@@ -91,8 +91,8 @@
 
   <!-- Dialog Actions -->
   <div mat-dialog-actions class="dialog-actions">
-    <button mat-raised-button color="primary" class="action-button" (click)="doAction()"
-      [disabled]="tabValue === 'Schema Columns' && disableSave">
+    <button mat-raised-button color="primary" [ngClass]="action === 'Delete' ? 'delete-button' : 'action-button'"
+      (click)="doAction()" [disabled]="tabValue === 'Schema Columns' && disableSave">
       {{ action }}
     </button>
 

@@ -18,8 +18,7 @@
     max-width: 100%;
     height: auto;
     margin-bottom: 1rem;
-    filter: brightness(0) saturate(100%) invert(19%) sepia(94%) saturate(3485%)
-      hue-rotate(212deg) brightness(96%) contrast(101%);
+    filter: brightness(0) saturate(100%) invert(19%) sepia(94%) saturate(3485%) hue-rotate(212deg) brightness(96%) contrast(101%);
   }
 }
 
@@ -54,6 +53,7 @@
 ::ng-deep .aip-filter {
   height: 56vh;
 }
+
 .customHeader {
   background: var(---0094ff) 0% 0% no-repeat padding-box;
   background: #0094ff 0% 0% no-repeat padding-box;
@@ -180,7 +180,7 @@ li {
   min-height: 100px;
 }
 
-.lfx-c-nav-list li > a > span.lfx-c-nav__nomar {
+.lfx-c-nav-list li>a>span.lfx-c-nav__nomar {
   margin-left: 0;
 }
 
@@ -189,7 +189,8 @@ li {
   padding: 0;
   margin: 0;
 }
-.le-c-nav-list--pin li > a > span {
+
+.le-c-nav-list--pin li>a>span {
   margin-left: 40px;
 }
 
@@ -240,4 +241,18 @@ li {
   border: 0.05rem solid #0000001f !important;
   border-radius: 1.6rem !important;
   opacity: 1 !important;
+}
+
+.lfx-u-body-sm {
+  font-size: 1.2rem !important;
+  font-weight: 400 !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-style: normal !important;
+}
+
+.lfx-u-body-md {
+  font-size: 1.6rem !important;
+  font-weight: 400 !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-style: normal !important;
 }
