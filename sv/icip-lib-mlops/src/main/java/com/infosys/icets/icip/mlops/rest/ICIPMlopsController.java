@@ -873,7 +873,7 @@ public class ICIPMlopsController {
 			return ResponseEntity.status(200).body(response);
     }
 	
-	@GetMapping("models/getfilters/{org}")
+	@GetMapping("/models/getfilters/{org}")
 	public ResponseEntity<String> getModelFilters(@PathVariable("org") String org)
 	{
 		List<ICIPDatasourceFilterDTO> results = fedModelService.getModelFilters(org);
