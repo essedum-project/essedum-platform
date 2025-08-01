@@ -1,0 +1,23 @@
+{
+  "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
+  "dest": "../../dist/iamp-usm",
+  "lib": {
+    "entryFile": "src/public-api.ts"
+  },
+  "allowedNonPeerDependencies": [
+    "@angular/cdk",
+    "@angular-material-components/datetime-picker",
+    "@angular-material-components/moment-adapter",
+    "ng2-file-upload",
+    "ng4-loading-spinner",
+    "ngx-drag-scroll",
+    "ngx-mat-select-search",
+    "ngx-pagination",
+    "ngx-quill",
+    "primeng",
+    "quill",
+    "file-saver",
+    "moment-timezone",
+    "tslib"
+  ]
+}
