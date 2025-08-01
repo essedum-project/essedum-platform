@@ -38,10 +38,9 @@ export class LoginComponent implements OnInit {
   messageService: any;
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
-    // this.ledsLibService.loginHeight();
+
   }
   constructor(
-    // private ledsLibService: LedsLibService,
     private router: Router,
     private apisService: ApisService,
     private route: ActivatedRoute,

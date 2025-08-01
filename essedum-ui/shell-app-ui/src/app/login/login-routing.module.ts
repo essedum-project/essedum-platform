@@ -8,10 +8,7 @@ const routes: Routes = [
   { path: 'logout', component: LogoutComponent },
   { path: "resetpassword/:email", component: LogoutComponent },
   { path: "error", component: LogoutComponent },
-  {
-    path: "registerNewUser",
-    loadChildren: () => import('./register-user/register-user.module').then(m => m.RegisterUserModule)
-  }
+ 
 ];
 
 @NgModule({

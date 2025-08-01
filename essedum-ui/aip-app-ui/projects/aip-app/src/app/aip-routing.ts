@@ -32,6 +32,7 @@ import { DatasetEditComponent } from './dataset/dataset-edit/dataset-edit.compon
 import { ModalConfigSchemaComponent } from './schema/modal-config-schema/modal-config-schema.component';
 import { PaginationComponent } from './pagination/pagination.component';
 import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-name.component';
+import { ModalConfigComponent } from './model/modal-config/modal-config.component';
 
 const routes: Routes = [
   {
@@ -43,10 +44,10 @@ const routes: Routes = [
         path: 'models',
         children: [
           { path: '', component: ModelComponent },
-          { path: 'preview/:cname/:name', component: ModelCreateComponent },
-          { path: 'edit/:name', component: ModelEditsComponent },
-          { path: 'deploy/:name', component: ModelDeployComponent },
-          { path: 'preview/:name', component: ModelDescriptionComponent },
+          { path: 'create', component: ModalConfigComponent },
+          { path: 'edit-model/:id', component: ModalConfigComponent },
+          { path: 'preview/:cname/:name', component: ModelCreateComponent }, 
+          { path: 'preview/:id', component: ModelDescriptionComponent },
         ],
       },
       
