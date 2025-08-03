@@ -2,6 +2,9 @@ import { NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from "@angular/cor
 import { NgBusyModule, BusyConfig } from "ng-busy";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MessageService } from "./services/message.service";
+import { RoleService } from "./services/role.service";
+import { UserProjectRoleService } from "./services/user-project-role.service";
+import { ProjectService } from "./services/project.service";
 
 import { NgxPaginationModule } from "ngx-pagination";
 import { Ng4LoadingSpinnerService } from 'ng4-loading-spinner';
@@ -27,6 +30,7 @@ import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from "@angu
 import { IampUsmService } from "./iamp-usm.service";
 
 import { SecretsComponent } from './components/secrets/secrets.component';
+import { RoleListComponent } from "./components/role-list/role-list.component";
 import { MatTableModule } from "@angular/material/table";
 import { MatTreeModule } from "@angular/material/tree";
 import { RouterModule } from "@angular/router";
@@ -74,13 +78,14 @@ import { MatTooltipModule } from "@angular/material/tooltip";
     declarations: [
   IampUsmComponent,
         SecretsComponent,
+        RoleListComponent
 
       
      
     ],
     providers: [
 
-        MessageService,
+        MessageService,RoleService,ProjectService,UserProjectRoleService,
 
         { provide: BusyConfig, useFactory: busyConfigFactory },
         IampUsmService,
@@ -88,7 +93,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
      
         
     ],
-    exports: [IampUsmComponent,SecretsComponent],
+    exports: [IampUsmComponent,SecretsComponent,RoleListComponent],
     // entryComponents: [ConfirmDeleteDialogComponent, ConfirmProjectDeleteDialogComponent,ConfirmRevokeDialogComponent,ConfirmRegenerateDialogComponent,],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
