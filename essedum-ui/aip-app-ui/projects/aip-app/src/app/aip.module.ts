@@ -140,6 +140,8 @@ import { AipLoadingComponent } from './sharedModule/aip-loading/aip-loading.comp
 import { ModalConfigComponent } from './model/modal-config/modal-config.component';
 import { ModalConfigSchemaHeaderComponent } from './schema/modal-config-schema/modal-config-schema-header/modal-config-schema-header.component';
 import { AipDeleteConfirmationComponent } from './sharedModule/aip-delete-confirmation/aip-delete-confirmation.component';
+import { AipSwaggerCustomComponent } from './sharedModule/aip-swagger-custom/aip-swagger-custom.component';
+import { AipMethodCreateEditComponent } from './sharedModule/aip-swagger-custom/aip-method-create-edit/aip-method-create-edit.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -235,6 +237,8 @@ const dbConfig: DBConfig = {
     AipFilterComponent,
     AipLoadingComponent,
     AipDeleteConfirmationComponent,
+    AipSwaggerCustomComponent,
+    AipMethodCreateEditComponent,
     ModalConfigSchemaHeaderComponent,
     ModalConfigComponent
   ],
