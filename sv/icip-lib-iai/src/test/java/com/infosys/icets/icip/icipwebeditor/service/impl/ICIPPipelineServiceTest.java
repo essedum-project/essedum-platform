@@ -17,6 +17,9 @@ package com.infosys.icets.icip.icipwebeditor.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -48,7 +51,7 @@ public class ICIPPipelineServiceTest {
 	private static Set<String> requiredJars = new HashSet<>();
 
 	@BeforeAll
-	private static void setup() throws SchedulerException {
+	private static void setup() throws SchedulerException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		SetupResources.setup();
 		nativeScriptService = new ICIPNativeScriptService(SetupResources.nativeScriptRepository);
 		binaryFilesService = new ICIPBinaryFilesService(SetupResources.binaryRepository);
