@@ -1251,11 +1251,11 @@ export class Services {
 
   getCountModels(param: HttpParams): Observable<any> {
     let session: any = sessionStorage.getItem('organization');
-    let updatedParam = param.set('project', session);
+   
     return this.https
       .get(this.dataUrl + '/service/v1/models/count/' + session, {
         observe: 'response',
-        params: updatedParam, // Use updatedParam instead of param
+        params:param, 
       })
       .pipe(
         map((response) => {
@@ -1406,6 +1406,47 @@ export class Services {
           return this.handleError(err);
         })
       );
+  }
+
+  //Fetch Model datasource filter list
+  getModelDatasourceList (param: HttpParams): Observable<any> {   
+    let session: any = sessionStorage.getItem('organization');
+    return this.https
+      .get(this.dataUrl + '/service/v1/models/getfilters/' + session, {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );  
+  }
+
+  //get model list with filter and search
+  getModelListWithFilterAndSearch (param: HttpParams): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    return this.https
+      .get(this.dataUrl + '/service/v1/models/list/' + session, {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+    
   }
 
   removelinkage(regBody: any): Observable<any> {
