@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
-import { CustomSnackbarComponent, SnackbarData } from '../custom-snackbar/custom-snackbar.component';
+import { AipSnackbarCustomComponent, SnackbarData } from '../aip-snackbar-custom/aip-snackbar-custom.component';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CustomSnackbarService {
+export class AipSnackbarCustomService {
 
   constructor(private snackBar: MatSnackBar) {}
 
@@ -20,7 +20,7 @@ export class CustomSnackbarService {
 
     const snackBarConfig = { ...defaultConfig, ...config };
     
-    return this.snackBar.openFromComponent(CustomSnackbarComponent, snackBarConfig);
+    return this.snackBar.openFromComponent(AipSnackbarCustomComponent, snackBarConfig);
   }
 
   success(message: string, action?: string, config?: MatSnackBarConfig) {

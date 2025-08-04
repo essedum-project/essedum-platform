@@ -118,8 +118,6 @@ import { QuillModule } from 'ngx-quill';
 import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-name.component';
 import { AdapterServices } from './adapter/adapter-service';
 import { MatIconModule } from '@angular/material/icon';
-import { CustomSnackbarComponent } from './sharedModule/custom-snackbar/custom-snackbar.component';
-import { CustomSnackbarService } from './sharedModule/services/custom-snackbar.service';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -136,6 +134,8 @@ import { AipPaginationComponent } from './sharedModule/aip-pagination/aip-pagina
 import { AipHeaderComponent } from './sharedModule/aip-header/aip-header.component';
 import { AipEmptyStateComponent } from './sharedModule/aip-empty-state/aip-empty-state.component';
 import { AipFilterComponent } from './sharedModule/aip-filter/aip-filter.component';
+import { AipSnackbarCustomComponent } from './sharedModule/aip-snackbar-custom/aip-snackbar-custom.component';
+import { AipSnackbarCustomService } from './sharedModule/services/aip-snackbar-custom.service';
 import { AipLoadingComponent } from './sharedModule/aip-loading/aip-loading.component';
 import { ModalConfigComponent } from './model/modal-config/modal-config.component';
 import { ModalConfigSchemaHeaderComponent } from './schema/modal-config-schema/modal-config-schema-header/modal-config-schema-header.component';
@@ -226,7 +226,7 @@ const dbConfig: DBConfig = {
     PaginationComponent,
     PipelineDialogComponent,
     DatasetByNameComponent,
-    CustomSnackbarComponent,
+    AipSnackbarCustomComponent,
     AipCardComponent,
     AipPaginationComponent,
     AipHeaderComponent,
@@ -315,11 +315,11 @@ const dbConfig: DBConfig = {
     RaiservicesService,
     SemanticService,
     DynamicRemoteLoad,
-    CustomSnackbarService,
+    AipSnackbarCustomService,
     { provide: MatDialogRef, useValue: {} },
     { provide: MAT_DIALOG_DATA, useValue: {} },
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AipComponent],
 })
-export class AipModule {}
+export class AipModule { }
