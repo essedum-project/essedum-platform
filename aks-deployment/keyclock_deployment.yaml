@@ -34,7 +34,7 @@ spec:
             - name: KC_HTTPS_ENABLED
               value: "true"
             - name: KC_HOSTNAME
-              value: "aiplatform.az.ad.idemo-ppc.com"
+              value: "login.lfn.essedum.anuket.iol.unh.edu"
             - name: KC_HOSTNAME_STRICT_HTTPS
               value: "true"
             - name: KC_HTTPS_CERTIFICATE_FILE
@@ -52,7 +52,7 @@ spec:
       volumes:
         - name: tls-cert
           secret:
-            secretName: aiplatform-secret
+            secretName: essedum-secret
 
 
 ---

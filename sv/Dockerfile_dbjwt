@@ -15,6 +15,7 @@ RUN mkdir /app/modules
 RUN mkdir /app/plugins
 RUN cp /sv/common-app/src/main/resources/*.yml /app/conf
 RUN cp /sv/common-app/src/main/resources/*.xml /app/conf
+RUN rm /app/conf/application-mysql-oauth2.yml
 RUN chmod 777 /sv/copy_jars.sh
 RUN /sv/copy_jars.sh
 

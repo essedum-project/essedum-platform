@@ -13,10 +13,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - essedum.az.ad.idemo-ppc.com
+    - lfn.essedum.anuket.iol.unh.edu
     secretName: essedum-secret
   rules:
-  - host: essedum.az.ad.idemo-ppc.com
+  - host: lfn.essedum.anuket.iol.unh.edu
     http:
       paths:
       - backend:

@@ -14,6 +14,7 @@
   •	Mysql server V 8.3 or higher
   •	Mysql workbench V 8.3 pr higher
   •	Eclipse or STS IDE for Code editing
+  •	keycloak 26.2.3 (OPTIONAL)
 
 #### Front End:
   •	Noje Js 
@@ -60,8 +61,7 @@
       •	Clone existing code from existing repository in development branch
       •	Backend related code placed in SV path
       •	Front End related code placed in UI folder
-    
-     
+
     #### 2.1.5 Crate Maven Build
       •	Run below maven command in SV directory “ai-platform/sv” 
       •	mvn clean install -Dmaven.test.skip=true -Dlicense.skip=true
@@ -70,8 +70,16 @@
       •	Import code into eclipse as a maven import
       •	Right click on Aip project->Run as-> maven build->paste the command in goals as shown below                          
       •	Once build was success you will see below output
-                            
-   
+
+    #### 2.1.5 Keycloak setup (OPTIONAL)
+      •	Go to the official site: https://www.keycloak.org/downloads
+      •	Download the zip file and unzip it.
+      •	Goto keycloak\bin directory.
+      •	Start the server with command  "kc.bat start-dev"
+      •	Access the admin console browsing http://localhost:8080
+      •	Create realm with name 'ESSEDUM' and enable it from admin console.
+      •	Select ESSEDUM realm and create client with name 'essedum-45' and client type 'OpenID Connect'.
+      •	Select 'Standard flow' in Authentication flow, Set ROOT URL, Web origins to essedum-ui domain and add Valid redirect URLs to essedum-ui domain with wild card.
     
     While creating build might fail because of improper Lombok dependency detection. To avoid that configure Lombok dependency in to eclipse by following below steps
     1.	Copy the lombok.jar into the root Eclipse folder and run the below command
@@ -115,7 +123,8 @@
 ### 2.5. Docker Build and Deployment in AKS Cluster :
 
 #### 2.5.1 Backend:
-sudo docker build -t essedum_app_backend:latest .
+sudo docker build -t essedum_app_backend:latest -f Dockerfile_dbjwt . (This uses dbjwt for authentication, keycloak server not required)
+sudo docker build -t essedum_app_backend:latest -f Dockerfile_oauth2 . (This uses oauth2 for authentication, keycloak server needs to be installed)
 sudo docker tag essedum_app_backend:latest 
 sudo docker push acrreq.azurecr.io/essedum_app_backend:latest
 kubectl delete -f leap_app_backend-azure.yaml
