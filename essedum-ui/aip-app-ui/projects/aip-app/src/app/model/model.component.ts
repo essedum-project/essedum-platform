@@ -277,23 +277,29 @@ export class ModelComponent implements OnInit, OnChanges {
             const fileData = res[0];
             let downloadData = fileData[0].data;
             const contentType = fileData[0].contentType;
+            downloadData=downloadData.replace(/\s/g,'');
+            while(downloadData.length%4!==0){
+              downloadData+='=';
+            }
+            const dataUrl =`data:${contentType};downloadData,${downloadData}`;
+            fetch(dataUrl).then(res=>res.blob()).then(blob=>{
 
-            try {
-              const decode = atob(downloadData);
-              const byteArray = new Uint8Array(decode.length);
-              for (let i = 0; i < decode.length; i++) {
-                byteArray[i] = decode.charCodeAt(i);
-              }
-              const blob = new Blob([byteArray], { type: contentType });
+            // try {
+            //   const decode = atob(downloadData);
+            //   const byteArray = new Uint8Array(decode.length);
+            //   for (let i = 0; i < decode.length; i++) {
+            //     byteArray[i] = decode.charCodeAt(i);
+            //   }
+            //   const blob = new Blob([byteArray], { type: contentType });
 
               const linkA = document.createElement('a');
               linkA.href = window.URL.createObjectURL(blob);
               linkA.download = fileName;
               linkA.click();
               URL.revokeObjectURL(linkA.href);
-            } catch (e) {
+            }).catch (err => {
               this.service.message('Download Failed. Invalid Data', 'error');
-            }
+            });
           } else {
             this.service.message(
               'Download Failed. Data does not exist',
