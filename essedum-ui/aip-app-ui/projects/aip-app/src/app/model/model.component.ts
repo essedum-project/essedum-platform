@@ -262,6 +262,7 @@ export class ModelComponent implements OnInit, OnChanges {
   }
 
   downloadModel(card: any) {
+    const parsedAttributes=JSON.parse(card.attributes);
     let obj = JSON.parse(card.attributes).object;
     let extension = obj.split('.').pop();
     let fileName = obj.split('/').toString();
@@ -272,41 +273,18 @@ export class ModelComponent implements OnInit, OnChanges {
 
       this.service
         .getModelFileData(card.modelName, `${fileName}`, card.organisation)
-        .subscribe((res: any) => {
-          if (res && res[0]) {
-            const fileData = res[0];
-            let downloadData = fileData[0].data;
-            const contentType = fileData[0].contentType;
-            downloadData=downloadData.replace(/\s/g,'');
-            while(downloadData.length%4!==0){
-              downloadData+='=';
-            }
-            const dataUrl =`data:${contentType};downloadData,${downloadData}`;
-            fetch(dataUrl).then(res=>res.blob()).then(blob=>{
-
-            // try {
-            //   const decode = atob(downloadData);
-            //   const byteArray = new Uint8Array(decode.length);
-            //   for (let i = 0; i < decode.length; i++) {
-            //     byteArray[i] = decode.charCodeAt(i);
-            //   }
-            //   const blob = new Blob([byteArray], { type: contentType });
-
+        .subscribe(blob=> {
               const linkA = document.createElement('a');
-              linkA.href = window.URL.createObjectURL(blob);
+              const url = window.URL.createObjectURL(blob);
+              linkA.href = url
               linkA.download = fileName;
               linkA.click();
-              URL.revokeObjectURL(linkA.href);
-            }).catch (err => {
+              window.URL.revokeObjectURL(url);
+            },
+              err => {
               this.service.message('Download Failed. Invalid Data', 'error');
             });
-          } else {
-            this.service.message(
-              'Download Failed. Data does not exist',
-              'error'
-            );
-          }
-        });
+          
     }
   }
 
