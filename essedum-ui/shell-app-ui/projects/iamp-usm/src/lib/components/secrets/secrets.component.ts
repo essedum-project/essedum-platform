@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from "../../services/message.service";
 import { SecretService } from '../../services/secret.service';
 import { DeleteComponent } from '../../shared-modules/confirm-delete/delete.component';
+import { SecretAddComponent } from './secret-add/secret-add.component';
 
 @Component({
   selector: 'lib-secrets',
@@ -54,7 +55,8 @@ export class SecretsComponent {
     private confirmDialog: MatDialog,
     private secretsService :SecretService,
     public messageService: MessageService,
-    private changeDetectionRef: ChangeDetectorRef
+    private changeDetectionRef: ChangeDetectorRef,
+    public dialog: MatDialog,
   ){}
   ngOnInit(){
     // this.keys = this.keys.concat('app_')
@@ -226,6 +228,24 @@ export class SecretsComponent {
     this.showCreate = true;
     this.edit = false;
    }
+
+   createSecretKey(){
+    const dialogRef = this.dialog.open(SecretAddComponent, {
+      height: '80%',
+      width: '50%',      
+      disableClose: true,
+      data: {
+        edit: false,
+      },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+       // this.refresh();
+      }
+    });
+   }
+
+
    onCreate(){
      this.secretsService.createKey(this.keys,this.passcode).subscribe((res)=>{      
       this.messageService.message(res,res.body);
