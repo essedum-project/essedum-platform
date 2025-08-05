@@ -262,7 +262,6 @@ export class ModelComponent implements OnInit, OnChanges {
   }
 
   downloadModel(card: any) {
-    const parsedAttributes=JSON.parse(card.attributes);
     let obj = JSON.parse(card.attributes).object;
     let extension = obj.split('.').pop();
     let fileName = obj.split('/').toString();
