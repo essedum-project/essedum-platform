@@ -20,6 +20,7 @@ import { Users } from "../../models/users";
 import { DeleteComponent } from "../../shared-modules/confirm-delete/delete.component";
 import { IampUsmService } from "../../iamp-usm.service";
 import { Role } from "../../models/role";
+import { MatSelectChange } from "@angular/material/select";
 // import { OpenTelemetryService } from "../../telemetry-util/open-telemetry.service";
 @Component({
   templateUrl: "role-list.component.html",
@@ -31,13 +32,16 @@ export class RoleListComponent implements OnInit, OnDestroy {
   statusArray = [];
   role: Role = new Role();
   roles = new Array<Role>();
-  rolesFilter = new Array<Role>();
+  // rolesFilter = new Array<Role>();
   roleList: MatTableDataSource<any> = new MatTableDataSource();
   rolesLength: number = 0;
   associatedproject: any = [];
   ProjectList: Project[] = [];
   currentproject: any;
   showList: boolean = false;
+    lastRefreshedTime: Date | null = null;
+  createAuth: boolean=true;
+
   view_Role: boolean = false;
   displayedColumns: string[] = ["id", "name", "AssociatedProject", "description", "actions"];
   selectedDesc: string = "All";
@@ -51,6 +55,10 @@ export class RoleListComponent implements OnInit, OnDestroy {
   currentRole: Role = new Role();
   popup: boolean = false;
   searchedRole: string = "All";
+  isFilterExpanded:boolean=false;
+  selectedAdapterType: string[]=[];
+  rolesFilter:Array<{label: string,selected:boolean}>=[];
+  TOOLTIP_POSITION:'above'|'below'='above';
   auth: string = "";
   isAuth: boolean = false;
   permissionList: any[];
@@ -309,7 +317,48 @@ export class RoleListComponent implements OnInit, OnDestroy {
   assignCopy() {
     this.roles = Object.assign([], this.rolesArraySorted);
   }
+toggleFilterExpanded():void{
+  this.isFilterExpanded=!this.isFilterExpanded;
+}
+toggleExpand():void{
+  this.toggleFilterExpanded();
+}
+hasActiveFilters():boolean{
+  return this.selectedAdapterType.length>0;
+}
+getActiveFilterSummary(): string{
+  return this.hasActiveFilters() ? this.selectedAdapterType.join(', '):'';
 
+}
+pipelineTypeSelected(event:MatSelectChange): void{
+  const selectedValue = event.value;
+  if(!selectedValue){
+    this.clearAllFilters('Role');
+    return;
+  }
+  if(!this.selectedAdapterType.includes(selectedValue)){
+    this.selectedAdapterType.push(selectedValue);
+  }
+  this.rolesFilter=this.rolesFilter.map(option=>({
+    ...option,
+    selected: option.label=== selectedValue
+  })
+
+  );
+}
+clearAllFilters(filtertype: string):void{
+  if(filtertype==='Role'){
+    this.selectedAdapterType=[];
+    this.rolesFilter=this.rolesFilter.map(option=>({ ...option, selected:false}));
+  }
+}
+removePipelineType(type:string):void{
+  this.selectedAdapterType=this.selectedAdapterType.filter(t => t!==type);
+  this.rolesFilter=this.rolesFilter.map(Option=> ({
+    ...Option,
+    selected: Option.label=== type?false: Option.selected
+  }));
+}
   filterItem(value) {
     if (!value) {
       this.assignCopy();

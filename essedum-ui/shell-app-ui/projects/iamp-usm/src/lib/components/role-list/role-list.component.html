@@ -1,24 +1,10 @@
-<div class="col-md-12 centerStyle paddingBottom selector-669-1" style="border: none">
+<!-- <div class="col-md-12 centerStyle paddingBottom selector-669-1" style="border: none">
   <div class="selector-669-2">
     <div class="clearfix selector-669-3">
       <div class="padTop20 selector-669-4">
         <h2 class="ams_h2 h2Mar selector-669-5">Role list</h2>
         <div class="ams_toptoolbar selector-669-6">
-          <!-- <div class="pull-right ams_filterCtr popupCtr up selector-669-7">
-           <a href="javascrit:void(0)" class="ams_upload marRght40">Upload Roles</a> 
-            <div class="hre selector-669-8">
-              <a href="javascript:void(0)" *ngIf="createFlag" (click)="showUploadDialog()" class="selector-669-9"><span class="fa fa-upload downloadb selector-669-10"></span><span class="download selector-669-11">Upload Roles</span></a>
-            </div>
-            <div *ngIf="popup" class="ams_popup pop selector-669-12">
-               <i class="fa fa-sort-desc" aria-hidden="true"></i>
-              <a href="javascript:void(0)" (click)="showUploadDialog()" class="ams_close selector-669-13"></a>
-              <div class="row selector-669-14">
-                <div class="col-md-12 selector-669-15" (uploaded)="Refresh()">
-                  <uploadroledata class="selector-669-16"></uploadroledata>
-                </div>
-              </div>
-            </div>
-          </div>  -->
+        
           <i class="fa fa-plus-square-o create-icon-color selector-669-17" (click)="createView()" *ngIf="createFlag" aria-hidden="true"></i>
           <span style="cursor: pointer" (click)="createView()" *ngIf="createFlag" class="selector-669-18">Create Roles</span>
         </div>
@@ -35,11 +21,7 @@
           <div class="ams_panelCnt formRow relative selector-669-26 labelsAlign">
             <div class="row rwMAr selector-669-27">
               <div class="col-md-6 clearboth select-style selector-669-28">
-                <!-- <label class="formLabel">Role</label>
-                                <div class="input-group ams_datetime">
-                                    <input type="text" placeholder="Role" [ngModelOptions]="{standalone: true}"
-                                        [(ngModel)]="searchedRole" class="form-control">
-                                </div> -->
+               
                 <mat-form-field style="width: 85%; margin-top:-1vh" class="selector-669-29">
                   <label class="formLabel selector-669-30">Role</label>
                   <mat-select [(ngModel)]="searchedRole" [ngModelOptions]="{ standalone: true }" name="role" class="selector-669-31" style="padding-top: 2vh;">
@@ -65,19 +47,13 @@
         </div>
         <div class="selector-669-41">
           <div class="ams_panelCnt formRow relative selector-669-42">
-            <!-- <div style="float: left; cursor: pointer" class="hre selector-669-43">
-              <a href="javascript:void(0)" (click)="download()" class="selector-669-44">
-                <span class="fa fa-download downloadb selector-669-45"></span>
-                <span class="download selector-669-46">Download Roles</span>
-              </a>
-            </div> -->
+           
             <div style="float: right; cursor: pointer" class="selector-669-47">
               <i class="fa fa-list-ul fa-lg icon1 selector-669-48" aria-hidden="true" matTooltip="Table View" (click)="showList = false"></i>
               <i class="fa fa-th-large fa-lg icon1 selector-669-49" aria-hidden="true" matTooltip="Card View" (click)="showList = true"></i>
             </div>
             <br class="selector-669-50" />
             <br class="selector-669-51" />
-            <!-- card view -->
             <div class="row selector-669-52" *ngIf="rolesLength > 0 &amp;&amp; showList">
               <div class="col-md-6 selector-669-53" *ngFor="let role of roles | paginate: { itemsPerPage: 6, currentPage: p }; trackBy: trackByMethod">
                 <div class="ams_cardCtr ams_cardfooterCtr selector-669-54">
@@ -121,7 +97,6 @@
               <pagination-controls (pageChange)="p = $event" class="selector-669-75"></pagination-controls>
             </div>
           </div>
-          <!-- list view -->
           <mat-card appearance="outlined" class="cardResponsive">
           <div *ngIf="rolesLength > 0 &amp;&amp; !showList" class="table-responsive selector-669-76">
             <table aria-label="" mat-table="" [dataSource]="roleList" class="table-hover list-table table selector-669-77" matSort="" matSortActive="scheduled_from" matSortDirection="asc">
@@ -187,4 +162,164 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->
+<!-- //////////////////
+<div >
+    <div class="aip-container lfx-u-pad-lr-30">
+<div class="filter-panel">
+  <div class="filter-panel__header"
+    [ngClass]="{'filter-panel__header--collapsed': !isFilterExpanded, 'filter-panel__header--expanded': isFilterExpanded}"
+    (click)="toggleFilterExpanded()">
+    <div class="filter-panel__icon-container">
+      <mat-icon id="filter-expand-icon" data-icon-type="filter-expand" class="filter-panel__icon"
+        (click)="toggleExpand()" [matTooltip]="isFilterExpanded ? 'Collapse Filters' : 'Expand Filters'"
+        [matTooltipPosition]="TOOLTIP_POSITION">
+        filter_list
+      </mat-icon>
+    </div>
+
+    <div class="filter-panel__title-container">
+      <h3 class="filter-panel__title">
+        Filter by:
+        <span *ngIf="!isFilterExpanded && hasActiveFilters()" class="filter-summary">
+          {{ getActiveFiltersSummary() }}
+        </span>
+      </h3>
+    </div>
+
+    <div class="filter-panel__toggle-container">
+      <mat-icon id="filter-toggle-icon" data-icon-type="filter-toggle" class="filter-panel__toggle-icon"
+        [ngClass]="{'filter-panel__toggle-icon--rotated': isFilterExpanded}"
+        [matTooltip]="isFilterExpanded ? 'Collapse Filters' : 'Expand Filters'" [matTooltipPosition]="TOOLTIP_POSITION">
+        keyboard_arrow_down
+      </mat-icon>
+    </div>
+  </div>
+
+  <div class="filter-panel__content" *ngIf="isFilterExpanded" @slideToggle>
+    <div>
+      <div class="filter-options">
+        <div class="filter-group">
+          <div class="filter-control">
+            <mat-form-field appearance="fill" class="w-100">
+              <label>Role</label>
+              <mat-select [id]="Role"
+                data-select-type="pipeline-type" (selectionChange)="pipelineTypeSelected($event)"
+                aria-labelledby="type-label" placeholder="All">
+                <mat-option *ngIf="selectedAdapterType?.length > 0" value="" (click)="clearAllFilters('Role')">
+                  All
+                </mat-option>
+                <ng-container *ngFor="let option of rolesFilter">
+                  <mat-option *ngIf="!option.selected" [value]="option.label">
+                    {{ option.label }}
+                  </mat-option>
+                </ng-container>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="selected-items" *ngIf="selectedAdapterType?.length > 0">
+            <mat-chip-set [id]="Role"
+              aria-label="Selected types">
+              <mat-chip [id]="Role" data-chip-type="adapter-type"
+                *ngFor="let type of selectedAdapterType; let i = index" removable="true"
+                (removed)="removePipelineType(type)">
+                {{ type }}
+                <mat-icon data-icon-type="chip-remove-adapter-type" matChipRemove>close</mat-icon>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    </div>
+    </div>
+    </div> -->
+
+
+
+    <div >
+    <div class="aip-container lfx-u-pad-lr-30">
+
+
+        <!-- Header Section -->
+
+        <!-- Header -->
+        <app-aip-header [cardTitle]="'Role List'" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createAuth"
+            (search)="Search()" (refresh)="Refresh()" (add)="createView()">
+        </app-aip-header>
+        <div >
+    <div class="aip-container lfx-u-pad-lr-30">
+<!-- <div class="filter-panel">
+  <div class="filter-panel__header"
+    [ngClass]="{'filter-panel__header--collapsed': !isFilterExpanded, 'filter-panel__header--expanded': isFilterExpanded}"
+    (click)="toggleFilterExpanded()">
+    <div class="filter-panel__icon-container">
+      <mat-icon id="filter-expand-icon" data-icon-type="filter-expand" class="filter-panel__icon"
+        (click)="toggleExpand()" [matTooltip]="isFilterExpanded ? 'Collapse Filters' : 'Expand Filters'"
+        [matTooltipPosition]="TOOLTIP_POSITION">
+        filter_list
+      </mat-icon>
+    </div>
+
+    <div class="filter-panel__title-container">
+      <h3 class="filter-panel__title">
+        Filter by:
+        <span *ngIf="!isFilterExpanded && hasActiveFilters()" class="filter-summary">
+          {{ getActiveFiltersSummary() }}
+        </span>
+      </h3>
+    </div>
+
+    <div class="filter-panel__toggle-container">
+      <mat-icon id="filter-toggle-icon" data-icon-type="filter-toggle" class="filter-panel__toggle-icon"
+        [ngClass]="{'filter-panel__toggle-icon--rotated': isFilterExpanded}"
+        [matTooltip]="isFilterExpanded ? 'Collapse Filters' : 'Expand Filters'" [matTooltipPosition]="TOOLTIP_POSITION">
+        keyboard_arrow_down
+      </mat-icon>
+    </div>
+  </div>
+
+  <div class="filter-panel__content" *ngIf="isFilterExpanded" @slideToggle>
+    <div>
+      <div class="filter-options">
+        <div class="filter-group">
+          <div class="filter-control">
+            <mat-form-field appearance="fill" class="w-100">
+              <label>Role</label>
+              <mat-select [id]="Role"
+                data-select-type="pipeline-type" (selectionChange)="pipelineTypeSelected($event)"
+                aria-labelledby="type-label" placeholder="All">
+                <mat-option *ngIf="selectedAdapterType?.length > 0" value="" (click)="clearAllFilters('Role')">
+                  All
+                </mat-option>
+                <ng-container *ngFor="let option of rolesFilter">
+                  <mat-option *ngIf="!option.selected" [value]="option.label">
+                    {{ option.label }}
+                  </mat-option>
+                </ng-container>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="selected-items" *ngIf="selectedAdapterType?.length > 0">
+            <mat-chip-set [id]="Role"
+              aria-label="Selected types">
+              <mat-chip [id]="Role" data-chip-type="adapter-type"
+                *ngFor="let type of selectedAdapterType; let i = index" removable="true"
+                (removed)="removePipelineType(type)">
+                {{ type }}
+                <mat-icon data-icon-type="chip-remove-adapter-type" matChipRemove>close</mat-icon>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    </div>
+    </div> -->
+    </div>
+        </div>
+        </div>
