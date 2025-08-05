@@ -231,7 +231,7 @@ export class SecretsComponent {
 
    createSecretKey(){
     const dialogRef = this.dialog.open(SecretAddComponent, {
-      height: '80%',
+      height: '67%',
       width: '50%',      
       disableClose: true,
       data: {
@@ -244,6 +244,23 @@ export class SecretsComponent {
       }
     });
    }
+
+   editSecretKey(){
+    const dialogRef = this.dialog.open(SecretAddComponent, {
+      height: '67%',
+      width: '50%',      
+      disableClose: true,
+      data: {
+        edit: true,
+      },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+       // this.refresh();
+      }
+    });
+   }
+
 
 
    onCreate(){

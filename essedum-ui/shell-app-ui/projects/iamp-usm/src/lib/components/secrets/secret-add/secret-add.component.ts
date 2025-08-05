@@ -6,6 +6,7 @@ import {
   MatDialog,
 } from "@angular/material/dialog";
 
+
 @Component({
   selector: "lib-secret-add",
   standalone: true,
@@ -26,7 +27,8 @@ export class SecretAddComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.edit = false;
+    this.edit = this.data.edit;
+    
   }
 
   closeSecretAddDialog(): void {
@@ -37,4 +39,6 @@ export class SecretAddComponent implements OnInit {
       }
     }
   }
+
+ 
 }
