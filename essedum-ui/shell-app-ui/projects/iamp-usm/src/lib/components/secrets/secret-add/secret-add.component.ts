@@ -17,6 +17,7 @@ import {
 export class SecretAddComponent implements OnInit {
   edit: boolean = false;
   description:string='test1';
+  secret:any;
 
   constructor(
     public dialogRef: MatDialogRef<SecretAddComponent>,
@@ -28,6 +29,7 @@ export class SecretAddComponent implements OnInit {
 
   ngOnInit(): void {
     this.edit = this.data.edit;
+    this.secret=this.data.secret;
     
   }
 

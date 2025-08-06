@@ -47,6 +47,36 @@ export class SecretsComponent {
   endIndex: number;
   startIndex: number;
   pageNumberChanged: boolean = true;
+     // Mock data for dashConstantList
+mockDashConstants = [
+  {
+    id: 1,
+    key: 'MAX_RETRY_ATTEMPTS',
+    passcode: '222222fffff3',
+    type: 'NUMBER',
+    description: 'Maximum number of retry attempts for API calls',
+    isActive: true,
+    lastUpdated: new Date('2025-08-01')
+  },
+  {
+    id: 2,
+    key: 'SESSION_TIMEOUT',
+    passcode: '18005tyuu',
+    type: 'NUMBER',
+    description: 'Session timeout in seconds (30 minutes)',
+    isActive: true,
+    lastUpdated: new Date('2025-08-02')
+  },
+  {
+    id: 3,
+    key: 'DEFAULT_THEME',
+    passcode: 'dark1234555',
+    type: 'STRING',
+    description: 'Default application theme',
+    isActive: false,
+    lastUpdated: new Date('2025-08-03')
+  }
+];
   
 
   constructor(
@@ -85,7 +115,11 @@ export class SecretsComponent {
       })
     }    
     console.log('data',this.data);
-   // this.dashConstantList=this.data;       
+   // this.dashConstantList=this.data;
+   
+
+
+
   }
   indexChanged(){
     if (this.pageNumberChanged) {
@@ -177,7 +211,9 @@ export class SecretsComponent {
       res.forEach((secret)=>{
         this.data.push(secret)
       })
-      this.dashConstantList=this.data;
+     // this.dashConstantList=this.data;
+     // Assign to your MatTableDataSource
+this.dashConstantList.data = this.mockDashConstants;
       this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
       this.pageArr = [...Array(this.noOfPages).keys()];
     })
@@ -245,13 +281,14 @@ export class SecretsComponent {
     });
    }
 
-   editSecretKey(){
+   editSecretKey(secret:any){
     const dialogRef = this.dialog.open(SecretAddComponent, {
       height: '67%',
       width: '50%',      
       disableClose: true,
       data: {
         edit: true,
+        secret
       },
     });
     dialogRef.afterClosed().subscribe((result) => {
