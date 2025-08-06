@@ -3068,7 +3068,18 @@ export class LandingComponent implements OnInit, AfterViewInit {
       .getStartupConstants([this.chatbotConstantsKey, this.chatbotPositionKey])
       .subscribe((res) => {
         let cotexchatbot = res["icip.aip.chatbot"];
-        let chatbotDetails = JSON.parse(cotexchatbot);
+        // let chatbotDetails = JSON.parse(cotexchatbot);
+        let chatbotDetails:any={};
+        if(cotexchatbot && cotexchatbot.trim().length>0){
+          try{
+            chatbotDetails= JSON.parse(cotexchatbot);
+
+          }catch(e){
+            chatbotDetails= {};
+          }
+        }else{
+          chatbotDetails={}
+        }
         if (
           res[this.chatbotConstantsKey] &&
           chatbotDetails.chatbotType == "aip"
