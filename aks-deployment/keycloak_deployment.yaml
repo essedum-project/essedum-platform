@@ -41,6 +41,14 @@ spec:
               value: "/etc/keycloak/certs/tls.crt"
             - name: KC_HTTPS_CERTIFICATE_KEY_FILE
               value: "/etc/keycloak/certs/tls.key"
+            - name: KC_DB
+              value: mysql
+            - name: KC_DB_URL
+              value: "jdbc:mysql://mysql:3306/keycloak"
+            - name: KC_DB_USERNAME
+              value: "root"
+            - name: KC_DB_PASSWORD
+              value: "password"
           ports:
             - containerPort: 8443
               protocol: TCP
