@@ -40,14 +40,22 @@ export class SecretsComponent {
   pageNumberInput: number = 1;
   noOfPages: number = 0;
   prevRowsPerPageValue: number;
-  itemsPerPage: number[] = [6, 9, 18, 36, 54,];
+  itemsPerPage: number[] = [2, 4, 6];
   noOfItems: number;
   @Output() pageChanged = new EventEmitter<any>();
   @Output() pageSizeChanged = new EventEmitter<any>();
   endIndex: number;
   startIndex: number;
   pageNumberChanged: boolean = true;
-     // Mock data for dashConstantList
+  lastRefreshedTime: Date | null = null;
+   pagedRoles: any[] = [];
+
+  page: number = 0;
+  rowsPerPage: number = 2;
+  totalrecords: number = 0
+  lastPage: number = 0;
+    secretContent: any = [];
+// Mock data for dashConstantList
 mockDashConstants = [
   {
     id: 1,
@@ -232,7 +240,8 @@ this.dashConstantList.data = this.mockDashConstants;
   deleteKey(secrets:any) {
     let dialogRef = this.confirmDialog.open(DeleteComponent, {
       disableClose: true,
-      data: { title: "Delete Configuration", message: "Do you want to delete?" },
+      width: '30%',    
+      data: { title: "Delete Secret key", message: "Are you sure do you want to delete the secret named '"+secrets.key+" ?" },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
@@ -298,6 +307,22 @@ this.dashConstantList.data = this.mockDashConstants;
     });
    }
 
+  viewSecretKey(){
+    const dialogRef = this.dialog.open(SecretAddComponent, {
+      height: '67%',
+      width: '50%',      
+      disableClose: true,
+      data: {
+        view:true
+      },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+       // this.refresh();
+      }
+    });
+   }
+
 
 
    onCreate(){
@@ -346,4 +371,48 @@ this.dashConstantList.data = this.mockDashConstants;
       this.getList();
     },500)    
    }
+
+   // PAGINATION BLOCK START
+  updatePagination() {
+    const totalPages = Math.ceil(this.totalrecords / this.rowsPerPage);
+    this.lastPage = Math.max(totalPages - 1, 0);
+    if (this.page > this.lastPage) {
+      this.page = this.lastPage;
+    }
+    this.updatePagedData()
+  }
+
+  updatePagedData() {
+    const startIndex = this.page * this.rowsPerPage;
+    const endIndex = Math.min(startIndex + this.rowsPerPage, this.totalrecords);
+    this.pagedRoles = this.dashConstantList.data.slice(startIndex, endIndex);
+    this.lastPage=Math.floor((this.dashConstantList.data.length-1)/ this.rowsPerPage);
+
+
+  }
+  getPageNumbers() {
+    const totalPages = this.lastPage + 1;
+    return Array.from({ length: totalPages }, (_, i) => i);
+  }
+  navigatePage(direction: 'Prev' | 'Next'){
+    if(direction === 'Prev' && this.page>0){
+      this.page--;
+    }else if(direction==='Next' && this.page<this.lastPage){
+      this.page++;
+        }
+        this.updatePagedData();
+  }
+
+// changePage(p:number){
+//   if(p>0 && p<=this.lastPage){
+//     this.page=p;
+//     this.updatePagedData();
+//   }
+// }
+
+searchSecret(){
+  alert('search clicked..')
+}
+
+
 }

@@ -16,6 +16,7 @@ import {
 })
 export class SecretAddComponent implements OnInit {
   edit: boolean = false;
+  view:boolean=false;
   description:string='test1';
   secret:any;
 
@@ -28,8 +29,11 @@ export class SecretAddComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.edit = this.data.edit;
+    if(this.data.edit)
+     this.edit = this.data.edit;
     this.secret=this.data.secret;
+    if(this.data.view)
+      this.view=this.data.view;
     
   }
 
