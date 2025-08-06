@@ -238,20 +238,18 @@
     </div> -->
 
 
+<!-- NEW LAYOUT -->
+<div>
+  <div class="aip-container lfx-u-pad-lr-30">
+    <!-- Header Section -->
 
-    <div >
-    <div class="aip-container lfx-u-pad-lr-30">
-
-
-        <!-- Header Section -->
-
-        <!-- Header -->
-        <app-aip-header [cardTitle]="'Role List'" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createAuth"
-            (search)="Search()" (refresh)="Refresh()" (add)="createView()">
-        </app-aip-header>
-        <div >
-    <div class="aip-container lfx-u-pad-lr-30">
-<!-- <div class="filter-panel">
+    <!-- Header -->
+    <app-aip-header [cardTitle]="'Role List'" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createAuth"
+      (search)="Search()" (refresh)="Refresh()" (add)="createView()">
+    </app-aip-header>
+    <div>
+      <div class="aip-container lfx-u-pad-lr-30">
+        <!-- <div class="filter-panel">
   <div class="filter-panel__header"
     [ngClass]="{'filter-panel__header--collapsed': !isFilterExpanded, 'filter-panel__header--expanded': isFilterExpanded}"
     (click)="toggleFilterExpanded()">
@@ -320,6 +318,72 @@
     </div>
     </div>
     </div> -->
+
+        <!-- Table Layout  -->
+        <div class="table-card">
+          <div class="table-scroll-container">
+
+            <!-- <div class="header">
+    <h2>Role List</h2>
+    <div class="header-actions">
+     <button class="create-role-btn">+ Create Role</button>
     </div>
+  </div> -->
+            <table class="styled-table" *ngIf="rolesContent.length; else noData">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Role ID</th>
+                  <th>Role Name</th>
+                  <th>Associated Project</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let role of pagedRoles; let i =index">
+                  <td>{{page * rowsPerPage +i+1}}</td>
+                  <td (click)="viewRole(role)" style="color: #0094ff; cursor: pointer;">{{ role.id}}</td>
+                  <td>{{ role.name || '-'}}</td>
+                  <td>{{ role.projectId!==null ? role.projectId: '-'}}</td>
+                  <td>{{ role.description ||'-'}}</td>
+                  <td>
+                    <mat-icon [matTooltip]="'Info'" matTooltipPosition="above"
+                      class="header-action-icon">info</mat-icon>
+                    <mat-icon [matTooltip]="'Edit'" matTooltipPosition="above"
+                      class="header-action-icon">edit</mat-icon>
+                    <mat-icon [matTooltip]="'Delete'" matTooltipPosition="above"
+                      class="header-action-icon">delete</mat-icon>
+                  </td>
+
+                </tr>
+              </tbody>
+            </table>
+            <ng-template #noData>
+              <div class="no-data">No data available</div>
+            </ng-template>
+          </div>
+          <!-- Pagination -->
+
+          <div class="pagination-wrapper d-flex justify-content-end">
+            <ul class="custom-pagination">
+              <li class="custom-pagination-arrow" [class.disabled]="page === 0" (click)="navigatePage('Prev')">
+                <span>&lsaquo;</span>
+              </li>
+
+              <li *ngFor="let p of getPageNumbers()" class="custom-pagination-number" [class.active]="p === page"
+                (click)="changePage(p)">
+                <span>{{ p + 1 }}</span>
+              </li>
+
+              <li class="custom-pagination-arrow" [class.disabled]="page === lastPage" (click)="navigatePage('Next')">
+                <span>&rsaquo;</span>
+              </li>
+            </ul>
+          </div>
+
         </div>
-        </div>
+      </div>
+    </div>
+  </div>
