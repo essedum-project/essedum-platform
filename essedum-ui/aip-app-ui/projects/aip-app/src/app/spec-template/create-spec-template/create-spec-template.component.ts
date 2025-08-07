@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AdapterServices } from '../../adapter/adapter-service';
+import { AdapterServices } from '../../sharedModule/services/adapter-service';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 import { Services } from '../../services/service';
 import { Location } from '@angular/common';

@@ -8,7 +8,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { Services } from '../services/service';
 import { TagsService } from '../services/tags.service';
-import { AdapterServices } from './adapter-service';
+import { AdapterServices } from '../sharedModule/services/adapter-service';
 import { MatDialog } from '@angular/material/dialog';
 import { Location } from '@angular/common';
 import { AipDeleteConfirmationComponent } from '../sharedModule/aip-delete-confirmation/aip-delete-confirmation.component';

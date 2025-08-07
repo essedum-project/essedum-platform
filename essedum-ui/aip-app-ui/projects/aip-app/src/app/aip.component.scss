@@ -1280,7 +1280,7 @@ div {
 
   .aip-card-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, 28.8rem);
+    grid-template-columns: repeat(auto-fit, 27rem);
     grid-template-rows: repeat(auto-fit, 15rem);
     justify-content: center;
     grid-row-gap: 2.4rem;
@@ -1289,7 +1289,7 @@ div {
   }
 
   .aip-card-wrapper {
-    min-width: 28.8rem;
+    min-width: 27em;
     min-height: 15rem;
 
     @media (max-width: 576px) {

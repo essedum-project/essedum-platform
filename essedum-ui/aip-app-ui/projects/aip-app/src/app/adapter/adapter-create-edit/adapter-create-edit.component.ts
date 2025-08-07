@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { NgModel, Validators, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AdapterServices } from '../adapter-service';
+import { AdapterServices } from '../../sharedModule/services/adapter-service';
 import { OptionsDTO } from '../../DTO/OptionsDTO';
 import { Services } from '../../services/service';
 import { Location } from '@angular/common';

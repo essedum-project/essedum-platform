@@ -276,3 +276,7 @@ mat-card-actions.card-actions-hover {
 .aip-menu-delete {
   color: #d32f2f;
 }
+
+::ng-deep .mat-mdc-menu-item{
+  min-height: 40px !important;
+}

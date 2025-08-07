@@ -12,7 +12,7 @@ import { HttpParams } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Services } from '../services/service';
 import { TagsService } from '../services/tags.service';
-import { AdapterServices } from '../adapter/adapter-service';
+import { AdapterServices } from '../sharedModule/services/adapter-service';
 import { MatDialog } from '@angular/material/dialog';
 import { Location } from '@angular/common';
 import * as _ from 'lodash';

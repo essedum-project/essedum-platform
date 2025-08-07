@@ -3,8 +3,8 @@ import { Inject, Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { encKey } from '../services/encKey';
-import { AipSnackbarCustomService } from '../sharedModule/services/aip-snackbar-custom.service';
+import { encKey } from '../../services/encKey';
+import { AipSnackbarCustomService } from './aip-snackbar-custom.service';
 
 @Injectable()
 export class AdapterServices {

@@ -1,6 +1,6 @@
 import { Component, Input, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AdapterServices } from '../../../adapter/adapter-service';
+import { AdapterServices } from '../../services/adapter-service';
 import { OptionsDTO } from '../../../DTO/OptionsDTO';
 import { Services } from '../../../services/service';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
@@ -239,7 +239,7 @@ export class AipMethodCreateEditComponent {
     this.adapterServices
       .getDataSource(this.adapter.connectionid)
       .subscribe((resp) => {
-        console.log(resp);
+        // console.log(resp);
 
         this.datasource = resp;
       });
@@ -405,18 +405,18 @@ export class AipMethodCreateEditComponent {
           )
         );
       });
-      console.log(this.connectionOptions);
+      // console.log(this.connectionOptions);
     });
   }
   connectionNameSelectChange(connectionNameSelectd: string) {
-    console.log(this.datasourcesForConnection);
+    // console.log(this.datasourcesForConnection);
     this.selectedConnection = this.datasourcesForConnection.filter(
       (datasource) => datasource.alias == connectionNameSelectd
     )[0];
-    console.log(this.selectedConnection);
+    // console.log(this.selectedConnection);
     this.dataset.attributes.remoteConnectionAlias =
-      this.selectedConnection.alias;
-    this.dataset.attributes.remoteConnectionName = this.selectedConnection.name;
+      this.selectedConnection?.alias;
+    this.dataset.attributes.remoteConnectionName = this.selectedConnection?.name;
     if (this.isRemoteExecution === false) {
       this.dataset.attributes.remoteConnectionAlias = '';
       this.dataset.attributes.remoteConnectionName = '';
@@ -822,9 +822,9 @@ export class AipMethodCreateEditComponent {
       this.dataset['views'] = '""';
       this.dataset['isadapteractive'] = 'Y';
       this.dataset.datasource = this.datasource;
-      console.log(this.dataset);
+      // console.log(this.dataset);
       if (this.action == 'create') {
-        console.log(this.dataset);
+        // console.log(this.dataset);
         this.adapterServices.createDataset(this.dataset).subscribe(
           (response) => {
             this.service.messageService(
@@ -846,7 +846,7 @@ export class AipMethodCreateEditComponent {
       }
 
       if (this.action == 'edit') {
-        console.log(this.dataset);
+        // console.log(this.dataset);
         this.adapterServices.saveDataset(this.dataset).subscribe(
           (response) => {
             this.returnedName = response.name;
@@ -881,7 +881,7 @@ export class AipMethodCreateEditComponent {
           this.dataset.attributes.transformScriptTransformationScript =
             JSON.stringify(this.transformScriptPython);
         else this.dataset.attributes.transformScriptTransformationScript = '';
-        console.log(this.dataset.attributes);
+        // console.log(this.dataset.attributes);
       }
       if (this.dataset.attributes.ScriptType == 'Groovy') {
         var transformScript1 = JSON.stringify(this.transformScript)
@@ -896,8 +896,8 @@ export class AipMethodCreateEditComponent {
             JSON.stringify(this.transformScript);
         else this.dataset.attributes.transformScriptTransformationScript = '';
       }
-      console.log(this.datasource);
-      console.log(this.dataset.attributes);
+      // console.log(this.datasource);
+      // console.log(this.dataset.attributes);
       this.dataset['datasource'] = this.datasource;
       this.dataset.expStatus = 0;
       this.dataset['groups'] = [];

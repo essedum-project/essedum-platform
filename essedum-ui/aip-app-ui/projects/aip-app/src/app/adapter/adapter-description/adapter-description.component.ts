@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Output, EventEmitter } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { AdapterServices } from '../adapter-service';
+import { AdapterServices } from '../../sharedModule/services/adapter-service';
 import { Services } from '../../services/service';
 import { ActivatedRoute, Router, NavigationExtras } from '@angular/router';
 import { OptionsDTO } from '../../DTO/OptionsDTO';

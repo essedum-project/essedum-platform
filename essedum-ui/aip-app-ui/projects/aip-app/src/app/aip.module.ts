@@ -116,7 +116,7 @@ import { DragDropModule as CdkDragDropModule } from '@angular/cdk/drag-drop';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { QuillModule } from 'ngx-quill';
 import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-name.component';
-import { AdapterServices } from './adapter/adapter-service';
+import { AdapterServices } from './sharedModule/services/adapter-service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';

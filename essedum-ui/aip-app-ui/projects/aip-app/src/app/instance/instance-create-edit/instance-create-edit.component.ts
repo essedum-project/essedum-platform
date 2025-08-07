@@ -7,7 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AdapterServices } from '../../adapter/adapter-service';
+import { AdapterServices } from '../../sharedModule/services/adapter-service';
 import { Services } from '../../services/service';
 import { OptionsDTO } from '../../DTO/OptionsDTO';
 import { NgModel, Validators } from '@angular/forms';

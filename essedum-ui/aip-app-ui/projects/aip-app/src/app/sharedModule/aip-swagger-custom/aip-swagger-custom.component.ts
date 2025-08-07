@@ -5,7 +5,7 @@ import {
   ViewChild,
   ChangeDetectorRef,
 } from '@angular/core';
-import { AdapterServices } from '../../adapter/adapter-service';
+import { AdapterServices } from '../services/adapter-service';
 import { OptionsDTO } from '../../DTO/OptionsDTO';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 import { AipDeleteConfirmationComponent } from '../aip-delete-confirmation/aip-delete-confirmation.component';
