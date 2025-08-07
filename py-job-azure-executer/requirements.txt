@@ -1,0 +1,16 @@
+flask
+boto3
+sagemaker
+minio
+flask_swagger_ui
+dateutils
+gitpython
+psutil
+gradio
+pandas
+sqlalchemy
+pymysql
+psycopg2
+azureml-core
+azureml-pipeline==1.54.0
+azure-ai-ml==1.12.0
