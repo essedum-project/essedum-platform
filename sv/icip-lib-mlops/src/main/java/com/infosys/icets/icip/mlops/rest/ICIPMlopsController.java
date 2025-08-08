@@ -111,6 +111,7 @@ import com.infosys.icets.icip.icipwebeditor.model.ICIPPartialGroups;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPPlugin;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPPluginScript;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPStreamingServices;
+import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPDatasourceFilterDTO;
 import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPMLFederatedEndpointDTO;
 import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPMLFederatedModelDTO;
 import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPStreamingServices2DTO;
@@ -866,26 +867,31 @@ public class ICIPMlopsController {
 
 	@GetMapping("/models/list/{org}")
 	public ResponseEntity<String> listModels(@PathVariable(name = "org") String org,
-			@RequestParam(name = "modelname", required = false) String modelName,
-			@RequestParam(name = "version", required = false) String version,
-			@RequestParam(name = "type", required = false) String modelType,
+			@RequestParam(name = "connectionname", required = false) String connectionName,
+			@RequestParam(name = "searchquery", required = false) String searchQuery,
 			@RequestParam(name = "page", required = false) Integer page,
 			@RequestParam(name = "size", required = false) Integer size,
 			@RequestHeader Map<String, String> headers) throws IOException {
 			logger.info("fetch models for org: {}", org );
 			Pageable pageable = (page==null||size==null) ? null : PageRequest.of(Math.max(page - 1, 0), size);
-			List<ICIPMLFederatedModelDS> results = fedModelService.getAllOptionalModelsByOrg(modelName, version, modelType, org, pageable);
+			List<ICIPMLFederatedModelDS> results = fedModelService.getAllOptionalModelsByOrg(org,connectionName, searchQuery, pageable);
 			String response = new JSONArray(results).toString();
 			return ResponseEntity.status(200).body(response);
-}
+    }
+	
+	@GetMapping("/models/getfilters/{org}")
+	public ResponseEntity<String> getModelFilters(@PathVariable("org") String org)
+	{
+		List<ICIPDatasourceFilterDTO> results = fedModelService.getModelFilters(org);
+		String response = new JSONArray(results).toString();
+		return ResponseEntity.status(200).body(response);
+	}
 	
 	@GetMapping("/models/count/{org}")
 	public ResponseEntity<Long> getAllModelsCount(@PathVariable(name = "org") String org,
-			@RequestParam(name = "modelname", required = false) String modelName,
-			@RequestParam(name = "version", required = false) String version,
-			@RequestParam(name = "type", required = false) String modelType) {
-		
-		Long results = fedModelService.getAllModelsCountByOrganisationOptionals(modelName, version, modelType, org);
+			@RequestParam(name = "connectionname", required = false) String connectionName,
+			@RequestParam(name = "searchquery", required = false) String searchQuery) {
+		Long results = fedModelService.getAllModelsCountByOrganisationOptionals(org, connectionName, searchQuery);
 		return ResponseEntity.status(200).body(results);
 	}
 
@@ -904,10 +910,12 @@ public class ICIPMlopsController {
 			@RequestParam(name = "modelid", required = true) int modelId,
 			@RequestParam(name = "project", required = true) String project) throws IOException {
 		ICIPMLFederatedModelDS response = fedModelService.getModelByModelId(modelId, project);
-		if (response != null)
+		if (response != null) {
 			return ResponseEntity.status(200).body(new JSONObject(response).toString());
-		else
+		}
+		else {
 			return ResponseEntity.status(500).body("");
+		}
 	}
 
 	@PostMapping("/models/updateModel")
