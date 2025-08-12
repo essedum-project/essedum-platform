@@ -349,12 +349,15 @@
                   <td>{{ role.projectId!==null ? role.projectId: '-'}}</td>
                   <td>{{ role.description ||'-'}}</td>
                   <td>
-                    <mat-icon [matTooltip]="'Info'" matTooltipPosition="above"
+                    <!-- <mat-icon [matTooltip]="'Info'" matTooltipPosition="above"
                       class="header-action-icon">info</mat-icon>
                     <mat-icon [matTooltip]="'Edit'" matTooltipPosition="above"
                       class="header-action-icon">edit</mat-icon>
                     <mat-icon [matTooltip]="'Delete'" matTooltipPosition="above"
-                      class="header-action-icon">delete</mat-icon>
+                      class="header-action-icon">delete</mat-icon> -->
+                                              <i class="fa fa-info-circle fa-lg selector-669-71 header-action-icon" aria-hidden="true" matTooltip="View Role" *ngIf="viewFlag" (click)="viewRole(role)"></i>
+                        <i class="fa fa-pencil fa-lg selector-669-72 header-action-icon" aria-hidden="true" matTooltip="Edit Role" (click)="editRole(role)" style="padding-left: 5px" *ngIf="editFlag"></i>
+                        <i class="fa fa-trash fa-lg selector-669-73 header-action-icon" aria-hidden="true" style="padding-left: 5px" matTooltip="Delete Role" (click)="deleteRole(role)" *ngIf="deleteFlag"></i>
                   </td>
 
                 </tr>
