@@ -22,6 +22,7 @@ import { IampUsmService } from "../../iamp-usm.service";
 import { Role } from "../../models/role";
 import { MatSelectChange } from "@angular/material/select";
 import { start } from "repl";
+import { RoleDetailComponent } from "../role-detail/role-detail.component";
 // import { OpenTelemetryService } from "../../telemetry-util/open-telemetry.service";
 @Component({
   templateUrl: "role-list.component.html",
@@ -90,6 +91,7 @@ export class RoleListComponent implements OnInit, OnDestroy {
     private userProjectRoleService: UserProjectRoleService,
     public projectService: ProjectService,
     public confirmDeleteDialog: MatDialog,
+    public dialog:MatDialog,
     private messageService: MessageService,
     // private telemetryService: LeapTelemetryService,
     private usmService: IampUsmService,
@@ -598,8 +600,22 @@ updateRole() {
 }
 
 createView() {
-  this.router.navigate(["../create"], { relativeTo: this.route });
-}
+  // this.router.navigate(["./role/create"], { relativeTo: this.route });
+   const dialogRef = this.dialog.open(RoleDetailComponent, {
+      height: "67%",
+      width: "50%",
+      disableClose: false,
+      data: {
+        edit: false,
+      },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // this.refresh();
+      }
+    });
+  }
+
 
 editRole(role: Role) {
   this.router.navigate(["../edit", role.id], { relativeTo: this.route });

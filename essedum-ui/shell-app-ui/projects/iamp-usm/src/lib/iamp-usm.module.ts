@@ -28,9 +28,12 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { NgxMatSelectSearchModule } from "ngx-mat-select-search";
 import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { IampUsmService } from "./iamp-usm.service";
+import { HelperService } from "./services/helper.service";
+import { UsersService } from "./services/users.service";
 
 import { SecretsComponent } from './components/secrets/secrets.component';
 import { RoleListComponent } from "./components/role-list/role-list.component";
+import { RoleDetailComponent } from "./components/role-detail/role-detail.component";
 import { AipHeaderComponent } from "./components/aip-header/aip-header.component";
 import { MatTableModule } from "@angular/material/table";
 import { MatTreeModule } from "@angular/material/tree";
@@ -80,6 +83,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
   IampUsmComponent,
         SecretsComponent,
         RoleListComponent, 
+        RoleDetailComponent,
         AipHeaderComponent,
 
       
@@ -87,7 +91,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
     ],
     providers: [
 
-        MessageService,RoleService,ProjectService,UserProjectRoleService,
+        MessageService,RoleService,ProjectService,UserProjectRoleService,HelperService,UsersService,
 
         { provide: BusyConfig, useFactory: busyConfigFactory },
         IampUsmService,
@@ -95,7 +99,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
      
         
     ],
-    exports: [IampUsmComponent,SecretsComponent,RoleListComponent],
+    exports: [IampUsmComponent,SecretsComponent,RoleListComponent, RoleDetailComponent],
     // entryComponents: [ConfirmDeleteDialogComponent, ConfirmProjectDeleteDialogComponent,ConfirmRevokeDialogComponent,ConfirmRegenerateDialogComponent,],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
