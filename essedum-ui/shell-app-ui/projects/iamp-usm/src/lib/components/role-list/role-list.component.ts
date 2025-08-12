@@ -146,7 +146,7 @@ export class RoleListComponent implements OnInit, OnDestroy {
         });
       }
     );
-    // this.fetchRole();
+    this.fetchRole();
     this.rolesResponse = {
       "totalPages": 1,
       "totalElements": 14,
