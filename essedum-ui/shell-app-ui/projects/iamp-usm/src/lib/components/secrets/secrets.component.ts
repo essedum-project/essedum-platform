@@ -24,7 +24,7 @@ export class SecretsComponent {
   showList: boolean = true;
   dashConstantList: MatTableDataSource<any> = new MatTableDataSource();
 
-  displayedColumns: string[] = ["id", "keys", "actions"];
+  displayedColumns: string[] = ['#', "Id", "Keys", "Actions"];
   showCreate: boolean = false;
   configureTheme: boolean = false;
   edit: boolean = false;
@@ -54,14 +54,14 @@ export class SecretsComponent {
   pageNumberChanged: boolean = true;
   lastRefreshedTime: Date | null = null;
   pagedRoles: any[] = [];
-
+  secretContent: any = [];
+  organization: string;
+  filterKey = "";
+  hoverStates: boolean[] = [];
   page: number = 0;
   rowsPerPage: number = 5;
   totalrecords: number = 0;
   lastPage: number = 0;
-  secretContent: any = [];
-  organization: string;
-  filterKey = "";
 
   constructor(
     private router: Router,
@@ -399,43 +399,6 @@ export class SecretsComponent {
     setTimeout(() => {
       this.getList();
     }, 500);
-  }
-
-  // PAGINATION BLOCK START
-  updatePagination() {
-    const totalPages = Math.ceil(this.totalrecords / this.rowsPerPage);
-    this.lastPage = Math.max(totalPages - 1, 0);
-    if (this.page > this.lastPage) {
-      this.page = this.lastPage;
-    }
-    this.updatePagedData();
-  }
-
-  updatePagedData() {
-    const startIndex = this.page * this.rowsPerPage;
-    const endIndex = Math.min(startIndex + this.rowsPerPage, this.totalrecords);
-    this.pagedRoles = this.dashConstantList.data.slice(startIndex, endIndex);
-    this.lastPage = Math.floor(
-      (this.dashConstantList.data.length - 1) / this.rowsPerPage
-    );
-  }
-
-  getPageNumbers() {
-    const totalPages = this.lastPage + 1;
-    return Array.from({ length: totalPages }, (_, i) => i);
-  }
-
-  navigatePage(direction: "Prev" | "Next") {
-    if (direction === "Prev" && this.page > 0) {
-      this.page--;
-    } else if (direction === "Next" && this.page < this.lastPage) {
-      this.page++;
-    }
-    this.updatePagedData();
-  }
-
-  searchSecret() {
-    alert("search clicked..");
   }
 
   lastRefreshTime() {
