@@ -24,7 +24,7 @@ export class SecretsComponent {
   showList: boolean = true;
   dashConstantList: MatTableDataSource<any> = new MatTableDataSource();
 
-  displayedColumns: string[] = ['#', "Id", "Keys", "Actions"];
+  displayedColumns: string[] = ["#", "Id", "Keys", "Actions"];
   showCreate: boolean = false;
   configureTheme: boolean = false;
   edit: boolean = false;
@@ -107,6 +107,7 @@ export class SecretsComponent {
     }
     console.log("data", this.data);
     this.dashConstantList = this.data;
+    this.lastRefreshTime();
   }
 
   indexChanged() {
@@ -407,4 +408,7 @@ export class SecretsComponent {
     }, 1000);
   }
 
+  getRowNumber(index: number): number {
+    return this.pageNumber * this.rowsPerPage + index + 1 - this.rowsPerPage;
+  }
 }
