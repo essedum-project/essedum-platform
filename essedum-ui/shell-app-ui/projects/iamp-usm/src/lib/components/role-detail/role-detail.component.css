@@ -124,7 +124,7 @@ body {
   color: #0052cc !important;
 }
 
-::ng-deep .save-btn {
+.save-btn {
   color: #ffffff !important;
   height: 30px !important;
   min-height: 30px !important;

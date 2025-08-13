@@ -17,7 +17,7 @@ import { UsmPortfolio } from "../../models/usm-portfolio";
 import { Subscription } from "rxjs";
 import { IampUsmService } from "../../iamp-usm.service";
 // import { LeapTelemetryService } from "../../telemetry-util/telemetry.service";
-// import { UsmPortfolioService } from "../../services/usm-portfolio.service";
+import { UsmPortfolioService } from "../../services/usm-portfolio.service";
 @Component({
   selector: 'lib-role-detail',
   templateUrl: './role-detail.component.html',
@@ -67,7 +67,7 @@ export class RoleDetailComponent implements OnInit {
     // private usersService: UsersService,
     private usmService: IampUsmService,
     // private telemetryService: LeapTelemetryService,
-    // private usm_portfolio: UsmPortfolioService
+    private usm_portfolio: UsmPortfolioService,
      public dialogRef: MatDialogRef<RoleDetailComponent>,
     public dialog: MatDialog,
    @Inject(MAT_DIALOG_DATA) public data: any
@@ -252,28 +252,29 @@ export class RoleDetailComponent implements OnInit {
   getid() {
     
     this.usm_portfolio_idObject = null;
-    // this.usm_portfolio
-    //   .findAll(this.usm_portfolio_idObject, {
-    //     first: 0,
-    //     rows: 1000,
-    //     sortField: null,
-    //     sortOrder: null,
-    //   })
-    //   .subscribe(
-    //     (pageResponse) => {
-    //       this.usm_portfolio_idArray = pageResponse.content;
-    //       this.usm_portfolio_idArray = this.usm_portfolio_idArray.filter((ele) => {
-    //         return ele.portfolioName != "Core";
-    //       })
-    //       this.usm_portfolio_idArray = this.usm_portfolio_idArray.sort((a, b) =>
-    //         a.portfolioName.toLowerCase() > b.portfolioName.toLowerCase() ? 1 : -1
-    //       );
-    //     },
-    //     (error) => this.messageService.error("Could not get the results", error)
-    //   );
+    this.usm_portfolio
+      .findAll(this.usm_portfolio_idObject, {
+        first: 0,
+        rows: 1000,
+        sortField: null,
+        sortOrder: null,
+      })
+      .subscribe(
+        (pageResponse) => {
+          this.usm_portfolio_idArray = pageResponse.content;
+          this.usm_portfolio_idArray = this.usm_portfolio_idArray.filter((ele) => {
+            return ele.portfolioName != "Core";
+          })
+          this.usm_portfolio_idArray = this.usm_portfolio_idArray.sort((a, b) =>
+            a.portfolioName.toLowerCase() > b.portfolioName.toLowerCase() ? 1 : -1
+          );
+        },
+        (error) => this.messageService.error("Could not get the results", error)
+      );
   }
 
   check(tool) {
+    console.log(tool)
     if (this.role && this.role.name) {
       this.role.name = this.role.name.trim();
     }
@@ -319,15 +320,15 @@ export class RoleDetailComponent implements OnInit {
     if (this.edit) {
       this.onUpdate();
     } else {
-      let arr1 = this.rolesArray.filter((item) => item.name != undefined);
-      let arr2 = arr1.filter((item) => item.name.toLowerCase() == this.role.name.toLowerCase());
-      if (arr2.length > 0) {
+      let arr1 = this.rolesArray?.filter((item) => item.name != undefined);
+      let arr2 = arr1?.filter((item) => item.name.toLowerCase() == this.role.name.toLowerCase());
+      if (arr2?.length > 0) {
         this.messageService.error("Role already exists", "IAMP");
         return;
       } else {
-        if (sessionStorage.getItem("telemetry") == "true") {
+        // if (sessionStorage.getItem("telemetry") == "true") {
         // this.telemetryService.audit(this.role,"CREATE");
-        }
+        // }
         this.busy = this.roleService.create(this.role).subscribe((roles) => {
           this.role = new Role();
           this.displayProjectDropdown = false;

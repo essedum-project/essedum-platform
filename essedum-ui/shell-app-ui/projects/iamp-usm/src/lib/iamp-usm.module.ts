@@ -2,6 +2,7 @@ import { NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from "@angular/cor
 import { NgBusyModule, BusyConfig } from "ng-busy";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MessageService } from "./services/message.service";
+import { UsmPortfolioService } from "./services/usm-portfolio.service";
 import { RoleService } from "./services/role.service";
 import { UserProjectRoleService } from "./services/user-project-role.service";
 import { ProjectService } from "./services/project.service";
@@ -91,7 +92,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
     ],
     providers: [
 
-        MessageService,RoleService,ProjectService,UserProjectRoleService,HelperService,UsersService,
+        MessageService,RoleService,ProjectService,UserProjectRoleService,HelperService,UsersService,UsmPortfolioService,
 
         { provide: BusyConfig, useFactory: busyConfigFactory },
         IampUsmService,

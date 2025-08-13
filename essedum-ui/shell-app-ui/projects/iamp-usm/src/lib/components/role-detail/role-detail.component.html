@@ -136,15 +136,17 @@
                 </button>
             </div>
         </div>
-        <mat-card>
+        <mat-card #roleForm="ngForm" ngForm="">
             <div class="lfx-u-pad-t-32 lfx-u-pad-r-24 p-20">
                 <div class="row rwMAr selector-668-15">
                     <div class="col-md-6 selector-668-16">
                         <div>
                             <mat-form-field appearance="fill" style="width: 90%" floatLabel="always">
                                 <mat-label class="mat-style-label">Role</mat-label>
-                                <input matInput class="ml-4" [disabled]="edit || view" placeholder="Enter Role..."
-                                    [(ngModel)]="role.name" required />
+                                <!-- <input matInput class="ml-4" [disabled]="edit || view" placeholder="Enter Role..."
+                                    [(ngModel)]="role.name" required /> -->
+                                                <input matInput class="ml-4" [disabled]="view" placeholder="Enter Role..." type="text"  maxlength="255" required="" [ngModelOptions]="{ standalone: true }" [(ngModel)]="role.name" (keyup)="checkNameMaxLength()" />
+
                                 <span class="error selector-668-19" style="font-size: 1.6vmin">
                                     Note: Alpha numeric and special characters -_. allowed </span><br
                                     class="selector-668-20" />
@@ -157,8 +159,10 @@
                         <div>
                             <mat-form-field appearance="fill" style="width: 90%" floatLabel="always">
                                 <mat-label class="mat-style-label">Role Description</mat-label>
-                                <input matInput class="ml-4" [disabled]="edit || view"
-                                    placeholder="Enter Description..." [(ngModel)]="role.description" required />
+                                <!-- <input matInput class="ml-4" [disabled]="edit || view"
+                                    placeholder="Enter Description..." [(ngModel)]="role.description" required /> -->
+                                                <input matInput class="ml-4" [disabled]="view" placeholder="Enter Description..." type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="role.description" maxlength="255" (keyup)="checkDescMaxLength()" />
+
                                 <span class="error selector-668-19" style="font-size: 1.6vmin">
                                     Note: Alpha numeric and special characters -_. allowed </span><br
                                     class="selector-668-20" />
@@ -234,7 +238,7 @@
                     </div>
                 </div>
             </div>
-                 <div class="d-flex lfx-u-mar-b-16 ml-24" *ngIf="!view">
+                            <div class="flex lfx-u-mar-b-16 ml-24" *ngIf="!view">
                 <button *ngIf="!edit &amp;&amp; !view" (click)="check(role)" [disabled]="!roleForm.form.valid" mat-raised-button class="save-btn">
                     Save Role
                 </button>
@@ -246,6 +250,20 @@
                     Cancel
                 </button>
             </div>
+        
         </mat-card>
+ 
     </div>
+      <div *ngIf="edit || view" class="selector-668-46">
+    <mat-tab-group class="selector-668-47">
+      <mat-tab label="Portfolio-Project-User" class="selector-668-48">
+        <user-project-role-list *ngIf="role.id" [selectedRole]="role" class="selector-668-49"></user-project-role-list>
+      </mat-tab>
+      <mat-tab label="Role-Role" class="selector-663-168">
+        <lib-role-role *ngIf="role.id" [selectedRole]="role" class="selector-668-49">
+        </lib-role-role>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
 </div>
+        
