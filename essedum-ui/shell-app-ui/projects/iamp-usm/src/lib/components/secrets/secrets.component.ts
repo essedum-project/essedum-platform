@@ -78,7 +78,12 @@ export class SecretsComponent {
   }
 
   ngOnInit() {
-    this.organization = sessionStorage.getItem("organization");
+    try {
+      this.organization = sessionStorage.getItem("organization");
+    } catch (e) {
+      this.organization = null;
+      console.error("Unable to access sessionStorage:", e);
+    }
     this.pageSize = this.itemsPerPage[0];
     this.pageNumber = 1;
     this.getCount();
