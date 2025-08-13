@@ -44,6 +44,7 @@ import { Subscription } from "rxjs";
 import { IampUsmService } from "../../iamp-usm.service";
 import { Project } from "../../models/project";
 import { ProjectService } from "../../services/project.service";
+import { UsmPortfolioAddComponent } from "./usm-portfolio-add/usm-portfolio-add.component";
 
 @Component({
   templateUrl: "usm-portfolio-list-view.component.html",
@@ -85,12 +86,12 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
   ProjectList: MatTableDataSource<any>;
 
   //foreign key dependencies
-  changeDetectionRef: ChangeDetectorRef;
-  constructor(
+  changeDetectionRef: ChangeDetectorRef;  constructor(
     public router: Router,
     public messageService: MessageService,
     public confirmDeleteDialog: MatDialog,
     public confirmDialog: MatDialog,
+    public dialog: MatDialog,
     public helperService: HelperService,
     private route: ActivatedRoute,
     public usmPortfolioService: UsmPortfolioService,
@@ -246,59 +247,160 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
     else this.router.navigate(["../"], { relativeTo: this.route });
   }
 
-  showUsmPortfolioList() { }
-
-  getUsmPortfolios(id) {
-    this.usmPortfolioService.getUsmPortfolio(id).subscribe((res) => {
-      this.currentUsmPortfolio = res;
-      this.usmPortfolio = res;
-      this.exampleProject.portfolioId = this.usmPortfolio;
-      this.projectService.findAll(this.exampleProject, this.lazyload).subscribe(
-      (pageResponse) => {
-        (this.currentPageProject = pageResponse),
-          (this.projects = this.currentPageProject.content.sort((a, b) =>
-            a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
-          ));
-        this.projects = this.currentPageProject.content;
-        this.projectsCopy = this.projects;
-        this.ProjectList = new MatTableDataSource(this.currentPageProject.content);
-        this.length=this.projects.length;
-        this.ProjectList.paginator = this.paginator1;
-
+  showUsmPortfolioList() { }  getUsmPortfolios(id) {
+    console.log("Getting portfolio with ID:", id);
+    this.busy = this.usmPortfolioService.getUsmPortfolio(id).subscribe(
+      (res) => {
+        console.log("Portfolio data received:", res);
+        this.currentUsmPortfolio = res;
+        this.usmPortfolio = res;
+        this.exampleProject.portfolioId = this.usmPortfolio;
+        
+        console.log("Fetching projects for portfolio ID:", id);
+        this.projectService.findAll(this.exampleProject, this.lazyload).subscribe(
+          (pageResponse) => {
+            console.log("Project data received:", pageResponse);
+            this.currentPageProject = pageResponse;
+            this.projects = this.currentPageProject.content.sort((a, b) =>
+              a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+            );
+            this.projectsCopy = this.projects;
+            this.ProjectList = new MatTableDataSource(this.currentPageProject.content);
+            this.length = this.projects.length;
+            this.ProjectList.paginator = this.paginator1;
+            console.log("Projects processed, count:", this.projects.length);
+          },
+          (error) => {
+            console.error("Error loading projects:", error);
+            this.messageService.error("Could not get the projects", "IAMP");
+            // Initialize with empty array to prevent null reference errors
+            this.projects = [];
+            this.projectsCopy = [];
+            this.ProjectList = new MatTableDataSource([]);
+          }
+        );
       },
-      (error) => this.messageService.error("Could not get the results", "IAMP")
+      (error) => {
+        console.error("Error loading portfolio:", error);
+        this.messageService.error("Could not load portfolio details", "IAMP");
+        // Reset data on error
+        this.currentUsmPortfolio = new UsmPortfolio();
+        this.projects = [];
+      }
     );
-    });
-
-
-  }
-
-  editUsmPortfolio(usmPortfolio: UsmPortfolio) {
+  }  editUsmPortfolio(usmPortfolio: UsmPortfolio) {
     sessionStorage.setItem("usmPortfolioid", usmPortfolio.id.toString());
     sessionStorage.setItem("pageview", "usmPortfolio");
-    if (window.location.href.includes("true") || window.location.href.includes("false")) {
-      this.router.navigate(["./" + usmPortfolio.id + "/" + false], { relativeTo: this.route });
-    } else {
-      this.router.navigate(["./" + usmPortfolio.id + "/" + false], { relativeTo: this.route });
-    }
-  }
+    
+    // First get the full portfolio data
+    this.getUsmPortfolios(usmPortfolio.id);
+    
+    // Wait a bit to ensure data is loaded
+    setTimeout(() => {
+      console.log("Opening edit dialog with projects:", this.projects);
+      const dialogRef = this.dialog.open(UsmPortfolioAddComponent, {
+         height: "80%",
+      width: "70%",
+      disableClose: true,
+        data: {
+          mode: 'edit',
+          portfolio: this.currentUsmPortfolio,
+          projectList: this.projects
+        }
+      });
 
-  view_UsmPortfolio(usmPortfolio: UsmPortfolio) {
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          this.fetchWave(null);
+          this.lastRefreshTime();
+        }
+      });
+    }, 300);
+  }  view_UsmPortfolio(usmPortfolio: UsmPortfolio) {
     sessionStorage.setItem("usmPortfolioid", usmPortfolio.id.toString());
     sessionStorage.setItem("pageview", "usmPortfolio");
-    if (window.location.href.includes("true") || window.location.href.includes("false")) {
-      this.router.navigate(["./" + usmPortfolio.id + "/" + true], { relativeTo: this.route });
-    } else {
-      this.router.navigate(["./" + usmPortfolio.id + "/" + true], { relativeTo: this.route });
-    }
-  }
+    
+    // First get the full portfolio data
+    this.getUsmPortfolios(usmPortfolio.id);
+    
+    // Wait a bit to ensure data is loaded
+    setTimeout(() => {      console.log("Opening view dialog with projects:", this.projects);        const dialogRef = this.dialog.open(UsmPortfolioAddComponent, {
+        height: "600px",  // Use fixed height
+        width: "800px",   // Use fixed width
+        disableClose: true,
+        panelClass: ["portfolio-dialog", "mat-elevation-z8"],
+        autoFocus: false, // Prevent autofocus to avoid scroll issues
+        data: {
+          mode: 'view',
+          portfolio: this.currentUsmPortfolio,
+          projectList: this.projects
+        }
+      });
 
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          this.fetchWave(null);
+          this.lastRefreshTime();
+        }
+      });
+    }, 300);
+  }
   createView() {
     if (window.location.href.includes("true") || window.location.href.includes("false")) {
       this.router.navigate(["./create"], { relativeTo: this.route });
     } else {
       this.router.navigate(["./create"], { relativeTo: this.route });
     }
+  }
+    createPortfolioKey() {
+    // Get all projects first
+    this.exampleProject = new Project();
+    this.projectService.findAll(this.exampleProject, this.lazyload).subscribe(
+      (pageResponse) => {
+        this.projects = pageResponse.content.sort((a, b) =>
+          a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+        );
+        
+        const dialogRef = this.dialog.open(UsmPortfolioAddComponent, {
+          height: "67%",
+          width: "50%",
+          disableClose: true,
+          data: {
+            mode: 'create',
+            projectList: this.projects
+          },
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+          if (result) {
+            this.fetchWave(null);
+            this.lastRefreshTime();
+          }
+        });
+      },
+      (error) => {
+        console.error("Error loading projects:", error);
+        this.messageService.error("Could not get the projects", "IAMP");
+        
+        // Open dialog even if projects fail to load
+        const dialogRef = this.dialog.open(UsmPortfolioAddComponent, {
+          height: "67%",
+          width: "50%",
+          disableClose: true,
+          data: {
+            mode: 'create',
+            projectList: []
+          },
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+          if (result) {
+            this.fetchWave(null);
+            this.lastRefreshTime();
+          }
+        });
+      }
+    );
   }
   onSave() {
     if (this.usmPortfolio && this.usmPortfolio.portfolioName) {
@@ -534,7 +636,10 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
       disableClose: true,
       data: {
         title: "Delete Portfolio",
-        message: "Are you sure you want to delete?",
+         message:
+          "Are you sure do you want to delete the portfolio named '" +
+          rowData.portfolioName +
+          " ?",
       },
     });
     dialogRef.afterClosed().subscribe((result) => {
@@ -777,7 +882,6 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
       this.pageChanged.emit(this.pageNumber);
     }
   }
-
 
    rowsPerPageChanged() {
     if (this.pageSize == 0) {

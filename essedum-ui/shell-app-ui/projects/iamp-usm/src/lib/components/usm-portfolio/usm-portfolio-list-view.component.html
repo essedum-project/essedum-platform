@@ -1,9 +1,8 @@
 <!-- NEW LAYOUT -->
 <div class="mt-26">
   <div class="aip-container lfx-u-pad-lr-30">
-    <!-- Header Section -->    <!-- Header -->
-    <app-aip-header [cardTitle]="title" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="true"
-      (search)="filterItem($event)" (refresh)="ngOnInit()" (add)="createView()">
+    <!-- Header Section -->    <!-- Header -->    <app-aip-header [cardTitle]="title" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="true"
+      (search)="filterItem($event)" (refresh)="ngOnInit()" (add)="createPortfolioKey()">
     </app-aip-header>
 
     <div>

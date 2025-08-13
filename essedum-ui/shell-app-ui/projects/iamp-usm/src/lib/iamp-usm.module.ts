@@ -32,6 +32,8 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatCardModule } from "@angular/material/card";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { AipPaginationComponent } from './components/aip-pagination/aip-pagination.component';
+import { UsmPortfolioListViewComponent } from "./components/usm-portfolio/usm-portfolio-list-view.component";
+import { UsmPortfolioAddComponent } from "./components/usm-portfolio/usm-portfolio-add/usm-portfolio-add.component";
 
 @NgModule({
     imports: [
@@ -65,16 +67,17 @@ import { AipPaginationComponent } from './components/aip-pagination/aip-paginati
         SecretsComponent,
         RoleListComponent, 
         AipHeaderComponent,        
-        AipPaginationComponent
-    ],
-    providers: [
+        AipPaginationComponent,
+        UsmPortfolioListViewComponent,
+        UsmPortfolioAddComponent
+    ],    providers: [
         MessageService,RoleService,ProjectService,UserProjectRoleService,
         { provide: BusyConfig, useFactory: busyConfigFactory },
         IampUsmService,
         Ng4LoadingSpinnerService,    
     ],
     exports: [IampUsmComponent,SecretsComponent,RoleListComponent],
-    // entryComponents: [ConfirmDeleteDialogComponent, ConfirmProjectDeleteDialogComponent,ConfirmRevokeDialogComponent,ConfirmRegenerateDialogComponent,],
+   // entryComponents: [UsmPortfolioAddComponent, DeleteComponent],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
 export class IampUsmModule { }
