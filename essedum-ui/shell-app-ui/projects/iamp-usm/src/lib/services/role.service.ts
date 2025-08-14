@@ -18,8 +18,30 @@ export class RoleService {
 
   create(role: Role): Observable<Role> {
     const copy = this.convert(role);
+        let req = new PageRequestByExample(role, event);
+    let body;
+    let headerValue;
+    try {
+      body = JSON.stringify(req);
+      headerValue = Buffer.from(body, 'utf8').toString('base64');
+    } catch (e : any)  {
+      console.error("JSON.stringify error - ", e.message);
+    }
+      const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+   const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || '',
+      'example': headerValue 
+    });
     return this.https
-      .post("/api/roles", copy, { observe: "response" })
+      .post("/api/roles", copy, { observe: "response", headers: headers })
       .pipe(
         map((response) => {
           return new Role(response.body);

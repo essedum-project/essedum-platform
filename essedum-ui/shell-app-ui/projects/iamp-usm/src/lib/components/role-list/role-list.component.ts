@@ -91,7 +91,7 @@ export class RoleListComponent implements OnInit, OnDestroy {
     private userProjectRoleService: UserProjectRoleService,
     public projectService: ProjectService,
     public confirmDeleteDialog: MatDialog,
-    public dialog:MatDialog,
+    public dialog: MatDialog,
     private messageService: MessageService,
     // private telemetryService: LeapTelemetryService,
     private usmService: IampUsmService,
@@ -151,10 +151,9 @@ export class RoleListComponent implements OnInit, OnDestroy {
     this.fetchRole();
 
   }
-// PAGINATION BLOCK START
+  // PAGINATION BLOCK START
   updatePagination() {
     const totalPages = Math.ceil(this.totalrecords / this.rowsPerPage);
-    console.log("Total Pages:", totalPages);
     this.lastPage = Math.max(totalPages - 1, 0);
     if (this.page > this.lastPage) {
       this.page = this.lastPage;
@@ -165,301 +164,287 @@ export class RoleListComponent implements OnInit, OnDestroy {
   updatePagedData() {
     const startIndex = this.page * this.rowsPerPage;
     const endIndex = Math.min(startIndex + this.rowsPerPage, this.totalrecords);
-    console.log("rolessss-", this.roles)
     this.pagedRoles = this.roles.slice(startIndex, endIndex);
-    this.lastPage=Math.floor((this.rolesLength-1)/ this.rowsPerPage);
-    console.log("Paged Roles:", this.pagedRoles);
-    console.log("Last Page:", this.lastPage);
+    this.lastPage = Math.floor((this.rolesLength - 1) / this.rowsPerPage);
 
 
   }
   getPageNumbers() {
     const totalPages = this.lastPage + 1;
-    console.log("Total Pages:", totalPages);
     return Array.from({ length: totalPages }, (_, i) => i);
   }
-  navigatePage(direction: 'Prev' | 'Next'){
-    if(direction === 'Prev' && this.page>0){
+  navigatePage(direction: 'Prev' | 'Next') {
+    if (direction === 'Prev' && this.page > 0) {
       this.page--;
-    }else if(direction==='Next' && this.page<this.lastPage){
+    } else if (direction === 'Next' && this.page < this.lastPage) {
       this.page++;
-        }
-        this.updatePagedData();
-  }
-
-changePage(p:number){
- 
-    this.page=p;
+    }
     this.updatePagedData();
-  
-}
-
-// PAGINATION BLOCK ENDS
-telemetryImpression() {
-  // this.telemetryService.impression("iamp-usm", "list", "RoleListComponent");
-  // this.openTelemetryService.startTelemetry("iamp-usm", "RoleListComponent", "list");
-}
-
-ngOnDestroy() {
-  // let activeSpan = this.openTelemetryService.fetchActiveSpan();
-  // this.openTelemetryService.endTelemetry(activeSpan);
-}
-
-setDataSourceAttributes() {
-  this.roleList.paginator = this.paginator;
-  this.roleList.sort = this.sort;
-}
-
-fetchRole() {
-  this.roles = [];
-
-  let allRole = new Role(); /** To check if the project has default roles or not */
-
-  allRole.projectId = null;
-
-  let role: Role;
-  try {
-
-    role = JSON.parse(sessionStorage.getItem("role"));
-    console.log("roleee", role)
-  } catch (e: any) {
-
-    console.error("JSON.parse error - ", e.message);
   }
 
-  let example: Project = new Project();
-  let event = { first: 0, rows: 1000, sortField: null, sortOrder: null };
-  console.log("CAME HEREE-1");
-  this.projectService.findAll(example, event).subscribe(
-    (pageResponse) => {
+  changePage(p: number) {
 
-      this.ProjectList = pageResponse.content;
-        console.log("CAME HEREE-2");
+    this.page = p;
+    this.updatePagedData();
 
-    },
-    (error) => this.messageService.error("Could not get the results", "IAMP"),
-    () => {
-  console.log("CAME HEREE-3");
+  }
 
-      if (role.roleadmin) {
-          console.log("CAME HEREE-4");
+  // PAGINATION BLOCK ENDS
+  telemetryImpression() {
+    // this.telemetryService.impression("iamp-usm", "list", "RoleListComponent");
+    // this.openTelemetryService.startTelemetry("iamp-usm", "RoleListComponent", "list");
+  }
+
+  ngOnDestroy() {
+    // let activeSpan = this.openTelemetryService.fetchActiveSpan();
+    // this.openTelemetryService.endTelemetry(activeSpan);
+  }
+
+  setDataSourceAttributes() {
+    this.roleList.paginator = this.paginator;
+    this.roleList.sort = this.sort;
+  }
+
+  fetchRole() {
+    this.roles = [];
+
+    let allRole = new Role(); /** To check if the project has default roles or not */
+
+    allRole.projectId = null;
+
+    let role: Role;
+    try {
+
+      role = JSON.parse(sessionStorage.getItem("role"));
+    } catch (e: any) {
+
+      console.error("JSON.parse error - ", e.message);
+    }
+
+    let example: Project = new Project();
+    let event = { first: 0, rows: 1000, sortField: null, sortOrder: null };
+    this.projectService.findAll(example, event).subscribe(
+      (pageResponse) => {
+
+        this.ProjectList = pageResponse.content;
+
+      },
+      (error) => this.messageService.error("Could not get the results", "IAMP"),
+      () => {
+
+        if (role.roleadmin) {
 
 
-        let userprojectrole = new UserProjectRole();
+          let userprojectrole = new UserProjectRole();
 
-        let portfolio: UsmPortfolio;
-        let project: Project;
-        let user: Users;
+          let portfolio: UsmPortfolio;
+          let project: Project;
+          let user: Users;
 
-        try {
-  console.log("CAME HEREE-5");
+          try {
 
 
-          portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
-          project = JSON.parse(sessionStorage.getItem("project"));
-          user = JSON.parse(sessionStorage.getItem("user"));
-        } catch (e: any) {
+            portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
+            project = JSON.parse(sessionStorage.getItem("project"));
+            user = JSON.parse(sessionStorage.getItem("user"));
+          } catch (e: any) {
 
-            console.log("CAME HEREE-6");
 
-          portfolio = null;
-          project = null;
-          user = null;
-          console.error("JSON.parse error - ", e.message);
-        }
-
-        userprojectrole.portfolio_id = new UsmPortfolio({ id: portfolio.id });
-        userprojectrole.project_id = new Project({ id: project.id });
-        userprojectrole.user_id = new Users({ id: user.id });
-          console.log("CAME HEREE-7");
-
-        this.roleService.findAll(allRole, this.lazyload).subscribe((res) => {
-          this.rolesArraySorted = [];
-          res.content.forEach((item) => {
-
-            if (item.id != 6) {
-
-              if (!item.roleadmin) {
-
-                if (!(item.projectadmin && item.projectAdminId != project.id)) {
-
-                  this.rolesArraySorted.push(item);
-                }
-              }
-            }
-          });
-          if (portfolio.id == role.portfolioId && role.roleadmin && !role.projectadmin) {
-
-            this.rolesArraySorted.forEach((ele) => {
-
-              if (ele.projectId == project.id) {
-
-                this.portfolioAdminPermsFlag.push(ele.id);
-              }
-              if (ele.projectadmin == true && ele.projectAdminId == project.id) {
-
-                this.portfolioAdminPermsFlag.push(ele.id);
-              }
-            })
+            portfolio = null;
+            project = null;
+            user = null;
+            console.error("JSON.parse error - ", e.message);
           }
 
-          this.computeRole(false);
-        });
-      } else {
+          userprojectrole.portfolio_id = new UsmPortfolio({ id: portfolio.id });
+          userprojectrole.project_id = new Project({ id: project.id });
+          userprojectrole.user_id = new Users({ id: user.id });
 
-console.log("CAME HEREE-8");
-        this.roleService.findAll(allRole, this.lazyload).subscribe(
-          (res) => {
-            console.log("CAME HEREE-9");
-            this.rolesResponse=res;
- this.rolesContent = this.rolesResponse.content;
-    this.totalrecords = this.rolesContent.length;
-            this.rolesArraySorted = res.content;
-            this.computeRole(true);
+          this.roleService.findAll(allRole, this.lazyload).subscribe((res) => {
+            this.rolesArraySorted = [];
+            res.content.forEach((item) => {
 
-          },
-          (error) => this.messageService.error("could not fetch", "IAMP")
-        );
+              if (item.id != 6) {
+
+                if (!item.roleadmin) {
+
+                  if (!(item.projectadmin && item.projectAdminId != project.id)) {
+
+                    this.rolesArraySorted.push(item);
+                  }
+                }
+              }
+            });
+            if (portfolio.id == role.portfolioId && role.roleadmin && !role.projectadmin) {
+
+              this.rolesArraySorted.forEach((ele) => {
+
+                if (ele.projectId == project.id) {
+
+                  this.portfolioAdminPermsFlag.push(ele.id);
+                }
+                if (ele.projectadmin == true && ele.projectAdminId == project.id) {
+
+                  this.portfolioAdminPermsFlag.push(ele.id);
+                }
+              })
+            }
+
+            this.computeRole(false);
+          });
+        } else {
+
+          this.roleService.findAll(allRole, this.lazyload).subscribe(
+            (res) => {
+              this.rolesResponse = res;
+              this.rolesContent = this.rolesResponse.content;
+              this.totalrecords = this.rolesContent.length;
+              this.rolesArraySorted = res.content;
+              this.computeRole(true);
+
+            },
+            (error) => this.messageService.error("could not fetch", "IAMP")
+          );
+        }
       }
+    );
+  }
+
+  checkPerms(roleSent: any) {
+    let role: Role;
+    let portfolio: UsmPortfolio;
+    try {
+      role = JSON.parse(sessionStorage.getItem("role"));
+      portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
+    } catch (e: any) {
+      console.error("JSON.parse error - ", e.message);
     }
-  );
-}
+    if (role.name == "Admin" || (role.roleadmin && role.portfolioId != portfolio.id)) {
+      return true;
+    }
 
-checkPerms(roleSent: any) {
-  let role: Role;
-  let portfolio: UsmPortfolio;
-  try {
-    role = JSON.parse(sessionStorage.getItem("role"));
-    portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
-  } catch (e: any) {
-    console.error("JSON.parse error - ", e.message);
-  }
-  if (role.name == "Admin" || (role.roleadmin && role.portfolioId != portfolio.id)) {
-    return true;
+    if (this.portfolioAdminPermsFlag.includes(roleSent.id)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
-  if (this.portfolioAdminPermsFlag.includes(roleSent.id)) {
-    return true;
-  } else {
-    return false;
+  Search() {
+    let newApps = [];
+    if (this.searchedRole == "All" || this.searchedRole == "") {
+      newApps = this.rolesArraySorted;
+    } else {
+      newApps = Object.assign([], this.rolesArraySorted).filter((item1) =>
+        item1.name == null ? "" : item1.name.toLowerCase() == this.searchedRole.toLowerCase()
+      );
+    }
+    if (this.selectedDesc == "All" || this.selectedDesc == "") {
+      newApps = newApps;
+    } else {
+      newApps = newApps.filter(
+        // item1 => item1.description.toLowerCase().indexOf(this.selectedDesc.toLowerCase()) > -1)
+        (item1) =>
+          item1.description == null
+            ? ""
+            : item1.description.toLowerCase().indexOf(this.selectedDesc.toLowerCase()) > -1
+      );
+      // newApps = this.rolePage.content.filter(element => element.description == this.selectedDesc)
+    }
+    this.roles = newApps;
+    this.roleList = new MatTableDataSource(newApps);
+    this.roleList.sort = this.sort;
+    this.roleList.paginator = this.paginator;
+    this.rolesLength = newApps.length;
   }
-}
 
-Search() {
-  let newApps = [];
-  if (this.searchedRole == "All" || this.searchedRole == "") {
-    newApps = this.rolesArraySorted;
-  } else {
-    newApps = Object.assign([], this.rolesArraySorted).filter((item1) =>
-      item1.name == null ? "" : item1.name.toLowerCase() == this.searchedRole.toLowerCase()
+  Refresh() {
+    this.fetchRole();
+  }
+
+  clearRole() {
+    this.selectedDesc = "All";
+    this.searchedRole = "All";
+    this.myInputReference.nativeElement.value = null;
+    let newapps = [];
+    newapps = this.rolesArraySorted;
+    this.roles = newapps;
+    this.roleList = new MatTableDataSource(newapps);
+    this.roleList.sort = this.sort;
+    this.roleList.paginator = this.paginator;
+    this.rolesLength = newapps.length;
+  }
+
+  assignCopy() {
+    this.roles = Object.assign([], this.rolesArraySorted);
+  }
+  toggleFilterExpanded(): void {
+    this.isFilterExpanded = !this.isFilterExpanded;
+  }
+  toggleExpand(): void {
+    this.toggleFilterExpanded();
+  }
+  hasActiveFilters(): boolean {
+    return this.selectedAdapterType.length > 0;
+  }
+  getActiveFilterSummary(): string {
+    return this.hasActiveFilters() ? this.selectedAdapterType.join(', ') : '';
+
+  }
+  pipelineTypeSelected(event: MatSelectChange): void {
+    const selectedValue = event.value;
+    if (!selectedValue) {
+      this.clearAllFilters('Role');
+      return;
+    }
+    if (!this.selectedAdapterType.includes(selectedValue)) {
+      this.selectedAdapterType.push(selectedValue);
+    }
+    this.rolesFilter = this.rolesFilter.map(option => ({
+      ...option,
+      selected: option.label === selectedValue
+    })
+
     );
   }
-  if (this.selectedDesc == "All" || this.selectedDesc == "") {
-    newApps = newApps;
-  } else {
-    newApps = newApps.filter(
-      // item1 => item1.description.toLowerCase().indexOf(this.selectedDesc.toLowerCase()) > -1)
-      (item1) =>
-        item1.description == null
-          ? ""
-          : item1.description.toLowerCase().indexOf(this.selectedDesc.toLowerCase()) > -1
+  clearAllFilters(filtertype: string): void {
+    if (filtertype === 'Role') {
+      this.selectedAdapterType = [];
+      this.rolesFilter = this.rolesFilter.map(option => ({ ...option, selected: false }));
+    }
+  }
+  removePipelineType(type: string): void {
+    this.selectedAdapterType = this.selectedAdapterType.filter(t => t !== type);
+    this.rolesFilter = this.rolesFilter.map(Option => ({
+      ...Option,
+      selected: Option.label === type ? false : Option.selected
+    }));
+  }
+  filterItem(value) {
+    if (!value) {
+      this.assignCopy();
+    }
+    this.roles = Object.assign([], this.rolesArraySorted).filter(
+      (item1) => item1.name.toLowerCase().indexOf(value.toLowerCase()) > -1
     );
-    // newApps = this.rolePage.content.filter(element => element.description == this.selectedDesc)
+    this.roleList = new MatTableDataSource(this.roles);
+    this.roleList.sort = this.sort;
+    this.roleList.paginator = this.paginator;
   }
-  this.roles = newApps;
-  this.roleList = new MatTableDataSource(newApps);
-  this.roleList.sort = this.sort;
-  this.roleList.paginator = this.paginator;
-  this.rolesLength = newApps.length;
-}
 
-Refresh() {
-  this.fetchRole();
-}
-
-clearRole() {
-  this.selectedDesc = "All";
-  this.searchedRole = "All";
-  this.myInputReference.nativeElement.value = null;
-  let newapps = [];
-  newapps = this.rolesArraySorted;
-  this.roles = newapps;
-  this.roleList = new MatTableDataSource(newapps);
-  this.roleList.sort = this.sort;
-  this.roleList.paginator = this.paginator;
-  this.rolesLength = newapps.length;
-}
-
-assignCopy() {
-  this.roles = Object.assign([], this.rolesArraySorted);
-}
-toggleFilterExpanded(): void {
-  this.isFilterExpanded = !this.isFilterExpanded;
-}
-toggleExpand(): void {
-  this.toggleFilterExpanded();
-}
-hasActiveFilters(): boolean {
-  return this.selectedAdapterType.length > 0;
-}
-getActiveFilterSummary(): string {
-  return this.hasActiveFilters() ? this.selectedAdapterType.join(', ') : '';
-
-}
-pipelineTypeSelected(event: MatSelectChange): void {
-  const selectedValue = event.value;
-  if(!selectedValue) {
-    this.clearAllFilters('Role');
-    return;
+  updateRole() {
+    this.roleService.update(this.currentRole).subscribe(
+      (rs) => {
+        this.messageService.info("Role updated successfully", "IAMP");
+        this.clear();
+      },
+      (error) => this.messageService.error("Could not update", "IAMP")
+    );
   }
-    if(!this.selectedAdapterType.includes(selectedValue)) {
-  this.selectedAdapterType.push(selectedValue);
-}
-this.rolesFilter = this.rolesFilter.map(option => ({
-  ...option,
-  selected: option.label === selectedValue
-})
 
-);
-  }
-clearAllFilters(filtertype: string): void {
-  if(filtertype === 'Role') {
-  this.selectedAdapterType = [];
-  this.rolesFilter = this.rolesFilter.map(option => ({ ...option, selected: false }));
-}
-  }
-removePipelineType(type: string): void {
-  this.selectedAdapterType = this.selectedAdapterType.filter(t => t !== type);
-  this.rolesFilter = this.rolesFilter.map(Option => ({
-    ...Option,
-    selected: Option.label === type ? false : Option.selected
-  }));
-}
-filterItem(value) {
-  if (!value) {
-    this.assignCopy();
-  }
-  this.roles = Object.assign([], this.rolesArraySorted).filter(
-    (item1) => item1.name.toLowerCase().indexOf(value.toLowerCase()) > -1
-  );
-  this.roleList = new MatTableDataSource(this.roles);
-  this.roleList.sort = this.sort;
-  this.roleList.paginator = this.paginator;
-}
-
-updateRole() {
-  this.roleService.update(this.currentRole).subscribe(
-    (rs) => {
-      this.messageService.info("Role updated successfully", "IAMP");
-      this.clear();
-    },
-    (error) => this.messageService.error("Could not update", "IAMP")
-  );
-}
-
-createView() {
-  // this.router.navigate(["./role/create"], { relativeTo: this.route });
-   const dialogRef = this.dialog.open(RoleDetailComponent, {
+  createView() {
+    // this.router.navigate(["./role/create"], { relativeTo: this.route });
+    const dialogRef = this.dialog.open(RoleDetailComponent, {
       height: "67%",
       width: "50%",
       disableClose: false,
@@ -468,131 +453,130 @@ createView() {
       },
     });
     dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        // this.refresh();
-      }
+      this.fetchRole();
+
     });
   }
 
 
 
-editRole(role: Role) {
-  // this.router.navigate(["../edit", role.id], { relativeTo: this.route });
+  editRole(role: Role) {
+    // this.router.navigate(["../edit", role.id], { relativeTo: this.route });
     this.router.navigate(["./role/edit", 6], { relativeTo: this.route });
 
-}
-
-viewRole(role: Role) {
-  this.router.navigate(["../view", role.id], { relativeTo: this.route });
-}
-
-clear() {
-  this.role = new Role();
-}
-deleteRole(role: any) {
-  let dialogRef = this.confirmDeleteDialog.open(DeleteComponent, {
-    disableClose: true,
-    data: {
-      title: "Delete Role",
-      message: "Are you sure you want to delete?",
-    },
-  });
-  dialogRef.afterClosed().subscribe(
-    (result) => {
-      if (result === "yes") {
-        this.delete(role);
-      }
-    },
-    (error) => this.messageService.error(error, Msg.APP)
-  );
-}
-delete (role: Role) {
-  this.roleService.delete(role.id).subscribe(
-    (Response) => {
-      if (sessionStorage.getItem("telemetry") == "true") {
-        // this.telemetryService.audit(role,"DELETE");
-      }
-      sessionStorage.setItem("UpdatedUser", "true");
-      this.messageService.info("Role Deleted successfully", "IAMP");
-      this.fetchRole();
-      if (this.myInputReference.nativeElement) {
-        this.myInputReference.nativeElement.value = null;
-      }
-    },
-    (error) => this.messageService.error("Could not delete", "IAMP")
-  );
-}
-compareObjects(o1: any, o2: any): boolean {
-  return o1 && o2 && o1.id == o2.id;
-}
-
-download() {
-  let project: Project;
-  try {
-    project = JSON.parse(sessionStorage.getItem("project"));
-  } catch (e: any) {
-    project = null;
-    console.error("JSON.parse error - ", e.message);
   }
-  var projectID = project.id;
 
-  this.roleService.download(projectID).subscribe((response) => {
-    let fileBlob = response as Blob;
-    importedSaveAs(fileBlob, "Roles.xlsx");
-  });
-}
-checkEnterPressed(event: any, val: any) {
-  if (event.keyCode === 13) {
-    this.filterItem(event.srcElement.value);
+  viewRole(role: Role) {
+    this.router.navigate(["../view", role.id], { relativeTo: this.route });
   }
-}
-computeRole(superadmin) {
-  let project: Project;
-  try {
-    project = JSON.parse(sessionStorage.getItem("project"));
-  } catch (e: any) {
-    project = null;
-    console.error("JSON.parse error - ", e.message);
+
+  clear() {
+    this.role = new Role();
   }
-  let pID: number = project.id;
-  let tempRolesArray = new Array<Role>();
-  this.associatedproject = [];
-  this.rolesArraySorted.forEach((element) => {
-    if (superadmin) tempRolesArray.push(element);
-    else if (element.projectId == pID || element.projectId == null) tempRolesArray.push(element);
-  });
-  this.rolesArraySorted = tempRolesArray;
-  this.rolesArraySorted = this.rolesArraySorted.sort((a, b) =>
-    a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
-  );
-  this.roles = this.rolesArraySorted;
-  this.rolesArraySorted.forEach((element) => {
-    if (element.projectId == null) {
-      element["projectName"] = "Default Role";
-      this.associatedproject.push(element);
-    } else {
-      this.ProjectList.forEach((element1) => {
-        if (element1.id == element.projectId) {
-          element["projectName"] = element1.name;
-          this.associatedproject.push(element);
+  deleteRole(role: any) {
+    let dialogRef = this.confirmDeleteDialog.open(DeleteComponent, {
+      disableClose: true,
+      data: {
+        title: "Delete Role",
+        message: "Are you sure you want to delete?",
+      },
+    });
+    dialogRef.afterClosed().subscribe(
+      (result) => {
+        if (result === "yes") {
+          this.delete(role);
         }
-      });
+      },
+      (error) => this.messageService.error(error, Msg.APP)
+    );
+  }
+  delete(role: Role) {
+    this.roleService.delete(role.id).subscribe(
+      (Response) => {
+        if (sessionStorage.getItem("telemetry") == "true") {
+          // this.telemetryService.audit(role,"DELETE");
+        }
+        sessionStorage.setItem("UpdatedUser", "true");
+        this.messageService.info("Role Deleted successfully", "IAMP");
+        this.fetchRole();
+        if (this.myInputReference.nativeElement) {
+          this.myInputReference.nativeElement.value = null;
+        }
+      },
+      (error) => this.messageService.error("Could not delete", "IAMP")
+    );
+  }
+  compareObjects(o1: any, o2: any): boolean {
+    return o1 && o2 && o1.id == o2.id;
+  }
+
+  download() {
+    let project: Project;
+    try {
+      project = JSON.parse(sessionStorage.getItem("project"));
+    } catch (e: any) {
+      project = null;
+      console.error("JSON.parse error - ", e.message);
     }
-  });
-  this.rolesArraySorted = this.associatedproject;
-  this.rolesLength = this.rolesArraySorted.length;
-  this.rolesArraySorted = this.rolesArraySorted.sort((a, b) =>
-    a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
-  );
-  this.roleList = new MatTableDataSource(this.rolesArraySorted);
-  this.roleList.sort = this.sort;
-  this.roleList.paginator = this.paginator;
-  this.rolesFilter = Object.assign([], this.roles);
+    var projectID = project.id;
+
+    this.roleService.download(projectID).subscribe((response) => {
+      let fileBlob = response as Blob;
+      importedSaveAs(fileBlob, "Roles.xlsx");
+    });
+  }
+  checkEnterPressed(event: any, val: any) {
+    if (event.keyCode === 13) {
+      this.filterItem(event.srcElement.value);
+    }
+  }
+  computeRole(superadmin) {
+    let project: Project;
+    try {
+      project = JSON.parse(sessionStorage.getItem("project"));
+    } catch (e: any) {
+      project = null;
+      console.error("JSON.parse error - ", e.message);
+    }
+    let pID: number = project.id;
+    let tempRolesArray = new Array<Role>();
+    this.associatedproject = [];
+    this.rolesArraySorted.forEach((element) => {
+      if (superadmin) tempRolesArray.push(element);
+      else if (element.projectId == pID || element.projectId == null) tempRolesArray.push(element);
+    });
+    this.rolesArraySorted = tempRolesArray;
+    this.rolesArraySorted = this.rolesArraySorted.sort((a, b) =>
+      a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+    );
+    this.roles = this.rolesArraySorted;
+    this.rolesArraySorted.forEach((element) => {
+      if (element.projectId == null) {
+        element["projectName"] = "Default Role";
+        this.associatedproject.push(element);
+      } else {
+        this.ProjectList.forEach((element1) => {
+          if (element1.id == element.projectId) {
+            element["projectName"] = element1.name;
+            this.associatedproject.push(element);
+          }
+        });
+      }
+    });
+    this.rolesArraySorted = this.associatedproject;
+    this.rolesLength = this.rolesArraySorted.length;
+    this.rolesArraySorted = this.rolesArraySorted.sort((a, b) =>
+      a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+    );
+    this.roleList = new MatTableDataSource(this.rolesArraySorted);
+    this.roleList.sort = this.sort;
+    this.roleList.paginator = this.paginator;
+    this.rolesFilter = Object.assign([], this.roles);
     this.updatePagedData();
 
-}
-trackByMethod(index, item) { }
-showUploadDialog() {
-  this.popup = !this.popup;
-}
+  }
+  trackByMethod(index, item) { }
+  showUploadDialog() {
+    this.popup = !this.popup;
+  }
 }

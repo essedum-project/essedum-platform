@@ -54,7 +54,7 @@ export class RoleDetailComponent implements OnInit {
   portfolioAdminBoolean: boolean = false;
   portfolioIdVar: any;
   disableEditOfDefaultRoles: boolean = false;
-    @Output() roleModelClosed = new EventEmitter<void>();
+  @Output() roleModelClosed = new EventEmitter<void>();
 
   constructor(
     public route: ActivatedRoute,
@@ -68,9 +68,9 @@ export class RoleDetailComponent implements OnInit {
     private usmService: IampUsmService,
     // private telemetryService: LeapTelemetryService,
     private usm_portfolio: UsmPortfolioService,
-     public dialogRef: MatDialogRef<RoleDetailComponent>,
+    public dialogRef: MatDialogRef<RoleDetailComponent>,
     public dialog: MatDialog,
-   @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     dialogRef.disableClose = true;
   }
@@ -80,7 +80,7 @@ export class RoleDetailComponent implements OnInit {
     let role: Role;
     try {
       role = JSON.parse(sessionStorage.getItem("role"));
-    } catch (e : any)  {
+    } catch (e: any) {
       role = null;
       console.error("JSON.parse error - ", e.message);
     }
@@ -101,7 +101,7 @@ export class RoleDetailComponent implements OnInit {
           sessionStorage.setItem("usmAuthority", "");
         }
       },
-      (error) => {},
+      (error) => { },
       () => {
         this.auth = sessionStorage.getItem("usmAuthority");
         this.selectedPermissionList = this.auth.split(",");
@@ -136,23 +136,23 @@ export class RoleDetailComponent implements OnInit {
         this.roleService.getRole(id).subscribe(
           (roles) => {
             this.role = roles;
-            if (this.role.projectId == undefined || this.role.projectId == null){
+            if (this.role.projectId == undefined || this.role.projectId == null) {
               this.displayProjectDropdown = false;
-            } 
+            }
             else {
               this.displayProjectDropdown = true;
             }
-    
-            if(role.name == 'Admin'){
+
+            if (role.name == 'Admin') {
               this.disableEditOfDefaultRoles = false;
             } else {
-              if(this.role.projectId == undefined || this.role.projectId == null){
+              if (this.role.projectId == undefined || this.role.projectId == null) {
                 this.disableEditOfDefaultRoles = true;
-              } else{
+              } else {
                 this.disableEditOfDefaultRoles = false;
               }
             }
-    
+
           },
           (error) => this.messageService.error("Could not fetch role", "IAMP")
         );
@@ -165,7 +165,6 @@ export class RoleDetailComponent implements OnInit {
 
     this.fetchProjects();
     this.getid();
-    console.log(this.role);
     this.params_subscription = this.route.params.subscribe((params) => {
       let id = params["rid"];
       if (id) {
@@ -205,7 +204,7 @@ export class RoleDetailComponent implements OnInit {
     let role: Role;
     try {
       role = JSON.parse(sessionStorage.getItem("role"));
-    } catch (e : any)  {
+    } catch (e: any) {
       role = null;
       console.error("JSON.parse error - ", e.message);
     }
@@ -214,7 +213,7 @@ export class RoleDetailComponent implements OnInit {
       var portfolio: UsmPortfolio;
       try {
         portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
-      } catch (e : any)  {
+      } catch (e: any) {
         portfolio = null;
         console.error("JSON.parse error - ", e.message);
       }
@@ -224,33 +223,33 @@ export class RoleDetailComponent implements OnInit {
     this.projectService.findAll(project, this.lazyload).subscribe((res) => {
       this.projectList = res.content;
       this.projectList = this.projectList.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1));
-      if(role.portfolioId && role.portfolioId == portfolio.id){
+      if (role.portfolioId && role.portfolioId == portfolio.id) {
         this.projectList.forEach(ele => {
-          if(ele.portfolioId.id == role.portfolioId){
+          if (ele.portfolioId.id == role.portfolioId) {
             this.projectListPortfolioAdmin.push(ele);
           }
         })
         this.projectList = this.projectListPortfolioAdmin;
-      }else if((role.portfolioId && role.portfolioId != portfolio.id) || (!role.roleadmin && !role.projectadmin && role.id != 6)){
-        if(!portfolio){
+      } else if ((role.portfolioId && role.portfolioId != portfolio.id) || (!role.roleadmin && !role.projectadmin && role.id != 6)) {
+        if (!portfolio) {
           portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
         }
         this.normalRole = true;
         this.projectList.forEach(ele => {
-          if(ele.portfolioId.id == portfolio.id){
+          if (ele.portfolioId.id == portfolio.id) {
             this.projectListPortfolioAdmin.push(ele);
           }
         })
         this.projectList = this.projectListPortfolioAdmin;
       }
-      this.projectList = this.projectList.filter((ele)=>{
+      this.projectList = this.projectList.filter((ele) => {
         return ele.name != "Core";
       })
     });
   }
 
   getid() {
-    
+
     this.usm_portfolio_idObject = null;
     this.usm_portfolio
       .findAll(this.usm_portfolio_idObject, {
@@ -274,7 +273,6 @@ export class RoleDetailComponent implements OnInit {
   }
 
   check(tool) {
-    console.log(tool)
     if (this.role && this.role.name) {
       this.role.name = this.role.name.trim();
     }
@@ -289,8 +287,8 @@ export class RoleDetailComponent implements OnInit {
     // else if (tool.permission == undefined || tool.permission == null) {
     //   this.messageService.info("Type of access can't be empty", "IAMP");
     // }
-    else if(tool.projectadmin==true && !tool.projectAdminId){
-      this.messageService.info("Please select the project","IAMP")
+    else if (tool.projectadmin == true && !tool.projectAdminId) {
+      this.messageService.info("Please select the project", "IAMP")
     }
     else {
       if (this.displayProjectDropdown == false)
@@ -316,7 +314,7 @@ export class RoleDetailComponent implements OnInit {
     }
   }
   onSave() {
-    this.role.permission=false;
+    this.role.permission = false;
     if (this.edit) {
       this.onUpdate();
     } else {
@@ -333,18 +331,18 @@ export class RoleDetailComponent implements OnInit {
           this.role = new Role();
           this.displayProjectDropdown = false;
           this.messageService.info("Role created", "IAMP");
-          this.listView();
+          this.closeRoleAddDialog();
         });
       }
     }
   }
-  compareTodiff(curr:any,prev:any){
-    let temparr=[];
+  compareTodiff(curr: any, prev: any) {
+    let temparr = [];
     Object.keys(prev).forEach(key => {
-    if(prev[key]!=curr[key])
-    temparr.push(key)
-   });
-   return temparr;
+      if (prev[key] != curr[key])
+        temparr.push(key)
+    });
+    return temparr;
   }
   onUpdate() {
     this.allRole.projectId = null;
@@ -357,12 +355,12 @@ export class RoleDetailComponent implements OnInit {
       return;
     } else {
       if (sessionStorage.getItem("telemetry") == "true") {
-      let arr = this.rolesArray.filter(
-        (item) =>
-          item.id == this.role.id
-      );
-      let diff=this.compareTodiff(this.role,arr1[0])
-      // this.telemetryService.audit(this.role,arr[0],diff);
+        let arr = this.rolesArray.filter(
+          (item) =>
+            item.id == this.role.id
+        );
+        let diff = this.compareTodiff(this.role, arr1[0])
+        // this.telemetryService.audit(this.role,arr[0],diff);
       }
       this.busy = this.roleService.update(this.role).subscribe(
         (roles) => {
@@ -373,7 +371,7 @@ export class RoleDetailComponent implements OnInit {
             let role: Role;
             try {
               role = JSON.parse(sessionStorage.getItem("role"));
-            } catch (e : any)  {
+            } catch (e: any) {
               role = null;
               console.error("JSON.parse error - ", e.message);
             }
@@ -381,7 +379,7 @@ export class RoleDetailComponent implements OnInit {
             if (roles.id == currentrole.id) {
               try {
                 sessionStorage.setItem("role", JSON.stringify(roles));
-              } catch (e : any)  {
+              } catch (e: any) {
                 console.error("JSON.stringify error - ", e.message);
               }
             }
@@ -390,7 +388,7 @@ export class RoleDetailComponent implements OnInit {
               let rolelist;
               try {
                 rolelist = JSON.parse(sessionStorage.getItem("roleList"));
-              } catch (e : any)  {
+              } catch (e: any) {
                 console.error("JSON.parse error - ", e.message);
               }
               let newrolelist = [];
@@ -404,7 +402,7 @@ export class RoleDetailComponent implements OnInit {
               });
               try {
                 sessionStorage.setItem("roleList", JSON.stringify(newrolelist));
-              } catch (e : any)  {
+              } catch (e: any) {
                 console.error("JSON.stringify error - ", e.message);
               }
             }
@@ -442,7 +440,7 @@ export class RoleDetailComponent implements OnInit {
       this.showNameLengthErrorMessage = false;
     }
   }
-  trackByMethod(index, item) {}
+  trackByMethod(index, item) { }
 
   checkNameMaxLength() {
     if (this.role.name.length >= 255) {
@@ -460,16 +458,16 @@ export class RoleDetailComponent implements OnInit {
     }
   }
 
-  resetChanges(changesobj,type){
-    if (changesobj == false){
-      if(type == 1){
+  resetChanges(changesobj, type) {
+    if (changesobj == false) {
+      if (type == 1) {
         this.role.projectId = JSON.parse(sessionStorage.getItem("project"))?.id;
       }
-      else if(type == 2){
+      else if (type == 2) {
         this.role.portfolioId = null;
       }
     }
-      
+
   }
 
 
