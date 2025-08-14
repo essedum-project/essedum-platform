@@ -507,33 +507,17 @@ UPDATE usm_constant SET item_value='{\"label\":\"AI Brain\",\"icon\":\"assets/ic
 
   <changeSet dbms="mysql" author="Leap (generated)" id="3v0-aip-118">
    <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/common/data/3v0/cip/mlfederatedmodels.csv" quotchar="&quot;" separator="," tableName="mlfederatedmodels">
-        <column header="fed_id" name="fed_id" type="STRING"/>
-        <column header="adapter_id" name="adapter_id" type="STRING"/>
-        <column header="app_name" name="app_name" type="STRING"/>
-        <column header="fed_name" name="fed_name" type="STRING"/>
-        <column header="fed_org" name="fed_org" type="STRING"/>
-        <column header="app_org" name="app_org" type="STRING"/>
-        <column header="status" name="status" type="STRING"/>
-        <column header="adapter_alias" name="adapter_alias" type="STRING"/>
-        <column header="created_by" name="created_by" type="STRING"/>
-        <column header="created_on" name="created_on" type="datetime(6)"/>
-        <column header="is_deleted" name="is_deleted" type="boolean"/>
-        <column header="app_modified_by" name="app_modified_by" type="STRING"/>
-        <column header="fed_modified_by" name="fed_modified_by" type="STRING"/>
-        <column header="app_modified_date" name="app_modified_date" type="datetime(6)"/>
-        <column header="fed_modified_date" name="fed_modified_date" type="datetime(6)"/>
-        <column header="sync_date" name="sync_date" type="datetime(6)"/>
-        <column header="model_type" name="model_type" type="STRING"/>
-        <column header="model_likes" name="model_likes" type="NUMERIC"/>
-        <column header="model_metadata" name="model_metadata" type="STRING"/>
-        <column header="raw_payload" name="raw_payload" type="STRING"/>
-        <column header="artifacts" name="artifacts" type="STRING"/>
-        <column header="container" name="container" type="STRING"/>
-        <column header="app_description" name="app_description" type="STRING"/>
-        <column header="fed_description" name="fed_description" type="STRING"/>
+		<column header="model_name" name="model_name" type="STRING"/>
+        <column header="description" name="description" type="STRING"/>
         <column header="version" name="version" type="STRING"/>
-        <column header="app_status" name="app_status" type="STRING"/>
-        <column header="model_deployment" name="model_deployment" type="STRING"/>
+        <column header="data_source" name="data_source" type="STRING"/>
+        <column header="attributes" name="attributes" type="STRING"/>
+        <column header="organisation" name="organisation" type="STRING"/>
+        <column header="model_type" name="model_type" type="STRING"/>
+        <column header="created_on" name="created_on" type="timestamp"/>
+        <column header="created_by" name="created_by" type="STRING"/>
+        <column header="app_modified_date" name="app_modified_date" type="timestamp"/>
+        <column header="app_modified_by" name="app_modified_by" type="STRING"/>
     </loadData>
   </changeSet>
 
