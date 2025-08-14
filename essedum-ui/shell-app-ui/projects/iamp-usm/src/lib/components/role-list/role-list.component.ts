@@ -149,173 +149,12 @@ export class RoleListComponent implements OnInit, OnDestroy {
       }
     );
     this.fetchRole();
-    this.rolesResponse = {
-      "totalPages": 1,
-      "totalElements": 14,
-      "content": [
-        {
-          "id": 1,
-          "projectId": null,
-          "name": "Project Manager",
-          "description": "Project Manager",
-          "permission": true,
-          "roleadmin": null,
-          "projectadmin": null,
-          "portfolioId": null,
-          "projectAdminId": null
-        },
-        {
-          "id": 6,
-          "projectId": 2,
-          "name": "Admin",
-          "description": "Admin",
-          "permission": false,
-          "roleadmin": null,
-          "projectadmin": null,
-          "portfolioId": null,
-          "projectAdminId": null
-        },
-        {
-          "id": 11,
-          "projectId": null,
-          "name": "Project Admin",
-          "description": "Project Admin",
-          "permission": true,
-          "roleadmin": null,
-          "projectadmin": null,
-          "portfolioId": null,
-          "projectAdminId": null
-        },
-        {
-          "id": 123,
-          "projectId": null,
-          "name": "Project Client",
-          "description": "Project Client",
-          "permission": true,
-          "roleadmin": null,
-          "projectadmin": null,
-          "portfolioId": null,
-          "projectAdminId": null
-        },
-        {
-          "id": 124,
-          "projectId": null,
-          "name": "Portfolio Admin",
-          "description": "Portfolio Admin",
-          "permission": true,
-          "roleadmin": null,
-          "projectadmin": null,
-          "portfolioId": null,
-          "projectAdminId": null
-        },
-        {
-          "id": 125,
-          "projectId": null,
-          "name": "Portfolio Client",
-          "description": "Portfolio Client",
-          "permission": true,
-          "roleadmin": null,
-          "projectadmin": null,
-          "portfolioId": null,
-          "projectAdminId": null
-        },
-        {
-          "id": 126,
-          "projectId": null,
-          "name": "Portfolio Manager",
-          "description": "Portfolio Manager",
-          "permission": true,
-          "roleadmin": null,
-          "projectadmin": null,
-          "portfolioId": null,
-          "projectAdminId": null
-        },
-        {
-          "id": 127,
-          "projectId": null,
-          "name": "Core Project Admin",
-          "description": "Core Project Admin",
-          "permission": true,
-          "roleadmin": null,
-          "projectadmin": null,
-          "portfolioId": null,
-          "projectAdminId": null
-        },
-        {
-          "id": 128,
-          "projectId": null,
-          "name": "Core Portfolio Admin",
-          "description": "Core Portfolio Admin",
-          "permission": false,
-          "roleadmin": null,
-          "projectadmin": null,
-          "portfolioId": null,
-          "projectAdminId": null
-        },
-        {
-          "id": 129,
-          "projectId": null,
-          "name": "leo1311",
-          "description": null,
-          "permission": false,
-          "roleadmin": null,
-          "projectadmin": false,
-          "portfolioId": null,
-          "projectAdminId": 18
-        },
-        {
-          "id": 131,
-          "projectId": null,
-          "name": "IT OPERATIONS Test",
-          "description": "IT OPERATIONS Test",
-          "permission": false,
-          "roleadmin": null,
-          "projectadmin": null,
-          "portfolioId": null,
-          "projectAdminId": null
-        },
-        {
-          "id": 133,
-          "projectId": null,
-          "name": "Test",
-          "description": "Test",
-          "permission": false,
-          "roleadmin": null,
-          "projectadmin": null,
-          "portfolioId": null,
-          "projectAdminId": null
-        },
-        {
-          "id": 134,
-          "projectId": null,
-          "name": "User",
-          "description": null,
-          "permission": false,
-          "roleadmin": null,
-          "projectadmin": null,
-          "portfolioId": null,
-          "projectAdminId": null
-        },
-        {
-          "id": 135,
-          "projectId": 2,
-          "name": "A",
-          "description": "A",
-          "permission": false,
-          "roleadmin": null,
-          "projectadmin": null,
-          "portfolioId": null,
-          "projectAdminId": null
-        }
-      ]
-    };
-    this.rolesContent = this.rolesResponse.content;
-    this.totalrecords = this.rolesContent.length;
-    this.updatePagedData();
+
   }
 // PAGINATION BLOCK START
   updatePagination() {
     const totalPages = Math.ceil(this.totalrecords / this.rowsPerPage);
+    console.log("Total Pages:", totalPages);
     this.lastPage = Math.max(totalPages - 1, 0);
     if (this.page > this.lastPage) {
       this.page = this.lastPage;
@@ -326,13 +165,17 @@ export class RoleListComponent implements OnInit, OnDestroy {
   updatePagedData() {
     const startIndex = this.page * this.rowsPerPage;
     const endIndex = Math.min(startIndex + this.rowsPerPage, this.totalrecords);
-    this.pagedRoles = this.rolesContent.slice(startIndex, endIndex);
-    this.lastPage=Math.floor((this.rolesContent.length-1)/ this.rowsPerPage);
+    console.log("rolessss-", this.roles)
+    this.pagedRoles = this.roles.slice(startIndex, endIndex);
+    this.lastPage=Math.floor((this.rolesLength-1)/ this.rowsPerPage);
+    console.log("Paged Roles:", this.pagedRoles);
+    console.log("Last Page:", this.lastPage);
 
 
   }
   getPageNumbers() {
     const totalPages = this.lastPage + 1;
+    console.log("Total Pages:", totalPages);
     return Array.from({ length: totalPages }, (_, i) => i);
   }
   navigatePage(direction: 'Prev' | 'Next'){
@@ -345,10 +188,10 @@ export class RoleListComponent implements OnInit, OnDestroy {
   }
 
 changePage(p:number){
-  if(p>0 && p<=this.lastPage){
+ 
     this.page=p;
     this.updatePagedData();
-  }
+  
 }
 
 // PAGINATION BLOCK ENDS
@@ -378,6 +221,7 @@ fetchRole() {
   try {
 
     role = JSON.parse(sessionStorage.getItem("role"));
+    console.log("roleee", role)
   } catch (e: any) {
 
     console.error("JSON.parse error - ", e.message);
@@ -385,15 +229,21 @@ fetchRole() {
 
   let example: Project = new Project();
   let event = { first: 0, rows: 1000, sortField: null, sortOrder: null };
+  console.log("CAME HEREE-1");
   this.projectService.findAll(example, event).subscribe(
     (pageResponse) => {
 
       this.ProjectList = pageResponse.content;
+        console.log("CAME HEREE-2");
+
     },
     (error) => this.messageService.error("Could not get the results", "IAMP"),
     () => {
+  console.log("CAME HEREE-3");
 
       if (role.roleadmin) {
+          console.log("CAME HEREE-4");
+
 
         let userprojectrole = new UserProjectRole();
 
@@ -402,12 +252,15 @@ fetchRole() {
         let user: Users;
 
         try {
+  console.log("CAME HEREE-5");
 
 
           portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
           project = JSON.parse(sessionStorage.getItem("project"));
           user = JSON.parse(sessionStorage.getItem("user"));
         } catch (e: any) {
+
+            console.log("CAME HEREE-6");
 
           portfolio = null;
           project = null;
@@ -418,6 +271,8 @@ fetchRole() {
         userprojectrole.portfolio_id = new UsmPortfolio({ id: portfolio.id });
         userprojectrole.project_id = new Project({ id: project.id });
         userprojectrole.user_id = new Users({ id: user.id });
+          console.log("CAME HEREE-7");
+
         this.roleService.findAll(allRole, this.lazyload).subscribe((res) => {
           this.rolesArraySorted = [];
           res.content.forEach((item) => {
@@ -452,10 +307,13 @@ fetchRole() {
         });
       } else {
 
-
+console.log("CAME HEREE-8");
         this.roleService.findAll(allRole, this.lazyload).subscribe(
           (res) => {
-
+            console.log("CAME HEREE-9");
+            this.rolesResponse=res;
+ this.rolesContent = this.rolesResponse.content;
+    this.totalrecords = this.rolesContent.length;
             this.rolesArraySorted = res.content;
             this.computeRole(true);
 
@@ -617,8 +475,11 @@ createView() {
   }
 
 
+
 editRole(role: Role) {
-  this.router.navigate(["../edit", role.id], { relativeTo: this.route });
+  // this.router.navigate(["../edit", role.id], { relativeTo: this.route });
+    this.router.navigate(["./role/edit", 6], { relativeTo: this.route });
+
 }
 
 viewRole(role: Role) {
@@ -727,6 +588,7 @@ computeRole(superadmin) {
   this.roleList.sort = this.sort;
   this.roleList.paginator = this.paginator;
   this.rolesFilter = Object.assign([], this.roles);
+    this.updatePagedData();
 
 }
 trackByMethod(index, item) { }
