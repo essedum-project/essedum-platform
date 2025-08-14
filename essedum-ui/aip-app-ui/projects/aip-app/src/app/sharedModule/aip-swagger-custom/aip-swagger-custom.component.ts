@@ -24,8 +24,6 @@ export class AipSwaggerCustomComponent implements OnInit {
   @Input() adapterName: any;
   @Input() isAdapter: any;
   @Input() instanceName: any;
-  @Input() endpointId: any;
-  @Input() forEndpoint: any;
   @Input() restProvider: any;
   @Input() endpointName: any;
   hasSwaggerData: Boolean = false;
@@ -99,39 +97,6 @@ export class AipSwaggerCustomComponent implements OnInit {
     if (this.isAdapter && this.isAdapter === 'no') {
       this.isInstance = true;
       this.getAdapterInstance();
-    }
-    if (this.isAdapter && this.isAdapter === 'connection') {
-      this.isEndpoint = true;
-      this.setSwaggerForEndpointByConnectionId();
-    }
-    if (this.forEndpoint && this.forEndpoint === 'yes') {
-      this.getDatasourceData().subscribe((res) => {
-        if (res && res.length > 0) {
-          this.restProviderData = res[0];
-          this.changeDetector.detectChanges();
-        } else {
-          this.restProviderData = null;
-          this.service.messageService('Please choose a Rest Provider');
-          return;
-        }
-        this.initializeSwaggerView();
-      });
-      /**this.swaggerView = !this.swaggerView;
-      if(!this.isToggle){
-        this.editorOptions.modes = ['text', 'tree', 'view'];
-        this.editorOptions.statusBar = true;
-        this.editorOptions.enableSort = false;
-        this.editorOptions.enableTransform = false;
-        this.editorOptions.mode='text';
-      }else if(this.isToggle){
-        this.editorOptions.enableSort = true;
-        this.editorOptions.enableTransform = true;
-        this.editorOptions.mode='tree';
-      }
-      // this.editorOptions.onChange = () => {
-      //   this.apispecTemplate = this.formJsonEditor.get();
-      // }
-      // this.setSwaggerForEndpointByConnectionId();**/
     }
   }
 
@@ -335,7 +300,7 @@ export class AipSwaggerCustomComponent implements OnInit {
       .replace('server_host_url', this.serverUrl);
     this.mlspecTemplate = this.mlspecTemplate.replaceAll(
       'endpoint__id',
-      this.endpointId
+      // this.endpointId
     );
     this.apispecTemplate = JSON.parse(this.mlspecTemplate);
     if (this.apispecTemplate.servers && this.apispecTemplate.servers[0]?.url)

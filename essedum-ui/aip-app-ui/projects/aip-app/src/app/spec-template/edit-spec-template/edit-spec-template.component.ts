@@ -11,6 +11,7 @@ import { Location } from '@angular/common';
   styleUrls: ['./edit-spec-template.component.scss'],
 })
 export class EditSpecTemplateComponent implements OnInit {
+    readonly CARD_TITLE = 'Spec';
   @ViewChild('formJsonEditor', { static: false })
   formJsonEditor: JsonEditorComponent;
   editorOptions = new JsonEditorOptions();
@@ -65,7 +66,7 @@ export class EditSpecTemplateComponent implements OnInit {
     };
   }
 
-  back() {
+  navigateBack() {
     this.location.back();
   }
 

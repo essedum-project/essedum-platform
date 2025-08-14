@@ -1,3 +1,14 @@
+.spec-view-slider {
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 48px;
+  align-items: center;
+}
+
+.spec-view-content {
+  margin: 10px;
+}
+
 .spec-header {
   top: 461px;
   left: 57px;
@@ -64,7 +75,7 @@ small {
 
 pre {
   color: #fff;
-  font-family: var(--font-type) !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
   margin: 0;
   padding: 0;
 }
@@ -114,7 +125,7 @@ pre {
   border-radius: 4px;
   box-shadow: 0 1px 2pxrgba (0, 0, 0, 0.1);
   color: #3b4151;
-  font-family: var(--font-type) !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
   font-size: 14px;
   font-weight: 700;
   padding: 5px 23px;
@@ -160,7 +171,7 @@ pre {
   background: #49cc90;
   border-radius: 3px;
   color: #fff;
-  font-family: var(--font-type) !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
   font-size: 14px;
   font-weight: 700;
   min-width: 80px;
@@ -178,7 +189,7 @@ pre {
   align-items: center;
   cursor: pointer;
   display: flex;
-  font-family: var(--font-type) !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
   font-size: 16px;
   margin: 0;
   padding: 10px 20px 10px 10px;
@@ -200,7 +211,7 @@ pre {
   border-radius: 4px;
   //   box-shadow: 0 1px 2 px rgb(0, 0, 0 / 10%);
   color: #3b4151;
-  font-family: var(--font-type) !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
   font-size: 14px;
   font-weight: 700;
   padding: 5px 23px;
@@ -215,7 +226,7 @@ pre {
   background-color: transparent;
   border-color: #ff6060;
   color: #ff6060;
-  font-family: var(--font-type) !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
 }
 
 section.models.is-open {
@@ -372,4 +383,151 @@ li {
 ::ng-deep .mdc-slider__track--active {
   height: 0px !important;
   top: 0 !important;
+}
+
+
+::ng-deep .cdk-overlay-container,
+.cdk-global-overlay-wrapper {
+  overflow-y: auto !important;
+}
+
+::ng-deep .mat-mdc-dialog-surface {
+  margin-top: 45px !important;
+  margin-bottom: 45px !important;
+}
+
+
+
+::ng-deep .mat-mdc-menu-panel {
+  border-radius: 16px;
+
+  font-size: 1.6rem !important;
+  line-height: 24px !important;
+  font-weight: 600 !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-style: normal !important;
+}
+
+::ng-deep .mat-mdc-menu-item {
+  min-height: 40px !important;
+}
+
+
+
+
+
+.lfx-u-servers {
+  font-size: 1.6rem;
+  font-weight: 400;
+  font-family: "Roboto", "Segoe UI", sans-serif;
+  line-height: 24px;
+  color: #00000099
+}
+
+::ng-deep .custom-alias-field {
+  .mat-mdc-form-field-flex {
+    height: 21px !important;
+    background-color: #fafafa !important;
+    padding: 0 4px !important;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    height: 21px !important;
+    background-color: #fafafa !important;
+    padding: 2px 0 !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    padding: 0px !important;
+  }
+}
+
+::ng-deep .custom-alias-input {
+  text-align: left;
+  font-size: 1.6rem;
+  font-weight: 400;
+  font-family: "Roboto", "Segoe UI", sans-serif;
+  font-style: normal;
+  line-height: 21px;
+  color: #737373;
+
+  background-color: #fafafa;
+  height: 21px;
+
+  &::placeholder,
+  &::-webkit-input-placeholder,
+  &::-moz-placeholder,
+  &:-ms-input-placeholder {
+    text-align: left;
+    font-size: 1.6rem;
+    font-weight: 400;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
+    font-style: normal;
+    line-height: 24px;
+    color: #737373;
+    opacity: 0.7;
+  }
+}
+
+::ng-deep .mat-mdc-input-element {
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+::ng-deep .mat-mdc-select {
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-size: 1.6rem !important;
+  font-weight: 400 !important;
+  line-height: 24px !important;
+  color: #737373 !important;
+}
+
+::ng-deep .mat-mdc-form-field {
+
+  .mat-mdc-form-field-hint-wrapper,
+  .mat-mdc-form-field-error-wrapper {
+    position: absolute !important;
+    padding: 1px !important;
+  }
+}
+
+.wd-350 {
+  width: 350px !important;
+}
+
+::ng-deep .mat-mdc-form-field {
+  height: 28px !important;
+
+
+  // State variations
+  &.mat-focused {
+    .mdc-line-ripple::after {
+      border-bottom: 2px solid #0094ff !important;
+      transform: scaleX(1);
+    }
+
+    .mat-mdc-floating-label {
+      color: #0094ff;
+    }
+  }
+
+  &.mat-form-field-invalid {
+    .mdc-line-ripple::before {
+      border-bottom: 2px solid #f44336 !important;
+    }
+
+    .mat-mdc-floating-label {
+      color: #f44336;
+    }
+  }
+}
+
+// Input element global override
+::ng-deep .mat-mdc-input-element {
+  border-bottom: none !important;
+}
+
+// Remove default underlines
+.mdc-line-ripple::before,
+.mdc-line-ripple::after {
+  border-bottom: none !important;
 }

@@ -22,7 +22,6 @@ import { DatasetConfigComponent } from './dataset/dataset-config/dataset-config.
 import { environment } from '../environments/environment';
 import { Services } from './services/service';
 import { PipelineService } from './services/pipeline.service';
-import { CommonModule } from '@angular/common';
 import { AipInterceptorService } from './services/interceptor';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ModelEditsComponent } from './model/model-edit/model-edit.component';
@@ -37,7 +36,6 @@ import { ModelDeployComponent } from './model/model-deploy/model-deploy.componen
 import { JsonFormsModule } from '@jsonforms/angular';
 import { JsonFormsAngularMaterialModule } from '@jsonforms/angular-material';
 import { TagsComponent } from './tags/tags.component';
-import { TaggingComponentComponent } from './tagging-component/tagging-component.component';
 import { SchemaComponent } from './schema/schema.component';
 import { AdapterComponent } from './adapter/adapter.component';
 import { InstanceComponent } from './instance/instance.component';
@@ -56,7 +54,6 @@ import { JobDataViewerComponent } from './pipeline.description/job-data-viewer/j
 import { CreateSpecTemplateComponent } from './spec-template/create-spec-template/create-spec-template.component';
 import { EditSpecTemplateComponent } from './spec-template/edit-spec-template/edit-spec-template.component';
 import { AdapterDescriptionComponent } from './adapter/adapter-description/adapter-description.component';
-import { SwaggerCustomComponent } from './swagger-custom/swagger-custom.component';
 import { NgJsonEditorModule } from 'ang-jsoneditor';
 import { JobsComponent } from './jobs/jobs.component';
 import { SpecTemplateCustomSwaggerComponent } from './spec-template/spec-template-custom-swagger/spec-template-custom-swagger.component';
@@ -65,7 +62,6 @@ import { NativeScriptComponent } from './native-script/native-script.component';
 import { MatTreeModule } from '@angular/material/tree';
 import { NativeScriptDialogComponent } from './native-script/native-script-dialog/native-script-dialog.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MethodCreateEditComponent } from './adapter/method-create-edit/method-create-edit.component';
 import { encKey } from './services/encKey';
 import { DashConstantService } from './services/dash-constant.service';
 import { RaiservicesService } from './services/raiservices.service';
@@ -202,12 +198,10 @@ const dbConfig: DBConfig = {
     CreateSpecTemplateComponent,
     EditSpecTemplateComponent,
     AdapterDescriptionComponent,
-    SwaggerCustomComponent,
     JobsComponent,
     SpecTemplateCustomSwaggerComponent,
     NativeScriptComponent,
     NativeScriptDialogComponent,
-    MethodCreateEditComponent,
     InstanceDescriptionComponent,
     JsonTreeComponent,
     JsonNodeComponent,
@@ -233,7 +227,6 @@ const dbConfig: DBConfig = {
     AipPaginationComponent,
     AipHeaderComponent,
     AipEmptyStateComponent,
-    TaggingComponentComponent,
     AipFilterComponent,
     AipLoadingComponent,
     AipDeleteConfirmationComponent,

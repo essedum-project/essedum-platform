@@ -1,46 +1,14 @@
 <div>
-    <div *ngIf="!restProvider" style="display: flex;margin-left:60%">
-        <div class="lfx-u-pad-r-16" style="align-self: center;"
-            [ngStyle]="{'color': (!swaggerView) ? 'grey' : '#0094ff'}">SWAGGER VIEW</div>
+    <div class="spec-view-slider">
+        <div class="lfx-u-pad-r-16" [ngStyle]="{'color': (!swaggerView) ? 'grey' : '#0094ff'}">SWAGGER VIEW</div>
         <mat-slider [disabled]="disabled" class="slider-toggle-width" min="0" max="1" step="1">
-            <input matSliderThumb [value]="checked ? 1 : 0" (input)="toggle($event.target.value == 1)"
-                aria-label="Toggle" />
+            <input matSliderThumb [value]="checked ? 1 : 0" (input)="toggle()" aria-label="Toggle" />
         </mat-slider>
-        <div class="lfx-u-pad-l-16" style="align-self: center;"
-            [ngStyle]="{'color': (swaggerView) ? 'grey' : '#0094ff'}">JSON VIEW
+        <div class="lfx-u-pad-l-16" [ngStyle]="{'color': (swaggerView) ? 'grey' : '#0094ff'}">JSON VIEW
         </div>
     </div>
-    <div *ngIf="restProvider && restProviderData" style="display: flex;">
-        <div style="flex-shrink: 0; margin-left: 30px; margin-right: 10px; color: #737373;">Rest Provider:</div>
-        <div style="flex-shrink: 0; margin-right: 300px; color: '#000'">{{restProviderData.alias}}</div>
-        <span *ngIf="swaggerView" style="cursor: pointer; margin-right: 10px;">
-            <mat-icon id="swagger-back-btn" data-icon-type="swagger-back" class="aip-led-icons"
-                (click)="backToEditor()">arrow_back</mat-icon>
-        </span>
-        <ng-container *ngIf="!swaggerView && !isToggle; else swaggerViewTemplate">
-            <button [ngStyle]="{
-                    'background-color': '#0094ff', 
-                    'color': '#fff',
-                    'border': 'none', 
-                    'cursor': 'pointer',
-                    'padding': '10px 20px',
-                    'border-radius': '5px'
-                }" (click)="onClickSwaggerView()">
-                Swagger View
-            </button>
-        </ng-container>
-        <ng-template #swaggerViewTemplate>
-            <div [ngStyle]="{'color': (swaggerView) ? 'grey' : '#0094ff' }">Swagger View</div>
-        </ng-template>
-        <mat-slider [disabled]="disabled" class="slider-toggle-width" min="0" max="1" step="1">
-            <input matSliderThumb [value]="checked ? 1 : 0" (input)="toggle($event.target.value == 1)"
-                aria-label="Toggle" />
-        </mat-slider>
-        <div *ngIf="swaggerView || isToggle" class="lfx-u-pad-l-16" style="align-self: center;"
-            [ngStyle]="{'color': (isToggle) ? 'grey' : '#0094ff'}">
-            JSON View</div>
-    </div>
-    <div style="margin:10px">
+
+    <div class="spec-view-content">
         <div *ngIf="swaggerView">
             <div *ngIf="apispecTemplate">
                 <div class="spec-header">
@@ -74,9 +42,12 @@
                     </section>
                 </div>
                 <div class="spec-body">
+
                     <div class="lfx-u-mar-tb-8">
-                        <mat-form-field appearance="fill" style="width: 100%;">
-                            <mat-label>Servers</mat-label>
+                        <span class="lfx-u-servers">
+                            Servers                           
+                        </span>
+                        <mat-form-field appearance="fill" class="wd-350 custom-alias-field" subscriptSizing="dynamic">
                             <mat-select data-select-type="server-url" [(value)]="serverUrl"
                                 (selectionChange)="selectChange($event)" (openChange)="onServerUrlChange($event)">
                                 <mat-option *ngFor="let option of serverUrls" [value]="option.value">
@@ -85,6 +56,7 @@
                             </mat-select>
                         </mat-form-field>
                     </div>
+
                     <mat-accordion class="example-headers-align" multi>
                         <mat-expansion-panel *ngFor="let spec of formattedapispec;let i=index">
                             <mat-expansion-panel-header class="exp-header" style="height: 45px;margin-bottom: 1%"
@@ -184,7 +156,7 @@
                                 <div *ngIf="spec.parameters">
                                     <div *ngFor=" let param of spec.parameters" style="margin-top: 1%;">
                                         <span
-                                            style="font-weight:700;margin-left: 1.7%;word-wrap: break-word;color:#3b4151;font-family: var(--font-type) !important;font-size: 16px;">{{param.name}}</span>
+                                            style="font-weight:700;margin-left: 1.7%;word-wrap: break-word;color:#3b4151;font-family: 'Roboto', 'Segoe UI', sans-serif !important;font-size: 16px;">{{param.name}}</span>
 
                                         <span style="margin-left: 16%;">{{param.description}}</span><br>
 
@@ -200,7 +172,7 @@
                                 </div>
                                 <div *ngIf="spec.requestBody && spec.requestType=='POST'">
                                     <span
-                                        style="font-weight:700;margin-left: 1.7%;word-wrap: break-word;color:#3b4151;font-family: var(--font-type) !important;font-size: 16px;">body</span>
+                                        style="font-weight:700;margin-left: 1.7%;word-wrap: break-word;color:#3b4151;font-family: 'Roboto', 'Segoe UI', sans-serif !important;font-size: 16px;">body</span>
                                     <span style="margin-left: 21%;">{{spec.requestBody.description}}</span><br>
                                     <div *ngIf="spec.requestBody.content['application/json']">
                                         <textarea [(ngModel)]="spec.requestBody['value']" disabled
@@ -310,7 +282,7 @@
                                     <mat-expansion-panel>
                                         <mat-expansion-panel-header>
                                             <mat-panel-title
-                                                style="font-size: 16px; font-family:sans-serif;font-weight:600;font-color:#505050;border-radius: 4px;">
+                                                style="font-size: 16px; font-family: 'Roboto', 'Segoe UI', sans-serif !important;font-weight:600;font-color:#505050;border-radius: 4px;">
                                                 <h5>input</h5>
                                             </mat-panel-title>
                                         </mat-expansion-panel-header>
@@ -321,7 +293,7 @@
                                     <mat-expansion-panel>
                                         <mat-expansion-panel-header>
                                             <mat-panel-title
-                                                style="font-size: 16px; font-family:sans-serif;font-weight:600;font-color:#505050;border-radius: 4px;">
+                                                style="font-size: 16px; font-family: 'Roboto', 'Segoe UI', sans-serif !important;font-weight:600;font-color:#505050;border-radius: 4px;">
                                                 <h5>output</h5>
                                             </mat-panel-title>
                                         </mat-expansion-panel-header>
@@ -339,13 +311,6 @@
         <div *ngIf="!swaggerView">
             <json-editor [options]="editorOptions" [data]="apispecTemplate" style="height: 450px;" #formJsonEditor=""
                 class="cipJSONEditor"></json-editor>
-            <div *ngIf="restProvider"
-                class="m-2 d-flex justify-content-end lfx-u-mar-b-32 lfx-u-pad-lr-16 lfx-u-pad-t-8">
-                <button mat-raised-button color="primary" [disabled]="false" type="button"
-                    (click)="saveSpecTemplateToEndpoint()">
-                    Save Spec
-                </button>
-            </div>
         </div>
     </div>
 </div>
