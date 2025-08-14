@@ -30,7 +30,7 @@
   border-bottom: 1px solid #e0e0e0;
   white-space: normal;
   word-break: break-word;
-  max-width: 200px;
+
   font-family: "Roboto", "Segoe UI", sans-serif !important;
   font-size: 16px;
   font-weight: 600;
@@ -42,11 +42,33 @@
   border-bottom: 1px solid #e0e0e0;
   white-space: normal;
   word-break: break-word;
-  max-width: 200px;
+
   font-family: "Roboto", "Segoe UI", sans-serif !important;
   font-size: 14px;
   font-weight: 400;
 }
+
+/* Column width settings */
+.styled-table th:nth-child(1),
+.styled-table td:nth-child(1) {
+  width: 60px; /* First column - # */
+  max-width: 60px;
+}
+
+.styled-table th:nth-child(2),
+.styled-table td:nth-child(2) {
+  width:80px; /* Second column - Project ID */
+  max-width: 80px;
+}
+
+.styled-table th:nth-child(3),
+.styled-table td:nth-child(3),
+.styled-table th:nth-child(4),
+.styled-table td:nth-child(4) {
+  width: auto; /* Remaining columns - Project Name and Display Name */
+  min-width: 160px;
+}
+
 
 .styled-table thead {
   background-color: #f4f4f4;
