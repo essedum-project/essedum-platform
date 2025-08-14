@@ -48,16 +48,16 @@
   font-weight: 400;
 }
 
-/* Column width settings */
+
 .styled-table th:nth-child(1),
 .styled-table td:nth-child(1) {
-  width: 60px; /* First column - # */
+  width: 60px; 
   max-width: 60px;
 }
 
 .styled-table th:nth-child(2),
 .styled-table td:nth-child(2) {
-  width:80px; /* Second column - Project ID */
+  width:80px;
   max-width: 80px;
 }
 
@@ -65,7 +65,7 @@
 .styled-table td:nth-child(3),
 .styled-table th:nth-child(4),
 .styled-table td:nth-child(4) {
-  width: auto; /* Remaining columns - Project Name and Display Name */
+  width: auto; 
   min-width: 160px;
 }
 
@@ -181,12 +181,9 @@
   background: white 0% 0% no-repeat padding-box;
 }
 
-
 .save-btn:hover {
   background: #dadada 0% 0% no-repeat padding-box !important;
 }
-
-
 
 .span-add {
   color: #0052cc !important;

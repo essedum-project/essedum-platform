@@ -83,10 +83,6 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
     this.sort = ms;
   }
   @ViewChild(MatPaginator) paginator1: MatPaginator;
-
-  // ngAfterViewInit() {
-  //   this.ProjectList.paginator = this.paginator1;
-  // }
   example: UsmPortfolio = new UsmPortfolio();
   exampleProject: Project = new Project();
 
@@ -119,11 +115,9 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
     changeDetectionRef: ChangeDetectorRef
   ) {
     this.changeDetectionRef = changeDetectionRef;
-    // Initialize UsmPortfolioList with empty data to prevent null reference errors
     this.UsmPortfolioList = new MatTableDataSource([]);
   }
 
-  //Temps
   testCreate: boolean = false;
   testId: number;
 
@@ -160,8 +154,6 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
   deleteFlag: boolean = false;
   createFlag: boolean = false;
   busy: Subscription;
-
-  // Pagination properties
   pageArr: number[] = [];
   pageNumberInput: number = 1;
   noOfPages: number = 0;
@@ -171,17 +163,15 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
   startIndex: number;
   pageNumberChanged: boolean = true;
   pageNumber: number = 0;
-  hoverStates: boolean[] = Array(10).fill(false); // For pagination hover effects
+  hoverStates: boolean[] = Array(10).fill(false); 
   @Output() pageChanged = new EventEmitter<any>();
   @Output() pageSizeChanged = new EventEmitter<any>();
 
   ngOnInit() {
-    // Make sure UsmPortfolioList is initialized
     if (!this.UsmPortfolioList) {
       this.UsmPortfolioList = new MatTableDataSource([]);
     }
 
-    // Initialize pagination variables
     this.pageNumber = 1;
     this.startIndex = 0;
     this.endIndex = 5;
@@ -487,7 +477,6 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
       });
       if (!flag) {
         if (sessionStorage.getItem("telemetry") == "true") {
-          // this.telemetryService.audit(this.usmPortfolio,"CREATE");
         }
         this.busy = this.usmPortfolioService
           .create(this.usmPortfolio)
@@ -495,7 +484,6 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
             (response) => {
               this.testId = response.id;
               this.messageService.info("Portfolio Saved Successfully", "IAMP");
-              // this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
               this.clearWave();
               this.showCreate = false;
               this.testCreate = true;
@@ -599,8 +587,6 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
         this.testCreate = true;
         sessionStorage.setItem("UpdatedUser", "true");
         this.currentPage.remove(usmPortfolioToDelete);
-        // this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
-        // this.fetchWave(null);
         this.Clear();
         this.messageService.info("Portfolio deleted successfully", "IAMP");
       },
@@ -625,13 +611,10 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    // this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
     this.fetchWave(null);
   }
 
-  /**
-   * Invoked when user presses the search button.
-   */
+ 
   search() {
     if (!this.sub) {
       this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
@@ -662,8 +645,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
       }
     );
   }
-  
-  fetchWave(pageEvent) {
+    fetchWave(pageEvent) {
     if (pageEvent == null || !pageEvent) {
       pageEvent = { page: 0, size: this.pageSize };
     }
@@ -684,16 +666,13 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
         this.UsmPortfolioList.paginator = this.paginator;
         this.UsmPortfolioList.sort = this.sort;
 
-        // Update pagination variables
         this.noOfPages = this.currentPage.totalPages;
-        this.pageNumber = pageEvent.page + 1 || 1; // Use the requested page or default to 1
+        this.pageNumber = pageEvent.page + 1 || 1; 
 
-        // Initialize pageArr with array of indexes
         this.pageArr = Array(this.noOfPages)
           .fill(0)
           .map((x, i) => i);
 
-        // Set startIndex and endIndex for pagination display
         if (this.pageNumber > 5) {
           this.endIndex = Math.min(this.pageNumber + 2, this.noOfPages);
           this.startIndex = Math.max(0, this.endIndex - 5);
@@ -703,10 +682,10 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
         }
 
         if (this.currentPage.totalPages > 0) this.testCreate = true;
-      },
-      (error) => {
+        
+        this.pageChanged.emit(this.pageNumber);
+      },      (error) => {
         this.testCreate = false;
-        // Ensure UsmPortfolioList is always initialized even on error
         if (!this.UsmPortfolioList) {
           this.UsmPortfolioList = new MatTableDataSource([]);
         }
@@ -743,28 +722,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
     this.router.navigate(["/portfoliolist", item.id]);
   }
   setSelectedEntities(event) {}
-  // Search() {
-  //     let newtasks = new Array<UsmPortfolio>();
-  //     if (this.searchedName == "All" || this.searchedName == "") {
-  //         this.usmPortfolios = this.usmPortfoliosCopy;
-  //     } else {
-  //         this.usmPortfolios = Object.assign([], this.usmPortfoliosCopy).filter((item1) =>
-  //             item1.portfolioName == null ? "" : item1.portfolioName.toLowerCase().indexOf(this.searchedName.
-  //toLowerCase()) > -1
-  //         );
-  //     }
-  //     if (this.filterUsmPortfolio == "All" || this.filterUsmPortfolio == "") {
-  //         this.usmPortfolios = this.usmPortfolios;
-  //     } else {
-  //         this.usmPortfolios = Object.assign([], this.usmPortfolios).filter((item1) =>
-  //             item1.description == null ? "" : item1.description.toLowerCase().indexOf(this.filterUsmPortfolio.
-  //toLowerCase()) > -1
-  //         );
-  //     }
-  //     this.UsmPortfolioList = new MatTableDataSource(this.usmPortfolios);
-  //     this.UsmPortfolioList.sort = this.sort;
-  //     this.UsmPortfolioList.paginator = this.paginator;
-  // }
+
   Search(pageEvent) {
     if (pageEvent == null || !pageEvent) {
       pageEvent = { page: 0, size: this.pageSize };
@@ -777,10 +735,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
       this.Clear();
       this.filterFlag = false;
     }
-    //  else if (this.searchedName == "" || this.filterUsmPortfolio == "") {
-    //   this.Clear();
-    //   this.filterFlag = false;
-    // }
+    
     else if (
       this.searchedName != undefined &&
       (this.filterUsmPortfolio == undefined || this.filterUsmPortfolio == "")
@@ -804,8 +759,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
       };
       this.filterFlag = true;
     }
-    if (this.filterFlag) {
-      this.usmPortfolioService.search(params, pageEvent).subscribe((res) => {
+    if (this.filterFlag) {      this.usmPortfolioService.search(params, pageEvent).subscribe((res) => {
         this.currentPage = res;
         this.usmPortfolios = this.currentPage.content;
         this.usmPortfoliosCopy = this.usmPortfolios;
@@ -815,6 +769,11 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
         );
         this.UsmPortfolioList.paginator = this.paginator;
         this.UsmPortfolioList.sort = this.sort;
+        
+        this.noOfPages = this.currentPage.totalPages;
+        this.pageNumber = pageEvent.page + 1 || 1; 
+        
+        this.pageChanged.emit(this.pageNumber);
       });
     }
   }
@@ -829,8 +788,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
   }
   assignCopy() {
     this.usmPortfolios = Object.assign([], this.usmPortfoliosCopy);
-  }
-  filterItem(value, pageEvent?) {
+  }  filterItem(value, pageEvent?) {
     this.portfolioSearched = value;
 
     if (!value) {
@@ -867,16 +825,13 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
           this.UsmPortfolioList.paginator = this.paginator;
           this.UsmPortfolioList.sort = this.sort;
 
-          // Update pagination variables
           this.noOfPages = this.currentPage.totalPages;
           this.pageNumber = pageEvent.page + 1;
 
-          // Initialize pageArr with array of indexes
           this.pageArr = Array(this.noOfPages)
             .fill(0)
             .map((x, i) => i);
 
-          // Set startIndex and endIndex for pagination display
           if (this.pageNumber > 5) {
             this.endIndex = Math.min(this.pageNumber + 2, this.noOfPages);
             this.startIndex = Math.max(0, this.endIndex - 5);
@@ -884,9 +839,9 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
             this.startIndex = 0;
             this.endIndex = Math.min(5, this.noOfPages);
           }
-        },
-        (error) => {
-          // Ensure UsmPortfolioList is always initialized even on error
+          
+          this.pageChanged.emit(this.pageNumber);
+        },        (error) => {
           if (!this.UsmPortfolioList) {
             this.UsmPortfolioList = new MatTableDataSource([]);
           }
@@ -895,23 +850,20 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
       );
     }
   }
-  // checkEnterPressed(event: any, val: any) {
-  //     if (event.keyCode === 13) {
-  //         this.filterItem(event.srcElement.value);
-  //     }
-  // }
-  trackByMethod(index, item) {}
+ 
   onPageFired(event) {
+    this.pageIndex = event.pageIndex;
+    
     if (this.filterFlag == false && this.filterFlag1 == false) {
       this.fetchWave({ page: event.pageIndex, size: this.pageSize });
-      this.pageIndex = event.pageIndex;
-    } else if (this.filterFlag == true)
+    } else if (this.filterFlag == true) {
       this.Search({ page: event.pageIndex, size: this.pageSize });
-    else if (this.filterFlag1 == true)
+    } else if (this.filterFlag1 == true) {
       this.filterItem(this.portfolioSearched, {
         page: event.pageIndex,
         size: this.pageSize,
       });
+    }
   }
 
   checkNameMaxLength() {
@@ -973,7 +925,6 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
   changePage(page?: number) {
     if (page && page >= 1 && page <= this.noOfPages) this.pageNumber = page;
     if (this.pageNumber >= 1 && this.pageNumber <= this.noOfPages) {
-      // Update pagination UI variables
       if (this.pageNumber > 5) {
         this.endIndex = this.pageNumber;
         this.startIndex = this.endIndex - 5;
@@ -982,18 +933,20 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
         this.endIndex = 5;
       }
 
-      // Fetch data for the new page
       const pageEvent = { page: this.pageNumber - 1, size: this.pageSize };
 
+      
       if (this.filterFlag == false && this.filterFlag1 == false) {
         this.fetchWave(pageEvent);
       } else if (this.filterFlag == true) {
         this.Search(pageEvent);
+     
+        this.pageChanged.emit(this.pageNumber);
       } else if (this.filterFlag1 == true) {
+           this.fetchWave(pageEvent);
         this.filterItem(this.portfolioSearched, pageEvent);
+        
       }
-
-      this.pageChanged.emit(this.pageNumber);
     }
   }
 

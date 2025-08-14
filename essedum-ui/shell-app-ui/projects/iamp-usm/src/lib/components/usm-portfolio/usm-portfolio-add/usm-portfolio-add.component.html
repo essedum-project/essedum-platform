@@ -1,5 +1,7 @@
 <div class="lfx-u-pad-t-8">
   <div class="lfx-l-level2-middle-col">
+
+    <!--header part-->
     <div class="d-flex justify-content-between align-items-center fixed-header" >
       <div class="align-items-center d-flex" *ngIf="!edit && !view">
         <h2 class="header-title">Create Portfolio</h2>
@@ -16,8 +18,10 @@
         </button>
       </div>
     </div>
+
     <mat-card>
-      <div class="lfx-u-pad-t-32 lfx-u-pad-r-24 p-20">
+      <div class="lfx-u-pad-t-32 lfx-u-pad-r-24 p-20">        
+        <!--add, edit, view fields-->
         <div class="row">
           <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
             <div>
@@ -53,6 +57,7 @@
           </div>
         </div>
       </div>
+      
       <div class="align-items-center d-flex mt-4" *ngIf="(edit || view) && projectList">
         <h2 class="header-sub-title">
           Projects under "{{usmPortfolio.portfolioName}}" Portfolio
@@ -71,9 +76,8 @@
                   <th *ngFor="let obj of displayColumns">{{ obj }}</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr
-                  *ngFor="let obj of projectList | slice:(pageNumber-1)*pageSize:(pageNumber*pageSize); let i = index">
+              <tbody>          <tr
+                  *ngFor="let obj of projectList | slice:(pageNumber-1)*pageSize:(pageNumber*pageSize); let i = index; trackBy: trackByMethod">
                   <td>{{ getRowNumber(i) }}</td>
                   <td style="color: #0052cc; cursor: pointer">{{ obj.id }}</td>
                   <td>{{ obj.name }}</td>
@@ -85,11 +89,12 @@
               <div class="no-data">No projects associated with this portfolio</div>
             </ng-template>
           </div>
+          <!--pagination-->
           <div class="pagination-container">
             <div class="paginator-buttons">
               <div class="pages-details">
                 <!-- Previous page button -->
-                <mat-icon id="prev-page-btn" data-icon-type="prev-button" class="pagination-arrow" [ngClass]="{
+                <mat-icon *ngIf="projectList.length > 0" id="prev-page-btn" data-icon-type="prev-button" class="pagination-arrow" [ngClass]="{
                       'disabled': pageNumber == 1,
                       'active': isPrevHovered && pageNumber != 1
                     }" (mouseenter)="isPrevHovered = true" (mouseleave)="isPrevHovered = false"
@@ -109,7 +114,7 @@
                 </div>
 
                 <!-- Next page button -->
-                <mat-icon id="next-page-btn" data-icon-type="next-button" class="pagination-arrow" [ngClass]="{
+                <mat-icon  *ngIf="projectList.length > 0" id="next-page-btn" data-icon-type="next-button" class="pagination-arrow" [ngClass]="{
                       'disabled': pageNumber == noOfPages,
                       'active': isNextHovered && pageNumber != noOfPages
                     }" (mouseenter)="isNextHovered = true" (mouseleave)="isNextHovered = false"
@@ -119,13 +124,11 @@
               </div>
             </div>
           </div>
-
         </div>
       </div>
 
-
-
       <hr />
+      <!--footer part-->
       <div class="d-flex lfx-u-mar-b-16 ml-24" *ngIf="!view">
         <button *ngIf="!edit" mat-raised-button [disabled]="false" (click)="onSave()" class="save-btn">
           Save Portfolio

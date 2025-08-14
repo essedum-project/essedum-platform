@@ -25,7 +25,6 @@ import {
   styleUrls: ["./usm-portfolio-add.component.scss"],
 })
 export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
-  // Properties
   usmPortfolio: UsmPortfolio = new UsmPortfolio();
   edit: boolean = false;
   view: boolean = false;
@@ -43,7 +42,6 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
     "Project Name",
     "Project Display Name",
   ];
-  // Pagination properties
   pageSize = 5;
   pageArr: number[] = [];
   pageNumberInput: number = 1;
@@ -55,12 +53,11 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
   pageNumberChanged: boolean = true;
   pageNumber: number = 0;
   projectList: any;
-  hoverStates: boolean[] = Array(10).fill(false); // For pagination hover effects
+  hoverStates: boolean[] = Array(10).fill(false); 
   @Output() pageChanged = new EventEmitter<any>();
   @Output() pageSizeChanged = new EventEmitter<any>();
 
   changeDetectionRef: ChangeDetectorRef;
-  // Add these properties to your component
   isPrevHovered: boolean = false;
   isNextHovered: boolean = false;
 
@@ -75,24 +72,19 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
     changeDetectionRef: ChangeDetectorRef
   ) {
     this.changeDetectionRef = changeDetectionRef;
-  }
-  ngOnInit() {
-    // Initialize pagination
+  }  ngOnInit() {
     this.pageNumber = 1;
     this.startIndex = 0;
     this.endIndex = 5;
 
-    // In your method that loads the project data
     if (this.projectList && this.projectList.length > 0) {
       this.noOfPages = Math.ceil(this.projectList.length / this.pageSize);
 
-      // Generate page numbers array for pagination (0-based)
-   this.pageArr = Array(this.noOfPages).fill(0).map((x, i) => i);
+      this.pageArr = Array(this.noOfPages).fill(0).map((x, i) => i);
+      console.log(`Portfolio dialog initialized with ${this.projectList.length} projects, ${this.noOfPages} pages`);
 
-      // Set default pagination values
       this.pageNumber = 1;
 
-      // Initial start and end indexes
       if (this.noOfPages <= 5) {
         this.startIndex = 0;
         this.endIndex = this.noOfPages;
@@ -102,42 +94,36 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Check if we're using dialog mode
     if (this.data) {
       if (this.data.mode === "edit" || this.data.mode === "view") {
         this.projectList = this.data.projectList || [];
         console.log("Project list received:", this.projectList);
         this.usmPortfolio = this.data.portfolio || new UsmPortfolio();
         this.view = this.data.mode === "view";
-        this.edit = true;        // Calculate pagination values
+        this.edit = true;      
         if (this.projectList && this.projectList.length > 0) {
           this.noOfPages = Math.ceil(this.projectList.length / this.pageSize);
-          // Generate page numbers array for pagination (0-based)
           this.pageArr = Array(this.noOfPages)
             .fill(0)
             .map((x, i) => i);
         }
       } else if (this.data.mode === "create") {
-        // Create mode
         this.usmPortfolio = new UsmPortfolio();
         this.projectList = this.data.projectList || [];
         this.edit = false;
         this.view = false;
       } else {
-        // Basic create mode without projects
         this.usmPortfolio = new UsmPortfolio();
         this.projectList = [];
         this.edit = false;
         this.view = false;
       }
     } else {
-      // Fallback to route parameters mode
       this.route.params.subscribe((params) => {
         if (params["id"]) {
           const portfolioId = +params["id"];
           if (portfolioId) {
             this.loadPortfolio(portfolioId);
-            // Check if view mode or edit mode
             this.view = params["mode"] === "view";
             this.edit = true;
           }
@@ -158,12 +144,10 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
   }
 
   onSave() {
-    // Trim portfolio name
     if (this.usmPortfolio && this.usmPortfolio.portfolioName) {
       this.usmPortfolio.portfolioName = this.usmPortfolio.portfolioName.trim();
     }
 
-    // Validate portfolio name
     if (
       !this.usmPortfolio.portfolioName ||
       this.usmPortfolio.portfolioName.trim().length === 0
@@ -172,7 +156,6 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Check if portfolio name exceeds maximum length
     if (this.usmPortfolio.portfolioName.length > 100) {
       this.messageService.info(
         "Portfolio name cannot be more than 100 characters",
@@ -181,7 +164,6 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Validate portfolio name format
     if (
       !/^[a-zA-Z][a-zA-Z0-9 \@\%\!\#\*\-\_\&\$\(\)\=\+\/\.\?\\]*?$/.test(
         this.usmPortfolio.portfolioName
@@ -191,11 +173,9 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // If in edit mode, update the portfolio
     if (this.edit) {
       this.updatePortfolio();
     } else {
-      // Otherwise create a new portfolio
       this.createPortfolio();
     }
   }
@@ -204,7 +184,7 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
       (response) => {
         this.messageService.info("Portfolio Saved Successfully", "IAMP");
         if (this.dialogRef) {
-          this.dialogRef.close(true); // Return true to indicate success
+          this.dialogRef.close(true); 
         } else {
           this.listView();
         }
@@ -220,7 +200,7 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
       (response) => {
         this.messageService.info("Portfolio updated successfully", "IAMP");
         if (this.dialogRef) {
-          this.dialogRef.close(true); // Return true to indicate success
+          this.dialogRef.close(true); 
         } else {
           this.listView();
         }
@@ -276,17 +256,15 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
   }
 
   isValidLetter(charCode: number): boolean {
-    // Allow letters, numbers, and specific special characters
     return (
       (charCode >= 65 && charCode <= 90) || // A-Z
       (charCode >= 97 && charCode <= 122) || // a-z
       (charCode >= 48 && charCode <= 57) || // 0-9
-      [8, 13, 16, 17, 20, 95].indexOf(charCode) > -1 // Backspace, Enter, Shift, Ctrl, CapsLock, Underscore
+      [8, 13, 16, 17, 20, 95].indexOf(charCode) > -1
     );
   }
 
   ngOnDestroy() {
-    // Clean up subscriptions
     if (this.busy) {
       this.busy.unsubscribe();
     }
@@ -316,28 +294,27 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
       this.pageNumber -= 1;
       this.changePage();
     }
-  }
-  changePage(page?: number) {
+  }  changePage(page?: number) {
     if (page && page >= 1 && page <= this.noOfPages) {
       this.pageNumber = page;
     }
+    
+    console.log(`Changing to page ${this.pageNumber} of ${this.noOfPages}, showing items ${(this.pageNumber-1)*this.pageSize+1}-${Math.min(this.pageNumber*this.pageSize, this.projectList?.length || 0)} of ${this.projectList?.length || 0}`);
 
-    // Always ensure page 1 is visible in pagination
     if (this.noOfPages <= 5) {
       this.startIndex = 0;
       this.endIndex = this.noOfPages;
     } else if (this.pageNumber <= 3) {
-      this.startIndex = 0; // This ensures page 1 (index 0) is always visible
+      this.startIndex = 0; 
       this.endIndex = 5;
     } else if (this.pageNumber >= this.noOfPages - 2) {
-      this.startIndex = Math.max(0, this.noOfPages - 5); // Prevent negative index
+      this.startIndex = Math.max(0, this.noOfPages - 5); 
       this.endIndex = this.noOfPages;
     } else {
-      this.startIndex = Math.max(0, this.pageNumber - 3); // Prevent negative index
+      this.startIndex = Math.max(0, this.pageNumber - 3);
       this.endIndex = this.pageNumber + 2;
     }
 
-    // Force view update
     this.changeDetectionRef.detectChanges();
   }
 
@@ -351,27 +328,28 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
     }
   }
   getRowNumber(index: number): number {
-    // Calculate the correct row number based on page number and page size
-    return this.pageNumber * this.pageSize + index + 1 - this.pageSize;
+    return (this.pageNumber - 1) * this.pageSize + index + 1;
   }
 
-  // Rename your methods or update the HTML to match
+  
   onPrevPage() {
-    this.prevPage(); // Call your existing method
+    this.prevPage(); 
   }
 
   onNextPage() {
-    this.nextPage(); // Call your existing method
+    this.nextPage(); 
   }
 
   onChangePage(page: number) {
-    this.changePage(page); // Call your existing method
+    this.changePage(page); 
   }
-  // Add this method for button styling
   getButtonStyle(page: number, idx: number) {
-    // Don't include background-color here, let CSS classes handle it
     return {
       "font-weight": page === this.pageNumber ? "bold" : "normal"
     };
+  }
+
+  trackByMethod(index: number, item: any): number {
+    return item.id;
   }
 }
