@@ -28,14 +28,3 @@ for referer in MYSQLREFERER:
     DB_CONNECTIONS[referer]['PORT'] = int(config[referer]['PORT'])
     DB_CONNECTIONS[referer]['DATABASE'] = config[referer]['DATABASE']
     DB_CONNECTIONS[referer]['TOKEN'] = config[referer]['TOKEN']
-
-
-for referer in POSTGRESSREFERER:
-    DB_CONNECTIONS[referer] = {}
-    DB_CONNECTIONS[referer]['USER'] = config[referer]['USER']
-    DB_CONNECTIONS[referer]['PASSWORD'] = config[referer]['PASSWORD']
-    DB_CONNECTIONS[referer]['HOST'] = config[referer]['HOST']
-    DB_CONNECTIONS[referer]['PORT'] = int(config[referer]['PORT'])
-    DB_CONNECTIONS[referer]['DATABASE'] = config[referer]['DATABASE']
-    DB_CONNECTIONS[referer]['SCHEMA'] = config[referer]['SCHEMA']
-    DB_CONNECTIONS[referer]['TOKEN'] = config[referer]['TOKEN']
