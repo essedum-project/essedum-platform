@@ -1,5 +1,18 @@
 # Stage 1: Build with Maven
-FROM maven:3.9.6-eclipse-temurin-21 AS builder
+FROM eclipse-temurin:21-jdk AS builder
+
+# Install Maven 3.6.3
+ENV MAVEN_VERSION=3.6.3
+ENV MAVEN_HOME=/opt/maven
+ENV PATH=$MAVEN_HOME/bin:$PATH
+
+RUN apt-get update && \
+    apt-get install -y curl unzip && \
+    curl -fsSL https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.zip -o maven.zip && \
+    unzip maven.zip -d /opt && \
+    mv /opt/apache-maven-${MAVEN_VERSION} $MAVEN_HOME && \
+    rm maven.zip && \
+    apt-get clean
 
 WORKDIR /sv
 
@@ -11,21 +24,19 @@ RUN mkdir /app
 RUN mkdir /app/conf
 RUN mkdir /app/lib
 RUN mkdir /app/log
-RUN mkdir /app/modules
-RUN mkdir /app/plugins
 RUN cp /sv/common-app/src/main/resources/*.yml /app/conf
 RUN cp /sv/common-app/src/main/resources/*.xml /app/conf
 RUN rm /app/conf/application-mysql.yml
 RUN mv /app/conf/application-mysql-oauth2.yml /app/conf/application-mysql.yml
-RUN chmod 777 /sv/copy_jars.sh
-RUN /sv/copy_jars.sh
+RUN find ~/.m2/repository -name "*.jar" -exec cp {} /app/lib/ \;
 
 # Use an official OpenJDK 21 base image
 FROM openjdk:21-jdk-slim
 
 USER root
+
 # Install Nginx
-RUN apt-get update && apt-get install -y nginx && apt-get clean
+RUN apt-get update && apt-get install -y nginx &&  apt-get clean
 
 COPY nginx_backend.conf /etc/nginx/nginx.conf
 
@@ -42,9 +53,6 @@ COPY --from=builder /app /app/
 WORKDIR /app
 ENV LEAP_HOME=/app
 
-# COPY appstart.sh /app/
-# RUN chmod +x /app/appstart.sh
-
-CMD ["/bin/bash", "-c", "service nginx start && java -Dspring.config.location=/app/conf/ -Dencryption.key=leap$123## -Dencryption.salt=NB9+lv0guQXYrZYbTmcS20Vd5FxW1h75b8CaI8r+nnPvYrIIHfYu05JVQf9qtJNCS0Vznh692VhUW9HeCPd2IA== -DLOG_PATH=/app/log -Dlicense=sOJDitKH4axL5syVqJDVXv4pmu3HZc4uzAwulC6cwf8mpNm9nWVvQA== -Dpublickey=3bQAP+ugsTVGLWdZ -Dlogging.level.com.springframework.security=DEBUG -Dlogging.level.com.infosys.icets.ai.comm.lib.util.logger=ERROR -Dspring.profiles.active=mysql,oauth2,btf,dbconstants,vault -cp common-app-3.3-SNAPSHOT.jar:lib/*:modules/*:plugins/*:conf/* com.infosys.Common -Dhttp.nonProxyHosts=aiplatform.az.ad.idemo-ppc.com"]
+CMD ["/bin/bash", "-c", "service nginx start && java -Dspring.config.location=/app/conf/ -Dencryption.key=leap$123## -Dencryption.salt=NB9+lv0guQXYrZYbTmcS20Vd5FxW1h75b8CaI8r+nnPvYrIIHfYu05JVQf9qtJNCS0Vznh692VhUW9HeCPd2IA== -DLOG_PATH=/app/log -Dlicense=sOJDitKH4axL5syVqJDVXv4pmu3HZc4uzAwulC6cwf8mpNm9nWVvQA== -Dpublickey=3bQAP+ugsTVGLWdZ -Dlogging.level.com.springframework.security=DEBUG -Dlogging.level.com.infosys.icets.ai.comm.lib.util.logger=ERROR -Dspring.profiles.active=mysql,oauth2,btf,dbconstants,vault -cp common-app-3.3-SNAPSHOT.jar:lib/*:conf/* com.infosys.Common"]
 
 EXPOSE 8082
