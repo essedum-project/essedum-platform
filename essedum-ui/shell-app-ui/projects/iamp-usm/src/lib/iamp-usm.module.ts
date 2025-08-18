@@ -33,8 +33,8 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatCardModule } from "@angular/material/card";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { AipPaginationComponent } from './components/aip-pagination/aip-pagination.component';
-import { UsmPortfolioListViewComponent } from "./components/usm-portfolio/usm-portfolio-list-view.component";
-import { UsmPortfolioAddComponent } from "./components/usm-portfolio/usm-portfolio-add/usm-portfolio-add.component";
+import { PortfolioListViewComponent } from "./components/portfolio/portfolio-list-view.component";
+import { PortfolioAddComponent } from "./components/portfolio/portfolio-add/portfolio-add.component";
 
 @NgModule({
     imports: [
@@ -69,8 +69,8 @@ import { UsmPortfolioAddComponent } from "./components/usm-portfolio/usm-portfol
         RoleListComponent, 
         AipHeaderComponent,        
         AipPaginationComponent,
-        UsmPortfolioListViewComponent,
-        UsmPortfolioAddComponent
+        PortfolioListViewComponent,
+        PortfolioAddComponent
     ],providers: [
         MessageService,RoleService,ProjectService,UserProjectRoleService,
         { provide: BusyConfig, useFactory: busyConfigFactory },

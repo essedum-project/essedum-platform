@@ -40,8 +40,8 @@ import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
 
-import { UsmPortfolio } from "../../models/usm-portfolio";
-import { UsmPortfolioService } from "../../services/usm-portfolio.service";
+import { Portfolio } from "../../models/portfolio";
+import { PortfolioService } from "../../services/portfolio.service";
 import { TagEventDTO } from "../../models/tagEventDTO.model";
 
 import { DeleteComponent } from "../../shared-modules/confirm-delete/delete.component";
@@ -49,21 +49,21 @@ import { Subscription } from "rxjs";
 import { IampUsmService } from "../../iamp-usm.service";
 import { Project } from "../../models/project";
 import { ProjectService } from "../../services/project.service";
-import { UsmPortfolioAddComponent } from "./usm-portfolio-add/usm-portfolio-add.component";
+import { PortfolioAddComponent } from "./portfolio-add/portfolio-add.component";
 
 @Component({
-  templateUrl: "usm-portfolio-list-view.component.html",
-  styleUrls: ["./usm-portfolio-list-view.component.scss"],
-  selector: "usm-portfolio-list-view",
+  templateUrl: "portfolio-list-view.component.html",
+  styleUrls: ["./portfolio-list-view.component.scss"],
+  selector: "portfolio-list-view",
 })
-export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
+export class PortfolioListViewComponent implements OnInit, OnDestroy {
   @Input() header = "UsmPortfolios...";
   @Output() changeView: EventEmitter<boolean> = new EventEmitter();
   @Input() sub: boolean = false;
   @Output() onAddNewClicked = new EventEmitter();
   p: number;
   @ViewChild("myInput", { static: false }) myInputReference: ElementRef;
-  usmPortfolioToDelete: UsmPortfolio;
+  usmPortfolioToDelete: Portfolio;
   UsmPortfolioList: MatTableDataSource<any>;
 
   tagrefresh = false;
@@ -87,11 +87,11 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
     this.sort = ms;
   }
   @ViewChild(MatPaginator) paginator1: MatPaginator;
-  example: UsmPortfolio = new UsmPortfolio();
+  example: Portfolio = new Portfolio();
   exampleProject: Project = new Project();
 
   // list is paginated
-  currentPage: PageResponse<UsmPortfolio> = new PageResponse<UsmPortfolio>(
+  currentPage: PageResponse<Portfolio> = new PageResponse<Portfolio>(
     0,
     0,
     []
@@ -113,7 +113,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
     public dialog: MatDialog,
     public helperService: HelperService,
     private route: ActivatedRoute,
-    public usmPortfolioService: UsmPortfolioService,
+    public portfolioService: PortfolioService,
     private usmService: IampUsmService,
     public projectService: ProjectService,
     changeDetectionRef: ChangeDetectorRef
@@ -128,8 +128,8 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
   filterUsmPortfolio: any;
   searchedName: any;
   showCreate: boolean = false;
-  usmPortfolios = new Array<UsmPortfolio>();
-  usmPortfoliosCopy = new Array<UsmPortfolio>();
+  usmPortfolios = new Array<Portfolio>();
+  usmPortfoliosCopy = new Array<Portfolio>();
   projects = new Array<Project>();
   projectsCopy = new Array<Project>();
   showList: boolean = true;
@@ -138,8 +138,8 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
   viewUsmPortfolio: boolean = false;
   edit: boolean = false;
   lazyload = { first: 0, rows: 5000, sortField: null, sortOrder: null };
-  usmPortfolio = new UsmPortfolio();
-  currentUsmPortfolio = new UsmPortfolio();
+  usmPortfolio = new Portfolio();
+  currentUsmPortfolio = new Portfolio();
   selected = new FormControl(0);
   pageSize = 5;
   wavesLength: number;
@@ -254,7 +254,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
     ) {
       this.showCreate = true;
       this.edit = false;
-      this.usmPortfolio = new UsmPortfolio();
+      this.usmPortfolio = new Portfolio();
       this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
       this.changeView.emit(false);
     } else {
@@ -275,7 +275,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
   showUsmPortfolioList() {}
   getUsmPortfolios(id) {
     console.log("Getting portfolio with ID:", id);
-    this.busy = this.usmPortfolioService.getUsmPortfolio(id).subscribe(
+    this.busy = this.portfolioService.getUsmPortfolio(id).subscribe(
       (res) => {
         console.log("Portfolio data received:", res);
         this.currentUsmPortfolio = res;
@@ -314,13 +314,13 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
         console.error("Error loading portfolio:", error);
         this.messageService.error("Could not load portfolio details", "IAMP");
         // Reset data on error
-        this.currentUsmPortfolio = new UsmPortfolio();
+        this.currentUsmPortfolio = new Portfolio();
         this.projects = [];
       }
     );
   }
 
-  editUsmPortfolio(usmPortfolio: UsmPortfolio) {
+  editUsmPortfolio(usmPortfolio: Portfolio) {
     sessionStorage.setItem("usmPortfolioid", usmPortfolio.id.toString());
     sessionStorage.setItem("pageview", "usmPortfolio");
 
@@ -330,7 +330,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
     // Wait a bit to ensure data is loaded
     setTimeout(() => {
       console.log("Opening edit dialog with projects:", this.projects);
-      const dialogRef = this.dialog.open(UsmPortfolioAddComponent, {
+      const dialogRef = this.dialog.open(PortfolioAddComponent, {
         height: "80%",
         width: "70%",
         disableClose: true,
@@ -350,7 +350,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
     }, 300);
   }
 
-  view_UsmPortfolio(usmPortfolio: UsmPortfolio) {
+  view_UsmPortfolio(usmPortfolio: Portfolio) {
     sessionStorage.setItem("usmPortfolioid", usmPortfolio.id.toString());
     sessionStorage.setItem("pageview", "usmPortfolio");
 
@@ -360,7 +360,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
     // Wait a bit to ensure data is loaded
     setTimeout(() => {
       console.log("Opening view dialog with projects:", this.projects);
-      const dialogRef = this.dialog.open(UsmPortfolioAddComponent, {
+      const dialogRef = this.dialog.open(PortfolioAddComponent, {
         height: "80%", // Use fixed height
         width: "70%", // Use fixed width
         disableClose: true,
@@ -400,7 +400,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
           a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
         );
 
-        const dialogRef = this.dialog.open(UsmPortfolioAddComponent, {
+        const dialogRef = this.dialog.open(PortfolioAddComponent, {
           height: "67%",
           width: "50%",
           disableClose: true,
@@ -422,7 +422,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
         this.messageService.error("Could not get the projects", "IAMP");
 
         // Open dialog even if projects fail to load
-        const dialogRef = this.dialog.open(UsmPortfolioAddComponent, {
+        const dialogRef = this.dialog.open(PortfolioAddComponent, {
           height: "67%",
           width: "50%",
           disableClose: true,
@@ -486,7 +486,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
       if (!flag) {
         if (sessionStorage.getItem("telemetry") == "true") {
         }
-        this.busy = this.usmPortfolioService
+        this.busy = this.portfolioService
           .create(this.usmPortfolio)
           .subscribe(
             (response) => {
@@ -564,7 +564,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
           let diff = this.compareTodiff(this.usmPortfolio, arr1[0]);
           // this.telemetryService.audit(this.usmPortfolio, arr1[0],diff);
         }
-        this.busy = this.usmPortfolioService
+        this.busy = this.portfolioService
           .update(this.usmPortfolio)
           .subscribe(
             (rs) => {
@@ -588,9 +588,9 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  delete(usmPortfolioToDelete: UsmPortfolio) {
+  delete(usmPortfolioToDelete: Portfolio) {
     let id = usmPortfolioToDelete.id;
-    this.usmPortfolioService.delete(id).subscribe(
+    this.portfolioService.delete(id).subscribe(
       (response) => {
         this.testCreate = true;
         sessionStorage.setItem("UpdatedUser", "true");
@@ -612,7 +612,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
       this.showNameLengthErrorMessage = false;
       this.showDescLengthErrorMessage = false;
     } else {
-      this.usmPortfolio = new UsmPortfolio();
+      this.usmPortfolio = new Portfolio();
       this.showNameLengthErrorMessage = false;
       this.showDescLengthErrorMessage = false;
     }
@@ -638,7 +638,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
   }
 
   loadPage(event) {
-    this.usmPortfolioService.findAll(this.example, event).subscribe(
+    this.portfolioService.findAll(this.example, event).subscribe(
       (pageResponse) => {
         (this.currentPage = pageResponse),
           (this.currentPage.content = this.currentPage.content.sort((a, b) =>
@@ -665,7 +665,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
     if (pageEvent == null || !pageEvent) {
       pageEvent = { page: 0, size: this.pageSize };
     }
-    this.usmPortfolioService.FindAll(this.example, pageEvent).subscribe(
+    this.portfolioService.FindAll(this.example, pageEvent).subscribe(
       (pageResponse) => {
         (this.currentPage = pageResponse),
           (this.currentPage.content = this.currentPage.content.sort((a, b) =>
@@ -716,7 +716,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
   }
 
   showDeleteDialog(rowData: any) {
-    let usmPortfolioToDelete: UsmPortfolio = <UsmPortfolio>rowData;
+    let usmPortfolioToDelete: Portfolio = <Portfolio>rowData;
 
     let dialogRef = this.confirmDeleteDialog.open(DeleteComponent, {
       disableClose: true,
@@ -735,7 +735,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
     });
   }
 
-  rowSelected(item: UsmPortfolio) {
+  rowSelected(item: Portfolio) {
     this.router.navigate(["/portfoliolist", item.id]);
   }
   setSelectedEntities(event) {}
@@ -775,7 +775,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
       this.filterFlag = true;
     }
     if (this.filterFlag) {
-      this.usmPortfolioService.search(params, pageEvent).subscribe((res) => {
+      this.portfolioService.search(params, pageEvent).subscribe((res) => {
         this.currentPage = res;
         this.usmPortfolios = this.currentPage.content;
         this.usmPortfoliosCopy = this.usmPortfolios;
@@ -793,7 +793,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
       });
     }
   }
-  
+
   Clear() {
     this.filterUsmPortfolio = undefined;
     this.searchedName = undefined;
@@ -837,7 +837,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
     }
 
     if (this.filterFlag1) {
-      this.usmPortfolioService.search(params, pageEvent).subscribe(
+      this.portfolioService.search(params, pageEvent).subscribe(
         (res) => {
           this.currentPage = res;
           this.usmPortfolios = this.currentPage.content;
@@ -1085,7 +1085,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
 
     console.log("Applying filters with params:", params);
 
-    this.usmPortfolioService
+    this.portfolioService
       .search(params, { page: 0, size: this.pageSize })
       .subscribe(
         (res) => {

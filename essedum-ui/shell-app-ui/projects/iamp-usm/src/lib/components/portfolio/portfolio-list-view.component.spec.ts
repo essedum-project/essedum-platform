@@ -11,9 +11,9 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 
-import { UsmPortfolio } from '../../models/usm-portfolio';
-import { UsmPortfolioService } from '../../services/usm-portfolio.service';
-import { UsmPortfolioListViewComponent } from './usm-portfolio-list-view.component';
+import { UsmPortfolio } from '../../models/portfolio';
+import { UsmPortfolioService } from '../../services/portfolio.service';
+import { UsmPortfolioListViewComponent } from './portfolio-list-view.component';
 
 
 

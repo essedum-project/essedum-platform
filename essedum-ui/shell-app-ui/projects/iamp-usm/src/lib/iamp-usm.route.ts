@@ -3,15 +3,15 @@ import { RouterModule, Routes } from "@angular/router";
 import { RoleListComponent } from "./components/role-list/role-list.component";
 
 import { SecretsComponent } from "./components/secrets/secrets.component";
-import { UsmPortfolioListViewComponent } from "./components/usm-portfolio/usm-portfolio-list-view.component";
-import { UsmPortfolioAddComponent } from "./components/usm-portfolio/usm-portfolio-add/usm-portfolio-add.component";
+import { PortfolioListViewComponent } from "./components/portfolio/portfolio-list-view.component";
+import { PortfolioAddComponent } from "./components/portfolio/portfolio-add/portfolio-add.component";
 const routes: Routes = [
            
             { path: "secret", component: SecretsComponent},
             { path: "secret/:key/:type", component: SecretsComponent},
-            { path: "portfoliolist", component: UsmPortfolioListViewComponent },
-            { path: "portfoliolist/:id/:view", component: UsmPortfolioAddComponent },
-            { path: "portfoliolist/create", component: UsmPortfolioAddComponent },
+            { path: "portfoliolist", component: PortfolioListViewComponent },
+            { path: "portfoliolist/:id/:view", component: PortfolioAddComponent },
+            { path: "portfoliolist/create", component: PortfolioAddComponent },
             { path: "role/list", component: RoleListComponent },
 
 ];

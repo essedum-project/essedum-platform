@@ -5,10 +5,10 @@ import { FormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
 import { of } from 'rxjs';
 
-import { UsmPortfolioAddComponent } from './usm-portfolio-add.component';
-import { UsmPortfolioService } from '../../../services/usm-portfolio.service';
+import { UsmPortfolioAddComponent } from './portfolio-add.component';
+import { UsmPortfolioService } from '../../../services/portfolio.service';
 import { MessageService } from '../../../services/message.service';
-import { UsmPortfolio } from '../../../models/usm-portfolio';
+import { UsmPortfolio } from '../../../models/portfolio';
 
 describe('UsmPortfolioAddComponent', () => {
   let component: UsmPortfolioAddComponent;

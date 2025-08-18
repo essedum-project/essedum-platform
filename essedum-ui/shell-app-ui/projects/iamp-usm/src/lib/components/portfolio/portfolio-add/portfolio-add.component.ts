@@ -10,8 +10,8 @@ import {
 } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { Subscription } from "rxjs";
-import { UsmPortfolio } from "../../../models/usm-portfolio";
-import { UsmPortfolioService } from "../../../services/usm-portfolio.service";
+import { Portfolio } from "../../../models/portfolio";
+import { PortfolioService } from "../../../services/portfolio.service";
 import { MessageService } from "../../../services/message.service";
 import {
   MatDialogRef,
@@ -20,12 +20,12 @@ import {
 } from "@angular/material/dialog";
 
 @Component({
-  selector: "usm-portfolio-add",
-  templateUrl: "./usm-portfolio-add.component.html",
-  styleUrls: ["./usm-portfolio-add.component.scss"],
+  selector: "portfolio-add",
+  templateUrl: "./portfolio-add.component.html",
+  styleUrls: ["./portfolio-add.component.scss"],
 })
-export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
-  usmPortfolio: UsmPortfolio = new UsmPortfolio();
+export class PortfolioAddComponent implements OnInit, OnDestroy {
+  usmPortfolio: Portfolio = new Portfolio();
   edit: boolean = false;
   view: boolean = false;
   buttonFlag: boolean = false;
@@ -64,10 +64,10 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private usmPortfolioService: UsmPortfolioService,
+    private portfolioService:PortfolioService,
     private messageService: MessageService,
     public dialog: MatDialog,
-    @Optional() public dialogRef: MatDialogRef<UsmPortfolioAddComponent>,
+    @Optional() public dialogRef: MatDialogRef<PortfolioAddComponent>,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any,
     changeDetectionRef: ChangeDetectorRef
   ) {
@@ -98,7 +98,7 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
       if (this.data.mode === "edit" || this.data.mode === "view") {
         this.projectList = this.data.projectList || [];
         console.log("Project list received:", this.projectList);
-        this.usmPortfolio = this.data.portfolio || new UsmPortfolio();
+        this.usmPortfolio = this.data.portfolio || new Portfolio();
         this.view = this.data.mode === "view";
         this.edit = true;      
         if (this.projectList && this.projectList.length > 0) {
@@ -108,12 +108,12 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
             .map((x, i) => i);
         }
       } else if (this.data.mode === "create") {
-        this.usmPortfolio = new UsmPortfolio();
+        this.usmPortfolio = new Portfolio();
         this.projectList = this.data.projectList || [];
         this.edit = false;
         this.view = false;
       } else {
-        this.usmPortfolio = new UsmPortfolio();
+        this.usmPortfolio = new Portfolio();
         this.projectList = [];
         this.edit = false;
         this.view = false;
@@ -133,7 +133,7 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
   }
 
   loadPortfolio(id: number) {
-    this.usmPortfolioService.getUsmPortfolio(id).subscribe(
+    this.portfolioService.getUsmPortfolio(id).subscribe(
       (portfolio) => {
         this.usmPortfolio = portfolio;
       },
@@ -180,7 +180,7 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
     }
   }
   createPortfolio() {
-    this.busy = this.usmPortfolioService.create(this.usmPortfolio).subscribe(
+    this.busy = this.portfolioService.create(this.usmPortfolio).subscribe(
       (response) => {
         this.messageService.info("Portfolio Saved Successfully", "IAMP");
         if (this.dialogRef) {
@@ -196,7 +196,7 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
   }
 
   updatePortfolio() {
-    this.busy = this.usmPortfolioService.update(this.usmPortfolio).subscribe(
+    this.busy = this.portfolioService.update(this.usmPortfolio).subscribe(
       (response) => {
         this.messageService.info("Portfolio updated successfully", "IAMP");
         if (this.dialogRef) {
@@ -215,7 +215,7 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
       this.usmPortfolio.portfolioName = null;
       this.usmPortfolio.description = null;
     } else {
-      this.usmPortfolio = new UsmPortfolio();
+      this.usmPortfolio = new Portfolio();
     }
     this.showNameLengthErrorMessage = false;
     this.showDescLengthErrorMessage = false;
@@ -273,7 +273,7 @@ export class UsmPortfolioAddComponent implements OnInit, OnDestroy {
   closePortfolioDialog(): void {
     const openDialogs = this.dialog.openDialogs;
     for (const dialog of openDialogs) {
-      if (dialog.componentInstance instanceof UsmPortfolioAddComponent) {
+      if (dialog.componentInstance instanceof PortfolioAddComponent) {
         dialog.close();
         this.dialogRef.afterClosed().subscribe(() => {
           this.portfolioModelClosed.emit();
