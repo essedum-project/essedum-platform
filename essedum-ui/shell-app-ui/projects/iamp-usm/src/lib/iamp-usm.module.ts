@@ -6,6 +6,7 @@ import { UsmPortfolioService } from "./services/usm-portfolio.service";
 import { RoleService } from "./services/role.service";
 import { UserProjectRoleService } from "./services/user-project-role.service";
 import { ProjectService } from "./services/project.service";
+import { DatePipe } from '@angular/common';
 
 import { NgxPaginationModule } from "ngx-pagination";
 import { Ng4LoadingSpinnerService } from 'ng4-loading-spinner';
@@ -57,6 +58,7 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatPaginatorModule } from "@angular/material/paginator";
 import { MatSortModule } from "@angular/material/sort";
 import { MatDialogModule } from "@angular/material/dialog";
+import { MatTabsModule } from "@angular/material/tabs";
 @NgModule({
     imports: [
         NgBusyModule,
@@ -86,6 +88,7 @@ import { MatDialogModule } from "@angular/material/dialog";
         MatTooltipModule,
         MatPaginatorModule,
         MatSortModule,
+        MatTabsModule,
      
     ],
     declarations: [
@@ -114,8 +117,9 @@ import { MatDialogModule } from "@angular/material/dialog";
         { provide: BusyConfig, useFactory: busyConfigFactory },
         IampUsmService,
         Ng4LoadingSpinnerService,
+        DatePipe,
     ],
-    exports: [IampUsmComponent, SecretsComponent, RoleListComponent, RoleDetailComponent],
+    exports: [IampUsmComponent, SecretsComponent, RoleListComponent, RoleDetailComponent, RoleRoleComponent, UserProjectRoleListComponent],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
 export class IampUsmModule { }

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ElementRef, Inject } from "@angular/core";
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ElementRef, Inject, Optional } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import {
   MAT_DIALOG_DATA,
@@ -70,7 +70,7 @@ export class RoleDetailComponent implements OnInit {
     private usm_portfolio: UsmPortfolioService,
     public dialogRef: MatDialogRef<RoleDetailComponent>,
     public dialog: MatDialog,
-    @Inject(MAT_DIALOG_DATA) public data: any
+   @Optional() @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     dialogRef.disableClose = true;
   }

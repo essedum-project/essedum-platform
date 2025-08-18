@@ -212,6 +212,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
    */
 
   ngOnInit() {
+  console.log("THIS WORKSSSS")
     if (sessionStorage.getItem("usmAuthority")) {
       sessionStorage.removeItem("usmAuthority");
       this.auth = "";

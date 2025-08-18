@@ -15,21 +15,15 @@ export class RoleService {
   /**
    * Create a new  Role.
    */
-
   create(role: Role): Observable<Role> {
     const copy = this.convert(role);
-        let req = new PageRequestByExample(role, event);
-    let body;
-    let headerValue;
-    try {
-      body = JSON.stringify(req);
-      headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e : any)  {
-      console.error("JSON.stringify error - ", e.message);
-    }
-      const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    
+    // Get project and role from sessionStorage
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-   const headers = new HttpHeaders({
+    
+    // Set headers
+    const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
       'Content-Type': 'application/json',
       'Accept': 'application/json,text/plain, */*',
@@ -37,18 +31,23 @@ export class RoleService {
       'project': project.id || '',
       'projectname': project.name || '',
       'roleid': userRole.id || '',
-      'rolename': userRole.name || '',
-      'example': headerValue 
+      'rolename': userRole.name || ''
     });
+    
+    console.log("Creating role:", copy);
+    console.log("Headers:", headers);
+    
     return this.https
       .post("/api/roles", copy, { observe: "response", headers: headers })
       .pipe(
         map((response) => {
+          console.log("Create role response:", response);
           return new Role(response.body);
         })
       )
       .pipe(
         catchError((err) => {
+          console.error("Error creating role:", err);
           return this.handleError(err);
         })
       );
@@ -58,15 +57,52 @@ export class RoleService {
    * Get a Role by id.
    */
   getRole(id: any): Observable<Role> {
+    console.log("Getting role with ID:", id);
+    
+    // Get a simpler set of headers for troubleshooting
+     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || ''
+    });
+
+    // Try a different URL format - some APIs use different patterns
+    const url = `/api/roles/${id}`;
+    console.log("Making request to:", url);
+ 
     return this.https
-      .get("/api/roles/" + id, { observe: "response" })
+      .get(url, { 
+        observe: "response", 
+        headers: headers,
+        // Add withCredentials to ensure cookies are sent
+        withCredentials: true
+      })
       .pipe(
         map((response) => {
+          console.log("Role response:", response);
           return new Role(response.body);
         })
       )
       .pipe(
         catchError((err) => {
+          console.error("Error getting role:", err);
+          // Try to get more specific error details
+          if (err.error instanceof ErrorEvent) {
+            // Client-side error
+            console.error('Client-side error:', err.error.message);
+          } else {
+            // Server-side error
+            console.error(`Server returned code ${err.status}, error:`, err.error);
+          }
           return this.handleError(err);
         })
       );
@@ -83,17 +119,39 @@ export class RoleService {
       console.error("JSON.stringify error - ", e.message);
     }
 
+    // Get project and role from sessionStorage
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || ''
+    });
+    
+    console.log("Updating role:", role);
+    console.log("Headers:", headers);
+
     return this.https
       .put("/api/roles", body, {
         observe: "response",
+        headers: headers
       })
       .pipe(
         map((response) => {
+          console.log("Update role response:", response);
           return new Role(response.body);
         })
       )
       .pipe(
         catchError((err) => {
+          console.error("Error updating role:", err);
           return this.handleError(err);
         })
       );
@@ -191,8 +249,35 @@ export class RoleService {
    * Delete an Role by id.
    */
   delete(id: any) {
-    return this.https.delete("/api/roles/" + id, { observe: "response" }).pipe(
+    // Get project and role from sessionStorage
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || ''
+    });
+    
+    console.log("Deleting role with ID:", id);
+    console.log("Headers:", headers);
+    
+    return this.https.delete("/api/roles/" + id, { 
+      observe: "response",
+      headers: headers 
+    }).pipe(
+      map(response => {
+        console.log("Delete role response:", response);
+        return response;
+      }),
       catchError((err) => {
+        console.error("Error deleting role:", err);
         return this.handleError(err);
       })
     );

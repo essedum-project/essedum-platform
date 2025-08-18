@@ -20,9 +20,30 @@ export class RoleroleService {
 
   create(usm_role_permissions: Roletorole): Observable<Roletorole> {
     const copy = this.convert(usm_role_permissions);
+    
+    // Get project and role from sessionStorage
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || ''
+    });
+    
+    console.log("Creating role-role:", copy);
+    console.log("Headers:", headers);
+    
     return this.https
       .post("/api/usm-role-role", copy, {
         observe: "response",
+        headers: headers
       })
       .pipe(
         map((response) => {
@@ -40,9 +61,29 @@ export class RoleroleService {
    * Get a Rolerole by id.
    */
   getRolerole(id: any): Observable<Roletorole> {
+    // Get project and role from sessionStorage
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || ''
+    });
+    
+    console.log("Getting role-role with ID:", id);
+    console.log("Headers:", headers);
+    
     return this.https
       .get("/api/usm-role-role/" + id, {
         observe: "response",
+        headers: headers
       })
       .pipe(
         map((response) => {
@@ -67,9 +108,29 @@ export class RoleroleService {
       console.error("JSON.stringify error - ", e.message);
     }
 
+    // Get project and role from sessionStorage
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || ''
+    });
+    
+    console.log("Updating role-role:", usm_role_permissions);
+    console.log("Headers:", headers);
+
     return this.https
       .put("/api/usm-role-role", body, {
         observe: "response",
+        headers: headers
       })
       .pipe(
         map((response) => {
@@ -97,8 +158,27 @@ export class RoleroleService {
     } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
-    let headers = new HttpHeaders();
-    headers = headers.append('example', headerValue);
+    
+    // Get project and role from sessionStorage
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || '',
+      'example': headerValue
+    });
+    
+    console.log("Finding role-roles");
+    console.log("Headers:", headers);
+
     return this.https
       .get("/api/usm-role-role/page", {
         observe: "response",
@@ -132,9 +212,30 @@ export class RoleroleService {
     } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
+    
+    // Get project and role from sessionStorage
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || ''
+    });
+    
+    console.log("Complete search for role-roles with query:", query);
+    console.log("Headers:", headers);
+    
     return this.https
       .post("/api/usm-role-role/complete", body, {
         observe: "response",
+        headers: headers
       })
       .pipe(
         map((response) => {
@@ -153,9 +254,29 @@ export class RoleroleService {
    * Delete an Rolerole by id.
    */
   delete(id: any) {
+    // Get project and role from sessionStorage
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || ''
+    });
+    
+    console.log("Deleting role-role with ID:", id);
+    console.log("Headers:", headers);
+    
     return this.https
       .delete("/api/usm-role-role/" + id, {
         observe: "response",
+        headers: headers
       })
       .pipe(
         catchError((err) => {
@@ -207,13 +328,22 @@ export class RoleroleService {
 
   // sample method from angular doc
   private handleError(error: any) {
-    // TODO: seems we cannot use messageService from here...
-    let errMsg = error.error;
-    error.status ? `Status: ${error.status} - Text: ${error.statusText}` : "Server error";
-    console.error(errMsg); // log to console instead
-    // if (error.status === 401) {
-    //   window.location.href = "/";
-    // }
+    // Enhanced error logging with detailed information
+    console.error('API Error in RoleRoleService');
+    console.error('Error status:', error.status);
+    console.error('Error status text:', error.statusText);
+    console.error('Error message:', error.message);
+    console.error('Error URL:', error.url);
+    
+    // Log request details if available
+    if (error.error && error.error.message) {
+      console.error('Server error message:', error.error.message);
+    }
+    
+    // Log the full error object for debugging
+    console.error('Full error object:', JSON.stringify(error, null, 2));
+    
+    let errMsg = error.error || error.statusText || 'Unknown server error';
     return throwError(errMsg);
   }
 

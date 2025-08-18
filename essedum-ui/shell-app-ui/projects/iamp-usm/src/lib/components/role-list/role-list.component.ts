@@ -461,13 +461,13 @@ export class RoleListComponent implements OnInit, OnDestroy {
 
 
   editRole(role: Role) {
-    // this.router.navigate(["../edit", role.id], { relativeTo: this.route });
-    this.router.navigate(["./role/edit", 6], { relativeTo: this.route });
+    this.router.navigate(["./role/edit", role.id], { relativeTo: this.route });
+    // this.router.navigate(["./role/edit", 6], { relativeTo: this.route });
 
   }
 
   viewRole(role: Role) {
-    this.router.navigate(["../view", role.id], { relativeTo: this.route });
+    this.router.navigate(["./role//view", role.id], { relativeTo: this.route });
   }
 
   clear() {

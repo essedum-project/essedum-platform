@@ -104,7 +104,7 @@
   <div *ngIf="edit || view" class="selector-668-46">
     <mat-tab-group class="selector-668-47">
       <mat-tab label="Portfolio-Project-User" class="selector-668-48">
-        <user-project-role-list *ngIf="role.id" [selectedRole]="role" class="selector-668-49"></user-project-role-list>
+        <lib-user-project-role-list *ngIf="role.id" [selectedRole]="role" class="selector-668-49"></lib-user-project-role-list>
       </mat-tab>
       <mat-tab label="Role-Role" class="selector-663-168">
         <lib-role-role *ngIf="role.id" [selectedRole]="role" class="selector-668-49">
@@ -256,9 +256,9 @@
     </div>
       <div *ngIf="edit || view" class="selector-668-46">
     <mat-tab-group class="selector-668-47">
-      <mat-tab label="Portfolio-Project-User" class="selector-668-48">
-        <user-project-role-list *ngIf="role.id" [selectedRole]="role" class="selector-668-49"></user-project-role-list>
-      </mat-tab>
+      <!-- <mat-tab label="Portfolio-Project-User" class="selector-668-48">
+        <lib-user-project-role-list *ngIf="role.id" [selectedRole]="role" class="selector-668-49"></lib-user-project-role-list>
+      </mat-tab> -->
       <mat-tab label="Role-Role" class="selector-663-168">
         <lib-role-role *ngIf="role.id" [selectedRole]="role" class="selector-668-49">
         </lib-role-role>

@@ -141,6 +141,7 @@ import {
     dbsViewFlag:boolean=false;
   
     ngOnInit() {
+      console.log("thisworkkkksss2222")
       // this.telemetryImpression();
       // this.fetchrole();
       this.fetchmodule();
