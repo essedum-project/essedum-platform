@@ -5,15 +5,15 @@ import { FormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
 import { of } from 'rxjs';
 
-import { UsmPortfolioAddComponent } from './portfolio-add.component';
-import { UsmPortfolioService } from '../../../services/portfolio.service';
+import { PortfolioAddComponent } from './portfolio-add.component';
+import { PortfolioService } from '../../../services/portfolio.service';
 import { MessageService } from '../../../services/message.service';
-import { UsmPortfolio } from '../../../models/portfolio';
+import { Portfolio } from '../../../models/portfolio';
 
-describe('UsmPortfolioAddComponent', () => {
-  let component: UsmPortfolioAddComponent;
-  let fixture: ComponentFixture<UsmPortfolioAddComponent>;
-  let usmPortfolioService: UsmPortfolioService;
+describe('PortfolioAddComponent', () => {
+  let component: PortfolioAddComponent;
+  let fixture: ComponentFixture<PortfolioAddComponent>;
+  let usmPortfolioService: PortfolioService;
   let messageService: MessageService;
 
   beforeEach(async () => {
@@ -25,17 +25,17 @@ describe('UsmPortfolioAddComponent', () => {
         MatDialogModule
       ],
       declarations: [
-        UsmPortfolioAddComponent
+        PortfolioAddComponent
       ],
       providers: [
-        UsmPortfolioService,
+        PortfolioService,
         MessageService
       ]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(UsmPortfolioAddComponent);
+    fixture = TestBed.createComponent(PortfolioAddComponent);
     component = fixture.componentInstance;
-    usmPortfolioService = TestBed.inject(UsmPortfolioService);
+    usmPortfolioService = TestBed.inject(PortfolioService);
     messageService = TestBed.inject(MessageService);
     fixture.detectChanges();
   });
@@ -46,7 +46,7 @@ describe('UsmPortfolioAddComponent', () => {
 
   it('should initialize with a new UsmPortfolio', () => {
     expect(component.usmPortfolio).toBeDefined();
-    expect(component.usmPortfolio instanceof UsmPortfolio).toBeTruthy();
+    expect(component.usmPortfolio instanceof Portfolio).toBeTruthy();
   });
 
   it('should validate portfolio name', () => {

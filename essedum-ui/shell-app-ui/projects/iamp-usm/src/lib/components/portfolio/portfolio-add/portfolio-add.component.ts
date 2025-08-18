@@ -352,4 +352,15 @@ export class PortfolioAddComponent implements OnInit, OnDestroy {
   trackByMethod(index: number, item: any): number {
     return item.id;
   }
+  
+  editViewChanged(type: "edit" | "view") {
+    if (type === "edit") {
+      this.edit = true;
+      this.view = false;
+    } else if (type === "view") {
+      this.view = true;
+      this.edit = false;
+    }
+  }
+
 }
