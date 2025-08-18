@@ -1,8 +1,14 @@
-<h2>THIS WORKSSSS</h2>
 <div class="col-md-12 mt-3 selector-673-1">
   <div *ngIf="!showCreate" class="selector-673-2">
     <div class="clearfix selector-673-3">
       <div class="selector-673-4">
+        <div class="header-with-back">
+          <div class="back-button" [ngClass]="{'back-hovered': isBackHovered}" (mouseenter)="isBackHovered = true" (mouseleave)="isBackHovered = false" (click)="listView()">
+            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+            <span>Back</span>
+          </div>
+          <h2 class="header-title">User Project Role list</h2>
+        </div>
         <div class="ams_toptoolbar selector-673-5">
           <!-- <a href="javascrit:void(0)" class="ams_create" (click)="createView()">Create User Role</a> -->
           <i class="fa fa-plus-square-o create-icon-color selector-673-6" *ngIf="project != undefined &amp;&amp; project.name!='Core' &amp;&amp; createFlag" (click)="createView()" aria-hidden="true"></i>
@@ -12,10 +18,10 @@
           <i class="fa fa-plus-square-o create-icon-color selector-673-10" *ngIf="selectedRole != undefined &amp;&amp; createFlag" (click)="createView()" aria-hidden="true"></i>
           <span style="cursor: pointer" *ngIf="selectedRole != undefined &amp;&amp; createFlag" (click)="createView(); fetchRelatedProjects()" class="selector-673-11">Create Portfolio User Project</span>
         </div>
-        <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-673-12 filterStyle">
+        <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-673-12 filterStyle" style="display: none;">
           <h3 class="clearfix selector-673-13">
             <div class="search-container ams_cusSrch pull-left selector-673-14">
-              <input style="color: black;" #myInput="" type="text" [placeholder]="role.projectadmin ? 'Search By Role' : 'Search'" [(ngModel)]="projectSearched" (keydown.enter)="filterItem(myInput.value, null)" class="selector-673-15" />
+              <input style="color: black; font-family: 'Roboto', 'Segoe UI', sans-serif;" #myInput="" type="text" [placeholder]="role.projectadmin ? 'Search By Role' : 'Search'" [(ngModel)]="projectSearched" (keydown.enter)="filterItem(myInput.value, null)" class="selector-673-15" />
               <button type="button" (click)="filterItem(myInput.value, null)" class="selector-673-16">
                 <i class="searchIcon selector-673-17"></i>
               </button>
@@ -147,7 +153,7 @@
               </div>
             </div>
           </div>
-          <div *ngIf="showList &amp;&amp; wavesLength > 0" class="selector-673-90">
+          <div *ngIf="showList &amp;&amp; users.length > 0" class="selector-673-90">
             <mat-paginator [pageSize]="pageSize" [length]="wavesLength" (page)="onPageFired($event)" showFirstLastButtons="" class="selector-673-91"></mat-paginator>
           </div>
           <!-- list view -->

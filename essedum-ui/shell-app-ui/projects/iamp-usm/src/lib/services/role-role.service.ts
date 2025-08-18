@@ -290,9 +290,25 @@ export class RoleroleService {
    */
   createAll(usm_role_permissions: Roletorole[]): Observable<Roletorole[]> {
     const copy: Roletorole[] = Object.assign([], usm_role_permissions);
+     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || ''
+    });
     return this.https
       .post("/api/usm-role-role-list", copy, {
         observe: "response",
+                headers: headers
+
       })
       .pipe(
         map((response) => {

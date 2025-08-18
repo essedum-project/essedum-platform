@@ -99,7 +99,9 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
     // private apisService: ApisService
   ) {}
 
-  //code related to make it consistent with wave UI
+  // listView() {
+  //   this.changeView.emit(false);
+  // }
   showCreate: boolean = false;
   users = new Array<UserProjectRole>();
   usersCopy = new Array<UserProjectRole>();
@@ -109,6 +111,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
   buttonFlag: boolean = false;
   viewUser: boolean = false;
   edit: boolean = false;
+  isBackHovered: boolean = false;
   lazyload = { first: 0, rows: 5000, sortField: null, sortOrder: null };
   user = new UserProjectRole();
   currentUser = new UserProjectRole();

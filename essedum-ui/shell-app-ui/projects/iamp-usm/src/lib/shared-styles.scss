@@ -1,3 +1,4 @@
+/* shared-styles.scss */
 .header-with-back {
   display: flex;
   align-items: center;
@@ -13,7 +14,6 @@
   padding: 5px;
   border-radius: 4px;
   transition: background-color 0.3s;
-  font-family: 'Roboto', 'Segoe UI', sans-serif;
 }
 
 .back-button:hover {
@@ -24,10 +24,6 @@
   margin-right: 5px;
 }
 
-.back-hovered {
-  background-color: rgba(0, 0, 0, 0.04);
-}
-
 .header-title {
   font-family: 'Roboto', 'Segoe UI', sans-serif;
   font-size: 1.5rem;
@@ -35,9 +31,55 @@
   margin: 0;
 }
 
+.filter-container {
+  display: none;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.table-container {
+  margin-top: 20px;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+}
+
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Only show pagination when there are records */
+.pagination-container:empty {
+  display: none;
+}
+
 /* General font styling */
 h1, h2, h3, h4, h5, h6, p, span, div, button, input, select, option, label, a {
   font-family: 'Roboto', 'Segoe UI', sans-serif;
+}
+
+/* Common button styling */
+.common-button {
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.common-button.primary {
+  background-color: #007bff;
+  color: white;
+  border: none;
+}
+
+.common-button.secondary {
+  background-color: transparent;
+  color: #007bff;
+  border: 1px solid #007bff;
 }
 
 /* Table styling */
@@ -51,29 +93,13 @@ h1, h2, h3, h4, h5, h6, p, span, div, button, input, select, option, label, a {
   padding: 12px;
   text-align: left;
   font-weight: 500;
-  font-family: 'Roboto', 'Segoe UI', sans-serif;
 }
 
 .custom-table td {
   padding: 12px;
   border-bottom: 1px solid #e0e0e0;
-  font-family: 'Roboto', 'Segoe UI', sans-serif;
 }
 
 .custom-table tr:hover {
   background-color: rgba(0, 0, 0, 0.02);
-}
-
-/* Hide filter bar */
-.filterStyle {
-  display: none !important;
-}
-
-/* Only show pagination when there are records */
-.pagination-container:empty {
-  display: none;
-}
-
-.mat-paginator {
-  font-family: 'Roboto', 'Segoe UI', sans-serif;
 }
