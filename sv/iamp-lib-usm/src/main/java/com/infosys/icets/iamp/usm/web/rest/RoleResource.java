@@ -259,7 +259,7 @@ public class RoleResource {
 	 */
 	@GetMapping("/roles/{id}")
 	@Timed
-	public ResponseEntity<?> getRole(@PathVariable Integer id) {
+	public ResponseEntity<?> getRole(@PathVariable("id") Integer id) {
 		try {
 			log.info("getRole : Request to get Role ID: {}", id);
 			Role role = roleService.findOne(id);
@@ -287,7 +287,7 @@ public class RoleResource {
 	 */
 	@DeleteMapping("/roles/{id}")
 	@Timed
-	public ResponseEntity<?> deleteRole(@PathVariable Integer id) {
+	public ResponseEntity<?> deleteRole(@PathVariable("id") Integer id) {
 		try {
 			log.info("deleteRole : Request to delete Role by ID: {} ", id);
 			roleService.delete(roleService.findOne(id));
