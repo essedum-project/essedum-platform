@@ -48,6 +48,7 @@ import { DatePipe } from "@angular/common";
   styleUrls: ["user-project-role-list.component.css"],
 })
 export class UserProjectRoleListComponent implements OnInit, OnChanges {
+  lastRefreshedTime: Date = new Date();
   @Input() header = "User Roles...";
   @Output() changeView: EventEmitter<boolean> = new EventEmitter();
   @Input() sub: boolean;
@@ -369,7 +370,14 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
       (error) => this.messageService.error("Could not get the results", "IAMP")
     );
   }
+
+  Refresh() {
+    this.lastRefreshedTime = new Date();
+    this.loadPage({ first: 0, rows: 5000, sortField: null, sortOrder: null });
+  }
+  
   fetchUserProjectRoles(pageEvent) {
+    this.lastRefreshedTime = new Date();
     this.demoUserFlag = false;
     this.prjFlag = false;
     if (pageEvent == null || !pageEvent) {
@@ -1304,6 +1312,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
   //     this.UserList.paginator = this.paginator;
   // }
   Search(pageEvent) {
+    this.lastRefreshedTime = new Date();
     if (pageEvent == null || !pageEvent) {
       pageEvent = { page: 0, size: this.pageSize };
     }

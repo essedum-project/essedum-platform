@@ -148,7 +148,11 @@ export class RoleDetailComponent implements OnInit {
           this.view = true;
           this.edit = false;
           this.viewRole = true;
-        }
+        }  
+        this.roleService.getRole(id).subscribe(
+          (roles) => {
+            this.role = roles;
+          });
         // Using hardcoded data to avoid API errors instead of calling this.roleService.getRole(id)
         this.role = this.getHardcodedRole();
         if (this.role.projectId == undefined || this.role.projectId == null) {
@@ -162,6 +166,7 @@ export class RoleDetailComponent implements OnInit {
         this.view = false;
         this.viewRole = false;
       }
+      
     });
 
     this.fetchProjects();

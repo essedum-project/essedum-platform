@@ -109,6 +109,9 @@ export class RoleListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // Initialize the lastRefreshedTime
+    this.lastRefreshedTime = new Date();
+    
     // this.telemetryImpression();
     if (sessionStorage.getItem("usmAuthority")) {
       sessionStorage.removeItem("usmAuthority");
@@ -206,6 +209,7 @@ export class RoleListComponent implements OnInit, OnDestroy {
   }
 
   fetchRole() {
+    this.lastRefreshedTime = new Date();
     this.roles = [];
 
     let allRole = new Role(); /** To check if the project has default roles or not */
@@ -331,6 +335,7 @@ export class RoleListComponent implements OnInit, OnDestroy {
   }
 
   Search() {
+    this.lastRefreshedTime = new Date();
     let newApps = [];
     if (this.searchedRole == "All" || this.searchedRole == "") {
       newApps = this.rolesArraySorted;
@@ -359,6 +364,7 @@ export class RoleListComponent implements OnInit, OnDestroy {
   }
 
   Refresh() {
+    this.lastRefreshedTime = new Date();
     this.fetchRole();
   }
 

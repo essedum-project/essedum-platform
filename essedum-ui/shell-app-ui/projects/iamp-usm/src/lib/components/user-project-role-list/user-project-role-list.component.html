@@ -514,10 +514,10 @@
     <!-- Header -->
     <app-aip-header 
       [cardTitle]="'User Project Role List'" 
-      [lastRefreshed]="" 
+      [lastRefreshedTime]="lastRefreshedTime" 
       [showAddButton]="createFlag"
       (search)="Search(null)" 
-      
+      (refresh)="Refresh()"
       (add)="createView(); fetchRelatedRoles()">
     </app-aip-header>
      <div>
