@@ -41,6 +41,7 @@ import { RoleRoleComponent } from "./components/Role-Role/role-role.component";
 import { UserProjectRoleListComponent } from "./components/user-project-role-list/user-project-role-list.component";
 import { RoleroleService } from "./services/role-role.service";
 import { AipHeaderComponent } from "./components/aip-header/aip-header.component";
+import { ProjectListViewComponent } from "./components/project/project-list-view.component";
 import { MatTableModule } from "@angular/material/table";
 import { MatTreeModule } from "@angular/material/tree";
 import { RouterModule } from "@angular/router";
@@ -101,7 +102,8 @@ import { MatTabsModule } from "@angular/material/tabs";
         UserProjectRoleListComponent,
         AipHeaderComponent,
         ConfirmDeleteDialogComponent,
-        ConfirmProjectDeleteDialogComponent,
+        ConfirmProjectDeleteDialogComponent,        ProjectListViewComponent,
+
         ConfirmRevokeDialogComponent,
         ConfirmRegenerateDialogComponent,
     ],

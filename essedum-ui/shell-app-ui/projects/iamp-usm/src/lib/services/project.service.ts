@@ -128,8 +128,25 @@ export class ProjectService {
     } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
-    let headers = new HttpHeaders();
-    headers = headers.append('example', headerValue);
+    // let headers = new HttpHeaders();
+
+    // headers = headers.append('example', headerValue);
+    // Get project and role from sessionStorage
+    const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project1.id || '',
+      'projectname': project1.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || '',
+      example: headerValue
+    });
     return this.https
       .get(`/api/projectss/page?page=${event.page}&size=${event.size}`, {
         observe: "response", headers: headers

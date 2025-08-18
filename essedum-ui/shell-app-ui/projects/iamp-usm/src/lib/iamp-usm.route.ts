@@ -4,6 +4,7 @@ import { RoleListComponent } from "./components/role-list/role-list.component";
 import { RoleDetailComponent } from "./components/role-detail/role-detail.component";
 
 import { SecretsComponent } from "./components/secrets/secrets.component";
+import { ProjectListViewComponent } from "./components/project/project-list-view.component";
 const routes: Routes = [
     {
         path: "",
@@ -29,6 +30,16 @@ const routes: Routes = [
     { path: "role/view/:rid", component: RoleDetailComponent },
     { path: "role/edit/:rid", component: RoleDetailComponent },
     { path: "role/create", component: RoleDetailComponent },
+     {
+        path: "",
+        component: ProjectListViewComponent,
+        children: [
+           
+           { path: "projectlist", component: ProjectListViewComponent },
+            { path: "projectlist/:projectid/:view", component: ProjectListViewComponent },
+          
+        ],
+    },
 ];
 
 @NgModule({
