@@ -15,6 +15,52 @@
   transition: background-color 0.3s;
   font-family: 'Roboto', 'Segoe UI', sans-serif;
 }
+.header-action-icon {
+  font-size: 16px;
+  height: 16px;
+  color: #002966;
+  cursor: pointer;
+  gap: 2rem;
+}
+
+.save-btn {
+  color: #ffffff !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+      no-repeat,
+    #0052cc padding-box !important;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+    no-repeat padding-box !important;
+}
+
+::ng-deep .cancel-btn {
+  color: #002966 !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: #dadada 0% 0% no-repeat padding-box;
+  opacity: 1;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: #dadada 0% 0% no-repeat padding-box;
+  opacity: 1;
+}
+
+.header-action-icon:hover {
+  color: #0094ff;
+}
 
 .back-button:hover {
   background-color: rgba(0, 0, 0, 0.04);
@@ -33,6 +79,16 @@
   font-size: 1.5rem;
   font-weight: 500;
   margin: 0;
+}
+
+/* Header styling for Map/View/Edit Portfolio-Project-User */
+.ams_h2.h2Mar.crud-header {
+  text-align: left;
+  font: normal normal 600 18px/24px "Roboto", sans-serif !important;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  margin-left: 16px !important;
 }
 
 /* General font styling */
