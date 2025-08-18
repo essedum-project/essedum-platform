@@ -48,6 +48,14 @@ import {
     @Output() onAddNewClicked = new EventEmitter();
     p: number;
     isBackHovered: boolean = false;
+  // Filter properties
+  isFilterExpanded: boolean = false;
+  filterOptions: any[] = [];
+  selectedFilterValues: any = {
+    roles: [],
+    projects: [],
+    descriptions: []
+  };
     lastRefreshedTime: Date = new Date();
     
     // Pagination variables
@@ -267,6 +275,10 @@ import {
         (response) => {
           console.log("Roles fetched:", response.content);
           this.roletorolearray = response.content;
+          
+          // Initialize filter options
+          this.initializeFilterOptions();
+          
           if(role && role.roleadmin && portfolio && role.portfolioId == portfolio.id){
             this.roletorolearray.forEach((element)=>{
               if(element.projectId == null || (project && element.projectId == project.id)){
@@ -301,6 +313,56 @@ import {
           this.messageService.error("Error loading roles", "LEAP");
         }
       );
+    }
+
+    // Filter methods
+    initializeFilterOptions(): void {
+      this.filterOptions = [];
+      
+      // Add role options if available
+      if (this.roletorolearray && this.roletorolearray.length > 0) {
+        const roleOptions = this.roletorolearray.map(role => ({
+          type: 'role',
+          label: role.name,
+          value: role.name,
+          selected: false
+        }));
+        this.filterOptions = [...this.filterOptions, ...roleOptions];
+      }
+    }
+    
+    onFilterSelected(event: any): void {
+      this.selectedFilterValues = event;
+      this.applyFilters();
+    }
+  
+    onFilterStatusChange(isExpanded: boolean): void {
+      this.isFilterExpanded = isExpanded;
+    }
+  
+    applyFilters(): void {
+      // Reset to original list
+      let filteredRoleRoles = [...this.roletorolemappinglist];
+      
+      // Apply role filters
+      if (this.selectedFilterValues.roles && this.selectedFilterValues.roles.length > 0) {
+        filteredRoleRoles = filteredRoleRoles.filter(roleRole => 
+          roleRole.childRoleId && this.selectedFilterValues.roles.includes(roleRole.childRoleId.name)
+        );
+      }
+      
+      // Apply parent role filters if needed
+      if (this.selectedFilterValues.parentRoles && this.selectedFilterValues.parentRoles.length > 0) {
+        filteredRoleRoles = filteredRoleRoles.filter(roleRole => 
+          roleRole.parentRoleId && this.selectedFilterValues.parentRoles.includes(roleRole.parentRoleId.name)
+        );
+      }
+      
+      // Update the table data
+      this.roletorolemappinglist = filteredRoleRoles;
+      this.totalrecords = filteredRoleRoles.length;
+      this.lastPage = Math.ceil(this.totalrecords / this.rowsPerPage) - 1;
+      this.updatePagedRoles();
     }
   
 

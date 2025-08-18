@@ -57,6 +57,15 @@
   background: #dadada 0% 0% no-repeat padding-box;
   opacity: 1;
 }
+.no-data {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px;
+  font-size: 16px;
+  color: #666;
+  font-family:"Roboto", "Segoe UI", sans-serif !important;
+}
 
 .header-action-icon:hover {
   color: #0094ff;

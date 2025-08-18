@@ -55,6 +55,15 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
   @Input() showCreateUserRole: boolean;
   @Output() onAddNewClicked = new EventEmitter();
 
+  // Filter properties
+  isFilterExpanded: boolean = false;
+  filterOptions: any[] = [];
+  selectedFilterValues: any = {
+    users: [],
+    roles: [],
+    projects: []
+  };
+
   userRoleToDelete: UserProjectRole;
   displayedColumns: string[] = ["name", "description", "actions"];
   UserList: MatTableDataSource<any>;
@@ -99,6 +108,79 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
     public datePipe: DatePipe,
     // private apisService: ApisService
   ) {}
+
+  /**
+   * Initialize filter options based on loaded data
+   */
+  initializeFilterOptions() {
+    this.filterOptions = [
+      {
+        id: 'users',
+        displayName: 'Users',
+        options: this.usersList.map(user => ({ id: user.id, name: user.user_login }))
+      },
+      {
+        id: 'roles',
+        displayName: 'Roles',
+        options: this.roleList.map(role => ({ id: role.id, name: role.name }))
+      },
+      {
+        id: 'projects',
+        displayName: 'Projects',
+        options: this.projectList.map(project => ({ id: project.id, name: project.name }))
+      }
+    ];
+  }
+
+  /**
+   * Handler for filter selection events
+   */
+  onFilterSelected(event: any) {
+    // Update selected filter values
+    this.selectedFilterValues = event;
+    // Apply filters to the data
+    this.applyFilters();
+  }
+
+  /**
+   * Handler for filter panel expansion/collapse
+   */
+  onFilterStatusChange(isExpanded: boolean) {
+    this.isFilterExpanded = isExpanded;
+  }
+
+  /**
+   * Apply selected filters to the data
+   */
+  applyFilters() {
+    let filteredData = [...this.usersCopy]; // Start with a copy of the original data
+
+    // Filter by users if any are selected
+    if (this.selectedFilterValues.users && this.selectedFilterValues.users.length > 0) {
+      const userIds = this.selectedFilterValues.users.map(u => u.id);
+      filteredData = filteredData.filter(item => userIds.includes(item.user_id?.id));
+    }
+
+    // Filter by roles if any are selected
+    if (this.selectedFilterValues.roles && this.selectedFilterValues.roles.length > 0) {
+      const roleIds = this.selectedFilterValues.roles.map(r => r.id);
+      filteredData = filteredData.filter(item => roleIds.includes(item.role_id?.id));
+    }
+
+    // Filter by projects if any are selected
+    if (this.selectedFilterValues.projects && this.selectedFilterValues.projects.length > 0) {
+      const projectIds = this.selectedFilterValues.projects.map(p => p.id);
+      filteredData = filteredData.filter(item => projectIds.includes(item.project_id?.id));
+    }
+
+    // Update the displayed data
+    this.users = filteredData;
+    
+    // Update the MatTableDataSource if it exists
+    if (this.UserList) {
+      this.UserList.data = filteredData;
+    }
+  }
 
   // listView() {
   //   this.changeView.emit(false);
@@ -445,6 +527,14 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
         this.page = pageEvent.page;
         this.pagesCount = Math.ceil(this.totalItems / this.pageSize);
         this.lastPage = this.pagesCount - 1;
+        
+        // Apply any active filters
+        if (this.selectedFilterValues && 
+            (this.selectedFilterValues.users?.length > 0 || 
+             this.selectedFilterValues.roles?.length > 0 || 
+             this.selectedFilterValues.projects?.length > 0)) {
+          this.applyFilters();
+        }
       },
       (error) => this.messageService.error("Could not get the results", "IAMP")
     );
@@ -504,6 +594,11 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
           a.user_login.toLowerCase() > b.user_login.toLowerCase() ? 1 : -1
         );
         this.usersListSearch.next(this.usersList.slice());
+        
+        // Initialize filter options after all data is loaded
+        if (this.roleList.length > 0 && this.projectList.length > 0) {
+          this.initializeFilterOptions();
+        }
       });
 
     } else {
@@ -514,6 +609,9 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
           a.user_login.toLowerCase() > b.user_login.toLowerCase() ? 1 : -1
         );
         this.usersListSearch.next(this.usersList.slice());
+        
+        // Initialize filter options after users are loaded
+        this.initializeFilterOptions();
       });
 
     }
@@ -537,6 +635,12 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
       this.projectList = this.projectList.sort((a, b) =>
         a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
       );
+      
+      // Initialize filter options if other data is loaded
+      if (this.usersList.length > 0 && this.roleList.length > 0) {
+        this.initializeFilterOptions();
+      }
+      
       if (this.selectedRole != undefined) this.fetchRelatedProjects();
       if (this.selectedUser != undefined) this.fetchRoles();
     });
@@ -589,6 +693,12 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
           }
         });
         this.roleList = this.roleList.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1));
+        
+        // Initialize filter options if other data is loaded
+        if (this.usersList.length > 0 && this.projectList.length > 0) {
+          this.initializeFilterOptions();
+        }
+        
         //this.filterRolesForProject()
         if(this.fromProjectFlag){
           this.fetchRelatedRoles(this.fromProject);

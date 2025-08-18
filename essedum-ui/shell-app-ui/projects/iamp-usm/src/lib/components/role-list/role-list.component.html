@@ -8,7 +8,15 @@
           <i class="fa fa-plus-square-o create-icon-color selector-669-17" (click)="createView()" *ngIf="createFlag" aria-hidden="true"></i>
           <span style="cursor: pointer" (click)="createView()" *ngIf="createFlag" class="selector-669-18">Create Roles</span>
         </div>
-        <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-669-19 filterStyle">
+        
+        <app-aip-filter
+          [filterOptions]="filterOptions"
+          [selectedFilterValues]="selectedFilterValues"
+          (filterSelected)="onFilterSelected($event)"
+          (filterStatusChange)="onFilterStatusChange($event)">
+        </app-aip-filter>
+        
+        <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-669-19 filterStyle" *ngIf="!isFilterExpanded">
           <h3 class="clearfix selector-669-20">
             <div class="search-container ams_cusSrch pull-left selector-669-21">
               <input style="color: black;" #myInput="" type="text" placeholder="Search By Role Name" (keypress)="checkEnterPressed($event, myInput.value)" class="selector-669-22" />
@@ -249,75 +257,13 @@
     </app-aip-header>
     <div>
       <div class="aip-container lfx-u-pad-lr-30">
-        <!-- <div class="filter-panel">
-  <div class="filter-panel__header"
-    [ngClass]="{'filter-panel__header--collapsed': !isFilterExpanded, 'filter-panel__header--expanded': isFilterExpanded}"
-    (click)="toggleFilterExpanded()">
-    <div class="filter-panel__icon-container">
-      <mat-icon id="filter-expand-icon" data-icon-type="filter-expand" class="filter-panel__icon"
-        (click)="toggleExpand()" [matTooltip]="isFilterExpanded ? 'Collapse Filters' : 'Expand Filters'"
-        [matTooltipPosition]="TOOLTIP_POSITION">
-        filter_list
-      </mat-icon>
-    </div>
-
-    <div class="filter-panel__title-container">
-      <h3 class="filter-panel__title">
-        Filter by:
-        <span *ngIf="!isFilterExpanded && hasActiveFilters()" class="filter-summary">
-          {{ getActiveFiltersSummary() }}
-        </span>
-      </h3>
-    </div>
-
-    <div class="filter-panel__toggle-container">
-      <mat-icon id="filter-toggle-icon" data-icon-type="filter-toggle" class="filter-panel__toggle-icon"
-        [ngClass]="{'filter-panel__toggle-icon--rotated': isFilterExpanded}"
-        [matTooltip]="isFilterExpanded ? 'Collapse Filters' : 'Expand Filters'" [matTooltipPosition]="TOOLTIP_POSITION">
-        keyboard_arrow_down
-      </mat-icon>
-    </div>
-  </div>
-
-  <div class="filter-panel__content" *ngIf="isFilterExpanded" @slideToggle>
-    <div>
-      <div class="filter-options">
-        <div class="filter-group">
-          <div class="filter-control">
-            <mat-form-field appearance="fill" class="w-100">
-              <label>Role</label>
-              <mat-select [id]="Role"
-                data-select-type="pipeline-type" (selectionChange)="pipelineTypeSelected($event)"
-                aria-labelledby="type-label" placeholder="All">
-                <mat-option *ngIf="selectedAdapterType?.length > 0" value="" (click)="clearAllFilters('Role')">
-                  All
-                </mat-option>
-                <ng-container *ngFor="let option of rolesFilter">
-                  <mat-option *ngIf="!option.selected" [value]="option.label">
-                    {{ option.label }}
-                  </mat-option>
-                </ng-container>
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <div class="selected-items" *ngIf="selectedAdapterType?.length > 0">
-            <mat-chip-set [id]="Role"
-              aria-label="Selected types">
-              <mat-chip [id]="Role" data-chip-type="adapter-type"
-                *ngFor="let type of selectedAdapterType; let i = index" removable="true"
-                (removed)="removePipelineType(type)">
-                {{ type }}
-                <mat-icon data-icon-type="chip-remove-adapter-type" matChipRemove>close</mat-icon>
-              </mat-chip>
-            </mat-chip-set>
-          </div>
-        </div>
-
-      </div>
-    </div>
-    </div>
-    </div> -->
+        <!-- Filter Component -->
+        <app-aip-filter-roles
+          [filterOptions]="filterOptions" 
+          [selectedFilterValues]="selectedFilterValues"
+          (filterSelected)="onFilterSelected($event)"
+          (filterStatusChange)="onFilterStatusChange($event)">
+        </app-aip-filter-roles>
 
         <!-- Table Layout  -->
         <div class="table-card">

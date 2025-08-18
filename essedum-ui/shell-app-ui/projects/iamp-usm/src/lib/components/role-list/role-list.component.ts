@@ -67,7 +67,6 @@ export class RoleListComponent implements OnInit, OnDestroy {
   private paginator: MatPaginator;
   private sort: MatSort;
   p: number;
-
   currentRole: Role = new Role();
   popup: boolean = false;
   searchedRole: string = "All";
@@ -75,6 +74,15 @@ export class RoleListComponent implements OnInit, OnDestroy {
   selectedAdapterType: string[] = [];
   rolesFilter: Array<{ label: string, selected: boolean }> = [];
   TOOLTIP_POSITION: 'above' | 'below' = 'above';
+  
+  // Filter options for the aip-filter component
+  filterOptions: any[] = [];
+  selectedFilterValues: any = {
+    roles: [],
+    projects: [],
+    descriptions: []
+  };
+  
   auth: string = "";
   isAuth: boolean = false;
   permissionList: any[];
@@ -305,6 +313,9 @@ export class RoleListComponent implements OnInit, OnDestroy {
               this.totalrecords = this.rolesContent.length;
               this.rolesArraySorted = res.content;
               this.computeRole(true);
+              
+              // Initialize filter options now that we have data
+              this.initializeFilterOptions();
 
             },
             (error) => this.messageService.error("could not fetch", "IAMP")
@@ -584,5 +595,83 @@ export class RoleListComponent implements OnInit, OnDestroy {
   trackByMethod(index, item) { }
   showUploadDialog() {
     this.popup = !this.popup;
+  }
+
+  private initializeFilterOptions(): void {
+    // Initialize role filter options from existing roles data
+    if (this.rolesContent && this.rolesContent.length > 0) {
+      const roleOptions = this.rolesContent.map(role => ({
+        type: 'role',
+        label: role.name,
+        value: role.name,
+        selected: false
+      }));
+      this.filterOptions = [...this.filterOptions, ...roleOptions];
+    }
+    
+    // Initialize project filter options from existing projects
+    if (this.ProjectList && this.ProjectList.length > 0) {
+      const projectOptions = this.ProjectList.map(project => ({
+        type: 'project',
+        label: project.name,
+        value: project.id,
+        selected: false
+      }));
+      this.filterOptions = [...this.filterOptions, ...projectOptions];
+    }
+  }
+
+  onFilterSelected(event: any): void {
+    this.selectedFilterValues = event;
+    this.applyFilters();
+  }
+
+  onFilterStatusChange(isExpanded: boolean): void {
+    this.isFilterExpanded = isExpanded;
+  }
+
+  applyFilters(): void {
+    // Reset to original list
+    let filteredRoles = [...this.rolesContent];
+    
+    // Apply role filters
+    if (this.selectedFilterValues.roles && this.selectedFilterValues.roles.length > 0) {
+      filteredRoles = filteredRoles.filter(role => 
+        this.selectedFilterValues.roles.includes(role.name)
+      );
+    }
+    
+    // Apply project filters
+    if (this.selectedFilterValues.projects && this.selectedFilterValues.projects.length > 0) {
+      filteredRoles = filteredRoles.filter(role => 
+        role.projectId && this.selectedFilterValues.projects.includes(role.projectId)
+      );
+    }
+    
+    // Apply description filters if needed
+    if (this.selectedFilterValues.descriptions && this.selectedFilterValues.descriptions.length > 0) {
+      filteredRoles = filteredRoles.filter(role => 
+        role.description && this.selectedFilterValues.descriptions.includes(role.description)
+      );
+    }
+    
+    // Update pagination
+    this.totalrecords = filteredRoles.length;
+    this.lastPage = Math.ceil(this.totalrecords / this.rowsPerPage) - 1;
+    
+    // Update the display with the filtered roles
+    this.updatePagedRoles(filteredRoles);
+  }
+  
+  updatePagedRoles(filteredRoles: any[] = null): void {
+    // If no filtered roles provided, use the current roles content
+    const roles = filteredRoles || this.rolesContent;
+    
+    // Calculate pagination
+    const startIndex = this.page * this.rowsPerPage;
+    const endIndex = Math.min(startIndex + this.rowsPerPage, roles.length);
+    
+    // Update the paged roles for display
+    this.pagedRoles = roles.slice(startIndex, endIndex);
   }
 }

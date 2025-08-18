@@ -10,7 +10,15 @@
             <i class="fa fa-plus-square-o create-icon-color selector-675-7" *ngIf="createFlag" (click)="createView()" aria-hidden="true"></i>
             <span style="cursor: pointer" *ngIf="createFlag" (click)="createView()" class="selector-675-8">Create Role-Role Mapping</span>
           </div>
-          <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-675-9 filterStyle">
+          
+          <app-aip-filter-roles
+            [filterOptions]="filterOptions"
+            [selectedFilterValues]="selectedFilterValues"
+            (filterSelected)="onFilterSelected($event)"
+            (filterStatusChange)="onFilterStatusChange($event)">
+          </app-aip-filter-roles>
+          
+          <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-675-9 filterStyle" *ngIf="!isFilterExpanded">
             <h3 class="clearfix selector-675-10">
               <div class="search-container ams_cusSrch pull-left selector-675-11">
                 <input style="color: black;" #myInput="" type="text" placeholder="Search By Child Role" (keypress)="checkEnterPressed($event, myInput.value)" class="selector-675-12" />
@@ -247,6 +255,13 @@
     </app-aip-header>
     <div>
       <div class="aip-container lfx-u-pad-lr-30">
+         
+          <app-aip-filter-roles
+            [filterOptions]="filterOptions"
+            [selectedFilterValues]="selectedFilterValues"
+            (filterSelected)="onFilterSelected($event)"
+            (filterStatusChange)="onFilterStatusChange($event)">
+          </app-aip-filter-roles>
         <!-- Table Layout  -->
         <div *ngIf="!showCreate" class="table-card">
           <div class="table-scroll-container">
