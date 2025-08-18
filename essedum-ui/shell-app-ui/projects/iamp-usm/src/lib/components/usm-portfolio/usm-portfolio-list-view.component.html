@@ -1,11 +1,16 @@
-<div class="mt-26">
+<div class="mt-10">
   <div class="aip-container lfx-u-pad-lr-30">
     <!-- Header Section -->
     <app-aip-header [cardTitle]="title" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="true"
       (search)="filterItem($event)" (refresh)="ngOnInit()" (add)="createPortfolioKey()">
     </app-aip-header>
+      <!-- Filter Section -->  <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="SERVICE_V1" [selectedPortfolioList]="{ 
+                        selectedAdapterType: selectedAdapterType
+                      }" (tagSelected)="onTagSelected($event)"
+    (filterStatusChange)="onFilterStatusChange($event)"></app-aip-filter>
+
     <div>
-      <div class="aip-container lfx-u-pad-lr-30 mt-16"></div>
+      <div class="aip-container lfx-u-pad-lr-30 mt-m16"></div>
       <!-- Table Layout  -->
       <div class="table-card">
         <div class="table-scroll-container">

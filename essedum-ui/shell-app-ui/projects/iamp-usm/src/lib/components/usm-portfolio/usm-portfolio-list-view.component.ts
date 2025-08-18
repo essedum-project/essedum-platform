@@ -42,6 +42,7 @@ import { MatTableDataSource } from "@angular/material/table";
 
 import { UsmPortfolio } from "../../models/usm-portfolio";
 import { UsmPortfolioService } from "../../services/usm-portfolio.service";
+import { TagEventDTO } from "../../models/tagEventDTO.model";
 
 import { DeleteComponent } from "../../shared-modules/confirm-delete/delete.component";
 import { Subscription } from "rxjs";
@@ -65,6 +66,9 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
   usmPortfolioToDelete: UsmPortfolio;
   UsmPortfolioList: MatTableDataSource<any>;
 
+  tagrefresh = false;
+  selectedAdapterType: string[] = [];
+  readonly SERVICE_V1 = "Portfolio";
   displayedColumns: string[] = [
     "#",
     "Id",
@@ -163,10 +167,9 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
   startIndex: number;
   pageNumberChanged: boolean = true;
   pageNumber: number = 0;
-  hoverStates: boolean[] = Array(10).fill(false); 
+  hoverStates: boolean[] = Array(10).fill(false);
   @Output() pageChanged = new EventEmitter<any>();
   @Output() pageSizeChanged = new EventEmitter<any>();
-
   ngOnInit() {
     if (!this.UsmPortfolioList) {
       this.UsmPortfolioList = new MatTableDataSource([]);
@@ -175,6 +178,11 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
     this.pageNumber = 1;
     this.startIndex = 0;
     this.endIndex = 5;
+
+    // Reset filter values
+    this.searchedName = "";
+    this.filterUsmPortfolio = "";
+    this.selectedAdapterType = [];
 
     if (sessionStorage.getItem("usmAuthority")) {
       sessionStorage.removeItem("usmAuthority");
@@ -614,10 +622,18 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
     this.fetchWave(null);
   }
 
- 
   search() {
     if (!this.sub) {
-      this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
+      if (this.hasActiveFilters()) {
+        this.filterPortfolios();
+      } else {
+        this.loadPage({
+          first: 0,
+          rows: 1000,
+          sortField: null,
+          sortOrder: null,
+        });
+      }
     }
   }
 
@@ -645,7 +661,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
       }
     );
   }
-    fetchWave(pageEvent) {
+  fetchWave(pageEvent) {
     if (pageEvent == null || !pageEvent) {
       pageEvent = { page: 0, size: this.pageSize };
     }
@@ -667,7 +683,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
         this.UsmPortfolioList.sort = this.sort;
 
         this.noOfPages = this.currentPage.totalPages;
-        this.pageNumber = pageEvent.page + 1 || 1; 
+        this.pageNumber = pageEvent.page + 1 || 1;
 
         this.pageArr = Array(this.noOfPages)
           .fill(0)
@@ -680,11 +696,12 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
           this.startIndex = 0;
           this.endIndex = Math.min(5, this.noOfPages);
         }
-
         if (this.currentPage.totalPages > 0) this.testCreate = true;
-        
+
         this.pageChanged.emit(this.pageNumber);
-      },      (error) => {
+        this.lastRefreshTime();
+      },
+      (error) => {
         this.testCreate = false;
         if (!this.UsmPortfolioList) {
           this.UsmPortfolioList = new MatTableDataSource([]);
@@ -734,9 +751,7 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
     ) {
       this.Clear();
       this.filterFlag = false;
-    }
-    
-    else if (
+    } else if (
       this.searchedName != undefined &&
       (this.filterUsmPortfolio == undefined || this.filterUsmPortfolio == "")
     ) {
@@ -759,7 +774,8 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
       };
       this.filterFlag = true;
     }
-    if (this.filterFlag) {      this.usmPortfolioService.search(params, pageEvent).subscribe((res) => {
+    if (this.filterFlag) {
+      this.usmPortfolioService.search(params, pageEvent).subscribe((res) => {
         this.currentPage = res;
         this.usmPortfolios = this.currentPage.content;
         this.usmPortfoliosCopy = this.usmPortfolios;
@@ -769,26 +785,35 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
         );
         this.UsmPortfolioList.paginator = this.paginator;
         this.UsmPortfolioList.sort = this.sort;
-        
+
         this.noOfPages = this.currentPage.totalPages;
-        this.pageNumber = pageEvent.page + 1 || 1; 
-        
+        this.pageNumber = pageEvent.page + 1 || 1;
+
         this.pageChanged.emit(this.pageNumber);
       });
     }
   }
+  
   Clear() {
     this.filterUsmPortfolio = undefined;
     this.searchedName = undefined;
-    this.myInputReference.nativeElement.value = null;
+
+    // Add null check to prevent error when myInputReference is not available
+    if (this.myInputReference && this.myInputReference.nativeElement) {
+      this.myInputReference.nativeElement.value = null;
+    }
+
     this.fetchWave(null);
     this.filterFlag = false;
     this.filterFlag1 = false;
     this.portfolioSearched = undefined;
   }
+
   assignCopy() {
     this.usmPortfolios = Object.assign([], this.usmPortfoliosCopy);
-  }  filterItem(value, pageEvent?) {
+  }
+
+  filterItem(value, pageEvent?) {
     this.portfolioSearched = value;
 
     if (!value) {
@@ -839,9 +864,10 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
             this.startIndex = 0;
             this.endIndex = Math.min(5, this.noOfPages);
           }
-          
+
           this.pageChanged.emit(this.pageNumber);
-        },        (error) => {
+        },
+        (error) => {
           if (!this.UsmPortfolioList) {
             this.UsmPortfolioList = new MatTableDataSource([]);
           }
@@ -850,10 +876,10 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
       );
     }
   }
- 
+
   onPageFired(event) {
     this.pageIndex = event.pageIndex;
-    
+
     if (this.filterFlag == false && this.filterFlag1 == false) {
       this.fetchWave({ page: event.pageIndex, size: this.pageSize });
     } else if (this.filterFlag == true) {
@@ -935,17 +961,15 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
 
       const pageEvent = { page: this.pageNumber - 1, size: this.pageSize };
 
-      
       if (this.filterFlag == false && this.filterFlag1 == false) {
         this.fetchWave(pageEvent);
       } else if (this.filterFlag == true) {
         this.Search(pageEvent);
-     
+
         this.pageChanged.emit(this.pageNumber);
       } else if (this.filterFlag1 == true) {
-           this.fetchWave(pageEvent);
+        this.fetchWave(pageEvent);
         this.filterItem(this.portfolioSearched, pageEvent);
-        
       }
     }
   }
@@ -962,5 +986,146 @@ export class UsmPortfolioListViewComponent implements OnInit, OnDestroy {
 
   getRowNumber(index: number): number {
     return this.pageNumber * this.pageSize + index + 1 - this.pageSize;
+  }
+
+  hasActiveFilters(): boolean {
+    return (
+      (this.selectedAdapterType && this.selectedAdapterType.length > 0) ||
+      (this.searchedName && this.searchedName.trim() !== "") ||
+      (this.filterUsmPortfolio && this.filterUsmPortfolio.trim() !== "")
+    );
+  }
+
+  getActiveFiltersSummary(): string {
+    if (!this.hasActiveFilters()) {
+      return "";
+    }
+
+    const filterParts = [];
+
+    if (this.selectedAdapterType && this.selectedAdapterType.length > 0) {
+      filterParts.push(`Type: ${this.selectedAdapterType.join(", ")}`);
+    }
+
+    if (this.searchedName && this.searchedName.trim() !== "") {
+      filterParts.push(`Name: ${this.searchedName}`);
+    }
+
+    if (this.filterUsmPortfolio && this.filterUsmPortfolio.trim() !== "") {
+      filterParts.push(`Description: ${this.filterUsmPortfolio}`);
+    }
+
+    return filterParts.join(" | ");
+  }
+  onFilterStatusChange(event: boolean) {
+    console.log("Filter status changed:", event);
+
+    if (event === false) {
+      // When filters are cleared in the filter component
+      if (this.hasActiveFilters() === false) {
+        this.fetchWave({ page: 0, size: this.pageSize });
+      }
+    } else {
+      // When filters are active, search using the current filter values
+      this.search();
+    }
+  }
+  onTagSelected(event: TagEventDTO) {
+    if (event) {
+      // Update filter values from the event
+      this.selectedAdapterType = event.selectedAdapterType || [];
+
+      // Get portfolio name and description from the event if available
+      if (event.portfolioName && event.portfolioName.length > 0) {
+        this.searchedName = event.portfolioName[0];
+      } else {
+        this.searchedName = "";
+      }
+
+      if (event.portfolioDescription && event.portfolioDescription.length > 0) {
+        this.filterUsmPortfolio = event.portfolioDescription[0];
+      } else {
+        this.filterUsmPortfolio = "";
+      }
+
+      this.tagrefresh = false;
+
+      // Apply the filters
+      this.filterPortfolios();
+
+      console.log(
+        "Filter applied with selected types:",
+        this.selectedAdapterType
+      );
+    }
+  }
+  private filterPortfolios(): void {
+    if (!this.hasActiveFilters()) {
+      this.fetchWave({ page: this.pageNumber - 1, size: this.pageSize });
+      return;
+    }
+
+    let params: any = {};
+
+    // Add portfolio type filter if present
+    if (this.selectedAdapterType && this.selectedAdapterType.length > 0) {
+      params.portfolioType = this.selectedAdapterType.join(",");
+    }
+
+    // Add name and description filters from AipFilterComponent
+    if (this.filterUsmPortfolio && this.filterUsmPortfolio.trim() !== "") {
+      params.description = this.filterUsmPortfolio;
+    }
+
+    if (this.searchedName && this.searchedName.trim() !== "") {
+      params.portfolioName = this.searchedName;
+    }
+
+    this.filterFlag = true; // Set filter flag to true to maintain filter state during pagination
+
+    console.log("Applying filters with params:", params);
+
+    this.usmPortfolioService
+      .search(params, { page: 0, size: this.pageSize })
+      .subscribe(
+        (res) => {
+          this.currentPage = res;
+          this.usmPortfolios = this.currentPage.content;
+          this.usmPortfoliosCopy = this.usmPortfolios;
+          this.wavesLength = this.currentPage.totalElements;
+
+          this.UsmPortfolioList = new MatTableDataSource(
+            this.currentPage.content
+          );
+          this.UsmPortfolioList.paginator = this.paginator;
+          this.UsmPortfolioList.sort = this.sort;
+
+          this.noOfPages = this.currentPage.totalPages;
+          this.pageNumber = 1;
+
+          this.pageArr = Array(this.noOfPages)
+            .fill(0)
+            .map((x, i) => i);
+
+          this.startIndex = 0;
+          this.endIndex = Math.min(5, this.noOfPages);
+
+          this.pageChanged.emit(this.pageNumber);
+          this.lastRefreshTime(); // Update the last refresh time
+
+          console.log(
+            "Filter results loaded, found:",
+            this.currentPage.totalElements,
+            "items"
+          );
+        },
+        (error) => {
+          console.error("Error applying filters:", error);
+          if (!this.UsmPortfolioList) {
+            this.UsmPortfolioList = new MatTableDataSource([]);
+          }
+          this.messageService.error("Could not apply filters", "IAMP");
+        }
+      );
   }
 }

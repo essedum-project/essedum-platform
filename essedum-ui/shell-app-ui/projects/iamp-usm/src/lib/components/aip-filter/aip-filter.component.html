@@ -1,0 +1,63 @@
+<div class="filter-panel">
+  <div class="filter-panel__header"
+    (click)="toggleFilterExpanded()">
+    <div class="filter-panel__icon-container">
+      <mat-icon id="filter-expand-icon" data-icon-type="filter-expand" class="filter-panel__icon"
+        (click)="toggleExpand()" [matTooltip]="isFilterExpanded ? 'Collapse Filters' : 'Expand Filters'"
+        [matTooltipPosition]="TOOLTIP_POSITION">
+        filter_list
+      </mat-icon>
+    </div>
+
+    <div class="filter-panel__title-container">
+      <h3 class="filter-panel__title">
+        Filter by:
+        <span *ngIf="!isFilterExpanded && hasActiveFilters()" class="filter-summary">
+          {{ getActiveFiltersSummary() }}
+        </span>
+      </h3>
+    </div>
+
+    <div class="filter-panel__toggle-container">
+      <mat-icon id="filter-toggle-icon" data-icon-type="filter-toggle" class="filter-panel__toggle-icon"
+        [matTooltip]="isFilterExpanded ? 'Collapse Filters' : 'Expand Filters'" [matTooltipPosition]="TOOLTIP_POSITION">
+        keyboard_arrow_down
+      </mat-icon>
+    </div>
+  </div>
+  <div class="filter-panel__content" *ngIf="isFilterExpanded" @slideToggle>
+    <div *ngIf="(servicev1 === ServiceType.PORTFOLIO)">
+      <div class="filter-options" >
+        <div class="filter-row" style="display:flex">
+          <div class="filter-field" >
+            <mat-form-field appearance="fill" floatLabel="always" class="w-100">
+              <mat-label>Portfolio Name</mat-label>
+              <input matInput [(ngModel)]="searchedName" placeholder="Enter portfolio name" 
+                     (keyup.enter)="applyFilters()">
+              <button *ngIf="searchedName" matSuffix mat-icon-button aria-label="Clear" 
+                      (click)="searchedName=''; applyFilters()">
+                <mat-icon>close</mat-icon>
+              </button>
+            </mat-form-field>
+          </div>
+          <div class="filter-field" >
+            <mat-form-field appearance="fill" floatLabel="always" class="w-100">
+              <mat-label>Portfolio Description</mat-label>
+              <input matInput [(ngModel)]="filterUsmPortfolio" placeholder="Enter description"
+                     (keyup.enter)="applyFilters()">
+              <button *ngIf="filterUsmPortfolio" matSuffix mat-icon-button aria-label="Clear" 
+                      (click)="filterUsmPortfolio=''; applyFilters()">
+                <mat-icon>close</mat-icon>
+              </button>
+            </mat-form-field>
+          </div>
+          <div class="filter-action">
+            <button mat-raised-button color="primary" (click)="applyFilters()">
+              <mat-icon>search</mat-icon> Search
+            </button>
+          </div>
+        </div>
+      </div>  
+    </div>
+  </div>
+</div>

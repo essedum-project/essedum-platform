@@ -9,7 +9,10 @@ export class TagEventDTO {
   selectedMlInstanceAdapterType: string[] = [];
   selectedMlInstanceConnectionType: string[] = [];
   selectedDatasetTopicType: string[] = [];
-
+  // Portfolio specific fields
+  portfolioName: string[] = [];
+  portfolioDescription: string[] = [];
+  
   constructor(
     selectedTagList,
     selectedAdapterType,
@@ -20,7 +23,9 @@ export class TagEventDTO {
     selectedMlSpecTemplateCapabilityType,
     selectedMlInstanceAdapterType,
     selectedMlInstanceConnectionType,
-    selectedDatasetTopicType
+    selectedDatasetTopicType,
+    portfolioName = [],
+    portfolioDescription = []
   ) {
     this.selectedAdapterInstance = selectedAdapterInstance;
     this.selectedAdapterType = selectedAdapterType;
@@ -29,10 +34,11 @@ export class TagEventDTO {
     this.selectedMlAdapterCategoryType = selectedMlAdapterCategoryType;
     this.selectedMlAdapterSpecType = selectedMlAdapterSpecType;
     this.selectedMlSpecTemplateCapabilityType =
-      selectedMlSpecTemplateCapabilityType;
-    this.selectedMlInstanceAdapterType = selectedMlInstanceAdapterType;
+      selectedMlSpecTemplateCapabilityType;    this.selectedMlInstanceAdapterType = selectedMlInstanceAdapterType;
     this.selectedMlInstanceConnectionType = selectedMlInstanceConnectionType;
     this.selectedDatasetTopicType = selectedDatasetTopicType;
+    this.portfolioName = portfolioName;
+    this.portfolioDescription = portfolioDescription;
   }
 
   getSelectedTagList() {
@@ -61,9 +67,16 @@ export class TagEventDTO {
   }
   getSelectedMlInstanceConnectionType() {
     return this.selectedMlInstanceConnectionType;
-  }
-  getSelectedDatasetTopicType() {
+  }  getSelectedDatasetTopicType() {
     return this.selectedDatasetTopicType;
+  }
+  
+  getPortfolioName() {
+    return this.portfolioName;
+  }
+  
+  getPortfolioDescription() {
+    return this.portfolioDescription;
   }
   setSelectedTagList(selectedTagList) {
     this.selectedTagList = selectedTagList;
@@ -94,8 +107,15 @@ export class TagEventDTO {
   }
   setSelectedMlInstanceConnectionType(selectedMlInstanceConnectionType) {
     this.selectedMlInstanceConnectionType = selectedMlInstanceConnectionType;
-  }
-  setSelectedDatasetTopicType(selectedDatasetTopicType) {
+  }  setSelectedDatasetTopicType(selectedDatasetTopicType) {
     this.selectedDatasetTopicType = selectedDatasetTopicType;
+  }
+  
+  setPortfolioName(portfolioName) {
+    this.portfolioName = portfolioName;
+  }
+  
+  setPortfolioDescription(portfolioDescription) {
+    this.portfolioDescription = portfolioDescription;
   }
 }
