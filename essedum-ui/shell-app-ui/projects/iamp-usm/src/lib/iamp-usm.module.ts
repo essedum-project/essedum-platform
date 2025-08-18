@@ -32,6 +32,7 @@ import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from "@angu
 import { IampUsmService } from "./iamp-usm.service";
 import { HelperService } from "./services/helper.service";
 import { UsersService } from "./services/users.service";
+import { encKey } from "./models/encKey";
 
 import { SecretsComponent } from './components/secrets/secrets.component';
 import { RoleListComponent } from "./components/role-list/role-list.component";
@@ -118,6 +119,7 @@ import { MatTabsModule } from "@angular/material/tabs";
         IampUsmService,
         Ng4LoadingSpinnerService,
         DatePipe,
+        encKey,
     ],
     exports: [IampUsmComponent, SecretsComponent, RoleListComponent, RoleDetailComponent, RoleRoleComponent, UserProjectRoleListComponent],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]

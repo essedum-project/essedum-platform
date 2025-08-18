@@ -153,6 +153,12 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
   prjFlag: boolean = false;
   filteredroleslist = [];
   processdata: any;
+  
+  // Pagination variables
+  page: number = 0;
+  lastPage: number = 0;
+  totalItems: number = 0;
+  pagesCount: number = 0;
 
   @ViewChild(MatSort, { static: false }) set matSort(ms: MatSort) {
     this.sort = ms;
@@ -425,6 +431,12 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
           this.UserList.paginator = this.paginator;
           this.UserList.sort = this.sort;
         }
+        
+        // Update pagination data
+        this.totalItems = this.currentPage.totalElements;
+        this.page = pageEvent.page;
+        this.pagesCount = Math.ceil(this.totalItems / this.pageSize);
+        this.lastPage = this.pagesCount - 1;
       },
       (error) => this.messageService.error("Could not get the results", "IAMP")
     );
@@ -1236,6 +1248,12 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
           this.usersCopy = this.users;
           this.wavesLength = this.currentPage.totalElements;
           this.pageIndex = 0;
+          
+          // Update pagination data for custom pagination
+          this.totalItems = this.currentPage.totalElements;
+          this.page = pageEvent.page;
+          this.pagesCount = Math.ceil(this.totalItems / this.pageSize);
+          this.lastPage = this.pagesCount - 1;
           this.UserList = new MatTableDataSource(this.users);
           this.UserList.paginator = this.paginator;
           this.UserList.sort = this.sort;
@@ -1380,6 +1398,12 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
         this.UserList = new MatTableDataSource(this.users);
         this.UserList.paginator = this.paginator;
         this.UserList.sort = this.sort;
+        
+        // Update pagination data for custom pagination
+        this.totalItems = this.currentPage.totalElements;
+        this.page = pageEvent.page;
+        this.pagesCount = Math.ceil(this.totalItems / this.pageSize);
+        this.lastPage = this.pagesCount - 1;
       });
     }
   }
@@ -1570,8 +1594,8 @@ this.filterroles();
   }
   trackByMethod(index, item) {}
   onPageFired(event) {
-    this.pageEvent=event;
-    console.log(this.pageEvent)
+    this.pageEvent = event;
+    console.log(this.pageEvent);
     if (this.filterFlag == false && this.filterFlag1 == false){
       this.fetchUserProjectRoles({ page: event.pageIndex, size: this.pageSize });
       this.pageIndex = event.pageIndex;
@@ -1579,5 +1603,42 @@ this.filterroles();
     else if (this.filterFlag == true) this.Search({ page: event.pageIndex, size: this.pageSize });
     else if (this.filterFlag1 == true)
       this.filterItem(this.projectSearched, { page: event.pageIndex, size: this.pageSize });
+  }
+  
+  // Custom pagination methods
+  getPageNumbers(): number[] {
+    const totalPages = this.pagesCount;
+    const currentPage = this.page;
+    const visiblePages = 5; // Number of page numbers to show
+    
+    let startPage = Math.max(0, currentPage - Math.floor(visiblePages / 2));
+    let endPage = Math.min(totalPages - 1, startPage + visiblePages - 1);
+    
+    // Adjust if we're near the end
+    if (endPage - startPage + 1 < visiblePages && startPage > 0) {
+      startPage = Math.max(0, endPage - visiblePages + 1);
+    }
+    
+    const pages = [];
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
+  }
+  
+  changePage(pageNumber: number): void {
+    if (pageNumber !== this.page) {
+      this.page = pageNumber;
+      this.onPageFired({ pageIndex: pageNumber, pageSize: this.pageSize, length: this.totalItems });
+    }
+  }
+  
+  navigatePage(direction: string): void {
+    if (direction === 'Next' && this.page < this.lastPage) {
+      this.changePage(this.page + 1);
+    } else if (direction === 'Prev' && this.page > 0) {
+      this.changePage(this.page - 1);
+    }
   }
 }
