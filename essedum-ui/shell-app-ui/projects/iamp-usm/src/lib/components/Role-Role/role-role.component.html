@@ -307,15 +307,18 @@
       <div class="padTop20 selector-675-105">
         <div>
   <div class="align-items-center d-flex">
-                <span>
-                    <span class="aip-led-icons" (click)="BackToListView()" style="cursor: pointer; font-family: 'Roboto', 'Segoe UI', sans-serif;"
-                        [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
-                        matTooltipPosition="above" (mouseenter)="isBackHovered = true"
-                        (mouseleave)="isBackHovered = false">&lt;</span>
-                </span>
-                <h2 class="header-title lfx-u-mar-l-8" style="font-family: 'Roboto', 'Segoe UI', sans-serif;" *ngIf="!edit">Create Role</h2>
+                   <span style="display: flex; align-items: center;">
+                    <span (click)="BackToListView()" style="cursor: pointer; font-size: 22px; 
+                        font-weight: bold; font-family: 'Roboto', 'Segoe UI', sans-serif;
+                        display: inline-block; vertical-align: middle; margin-right: 8px; line-height: 1;"
+                        [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" 
+                        title="Back" (mouseenter)="isBackHovered = true"
+                        (mouseleave)="isBackHovered = false">&#8592;</span>
+                
+                     <h2 class="header-title lfx-u-mar-l-8" style="font-family: 'Roboto', 'Segoe UI', sans-serif;" *ngIf="!edit">Create Role</h2>
                 <h2 class="header-title lfx-u-mar-l-8" style="font-family: 'Roboto', 'Segoe UI', sans-serif;" *ngIf="edit &amp;&amp; !view">Edit Role</h2>
                 <h2 class="header-title lfx-u-mar-l-8" style="font-family: 'Roboto', 'Segoe UI', sans-serif;" *ngIf="edit &amp;&amp; view">View Role</h2>
+                </span>
             </div>
 
         </div>
