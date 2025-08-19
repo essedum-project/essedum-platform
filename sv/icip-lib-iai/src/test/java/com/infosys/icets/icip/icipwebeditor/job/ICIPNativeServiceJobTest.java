@@ -15,6 +15,10 @@
 
 package com.infosys.icets.icip.icipwebeditor.job;
 
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -66,7 +70,7 @@ public class ICIPNativeServiceJobTest {
 	private static JobDataMap jobDataMap;
 
 	@BeforeAll
-	private static void setup() throws SchedulerException {
+	private static void setup() throws SchedulerException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		SetupResources.setup();
 		binaryService = new ICIPBinaryFilesService(SetupResources.binaryRepository);
 		nativeScriptService = new ICIPNativeScriptService(SetupResources.nativeScriptRepository);
