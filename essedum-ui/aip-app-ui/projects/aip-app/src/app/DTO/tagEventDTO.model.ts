@@ -1,16 +1,41 @@
 export class TagEventDTO{
-    selectedTagList: any[];
-    selectedAdapterType: string[]=[];
-    selectedAdapterInstance: string[]=[];
+    selectedTagList: any[] = [];
+    selectedAdapterType: string[] = [];
+    selectedAdapterInstance: string[] = [];
     selectedMlAdapterConnectionType: string[] = [];
     selectedMlAdapterCategoryType: string[] = [];
     selectedMlAdapterSpecType: string[] = [];
-    selectedMlSpecTemplateCapabilityType:string[]=[];
-    selectedMlInstanceAdapterType:string[]=[]
-    selectedMlInstanceConnectionType:string[]=[]
-    selectedDatasetTopicType:string[]=[]
+    selectedMlSpecTemplateCapabilityType: string[] = [];
+    selectedMlInstanceAdapterType: string[] = [];
+    selectedMlInstanceConnectionType: string[] = [];
+    selectedDatasetTopicType: string[] = [];
+    selectedModelDatasource: string[] = [];
 
-    constructor(selectedTagList, selectedAdapterType, selectedAdapterInstance, selectedMlAdapterConnectionType, selectedMlAdapterCategoryType, selectedMlAdapterSpecType, selectedMlSpecTemplateCapabilityType,selectedMlInstanceAdapterType,selectedMlInstanceConnectionType,selectedDatasetTopicType) { this.selectedAdapterInstance = selectedAdapterInstance; this.selectedAdapterType = selectedAdapterType; this.selectedTagList = selectedTagList; this.selectedMlAdapterConnectionType = selectedMlAdapterConnectionType; this.selectedMlAdapterCategoryType = selectedMlAdapterCategoryType; this.selectedMlAdapterSpecType = selectedMlAdapterSpecType; this.selectedMlSpecTemplateCapabilityType=selectedMlSpecTemplateCapabilityType; this.selectedMlInstanceAdapterType= selectedMlInstanceAdapterType; this.selectedMlInstanceConnectionType=selectedMlInstanceConnectionType;this.selectedDatasetTopicType=selectedDatasetTopicType; }
+    constructor(
+        selectedTagList: any[] = [],
+        selectedAdapterType: string[] = [],
+        selectedAdapterInstance: string[] = [],
+        selectedMlAdapterConnectionType: string[] = [],
+        selectedMlAdapterCategoryType: string[] = [],
+        selectedMlAdapterSpecType: string[] = [],
+        selectedMlSpecTemplateCapabilityType: string[] = [],
+        selectedMlInstanceAdapterType: string[] = [],
+        selectedMlInstanceConnectionType: string[] = [],
+        selectedDatasetTopicType: string[] = [],
+        selectedModelDatasource: string[] = []
+    ) {
+        this.selectedAdapterInstance = selectedAdapterInstance;
+        this.selectedAdapterType = selectedAdapterType;
+        this.selectedTagList = selectedTagList;
+        this.selectedMlAdapterConnectionType = selectedMlAdapterConnectionType;
+        this.selectedMlAdapterCategoryType = selectedMlAdapterCategoryType;
+        this.selectedMlAdapterSpecType = selectedMlAdapterSpecType;
+        this.selectedMlSpecTemplateCapabilityType = selectedMlSpecTemplateCapabilityType;
+        this.selectedMlInstanceAdapterType = selectedMlInstanceAdapterType;
+        this.selectedMlInstanceConnectionType = selectedMlInstanceConnectionType;
+        this.selectedDatasetTopicType = selectedDatasetTopicType;
+        this.selectedModelDatasource = selectedModelDatasource;
+    }
 
     getSelectedTagList(){return this.selectedTagList;}
     getSelectedAdapterType(){return this.selectedAdapterType;}
@@ -22,6 +47,9 @@ export class TagEventDTO{
     getSelectedMlInstanceAdapterType() { return this.selectedMlInstanceAdapterType; }
     getSelectedMlInstanceConnectionType() { return this.selectedMlInstanceConnectionType; }
     getSelectedDatasetTopicType() { return this.selectedDatasetTopicType; }
+    getSelectedModelDatasource(): string[] {
+        return this.selectedModelDatasource || [];
+    }
     setSelectedTagList(selectedTagList){this.selectedTagList=selectedTagList;}
     setSelectedAdapterType(selectedAdapterType){this.selectedAdapterType=selectedAdapterType;}
     setSelectedAdapterInstance(selectedAdapterInstance){this.selectedAdapterInstance=selectedAdapterInstance;}
@@ -32,4 +60,5 @@ export class TagEventDTO{
     setSelectedMlInstanceAdapterType(selectedMlInstanceAdapterType) { this.selectedMlInstanceAdapterType=selectedMlInstanceAdapterType; }
     setSelectedMlInstanceConnectionType(selectedMlInstanceConnectionType) { this.selectedMlInstanceConnectionType=selectedMlInstanceConnectionType; }
     setSelectedDatasetTopicType(selectedDatasetTopicType) { this.selectedDatasetTopicType=selectedDatasetTopicType; }
+    setSelectedModelDatasource(selectedModelDatasource) { this.selectedModelDatasource=selectedModelDatasource; }
 }

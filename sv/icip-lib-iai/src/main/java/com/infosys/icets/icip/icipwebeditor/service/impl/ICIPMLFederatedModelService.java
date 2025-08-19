@@ -22,6 +22,7 @@ import com.google.gson.JsonObject;
 import com.infosys.icets.ai.comm.lib.util.logger.JobLogger;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedModel;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedModelDS;
+import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPDatasourceFilterDTO;
 import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPMLFederatedModelDTO;
 import com.infosys.icets.icip.icipwebeditor.repository.ICIPMLFederatedModelsRepository;
 import com.infosys.icets.icip.icipwebeditor.repository.ICPMLFederatedModelsDSRepository;
@@ -40,7 +41,6 @@ public class ICIPMLFederatedModelService implements IICIPMLFederatedModelService
 
 	@Autowired 
 	private ICPMLFederatedModelsDSRepository mlfedmodeldsRepo;
-	
 	
 
 	@Autowired
@@ -91,52 +91,35 @@ public class ICIPMLFederatedModelService implements IICIPMLFederatedModelService
 
 	@Override
 	public List<ICIPMLFederatedModelDS> getAllOptionalModelsByOrg(
-	        String modelName, String version, String modelType, String organisation, Pageable page) {
-	    List<String> modelNames = null;
-	    List<String> versions = null;
-	    List<String> modelTypes = null;
-
-	    if (modelName != null && !modelName.isEmpty()) {
-	        modelNames = Arrays.asList(modelName.split(","));
+	        String organisation, String dataSource, String query, Pageable page) {
+	    List<String> dataSourceList = null;
+	    
+	    if (dataSource != null && !dataSource.isEmpty()) {
+	    	dataSourceList = Arrays.asList(dataSource.split(","));
 	    }
-
-	    if (version != null && !version.isEmpty()) {
-	        versions = Arrays.asList(version.split(","));
-	    }
-
-	    if (modelType != null && !modelType.isEmpty()) {
-	        modelTypes = Arrays.asList(modelType.split(","));
-	    }
-
-	    Page<ICIPMLFederatedModelDS> modelsPage = mlfedmodeldsRepo.findByOrganisationAndOptionalParams(
-	            organisation, modelNames, versions, modelTypes, page);
+	    Page<ICIPMLFederatedModelDS> modelsPage = mlfedmodeldsRepo.findByOrganisationAndOptionalDatasourceNamesAndSearch(
+	            organisation, dataSourceList, query, page);
 	   return modelsPage.toList();
 	
+	}
+	
+	@Override
+	public List<ICIPDatasourceFilterDTO> getModelFilters(String org){
+		
+		return mlfedmodeldsRepo.findDistinctDatasourceNameAndAliasByOrganisation(org);
+		
 	}
 
 
 	@Override
-	public Long getAllModelsCountByOrganisationOptionals(String modelName, String version, String modelType, String organisation) {
+	public Long getAllModelsCountByOrganisationOptionals(String org, String dataSourcename, String searchInput) {
 		
-		 List<String> modelNames = null;
-		    List<String> versions = null;
-		    List<String> modelTypes = null;
-
-		    if (modelName != null && !modelName.isEmpty()) {
-		        modelNames = Arrays.asList(modelName.split(","));
+		    List<String> dataSourcenames = null;
+		    if (dataSourcename != null && !dataSourcename.isEmpty()) {
+		    	dataSourcenames = Arrays.asList(dataSourcename.split(","));
 		    }
+		    return  mlfedmodeldsRepo.countByOrganisationAndOptionalDatasourceNamesAndSearch(org, dataSourcenames, searchInput);
 
-		    if (version != null && !version.isEmpty()) {
-		        versions = Arrays.asList(version.split(","));
-		    }
-
-		    if (modelType != null && !modelType.isEmpty()) {
-		        modelTypes = Arrays.asList(modelType.split(","));
-		    }
-
-		    return  mlfedmodeldsRepo.countByOrganisationAndOptionalParams(organisation, modelNames, versions, modelTypes);
-
-		
 	}
 
 	public Flux<BaseEntity> getObjectByIDTypeAndorganisation(String type, Integer id, String organisation) {
