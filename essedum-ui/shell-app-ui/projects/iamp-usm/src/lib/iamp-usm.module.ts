@@ -18,6 +18,9 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { NgxMatSelectSearchModule } from "ngx-mat-select-search";
 import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { IampUsmService } from "./iamp-usm.service";
+import { UsmRolePermissionsService } from "./services/usm-role-permissions.service";
+import { UsmPermissionsService } from "./services/usm-permission.service";
+import { DashConstantService } from "./services/dash-constant.service";
 
 import { SecretsComponent } from './components/secrets/secrets.component';
 import { RoleListComponent } from "./components/role-list/role-list.component";
@@ -35,6 +38,8 @@ import { MatTooltipModule } from "@angular/material/tooltip";
 import { AipPaginationComponent } from './components/aip-pagination/aip-pagination.component';
 import { PortfolioListViewComponent } from "./components/portfolio/portfolio-list-view.component";
 import { PortfolioAddComponent } from "./components/portfolio/portfolio-add/portfolio-add.component";
+import { UsmRolePermissionComponent } from "./components/usm-role-permission/usm-role-permission.component";
+import { RolePermissionAddComponent } from "./components/usm-role-permission/role-permission-add/role-permission-add/role-permission-add.component";
 
 @NgModule({
     imports: [
@@ -70,12 +75,14 @@ import { PortfolioAddComponent } from "./components/portfolio/portfolio-add/port
         AipHeaderComponent,        
         AipPaginationComponent,
         PortfolioListViewComponent,
-        PortfolioAddComponent
-    ],providers: [
+        PortfolioAddComponent,UsmRolePermissionComponent, RolePermissionAddComponent   ],providers: [
         MessageService,RoleService,ProjectService,UserProjectRoleService,
         { provide: BusyConfig, useFactory: busyConfigFactory },
         IampUsmService,
-        Ng4LoadingSpinnerService,    
+        Ng4LoadingSpinnerService,
+        UsmRolePermissionsService,
+        UsmPermissionsService,
+        DashConstantService,    
     ],
     exports: [IampUsmComponent,SecretsComponent,RoleListComponent],
    // entryComponents: [UsmPortfolioAddComponent, DeleteComponent],
