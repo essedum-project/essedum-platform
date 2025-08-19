@@ -253,7 +253,7 @@
 
     <!-- Header -->
     <app-aip-header [cardTitle]="'Role List'" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createAuth"
-      (search)="Search()" (refresh)="Refresh()" (add)="createView()">
+      (search)="Search($event)" (refresh)="Refresh()" (add)="createView()">
     </app-aip-header>
     <div>
       <div class="aip-container lfx-u-pad-lr-30">

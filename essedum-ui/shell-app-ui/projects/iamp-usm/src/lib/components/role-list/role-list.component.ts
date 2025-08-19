@@ -345,33 +345,48 @@ export class RoleListComponent implements OnInit, OnDestroy {
     }
   }
 
-  Search() {
+  Search(searchText?: string) {
     this.lastRefreshedTime = new Date();
     let newApps = [];
-    if (this.searchedRole == "All" || this.searchedRole == "") {
+    
+    // Check if searchText is provided from the header search input
+    if (searchText !== undefined && searchText !== '') {
+      // Filter roles by name containing the search text
+      newApps = Object.assign([], this.rolesArraySorted).filter((item1) =>
+        item1.name ? item1.name.toLowerCase().includes(searchText.toLowerCase()) : false
+      );
+    } else if (searchText === '') {
+      // If search text is empty, show all roles
+      newApps = this.rolesArraySorted;
+    } else if (this.searchedRole == "All" || this.searchedRole == "") {
       newApps = this.rolesArraySorted;
     } else {
       newApps = Object.assign([], this.rolesArraySorted).filter((item1) =>
         item1.name == null ? "" : item1.name.toLowerCase() == this.searchedRole.toLowerCase()
       );
     }
+    
     if (this.selectedDesc == "All" || this.selectedDesc == "") {
-      newApps = newApps;
+      // Keep as is
     } else {
       newApps = newApps.filter(
-        // item1 => item1.description.toLowerCase().indexOf(this.selectedDesc.toLowerCase()) > -1)
         (item1) =>
           item1.description == null
             ? ""
             : item1.description.toLowerCase().indexOf(this.selectedDesc.toLowerCase()) > -1
       );
-      // newApps = this.rolePage.content.filter(element => element.description == this.selectedDesc)
     }
     this.roles = newApps;
     this.roleList = new MatTableDataSource(newApps);
     this.roleList.sort = this.sort;
     this.roleList.paginator = this.paginator;
     this.rolesLength = newApps.length;
+    
+    // Update pagination for the new UI
+    this.totalrecords = newApps.length;
+    this.lastPage = Math.ceil(this.totalrecords / this.rowsPerPage) - 1;
+    this.page = 0; // Reset to first page
+    this.updatePagedRoles(newApps);
   }
 
   Refresh() {
