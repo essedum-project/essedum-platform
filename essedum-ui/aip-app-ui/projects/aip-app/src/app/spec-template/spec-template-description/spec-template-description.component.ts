@@ -8,12 +8,12 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
-import { AdapterServices } from '../../adapter/adapter-service';
-import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.component/confirm-delete-dialog.component';
+import { AdapterServices } from '../../sharedModule/services/adapter-service';
 import { MatDialog } from '@angular/material/dialog';
 import { OptionsDTO } from '../../DTO/OptionsDTO';
 import { Services } from '../../services/service';
 import { Location } from '@angular/common';
+import { AipDeleteConfirmationComponent } from '../../sharedModule/aip-delete-confirmation/aip-delete-confirmation.component';
 
 @Component({
   selector: 'app-spec-template-description',
@@ -190,7 +190,10 @@ export class SpecTemplateDescriptionComponent implements OnInit {
   }
 
   deleteSpecTemplate(domainName: any) {
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
+    const dialogRef = this.dialog.open(AipDeleteConfirmationComponent, {
+      width: '360px',
+      panelClass: 'standard-dialog',
+    });
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'delete') {
         this.adapterService

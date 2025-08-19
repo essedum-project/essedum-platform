@@ -1,242 +1,178 @@
-<div *ngIf="card" class="container-fluid backgroud-color">
-    <div class="lfx-l-level1-wrapper">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="lfx-l-level1-middle-col lfx-l-base-layout-center">
-                    <div class="lfx-l-level2-middle-ctr">
-                        <div class="lfx-l-level2-middle-col lfx-u-mar-b-24__mb">
-                            <div class="align-items-center flex  justify-content-between flex">
-                                <div class=" selector-model-title-head flex  align-items-center">
-                                    <mat-icon class="mx-2 aip-cursor" (click)="toggler()"
-                                        [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
-                                        matTooltipPosition="above" (mouseenter)="isBackHovered = true"
-                                        (mouseleave)="isBackHovered = false">
-                                        arrow_back
-                                    </mat-icon>
+<div *ngIf="card" class="aip-container lfx-l-level2-middle-ctr lfx-u-pad-lr-24">
 
-                                    <span class=" aip-desc-title lfx-u-header-xxl"><span
-                                            style="color: #737373;">Instance:
-                                        </span>{{card.name}} </span>
-                                </div>
-                                <div class=" selector-model-title-tail">
-                                    <ul class="flex justify-content-between align-items-center">
-                                        <li>
-                                            <mat-icon *ngIf="editAuth" class="aip-led-icons  aip-cursor mx-2"
-                                                (click)="openModal(instanceContent3)" matTooltip="Edit"
-                                                [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
-                                                edit
-                                            </mat-icon>
+    <app-aip-header [cardTitle]="CARD_TITLE" [cardName]="card?.name" [action]="'view-details'" [backAction]="true"
+        [closeAction]="false" [showRelatedInstances]="showRelatedInstances" (navigateBack)="toggler()"
+        (edit)="openModal(editModal)" (delete)="deleteInstance(card?.name)" (zoom)="listToggle()">
+    </app-aip-header>
+    <mat-card class="lfx-schema-card">
+        <mat-tab-group id="schema-modal-tabs" class="tabs-left-aligned"
+            (selectedIndexChange)="basicReqTabChange($event)">
 
-                                            <ng-template #instanceContent3 let-modal>
-                                                <app-instance-create-edit [data]=card
-                                                    [action]="editAction"></app-instance-create-edit>
-                                            </ng-template>
-                                        </li>
-                                        <li>
-                                            <mat-icon *ngIf="deleteAuth" class="aip-led-icons  aip-cursor mx-2"
-                                                (click)="deleteInstance(card.name)" matTooltip="Delete"
-                                                [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
-                                                delete
-                                            </mat-icon>
-                                        </li>
-                                        <li *ngIf="showRelatedInstances"> <mat-icon
-                                                class="aip-led-icons  aip-cursor mx-2" (click)="listToggle()"
-                                                [matTooltip]="'Hide Related Components'"
-                                                [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
-                                                zoom_out_map
-                                            </mat-icon>
-                                        </li>
-                                        <li *ngIf="!showRelatedInstances"><mat-icon
-                                                class="aip-led-icons  aip-cursor mx-2" (click)="listToggle()"
-                                                [matTooltip]="'Show Related Components'"
-                                                [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
-                                                zoom_in_map
-                                            </mat-icon>
-                                        </li>
-                                    </ul>
-                                </div>
+            <!-- Details Tab -->
+            <mat-tab label="Details" data-tab-id="Instance-Details">
+                <div class="lfx-u-pad-16">
+                    <div>
+                        <div>
+                            <div class="lfx-u-body-sm aip-label-color">
+                                Description
                             </div>
-                            <div class="col-md-12 col-lg-12 aip-desc lfx-u-mar-tb-16 lfx-u-pad-tb-16 aip-panel-shadow">
-                                <div matTabGroup>
-                                    <mat-tab-group id="instance-description-tabs" disableRipple
-                                        (selectedIndexChange)="basicReqTabChange($event)">
-                                        <mat-tab class="lfx-u-header-xl" label="Details" data-tab-id="instance-details">
-                                            <ng-template mat-tab-label>Details</ng-template>
-                                        </mat-tab>
-                                        <mat-tab class="lfx-u-header-xl" label="API Spec"
-                                            data-tab-id="instance-api-spec">
-                                            <ng-template mat-tab-label>API Spec</ng-template>
-                                        </mat-tab>
-                                    </mat-tab-group>
-                                    <div *ngIf="basicReqTab == 'detailsTab'">
-                                        <div class="ml-2 row col-md-12">
-                                            <div>
-                                                <div class="lfx-u-body-sm mt-3 aip-label-color lfx-u-pad-t-16">
-                                                    Description
-                                                </div>
-                                                <div class="lfx-u-body-md mt-3" style="min-height: 4rem;">
-                                                    <p
-                                                        class="lfx-u-body-md lfx-u-text-neutral-80 lfx-u-line-2 aip-desc-ellipsis">
-                                                        {{card.description}}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div class="row mt-4">
-                                                <div class="aip-model-type col-md-4">
-                                                    <div class="lfx-u-body-sm aip-label-color">Implementation Name</div>
-                                                    <div class="lfx-u-body-md mt-3">{{card.adaptername}}</div>
-                                                </div>
-                                                <div class="aip-model-type col-md-4">
-                                                    <div class="lfx-u-body-sm aip-label-color">Connection Name</div>
-                                                    <div class="lfx-u-body-md mt-3">
-                                                        {{card.executiontype}}-{{card.connectionname}}</div>
-                                                </div>
-                                                <div class="aip-model-type col-md-4">
-                                                    <div class="lfx-u-body-sm aip-label-color">Spec Name</div>
-                                                    <div class="lfx-u-body-md mt-3">{{card.spectemplatedomainname}}
-                                                    </div>
-                                                </div>
-                                                <div class="aip-model-type col-md-4 lfx-u-pad-t-16">
-                                                    <div class="lfx-u-body-sm aip-label-color">App Organisation</div>
-                                                    <div class="lfx-u-body-md mt-3">{{card.organization}}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="mt-5 lfx-u-mar-l-8">
-                                            <hr class="aip-line" />
-                                            <div class="row">
-                                                <div class="aip-createdBy col-md-6">
-                                                    <div class="lfx-u-body-sm aip-label-color">Created By</div>
-                                                    <div class="flex mt-2 align-items-center ">
-                                                        <div class="lfx-c-avatar  lfx-c-avatar--sm"
-                                                            style="margin: 0 2rem 0 0;">
-                                                            {{getShortName(card.createdby)}}</div>
-                                                        <div class="lfx-u-body-md">{{card.createdby}}</div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="lfx-u-body-sm aip-label-color">Created On</div>
-                                                    <div class="lfx-u-body-md  mt-3">{{card.createdon}}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div *ngIf="basicReqTab == 'swaggerTab'">
-                                        <div class="mt-5 lfx-u-mar-l-8">
-                                            <lib-swagger-custom [adapterName]="card.adaptername"
-                                                [instanceName]="card.name" [isAdapter]="isAdapter"></lib-swagger-custom>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="lfx-u-body-md mt-3" style="min-height: 4rem;">
+                                <p class="lfx-u-body-md lfx-u-text-neutral-80 lfx-u-line-2 aip-desc-ellipsis">
+                                    {{card?.description}}
+                                </p>
                             </div>
                         </div>
-                        <div *ngIf="showRelatedInstances" class="lfx-l-level2-right-col  lfx-u-pad-t-32">
-                            <mat-card class=""
-                                *ngIf="relatedInstances.length > 0 || similarInstances.length > 0 || relatedAdapters.length > 0; else noRelatedInstances">
-                                <div class="lfx-u-header-lg lfx-u-pad-tb-16 lfx-u-pad-l-32 customHeader">Related
-                                    Components
+                        <div class="row mt-4">
+                            <div class="aip-model-type col-md-4">
+                                <div class="lfx-u-body-sm aip-label-color">Implementation Name</div>
+                                <div class="lfx-u-body-md mt-3">{{card?.adaptername}}</div>
+                            </div>
+                            <div class="aip-model-type col-md-4">
+                                <div class="lfx-u-body-sm aip-label-color">Connection Name</div>
+                                <div class="lfx-u-body-md mt-3">
+                                    {{card?.executiontype}}-{{card?.connectionname}}</div>
+                            </div>
+                            <div class="aip-model-type col-md-4">
+                                <div class="lfx-u-body-sm aip-label-color">Spec Name</div>
+                                <div class="lfx-u-body-md mt-3">{{card?.spectemplatedomainname}}
                                 </div>
-                                <div class="aip-filter aip-scroll-hover">
-                                    <div type="default" styleClass="" contentClass="">
-                                        <div class="lfx-c-panel__content">
-                                            <div class="lfx-u-pad-16">
-                                                <mat-list position="left" [selectOnClick]="true">
-                                                    <li class="aip-daa" *ngFor="let component of similarInstances">
-                                                        <div class="aip-related-list"
-                                                            (click)="redirectToSelectedComponent(component)">
-                                                            <div class="lfx-u-pad-8 aip-cursor">
-                                                                <div class="aip-related-component-ellipsis">
-                                                                    <span
-                                                                        class="lfx-c-nav__nomar lfx-u-header-xl lfx-u-text-neutral-80">{{component.value}}</span>
-                                                                </div>
-                                                                <div
-                                                                    class="lfx-c-badge float-end lfx-c-badge--warning aip-related-badge">
-                                                                    <span [matTooltip]="'Similar Instance'"
-                                                                        [matTooltipPosition]="tooltipPosition">{{component.viewValue}}</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                    <li class="aip-daa" *ngFor="let component of relatedAdapters">
-                                                        <div class="aip-related-list"
-                                                            (click)="redirectToSelectedComponent(component)">
-                                                            <div class="lfx-u-pad-8 aip-cursor">
-                                                                <div class="aip-related-component-ellipsis">
-                                                                    <span
-                                                                        class="lfx-c-nav__nomar lfx-u-header-xl lfx-u-text-neutral-80">{{component.value}}</span>
-                                                                </div>
-                                                                <div
-                                                                    class="lfx-c-badge float-end lfx-c-badge--active aip-related-badge">
-                                                                    <span [matTooltip]="'Implementation'"
-                                                                        [matTooltipPosition]="tooltipPosition">{{component.viewValue}}</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                    <li class="aip-daa" *ngFor="let component of relatedSpecs">
-                                                        <div class="aip-related-list"
-                                                            (click)="redirectToSelectedComponent(component)">
-                                                            <div class="lfx-u-pad-8 aip-cursor">
-                                                                <div class="aip-related-component-ellipsis">
-                                                                    <span
-                                                                        class="lfx-c-nav__nomar lfx-u-header-xl lfx-u-text-neutral-80">{{component.value}}</span>
-                                                                </div>
-                                                                <div
-                                                                    class="lfx-c-badge float-end lfx-c-badge--info aip-related-badge">
-                                                                    <span [matTooltip]="'Spec'"
-                                                                        [matTooltipPosition]="tooltipPosition">{{component.viewValue}}</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-
-                                                    <li class="aip-daa" *ngFor="let component of relatedChains">
-                                                        <div class="aip-related-list"
-                                                            (click)="redirectToSelectedComponent(component)">
-                                                            <div class="lfx-u-pad-8 aip-cursor">
-                                                                <div class="aip-related-component-ellipsis">
-                                                                    <span
-                                                                        class="lfx-c-nav__nomar lfx-u-header-xl lfx-u-text-neutral-80">{{component.value}}</span>
-                                                                </div>
-                                                                <div
-                                                                    class="lfx-c-badge float-end lfx-c-badge--info aip-related-badge">
-                                                                    <span [matTooltip]="'Spec'"
-                                                                        [matTooltipPosition]="tooltipPosition">{{component.viewValue}}</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                    <li class="aip-daa" *ngFor="let component of relatedConnections">
-                                                        <div class="aip-related-list"
-                                                            (click)="redirectToSelectedComponent(component)">
-                                                            <div class="lfx-u-pad-8 aip-cursor">
-                                                                <div class="aip-related-component-ellipsis">
-                                                                    <span
-                                                                        class="lfx-c-nav__nomar lfx-u-header-xl lfx-u-text-neutral-80">{{component.value}}</span>
-                                                                </div>
-                                                                <div
-                                                                    class="lfx-c-badge float-end lfx-c-badge--info aip-related-badge">
-                                                                    <span [matTooltip]="'Spec'"
-                                                                        [matTooltipPosition]="tooltipPosition">{{component.viewValue}}</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                </mat-list>
+                            </div>
+                            <div class="aip-model-type col-md-4 lfx-u-pad-t-16">
+                                <div class="lfx-u-body-sm aip-label-color">App Organisation</div>
+                                <div class="lfx-u-body-md mt-3">{{card?.organization}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-5 lfx-u-mar-l-8">
+                        <hr class="aip-line" />
+                        <div class="row">
+                            <div class="aip-createdBy col-md-6">
+                                <div class="lfx-u-body-sm aip-label-color">Created By</div>
+                                <div class="flex mt-2 align-items-center ">
+                                    <div class="lfx-c-avatar  lfx-c-avatar--sm" style="margin: 0 2rem 0 0;">
+                                        {{getShortName(card?.createdby)}}</div>
+                                    <div class="lfx-u-body-md">{{card?.createdby}}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="lfx-u-body-sm aip-label-color">Created On</div>
+                                <div class="lfx-u-body-md  mt-3">{{card?.createdon}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </mat-tab>
+            <mat-tab label="API Spec" data-tab-id="Instance-APISpec">
+                <app-aip-swagger-custom [adapterName]="card?.adaptername" [instanceName]="card?.name"
+                    [isAdapter]="isAdapter"></app-aip-swagger-custom>
+            </mat-tab>
+        </mat-tab-group>
+    </mat-card>
+    <ng-template #editModal let-modal>
+        <app-adapter-create-edit [data]=card [action]="editAction"></app-adapter-create-edit>
+    </ng-template>
+    <div *ngIf="showRelatedInstances" class="lfx-l-level2-right-col lfx-u-pad-t-10">
+        <mat-card class="lfx-related-card"
+            *ngIf="relatedInstances.length > 0 || similarInstances.length > 0 || relatedAdapters.length > 0; else noRelatedInstances">
+            <div class="lfx-u-header-lg lfx-u-pad-tb-16 lfx-u-pad-l-32 customHeader">Related
+                Components
+            </div>
+            <div class="aip-filter aip-scroll-hover">
+                <div type="default" styleClass="" contentClass="">
+                    <div class="lfx-c-panel__content">
+                        <div class="lfx-u-pad-16">
+                            <mat-list position="left" [selectOnClick]="true">
+                                <li class="aip-daa" *ngFor="let component of similarInstances">
+                                    <div class="aip-related-list" (click)="redirectToSelectedComponent(component)">
+                                        <div class="lfx-u-pad-8 aip-cursor">
+                                            <div class="aip-related-component-ellipsis">
+                                                <span
+                                                    class="lfx-c-nav__nomar lfx-u-header-xl lfx-u-text-neutral-80">{{component.value}}</span>
+                                            </div>
+                                            <div class="lfx-c-badge float-end lfx-c-badge--warning aip-related-badge">
+                                                <span [matTooltip]="'Similar Instance'"
+                                                    [matTooltipPosition]="tooltipPosition">{{component.viewValue}}</span>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </mat-card>
-                            <ng-template #noRelatedInstances>
-                                <div class="lfx-u-body-md lfx-u-text-neutral-80 lfx-u-line-2 aip-desc-ellipsis">
-                                    No Related Components
-                                </div>
-                            </ng-template>
+                                </li>
+                                <li class="aip-daa" *ngFor="let component of relatedAdapters">
+                                    <div class="aip-related-list" (click)="redirectToSelectedComponent(component)">
+                                        <div class="lfx-u-pad-8 aip-cursor">
+                                            <div class="aip-related-component-ellipsis">
+                                                <span
+                                                    class="lfx-c-nav__nomar lfx-u-header-xl lfx-u-text-neutral-80">{{component.value}}</span>
+                                            </div>
+                                            <div class="lfx-c-badge float-end lfx-c-badge--active aip-related-badge">
+                                                <span [matTooltip]="'Implementation'"
+                                                    [matTooltipPosition]="tooltipPosition">{{component.viewValue}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="aip-daa" *ngFor="let component of relatedSpecs">
+                                    <div class="aip-related-list" (click)="redirectToSelectedComponent(component)">
+                                        <div class="lfx-u-pad-8 aip-cursor">
+                                            <div class="aip-related-component-ellipsis">
+                                                <span
+                                                    class="lfx-c-nav__nomar lfx-u-header-xl lfx-u-text-neutral-80">{{component.value}}</span>
+                                            </div>
+                                            <div class="lfx-c-badge float-end lfx-c-badge--info aip-related-badge">
+                                                <span [matTooltip]="'Spec'"
+                                                    [matTooltipPosition]="tooltipPosition">{{component.viewValue}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li class="aip-daa" *ngFor="let component of relatedChains">
+                                    <div class="aip-related-list" (click)="redirectToSelectedComponent(component)">
+                                        <div class="lfx-u-pad-8 aip-cursor">
+                                            <div class="aip-related-component-ellipsis">
+                                                <span
+                                                    class="lfx-c-nav__nomar lfx-u-header-xl lfx-u-text-neutral-80">{{component.value}}</span>
+                                            </div>
+                                            <div class="lfx-c-badge float-end lfx-c-badge--info aip-related-badge">
+                                                <span [matTooltip]="'Spec'"
+                                                    [matTooltipPosition]="tooltipPosition">{{component.viewValue}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="aip-daa" *ngFor="let component of relatedConnections">
+                                    <div class="aip-related-list" (click)="redirectToSelectedComponent(component)">
+                                        <div class="lfx-u-pad-8 aip-cursor">
+                                            <div class="aip-related-component-ellipsis">
+                                                <span
+                                                    class="lfx-c-nav__nomar lfx-u-header-xl lfx-u-text-neutral-80">{{component.value}}</span>
+                                            </div>
+                                            <div class="lfx-c-badge float-end lfx-c-badge--info aip-related-badge">
+                                                <span [matTooltip]="'Spec'"
+                                                    [matTooltipPosition]="tooltipPosition">{{component.viewValue}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </mat-list>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </mat-card>
+        <ng-template #noRelatedInstances>
+            <mat-card class="lfx-related-card">
+                <div class="lfx-u-body-md lfx-u-text-neutral-80 lfx-u-line-2 aip-desc-ellipsis lfx-u-pad-tb-16">
+                    <div class="flex justify-content-center align-items-center flex-column">
+                        <img src="assets/images/aip_empty_state_leds.svg" class="img-responsive img-color"
+                            alt="aip_empty_state_leds" style="width:15rem" />
+                        No Related Components
+                    </div>
+                </div>
+            </mat-card>
+            <!-- <div class="lfx-u-body-md lfx-u-text-neutral-80  aip-desc-ellipsis">
+                No Related Components
+            </div> -->
+        </ng-template>
     </div>
+
 </div>

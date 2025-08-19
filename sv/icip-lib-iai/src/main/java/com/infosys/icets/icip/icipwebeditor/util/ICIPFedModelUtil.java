@@ -47,6 +47,9 @@ public static List<ICIPMLFederatedModelDTO> MapModelListToDTOList(List<ICIPMLFed
 		dtoObject.setOrganisation(m.getOrganisation());
 		dtoObject.setCreatedOn(m.getCreatedOn());
 		dtoObject.setVersion(m.getVersion());
+		dtoObject.setDataSource(m.getDatasource());
+		dtoObject.setAttributes(m.getAttributes());
+		dtoObject.setModifiedDate(m.getModifiedDate());
 		dtoObject.setCreatedBy(m.getCreatedBy());
 		dtoObject.setType(m.getModelType());
 		dtoList.add(dtoObject);

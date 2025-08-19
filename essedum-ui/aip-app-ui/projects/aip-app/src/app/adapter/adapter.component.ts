@@ -8,10 +8,10 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { Services } from '../services/service';
 import { TagsService } from '../services/tags.service';
-import { AdapterServices } from './adapter-service';
+import { AdapterServices } from '../sharedModule/services/adapter-service';
 import { MatDialog } from '@angular/material/dialog';
-import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog.component/confirm-delete-dialog.component';
 import { Location } from '@angular/common';
+import { AipDeleteConfirmationComponent } from '../sharedModule/aip-delete-confirmation/aip-delete-confirmation.component';
 
 @Component({
   selector: 'app-adapter',
@@ -483,13 +483,16 @@ export class AdapterComponent implements OnInit {
 
   openedit(content: any): void {
     this.dialog.open(content, {
-      width: '830px',
+      width: '560px',
       panelClass: 'standard-dialog',
     });
   }
 
   deleteAdapter(adapterName: string): void {
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
+    const dialogRef = this.dialog.open(AipDeleteConfirmationComponent, {
+      width: '360px',
+      panelClass: 'standard-dialog',
+    });
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'delete') {
         this.adapterServices.deleteAdapter(adapterName).subscribe(

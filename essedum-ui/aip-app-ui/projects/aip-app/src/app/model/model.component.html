@@ -10,10 +10,13 @@
                 </app-aip-header>
 
                 <!-- Filter Section -->
-                <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="servicev1" [selectedConnectionTypeList]="{ 
-                            selectedAdapterType: selectedAdapterType
-                          }" (tagSelected)="tagSelectedEvent($event)"
-                    (filterStatusChange)="onFilterStatusChange($event)"></app-aip-filter>
+                <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="servicev1" 
+                    [selectedModelDataSourceList]="{
+                        dataSourceList: dataSourceList
+                    }" 
+                    (tagSelected)="tagSelectedEvent($event)"
+                    (filterStatusChange)="onFilterStatusChange($event)">
+                </app-aip-filter>
             </div>
 
 

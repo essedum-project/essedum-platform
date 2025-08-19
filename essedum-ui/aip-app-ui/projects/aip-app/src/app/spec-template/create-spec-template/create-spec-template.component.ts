@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { Validators } from '@angular/forms';
+import { NgModel, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AdapterServices } from '../../adapter/adapter-service';
+import { AdapterServices } from '../../sharedModule/services/adapter-service';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
 import { Services } from '../../services/service';
 import { Location } from '@angular/common';
@@ -12,8 +12,10 @@ import { Location } from '@angular/common';
   styleUrls: ['./create-spec-template.component.scss'],
 })
 export class CreateSpecTemplateComponent implements OnInit {
+  readonly CARD_TITLE = 'Spec';
   @ViewChild('formJsonEditor', { static: false })
   formJsonEditor: JsonEditorComponent;
+  @ViewChild('nameRef') nameRef: NgModel;
   editorOptions = new JsonEditorOptions();
   capabilityList = [
     { viewValue: 'Dataset', value: 'dataset' },
@@ -34,7 +36,7 @@ export class CreateSpecTemplateComponent implements OnInit {
   regexPatternForValidAlphabets = `^[a-zA-Z0-9\_\-]+$`;
   regexPatternForValidAlphabetsObj: RegExp;
   regexPatternForExistingNamesObj: RegExp;
-  errMsg: string;
+  errMsg: string = 'Name is required field.';
   isBackHovered: boolean = false;
   nameFlag: boolean = false;
   errMsgFlag: boolean = true;
@@ -63,7 +65,7 @@ export class CreateSpecTemplateComponent implements OnInit {
 
   authentications() {
     this.dsService.getPermission('cip').subscribe((cipAuthority) => {
-      if (!cipAuthority.includes('spectemplate-create')) this.back();
+      if (!cipAuthority.includes('spectemplate-create')) this.navigateBack();
     });
   }
 
@@ -115,26 +117,27 @@ export class CreateSpecTemplateComponent implements OnInit {
     this.service.createApiSpecTemplate(this.data).subscribe((resp) => {
       console.log(resp);
       this.service.messageService(resp, 'Spec  Created Successfully');
-       this.router.navigate(['../'], { relativeTo: this.route });
+      this.router.navigate(['../'], { relativeTo: this.route });
     });
     console.log(this.data);
-   
   }
 
-  back() {
+  navigateBack() {
     this.location.back();
   }
 
   domainNameChanges(specName: string) {
-    this.errMsg = 'Name is required filed.';
     if (this.regexPatternObj.test(specName)) {
       this.nameFlag = true;
       this.errMsgFlag = false;
+       if (this.nameRef && this.nameRef.control) {
+        this.nameRef.control.setErrors(null);
+      }
     } else {
       this.nameFlag = false;
       this.errMsgFlag = true;
       if (specName.length == 0) {
-        this.errMsg = 'Name is required filed.';
+        this.errMsg = 'Name is required field.';
       } else if (specName.match(this.regexPatternForExistingNamesObj) == null) {
         this.errMsg = 'Name already exists';
       } else if (
@@ -142,6 +145,9 @@ export class CreateSpecTemplateComponent implements OnInit {
       ) {
         this.errMsg =
           'Name should not contain special characters, accepted special characters are _ and -';
+      }
+       if (this.nameRef && this.nameRef.control) {
+        this.nameRef.control.setErrors({ custom: true });
       }
     }
   }

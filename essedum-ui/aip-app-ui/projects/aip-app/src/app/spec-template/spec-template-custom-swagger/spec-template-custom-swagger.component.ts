@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
-import { AdapterServices } from '../../adapter/adapter-service';
+import { AdapterServices } from '../../sharedModule/services/adapter-service';
 import { OptionsDTO } from '../../DTO/OptionsDTO';
 
 @Component({

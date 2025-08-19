@@ -1,12 +1,37 @@
-.aip-center-align{
-    align-content: center;
-    display: flex;
-    flex-wrap: wrap;
+.aip-center-align {
+  align-content: center;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.selector-693-9 {
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.selector-693-19_a input[type="file"] {
+  margin-top: 0 !important ;
+  padding: 5px 0;
+  height: 36px;
+  line-height: 36px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.upload-button {
+  margin-top: 0 !important;
+   padding: 5px 0;
+  height: 36px;
+  display: inline-block;
+  vertical-align: middle;
+
 }
 
 input[type="file"] {
-    padding: 15px;
-}.lfx-form-field {
+  padding: 15px;
+}
+
+.lfx-form-field {
   width: 100%;
   // margin-bottom: 16px;
 }
@@ -21,13 +46,15 @@ input[type="file"] {
   font-size: 0.95rem;
   color: #00000099 !important;
 }
-.list-header{
-  font-size: 16px; 
-  color:#0094ff;
-      font: normal normal normal  Roboto !important;
+
+.list-header {
+  font-size: 16px;
+  color: #0094ff;
+  font: normal normal normal Roboto !important;
 
 
 }
+
 .test-btn:hover {
   color: #ffffff !important;
   background-color: #ebf1f6 !important;
@@ -39,11 +66,8 @@ input[type="file"] {
   letter-spacing: 0px;
   font-family: "Roboto", sans-serif !important;
   border-radius: 16px;
-  background: transparent
-    linear-gradient(90deg, var(---0052cc) 0%, #0094ff 100%) 0% 0% no-repeat
-    padding-box;
-  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
-    no-repeat padding-box;
+  background: transparent linear-gradient(90deg, var(---0052cc) 0%, #0094ff 100%) 0% 0% no-repeat padding-box;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0% no-repeat padding-box;
 }
 
 .test-btn {
@@ -77,11 +101,11 @@ input[type="file"] {
 }
 
 :host {
-     font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
 }
 
 :host ::ng-deep {
-     font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
 
   mat-form-field,
   mat-select,
@@ -94,9 +118,10 @@ input[type="file"] {
   button,
   .mat-button-wrapper,
   .mat-select-placeholder {
-     font-family:  "Roboto", "Segoe UI", sans-serif !important;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
   }
 }
+
 ::ng-deep .mat-mdc-form-field {
   width: 100%;
   background: transparent;
@@ -177,9 +202,10 @@ input[type="file"] {
   color: #555555;
   opacity: 1;
 }
+
 ::ng-deep mat-option {
-  font: normal normal normal  Roboto !important;
-  
+  font: normal normal normal Roboto !important;
+
 }
 
 
@@ -209,7 +235,7 @@ input[type="file"] {
   background-color: #f7f7f7ed !important;
   border-radius: 4px !important;
   margin-left: 4px !important;
-  font: normal normal normal  Roboto !important;
+  font: normal normal normal Roboto !important;
 
 }
 

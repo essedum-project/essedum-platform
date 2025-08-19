@@ -1,6 +1,6 @@
 import { Component, Input, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AdapterServices } from '../adapter-service';
+import { AdapterServices } from '../../sharedModule/services/adapter-service';
 import { OptionsDTO } from '../../DTO/OptionsDTO';
 import { Services } from '../../services/service';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';

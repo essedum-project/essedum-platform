@@ -35,7 +35,6 @@
   line-height: 11px;
   font-weight: 600;
   font-family: "Roboto", "Segoe UI", sans-serif !important;
-
   font-style: normal;
 }
 
@@ -132,25 +131,42 @@ mat-card-actions.card-actions-hover {
       border-radius: 50%;
       font-size: 14px;
     }
-
-    .aip-hover-detail {
-      position: absolute;
-      display: none;
-      background-color: white;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-      padding: 8px;
-      border-radius: 4px;
-      z-index: 10;
-      min-width: 120px;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    &:hover .aip-hover-detail {
-      display: block;
-    }
   }
+}
+
+::ng-deep .aip-hover-detail {
+  box-shadow: 0px 2px 4px #00000029;
+  border: 0.5px solid #0000001f;
+  border-radius: 16px;
+  display: none;
+  cursor: pointer;
+  position: absolute;
+  top: -3rem;
+  z-index: 10000;
+  left: 8%;
+  background-color: var(--background-colour);
+  text-wrap: balance;
+  width: 23rem;
+  text-align: center;
+  word-break: break-all;
+}
+
+::ng-deep .aip-hover-avatar:hover ~ .aip-hover-detail {
+  display: block;
+  transition: display 1s ease-out 0.5s;
+}
+
+::ng-deep .aip-hover-detail::after {
+  content: "";
+  position: absolute;
+  bottom: -1rem;
+  left: 60%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 3.2rem solid transparent;
+  border-right: 0 solid transparent;
+  border-top: 1rem solid white;
 }
 
 .aip-more-actions-icon {
@@ -171,22 +187,6 @@ mat-card-actions.card-actions-hover {
 
 .aip-hover-avatar {
   position: relative;
-}
-
-.aip-hover-detail {
-  box-shadow: 0rem 0.2rem 2.5rem rgba(0, 0, 0, 25%);
-  display: none;
-  cursor: pointer;
-  position: absolute;
-  top: -3rem;
-  z-index: 10000;
-  left: 8%;
-  background-color: var(--background-colour);
-  text-wrap: balance;
-  border-radius: 1rem;
-  width: 23rem;
-  text-align: center;
-  word-break: break-all;
 }
 
 .lfx-u-mar-b-8 {
@@ -256,4 +256,27 @@ mat-card-actions.card-actions-hover {
 
 .action-icon:hover {
   color: #0094ff;
+}
+
+::ng-deep .mat-mdc-menu-panel {
+  border-radius: 16px;
+
+  font-size: 1.6rem !important;
+  line-height: 24px !important;
+  font-weight: 600 !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-style: normal !important;
+}
+
+.aip-menu-icon {
+  margin-right: 12px;
+  color: #1976d2;
+}
+
+.aip-menu-delete {
+  color: #d32f2f;
+}
+
+::ng-deep .mat-mdc-menu-item{
+  min-height: 40px !important;
 }
