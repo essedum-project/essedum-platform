@@ -11,7 +11,7 @@ telemetry:
     driverClassName: com.mysql.cj.jdbc.Driver
     jdbcurl: jdbc:mysql://localhost:3306/telemetrydb
     username: root
-    password: root
+    password: Infy@123
  
 config:
   active-profiles: mysql,dbjwt,btf,dbconstants,vault
@@ -21,8 +21,8 @@ config:
   
   datasourceurl: jdbc:mysql://localhost:3306
   datasourceuser: root
-  datasourcepass: root
-  leapcoredb: leap_8000_coredb_m116
+  datasourcepass: Infy@123
+  leapcoredb: leap_8000_coredb_j16
   leapquartzdb: leap2_8000_quartz
   
   leapbtfdb: leapmaster_btf
@@ -318,7 +318,7 @@ quartz:
                 batch_versioned_data: true
                 time_zone: UTC
             ddl-auto: none
-            physical_naming_strategy : com.infosys.icets.icip.icipwebeditor.job.config.UpperCaseStrategy
+            physical_naming_strategy : com.lfn.icip.icipwebeditor.job.config.UpperCaseStrategy
             implicit_naming_strategy : org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy      
  
 exp:

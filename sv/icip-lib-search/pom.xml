@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.infosys.icets.icip</groupId>
+	<groupId>com.lfn.icip</groupId>
 	<artifactId>icip-lib-search</artifactId>
 	<packaging>jar</packaging>
 	<name>icip-lib-search</name>
 	<url>http://maven.apache.org</url>
 	<parent>
-		<groupId>com.infosys.icets.ai</groupId>
-		<artifactId>aip</artifactId>
+		<groupId>com.lfn.ai</groupId>
+		<artifactId>essedum</artifactId>
 		<version>3.3-SNAPSHOT</version>
 	</parent>
 	<properties>
@@ -74,7 +74,7 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.ai</groupId>
+			<groupId>com.lfn.ai</groupId>
 			<artifactId>comm-lib-util</artifactId>
 			<scope>provided</scope>
 		</dependency>
