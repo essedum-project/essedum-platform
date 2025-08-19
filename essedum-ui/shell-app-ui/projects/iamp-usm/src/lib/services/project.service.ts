@@ -21,9 +21,34 @@ export class ProjectService {
 
   create(project: Project): Observable<Project> {
     const copy = this.convert(project);
+    const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    let headerValue;
+    let req = new PageRequestByExample(project, event);
+    let body;
+    try {
+      body = JSON.stringify(req);
+      headerValue = Buffer.from(body, 'utf8').toString('base64');
+    } catch (e: any) {
+      console.error("JSON.stringify error - ", e.message);
+    }
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project1.id || '',
+      'projectname': project1.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || '',
+      example: headerValue
+
+    });
     return this.https
       .post("/api/projects", copy, {
         observe: "response",
+        headers: headers
       })
       .pipe(
         map((response) => {
@@ -60,15 +85,35 @@ export class ProjectService {
    */
   update(project: Project): Observable<Project> {
     let body;
+        let headerValue;
+
     try {
       body = JSON.stringify(project);
-    } catch (e : any)  {
+            headerValue = Buffer.from(body, 'utf8').toString('base64');
+
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
+const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+  
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project1.id || '',
+      'projectname': project1.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || '',
+      example: headerValue
 
+    });
     return this.https
       .put("/api/projects", body, {
         observe: "response",
+        headers: headers
       })
       .pipe(
         map((response) => {
@@ -93,7 +138,7 @@ export class ProjectService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     let headers = new HttpHeaders();
@@ -125,7 +170,7 @@ export class ProjectService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     // let headers = new HttpHeaders();
@@ -134,7 +179,7 @@ export class ProjectService {
     // Get project and role from sessionStorage
     const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -169,7 +214,7 @@ export class ProjectService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -197,7 +242,7 @@ export class ProjectService {
     let body;
     try {
       body = JSON.stringify({ query: query, maxResults: 10 });
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -236,7 +281,7 @@ export class ProjectService {
     let body;
     try {
       body = toproject;
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -259,7 +304,7 @@ export class ProjectService {
     let body;
     try {
       body = toproject;
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -281,7 +326,7 @@ export class ProjectService {
     let body;
     try {
       body = toproject;
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -303,7 +348,7 @@ export class ProjectService {
     let body;
     try {
       body = toproject;
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https

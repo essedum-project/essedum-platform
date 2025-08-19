@@ -36,6 +36,7 @@ import { Role } from "../../models/role";
 import { AppTheme, BCCTheme, DashboardTheme, Theme, WidgetTheme } from "../../models/theme";
 import { DashConstant } from "../../models/dash-constant";
 import { DashConstantService } from "../../services/dash-constant.service";
+import { ProjectDetailComponent } from "../project-detail/project-detail.component";
 @Component({
   //moduleId: module.id,
   templateUrl: "project-list-view.component.html",
@@ -69,12 +70,16 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
   busy1: Subscription;
   role: any;
   
+  // Add subscriptions for cleanup
+  private paramsSubscription: Subscription;
+  private subscriptions: Subscription[] = [];
+  
   // New properties for updated UI
   isFilterExpanded = false;
   filterOptions = [
     { key: 'name', label: 'Project Name', type: 'text' },
     { key: 'description', label: 'Description', type: 'text' },
-    { key: 'portfolioName', label: 'Portfolio', type: 'text' }
+    { key: 'portfolioName', label: 'Portfolio', type: 'portfolio' }
   ];
   selectedFilterValues: any = {};
   activeFilters: any = {};
@@ -140,6 +145,8 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
     private usmService: IampUsmService,
   ) { }
 
+
+
   //code related to make it consistent with wave UI
   filterProject: any;
   filterProjectName: any;
@@ -186,10 +193,11 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
     this.showDescLengthErrorMessage = false;
   }
 
+
   showProjectList() { }
 
   getProjects(id) {
-    this.projectService.getProject(id).subscribe((res) => {
+    const subscription = this.projectService.getProject(id).subscribe((res) => {
       this.currentProject = res;
       this.project = res;
       if (this.project.theme == null) {
@@ -208,48 +216,68 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
         }
       }
     });
+    
+    // Add the subscription to our tracked subscriptions for cleanup
+    this.subscriptions.push(subscription);
   }
 
   editProject(project: Project) {
-    this.changeView.emit(false);
-    this.view = false;
-    this.edit = true;
-    this.showCreate = true;
-    this.project = project;
-    this.buttonFlag = false;
-    this.clickedcopyblueprint = false;
-    this.router.navigate(["./" + project.id + "/" + false], { relativeTo: this.route });
-    // if (window.location.href.includes('project')) {
-    //     this.router.navigate(["projectlist/" + project.id + "/" + false]);
-
-    // }
+    // this.changeView.emit(false);
+    // this.view = false;
+    // this.edit = true;
+    // this.project = project;
+    // this.buttonFlag = false;
+    // this.clickedcopyblueprint = false;
+    // this.router.navigate(["./projectlist/" + project.id + "/" + false], { relativeTo: this.route });
+   const dialogRef = this.confirmDialog.open(ProjectDetailComponent, {
+      maxHeight: "90vh",
+      width: "600px",
+      maxWidth: "90vw",
+      disableClose: false,
+      autoFocus: false,
+      panelClass: 'custom-dialog-container',
+      data: {
+        edit: true,
+        project: project
+      },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      this.fetchWave(null);
+    });
   }
 
   view_Project(project: Project) {
-    this.view = true;
-    this.edit = true;
-    this.viewProject = true;
-    this.changeView.emit(false);
-    this.showCreate = true;
-    this.buttonFlag = true;
-    this.currentProject = project;
-    this.project = project;
-    // if (window.location.href.includes('projectlist')) {
-    //     this.router.navigate(["projectlist/" + project.id + "/" + true]);
-
-    // }
-    this.router.navigate(["./" + project.id + "/" + true], { relativeTo: this.route });
+    const dialogRef = this.confirmDialog.open(ProjectDetailComponent, {
+      maxHeight: "90vh",
+      width: "600px",
+      maxWidth: "90vw",
+      disableClose: false,
+      autoFocus: false,
+      panelClass: 'custom-dialog-container',
+      data: {
+        view: true,
+        project: project
+      },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      this.fetchWave(null);
+    });
   }
+  
 
-  createView() {
-    this.showCreate = true;
-    this.edit = false;
-    this.project = new Project();
-    this.changeView.emit(false);
-    this.getid();
-    this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
-    // this.view_Cluster = false;
-  }
+  // createView() {
+  //   const dialogRef = this.confirmDialog.open(ProjectDetailComponent, {
+  //     height: "80%",
+  //     width: "60%",
+  //     disableClose: false,
+  //     data: {
+  //       edit: false,
+  //     },
+  //   });
+  //   dialogRef.afterClosed().subscribe((result) => {
+  //     this.fetchWave(null);
+  //   });
+  // }
   check(tool) {
     if (this.project && this.project.name) {
       this.project.name = this.project.name.trim();
@@ -347,6 +375,9 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
           this.usm_portfolio_idArray = this.usm_portfolio_idArray.sort((a, b) =>
             a.portfolioName.toLowerCase() > b.portfolioName.toLowerCase() ? 1 : -1
           );
+          
+          // Update filter options with portfolio data
+          this.updatePortfolioFilterOptions();
         },
         (error) => this.messageService.error("Could not get the results", error)
       );
@@ -358,6 +389,27 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
     temparr.push(key)
    });
    return temparr;
+  }
+
+  // Add portfolio data to filter options
+  updatePortfolioFilterOptions() {
+    // Create portfolio filter options
+    const portfolioOptions = this.usm_portfolio_idArray.map(portfolio => {
+      return {
+        key: 'portfolioId',
+        label: portfolio.portfolioName,
+        value: portfolio.id,
+        type: 'portfolio'
+      };
+    });
+
+    // Update the filter options with portfolio data
+    const updatedFilterOptions = [
+      ...this.filterOptions.filter(option => option.type !== 'portfolio'),
+      ...portfolioOptions
+    ];
+
+    this.filterOptions = updatedFilterOptions;
   }
 
   updateWave() {
@@ -525,7 +577,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
       this.view = true;
       this.viewProject = true;
       this.buttonFlag = true;
-      this.route.params.subscribe((res: any) => {
+      this.paramsSubscription = this.route.params.subscribe((res: any) => {
         if (res && res.projectid) {
           this.getProjects(res.projectid);
         }
@@ -537,7 +589,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
       this.edit = true;
       this.view = false;
       this.buttonFlag = false;
-      this.route.params.subscribe((res: any) => {
+      this.paramsSubscription = this.route.params.subscribe((res: any) => {
         //res.id
         if (res && res.projectid) {
           this.getProjects(res.projectid);
@@ -585,6 +637,29 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
 
   onFilterSelected(event: any) {
     this.selectedFilterValues = { ...this.selectedFilterValues, ...event };
+    
+    // Handle portfolio filter specifically
+    if (event.portfolios && event.portfolios.length > 0) {
+      // Find the matching portfolio from the usm_portfolio_idArray
+      const portfolioId = event.portfolios[0];
+      const selectedPortfolio = this.usm_portfolio_idArray.find(p => p.id.toString() === portfolioId);
+      
+      if (selectedPortfolio) {
+        this.filterProject = selectedPortfolio;
+      }
+    } else if (event.portfolios && event.portfolios.length === 0) {
+      // If portfolios were cleared, reset filterProject
+      this.filterProject = undefined;
+    }
+    
+    // Handle project name filter
+    if (event.projects && event.projects.length > 0) {
+      this.filterProjectName = event.projects[0];
+    } else if (event.projects && event.projects.length === 0) {
+      // If projects were cleared, reset filterProjectName
+      this.filterProjectName = undefined;
+    }
+    
     this.Search(null);
   }
 
@@ -634,7 +709,26 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
   lastRefreshedTime = new Date();
 
   ngOnDestroy(): void {
-
+    // Clean up all subscriptions
+    if (this.paramsSubscription) {
+      this.paramsSubscription.unsubscribe();
+    }
+    
+    // Unsubscribe from all subscriptions in the array
+    this.subscriptions.forEach(sub => {
+      if (sub) {
+        sub.unsubscribe();
+      }
+    });
+    
+    // Clean up busy subscriptions
+    if (this.busy) {
+      this.busy.unsubscribe();
+    }
+    
+    if (this.busy1) {
+      this.busy1.unsubscribe();
+    }
   }
 
   telemetryImpression() {
@@ -795,41 +889,54 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
     if (pageEvent == null || !pageEvent) {
       pageEvent = { page: 0, size: this.pageSize };
     }
-    let params;
-    if (
-      (this.filterProjectName == undefined || this.filterProjectName == "") &&
-      (this.filterProject == undefined || this.filterProject == "")
-    ) {
+    let params = {};
+    
+    // Check for portfolios in selectedFilterValues
+    if (this.selectedFilterValues.portfolios && this.selectedFilterValues.portfolios.length > 0) {
+      const portfolioId = this.selectedFilterValues.portfolios[0];
+      params['portfolioId'] = portfolioId;
+      this.filterFlag = true;
+    }
+    
+    // Check for project name filter
+    if (this.selectedFilterValues.projects && this.selectedFilterValues.projects.length > 0) {
+      params['name'] = this.selectedFilterValues.projects[0];
+      this.filterFlag = true;
+    }
+    
+    // If no filters are applied, reset everything
+    if (Object.keys(params).length === 0 && 
+        (this.filterProjectName == undefined || this.filterProjectName == "") &&
+        (this.filterProject == undefined || this.filterProject == "")) {
       this.Clear();
       this.filterFlag = false;
     }
-    //  else if (this.filterProjectName == "" || this.filterProject == "") {
-    //   this.Clear();
-    //   this.filterFlag = false;
-    // }
+    
+    // Use traditional filters if they exist
     else if (
       this.filterProjectName != undefined &&
-      (this.filterProject == undefined || this.filterProject == "")
+      (this.filterProject == undefined || this.filterProject == "") &&
+      !params['name']
     ) {
-      params = {
-        name: this.filterProjectName,
-      };
+      params['name'] = this.filterProjectName;
       this.filterFlag = true;
     } else if (
       (this.filterProjectName == undefined || this.filterProjectName == "") &&
-      this.filterProject != undefined
+      this.filterProject != undefined &&
+      !params['portfolioId']
     ) {
-      params = {
-        portfolioId: this.filterProject,
-      };
+      params['portfolioId'] = this.filterProject;
       this.filterFlag = true;
-    } else {
-      params = {
-        name: this.filterProjectName,
-        portfolioId: this.filterProject,
-      };
+    } else if (
+      this.filterProjectName != undefined && 
+      this.filterProject != undefined &&
+      !params['name'] && !params['portfolioId']
+    ) {
+      params['name'] = this.filterProjectName;
+      params['portfolioId'] = this.filterProject;
       this.filterFlag = true;
     }
+    
     if (this.role.roleadmin) {
       let portfolio: UsmPortfolio;
       try {
@@ -838,11 +945,16 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
         portfolio = null;
         console.error("JSON.parse error - ", e.message);
       }
-      params.portfolioId = portfolio;
+      params['portfolioId'] = portfolio;
     }
 
     if (this.filterFlag) {
-      this.projectService.search(params, pageEvent).subscribe((res) => {
+      // Convert the params object to a Project instance
+      let searchProject = new Project();
+      if (params['name']) searchProject.name = params['name'];
+      if (params['portfolioId']) searchProject.portfolioId = params['portfolioId'];
+      
+      this.projectService.search(searchProject, pageEvent).subscribe((res) => {
         this.projects = res.content;
         this.projectsCopy = this.projects;
         this.wavesLength = res.totalElements;
@@ -858,6 +970,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
     this.filterProjectName = undefined;
     this.projectSearched = undefined;
     this.filterFlag1 = false;
+    this.selectedFilterValues = {}; // Reset selected filter values
     this.myInputReference.nativeElement.value = null;
     this.fetchWave(null);
     this.filterFlag = false;
@@ -1021,6 +1134,43 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
 
   isValidLetter(i) {
     return ((i >= 65 && i <= 90) || (i >= 97 && i <= 122) || (i >= 48 && i <= 57) || [8, 13, 16, 17, 20, 95].indexOf(i) > -1)
+  }
+
+  createView() {
+    const dialogRef = this.confirmDialog.open(ProjectDetailComponent, {
+      maxHeight: "90vh",
+      width: "600px",
+      maxWidth: "90vw",
+      disableClose: false,
+      autoFocus: false,
+      panelClass: 'custom-dialog-container',
+      data: {
+        edit: false,
+      },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      this.fetchWave(null);
+    });
+  }
+
+  editView(project: Project) {
+    // Navigate to the project detail page for editing
+    this.router.navigate(["./projectlist/" + project.id + "/" + false], { relativeTo: this.route });
+  }
+  
+  viewDetails(project: Project) {
+    const dialogRef = this.confirmDialog.open(ProjectDetailComponent, {
+      height: "70%", 
+      width: "50%",
+      disableClose: false,
+      data: {
+        view: true,
+        project: project
+      },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      this.fetchWave(null);
+    });
   }
   theme = new Theme();
   response;

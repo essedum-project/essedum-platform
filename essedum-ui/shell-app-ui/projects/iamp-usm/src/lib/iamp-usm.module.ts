@@ -42,6 +42,7 @@ import { UserProjectRoleListComponent } from "./components/user-project-role-lis
 import { RoleroleService } from "./services/role-role.service";
 import { AipHeaderComponent } from "./components/aip-header/aip-header.component";
 import { ProjectListViewComponent } from "./components/project/project-list-view.component";
+import { ProjectDetailComponent } from "./components/project-detail/project-detail.component";
 import { MatTableModule } from "@angular/material/table";
 import { MatTreeModule } from "@angular/material/tree";
 import { RouterModule } from "@angular/router";
@@ -102,7 +103,9 @@ import { MatTabsModule } from "@angular/material/tabs";
         UserProjectRoleListComponent,
         AipHeaderComponent,
         ConfirmDeleteDialogComponent,
-        ConfirmProjectDeleteDialogComponent,        ProjectListViewComponent,
+        ConfirmProjectDeleteDialogComponent,
+        ProjectListViewComponent,
+        ProjectDetailComponent,
 
         ConfirmRevokeDialogComponent,
         ConfirmRegenerateDialogComponent,
@@ -123,7 +126,7 @@ import { MatTabsModule } from "@angular/material/tabs";
         DatePipe,
         encKey,
     ],
-    exports: [IampUsmComponent, SecretsComponent, RoleListComponent, RoleDetailComponent, RoleRoleComponent, UserProjectRoleListComponent],
+    exports: [IampUsmComponent, SecretsComponent, RoleListComponent, RoleDetailComponent, RoleRoleComponent, UserProjectRoleListComponent, ProjectDetailComponent],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
 export class IampUsmModule { }

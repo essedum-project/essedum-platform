@@ -129,6 +129,39 @@
             </mat-chip-set>
           </div>
         </div>
+
+        <!-- Portfolio Filter -->
+        <div class="filter-group" *ngIf="portfolioOptions.length > 0">
+          <div class="filter-control">
+            <mat-form-field appearance="fill" class="w-100">
+              <label>Portfolio</label>
+              <mat-select id="portfolio-select"
+                data-select-type="portfolio-type" (selectionChange)="portfolioSelected($event)"
+                aria-labelledby="portfolio-label" placeholder="All">
+                <mat-option *ngIf="selectedPortfolioList?.length > 0" value="" (click)="clearAllFilters('portfolio')">
+                  All
+                </mat-option>
+                <ng-container *ngFor="let option of portfolioOptions">
+                  <mat-option *ngIf="!selectedPortfolioList.includes(option.value)" [value]="option.value">
+                    {{ option.label }}
+                  </mat-option>
+                </ng-container>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="selected-items" *ngIf="selectedPortfolioList?.length > 0">
+            <mat-chip-set id="portfolio-chips-set"
+              aria-label="Selected portfolios">
+              <mat-chip data-chip-type="portfolio"
+                *ngFor="let portfolio of selectedPortfolioList; let i = index" removable="true"
+                (removed)="removePortfolio(portfolio)">
+                {{ portfolio }}
+                <mat-icon data-icon-type="chip-remove-portfolio" matChipRemove>close</mat-icon>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -50,11 +50,13 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
   selectedRoleList: string[] = [];
   selectedProjectList: string[] = [];
   selectedDescriptionList: string[] = [];
+  selectedPortfolioList: string[] = [];
   
   // Filter properties
   roleOptions: any[] = [];
   projectOptions: any[] = [];
   descriptionOptions: any[] = [];
+  portfolioOptions: any[] = [];
   
   constructor() {}
 
@@ -77,6 +79,10 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
       this.roleOptions = this.filterOptions.filter(option => option.type === 'role');
       this.projectOptions = this.filterOptions.filter(option => option.type === 'project');
       this.descriptionOptions = this.filterOptions.filter(option => option.type === 'description');
+      this.portfolioOptions = this.filterOptions.filter(option => option.type === 'portfolio');
+      
+      // Log for debugging
+      console.log('Portfolio options:', this.portfolioOptions);
     }
     this.updateSelectedFilters();
   }
@@ -86,6 +92,7 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
       this.selectedRoleList = this.selectedFilterValues.roles || [];
       this.selectedProjectList = this.selectedFilterValues.projects || [];
       this.selectedDescriptionList = this.selectedFilterValues.descriptions || [];
+      this.selectedPortfolioList = this.selectedFilterValues.portfolios || [];
     }
   }
 
@@ -149,6 +156,14 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
     }
   }
 
+  portfolioSelected(event: any): void {
+    const selectedValue = event.value;
+    if (selectedValue && !this.selectedPortfolioList.includes(selectedValue)) {
+      this.selectedPortfolioList.push(selectedValue);
+      this.emitFilterChange();
+    }
+  }
+
   removeRole(role: string): void {
     this.selectedRoleList = this.selectedRoleList.filter(r => r !== role);
     this.emitFilterChange();
@@ -164,6 +179,11 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
     this.emitFilterChange();
   }
 
+  removePortfolio(portfolio: string): void {
+    this.selectedPortfolioList = this.selectedPortfolioList.filter(p => p !== portfolio);
+    this.emitFilterChange();
+  }
+
   clearAllFilters(filterType: string): void {
     switch (filterType) {
       case 'role':
@@ -175,10 +195,14 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
       case 'description':
         this.selectedDescriptionList = [];
         break;
+      case 'portfolio':
+        this.selectedPortfolioList = [];
+        break;
       default:
         this.selectedRoleList = [];
         this.selectedProjectList = [];
         this.selectedDescriptionList = [];
+        this.selectedPortfolioList = [];
         break;
     }
     this.emitFilterChange();
@@ -188,7 +212,8 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
     this.filterSelected.emit({
       roles: this.selectedRoleList,
       projects: this.selectedProjectList,
-      descriptions: this.selectedDescriptionList
+      descriptions: this.selectedDescriptionList,
+      portfolios: this.selectedPortfolioList
     });
   }
 }
