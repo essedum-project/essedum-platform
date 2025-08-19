@@ -35,6 +35,7 @@ interface FilterItem {
 // Enum for service types
 enum ServiceType {
   PORTFOLIO = 'Portfolio',
+  ROLEPERMISSION = 'RolePermission',
 }
 
 // Enum for filter types
@@ -141,6 +142,12 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
   selectedPortfolioNameList:string[]=[];
   portfolioDescription:string[]=[];
   portfolioName:string[]=[];
+  modulepermissionarrayFilter: { id: number; module: string; permission: string }[] = [];
+  roleArray: { id: number; name: string; description: string; projectId: any; }[];
+  rolePermission: { role: any; permission: any } = { role: null, permission: null };
+  showRoleError: boolean = false;
+  view: boolean = false;
+  
 
   constructor(
     private router: Router,
@@ -239,6 +246,8 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
 
     switch (this.servicev1) {   
       case ServiceType.PORTFOLIO:
+      case ServiceType.ROLEPERMISSION:
+        this.initializeMockData();
       
         break;
       default:        
@@ -468,7 +477,7 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
   /**
    * Creates a tag event DTO
    */  geteventtagsdto(): TagEventDTO {
-    return new TagEventDTO(
+    const dto = new TagEventDTO(
       this.selectedTagList,
       this.selectedAdapterType,
       this.selectedAdapterInstance,
@@ -482,6 +491,14 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
       this.searchedName ? [this.searchedName] : [],
       this.filterUsmPortfolio ? [this.filterUsmPortfolio] : []
     );
+    
+    // Add role permission filters
+    if (this.servicev1 === ServiceType.ROLEPERMISSION) {
+      dto['roleFilter'] = this.rolePermission.role;
+      dto['permissionFilter'] = this.rolePermission.permission;
+    }
+    
+    return dto;
   }
 
   /**
@@ -499,17 +516,35 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
   }
   /**
    * Applies the current filter values and emits filter change event
-   */
-  applyFilters(): void {
-    // Set portfolio filters from input values
-    this.portfolioName = this.searchedName ? [this.searchedName] : [];
-    this.portfolioDescription = this.filterUsmPortfolio ? [this.filterUsmPortfolio] : [];
-    
-    console.log('AipFilterComponent: Applying filters', {
-      portfolioName: this.portfolioName,
-      portfolioDescription: this.portfolioDescription,
-      selectedAdapterType: this.selectedAdapterType
-    });
+   */  applyFilters(): void {
+    switch (this.servicev1) {
+      case ServiceType.PORTFOLIO:
+        // Set portfolio filters from input values
+        this.portfolioName = this.searchedName ? [this.searchedName] : [];
+        this.portfolioDescription = this.filterUsmPortfolio ? [this.filterUsmPortfolio] : [];
+        
+        console.log('AipFilterComponent: Applying portfolio filters', {
+          portfolioName: this.portfolioName,
+          portfolioDescription: this.portfolioDescription
+        });
+        break;
+        
+      case ServiceType.ROLEPERMISSION:
+        // Handle role permission filters
+        console.log('AipFilterComponent: Applying role permission filters', {
+          role: this.rolePermission.role ? this.rolePermission.role.name : 'All',
+          permission: this.rolePermission.permission ? 
+            `${this.rolePermission.permission.module}-${this.rolePermission.permission.permission}` : 'All'
+        });
+        break;
+        
+      default:
+        // Handle other filter types
+        console.log('AipFilterComponent: Applying adapter filters', {
+          selectedAdapterType: this.selectedAdapterType
+        });
+        break;
+    }
     
     // Emit the filter changes
     this.emitSelectionChanges();
@@ -521,8 +556,7 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
 
   /**
    * Checks if there are active filters
-   */  
-  hasActiveFilters(): boolean {
+   */    hasActiveFilters(): boolean {
     if (this.servicev1 === ServiceType.PORTFOLIO) {
       return (
         this.selectedAdapterType?.length > 0 ||
@@ -532,6 +566,13 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
         Boolean(this.filterUsmPortfolio)
       );
     }
+    
+    if (this.servicev1 === ServiceType.ROLEPERMISSION) {
+      return (
+        Boolean(this.rolePermission.role) || 
+        Boolean(this.rolePermission.permission)
+      );
+    }
 
     // Default case for other service types
     return (
@@ -539,12 +580,11 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
       this.selectedAdapterInstance?.length > 0 ||
       this.selectedTagList?.length > 0
     );
-  } 
+  }
 
   /**
    * Gets a summary of active filters for display
-   */
-  getActiveFiltersSummary(): string {
+   */  getActiveFiltersSummary(): string {
     if (this.servicev1 === ServiceType.PORTFOLIO) {
       const filterSummary = [];
       
@@ -561,6 +601,22 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
       // Add other filters if present
       if (this.selectedAdapterType?.length > 0) {
         filterSummary.push(`Type: ${this.selectedAdapterType.join(', ')}`);
+      }
+      
+      return filterSummary.join(' | ');
+    }
+    
+    if (this.servicev1 === ServiceType.ROLEPERMISSION) {
+      const filterSummary = [];
+      
+      // Add role filter if present
+      if (this.rolePermission.role) {
+        filterSummary.push(`Role: ${this.rolePermission.role.name}`);
+      }
+      
+      // Add permission filter if present
+      if (this.rolePermission.permission) {
+        filterSummary.push(`Permission: ${this.rolePermission.permission.module}-${this.rolePermission.permission.permission}`);
       }
       
       return filterSummary.join(' | ');
@@ -587,5 +643,65 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
       this.selectedAdapterType.splice(index, 1);
       this.applyFilters();
     }
+  }
+
+  initializeMockData() {
+    // Mock data for roles
+    this.roleArray = [
+      { id: 1, name: 'Admin', description: 'Administrator role', projectId: null },
+      { id: 2, name: 'User', description: 'Standard user role', projectId: null },
+      { id: 3, name: 'Manager', description: 'Manager role', projectId: null },
+      { id: 4, name: 'Viewer', description: 'Read-only role', projectId: null },
+      { id: 5, name: 'Developer', description: 'Developer role', projectId: null }
+    ];
+
+    // Mock data for module permissions
+    this.modulepermissionarrayFilter = [
+      { id: 1, module: 'usm', permission: 'create' },
+      { id: 2, module: 'usm', permission: 'view' },
+      { id: 3, module: 'usm', permission: 'edit' },
+      { id: 4, module: 'usm', permission: 'delete' },
+      { id: 5, module: 'dbs', permission: 'view' },
+      { id: 6, module: 'dbs', permission: 'edit' },
+      { id: 7, module: 'portfolio', permission: 'create' },
+      { id: 8, module: 'portfolio', permission: 'view' },
+      { id: 9, module: 'portfolio', permission: 'edit' },
+      { id: 10, module: 'portfolio', permission: 'delete' }
+    ];
+
+    // Initialize the filtered array with all permissions
+    this.modulepermissionarrayFilter = [...this.modulepermissionarrayFilter];
+  }
+  // Method to handle role selection change
+  roleSelectionChanged(event: any) {
+    console.log('Role selection changed:', event);
+    
+    // Handle the "All" selection case
+    if (event && event.value === undefined) {
+      // If "All" was selected for roles
+      if (event.source.placeholder === "Select Role") {
+        this.rolePermission.role = null;
+      }
+      // If "All" was selected for permissions
+      else if (event.source.placeholder === "Select Permission") {
+        this.rolePermission.permission = null;
+      }
+    }
+    
+    // Apply filters only when a specific value is selected or explicitly set to "All"
+    this.applyFilters();
+  }
+  // Method to compare objects for mat-select
+  compareObjects(o1: any, o2: any): boolean {
+    // Handle null or undefined values
+    if (!o1 || !o2) {
+      return o1 === o2;
+    }
+    // Handle "All" option case
+    if (o1 === "All" || o2 === "All") {
+      return o1 === o2;
+    }
+    // Compare by id for objects
+    return o1.id === o2.id;
   }
 }

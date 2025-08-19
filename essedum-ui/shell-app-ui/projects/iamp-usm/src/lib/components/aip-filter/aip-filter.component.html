@@ -59,5 +59,41 @@
         </div>
       </div>  
     </div>
+        <div *ngIf="(servicev1 === ServiceType.ROLEPERMISSION)">
+      <div class="filter-options" >
+        <div class="filter-row" style="display:flex">
+          <div class="filter-field" >
+            <mat-form-field appearance="fill" style="width: 100%;"
+              floatLabel="always">
+              <mat-label>Role Name</mat-label> <mat-select
+                [(ngModel)]="rolePermission.role" [compareWith]="compareObjects" placeholder="Select Role"
+                [disabled]="view" (blur)="showRoleError = !rolePermission.role"
+                (selectionChange)="roleSelectionChanged($event)">
+                <mat-option>All</mat-option>
+                <mat-option *ngFor="let option of roleArray" [value]="option">
+                  {{ option.name }}
+                </mat-option>
+              </mat-select>
+           
+            </mat-form-field>
+
+          </div>          <div class="filter-field" >
+    <mat-form-field appearance="fill" style="width: 100%;"
+              floatLabel="always">
+              <mat-label>Module-Permission</mat-label> <mat-select
+                [(ngModel)]="rolePermission.permission" [compareWith]="compareObjects" placeholder="Select Permission"
+                [disabled]="view"
+                (selectionChange)="roleSelectionChanged($event)">
+                <mat-option>All</mat-option>
+                <mat-option *ngFor="let option of modulepermissionarrayFilter" [value]="option">
+                  {{ option.module }}-{{ option.permission }}
+                </mat-option>
+              </mat-select>           
+            </mat-form-field>          </div>
+          
+      
+        </div>
+      </div>  
+    </div>
   </div>
 </div>

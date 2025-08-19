@@ -1,28 +1,28 @@
 <div class="lfx-u-pad-t-8">
   <div class="lfx-l-level2-middle-col">
-
     <!--header part-->
     <div class="d-flex justify-content-between align-items-center fixed-header">
       <div class="align-items-center d-flex" *ngIf="!edit && !view">
-        <h2 class="header-title">{{createRolePermission}}</h2>
+        <h2 class="header-title">{{ createRolePermission }}</h2>
       </div>
       <div class="align-items-center d-flex" *ngIf="edit && !view">
-        <h2 class="header-title">{{editRolePermission}}</h2>
+        <h2 class="header-title">{{ editRolePermission }}</h2>
       </div>
       <div class="align-items-center d-flex" *ngIf="view">
-        <h2 class="header-title">{{viewRolePermission}}</h2>
+        <h2 class="header-title">{{ viewRolePermission }}</h2>
       </div>
       <div class="d-flex justify-content-end">
         <div *ngIf="view || edit">
-          <button type="button" class="edit-view-btn" (click)="editViewChanged('edit')" *ngIf="view"  matTooltip="Edit">
-              <mat-icon class="icon-color">edit</mat-icon>
+          <button type="button" class="edit-view-btn" (click)="editViewChanged('edit')" *ngIf="view" matTooltip="Edit">
+            <mat-icon class="icon-color">edit</mat-icon>
           </button>
-          <button type="button" class="edit-view-btn" (click)="editViewChanged('view')" *ngIf="edit && !view"  matTooltip="View">
+          <button type="button" class="edit-view-btn" (click)="editViewChanged('view')" *ngIf="edit && !view"
+            matTooltip="View">
             <mat-icon class="icon-color">remove_red_eye</mat-icon>
           </button>
         </div>
-        <button type="button" class="edit-view-btn" aria-label="Close"  matTooltip="Close" (click)="closeDialog()">
-           <mat-icon class="icon-color">close</mat-icon>
+        <button type="button" class="edit-view-btn" aria-label="Close" matTooltip="Close" (click)="closeDialog()">
+          <mat-icon class="icon-color">close</mat-icon>
         </button>
       </div>
     </div>
@@ -32,47 +32,58 @@
         <!--add, edit, view fields-->
         <div class="row">
           <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-            <div>
-              <mat-form-field appearance="fill" style="width: 90%" floatLabel="always">
-                <mat-label class="mat-style-label">{{role}}</mat-label>
-                <input   matInput class="ml-4"
-                  [disabled]="view" placeholder="Enter Portfolio Name..."
-                  [(ngModel)]="usmPortfolio.portfolioName" maxlength="255" required />
-                <mat-error class="ml-4" *ngIf="!usmPortfolio.portfolioName">This field is required</mat-error>
-                <mat-hint class="ml-4" *ngIf="!edit">
-                  Note: Alpha numeric characters and _ allowed
-                </mat-hint>
-        
-              </mat-form-field>
-            </div>
-          </div>
-          <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
-            <mat-form-field appearance="fill" style="width: 90%" floatLabel="always">
-              <mat-label class="mat-style-label">Portfolio Description</mat-label>
-              <input class="ml-4" matInput [disabled]="view" maxlength="255"
-                placeholder="Enter Portfolio Description..." [(ngModel)]="usmPortfolio.description"
-                />
-
-              <mat-hint class="ml-4" *ngIf="!view">
-                Note: Alpha numeric and special characters -_. allowed
+             <mat-form-field appearance="fill" style="width: 100%;"
+              floatLabel="always">
+              <mat-label>{{ role }} <span class="text-danger">*</span></mat-label> <mat-select
+                [(ngModel)]="rolePermission.role" [compareWith]="compareObjects" placeholder="Select Role"
+                [disabled]="view" (blur)="showRoleError = !rolePermission.role"
+                (selectionChange)="roleSelectionChanged($event)">
+                <mat-option *ngFor="let option of roleArray" [value]="option">
+                  {{ option.name }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="showRoleError">
+                Role is required
+              </mat-error>
+              <mat-hint class="hint">
+                Note* Role specific to projectAdmin edit,create and delete access is enabled only in subpages of
+                USM.
               </mat-hint>
-           
+            </mat-form-field>
+
+          </div>
+          <div class="col-lg-12 col-md-12 lfx-u-mar-b-16"> <mat-form-field appearance="fill" style="width: 100%;"
+              floatLabel="always">
+              <mat-label>{{ modulePermission }} <span class="text-danger">*</span></mat-label> <mat-select
+                [(ngModel)]="rolePermission.permission" multiple [compareWith]="compareObjects1"
+                placeholder="Select Module-Permission" [disabled]="view" (blur)="permissionCheck($event)"
+                (selectionChange)="permissionCheck($event)">
+                <mat-option>
+                  <ngx-mat-select-search placeholderLabel="Search module-permission..."
+                    noEntriesFoundLabel="No matching modules or permissions found" (keyup)="onKey($event.target.value)">
+                  </ngx-mat-select-search>
+                </mat-option>
+                <mat-option *ngFor="let item of modulepermissionarrayFilter" [value]="item">
+                  {{ item.module }}-{{ item.permission }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="showPermissionError">
+                Module-Permission is required
+              </mat-error>
             </mat-form-field>
           </div>
         </div>
       </div>
-
-      <hr />
-      <!--footer part-->
-      <div class="d-flex lfx-u-mar-b-16 ml-24" *ngIf="!view">
-        <button *ngIf="!edit" mat-raised-button [disabled]="false" (click)="onSave()" class="save-btn">
-          {{saveRolePermission}}
+      <hr /> <!--footer part-->
+      <div class="d-flex lfx-u-mar-b-16 ml-24" *ngIf="!view"> <button *ngIf="!edit" mat-raised-button
+          [disabled]="!validateForm()" (click)="onSave()" class="save-btn">
+          {{ saveRolePermission }}
         </button>
-        <button *ngIf="edit" mat-raised-button [disabled]="false" (click)="onSave()" class="save-btn">
-           {{updateRolePermission}}
+        <button *ngIf="edit" mat-raised-button [disabled]="!validateForm()" (click)="onSave()" class="save-btn">
+          {{ updateRolePermission }}
         </button>
-        <button class="lfx-u-pad-r-16" mat-raised-button [disabled]="false" (click)="clearWave()" class="cancel-btn">
-          {{clear}}
+        <button class="lfx-u-pad-r-16" mat-raised-button (click)="clearWave()" class="cancel-btn">
+          {{ clear }}
         </button>
       </div>
     </mat-card>

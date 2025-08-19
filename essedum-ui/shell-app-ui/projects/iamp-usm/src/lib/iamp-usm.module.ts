@@ -35,6 +35,7 @@ import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
 import { MatCardModule } from "@angular/material/card";
 import { MatTooltipModule } from "@angular/material/tooltip";
+import { MatIconModule } from "@angular/material/icon";
 import { AipPaginationComponent } from './components/aip-pagination/aip-pagination.component';
 import { PortfolioListViewComponent } from "./components/portfolio/portfolio-list-view.component";
 import { PortfolioAddComponent } from "./components/portfolio/portfolio-add/portfolio-add.component";
@@ -62,12 +63,12 @@ import { RolePermissionAddComponent } from "./components/usm-role-permission/rol
         MatTableModule,
         MatButtonModule,       
         ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
+        MatFormFieldModule,        MatInputModule,
         MatSelectModule,    
         MatCardModule,     
         MatTooltipModule,
-        AipFilterComponent,     
+        MatIconModule,
+        AipFilterComponent,
     ],    declarations: [
         IampUsmComponent,
         SecretsComponent,
