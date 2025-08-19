@@ -119,13 +119,13 @@
   .mat-mdc-form-field-flex {
     height: 21px !important;
     background-color: #fafafa !important;
-    padding: 0px !important;
+    padding: 0 4px !important;
   }
 
   .mat-mdc-text-field-wrapper {
     height: 21px !important;
     background-color: #fafafa !important;
-    padding: 12px 0 !important;
+    padding: 6px 0 !important;
   }
 
   .mat-mdc-form-field-infix {
@@ -143,6 +143,7 @@
 }
 
 ::ng-deep .mat-mdc-form-field {
+
   .mat-mdc-form-field-hint-wrapper,
   .mat-mdc-form-field-error-wrapper {
     position: absolute !important;
@@ -183,20 +184,20 @@
   font-weight: 400 !important;
   font-family: "Roboto", "Segoe UI", sans-serif !important;
   font-style: normal !important;
-  line-height: 24px !important  ;
+  line-height: 24px !important;
   color: #000000 !important;
   opacity: 0.7 !important;
 }
 
 ::ng-deep .mat-mdc-form-field {
-  height: 40px !important;
+  height: 35px !important;
 }
 
 // Focus styles for inputs
 input:focus,
 .txtInput:focus {
   outline: none !important;
-  border-bottom: 1px solid #0094ff !important;
+  border-bottom: 2px solid #0094ff !important;
 }
 
 // Select dropdown
@@ -210,16 +211,17 @@ input:focus,
 }
 
 // Form field focus states
-::ng-deep
-  .mdc-text-field--filled:not(.mdc-text-field--disabled).mdc-text-field--focused
-  .mdc-floating-label {
+::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-floating-label {
   color: #0094ff !important;
 }
 
 // Dialog surface
 ::ng-deep .mat-mdc-dialog-surface {
-  border-radius: 16px !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 1.5px 4px rgba(0, 0, 0, 0.08) !important;
+  background: #ffffff 0% 0% no-repeat padding-box !important;
+  box-shadow: 0rem 0.2rem 0.4rem #00000029 !important;
+  border: 0.05rem solid #0000001f !important;
+  border-radius: 1.6rem !important;
+  opacity: 1 !important;
 }
 
 ::ng-deep .mat-mdc-tab-group {

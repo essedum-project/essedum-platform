@@ -79,14 +79,20 @@
                 more_vert
             </mat-icon>
             <mat-menu #menu="matMenu">
-                <button mat-menu-item *ngIf="editAuth" (click)="onEdit()">Edit</button>
+                <button mat-menu-item *ngIf="editAuth" (click)="onEdit()">
+                    <mat-icon class="aip-menu-icon">edit</mat-icon>
+                    Edit
+                </button>
                 <button mat-menu-item *ngIf="servicev1 === 'connections'" (click)="onViewDatasets(card.type)">
+                    <mat-icon class="aip-menu-icon">storage</mat-icon>
                     View Datasets
                 </button>
                 <button mat-menu-item *ngIf="deleteAuth" (click)="onDelete()">
+                    <mat-icon class="aip-menu-delete">delete</mat-icon>
                     Delete
                 </button>
                 <button mat-menu-item *ngIf="servicev1 === 'pipeline' && card.type == 'REMOTE'" (click)="jobConsole()">
+                    <mat-icon class="aip-menu-icon">terminal</mat-icon>
                     Job Console
                 </button>
             </mat-menu>

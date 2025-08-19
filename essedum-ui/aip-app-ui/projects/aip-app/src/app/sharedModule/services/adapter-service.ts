@@ -3,8 +3,8 @@ import { Inject, Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { encKey } from '../services/encKey';
-import { CustomSnackbarService } from '../sharedModule/services/custom-snackbar.service';
+import { encKey } from '../../services/encKey';
+import { AipSnackbarCustomService } from './aip-snackbar-custom.service';
 
 @Injectable()
 export class AdapterServices {
@@ -14,7 +14,7 @@ export class AdapterServices {
     @Inject('dataSets') private dataUrl: string,
     private matSnackbar: MatSnackBar,
     private encKey: encKey,
-    private customSnackbar: CustomSnackbarService
+    private customSnackbar: AipSnackbarCustomService
   ) {}
 
   private handleError(error: any) {
