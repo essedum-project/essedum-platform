@@ -5,27 +5,25 @@ import {
   ViewChild,
   ChangeDetectorRef,
 } from '@angular/core';
-import { AdapterServices } from '../sharedModule/services/adapter-service';
-import { OptionsDTO } from '../DTO/OptionsDTO';
+import { AdapterServices } from '../services/adapter-service';
+import { OptionsDTO } from '../../DTO/OptionsDTO';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
-import { ConfirmDeleteDialogComponent } from '../confirm-delete-dialog.component/confirm-delete-dialog.component';
+import { AipDeleteConfirmationComponent } from '../aip-delete-confirmation/aip-delete-confirmation.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { Services } from '../services/service';
-import { MLOpsSwaggerAPISpec } from '../DTO/mlopsapispec';
+import { Services } from '../../services/service';
+import { MLOpsSwaggerAPISpec } from '../../DTO/mlopsapispec';
 import { HttpParams } from '@angular/common/http';
 
 @Component({
-  selector: 'lib-swagger-custom',
-  templateUrl: './swagger-custom.component.html',
-  styleUrls: ['./swagger-custom.component.css'],
+  selector: 'app-aip-swagger-custom',
+  templateUrl: './aip-swagger-custom.component.html',
+  styleUrls: ['./aip-swagger-custom.component.scss']
 })
-export class SwaggerCustomComponent implements OnInit {
+export class AipSwaggerCustomComponent implements OnInit {
   @Input() adapterName: any;
   @Input() isAdapter: any;
   @Input() instanceName: any;
-  @Input() endpointId: any;
-  @Input() forEndpoint: any;
   @Input() restProvider: any;
   @Input() endpointName: any;
   hasSwaggerData: Boolean = false;
@@ -86,7 +84,7 @@ export class SwaggerCustomComponent implements OnInit {
     private clipboard: Clipboard,
     private changeDetector: ChangeDetectorRef,
     private service: Services
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.authentications();
@@ -99,39 +97,6 @@ export class SwaggerCustomComponent implements OnInit {
     if (this.isAdapter && this.isAdapter === 'no') {
       this.isInstance = true;
       this.getAdapterInstance();
-    }
-    if (this.isAdapter && this.isAdapter === 'connection') {
-      this.isEndpoint = true;
-      this.setSwaggerForEndpointByConnectionId();
-    }
-    if (this.forEndpoint && this.forEndpoint === 'yes') {
-      this.getDatasourceData().subscribe((res) => {
-        if (res && res.length > 0) {
-          this.restProviderData = res[0];
-          this.changeDetector.detectChanges();
-        } else {
-          this.restProviderData = null;
-          this.service.messageService('Please choose a Rest Provider');
-          return;
-        }
-        this.initializeSwaggerView();
-      });
-      /**this.swaggerView = !this.swaggerView;
-      if(!this.isToggle){
-        this.editorOptions.modes = ['text', 'tree', 'view'];
-        this.editorOptions.statusBar = true;
-        this.editorOptions.enableSort = false;
-        this.editorOptions.enableTransform = false;
-        this.editorOptions.mode='text';
-      }else if(this.isToggle){
-        this.editorOptions.enableSort = true;
-        this.editorOptions.enableTransform = true;
-        this.editorOptions.mode='tree';
-      }
-      // this.editorOptions.onChange = () => {
-      //   this.apispecTemplate = this.formJsonEditor.get();
-      // }
-      // this.setSwaggerForEndpointByConnectionId();**/
     }
   }
 
@@ -203,9 +168,8 @@ export class SwaggerCustomComponent implements OnInit {
     const connectionDetails = JSON.parse(restConnection.connectionDetails);
     const url = connectionDetails.Url;
     const parsedUrl = new URL(url);
-    const baseUrl = `${parsedUrl.protocol}//${parsedUrl.hostname}${
-      parsedUrl.port ? `:${parsedUrl.port}` : ''
-    }`;
+    const baseUrl = `${parsedUrl.protocol}//${parsedUrl.hostname}${parsedUrl.port ? `:${parsedUrl.port}` : ''
+      }`;
     const path = parsedUrl.pathname;
     const finalBody = this.generateFinalBody(connectionDetails);
     this.serverUrl = baseUrl;
@@ -229,58 +193,58 @@ export class SwaggerCustomComponent implements OnInit {
       paths: {
         [path]: {
           [connectionDetails.testDataset.attributes.RequestMethod.toLowerCase()]:
-            {
-              description: '',
-              parameters: [],
-              requestBody: {
-                description: 'Request body',
-                required: true,
+          {
+            description: '',
+            parameters: [],
+            requestBody: {
+              description: 'Request body',
+              required: true,
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {},
+                  },
+                },
+              },
+              value: finalBody,
+            },
+            responses: {
+              '200': {
+                description: 'Successful inference',
                 content: {
                   'application/json': {
                     schema: {
                       type: 'object',
-                      properties: {},
-                    },
-                  },
-                },
-                value: finalBody,
-              },
-              responses: {
-                '200': {
-                  description: 'Successful inference',
-                  content: {
-                    'application/json': {
-                      schema: {
-                        type: 'object',
-                        properties: {
-                          response: {
-                            type: 'string',
-                          },
+                      properties: {
+                        response: {
+                          type: 'string',
                         },
                       },
                     },
                   },
                 },
-                '400': {
-                  description: 'Invalid request parameters',
-                  content: {},
-                },
-                '500': {
-                  description: 'Server error',
-                  content: {},
-                },
-                default: {
-                  description: 'Unexpected error',
-                  content: {
-                    'application/json': {
-                      schema: {
-                        type: 'string',
-                      },
+              },
+              '400': {
+                description: 'Invalid request parameters',
+                content: {},
+              },
+              '500': {
+                description: 'Server error',
+                content: {},
+              },
+              default: {
+                description: 'Unexpected error',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'string',
                     },
                   },
                 },
               },
             },
+          },
         },
       },
     };
@@ -336,7 +300,7 @@ export class SwaggerCustomComponent implements OnInit {
       .replace('server_host_url', this.serverUrl);
     this.mlspecTemplate = this.mlspecTemplate.replaceAll(
       'endpoint__id',
-      this.endpointId
+      // this.endpointId
     );
     this.apispecTemplate = JSON.parse(this.mlspecTemplate);
     if (this.apispecTemplate.servers && this.apispecTemplate.servers[0]?.url)
@@ -531,7 +495,7 @@ export class SwaggerCustomComponent implements OnInit {
               respObj['status'] = resp;
               respObj['description'] =
                 this.apispecTemplate.paths[keys][key][value][resp][
-                  'description'
+                'description'
                 ];
               respObj['content'] =
                 this.apispecTemplate.paths[keys][key][value][resp]['content'];
@@ -639,10 +603,10 @@ export class SwaggerCustomComponent implements OnInit {
         if (
           this.adapterApispecTemplate.paths[spec.path] &&
           this.adapterApispecTemplate.paths[spec.path][
-            spec.requestType.toLowerCase()
+          spec.requestType.toLowerCase()
           ]
         ) {
-          const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
+          const dialogRef = this.dialog.open(AipDeleteConfirmationComponent);
           dialogRef.afterClosed().subscribe((result) => {
             if (result === 'delete') {
               let apispec = this.adapterApispecTemplate;
@@ -666,15 +630,15 @@ export class SwaggerCustomComponent implements OnInit {
         if (
           this.adapterApispecTemplate.paths[spec.path] &&
           this.adapterApispecTemplate.paths[spec.path][
-            spec.requestType.toLowerCase()
+          spec.requestType.toLowerCase()
           ]
         ) {
           let method =
             this.adapterApispecTemplate.paths[spec.path][
-              spec.requestType.toLowerCase()
+            spec.requestType.toLowerCase()
             ];
           if (method.dataset) {
-            const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
+            const dialogRef = this.dialog.open(AipDeleteConfirmationComponent);
             dialogRef.afterClosed().subscribe((result) => {
               if (result === 'delete') {
                 this.adapterServices.deleteDatasets(method.dataset).subscribe(
@@ -741,14 +705,14 @@ export class SwaggerCustomComponent implements OnInit {
           if (!this.isInstance)
             params[param.name] = param.value
               ? param.value
-                  .replace('{datasource}', this.adapter)
-                  .replace('{org}', sessionStorage.getItem('organization'))
+                .replace('{datasource}', this.adapter)
+                .replace('{org}', sessionStorage.getItem('organization'))
               : '';
           else {
             params[param.name] = param.value
               ? param.value
-                  .replace('{datasource}', this.instanceName)
-                  .replace('{org}', sessionStorage.getItem('organization'))
+                .replace('{datasource}', this.instanceName)
+                .replace('{org}', sessionStorage.getItem('organization'))
               : '';
           }
           if (!param.value) param.value = '';
@@ -918,4 +882,5 @@ export class SwaggerCustomComponent implements OnInit {
     }
     this.cURL = cUrlReq;
   }
+
 }

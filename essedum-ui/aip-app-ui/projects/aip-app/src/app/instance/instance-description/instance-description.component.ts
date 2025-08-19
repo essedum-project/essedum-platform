@@ -1,12 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { Output, EventEmitter } from '@angular/core';
-import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.component/confirm-delete-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { AdapterServices } from '../../adapter/adapter-service';
+import { AdapterServices } from '../../sharedModule/services/adapter-service';
 import { Services } from '../../services/service';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { OptionsDTO } from '../../DTO/OptionsDTO';
 import { Location } from '@angular/common';
+import { AipDeleteConfirmationComponent } from '../../sharedModule/aip-delete-confirmation/aip-delete-confirmation.component';
 
 @Component({
   selector: 'app-instance-description',
@@ -14,6 +14,7 @@ import { Location } from '@angular/common';
   styleUrls: ['./instance-description.component.scss'],
 })
 export class InstanceDescriptionComponent {
+  readonly CARD_TITLE = 'Instance';
   @Input() card: any;
   @Input() cardToggled: boolean = false;
 
@@ -96,11 +97,14 @@ export class InstanceDescriptionComponent {
   }
 
   getShortName(fullName: string) {
-    return fullName.charAt(0).toUpperCase();
+    return fullName?.charAt(0)?.toUpperCase();
   }
 
   deleteInstance(instanceName: string) {
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
+    const dialogRef = this.dialog.open(AipDeleteConfirmationComponent, {
+      width: '360px',
+      panelClass: 'standard-dialog',
+    });
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'delete') {
         this.adapterServices.deleteInstance(instanceName).subscribe(

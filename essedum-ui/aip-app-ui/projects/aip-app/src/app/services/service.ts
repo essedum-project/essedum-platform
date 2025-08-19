@@ -10,7 +10,7 @@ import { Dataset } from '../dataset/datasets';
 import { StreamingServices } from '../streaming-services/streaming-service';
 import { DashConstant } from '../DTO/dash-constant';
 import { App } from '../apps/app';
-import { CustomSnackbarService } from '../sharedModule/services/custom-snackbar.service';
+import { AipSnackbarCustomService } from '../sharedModule/services/aip-snackbar-custom.service';
 
 @Injectable()
 export class Services {
@@ -25,8 +25,9 @@ export class Services {
     @Inject('dataSets') private dataUrl: string,
     @Inject('envi') private baseUrl: string,
     private encKey: encKey,
-    private customSnackbar: CustomSnackbarService
-  ) { }
+    private customSnackbar: AipSnackbarCustomService
+  ) {}
+
 
   getMlTags(): Observable<any> {
     return this.https

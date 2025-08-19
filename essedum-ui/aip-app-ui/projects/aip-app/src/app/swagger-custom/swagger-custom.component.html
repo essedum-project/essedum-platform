@@ -1,13 +1,13 @@
 <div>
     <div *ngIf="!restProvider" style="display: flex;margin-left:60%">
         <div class="lfx-u-pad-r-16" style="align-self: center;"
-            [ngStyle]="{'color': (!swaggerView) ? 'grey' : '#0094ff'}">Swagger View</div>
+            [ngStyle]="{'color': (!swaggerView) ? 'grey' : '#0094ff'}">SWAGGER VIEW</div>
         <mat-slider [disabled]="disabled" class="slider-toggle-width" min="0" max="1" step="1">
             <input matSliderThumb [value]="checked ? 1 : 0" (input)="toggle($event.target.value == 1)"
                 aria-label="Toggle" />
         </mat-slider>
         <div class="lfx-u-pad-l-16" style="align-self: center;"
-            [ngStyle]="{'color': (swaggerView) ? 'grey' : '#0094ff'}">JSON View
+            [ngStyle]="{'color': (swaggerView) ? 'grey' : '#0094ff'}">JSON VIEW
         </div>
     </div>
     <div *ngIf="restProvider && restProviderData" style="display: flex;">

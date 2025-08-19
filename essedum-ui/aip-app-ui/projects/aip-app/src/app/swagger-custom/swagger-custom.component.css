@@ -16,6 +16,7 @@
   box-shadow: 0px 2px 4px #00000029;
   border-radius: 0px 0px 8px 8px;
   opacity: 1;
+  padding: 4px 16px;
 }
 
 .spec-header.title {
@@ -31,10 +32,7 @@
   opacity: 1;
 }
 
-::ng-deep
-  .le-c-form-field.le-c-form-field--select-withbg
-  .mat-mdc-select
-  .mat-mdc-select-value {
+::ng-deep .le-c-form-field.le-c-form-field--select-withbg .mat-mdc-select .mat-mdc-select-value {
   max-width: none;
 }
 
@@ -48,7 +46,7 @@
   align-items: center;
 }
 
-.example-headers-align .mat-mdc-form-field + .mat-mdc-form-field {
+.example-headers-align .mat-mdc-form-field+.mat-mdc-form-field {
   margin-left: 8px;
 }
 
@@ -273,9 +271,11 @@ pre {
   white-space: -o-pre-wrap;
   word-wrap: break-word;
 }
+
 ::ng-deep .jsoneditor {
   border: thin solid #0094ff;
 }
+
 ::ng-deep .jsoneditor-menu {
   background: #0094ff;
 }
@@ -296,7 +296,8 @@ li {
 }
 
 ::ng-deep .mat-slide-toggle-bar .mat-slide-toggle-thumb {
-  background-image: none !important; /* Remove check icon */
+  background-image: none !important;
+  /* Remove check icon */
 }
 
 .lfx-u-pad-l-16 {

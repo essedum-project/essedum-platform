@@ -11,7 +11,7 @@ import { Services } from '../../services/service';
 import { TagsService } from '../../services/tags.service';
 import { HttpParams } from '@angular/common/http';
 import { TagEventDTO } from '../../DTO/tagEventDTO.model';
-import { AdapterServices } from '../../adapter/adapter-service';
+import { AdapterServices } from '../services/adapter-service';
 import { DatasetServices } from '../../dataset/dataset-service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SemanticService } from '../../services/semantic.services';

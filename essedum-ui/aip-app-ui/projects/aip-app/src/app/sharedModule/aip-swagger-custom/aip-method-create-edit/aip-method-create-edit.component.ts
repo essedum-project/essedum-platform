@@ -1,19 +1,19 @@
 import { Component, Input, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AdapterServices } from '../../sharedModule/services/adapter-service';
-import { OptionsDTO } from '../../DTO/OptionsDTO';
-import { Services } from '../../services/service';
+import { AdapterServices } from '../../services/adapter-service';
+import { OptionsDTO } from '../../../DTO/OptionsDTO';
+import { Services } from '../../../services/service';
 import { JsonEditorComponent, JsonEditorOptions } from 'ang-jsoneditor';
-import { SwaggerAPISpec } from '../../DTO/swaggerapispec';
-import { SwaggerCustomComponent } from '../../swagger-custom/swagger-custom.component';
+import { SwaggerAPISpec } from '../../../DTO/swaggerapispec';
+import { AipSwaggerCustomComponent } from '../aip-swagger-custom.component';
 import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-method-create-edit',
-  templateUrl: './method-create-edit.component.html',
-  styleUrls: ['./method-create-edit.component.scss'],
+  selector: 'app-aip-method-create-edit',
+  templateUrl: './aip-method-create-edit.component.html',
+  styleUrls: ['./aip-method-create-edit.component.scss']
 })
-export class MethodCreateEditComponent {
+export class AipMethodCreateEditComponent {
   tab: any = 'connectionTab';
   scriptType = ['Groovy', 'Python'];
   requestMethods = ['GET', 'POST', 'PUT', 'DELETE'];
@@ -40,13 +40,13 @@ export class MethodCreateEditComponent {
   connectionOptions: OptionsDTO[] = [];
   selectedConnection: any = { alias: '' };
   constructor(
-    private dialogRef: MatDialogRef<MethodCreateEditComponent>,
+    private dialogRef: MatDialogRef<AipMethodCreateEditComponent>,
     private router: Router,
     private route: ActivatedRoute,
     private adapterServices: AdapterServices,
     private service: Services,
-    private swaggerCustomComponent: SwaggerCustomComponent
-  ) {}
+    private swaggerCustomComponent: AipSwaggerCustomComponent
+  ) { }
 
   @Input('data') data: any;
   @Input('action') action: any;
@@ -192,17 +192,17 @@ export class MethodCreateEditComponent {
         if (
           this.adapterApispecTemplate.paths[spec.path] &&
           this.adapterApispecTemplate.paths[spec.path][
-            spec.requestType.toLowerCase()
+          spec.requestType.toLowerCase()
           ]
         ) {
           let method =
             this.adapterApispecTemplate.paths[spec.path][
-              spec.requestType.toLowerCase()
+            spec.requestType.toLowerCase()
             ];
           if (method.dataset) {
             this.adapterServices.getDataset(method.dataset).subscribe((res) => {
               this.dataset = res;
-              this.dataset.attributes = JSON.parse(this.dataset.attributes);
+              this.dataset.attributes = JSON.parse(this.dataset?.attributes);
               if (this.dataset.attributes.ScriptType === 'Python') {
                 this.transformScriptPython = JSON.parse(
                   this.dataset.attributes.transformScriptTransformationScript
@@ -239,7 +239,7 @@ export class MethodCreateEditComponent {
     this.adapterServices
       .getDataSource(this.adapter.connectionid)
       .subscribe((resp) => {
-        console.log(resp);
+        // console.log(resp);
 
         this.datasource = resp;
       });
@@ -405,18 +405,18 @@ export class MethodCreateEditComponent {
           )
         );
       });
-      console.log(this.connectionOptions);
+      // console.log(this.connectionOptions);
     });
   }
   connectionNameSelectChange(connectionNameSelectd: string) {
-    console.log(this.datasourcesForConnection);
+    // console.log(this.datasourcesForConnection);
     this.selectedConnection = this.datasourcesForConnection.filter(
       (datasource) => datasource.alias == connectionNameSelectd
     )[0];
-    console.log(this.selectedConnection);
+    // console.log(this.selectedConnection);
     this.dataset.attributes.remoteConnectionAlias =
-      this.selectedConnection.alias;
-    this.dataset.attributes.remoteConnectionName = this.selectedConnection.name;
+      this.selectedConnection?.alias;
+    this.dataset.attributes.remoteConnectionName = this.selectedConnection?.name;
     if (this.isRemoteExecution === false) {
       this.dataset.attributes.remoteConnectionAlias = '';
       this.dataset.attributes.remoteConnectionName = '';
@@ -822,9 +822,9 @@ export class MethodCreateEditComponent {
       this.dataset['views'] = '""';
       this.dataset['isadapteractive'] = 'Y';
       this.dataset.datasource = this.datasource;
-      console.log(this.dataset);
+      // console.log(this.dataset);
       if (this.action == 'create') {
-        console.log(this.dataset);
+        // console.log(this.dataset);
         this.adapterServices.createDataset(this.dataset).subscribe(
           (response) => {
             this.service.messageService(
@@ -846,7 +846,7 @@ export class MethodCreateEditComponent {
       }
 
       if (this.action == 'edit') {
-        console.log(this.dataset);
+        // console.log(this.dataset);
         this.adapterServices.saveDataset(this.dataset).subscribe(
           (response) => {
             this.returnedName = response.name;
@@ -881,7 +881,7 @@ export class MethodCreateEditComponent {
           this.dataset.attributes.transformScriptTransformationScript =
             JSON.stringify(this.transformScriptPython);
         else this.dataset.attributes.transformScriptTransformationScript = '';
-        console.log(this.dataset.attributes);
+        // console.log(this.dataset.attributes);
       }
       if (this.dataset.attributes.ScriptType == 'Groovy') {
         var transformScript1 = JSON.stringify(this.transformScript)
@@ -896,8 +896,8 @@ export class MethodCreateEditComponent {
             JSON.stringify(this.transformScript);
         else this.dataset.attributes.transformScriptTransformationScript = '';
       }
-      console.log(this.datasource);
-      console.log(this.dataset.attributes);
+      // console.log(this.datasource);
+      // console.log(this.dataset.attributes);
       this.dataset['datasource'] = this.datasource;
       this.dataset.expStatus = 0;
       this.dataset['groups'] = [];

@@ -12,7 +12,7 @@ import { Services } from '../services/service';
 import { TagsService } from '../services/tags.service';
 import { HttpParams } from '@angular/common/http';
 import { TagEventDTO } from '../DTO/tagEventDTO.model';
-import { AdapterServices } from '../adapter/adapter-service';
+import { AdapterServices } from '../sharedModule/services/adapter-service';
 // import { LeapTelemetryService } from 'com-lib-util';
 import { DatasetServices } from '../dataset/dataset-service';
 import { ActivatedRoute, Router } from '@angular/router';
