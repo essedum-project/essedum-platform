@@ -237,8 +237,6 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
   }
 
   closeProjectAddDialog(): void {
-    // If we're in a dialog, close the dialog
-    if (this.dialogRef) {
       const openDialogs = this.dialog.openDialogs;
       for (const dialog of openDialogs) {
         if (dialog.componentInstance instanceof ProjectDetailComponent) {
@@ -247,13 +245,13 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
             this.projectModelClosed.emit();
           });
         }
-      }
-    } else {
-      // If we're not in a dialog, navigate back to the project list
-      this.router.navigate(['../../projectlist'], { relativeTo: this.route });
-    }
+      
+    } 
   }
-  
+  navigateToList(){
+          this.router.navigate(['./landing/iamp-usm/projectlist/'],);
+
+  }
   onSave() {
     if (this.edit) {
       this.onUpdate();
@@ -296,7 +294,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
           this.project = project;
           this.messageService.info("Project updated", "IAMP");
           this.clearProject();
-          this.closeProjectAddDialog();
+          this.navigateToList();
         },
         (error) => this.messageService.error("Could not update", "IAMP")
       );

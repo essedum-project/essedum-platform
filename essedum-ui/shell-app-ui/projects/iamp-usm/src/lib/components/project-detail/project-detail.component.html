@@ -2,13 +2,19 @@
     <div class="lfx-l-level2-middle-col">
         <div class="d-flex justify-content-between align-items-center">
             <div class="align-items-center d-flex">
+                <span *ngIf="edit" style="cursor: pointer; margin-right: 10px;">
+                    <mat-icon class="back-icon" (click)="navigateToList()"
+                        [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back to Project List"
+                        matTooltipPosition="above" (mouseenter)="isBackHovered = true"
+                        (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
+                </span>
                 <h2 class="header-title" style="font-family: 'Roboto', 'Segoe UI', sans-serif; display: inline-block; margin: 0; vertical-align: middle;" *ngIf="edit">Edit Project</h2>
                 <h2 class="header-title" style="font-family: 'Roboto', 'Segoe UI', sans-serif; display: inline-block; margin: 0; vertical-align: middle;" *ngIf="view">View Project</h2>
                 <h2 class="header-title lfx-u-mar-l-8" style="font-family: 'Roboto', 'Segoe UI', sans-serif;" *ngIf="!edit && !view">Create Project</h2>
             </div>
 
             <div class="d-flex justify-content-end">
-                <button type="button" class="btn-close" aria-label="Close" (click)="closeProjectAddDialog()">
+                <button *ngIf="!edit" type="button" class="btn-close" aria-label="Close" (click)="closeProjectAddDialog()">
                     <i class="icon x-16 close-icon"></i>
                 </button>
             </div>
