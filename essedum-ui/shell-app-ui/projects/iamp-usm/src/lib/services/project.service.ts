@@ -20,39 +20,53 @@ export class ProjectService {
    */
 
   create(project: Project): Observable<Project> {
+    // Get a copy of the project to modify
     const copy = this.convert(project);
+    
+    // Ensure required fields are present (use properties from the model)
+    copy.is_active = true; // Now this property exists in the model
+    copy.projectdisplayname = copy.projectdisplayname || copy.name; // Use name as display name if not set
+    copy.autoUserProject = copy.autoUserProject === undefined ? false : copy.autoUserProject;
+    copy.defaultrole = copy.defaultrole === undefined ? false : copy.defaultrole;
+    copy.disableExcel = copy.disableExcel === undefined ? false : copy.disableExcel;
+    copy.timeZone = copy.timeZone || "Asia/Calcutta";
+    
+    // Get context from session storage
     const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    let headerValue;
-    let req = new PageRequestByExample(project, event);
-    let body;
-    try {
-      body = JSON.stringify(req);
-      headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e: any) {
-      console.error("JSON.stringify error - ", e.message);
+    
+    // Ensure portfolioId is valid
+    if (!copy.portfolioId || !copy.portfolioId.id) {
+      try {
+        const portfolioData = JSON.parse(sessionStorage.getItem("portfoliodata") || '{}');
+        if (portfolioData && portfolioData.id) {
+          copy.portfolioId = portfolioData;
+        }
+      } catch (e) {
+        console.error("Error getting portfolio data from session:", e);
+      }
     }
-    // Set headers
+    
+    // Create headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
       'Content-Type': 'application/json',
-      'Accept': 'application/json,text/plain, */*',
-      'Priority': 'u=1, i',
+      'Accept': 'application/json',
       'project': project1.id || '',
       'projectname': project1.name || '',
       'roleid': userRole.id || '',
-      'rolename': userRole.name || '',
-      example: headerValue
-
+      'rolename': userRole.name || ''
     });
+    
+    console.log('Creating project with payload:', JSON.stringify(copy));
+    
     return this.https
-      .post("/api/projects", copy, {
-        observe: "response",
+      .post<any>("/api/projects", copy, {
         headers: headers
       })
       .pipe(
         map((response) => {
-          return new Project(response.body);
+          return new Project(response);
         })
       )
       .pipe(
@@ -283,9 +297,38 @@ const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
    * Delete an Project by id.
    */
   delete(id: any) {
+     let req = new PageRequestByExample(id, event);
+    let body;
+    let headerValue;
+    try {
+      body = JSON.stringify(req);
+      headerValue = Buffer.from(body, 'utf8').toString('base64');
+    } catch (e: any) {
+      console.error("JSON.stringify error - ", e.message);
+    }
+    // let headers = new HttpHeaders();
+
+    // headers = headers.append('example', headerValue);
+    // Get project and role from sessionStorage
+    const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project1.id || '',
+      'projectname': project1.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || '',
+      example: headerValue
+    });
     return this.https
       .delete("/api/projects/" + id, {
         observe: "response",
+        headers:headers
       })
       .pipe(
         catchError((err) => {

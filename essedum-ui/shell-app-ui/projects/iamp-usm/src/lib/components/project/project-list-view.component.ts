@@ -536,6 +536,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
         this.Clear();
         //this.initUserSettings();
         this.messageService.info("Project deleted successfully", "IAMP!");
+        this.Refresh();
       },
       (error) => this.messageService.error("Could not delete!", "IAMP")
     );
