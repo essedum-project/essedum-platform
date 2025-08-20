@@ -122,9 +122,9 @@
     kubectl apply -f leap_app_backend-azure.yaml
 
 #### 2.5.2 Frontend:
-    sudo docker build -t essedum_app_ui:latest .
-    sudo docker tag essedum_app_ui:latest 
-    sudo docker push acrreq.azurecr.io/essedum_app_ui:latest
+    docker build -t essedum_app_ui:latest .
+    docker tag essedum_app_ui:latest 
+    docker push acrreq.azurecr.io/essedum_app_ui:latest
     kubectl delete -f leap-ui-azure.yaml
     kubectl delete -f leap-ui-service.yaml
     kubectl apply -f leap-ui-azure.yaml
