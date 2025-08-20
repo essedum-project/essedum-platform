@@ -86,7 +86,7 @@ import lombok.Setter;
 /**
  * The Class ICIPCopyBluePrintJob.
  *
- * @author icets
+ * @author essedum
  */
 @Setter
 public class ICIPCopyPipelinesJob implements Job {
@@ -192,7 +192,7 @@ public class ICIPCopyPipelinesJob implements Job {
 			Boolean status = copyPipelines(marker, fromProjectName, toProjectName, datasetProjectId, internalJob);
 			if(status) {
 				jobsService.updateInternalJob(internalJob, JobStatus.COMPLETED.toString());
-//				String url = String.format(leapUrl+"api/copyDashboards/%s/%s?projectId=%s", toProjectName, fromProjectName, String.valueOf(datasetProjectId));
+//				String url = String.format(essedumUrl+"api/copyDashboards/%s/%s?projectId=%s", toProjectName, fromProjectName, String.valueOf(datasetProjectId));
 //
 //		        HttpClient client = HttpClient.newHttpClient();
 //
@@ -238,7 +238,7 @@ public class ICIPCopyPipelinesJob implements Job {
 //				              }
 //				              CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
 //				              HttpPost httpPost = new HttpPost(
-//				            		  leapUrl+"api/copyDashboards/"+toProjectName+"/"+fromProjectName);
+//				            		  essedumUrl+"api/copyDashboards/"+toProjectName+"/"+fromProjectName);
 //				              httpPost.addHeader("Content-Type", "application/json");
 //				              httpPost.addHeader("project", String.valueOf(datasetProjectId));
 //				              httpPost.addHeader("access-token", accessToken);

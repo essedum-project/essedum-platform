@@ -28,7 +28,7 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
 
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -37,7 +37,7 @@ import com.zaxxer.hikari.HikariDataSource;
 /**
  * The Class ICIPDataSetServiceUtilMySQLPoolMap.
  *
- * @author icets
+ * @author essedum
  */
 @Component
 @RefreshScope
@@ -47,23 +47,23 @@ public class ICIPDataSetServiceUtilMySQLPoolMap {
 	private static Logger logger = LoggerFactory.getLogger(ICIPDataSetServiceUtilMySQLPoolMap.class);
 
 	/** The hikari max pool size. */
-	@LeapProperty("icip.hikari-max-pool-size")
+	@EssedumProperty("icip.hikari-max-pool-size")
 	private String hikariMaxPoolSize;
 
 	/** The connection timeout. */
-	@LeapProperty("icip.connectionTimeout")
+	@EssedumProperty("icip.connectionTimeout")
 	private String connectionTimeout;
 
 	/** The idle timeout. */
-	@LeapProperty("icip.idleTimeout")
+	@EssedumProperty("icip.idleTimeout")
 	private String idleTimeout;
 
 	/** The max lifetime. */
-	@LeapProperty("icip.maxLifetime")
+	@EssedumProperty("icip.maxLifetime")
 	private String maxLifetime;
 
 	/** The leak detection threshold. */
-	@LeapProperty("icip.leakDetectionThreshold")
+	@EssedumProperty("icip.leakDetectionThreshold")
 	private String leakDetectionThreshold;
 
 	/** The datasource map. */

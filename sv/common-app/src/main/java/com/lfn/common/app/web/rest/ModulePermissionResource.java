@@ -19,7 +19,7 @@
 //import org.springframework.web.bind.annotation.RequestMapping;
 //import org.springframework.web.bind.annotation.RestController;
 //
-//import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+//import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 //import com.lfn.iamp.usm.config.Constants;
 //import com.lfn.iamp.usm.config.Messages;
 //import com.lfn.iamp.usm.domain.Role;
@@ -95,7 +95,7 @@
 //			finalList.add(roleMap);
 //			return new ResponseEntity<List<LinkedHashMap<String, LinkedHashMap<String, Set<LinkedHashMap<String, Set<String>>>>>>>(
 //					finalList, new HttpHeaders(), HttpStatus.OK);
-//		} catch (LeapException e) {
+//		} catch (EssedumException e) {
 //			// TODO Auto-generated catch block
 //			return new ResponseEntity<String>(Messages.getMsg(Constants.EXCEPTION_USERSERVICEIMPL_FINDEMAIL),
 //					new HttpHeaders(), HttpStatus.BAD_REQUEST);

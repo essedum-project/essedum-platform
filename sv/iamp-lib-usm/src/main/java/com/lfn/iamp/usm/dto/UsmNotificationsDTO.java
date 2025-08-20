@@ -29,7 +29,7 @@ import lombok.ToString;
 /**
  * The Class UsmNotificationsDTO.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

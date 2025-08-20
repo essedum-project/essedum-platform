@@ -63,7 +63,7 @@ import net.minidev.json.JSONValue;
 /**
  * The Class MlSpecTemplatesServiceImpl.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @RefreshScope

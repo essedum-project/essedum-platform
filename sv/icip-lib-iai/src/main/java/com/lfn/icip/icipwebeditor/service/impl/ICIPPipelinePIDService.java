@@ -30,7 +30,7 @@ import com.lfn.icip.icipwebeditor.service.IICIPPipelinePIDService;
 /**
  * The Class ICIPPipelinePIDService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 public class ICIPPipelinePIDService implements IICIPPipelinePIDService {

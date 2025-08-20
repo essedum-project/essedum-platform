@@ -44,7 +44,7 @@ import lombok.Setter;
 /**
  * The Class ICIPSchemaRegistry.
  *
- * @author icets
+ * @author essedum
  */
 //@MappedSuperclass
 @EntityListeners(AuditListener.class)

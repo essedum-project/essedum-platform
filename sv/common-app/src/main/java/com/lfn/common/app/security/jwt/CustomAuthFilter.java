@@ -37,7 +37,7 @@ import org.springframework.web.filter.GenericFilterBean;
  * found.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @Service
 public class CustomAuthFilter extends GenericFilterBean {

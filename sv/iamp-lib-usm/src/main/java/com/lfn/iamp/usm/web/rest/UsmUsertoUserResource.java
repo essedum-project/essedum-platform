@@ -72,7 +72,7 @@ import org.json.JSONArray;
  * REST controller for managing usm_user_to_user.
  */
 /**
-* @author icets
+* @author essedum
 */
 @RestController
 @RequestMapping("/api")

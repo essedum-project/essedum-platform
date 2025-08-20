@@ -56,7 +56,7 @@ import com.lfn.iamp.usm.service.impl.OrgUnitServiceImpl;
 /**
  * The Class OrgUnitResourceTest.
  *
- * @author icets
+ * @author essedum
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class OrgUnitResourceTest {

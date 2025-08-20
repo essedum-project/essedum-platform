@@ -36,7 +36,7 @@ import lombok.Setter;
 /**
  * The Class ICIPPluginScript.
  *
- * @author icets
+ * @author essedum
  */
 @EntityListeners(AuditListener.class)
 @Entity

@@ -63,7 +63,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lfn.ai.comm.lib.util.HeaderUtil;
 import com.lfn.ai.comm.lib.util.PaginationUtil;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.impl.ConstantsServiceImplAbstract;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageRequestByExample;
 import com.lfn.iamp.usm.config.Constants;
@@ -86,7 +86,7 @@ import io.swagger.v3.oas.annotations.Parameter;
  * REST controller for managing UserProjectRole.
  */
 /**
-* @author icets
+* @author essedum
 */
 @RestController
 @RequestMapping("/api")
@@ -109,7 +109,7 @@ public class UserProjectRoleResource {
 	ConstantsServiceImplAbstract constantsServiceImplAbstract;
 	
 //	/** The defailtdemostatus. */
-//	@LeapProperty("usm.deleteautoassignedroles")
+//	@EssedumProperty("usm.deleteautoassignedroles")
 //	private static String autoassignedrolekey;
 
 	private static String autoassignedrolekey = "usm.deleteautoassignedroles";

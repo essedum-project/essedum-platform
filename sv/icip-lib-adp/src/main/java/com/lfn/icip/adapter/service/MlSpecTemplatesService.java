@@ -24,7 +24,7 @@ import com.lfn.icip.dataset.model.MlSpecTemplates2;
 /**
  * The Interface MlSpecTemplatesService.
  *
- * @author icets
+ * @author essedum
  */
 public interface MlSpecTemplatesService {
 

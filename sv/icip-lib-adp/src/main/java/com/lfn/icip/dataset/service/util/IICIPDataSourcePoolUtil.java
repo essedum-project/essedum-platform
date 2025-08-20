@@ -24,7 +24,7 @@ import javax.sql.DataSource;
 /**
  * The Interface IICIPDataSourcePoolUtil.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPDataSourcePoolUtil {
 	

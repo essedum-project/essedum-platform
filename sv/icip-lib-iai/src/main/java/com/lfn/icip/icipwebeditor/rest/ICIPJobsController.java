@@ -49,11 +49,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.lfn.ai.comm.lib.util.exceptions.ApiError;
 import com.lfn.ai.comm.lib.util.exceptions.ExceptionUtil;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.service.UsmService;
 import com.lfn.iamp.usm.domain.DashConstant;
 import com.lfn.iamp.usm.domain.Users;
@@ -83,7 +83,7 @@ import io.micrometer.core.annotation.Timed;
 /**
  * The Class ICIPJobsController.
  *
- * @author icets
+ * @author essedum
  */
 @RestController
 @Timed
@@ -117,7 +117,7 @@ public class ICIPJobsController {
 	private String claim;
 	
 	/** The scheduler status. */
-	@LeapProperty("icip.scheduler.pause.status")
+	@EssedumProperty("icip.scheduler.pause.status")
 	private String schedulerPauseStatus;
 
 	@Autowired
@@ -406,7 +406,7 @@ public class ICIPJobsController {
 				iICIPInternalJobsService.save(internaljob);
 				break;
 			default:
-				throw new LeapException("Invalid JobType");
+				throw new EssedumException("Invalid JobType");
 			}
 			return new ResponseEntity<>("done", new HttpHeaders(), HttpStatus.OK);
 		} catch (Exception ex) {

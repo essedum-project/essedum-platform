@@ -34,7 +34,7 @@ import com.lfn.iamp.usm.service.UsersService;
 /**
  * The Class UserDetailsServiceCommon.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 class CustomUserDetailsService implements UserDetailsService {

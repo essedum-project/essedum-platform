@@ -25,7 +25,7 @@ import com.lfn.icip.dataset.model.ICIPDatasetMlOcr;
 /**
  * The Interface IICIPDatasetMlOcrService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPDatasetMlOcrService {
 	

@@ -80,7 +80,7 @@ import com.lfn.icip.dataset.service.util.IICIPDataSetServiceUtil.SQLPagination;
 /**
  * The Class ICIPAdaptersV1ServiceImpl.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @RefreshScope
@@ -128,8 +128,8 @@ public class ICIPAdaptersV1ServiceImpl implements ICIPAdaptersV1Service {
 	@Autowired
 	private SecretsManagerService smService;
 
-	/** The leap url. */
-	@Value("${LEAP_ULR}")
+	/** The essedum url. */
+	@Value("${ESSEDUM_URL}")
 	private String referer;
 
 	@Override

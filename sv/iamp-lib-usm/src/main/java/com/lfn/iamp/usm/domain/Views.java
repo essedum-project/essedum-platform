@@ -21,7 +21,7 @@ import java.io.Serializable;
 /**
  * The Class Views.
  *
- * @author icets
+ * @author essedum
  */
 public class Views implements Serializable {
 	
@@ -32,7 +32,7 @@ public class Views implements Serializable {
 	 * The Class Public.
 	 */
 	/**
-	* @author icets
+	* @author essedum
 	*/
 	public static class Public implements Serializable {
 		
@@ -44,7 +44,7 @@ public class Views implements Serializable {
 	 * The Class Internal.
 	 */
 	/**
-	* @author icets
+	* @author essedum
 	*/
 	public static class Internal extends Public {
 		

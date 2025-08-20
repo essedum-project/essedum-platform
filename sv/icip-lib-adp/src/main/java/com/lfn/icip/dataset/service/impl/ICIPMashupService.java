@@ -48,7 +48,7 @@ import com.lfn.icip.dataset.service.IICIPMashupService;
 /**
  * The Class ICIPSchemaRegistryService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional

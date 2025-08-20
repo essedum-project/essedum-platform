@@ -60,7 +60,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 /**
  * The Class ICIPSchemaRegistryController.
  *
- * @author icets
+ * @author essedum
  */
 @RestController
 @Timed

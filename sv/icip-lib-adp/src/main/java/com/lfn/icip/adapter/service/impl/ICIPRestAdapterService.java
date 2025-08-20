@@ -53,7 +53,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.dataset.constants.ICIPPluginConstants;
 
 
@@ -61,7 +61,7 @@ import com.lfn.icip.dataset.constants.ICIPPluginConstants;
 public class ICIPRestAdapterService {
 		
 	/** The folder path. */
-	@LeapProperty("icip.fileuploadDir")
+	@EssedumProperty("icip.fileuploadDir")
 	private String folderPath;
 	
 	/** The icip pathPrefix. */

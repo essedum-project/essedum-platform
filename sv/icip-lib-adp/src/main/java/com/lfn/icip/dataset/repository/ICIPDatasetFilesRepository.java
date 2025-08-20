@@ -27,7 +27,7 @@ import com.lfn.icip.dataset.model.ICIPDatasetFiles;
 /**
  * The Interface ICIPDatasetFilesRepository.
  *
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPDatasetFilesRepository extends JpaRepository<ICIPDatasetFiles, Integer> {

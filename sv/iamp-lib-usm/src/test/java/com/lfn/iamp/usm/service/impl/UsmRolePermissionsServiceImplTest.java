@@ -46,7 +46,7 @@ import com.lfn.iamp.usm.service.UsmPermissionsService;
 /**
  * The Class UsmRolePermissionsServiceImplTest.
  *
- * @author icets
+ * @author essedum
  */
 public class UsmRolePermissionsServiceImplTest {
 

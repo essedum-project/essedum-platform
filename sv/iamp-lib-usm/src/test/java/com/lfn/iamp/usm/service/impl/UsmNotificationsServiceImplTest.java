@@ -46,7 +46,7 @@ import com.lfn.iamp.usm.repository.UsmNotificationsRepository;
 /**
  * The Class UsmNotificationsServiceImplTest.
  *
- * @author icets
+ * @author essedum
  */
 public class UsmNotificationsServiceImplTest {	
 	

@@ -30,7 +30,7 @@ import lombok.Setter;
 /**
  * The Class UsersDTO.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

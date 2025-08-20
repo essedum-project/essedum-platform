@@ -37,9 +37,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.event.model.LogFileDownloadEvent;
 import com.lfn.icip.icipwebeditor.event.model.LogFileUploadEvent;
 import com.lfn.icip.icipwebeditor.event.publisher.LogFileDownloadEventPublisher;
@@ -60,7 +60,7 @@ import com.lfn.icip.icipwebeditor.job.util.InternalJob;
 /**
  * The Class ICIPInternalJobsService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional
@@ -104,7 +104,7 @@ public class ICIPInternalJobsService implements IICIPInternalJobsService {
 	private ConstantsService constantService;
 
 	/** The days string. */
-	@LeapProperty("icip.cleanup.deletion.days")
+	@EssedumProperty("icip.cleanup.deletion.days")
 	private String daysString;
 	
 	@Autowired
@@ -390,18 +390,18 @@ public class ICIPInternalJobsService implements IICIPInternalJobsService {
 	/**
 	 * Delete older data.
 	 *
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	@Override
 	@Transactional
-	public void deleteOlderData() throws LeapException {
+	public void deleteOlderData() throws EssedumException {
 		try {
 			int days = Integer.parseInt(daysString);
 			logger.info("Deleting data older than {} day(s)", days);
 			iCIPInternalJobsRepository.deleteOlderData(days);
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
-			throw new LeapException(ex.getMessage());
+			throw new EssedumException(ex.getMessage());
 		}
 	}
 

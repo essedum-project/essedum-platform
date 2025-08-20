@@ -33,7 +33,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPNativeScript;
 /**
  * The Interface IICIPNativeScriptService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPNativeScriptService {
 

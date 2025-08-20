@@ -44,7 +44,7 @@ import lombok.Setter;
 /**
  * The Class MlSpecTemplates.
  *
- * @author icets
+ * @author essedum
  */
 //@MappedSuperclass
 @EntityListeners(AuditListener.class)

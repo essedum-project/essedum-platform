@@ -43,7 +43,7 @@ import com.lfn.icip.dataset.service.util.ICIPDataSetServiceUtilRest;
 import com.lfn.icip.dataset.service.util.IICIPDataSetServiceUtil.SQLPagination;
 
 /**
- * @author icets
+ * @author essedum
  */
 @RunWith(MockitoJUnitRunner.class)
 class ICIPDataSetServiceUtilRESTTest {

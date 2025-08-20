@@ -28,7 +28,7 @@ import com.lfn.icip.icipmodelserver.service.IICIPModService;
 /**
  * The Class ICIPModService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional

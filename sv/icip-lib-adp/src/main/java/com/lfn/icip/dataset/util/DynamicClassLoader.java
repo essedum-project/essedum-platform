@@ -20,7 +20,7 @@ package com.lfn.icip.dataset.util;
 /**
  * The Class DynamicClassLoader.
  *
- * @author icets
+ * @author essedum
  */
 public class DynamicClassLoader  extends ClassLoader {
 	

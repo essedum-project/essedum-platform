@@ -25,7 +25,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPPartialGroups;
 /**
  * The Interface IICIPPartialGroupsService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPPartialGroupsService {
 

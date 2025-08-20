@@ -22,7 +22,7 @@ import com.lfn.icip.icipmodelserver.v2.model.dto.ICIPPolyAIResponseWrapper;
 /**
  * The Interface IICIPDataSetServiceUtil.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPMlopsEndpointServiceUtil {
 

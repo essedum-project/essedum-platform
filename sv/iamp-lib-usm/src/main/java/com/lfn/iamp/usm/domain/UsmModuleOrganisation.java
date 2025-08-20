@@ -39,7 +39,7 @@ import lombok.ToString;
  * A UsmModuleOrganisation.
  */
 /**
-* @author icets
+* @author essedum
 */
 
 /**

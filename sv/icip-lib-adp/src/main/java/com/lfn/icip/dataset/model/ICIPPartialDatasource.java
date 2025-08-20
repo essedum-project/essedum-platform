@@ -46,7 +46,7 @@ import lombok.Setter;
 /**
  * The Class ICIPPartialDatasource.
  *
- * @author icets
+ * @author essedum
  */
 //@MappedSuperclass
 @EntityListeners(AuditListener.class)

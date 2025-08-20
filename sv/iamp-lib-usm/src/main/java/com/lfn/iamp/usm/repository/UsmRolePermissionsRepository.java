@@ -34,7 +34,7 @@ import com.lfn.iamp.usm.domain.UsmRolePermissions;
  * Spring Data JPA repository for the UsmRolePermissions entity.
  */
 /**
-* @author icets
+* @author essedum
 */
 @SuppressWarnings("unused")
 @Repository

@@ -23,7 +23,7 @@ import jakarta.validation.constraints.NotNull;
 /**
  * The Class ProjectDTO.
  *
- * @author icets
+ * @author essedum
  */
 public class ProjectDTO implements Serializable{
 

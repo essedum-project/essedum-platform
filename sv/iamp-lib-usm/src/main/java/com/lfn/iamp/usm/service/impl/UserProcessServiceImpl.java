@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageResponse;
 import com.lfn.iamp.usm.domain.UserProcessMapping;
 import com.lfn.iamp.usm.dto.UserProcessMappingDTO;
@@ -107,8 +107,8 @@ public class UserProcessServiceImpl implements UserProcessMappingService, Applic
 	
 
 	@Override
-	@Transactional(rollbackFor = LeapException.class)
-	public UserProcessMapping create(UserProcessMappingDTO userProcessMappingDTO) throws LeapException {
+	@Transactional(rollbackFor = EssedumException.class)
+	public UserProcessMapping create(UserProcessMappingDTO userProcessMappingDTO) throws EssedumException {
 		
 		UserProcessMapping userProcess = createEntity( userProcessMappingDTO);
 				return  userProcessRepository.save(userProcess);

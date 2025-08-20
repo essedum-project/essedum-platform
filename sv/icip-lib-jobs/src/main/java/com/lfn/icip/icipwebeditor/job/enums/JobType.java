@@ -19,7 +19,7 @@ package com.lfn.icip.icipwebeditor.job.enums;
 /**
  * The Enum JobType.
  *
- * @author icets
+ * @author essedum
  */
 public enum JobType {
 	

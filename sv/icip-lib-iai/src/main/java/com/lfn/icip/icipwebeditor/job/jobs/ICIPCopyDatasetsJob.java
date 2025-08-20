@@ -94,7 +94,7 @@ import org.springframework.http.HttpMethod;
 /**
  * The Class ICIPCopyBluePrintJob.
  *
- * @author icets
+ * @author essedum
  */
 @Setter
 public class ICIPCopyDatasetsJob implements Job {
@@ -130,8 +130,8 @@ public class ICIPCopyDatasetsJob implements Job {
     @Autowired
 	private RestTemplate restTemplate;
     
-	@Value("${LEAP_ULR}")
-	private String leapUrl;
+	@Value("${ESSEDUM_URL}")
+	private String essedumUrl;
 
 	/** The logging path. */
 	@Value("${LOG_PATH}")
@@ -205,7 +205,7 @@ public class ICIPCopyDatasetsJob implements Job {
 				apiCaller.runCopyPipelines(toProjectName, fromProjectName,String.valueOf(datasetProjectId), org);
 
 //				try {
-//				String url = String.format(leapUrl+"api/copyPiplines/%s/%s?projectId=%s", toProjectName, fromProjectName, String.valueOf(datasetProjectId));
+//				String url = String.format(essedumUrl+"api/copyPiplines/%s/%s?projectId=%s", toProjectName, fromProjectName, String.valueOf(datasetProjectId));
 //
 //		        HttpClient client = HttpClient.newHttpClient();
 //

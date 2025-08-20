@@ -20,7 +20,7 @@ package com.lfn.icip.icipwebeditor.event.type;
 /**
  * The Enum EventJobType.
  *
- * @author icets
+ * @author essedum
  */
 public enum EventJobType {
 	/** The chain. */

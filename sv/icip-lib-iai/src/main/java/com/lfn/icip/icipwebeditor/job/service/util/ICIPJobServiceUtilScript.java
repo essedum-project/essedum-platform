@@ -30,8 +30,8 @@ import org.yaml.snakeyaml.Yaml;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.service.impl.ICIPDatasetService;
 import com.lfn.icip.icipwebeditor.IICIPJobServiceUtil;
 import com.lfn.icip.icipwebeditor.constants.IAIJobConstants;
@@ -51,7 +51,7 @@ import lombok.extern.log4j.Log4j2;
 /**
  * The Class ICIPJobServiceUtilScript.
  *
- * @author icets
+ * @author essedum
  */
 
 @Component("scriptjob")
@@ -78,7 +78,7 @@ public class ICIPJobServiceUtilScript extends ICIPCommonJobServiceUtil implement
 	private ICIPStreamingServiceService streamingService;
 
 	/** The script command. */
-	@LeapProperty("icip.pipeline.script.command")
+	@EssedumProperty("icip.pipeline.script.command")
 	private String scriptCommand;
 
 	/**
@@ -86,10 +86,10 @@ public class ICIPJobServiceUtilScript extends ICIPCommonJobServiceUtil implement
 	 *
 	 * @param jobDetails the job details
 	 * @return the command
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	@Override
-	public String getCommand(ICIPNativeJobDetails jobDetails) throws LeapException {
+	public String getCommand(ICIPNativeJobDetails jobDetails) throws EssedumException {
 		ICIPStreamingServices ss = streamingService.getICIPStreamingServicesRefactored(jobDetails.getCname(),
 				jobDetails.getOrg());
 
@@ -100,7 +100,7 @@ public class ICIPJobServiceUtilScript extends ICIPCommonJobServiceUtil implement
 			String msg = "Error in getting json content : " + ex.getClass().getCanonicalName() + " - "
 					+ ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		String org = jobDetails.getOrg();
@@ -115,7 +115,7 @@ public class ICIPJobServiceUtilScript extends ICIPCommonJobServiceUtil implement
 			String msg = "Error in getting dagster script : " + ex.getClass().getCanonicalName() + " - "
 					+ ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		StringBuilder script = visitor.getScript();
@@ -126,7 +126,7 @@ public class ICIPJobServiceUtilScript extends ICIPCommonJobServiceUtil implement
 		} catch (Exception ex) {
 			String msg = "Error in getting input : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		StringBuilder inputBuilder = new StringBuilder("[");
@@ -145,7 +145,7 @@ public class ICIPJobServiceUtilScript extends ICIPCommonJobServiceUtil implement
 		} catch (Exception ex) {
 			String msg = "Error in getting output : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		StringBuilder outputBuilder = new StringBuilder("[");
@@ -203,10 +203,10 @@ public class ICIPJobServiceUtilScript extends ICIPCommonJobServiceUtil implement
 	 * @param output the output
 	 * @param params the params
 	 * @return the string builder
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	private StringBuilder createYamlscript(StringBuilder input, StringBuilder output, String params)
-			throws LeapException {
+			throws EssedumException {
 		try {
 			log.info("creating yaml script for script pipeline");
 			Yaml yaml = new Yaml();
@@ -247,7 +247,7 @@ public class ICIPJobServiceUtilScript extends ICIPCommonJobServiceUtil implement
 			String msg = "Error in creating yaml script : " + ex.getClass().getCanonicalName() + " - "
 					+ ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 	}
 
@@ -256,9 +256,9 @@ public class ICIPJobServiceUtilScript extends ICIPCommonJobServiceUtil implement
 	 *
 	 * @param jsonElement the json element
 	 * @return the attributes
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private JsonObject getAttributes(JsonElement jsonElement) throws LeapException {
+	private JsonObject getAttributes(JsonElement jsonElement) throws EssedumException {
 		try {
 			return new Gson().fromJson(jsonElement, JsonElement.class).getAsJsonObject().get("elements")
 					.getAsJsonArray().get(0).getAsJsonObject().get("attributes").getAsJsonObject();
@@ -266,7 +266,7 @@ public class ICIPJobServiceUtilScript extends ICIPCommonJobServiceUtil implement
 			String msg = "Error in fetching elements[0].attributes : " + ex.getClass().getCanonicalName() + " - "
 					+ ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 	}
 

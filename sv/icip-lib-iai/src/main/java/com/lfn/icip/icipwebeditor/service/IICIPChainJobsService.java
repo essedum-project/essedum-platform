@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.quartz.SchedulerException;
 
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.job.model.ICIPChainJobs;
 import com.lfn.icip.icipwebeditor.job.model.ICIPChainJobsPartial;
 
@@ -29,7 +29,7 @@ import com.lfn.icip.icipwebeditor.job.model.ICIPChainJobsPartial;
 /**
  * The Interface IICIPChainJobsService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPChainJobsService {
 
@@ -177,9 +177,9 @@ public interface IICIPChainJobsService {
 	 * Stop local job.
 	 *
 	 * @param jobid the jobid
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	void stopLocalJob(String jobid) throws LeapException;
+	void stopLocalJob(String jobid) throws EssedumException;
 
 	/**
 	 * Boot cleanup.
@@ -212,9 +212,9 @@ public interface IICIPChainJobsService {
 	/**
 	 * Delete older data.
 	 *
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	void deleteOlderData() throws LeapException;
+	void deleteOlderData() throws EssedumException;
 
 	/**
 	 * Run chain.

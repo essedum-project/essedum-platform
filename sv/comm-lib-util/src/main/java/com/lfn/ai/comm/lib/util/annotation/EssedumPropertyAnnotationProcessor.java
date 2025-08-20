@@ -15,41 +15,40 @@
 
 package com.lfn.ai.comm.lib.util.annotation;
 
-import java.lang.reflect.Field;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.FieldCallback;
 
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 
-import lombok.extern.log4j.Log4j2;
+@Component
+public class EssedumPropertyAnnotationProcessor implements BeanPostProcessor {
 
-@Log4j2
-public class LeapPropertiesFieldCallback implements FieldCallback {
+	@Autowired
+	private ConstantsService constantsService;
 
-	private static String ERROR_PROPERTY_NOT_FOUND = "@LeapProperties(entity) does not exist in the constant DB.";
-	private Object value;
-	private ConstantsService dashConstantService;
-
-	public LeapPropertiesFieldCallback(Object value, ConstantsService dashConstantService) {
-		this.value = value;
-		this.dashConstantService = dashConstantService;
+	@Override
+	public Object postProcessBeforeInitialization(Object value, String beanName) {
+		this.scanDataAccessAnnotation(value);
+		return value;
 	}
 
 	@Override
-	public void doWith(Field field) throws IllegalAccessException {
-		if (!field.isAnnotationPresent(LeapProperties.class)) {
-			return;
-		}
-		ReflectionUtils.makeAccessible(field);
-		String key = field.getDeclaredAnnotation(LeapProperties.class).value();
-		try {
-			field.set(value, dashConstantService.findByKeyArray(key, "Core"));
-		} catch (Exception ex) {
-			String error = String.format("%s : Key %s", ERROR_PROPERTY_NOT_FOUND, key);
-			log.error(error, ex);
-			throw new IllegalArgumentException(error);
-		}
+	public Object postProcessAfterInitialization(Object value, String beanName) {
+		return value;
+	}
+
+	protected void scanDataAccessAnnotation(Object value) {
+		this.configureFieldInjection(value);
+	}
+
+	private void configureFieldInjection(Object value) {
+		Class<?> managedBeanClass = value.getClass();
+		FieldCallback fieldCallback = new EssedumPropertyFieldCallback(value, constantsService);
+		ReflectionUtils.doWithFields(managedBeanClass, fieldCallback);
 	}
 
 }

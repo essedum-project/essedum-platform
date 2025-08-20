@@ -44,7 +44,7 @@ import liquibase.integration.spring.SpringLiquibase;
 /**
  * The Class DashboardDbConfig.
  *
- * @author icets
+ * @author essedum
  */
 @Configuration
 @EnableTransactionManagement

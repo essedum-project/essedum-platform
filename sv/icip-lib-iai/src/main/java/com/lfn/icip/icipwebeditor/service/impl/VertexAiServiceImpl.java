@@ -5,7 +5,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.service.impl.ICIPDatasourceService;
 import com.lfn.icip.icipwebeditor.model.ICIPPrompts;
@@ -50,7 +50,7 @@ public class VertexAiServiceImpl implements ICIPPromptChatModel {
 	@Autowired
 	ICIPDatasourceService datasourceService;
 	
-	@LeapProperty("icip.certificateCheck")
+	@EssedumProperty("icip.certificateCheck")
 	private String certificateCheck;
 	
 	@Override

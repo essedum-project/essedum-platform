@@ -48,7 +48,7 @@ import com.lfn.iamp.usm.service.UsmRoletoRoleService;
  * Service Implementation for managing UsmRolePermissions.
  */
 /**
-* @author icets
+* @author essedum
 */
 @Service
 @Transactional

@@ -28,7 +28,7 @@ import com.lfn.icip.dataset.model.MlAdapters;
  * Spring Data JPA repository for the MlAdapters entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface MlAdaptersRepository extends JpaRepository<MlAdapters, Integer> {

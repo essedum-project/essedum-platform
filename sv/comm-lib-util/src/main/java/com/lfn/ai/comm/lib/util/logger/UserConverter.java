@@ -26,7 +26,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 /**
  * The Class UserConverter.
  *
- * @author icets
+ * @author essedum
  */
 public class UserConverter extends ClassicConverter {
     

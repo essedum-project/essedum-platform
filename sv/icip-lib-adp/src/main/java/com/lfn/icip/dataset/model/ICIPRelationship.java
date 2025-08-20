@@ -22,7 +22,7 @@ import lombok.Setter;
 /**
 * The Class ICIPRelationship.
 *
-* @author icets
+* @author essedum
 */
 @Entity
 @Table(name = "mlrelationship", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "organization" }))

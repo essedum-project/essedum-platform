@@ -40,8 +40,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.constants.AlertConstants;
 import com.lfn.icip.icipwebeditor.constants.IAIJobConstants;
 import com.lfn.icip.icipwebeditor.event.model.AlertEvent;
@@ -121,7 +121,7 @@ public class JobSyncExecutorService {
 	private AlertEventPublisher.AlertService alertEventPublisher;
 
 	/** The domain. */
-	@LeapProperty("icip.mailserver.domain")
+	@EssedumProperty("icip.mailserver.domain")
 	private String domain;
 
 	/**
@@ -414,9 +414,9 @@ public class JobSyncExecutorService {
 	 * Stop local job.
 	 *
 	 * @param jobid the jobid
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	public void stopLocalJob(String jobid) throws LeapException {
+	public void stopLocalJob(String jobid) throws EssedumException {
 		if (icipChainJobsPartialRepository.findByJobId(jobid) != null) {
 			ICIPChainJobsPartial groupedjobs = icipChainJobsPartialRepository.findByJobId(jobid);
 			String jobmetadata = groupedjobs.getJobmetadata();
@@ -437,7 +437,7 @@ public class JobSyncExecutorService {
 						if (stopJobServices != null) {
 							try {
 								chainjob = stopJobServices.stopPipelineJobs(chainjob);
-							} catch (LeapException e) {
+							} catch (EssedumException e) {
 								e.printStackTrace();
 							}
 						}
@@ -461,7 +461,7 @@ public class JobSyncExecutorService {
 		}
 	}
 
-	public JSONObject outputArtifacts(String jobid) throws LeapException {
+	public JSONObject outputArtifacts(String jobid) throws EssedumException {
 
 		ICIPJobsPartial job = jobsPartialRepository.findByJobId(jobid);
 		String[] parts = job.getRuntime().split("-");
@@ -478,7 +478,7 @@ public class JobSyncExecutorService {
 		return outputArtifact;
 	}
 
-	public JSONObject outputArtifactsCorelid(String corelid) throws LeapException {
+	public JSONObject outputArtifactsCorelid(String corelid) throws EssedumException {
 
 		ICIPJobsPartial job = jobsPartialRepository.findByCorelId(corelid);
 		String[] parts = job.getRuntime().split("-");

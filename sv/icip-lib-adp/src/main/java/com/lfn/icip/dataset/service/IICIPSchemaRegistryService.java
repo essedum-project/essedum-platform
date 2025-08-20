@@ -27,7 +27,7 @@ import com.lfn.icip.dataset.model.dto.ICIPSchemaRegistryDTO2;
 /**
  * The Interface IICIPSchemaRegistryService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPSchemaRegistryService {
 

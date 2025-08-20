@@ -28,7 +28,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPGroups;
 /**
  * The Interface IICIPGroupsService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPGroupsService {
 

@@ -45,7 +45,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.common.app.security.jwt.CustomAuthFilter;
 import com.lfn.common.app.security.jwt.CustomJWTTokenProvider;
 
@@ -56,7 +56,7 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * The Class DBJWTSecurityConfig.
  *
- * @author icets
+ * @author essedum
  */
 @Configuration
 @EnableWebSecurity
@@ -138,7 +138,7 @@ class CustomAuthSecurityConfig {
 				}
 			});
 		else
-			throw new LeapException("The active profile must contain either dbjwt or oauth2");
+			throw new EssedumException("The active profile must contain either dbjwt or oauth2");
 		
 		http.headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.sameOrigin()));
 //		http.csrf(configurer -> {

@@ -74,7 +74,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.Gson;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
 import com.lfn.ai.comm.lib.util.service.dto.support.NameEncoderService;
@@ -97,7 +97,7 @@ import com.lfn.icip.icipwebeditor.util.ICIPPageResponse;
 /**
  * The Class ICIPStreamingServiceService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional
@@ -118,7 +118,7 @@ public class ICIPStreamingServiceService implements IICIPStreamingServiceService
 	/** The ncs. */
 	private NameEncoderService ncs;
 
-	@LeapProperty("icip.pipelineScript.directory")
+	@EssedumProperty("icip.pipelineScript.directory")
 	private String pipelineScriptPath;
 
 	/** The environment. */

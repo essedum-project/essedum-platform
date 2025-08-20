@@ -44,7 +44,7 @@ import lombok.extern.log4j.Log4j2;
 /**
  * The Class ICIPNativeScript.
  *
- * @author icets
+ * @author essedum
  */
 //@EntityListeners(AuditListener.class)
 @Entity

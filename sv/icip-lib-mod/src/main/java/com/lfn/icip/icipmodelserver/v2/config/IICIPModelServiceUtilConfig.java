@@ -12,7 +12,7 @@ import com.lfn.icip.icipmodelserver.v2.factory.IICIPModelServiceUtilFactory;
 /**
  * The Class IICIPDataSetServiceUtilConfig.
  *
- * @author icets
+ * @author essedum
  */
 @Configuration
 @ComponentScan(basePackages = { "com.lfn.icip.icipmodelserver.v2"})

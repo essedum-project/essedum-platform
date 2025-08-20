@@ -28,7 +28,7 @@ import lombok.Setter;
 /**
  * The Class DatasetChunkMetaData.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

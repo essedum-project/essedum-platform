@@ -30,7 +30,7 @@ import lombok.ToString;
 * A IcmSops.
 */
 /**
-* @author icets
+* @author essedum
 */
 @EntityListeners(AuditListener.class)
 @Entity

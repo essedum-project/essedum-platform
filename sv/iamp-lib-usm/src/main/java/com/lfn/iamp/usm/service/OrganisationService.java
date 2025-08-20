@@ -29,7 +29,7 @@ import com.lfn.iamp.usm.domain.Organisation;
  * Service Interface for managing Organisation.
  */
 /**
-* @author icets
+* @author essedum
 */
 public interface OrganisationService {
 

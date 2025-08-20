@@ -39,7 +39,7 @@ import lombok.ToString;
 /**
  * The Class UsmPermissions.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

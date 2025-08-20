@@ -97,7 +97,7 @@ import lombok.Getter;
 /**
  * The Class JobScheduleServiceImpl.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

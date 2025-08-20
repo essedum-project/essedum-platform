@@ -19,7 +19,7 @@ package com.lfn.ai.comm.lib.util.exceptions;
 /**
  * The Enum ExceptionCode.
  *
- * @author icets
+ * @author essedum
  */
 public enum ExceptionCode {
 

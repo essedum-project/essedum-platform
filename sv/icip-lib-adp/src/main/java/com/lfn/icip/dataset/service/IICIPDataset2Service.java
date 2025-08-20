@@ -25,7 +25,7 @@ import com.lfn.icip.dataset.model.dto.ICIPDatasourceSummary;
 /**
  * The Interface IICIPDataset2Service.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPDataset2Service {
 

@@ -30,7 +30,7 @@ import lombok.Setter;
 /**
  * The Class LazyLoadEvent.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

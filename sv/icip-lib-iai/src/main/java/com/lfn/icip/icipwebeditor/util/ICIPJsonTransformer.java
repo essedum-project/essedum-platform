@@ -22,7 +22,7 @@ import com.google.gson.JsonElement;
  * The Interface ICIPJsonTransformer.
  *
  * @param <T> the generic type
- * @author icets
+ * @author essedum
  */
 public interface ICIPJsonTransformer<T>
 	extends Function<JsonElement, T> 

@@ -50,7 +50,7 @@ import com.lfn.iamp.usm.service.UsmPortfolioService;
 /**
  * The Class ProjectServiceImplTest.
  *
- * @author icets
+ * @author essedum
  */
 public class ProjectServiceImplTest {
 	

@@ -39,7 +39,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -48,10 +48,10 @@ import lombok.extern.log4j.Log4j2;
 @RefreshScope
 public class EmailServiceImpl {
 
-	@LeapProperty("icip.mailserver.url")
+	@EssedumProperty("icip.mailserver.url")
 	private String mailserverUrl;
 
-	@LeapProperty("icip.mailserver.enabled")
+	@EssedumProperty("icip.mailserver.enabled")
 	private String mailserverEnabled;
 
 	@Value("${mailserver.accesstoken}")

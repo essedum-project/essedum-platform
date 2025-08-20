@@ -25,7 +25,7 @@ import lombok.Setter;
 /**
  * The Class JobCreateParams.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

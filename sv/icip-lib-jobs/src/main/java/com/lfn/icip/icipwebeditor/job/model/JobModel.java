@@ -30,7 +30,7 @@ import lombok.Setter;
 /**
  * The Class JobModel.
  *
- * @author icets
+ * @author essedum
  */
 
 /**
@@ -106,7 +106,7 @@ public class JobModel {
 	/**
 	 * The Class JobProperties.
 	 *
-	 * @author icets
+	 * @author essedum
 	 */
 
 	/**
@@ -198,7 +198,7 @@ public class JobModel {
 	/**
 	 * The Class RestProperties.
 	 *
-	 * @author icets
+	 * @author essedum
 	 */
 
 	/**

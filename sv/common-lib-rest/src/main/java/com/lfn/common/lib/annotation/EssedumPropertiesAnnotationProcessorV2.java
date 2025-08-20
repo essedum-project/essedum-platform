@@ -13,34 +13,40 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lfn.ai.comm.lib.util.exceptions;
+package com.lfn.common.lib.annotation;
 
-/**
- * The Class LeapException.
- *
- * @author icets
- */
-@SuppressWarnings("serial")
-public class LeapException extends Exception {
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.ReflectionUtils.FieldCallback;
+
+
+@Component
+public class EssedumPropertiesAnnotationProcessorV2 implements BeanPostProcessor {
+
+	@Value("${commonAppUrl}")
+	private String commonAppUrl;
 	
-	/**
-	 * Instantiates a new leap exception.
-	 *
-	 * @param errorMessage the error message
-	 */
-	public LeapException(String errorMessage) {
-		// Call constructor of parent Exception
-		super(errorMessage);
+	@Override
+	public Object postProcessBeforeInitialization(Object value, String beanName) {
+		this.scanDataAccessAnnotation(value);
+		return value;
 	}
 
-	/**
-	 * Instantiates a new leap exception.
-	 *
-	 * @param errorMessage the error message
-	 */
-	public LeapException(String errorMessage, Throwable cause) {
-		// Call constructor of parent Exception
-		super(errorMessage, cause);
+	@Override
+	public Object postProcessAfterInitialization(Object value, String beanName) {
+		return value;
 	}
-	
+
+	protected void scanDataAccessAnnotation(Object value) {
+		this.configureFieldInjection(value);
+	}
+
+	private void configureFieldInjection(Object value) {
+		Class<?> managedBeanClass = value.getClass();
+		FieldCallback fieldCallback = new EssedumPropertiesFieldCallbackV2(value,commonAppUrl);
+		ReflectionUtils.doWithFields(managedBeanClass, fieldCallback);
+	}
+
 }

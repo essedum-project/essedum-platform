@@ -40,7 +40,7 @@ import lombok.Setter;
 /**
  * The Class ICIPPartialGroups.
  *
- * @author icets
+ * @author essedum
  */
 @EntityListeners(AuditListener.class)
 @Entity

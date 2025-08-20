@@ -36,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * last modified by date.
  */
 /**
-* @author icets
+* @author essedum
 */
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)

@@ -18,7 +18,7 @@ package com.lfn.ai.comm.lib.util.exceptions;
 @SuppressWarnings("serial")
 public class ExtensionKeyInvalidValue extends Exception{
 	/**
-	 * Instantiates a new leap exception.
+	 * Instantiates a new essedum exception.
 	 *
 	 * @param errorMessage the error message
 	 */

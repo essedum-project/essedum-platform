@@ -38,7 +38,7 @@
 //@RefreshScope
 //public class SSEController {
 //
-//	@LeapProperty("icip.jobLogFileDir")
+//	@EssedumProperty("icip.jobLogFileDir")
 //	private String folderPath;
 //
 //	@Autowired

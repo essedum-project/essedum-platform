@@ -20,7 +20,7 @@ package com.lfn.icip.icipmodelserver.service;
 /**
  * The Interface IICIPModService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPModService {
 	

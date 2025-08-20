@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.azure.identity.ClientSecretCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.iamp.usm.domain.Users;
 import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
 import com.microsoft.graph.core.ClientException;
@@ -38,19 +38,19 @@ public class AzureUserServiceImpl {
 
 	private final Logger log = LoggerFactory.getLogger(AzureUserServiceImpl.class);
 
-	@LeapProperty("application.azure.clientId")
+	@EssedumProperty("application.azure.clientId")
 	private String clientId;
 
-	@LeapProperty("application.azure.clientSecret")
+	@EssedumProperty("application.azure.clientSecret")
 	private String clientSecret;
 
-	@LeapProperty("application.azure.tenantId")
+	@EssedumProperty("application.azure.tenantId")
 	private String tenantId;
 
-	@LeapProperty("application.azure.scope")
+	@EssedumProperty("application.azure.scope")
 	private String scope;
 	
-	@LeapProperty("application.azure.inviteRedirectUrl")
+	@EssedumProperty("application.azure.inviteRedirectUrl")
 	private String inviteRedirectUrl;
 
 	public boolean inviteAzureUser(Users user) {

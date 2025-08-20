@@ -26,7 +26,7 @@ import com.google.gson.JsonPrimitive;
  * The Interface ICIPJsonVisitor.
  *
  * @param <T> the generic type
- * @author icets
+ * @author essedum
  */
 public interface ICIPJsonVisitor<T> {
 	

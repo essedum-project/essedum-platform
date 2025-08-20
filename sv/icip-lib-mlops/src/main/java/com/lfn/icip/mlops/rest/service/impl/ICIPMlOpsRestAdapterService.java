@@ -50,8 +50,8 @@ import com.lfn.icip.icipwebeditor.service.IICIPMLFederatedModelService;
 @Service
 public class ICIPMlOpsRestAdapterService {
 
-	/** The leap url. */
-	@Value("${LEAP_ULR}")
+	/** The essedum url. */
+	@Value("${ESSEDUM_URL}")
 	private String referer;
 	
 	/** The icip pathPrefix. */

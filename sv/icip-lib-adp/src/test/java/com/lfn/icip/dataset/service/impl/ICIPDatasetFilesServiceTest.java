@@ -83,7 +83,7 @@ public class ICIPDatasetFilesServiceTest {
 		datasetFiles = new ArrayList<ICIPDatasetFiles>();
 		datasetFiles.add(datasetFile);
 		index = 1;
-		folderPath = "D:/leap";
+		folderPath = "D:/essedum";
 		Mockito.when(env.getProperty("icip.fileuploadDir")).thenReturn(folderPath);
 		Mockito.when(datasetFilesRepository.save(datasetFile)).thenReturn(datasetFile);
 		Mockito.when(datasetFilesRepository.findById(id)).thenReturn(datasetFile);
@@ -188,7 +188,7 @@ public class ICIPDatasetFilesServiceTest {
 	@Test
 	public void testSaveFile() throws Exception {
 		assertEquals(iCIPDatasetFilesService.saveFile(mfile, metadata, file, file, projectId, type).toString(),
-				"D:\\leap\\datasetfiles\\1\\1_loader.properties");
+				"D:\\essedum\\datasetfiles\\1\\1_loader.properties");
 	}
 
 

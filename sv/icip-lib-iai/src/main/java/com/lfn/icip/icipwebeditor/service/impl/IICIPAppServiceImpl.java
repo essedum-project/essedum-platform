@@ -41,7 +41,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
 import com.lfn.icip.icipwebeditor.constants.FileConstants;
 import com.lfn.icip.icipwebeditor.fileserver.dto.ICIPChunkMetaData;
@@ -77,7 +77,7 @@ public class IICIPAppServiceImpl implements IICIPAppService, IICIPSearchable {
 
 	private final ICIPAppsRepository appsRepository;
 
-	@LeapProperty("icip.fileuploadDir")
+	@EssedumProperty("icip.fileuploadDir")
 	private String folderPath;
 
 	@Autowired
@@ -93,7 +93,7 @@ public class IICIPAppServiceImpl implements IICIPAppService, IICIPSearchable {
 	@Autowired
 	private ICIPImageSavingServiceImpl imageService;
 
-	@LeapProperty("icip.fileserver.minio.bucket")
+	@EssedumProperty("icip.fileserver.minio.bucket")
 	private String bucket;
 
 	@Value("${fileserver.minio.secret-key}")

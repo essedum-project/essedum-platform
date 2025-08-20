@@ -48,7 +48,7 @@ import lombok.Setter;
 /**
  * The Class ICIPDeleteProject.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

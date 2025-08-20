@@ -27,7 +27,7 @@ import lombok.ToString;
 /**
  * The Class QrtzTriggersId.
  * 
- * @author icets
+ * @author essedum
  *
  */
 

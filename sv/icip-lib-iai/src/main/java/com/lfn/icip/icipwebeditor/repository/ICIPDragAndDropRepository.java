@@ -25,7 +25,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPDragAndDrop;
 /**
  * The Interface ICIPDragAndDropRepository.
  *
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPDragAndDropRepository extends JpaRepository<ICIPDragAndDrop, Integer> {

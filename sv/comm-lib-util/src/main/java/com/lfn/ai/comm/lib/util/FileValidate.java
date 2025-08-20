@@ -50,7 +50,7 @@ import com.lfn.ai.comm.lib.util.dto.UploadObject;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author icets
+ * @author essedum
  *
  */
 

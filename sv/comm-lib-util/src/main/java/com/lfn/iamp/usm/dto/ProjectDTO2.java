@@ -25,7 +25,7 @@ import lombok.Data;
 /**
  * The Class ProjectDTO.
  *
- * @author icets
+ * @author essedum
  */
 @Data
 public class ProjectDTO2 implements Serializable{

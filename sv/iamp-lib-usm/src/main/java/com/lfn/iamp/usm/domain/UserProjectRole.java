@@ -42,7 +42,7 @@ import lombok.Setter;
  * A UserProjectRole.
  */
 /**
-* @author icets
+* @author essedum
 */
 
 

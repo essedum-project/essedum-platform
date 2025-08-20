@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * The Class JobConstants.
  *
- * @author icets
+ * @author essedum
  */
 
 public class JobConstants {

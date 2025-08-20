@@ -28,7 +28,7 @@ import lombok.Setter;
 /**
  * The Class PageRequestByExample.
  *
- * @author icets
+ * @author essedum
  * @param <T> the generic type
  */
 

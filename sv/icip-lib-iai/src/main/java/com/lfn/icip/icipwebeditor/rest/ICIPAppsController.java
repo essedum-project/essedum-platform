@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.lfn.ai.comm.lib.util.HeaderUtil;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.exceptions.ApiError;
 import com.lfn.ai.comm.lib.util.exceptions.ExceptionUtil;
 import com.lfn.icip.icipwebeditor.model.ICIPApps;
@@ -60,7 +60,7 @@ import jakarta.transaction.Transactional;
 /**
  * The Class ICIPPluginController.
  *
- * @author icets
+ * @author essedum
  */
 @RestController
 @Timed
@@ -85,7 +85,7 @@ public class ICIPAppsController {
 	@Autowired
 	private IICIPAppService appService;
 
-	@LeapProperty("icip.app.route")
+	@EssedumProperty("icip.app.route")
 	String appRoute;
 
 	@GetMapping("/{name}/{org}")

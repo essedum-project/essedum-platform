@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.slf4j.Marker;
 
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.IICIPJobRuntimeServiceUtil;
 import com.lfn.icip.icipwebeditor.model.ICIPEventJobMapping;
 
@@ -28,7 +28,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPEventJobMapping;
 /**
  * The Interface IICIPEventJobMappingService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPEventJobMappingService {
 
@@ -134,9 +134,9 @@ public interface IICIPEventJobMappingService {
 	 * @param corelid the corelid
 	 * @param params the params
 	 * @return the string
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	String trigger(String name, String org, String corelid, String params, String datasource) throws LeapException;
+	String trigger(String name, String org, String corelid, String params, String datasource) throws EssedumException;
 
 	/**
 	 * Gets the api classes.

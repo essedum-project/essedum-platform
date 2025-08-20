@@ -37,7 +37,7 @@ import lombok.Setter;
 /**
  * The Class ICIPCopyBluePrintJob.
  *
- * @author icets
+ * @author essedum
  */
 @Setter
 public class ICIPCopyTemplate implements Job {

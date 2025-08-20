@@ -39,7 +39,7 @@ import jakarta.persistence.CascadeType;
 /**
  * The Class UsmRolePermissions.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

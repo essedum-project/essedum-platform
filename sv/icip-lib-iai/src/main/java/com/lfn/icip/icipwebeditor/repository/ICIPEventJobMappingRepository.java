@@ -28,7 +28,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPEventJobMapping;
 /**
  * The Interface ICIPEventJobMappingRepository.
  *
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPEventJobMappingRepository extends JpaRepository<ICIPEventJobMapping, Integer> {

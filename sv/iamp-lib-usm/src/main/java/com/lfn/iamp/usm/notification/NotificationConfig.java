@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * The Class NotificationConfig.
  *
- * @author icets
+ * @author essedum
  */
 @Configuration
 public class NotificationConfig {
@@ -43,7 +43,7 @@ public class NotificationConfig {
 	 * The Class NotificationService.
 	 */
 	/**
-	* @author icets
+	* @author essedum
 	*/
 	public class NotificationService implements ApplicationEventPublisherAware {
 

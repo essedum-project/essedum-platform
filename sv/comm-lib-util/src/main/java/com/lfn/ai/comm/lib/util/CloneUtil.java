@@ -20,7 +20,7 @@ import com.google.gson.Gson;
 /**
  * The Class CloneUtil.
  * 
- * @author icets
+ * @author essedum
  *
  */
 public class CloneUtil {

@@ -28,7 +28,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * and follow <a href="http://tools.ietf.org/html/rfc5988">RFC 5988 (Link header)</a>.
  */
 /**
-* @author icets
+* @author essedum
 */
 public final class PaginationUtil {
 

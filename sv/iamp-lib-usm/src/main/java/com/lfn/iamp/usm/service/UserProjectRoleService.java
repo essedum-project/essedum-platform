@@ -39,7 +39,7 @@ import com.lfn.iamp.usm.domain.Users;
  * Service Interface for managing UserProjectRole.
  */
 /**
-* @author icets
+* @author essedum
 */
 public interface UserProjectRoleService {
 

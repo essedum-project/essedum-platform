@@ -26,7 +26,7 @@ import lombok.ToString;
  * A UsmModuleOrganisationDTO.
  */
 /**
-* @author icets
+* @author essedum
 */
 
 /**

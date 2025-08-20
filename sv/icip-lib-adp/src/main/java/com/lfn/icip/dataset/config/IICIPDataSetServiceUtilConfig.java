@@ -30,7 +30,7 @@ import com.lfn.icip.dataset.factory.IICIPDataSourceServiceUtilFactory;
 /**
  * The Class IICIPDataSetServiceUtilConfig.
  *
- * @author icets
+ * @author essedum
  */
 @Configuration
 @ComponentScan(basePackages = { "com.lfn.icip.dataset.service.util", "com.lfn.icip.plugins.service.util" })

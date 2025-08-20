@@ -71,8 +71,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lfn.ai.comm.lib.util.Crypt;
 import com.lfn.ai.comm.lib.util.HeaderUtil;
 import com.lfn.ai.comm.lib.util.PaginationUtil;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageRequestByExample;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageResponse;
 import com.lfn.iamp.usm.config.Constants;
@@ -92,7 +92,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * REST controller for managing Users.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @RestController
 @RequestMapping("/api")
@@ -111,17 +111,17 @@ public class UsersResource {
 	@Autowired(required = false)
 	private CamundaUSM camundaUSM;
 
-	@LeapProperty("application.autouser.defaultPWD")
+	@EssedumProperty("application.autouser.defaultPWD")
 	private String defaultPWD;
 
 	@Autowired
 	EmailServiceImpl mailService;
 
-	@LeapProperty("application.mailNotificationUserCreation")
+	@EssedumProperty("application.mailNotificationUserCreation")
 	private String mailNotificationUserCreation;
 
 	/** The enckeydefault. */
-	@LeapProperty("application.uiconfig.enckeydefault")
+	@EssedumProperty("application.uiconfig.enckeydefault")
 	private static String enckeydefault;
 
 	/**
@@ -458,7 +458,7 @@ public class UsersResource {
 	 *         with status 500 (Internal Server Error) if the users couldn't be
 	 *         updated
 	 * @throws URISyntaxException if the Location URI syntax is incorrect
-	 * @throws LeapException 
+	 * @throws EssedumException 
 	 * @throws InvalidAlgorithmParameterException 
 	 * @throws UnsupportedEncodingException 
 	 * @throws BadPaddingException 
@@ -468,7 +468,7 @@ public class UsersResource {
 	 */
 	@PutMapping("/userss/resetPassword")
 	@Timed
-	public ResponseEntity<?> resetPassword(@RequestBody UsersDTO users_dto) throws URISyntaxException, LeapException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException {
+	public ResponseEntity<?> resetPassword(@RequestBody UsersDTO users_dto) throws URISyntaxException, EssedumException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException {
 		try {
 			log.info("updatePassword : Request to update Password for ID:{} Name: {}", users_dto.getId(),
 					users_dto.getUser_f_name());
@@ -524,7 +524,7 @@ public class UsersResource {
 			String body = Crypt.decrypt(email, enckeydefault);
 			Integer user_details = usersService.findEmail(body);
 			return new ResponseEntity<Integer>(user_details, new HttpHeaders(), HttpStatus.OK);
-		} catch (LeapException e) {
+		} catch (EssedumException e) {
 			// TODO: handle exception
 			log.error(new StringBuffer("Exception ").append(e.getClass().getName()).append(": ").append(e).toString());
 			return new ResponseEntity<String>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
@@ -763,7 +763,7 @@ public class UsersResource {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 
 		}
-		catch (LeapException e) {
+		catch (EssedumException e) {
 			// TODO: handle exception
 			log.error(new StringBuffer("Exception ").append(e.getClass().getName()).append(": ").append(e).toString());
 			return new ResponseEntity<String>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);

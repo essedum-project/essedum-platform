@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.icipwebeditor.fileserver.constants.LoggerConstants;
 import com.lfn.icip.icipwebeditor.fileserver.factory.FileServerFactory;
 import com.lfn.icip.icipwebeditor.fileserver.util.APIUtil;
@@ -29,7 +29,7 @@ public class CommonService {
 	private FileServerFactory factory;
 
 	/** The active server. */
-	@LeapProperty("icip.fileserver.active.server")
+	@EssedumProperty("icip.fileserver.active.server")
 	private String activeServer;
 
 	/**

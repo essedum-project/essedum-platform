@@ -31,7 +31,7 @@ import com.lfn.iamp.usm.domain.UsmPermissionApi;
  * Service Interface for managing UsmPermissionApi.
  */
 /**
-* @author icets
+* @author essedum
 */
 public interface UserApiPermissionsService {
 	

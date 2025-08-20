@@ -28,7 +28,7 @@ import com.lfn.icip.icipwebeditor.job.quartz.model.QrtzTriggersId;
 /**
  * The Interface ICIPInternalJobsRepository.
  *
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface QrtzTriggersRepository extends PagingAndSortingRepository<QrtzTriggers, QrtzTriggersId> {

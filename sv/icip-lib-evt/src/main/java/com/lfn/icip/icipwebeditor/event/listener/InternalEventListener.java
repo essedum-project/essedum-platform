@@ -64,7 +64,7 @@ import com.lfn.icip.icipwebeditor.job.model.dto.JobObjectDTO.Jobs;
  * component's <code>addInternalEventListener<code> method. When the
  * internalEvent event occurs, that object's appropriate method is invoked.
  *
- * @author icets
+ * @author essedum
  */
 @Component
 public class InternalEventListener {

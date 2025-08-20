@@ -65,7 +65,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import com.lfn.ai.comm.lib.util.FileValidate;
 import com.lfn.ai.comm.lib.util.FileValidateV2;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.dto.FileValidateSummary;
 import com.lfn.ai.comm.lib.util.exceptions.ExtensionKeyInvalidValue;
 import com.lfn.ai.comm.lib.util.exceptions.ExtensionKeyNotFoundException;
@@ -83,7 +83,7 @@ import com.opencsv.exceptions.CsvValidationException;
 /**
  * The Class ICIPDatasetFilesService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @RefreshScope
@@ -96,7 +96,7 @@ public class ICIPDatasetFilesService implements IICIPDatasetFilesService {
 	public static final String DATASETFILESPATH = "datasetfiles/";
 
 	/** The icip upload dir. */
-	@LeapProperty("icip.fileuploadDir")
+	@EssedumProperty("icip.fileuploadDir")
 	private String icipUploadDir;
 
 	/** The dataset files repository. */
@@ -286,7 +286,7 @@ public class ICIPDatasetFilesService implements IICIPDatasetFilesService {
 //				for (var e : nextLine) {
 //					if(e.startsWith("=") || e.startsWith("+") || e.startsWith("-")
 //	            		   || e.startsWith("@")) {
-//						throw new LeapException("CSV file containing formula is not allowed");           	   
+//						throw new EssedumException("CSV file containing formula is not allowed");           	   
 //					}
 //				}
 //			}
@@ -303,15 +303,15 @@ public class ICIPDatasetFilesService implements IICIPDatasetFilesService {
 //					switch(currentCell.getCellType().toString()) {
 //					case "STRING":
 //						if(currentCell.getStringCellValue().matches("(=|\\+|-|@).*")) {
-//							throw new LeapException("Excel file containing formula is not allowed");
+//							throw new EssedumException("Excel file containing formula is not allowed");
 //						}
 //						break;
 //					case "NUMERIC":
 //						if(String.valueOf(currentCell.getNumericCellValue()).matches("(=|\\+|-|@).*"))
-//							throw new LeapException("Excel file containing formula is not allowed");
+//							throw new EssedumException("Excel file containing formula is not allowed");
 //						break;
 //					case "FORMULA":
-//						throw new LeapException("Excel file containing formula is not allowed");
+//						throw new EssedumException("Excel file containing formula is not allowed");
 //					default:
 //						break;
 //						
@@ -390,7 +390,7 @@ public class ICIPDatasetFilesService implements IICIPDatasetFilesService {
 //				for (var e : nextLine) {
 //					if(e.startsWith("=") || e.startsWith("+") || e.startsWith("-")
 //	            		   || e.startsWith("@")) {
-//						throw new LeapException("CSV file containing formula is not allowed");           	   
+//						throw new EssedumException("CSV file containing formula is not allowed");           	   
 //					}
 //				}
 //			}
@@ -407,15 +407,15 @@ public class ICIPDatasetFilesService implements IICIPDatasetFilesService {
 //					switch(currentCell.getCellType().toString()) {
 //					case "STRING":
 //						if(currentCell.getStringCellValue().matches("(=|\\+|-|@).*")) {
-//							throw new LeapException("Excel file containing formula is not allowed");
+//							throw new EssedumException("Excel file containing formula is not allowed");
 //						}
 //						break;
 //					case "NUMERIC":
 //						if(String.valueOf(currentCell.getNumericCellValue()).matches("(=|\\+|-|@).*"))
-//							throw new LeapException("Excel file containing formula is not allowed");
+//							throw new EssedumException("Excel file containing formula is not allowed");
 //						break;
 //					case "FORMULA":
-//						throw new LeapException("Excel file containing formula is not allowed");
+//						throw new EssedumException("Excel file containing formula is not allowed");
 //					default:
 //						break;
 //						

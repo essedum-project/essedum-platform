@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 /**
  * The Class ICIPDataSetServiceUtilSHA.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 public class ICIPDataSetServiceUtilSHA {

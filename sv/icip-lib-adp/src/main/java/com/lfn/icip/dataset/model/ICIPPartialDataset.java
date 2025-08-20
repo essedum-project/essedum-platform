@@ -49,7 +49,7 @@ import lombok.Setter;
 /**
  * The Class ICIPPartialDataset.
  *
- * @author icets
+ * @author essedum
  */
 @MappedSuperclass
 @EntityListeners(AuditListener.class)

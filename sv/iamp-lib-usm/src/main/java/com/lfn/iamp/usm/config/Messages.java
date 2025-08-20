@@ -22,7 +22,7 @@ import com.lfn.ai.comm.lib.util.i18n.MessageResource;
  * The Class Messages.
  */
 /**
- * @author icets
+ * @author essedum
  */
 public class Messages {
 	

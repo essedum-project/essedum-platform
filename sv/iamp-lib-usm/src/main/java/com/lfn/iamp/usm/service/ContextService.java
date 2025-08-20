@@ -27,7 +27,7 @@ import com.lfn.iamp.usm.domain.Context;
  * Service Interface for managing Context.
  */
 /**
-* @author icets
+* @author essedum
 */
 public interface ContextService {
 

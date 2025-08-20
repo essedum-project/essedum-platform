@@ -27,7 +27,7 @@ import org.slf4j.Marker;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.fileserver.dto.ICIPChunkMetaData;
 import com.lfn.icip.icipmodelserver.model.ICIPModelServers;
 import com.lfn.icip.icipmodelserver.model.ICIPPipelineModel;
@@ -37,7 +37,7 @@ import com.lfn.icip.icipmodelserver.model.dto.ICIPPipelineModelDTO;
 /**
  * The Interface IICIPPipelineModelService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPPipelineModelService {
 
@@ -76,10 +76,10 @@ public interface IICIPPipelineModelService {
 	 * @param page   the page
 	 * @param size   the size
 	 * @return the pipeline models
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	List<ICIPPipelineModel> getPipelineModelsBySearch(String org, String search, int page, int size)
-			throws LeapException;
+			throws EssedumException;
 
 	/**
 	 * Gets the pipeline models len by search.
@@ -121,10 +121,10 @@ public interface IICIPPipelineModelService {
 	 *
 	 * @param pipelineModelDTO the pipeline model DTO
 	 * @return the ICIP pipeline model
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 * @throws SQLException  the SQL exception
 	 */
-	ICIPPipelineModel exposePipelineAsModel(ICIPPipelineModelDTO pipelineModelDTO) throws LeapException, SQLException;
+	ICIPPipelineModel exposePipelineAsModel(ICIPPipelineModelDTO pipelineModelDTO) throws EssedumException, SQLException;
 
 	/**
 	 * Initialize value in pipeline model.
@@ -270,10 +270,10 @@ public interface IICIPPipelineModelService {
 	 *
 	 * @param pipelineModelDTO the pipeline model DTO
 	 * @return the ICIP pipeline model
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 * @throws SQLException  the SQL exception
 	 */
-	ICIPPipelineModel addHostedModel(ICIPPipelineModelDTO pipelineModelDTO) throws LeapException, SQLException;
+	ICIPPipelineModel addHostedModel(ICIPPipelineModelDTO pipelineModelDTO) throws EssedumException, SQLException;
 
 	/**
 	 * Delete file.

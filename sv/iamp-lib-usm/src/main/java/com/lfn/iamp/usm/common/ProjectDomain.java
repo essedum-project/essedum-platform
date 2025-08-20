@@ -27,7 +27,7 @@ import lombok.Setter;
 /**
  * The Class ProjectDomain.
  *
- * @author icets
+ * @author essedum
  */
 /**
  * Gets the value.

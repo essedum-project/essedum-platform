@@ -20,7 +20,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.model.FedEndpointID;
 import com.lfn.icip.icipwebeditor.model.FedModelsID;
 import com.lfn.icip.icipwebeditor.model.ICIPBinaryFiles;

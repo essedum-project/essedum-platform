@@ -54,7 +54,7 @@ import io.jsonwebtoken.SignatureException;
 /**
  * The Class TokenProvider.
  *
- * @author icets
+ * @author essedum
  */
 @Component
 public class CustomJWTTokenProvider implements InitializingBean {

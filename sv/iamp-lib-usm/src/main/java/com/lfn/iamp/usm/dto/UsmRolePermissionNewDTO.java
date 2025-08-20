@@ -22,7 +22,7 @@ import lombok.Setter;
 /**
  * The Class UsmRolePermissionNewDTO.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

@@ -29,7 +29,7 @@ import com.lfn.iamp.usm.domain.UserUnit;
  * Service Interface for managing UserUnit.
  */
 /**
-* @author icets
+* @author essedum
 */
 public interface UserUnitService {
 

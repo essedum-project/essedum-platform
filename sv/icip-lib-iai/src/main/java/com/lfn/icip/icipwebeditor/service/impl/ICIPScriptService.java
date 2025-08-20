@@ -36,7 +36,7 @@ import com.lfn.icip.icipwebeditor.service.IICIPScriptService;
 /**
  * The Class ICIPScriptService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 public class ICIPScriptService implements IICIPScriptService {

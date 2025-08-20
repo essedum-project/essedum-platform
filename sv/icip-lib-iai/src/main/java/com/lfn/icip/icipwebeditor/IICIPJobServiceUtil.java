@@ -21,7 +21,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPNativeJobDetails;
 
 // TODO: Auto-generated Javadoc
@@ -29,7 +29,7 @@ import com.lfn.icip.icipwebeditor.model.dto.ICIPNativeJobDetails;
 /**
  * The Interface IICIPJobServiceUtil.
  *
- * @author icets
+ * @author essedum
  */
 
 public interface IICIPJobServiceUtil {
@@ -39,12 +39,12 @@ public interface IICIPJobServiceUtil {
 	 *
 	 * @param jobDetails the job details
 	 * @return the command
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 * @throws GitAPIException 
 	 * @throws TransportException 
 	 * @throws InvalidRemoteException 
 	 */
-	public String getCommand(ICIPNativeJobDetails jobDetails) throws LeapException, InvalidRemoteException, TransportException, GitAPIException;
+	public String getCommand(ICIPNativeJobDetails jobDetails) throws EssedumException, InvalidRemoteException, TransportException, GitAPIException;
 	
 	public Path getFilePath(ICIPNativeJobDetails jobDetails) throws InvalidRemoteException, TransportException, GitAPIException;
 }

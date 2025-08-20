@@ -50,8 +50,8 @@ import io.micrometer.core.annotation.Timed;
 @RefreshScope
 public class ICIPAIOpsController {
 
-	/** The leap url. */
-	@Value("${LEAP_ULR}")
+	/** The essedum url. */
+	@Value("${ESSEDUM_URL}")
 	private String referer;
 
 	/** The plugin service. */

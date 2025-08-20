@@ -31,7 +31,7 @@ import com.lfn.iamp.usm.domain.Role;
  * Service Interface for managing Role.
  */
 /**
-* @author icets
+* @author essedum
 */
 public interface RoleService {
 

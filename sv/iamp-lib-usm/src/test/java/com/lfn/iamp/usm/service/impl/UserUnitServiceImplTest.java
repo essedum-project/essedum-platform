@@ -48,7 +48,7 @@ import com.lfn.iamp.usm.service.UsersService;
 /**
  * The Class UserUnitServiceImplTest.
  *
- * @author icets
+ * @author essedum
  */
 public class UserUnitServiceImplTest {
 	

@@ -26,7 +26,7 @@ import lombok.Getter;
 /**
  * The Class NotificationEvent.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

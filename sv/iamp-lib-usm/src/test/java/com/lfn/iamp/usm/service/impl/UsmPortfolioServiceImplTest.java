@@ -43,7 +43,7 @@ import com.lfn.iamp.usm.repository.UsmPortfolioRepository;
 /**
  * The Class UsmPortfolioServiceImplTest.
  *
- * @author icets
+ * @author essedum
  */
 public class UsmPortfolioServiceImplTest {
 	

@@ -65,7 +65,7 @@ import com.lfn.iamp.usm.service.impl.UserUnitServiceImpl;
 /**
  * The Class UserUnitResourceTest.
  *
- * @author icets
+ * @author essedum
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserUnitResourceTest {
@@ -100,7 +100,7 @@ public class UserUnitResourceTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setContext(new Context());
 		userUnit.setUser(users);
@@ -161,7 +161,7 @@ public class UserUnitResourceTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setContext(new Context());
 		userUnit.setUser(users);
@@ -195,7 +195,7 @@ public class UserUnitResourceTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setContext(new Context());
 		userUnit.setUser(users);

@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 /**
  * The Class PipelineEventPublisher.
  *
- * @author icets
+ * @author essedum
  */
 @Component
 public class PipelineEventPublisher implements ApplicationEventPublisherAware {

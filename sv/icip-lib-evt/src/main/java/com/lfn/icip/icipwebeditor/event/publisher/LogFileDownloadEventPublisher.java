@@ -25,7 +25,7 @@ public class LogFileDownloadEventPublisher {
 	/**
 	 * The Class AlertService.
 	 * 
-	 * @author icets
+	 * @author essedum
 	 */
 	public class LogFileDownloadService implements ApplicationEventPublisherAware {
 

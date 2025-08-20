@@ -65,7 +65,7 @@ import jakarta.persistence.EntityNotFoundException;
  * REST controller for managing Role.
  */
 /**
-* @author icets
+* @author essedum
 */
 @RestController
 @RequestMapping("/api")

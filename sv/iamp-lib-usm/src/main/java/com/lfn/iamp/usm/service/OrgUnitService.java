@@ -29,7 +29,7 @@ import com.lfn.iamp.usm.domain.OrgUnit;
  * Service Interface for managing OrgUnit.
  */
 /**
-* @author icets
+* @author essedum
 */
 public interface OrgUnitService {
 

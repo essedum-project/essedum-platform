@@ -15,7 +15,7 @@ import com.lfn.icip.icipwebeditor.service.IICIPJobRuntimePluginsService;
 /**
  * The Class ICIPDatasourcePluginsService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 public class ICIPJobRuntimePluginsService implements IICIPJobRuntimePluginsService {

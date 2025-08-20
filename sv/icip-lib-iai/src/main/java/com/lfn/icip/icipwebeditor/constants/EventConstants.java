@@ -20,7 +20,7 @@ package com.lfn.icip.icipwebeditor.constants;
 /**
 * The Class EventConstants.
 *
-* @author icets
+* @author essedum
 */
 
 public class EventConstants {

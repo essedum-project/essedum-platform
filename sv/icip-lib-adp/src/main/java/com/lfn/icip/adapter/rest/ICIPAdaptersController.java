@@ -83,7 +83,7 @@ import io.micrometer.core.annotation.Timed;
 /**
  * The Class ICIPDatasetController.
  *
- * @author icets
+ * @author essedum
  */
 @RestController
 @Timed
@@ -119,8 +119,8 @@ public class ICIPAdaptersController {
 	@Autowired
 	private ICIPRestAdapterService iCIPRestAdapterService;
 	
-	/** The leap url. */
-	@Value("${LEAP_ULR}")
+	/** The essedum url. */
+	@Value("${ESSEDUM_URL}")
 	private String referer;
 
 	@GetMapping(path = "/{adaptername}/{methodname}/{org}")

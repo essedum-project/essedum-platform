@@ -30,7 +30,7 @@ import org.springframework.core.env.MutablePropertySources;
 import com.lfn.common.app.config.DecryptPropertyConfigurer;
 
 /**
-* @author icets
+* @author essedum
 */
 class DecryptPropertyConfigurerTest {
 	static DecryptPropertyConfigurer configurer;
@@ -61,7 +61,7 @@ class DecryptPropertyConfigurerTest {
 	
 //	@Test
 //	void test() throws IOException {
-//		System.setProperty("encryption.key","leap$123##");
+//		System.setProperty("encryption.key","essedum$123##");
 //		System.setProperty("encryption.salt","NB9+lv0guQXYrZYbTmcS20Vd5FxW1h75b8CaI8r+nnPvYrIIHfYu05JVQf9qtJNCS0Vznh692VhUW9HeCPd2IA==");
 //		Properties props = new Properties();
 //		configurer.loadProperties(props);

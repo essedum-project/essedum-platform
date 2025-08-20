@@ -25,7 +25,7 @@ import lombok.Setter;
 /**
  * The Class ICIPEventJobMappingDTO.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

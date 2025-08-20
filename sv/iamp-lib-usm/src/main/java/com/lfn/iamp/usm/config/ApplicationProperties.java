@@ -30,7 +30,7 @@ import lombok.Setter;
  * 
  */
 /**
- * @author icets
+ * @author essedum
  */
 @Configuration
 @ConfigurationProperties(prefix = "application")
@@ -55,7 +55,7 @@ public class ApplicationProperties {
 	/**
 	 * The Class UIConfig.
 	 *
-	 * @author icets
+	 * @author essedum
 	 */
 	/**
 	 * Gets the font.

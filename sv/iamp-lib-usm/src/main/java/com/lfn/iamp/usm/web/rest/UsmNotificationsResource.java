@@ -54,7 +54,7 @@ import io.micrometer.core.annotation.Timed;
  * REST controller for managing UsmNotifications.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @RestController
 @RequestMapping("/api")

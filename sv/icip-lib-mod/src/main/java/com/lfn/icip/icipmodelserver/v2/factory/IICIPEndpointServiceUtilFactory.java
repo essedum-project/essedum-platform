@@ -5,7 +5,7 @@ import com.lfn.icip.icipmodelserver.v2.service.util.IICIPMlopsEndpointServiceUti
 /**
  * A factory for creating IICIPModelServiceUtilFactory objects.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPEndpointServiceUtilFactory {
 

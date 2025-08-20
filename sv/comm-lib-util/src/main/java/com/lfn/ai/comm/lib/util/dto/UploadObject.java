@@ -16,7 +16,7 @@
 package com.lfn.ai.comm.lib.util.dto;
 
 /**
- * @author icets
+ * @author essedum
  *
  */
 public class UploadObject {

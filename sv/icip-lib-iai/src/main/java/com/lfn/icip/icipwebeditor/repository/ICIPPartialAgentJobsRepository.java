@@ -30,7 +30,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPPartialAgentJobs;
  * Spring Data JPA repository for the SchemaRegistry entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPPartialAgentJobsRepository extends PagingAndSortingRepository<ICIPPartialAgentJobs, Integer> {

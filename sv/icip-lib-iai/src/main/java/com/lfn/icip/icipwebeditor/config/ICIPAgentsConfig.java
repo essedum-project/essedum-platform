@@ -21,8 +21,8 @@ import java.util.List;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
 
-import com.lfn.ai.comm.lib.util.annotation.LeapProperties;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperties;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 
 import lombok.Data;
 
@@ -31,7 +31,7 @@ import lombok.Data;
 /**
  * The Class ICIPAgentsFile.
  *
- * @author icets
+ * @author essedum
  */
 
 @Component
@@ -54,91 +54,91 @@ public class ICIPAgentsConfig {
 	private static final String FILEWATCHERKEYWORD = "filewatcher";
 
 	/** The metricconfigfile. */
-	@LeapProperty("icip.agents.metric.configfile")
+	@EssedumProperty("icip.agents.metric.configfile")
 	private String metricconfigfile;
 
 	/** The metricxmlfile. */
-	@LeapProperty("icip.agents.metric.xmlfile")
+	@EssedumProperty("icip.agents.metric.xmlfile")
 	private String metricxmlfile;
 
 	/** The metriccollectkey. */
-	@LeapProperty("icip.agents.metric.collectkey")
+	@EssedumProperty("icip.agents.metric.collectkey")
 	private String metriccollectkey;
 
 	/** The metricxmlkey. */
-	@LeapProperty("icip.agents.metric.xmlkey")
+	@EssedumProperty("icip.agents.metric.xmlkey")
 	private String metricxmlkey;
 
 	/** The metricpykey. */
-	@LeapProperty("icip.agents.metric.pykey")
+	@EssedumProperty("icip.agents.metric.pykey")
 	private String metricpykey;
 
 	/** The metricsamplefile. */
-	@LeapProperty("icip.agents.metric.samplefile")
+	@EssedumProperty("icip.agents.metric.samplefile")
 	private String metricsamplefile;
 
 	/** The metricbasefile. */
-	@LeapProperty("icip.agents.metric.basefile")
+	@EssedumProperty("icip.agents.metric.basefile")
 	private String metricbasefile;
 
 	/** The metriceggfile. */
-	@LeapProperty("icip.agents.metric.eggfile")
+	@EssedumProperty("icip.agents.metric.eggfile")
 	private String metriceggfile;
 
 	/** The metricreadme. */
-	@LeapProperty("icip.agents.metric.readme")
+	@EssedumProperty("icip.agents.metric.readme")
 	private String metricreadme;
 
 	/** The metricrequirementfile. */
-	@LeapProperty("icip.agents.metric.requirementfile")
+	@EssedumProperty("icip.agents.metric.requirementfile")
 	private String metricrequirementfile;
 
 	/** The metricreadonlykeys. */
-	@LeapProperties("icip.agents.metric.readonlykeys")
+	@EssedumProperties("icip.agents.metric.readonlykeys")
 	private List<String> metricreadonlykeys;
 
 	/** The metricpasswordkeys. */
-	@LeapProperties("icip.agents.metric.passwordkeys")
+	@EssedumProperties("icip.agents.metric.passwordkeys")
 	private List<String> metricpasswordkeys;
 
 	/** The filewatcherconfigfile. */
-	@LeapProperty("icip.agents.filewatcher.configfile")
+	@EssedumProperty("icip.agents.filewatcher.configfile")
 	private String filewatcherconfigfile;
 
 	/** The filewatcherlookupkey. */
-	@LeapProperty("icip.agents.filewatcher.lookupkey")
+	@EssedumProperty("icip.agents.filewatcher.lookupkey")
 	private String filewatcherlookupkey;
 
 	/** The filewatcherpykey. */
-	@LeapProperty("icip.agents.filewatcher.pykey")
+	@EssedumProperty("icip.agents.filewatcher.pykey")
 	private String filewatcherpykey;
 
 	/** The filewatchersamplefile. */
-	@LeapProperty("icip.agents.filewatcher.samplefile")
+	@EssedumProperty("icip.agents.filewatcher.samplefile")
 	private String filewatchersamplefile;
 
 	/** The filewatcherbasefile. */
-	@LeapProperty("icip.agents.filewatcher.basefile")
+	@EssedumProperty("icip.agents.filewatcher.basefile")
 	private String filewatcherbasefile;
 
 	/** The filewatchereggfile. */
-	@LeapProperty("icip.agents.filewatcher.eggfile")
+	@EssedumProperty("icip.agents.filewatcher.eggfile")
 	private String filewatchereggfile;
 
 	/** The filewatcherreadme. */
-	@LeapProperty("icip.agents.filewatcher.readme")
+	@EssedumProperty("icip.agents.filewatcher.readme")
 	private String filewatcherreadme;
 
 	/** The filewatcherrequirementfile. */
-	@LeapProperty("icip.agents.filewatcher.requirementfile")
+	@EssedumProperty("icip.agents.filewatcher.requirementfile")
 	private String filewatcherrequirementfile;
 
 	/** The filewatcherreadonlykeys. */
-	@LeapProperties("icip.agents.filewatcher.readonlykeys")
+	@EssedumProperties("icip.agents.filewatcher.readonlykeys")
 	private List<String> filewatcherreadonlykeys;
 
 	/** The filewatcherpasswordkeys. */
-	@LeapProperties("icip.agents.filewatcher.passwordkeys")
+	@EssedumProperties("icip.agents.filewatcher.passwordkeys")
 	private List<String> filewatcherpasswordkeys;
 
 	/**

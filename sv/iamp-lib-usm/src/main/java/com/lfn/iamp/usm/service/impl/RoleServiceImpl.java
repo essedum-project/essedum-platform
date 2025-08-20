@@ -46,7 +46,7 @@ import com.lfn.iamp.usm.service.RoleService;
  * Service Implementation for managing Role.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional

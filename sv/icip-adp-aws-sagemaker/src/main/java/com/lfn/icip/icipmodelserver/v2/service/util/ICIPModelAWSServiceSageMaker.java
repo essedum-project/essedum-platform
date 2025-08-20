@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.constants.ICIPPluginConstants;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.model.ICIPDatasource;
@@ -103,8 +103,8 @@ public class ICIPModelAWSServiceSageMaker implements IICIPModelServiceUtil {
 	@Autowired
 	private ICIPMLFederatedModelsRepository fedModelRepo;
 
-	/** The leap url. */
-	@Value("${LEAP_ULR}")
+	/** The essedum url. */
+	@Value("${ESSEDUM_URL}")
 	private String referer;
 
 	/*
@@ -221,7 +221,7 @@ public class ICIPModelAWSServiceSageMaker implements IICIPModelServiceUtil {
 	 * This Method is defined for Register/Create Model
 	 */
 	@Override
-	public ICIPMLFederatedModel registerModel(ICIPPolyAIRequestWrapper request) throws IOException, LeapException {
+	public ICIPMLFederatedModel registerModel(ICIPPolyAIRequestWrapper request) throws IOException, EssedumException {
 		ICIPDatasource datasource = dsService.getDatasource(request.getName(), request.getOrganization());
 		Boolean isRemoteVMexecutionRequired = false;
 		if (!ICIPPluginConstants.REST.equalsIgnoreCase(datasource.getType())) {
@@ -294,7 +294,7 @@ public class ICIPModelAWSServiceSageMaker implements IICIPModelServiceUtil {
 			saveModel = parseMLFedModel(listJSON, request.getName(), datasource.getAlias(), request.getOrganization());
 		} catch (SageMakerException e) {
 			logger.error("Exception: " + e.awsErrorDetails().errorMessage());
-			throw new LeapException(e.awsErrorDetails().errorMessage());
+			throw new EssedumException(e.awsErrorDetails().errorMessage());
 		} catch (JSONException e) {
 			logger.error("Exception:" + e.getMessage());
 		} catch (ParseException e) {
@@ -525,7 +525,7 @@ public class ICIPModelAWSServiceSageMaker implements IICIPModelServiceUtil {
 	 * This is used to Create Endpoint
 	 */
 	@Override
-	public ICIPMLFederatedEndpoint createEndpoint(ICIPPolyAIRequestWrapper request) throws IOException, LeapException {
+	public ICIPMLFederatedEndpoint createEndpoint(ICIPPolyAIRequestWrapper request) throws IOException, EssedumException {
 		ICIPDatasource datasource = dsService.getDatasource(request.getName(), request.getOrganization());
 		String reqBody = request.getBody();
 		Boolean isRemoteVMexecutionRequired = false;
@@ -583,7 +583,7 @@ public class ICIPModelAWSServiceSageMaker implements IICIPModelServiceUtil {
 			}
 
 		} catch (SageMakerException e) {
-			throw new LeapException(e.awsErrorDetails().errorMessage());
+			throw new EssedumException(e.awsErrorDetails().errorMessage());
 		}
 		sageMakerClient(request.getName(), request.getOrganization()).close();
 		// wrapResponse.setType("AWSSAGEMAKER");
@@ -857,7 +857,7 @@ public class ICIPModelAWSServiceSageMaker implements IICIPModelServiceUtil {
 	 */
 
 	@Override
-	public ICIPPolyAIResponseWrapper deleteEndpoint(ICIPPolyAIRequestWrapper request) throws IOException, LeapException {
+	public ICIPPolyAIResponseWrapper deleteEndpoint(ICIPPolyAIRequestWrapper request) throws IOException, EssedumException {
 		String reqBody = request.getBody();
 		// Calling Method that contains required details
 		//JSONObject body = deployModel(reqBody);
@@ -921,7 +921,7 @@ public class ICIPModelAWSServiceSageMaker implements IICIPModelServiceUtil {
 				}
              
 		} catch (SageMakerException e) {
-			throw new LeapException(e.awsErrorDetails().errorMessage());
+			throw new EssedumException(e.awsErrorDetails().errorMessage());
 		}
 		sageMakerClient(request.getName(), request.getOrganization()).close();
 		wrapResponse.setType("AWSSAGEMAKER");
@@ -1441,7 +1441,7 @@ public class ICIPModelAWSServiceSageMaker implements IICIPModelServiceUtil {
 
 	@Override
 	public ICIPPolyAIResponseWrapper deleteModel(ICIPPolyAIRequestWrapper request)
-			throws LeapException, JSONException, IOException {
+			throws EssedumException, JSONException, IOException {
 		ICIPPolyAIResponseWrapper modelObj = new ICIPPolyAIResponseWrapper();
 		JSONObject reqJsonObj = new JSONObject(request.getRequest());
 		ICIPMLFederatedModel dto = new ICIPMLFederatedModel();

@@ -17,7 +17,7 @@ package com.lfn.icip.icipwebeditor.service.impl;
 
 import org.junit.jupiter.api.Test;
 /**
-* @author icets
+* @author essedum
 */
 class ICIPPluginServiceTest {
 

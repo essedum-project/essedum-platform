@@ -47,7 +47,7 @@ import com.openpojo.validation.utils.SameInstanceIdentityHandlerStub;
 import com.openpojo.validation.utils.ValidationHelper;
 
 /**
- * @author icets
+ * @author essedum
  *
  */
 public class PojoTest {	

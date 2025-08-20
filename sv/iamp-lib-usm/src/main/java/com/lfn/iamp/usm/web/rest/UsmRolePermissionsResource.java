@@ -71,7 +71,7 @@ import org.springframework.transaction.annotation.Transactional;
  * REST controller for managing UsmRolePermissions.
  */
 /**
-* @author icets
+* @author essedum
 */
 @RestController
 @RequestMapping("/api")

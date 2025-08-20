@@ -43,7 +43,7 @@ import com.lfn.iamp.usm.service.UsersService;
  * Service Implementation for managing UserUnit.
  */
 /**
-* @author icets
+* @author essedum
 */
 @Service
 @Transactional

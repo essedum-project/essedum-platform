@@ -28,7 +28,7 @@ import com.lfn.iamp.usm.repository.UsersRepository;
  * Service Interface for managing DashConstant.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @Profile("dbconstants")
 @Service

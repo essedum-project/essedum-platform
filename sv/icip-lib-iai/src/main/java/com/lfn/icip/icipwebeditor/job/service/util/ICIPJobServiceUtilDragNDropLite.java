@@ -30,8 +30,8 @@ import org.yaml.snakeyaml.Yaml;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.IICIPJobServiceUtil;
 import com.lfn.icip.icipwebeditor.constants.IAIJobConstants;
 import com.lfn.icip.icipwebeditor.job.constants.JobConstants;
@@ -46,7 +46,7 @@ import lombok.extern.log4j.Log4j2;
 /**
  * The Class ICIPJobServiceUtildragndroplite.
  *
- * @author icets
+ * @author essedum
  */
 @Component("dragndroplitejob")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -72,10 +72,10 @@ public class ICIPJobServiceUtilDragNDropLite extends ICIPCommonJobServiceUtil im
 	private IAIResolverAspect resolver;
 
 	/** The drag and drop command. */
-	@LeapProperty("icip.pipeline.dragndroplite.command")
+	@EssedumProperty("icip.pipeline.dragndroplite.command")
 	private String dragndropliteCommand;
 
-	@LeapProperty("icip.pipelineScript.directory")
+	@EssedumProperty("icip.pipelineScript.directory")
 	private String pipelineScriptPath;
 
 	/**
@@ -84,10 +84,10 @@ public class ICIPJobServiceUtilDragNDropLite extends ICIPCommonJobServiceUtil im
 	 *
 	 * @param jobDetails the job details
 	 * @return the command
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	@Override
-	public String getCommand(ICIPNativeJobDetails jobDetails) throws LeapException {
+	public String getCommand(ICIPNativeJobDetails jobDetails) throws EssedumException {
 		String cname = jobDetails.getCname();
 		String org = jobDetails.getOrg();
 		String params = jobDetails.getParams();
@@ -100,7 +100,7 @@ public class ICIPJobServiceUtilDragNDropLite extends ICIPCommonJobServiceUtil im
 		} catch (Exception ex) {
 			String msg = "Error in populating dataset : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		try {
@@ -108,7 +108,7 @@ public class ICIPJobServiceUtilDragNDropLite extends ICIPCommonJobServiceUtil im
 		} catch (Exception ex) {
 			String msg = "Error in populating schema : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		if (params != null && !params.isEmpty() && !params.equals("{}")) {
@@ -118,7 +118,7 @@ public class ICIPJobServiceUtilDragNDropLite extends ICIPCommonJobServiceUtil im
 				String msg = "Error in populating attributes : " + ex.getClass().getCanonicalName() + " - "
 						+ ex.getMessage();
 				log.error(msg, ex);
-				throw new LeapException(msg, ex);
+				throw new EssedumException(msg, ex);
 			}
 		}
 
@@ -135,10 +135,10 @@ public class ICIPJobServiceUtilDragNDropLite extends ICIPCommonJobServiceUtil im
 	 * @param pipelineName the pipeline name
 	 * @param jobDetails   the job details
 	 * @return the string builder
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	private StringBuilder createDragNDropYamlscript(Object elementsData, String org, String pipelineName,
-			ICIPNativeJobDetails jobDetails) throws LeapException {
+			ICIPNativeJobDetails jobDetails) throws EssedumException {
 		try {
 			log.info("creating draganddrop yaml script");
 			Yaml yaml = new Yaml();
@@ -164,7 +164,7 @@ public class ICIPJobServiceUtilDragNDropLite extends ICIPCommonJobServiceUtil im
 		} catch (Exception ex) {
 			String msg = "Error in creating yaml file : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 	}
 

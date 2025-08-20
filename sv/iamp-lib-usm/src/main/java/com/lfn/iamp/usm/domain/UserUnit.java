@@ -37,7 +37,7 @@ import lombok.Setter;
  * A UserUnit.
  */
 /**
-* @author icets
+* @author essedum
 */
 
 /**

@@ -57,7 +57,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.service.dto.support.LazyLoadEvent;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageRequestByExample;
 import com.lfn.iamp.usm.domain.Context;
@@ -73,7 +73,7 @@ import com.lfn.iamp.usm.service.impl.UsersServiceImpl;
 /**
  * The Class UsersResourceTest.
  *
- * @author icets
+ * @author essedum
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UsersResourceTest {
@@ -106,7 +106,7 @@ public class UsersResourceTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setContext(new Context());
 		users.setActivated(true);
@@ -117,7 +117,7 @@ public class UsersResourceTest {
 		users.setClientDetails("test");
 		Mockito.when(usersRepository.findById(2)).thenReturn(Optional.of(users));
 		Mockito.when(usersRepository.findByUserLogin("testuser")).thenReturn(users);
-		Mockito.when(usersRepository.findByUserEmail("testuser@infosys.com")).thenReturn(users);
+		Mockito.when(usersRepository.findByUserEmail("testuser@lfn.com")).thenReturn(users);
 		Mockito.when(usersRepository.save(users)).thenReturn(users);
 		Page<Users> usersPage = new PageImpl<>(Collections.singletonList(users));
 		pageable = PageRequest.of(0, 1);
@@ -182,7 +182,7 @@ public class UsersResourceTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setContext(new Context());
 		users.setActivated(true);
@@ -219,7 +219,7 @@ public class UsersResourceTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setContext(new Context());
 		users.setActivated(true);
@@ -276,7 +276,7 @@ public class UsersResourceTest {
 		users1.setUser_f_name("test");
 		users1.setUser_l_name("User");
 		users1.setUser_login("testuser");
-		users1.setUser_email("testuser@infosys.com");
+		users1.setUser_email("testuser@lfn.com");
 		users1.setOnboarded(true);
 		users1.setPassword("test@123");
 		users1.setContext(new Context());
@@ -454,7 +454,7 @@ public class UsersResourceTest {
 		users1.setUser_f_name("test");
 		users1.setUser_l_name("User");
 		users1.setUser_login("testuser");
-		users1.setUser_email("testuser@infosys.com");
+		users1.setUser_email("testuser@lfn.com");
 		users1.setOnboarded(true);
 		users1.setPassword("test@123");
 		users1.setContext(new Context());
@@ -493,24 +493,24 @@ public class UsersResourceTest {
 	@Test
 	@Order(3)
 	public void testfindbymail() throws InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException  {
-		assertEquals(usersResource.checkMail("testuser@infosys.com").getStatusCode(), HttpStatus.OK);
+		assertEquals(usersResource.checkMail("testuser@lfn.com").getStatusCode(), HttpStatus.OK);
 	}
 	@Test
 	@Order(2)
 	public void testNegativefindmymail() throws InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException {
-		assertEquals(usersResource.checkMail("test@infosys.com").getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+		assertEquals(usersResource.checkMail("test@lfn.com").getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 		@Test
 		@Order(1)
-		public void testresetPassword() throws InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException, LeapException {
+		public void testresetPassword() throws InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException, EssedumException {
 			UsersDTO usersDTO = new UsersDTO();
 			Users users1 = new Users();
 			users1.setId(2);
 			users1.setUser_f_name("test");
 			users1.setUser_l_name("User");
 			users1.setUser_login("testuser");
-			users1.setUser_email("testuser@infosys.com");
+			users1.setUser_email("testuser@lfn.com");
 			users1.setOnboarded(true);
 			users1.setPassword("test@123");
 			users1.setContext(new Context());
@@ -524,14 +524,14 @@ public class UsersResourceTest {
 		}
 		@Test
 		@Order(2)
-		public void testNegativeResetPassword() throws InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException, LeapException {
+		public void testNegativeResetPassword() throws InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException, EssedumException {
 			UsersDTO usersDTO = new UsersDTO();
 			Users users1 = new Users();
 			users1.setId(2);
 			users1.setUser_f_name("test");
 			users1.setUser_l_name("User");
 			users1.setUser_login("testuser");
-			users1.setUser_email("testuser@infosys.com");
+			users1.setUser_email("testuser@lfn.com");
 			users1.setOnboarded(true);
 			users1.setPassword("test@123");
 			users1.setContext(new Context());
@@ -546,14 +546,14 @@ public class UsersResourceTest {
 		}
 		@Test
 		@Order(2)
-		public void testNegativeResetPasswordd() throws InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException, LeapException {
+		public void testNegativeResetPasswordd() throws InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException, EssedumException {
 			UsersDTO usersDTO = new UsersDTO();
 			Users users1 = new Users();
 			users1.setId(2);
 			users1.setUser_f_name("test");
 			users1.setUser_l_name("User");
 			users1.setUser_login("testuser");
-			users1.setUser_email("testuser@infosys.com");
+			users1.setUser_email("testuser@lfn.com");
 			users1.setOnboarded(true);
 			users1.setContext(new Context());
 			ModelMapper modelMapper = new ModelMapper();
@@ -603,7 +603,7 @@ public class UsersResourceTest {
 //			users.setUser_f_name("test");
 //			users.setUser_l_name("User");
 //			users.setUser_login("testuser");
-//			users.setUser_email("testuser@infosys.com");
+//			users.setUser_email("testuser@lfn.com");
 //			users.setOnboarded(true);
 //			users.setContext(new Context());
 //			users.setActivated(true);

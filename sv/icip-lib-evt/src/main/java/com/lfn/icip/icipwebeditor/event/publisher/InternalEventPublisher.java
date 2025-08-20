@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 /**
  * The Class InternalEventPublisher.
  *
- * @author icets
+ * @author essedum
  */
 
 @Component

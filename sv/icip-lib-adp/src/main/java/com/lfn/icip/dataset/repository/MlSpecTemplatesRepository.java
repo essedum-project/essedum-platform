@@ -28,7 +28,7 @@ import com.lfn.icip.dataset.model.MlSpecTemplates2;
  * Spring Data JPA repository for the MlSpecTemplates entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface MlSpecTemplatesRepository extends JpaRepository<MlSpecTemplates, Integer> {

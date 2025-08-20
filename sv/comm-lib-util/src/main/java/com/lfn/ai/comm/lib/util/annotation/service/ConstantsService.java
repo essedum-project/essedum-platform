@@ -31,7 +31,7 @@ import com.lfn.iamp.usm.domain.DashConstant2;
  * Service Interface for managing DashConstant.
  */
 /**
- * @author icets
+ * @author essedum
  */
 public interface ConstantsService {
 

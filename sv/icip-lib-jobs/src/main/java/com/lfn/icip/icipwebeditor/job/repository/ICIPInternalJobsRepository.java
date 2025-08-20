@@ -26,7 +26,7 @@ import com.lfn.icip.icipwebeditor.job.model.ICIPInternalJobs;
 /**
  * The Interface ICIPInternalJobsRepository.
  *
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPInternalJobsRepository extends PagingAndSortingRepository<ICIPInternalJobs, Integer> , CrudRepository<ICIPInternalJobs, Integer>{

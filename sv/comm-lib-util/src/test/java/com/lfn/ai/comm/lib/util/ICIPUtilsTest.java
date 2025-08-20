@@ -19,13 +19,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.Test;
 
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 
 public class ICIPUtilsTest {
 	private  final static Logger logger = LoggerFactory.getLogger(ICIPUtils.class);
 
 	@Test
-	public void randomStringGeneratorTest() throws LeapException {
+	public void randomStringGeneratorTest() throws EssedumException {
 		logger.info(ICIPUtils.randomStringGenerator(
 				"INC%parameter_1#2!%parameter_2#3!%randomdigit#3!%randomstring#5!", "ABC", "XYZ"));
 	}

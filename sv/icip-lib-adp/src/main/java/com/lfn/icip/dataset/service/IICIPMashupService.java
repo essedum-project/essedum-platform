@@ -30,7 +30,7 @@ import com.lfn.icip.dataset.model.ICIPMashups;
 /**
  * The Interface IICIPSchemaRegistryService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPMashupService {
 

@@ -30,7 +30,7 @@ import com.google.gson.JsonPrimitive;
 /**
  * The Class ICIPJsonWalker.
  *
- * @author icets
+ * @author essedum
  */
 public class ICIPJsonWalker {
 

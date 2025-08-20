@@ -29,7 +29,7 @@ import com.lfn.iamp.usm.domain.UsmPortfolio;
  * Service Interface for managing UsmPortfolio.
  */
 /**
-* @author icets
+* @author essedum
 */
 public interface UsmPortfolioService {
 

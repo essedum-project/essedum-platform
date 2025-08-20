@@ -28,7 +28,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPBinaryFiles;
 /**
  * The Interface IICIPBinaryFilesService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPBinaryFilesService {
 

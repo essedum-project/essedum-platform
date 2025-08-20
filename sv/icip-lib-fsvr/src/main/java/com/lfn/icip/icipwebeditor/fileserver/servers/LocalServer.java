@@ -39,7 +39,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.icipwebeditor.fileserver.service.impl.CommonService;
 import com.lfn.icip.icipwebeditor.fileserver.util.FileServerUtil;
 
@@ -66,7 +66,7 @@ public class LocalServer implements FileServerUtil {
 	private static final String BUCKET_EQUALS = "?bucket=";
 
 	/** The fileserver url. */
-	@LeapProperty("icip.fileserver.local.url")
+	@EssedumProperty("icip.fileserver.local.url")
 	private String fileserverUrl;
 
 	/** The access token. */

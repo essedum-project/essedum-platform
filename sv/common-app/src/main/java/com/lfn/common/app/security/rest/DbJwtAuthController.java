@@ -56,7 +56,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lfn.ai.comm.lib.util.Crypt;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.common.app.security.jwt.CustomAuthFilter;
 import com.lfn.common.app.security.jwt.CustomJWTTokenProvider;
 import com.lfn.common.app.security.rest.dto.AuthorizeApiDTO;
@@ -74,7 +74,7 @@ import lombok.Setter;
 /**
  * The Class DbJwtAuthController.
  *
- * @author icets
+ * @author essedum
  */
 @Profile("dbjwt")
 @RestController
@@ -100,10 +100,10 @@ public class DbJwtAuthController {
 	private ProjectRepository projectRepo;
 
 	/** The auto user creation. */
-	@LeapProperty("application.uiconfig.autoUserCreation")
+	@EssedumProperty("application.uiconfig.autoUserCreation")
 	String autoUserCreation;
 
-	@LeapProperty("application.uiconfig.enckeydefault")
+	@EssedumProperty("application.uiconfig.enckeydefault")
 	private String encKeydefault;
 
 	/** Claim. */
@@ -397,7 +397,7 @@ public class DbJwtAuthController {
 	/**
 	 * Object to return as body in JWT Authentication.
 	 * 
-	 * @author icets
+	 * @author essedum
 	 */
 	
 	public static class JWTToken {

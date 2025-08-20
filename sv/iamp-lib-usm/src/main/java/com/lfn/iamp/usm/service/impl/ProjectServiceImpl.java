@@ -49,7 +49,7 @@ import com.lfn.iamp.usm.service.UsmPortfolioService;
  * Service Implementation for managing Project.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional

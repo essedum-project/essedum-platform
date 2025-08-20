@@ -60,7 +60,7 @@ import com.lfn.icip.dataset.service.IICIPDatasourcePluginsService;
 /**
  * The Class ICIPAdpService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional

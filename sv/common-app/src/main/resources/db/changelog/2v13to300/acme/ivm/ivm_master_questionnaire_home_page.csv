@@ -219,11 +219,11 @@ id,route,page,questionnaire_id,summary_report,default,usm_project_id,title,sub_t
 
 <body>
 	<div class=\"page\">
-		<div class=\"banner\" style=\"background-image: url('https://leap7/ivmui/assets/images/sre-banner.png');
+		<div class=\"banner\" style=\"background-image: url('https://essedum7/ivmui/assets/images/sre-banner.png');
 background-color: #8626c3;
     background-blend-mode: screen;
 }\">
-			<div class=\"banner-content\" style=\"background-image: url('https://leap7/ivmui/assets/images/geometry.png');\">
+			<div class=\"banner-content\" style=\"background-image: url('https://essedum7/ivmui/assets/images/geometry.png');\">
 			</div>
 		</div>
 		<div id=\"intro\">
@@ -246,7 +246,7 @@ background-color: #8626c3;
 						<div class=\"cardFlex\">
 							<div class=\"card\">
 								<div class=\"card-header\"
-									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/operatingmodel.png');\">
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://essedum7/ivmui/assets/image/operatingmodel.png');\">
 									<div style=\"margin: 0 16px;\">Design & Build</div>
 								</div>
 								<div class=\"card-footer\">
@@ -258,7 +258,7 @@ background-color: #8626c3;
 							</div>
 							<div class=\"card\">
 								<div class=\"card-header\"
-									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Automation.png');\">
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://essedum7/ivmui/assets/image/Automation.png');\">
 									<div style=\"margin: 0 16px;\">Service Management</div>
 								</div>
 								<div class=\"card-footer\">
@@ -269,7 +269,7 @@ background-color: #8626c3;
 							</div>
 							<div class=\"card\">
 								<div class=\"card-header\"
-									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Resilience.png');\">
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://essedum7/ivmui/assets/image/Resilience.png');\">
 									<div style=\"margin: 0 16px;\">Monitoring and Alerting</div>
 								</div>
 								<div class=\"card-footer\">
@@ -1437,11 +1437,11 @@ background-color: #8626c3;\
 
 <body>
 	<div class=\"page\">
-		<div class=\"banner\" style=\"background-image: url('https://leap7/ivmui/assets/images/banner-logodesign.png');
+		<div class=\"banner\" style=\"background-image: url('https://essedum7/ivmui/assets/images/banner-logodesign.png');
 background-color: #8626c3;
     background-blend-mode: screen;
 }\">
-			<div class=\"banner-content\" style=\"background-image: url('https://leap7/ivmui/assets/images/geometry.png');\">
+			<div class=\"banner-content\" style=\"background-image: url('https://essedum7/ivmui/assets/images/geometry.png');\">
 			</div>
 		</div>
 		<div id=\"intro\">
@@ -1469,7 +1469,7 @@ background-color: #8626c3;
 						<div class=\"cardFlex\">
 							<div class=\"card\">
 								<div class=\"card-header\"
-									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/operatingmodel.png');\">
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://essedum7/ivmui/assets/image/operatingmodel.png');\">
 									<div style=\"margin: 0 16px;\">Operating Model</div>
 								</div>
 								<div class=\"card-footer\">
@@ -1483,7 +1483,7 @@ background-color: #8626c3;
 							</div>
 							<div class=\"card\">
 								<div class=\"card-header\"
-									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Automation.png');\">
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://essedum7/ivmui/assets/image/Automation.png');\">
 									<div style=\"margin: 0 16px;\">Service Automation</div>
 								</div>
 								<div class=\"card-footer\">
@@ -1495,7 +1495,7 @@ background-color: #8626c3;
 							</div>
 							<div class=\"card\">
 								<div class=\"card-header\"
-									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Resilience.png');\">
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://essedum7/ivmui/assets/image/Resilience.png');\">
 									<div style=\"margin: 0 16px;\">Resilience</div>
 								</div>
 								<div class=\"card-footer\">
@@ -1508,7 +1508,7 @@ background-color: #8626c3;
 							</div>
 							<div class=\"card\">
 								<div class=\"card-header\"
-									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Automation.png');\">
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://essedum7/ivmui/assets/image/Automation.png');\">
 									<div style=\"margin: 0 16px;\">Business Alignment</div>
 								</div>
 								<div class=\"card-footer\">
@@ -1748,11 +1748,11 @@ background-color: #8626c3;
 
 <body>
 	<div class=\"page\">
-		<div class=\"banner\" style=\"background-image: url('https://leap7/ivmui/assets/images/banner-logodesign.png');
+		<div class=\"banner\" style=\"background-image: url('https://essedum7/ivmui/assets/images/banner-logodesign.png');
 background-color: #8626c3;
     background-blend-mode: screen;
 }\">
-			<div class=\"banner-content\" style=\"background-image: url('https://leap7/ivmui/assets/images/geometry.png');\">
+			<div class=\"banner-content\" style=\"background-image: url('https://essedum7/ivmui/assets/images/geometry.png');\">
 			</div>
 		</div>
 		<div id=\"intro\">
@@ -1780,7 +1780,7 @@ background-color: #8626c3;
 						<div class=\"cardFlex\">
 							<div class=\"card\">
 								<div class=\"card-header\"
-									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/operatingmodel.png');\">
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://essedum7/ivmui/assets/image/operatingmodel.png');\">
 									<div style=\"margin: 0 16px;\">Operating Model</div>
 								</div>
 								<div class=\"card-footer\">
@@ -1794,7 +1794,7 @@ background-color: #8626c3;
 							</div>
 							<div class=\"card\">
 								<div class=\"card-header\"
-									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Automation.png');\">
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://essedum7/ivmui/assets/image/Automation.png');\">
 									<div style=\"margin: 0 16px;\">Service Automation</div>
 								</div>
 								<div class=\"card-footer\">
@@ -1806,7 +1806,7 @@ background-color: #8626c3;
 							</div>
 							<div class=\"card\">
 								<div class=\"card-header\"
-									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Resilience.png');\">
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://essedum7/ivmui/assets/image/Resilience.png');\">
 									<div style=\"margin: 0 16px;\">Resilience</div>
 								</div>
 								<div class=\"card-footer\">
@@ -1819,7 +1819,7 @@ background-color: #8626c3;
 							</div>
 							<div class=\"card\">
 								<div class=\"card-header\"
-									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Automation.png');\">
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://essedum7/ivmui/assets/image/Automation.png');\">
 									<div style=\"margin: 0 16px;\">Business Alignment</div>
 								</div>
 								<div class=\"card-footer\">
@@ -1842,7 +1842,7 @@ background-color: #8626c3;
 	</div>
 </body>
 
-</html>","167","NULL","NULL","2","Infosys Value Management","Identify your potential for transformation through tailored maturity and benchmarking","An organization’s capability to transform is critical for long-term performance. However, many organizations fail short of realizing the potential value of transformational programs. Business leaders lack a straightforward way to measure and improve performance. Our Maturity score assessment applies analytical rigor to help organizations provide a diagnostic & benchmarking toolkit to understand the current state of transformation & enable organization flip the odds to realize value from their transformational programs. Take the assessment to understand the current state of maturity in your organization.","false","0"
+</html>","167","NULL","NULL","2","Infosys Value Management","Identify your potential for transformation through tailored maturity and benchmarking","An organizationï¿½s capability to transform is critical for long-term performance. However, many organizations fail short of realizing the potential value of transformational programs. Business leaders lack a straightforward way to measure and improve performance. Our Maturity score assessment applies analytical rigor to help organizations provide a diagnostic & benchmarking toolkit to understand the current state of transformation & enable organization flip the odds to realize value from their transformational programs. Take the assessment to understand the current state of maturity in your organization.","false","0"
 "71","NULL","<!doctype html>
 <html lang=\"en\">
 
@@ -2059,11 +2059,11 @@ background-color: #8626c3;
 
 <body>
 	<div class=\"page\">
-		<div class=\"banner\" style=\"background-image: url('https://leap7/ivmui/assets/images/banner-logodesign.png');
+		<div class=\"banner\" style=\"background-image: url('https://essedum7/ivmui/assets/images/banner-logodesign.png');
 background-color: #8626c3;
     background-blend-mode: screen;
 }\">
-			<div class=\"banner-content\" style=\"background-image: url('https://leap7/ivmui/assets/images/geometry.png');\">
+			<div class=\"banner-content\" style=\"background-image: url('https://essedum7/ivmui/assets/images/geometry.png');\">
 			</div>
 		</div>
 		<div id=\"intro\">
@@ -2091,7 +2091,7 @@ background-color: #8626c3;
 						<div class=\"cardFlex\">
 							<div class=\"card\">
 								<div class=\"card-header\"
-									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/operatingmodel.png');\">
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://essedum7/ivmui/assets/image/operatingmodel.png');\">
 									<div style=\"margin: 0 16px;\">Operating Model</div>
 								</div>
 								<div class=\"card-footer\">
@@ -2105,7 +2105,7 @@ background-color: #8626c3;
 							</div>
 							<div class=\"card\">
 								<div class=\"card-header\"
-									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Automation.png');\">
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://essedum7/ivmui/assets/image/Automation.png');\">
 									<div style=\"margin: 0 16px;\">Service Automation</div>
 								</div>
 								<div class=\"card-footer\">
@@ -2117,7 +2117,7 @@ background-color: #8626c3;
 							</div>
 							<div class=\"card\">
 								<div class=\"card-header\"
-									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Resilience.png');\">
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://essedum7/ivmui/assets/image/Resilience.png');\">
 									<div style=\"margin: 0 16px;\">Resilience</div>
 								</div>
 								<div class=\"card-footer\">
@@ -2130,7 +2130,7 @@ background-color: #8626c3;
 							</div>
 							<div class=\"card\">
 								<div class=\"card-header\"
-									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://leap7/ivmui/assets/image/Automation.png');\">
+									style=\"background-image: linear-gradient(rgba(0, 0, 0, 0.527),rgba(0, 0, 0, 0.5)),url('https://essedum7/ivmui/assets/image/Automation.png');\">
 									<div style=\"margin: 0 16px;\">Business Alignment</div>
 								</div>
 								<div class=\"card-footer\">
@@ -2153,4 +2153,4 @@ background-color: #8626c3;
 	</div>
 </body>
 
-</html>","175","NULL","NULL","2","Medical Devices and Technology","OPQ","MedTech is a field that accounts for technologies i.e. devices to the healthcare systems for diagnosis, patient care, treatment and improvement of a person’s health.This sector in the healthcare industry is used to connect patient care with technology. MedTech provides all the equipment, tools, and devices which are employed to diagnose and treat a patient.","false","false"
+</html>","175","NULL","NULL","2","Medical Devices and Technology","OPQ","MedTech is a field that accounts for technologies i.e. devices to the healthcare systems for diagnosis, patient care, treatment and improvement of a personï¿½s health.This sector in the healthcare industry is used to connect patient care with technology. MedTech provides all the equipment, tools, and devices which are employed to diagnose and treat a patient.","false","false"

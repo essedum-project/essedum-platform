@@ -24,7 +24,7 @@ import lombok.Setter;
 /**
  * The Class UsmPermissionsDTO.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

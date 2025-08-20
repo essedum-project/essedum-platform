@@ -24,7 +24,7 @@ import com.lfn.icip.dataset.model.ICIPPartialDataset;
 /**
  * The Interface IICIPPartialDatasetService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPPartialDatasetService  {
 	

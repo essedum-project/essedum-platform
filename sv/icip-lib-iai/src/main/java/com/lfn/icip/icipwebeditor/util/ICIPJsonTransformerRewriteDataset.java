@@ -35,7 +35,7 @@ import com.lfn.icip.dataset.model.ICIPSchemaDetails;
 /**
  * The Class ICIPJsonTransformerRewriteDataset.
  *
- * @author icets
+ * @author essedum
  */
 public class ICIPJsonTransformerRewriteDataset extends ICIPJsonTransformerBase<JsonElement> {
 

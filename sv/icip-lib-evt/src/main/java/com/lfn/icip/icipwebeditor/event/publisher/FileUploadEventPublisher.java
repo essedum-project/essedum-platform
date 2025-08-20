@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * The Class FileUploadEventPublisher.
  *
- * @author icets
+ * @author essedum
  */
 
 @Configuration
@@ -44,7 +44,7 @@ public class FileUploadEventPublisher {
 	/**
 	 * The Class FileUploadService.
 	 * 
-	 * @author icets
+	 * @author essedum
 	 */
 	public class FileUploadService implements ApplicationEventPublisherAware {
 

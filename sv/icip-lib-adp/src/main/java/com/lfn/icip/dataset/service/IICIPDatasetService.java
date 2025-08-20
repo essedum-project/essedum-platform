@@ -27,7 +27,7 @@ import org.slf4j.Marker;
 import org.springframework.data.domain.Pageable;
 
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.model.ICIPDataset2;
 import com.lfn.icip.dataset.model.ICIPSchemaRegistry;
@@ -40,7 +40,7 @@ import javassist.NotFoundException;
 /**
  * The Interface IICIPDatasetService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPDatasetService {
 
@@ -332,9 +332,9 @@ public interface IICIPDatasetService {
 	 * @param id the id
 	 * @param config the config
 	 * @return the ICIP dataset 2
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	ICIPDataset2 saveArchivalConfig(int id, String config) throws LeapException;
+	ICIPDataset2 saveArchivalConfig(int id, String config) throws EssedumException;
 
 	/**
 	 * Gets the dataset by dashboard.
@@ -348,7 +348,7 @@ public interface IICIPDatasetService {
 	 * @param schemaAlias
 	 * @param projectName
 	 * @return
-	 * @throws LeapException
+	 * @throws EssedumException
 	 */
 	List<ICIPDataset> getDatasetBySchemaAndOrganization(ICIPSchemaRegistry schema, String projectName) ;
 	

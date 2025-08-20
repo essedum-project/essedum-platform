@@ -31,7 +31,7 @@ import lombok.Setter;
 /**
  * The Class ICIPLazyLoadEvent.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

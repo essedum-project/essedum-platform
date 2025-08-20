@@ -32,7 +32,7 @@ import com.lfn.iamp.usm.domain.Users;
  * Spring Data JPA repository for the UserProjectRole entity.
  */
 /**
-* @author icets	
+* @author essedum	
 */
 @SuppressWarnings("unused")
 //@Repository("usmUserProjectRoleRepository")

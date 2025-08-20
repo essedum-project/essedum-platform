@@ -38,7 +38,7 @@ import lombok.Setter;
 /**
  * The Class ICIPPipelineModel.
  *
- * @author icets
+ * @author essedum
  */
 //@MappedSuperclass
 @EntityListeners(AuditListener.class)

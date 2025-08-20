@@ -21,7 +21,7 @@ import java.util.Objects;
 /**
  * The Class ExceptionUtil.
  *
- * @author icets
+ * @author essedum
  */
 public class ExceptionUtil {
 

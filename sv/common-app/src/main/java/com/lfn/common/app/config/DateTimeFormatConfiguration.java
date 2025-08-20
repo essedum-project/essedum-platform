@@ -27,7 +27,7 @@ import com.lfn.common.app.filter.ApiLogger;
 /**
  * The Class DateTimeFormatConfiguration.
  *
- * @author icets
+ * @author essedum
  */
 @Configuration
 public class DateTimeFormatConfiguration implements WebMvcConfigurer {

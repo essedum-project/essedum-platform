@@ -66,7 +66,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.IICIPJobRuntimeServiceUtil;
 import com.lfn.icip.icipwebeditor.constants.AlertConstants;
 import com.lfn.icip.icipwebeditor.constants.FileConstants;
@@ -230,7 +230,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 	private ICIPFileService iCIPFileService;
 		
 	/** The logging path. */
-	@Value("${LEAP_HOME}")
+	@Value("${ESSEDUM_HOME}")
 	private String folderPath;
 	
 	/** The jobs partial repository. */
@@ -328,7 +328,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 					String msg = "Error in creating new entry in Job Table : " + ex.getClass().getCanonicalName()
 							+ " - " + ex.getMessage();
 					log.error(msg, ex);
-					throw new LeapException(msg, ex);
+					throw new EssedumException(msg, ex);
 				}
      if(allScriptGenerated !=0) {
 				Timestamp[] timestamps = getTimestamps(job);
@@ -367,7 +367,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 			String error = "Job Interrupted after Threshold Time";
 			try {
 				handlingInterruptStatus(error, job);
-			} catch (LeapException e1) {
+			} catch (EssedumException e1) {
 				log.error(e.getMessage(), e);
 			}
 			log.info(error);
@@ -379,7 +379,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 			log.error(error, ex);
 			try {
 				handlingErrorStatus(error, job);
-			} catch (LeapException e) {
+			} catch (EssedumException e) {
 				log.error(e.getMessage(), e);
 			}
 		}
@@ -394,14 +394,14 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 	 * @param jobId the job id
 	 * @return the integer
 	 * @throws IOException Signals that an I/O exception has occurred.
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 * @throws InterruptedException the interrupted exception
 	 * @throws NoSuchAlgorithmException the no such algorithm exception
 	 * @throws ExecutionException the execution exception
 	 */
 	private Integer runNativeCommand(JobObjectDTO job, List<String> cmds, List<ICIPNativeJobDetails> nativeJobDetails,
 			String jobId)
-			throws IOException, LeapException, InterruptedException, NoSuchAlgorithmException, ExecutionException {
+			throws IOException, EssedumException, InterruptedException, NoSuchAlgorithmException, ExecutionException {
 
 		initializeJob(job);
 
@@ -488,7 +488,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 								String msg = "Error in fetching elements[0].attributes : "
 										+ ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 								log.error(msg, ex);
-								throw new LeapException(msg, ex);
+								throw new EssedumException(msg, ex);
 							}
 							String tmpfileType;
 							JsonArray argsJsonArray = new JsonArray();
@@ -500,7 +500,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 								String msg = "Error in getting filetype : " + ex.getClass().getCanonicalName() + " - "
 										+ ex.getMessage();
 								log.error(msg, ex);
-								throw new LeapException(msg, ex);
+								throw new EssedumException(msg, ex);
 							}
 							if (IAIJobConstants.JYTHON.equalsIgnoreCase(tmpfileType)) {
 								log.info("Jython Execution will be started");
@@ -511,7 +511,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 									String msg = "Error in getting file array : " + ex.getClass().getCanonicalName()
 											+ " - " + ex.getMessage();
 									log.error(msg, ex);
-									throw new LeapException(msg, ex);
+									throw new EssedumException(msg, ex);
 								}
 								Path pathOfCode = null;
 								Path pathOfLog = null;
@@ -527,7 +527,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 										String msg = "Error in getting file path : " + ex.getClass().getCanonicalName()
 												+ " - " + ex.getMessage();
 										log.error(msg, ex);
-										throw new LeapException(msg, ex);
+										throw new EssedumException(msg, ex);
 
 									} finally {
 										if (is != null) {
@@ -620,7 +620,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 							result = process.waitFor();
 							break;
 						default:
-							throw new LeapException(INVALID_JOBTYPE);
+							throw new EssedumException(INVALID_JOBTYPE);
 						}
 					} else {
 						if (job.getJobType() !=null && job.getJobType().equals(JobType.CHAIN) && tmpjob != null) {
@@ -647,7 +647,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 						returnPath(job.getJobType(), IAIJobConstants.OUTLOG, null));
 				break;
 			default:
-				throw new LeapException(INVALID_JOBTYPE);
+				throw new EssedumException(INVALID_JOBTYPE);
 			}
 			return result;
 		}
@@ -737,9 +737,9 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 	 * Initialize running.
 	 *
 	 * @param jobtype the jobtype
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private void initializeRunning(JobType jobtype) throws LeapException {
+	private void initializeRunning(JobType jobtype) throws EssedumException {
 		switch (jobtype) {
 		case CHAIN:
 			iCIPChainJobs.setJobStatus(JobStatus.RUNNING.toString());
@@ -754,7 +754,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 			iCIPJobs = jobsService.save(iCIPJobs);
 			break;
 		default:
-			throw new LeapException(INVALID_JOBTYPE);
+			throw new EssedumException(INVALID_JOBTYPE);
 		}
 	}
 
@@ -765,9 +765,9 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 	 * @param logpath the logpath
 	 * @param tmpJob the tmp job
 	 * @return the path
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private Path returnPath(JobType jobtype, String logpath, ICIPJobs tmpJob) throws LeapException {
+	private Path returnPath(JobType jobtype, String logpath, ICIPJobs tmpJob) throws EssedumException {
 		switch (jobtype) {
 		case CHAIN:
 			return Paths.get(annotationServiceUtil.getFolderPath(), IAIJobConstants.LOGPATH,
@@ -780,7 +780,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 			return Paths.get(annotationServiceUtil.getFolderPath(), String.format(LoggerConstants.STRING_DECIMAL_STRING,
 					IAIJobConstants.PIPELINELOGPATH, iCIPJobs.getId(), logpath));
 		default:
-			throw new LeapException(INVALID_JOBTYPE);
+			throw new EssedumException(INVALID_JOBTYPE);
 		}
 	}
 
@@ -788,9 +788,9 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 	 * Initialize job.
 	 *
 	 * @param job the job
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private void initializeJob(JobObjectDTO job) throws LeapException {
+	private void initializeJob(JobObjectDTO job) throws EssedumException {
 		switch (job.getJobType()) {
 		case CHAIN:
 			iCIPChainJobs = chainJobsService.save(iCIPChainJobs);
@@ -802,7 +802,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 			iCIPJobs = jobsService.save(iCIPJobs);
 			break;
 		default:
-			throw new LeapException(INVALID_JOBTYPE);
+			throw new EssedumException(INVALID_JOBTYPE);
 		}
 	}
 
@@ -880,13 +880,13 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 	 * @param job the job
 	 * @param nativeJobDetails the native job details
 	 * @return the list
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 * @throws GitAPIException 
 	 * @throws TransportException 
 	 * @throws InvalidRemoteException 
 	 */
 	private List<String> loadCommands(JobObjectDTO job, List<ICIPNativeJobDetails> nativeJobDetails)
-			throws LeapException, InvalidRemoteException, TransportException, GitAPIException {
+			throws EssedumException, InvalidRemoteException, TransportException, GitAPIException {
 		List<String> cmds = new LinkedList<>();
 		if("generated".equals(nativeJobDetails.get(0).getParams()) || (job.isEvent() && !job.getJobs().get(0).getRuntime().toString().equals("NATIVESCRIPT") && !job.getJobs().get(0).getRuntime().toString().equals("BINARY"))) {
 			String params = nativeJobDetails.get(0).getParams();
@@ -901,7 +901,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
                     String msg = "Error in populating attributes : " + ex.getClass().getCanonicalName() + " - "
                             + ex.getMessage();
                     log.error(msg, ex);
-                    throw new LeapException(msg, ex);
+                    throw new EssedumException(msg, ex);
                 }
             }
 
@@ -984,9 +984,9 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 	 *
 	 * @param job the job
 	 * @return the timestamps
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private Timestamp[] getTimestamps(JobObjectDTO job) throws LeapException {
+	private Timestamp[] getTimestamps(JobObjectDTO job) throws EssedumException {
 		Timestamp[] timestamps = new Timestamp[] { null, null };
 		switch (job.getJobType()) {
 		case CHAIN:
@@ -1024,7 +1024,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 			}
 			break;
 		default:
-			throw new LeapException(INVALID_JOBTYPE);
+			throw new EssedumException(INVALID_JOBTYPE);
 		}
 		return timestamps;
 	}
@@ -1034,9 +1034,9 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 	 *
 	 * @param error the error
 	 * @param job the job
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private void handlingErrorStatus(String error, JobObjectDTO job) throws LeapException {
+	private void handlingErrorStatus(String error, JobObjectDTO job) throws EssedumException {
 		StringBuilder stringBuilder = new StringBuilder(IAIJobConstants.STRING_BUILDER_CAPACITY);
 		stringBuilder.append(System.getProperty(IAIJobConstants.LINE_SEPARATOR));
 		stringBuilder.append(error);
@@ -1055,7 +1055,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 			jobsService.save(iCIPJobs);
 			break;
 		default:
-			throw new LeapException(INVALID_JOBTYPE);
+			throw new EssedumException(INVALID_JOBTYPE);
 		}
 		jobSyncExecutorService.callAlertEvent(true, job.getSubmittedBy(),
 				alertConstants.getPIPELINE_ERROR_MAIL_SUBJECT(), alertConstants.getPIPELINE_ERROR_MAIL_MESSAGE(),
@@ -1067,9 +1067,9 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 	 *
 	 * @param error the error
 	 * @param job the job
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private void handlingInterruptStatus(String error, JobObjectDTO job) throws LeapException {
+	private void handlingInterruptStatus(String error, JobObjectDTO job) throws EssedumException {
 		StringBuilder stringBuilder = new StringBuilder(IAIJobConstants.STRING_BUILDER_CAPACITY);
 		stringBuilder.append(System.getProperty(IAIJobConstants.LINE_SEPARATOR));
 		stringBuilder.append(error);
@@ -1088,7 +1088,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 			jobsService.save(iCIPJobs);
 			break;
 		default:
-			throw new LeapException(INVALID_JOBTYPE);
+			throw new EssedumException(INVALID_JOBTYPE);
 		}
 		jobSyncExecutorService.callAlertEvent(true, job.getSubmittedBy(),
 				alertConstants.getPIPELINE_ERROR_MAIL_SUBJECT(), alertConstants.getPIPELINE_ERROR_MAIL_MESSAGE(),
@@ -1102,10 +1102,10 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 	 * @param attributesHash the attributes hash
 	 * @param submittedOn the submitted on
 	 * @param jobId the job id
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	private void addEntryInJobsTable(JobObjectDTO job, String attributesHash, Timestamp submittedOn,
-			StringBuilder jobId) throws LeapException {
+			StringBuilder jobId) throws EssedumException {
 		Gson gson = new Gson();
 		JobMetadata jobMetadata = returnJobMetadata(job);
 		switch (job.getJobType()) {
@@ -1143,7 +1143,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 					job.getCorelId(), null, gson.toJson(pipelineMetadata), 0, "{}", "{}","{}","{}","{}","");
 			break;
 		default:
-			throw new LeapException(INVALID_JOBTYPE);
+			throw new EssedumException(INVALID_JOBTYPE);
 		}
 	}
 
@@ -1201,9 +1201,9 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 	 * @param job the job
 	 * @return the attribute hash string
 	 * @throws NoSuchAlgorithmException the no such algorithm exception
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private String getAttributeHashString(JobObjectDTO job) throws NoSuchAlgorithmException, LeapException {
+	private String getAttributeHashString(JobObjectDTO job) throws NoSuchAlgorithmException, EssedumException {
 		String params = job.getJobs().get(0).getParams();
 		String nameAndOrg=job.getName().toString()+job.getOrg();
 		if (params == null) {
@@ -1226,7 +1226,7 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 			}
 			return attributesHash;
 		default:
-			throw new LeapException(INVALID_JOBTYPE);
+			throw new EssedumException(INVALID_JOBTYPE);
 		}
 	}
 
@@ -1265,10 +1265,10 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 	 * @return the list
 	 * @throws NoSuchAlgorithmException the no such algorithm exception
 	 * @throws IOException Signals that an I/O exception has occurred.
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	private List<ChainProcess> runSequentially(JobObjectDTO job, List<String[]> cmds)
-			throws NoSuchAlgorithmException, IOException, LeapException {
+			throws NoSuchAlgorithmException, IOException, EssedumException {
 		List<ChainProcess> pbs = new LinkedList<>();
 		for (int index = 0, limit = cmds.size(); index < limit; index++) {
 //			pbs.add(runJob(job, cmds.get(index), index));
@@ -1289,10 +1289,10 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 	 * @return the chain process
 	 * @throws NoSuchAlgorithmException the no such algorithm exception
 	 * @throws IOException Signals that an I/O exception has occurred.
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	private ChainProcess runJob(JobObjectDTO job, String[] cmd, int index)
-			throws NoSuchAlgorithmException, IOException, LeapException {
+			throws NoSuchAlgorithmException, IOException, EssedumException {
 
 		ICIPJobs tmpJob = null;
 		if (job.getJobType().equals(JobType.CHAIN)) {
@@ -1427,25 +1427,25 @@ public class ICIPNativeServiceJob implements IICIPJobRuntimeServiceUtil {
 	}
 
 	@Override
-	public String getNativeJobCommand(ICIPNativeJobDetails jobDetails) throws LeapException {
+	public String getNativeJobCommand(ICIPNativeJobDetails jobDetails) throws EssedumException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String getDragAndDropJobCommand(ICIPNativeJobDetails jobDetails) throws LeapException {
+	public String getDragAndDropJobCommand(ICIPNativeJobDetails jobDetails) throws EssedumException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String getBinaryJobCommand(ICIPNativeJobDetails jobDetails) throws LeapException {
+	public String getBinaryJobCommand(ICIPNativeJobDetails jobDetails) throws EssedumException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String getAzureJobCommand(ICIPNativeJobDetails jobDetails) throws LeapException {
+	public String getAzureJobCommand(ICIPNativeJobDetails jobDetails) throws EssedumException {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -32,7 +32,7 @@ import com.lfn.iamp.usm.service.UsmAccessTokensService;
 /**
  * The Class TokenProvider.
  *
- * @author icets
+ * @author essedum
  */
 @Component
 public class CustomAccessTokenProvider {

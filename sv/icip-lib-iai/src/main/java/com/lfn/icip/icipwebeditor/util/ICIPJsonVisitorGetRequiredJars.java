@@ -29,7 +29,7 @@ import com.google.gson.JsonPrimitive;
 /**
  * The Class ICIPJsonVisitorGetRequiredJars.
  *
- * @author icets
+ * @author essedum
  */
 public class ICIPJsonVisitorGetRequiredJars implements ICIPJsonVisitor<JsonElement> {
 

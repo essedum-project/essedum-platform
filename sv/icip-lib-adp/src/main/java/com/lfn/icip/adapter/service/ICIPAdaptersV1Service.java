@@ -37,7 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 /**
  * The Interface ICIPAdaptersV1Service.
  *
- * @author icets
+ * @author essedum
  */
 public interface ICIPAdaptersV1Service {
 

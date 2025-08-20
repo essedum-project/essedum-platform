@@ -46,7 +46,7 @@ import com.lfn.iamp.usm.service.OrganisationService;
 /**
  * The Class OrgUnitServiceImplTest.
  *
- * @author icets
+ * @author essedum
  */
 public class OrgUnitServiceImplTest {
 	

@@ -42,7 +42,7 @@ import com.lfn.iamp.usm.repository.RoleRepository;
 /**
  * The Class RoleServiceImplTest.
  *
- * @author icets
+ * @author essedum
  */
 public class RoleServiceImplTest {
 	

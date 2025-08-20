@@ -28,7 +28,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPGroupModel2;
  * Spring Data JPA repository for the SchemaRegistry entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPGroupModelRepository2 extends JpaRepository<ICIPGroupModel2, Integer> {

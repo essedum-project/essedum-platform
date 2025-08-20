@@ -51,7 +51,7 @@ import lombok.ToString;
 /**
  * The Class ICIPDataset.
  *
- * @author icets
+ * @author essedum
  */
 //@MappedSuperclass
 @EntityListeners(AuditListener.class)

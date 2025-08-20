@@ -39,7 +39,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.impl.ConstantsServiceImplAbstract;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageRequestByExample;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageResponse;
@@ -71,7 +71,7 @@ import com.lfn.iamp.usm.service.UsmPortfolioService;
  * Service Implementation for managing UserProjectRole.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional
@@ -104,11 +104,11 @@ public class UserProjectRoleServiceImpl implements UserProjectRoleService {
 	private UsmPortfolioService portfolioService;
 
 	/** The roles. */
-	@LeapProperty("application.autouser.autoRoles")
+	@EssedumProperty("application.autouser.autoRoles")
 	private String roles;
 
 	/** The auto user project. */
-	@LeapProperty("application.uiconfig.autoUserProject")
+	@EssedumProperty("application.uiconfig.autoUserProject")
 	private String autoUserProject;
 	
 	
@@ -132,7 +132,7 @@ public class UserProjectRoleServiceImpl implements UserProjectRoleService {
 	/** The Constant default portfolio key. */
 	private static final String DEFAULT_PORTFOLIO_KEY = "defaultPortfolio";
 
-//	@LeapProperty("defaultPortfolio")
+//	@EssedumProperty("defaultPortfolio")
 	private String defaultPortfolio;
 	
 	@Autowired(required = false)

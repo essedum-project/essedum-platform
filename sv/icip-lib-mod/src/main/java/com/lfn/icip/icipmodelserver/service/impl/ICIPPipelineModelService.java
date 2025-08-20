@@ -66,9 +66,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
 import com.lfn.icip.icipmodelserver.constants.PipelineExposeConstants;
 import com.lfn.icip.icipmodelserver.model.ICIPModelServers;
@@ -95,7 +95,7 @@ import com.lfn.icip.icipwebeditor.service.IICIPStreamingServiceService;
 /**
  * The Class ICIPPipelineModelService.
  *
- * @author icets
+ * @author essedum
  */
 @SuppressWarnings("deprecation")
 @Service
@@ -134,15 +134,15 @@ public class ICIPPipelineModelService implements IICIPPipelineModelService {
 	private String claim;
 
 	/** The folder path. */
-	@LeapProperty("icip.jobLogFileDir")
+	@EssedumProperty("icip.jobLogFileDir")
 	private String folderPath;
 
 	/** The kubeflow deploy url. */
-	@LeapProperty("icip.urls.kubeflowdeploy")
+	@EssedumProperty("icip.urls.kubeflowdeploy")
 	private String kubeflowDeployUrl;
 
 	/** The kubeflow status url. */
-	@LeapProperty("icip.urls.kubeflowstatus")
+	@EssedumProperty("icip.urls.kubeflowstatus")
 	private String kubeflowStatusUrl;
 
 	/** The event publisher. */
@@ -165,8 +165,8 @@ public class ICIPPipelineModelService implements IICIPPipelineModelService {
 	/** The Constant STATUS. */
 	private static final String STATUS = "status";
 
-	/** The Constant LEAPURL. */
-	private static final String LEAPURL = "@!url!@";
+	/** The Constant ESSEDUM_URL. */
+	private static final String ESSEDUM_URL = "@!url!@";
 
 	/**
 	 * Gets the pipeline models.
@@ -254,11 +254,11 @@ public class ICIPPipelineModelService implements IICIPPipelineModelService {
 	 * @param page   the page
 	 * @param size   the size
 	 * @return the pipeline models by search
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	@Override
 	public List<ICIPPipelineModel> getPipelineModelsBySearch(String org, String search, int page, int size)
-			throws LeapException {
+			throws EssedumException {
 		return iCIPPipelineModelRepository.findByOrganizationAndSearch(org, search, PageRequest.of(page, size));
 	}
 
@@ -355,12 +355,12 @@ public class ICIPPipelineModelService implements IICIPPipelineModelService {
 	 *
 	 * @param pipelineModelDTO the pipeline model DTO
 	 * @return the ICIP pipeline model
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 * @throws SQLException  the SQL exception
 	 */
 	@Override
 	public ICIPPipelineModel exposePipelineAsModel(ICIPPipelineModelDTO pipelineModelDTO)
-			throws LeapException, SQLException {
+			throws EssedumException, SQLException {
 		String name = pipelineModelDTO.getModelpath();
 		String org = pipelineModelDTO.getOrg();
 		ICIPStreamingServices pipeline = iCIPStreamingServiceService.getICIPStreamingServices(name, org);
@@ -377,7 +377,7 @@ public class ICIPPipelineModelService implements IICIPPipelineModelService {
 		pipelineModel.setStatus(1);
 		pipelineModel.setError(0);
 		String newkey = "/" + event.getEventname() + "/" + event.getOrganization();
-		String newUrl = LEAPURL + "/api/pipelinemodels/run";
+		String newUrl = ESSEDUM_URL + "/api/pipelinemodels/run";
 		updateApiSpec(pipelineModel, newkey, newUrl);
 		pipelineModel = save(pipelineModel);
 		return pipelineModel;
@@ -388,11 +388,11 @@ public class ICIPPipelineModelService implements IICIPPipelineModelService {
 	 *
 	 * @param pipelineModelDTO the pipeline model DTO
 	 * @return the ICIP pipeline model
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 * @throws SQLException  the SQL exception
 	 */
 	@Override
-	public ICIPPipelineModel addHostedModel(ICIPPipelineModelDTO pipelineModelDTO) throws LeapException, SQLException {
+	public ICIPPipelineModel addHostedModel(ICIPPipelineModelDTO pipelineModelDTO) throws EssedumException, SQLException {
 		ICIPPipelineModel pipelineModel = new ICIPPipelineModel();
 		pipelineModel = initializeValueInPipelineModel(pipelineModelDTO, pipelineModel);
 		pipelineModel.setModelpath(pipelineModelDTO.getModelpath());
@@ -535,9 +535,9 @@ public class ICIPPipelineModelService implements IICIPPipelineModelService {
 	 * Update rest node.
 	 *
 	 * @param jsonContent the json content
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private void updateRestNode(JsonElement jsonContent) throws LeapException {
+	private void updateRestNode(JsonElement jsonContent) throws EssedumException {
 		if (jsonContent != null && jsonContent.isJsonObject()) {
 			JsonObject jsonContentObject = jsonContent.getAsJsonObject();
 			JsonElement element = jsonContentObject.get("elements");
@@ -558,17 +558,17 @@ public class ICIPPipelineModelService implements IICIPPipelineModelService {
 									unescapedString.substring(1, unescapedString.length() - 1), JsonObject.class);
 							addRestNode(attributesObject);
 						} catch (Exception jsonex) {
-							throw new LeapException("Unable to find attributes in json_content");
+							throw new EssedumException("Unable to find attributes in json_content");
 						}
 					}
 				} else {
-					throw new LeapException("Unable to find elements in json_content");
+					throw new EssedumException("Unable to find elements in json_content");
 				}
 			} else {
-				throw new LeapException("Unable to find elements in json_content");
+				throw new EssedumException("Unable to find elements in json_content");
 			}
 		} else {
-			throw new LeapException("Unable to parse json_content");
+			throw new EssedumException("Unable to parse json_content");
 		}
 	}
 
@@ -576,13 +576,13 @@ public class ICIPPipelineModelService implements IICIPPipelineModelService {
 	 * Adds the rest node.
 	 *
 	 * @param attributesObject the attributes object
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private void addRestNode(JsonObject attributesObject) throws LeapException {
+	private void addRestNode(JsonObject attributesObject) throws EssedumException {
 		if (attributesObject != null) {
 			attributesObject.addProperty("restnode", true);
 		} else {
-			throw new LeapException("Unable to find attributes in json_content");
+			throw new EssedumException("Unable to find attributes in json_content");
 		}
 	}
 
@@ -640,7 +640,7 @@ public class ICIPPipelineModelService implements IICIPPipelineModelService {
 		pipelineModel.setError(0);
 		pipelineModel.setExecutionscript(getBlobFromStringArray(pipelineModelDTO.getExecutionscript()));
 		pipelineModel.setLoadscript(getBlobFromStringArray(pipelineModelDTO.getLoadscript()));
-		String newUrl = LEAPURL + "/api/pipelinemodels/run/server";
+		String newUrl = ESSEDUM_URL + "/api/pipelinemodels/run/server";
 		updateApiSpec(pipelineModel, "/" + pipelineModelDTO.getFileid(), newUrl);
 		pipelineModel = save(pipelineModel);
 		return pipelineModel;
@@ -700,7 +700,7 @@ public class ICIPPipelineModelService implements IICIPPipelineModelService {
 		String modeldesc = model.getDescription();
 		String usecase = model.getModelpath();
 		String user = ICIPUtils.getUser(claim);
-		String sourceSystem = "leap";
+		String sourceSystem = "essedum";
 		String url = String.format("%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
 				kubeflowDeployUrl, "?modelDesc=", modeldesc, "&modelName=", modelname, "&sourceSystem=", sourceSystem,
 				"&pushToCodestore=", pushToCodeStore, "&usecaseDesc=", usecase, "&modelVersion=", version,

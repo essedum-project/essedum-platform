@@ -31,7 +31,7 @@ import lombok.extern.log4j.Log4j2;
 public class LeapPropertyFieldCallbackV2 implements FieldCallback {
 
 
-	private static String ERROR_PROPERTY_NOT_FOUND = "@LeapProperty(entity) does not exist in the constant DB.";
+	private static String ERROR_PROPERTY_NOT_FOUND = "@EssedumProperty(entity) does not exist in the constant DB.";
 	private Object value;
 	private String commonAppUrl;
 	

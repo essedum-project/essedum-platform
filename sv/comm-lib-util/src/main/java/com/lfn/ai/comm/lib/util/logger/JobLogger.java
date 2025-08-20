@@ -19,7 +19,7 @@ package com.lfn.ai.comm.lib.util.logger;
 /**
  * The Class JobLogger.
  *
- * @author icets
+ * @author essedum
  */
 public class JobLogger {
 

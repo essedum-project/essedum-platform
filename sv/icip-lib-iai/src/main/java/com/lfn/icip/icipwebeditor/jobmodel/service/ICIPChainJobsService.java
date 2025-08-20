@@ -43,8 +43,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.Gson;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.constants.IAIJobConstants;
 import com.lfn.icip.icipwebeditor.executor.sync.service.JobSyncExecutorService;
 import com.lfn.icip.icipwebeditor.job.ICIPNativeServiceJob;
@@ -67,7 +67,7 @@ import com.lfn.icip.icipwebeditor.service.impl.JobScheduleServiceImpl;
 /**
  * The Class ICIPChainJobsService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional
@@ -93,7 +93,7 @@ public class ICIPChainJobsService implements IICIPChainJobsService {
 	private JobSyncExecutorService jobSyncExecutorService;
 
 	/** The days string. */
-	@LeapProperty("icip.cleanup.deletion.days")
+	@EssedumProperty("icip.cleanup.deletion.days")
 	private String daysString;
 
 	@Autowired
@@ -370,10 +370,10 @@ public class ICIPChainJobsService implements IICIPChainJobsService {
 	 * Stop local job.
 	 *
 	 * @param jobid the jobid
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	@Override
-	public void stopLocalJob(String jobid) throws LeapException {
+	public void stopLocalJob(String jobid) throws EssedumException {
 		jobSyncExecutorService.stopLocalJob(jobid);
 	}
 
@@ -654,18 +654,18 @@ public class ICIPChainJobsService implements IICIPChainJobsService {
 	/**
 	 * Delete older data.
 	 *
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	@Override
 	@Transactional
-	public void deleteOlderData() throws LeapException {
+	public void deleteOlderData() throws EssedumException {
 		try {
 			int days = Integer.parseInt(daysString);
 			logger.info("Deleting data older than {} day(s)", days);
 			iCIPChainJobsRepository.deleteOlderData(days);
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
-			throw new LeapException(ex.getMessage());
+			throw new EssedumException(ex.getMessage());
 		}
 	}
 

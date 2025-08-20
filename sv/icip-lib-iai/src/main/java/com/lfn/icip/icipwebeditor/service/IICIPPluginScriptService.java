@@ -24,7 +24,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPPluginScript;
 /**
  * The Interface IICIPPluginService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPPluginScriptService {
 

@@ -36,7 +36,7 @@ import com.lfn.icip.icipwebeditor.service.IICIPBinaryFilesService;
 /**
  * The Class ICIPBinaryFilesService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 public class ICIPBinaryFilesService implements IICIPBinaryFilesService {

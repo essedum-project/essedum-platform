@@ -62,7 +62,7 @@ public class DbJwtAuthControllerTest {
 		SecurityContext securityContext = mock(SecurityContext.class);
 		Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
 		SecurityContextHolder.setContext(securityContext);
-		ReflectionTestUtils.setField(dbJwtAuthController, "encKeydefault", "leapAppInfosys12");
+		ReflectionTestUtils.setField(dbJwtAuthController, "encKeydefault", "essedumAppLfn123");
 
 	}
 

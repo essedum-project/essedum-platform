@@ -44,7 +44,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.Crypt;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
 import com.lfn.icip.adapter.service.MlInstancesService;
 import com.lfn.icip.dataset.constants.ICIPPluginConstants;
@@ -66,7 +66,7 @@ import com.lfn.icip.dataset.service.impl.ICIPDatasourceService;
 /**
  * The Class MlInstancesServiceImpl.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @RefreshScope
@@ -107,7 +107,7 @@ public class MlInstancesServiceImpl implements MlInstancesService {
 	private String claim;
 	
 	/** The encryption key. */
-	@LeapProperty("application.uiconfig.enckeydefault")
+	@EssedumProperty("application.uiconfig.enckeydefault")
 	private static String enckeydefault;
 	
 	@Autowired

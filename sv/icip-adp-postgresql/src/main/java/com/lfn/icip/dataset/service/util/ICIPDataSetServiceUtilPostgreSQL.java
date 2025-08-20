@@ -64,7 +64,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.factory.IICIPDataSetServiceUtilFactory;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.model.ICIPDatasource;
@@ -74,7 +74,7 @@ import com.lfn.icip.dataset.service.util.IICIPDataSetServiceUtil.SQLPagination;
 /**
  * The Class ICIPDataSetServiceUtilMSSQL.
  *
- * @author icets
+ * @author essedum
  */
 @Component("postgresqlds")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -135,10 +135,10 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 	 *
 	 * @param dataset the dataset
 	 * @return true, if successful
-	 * @throws LeapException 
+	 * @throws EssedumException 
 	 */
 	@Override
-	public boolean testConnection(ICIPDataset dataset) throws LeapException {
+	public boolean testConnection(ICIPDataset dataset) throws EssedumException {
 		JSONObject obj = new JSONObject(dataset.getDatasource().getConnectionDetails());
 		try (Connection conn = DriverManager.getConnection(obj.optString("url"), obj.optString("userName"),
 				obj.optString(PSTR))) {
@@ -149,10 +149,10 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 			}
 			else {
 				
-				throw new LeapException("Only SELECT query allowed");
+				throw new EssedumException("Only SELECT query allowed");
 			}
 		} catch (SQLException e) {
-			throw new LeapException("Error Testing Connection : ", e);
+			throw new EssedumException("Error Testing Connection : ", e);
 		}	
 	}
 	
@@ -1258,7 +1258,7 @@ public class ICIPDataSetServiceUtilPostgreSQL extends ICIPDataSetServiceUtilSqlA
 	}
 
 //	public void loadDataset(Marker marker, Map<String, String> map, String id, ICIPDataset dataset, int projectId,
-//			boolean overwrite, String org) throws IOException, LeapException {
+//			boolean overwrite, String org) throws IOException, EssedumException {
 //		
 //	}
 

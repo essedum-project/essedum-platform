@@ -26,7 +26,7 @@ public class SwaggerConfigTest {
 	SwaggerConfig config = new SwaggerConfig();
 	@Test
 	void testApi() throws Exception {
-		assertNotNull(config.LeapOpenAPI());
+		assertNotNull(config.EssedumOpenAPI());
 	}
 
 }

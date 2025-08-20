@@ -47,7 +47,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lfn.ai.comm.lib.util.Crypt;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.common.app.security.jwt.CustomJWTTokenProvider;
 import com.lfn.common.app.security.rest.dto.AuthorizeApiDTO;
 import com.lfn.common.app.security.rest.dto.ResponseDTO;
@@ -67,7 +67,7 @@ import lombok.Setter;
 /**
  * The Class OAuth2AuthController.
  *
- * @author icets
+ * @author essedum
  */
 @Profile("oauth2")
 @Controller
@@ -105,7 +105,7 @@ public class OAuth2AuthController {
 	/** Claim. */
 	@Value("${security.claim}")
 	private String claim;
-	@LeapProperty("application.uiconfig.enckeydefault")
+	@EssedumProperty("application.uiconfig.enckeydefault")
 	private String encKeydefault;
 	
 	@Autowired

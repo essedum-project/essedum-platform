@@ -1054,7 +1054,7 @@ export class ApisService {
   }
 
   revokeRecursive(retryCount): Observable<any> {
-    return this.https.get("/api/leap/logout",
+    return this.https.get("/api/essedum/logout",
       { observe: "response", responseType: "text", })
       .pipe(map((response) => {
         if (response.status == 200) {

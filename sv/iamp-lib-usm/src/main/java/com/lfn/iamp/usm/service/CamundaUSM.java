@@ -28,7 +28,7 @@ import com.lfn.iamp.usm.dto.UsmPortfolioDTO;
  * Service Interface for managing Context.
  */
 /**
-* @author icets
+* @author essedum
 */
 public interface CamundaUSM {
 

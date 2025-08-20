@@ -15,40 +15,41 @@
 
 package com.lfn.ai.comm.lib.util.annotation;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
+import java.lang.reflect.Field;
+
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.FieldCallback;
 
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 
-@Component
-public class LeapPropertyAnnotationProcessor implements BeanPostProcessor {
+import lombok.extern.log4j.Log4j2;
 
-	@Autowired
+@Log4j2
+public class EssedumPropertyFieldCallback implements FieldCallback {
+
+	private static String ERROR_PROPERTY_NOT_FOUND = "@EssedumProperty(entity) does not exist in the constant DB.";
+	private Object value;
 	private ConstantsService constantsService;
 
-	@Override
-	public Object postProcessBeforeInitialization(Object value, String beanName) {
-		this.scanDataAccessAnnotation(value);
-		return value;
+	public EssedumPropertyFieldCallback(Object value, ConstantsService constantsService) {
+		this.value = value;
+		this.constantsService = constantsService;
 	}
 
 	@Override
-	public Object postProcessAfterInitialization(Object value, String beanName) {
-		return value;
-	}
-
-	protected void scanDataAccessAnnotation(Object value) {
-		this.configureFieldInjection(value);
-	}
-
-	private void configureFieldInjection(Object value) {
-		Class<?> managedBeanClass = value.getClass();
-		FieldCallback fieldCallback = new LeapPropertyFieldCallback(value, constantsService);
-		ReflectionUtils.doWithFields(managedBeanClass, fieldCallback);
+	public void doWith(Field field) throws IllegalAccessException {
+		if (!field.isAnnotationPresent(EssedumProperty.class)) {
+			return;
+		}
+		ReflectionUtils.makeAccessible(field);
+		String key = field.getDeclaredAnnotation(EssedumProperty.class).value();
+		try {
+			field.set(value, constantsService.findByKeys(key, "Core").trim());
+		} catch (Exception ex) {
+			String error = String.format("%s : Key %s", ERROR_PROPERTY_NOT_FOUND, key);
+			log.error(error, ex);
+			throw new IllegalArgumentException(error);
+		}
 	}
 
 }

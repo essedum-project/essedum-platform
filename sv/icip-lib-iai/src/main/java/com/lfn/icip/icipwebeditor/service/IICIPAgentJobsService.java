@@ -18,7 +18,7 @@ package com.lfn.icip.icipwebeditor.service;
 import java.io.IOException;
 import java.util.List;
 
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.model.ICIPAgentJobs;
 import com.lfn.icip.icipwebeditor.model.ICIPPartialAgentJobs;
 
@@ -27,7 +27,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPPartialAgentJobs;
 /**
  * The Interface IICIPAgentJobsService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPAgentJobsService {
 
@@ -149,9 +149,9 @@ public interface IICIPAgentJobsService {
 	 * Stop local job.
 	 *
 	 * @param jobid the jobid
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	void stopLocalJob(String jobid) throws LeapException;
+	void stopLocalJob(String jobid) throws EssedumException;
 
 	/**
 	 * Boot cleanup.
@@ -161,9 +161,9 @@ public interface IICIPAgentJobsService {
 	/**
 	 * Delete older data.
 	 *
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	void deleteOlderData() throws LeapException;
+	void deleteOlderData() throws EssedumException;
 
 	/**
 	 * Find by job id with log.

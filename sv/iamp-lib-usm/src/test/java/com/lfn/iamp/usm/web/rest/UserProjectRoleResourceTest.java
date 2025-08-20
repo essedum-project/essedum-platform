@@ -85,7 +85,7 @@ import com.lfn.iamp.usm.service.impl.UserProjectRoleServiceImpl;
 /**
  * The Class UserProjectRoleResourceTest.
  *
- * @author icets
+ * @author essedum
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserProjectRoleResourceTest {
@@ -171,7 +171,7 @@ public class UserProjectRoleResourceTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setContext(new Context());
 		users.setActivated(true);
@@ -186,7 +186,7 @@ public class UserProjectRoleResourceTest {
 		users1.setUser_f_name("test");
 		users1.setUser_l_name("User");
 		users1.setUser_login("testuser");
-		users1.setUser_email("testuser@infosys.com");
+		users1.setUser_email("testuser@lfn.com");
 		users1.setOnboarded(true);
 		users1.setContext(new Context());
 		users1.setActivated(true);
@@ -306,7 +306,7 @@ public class UserProjectRoleResourceTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setContext(new Context());
 		users.setActivated(true);
@@ -364,7 +364,7 @@ public class UserProjectRoleResourceTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setContext(new Context());
 		users.setActivated(true);
@@ -608,7 +608,7 @@ public class UserProjectRoleResourceTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setContext(new Context());
 		users.setActivated(true);
@@ -686,7 +686,7 @@ public class UserProjectRoleResourceTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setContext(new Context());
 		users.setActivated(true);
@@ -722,7 +722,7 @@ public class UserProjectRoleResourceTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setContext(new Context());
 		users.setActivated(true);
@@ -758,7 +758,7 @@ public class UserProjectRoleResourceTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setContext(new Context());
 		users.setActivated(true);

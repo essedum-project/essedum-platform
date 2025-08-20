@@ -71,7 +71,7 @@ import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.ICIPHeaderUtil;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.model.ICIPMlIntstance;
@@ -625,7 +625,7 @@ public class ICIPMlopsController {
 			@RequestParam(name = "project", required = true) String project,
 			@RequestParam(name = "isCached", required = true) Boolean isCached,
 			@RequestParam(name = "isInstance", required = false) String isInstance,
-			@RequestHeader Map<String, String> headers) throws IOException, LeapException {
+			@RequestHeader Map<String, String> headers) throws IOException, EssedumException {
 		if (isCached) {
 			ICIPPolyAIRequestWrapper request = new ICIPPolyAIRequestWrapper();
 			request.setOrganization(project);
@@ -688,7 +688,7 @@ public class ICIPMlopsController {
 			@RequestParam(name = "version", required = true) String version,
 			@RequestParam(name = "cloud_provider", required = true) String adapterInstance,
 			@RequestParam(name = "project", required = true) String project, @RequestHeader Map<String, String> headers)
-			throws IOException, LeapException {
+			throws IOException, EssedumException {
 		Map<String, String> params = new HashMap<String, String>();
 		ICIPPolyAIRequestWrapper request = new ICIPPolyAIRequestWrapper();
 		request.setHeader(headers);
@@ -1032,7 +1032,7 @@ public class ICIPMlopsController {
 			@RequestParam(name = "filter", required = false) String filter,
 			@RequestParam(name = "isCached", required = true) Boolean isCached,
 			@RequestParam(name = "isInstance", required = false) String isInstance,
-			@RequestHeader Map<String, String> headers) throws IOException, LeapException, Exception {
+			@RequestHeader Map<String, String> headers) throws IOException, EssedumException, Exception {
 		Map<String, String> params = new HashMap<String, String>();
 		if (isCached) {
 			ICIPPolyAIRequestWrapper request = new ICIPPolyAIRequestWrapper();

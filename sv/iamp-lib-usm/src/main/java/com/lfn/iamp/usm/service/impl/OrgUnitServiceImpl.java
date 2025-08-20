@@ -41,7 +41,7 @@ import com.lfn.iamp.usm.service.OrganisationService;
  * Service Implementation for managing OrgUnit.
  */
 /**
-* @author icets
+* @author essedum
 */
 @Service
 @Transactional

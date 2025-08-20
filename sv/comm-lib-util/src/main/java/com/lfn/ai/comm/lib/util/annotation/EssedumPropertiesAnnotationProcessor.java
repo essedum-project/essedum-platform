@@ -13,31 +13,42 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lfn.common.app.bootstrap;
+package com.lfn.ai.comm.lib.util.annotation;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.ReflectionUtils.FieldCallback;
 
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
-import com.lfn.iamp.usm.service.UsmPermissionApiService;
 
 @Component
-public class PostLeapStart implements ApplicationRunner {
+public class EssedumPropertiesAnnotationProcessor implements BeanPostProcessor {
 
 	@Autowired
 	private ConstantsService dashConstantService;
 
-	@Autowired
-	private UsmPermissionApiService usmPermissionApiService;
+	@Override
+	public Object postProcessBeforeInitialization(Object value, String beanName) {
+		this.scanDataAccessAnnotation(value);
+		return value;
+	}
 
 	@Override
-	public void run(ApplicationArguments args) throws Exception {
+	public Object postProcessAfterInitialization(Object value, String beanName) {
+		return value;
+	}
 
-		dashConstantService.refreshConfigKeyMap();
-		usmPermissionApiService.refreshConfigAPIsMap();
+	protected void scanDataAccessAnnotation(Object value) {
+		this.configureFieldInjection(value);
+	}
 
+	private void configureFieldInjection(Object value) {
+		Class<?> managedBeanClass = value.getClass();
+		FieldCallback fieldCallback = new EssedumPropertiesFieldCallback(value, dashConstantService);
+		ReflectionUtils.doWithFields(managedBeanClass, fieldCallback);
 	}
 
 }

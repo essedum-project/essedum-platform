@@ -59,7 +59,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 /**
  * The Class ICIPPluginController.
  *
- * @author icets
+ * @author essedum
  */
 @RestController
 @Timed

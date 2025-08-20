@@ -42,7 +42,7 @@ import com.lfn.icip.dataset.model.ICIPDatasource;
 /**
  * The Class ICIPDataSourceServiceUtilMySQL.
  *
- * @author icets
+ * @author essedum
  */
 @Component("mysqlsource")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

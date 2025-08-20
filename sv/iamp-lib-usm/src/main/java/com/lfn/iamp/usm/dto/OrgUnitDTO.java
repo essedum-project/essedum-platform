@@ -24,7 +24,7 @@ import lombok.Setter;
 /**
  * The Class OrgUnitDTO.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

@@ -76,7 +76,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.model.ICIPSchemaDetails;
@@ -234,9 +234,9 @@ public class ICIPRemoteSagemakerJob extends ICIPCommonJobServiceUtil implements 
 
 	private String binaryCommand = "/venv/lib/python3.7/site-packages/pyspark/bin/spark-submit --class # # # # #";
 
-	private String dragAndDropCommand = "@!icip.pythonpath!@ -m dagster pipeline execute -m leap.DagsterExecuter -n pipelineExecuter";
+	private String dragAndDropCommand = "@!icip.pythonpath!@ -m dagster pipeline execute -m essedum.DagsterExecuter -n pipelineExecuter";
 
-	private String dragAndDropCommandWithRestNode = "@!icip.pythonpath!@ -m dagster pipeline execute -m leap.RESTAPIExecuter -n pipelineExecuter";
+	private String dragAndDropCommandWithRestNode = "@!icip.pythonpath!@ -m dagster pipeline execute -m essedum.RESTAPIExecuter -n pipelineExecuter";
 
 	/** The Constant INVALID_TYPE. */
 	private static final String INVALID_TYPE = "Invalid Type";
@@ -397,7 +397,7 @@ public class ICIPRemoteSagemakerJob extends ICIPCommonJobServiceUtil implements 
 					String msg = "Error in running job : " + ex.getClass().getCanonicalName()
 							+ " - " + ex.getMessage();
 					log.error(msg, ex);
-					throw new LeapException(msg, ex);
+					throw new EssedumException(msg, ex);
 				}
 
 			}
@@ -420,7 +420,7 @@ public class ICIPRemoteSagemakerJob extends ICIPCommonJobServiceUtil implements 
 				writer.writeBytes(ex.getMessage());
 				//handlingErrorStatus("error occurred ", jobObject);
 				handlingErrorStatus(ex.getMessage(), jobObject);
-			} catch (LeapException | IOException e) {
+			} catch (EssedumException | IOException e) {
 				log.error("An error occurred while processing the job", e);
 			} finally {
 				try {
@@ -442,9 +442,9 @@ public class ICIPRemoteSagemakerJob extends ICIPCommonJobServiceUtil implements 
 	 *
 	 * @param error the error
 	 * @param job   the job
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private void handlingErrorStatus(String error, JobObjectDTO job) throws LeapException {
+	private void handlingErrorStatus(String error, JobObjectDTO job) throws EssedumException {
 		StringBuilder stringBuilder = new StringBuilder(IAIJobConstants.STRING_BUILDER_CAPACITY);
 		stringBuilder.append(System.getProperty(IAIJobConstants.LINE_SEPARATOR));
 		stringBuilder.append(error);
@@ -463,9 +463,9 @@ public class ICIPRemoteSagemakerJob extends ICIPCommonJobServiceUtil implements 
 	 *
 	 * @param error the error
 	 * @param job   the job
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private void handlingInterruptStatus(String error, JobObjectDTO job) throws LeapException {
+	private void handlingInterruptStatus(String error, JobObjectDTO job) throws EssedumException {
 		StringBuilder stringBuilder = new StringBuilder(IAIJobConstants.STRING_BUILDER_CAPACITY);
 		stringBuilder.append(System.getProperty(IAIJobConstants.LINE_SEPARATOR));
 		stringBuilder.append(error);
@@ -479,7 +479,7 @@ public class ICIPRemoteSagemakerJob extends ICIPCommonJobServiceUtil implements 
 				alertConstants.getPIPELINE_ERROR_NOTIFICATION_MESSAGE(), job.getName(), job.getOrg(), null);
 	}
 
-	private String getRunCommand(Jobs job, List<ICIPNativeJobDetails> nativeJobDetails) throws LeapException, InvalidRemoteException, TransportException, GitAPIException {
+	private String getRunCommand(Jobs job, List<ICIPNativeJobDetails> nativeJobDetails) throws EssedumException, InvalidRemoteException, TransportException, GitAPIException {
 		String runCmd = "";
 		switch (job.getRuntime()) {
 		case NATIVESCRIPT:
@@ -544,7 +544,7 @@ public class ICIPRemoteSagemakerJob extends ICIPCommonJobServiceUtil implements 
 
 	private ResponseEntity<String> runScript(Integer version, String runCmd, IICIPJobServiceUtil jobUtilConn,
 			List<ICIPNativeJobDetails> nativeJobDetails, JSONObject connDetails, ICIPDatasource uploadDs, Jobs job,
-			String datasourceName) throws LeapException, InvalidRemoteException, TransportException, GitAPIException {
+			String datasourceName) throws EssedumException, InvalidRemoteException, TransportException, GitAPIException {
 
 		String pipelineId = null;
 		Path filePath = getUploadFilePath(jobUtilConn, nativeJobDetails);
@@ -595,7 +595,7 @@ public class ICIPRemoteSagemakerJob extends ICIPCommonJobServiceUtil implements 
 				return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
 			}
 		} catch (Exception e) {
-			throw new LeapException(e.getMessage());
+			throw new EssedumException(e.getMessage());
 
 		}
 
@@ -821,7 +821,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public String getNativeJobCommand(ICIPNativeJobDetails jobDetails) throws LeapException, InvalidRemoteException, TransportException, GitAPIException {
+	public String getNativeJobCommand(ICIPNativeJobDetails jobDetails) throws EssedumException, InvalidRemoteException, TransportException, GitAPIException {
 		String cname = jobDetails.getCname();
 		String org = jobDetails.getOrg();
 		String params = jobDetails.getParams();
@@ -837,7 +837,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 			String msg = "Error in fetching elements[0].attributes : " + ex.getClass().getCanonicalName() + " - "
 					+ ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		String tmpfileType;
@@ -846,7 +846,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 		} catch (Exception ex) {
 			String msg = "Error in getting filetype : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		String[] separator = new String[] { "" };
@@ -869,7 +869,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 		} catch (Exception ex) {
 			String msg = "Error in getting file array : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		for (JsonElement file : files) {
@@ -883,7 +883,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 				String msg = "Error in getting file path : " + ex.getClass().getCanonicalName() + " - "
 						+ ex.getMessage();
 				log.error(msg, ex);
-				throw new LeapException(msg, ex);
+				throw new EssedumException(msg, ex);
 			} finally {
 				if (is != null) {
 					try {
@@ -919,7 +919,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 						String msg = "Error in getting datasource : " + ex.getClass().getCanonicalName() + " - "
 								+ ex.getMessage();
 						log.error(msg, ex);
-						throw new LeapException(msg, ex);
+						throw new EssedumException(msg, ex);
 					}
 					connDetails.addProperty("salt", datasource.getSalt());
 					value = String.format(LoggerConstants.STRING_STRING_STRING, "\"",
@@ -935,7 +935,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 						String msg = "Error in getting dataset : " + ex.getClass().getCanonicalName() + " - "
 								+ ex.getMessage();
 						log.error(msg, ex);
-						throw new LeapException(msg, ex);
+						throw new EssedumException(msg, ex);
 					}
 					for (Entry<String, JsonElement> schemaentry : e.getAsJsonObject().entrySet()) {
 						if (schemaentry.getKey().equals(IAIJobConstants.SCHEMA)) {
@@ -953,7 +953,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 								String msg = "Error in getting schema from dataset : "
 										+ ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 								log.error(msg, ex);
-								throw new LeapException(msg, ex);
+								throw new EssedumException(msg, ex);
 							}
 							break;
 						}
@@ -969,7 +969,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 						String msg = "Error in getting schema : " + ex.getClass().getCanonicalName() + " - "
 								+ ex.getMessage();
 						log.error(msg, ex);
-						throw new LeapException(msg, ex);
+						throw new EssedumException(msg, ex);
 					}
 					break;
 				default:
@@ -992,7 +992,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 				writeTempFile(createNativeYamlscript(argumentBuilder), filePath);
 				arguments = filePath.toAbsolutePath().toString();
 			} catch (Exception ex) {
-				throw new LeapException(ex.getMessage(), ex);
+				throw new EssedumException(ex.getMessage(), ex);
 			}
 		} else {
 			StringBuilder args = new StringBuilder();
@@ -1028,9 +1028,9 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 	 * @param params the params
 	 * @param gson   the gson
 	 * @return the latest argument
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private JsonArray getLatestArgument(JsonObject binary, String params, Gson gson) throws LeapException {
+	private JsonArray getLatestArgument(JsonObject binary, String params, Gson gson) throws EssedumException {
 		try {
 			JsonArray binaryArray = binary.get("arguments").getAsJsonArray();
 			if (!(params == null || params.trim().isEmpty() || params.trim().equals("{}"))) {
@@ -1061,7 +1061,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 		} catch (Exception ex) {
 			String msg = "Error in getting arguments : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 	}
 
@@ -1070,9 +1070,9 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 	 *
 	 * @param data the data
 	 * @return the string builder
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private StringBuilder createNativeYamlscript(Map<String, String> data) throws LeapException {
+	private StringBuilder createNativeYamlscript(Map<String, String> data) throws EssedumException {
 		try {
 			log.info("creating native yaml script");
 			Yaml yaml = new Yaml();
@@ -1080,12 +1080,12 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 		} catch (Exception ex) {
 			String msg = "Error in creating yaml file : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 	}
 
 	@Override
-	public String getDragAndDropJobCommand(ICIPNativeJobDetails jobDetails) throws LeapException {
+	public String getDragAndDropJobCommand(ICIPNativeJobDetails jobDetails) throws EssedumException {
 		String cname = jobDetails.getCname();
 		String org = jobDetails.getOrg();
 		String params = jobDetails.getParams();
@@ -1101,7 +1101,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 				String msg = "Error in creating correlation file : " + ex.getClass().getCanonicalName() + " - "
 						+ ex.getMessage();
 				log.error(msg, ex);
-				throw new LeapException(msg, ex);
+				throw new EssedumException(msg, ex);
 			}
 		}
 		data = String.format("%s%s%s", "{\"input_string\":", data, "}");
@@ -1111,7 +1111,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 		} catch (Exception ex) {
 			String msg = "Error in populating dataset : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		try {
@@ -1119,7 +1119,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 		} catch (Exception ex) {
 			String msg = "Error in populating schema : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		if (params != null && !params.isEmpty() && !params.equals("{}")) {
@@ -1129,7 +1129,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 				String msg = "Error in populating attributes : " + ex.getClass().getCanonicalName() + " - "
 						+ ex.getMessage();
 				log.error(msg, ex);
-				throw new LeapException(msg, ex);
+				throw new EssedumException(msg, ex);
 			}
 		}
 
@@ -1154,10 +1154,10 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 	 * @param pipelineName the pipeline name
 	 * @param jobDetails   the job details
 	 * @return the string builder
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	private StringBuilder createDragNDropYamlscript(Object elementsData, String org, String pipelineName,
-			ICIPNativeJobDetails jobDetails) throws LeapException {
+			ICIPNativeJobDetails jobDetails) throws EssedumException {
 		try {
 			log.info("creating draganddrop yaml script");
 			Yaml yaml = new Yaml();
@@ -1183,7 +1183,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 		} catch (Exception ex) {
 			String msg = "Error in creating yaml file : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 	}
 
@@ -1196,10 +1196,10 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 	 * @param restNodeJson the rest node json
 	 * @param jobDetails   the job details
 	 * @return the string builder
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	private StringBuilder createDragNDropYamlscript(Object elementsData, String org, String pipelineName,
-			JsonObject restNodeJson, ICIPNativeJobDetails jobDetails) throws LeapException {
+			JsonObject restNodeJson, ICIPNativeJobDetails jobDetails) throws EssedumException {
 		try {
 			log.info("creating draganddrop yaml script");
 			Yaml yaml = new Yaml();
@@ -1228,7 +1228,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 		} catch (Exception ex) {
 			String msg = "Error in creating yaml file : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 	}
 
@@ -1256,7 +1256,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 	}
 
 	@Override
-	public String getBinaryJobCommand(ICIPNativeJobDetails jobDetails) throws LeapException {
+	public String getBinaryJobCommand(ICIPNativeJobDetails jobDetails) throws EssedumException {
 		String cname = jobDetails.getCname();
 		String org = jobDetails.getOrg();
 		String cmdStr;
@@ -1271,7 +1271,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 			String msg = "Error in fetching elements[0].attributes : " + ex.getClass().getCanonicalName() + " - "
 					+ ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		String tmpfileType = null;
@@ -1280,7 +1280,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 		} catch (Exception ex) {
 			String msg = "Error in getting filetype : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		String fileType = "";
@@ -1292,7 +1292,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 		} catch (Exception ex) {
 			String msg = "Error in getting file array : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		for (JsonElement file : files2) {
@@ -1306,7 +1306,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 				String msg = "Error in getting file path : " + ex.getClass().getCanonicalName() + " - "
 						+ ex.getMessage();
 				log.error(msg, ex);
-				throw new LeapException(msg, ex);
+				throw new EssedumException(msg, ex);
 			} finally {
 				if (fis != null) {
 					try {
@@ -1341,7 +1341,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 		} catch (Exception ex) {
 			String msg = "Error in getting file array : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		for (JsonElement file : files) {
@@ -1355,7 +1355,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 				String msg = "Error in getting file path : " + ex.getClass().getCanonicalName() + " - "
 						+ ex.getMessage();
 				log.error(msg, ex);
-				throw new LeapException(msg, ex);
+				throw new EssedumException(msg, ex);
 			} finally {
 				if (is != null) {
 					try {
@@ -1377,7 +1377,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 		} catch (Exception ex) {
 			String msg = "Error in getting class name : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		String arguments;
@@ -1386,7 +1386,7 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 		} catch (Exception ex) {
 			String msg = "Error in getting arguments : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		cmdStr = resolveCommand(binaryCommand,
@@ -1400,9 +1400,9 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 	 * @param job the job
 	 * @return the attribute hash string
 	 * @throws NoSuchAlgorithmException the no such algorithm exception
-	 * @throws LeapException            the leap exception
+	 * @throws EssedumException            the essedum exception
 	 */
-	private String getAttributeHashString(JobObjectDTO job) throws NoSuchAlgorithmException, LeapException {
+	private String getAttributeHashString(JobObjectDTO job) throws NoSuchAlgorithmException, EssedumException {
 		String params = job.getJobs().get(0).getParams();
 		String nameAndOrg = job.getName().toString() + job.getOrg();
 		if (params == null) {
@@ -1429,13 +1429,13 @@ private String processingJob(ICIPDatasource datasource,JSONObject connDetails, S
 			}
 			return attributesHash;
 		default:
-			throw new LeapException(INVALID_JOBTYPE);
+			throw new EssedumException(INVALID_JOBTYPE);
 		}
 	}
 
 
 	@Override
-	public String getAzureJobCommand(ICIPNativeJobDetails jobDetails) throws LeapException {
+	public String getAzureJobCommand(ICIPNativeJobDetails jobDetails) throws EssedumException {
 		// TODO Auto-generated method stub
 		return null;
 	}

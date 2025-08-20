@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lfn.ai.comm.lib.util.HeadersUtil;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.common.app.security.jwt.CustomAuthFilter;
 import com.lfn.common.app.security.jwt.CustomJWTTokenProvider;
 import com.lfn.common.app.security.rest.dto.ApplicationUIConfigDTO;
@@ -65,7 +65,7 @@ import lombok.Setter;
 /**
  * The Class ApplicationConfigResource.
  *
- * @author icets
+ * @author essedum
  */
 @RestController
 @RequestMapping("/api")
@@ -115,72 +115,72 @@ public class ApplicationConfigResource {
 	@Value("${security.silentRefreshTimeoutFactor:0.90}")
 	private Double silentRefreshTimeoutFactor;
 
-	@LeapProperty("application.uiconfig.font")
+	@EssedumProperty("application.uiconfig.font")
 	private String font;
 
-	@LeapProperty("application.uiconfig.ldapVerification")
+	@EssedumProperty("application.uiconfig.ldapVerification")
 	private String ldapVerification;
 
-	@LeapProperty("application.uiconfig.logoLocation")
+	@EssedumProperty("application.uiconfig.logoLocation")
 	private String logoLocation;
 
-	@LeapProperty("application.uiconfig.telemetry")
+	@EssedumProperty("application.uiconfig.telemetry")
 	private String telemetry;
 
-	@LeapProperty("application.uiconfig.telemetryUrl")
+	@EssedumProperty("application.uiconfig.telemetryUrl")
 	private String telemetryUrl;
 
-	@LeapProperty("application.uiconfig.telemetry.pdata.id")
+	@EssedumProperty("application.uiconfig.telemetry.pdata.id")
 	private String telemetryPdataId;
 
-	@LeapProperty("application.uiconfig.theme")
+	@EssedumProperty("application.uiconfig.theme")
 	private String theme;
 
-	@LeapProperty("application.uiconfig.data_limit")
+	@EssedumProperty("application.uiconfig.data_limit")
 	private String dataLimit;
 
-	@LeapProperty("application.uiconfig.autoUserProject")
+	@EssedumProperty("application.uiconfig.autoUserProject")
 	private String autoUserProject;
 
-	@LeapProperty("application.uiconfig.autoUserCreation")
+	@EssedumProperty("application.uiconfig.autoUserCreation")
 	private String autoUserCreation;
 
-	@LeapProperty("application.uiconfig.capBaseUrl")
+	@EssedumProperty("application.uiconfig.capBaseUrl")
 	private String capBaseUrl;
 
-	@LeapProperty("application.uiconfig.epoch")
+	@EssedumProperty("application.uiconfig.epoch")
 	private String epoch;
 	
-	@LeapProperty("application.uiconfig.notification")
+	@EssedumProperty("application.uiconfig.notification")
 	private String notification;
 	
-	@LeapProperty("application.uiconfig.calendar")
+	@EssedumProperty("application.uiconfig.calendar")
 	private String calendar;
 	
-	@LeapProperty("application.uiconfig.dstFlag")
+	@EssedumProperty("application.uiconfig.dstFlag")
 	private String dstFlag;
 
-	@LeapProperty("application.uiconfig.epochChatUrl")
+	@EssedumProperty("application.uiconfig.epochChatUrl")
 	private String epochChatUrl;
-	@LeapProperty("application.uiconfig.appVersion")
+	@EssedumProperty("application.uiconfig.appVersion")
 	private String appVersion;
 	
-	@LeapProperty("application.uiconfig.leapAppYear")
-	private String leapAppYear;
+	@EssedumProperty("application.uiconfig.essedumAppYear")
+	private String essedumAppYear;
 
-	@LeapProperty("application.uiconfig.showPortfolioHeader")
+	@EssedumProperty("application.uiconfig.showPortfolioHeader")
 	private String showPortfolioHeader;
 
-	@LeapProperty("application.uiconfig.eventApiUrls")
+	@EssedumProperty("application.uiconfig.eventApiUrls")
 	private String eventApiUrls;
 
-	@LeapProperty("application.uiconfig.enckeydefault")
+	@EssedumProperty("application.uiconfig.enckeydefault")
 	private String encKeydefault;
 	
-	@LeapProperty("application.uiconfig.enckeydefault")
+	@EssedumProperty("application.uiconfig.enckeydefault")
 	private String logoValue;
 
-	@LeapProperty("application.uiconfig.showProfileIcon")
+	@EssedumProperty("application.uiconfig.showProfileIcon")
 	private String showProfileIcon;
 
 	@Value("${jwt.token-validity-in-seconds:#{null}}")
@@ -236,7 +236,7 @@ public class ApplicationConfigResource {
 		configDTO.setScope(scope);
 		configDTO.setSilentRefreshTimeoutFactor(silentRefreshTimeoutFactor);
 		configDTO.setAppVersion(appVersion);
-		configDTO.setLeapAppYear(leapAppYear);
+		configDTO.setEssedumAppYear(essedumAppYear);
 		configDTO.setExpireTokenTime(expireTokenTime);
 		configDTO.setShowPortfolioHeader(showPortfolioHeader);
 		configDTO.setEventApiUrls(eventApiUrls);
@@ -251,7 +251,7 @@ public class ApplicationConfigResource {
 	 * @throws JsonProcessingException
 	 */
 	@Operation(summary = "Logout User")
-	@GetMapping("/leap/logout")
+	@GetMapping("/essedum/logout")
 	public ResponseEntity<?> createInvalidToken() throws JsonProcessingException {
 		if(HeadersUtil.getAuthorizationToken(request)!=null) {
 			UsmAuthToken usmAuthToken=new UsmAuthToken();
@@ -280,7 +280,7 @@ public class ApplicationConfigResource {
 	 * 
 	 */
 	@Operation(summary = "authorize a url")
-	@PostMapping(value="/leap/authorize", produces = APPLICATION_JSON_VALUE) 
+	@PostMapping(value="/essedum/authorize", produces = APPLICATION_JSON_VALUE) 
 	 public ResponseEntity<ResponseDTO> authorize(@Valid @RequestBody AuthorizeApiDTO authorizeApiDTO){
 
 		return new ResponseEntity<>(this.tokenProvider.authorize(authorizeApiDTO),new HttpHeaders(),HttpStatus.OK);

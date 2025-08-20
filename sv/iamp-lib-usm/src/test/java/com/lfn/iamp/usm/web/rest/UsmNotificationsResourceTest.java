@@ -50,7 +50,7 @@ import com.lfn.iamp.usm.service.impl.UsmNotificationsServiceImpl;
 /**
  * The Class UsmNotificationsResourceTest.
  *
- * @author icets
+ * @author essedum
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UsmNotificationsResourceTest {

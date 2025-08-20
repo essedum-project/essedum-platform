@@ -46,7 +46,7 @@ import org.springframework.stereotype.Component;
 /**
  * The Class DecryptPassword.
  *
- * @author icets
+ * @author essedum
  */
 @Component
 public class DecryptPassword {

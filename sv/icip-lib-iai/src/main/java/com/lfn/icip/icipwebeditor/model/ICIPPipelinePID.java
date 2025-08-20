@@ -34,7 +34,7 @@ import lombok.Setter;
 /**
  * The Class ICIPPipelinePID.
  *
- * @author icets
+ * @author essedum
  */
 @EntityListeners(AuditListener.class)
 @Entity

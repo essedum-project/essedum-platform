@@ -47,7 +47,7 @@ import com.lfn.iamp.usm.repository.DashConstantRepository2;
  * Service Implementation for managing DashConstant.
  */
 /**
- * @author icets
+ * @author essedum
  */
 
 public abstract class ConstantsServiceImplAbstract implements ConstantsService {
@@ -314,7 +314,7 @@ public abstract class ConstantsServiceImplAbstract implements ConstantsService {
 
 	@Override
 	public DashConstant getByKeys(String key, String project) {
-		log.debug("Request to get dash-constants for leapPropertyCache");
+		log.debug("Request to get dash-constants for essedumPropertyCache");
 		DashConstant dashConstant = dash_constantRepository.findByKeys(key, project);
 		if (dashConstant != null) {
 			String element = dashConstant.getValue();

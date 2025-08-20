@@ -28,8 +28,8 @@ import org.springframework.stereotype.Component;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.IICIPJobServiceUtil;
 import com.lfn.icip.icipwebeditor.config.ICIPAgentsConfig;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPNativeJobDetails;
@@ -42,7 +42,7 @@ import lombok.extern.log4j.Log4j2;
 /**
  * The Class ICIPJobServiceUtilAgents.
  *
- * @author icets
+ * @author essedum
  */
 
 @Component("agentsjob")
@@ -73,15 +73,15 @@ public class ICIPJobServiceUtilAgents extends ICIPCommonJobServiceUtil implement
 	private String decryptionKey;
 
 	/** The agent path. */
-	@LeapProperty("icip.agentsDir")
+	@EssedumProperty("icip.agentsDir")
 	private String agentPath;
 
 	/** The metric command. */
-	@LeapProperty("icip.agents.metric.command")
+	@EssedumProperty("icip.agents.metric.command")
 	private String metricCommand;
 
 	/** The filewatcher command. */
-	@LeapProperty("icip.agents.filewatcher.command")
+	@EssedumProperty("icip.agents.filewatcher.command")
 	private String filewatcherCommand;
 
 	/**
@@ -89,10 +89,10 @@ public class ICIPJobServiceUtilAgents extends ICIPCommonJobServiceUtil implement
 	 *
 	 * @param jobDetails the job details
 	 * @return the command
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	@Override
-	public String getCommand(ICIPNativeJobDetails jobDetails) throws LeapException {
+	public String getCommand(ICIPNativeJobDetails jobDetails) throws EssedumException {
 		String cname = jobDetails.getCname();
 		String org = jobDetails.getOrg();
 		String cmdStr = null;
@@ -107,7 +107,7 @@ public class ICIPJobServiceUtilAgents extends ICIPCommonJobServiceUtil implement
 			String msg = "Error in fetching elements[0].attributes : " + ex.getClass().getCanonicalName() + " - "
 					+ ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		String tmpAgentType = null;
@@ -116,7 +116,7 @@ public class ICIPJobServiceUtilAgents extends ICIPCommonJobServiceUtil implement
 		} catch (Exception ex) {
 			String msg = "Error in getting agenttype : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		Path path = Paths.get(agentPath, tmpAgentType, ICIPUtils.removeSpecialCharacter(org.toLowerCase()),

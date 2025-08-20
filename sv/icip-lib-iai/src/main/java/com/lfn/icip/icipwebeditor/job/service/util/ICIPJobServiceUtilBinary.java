@@ -29,8 +29,8 @@ import org.springframework.stereotype.Component;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.IICIPJobServiceUtil;
 import com.lfn.icip.icipwebeditor.constants.FileConstants;
 import com.lfn.icip.icipwebeditor.file.service.ICIPFileService;
@@ -44,7 +44,7 @@ import lombok.extern.log4j.Log4j2;
 /**
  * The Class ICIPJobServiceUtilBinary.
  *
- * @author icets
+ * @author essedum
  */
 
 @Component("binaryjob")
@@ -71,7 +71,7 @@ public class ICIPJobServiceUtilBinary extends ICIPCommonJobServiceUtil implement
 	private ICIPFileService iCIPFileService;
 
 	/** The binary command. */
-	@LeapProperty("icip.pipeline.binary.command")
+	@EssedumProperty("icip.pipeline.binary.command")
 	private String binaryCommand;
 
 	/**
@@ -79,10 +79,10 @@ public class ICIPJobServiceUtilBinary extends ICIPCommonJobServiceUtil implement
 	 *
 	 * @param jobDetails the job details
 	 * @return the command
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	@Override
-	public String getCommand(ICIPNativeJobDetails jobDetails) throws LeapException {
+	public String getCommand(ICIPNativeJobDetails jobDetails) throws EssedumException {
 		String cname = jobDetails.getCname();
 		String org = jobDetails.getOrg();
 		String cmdStr;
@@ -97,7 +97,7 @@ public class ICIPJobServiceUtilBinary extends ICIPCommonJobServiceUtil implement
 			String msg = "Error in fetching elements[0].attributes : " + ex.getClass().getCanonicalName() + " - "
 					+ ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		String tmpfileType = null;
@@ -106,7 +106,7 @@ public class ICIPJobServiceUtilBinary extends ICIPCommonJobServiceUtil implement
 		} catch (Exception ex) {
 			String msg = "Error in getting filetype : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		String fileType = "";
@@ -118,7 +118,7 @@ public class ICIPJobServiceUtilBinary extends ICIPCommonJobServiceUtil implement
 		} catch (Exception ex) {
 			String msg = "Error in getting file array : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		for (JsonElement file : files2) {
@@ -133,7 +133,7 @@ public class ICIPJobServiceUtilBinary extends ICIPCommonJobServiceUtil implement
 				String msg = "Error in getting file path : " + ex.getClass().getCanonicalName() + " - "
 						+ ex.getMessage();
 				log.error(msg, ex);
-				throw new LeapException(msg, ex);
+				throw new EssedumException(msg, ex);
 			}
 			finally {
 				if(fis != null)
@@ -170,7 +170,7 @@ public class ICIPJobServiceUtilBinary extends ICIPCommonJobServiceUtil implement
 		} catch (Exception ex) {
 			String msg = "Error in getting file array : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		for (JsonElement file : files) {
@@ -185,7 +185,7 @@ public class ICIPJobServiceUtilBinary extends ICIPCommonJobServiceUtil implement
 				String msg = "Error in getting file path : " + ex.getClass().getCanonicalName() + " - "
 						+ ex.getMessage();
 				log.error(msg, ex);
-				throw new LeapException(msg, ex);
+				throw new EssedumException(msg, ex);
 			}
 			finally {
 				if(is != null)
@@ -209,7 +209,7 @@ public class ICIPJobServiceUtilBinary extends ICIPCommonJobServiceUtil implement
 		} catch (Exception ex) {
 			String msg = "Error in getting class name : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		String arguments;
@@ -218,7 +218,7 @@ public class ICIPJobServiceUtilBinary extends ICIPCommonJobServiceUtil implement
 		} catch (Exception ex) {
 			String msg = "Error in getting arguments : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		cmdStr = resolveCommand(binaryCommand,

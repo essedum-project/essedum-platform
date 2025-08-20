@@ -21,7 +21,7 @@ import java.util.Map;
 /**
  * The Interface IICIPDataSetServiceUtil.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPMlopsServiceUtil {
 

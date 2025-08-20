@@ -48,7 +48,7 @@ import com.lfn.icip.icipwebeditor.service.IICIPChainsService;
 /**
  * The Class ICIPChainsService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional

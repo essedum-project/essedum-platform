@@ -48,7 +48,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 
 /**
- * @author icets
+ * @author essedum
  */
 class ICIPDataSourceServiceUtilRESTTest {
 	@Test

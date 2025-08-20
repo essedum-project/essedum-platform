@@ -28,7 +28,7 @@ import com.lfn.icip.icipwebeditor.job.model.ICIPPartialInternalJobs;
 /**
  * The Interface ICIPInternalJobsRepository.
  *
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPPartialInternalJobsRepository

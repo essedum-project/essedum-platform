@@ -32,7 +32,7 @@ import com.lfn.icip.dataset.model.dto.ICIPSchemaRegistryDTO2;
  * Spring Data JPA repository for the SchemaRegistry entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPSchemaRegistryRepository extends JpaRepository<ICIPSchemaRegistry, Integer> {

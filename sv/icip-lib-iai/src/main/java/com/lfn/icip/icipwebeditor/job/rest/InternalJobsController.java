@@ -35,7 +35,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.ICIPHeaderUtil;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
 import com.lfn.iamp.usm.domain.DashConstant;
@@ -107,7 +107,7 @@ public class InternalJobsController {
 	private ConstantsService dashConstantService;
 	
 	/** The scheduler status. */
-	@LeapProperty("icip.scheduler.pause.status")
+	@EssedumProperty("icip.scheduler.pause.status")
 	private String schedulerPauseStatus;
 	
 	/** The claim. */

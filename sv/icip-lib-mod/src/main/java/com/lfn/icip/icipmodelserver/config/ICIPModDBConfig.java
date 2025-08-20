@@ -36,7 +36,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 /**
  * The Class ICIPDbConfig.
  *
- * @author icets
+ * @author essedum
  */
 @Configuration
 @EnableTransactionManagement

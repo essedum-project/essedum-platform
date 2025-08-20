@@ -33,7 +33,7 @@ import lombok.Setter;
  * A Portfolio.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @Entity
 @Table(name = "usm_portfolio")

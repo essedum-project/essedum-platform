@@ -15,7 +15,7 @@ import com.lfn.icip.icipwebeditor.service.IICIPJobsPluginsService;
 /**
  * The Class ICIPDatasourcePluginsService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 public class ICIPJobsPluginsService implements IICIPJobsPluginsService {

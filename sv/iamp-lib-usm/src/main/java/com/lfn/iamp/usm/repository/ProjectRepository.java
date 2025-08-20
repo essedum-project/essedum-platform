@@ -33,7 +33,7 @@ import com.lfn.iamp.usm.domain.Project2;
  * Spring Data JPA repository for the Project entity.
  */
 /**
-* @author icets
+* @author essedum
 */
 @SuppressWarnings("unused")
 //@Repository("usmProjectRepository")

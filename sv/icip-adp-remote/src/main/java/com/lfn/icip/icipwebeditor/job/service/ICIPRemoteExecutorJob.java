@@ -68,10 +68,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.dto.ResolvedSecret;
 import com.lfn.ai.comm.lib.util.dto.Secret;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.service.SecretsManagerService;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.model.ICIPDatasource;
@@ -203,7 +203,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 	@Autowired
 	private ICIPFileService iCIPFileService;
 
-	@LeapProperty("icip.certificateCheck")
+	@EssedumProperty("icip.certificateCheck")
 	private String certificateCheck;
 
 	/** The resolver. */
@@ -299,7 +299,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 		String attributesHash = null;
 		try {
 			attributesHash = getAttributeHashString(jobObject);
-		} catch (NoSuchAlgorithmException | LeapException e1) {
+		} catch (NoSuchAlgorithmException | EssedumException e1) {
 			// TODO Auto-generated catch block
 			log.error(e1.getMessage());
 		}
@@ -352,7 +352,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 			}
 			logger.info("Submitting the Pipeline to Job Server Remotely");
 
-		} catch (LeapException | IOException e1) {
+		} catch (EssedumException | IOException e1) {
 			// TODO Auto-generated catch block
 
 			logger.error(e1.getMessage());
@@ -760,7 +760,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt(); // Restore the interrupted status
 
-						throw new LeapException("Thread was interrupted: " + e.getMessage()); // Throw a custom
+						throw new EssedumException("Thread was interrupted: " + e.getMessage()); // Throw a custom
 																								// exception
 					} catch (Exception ex) {
 						if (Objects.nonNull(dsObject.getAlias())) {
@@ -790,7 +790,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 								+ ex.getMessage().replace("Connection reset", "");
 
 						log.error(msg, ex);
-						throw new LeapException("\n" + msg);
+						throw new EssedumException("\n" + msg);
 
 					}
 
@@ -844,7 +844,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 							log.info("Error logs written to path: {}", outPath);
 							handlingErrorStatus(error, jobObject);
 						}
-					} catch (LeapException | IOException e) {
+					} catch (EssedumException | IOException e) {
 						log.error(e.getMessage(), e);
 					} catch (Exception e) {
 						log.info("Inside Exception while writing error logs");
@@ -891,7 +891,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 		}
 	}
 
-	protected Path returnPath(JobType jobtype, String logpath, ICIPJobs tmpJob) throws LeapException {
+	protected Path returnPath(JobType jobtype, String logpath, ICIPJobs tmpJob) throws EssedumException {
 		switch (jobtype) {
 		case CHAIN:
 			return Paths.get(annotationServiceUtil.getFolderPath(), IAIJobConstants.LOGPATH,
@@ -901,7 +901,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 			return Paths.get(annotationServiceUtil.getFolderPath(), String.format(LoggerConstants.STRING_DECIMAL_STRING,
 					IAIJobConstants.PIPELINELOGPATH, iCIPJobs.getId(), logpath));
 		default:
-			throw new LeapException(INVALID_JOBTYPE);
+			throw new EssedumException(INVALID_JOBTYPE);
 		}
 	}
 
@@ -910,9 +910,9 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 	 *
 	 * @param error the error
 	 * @param job   the job
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private void handlingErrorStatus(String error, JobObjectDTO job) throws LeapException {
+	private void handlingErrorStatus(String error, JobObjectDTO job) throws EssedumException {
 		StringBuilder stringBuilder = new StringBuilder(IAIJobConstants.STRING_BUILDER_CAPACITY);
 		stringBuilder.append(System.getProperty(IAIJobConstants.LINE_SEPARATOR));
 		stringBuilder.append(error);
@@ -931,7 +931,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 	}
 
 	private String getRunCommand(Jobs job, List<ICIPNativeJobDetails> nativeJobDetails, int index)
-			throws LeapException, InvalidRemoteException, TransportException, GitAPIException {
+			throws EssedumException, InvalidRemoteException, TransportException, GitAPIException {
 		String runCmd = "";
 		switch (job.getRuntime()) {
 		case NATIVESCRIPT:
@@ -962,7 +962,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 	}
 
 	private String uploadScript(ICIPDatasource uploadDs, String attributes, String uploadFile)
-			throws LeapException, Exception {
+			throws EssedumException, Exception {
 		IICIPDataSourceServiceUtil uploadPluginConn = dsPluginService.getDataSourceService(uploadDs);
 		return uploadPluginConn.uploadFile(uploadDs, attributes, uploadFile);
 	}
@@ -970,7 +970,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 	private String runScript(Integer version, String runCmd, IICIPJobServiceUtil jobUtilConn,
 			List<ICIPNativeJobDetails> nativeJobDetails, JSONObject connDetails, ICIPDatasource uploadDs, Jobs job,
 			String datasourceName, RemotePipelineConfig pipelinConfig, int index, JsonObject env, Boolean isEvent,
-			JSONObject usedSecrets) throws LeapException, InterruptedException {
+			JSONObject usedSecrets) throws EssedumException, InterruptedException {
 		String payload = null;
 		String status = null;
 		JSONObject attributes = new JSONObject();
@@ -1049,12 +1049,12 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 			 */
 			return payload;
 		} catch (Exception e) {
-			throw new LeapException("Error in executeScript:" + e.getMessage());
+			throw new EssedumException("Error in executeScript:" + e.getMessage());
 
 		}
 	}
 
-	JSONObject getTaskStatus(String taskId, JSONObject connDetails) throws LeapException {
+	JSONObject getTaskStatus(String taskId, JSONObject connDetails) throws EssedumException {
 		// TODO Auto-generated method stub
 
 		logger.info("Inside getTaskStatus");
@@ -1082,14 +1082,14 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 					return new JSONObject(response);
 
 			} catch (Exception e) {
-				throw new LeapException("Error in getStatus:" + e.getMessage());
+				throw new EssedumException("Error in getStatus:" + e.getMessage());
 			}
 		} else {
-			throw new LeapException("SSLContext is null, could not create a secure connection.");
+			throw new EssedumException("SSLContext is null, could not create a secure connection.");
 		}
 	}
 
-	JSONObject getLog(String taskId, JSONObject connDetails) throws LeapException {
+	JSONObject getLog(String taskId, JSONObject connDetails) throws EssedumException {
 		logger.info("Inside getLog");
 		String url = connDetails.get("Url").toString() + "/" + taskId + "/getLog";
 		logger.info("getLog URL " + url);
@@ -1126,19 +1126,19 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 					return responsebody;
 
 				} else if (response.code() == 400) {
-					throw new LeapException("Remote get task Log for taskid " + taskId);
+					throw new EssedumException("Remote get task Log for taskid " + taskId);
 				} else {
-					throw new LeapException("Remote get task log for  " + taskId + " Response Code " + response.code()
+					throw new EssedumException("Remote get task log for  " + taskId + " Response Code " + response.code()
 							+ " Response Body " + response.body());
 				}
 
 			} catch (Exception e) {
-				throw new LeapException("Error in getLog:" + e.getMessage() + " Task Id is:" + taskId);
+				throw new EssedumException("Error in getLog:" + e.getMessage() + " Task Id is:" + taskId);
 
 			}
 
 		} else {
-			throw new LeapException("SSLContext is null, could not create a secure connection.");
+			throw new EssedumException("SSLContext is null, could not create a secure connection.");
 		}
 	}
 
@@ -1171,7 +1171,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 
 	private String executeScript(Integer version, JSONObject connDetails, List<ICIPNativeJobDetails> nativeJobDetails,
 			IICIPJobServiceUtil jobUtilConn, int index, ICIPDatasource uploadDs, String payload)
-			throws InterruptedException, LeapException {
+			throws InterruptedException, EssedumException {
 		String s3path = null;
 		try {
 			String url = connDetails.get("Url").toString();
@@ -1208,21 +1208,21 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 					logger.info("Response:" + responseData);
 					return responseData;
 				} else {
-					throw new LeapException("Remote Execution Error for jobid" + nativeJobDetails.get(index).getId()
+					throw new EssedumException("Remote Execution Error for jobid" + nativeJobDetails.get(index).getId()
 							+ " Response Code " + response.code());
 				}
 			} else {
-				throw new LeapException("SSLContext is null, could not create a secure connection.");
+				throw new EssedumException("SSLContext is null, could not create a secure connection.");
 			}
 		} catch (Exception e) {
-			throw new LeapException("Error in executeScript:" + e.getMessage() + "InputArtifacts Path: " + s3path);
+			throw new EssedumException("Error in executeScript:" + e.getMessage() + "InputArtifacts Path: " + s3path);
 		}
 	}
 
 	private String getPayloadForScriptExecution(Integer version, JSONObject connDetails,
 			List<ICIPNativeJobDetails> nativeJobDetails, IICIPJobServiceUtil jobUtilConn, ICIPDatasource uploadDs,
 			String runCmd, RemotePipelineConfig pipelinConfig, int index, JsonObject env, Boolean isEvent,
-			JSONObject usedSecrets) throws LeapException {
+			JSONObject usedSecrets) throws EssedumException {
 		String bodyString = null;
 		String s3path = null;
 		try {
@@ -1341,7 +1341,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 			logger.info("Payload is:" + bodyString);
 			return bodyString;
 		} catch (Exception e) {
-			throw new LeapException("Error in getPayloadForScriptExecution:" + e.getMessage() + "InputArtifacts Path: "
+			throw new EssedumException("Error in getPayloadForScriptExecution:" + e.getMessage() + "InputArtifacts Path: "
 					+ s3path + "Payload Id is:" + bodyString);
 		}
 	}
@@ -1405,7 +1405,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 	@SuppressWarnings("deprecation")
 	@Override
 	public String getNativeJobCommand(ICIPNativeJobDetails jobDetails)
-			throws LeapException, InvalidRemoteException, TransportException, GitAPIException {
+			throws EssedumException, InvalidRemoteException, TransportException, GitAPIException {
 		String cname = jobDetails.getCname();
 		String org = jobDetails.getOrg();
 		String params = jobDetails.getParams();
@@ -1421,7 +1421,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 			String msg = "Error in fetching elements[0].attributes : " + ex.getClass().getCanonicalName() + " - "
 					+ ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		String tmpfileType;
@@ -1430,7 +1430,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 		} catch (Exception ex) {
 			String msg = "Error in getting filetype : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		String[] separator = new String[] { "" };
@@ -1453,7 +1453,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 		} catch (Exception ex) {
 			String msg = "Error in getting file array : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		for (JsonElement file : files) {
@@ -1467,7 +1467,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 				String msg = "Error in getting file path : " + ex.getClass().getCanonicalName() + " - "
 						+ ex.getMessage();
 				log.error(msg, ex);
-				throw new LeapException(msg, ex);
+				throw new EssedumException(msg, ex);
 			} finally {
 				if (is != null) {
 					try {
@@ -1503,7 +1503,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 						String msg = "Error in getting datasource : " + ex.getClass().getCanonicalName() + " - "
 								+ ex.getMessage();
 						log.error(msg, ex);
-						throw new LeapException(msg, ex);
+						throw new EssedumException(msg, ex);
 					}
 					connDetails.addProperty("salt", datasource.getSalt());
 					value = String.format(LoggerConstants.STRING_STRING_STRING, "\"",
@@ -1519,7 +1519,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 						String msg = "Error in getting dataset : " + ex.getClass().getCanonicalName() + " - "
 								+ ex.getMessage();
 						log.error(msg, ex);
-						throw new LeapException(msg, ex);
+						throw new EssedumException(msg, ex);
 					}
 					for (Entry<String, JsonElement> schemaentry : e.getAsJsonObject().entrySet()) {
 						if (schemaentry.getKey().equals(IAIJobConstants.SCHEMA)) {
@@ -1537,7 +1537,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 								String msg = "Error in getting schema from dataset : "
 										+ ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 								log.error(msg, ex);
-								throw new LeapException(msg, ex);
+								throw new EssedumException(msg, ex);
 							}
 							break;
 						}
@@ -1553,7 +1553,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 						String msg = "Error in getting schema : " + ex.getClass().getCanonicalName() + " - "
 								+ ex.getMessage();
 						log.error(msg, ex);
-						throw new LeapException(msg, ex);
+						throw new EssedumException(msg, ex);
 					}
 					break;
 				default:
@@ -1585,7 +1585,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 				writeTempFile(createNativeYamlscript(argumentBuilder), filePath);
 				arguments = filePath.toAbsolutePath().toString();
 			} catch (Exception ex) {
-				throw new LeapException(ex.getMessage(), ex);
+				throw new EssedumException(ex.getMessage(), ex);
 			}
 		} else {
 			StringBuilder args = new StringBuilder();
@@ -1621,9 +1621,9 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 	 * @param params the params
 	 * @param gson   the gson
 	 * @return the latest argument
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private JsonArray getLatestArgument(JsonObject binary, String params, Gson gson) throws LeapException {
+	private JsonArray getLatestArgument(JsonObject binary, String params, Gson gson) throws EssedumException {
 		try {
 			JsonArray binaryArray = binary.get("arguments").getAsJsonArray();
 			if (!(params == null || params.trim().isEmpty() || params.trim().equals("{}"))) {
@@ -1654,7 +1654,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 		} catch (Exception ex) {
 			String msg = "Error in getting arguments : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 	}
 
@@ -1663,9 +1663,9 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 	 *
 	 * @param data the data
 	 * @return the string builder
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private StringBuilder createNativeYamlscript(Map<String, String> data) throws LeapException {
+	private StringBuilder createNativeYamlscript(Map<String, String> data) throws EssedumException {
 		try {
 			log.info("creating native yaml script");
 			Yaml yaml = new Yaml();
@@ -1673,12 +1673,12 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 		} catch (Exception ex) {
 			String msg = "Error in creating yaml file : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 	}
 
 	@Override
-	public String getDragAndDropJobCommand(ICIPNativeJobDetails jobDetails) throws LeapException {
+	public String getDragAndDropJobCommand(ICIPNativeJobDetails jobDetails) throws EssedumException {
 
 		String cname = jobDetails.getCname();
 		String cmdStr = "python " + cname + "_generatedCode.py";
@@ -1686,7 +1686,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 	}
 
 	@Override
-	public String getAzureJobCommand(ICIPNativeJobDetails jobDetails) throws LeapException {
+	public String getAzureJobCommand(ICIPNativeJobDetails jobDetails) throws EssedumException {
 
 		String cname = jobDetails.getCname();
 		String cmdStr = "python " + cname + "_generatedCode.py";
@@ -1694,7 +1694,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 	}
 
 	@Override
-	public String getBinaryJobCommand(ICIPNativeJobDetails jobDetails) throws LeapException {
+	public String getBinaryJobCommand(ICIPNativeJobDetails jobDetails) throws EssedumException {
 		String cname = jobDetails.getCname();
 		String org = jobDetails.getOrg();
 		String cmdStr;
@@ -1709,7 +1709,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 			String msg = "Error in fetching elements[0].attributes : " + ex.getClass().getCanonicalName() + " - "
 					+ ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		String tmpfileType = null;
@@ -1718,7 +1718,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 		} catch (Exception ex) {
 			String msg = "Error in getting filetype : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		String fileType = "";
@@ -1730,7 +1730,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 		} catch (Exception ex) {
 			String msg = "Error in getting file array : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		for (JsonElement file : files2) {
@@ -1744,7 +1744,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 				String msg = "Error in getting file path : " + ex.getClass().getCanonicalName() + " - "
 						+ ex.getMessage();
 				log.error(msg, ex);
-				throw new LeapException(msg, ex);
+				throw new EssedumException(msg, ex);
 			} finally {
 				if (fis != null) {
 					try {
@@ -1779,7 +1779,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 		} catch (Exception ex) {
 			String msg = "Error in getting file array : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		for (JsonElement file : files) {
@@ -1793,7 +1793,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 				String msg = "Error in getting file path : " + ex.getClass().getCanonicalName() + " - "
 						+ ex.getMessage();
 				log.error(msg, ex);
-				throw new LeapException(msg, ex);
+				throw new EssedumException(msg, ex);
 			} finally {
 				if (is != null) {
 					try {
@@ -1815,7 +1815,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 		} catch (Exception ex) {
 			String msg = "Error in getting class name : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		String arguments;
@@ -1824,7 +1824,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 		} catch (Exception ex) {
 			String msg = "Error in getting arguments : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		cmdStr = resolveCommand(binaryCommand,
@@ -1838,9 +1838,9 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 	 * @param job the job
 	 * @return the attribute hash string
 	 * @throws NoSuchAlgorithmException the no such algorithm exception
-	 * @throws LeapException            the leap exception
+	 * @throws EssedumException            the essedum exception
 	 */
-	private String getAttributeHashString(JobObjectDTO job) throws NoSuchAlgorithmException, LeapException {
+	private String getAttributeHashString(JobObjectDTO job) throws NoSuchAlgorithmException, EssedumException {
 		String params = job.getJobs().get(0).getParams();
 		String nameAndOrg = job.getName().toString() + job.getOrg();
 		if (params == null) {
@@ -1867,7 +1867,7 @@ public class ICIPRemoteExecutorJob extends ICIPCommonJobServiceUtil implements I
 			}
 			return attributesHash;
 		default:
-			throw new LeapException(INVALID_JOBTYPE);
+			throw new EssedumException(INVALID_JOBTYPE);
 		}
 	}
 

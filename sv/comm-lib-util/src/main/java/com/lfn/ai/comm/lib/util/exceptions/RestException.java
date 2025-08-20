@@ -19,7 +19,7 @@ package com.lfn.ai.comm.lib.util.exceptions;
 /**
  * The Class RestException.
  *
- * @author icets
+ * @author essedum
  */
 public class RestException {
 

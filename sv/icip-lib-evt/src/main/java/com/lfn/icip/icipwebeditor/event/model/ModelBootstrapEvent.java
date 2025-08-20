@@ -25,7 +25,7 @@ import lombok.Getter;
 /**
 * The Class  ModelBootstrapEvent.
 *
-* @author icets
+* @author essedum
 */
 
 /**

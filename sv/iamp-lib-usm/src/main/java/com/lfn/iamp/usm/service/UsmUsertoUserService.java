@@ -36,7 +36,7 @@ import org.json.JSONArray;
  * Service Interface for managing user_to_user.
  */
 /**
-* @author icets
+* @author essedum
 */
 public interface UsmUsertoUserService {
 

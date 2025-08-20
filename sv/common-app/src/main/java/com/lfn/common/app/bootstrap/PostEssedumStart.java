@@ -13,18 +13,31 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lfn.ai.comm.lib.util.exceptions;
+package com.lfn.common.app.bootstrap;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.stereotype.Component;
 
-import org.junit.jupiter.api.Test;
+import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
+import com.lfn.iamp.usm.service.UsmPermissionApiService;
 
-public class LeapExceptionTest {
+@Component
+public class PostEssedumStart implements ApplicationRunner {
 
-	@Test
-	public void testLeapException() {
-		String errorMessage="Hello World";
-		LeapException leapException= new LeapException(errorMessage);
-		assertEquals(leapException.getMessage(),errorMessage);
+	@Autowired
+	private ConstantsService dashConstantService;
+
+	@Autowired
+	private UsmPermissionApiService usmPermissionApiService;
+
+	@Override
+	public void run(ApplicationArguments args) throws Exception {
+
+		dashConstantService.refreshConfigKeyMap();
+		usmPermissionApiService.refreshConfigAPIsMap();
+
 	}
+
 }

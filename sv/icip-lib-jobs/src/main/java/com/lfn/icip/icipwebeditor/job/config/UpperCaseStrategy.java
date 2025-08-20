@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 /**
  * The Class MySQLUpperCaseStrategy.
  *
- * @author icets
+ * @author essedum
  */
 @Component
 public class UpperCaseStrategy extends PhysicalNamingStrategyStandardImpl {

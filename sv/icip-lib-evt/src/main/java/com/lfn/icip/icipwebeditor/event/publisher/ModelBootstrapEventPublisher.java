@@ -26,7 +26,7 @@ import com.lfn.icip.icipwebeditor.event.listener.ModelBootstrapEventListener;
 /**
  * The Class ModelBootstrapEventPublisher.
  * 
- * @author icets
+ * @author essedum
  */
 
 @Configuration
@@ -45,7 +45,7 @@ public class ModelBootstrapEventPublisher {
 	/**
 	 * The Class ModelBootstrapService.
 	 * 
-	 * @author icets
+	 * @author essedum
 	 */
 	public class ModelBootstrapService implements ApplicationEventPublisherAware {
 

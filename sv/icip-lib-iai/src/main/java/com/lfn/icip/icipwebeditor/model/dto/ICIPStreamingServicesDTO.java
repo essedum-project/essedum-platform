@@ -30,7 +30,7 @@ import lombok.Setter;
 /**
  * The Class ICIPStreamingServicesDTO.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

@@ -25,7 +25,7 @@ import com.lfn.iamp.usm.domain.UsmPortfolio;
  * Spring Data JPA repository for the UsmPortfolio entity.
  */
 /**
-* @author icets
+* @author essedum
 */
 @SuppressWarnings("unused")
 @Repository

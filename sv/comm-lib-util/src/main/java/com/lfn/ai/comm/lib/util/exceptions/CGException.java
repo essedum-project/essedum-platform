@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * The Class CGException.
  *
- * @author icets
+ * @author essedum
  */
 @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 public class CGException extends RuntimeException {

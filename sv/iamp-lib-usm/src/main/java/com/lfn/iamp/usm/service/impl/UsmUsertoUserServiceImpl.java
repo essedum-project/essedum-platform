@@ -53,7 +53,7 @@ import org.json.JSONObject;
  * Service Implementation for managing UsmRolePermissions.
  */
 /**
-* @author icets
+* @author essedum
 */
 @Service
 @Transactional

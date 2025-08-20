@@ -33,8 +33,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.IICIPJobServiceUtil;
 import com.lfn.icip.icipwebeditor.constants.IAIJobConstants;
 import com.lfn.icip.icipwebeditor.job.constants.JobConstants;
@@ -49,7 +49,7 @@ import lombok.extern.log4j.Log4j2;
 /**
  * The Class ICIPJobServiceUtilAWS.
  *
- * @author icets
+ * @author essedum
  */
 @Component("awsjob")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -79,14 +79,14 @@ public class ICIPJobServiceUtilAWS extends ICIPCommonJobServiceUtil implements I
 	private IAIResolverAspect resolver;
 
 	/** The drag and drop command. */
-	@LeapProperty("icip.pipeline.draganddrop.command")
+	@EssedumProperty("icip.pipeline.draganddrop.command")
 	private String dragAndDropCommand;
 
 	/** The drag and drop command with rest node. */
-	@LeapProperty("icip.pipeline.draganddrop.restnode.command")
+	@EssedumProperty("icip.pipeline.draganddrop.restnode.command")
 	private String dragAndDropCommandWithRestNode;
 
-	@LeapProperty("icip.pipelineScript.directory")
+	@EssedumProperty("icip.pipelineScript.directory")
 	private String pipelineScriptPath;
 
 	/**
@@ -94,10 +94,10 @@ public class ICIPJobServiceUtilAWS extends ICIPCommonJobServiceUtil implements I
 	 *
 	 * @param jobDetails the job details
 	 * @return the command
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	@Override
-	public String getCommand(ICIPNativeJobDetails jobDetails) throws LeapException {
+	public String getCommand(ICIPNativeJobDetails jobDetails) throws EssedumException {
 		String cname = jobDetails.getCname();
 		String org = jobDetails.getOrg();
 		String params = jobDetails.getParams();
@@ -113,7 +113,7 @@ public class ICIPJobServiceUtilAWS extends ICIPCommonJobServiceUtil implements I
 				String msg = "Error in creating correlation file : " + ex.getClass().getCanonicalName() + " - "
 						+ ex.getMessage();
 				log.error(msg, ex);
-				throw new LeapException(msg, ex);
+				throw new EssedumException(msg, ex);
 			}
 		}
 		data = String.format("%s%s%s", "{\"input_string\":", data, "}");
@@ -123,7 +123,7 @@ public class ICIPJobServiceUtilAWS extends ICIPCommonJobServiceUtil implements I
 		} catch (Exception ex) {
 			String msg = "Error in populating dataset : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		try {
@@ -131,7 +131,7 @@ public class ICIPJobServiceUtilAWS extends ICIPCommonJobServiceUtil implements I
 		} catch (Exception ex) {
 			String msg = "Error in populating schema : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		if (params != null && !params.isEmpty() && !params.equals("{}")) {
@@ -141,7 +141,7 @@ public class ICIPJobServiceUtilAWS extends ICIPCommonJobServiceUtil implements I
 				String msg = "Error in populating attributes : " + ex.getClass().getCanonicalName() + " - "
 						+ ex.getMessage();
 				log.error(msg, ex);
-				throw new LeapException(msg, ex);
+				throw new EssedumException(msg, ex);
 			}
 		}
 
@@ -166,10 +166,10 @@ public class ICIPJobServiceUtilAWS extends ICIPCommonJobServiceUtil implements I
 	 * @param pipelineName the pipeline name
 	 * @param jobDetails   the job details
 	 * @return the string builder
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	private StringBuilder createDragNDropYamlscript(Object elementsData, String org, String pipelineName,
-			ICIPNativeJobDetails jobDetails) throws LeapException {
+			ICIPNativeJobDetails jobDetails) throws EssedumException {
 		try {
 			log.info("creating draganddrop yaml script");
 			Yaml yaml = new Yaml();
@@ -195,7 +195,7 @@ public class ICIPJobServiceUtilAWS extends ICIPCommonJobServiceUtil implements I
 		} catch (Exception ex) {
 			String msg = "Error in creating yaml file : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 	}
 
@@ -208,10 +208,10 @@ public class ICIPJobServiceUtilAWS extends ICIPCommonJobServiceUtil implements I
 	 * @param restNodeJson the rest node json
 	 * @param jobDetails   the job details
 	 * @return the string builder
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	private StringBuilder createDragNDropYamlscript(Object elementsData, String org, String pipelineName,
-			JsonObject restNodeJson, ICIPNativeJobDetails jobDetails) throws LeapException {
+			JsonObject restNodeJson, ICIPNativeJobDetails jobDetails) throws EssedumException {
 		try {
 			log.info("creating draganddrop yaml script");
 			Yaml yaml = new Yaml();
@@ -240,7 +240,7 @@ public class ICIPJobServiceUtilAWS extends ICIPCommonJobServiceUtil implements I
 		} catch (Exception ex) {
 			String msg = "Error in creating yaml file : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 	}
 

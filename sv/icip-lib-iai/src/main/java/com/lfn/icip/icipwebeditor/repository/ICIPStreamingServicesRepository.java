@@ -40,7 +40,7 @@ import com.lfn.icip.icipwebeditor.model.dto.ICIPStreamingServices3DTO;
  * Spring Data JPA repository for the StreamingServices entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 @Transactional

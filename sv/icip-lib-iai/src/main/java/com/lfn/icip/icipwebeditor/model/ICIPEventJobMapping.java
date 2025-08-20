@@ -38,7 +38,7 @@ import lombok.Setter;
 /**
  * The Class ICIPEventJobMapping.
  *
- * @author icets
+ * @author essedum
  */
 @EntityListeners(AuditListener.class)
 @Entity

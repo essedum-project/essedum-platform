@@ -87,7 +87,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
 import com.lfn.ai.comm.lib.util.service.dto.support.NameEncoderService;
 import com.lfn.icip.dataset.model.ICIPDataset;
@@ -114,7 +114,7 @@ public abstract class ICIPDataSetServiceUtilSqlAbstract extends ICIPDataSetServi
 		implements IICIPDataSetServiceUtilSql {
 
 	/** The update batch size. */
-	@LeapProperty("icip.updateBatchSize")
+	@EssedumProperty("icip.updateBatchSize")
 	private String updateBatchSize;
 
 	/** The logger. */

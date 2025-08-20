@@ -50,7 +50,7 @@ import com.lfn.iamp.usm.service.impl.UsmPortfolioServiceImpl;
 /**
  * The Class UsmPortfolioResourceTest.
  *
- * @author icets
+ * @author essedum
  */
 public class UsmPortfolioResourceTest {
 	

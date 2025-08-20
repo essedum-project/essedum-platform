@@ -33,7 +33,7 @@ import com.lfn.icip.icipwebeditor.fileserver.dto.ICIPChunkMetaData;
 /**
  * The Interface IICIPDatasetFilesService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPDatasetFilesService {
 

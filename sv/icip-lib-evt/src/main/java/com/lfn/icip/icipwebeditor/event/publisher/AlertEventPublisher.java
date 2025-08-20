@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * The Class AlertEventPublisher.
  *
- * @author icets
+ * @author essedum
  */
 
 @Configuration
@@ -44,7 +44,7 @@ public class AlertEventPublisher {
 	/**
 	 * The Class AlertService.
 	 * 
-	 * @author icets
+	 * @author essedum
 	 */
 	public class AlertService implements ApplicationEventPublisherAware {
 

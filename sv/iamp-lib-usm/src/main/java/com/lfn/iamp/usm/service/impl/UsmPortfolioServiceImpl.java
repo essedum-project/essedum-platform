@@ -41,7 +41,7 @@ import com.lfn.iamp.usm.service.UsmPortfolioService;
  * Service Implementation for managing UsmPortfolio.
  */
 /**
-* @author icets
+* @author essedum
 */
 @Service
 @Transactional

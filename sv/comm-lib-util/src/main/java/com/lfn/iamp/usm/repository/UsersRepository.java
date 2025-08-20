@@ -31,7 +31,7 @@ import com.lfn.iamp.usm.dto.UserPartialDTO;
  * Spring Data JPA repository for the Users entity.
  */
 /**
-* @author icets
+* @author essedum
 */
 @SuppressWarnings("unused")
 //@Repository("usmUsersRepository")

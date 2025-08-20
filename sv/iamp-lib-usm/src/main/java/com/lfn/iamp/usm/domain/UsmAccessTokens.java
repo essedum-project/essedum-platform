@@ -37,7 +37,7 @@ import lombok.Setter;
 /**
  * The Class UsmAccessTokens.
  *
- * @author icets
+ * @author essedum
  */
 
 @Getter

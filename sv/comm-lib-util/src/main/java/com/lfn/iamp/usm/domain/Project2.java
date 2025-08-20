@@ -42,7 +42,7 @@ import lombok.Setter;
  * A Project.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @Entity
 @Table(name = "usm_project")

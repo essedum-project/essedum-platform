@@ -27,7 +27,7 @@ import lombok.Setter;
 /**
  * The Class ICIPNativeJobDetails.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

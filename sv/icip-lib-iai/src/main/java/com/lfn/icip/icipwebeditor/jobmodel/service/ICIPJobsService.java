@@ -56,9 +56,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.service.IICIPDatasourcePluginsService;
 import com.lfn.icip.dataset.service.IICIPDatasourceService;
@@ -93,7 +93,7 @@ import okhttp3.Response;
 /**
  * The Class ICIPJobsService.
  *
- * @author icets
+ * @author essedum
  */
 @Log4j2
 @Service
@@ -119,19 +119,19 @@ public class ICIPJobsService implements IICIPJobsService {
 	private ICIPJobsRepository iCIPJobsRepository;
 
 	/** The folder th. */
-	@LeapProperty("icip.jobLogFileDir")
+	@EssedumProperty("icip.jobLogFileDir")
 	private String folderPath;
 
 	/** The spark host. */
-	@LeapProperty("icip.sparkServer.host")
+	@EssedumProperty("icip.sparkServer.host")
 	private String sparkHost;
 
 	/** The spark port. */
-	@LeapProperty("icip.sparkServer.port")
+	@EssedumProperty("icip.sparkServer.port")
 	private String sparkPort;
 
 	/** The days string. */
-	@LeapProperty("icip.cleanup.deletion.days")
+	@EssedumProperty("icip.cleanup.deletion.days")
 	private String daysString;
 
 	/** The jobs partial repository. */
@@ -499,7 +499,7 @@ public class ICIPJobsService implements IICIPJobsService {
 		return sslContext;
 	}
 
-	private JSONObject getLog(String taskId, JSONObject connDetails) throws LeapException {
+	private JSONObject getLog(String taskId, JSONObject connDetails) throws EssedumException {
 		// TODO Auto-generated method stub
 		logger.info("Inside getLog");
 		String url = connDetails.get("Url").toString() + "/" + taskId + "/getLog";
@@ -523,14 +523,14 @@ public class ICIPJobsService implements IICIPJobsService {
 
 				return responsebody;
 			} else if (response.code() == 400) {
-				throw new LeapException("Remote get task Log for taskid " + taskId);
+				throw new EssedumException("Remote get task Log for taskid " + taskId);
 			} else {
-				throw new LeapException("Remote get task log for  " + taskId + " Response Code " + response.code()
+				throw new EssedumException("Remote get task log for  " + taskId + " Response Code " + response.code()
 						+ "Response Body" + response.body());
 			}
 
 		} catch (Exception e) {
-			throw new LeapException("Error in getLog:" + e.getMessage() + "Task Id is:" + taskId);
+			throw new EssedumException("Error in getLog:" + e.getMessage() + "Task Id is:" + taskId);
 
 		}
 		// return null;
@@ -900,18 +900,18 @@ public class ICIPJobsService implements IICIPJobsService {
 	/**
 	 * Delete older data.
 	 *
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	@Override
 	@Transactional
-	public void deleteOlderData() throws LeapException {
+	public void deleteOlderData() throws EssedumException {
 		try {
 			int days = Integer.parseInt(daysString);
 			logger.info("Deleting data older than {} day(s)", days);
 			iCIPJobsRepository.deleteOlderData(days);
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
-			throw new LeapException(ex.getMessage());
+			throw new EssedumException(ex.getMessage());
 		}
 	}
 
@@ -1087,7 +1087,7 @@ public class ICIPJobsService implements IICIPJobsService {
 		return stringToReturn;
 	}
 
-	public String getAllRemoteJobs(String url) throws LeapException {
+	public String getAllRemoteJobs(String url) throws EssedumException {
 		TrustManager[] trustAllCerts = getTrustAllCerts();
 		SSLContext sslContext = getSslContext(trustAllCerts);
 		OkHttpClient.Builder newBuilder = new OkHttpClient.Builder();
@@ -1104,14 +1104,14 @@ public class ICIPJobsService implements IICIPJobsService {
 				String jsonData = response.body().string();
 				return jsonData;
 			} else {
-				throw new LeapException("Failed to Fetch all remote logs");
+				throw new EssedumException("Failed to Fetch all remote logs");
 			}
 		} catch (Exception e) {
-			throw new LeapException("Error in fetch all remote logs:" + e.getMessage() + "Url is:" + url);
+			throw new EssedumException("Error in fetch all remote logs:" + e.getMessage() + "Url is:" + url);
 		}
 	}
 
-	public String getLogData(String url, String jobId) throws LeapException {
+	public String getLogData(String url, String jobId) throws EssedumException {
 		TrustManager[] trustAllCerts = getTrustAllCerts();
 		SSLContext sslContext = getSslContext(trustAllCerts);
 		OkHttpClient.Builder newBuilder = new OkHttpClient.Builder();
@@ -1129,14 +1129,14 @@ public class ICIPJobsService implements IICIPJobsService {
 				String jsonData = response.body().string();
 				return jsonData;
 			} else {
-				throw new LeapException("Failed to Fetch remote log");
+				throw new EssedumException("Failed to Fetch remote log");
 			}
 		} catch (Exception e) {
-			throw new LeapException("Error while fetching remote log:" + e.getMessage() + "job Id is:" + jobId);
+			throw new EssedumException("Error while fetching remote log:" + e.getMessage() + "job Id is:" + jobId);
 		}
 	}
 
-	public String stopRemoteJob(String url, String jobId) throws LeapException {
+	public String stopRemoteJob(String url, String jobId) throws EssedumException {
 		TrustManager[] trustAllCerts = getTrustAllCerts();
 		SSLContext sslContext = getSslContext(trustAllCerts);
 		OkHttpClient.Builder newBuilder = new OkHttpClient.Builder();
@@ -1154,10 +1154,10 @@ public class ICIPJobsService implements IICIPJobsService {
 				String jsonData = response.body().string();
 				return jsonData;
 			} else {
-				throw new LeapException("Failed to terminate the remote job");
+				throw new EssedumException("Failed to terminate the remote job");
 			}
 		} catch (Exception e) {
-			throw new LeapException("Error in terminating remote job:" + e.getMessage() + "job Id is:" + jobId);
+			throw new EssedumException("Error in terminating remote job:" + e.getMessage() + "job Id is:" + jobId);
 		}
 	}
 

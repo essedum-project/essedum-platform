@@ -27,7 +27,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageRequestByExample;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageResponse;
 import com.lfn.iamp.usm.domain.UsmNotifications;
@@ -40,7 +40,7 @@ import com.lfn.iamp.usm.service.UsmNotificationsService;
  * Service Implementation for managing UsmNotifications.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional
@@ -52,7 +52,7 @@ public class UsmNotificationsServiceImpl implements UsmNotificationsService {
 	/** The usm notifications repository. */
 	private final UsmNotificationsRepository usm_notificationsRepository;
 	
-	@LeapProperty("license_notification_role") //application.autouser.autoRoles
+	@EssedumProperty("license_notification_role") //application.autouser.autoRoles
 	private String roleid;
 
 	/**
@@ -174,7 +174,7 @@ public class UsmNotificationsServiceImpl implements UsmNotificationsService {
 	 * 
 	 * @see
 	 * com.lfn.iamp.usm.service.UsmNotificationsService#save(com.lfn.
-	 * icets.iamp.usm.dto.UsmNotificationsDTO)
+	 * iamp.usm.dto.UsmNotificationsDTO)
 	 */
 	@Override
 	public UsmNotifications save(UsmNotificationsDTO usmNotificationsDto) {

@@ -20,7 +20,7 @@ import ch.qos.logback.classic.PatternLayout;
 /**
  * The Class PatternLayoutWithUserContext.
  *
- * @author icets
+ * @author essedum
  */
 public class PatternLayoutWithUserContext extends PatternLayout {
     static {

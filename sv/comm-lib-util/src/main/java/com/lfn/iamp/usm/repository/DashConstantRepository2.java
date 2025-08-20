@@ -27,7 +27,7 @@ import com.lfn.iamp.usm.domain.DashConstant2;
  * Spring Data JPA repository for the DashConstant entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @SuppressWarnings("unused")
 @Repository

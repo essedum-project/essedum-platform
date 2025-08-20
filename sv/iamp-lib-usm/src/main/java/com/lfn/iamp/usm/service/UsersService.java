@@ -22,7 +22,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageRequestByExample;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageResponse;
 import com.lfn.iamp.usm.domain.Users;
@@ -33,7 +33,7 @@ import com.lfn.iamp.usm.dto.UserPartialDTO;
  * Service Interface for managing Users.
  */
 /**
-* @author icets
+* @author essedum
 */
 public interface UsersService {
 
@@ -167,9 +167,9 @@ public interface UsersService {
 	 *
 	 * @param email the email
 	 * @return the user details
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-    Integer findEmail(String email) throws LeapException;
+    Integer findEmail(String email) throws EssedumException;
 
 	/**
 	 * Gets the paginated users list.
@@ -201,7 +201,7 @@ public interface UsersService {
 	
 	public List<Users> findUsersByPortfolio(Integer portfolioId) ;
 	
-	public Users revokeAccess(String userEmail) throws SQLException, LeapException;
+	public Users revokeAccess(String userEmail) throws SQLException, EssedumException;
 
 	public List<UserPartialDTO> findUserDetailsIds(Integer[] fetchAllocatedUsers);
 
@@ -211,7 +211,7 @@ public interface UsersService {
 	
 	public List<String> getActiveModules();
 
-	public Users findUserDataByEmail(String email) throws LeapException;
+	public Users findUserDataByEmail(String email) throws EssedumException;
 
 	public PageResponse<Users> getProjectUsersList(Pageable pageable, Boolean portfolio, Integer Id) throws SQLException;
 

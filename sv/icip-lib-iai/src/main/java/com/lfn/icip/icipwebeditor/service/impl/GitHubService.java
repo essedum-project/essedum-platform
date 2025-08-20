@@ -60,7 +60,7 @@ import com.amazonaws.http.conn.ssl.SdkTLSSocketFactory;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.model.ICIPDatasource;
@@ -90,7 +90,7 @@ public class GitHubService {
 	String proxyPort;
 	
 	/** The folder path. */
-	@LeapProperty("icip.fileuploadDir")
+	@EssedumProperty("icip.fileuploadDir")
 	private String folderPath;
 
 	@Autowired

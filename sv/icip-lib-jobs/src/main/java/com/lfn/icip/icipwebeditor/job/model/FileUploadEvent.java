@@ -26,7 +26,7 @@ import lombok.Getter;
 /**
  * The Class FileUploadEvent.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

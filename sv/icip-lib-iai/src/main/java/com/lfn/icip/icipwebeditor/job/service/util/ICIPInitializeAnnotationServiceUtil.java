@@ -22,8 +22,8 @@ import java.util.List;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
 
-import com.lfn.ai.comm.lib.util.annotation.LeapProperties;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperties;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.icipwebeditor.job.util.SystemUtils;
 
 import lombok.Getter;
@@ -54,31 +54,31 @@ import lombok.extern.log4j.Log4j2;
 public class ICIPInitializeAnnotationServiceUtil {
 
 	/** The environments. */
-	@LeapProperties("icip.environment")
+	@EssedumProperties("icip.environment")
 	private List<String> environments;
 
 	/** The folder path. */
-	@LeapProperty("icip.jobLogFileDir")
+	@EssedumProperty("icip.jobLogFileDir")
 	private String folderPath;
 
 	/** The agents timeout. */
-	@LeapProperty("icip.agentsTimeout")
+	@EssedumProperty("icip.agentsTimeout")
 	private String agentsTimeout;
 
 	/** The python main class. */
-	@LeapProperty("icip.sparkServer.pythonMainClass")
+	@EssedumProperty("icip.sparkServer.pythonMainClass")
 	private String pythonMainClass;
 
 	/** The python app name. */
-	@LeapProperty("icip.sparkServer.pythonAppName")
+	@EssedumProperty("icip.sparkServer.pythonAppName")
 	private String pythonAppName;
 
 	/** The days string. */
-	@LeapProperty("icip.cleanup.deletion.days")
+	@EssedumProperty("icip.cleanup.deletion.days")
 	private String daysString;
 
 	/** The fileupload dir. */
-	@LeapProperty("icip.fileuploadDir")
+	@EssedumProperty("icip.fileuploadDir")
 	private String fileuploadDir;
 
 	/** The instance id. */

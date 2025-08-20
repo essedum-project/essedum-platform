@@ -24,7 +24,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPDragAndDrop;
 /**
  * The Interface IICIPDragAndDropService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPDragAndDropService {
 

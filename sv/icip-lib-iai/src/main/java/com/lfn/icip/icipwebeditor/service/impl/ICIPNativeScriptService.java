@@ -40,7 +40,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
 import com.lfn.icip.icipwebeditor.model.ICIPNativeScript;
@@ -52,7 +52,7 @@ import com.lfn.icip.icipwebeditor.service.IICIPNativeScriptService;
 /**
  * The Class ICIPNativeScriptService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 public class ICIPNativeScriptService implements IICIPNativeScriptService {
@@ -66,7 +66,7 @@ public class ICIPNativeScriptService implements IICIPNativeScriptService {
 	/** The native script repository. */
 	private ICIPNativeScriptRepository nativeScriptRepository;
 	
-//	@LeapProperty("icip.script.github.enabled")
+//	@EssedumProperty("icip.script.github.enabled")
 //	private String remoteScript;
 	
 	@Autowired

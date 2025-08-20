@@ -26,7 +26,7 @@ import com.lfn.icip.dataset.model.ICIPMlIntstance;
  * Spring Data JPA repository for the ICIPMlIntstance entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPMlIntstanceRepository extends JpaRepository<ICIPMlIntstance, Integer> {

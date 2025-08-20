@@ -65,7 +65,7 @@ import io.swagger.v3.oas.annotations.Parameter;
  * REST controller for managing UsmRolePermissions.
  */
 /**
-* @author icets
+* @author essedum
 */
 @RestController
 @RequestMapping("/api")

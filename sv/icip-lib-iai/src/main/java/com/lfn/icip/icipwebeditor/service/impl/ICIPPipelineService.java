@@ -56,7 +56,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
 import com.lfn.icip.dataset.model.ICIPDatasource;
@@ -97,7 +97,7 @@ import reactor.core.publisher.Flux;
 /**
  * The Class ICIPPipelineService.
  *
- * @author icets
+ * @author essedum
  */
 @Service("pipelineservice")
 @RefreshScope
@@ -153,23 +153,23 @@ public class ICIPPipelineService implements IICIPSearchable{
 
 
 	/** The sjs host. */
-	@LeapProperty("icip.sparkServer.host")
+	@EssedumProperty("icip.sparkServer.host")
 	private String sjsHost;
 
 	/** The sjs port. */
-	@LeapProperty("icip.sparkServer.port")
+	@EssedumProperty("icip.sparkServer.port")
 	private String sjsPort;
 
 	/** The sjs app name. */
-	@LeapProperty("icip.sparkServer.appName")
+	@EssedumProperty("icip.sparkServer.appName")
 	private String sjsAppName;
 
 	/** The sjs jar location. */
-	@LeapProperty("icip.sparkServer.requiredJarsLocation")
+	@EssedumProperty("icip.sparkServer.requiredJarsLocation")
 	private String sjsJarLocation;
 
 	/** The sjs python context. */
-	@LeapProperty("icip.sparkServer.pythonContext")
+	@EssedumProperty("icip.sparkServer.pythonContext")
 	private String sjsPythonContext;
 
 	/** Claim. */

@@ -52,7 +52,7 @@ import org.springframework.data.domain.Sort;
  * Service Implementation for managing UsmRolePermissions.
  */
 /**
-* @author icets
+* @author essedum
 */
 @Service
 @Transactional

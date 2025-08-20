@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.gson.JsonObject;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.repository.ICIPDatasourceRepository;
 import com.lfn.icip.icipwebeditor.exception.NoUnassignedPortFoundException;
@@ -77,7 +77,7 @@ public class ICIPMLFederatedRuntimeService {
 	@Value("${port_automation_app_url}")
 	private String port_automation_app_url;
 
-	@LeapProperty("icip.certificateCheck")
+	@EssedumProperty("icip.certificateCheck")
 	private String certificateCheck;
 
 	@Autowired

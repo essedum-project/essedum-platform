@@ -40,7 +40,7 @@ import com.lfn.iamp.usm.service.ContextService;
  * Service Implementation for managing Context.
  */
 /**
-* @author icets
+* @author essedum
 */
 @Service
 @Transactional

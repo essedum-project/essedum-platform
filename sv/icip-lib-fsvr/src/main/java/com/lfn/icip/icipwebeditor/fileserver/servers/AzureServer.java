@@ -42,7 +42,7 @@ import com.azure.storage.blob.models.BlobHttpHeaders;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.ListBlobsOptions;
 import com.azure.storage.blob.models.ParallelTransferOptions;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.icipwebeditor.fileserver.constants.FileServerConstants;
 import com.lfn.icip.icipwebeditor.fileserver.constants.LoggerConstants;
 import com.lfn.icip.icipwebeditor.fileserver.service.impl.CommonService;
@@ -75,7 +75,7 @@ public class AzureServer implements FileServerUtil {
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(AzureServer.class);
 	
-	@LeapProperty("icip.certificateCheck")
+	@EssedumProperty("icip.certificateCheck")
 	private String certificateCheck;
 	
 	private static final String UTF_ENCODE = "UTF-8";

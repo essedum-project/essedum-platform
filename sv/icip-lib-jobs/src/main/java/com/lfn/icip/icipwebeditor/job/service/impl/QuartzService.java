@@ -40,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.Gson;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
 import com.lfn.iamp.usm.domain.DashConstant;
@@ -82,7 +82,7 @@ public class QuartzService {
 	private FileServerService fileserverService;
 
 	/** The folder path. */
-	@LeapProperty("icip.jobLogFileDir")
+	@EssedumProperty("icip.jobLogFileDir")
 	private String folderPath;
 
 	@Autowired

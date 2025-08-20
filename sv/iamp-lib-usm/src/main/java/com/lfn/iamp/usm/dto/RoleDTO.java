@@ -26,7 +26,7 @@ import lombok.Setter;
 /**
  * The Class RoleDTO.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

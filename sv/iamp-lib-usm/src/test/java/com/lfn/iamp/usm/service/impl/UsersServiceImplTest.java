@@ -38,7 +38,7 @@ import org.springframework.data.repository.query.QueryByExampleExecutor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 //import org.springframework.test.util.ReflectionTestUtils;
 
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageRequestByExample;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageResponse;
 import com.lfn.iamp.usm.domain.Context;
@@ -52,7 +52,7 @@ import com.lfn.iamp.usm.service.ContextService;
 /**
  * The Class UsersServiceImplTest.
  *
- * @author icets
+ * @author essedum
  */
 public class UsersServiceImplTest {
 
@@ -97,7 +97,7 @@ public class UsersServiceImplTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setContext(new Context());
 		users.setActivated(true);
@@ -112,7 +112,7 @@ public class UsersServiceImplTest {
 		users1.setUser_f_name("test");
 		users1.setUser_l_name("User");
 		users1.setUser_login("testuser");
-		users1.setUser_email("testuser@infosys.com");
+		users1.setUser_email("testuser@lfn.com");
 		users1.setOnboarded(true);
 		users1.setContext(new Context());
 		users1.setActivated(true);
@@ -125,7 +125,7 @@ public class UsersServiceImplTest {
 		Mockito.when(usersRepository.findById(2)).thenReturn(Optional.of(users));
 
 		Mockito.when(usersRepository.findByUserLogin("testuser")).thenReturn(users);
-		Mockito.when(usersRepository.findByUserEmail("testuser@infosys.com")).thenReturn(users);
+		Mockito.when(usersRepository.findByUserEmail("testuser@lfn.com")).thenReturn(users);
 		Mockito.when(userUnitRepository.findByUserAndOrg(2, "test")).thenReturn(userunit);
 		Mockito.when(usersRepository.save(users)).thenReturn(users);
 		Page<Users> usersPage = new PageImpl<>(Collections.singletonList(users));
@@ -147,7 +147,7 @@ public class UsersServiceImplTest {
 				azureService);
 
 //		ReflectionTestUtils.setField(service, "defaultPWD", "test@123");
-//		ReflectionTestUtils.setField(service, "domain", "@infosys.com");
+//		ReflectionTestUtils.setField(service, "domain", "@lfn.com");
 
 	}
 
@@ -173,7 +173,7 @@ public class UsersServiceImplTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setContext(new Context());
 		users.setActivated(true);
@@ -223,7 +223,7 @@ public class UsersServiceImplTest {
 	@Test
 	void testCreateUserWithDefaultMappings() {
 
-		assertEquals(service.createUserWithDefaultMapping("testuser", "test", "user", "testuser@infosys.com")
+		assertEquals(service.createUserWithDefaultMapping("testuser", "test", "user", "testuser@lfn.com")
 				.getUser_f_name(), "test");
 	}
 
@@ -251,7 +251,7 @@ public class UsersServiceImplTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setPassword("test@123");
 		users.setContext(new Context());
@@ -285,7 +285,7 @@ public class UsersServiceImplTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setPassword("test@123");
 		users.setContext(new Context());
@@ -319,8 +319,8 @@ public class UsersServiceImplTest {
 	@Test
 	void testFindByUserEmail() {
 		try {
-			assertEquals(service.findEmail("testuser@infosys.com"), 2);
-		} catch (LeapException e) {
+			assertEquals(service.findEmail("testuser@lfn.com"), 2);
+		} catch (EssedumException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -329,8 +329,8 @@ public class UsersServiceImplTest {
 	@Test
 	void testFindByUserEmails() {
 		try {
-			service.findEmail("test@infosys.com");
-		} catch (LeapException e) {
+			service.findEmail("test@lfn.com");
+		} catch (EssedumException e) {
 			assertEquals(e.getMessage().isEmpty(), false);
 
 		}

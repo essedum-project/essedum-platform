@@ -24,7 +24,7 @@ import lombok.Setter;
 /**
  * The Class ContextDTO.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

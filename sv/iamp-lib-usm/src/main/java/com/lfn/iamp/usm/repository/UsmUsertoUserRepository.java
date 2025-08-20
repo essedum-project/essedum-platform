@@ -33,7 +33,7 @@ import com.lfn.iamp.usm.dto.UserPartialHierarchyDTO;
 /**
  */
 /**
-* @author icets
+* @author essedum
 */
 @SuppressWarnings("unused")
 @NoRepositoryBean

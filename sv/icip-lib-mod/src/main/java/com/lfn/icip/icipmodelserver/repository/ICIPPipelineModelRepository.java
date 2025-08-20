@@ -22,7 +22,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipmodelserver.model.ICIPPipelineModel;
 
 // TODO: Auto-generated Javadoc
@@ -30,7 +30,7 @@ import com.lfn.icip.icipmodelserver.model.ICIPPipelineModel;
  * Spring Data JPA repository for the ICIPPipelineModel entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPPipelineModelRepository extends JpaRepository<ICIPPipelineModel, Integer> {
@@ -84,10 +84,10 @@ public interface ICIPPipelineModelRepository extends JpaRepository<ICIPPipelineM
 	 * @param search the search
 	 * @param pageable the pageable
 	 * @return the list
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	List<ICIPPipelineModel> findByOrganizationAndSearch(String org, String search, Pageable pageable)
-			throws LeapException;
+			throws EssedumException;
 
 	/**
 	 * Count by organization.

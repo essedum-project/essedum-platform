@@ -49,7 +49,7 @@ import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.exceptions.ApiError;
 import com.lfn.ai.comm.lib.util.exceptions.ExceptionUtil;
 import com.lfn.icip.icipwebeditor.constants.FileConstants;
@@ -65,7 +65,7 @@ import io.micrometer.core.annotation.Timed;
 /**
  * The Class ICIPFileController.
  *
- * @author icets
+ * @author essedum
  */
 @RestController
 @Timed
@@ -82,7 +82,7 @@ public class ICIPFileController {
 	@Autowired
 	private GitHubService githubservice;
 	
-	@LeapProperty("icip.script.github.enabled")
+	@EssedumProperty("icip.script.github.enabled")
 	private String remoteScript;
 
 	/**

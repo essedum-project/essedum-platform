@@ -39,7 +39,7 @@ import lombok.Setter;
 /**
  * The Class ICIPSpecTemplate.
  *
- * @author icets
+ * @author essedum
  */
 //@MappedSuperclass
 @EntityListeners(AuditListener.class)

@@ -26,7 +26,7 @@ import com.lfn.icip.dataset.model.MlAdapters;
 /**
  * The Interface MlAdaptersService.
  *
- * @author icets
+ * @author essedum
  */
 public interface MlAdaptersService {
 

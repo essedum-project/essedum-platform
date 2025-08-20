@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.HeaderUtil;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageResponse;
 import com.lfn.iamp.usm.domain.UserProcessMapping;
 import com.lfn.iamp.usm.dto.UserProcessMappingDTO;
@@ -72,7 +72,7 @@ public class UserProcessMappingResource {
 			log.info("Request to save UserProcessMapping : {} : end");
 			return ResponseEntity.created(new URI("/api/UserProcessMapping/" + result.getId()))
 					.headers(HeaderUtil.createEntityCreationAlert("", result.getId().toString())).body(result);
-		} catch (LeapException | URISyntaxException e) {
+		} catch (EssedumException | URISyntaxException e) {
 			return ResponseEntity.status(HttpStatus.OK).body(e.toString());
 		}
 		

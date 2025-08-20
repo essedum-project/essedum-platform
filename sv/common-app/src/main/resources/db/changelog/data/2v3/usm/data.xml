@@ -6,15 +6,15 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
                         http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="Leap" id="2v3-usm-2182023">
+    <changeSet author="Essedum" id="2v3-usm-2182023">
         <sql splitStatements="true" stripComments="true"> 
             DELETE FROM usm_permissions WHERE id IN (SELECT DISTINCT permission_id FROM usm_permission_api) </sql>
     </changeSet>
-    <changeSet  author="Leap"  id="2v3-usm-2182024">  
+    <changeSet  author="Essedum"  id="2v3-usm-2182024">  
         <delete tableName="usm_permission_api">   </delete>  
     </changeSet>
 
-    <changeSet author="Leap (generated)" id="2v3-usm-2182025">
+    <changeSet author="Essedum (generated)" id="2v3-usm-2182025">
         <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/data/2v3/usm/usm_permissions.csv"
             quotchar="&quot;" separator="," tableName="usm_permissions">
             <column header="module" name="module" type="STRING" />
@@ -22,21 +22,21 @@
                 name="permission" type="STRING" />
         </loadData>
     </changeSet>
-    <changeSet dbms="!mssql" author="Leap" id="2v3-usm-310526" runInTransaction="true">
+    <changeSet dbms="!mssql" author="Essedum" id="2v3-usm-310526" runInTransaction="true">
         <comment>to be udpated</comment>
         <sqlFile relativeToChangelogFile="true" splitStatements="true" stripComments="true"
             path="usm_permission_api_mysql.sql" />
     </changeSet>
-    <changeSet dbms="mssql" author="Leap" id="2v3-usm-310527" runInTransaction="true">
+    <changeSet dbms="mssql" author="Essedum" id="2v3-usm-310527" runInTransaction="true">
 		<comment>to be udpated</comment>
 			<sqlFile relativeToChangelogFile="true" splitStatements="true" stripComments="true" path="usm_permission_api_mssql.sql" />  
 	</changeSet>
-    <changeSet  author="Leap"  id="2v3-usm-2182028">  
+    <changeSet  author="Essedum"  id="2v3-usm-2182028">  
         <delete tableName="usm_constant">  
             <where>item='Batch Job Manager Side' AND item_value LIKE '%AI Brain%'</where>  
         </delete>  
     </changeSet>
-    <changeSet author="Leap (generated)" id="2v3-usm-20231509">
+    <changeSet author="Essedum (generated)" id="2v3-usm-20231509">
 		<createIndex indexName="usm_permission_api_ibfk_2"
 			tableName="usm_permission_api">
 			<column name="permission_id" />

@@ -27,7 +27,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPPipelinePID;
 /**
  * The Interface ICIPPipelinePIDRepository.
  *
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPPipelinePIDRepository extends JpaRepository<ICIPPipelinePID, Integer> {

@@ -27,7 +27,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPNativeScript;
 /**
  * The Interface ICIPNativeScriptRepository.
  *
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPNativeScriptRepository extends JpaRepository<ICIPNativeScript, Integer> {

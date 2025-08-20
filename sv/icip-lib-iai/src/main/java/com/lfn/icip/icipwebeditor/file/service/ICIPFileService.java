@@ -67,7 +67,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.lfn.icip.dataset.service.impl.ICIPDatasetFilesService;
 import com.lfn.icip.icipwebeditor.config.ICIPAgentsConfig;
@@ -93,7 +93,7 @@ import com.lfn.icip.icipwebeditor.service.impl.ICIPScriptService;
 /**
  * The Class ICIPFileService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @RefreshScope
@@ -126,11 +126,11 @@ public class ICIPFileService {
 	private ICIPDatasetFilesService datasetFileService;
 
 	/** The folder path. */
-	@LeapProperty("icip.fileuploadDir")
+	@EssedumProperty("icip.fileuploadDir")
 	private String folderPath;
 
 	/** The agent path. */
-	@LeapProperty("icip.agentsDir")
+	@EssedumProperty("icip.agentsDir")
 	private String agentPath;
 	
 	@Autowired

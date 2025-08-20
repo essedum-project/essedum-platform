@@ -27,7 +27,7 @@ import com.lfn.iamp.usm.domain.UsmAccessTokens;
  * Spring Data JPA repository for the UsmAccessTokens entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @Repository
 public interface UsmAccessTokensRepository extends JpaRepository<UsmAccessTokens, Integer> {

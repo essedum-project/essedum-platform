@@ -90,11 +90,11 @@ import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.Crypt;
 import com.lfn.ai.comm.lib.util.ICIPHeaderUtil;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
 import com.lfn.ai.comm.lib.util.exceptions.ApiError;
 import com.lfn.ai.comm.lib.util.exceptions.ExceptionUtil;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.iamp.usm.domain.DashConstant;
 import com.lfn.icip.dataset.constants.ICIPPluginConstants;
 import com.lfn.icip.dataset.factory.IICIPDataSetServiceUtilFactory;
@@ -129,7 +129,7 @@ import jakarta.persistence.EntityNotFoundException;
 /**
  * The Class ICIPDatasetController.
  *
- * @author icets
+ * @author essedum
  */
 @RestController
 @Timed
@@ -190,17 +190,17 @@ public class ICIPDatasetController {
 	private static final String EXCEPTION = "Exception";
 	
 	/** The encryption key. */
-	@LeapProperty("application.uiconfig.enckeydefault")
+	@EssedumProperty("application.uiconfig.enckeydefault")
 	private static String enckeydefault;
 	
-	@LeapProperty("icip.pyJobServer")
+	@EssedumProperty("icip.pyJobServer")
 	private String jobServer;
 	
 	/** The scheduler status. */
-	@LeapProperty("icip.scheduler.pause.status")
+	@EssedumProperty("icip.scheduler.pause.status")
 	private String schedulerPauseStatus;
 
-	@LeapProperty("icip.multivariateUrl")
+	@EssedumProperty("icip.multivariateUrl")
 	private String multivariateUrl;
 	
 	@Autowired
@@ -686,13 +686,13 @@ public class ICIPDatasetController {
 	 * @throws IOException                        Signals that an I/O exception has
 	 *                                            occurred.
 	 * @throws URISyntaxException                 the URI syntax exception
-	 * @throws LeapException                      the leap exception
+	 * @throws EssedumException                      the essedum exception
 	 */
 	@PostMapping(path = "/test")
 	public ResponseEntity<String> testConnection(@RequestBody ICIPDatasetDTO datasetDTO) throws InvalidKeyException,
 			KeyManagementException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException,
 			InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, KeyStoreException,
-			ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException, LeapException {
+			ClassNotFoundException, SQLException, DecoderException, IOException, URISyntaxException, EssedumException {
 		logger.info("testing dataset connection");
 		ModelMapper modelmapper = new ModelMapper();
 		Converter<Map<String, String>, String> converter = new Converter<>() {
@@ -714,7 +714,7 @@ public class ICIPDatasetController {
 		try {
 			if (pluginService.getDataSetService(dataset).testConnection(dataset))
 				return new ResponseEntity<>("SUCCESS", new HttpHeaders(), HttpStatus.OK);
-		} catch (LeapException e) {
+		} catch (EssedumException e) {
 			return new ResponseEntity<>(String.format("%s%s", "FAILED : ", e.getMessage()), new HttpHeaders(),
 					HttpStatus.BAD_REQUEST);
 		}
@@ -1174,7 +1174,7 @@ public class ICIPDatasetController {
 //					for (var e : nextLine) {
 //						if(e.startsWith("=") || e.startsWith("+") || e.startsWith("-")
 //		            		   || e.startsWith("@")) {
-//							throw new LeapException("CSV files containing formula are not allowed");           	   
+//							throw new EssedumException("CSV files containing formula are not allowed");           	   
 //						}
 //					}
 //				}
@@ -1189,7 +1189,7 @@ public class ICIPDatasetController {
 //					while (cellIterator.hasNext()) {
 //						Cell currentCell = cellIterator.next();
 //						if(currentCell.getCellType().toString().equals("FORMULA")) {
-//								throw new LeapException("Excel files containing formula are not allowed");           	   
+//								throw new EssedumException("Excel files containing formula are not allowed");           	   
 //							}
 //					}
 //				}
@@ -2143,10 +2143,10 @@ public class ICIPDatasetController {
 	 * @param id     the id
 	 * @param config the config
 	 * @return the response entity
-	 * @throws LeapException 
+	 * @throws EssedumException 
 	 */
 	@PostMapping("/save/archival-config/{id}")
-	public ResponseEntity<ICIPDataset2> saveViews(@PathVariable("id") int id, @RequestBody String config) throws LeapException {
+	public ResponseEntity<ICIPDataset2> saveViews(@PathVariable("id") int id, @RequestBody String config) throws EssedumException {
 		ICIPDataset2 dataset = datasetService.saveArchivalConfig(id, config);
 		try {
 			return new ResponseEntity<>(encryptDataset2Attributes(datasetService.saveArchivalConfig(id, config)), HttpStatus.OK);

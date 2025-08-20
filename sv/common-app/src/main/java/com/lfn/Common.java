@@ -43,7 +43,7 @@ import javax.sql.DataSource;
 /**
  * The Class COMMON.
  *
- * @author icets
+ * @author essedum
  */
 @SpringBootApplication
 @RefreshScope

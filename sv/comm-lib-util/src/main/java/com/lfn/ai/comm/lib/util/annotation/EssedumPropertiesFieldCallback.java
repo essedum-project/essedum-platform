@@ -13,42 +13,38 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lfn.common.lib.annotation;
+package com.lfn.ai.comm.lib.util.annotation;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.FieldCallback;
 
-import com.lfn.common.lib.rest.RestClientUtil;
+import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class LeapPropertiesFieldCallbackV2 implements FieldCallback {
-	
-	private String commonAppUrl;
+public class EssedumPropertiesFieldCallback implements FieldCallback {
 
-	private static String ERROR_PROPERTY_NOT_FOUND = "@LeapProperties(entity) does not exist in the constant DB.";
+	private static String ERROR_PROPERTY_NOT_FOUND = "@EssedumProperties(entity) does not exist in the constant DB.";
 	private Object value;
+	private ConstantsService dashConstantService;
 
-	public LeapPropertiesFieldCallbackV2(Object value,@Value("${commonAppUrl}") String commonAppUrl) {
+	public EssedumPropertiesFieldCallback(Object value, ConstantsService dashConstantService) {
 		this.value = value;
-		this.commonAppUrl = commonAppUrl;
+		this.dashConstantService = dashConstantService;
 	}
 
 	@Override
 	public void doWith(Field field) throws IllegalAccessException {
-		if (!field.isAnnotationPresent(LeapPropertiesV2.class)) {
+		if (!field.isAnnotationPresent(EssedumProperties.class)) {
 			return;
 		}
 		ReflectionUtils.makeAccessible(field);
-		String key = field.getDeclaredAnnotation(LeapPropertiesV2.class).value();
+		String key = field.getDeclaredAnnotation(EssedumProperties.class).value();
 		try {
-			String result = RestClientUtil.getApiCall(commonAppUrl + "api/get-startup-constants/array/" + key+"/Core","");
-			field.set(value, Arrays.asList(result));
+			field.set(value, dashConstantService.findByKeyArray(key, "Core"));
 		} catch (Exception ex) {
 			String error = String.format("%s : Key %s", ERROR_PROPERTY_NOT_FOUND, key);
 			log.error(error, ex);

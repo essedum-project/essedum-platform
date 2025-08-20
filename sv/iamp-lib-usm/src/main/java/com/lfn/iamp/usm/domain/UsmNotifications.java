@@ -40,7 +40,7 @@ import lombok.ToString;
  * @author iCets
  */
 /**
- * @author icets
+ * @author essedum
  */
 @Entity
 @Table(name = "usm_notifications")

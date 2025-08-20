@@ -25,7 +25,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 /**
  * The Class SessionConverter.
  *
- * @author icets
+ * @author essedum
  */
 public class SessionConverter extends ClassicConverter {
     

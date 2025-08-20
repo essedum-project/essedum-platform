@@ -51,7 +51,7 @@ import com.lfn.icip.dataset.service.IICIPRelationshipService;
 /**
  * The Class IICIPRelationshipService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional

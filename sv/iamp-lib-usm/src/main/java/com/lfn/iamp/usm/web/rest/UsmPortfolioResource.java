@@ -61,7 +61,7 @@ import io.swagger.v3.oas.annotations.Parameter;
  * REST controller for managing UsmPortfolio.
  */
 /**
-* @author icets
+* @author essedum
 */
 @RestController
 @RequestMapping("/api")

@@ -26,7 +26,7 @@ import lombok.Data;
  * The Class ICIPPageResponse.
  *
  * @param <T> the generic type
- * @author icets
+ * @author essedum
  */
 
 /**

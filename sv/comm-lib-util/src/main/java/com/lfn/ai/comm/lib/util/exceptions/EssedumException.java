@@ -13,17 +13,34 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lfn.ai.comm.lib.util.annotation;
+package com.lfn.ai.comm.lib.util.exceptions;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+/**
+ * The Class EssedumException.
+ *
+ * @author essedum
+ */
+@SuppressWarnings("serial")
+public class EssedumException extends Exception {
+	
+	/**
+	 * Instantiates a new essedum exception.
+	 *
+	 * @param errorMessage the error message
+	 */
+	public EssedumException(String errorMessage) {
+		// Call constructor of parent Exception
+		super(errorMessage);
+	}
 
-@Target({ ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.ANNOTATION_TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface LeapProperties {
-	String value();
+	/**
+	 * Instantiates a new essedum exception.
+	 *
+	 * @param errorMessage the error message
+	 */
+	public EssedumException(String errorMessage, Throwable cause) {
+		// Call constructor of parent Exception
+		super(errorMessage, cause);
+	}
+	
 }

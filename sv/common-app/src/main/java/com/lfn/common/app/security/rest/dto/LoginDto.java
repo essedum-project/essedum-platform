@@ -23,7 +23,7 @@ import jakarta.validation.constraints.Size;
  * DTO for storing a user's credentials.
  */
 /**
- * @author icets
+ * @author essedum
  */
 public class LoginDto {
 

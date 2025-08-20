@@ -21,7 +21,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.model.ICIPJobs;
 import com.lfn.icip.icipwebeditor.model.ICIPJobsPartial;
 import com.lfn.icip.icipwebeditor.model.dto.IHiddenJobs;
@@ -34,7 +34,7 @@ import okhttp3.Response;
 /**
  * The Interface IICIPJobsService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPJobsService {
 
@@ -189,9 +189,9 @@ public interface IICIPJobsService {
 	/**
 	 * Delete older data.
 	 *
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	void deleteOlderData() throws LeapException;
+	void deleteOlderData() throws EssedumException;
 
 	/**
 	 * Find by job id with log.
@@ -254,11 +254,11 @@ public interface IICIPJobsService {
 
 	String getCsvData(String colsToDownload, String org);
 	
-	String getAllRemoteJobs(String url) throws LeapException;
+	String getAllRemoteJobs(String url) throws EssedumException;
 	
-	String getLogData(String url,String jobId) throws LeapException;
+	String getLogData(String url,String jobId) throws EssedumException;
 	
-	String stopRemoteJob(String url,String jobId) throws LeapException;
+	String stopRemoteJob(String url,String jobId) throws EssedumException;
 	
 	List<ICIPJobsPartial> getAllCommonJobsPartial(String org, int page, int size);
 

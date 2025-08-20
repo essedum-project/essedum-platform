@@ -23,7 +23,7 @@ import org.springframework.http.HttpHeaders;
  * Utility class for HTTP headers creation.
  */
 /**
-* @author icets
+* @author essedum
 */
 public final class ICIPHeaderUtil {
 

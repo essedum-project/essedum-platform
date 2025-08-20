@@ -371,7 +371,7 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 			}
 		}
 		body = body.isEmpty() ? body : replaceBodyString(body, attributes);
-		String leapparams = attributes.optString("LeapParams");
+		String leapparams = attributes.optString("EssedumParams");
 		String fileId = connectionDetails.optString("fileid").trim();
 
 		String encodedUrlString = URLEncoder.encode(urlString, StandardCharsets.UTF_8.toString());
@@ -716,8 +716,8 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 		for (int i = 0; i < paramValues.length; i++) {
 			String extparamValue = paramValues[i];
 			extparamValue = extparamValue.substring(2, extparamValue.length() - 2);
-			if (attributes.has("LeapParams") && attributes.get("LeapParams") != null) {
-				JSONArray leapparams = new JSONArray(attributes.get("LeapParams").toString());
+			if (attributes.has("EssedumParams") && attributes.get("EssedumParams") != null) {
+				JSONArray leapparams = new JSONArray(attributes.get("EssedumParams").toString());
 				for (int j = 0; j < leapparams.length(); j++) {
 					if (leapparams.getJSONObject(j) != null
 							&& leapparams.getJSONObject(j).optString("key").equals(extparamValue)) {
@@ -1364,7 +1364,7 @@ public abstract class ICIPDataSetServiceUtilRestAbstract extends ICIPDataSetServ
 				String params = attributes.optString("QueryParams");
 				String body = attributes.optString("Body");
 				body = body.isEmpty() ? body : replaceBodyString(body, attributes);
-				String leapparams = attributes.optString("LeapParams");
+				String leapparams = attributes.optString("EssedumParams");
 				String fileId = connectionDetails.optString("fileid").trim();
 
 				URI uri = null;

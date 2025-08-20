@@ -31,7 +31,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPApps;
 /**
  * The Interface ICIPAppsRepository.
  *
- * @author icets
+ * @author essedum
  */
 @SuppressWarnings("unused")
 @NoRepositoryBean

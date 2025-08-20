@@ -32,7 +32,7 @@ import com.google.gson.JsonPrimitive;
 /**
  * The Class ICIPJsonVisitorGetElements.
  *
- * @author icets
+ * @author essedum
  */
 @Component
 public class ICIPJsonVisitorGetElements {

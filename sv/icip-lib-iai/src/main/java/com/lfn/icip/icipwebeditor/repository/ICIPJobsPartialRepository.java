@@ -30,7 +30,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPJobsPartial;
  * Spring Data JPA repository for the SchemaRegistry entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPJobsPartialRepository extends PagingAndSortingRepository<ICIPJobsPartial, Integer> {

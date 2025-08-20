@@ -27,7 +27,7 @@ import com.lfn.icip.icipwebeditor.job.model.ICIPChains;
 /**
  * The Interface IICIPChainsService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPChainsService {
 

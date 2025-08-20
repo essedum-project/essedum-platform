@@ -17,7 +17,7 @@ package com.lfn.icip.dataset.model.dto;
 	/**
 	 * The Class ICIPDatasetDTO.
 	 *
-	 * @author icets
+	 * @author essedum
 	 */
 
 	/**

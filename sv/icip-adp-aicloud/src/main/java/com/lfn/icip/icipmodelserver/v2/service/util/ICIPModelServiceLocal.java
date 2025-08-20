@@ -18,7 +18,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipmodelserver.v2.model.dto.ICIPPolyAIRequestWrapper;
 import com.lfn.icip.icipmodelserver.v2.model.dto.ICIPPolyAIResponseWrapper;
 import com.lfn.icip.icipwebeditor.model.FedModelsID;
@@ -185,7 +185,7 @@ public class ICIPModelServiceLocal implements IICIPModelServiceUtil {
 		return null;
 	}
 	@Override
-	public ICIPMLFederatedModel registerModel(ICIPPolyAIRequestWrapper request) throws IOException, LeapException {
+	public ICIPMLFederatedModel registerModel(ICIPPolyAIRequestWrapper request) throws IOException, EssedumException {
 		String strbody = request.getBody();
 		JSONObject body = new JSONObject(strbody);
 		ICIPMLFederatedModel saveModel = null;
@@ -203,7 +203,7 @@ public class ICIPModelServiceLocal implements IICIPModelServiceUtil {
 		return null;
 	}
 	@Override
-	public ICIPPolyAIResponseWrapper deployModel(ICIPPolyAIRequestWrapper request) throws IOException, LeapException {
+	public ICIPPolyAIResponseWrapper deployModel(ICIPPolyAIRequestWrapper request) throws IOException, EssedumException {
 		// Method not required in this service class
 		return null;
 	}
@@ -214,7 +214,7 @@ public class ICIPModelServiceLocal implements IICIPModelServiceUtil {
 	}
 	@Override
 	public ICIPPolyAIResponseWrapper deleteDeployment(ICIPPolyAIRequestWrapper request)
-			throws IOException, LeapException {
+			throws IOException, EssedumException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -229,7 +229,7 @@ public class ICIPModelServiceLocal implements IICIPModelServiceUtil {
 		return null;
 	}
 	@Override
-	public ICIPMLFederatedEndpoint createEndpoint(ICIPPolyAIRequestWrapper request) throws IOException, LeapException {
+	public ICIPMLFederatedEndpoint createEndpoint(ICIPPolyAIRequestWrapper request) throws IOException, EssedumException {
 		String strbody = request.getBody();
 		JSONObject body = new JSONObject(strbody);
 		ICIPMLFederatedEndpoint saveEndpoint = null;
@@ -264,7 +264,7 @@ public class ICIPModelServiceLocal implements IICIPModelServiceUtil {
 	}
 	@Override
 	public ICIPPolyAIResponseWrapper deleteEndpoint(ICIPPolyAIRequestWrapper request)
-			throws IOException, LeapException {
+			throws IOException, EssedumException {
 		String endpointId = request.getBody();
 		ICIPMLFederatedEndpointDTO endpointDto = new ICIPMLFederatedEndpointDTO();
 		endpointDto.setAdapterId(request.getName());
@@ -394,7 +394,7 @@ public class ICIPModelServiceLocal implements IICIPModelServiceUtil {
 	}
 	@Override
 	public ICIPPolyAIResponseWrapper deleteModel(ICIPPolyAIRequestWrapper request)
-			throws LeapException, JSONException, IOException {
+			throws EssedumException, JSONException, IOException {
 		// Method not required in this service class
 		return null;
 	}

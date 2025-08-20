@@ -29,7 +29,7 @@ import com.lfn.iamp.usm.domain.Role;
  * Spring Data JPA repository for the Role entity.
  */
 /**
-* @author icets
+* @author essedum
 */
 @SuppressWarnings("unused")
 @Repository("usmRoleRepository")

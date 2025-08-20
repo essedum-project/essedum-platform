@@ -21,7 +21,7 @@ import org.eclipse.jgit.api.errors.TransportException;
 import org.json.JSONObject;
 import org.quartz.InterruptableJob;
 
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.model.dto.ICIPNativeJobDetails;
 
 // TODO: Auto-generated Javadoc
@@ -29,19 +29,19 @@ import com.lfn.icip.icipwebeditor.model.dto.ICIPNativeJobDetails;
 /**
  * The Interface IICIPJobRuntimeServiceUtil.
  *
- * @author icets
+ * @author essedum
  */
 
 public interface IICIPJobRuntimeServiceUtil extends InterruptableJob {
 
 	JSONObject getJson();
 
-	public String getNativeJobCommand(ICIPNativeJobDetails jobDetails) throws LeapException, InvalidRemoteException, TransportException, GitAPIException;
+	public String getNativeJobCommand(ICIPNativeJobDetails jobDetails) throws EssedumException, InvalidRemoteException, TransportException, GitAPIException;
 
-	public String getDragAndDropJobCommand(ICIPNativeJobDetails jobDetails) throws LeapException;
+	public String getDragAndDropJobCommand(ICIPNativeJobDetails jobDetails) throws EssedumException;
 
-	public String getBinaryJobCommand(ICIPNativeJobDetails jobDetails) throws LeapException;
+	public String getBinaryJobCommand(ICIPNativeJobDetails jobDetails) throws EssedumException;
 
-	public String getAzureJobCommand(ICIPNativeJobDetails jobDetails) throws LeapException;
+	public String getAzureJobCommand(ICIPNativeJobDetails jobDetails) throws EssedumException;
 
 }

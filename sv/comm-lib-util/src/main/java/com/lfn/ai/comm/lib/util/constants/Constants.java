@@ -16,7 +16,7 @@
 package com.lfn.ai.comm.lib.util.constants;
 
 /**
- * @author icets
+ * @author essedum
  *
  */
 
@@ -32,7 +32,7 @@ public class Constants {
 	/** key for DB type from the yml**/
 	public static final String ENV_DATABASE_TYPE = "databaseType";
 	/** DB queries file path **/
-	public static final String DB_QUERY_FILE_PATH = "dbQueries.leapqueries";
+	public static final String DB_QUERY_FILE_PATH = "dbQueries.essedumqueries";
 	/**	DEFAULT_DB_TYPE */
 	public static final String DEFAULT_DB_TYPE = "mysql";
 

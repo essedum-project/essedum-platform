@@ -20,7 +20,7 @@ package com.lfn.icip.icipwebeditor.exception;
 /**
  * The Class IcipIaiException.
  *
- * @author icets
+ * @author essedum
  */
 public class IcipIaiException extends Exception{
 	

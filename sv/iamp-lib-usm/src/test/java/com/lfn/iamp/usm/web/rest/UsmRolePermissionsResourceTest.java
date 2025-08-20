@@ -60,7 +60,7 @@ import com.lfn.iamp.usm.service.impl.UsmRolePermissionsServiceImpl;
 /**
  * The Class UsmRolePermissionsResourceTest.
  *
- * @author icets
+ * @author essedum
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UsmRolePermissionsResourceTest {

@@ -25,7 +25,7 @@ import com.lfn.iamp.usm.domain.OrgUnit;
  * Spring Data JPA repository for the OrgUnit entity.
  */
 /**
-* @author icets
+* @author essedum
 */
 @Repository("usmOrgUnitRepository")
 public interface OrgUnitRepository extends JpaRepository<OrgUnit,Integer> {

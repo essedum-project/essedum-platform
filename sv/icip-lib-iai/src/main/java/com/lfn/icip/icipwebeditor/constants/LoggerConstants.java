@@ -20,7 +20,7 @@ package com.lfn.icip.icipwebeditor.constants;
 /**
 * The Class LoggerConstants.
 *
-* @author icets
+* @author essedum
 */
 
 public class LoggerConstants {

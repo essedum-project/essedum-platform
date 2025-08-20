@@ -22,7 +22,7 @@ import com.lfn.icip.dataset.service.util.IICIPDataSourcePoolUtil;
 /**
  * A factory for creating IICIPDataSetServiceUtil objects.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPDataSourcePoolUtilFactory {
 

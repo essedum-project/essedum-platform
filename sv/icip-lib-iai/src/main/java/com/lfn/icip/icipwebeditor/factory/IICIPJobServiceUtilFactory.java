@@ -22,7 +22,7 @@ import com.lfn.icip.icipwebeditor.IICIPJobServiceUtil;
 /**
  * A factory for creating IICIPDataSourceServiceUtil objects.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPJobServiceUtilFactory {
 

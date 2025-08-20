@@ -68,7 +68,7 @@ import com.lfn.ai.comm.lib.util.FileValidateV2;
 import com.lfn.ai.comm.lib.util.HeaderUtil;
 import com.lfn.ai.comm.lib.util.HeadersUtil;
 import com.lfn.ai.comm.lib.util.PaginationUtil;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.dto.FileValidateSummary;
 import com.lfn.ai.comm.lib.util.exceptions.ExtensionKeyInvalidValue;
 import com.lfn.ai.comm.lib.util.exceptions.ExtensionKeyNotFoundException;
@@ -94,7 +94,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * REST controller for managing Project.
  */
 /**
-* @author icets
+* @author essedum
 */
 @RestController
 @RequestMapping("/api")
@@ -110,7 +110,7 @@ public class ProjectResource {
 	/** The project service. */
 	private final ProjectService projectService;
 	/** The enckeydefault. */
-	@LeapProperty("application.uiconfig.enckeydefault")
+	@EssedumProperty("application.uiconfig.enckeydefault")
 	private static String enckeydefault;
 	
     @Autowired

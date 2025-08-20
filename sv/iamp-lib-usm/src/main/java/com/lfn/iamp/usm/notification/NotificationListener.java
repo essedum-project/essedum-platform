@@ -33,7 +33,7 @@ import com.lfn.iamp.usm.service.UsmNotificationsService;
  * the notification event occurs, that object's appropriate
  * method is invoked.
  *
- * @author icets
+ * @author essedum
  */
 @Component
 public class NotificationListener implements ApplicationListener<NotificationEvent>  {

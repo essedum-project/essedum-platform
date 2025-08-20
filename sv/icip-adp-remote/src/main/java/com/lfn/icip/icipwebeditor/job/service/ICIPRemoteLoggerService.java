@@ -47,7 +47,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.swagger.client.JSON;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.service.IICIPDatasourcePluginsService;
@@ -330,7 +330,7 @@ public class ICIPRemoteLoggerService implements IICIPJobRuntimeLoggerService {
 
 				}
 			}
-		} catch (IOException | JSONException | LeapException e1) {
+		} catch (IOException | JSONException | EssedumException e1) {
 			String error = "Error in Job Execution : " + e1.getMessage()
 					+ System.getProperty(IAIJobConstants.LINE_SEPARATOR) + e1.toString();
 			job2save.setJobStatus("ERROR");

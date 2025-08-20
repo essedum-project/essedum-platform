@@ -45,7 +45,7 @@ import com.lfn.iamp.usm.service.ContextService;
 /**
  * The Class OrganisationServiceImplTest.
  *
- * @author icets
+ * @author essedum
  */
 public class OrganisationServiceImplTest {
 	

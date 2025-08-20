@@ -20,7 +20,7 @@ package com.lfn.icip.icipwebeditor.job.enums;
 /**
  * The Enum JOBSTATUS.
  *
- * @author icets
+ * @author essedum
  */
 public enum JobStatus {
 	/** The started. */

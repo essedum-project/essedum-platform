@@ -43,7 +43,7 @@ import lombok.Setter;
 /**
  * The Class ICIPBinaryFiles.
  *
- * @author icets
+ * @author essedum
  */
 @EntityListeners(AuditListener.class)
 @Entity

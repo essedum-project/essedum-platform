@@ -33,7 +33,7 @@ import com.lfn.icip.icipwebeditor.model.dto.IJobLog;
  * Spring Data JPA repository for the SchemaRegistry entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPJobsRepository extends PagingAndSortingRepository<ICIPJobs, Integer>, CrudRepository<ICIPJobs, Integer> {

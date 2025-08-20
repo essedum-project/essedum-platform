@@ -65,7 +65,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * REST controller for managing Organisation.
  */
 /**
-* @author icets
+* @author essedum
 */
 @RestController
 @RequestMapping("/api")

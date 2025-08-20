@@ -42,7 +42,7 @@ import com.lfn.iamp.usm.repository.ContextRepository;
 /**
  * The Class ContextServiceImplTest.
  *
- * @author icets
+ * @author essedum
  */
 class ContextServiceImplTest {
 	

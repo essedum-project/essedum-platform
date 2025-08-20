@@ -30,7 +30,7 @@ import com.lfn.ai.comm.lib.util.constants.Constants;
 /**
  * The Class MessageResource.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 public class MessageResource {

@@ -59,7 +59,7 @@ import com.lfn.icip.icipwebeditor.service.JobScheduleService;
  * component's <code>addPipelineEventListener<code> method. When the
  * pipelineEvent event occurs, that object's appropriate method is invoked.
  *
- * @author icets
+ * @author essedum
  */
 @Component
 public class PipelineEventListener {

@@ -19,7 +19,7 @@ package com.lfn.icip.icipwebeditor.constants;
 /**
  * The Class IAIJobConstants.
  * 
- * @author icets
+ * @author essedum
  *
  */
 public class IAIJobConstants {
@@ -40,7 +40,7 @@ public class IAIJobConstants {
 	public static final String RESTNODEFILE = "inputFilePath";
 
 	/** The Constant RESTNODECLASSNAME. */
-	public static final String RESTNODECLASSNAME = "leap.RESTAPIExecuter";
+	public static final String RESTNODECLASSNAME = "essedum.RESTAPIExecuter";
 
 	/** The Constant LOGGERS. */
 	public static final String LOGGERS = "loggers";

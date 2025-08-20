@@ -28,7 +28,7 @@ import lombok.Setter;
 /**
  * The Class InternalEvent.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

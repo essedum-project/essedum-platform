@@ -20,14 +20,14 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.gson.JsonObject;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageResponse;
 import com.lfn.iamp.usm.domain.UserProcessMapping;
 import com.lfn.iamp.usm.dto.UserProcessMappingDTO;
 
 public interface UserProcessMappingService {
 	
-	public UserProcessMapping create(UserProcessMappingDTO userProcessMappingDTO) throws  LeapException;
+	public UserProcessMapping create(UserProcessMappingDTO userProcessMappingDTO) throws  EssedumException;
 
 	UserProcessMapping updateStatus(Integer id, Boolean status);
 

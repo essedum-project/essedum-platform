@@ -55,7 +55,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
 import com.lfn.ai.comm.lib.util.service.dto.support.NameEncoderService;
 import com.lfn.icip.dataset.config.WebConfigAIP;
@@ -136,7 +136,7 @@ import com.amazonaws.services.s3.model.InitiateMultipartUploadResult;
 import com.amazonaws.services.s3.model.PartETag;
 import com.amazonaws.services.s3.model.UploadPartRequest;
 import com.amazonaws.services.s3.model.UploadPartResult;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.dataset.model.dto.ICIPDatasetDTO;
 import com.lfn.icip.dataset.properties.ProxyProperties;
 import com.lfn.icip.dataset.util.ICIPRestPluginUtils;
@@ -147,7 +147,7 @@ import jakarta.persistence.EntityNotFoundException;
 /**
  * The Class ICIPDatasetService.
  *
- * @author icets
+ * @author essedum
  */
 @Service("datasetservice")
 public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
@@ -195,7 +195,7 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 	@Value("${security.claim:#{null}}")
 	private String claim;
 	
-	@LeapProperty("icip.certificateCheck")
+	@EssedumProperty("icip.certificateCheck")
 	private String certificateCheck;
 	
 	/** The File Server Service. */
@@ -1215,16 +1215,16 @@ public class ICIPDatasetService implements IICIPDatasetService,IICIPSearchable {
 	 * @param id     the id
 	 * @param config the config
 	 * @return the ICIP dataset 2
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	@Override
-	public ICIPDataset2 saveArchivalConfig(int id, String config) throws LeapException {
+	public ICIPDataset2 saveArchivalConfig(int id, String config) throws EssedumException {
 		ICIPDataset2 dataset = datasetRepository2.findById(id).orElse(null);
 		if (dataset != null) {
 			dataset.setArchivalConfig(config);
 			return datasetRepository2.save(dataset);
 		}
-		throw new LeapException("dataset unavailable");
+		throw new EssedumException("dataset unavailable");
 	}
 
 	@Override

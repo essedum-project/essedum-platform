@@ -39,9 +39,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.constants.IAIJobConstants;
 import com.lfn.icip.icipwebeditor.constants.LoggerConstants;
 import com.lfn.icip.icipwebeditor.event.model.LogFileDownloadEvent;
@@ -63,7 +63,7 @@ import com.lfn.icip.icipwebeditor.service.IICIPAgentJobsService;
 /**
  * The Class ICIPAgentJobsService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional
@@ -94,11 +94,11 @@ public class ICIPAgentJobsService implements IICIPAgentJobsService {
 	private ICIPPartialAgentJobsRepository iCIPPartialAgentJobsRepository;
 
 	/** The folder path. */
-	@LeapProperty("icip.jobLogFileDir")
+	@EssedumProperty("icip.jobLogFileDir")
 	private String folderPath;
 
 	/** The days string. */
-	@LeapProperty("icip.cleanup.deletion.days")
+	@EssedumProperty("icip.cleanup.deletion.days")
 	private String daysString;
 	
 	@Autowired
@@ -411,10 +411,10 @@ public class ICIPAgentJobsService implements IICIPAgentJobsService {
 	 * Stop local job.
 	 *
 	 * @param jobid the jobid
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	@Override
-	public void stopLocalJob(String jobid) throws LeapException {
+	public void stopLocalJob(String jobid) throws EssedumException {
 		jobSyncExecutorService.stopLocalJob(jobid);
 	}
 
@@ -438,18 +438,18 @@ public class ICIPAgentJobsService implements IICIPAgentJobsService {
 	/**
 	 * Delete older data.
 	 *
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	@Override
 	@Transactional
-	public void deleteOlderData() throws LeapException {
+	public void deleteOlderData() throws EssedumException {
 		try {
 			int days = Integer.parseInt(daysString);
 			logger.info("Deleting data older than {} day(s)", days);
 			iCIPAgentJobsRepository.deleteOlderData(days);
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
-			throw new LeapException(ex.getMessage());
+			throw new EssedumException(ex.getMessage());
 		}
 	}
 

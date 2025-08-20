@@ -44,7 +44,7 @@ import com.lfn.iamp.usm.service.configApis.support.ConfigurationApisService;
  * Service Implementation for managing UserApiPermissions.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional
@@ -83,7 +83,7 @@ public class UserApiPermissionsServiceImpl implements UserApiPermissionsService 
 	 * 
 	 * @see
 	 * com.lfn.iamp.usm.service.UserApiPermissionsService#save(com.lfn
-	 * .icets.iamp.usm.domain.UserApiPermissions)
+	 * .iamp.usm.domain.UserApiPermissions)
 	 */
 	@Override
 	public UsmPermissionApi save(UsmPermissionApi userApiPermissions) throws SQLException {

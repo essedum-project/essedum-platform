@@ -24,7 +24,7 @@ import org.springframework.http.HttpHeaders;
  * Utility class for HTTP headers creation.
  */
 /**
-* @author icets
+* @author essedum
 */
 public final class HeaderUtil {
 
@@ -32,7 +32,7 @@ public final class HeaderUtil {
     private static final Logger log = LoggerFactory.getLogger(HeaderUtil.class);
 
     /** The Constant APPLICATION_NAME. */
-    private static final String APPLICATION_NAME = "leap";
+    private static final String APPLICATION_NAME = "essedum";
 
     /**
      * Instantiates a new header util.

@@ -28,7 +28,7 @@ import lombok.Setter;
 /**
  * The Class ApiError.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

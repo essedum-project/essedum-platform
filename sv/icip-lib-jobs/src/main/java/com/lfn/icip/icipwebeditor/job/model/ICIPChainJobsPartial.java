@@ -38,7 +38,7 @@ import lombok.Setter;
 /**
  * The Class ICIPChainJobs.
  *
- * @author icets
+ * @author essedum
  */
 @EntityListeners(AuditListener.class)
 @Entity

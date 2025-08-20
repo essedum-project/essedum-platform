@@ -37,7 +37,7 @@ import lombok.Setter;
 /**
  * The Class QuartzSchedulerConfig.
  *
- * @author icets
+ * @author essedum
  */
 @Configuration
 @Setter
@@ -99,7 +99,7 @@ public class QuartzSchedulerConfig {
 	/**
 	 * A factory for creating AutowiringSpringBeanJob objects.
 	 * 
-	 * @author icets
+	 * @author essedum
 	 */
 	private class AutowiringSpringBeanJobFactory extends SpringBeanJobFactory implements ApplicationContextAware {
 

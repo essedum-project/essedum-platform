@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.icipwebeditor.fileserver.constants.FileServerConstants;
 import com.lfn.icip.icipwebeditor.fileserver.constants.LoggerConstants;
 import com.lfn.icip.icipwebeditor.fileserver.service.impl.CommonService;
@@ -75,7 +75,7 @@ public class MinioServer implements FileServerUtil {
 	private CommonService commonService;
 
 	/** The bucket. */
-	@LeapProperty("icip.fileserver.minio.bucket")
+	@EssedumProperty("icip.fileserver.minio.bucket")
 	private String bucket;
 
 	/** The minio client. */

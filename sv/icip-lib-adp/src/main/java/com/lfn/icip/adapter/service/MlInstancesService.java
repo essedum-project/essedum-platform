@@ -26,7 +26,7 @@ import com.lfn.icip.dataset.model.MlInstance;
 /**
  * The Interface MlInstancesService.
  *
- * @author icets
+ * @author essedum
  */
 public interface MlInstancesService {
 

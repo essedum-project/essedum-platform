@@ -25,7 +25,7 @@ import lombok.Setter;
 /**
  * The Class UserProjectRoleDTO.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 /**
  * The Class FileConstants.
  *
- * @author icets
+ * @author essedum
  */
 
 @Component

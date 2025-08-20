@@ -57,7 +57,7 @@ import com.lfn.iamp.usm.service.impl.OrganisationServiceImpl;
 /**
  * The Class OrganisationResourceTest.
  *
- * @author icets
+ * @author essedum
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class OrganisationResourceTest {

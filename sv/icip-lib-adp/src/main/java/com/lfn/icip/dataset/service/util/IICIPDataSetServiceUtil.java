@@ -26,7 +26,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Marker;
 
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.service.util.IICIPDataSetServiceUtil.DATATYPE;
 import com.lfn.icip.dataset.service.util.IICIPDataSetServiceUtil.SQLPagination;
@@ -39,7 +39,7 @@ import lombok.Setter;
 /**
  * The Interface IICIPDataSetServiceUtil.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPDataSetServiceUtil {
 
@@ -149,9 +149,9 @@ public interface IICIPDataSetServiceUtil {
 	 *
 	 * @param dataset the dataset
 	 * @return true, if successful
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	public boolean testConnection(ICIPDataset dataset) throws LeapException;
+	public boolean testConnection(ICIPDataset dataset) throws EssedumException;
 
 	/**
 	 * Gets the data count.

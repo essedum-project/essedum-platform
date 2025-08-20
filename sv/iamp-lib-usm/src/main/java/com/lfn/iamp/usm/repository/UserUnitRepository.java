@@ -30,7 +30,7 @@ import com.lfn.iamp.usm.domain.UserUnit;
  * Spring Data JPA repository for the UserUnit entity.
  */
 /**
-* @author icets
+* @author essedum
 */
 @Repository("usmUserUnitRepository")
 public interface UserUnitRepository extends JpaRepository<UserUnit, Integer> {

@@ -32,7 +32,7 @@ import com.lfn.iamp.usm.domain.Users;
  * Service Interface for managing DashConstant.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @Profile("restconstants")
 @Service

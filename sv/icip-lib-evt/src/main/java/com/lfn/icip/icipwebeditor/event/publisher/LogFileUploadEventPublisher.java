@@ -25,7 +25,7 @@ public class LogFileUploadEventPublisher {
 	/**
 	 * The Class AlertService.
 	 * 
-	 * @author icets
+	 * @author essedum
 	 */
 	public class LogFileUploadService implements ApplicationEventPublisherAware {
 

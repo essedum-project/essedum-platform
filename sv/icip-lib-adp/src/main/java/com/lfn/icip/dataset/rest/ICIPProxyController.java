@@ -65,7 +65,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.gson.Gson;
 import com.lfn.ai.comm.lib.util.exceptions.ApiError;
 import com.lfn.ai.comm.lib.util.exceptions.ExceptionUtil;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.dataset.constants.ICIPPluginConstants;
 import com.lfn.icip.dataset.factory.IICIPDataSetServiceUtilFactory;
 import com.lfn.icip.dataset.model.HeaderAttributes;
@@ -89,7 +89,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 /**
  * The Class ICIPDatasetController.
  *
- * @author icets
+ * @author essedum
  */
 @Log4j2
 @RestController
@@ -133,7 +133,7 @@ public class ICIPProxyController {
 	private String claim;
 
 	/** The encryption key. */
-	@LeapProperty("application.uiconfig.enckeydefault")
+	@EssedumProperty("application.uiconfig.enckeydefault")
 	private static String enckeydefault;
 
 	/** The cm. */
@@ -244,7 +244,7 @@ public class ICIPProxyController {
 		JSONObject attributes = new JSONObject(dset.getAttributes()).put("PathVariables", parameters)
 				.put(ICIPPluginConstants.HEADERS, headerArray).put("QueryParams", parameters);
 //		new JSONObject(attributes).put("Headers", headerArray).toString();
-//		new JSONObject(attributes).put("LeapParams", parameters).toString();
+//		new JSONObject(attributes).put("EssedumParams", parameters).toString();
 		dset.setAttributes(attributes.toString());
 		return getCompleteData(dsrc, dset, org, params.getOrDefault("size", "10"), false, false,
 				Integer.parseInt(params.getOrDefault("page", "0")), null, -1, removeCache);

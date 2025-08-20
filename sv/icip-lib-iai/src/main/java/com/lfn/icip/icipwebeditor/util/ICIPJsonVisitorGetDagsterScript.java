@@ -29,7 +29,7 @@ import lombok.Setter;
 /**
  * The Class ICIPJsonVisitorGetDagsterScript.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

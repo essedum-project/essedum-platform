@@ -35,7 +35,7 @@ import com.lfn.icip.dataset.service.IICIPDataset2Service;
 /**
  * The Class ICIPDataset2Service.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 public class ICIPDataset2Service implements IICIPDataset2Service {

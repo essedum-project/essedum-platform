@@ -25,7 +25,7 @@ import lombok.Setter;
 /**
  * The Class PipelineEvent.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

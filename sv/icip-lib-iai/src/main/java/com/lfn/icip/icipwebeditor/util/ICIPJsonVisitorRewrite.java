@@ -28,7 +28,7 @@ import com.lfn.icip.dataset.service.IICIPSchemaRegistryService;
 /**
  * The Class ICIPJsonVisitorRewrite.
  *
- * @author icets
+ * @author essedum
  */
 public class ICIPJsonVisitorRewrite implements ICIPJsonVisitor<JsonElement>
 {

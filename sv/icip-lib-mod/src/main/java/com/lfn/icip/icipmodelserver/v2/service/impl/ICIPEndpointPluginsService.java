@@ -11,7 +11,7 @@ import com.lfn.icip.icipmodelserver.v2.service.util.IICIPMlopsEndpointServiceUti
 /**
  * The Class ICIPDatasourcePluginsService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 public class ICIPEndpointPluginsService implements IICIPEndpointPluginsService {

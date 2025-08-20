@@ -33,7 +33,7 @@ import lombok.Data;
 /**
  * The Class QrtzTriggers.
  * 
- * @author icets
+ * @author essedum
  *
  */
 @EntityListeners(AuditListener.class)

@@ -29,7 +29,7 @@ import org.json.JSONArray;
 /**
  * The Interface IICIPIaiService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPIaiService {
 	

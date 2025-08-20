@@ -428,8 +428,8 @@ public class ICIPDataSourceServiceUtilAWSServiceSageMaker extends ICIPDataSource
 		for (int i = 0; i < paramValues.length; i++) {
 			String extparamValue = paramValues[i];
 			extparamValue = extparamValue.substring(1, extparamValue.length() - 1);
-			if (attributes.has("LeapParams") && attributes.get("LeapParams") != null) {
-				JSONArray leapparams = new JSONArray(attributes.get("LeapParams").toString());
+			if (attributes.has("EssedumParams") && attributes.get("EssedumParams") != null) {
+				JSONArray leapparams = new JSONArray(attributes.get("EssedumParams").toString());
 				for (int j = 0; j < leapparams.length(); j++) {
 					if (leapparams.getJSONObject(j) != null
 							&& leapparams.getJSONObject(j).optString("key").equals(extparamValue)) {

@@ -58,7 +58,7 @@ import com.lfn.iamp.usm.service.UsmPortfolioService;
 /**
  * The Class UserProjectRoleServiceImplTest.
  *
- * @author icets
+ * @author essedum
  */
 public class UserProjectRoleServiceImplTest {
 	
@@ -145,7 +145,7 @@ public class UserProjectRoleServiceImplTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setContext(new Context());
 		users.setActivated(true);
@@ -162,7 +162,7 @@ public class UserProjectRoleServiceImplTest {
 		users1.setUser_f_name("test");
 		users1.setUser_l_name("User");
 		users1.setUser_login("testuser");
-		users1.setUser_email("testuser@infosys.com");
+		users1.setUser_email("testuser@lfn.com");
 		users1.setOnboarded(true);
 		users1.setContext(new Context());
 		users1.setActivated(true);
@@ -269,7 +269,7 @@ public class UserProjectRoleServiceImplTest {
 		users.setUser_f_name("test");
 		users.setUser_l_name("User");
 		users.setUser_login("testuser");
-		users.setUser_email("testuser@infosys.com");
+		users.setUser_email("testuser@lfn.com");
 		users.setOnboarded(true);
 		users.setContext(new Context());
 		users.setActivated(true);

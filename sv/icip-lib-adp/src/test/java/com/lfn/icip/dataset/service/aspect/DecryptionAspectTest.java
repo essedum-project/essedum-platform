@@ -37,7 +37,7 @@ public class DecryptionAspectTest {
 	@Mock
 	IICIPDatasourceService iICIPDatasourceService;
 
-	private static String password = "leap$%123";
+	private static String password = "essedum$%123";
 	JoinPoint joinPoint;
 	ICIPDatasource ds;
 	ICIPDataset dst;

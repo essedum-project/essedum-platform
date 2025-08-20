@@ -77,7 +77,7 @@ import lombok.Setter;
 /**
  * The Class ChainObject.
  *
- * @author icets
+ * @author essedum
  */
 
 /**
@@ -165,7 +165,7 @@ public class ChainObject {
 	/**
 	 * Instantiates a new initial json content.
 	 * 
-	 * @author icets
+	 * @author essedum
 	 */
 
 	/**
@@ -256,7 +256,7 @@ public class ChainObject {
 	/**
 	 * Instantiates a new initial json content 2.
 	 * 
-	 * @author icets
+	 * @author essedum
 	 */
 
 	/**
@@ -354,7 +354,7 @@ public class ChainObject {
 	/**
 	 * The Class ChainJobElement.
 	 *
-	 * @author icets
+	 * @author essedum
 	 */
 
 	/**
@@ -432,7 +432,7 @@ public class ChainObject {
 		/**
 		 * The Class ChainJob.
 		 *
-		 * @author icets
+		 * @author essedum
 		 */
 
 		/**
@@ -565,7 +565,7 @@ public class ChainObject {
 			/**
 			 * The Class JobConnector.
 			 *
-			 * @author icets
+			 * @author essedum
 			 */
 
 			/**
@@ -653,7 +653,7 @@ public class ChainObject {
 	/**
 	 * Instantiates a new chain job element 2.
 	 * 
-	 * @author icets
+	 * @author essedum
 	 */
 
 	/**
@@ -729,7 +729,7 @@ public class ChainObject {
 		/**
 		 * Instantiates a new chain job 2.
 		 * 
-		 * @author icets
+		 * @author essedum
 		 */
 
 		/**
@@ -818,7 +818,7 @@ public class ChainObject {
 			/**
 			 * Instantiates a new chain job 2.
 			 * 
-			 * @author icets
+			 * @author essedum
 			 */
 
 			/**

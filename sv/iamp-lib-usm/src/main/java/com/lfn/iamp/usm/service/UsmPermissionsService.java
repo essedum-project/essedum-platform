@@ -30,7 +30,7 @@ import com.lfn.iamp.usm.domain.UsmPermissions;
  * Service Interface for managing UsmPermissions.
  */
 /**
-* @author icets
+* @author essedum
 */
 public interface UsmPermissionsService {
 

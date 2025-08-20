@@ -5,7 +5,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-	<changeSet author="Leap (generated)" id="1614785155891-53">
+	<changeSet author="Essedum (generated)" id="1614785155891-53">
 		<createTable tableName="icm_clusters">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -15,7 +15,7 @@
 			<column name="name" type="VARCHAR(255)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-54">
+	<changeSet author="Essedum (generated)" id="1614785155891-54">
 		<createTable tableName="icm_problem_type">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -37,7 +37,7 @@
 			<column name="selfservice_start_date" type="DATETIME" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-55">
+	<changeSet author="Essedum (generated)" id="1614785155891-55">
 		<createTable tableName="icm_rca">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -52,7 +52,7 @@
 			<column name="project_id" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-56">
+	<changeSet author="Essedum (generated)" id="1614785155891-56">
 		<createTable tableName="icm_sops">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -73,7 +73,7 @@
 			<column name="alias_id" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-57">
+	<changeSet author="Essedum (generated)" id="1614785155891-57">
 		<createTable tableName="icm_sops_alias">
 			<column autoIncrement="true" name="alias_id" type="INT">
 				<constraints primaryKey="true" />
@@ -83,7 +83,7 @@
 			<column name="name" type="VARCHAR(255)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap" id="1312v0-icm-1001">
+	<changeSet author="Essedum" id="1312v0-icm-1001">
 		<sql dbms="mysql" splitStatements="true" stripComments="true">
 			ALTER TABLE icm_rca MODIFY COLUMN id INT AUTO_INCREMENT; 
 			ALTER TABLE icm_sops MODIFY COLUMN id INT AUTO_INCREMENT; 			

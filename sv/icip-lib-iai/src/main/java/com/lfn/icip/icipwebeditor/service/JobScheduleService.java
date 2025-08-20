@@ -42,7 +42,7 @@ import com.lfn.icip.icipwebeditor.job.model.dto.JobParamsDTO;
 /**
  * The Interface JobScheduleService.
  *
- * @author icets
+ * @author essedum
  */
 public interface JobScheduleService {
 

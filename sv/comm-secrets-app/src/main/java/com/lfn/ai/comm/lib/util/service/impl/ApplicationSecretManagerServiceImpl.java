@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.lfn.ai.comm.lib.util.dto.ResolvedSecret;
 import com.lfn.ai.comm.lib.util.dto.Secret;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.service.ApplicationSecretManagerService;
 import com.lfn.iamp.usm.domain.Project;
 import com.lfn.iamp.usm.domain.UsmSecret;
@@ -59,7 +59,7 @@ public class ApplicationSecretManagerServiceImpl implements ApplicationSecretMan
 	}
 
 	@Override
-	public String addSecret(Secret secret) throws KeyAlreadyExistsException, LeapException {
+	public String addSecret(Secret secret) throws KeyAlreadyExistsException, EssedumException {
 		if (!checkIfKeyExists(secret)) {
 			try {
 				Project project = projectService.findByName(secret.getOrganization());
@@ -80,7 +80,7 @@ public class ApplicationSecretManagerServiceImpl implements ApplicationSecretMan
 				smRepository.save(secretModel);
 				return "Added Successfully";
 			} catch (NoSuchAlgorithmException e) {
-				throw new LeapException("Error while salt generation");
+				throw new EssedumException("Error while salt generation");
 			}
 
 		} else {

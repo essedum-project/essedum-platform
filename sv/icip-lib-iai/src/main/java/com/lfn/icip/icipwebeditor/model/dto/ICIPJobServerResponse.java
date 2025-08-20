@@ -79,7 +79,7 @@ import lombok.Setter;
 /**
 * The Class ICIPJobServerResponse.
 *
-* @author icets
+* @author essedum
 */
 
  public class ICIPJobServerResponse {

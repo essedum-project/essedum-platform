@@ -26,7 +26,7 @@ import com.google.gson.JsonElement;
  * The Class ICIPJsonTransformerBase.
  *
  * @param <T> the generic type
- * @author icets
+ * @author essedum
  */
 public abstract class ICIPJsonTransformerBase<T> implements ICIPJsonTransformer<T>, ICIPJsonVisitor<T> {
 	

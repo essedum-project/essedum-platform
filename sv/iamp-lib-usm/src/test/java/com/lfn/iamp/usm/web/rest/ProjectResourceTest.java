@@ -58,7 +58,7 @@ import com.lfn.iamp.usm.service.impl.ProjectServiceImpl;
 /**
  * The Class ProjectResourceTest.
  *
- * @author icets
+ * @author essedum
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 

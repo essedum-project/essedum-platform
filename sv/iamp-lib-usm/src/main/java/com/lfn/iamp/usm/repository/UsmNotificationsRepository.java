@@ -25,7 +25,7 @@ import com.lfn.iamp.usm.domain.UsmNotifications;
  * Spring Data JPA repository for the UsmNotifications entity.
  */
 /**
-* @author icets
+* @author essedum
 */
 @SuppressWarnings("unused")
 @Repository

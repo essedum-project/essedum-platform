@@ -48,7 +48,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.ICIPHeaderUtil;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.lfn.ai.comm.lib.util.domain.NameAndAliasDTO;
 import com.lfn.ai.comm.lib.util.exceptions.ApiError;
@@ -71,7 +71,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 /**
  * The Class ICIPDatasourceController.
  *
- * @author icets
+ * @author essedum
  */
 @RestController
 @Timed
@@ -111,7 +111,7 @@ public class ICIPDatasourceController {
 	private String claim;
 	
 	/** The scheduler status. */
-	@LeapProperty("icip.scheduler.pause.status")
+	@EssedumProperty("icip.scheduler.pause.status")
 	private String schedulerPauseStatus;
 
 	/**

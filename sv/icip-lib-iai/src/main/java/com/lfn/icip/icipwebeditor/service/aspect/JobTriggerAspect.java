@@ -24,7 +24,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.icipwebeditor.job.quartz.model.QrtzTriggers;
 import com.lfn.icip.icipwebeditor.job.quartz.repository.QrtzTriggersRepository;
 
@@ -44,11 +44,11 @@ public class JobTriggerAspect {
 	
 
 	/** The qrtz retry limit str. */
-	@LeapProperty("icip.quartz.retrylimit")
+	@EssedumProperty("icip.quartz.retrylimit")
 	private String qrtzRetryLimitStr;
 
 	/** The mailserver url. */
-	@LeapProperty("icip.mailserver.url")
+	@EssedumProperty("icip.mailserver.url")
 	private String mailserverUrl;
 
 	/** The access token. */
@@ -56,11 +56,11 @@ public class JobTriggerAspect {
 	private String accessToken;
 
 	/** The receiver. */
-	@LeapProperty("icip.mailserver.receiver")
+	@EssedumProperty("icip.mailserver.receiver")
 	private String receiver;
 
 	/** The mail to receiver str. */
-	@LeapProperty("icip.mailserver.mailtoreceiver")
+	@EssedumProperty("icip.mailserver.mailtoreceiver")
 	private String mailToReceiverStr;
 
 	/** The scheduler. */

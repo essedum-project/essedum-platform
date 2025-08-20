@@ -52,7 +52,7 @@ import com.lfn.iamp.usm.service.impl.RoleServiceImpl;
 /**
  * The Class RoleResourceTest.
  *
- * @author icets
+ * @author essedum
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class RoleResourceTest {

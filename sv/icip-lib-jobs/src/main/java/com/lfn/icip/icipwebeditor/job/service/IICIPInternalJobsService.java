@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
 
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.job.model.ICIPInternalJobs;
 import com.lfn.icip.icipwebeditor.job.model.ICIPPartialInternalJobs;
 import com.lfn.icip.icipwebeditor.job.util.InternalJob;
@@ -29,7 +29,7 @@ import com.lfn.icip.icipwebeditor.job.util.InternalJob;
 /**
  * The Interface IICIPInternalJobsService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPInternalJobsService {
 
@@ -138,9 +138,9 @@ public interface IICIPInternalJobsService {
 	/**
 	 * Delete older data.
 	 *
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	void deleteOlderData() throws LeapException;
+	void deleteOlderData() throws EssedumException;
 
 	/**
 	 * Creates the internal jobs.

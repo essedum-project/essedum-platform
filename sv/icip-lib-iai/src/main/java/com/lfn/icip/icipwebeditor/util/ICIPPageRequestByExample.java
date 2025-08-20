@@ -30,7 +30,7 @@ import lombok.Setter;
  * The Class ICIPPageRequestByExample.
  *
  * @param <T> the generic type
- * @author icets
+ * @author essedum
  */
 
 /**

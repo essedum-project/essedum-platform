@@ -28,7 +28,7 @@ import com.lfn.ai.comm.lib.util.ICIPUtils;
 /**
  * The Class MachineConfiguration.
  * 
- * @author icets
+ * @author essedum
  *
  */
 public class SystemUtils {

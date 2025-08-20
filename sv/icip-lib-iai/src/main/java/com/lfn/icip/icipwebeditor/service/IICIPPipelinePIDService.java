@@ -24,7 +24,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPPipelinePID;
 /**
  * The Interface IICIPPipelinePIDService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPPipelinePIDService {
 

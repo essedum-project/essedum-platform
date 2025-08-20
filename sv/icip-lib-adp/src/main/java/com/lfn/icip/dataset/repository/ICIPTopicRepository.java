@@ -9,7 +9,7 @@ import com.lfn.icip.dataset.model.ICIPTopic;
  * Spring Data JPA repository for the ICIPTopic entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPTopicRepository extends JpaRepository<ICIPTopic, Integer> {

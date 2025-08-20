@@ -24,7 +24,7 @@ import lombok.Setter;
 /**
  * The Class ApplicationUIConfigDTO.
  *
- * @author icets
+ * @author essedum
  */
 
 /**
@@ -150,7 +150,7 @@ public class ApplicationUIConfigDTO {
 	private String scope;
 	private Double silentRefreshTimeoutFactor;
 	private String appVersion;
-	private String leapAppYear;
+	private String essedumAppYear;
 	private String showPortfolioHeader;
 	private String eventApiUrls;
 	private String encDefault;

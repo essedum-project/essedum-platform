@@ -24,7 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.google.gson.JsonArray;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.service.util.ICIPDataSetServiceUtilSqlAbstract;
@@ -50,9 +50,9 @@ public interface IICIPDatasetPluginsService {
 	 *
 	 * @param dataset the dataset
 	 * @return true, if successful
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	boolean testConnection(ICIPDataset dataset) throws LeapException;
+	boolean testConnection(ICIPDataset dataset) throws EssedumException;
 
 	/**
 	 * Gets the data set service.

@@ -92,8 +92,8 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
 //import com.ibm.icu.math.BigDecimal;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
-//import com.lfn.iamp.usm.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
+//import com.lfn.iamp.usm.annotation.EssedumProperty;
 import com.lfn.icip.dataset.factory.IICIPDataSetServiceUtilFactory;
 import com.lfn.icip.dataset.model.ICIPDataset;
 
@@ -102,7 +102,7 @@ import com.lfn.icip.dataset.model.ICIPDataset;
 /**
  * The Class ICIPDataSetServiceUtilMySQL.
  *
- * @author icets
+ * @author essedum
  */
 @Component("mysqlds")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -163,11 +163,11 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 	 *
 	 * @param dataset the dataset
 	 * @return true, if successful
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 * 
 	 */
 	@Override
-	public boolean testConnection(ICIPDataset dataset) throws LeapException {
+	public boolean testConnection(ICIPDataset dataset) throws EssedumException {
 		if (dataset.getType().equals("t")) {
 			return true;
 		}
@@ -179,12 +179,12 @@ public class ICIPDataSetServiceUtilMySQL extends ICIPDataSetServiceUtilSqlAbstra
 			try {
 				validateQuery(query);
 			} catch (SQLException e) {
-				throw new LeapException(e.getMessage());
+				throw new EssedumException(e.getMessage());
 			}
 
 			return true;
 		} catch (SQLException e) {
-			throw new LeapException("Error Testing Connection : ", e);
+			throw new EssedumException("Error Testing Connection : ", e);
 		}
 	}
 

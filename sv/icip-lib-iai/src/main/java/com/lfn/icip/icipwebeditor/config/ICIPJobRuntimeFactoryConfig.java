@@ -28,7 +28,7 @@ import com.lfn.icip.icipwebeditor.factory.IICIPJobRuntimeServiceUtilFactory;
 /**
  * The Class IICIPDataSetServiceUtilConfig.
  *
- * @author icets
+ * @author essedum
  */
 @Configuration
 @ComponentScan(basePackages = { "com.lfn.icip.icipwebeditor" })

@@ -21,7 +21,7 @@ package com.lfn.icip.icipwebeditor.event.soap;
 //@Log4j2
 //public class WebhookController {
 //
-//	private static final String NAMESPACE_URI = "http://infosys.com/icets/icip/icipwebeditor/ws";
+//	private static final String NAMESPACE_URI = " ";
 //
 //	@Autowired
 //	private IICIPEventJobMappingService eventMappingService;

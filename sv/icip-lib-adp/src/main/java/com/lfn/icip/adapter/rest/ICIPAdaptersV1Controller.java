@@ -57,7 +57,7 @@ import io.micrometer.core.annotation.Timed;
 /**
  * The Class ICIPAdaptersV1Controller.
  *
- * @author icets
+ * @author essedum
  */
 @RestController
 @Timed

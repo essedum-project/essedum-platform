@@ -40,7 +40,7 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
  * method. When the ICIPJobScheduler event occurs, that object's appropriate
  * method is invoked.
  *
- * @author icets
+ * @author essedum
  */
 
 public class ICIPJobSchedulerListener implements JobListener {

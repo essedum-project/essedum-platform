@@ -15,38 +15,15 @@
 
 package com.lfn.common.lib.annotation;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.stereotype.Component;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.ReflectionUtils.FieldCallback;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-
-@Component
-public class LeapPropertiesAnnotationProcessorV2 implements BeanPostProcessor {
-
-	@Value("${commonAppUrl}")
-	private String commonAppUrl;
-	
-	@Override
-	public Object postProcessBeforeInitialization(Object value, String beanName) {
-		this.scanDataAccessAnnotation(value);
-		return value;
-	}
-
-	@Override
-	public Object postProcessAfterInitialization(Object value, String beanName) {
-		return value;
-	}
-
-	protected void scanDataAccessAnnotation(Object value) {
-		this.configureFieldInjection(value);
-	}
-
-	private void configureFieldInjection(Object value) {
-		Class<?> managedBeanClass = value.getClass();
-		FieldCallback fieldCallback = new LeapPropertiesFieldCallbackV2(value,commonAppUrl);
-		ReflectionUtils.doWithFields(managedBeanClass, fieldCallback);
-	}
-
+@Target({ ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.ANNOTATION_TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface EssedumPropertiesV2 {
+	String value();
 }

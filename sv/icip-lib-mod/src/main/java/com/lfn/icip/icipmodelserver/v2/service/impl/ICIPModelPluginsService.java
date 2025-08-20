@@ -14,7 +14,7 @@ import com.lfn.icip.icipmodelserver.v2.service.util.IICIPModelServiceUtil;
 /**
  * The Class ICIPDatasourcePluginsService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 public class ICIPModelPluginsService implements IICIPModelPluginsService {

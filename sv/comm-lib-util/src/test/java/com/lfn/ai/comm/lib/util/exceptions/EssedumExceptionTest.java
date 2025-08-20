@@ -13,72 +13,18 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lfn.iamp.usm.domain;
+package com.lfn.ai.comm.lib.util.exceptions;
 
-import java.io.Serializable;
-import lombok.EqualsAndHashCode;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.junit.jupiter.api.Test;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+public class EssedumExceptionTest {
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class Reset.
- *
- * @author essedum
- */
-
-/**
- * Sets the new .
- *
- * @param  the new new 
- */
-@Setter
-
-/**
- * Gets the new .
- *
- * @return the new 
- */
-@Getter
-
-/**
- * To string.
- *
- * @return the java.lang. string
- */
-@ToString
-
-/**
- * Instantiates a new reset .
- */
-@NoArgsConstructor
-
-/**
- * Hash code.
- *
- * @return the int
- */
- @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class ResetPassword implements Serializable {
-
-	/** The Constant serialVersionUID. */
-	private static final long serialVersionUID = 1L;
-
-	/** The id. */
-	@EqualsAndHashCode.Include
-	private Long id;
-	
-	/** The current . */
-	@JsonProperty(value = "currentPassword")
-	private String currentPassword;
-	
-	/** The new . */
-	@JsonProperty(value = "newPassword")
-	private String newPassword;
-
+	@Test
+	public void testEssedumException() {
+		String errorMessage="Hello World";
+		EssedumException essedumException= new EssedumException(errorMessage);
+		assertEquals(essedumException.getMessage(),errorMessage);
+	}
 }

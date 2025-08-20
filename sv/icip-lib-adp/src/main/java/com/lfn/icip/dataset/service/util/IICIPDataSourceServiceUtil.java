@@ -38,7 +38,7 @@ import com.lfn.icip.dataset.model.ICIPDatasource;
 /**
  * The Interface IICIPDataSourceServiceUtil.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPDataSourceServiceUtil {
 

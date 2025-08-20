@@ -46,7 +46,7 @@ import io.micrometer.core.annotation.Timed;
 /**
  * The Class MlInstancesController.
  *
- * @author icets
+ * @author essedum
  */
 @RestController
 @Timed

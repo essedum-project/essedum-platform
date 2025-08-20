@@ -41,7 +41,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 /**
  * The Class ICIPStreamingServicesController.
  *
- * @author icets
+ * @author essedum
  */
 @RestController
 @Timed

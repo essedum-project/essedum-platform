@@ -6,7 +6,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
                         http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd
                         http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-		<changeSet author="Leap (generated)" id="3v0-bcc-240124-1">
+		<changeSet author="Essedum (generated)" id="3v0-bcc-240124-1">
     	<sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
     		ALTER TABLE bcc_svg ADD element_title_array TEXT;
     	</sql>
@@ -17,12 +17,12 @@
     		ALTER TABLE bcc_svg ADD mapWithTitle BIT ;
     	</sql>
     </changeSet>
-    <changeSet author="Leap (generated)" id="3v0-bcc-240124-2">
+    <changeSet author="Essedum (generated)" id="3v0-bcc-240124-2">
     	<sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
     		ALTER TABLE bcc_svg_ci_mapping ADD element_title VARCHAR(255);
     	</sql>
     </changeSet>
-    <changeSet author="Leap (generated)" id="3v0-bcc-240124-3">
+    <changeSet author="Essedum (generated)" id="3v0-bcc-240124-3">
     	<sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
     		ALTER TABLE bcc_svg_elements ADD element_title VARCHAR(255);
     	</sql>

@@ -30,7 +30,7 @@ import com.lfn.common.app.util.DecryptPasswordUtil;
 /**
  * The Class DecryptPropertyConfigurer.
  *
- * @author icets
+ * @author essedum
  */
 @Component
 public class DecryptPropertyConfigurer extends PropertySourcesPlaceholderConfigurer {

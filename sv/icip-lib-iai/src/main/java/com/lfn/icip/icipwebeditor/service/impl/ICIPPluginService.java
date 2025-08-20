@@ -54,7 +54,7 @@ import com.lfn.icip.icipwebeditor.service.IICIPPluginService;
 /**
  * The Class ICIPPluginService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional

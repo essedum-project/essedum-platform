@@ -40,8 +40,8 @@ quartz:
         driverClassName: ${config.driverClassName}
         jdbcUrl: ${config.datasourceurl}?currentSchema=quartz
         url: ${config.datasourceurl}?currentSchema=quartz1
-        username: ${config.leap-db-username}
-        password: ${config.leap-db-password}
+        username: ${config.essedum-db-username}
+        password: ${config.essedum-db-password}
         maximum-pool-size: 8
         minimumIdle: 3
         idleTimeout: 60000

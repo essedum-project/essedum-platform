@@ -47,7 +47,7 @@ import com.lfn.icip.dataset.properties.ProxyProperties.HttpProxyConfiguration;
 /**
  * The Class HttpClientUtil.
  *
- * @author icets
+ * @author essedum
  */
 public class HttpClientUtil {
 	

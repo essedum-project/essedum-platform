@@ -13,38 +13,42 @@
  * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.lfn.ai.comm.lib.util.annotation;
+package com.lfn.common.lib.annotation;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.FieldCallback;
 
-import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
+import com.lfn.common.lib.rest.RestClientUtil;
 
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class LeapPropertyFieldCallback implements FieldCallback {
+public class EssedumPropertiesFieldCallbackV2 implements FieldCallback {
+	
+	private String commonAppUrl;
 
-	private static String ERROR_PROPERTY_NOT_FOUND = "@LeapProperty(entity) does not exist in the constant DB.";
+	private static String ERROR_PROPERTY_NOT_FOUND = "@EssedumProperties(entity) does not exist in the constant DB.";
 	private Object value;
-	private ConstantsService constantsService;
 
-	public LeapPropertyFieldCallback(Object value, ConstantsService constantsService) {
+	public EssedumPropertiesFieldCallbackV2(Object value,@Value("${commonAppUrl}") String commonAppUrl) {
 		this.value = value;
-		this.constantsService = constantsService;
+		this.commonAppUrl = commonAppUrl;
 	}
 
 	@Override
 	public void doWith(Field field) throws IllegalAccessException {
-		if (!field.isAnnotationPresent(LeapProperty.class)) {
+		if (!field.isAnnotationPresent(EssedumPropertiesV2.class)) {
 			return;
 		}
 		ReflectionUtils.makeAccessible(field);
-		String key = field.getDeclaredAnnotation(LeapProperty.class).value();
+		String key = field.getDeclaredAnnotation(EssedumPropertiesV2.class).value();
 		try {
-			field.set(value, constantsService.findByKeys(key, "Core").trim());
+			String result = RestClientUtil.getApiCall(commonAppUrl + "api/get-startup-constants/array/" + key+"/Core","");
+			field.set(value, Arrays.asList(result));
 		} catch (Exception ex) {
 			String error = String.format("%s : Key %s", ERROR_PROPERTY_NOT_FOUND, key);
 			log.error(error, ex);

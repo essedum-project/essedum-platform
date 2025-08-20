@@ -27,7 +27,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPBinaryFiles;
 /**
  * The Interface ICIPBinaryFilesRepository.
  *
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPBinaryFilesRepository extends JpaRepository<ICIPBinaryFiles, Integer> {

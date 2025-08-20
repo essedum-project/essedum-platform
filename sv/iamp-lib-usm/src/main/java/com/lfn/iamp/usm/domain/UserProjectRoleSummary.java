@@ -26,7 +26,7 @@ import lombok.Setter;
  * A UserProjectRole.
  */
 /**
-* @author icets
+* @author essedum
 */
 
 /**
@@ -67,7 +67,7 @@ public class UserProjectRoleSummary implements Serializable {
 	/**
 	 * The Class Porfolio.
 	 *
-	 * @author icets
+	 * @author essedum
 	 */
 	
 	/**
@@ -109,7 +109,7 @@ public class UserProjectRoleSummary implements Serializable {
 	/**
 	 * The Class ProjectWithRoles.
 	 *
-	 * @author icets
+	 * @author essedum
 	 */
 	/**
 	 * Gets the role id.

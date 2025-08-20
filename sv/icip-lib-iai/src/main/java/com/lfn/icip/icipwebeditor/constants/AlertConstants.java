@@ -18,7 +18,7 @@ package com.lfn.icip.icipwebeditor.constants;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
 
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
 /**
  * The Class AlertConstants.
  *
- * @author icets
+ * @author essedum
  */
 
 @Component
@@ -65,43 +65,43 @@ import lombok.NoArgsConstructor;
 public class AlertConstants {
 
 	/** The pipeline error mail subject. */
-	@LeapProperty("icip.mailevent.error.subject")
+	@EssedumProperty("icip.mailevent.error.subject")
 	private String PIPELINE_ERROR_MAIL_SUBJECT;
 
 	/** The pipeline error mail message. */
-	@LeapProperty("icip.mailevent.error.message")
+	@EssedumProperty("icip.mailevent.error.message")
 	private String PIPELINE_ERROR_MAIL_MESSAGE;
 
 	/** The pipeline success mail subject. */
-	@LeapProperty("icip.mailevent.success.subject")
+	@EssedumProperty("icip.mailevent.success.subject")
 	private String PIPELINE_SUCCESS_MAIL_SUBJECT;
 
 	/** The pipeline success mail message. */
-	@LeapProperty("icip.mailevent.success.message")
+	@EssedumProperty("icip.mailevent.success.message")
 	private String PIPELINE_SUCCESS_MAIL_MESSAGE;
 
 	/** The pipeline success notification message. */
-	@LeapProperty("icip.alertevent.success.message")
+	@EssedumProperty("icip.alertevent.success.message")
 	private String PIPELINE_SUCCESS_NOTIFICATION_MESSAGE;
 
 	/** The pipeline error notification message. */
-	@LeapProperty("icip.alertevent.error.message")
+	@EssedumProperty("icip.alertevent.error.message")
 	private String PIPELINE_ERROR_NOTIFICATION_MESSAGE;
 
 	/** The pipeline error notification enabled. */
-	@LeapProperty("icip.alertevent.error.enabled")
+	@EssedumProperty("icip.alertevent.error.enabled")
 	private String PIPELINE_ERROR_NOTIFICATION_ENABLED;
 
 	/** The pipeline success notification enabled. */
-	@LeapProperty("icip.alertevent.success.enabled")
+	@EssedumProperty("icip.alertevent.success.enabled")
 	private String PIPELINE_SUCCESS_NOTIFICATION_ENABLED;
 
 	/** The pipeline success mail enabled. */
-	@LeapProperty("icip.mailevent.success.enabled")
+	@EssedumProperty("icip.mailevent.success.enabled")
 	private String PIPELINE_SUCCESS_MAIL_ENABLED;
 
 	/** The pipeline error mail enabled. */
-	@LeapProperty("icip.mailevent.error.enabled")
+	@EssedumProperty("icip.mailevent.error.enabled")
 	private String PIPELINE_ERROR_MAIL_ENABLED;
 
 	/** The Constant NOTIFICATION_SEVERITY. */

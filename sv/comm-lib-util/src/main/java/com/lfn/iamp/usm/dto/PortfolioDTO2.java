@@ -24,7 +24,7 @@ import lombok.Data;
 /**
  * The Class PortfolioDTO.
  *
- * @author icets
+ * @author essedum
  */
 @Data
 public class PortfolioDTO2 implements Serializable{

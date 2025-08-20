@@ -37,8 +37,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageRequestByExample;
 import com.lfn.ai.comm.lib.util.service.dto.support.PageResponse;
 import com.lfn.iamp.usm.config.Constants;
@@ -58,7 +58,7 @@ import com.lfn.iamp.usm.service.UsersService;
  * Service Implementation for managing Users.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional
@@ -82,7 +82,7 @@ public class UsersServiceImpl implements UsersService {
 	private final PasswordEncoder passwordEncoder;
 
 	/** The default PWD. */
-	@LeapProperty("application.autouser.defaultPWD")
+	@EssedumProperty("application.autouser.defaultPWD")
 	private String defaultPWD;
 
 	@Autowired
@@ -96,7 +96,7 @@ public class UsersServiceImpl implements UsersService {
 	@Autowired
 	private UserProjectRoleRepository userProjectRoleRepository;
 
-	@LeapProperty("application.azure.inviteAzureUsers")
+	@EssedumProperty("application.azure.inviteAzureUsers")
 	private String inviteAzureUsers;
 
 	@Value("${config.active-profiles}")
@@ -387,7 +387,7 @@ public class UsersServiceImpl implements UsersService {
 	 * 
 	 * @see
 	 * com.lfn.iamp.usm.service.UsersService#authorizeUser(com.lfn.
-	 * icets.iamp.usm.domain.Users, java.lang.String)
+	 *iamp.usm.domain.Users, java.lang.String)
 	 */
 	@Override
 	public Users authorizeUser(Users users, String orgName) {
@@ -430,7 +430,7 @@ public class UsersServiceImpl implements UsersService {
 	 * 
 	 * @see
 	 * com.lfn.iamp.usm.service.UsersService#authenticateUser(com.lfn.
-	 * icets.iamp.usm.domain.Users, java.lang.String)
+	 * iamp.usm.domain.Users, java.lang.String)
 	 */
 	@Override
 	public Users authenticateUser(Users users, String orgName) {
@@ -564,13 +564,13 @@ public class UsersServiceImpl implements UsersService {
 	 *
 	 * @param email the user email
 	 * @return the User details
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	@Override
-	public Users findUserDataByEmail(String email) throws LeapException {
+	public Users findUserDataByEmail(String email) throws EssedumException {
 		Users user = usersRepository.findByUserEmail(email.trim());
 		if (user == null)
-			throw new LeapException(Messages.getMsg(Constants.EXCEPTION_USERSERVICEIMPL_FINDEMAIL));
+			throw new EssedumException(Messages.getMsg(Constants.EXCEPTION_USERSERVICEIMPL_FINDEMAIL));
 		else
 			return user;
 	}
@@ -580,13 +580,13 @@ public class UsersServiceImpl implements UsersService {
 	 *
 	 * @param email the email
 	 * @return the client details
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	@Override
-	public Integer findEmail(String email) throws LeapException {
+	public Integer findEmail(String email) throws EssedumException {
 		Users user = usersRepository.findByUserEmail(email.trim());
 		if (user == null)
-			throw new LeapException(Messages.getMsg(Constants.EXCEPTION_USERSERVICEIMPL_FINDEMAIL));
+			throw new EssedumException(Messages.getMsg(Constants.EXCEPTION_USERSERVICEIMPL_FINDEMAIL));
 		else
 			return user.getId();
 	}
@@ -828,11 +828,11 @@ public class UsersServiceImpl implements UsersService {
 	}
 
 	@Override
-	public Users revokeAccess(String email) throws SQLException, LeapException {
+	public Users revokeAccess(String email) throws SQLException, EssedumException {
 		// TODO Auto-generated method stub
 		Users user = usersRepository.findByUserEmail(email);
 		if (user == null)
-			throw new LeapException(Messages.getMsg(Constants.EXCEPTION_USERSERVICEIMPL_FINDEMAIL));
+			throw new EssedumException(Messages.getMsg(Constants.EXCEPTION_USERSERVICEIMPL_FINDEMAIL));
 		else {
 			user.setActivated(false);
 			user.setOnboarded(false);

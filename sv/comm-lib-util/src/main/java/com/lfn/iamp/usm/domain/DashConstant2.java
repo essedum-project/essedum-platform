@@ -36,7 +36,7 @@ import lombok.Setter;
  * A DashConstant.
  */
 /**
- * @author icets
+ * @author essedum
  */
 
 @Entity

@@ -34,7 +34,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPPlugin;
  * Spring Data JPA repository for the Plugin entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPPluginRepository extends JpaRepository<ICIPPlugin, Integer> {

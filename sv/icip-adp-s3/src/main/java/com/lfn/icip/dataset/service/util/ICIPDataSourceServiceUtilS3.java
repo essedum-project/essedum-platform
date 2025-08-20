@@ -84,8 +84,8 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 
 import io.minio.ListObjectsArgs;
@@ -101,7 +101,7 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
 
 	/** The logger. */
 	private static Logger logger = LoggerFactory.getLogger(ICIPDataSourceServiceUtilS3.class);
-	@LeapProperty("icip.certificateCheck")
+	@EssedumProperty("icip.certificateCheck")
 	private String certificateCheck;
 
 	/**
@@ -144,7 +144,7 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
 				}
 			} else {
 				// Handle the case where sslContext is null
-				throw new LeapException("SSLContext could not be initialized");
+				throw new EssedumException("SSLContext could not be initialized");
 			}
 		} catch (Exception ex) {
 			logger.error("Connection test failed: " + ex.getMessage(), ex);

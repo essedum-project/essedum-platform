@@ -32,7 +32,7 @@ import lombok.Setter;
 /**
  * The Class ICIPJsonVisitorGetInput.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

@@ -44,7 +44,7 @@ import com.lfn.icip.icipwebeditor.service.IICIPGroupModelService;
 /**
  * The Class ICIPGroupModelService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional

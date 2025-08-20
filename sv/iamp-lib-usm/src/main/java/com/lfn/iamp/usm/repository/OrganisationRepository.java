@@ -25,7 +25,7 @@ import com.lfn.iamp.usm.domain.Organisation;
  * Spring Data JPA repository for the Organisation entity.
  */
 /**
-* @author icets
+* @author essedum
 */
 @Repository("usmOrganisationRepository")
 public interface OrganisationRepository extends JpaRepository<Organisation,Integer> {

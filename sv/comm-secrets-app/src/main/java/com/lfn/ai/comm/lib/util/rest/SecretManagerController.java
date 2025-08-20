@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.lfn.ai.comm.lib.util.dto.ResolvedSecret;
 import com.lfn.ai.comm.lib.util.dto.Secret;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.service.ApplicationSecretManagerService;
 import com.lfn.ai.comm.lib.util.service.SecretsManagerService;
 
@@ -86,7 +86,7 @@ public class SecretManagerController {
 		try {
 			String response = asmSevice.addSecret(secret);
 			return ResponseEntity.status(200).body(response);
-		} catch (LeapException | KeyAlreadyExistsException e) {
+		} catch (EssedumException | KeyAlreadyExistsException e) {
 			return ResponseEntity.status(500).body(e.getMessage());
 		}
 	}

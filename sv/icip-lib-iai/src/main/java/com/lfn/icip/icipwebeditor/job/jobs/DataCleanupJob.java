@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
 import com.lfn.icip.icipwebeditor.job.enums.JobMetadata;
 import com.lfn.icip.icipwebeditor.job.enums.JobStatus;
@@ -116,28 +116,28 @@ public class DataCleanupJob implements InternalJob {
 		try {
 			logger.info(marker, "deleting chainjobs data...");
 			chainJobsService.deleteOlderData();
-		} catch (LeapException ex) {
+		} catch (EssedumException ex) {
 			allDone = false;
 			logger.error(marker, ex.getMessage(), ex);
 		}
 		try {
 			logger.info(marker, "deleting jobs data...");
 			jobsService.deleteOlderData();
-		} catch (LeapException ex) {
+		} catch (EssedumException ex) {
 			allDone = false;
 			logger.error(marker, ex.getMessage(), ex);
 		}
 		try {
 			logger.info(marker, "deleting agentjobs data...");
 			agentJobsService.deleteOlderData();
-		} catch (LeapException ex) {
+		} catch (EssedumException ex) {
 			allDone = false;
 			logger.error(marker, ex.getMessage(), ex);
 		}
 		try {
 			logger.info(marker, "deleting internaljobs data...");
 			internaljobsService.deleteOlderData();
-		} catch (LeapException ex) {
+		} catch (EssedumException ex) {
 			allDone = false;
 			logger.error(marker, ex.getMessage(), ex);
 		}

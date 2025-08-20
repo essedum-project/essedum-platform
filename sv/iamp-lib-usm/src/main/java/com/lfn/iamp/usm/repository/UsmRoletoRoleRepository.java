@@ -31,7 +31,7 @@ import com.lfn.iamp.usm.domain.RoletoRole;
 /**
  */
 /**
-* @author icets
+* @author essedum
 */
 @SuppressWarnings("unused")
 @Repository

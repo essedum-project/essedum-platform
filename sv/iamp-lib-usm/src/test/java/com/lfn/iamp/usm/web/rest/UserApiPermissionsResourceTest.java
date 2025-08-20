@@ -54,7 +54,7 @@
 ///**
 // * The Class UserApiPermissionsResourceTest.
 // *
-// * @author icets
+// * @author essedum
 // */
 //@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 //public class UserApiPermissionsResourceTest {

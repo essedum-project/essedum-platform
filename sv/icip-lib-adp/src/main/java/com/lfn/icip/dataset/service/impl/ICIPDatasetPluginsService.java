@@ -46,7 +46,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.factory.IICIPDataSetServiceUtilFactory;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.model.ICIPDatasource;
@@ -65,7 +65,7 @@ import com.lfn.icip.dataset.service.util.IICIPMlopsServiceUtil;
 /**
  * The Class ICIPDatasetPluginsService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 public class ICIPDatasetPluginsService implements IICIPDatasetPluginsService {
@@ -171,10 +171,10 @@ public class ICIPDatasetPluginsService implements IICIPDatasetPluginsService {
 	 *
 	 * @param dataset the dataset
 	 * @return true, if successful
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	@Override
-	public boolean testConnection(ICIPDataset dataset) throws LeapException {
+	public boolean testConnection(ICIPDataset dataset) throws EssedumException {
 		return datasetFactory.getDataSetUtil(String.format("%s%s", dataset.getDatasource().getType(), "ds"))
 				.testConnection(dataset);
 	}
@@ -306,7 +306,7 @@ public class ICIPDatasetPluginsService implements IICIPDatasetPluginsService {
 		case "REST":
 			JSONObject attributes = new JSONObject(dataset.getAttributes());
 			//convert searchParams into rest acceptable format
-			attributes.put("LeapParams", searchParams);
+			attributes.put("EssedumParams", searchParams);
 			dataset.setAttributes(attributes.toString());
 		default :
 			return this.getDataSetService(dataset).getDatasetData(dataset,

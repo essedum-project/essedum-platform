@@ -68,7 +68,7 @@
       •	Maven build can also be created directly form the Eclipse or STS Ide
       •	To create Maven build from Eclipse below are the steps
       •	Import code into eclipse as a maven import
-      •	Right click on Aip project->Run as-> maven build->paste the command in goals as shown below                          
+      •	Right click on essedum project->Run as-> maven build->paste the command in goals as shown below                          
       •	Once build was success you will see below output
                             
    
@@ -88,8 +88,8 @@
       •	Create schemas highlighted in red in MYSQL server using MYSQL Work Bench
                
       •	Right click on common-app->click on run-> select run configuration->select java application 
-      •	Provide “com.infosys.Common” as input in Main Class.
-      •	Provide “-Dencryption.key=leap$123## -Dencryption.salt=salt-token -Dspring.config.location=../common-app/src/main/resources/application.yml -DLOG_PATH=/app/log -Dlogging.config=../common-app/src/main/resources/logback-spring.xml” as input in the VM arguments.
+      •	Provide “com.lfn.Common” as input in Main Class.
+      •	Provide “-Dencryption.key=essedum$123## -Dencryption.salt=salt-token -Dspring.config.location=../common-app/src/main/resources/application.yml -DLOG_PATH=/app/log -Dlogging.config=../common-app/src/main/resources/logback-spring.xml” as input in the VM arguments.
                            
       •	Click on run to start the application
       •	Application startup will take some time if we are doing it for the first time it will create all the required tables and populate data within it.

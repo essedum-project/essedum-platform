@@ -37,7 +37,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 //import com.lfn.iamp.usm.dto.UsmNotificationsDTO;
 //import com.lfn.iamp.usm.service.UsmNotificationsService;
 import com.lfn.icip.icipwebeditor.event.model.AlertEvent;
@@ -50,7 +50,7 @@ import lombok.extern.log4j.Log4j2;
 /**
  * The Class AlertEventListener.
  *
- * @author icets
+ * @author essedum
  */
 
 /** The Constant log. */
@@ -64,7 +64,7 @@ import lombok.extern.log4j.Log4j2;
 public class AlertEventListener {
 
 	/** The mailserver url. */
-	@LeapProperty("icip.mailserver.url")
+	@EssedumProperty("icip.mailserver.url")
 	private String mailserverUrl;
 
 	/** The access token. */
@@ -72,15 +72,15 @@ public class AlertEventListener {
 	private String accessToken;
 
 	/** The mailserver enabled. */
-	@LeapProperty("icip.mailserver.enabled")
+	@EssedumProperty("icip.mailserver.enabled")
 	private String mailserverEnabled;
 
 	/** The mailserver receiver. */
-	@LeapProperty("icip.mailserver.receiver")
+	@EssedumProperty("icip.mailserver.receiver")
 	private String mailserverReceiver;
 
 	/** The mail to receiver. */
-	@LeapProperty("icip.mailserver.mailtoreceiver")
+	@EssedumProperty("icip.mailserver.mailtoreceiver")
 	private String mailToReceiver;
 
 	/** The usm notifications service. */

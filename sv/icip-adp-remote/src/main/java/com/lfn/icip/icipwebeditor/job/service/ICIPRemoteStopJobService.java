@@ -19,8 +19,8 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.service.IICIPDatasourceService;
 import com.lfn.icip.icipwebeditor.model.ICIPJobsPartial;
@@ -40,7 +40,7 @@ public class ICIPRemoteStopJobService implements IICIPStopJobService {
 	private ICIPRemoteExecutorJob remoteJob;
 	@Autowired
 	private IICIPDatasourceService dsService;
-	@LeapProperty("icip.certificateCheck")
+	@EssedumProperty("icip.certificateCheck")
 	private String certificateCheck;
 	/** The Constant logger. */
 	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ICIPRemoteStopJobService.class);
@@ -48,12 +48,12 @@ public class ICIPRemoteStopJobService implements IICIPStopJobService {
 	String tag;
 
 	// @Override
-	public ICIPJobsPartial stopPipelineJobs(ICIPJobsPartial job) throws LeapException {
+	public ICIPJobsPartial stopPipelineJobs(ICIPJobsPartial job) throws EssedumException {
 		// TODO Auto-generated method stub
 		return stopRemotePipelineJobs(job);
 	}
 
-	public ICIPJobsPartial stopRemotePipelineJobs(ICIPJobsPartial job) throws LeapException {
+	public ICIPJobsPartial stopRemotePipelineJobs(ICIPJobsPartial job) throws EssedumException {
 		org.json.JSONObject jobMetaData = new org.json.JSONObject(job.getJobmetadata());
 		taskIds = jobMetaData.getString("taskId");
 		tag = jobMetaData.getString("tag");
@@ -68,7 +68,7 @@ public class ICIPRemoteStopJobService implements IICIPStopJobService {
 	}
 
 	private JSONObject terminateJob(String taskIds, String userId, JSONObject connDetails, String tag)
-			throws LeapException {
+			throws EssedumException {
 		// TODO Auto-generated method stub
 		logger.info("Inside Remote Terminate Job");
 		String url = connDetails.get("Url").toString() + "/" + taskIds + "/stop";
@@ -109,10 +109,10 @@ public class ICIPRemoteStopJobService implements IICIPStopJobService {
 				return new JSONObject(response);
 
 		} catch (Exception e) {
-			throw new LeapException("Error in terminateJob:" + e.getMessage() + "Task Id is:" + taskIds);
+			throw new EssedumException("Error in terminateJob:" + e.getMessage() + "Task Id is:" + taskIds);
 		}
 		} else {
-			throw new LeapException("SSLContext is null, could not create a secure connection.");
+			throw new EssedumException("SSLContext is null, could not create a secure connection.");
 		}
 	}
 

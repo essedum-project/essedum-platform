@@ -40,9 +40,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.lfn.ai.comm.lib.util.FileValidate;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.dto.FileValidateSummary;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.icipwebeditor.fileserver.dto.ICIPChunkMetaData;
 import com.lfn.icip.icipwebeditor.fileserver.factory.FileServerFactory;
 import com.opencsv.CSVReader;
@@ -63,15 +63,15 @@ public class FileServerService {
 	private FileServerFactory factory;
 
 	/** The active server. */
-	@LeapProperty("icip.fileserver.active.server")
+	@EssedumProperty("icip.fileserver.active.server")
 	private String activeServer;
 	
 	/** The enabled. */
-	@LeapProperty("icip.fileserver.enabled")
+	@EssedumProperty("icip.fileserver.enabled")
 	private String enabled;
 	
 	/** The folder path. */
-	@LeapProperty("icip.fileuploadDir")
+	@EssedumProperty("icip.fileuploadDir")
 	private String folderPath;
 	
 	@Autowired
@@ -98,7 +98,7 @@ public class FileServerService {
 		if (Boolean.parseBoolean(enabled)) {
 			return factory.getServiceUtil(activeServer).generateFileID(bucket, prefix);
 		} else {
-			throw new LeapException("Please enable fileserver to generate fileid");
+			throw new EssedumException("Please enable fileserver to generate fileid");
 		}
 	}
 	/**
@@ -116,7 +116,7 @@ public class FileServerService {
 		if (Boolean.parseBoolean(enabled)) {
 			return factory.getServiceUtil(activeServer).upload(path, null, fileid, totalCount, replace, bucket, file);
 		} else {
-			throw new LeapException("Please enable fileserver to upload file");
+			throw new EssedumException("Please enable fileserver to upload file");
 		}
 	}
 	
@@ -124,7 +124,7 @@ public class FileServerService {
 		if (Boolean.parseBoolean(enabled)) {
 			return factory.getServiceUtil(activeServer).upload(path, null, fileid, totalCount, replace, bucket);
 		} else {
-			throw new LeapException("Please enable fileserver to upload file");
+			throw new EssedumException("Please enable fileserver to upload file");
 		}
 	}
 
@@ -145,7 +145,7 @@ public class FileServerService {
 		if (Boolean.parseBoolean(enabled)) {
 			return factory.getServiceUtil(activeServer).upload(path, folder, fileid, totalCount, replace, bucket);
 		} else {
-			throw new LeapException("Please enable fileserver to upload file");
+			throw new EssedumException("Please enable fileserver to upload file");
 		}
 	}
 
@@ -162,7 +162,7 @@ public class FileServerService {
 		if (Boolean.parseBoolean(enabled)) {
 			return factory.getServiceUtil(activeServer).download(fileid, index, bucket);
 		} else {
-			throw new LeapException("Please enable fileserver to download file");
+			throw new EssedumException("Please enable fileserver to download file");
 		}
 	}
 
@@ -171,7 +171,7 @@ public class FileServerService {
 		if (Boolean.parseBoolean(enabled)) {
 			return factory.getServiceUtil(activeServer).download(fileid, index, bucket,fileserverurl);
 		} else {
-			throw new LeapException("Please enable fileserver to download file");
+			throw new EssedumException("Please enable fileserver to download file");
 		}
 	}
 	/**
@@ -186,7 +186,7 @@ public class FileServerService {
 		if (Boolean.parseBoolean(enabled)) {
 			return factory.getServiceUtil(activeServer).delete(fileid, bucket);
 		} else {
-			throw new LeapException("Please enable fileserver to delete file");
+			throw new EssedumException("Please enable fileserver to delete file");
 		}
 	}
 
@@ -202,7 +202,7 @@ public class FileServerService {
 		if (Boolean.parseBoolean(enabled)) {
 			return factory.getServiceUtil(activeServer).lastCall(fileid, bucket);
 		} else {
-			throw new LeapException("Please enable fileserver to get last call");
+			throw new EssedumException("Please enable fileserver to get last call");
 		}
 	}
 
@@ -218,7 +218,7 @@ public class FileServerService {
 		if (Boolean.parseBoolean(enabled)) {
 			return factory.getServiceUtil(activeServer).getLastIndex(fileid, bucket, datasource);
 		} else {
-			throw new LeapException("Please enable fileserver to get last index value");
+			throw new EssedumException("Please enable fileserver to get last index value");
 		}
 	}
 	
@@ -226,7 +226,7 @@ public class FileServerService {
 		if (Boolean.parseBoolean(enabled)) {
 			return factory.getServiceUtil(activeServer).getLastIndex(fileid, bucket);
 		} else {
-			throw new LeapException("Please enable fileserver to get last index value");
+			throw new EssedumException("Please enable fileserver to get last index value");
 		}
 	}
 
@@ -243,7 +243,7 @@ public class FileServerService {
 		if (Boolean.parseBoolean(enabled)) {
 			return factory.getServiceUtil(activeServer).getChecksum(fileid, index, bucket);
 		} else {
-			throw new LeapException("Please enable fileserver to get checksum");
+			throw new EssedumException("Please enable fileserver to get checksum");
 		}
 	}
 
@@ -267,13 +267,13 @@ public class FileServerService {
 			return factory.getServiceUtil(activeServer).deploy(authserviceSession, url, filename,
 					inferenceClassFileName, modelClassFileName, requirementsFileName, fileid, bucket);
 		} else {
-			throw new LeapException("Please enable fileserver to deploy");
+			throw new EssedumException("Please enable fileserver to deploy");
 		}
 	}
 	
 	public Map<String,String> fileUploadHelper1(String fileid, String org, MultipartFile file,
 			ICIPChunkMetaData chunkMetadata, String formulaCheck, List<String> allowedExtensions, Integer maxDepth, List<String> selectedRoles) throws JsonProcessingException, JsonMappingException, IOException,
-			CsvValidationException, LeapException, Exception {
+			CsvValidationException, EssedumException, Exception {
 		
 		checkFileForEmbeddedContent(file, allowedExtensions, maxDepth);
 		
@@ -294,7 +294,7 @@ public class FileServerService {
 					while ((nextLine = csvReader.readNext()) != null) {
 						for (var e : nextLine) {
 							if (e.startsWith("=") || e.startsWith("+") || e.startsWith("-") || e.startsWith("@")) {
-								throw new LeapException("CSV files containing formula are not allowed");
+								throw new EssedumException("CSV files containing formula are not allowed");
 							}
 						}
 					}
@@ -309,7 +309,7 @@ public class FileServerService {
 						while (cellIterator.hasNext()) {
 							Cell currentCell = cellIterator.next();
 							if (currentCell.getCellType().toString().equals("FORMULA")) {
-								throw new LeapException("Excel files containing formula are not allowed");
+								throw new EssedumException("Excel files containing formula are not allowed");
 							}
 						}
 					}
@@ -337,7 +337,7 @@ public class FileServerService {
 	
 	public Map<String,String> fileUploadHelper(String fileid, String org, MultipartFile file,
 			ICIPChunkMetaData chunkMetadata, String formulaCheck, List<String> allowedExtensions, Integer maxDepth) throws JsonProcessingException, JsonMappingException, IOException,
-			CsvValidationException, LeapException, Exception {
+			CsvValidationException, EssedumException, Exception {
 		
 		checkFileForEmbeddedContent(file, allowedExtensions, maxDepth);
 		
@@ -358,7 +358,7 @@ public class FileServerService {
 					while ((nextLine = csvReader.readNext()) != null) {
 						for (var e : nextLine) {
 							if (e.startsWith("=") || e.startsWith("+") || e.startsWith("-") || e.startsWith("@")) {
-								throw new LeapException("CSV files containing formula are not allowed");
+								throw new EssedumException("CSV files containing formula are not allowed");
 							}
 						}
 					}
@@ -373,7 +373,7 @@ public class FileServerService {
 						while (cellIterator.hasNext()) {
 							Cell currentCell = cellIterator.next();
 							if (currentCell.getCellType().toString().equals("FORMULA")) {
-								throw new LeapException("Excel files containing formula are not allowed");
+								throw new EssedumException("Excel files containing formula are not allowed");
 							}
 						}
 					}
@@ -428,14 +428,14 @@ public class FileServerService {
 	}
 	public Map<String,String> fileUploadHelper(String fileid, String org, MultipartFile file,
 			ICIPChunkMetaData chunkMetadata, String formulaCheck) throws JsonProcessingException, JsonMappingException, IOException,
-			CsvValidationException, LeapException, Exception {
+			CsvValidationException, EssedumException, Exception {
 		List<String> allowedExtensions = new ArrayList<>();
 		return this.fileUploadHelper(fileid, org, file, chunkMetadata, formulaCheck, allowedExtensions, Integer.valueOf(0));
 	}
 	
 	public Map<String,String> fileUploadHelper1(String fileid, String org, MultipartFile file,
 			ICIPChunkMetaData chunkMetadata, String formulaCheck, List<String> selectedRoles) throws JsonProcessingException, JsonMappingException, IOException,
-			CsvValidationException, LeapException, Exception {
+			CsvValidationException, EssedumException, Exception {
 		List<String> allowedExtensions = new ArrayList<>();
 		return this.fileUploadHelper1(fileid, org, file, chunkMetadata, formulaCheck, allowedExtensions, Integer.valueOf(0), selectedRoles);
 	}
@@ -445,16 +445,16 @@ public class FileServerService {
 		return generateReqsAndUpload1(org, file, prefix, chunkingIndex, chunkCount, formulaCheck, allowedExtensions, Integer.valueOf(0), selectedRoles);
 	}
 	
-	private void checkFileForEmbeddedContent(MultipartFile file, List<String> allowedExtensions, Integer maxDepth) throws LeapException{
+	private void checkFileForEmbeddedContent(MultipartFile file, List<String> allowedExtensions, Integer maxDepth) throws EssedumException{
 		FileValidateSummary fileValidateSummary = fileValidate.validateFile(file, allowedExtensions, maxDepth, true);
 		if(fileValidateSummary!=null && !fileValidateSummary.isValid) {
-			throw new LeapException("Uploaded file is invalid "+fileValidateSummary.reason);
+			throw new EssedumException("Uploaded file is invalid "+fileValidateSummary.reason);
 		}
 	}
 	
 	public Map<String,String> archivalToFileserver(String fileid, String org, MultipartFile file,
 			ICIPChunkMetaData chunkMetadata, String fileserverurl) throws JsonProcessingException, JsonMappingException, IOException,
-			CsvValidationException, LeapException, Exception {
+			CsvValidationException, EssedumException, Exception {
 			
 		String chunkIndex = String.valueOf(chunkMetadata.getIndex());
 		String fileName = chunkMetadata.getFileName();

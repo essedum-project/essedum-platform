@@ -29,7 +29,7 @@ import lombok.Setter;
 /**
  * The Class ICIPGroupsDTO.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

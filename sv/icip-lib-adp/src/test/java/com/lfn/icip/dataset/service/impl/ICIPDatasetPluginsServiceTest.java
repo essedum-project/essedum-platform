@@ -35,7 +35,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Marker;
 
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.factory.IICIPDataSetServiceUtilFactory;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.model.ICIPDatasource;
@@ -196,7 +196,7 @@ public class ICIPDatasetPluginsServiceTest {
 
 
 			@Override
-			public boolean testConnection(ICIPDataset dataset) throws LeapException {
+			public boolean testConnection(ICIPDataset dataset) throws EssedumException {
 				// TODO Auto-generated method stub
 				return false;
 			}

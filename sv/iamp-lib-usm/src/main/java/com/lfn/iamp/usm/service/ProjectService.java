@@ -32,7 +32,7 @@ import com.lfn.iamp.usm.domain.Project2;
  * Service Interface for managing Project.
  */
 /**
- * @author icets
+ * @author essedum
  */
 public interface ProjectService {
 

@@ -24,7 +24,7 @@ import lombok.Setter;
 /**
  * The Class JobContextDiscriminator.
  *
- * @author icets
+ * @author essedum
  */
 @Getter
 @Setter

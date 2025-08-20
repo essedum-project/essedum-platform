@@ -25,7 +25,7 @@ import com.lfn.iamp.usm.domain.Context;
  * Spring Data JPA repository for the Context entity.
  */
 /**
-* @author icets
+* @author essedum
 */
 @Repository("usmContextRepository")
 public interface ContextRepository extends JpaRepository<Context,Integer> {

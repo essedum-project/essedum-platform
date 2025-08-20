@@ -30,7 +30,7 @@ import com.lfn.icip.icipwebeditor.model.ICIPPartialGroups;
  * Spring Data JPA repository for the SchemaRegistry entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPPartialGroupsRepository extends JpaRepository<ICIPPartialGroups, Integer> {

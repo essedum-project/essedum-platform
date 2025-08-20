@@ -40,7 +40,7 @@ import com.lfn.iamp.usm.service.OrganisationService;
  * Service Implementation for managing Organisation.
  */
 /**
-* @author icets
+* @author essedum
 */
 @Service
 @Transactional

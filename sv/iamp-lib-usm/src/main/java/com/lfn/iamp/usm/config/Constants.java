@@ -20,7 +20,7 @@ package com.lfn.iamp.usm.config;
  * Application constants.
  */
 /**
- * @author icets
+ * @author essedum
  */
 public final class Constants {
 

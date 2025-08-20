@@ -75,7 +75,7 @@ import io.swagger.v3.oas.annotations.Parameter;
  * REST controller for managing DashConstant.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @RestController
 @Hidden

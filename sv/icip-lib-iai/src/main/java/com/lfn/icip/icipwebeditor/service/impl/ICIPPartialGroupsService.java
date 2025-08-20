@@ -36,7 +36,7 @@ import com.lfn.icip.icipwebeditor.service.IICIPPartialGroupsService;
 /**
  * The Class ICIPPartialGroupsService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional

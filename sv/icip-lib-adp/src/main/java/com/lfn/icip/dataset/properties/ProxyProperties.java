@@ -26,7 +26,7 @@ import lombok.Setter;
 /**
  * The Class ProxyProperties.
  *
- * @author icets
+ * @author essedum
  */
 @Configuration
 @ConfigurationProperties(prefix = "proxy", ignoreInvalidFields = true, ignoreUnknownFields = true)

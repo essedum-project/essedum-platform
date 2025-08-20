@@ -30,7 +30,7 @@ import lombok.Setter;
 /**
  * The Class ICIPSchemaDetails.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

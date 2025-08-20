@@ -27,7 +27,7 @@ import com.lfn.iamp.usm.dto.UsmNotificationsDTO;
  * Service Interface for managing UsmNotifications.
  */
 /**
-* @author icets
+* @author essedum
 */
 public interface UsmNotificationsService {
 

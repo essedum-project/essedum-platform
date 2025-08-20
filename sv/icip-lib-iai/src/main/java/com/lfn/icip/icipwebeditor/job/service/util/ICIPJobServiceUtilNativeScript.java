@@ -43,8 +43,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.model.ICIPSchemaDetails;
@@ -67,7 +67,7 @@ import lombok.extern.log4j.Log4j2;
 /**
  * The Class ICIPJobServiceUtilNativeScript.
  *
- * @author icets
+ * @author essedum
  */
 
 @Component("nativescriptjob")
@@ -110,27 +110,27 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 	private IAIResolverAspect resolver;
 
 	/** The nativescript python command. */
-	@LeapProperty("icip.pipeline.nativescript.python.command")
+	@EssedumProperty("icip.pipeline.nativescript.python.command")
 	private String nativescriptPythonCommand;
 
 	/** The nativescript python 2 command. */
-	@LeapProperty("icip.pipeline.nativescript.python2.command")
+	@EssedumProperty("icip.pipeline.nativescript.python2.command")
 	private String nativescriptPython2Command;
 
 	/** The nativescript javascript command. */
-	@LeapProperty("icip.pipeline.nativescript.javascript.command")
+	@EssedumProperty("icip.pipeline.nativescript.javascript.command")
 	private String nativescriptJavascriptCommand;
 
 	/** The nativescript python V 2 command. */
-	@LeapProperty("icip.pipeline.nativescript.v2.python.command")
+	@EssedumProperty("icip.pipeline.nativescript.v2.python.command")
 	private String nativescriptPythonV2Command;
 
 	/** The nativescript python 2 V 2 command. */
-	@LeapProperty("icip.pipeline.nativescript.v2.python2.command")
+	@EssedumProperty("icip.pipeline.nativescript.v2.python2.command")
 	private String nativescriptPython2V2Command;
 
 	/** The nativescript javascript V 2 command. */
-	@LeapProperty("icip.pipeline.nativescript.v2.javascript.command")
+	@EssedumProperty("icip.pipeline.nativescript.v2.javascript.command")
 	private String nativescriptJavascriptV2Command;
 
 	/** The Constant INVALID_TYPE. */
@@ -141,13 +141,13 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 	 *
 	 * @param jobDetails the job details
 	 * @return the command
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 * @throws GitAPIException 
 	 * @throws TransportException 
 	 * @throws InvalidRemoteException 
 	 */
 	@Override
-	public String getCommand(ICIPNativeJobDetails jobDetails) throws LeapException, InvalidRemoteException, TransportException, GitAPIException {
+	public String getCommand(ICIPNativeJobDetails jobDetails) throws EssedumException, InvalidRemoteException, TransportException, GitAPIException {
 		String cname = jobDetails.getCname();
 		String org = jobDetails.getOrg();
 		String params = jobDetails.getParams();
@@ -163,7 +163,7 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 			String msg = "Error in fetching elements[0].attributes : " + ex.getClass().getCanonicalName() + " - "
 					+ ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		String tmpfileType;
@@ -172,7 +172,7 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 		} catch (Exception ex) {
 			String msg = "Error in getting filetype : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		String[] separator = new String[] { "" };
@@ -196,7 +196,7 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 		} catch (Exception ex) {
 			String msg = "Error in getting file array : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 
 		for (JsonElement file : files) {
@@ -210,7 +210,7 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 				String msg = "Error in getting file path : " + ex.getClass().getCanonicalName() + " - "
 						+ ex.getMessage();
 				log.error(msg, ex);
-				throw new LeapException(msg, ex);
+				throw new EssedumException(msg, ex);
 			} finally {
 				if (is != null) {
 					try {
@@ -246,7 +246,7 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 						String msg = "Error in getting datasource : " + ex.getClass().getCanonicalName() + " - "
 								+ ex.getMessage();
 						log.error(msg, ex);
-						throw new LeapException(msg, ex);
+						throw new EssedumException(msg, ex);
 					}
 					connDetails.addProperty("salt", datasource.getSalt());
 					value = String.format(LoggerConstants.STRING_STRING_STRING, "\"",
@@ -262,7 +262,7 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 						String msg = "Error in getting dataset : " + ex.getClass().getCanonicalName() + " - "
 								+ ex.getMessage();
 						log.error(msg, ex);
-						throw new LeapException(msg, ex);
+						throw new EssedumException(msg, ex);
 					}
 					for (Entry<String, JsonElement> schemaentry : e.getAsJsonObject().entrySet()) {
 						if (schemaentry.getKey().equals(IAIJobConstants.SCHEMA)) {
@@ -280,7 +280,7 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 								String msg = "Error in getting schema from dataset : "
 										+ ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 								log.error(msg, ex);
-								throw new LeapException(msg, ex);
+								throw new EssedumException(msg, ex);
 							}
 							break;
 						}
@@ -296,7 +296,7 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 						String msg = "Error in getting schema : " + ex.getClass().getCanonicalName() + " - "
 								+ ex.getMessage();
 						log.error(msg, ex);
-						throw new LeapException(msg, ex);
+						throw new EssedumException(msg, ex);
 					}
 					break;
 				default:
@@ -319,7 +319,7 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 				writeTempFile(createNativeYamlscript(argumentBuilder), filePath);
 				arguments = filePath.toAbsolutePath().toString();
 			} catch (Exception ex) {
-				throw new LeapException(ex.getMessage(), ex);
+				throw new EssedumException(ex.getMessage(), ex);
 			}
 		} else {
 			StringBuilder args = new StringBuilder();
@@ -356,9 +356,9 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 	 * @param params the params
 	 * @param gson   the gson
 	 * @return the latest argument
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private JsonArray getLatestArgument(JsonObject binary, String params, Gson gson) throws LeapException {
+	private JsonArray getLatestArgument(JsonObject binary, String params, Gson gson) throws EssedumException {
 		try {
 			JsonArray binaryArray = binary.get("arguments").getAsJsonArray();
 			if (!(params == null || params.trim().isEmpty() || params.trim().equals("{}"))) {
@@ -389,7 +389,7 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 		} catch (Exception ex) {
 			String msg = "Error in getting arguments : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 	}
 
@@ -398,9 +398,9 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 	 *
 	 * @param data the data
 	 * @return the string builder
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
-	private StringBuilder createNativeYamlscript(Map<String, String> data) throws LeapException {
+	private StringBuilder createNativeYamlscript(Map<String, String> data) throws EssedumException {
 		try {
 			log.info("creating native yaml script");
 			Yaml yaml = new Yaml();
@@ -408,7 +408,7 @@ public class ICIPJobServiceUtilNativeScript extends ICIPCommonJobServiceUtil imp
 		} catch (Exception ex) {
 			String msg = "Error in creating yaml file : " + ex.getClass().getCanonicalName() + " - " + ex.getMessage();
 			log.error(msg, ex);
-			throw new LeapException(msg, ex);
+			throw new EssedumException(msg, ex);
 		}
 	}
 

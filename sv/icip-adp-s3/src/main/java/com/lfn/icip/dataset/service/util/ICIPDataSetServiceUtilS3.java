@@ -113,8 +113,8 @@ import com.amazonaws.services.s3.model.UploadPartRequest;
 import com.amazonaws.services.s3.model.UploadPartResult;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDataset;
 
 import com.lfn.icip.icipwebeditor.rest.WebSocketController;
@@ -167,7 +167,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 	
 	public static final String UPLOAD_DATASOURCE_URL_ERROR = "Upload DATASOURCE URL not correct";
     
-	@LeapProperty("icip.certificateCheck")
+	@EssedumProperty("icip.certificateCheck")
 	private String certificateCheck;
 	
 	/** The logger. */
@@ -188,7 +188,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 			);
 
 	@Override
-	public boolean testConnection(ICIPDataset dataset) throws LeapException {
+	public boolean testConnection(ICIPDataset dataset) throws EssedumException {
 
 		try {
 			boolean response;
@@ -213,7 +213,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 		return false;
 	}
 
-	private boolean connectMinio(ICIPDataset dataset) throws LeapException {
+	private boolean connectMinio(ICIPDataset dataset) throws EssedumException {
 
 		JSONObject connectionDetails = new JSONObject(dataset.getDatasource().getConnectionDetails());
 		String accessKey = connectionDetails.optString(ACCESS_KEY);
@@ -238,11 +238,11 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 			    }
 		     else {
 			  // Handle the case where sslContext is null
-	             throw new LeapException(SSL_CONTEXT_ERROR_MESSAGE);
+	             throw new EssedumException(SSL_CONTEXT_ERROR_MESSAGE);
 	       }
 		} catch (Exception e) {
 			logger.info(e.getMessage());
-			throw new LeapException(e.getMessage());
+			throw new EssedumException(e.getMessage());
 		}
 		return true;
 	}
@@ -276,14 +276,14 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 				return false;
 			}
 		} else {
-			throw new LeapException(SSL_CONTEXT_ERROR_MESSAGE);
+			throw new EssedumException(SSL_CONTEXT_ERROR_MESSAGE);
 
 		}
 
 		return true;
 	}
 
-	private BlobServiceClient blobServiceClient(ICIPDataset dataset) throws LeapException, Exception {
+	private BlobServiceClient blobServiceClient(ICIPDataset dataset) throws EssedumException, Exception {
 		JSONObject connectionDetails = new JSONObject(dataset.getDatasource().getConnectionDetails());
 		String accessKey = connectionDetails.optString(ACCESS_KEY);
 		String secretKey = connectionDetails.optString(SECRET_KEY);
@@ -311,7 +311,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 
 			}
 		} else {
-			throw new LeapException(SSL_CONTEXT_ERROR_MESSAGE);
+			throw new EssedumException(SSL_CONTEXT_ERROR_MESSAGE);
 
 		}
 
@@ -319,7 +319,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 	}
 
 	// Returns a blobs/file list inside a container/bucket
-	public JSONArray blobsList_azure(ICIPDataset dataset) throws LeapException, Exception {
+	public JSONArray blobsList_azure(ICIPDataset dataset) throws EssedumException, Exception {
 		BlobServiceClient blbserviceClient = blobServiceClient(dataset);
 		JSONArray blobsList = new JSONArray();
 		if (blbserviceClient != null) {
@@ -333,14 +333,14 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 				logger.error("Error : ", e.getMessage());
 			}
 		} else {
-			throw new LeapException(SSL_CONTEXT_ERROR_MESSAGE);
+			throw new EssedumException(SSL_CONTEXT_ERROR_MESSAGE);
 
 		}
 		return blobsList;
 	}
 
 	private void uploadFileToAzure(ICIPDataset dataset, String uploadFile)
-			throws UncheckedIOException, NullPointerException, LeapException, Exception {
+			throws UncheckedIOException, NullPointerException, EssedumException, Exception {
 		JSONObject attr = new JSONObject(dataset.getAttributes());
 		String bucketName = attr.optString(BUCKET_KEY);
 
@@ -368,12 +368,12 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 
 			logger.info("File Uploaded Successfully");
 		} else {
-			throw new LeapException(SSL_CONTEXT_ERROR_MESSAGE);
+			throw new EssedumException(SSL_CONTEXT_ERROR_MESSAGE);
 		}
 	}
 
 	private JSONArray fetchFileFromAzure(ICIPDataset dataset, String blobName, int limit, int page)
-			throws CsvValidationException, LeapException, Exception {
+			throws CsvValidationException, EssedumException, Exception {
 		JSONObject attr = new JSONObject(dataset.getAttributes());
 		String objectKey = attr.optString(OBJECT_KEY);
 		String bucketName = new JSONObject(dataset.getAttributes()).optString(BUCKET_KEY);
@@ -482,7 +482,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 				}
 			}
 		} else {
-			throw new LeapException(" client cannot be null");
+			throw new EssedumException(" client cannot be null");
 		}
 
 		return records;
@@ -622,7 +622,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 				s3Client.deleteObject(delete);
 				logger.info("File Deleted Successfully");
 			} else {
-				throw new LeapException("Endpoint URL cannot be null");
+				throw new EssedumException("Endpoint URL cannot be null");
 			}
 		} catch (Exception e) {
 			logger.info("File is not deleted");
@@ -707,7 +707,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 			}
 			logger.info("Fetched file info successfully");
 		} else {
-			throw new LeapException("Endpoint URL cannot be null");
+			throw new EssedumException("Endpoint URL cannot be null");
 		}
 		return records;
 	}

@@ -34,7 +34,7 @@ import net.minidev.json.JSONObject;
 /**
  * The Class ICIPDatasourcePluginsService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 public class ICIPDatasourcePluginsService implements IICIPDatasourcePluginsService {

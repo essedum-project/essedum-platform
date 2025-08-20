@@ -30,7 +30,7 @@ import org.json.JSONArray;
 /**
  * The Interface IICIPAdpService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPAdpService {
 

@@ -28,7 +28,7 @@ import com.lfn.icip.dataset.model.MlInstance;
  * Spring Data JPA repository for the MlInstance entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface MlInstancesRepository extends JpaRepository<MlInstance, Integer> {

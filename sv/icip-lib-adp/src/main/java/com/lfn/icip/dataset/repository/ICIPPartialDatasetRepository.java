@@ -29,7 +29,7 @@ import com.lfn.icip.dataset.model.ICIPDataset2;
  * Spring Data JPA repository for the ICIPDataset entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPPartialDatasetRepository extends JpaRepository<ICIPDataset, Integer> {

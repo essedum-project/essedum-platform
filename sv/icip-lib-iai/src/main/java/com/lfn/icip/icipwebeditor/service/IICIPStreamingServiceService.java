@@ -39,7 +39,7 @@ import com.lfn.icip.icipwebeditor.util.ICIPPageResponse;
 /**
  * The Interface IICIPStreamingServiceService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPStreamingServiceService {
 

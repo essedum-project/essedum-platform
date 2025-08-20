@@ -30,7 +30,7 @@ import com.lfn.icip.icipwebeditor.service.IICIPDragAndDropService;
 /**
  * The Class ICIPDragAndDropService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 public class ICIPDragAndDropService implements IICIPDragAndDropService {

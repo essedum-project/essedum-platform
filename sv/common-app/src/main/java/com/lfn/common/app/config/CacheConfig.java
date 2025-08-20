@@ -33,7 +33,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * The Class CacheConfig.
  *
- * @author icets
+ * @author essedum
  */
 @Configuration
 @EnableCaching

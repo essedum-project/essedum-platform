@@ -56,10 +56,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lfn.ai.comm.lib.util.ICIPUtils;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.lfn.ai.comm.lib.util.event.IAPIEvent;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
 import com.lfn.icip.dataset.model.MlInstance;
 import com.lfn.icip.icipwebeditor.IICIPJobRuntimeServiceUtil;
@@ -84,7 +84,7 @@ import com.lfn.icip.icipwebeditor.service.IICIPEventJobMappingService;
 /**
  * The Class ICIPEventJobMappingService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 public class ICIPEventJobMappingService implements IICIPEventJobMappingService {
@@ -123,7 +123,7 @@ public class ICIPEventJobMappingService implements IICIPEventJobMappingService {
 	@Autowired(required = false)
 	private List<IAPIEvent> apiEvents;
 
-	@LeapProperty("icip.pipelineScript.directory")
+	@EssedumProperty("icip.pipelineScript.directory")
 	private String pipelineScriptPath;
 	
 	@Autowired
@@ -387,11 +387,11 @@ public class ICIPEventJobMappingService implements IICIPEventJobMappingService {
 	 * @param corelid the corelid
 	 * @param params  the params
 	 * @return the string
-	 * @throws LeapException the leap exception
+	 * @throws EssedumException the essedum exception
 	 */
 	@Override
 	public String trigger(String name, String org, String corelid, String params, String datasourceName)
-			throws LeapException {
+			throws EssedumException {
 		name = name.trim();
 		logger.info("request to trigger job event");
 		if (isValidEvent(name, org)) {
@@ -528,7 +528,7 @@ public class ICIPEventJobMappingService implements IICIPEventJobMappingService {
 
 			return corelid;
 		}
-		throw new LeapException("Invalid Event Details");
+		throw new EssedumException("Invalid Event Details");
 	}
 
 	/**

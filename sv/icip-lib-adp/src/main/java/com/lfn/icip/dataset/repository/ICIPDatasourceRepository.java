@@ -35,7 +35,7 @@ import com.lfn.icip.dataset.model.dto.ICIPDatasoureNameAliasTypeDTO;
  * Spring Data JPA repository for the ICIPDataset entity.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPDatasourceRepository extends JpaRepository<ICIPDatasource, Integer> {

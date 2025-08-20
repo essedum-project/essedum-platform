@@ -24,7 +24,7 @@ import com.lfn.icip.dataset.service.util.IICIPMlopsServiceUtil;
 /**
  * A factory for creating IICIPDataSetServiceUtil objects.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPDataSetServiceUtilFactory {
 	

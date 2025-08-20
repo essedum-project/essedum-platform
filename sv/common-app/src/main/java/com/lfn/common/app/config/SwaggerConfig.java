@@ -27,7 +27,7 @@ import io.swagger.v3.oas.models.info.License;
 /**
  * The Class SwaggerConfig.
  *
- * @author icets
+ * @author essedum
  */
 @Configuration
 public class SwaggerConfig {
@@ -39,14 +39,14 @@ public class SwaggerConfig {
 	 */
 
 	@Bean
-	public OpenAPI LeapOpenAPI() {
-		return new OpenAPI().info(new Info().title("Leap API").description("Leap application").version("v2.0")
-				.license(new License().name("Infosys").url("http://infosys.com")));
+	public OpenAPI EssedumOpenAPI() {
+		return new OpenAPI().info(new Info().title("Essedum API").description("Essedum application").version("v2.0")
+				.license(new License().name("LFN").url("https://lfnetworking.org")));
 	}
 
 	@Bean
-	public GroupedOpenApi leapApi() {
-		return GroupedOpenApi.builder().group("leap-apis").packagesToScan("com.lfn").build();
+	public GroupedOpenApi essedumApi() {
+		return GroupedOpenApi.builder().group("essedum-apis").packagesToScan("com.lfn").build();
 	}
 
 	@Bean

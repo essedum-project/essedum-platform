@@ -1,7 +1,7 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
  
-  <changeSet author="Leap-BJM" id="312_bjm_01">
+  <changeSet author="Essedum-BJM" id="312_bjm_01">
       <sql >
         UPDATE bjm_master_data SET NAME='precededBy' WHERE NAME='preceededBy';
 	UPDATE bjm_ji_jig_mapping SET relation_name='precededBy' WHERE relation_name='preceededBy';
@@ -10,7 +10,7 @@
       	
   </changeSet>
 
-<changeSet author="Leap-BJM" id="312_bjm_02">
+<changeSet author="Essedum-BJM" id="312_bjm_02">
   <sql dbms="mssql">
     UPDATE mldataset SET attributes =N'{"filter":"","mode":"query","Query":"SELECT job_name JOB_NAME, running_job_instance_id JOB_INSTANCE_ID, status Status, convert(varchar,start_time,120) AS Start_Time, convert(varchar,end_time,120) AS End_Time, datepart(MINUTE,CAST(end_time - start_time as Time)) Duration FROM bjm_job_instance WHERE  status IN (''Cancelled'',''failed'',''Failed'') AND project_id = ({projectId}) AND start_time BETWEEN ({startDate}) AND ({endDate})","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{''projectId'':''project_id'',''startDate'':''\\''2018-04-01\\'''' , ''endDate'':''(SELECT CURRENT_TIMESTAMP)''}","tableName":"","uniqueIdentifier":""}' WHERE ALIAS = 'Acme_bjm2_Failed_Job_Instances_Name' ;
 

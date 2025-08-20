@@ -49,7 +49,7 @@ import io.micrometer.core.annotation.Timed;
 /**
  * The Class ICIPServicesController.
  *
- * @author icets
+ * @author essedum
  */
 @RestController
 @Timed

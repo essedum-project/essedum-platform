@@ -42,7 +42,7 @@ import liquibase.integration.spring.SpringLiquibase;
 /**
  * The Class ICIPDbConfig.
  *
- * @author icets
+ * @author essedum
  */
 @Configuration
 @EnableTransactionManagement

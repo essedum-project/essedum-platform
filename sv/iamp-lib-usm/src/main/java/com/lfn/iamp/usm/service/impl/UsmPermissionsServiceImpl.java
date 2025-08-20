@@ -44,7 +44,7 @@ import com.lfn.iamp.usm.service.UsmPermissionsService;
  * Service Implementation for managing UsmPermissions.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional

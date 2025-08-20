@@ -50,7 +50,7 @@ import lombok.Setter;
 /**
  * The Class ICIPCopyBluePrintJob.
  *
- * @author icets
+ * @author essedum
  */
 
 /**

@@ -30,7 +30,7 @@ import com.lfn.icip.icipwebeditor.job.model.ICIPChains;
 /**
  * The Interface ICIPChainsRepository.
  *
- * @author icets
+ * @author essedum
  */
 @NoRepositoryBean
 public interface ICIPChainsRepository extends PagingAndSortingRepository<ICIPChains, Integer> , CrudRepository<ICIPChains, Integer> {

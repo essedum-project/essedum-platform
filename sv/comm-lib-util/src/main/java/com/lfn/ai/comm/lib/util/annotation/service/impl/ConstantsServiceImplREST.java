@@ -34,7 +34,7 @@ import com.lfn.ai.comm.lib.util.annotation.service.ConstantsService;
  * Service Implementation for managing DashConstant.
  */
 /**
- * @author icets
+ * @author essedum
  */
 @Profile("restconstants")
 @Service
@@ -49,7 +49,7 @@ public class ConstantsServiceImplREST  extends ConstantsServiceImplAbstract impl
 	
 	@Override
 	public String findByKeys(String key, String project) {
-		log.debug("Request to get dash-constants for leapPropertyCache");
+		log.debug("Request to get dash-constants for essedumPropertyCache");
 		String result="";
 		try {
 			result = RestClientUtil.getApiCall(commonAppUrl + "api/get-startup-constants/"+key+"/"+project,"");

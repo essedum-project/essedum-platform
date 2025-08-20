@@ -7,14 +7,14 @@ import javax.management.openmbean.KeyAlreadyExistsException;
 
 import com.lfn.ai.comm.lib.util.dto.ResolvedSecret;
 import com.lfn.ai.comm.lib.util.dto.Secret;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 
 public interface ApplicationSecretManagerService extends SecretsManager{
 
 		
 	public ResolvedSecret resolveSecret(Secret secret) throws KeyException;
 
-	public String addSecret(Secret secret) throws KeyAlreadyExistsException,LeapException;
+	public String addSecret(Secret secret) throws KeyAlreadyExistsException,EssedumException;
 
 	public String updateSecret(Secret secret) throws KeyException;
 

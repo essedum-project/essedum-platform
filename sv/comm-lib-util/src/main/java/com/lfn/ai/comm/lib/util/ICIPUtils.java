@@ -65,7 +65,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.codec.Hex;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.ai.comm.lib.util.logger.JobLogger;
 
 import lombok.AllArgsConstructor;
@@ -255,7 +255,7 @@ public class ICIPUtils {
 	 * : INCABXYZ202nFICi
 	 * 
 	 */
-	public static String randomStringGenerator(String regex, String... parameters) throws LeapException {
+	public static String randomStringGenerator(String regex, String... parameters) throws EssedumException {
 		try {
 			StringBuilder result = new StringBuilder("");
 			Map<String, Integer> map = new LinkedHashMap<>();
@@ -286,7 +286,7 @@ public class ICIPUtils {
 			return result.toString();
 		} catch (Exception ex) {
 			log.error("Some error occured", ex);
-			throw new LeapException("Invalid Expression");
+			throw new EssedumException("Invalid Expression");
 		}
 	}
 

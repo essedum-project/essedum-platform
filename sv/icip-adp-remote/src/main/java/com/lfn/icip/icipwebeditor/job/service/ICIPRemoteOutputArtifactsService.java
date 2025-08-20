@@ -8,8 +8,8 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
-import com.lfn.ai.comm.lib.util.exceptions.LeapException;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDatasource;
 import com.lfn.icip.dataset.service.IICIPDatasourceService;
 import com.lfn.icip.icipwebeditor.model.ICIPJobsPartial;
@@ -41,17 +41,17 @@ public class ICIPRemoteOutputArtifactsService implements IICIPOutputArtifactsSer
 	@Autowired
 	private IICIPDatasourceService dsService;
 	
-	@LeapProperty("icip.certificateCheck")
+	@EssedumProperty("icip.certificateCheck")
 	private String certificateCheck;
 	/** The Constant logger. */
 	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ICIPRemoteStopJobService.class);
 	String taskIds;
 	@Override
-	public JSONObject findOutputArtifacts(ICIPJobsPartial job) throws LeapException {
+	public JSONObject findOutputArtifacts(ICIPJobsPartial job) throws EssedumException {
 		// TODO Auto-generated method stub
 		return RemoteOutputArtifactsJobs(job);
 	}
-	public JSONObject RemoteOutputArtifactsJobs(ICIPJobsPartial job) throws LeapException {
+	public JSONObject RemoteOutputArtifactsJobs(ICIPJobsPartial job) throws EssedumException {
 		org.json.JSONObject jobMetaData = new org.json.JSONObject(job.getJobmetadata());
 		taskIds = jobMetaData.getString("taskId");
 		ICIPDatasource dsObject = dsService.getDatasource(jobMetaData.getString("datasourceName"),
@@ -65,7 +65,7 @@ public class ICIPRemoteOutputArtifactsService implements IICIPOutputArtifactsSer
 		
 
 }
-	private JSONObject getOutputArtifacts(String taskIds, JSONObject connDetails)throws LeapException {
+	private JSONObject getOutputArtifacts(String taskIds, JSONObject connDetails)throws EssedumException {
 		// TODO Auto-generated method stub
 		logger.info("Inside getOutputArtifacts");
 		String url = connDetails.get("Url").toString() + "/" + taskIds + "/getOutputArtifacts";
@@ -91,19 +91,19 @@ public class ICIPRemoteOutputArtifactsService implements IICIPOutputArtifactsSer
 
 					return responsebody;
 				} else if (response.code() == 400) {
-					throw new LeapException("Remote get OutputArtifacts  for taskid " + taskIds);
+					throw new EssedumException("Remote get OutputArtifacts  for taskid " + taskIds);
 					} else {
-						throw new LeapException("Remote get OutputArtifacts  for  " + taskIds + " Response Code "
+						throw new EssedumException("Remote get OutputArtifacts  for  " + taskIds + " Response Code "
 								+ response.code() + "Response Body" + response.body());
 					}
 
 
 		} catch (Exception e) {
-			throw new LeapException("Error in getOutputArtifacts:" + e.getMessage() + "Task Id is:" + taskIds);
+			throw new EssedumException("Error in getOutputArtifacts:" + e.getMessage() + "Task Id is:" + taskIds);
 
 			}
 		} else {
-			throw new LeapException("SSLContext is null, could not create a secure connection.");
+			throw new EssedumException("SSLContext is null, could not create a secure connection.");
 		}
 
 	}

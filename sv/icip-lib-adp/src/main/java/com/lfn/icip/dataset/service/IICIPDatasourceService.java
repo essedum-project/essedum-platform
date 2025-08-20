@@ -33,7 +33,7 @@ import com.lfn.icip.dataset.model.dto.ICIPDatasoureNameAliasTypeDTO;
 /**
  * The Interface IICIPDatasourceService.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPDatasourceService {
 

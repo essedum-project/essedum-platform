@@ -45,7 +45,7 @@ import lombok.Setter;
 /**
  * The Class ICIPDataset2.
  *
- * @author icets
+ * @author essedum
  */
 //@MappedSuperclass
 @EntityListeners(AuditListener.class)

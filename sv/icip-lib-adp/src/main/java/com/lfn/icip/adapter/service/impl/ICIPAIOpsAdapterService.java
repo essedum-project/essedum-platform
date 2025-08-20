@@ -26,7 +26,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lfn.ai.comm.lib.util.annotation.LeapProperty;
+import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.icip.dataset.cache.EncryptionCache;
 import com.lfn.icip.dataset.model.ICIPDataset;
 import com.lfn.icip.dataset.service.aspect.ResolverAspect;
@@ -47,7 +47,7 @@ public class ICIPAIOpsAdapterService {
 	private static final String TICKETSDATASETNAME = "Tickets";
 
 	/** The encryption key. */
-	@LeapProperty("application.uiconfig.enckeydefault")
+	@EssedumProperty("application.uiconfig.enckeydefault")
 	private static String enckeydefault;
 
 	/** The encryption cache. */

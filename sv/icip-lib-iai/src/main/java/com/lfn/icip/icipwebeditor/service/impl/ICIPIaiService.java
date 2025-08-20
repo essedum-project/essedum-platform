@@ -45,7 +45,7 @@ import com.lfn.icip.icipwebeditor.service.IICIPNativeScriptService;
 /**
  * The Class ICIPIaiService.
  *
- * @author icets
+ * @author essedum
  */
 @Service
 @Transactional

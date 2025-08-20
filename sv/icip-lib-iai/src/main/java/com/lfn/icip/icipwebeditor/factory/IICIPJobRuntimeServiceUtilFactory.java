@@ -22,7 +22,7 @@ import com.lfn.icip.icipwebeditor.IICIPJobRuntimeServiceUtil;
 /**
  * A factory for creating IICIPJobRuntimeServiceUtilFactory objects.
  *
- * @author icets
+ * @author essedum
  */
 public interface IICIPJobRuntimeServiceUtilFactory {
 

@@ -26,7 +26,7 @@ import lombok.Setter;
 /**
  * The Class JobDataModel.
  *
- * @author icets
+ * @author essedum
  */
 
 /**
@@ -109,7 +109,7 @@ public class JobModelDTO {
 	/**
 	 * The Class QuartzProperties.
 	 *
-	 * @author icets
+	 * @author essedum
 	 */
 
 	/**
@@ -180,7 +180,7 @@ public class JobModelDTO {
 		/**
 		 * The Class QuartzJobDetails.
 		 *
-		 * @author icets
+		 * @author essedum
 		 */
 
 		/**

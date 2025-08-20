@@ -25,7 +25,7 @@ import com.lfn.icip.dataset.model.ICIPMlIntstance;
 /**
  * The Interface ICIPMlIntstanceService.
  *
- * @author icets
+ * @author essedum
  */
 public interface ICIPMlIntstanceService {
 

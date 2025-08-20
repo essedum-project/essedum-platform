@@ -43,7 +43,7 @@
 ///**
 // * The Class UserApiPermissionsServiceImplTest.
 // *
-// * @author icets
+// * @author essedum
 // */
 //public class UserApiPermissionsServiceImplTest {
 //

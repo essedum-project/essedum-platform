@@ -39,7 +39,7 @@ import lombok.ToString;
  * A Organisation.
  */
 /**
-* @author icets
+* @author essedum
 */
 
 /**

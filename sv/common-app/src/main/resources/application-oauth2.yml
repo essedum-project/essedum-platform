@@ -1,10 +1,10 @@
 # Sample setup with keycloak
 security:
-  issuer-uri: https://victlptst-61:8443/realms/LEAP
-  jwk-set-uri: https://victlptst-61:8443/realms/LEAP/protocol/openid-connect/certs
-  clientId: leap32
+  issuer-uri: http://localhost:8180/realms/LFN
+  jwk-set-uri: http://localhost:8180//realms/LFN/protocol/openid-connect/certs
+  clientId: lfn-45
   scope: email
-  claim: email||leapaccount01
+  claim: email||admin
   createUserIfNotExist: true
   silentRefreshTimeoutFactor: 0.85
  

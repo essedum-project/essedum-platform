@@ -23,7 +23,7 @@ import java.util.List;
 /**
 * The Interface IICIPPluginService.
 *
-* @author icets
+* @author essedum
 */
 public interface IICIPPluginDetailsService {
 

@@ -33,7 +33,7 @@ import com.lfn.icip.dataset.properties.ProxyProperties;
 /**
  * The Class ICIPDataSetServiceUtilRest.
  *
- * @author icets
+ * @author essedum
  */
 @Component("restds")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

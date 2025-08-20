@@ -33,7 +33,7 @@ import com.google.gson.JsonPrimitive;
 /**
  * The Class ICIPJsonTransformerRewrite.
  *
- * @author icets
+ * @author essedum
  */
 public class ICIPJsonTransformerRewrite extends ICIPJsonTransformerBase<JsonElement> {
 
