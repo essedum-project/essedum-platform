@@ -666,6 +666,53 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
   onFilterStatusChange(isExpanded: boolean) {
     this.isFilterExpanded = isExpanded;
   }
+  
+  /**
+   * Handles search input from the header component
+   * This performs client-side filtering without making API calls
+   * @param searchText The search text input from the user
+   */
+  onSearchInput(searchText: string) {
+    this.lastRefreshedTime = new Date();
+    
+    // If we don't have projectsCopy (original data), initialize it
+    if (!this.projectsCopy || this.projectsCopy.length === 0) {
+      this.projectsCopy = JSON.parse(JSON.stringify(this.projects));
+    }
+    
+    // If search text is empty, restore the original data
+    if (!searchText) {
+      this.projects = JSON.parse(JSON.stringify(this.projectsCopy));
+      this.wavesLength = this.projects.length;
+      this.page = 0;
+      this.updateTableData();
+      return;
+    }
+    
+    // Perform client-side filtering on the original data
+    searchText = searchText.toLowerCase();
+    this.projects = this.projectsCopy.filter(project => 
+      (project.name && project.name.toLowerCase().includes(searchText)) ||
+      (project.projectdisplayname && project.projectdisplayname.toLowerCase().includes(searchText)) ||
+      (project.description && project.description.toLowerCase().includes(searchText)) ||
+      (project.id && project.id.toString().toLowerCase().includes(searchText)) ||
+      (project.portfolioId?.portfolioName && project.portfolioId.portfolioName.toLowerCase().includes(searchText))
+    );
+    
+    // Update table and pagination
+    this.wavesLength = this.projects.length;
+    this.page = 0;
+    this.updateTableData();
+  }
+  
+  /**
+   * Updates the table data source and pagination
+   */
+  updateTableData() {
+    this.ProjectList = new MatTableDataSource(this.projects);
+    this.ProjectList.sort = this.sort;
+    this.ProjectList.paginator = this.paginator;
+  }
 
   getPageNumbers(): number[] {
     const totalPages = Math.ceil(this.wavesLength / this.pageSize);
@@ -769,10 +816,13 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
           ));
         this.projects = this.currentPage.content;
         this.copyblueprintProjects = this.currentPage.content.filter((project) => project.name.toLowerCase() != "core")
-        this.projectsCopy = this.projects;
-        //this.ProjectList = new MatTableDataSource(this.currentPage.content);
-        //this.ProjectList.paginator = this.paginator;
-        //this.ProjectList.sort = this.sort;
+        
+        // Store a deep copy of the original data for client-side filtering
+        this.projectsCopy = JSON.parse(JSON.stringify(this.projects));
+        
+        // Update table data and pagination
+        this.wavesLength = this.currentPage.totalElements;
+        this.updateTableData();
       },
       (error) => this.messageService.error("Could not get the results", "IAMP")
     );
@@ -813,7 +863,8 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
             a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
           ));
         this.projects = this.currentPage.content;
-        this.projectsCopy = this.projects;
+        // Store a deep copy of the original projects for filtering
+        this.projectsCopy = JSON.parse(JSON.stringify(this.projects));
         this.wavesLength = this.currentPage.totalElements;
         this.ProjectList = new MatTableDataSource(this.currentPage.content);
         this.ProjectList.paginator = this.paginator;
@@ -889,6 +940,33 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
     if (pageEvent == null || !pageEvent) {
       pageEvent = { page: 0, size: this.pageSize };
     }
+    
+    // If this is a search text from the header component, treat it differently
+    if (typeof pageEvent === 'string') {
+      const searchText = pageEvent;
+      
+      // If search text is empty, restore original data
+      if (!searchText) {
+        this.projects = [...this.projectsCopy];
+        this.wavesLength = this.projects.length;
+        this.page = 0;
+        this.updateTableData();
+        return;
+      }
+      
+      // Filter projects by name containing the search text
+      this.projects = this.projectsCopy.filter(project => 
+        project.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+        project.projectdisplayname?.toLowerCase().includes(searchText.toLowerCase()) ||
+        project.description?.toLowerCase().includes(searchText.toLowerCase())
+      );
+      
+      this.wavesLength = this.projects.length;
+      this.page = 0;
+      this.updateTableData();
+      return;
+    }
+    
     let params = {};
     
     // Check for portfolios in selectedFilterValues
@@ -956,7 +1034,8 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
       
       this.projectService.search(searchProject, pageEvent).subscribe((res) => {
         this.projects = res.content;
-        this.projectsCopy = this.projects;
+        // Store a deep copy of the original projects for filtering
+        this.projectsCopy = JSON.parse(JSON.stringify(this.projects));
         this.wavesLength = res.totalElements;
         this.ProjectList = new MatTableDataSource(res.content);
         this.ProjectList.sort = this.sort;
@@ -971,8 +1050,23 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
     this.projectSearched = undefined;
     this.filterFlag1 = false;
     this.selectedFilterValues = {}; // Reset selected filter values
-    this.myInputReference.nativeElement.value = null;
-    this.fetchWave(null);
+    
+    // Clear search field if it exists
+    if (this.myInputReference && this.myInputReference.nativeElement) {
+      this.myInputReference.nativeElement.value = null;
+    }
+    
+    // If we have stored original data, restore it for client-side filtering
+    if (this.projectsCopy && this.projectsCopy.length > 0) {
+      this.projects = JSON.parse(JSON.stringify(this.projectsCopy));
+      this.wavesLength = this.projects.length;
+      this.page = 0;
+      this.updateTableData();
+    } else {
+      // If no original data, fetch from server
+      this.fetchWave(null);
+    }
+    
     this.filterFlag = false;
   }
   assignCopy() {

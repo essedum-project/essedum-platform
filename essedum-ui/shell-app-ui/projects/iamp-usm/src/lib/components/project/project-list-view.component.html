@@ -5,7 +5,7 @@
 
     <!-- Header -->
     <app-aip-header [cardTitle]="'Project List'" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createFlag"
-      (search)="Search(null)" (refresh)="Refresh()" (add)="createView()">
+      (search)="onSearchInput($event)" (refresh)="Refresh()" (add)="createView()">
     </app-aip-header>
     <div>
       <div class="aip-container lfx-u-pad-lr-30">
