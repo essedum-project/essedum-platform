@@ -20,7 +20,7 @@
             </div>
         </div>
         <!-- Added mat-dialog-content wrapper for scrollable content -->
-        <mat-dialog-content>
+        <mat-dialog-content [ngClass]="{'no-scroll-content': edit}">
             <mat-card #projectForm="ngForm" ngForm="">
             <div class="lfx-u-pad-t-32 lfx-u-pad-r-24 p-20">
                 <div class="row rwMAr">
@@ -351,4 +351,42 @@
         </mat-card>
         </mat-dialog-content>
     </div>
+              <div *ngIf="edit" class="selector-665-242">
+            <mat-tab-group class="selector-665-243">
+              <mat-tab *ngIf="!showBluePrint" label="Portfolio-User-Role" class="selector-665-244">
+                <user-project-role-list *ngIf="showCreateUserRole &amp;&amp; project.id" [showCreateUserRole]="showCreateUserRole" [project]="project" class="selector-665-245"></user-project-role-list>
+                <user-project-role-list *ngIf="!showCreateUserRole &amp;&amp; project.id" [showCreateUserRole]="showCreateUserRole" [project]="project" class="selector-665-246"></user-project-role-list>
+              </mat-tab>
+              <mat-tab *ngIf="showBluePrint" label="Copy Blue Print" class="selector-665-247">
+                <div class="ams_panelCnt formRow relative selector-665-248">
+                  <span class="ams_back pull-right linkMar selector-665-249" style="float: right" (click)="showBluePrint = false">Back to Portfolio-User-Role</span>
+                  <i class="fa fa-caret-square-o-left create-icon-color pull-right linkMar selector-665-250" (click)="showBluePrint = false" aria-hidden="true"></i>
+                  <div class="row rwMAr selector-665-251">
+                    <div class="col-md-6 select-style selector-665-252">
+                      <mat-form-field style="width: 85%" class="selector-665-253">
+                        <label class="formLabel selector-665-254">From Project*</label>
+                        <mat-select [disabled]="view" [ngModelOptions]="{ standalone: true }" [(ngModel)]="fromProject" required="" class="selector-665-255">
+                          <mat-option *ngFor="let item of copyblueprintProjects; trackBy: trackByMethod" [value]="item.name" class="selector-665-256">
+                            {{ item.name }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <div class="selector-665-257">
+                 
+                    <button mat-raised-button=""  [ngBusy]="{ busy: busy1, message: 'Copy Blueprint Processing...' }" (click)="copyblueprint()"  [disabled]="clickedcopyblueprint" class="marRght30 selector-665-258">
+                      Copy
+                    </button>
+                  </div>
+                  <div class="col-md-12 noteAlign selector-665-259">
+                    <p style="color: red" class="selector-665-260">
+                      **Note: Copy Blueprint can be done only once for a project and only dashboards and data
+                      related to dashboards will get copied.
+                    </p>
+                  </div>
+                </div>
+              </mat-tab>
+            </mat-tab-group>
+          </div>
 </div>

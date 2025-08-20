@@ -42,6 +42,13 @@ body {
   padding-bottom: 24px !important; /* Added padding at the bottom */
 }
 
+/* No scrollbar for edit project screen */
+::ng-deep .no-scroll-content {
+  overflow-y: hidden !important;
+  overflow-x: hidden !important;
+  max-height: none !important;
+}
+
 /* Ensure scrollbar is always visible - using light gray color */
 ::ng-deep .mat-mdc-dialog-content::-webkit-scrollbar {
   width: 10px !important; /* Wider scrollbar for better visibility */
