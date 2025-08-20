@@ -66,11 +66,28 @@ export class ProjectService {
    * Get a Project by id.
    */
   getProject(id: any): Observable<Project> {
+    // Get project and role from sessionStorage for headers
+    const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers with only essential data
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'project': project1.id || '',
+      'projectname': project1.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || ''
+    });
+    
     return this.https
-      .get("/api/projects/" + id, { observe: "response" })
+      .get<any>(`/api/projects/${id}`, { 
+        headers: headers 
+      })
       .pipe(
         map((response) => {
-          return new Project(response.body);
+          return new Project(response);
         })
       )
       .pipe(

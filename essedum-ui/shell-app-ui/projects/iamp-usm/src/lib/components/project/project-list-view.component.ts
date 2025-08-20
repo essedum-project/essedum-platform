@@ -191,12 +191,64 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
     this.showNameLengthErrorMessage = false;
     this.showDisplayNameLengthErrorMessage = false;
     this.showDescLengthErrorMessage = false;
+    
+    // Clean up session storage
+    try {
+      sessionStorage.removeItem('currentEditProject');
+    } catch (e) {
+      console.error("Error removing project from session storage:", e);
+    }
   }
 
 
   showProjectList() { }
 
   getProjects(id) {
+    // First, check if this is an edit operation and if we have project data in session storage
+    if (this.edit) {
+      try {
+        const storedProject = sessionStorage.getItem('currentEditProject');
+        if (storedProject) {
+          const projectData = JSON.parse(storedProject);
+          // Verify this is the correct project by checking ID
+          if (projectData.id == id) {
+            console.log("Loading project from session storage:", projectData);
+            this.currentProject = projectData;
+            this.project = projectData;
+            
+            // Set theme color
+            if (this.project.theme == null) {
+              this.project.theme = sessionStorage.getItem("defaultTheme");
+            }
+            this.themeoriginalcolor = this.project.theme;
+            
+            // Set logo URL if available
+            if (this.project.logo) {
+              this.url = "data:image/png;base64," + this.project.logo;
+            } else {
+              this.url = null;
+            }
+            
+            // Check for Core project restrictions
+            if (this.project.name == "Core") {
+              this.coreProjectFlag = true;
+              if (this.edit && this.coreProjectFlag) {
+                window.location.href = '/unauthorized.html';
+              }
+            }
+            
+            // We've loaded from session storage, so we can return early
+            return;
+          }
+        }
+      } catch (e) {
+        console.error("Error retrieving project from session storage:", e);
+        // Continue with API call if session storage fails
+      }
+    }
+    
+    // If we didn't find it in session storage or this is not an edit operation,
+    // proceed with the API call
     const subscription = this.projectService.getProject(id).subscribe((res) => {
       this.currentProject = res;
       this.project = res;
@@ -222,28 +274,22 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
   }
 
   editProject(project: Project) {
-    // this.changeView.emit(false);
-    // this.view = false;
-    // this.edit = true;
-    // this.project = project;
-    // this.buttonFlag = false;
-    // this.clickedcopyblueprint = false;
-    // this.router.navigate(["./projectlist/" + project.id + "/" + false], { relativeTo: this.route });
-   const dialogRef = this.confirmDialog.open(ProjectDetailComponent, {
-      maxHeight: "90vh",
-      width: "600px",
-      maxWidth: "90vw",
-      disableClose: false,
-      autoFocus: false,
-      panelClass: 'custom-dialog-container',
-      data: {
-        edit: true,
-        project: project
-      },
-    });
-    dialogRef.afterClosed().subscribe((result) => {
-      this.fetchWave(null);
-    });
+    this.changeView.emit(false);
+    this.view = false;
+    this.edit = true;
+    this.project = project;
+    this.buttonFlag = false;
+    this.clickedcopyblueprint = false;
+    
+    // Store the project data in session storage for retrieval after navigation
+    try {
+      sessionStorage.setItem('currentEditProject', JSON.stringify(project));
+    } catch (e) {
+      console.error("Error storing project in session storage:", e);
+    }
+    
+    // Navigate to the edit route
+    this.router.navigate(["projectlist", project.id, "false"], { relativeTo: this.route.parent });
   }
 
   view_Project(project: Project) {
@@ -461,7 +507,13 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
           //this.initUserSettings()
           this.clearWave();
           this.showCreate = false;
-          //this.listView();
+          
+          // Clean up session storage after successful update
+          try {
+            sessionStorage.removeItem('currentEditProject');
+          } catch (e) {
+            console.error("Error removing project from session storage:", e);
+          }
         },
         (error) => this.messageService.error("Could not update", "IAMP")
       );
