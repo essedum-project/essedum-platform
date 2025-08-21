@@ -1,15 +1,14 @@
 <div class="lfx-u-pad-t-8">
   <div class="lfx-l-level2-middle-col">
-    <!--header part-->
-    <div class="d-flex justify-content-between align-items-center fixed-header">
+    <!--header part-->    <div class="d-flex justify-content-between align-items-center fixed-header">
       <div class="align-items-center d-flex" *ngIf="!edit && !view">
-        <h2 class="header-title">{{ createRolePermission }}</h2>
+        <h2 class="header-title">{{ createRolePermissionLabel }}</h2>
       </div>
       <div class="align-items-center d-flex" *ngIf="edit && !view">
-        <h2 class="header-title">{{ editRolePermission }}</h2>
+        <h2 class="header-title">{{ editRolePermissionLabel }}</h2>
       </div>
       <div class="align-items-center d-flex" *ngIf="view">
-        <h2 class="header-title">{{ viewRolePermission }}</h2>
+        <h2 class="header-title">{{ viewRolePermissionLabel }}</h2>
       </div>
       <div class="d-flex justify-content-end">
         <div *ngIf="view || edit">
@@ -29,12 +28,11 @@
 
     <mat-card>
       <div class="lfx-u-pad-t-32 lfx-u-pad-r-24 p-20">
-        <!--add, edit, view fields-->
-        <div class="row">
+        <!--add, edit, view fields-->        <div class="row">
           <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
              <mat-form-field appearance="fill" style="width: 100%;"
               floatLabel="always">
-              <mat-label>{{ role }} <span class="text-danger">*</span></mat-label> <mat-select
+              <mat-label>{{ roleLabel }} <span class="text-danger">*</span></mat-label> <mat-select
                 [(ngModel)]="rolePermission.role" [compareWith]="compareObjects" placeholder="Select Role"
                 [disabled]="view" (blur)="showRoleError = !rolePermission.role"
                 (selectionChange)="roleSelectionChanged($event)">
@@ -51,10 +49,9 @@
               </mat-hint>
             </mat-form-field>
 
-          </div>
-          <div class="col-lg-12 col-md-12 lfx-u-mar-b-16"> <mat-form-field appearance="fill" style="width: 100%;"
+          </div>          <div class="col-lg-12 col-md-12 lfx-u-mar-b-16"> <mat-form-field appearance="fill" style="width: 100%;"
               floatLabel="always">
-              <mat-label>{{ modulePermission }} <span class="text-danger">*</span></mat-label> <mat-select
+              <mat-label>{{ modulePermissionLabel }} <span class="text-danger">*</span></mat-label> <mat-select
                 [(ngModel)]="rolePermission.permission" multiple [compareWith]="compareObjects1"
                 placeholder="Select Module-Permission" [disabled]="view" (blur)="permissionCheck($event)"
                 (selectionChange)="permissionCheck($event)">
@@ -74,16 +71,15 @@
           </div>
         </div>
       </div>
-      <hr /> <!--footer part-->
-      <div class="d-flex lfx-u-mar-b-16 ml-24" *ngIf="!view"> <button *ngIf="!edit" mat-raised-button
+      <hr /> <!--footer part-->      <div class="d-flex lfx-u-mar-b-16 ml-24" *ngIf="!view"> <button *ngIf="!edit" mat-raised-button
           [disabled]="!validateForm()" (click)="onSave()" class="save-btn">
-          {{ saveRolePermission }}
+          {{ saveRolePermissionLabel }}
         </button>
         <button *ngIf="edit" mat-raised-button [disabled]="!validateForm()" (click)="onSave()" class="save-btn">
-          {{ updateRolePermission }}
+          {{ updateRolePermissionLabel }}
         </button>
         <button class="lfx-u-pad-r-16" mat-raised-button (click)="clearWave()" class="cancel-btn">
-          {{ clear }}
+          {{ clearLabel }}
         </button>
       </div>
     </mat-card>

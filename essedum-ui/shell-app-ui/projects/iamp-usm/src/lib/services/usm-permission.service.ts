@@ -109,7 +109,8 @@ export class UsmPermissionsService {
     } catch (e : any) {
       console.error("JSON.stringify error - ", e.message);
     }
-    let headers = new HttpHeaders();
+    //let headers = new HttpHeaders();
+     let headers = this.createRequestHeaders();
     headers = headers.append('example', headerValue);
     return this.https
       .get("/api/usm-permissionss/page", {
@@ -194,9 +195,11 @@ export class UsmPermissionsService {
    * Delete an UsmPermissions by id.
    */
   delete(id: any) {
+     let headers = this.createRequestHeaders();
     return this.https
       .delete("/api/usm-permissionss/" + id, {
         observe: "response",
+        headers: headers
       })
       .pipe(
         catchError((err) => {
@@ -246,5 +249,59 @@ export class UsmPermissionsService {
   private convert(usm_permissions: UsmPermissions): UsmPermissions {
     const copy: UsmPermissions = Object.assign({}, usm_permissions);
     return copy;
+  }
+
+    // Helper method to create standardized request headers with all required values
+  private createRequestHeaders(): HttpHeaders {
+    let headers = new HttpHeaders();
+    // Add Referer header - matching the exact format in the curl example
+    if (typeof window !== 'undefined') {
+      // Use the actual origin like in the curl example
+      headers = headers.append('Referer', window.location.origin + '/');
+    }
+    
+    // Add authorization header if available
+    if (sessionStorage.getItem("authToken")) {
+      headers = headers.append('Authorization', 'Bearer ' + sessionStorage.getItem("authToken"));
+    } else if (localStorage.getItem("jwtToken")) {
+      headers = headers.append('Authorization', 'Bearer ' + localStorage.getItem("jwtToken"));
+    }
+    
+    // Add Project headers - exact casing as in the curl example
+    if (sessionStorage.hasOwnProperty("project") && sessionStorage.getItem("project") !== "") {
+      try {
+        const project = JSON.parse(sessionStorage.getItem("project") || "{}");
+        if (project.id) {
+          headers = headers.append('Project', project.id.toString());
+        }
+        if (project.name) {
+          headers = headers.append('ProjectName', project.name.toString());
+        }
+      } catch (e) {
+        console.error("Error parsing project from sessionStorage:", e);
+      }
+    }
+    
+    // Add role headers - exact casing as in the curl example
+    if (sessionStorage.hasOwnProperty("role") && sessionStorage.getItem("role") !== "") {
+      try {
+        const role = JSON.parse(sessionStorage.getItem("role") || "{}");
+        if (role.id) {
+          headers = headers.append('roleId', role.id.toString());
+        }
+        if (role.name) {
+          headers = headers.append('roleName', role.name.toString());
+        }
+      } catch (e) {
+        console.error("Error parsing role from sessionStorage:", e);
+      }
+    }
+    
+    // Try to add Cookie header if available from document.cookie
+    if (typeof document !== 'undefined' && document.cookie) {
+      headers = headers.append('Cookie', document.cookie);
+    }
+    
+    return headers;
   }
 }

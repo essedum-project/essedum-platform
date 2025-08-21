@@ -22,12 +22,16 @@
                 <th *ngFor="let obj of displayedColumns">{{obj}}</th>
               </tr>
             </thead>
-            <tbody>
-              <tr *ngFor="let obj of usmRolePermissionss; let i =index">
+            <tbody>              <tr *ngFor="let obj of usmRolePermissionss; let i =index">
                 <td>{{getRowNumber(i)}}</td>
                 <td style="color: #0052cc; cursor: pointer;">{{ obj.id}}</td>
                 <td>{{ obj.role?.name || 'No role name available' }}</td>
-                <td>{{ obj.permission?.module || 'No module available' }}</td>
+                <td>
+                  {{ (obj.permission && obj.permission.length > 0) ? (obj.permission[0].module) : 'No module available' }}
+                </td>
+                <td>
+                  {{ (obj.permission && obj.permission.length > 0) ? (obj.permission[0].permission) : 'No permission available' }}
+                </td> 
                 <td>
                   <i class="fa fa-info-circle fa-lg selector-669-71 header-action-icon" aria-hidden="true"
                     matTooltip="View" (click)="view_UsmRolePermissions(obj)"></i>&nbsp; &nbsp;
@@ -61,12 +65,6 @@
   </div>
 </div>
 
-
-<div class="ams_toptoolbar selector-675-6" style="margin-top: 6vh;">
-  <i class="fa fa-eye create-icon-color selector-675-7" *ngIf="viewFlag" aria-hidden="true"></i>
-  <span style="cursor: pointer" *ngIf="viewFlag" (click)="viewRolePermission()" class="selector-675-8">View Role
-    Permissions</span>
-</div>
 <!--
 
 <div class="col-md-12 paddingBottom selector-675-1">

@@ -19,12 +19,23 @@ import { UsmPermissions } from "./usm-permissions";
 export class UsmRolePermissions {
  id: number;
  role: Role;
- permission: UsmPermissions;
+ permission: UsmPermissions[] = []; // Changed to array to support multiple selection
  constructor(json?: any) {
   if (json != null) {
    this.id = json.id;
    this.role = json.role;
-   this.permission = json.permission;
+   
+   // Handle both array and single permission
+   if (json.permission) {
+     if (Array.isArray(json.permission)) {
+       this.permission = json.permission;
+     } else {
+       // If it's a single permission, convert to array
+       this.permission = [json.permission];
+     }
+   } else {
+     this.permission = [];
+   }
   }
  }
 

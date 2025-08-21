@@ -72,6 +72,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
     lastRefreshedTime: Date | null = null;
       tagrefresh = false;
   displayedColumns: string[] = [
+    "#",
     "Id",
     "Role",
     "Module",
@@ -85,7 +86,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
   selectedWidgetSettings: any[] = [];
   dashconstant: DashConstant;
   wavesLength: number = 0;
-  pageSize: number = 6;
+  pageSize: number = 5;
   pageInde = 0;
   pageEvent: any;
 
@@ -160,7 +161,7 @@ selectedAdapterType: any;
   modulepermissionarrayFilter: any[] = [];  pageArr: number[] = [0]; // Initialize with at least one page
   pageNumberInput: number = 1;
   noOfPages: number = 1; // Start with at least one page
-  prevRowsPerPageValue: number = 6; // Default to pageSize
+  prevRowsPerPageValue: number = 5; // Default to pageSize
   itemsPerPage: number[] = [5, 10, 20];
   endIndex: number = 5; // Default value for pagination display
   startIndex: number = 0; // Default value for pagination display
@@ -178,6 +179,10 @@ selectedAdapterType: any;
     this.fetchrole();
     this.fetchmodule();
     this.fetchdashconstants();
+    
+    // Always load data from API at initialization
+    this.loadPaginated(0, this.pageSize, null, null);
+    
     if (sessionStorage.getItem("usmAuthority")) {
       sessionStorage.removeItem("usmAuthority");
       this.auth = "";
@@ -220,90 +225,33 @@ selectedAdapterType: any;
       window.location.href.includes("permissionlist") &&
       window.location.href.includes("true")
     ) {
-      //  this.usmRolePermissionsService.findAllPermissions(this.examplepermission, this.lazyload).subscribe((response)
-      //=> {
-      //   this.permissionarray = response.content;
-      //   this.permissionarray = this.permissionarray.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1
-      //: -1));
       this.showCreate = true;
       this.edit = true;
       this.view = true;
       this.viewUsmRolePermissions = true;
       this.buttonFlag = true;
-      // var that = this;
-      // this.getUsmRolePermissionss(that).then((value) => {
       this.route.params.subscribe((res) => {
         this.getUsmRolePermissionss(Number(window.atob(res["id"])));
-        //   that.currentUsmRolePermissions = value.filter((usmRolePermissions) => usmRolePermissions.id == res.id).pop
-        //();
-        //   that.usmRolePermissions = value.filter((usmRolePermissions) => usmRolePermissions.id == res.id).pop();
-        //  });
-        //  try {
-        //   this.target = JSON.parse(this.usmRolePermissions.permission);
-        //  } catch (e) {
-        //   //console.error("JSON.parse error - ", e.message);
-        //  }
       });
-      //  });
     } else if (
       window.location.href.includes("permissionlist") &&
       window.location.href.includes("false")
     ) {
-      //  this.usmRolePermissionsService.findAllPermissions(this.examplepermission, this.lazyload).subscribe((response)
-      //=> {
-      //   this.permissionarray = response.content;
-      //   this.permissionarray = this.permissionarray.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1
-      //: -1));
       this.showCreate = true;
       this.edit = true;
       this.view = false;
       this.buttonFlag = false;
-      // var that = this;
-      // this.getUsmRolePermissionss(that).then((value) => {
       this.route.params.subscribe((res) => {
         this.getUsmRolePermissionss(Number(window.atob(res["id"])));
-        //   that.currentUsmRolePermissions = value.filter((usmRolePermissions) => usmRolePermissions.id == res.id).pop
-        //();
-        //   that.usmRolePermissions = value.filter((usmRolePermissions) => usmRolePermissions.id == res.id).pop();
-        //  });
-        //  try {
-        //   JSON.parse(this.usmRolePermissions.permission).forEach((element) => {
-        //    this.target.push(element.name);
-        //   });
-        //   this.permissionarray.forEach((ele) => {
-        //    if (!JSON.parse(this.usmRolePermissions.permission).includes(ele)) {
-        //     this.source.push(ele.name);
-        //    }
-        //   });
-        //  } catch (e) {
-        //   //console.error("JSON.parse error - ", e.message);
-        //  }
-        // });
       });
     } else if (
       window.location.href.includes("permissionlist") &&
       window.location.href.includes("create")
     ) {
-      //  this.usmRolePermissionsService.findAllPermissions(this.examplepermission, this.lazyload).subscribe((response)
-      //=> {
-      //   this.permissionarray = response.content;
-      //   this.permissionarray = this.permissionarray.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase() ? 1
-      //: -1));
-
-      // this.permissionarray.forEach((e) => this.source.push(e.name));
-
       this.showCreate = true;
       this.edit = false;
       this.usmRolePermissions = new UsmRolePermissions();
       this.changeView.emit(false);
-      //  });    } else {
-      // Try to load data from the server first
-      try {
-        this.loadPaginated(0, this.pageSize, null, null);
-      } catch (error) {
-        console.warn('Error loading data from server, using mock data instead', error);
-        this.initializeMockData();
-      }
     }
   }
   fetchdashconstants() {
@@ -411,17 +359,25 @@ selectedAdapterType: any;
     this.viewUsmRolePermissions = false;
     this.loadPaginated(0, this.pageSize, null, null);
     this.router.navigate(["../../"], { relativeTo: this.route });
-  }
-  checkUsmRolePermissions() {
+  }  checkUsmRolePermissions() {
     this.existingUsmRolePermissions = new Array<UsmRolePermissions>();
-    this.usmRolePermissionss.forEach((element) => {
-      this.usmRolePermissionsArray.forEach((ele) => {
-        if (
-          element.role.id == ele.role.id &&
-          element.permission.module == ele.permission.module &&
-          element.permission.permission == ele.permission.permission
-        ) {
-          this.existingUsmRolePermissions.push(element);
+    this.usmRolePermissionss.forEach((existingElement) => {
+      this.usmRolePermissionsArray.forEach((newElement) => {
+        // Ensure we're working with arrays
+        const existingPermissions = Array.isArray(existingElement.permission) ? existingElement.permission : [existingElement.permission];
+        const newPermissions = Array.isArray(newElement.permission) ? newElement.permission : [newElement.permission];
+        
+        // Check if role IDs match and if there's any overlap in permissions
+        if (existingElement.role.id === newElement.role.id) {
+          for (const existingPerm of existingPermissions) {
+            for (const newPerm of newPermissions) {
+              if (existingPerm.module === newPerm.module && 
+                  existingPerm.permission === newPerm.permission) {
+                this.existingUsmRolePermissions.push(existingElement);
+                break;
+              }
+            }
+          }
         }
       });
     });
@@ -471,27 +427,24 @@ selectedAdapterType: any;
       this.messageService.error(
         "Please Select A Module and Permission",
         "LEAP"
-      );
-    } else {
+      );    } else {
       if (this.edit) this.updateWave();
       else {
         this.usmRolePermissionsArray = new Array<UsmRolePermissions>();
-        let temp: UsmRolePermissions = new UsmRolePermissions();
-        let permissions: any = this.usmRolePermissions.permission;
+        let permissions: UsmPermissions[] = this.usmRolePermissions.permission;
+        
         if (permissions.length > 1) {
+          // Create separate role-permission entries for each permission
           permissions.forEach((element) => {
-            temp.permission = element;
-            temp.permission.module = element.module;
-            temp.permission.permission = element.permission;
+            let temp = new UsmRolePermissions();
+            temp.permission = [element];
             temp.role = this.usmRolePermissions.role;
             this.usmRolePermissionsArray.push(temp);
-            temp = new UsmRolePermissions();
           });
-        } else {
-          temp.permission = this.usmRolePermissions.permission[0];
-          temp.permission.module = this.usmRolePermissions.permission[0].module;
-          temp.permission.permission =
-            this.usmRolePermissions.permission[0].permission;
+        } else if (permissions.length === 1) {
+          // Just one permission, create a single role-permission entry
+          let temp = new UsmRolePermissions();
+          temp.permission = [permissions[0]]; 
           temp.role = this.usmRolePermissions.role;
           this.usmRolePermissionsArray.push(temp);
         }
@@ -545,15 +498,25 @@ selectedAdapterType: any;
   }
 
   getUsmRolePermissionss(that) {
-    this.usmRolePermissionsService
-      .getUsmRolePermissions(that)
+    this.usmRolePermissionsService      .getUsmRolePermissions(that)
       .subscribe((res) => {
         this.usmRolePermissions = res;
-        if (
-          this.usmRolePermissions.permission?.module == "dbs" &&
-          this.usmRolePermissions.permission?.permission == "view"
-        ) {
-          this.dbsViewFlag = true;
+        
+        // Ensure permission is always treated as an array
+        if (!Array.isArray(this.usmRolePermissions.permission)) {
+          this.usmRolePermissions.permission = this.usmRolePermissions.permission ? 
+            [this.usmRolePermissions.permission] : [];
+        }
+        
+        // Check if any permission is for dbs view
+        this.dbsViewFlag = false;
+        if (this.usmRolePermissions.permission && this.usmRolePermissions.permission.length > 0) {
+          for (let perm of this.usmRolePermissions.permission) {
+            if (perm.module == "dbs" && perm.permission == "view") {
+              this.dbsViewFlag = true;
+              break;
+            }
+          }
         }
         let project: any;
         try {
@@ -608,7 +571,10 @@ selectedAdapterType: any;
       disableClose: true,
       data: {
         title: "Delete Role Permission",
-        message: "Are you sure you want to delete?",
+        message:
+          "Are you sure do you want to delete the role permission named '" +
+          rowData.role?.name + "' with permission '"+rowData.permission?.module +
+          "' ?",
       },
     });
     dialogRef.afterClosed().subscribe((result) => {
@@ -617,6 +583,7 @@ selectedAdapterType: any;
       }
     });
   }
+  
   editUsmRolePermissions(usmRolePermissions) {
     // Use the new dialog approach
     this.editRolePermission(usmRolePermissions);
@@ -694,27 +661,36 @@ selectedAdapterType: any;
         .subscribe(
           (pageResponse) => {
             // Check if we received valid data
-            if (pageResponse && pageResponse.content && pageResponse.content.length > 0) {
+            if (pageResponse && pageResponse.content) {
               this.loadData(pageResponse);
+              
+              // If the response is empty, show an info message
+              if (pageResponse.content.length === 0) {
+                this.messageService.info("No role-permission records found", "LEAP");
+              }
             } else {
-              // If the API returned empty data, use mock data
-              console.warn('API returned empty data, using mock data instead');
-              this.initializeMockData();
-              this.messageService.info("Using mock data for demonstration", "LEAP");
+              // Handle null or invalid response
+              this.messageService.error("Invalid response received from API", "LEAP");
+              // Initialize empty data structure
+              this.loadData({ content: [], totalElements: 0, totalPages: 0 });
             }
           },
           (error) => {
-            console.warn('Error loading data from API, falling back to mock data', error);
-            this.initializeMockData();
-            this.messageService.info("Using mock data for demonstration", "LEAP");
+            console.error('Error loading data from API:', error);
+            this.messageService.error("Failed to load role-permissions: " + (error.message || "Unknown error"), "LEAP");
+            this.testCreate = false;
+            // Initialize empty data structure
+            this.loadData({ content: [], totalElements: 0, totalPages: 0 });
           }
         );
     } catch (error) {
-      console.warn('Exception occurred, using mock data', error);
-      this.initializeMockData();
-      this.messageService.info("Using mock data for demonstration", "LEAP");
+      console.error('Exception occurred while loading data:', error);
+      this.messageService.error("An error occurred while loading data", "LEAP");
+      this.testCreate = false;
+      // Initialize empty data structure
+      this.loadData({ content: [], totalElements: 0, totalPages: 0 });
     }
-  }  loadData(pageResponse) {
+  }loadData(pageResponse) {
     console.log("pageResponse", pageResponse);
     pageResponse.content = pageResponse.content.sort((a, b) => {
       const nameA = a.role ? a.role.name.toLowerCase() : "";
@@ -849,15 +825,37 @@ selectedAdapterType: any;
     }
   }
   updateWave() {
-    let arr = this.usmRolePermissionss.filter(
-      (item) =>
-        item.id != this.usmRolePermissions.id &&
-        item.role.id == this.usmRolePermissions.role.id &&
-        item.permission.module == this.usmRolePermissions.permission.module &&
-        item.permission.permission ==
-          this.usmRolePermissions.permission.permission
-    );
-    if (arr.length > 0) {
+    // Make sure we're dealing with an array of permissions
+    if (!Array.isArray(this.usmRolePermissions.permission)) {
+      this.usmRolePermissions.permission = this.usmRolePermissions.permission ? 
+        [this.usmRolePermissions.permission] : [];
+    }
+    
+    // Check for duplicate role-permission combinations
+    let duplicateFound = false;
+    
+    // For each permission in the current role permission object
+    for (const currentPermission of this.usmRolePermissions.permission) {
+      // Check against existing role permissions
+      const duplicates = this.usmRolePermissionss.filter(
+        (item) =>
+          item.id != this.usmRolePermissions.id &&
+          item.role.id == this.usmRolePermissions.role.id &&
+          // Check if any permission matches
+          Array.isArray(item.permission) && 
+          item.permission.some(p => 
+            p.module === currentPermission.module && 
+            p.permission === currentPermission.permission
+          )
+      );
+      
+      if (duplicates.length > 0) {
+        duplicateFound = true;
+        break;
+      }
+    }
+    
+    if (duplicateFound) {
       this.messageService.error(
         "Duplicate Role Permission cannot be created",
         "IAMP"
@@ -886,30 +884,49 @@ selectedAdapterType: any;
         );
     }
   }
-
   delete(usmRolePermissionsToDelete: UsmRolePermissions) {
     let id = usmRolePermissionsToDelete.id;
+    
+    // Log delete operation for debugging
+    console.log(`Attempting to delete role permission with ID: ${id}`, usmRolePermissionsToDelete);
+    
     this.usmRolePermissionsService.delete(id).subscribe(
       (response) => {
+        console.log(`Delete response for ID ${id}:`, response);
         this.testCreate = true;
-        this.deletedashconstant(usmRolePermissionsToDelete);
-        this.currentPage.remove(usmRolePermissionsToDelete);
+        
+        // First refresh the data, then update UI
         this.loadPaginated(0, this.pageSize, null, null);
+        
+        // Remove from current page after successful deletion
+        this.currentPage.remove(usmRolePermissionsToDelete);
+        
+        // Clean up related data
+        this.deletedashconstant(usmRolePermissionsToDelete);
+        
+        // Show success message
         this.messageService.info(
           "Role-Permission Deleted successfully",
           "LEAP!"
         );
+        
         this.Clear();
       },
       (error) => {
+        console.error(`Error deleting role permission with ID ${id}:`, error);
         this.testCreate = false;
-        this.messageService.error("Could not delete!", "LEAP");
+        
+        // Provide more detailed error message if available
+        const errorMessage = error?.error?.message || "Could not delete! Server returned an error.";
+        this.messageService.error(errorMessage, "LEAP");
+        
+        // Refresh the data to ensure consistent state
+        this.loadPaginated(0, this.pageSize, null, null);
       }
     );
-  }
-  clearWave() {
+  }  clearWave() {
     if (this.edit || this.view) {
-      this.usmRolePermissions.permission = null;
+      this.usmRolePermissions.permission = []; // Now using empty array instead of null
       this.usmRolePermissions.role = null;
       this.errorMessage = false;
     } else {
@@ -957,16 +974,21 @@ selectedAdapterType: any;
     }
     if (flag) this.dbsViewFlag = true;
     else this.dbsViewFlag = false;
-  }
-  updatepermissionCheck(event) {
+  }  updatepermissionCheck(event) {
     let flag: boolean = false;
     let permissions: any = this.usmRolePermissions.permission;
-    if (
-      permissions &&
-      permissions.module == "dbs" &&
-      permissions.permission == "view"
-    )
-      flag = true;
+    
+    // Check if permissions is an array and has items
+    if (permissions && Array.isArray(permissions) && permissions.length > 0) {
+      // Check if any permission matches the criteria
+      for (let perm of permissions) {
+        if (perm.module == "dbs" && perm.permission == "view") {
+          flag = true;
+          break;
+        }
+      }
+    }
+    
     if (flag) this.dbsViewFlag = true;
     else this.dbsViewFlag = false;
   }
@@ -1040,12 +1062,17 @@ selectedAdapterType: any;
     } catch (e) {
       project = null;
       //console.error("JSON.parse error - ", e.message);
-    }
-    if (
-      usmRolePermissionsToDelete.permission.module == "dbs" &&
-      usmRolePermissionsToDelete.permission.permission == "view"
-    ) {
-      dbsViewFlag = true;
+    }    // Check if permission is an array and has any dbs-view permissions
+    if (usmRolePermissionsToDelete.permission) {
+      const permissions = Array.isArray(usmRolePermissionsToDelete.permission) ? 
+        usmRolePermissionsToDelete.permission : [usmRolePermissionsToDelete.permission];
+        
+      for (const perm of permissions) {
+        if (perm.module === "dbs" && perm.permission === "view") {
+          dbsViewFlag = true;
+          break;
+        }
+      }
     }
     if (dbsViewFlag) {
       this.dashConstantService.getDashConsts(project).subscribe((res) => {
@@ -1096,8 +1123,8 @@ selectedAdapterType: any;
     if (!rolePermission && this.usmRolePermissionss && this.usmRolePermissionss.length > 0) {
       rolePermission = this.usmRolePermissionss[0];
     } else if (!rolePermission) {
-      // If no items exist yet, first initialize mock data
-      this.initializeMockData();
+      // If no items exist yet, load data from API
+      this.loadPaginated(0, this.pageSize, null, null);
       if (this.usmRolePermissionss && this.usmRolePermissionss.length > 0) {
         rolePermission = this.usmRolePermissionss[0];
       } else {
@@ -1122,14 +1149,13 @@ selectedAdapterType: any;
       }
     });
   }
-
   viewRolePermission(rolePermission?: UsmRolePermissions) {
     // If no rolePermission is provided (called from menu), get the first item from the list
     if (!rolePermission && this.usmRolePermissionss && this.usmRolePermissionss.length > 0) {
       rolePermission = this.usmRolePermissionss[0];
     } else if (!rolePermission) {
-      // If no items exist yet, first initialize mock data
-      this.initializeMockData();
+      // If no items exist yet, load data from API
+      this.loadPaginated(0, this.pageSize, null, null);
       if (this.usmRolePermissionss && this.usmRolePermissionss.length > 0) {
         rolePermission = this.usmRolePermissionss[0];
       } else {
@@ -1188,8 +1214,7 @@ selectedAdapterType: any;
     developerRole.name = 'Developer';
     developerRole.description = 'Developer role';
     developerRole.projectId = null;
-    
-    // Add mock data
+      // Add mock data
     const addMockRolePermission = (id: number, role: Role, module: string, perm: string) => {
       const permission = new UsmPermissions();
       permission.module = module;
@@ -1198,7 +1223,7 @@ selectedAdapterType: any;
       const rolePermission = new UsmRolePermissions();
       rolePermission.id = id;
       rolePermission.role = role;
-      rolePermission.permission = permission;
+      rolePermission.permission = [permission]; // Now assigning as an array
       
       mockRolePermissions.push(rolePermission);
     };
@@ -1267,19 +1292,9 @@ selectedAdapterType: any;
       endIndex: this.endIndex
     });
   }
-
-  // Method to force load mock data, can be used for testing
-  loadMockData() {
-    this.initializeMockData();
-    this.messageService.info("Mock data loaded successfully", "LEAP");
-  }
-
   // Calculate row number based on current page index and row index
   getRowNumber(index: number): number {
-    if (this.pageEvent) {
-      return this.pageEvent.pageIndex * this.pageEvent.pageSize + index + 1;
-    }
-    return index + 1;
+    return this.pageNumber * this.pageSize + index + 1 - this.pageSize;
   }
   
   lastRefreshTime() {

@@ -32,10 +32,12 @@ export class UsmRolePermissionsService {
    */
 
   create(usm_role_permissions: UsmRolePermissions): Observable<UsmRolePermissions> {
+      let headers = this.createRequestHeaders();
     const copy = this.convert(usm_role_permissions);
     return this.https
       .post("/api/usm-role-permissionss", copy, {
         observe: "response",
+        headers: headers 
       })
       .pipe(
         map((response) => {
@@ -73,6 +75,7 @@ export class UsmRolePermissionsService {
    * Update the passed usm_role_permissions.
    */
   update(usm_role_permissions: UsmRolePermissions): Observable<UsmRolePermissions> {
+      let headers = this.createRequestHeaders();
     let body;
     try {
       body = JSON.stringify(usm_role_permissions);
@@ -83,6 +86,7 @@ export class UsmRolePermissionsService {
     return this.https
       .put("/api/usm-role-permissionss", body, {
         observe: "response",
+        headers:headers
       })
       .pipe(
         map((response) => {
@@ -109,8 +113,8 @@ export class UsmRolePermissionsService {
       headerValue = Buffer.from(body, 'utf8').toString('base64');
     } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
-    }
-    let headers = new HttpHeaders();
+    }    // Get base headers from createRequestHeaders, then add the example header
+    let headers = this.createRequestHeaders();
     headers = headers.append('example', headerValue);
     return this.https
       .get("/api/usm-role-permissionss/page", {
@@ -132,12 +136,17 @@ export class UsmRolePermissionsService {
           return this.handleError(err);
         })
       );
-  }
-
-  findAllPaginated(page,size,sortBy,orderBy): Observable<PageResponse<UsmRolePermissions>> {
+  }  findAllPaginated(page,size,sortBy,orderBy): Observable<PageResponse<UsmRolePermissions>> {
+    // Create standardized headers with all required information
+    let headers = this.createRequestHeaders();
+    
+    // Note: The role headers are now added in the createRequestHeaders() method
+    // No need to add them here again
+    
     return this.https
       .get("/api/usm-role-permissionss/paginated?page="+page+"&size="+size, {
         observe: "response",
+        headers: headers
       })
       .pipe(
         map((response) => {
@@ -156,12 +165,15 @@ export class UsmRolePermissionsService {
       );
   }
 
-
-
   findAllSearched(module,permission,role,page,size,sortBy,orderBy): Observable<PageResponse<UsmRolePermissions>> {
+    // We'll use the same header creation logic that we use in findAllPaginated
+    // for consistency and to ensure all required headers are included
+    let headers = this.createRequestHeaders();
+    
     return this.https
       .get("/api/usm-role-permissionss/searched?"+"module="+module+"&permission="+permission+"&role="+role+"&page="+page+"&size="+size, {
         observe: "response",
+        headers: headers
       })
       .pipe(
         map((response) => {
@@ -190,8 +202,8 @@ export class UsmRolePermissionsService {
 
     } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
-    }
-    let headers = new HttpHeaders();
+    }    // Get base headers from createRequestHeaders, then add the example header
+    let headers = this.createRequestHeaders();
     headers = headers.append('example', headerValue);
     return this.https
       .get("/api/usm-permissionss/page", {
@@ -235,41 +247,105 @@ export class UsmRolePermissionsService {
           return this.handleError(err);
         })
       );
-  }
-
-  /**
+  }  /**
    * Delete an UsmRolePermissions by id.
    */
   delete(id: any) {
+    let headers = this.createRequestHeaders();
+    
+    // Set content type to application/json
+    headers = headers.append('Content-Type', 'application/json');
+    
+    // Log the request for debugging
+    console.log(`Deleting role permission with ID: ${id}`);
+    
+    // First try the original endpoint (plural form)
     return this.https
       .delete("/api/usm-role-permissionss/" + id, {
         observe: "response",
+        headers: headers
       })
       .pipe(
         catchError((err) => {
-          return this.handleError(err);
+          // If the first attempt fails, try the fallback endpoint
+          console.log(`First delete attempt failed, trying fallback endpoint for ID ${id}`);
+          return this.deleteWithFallback(id, headers);
         })
       );
   }
-
-   /**
-   * Create a List of  UsmRolePermissions.
+  
+  /**
+   * Fallback method to delete UsmRolePermissions if the first attempt fails.
+   * This tries alternative endpoint formats that might be correct.
    */
-  createAll(usm_role_permissions: UsmRolePermissions[]): Observable<UsmRolePermissions[]> {
-    const copy: UsmRolePermissions[] = Object.assign([], usm_role_permissions);
+  private deleteWithFallback(id: any, headers: HttpHeaders) {
+    // Try singular form of endpoint
     return this.https
-      .post("/api/usm-role-permissionss-list", copy, {
+      .delete("/api/usm-role-permissions/" + id, {
         observe: "response",
+        
+      })
+      .pipe(
+        catchError((err) => {
+          // Log the error from the fallback attempt
+          console.error(`Both delete attempts failed for ID ${id}:`, err);
+          return this.handleError(err);
+        })
+      );
+  }   
+  /**
+   * Create a List of UsmRolePermissions.
+   */  
+  createAll(usm_role_permissions: UsmRolePermissions[]): Observable<UsmRolePermissions[]> {
+    let headers = this.createRequestHeaders();
+    
+ 
+    
+    // Create a properly formatted copy of the data
+    const copy: UsmRolePermissions[] = Object.assign([], usm_role_permissions);      // Try the batch endpoint (for creating multiple records)
+    console.log('Sending data to create multiple role permissions:', JSON.stringify(copy));
+    return this.https
+      .post("/api/usm-role-permissionss/batch", copy, {
+        observe: "response",
+        headers: headers
       })
       .pipe(
         map((response) => {
           let a: any = response.body;
           return UsmRolePermissions.toArray(a);
-        })
-      )
-      .pipe(
-        catchError((err) => {
-          return this.handleError(err);
+        }),        catchError((err) => {          console.log('Batch endpoint failed, trying individual creation', err);
+          
+          // Try creating individual permissions sequentially
+          if (copy.length === 1) {
+            console.log('Trying single record with standard endpoint');
+            return this.https
+              .post("/api/usm-role-permissionss", copy[0], {
+                observe: "response",
+                headers: headers
+              })
+              .pipe(
+                map(response => {
+                  let a: any = response.body;
+                  return [new UsmRolePermissions(a)];
+                })
+              );          } else {
+            console.log('Trying standard endpoint with array');
+            return this.https
+              .post("/api/usm-role-permissionss", copy, {
+                observe: "response",
+                headers: headers
+              })
+              .pipe(
+                map((response) => {
+                  let a: any = response.body;
+                  return UsmRolePermissions.toArray(a);
+                }),
+                catchError((secondError) => {
+                  console.error('Both createAll attempts failed:', secondError);
+                  return this.handleError(secondError);
+                })
+              );
+          }
         })
       );
   }
@@ -285,9 +361,61 @@ export class UsmRolePermissionsService {
     // }
     return throwError(errMsg);
   }
-
   private convert(usm_role_permissions: UsmRolePermissions): UsmRolePermissions {
     const copy: UsmRolePermissions = Object.assign({}, usm_role_permissions);
     return copy;
+  }
+  // Helper method to create standardized request headers with all required values
+  private createRequestHeaders(): HttpHeaders {
+    let headers = new HttpHeaders();
+    // Add Referer header - matching the exact format in the curl example
+    if (typeof window !== 'undefined') {
+      // Use the actual origin like in the curl example
+      headers = headers.append('Referer', window.location.origin + '/');
+    }
+    
+    // Add authorization header if available
+    if (sessionStorage.getItem("authToken")) {
+      headers = headers.append('Authorization', 'Bearer ' + sessionStorage.getItem("authToken"));
+    } else if (localStorage.getItem("jwtToken")) {
+      headers = headers.append('Authorization', 'Bearer ' + localStorage.getItem("jwtToken"));
+    }
+    
+    // Add Project headers - exact casing as in the curl example
+    if (sessionStorage.hasOwnProperty("project") && sessionStorage.getItem("project") !== "") {
+      try {
+        const project = JSON.parse(sessionStorage.getItem("project") || "{}");
+        if (project.id) {
+          headers = headers.append('Project', project.id.toString());
+        }
+        if (project.name) {
+          headers = headers.append('ProjectName', project.name.toString());
+        }
+      } catch (e) {
+        console.error("Error parsing project from sessionStorage:", e);
+      }
+    }
+    
+    // Add role headers - exact casing as in the curl example
+    if (sessionStorage.hasOwnProperty("role") && sessionStorage.getItem("role") !== "") {
+      try {
+        const role = JSON.parse(sessionStorage.getItem("role") || "{}");
+        if (role.id) {
+          headers = headers.append('roleId', role.id.toString());
+        }
+        if (role.name) {
+          headers = headers.append('roleName', role.name.toString());
+        }
+      } catch (e) {
+        console.error("Error parsing role from sessionStorage:", e);
+      }
+    }
+    
+    // Try to add Cookie header if available from document.cookie
+    if (typeof document !== 'undefined' && document.cookie) {
+      headers = headers.append('Cookie', document.cookie);
+    }
+    
+    return headers;
   }
 }
