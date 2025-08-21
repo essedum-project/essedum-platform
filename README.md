@@ -83,16 +83,20 @@ This setup is ideal for developers who want to work on the source code and contr
      python app.py
      ```
 
-### 3.2. Docker Compose Setup
+### 3.2. Containerized Setup
 
-This setup is recommended for users who want to quickly deploy and run the Essedum platform in a containerized environment using Docker Compose. This is a simpler alternative to the Kubernetes-based deployment.
+This section describes two ways to deploy the Essedum platform in a containerized environment: using Docker Compose for a simple, local setup, or using Kubernetes for a more robust, scalable deployment.
 
-#### Prerequisites
+#### 3.2.1. Docker Compose Setup
+
+This setup is recommended for users who want to quickly deploy and run the Essedum platform on a local machine.
+
+##### Prerequisites
 
 - Docker
 - Docker Compose
 
-#### Deployment Steps
+##### Deployment Steps
 
 1. **Navigate to the `docker` directory**:
    ```bash
@@ -115,6 +119,47 @@ This setup is recommended for users who want to quickly deploy and run the Essed
    ```bash
    docker-compose down
    ```
+
+#### 3.2.2. Kubernetes Setup
+
+This setup is ideal for deploying the Essedum platform to a production-like environment.
+
+##### Prerequisites
+
+- Docker
+- Kubernetes (e.g., Docker Desktop, Minikube, or a cloud-based provider like AKS)
+
+##### Deployment Steps
+
+1. **Build Docker Images**:
+   - For each component (backend, frontend, py-job-executor), build the Docker image using the provided `Dockerfile`.
+   - **Backend**:
+     ```bash
+     docker build -t essedum_app_backend:latest ./sv
+     ```
+   - **Frontend**:
+     ```bash
+     docker build -t essedum_app_ui:latest ./essedum-ui
+     ```
+   - **Python Job Executor**:
+     ```bash
+     docker build -t essedum_py_job_executor:latest ./py-job-executer
+     ```
+
+2. **Push Images to a Registry**:
+   - Tag and push the images to a container registry (e.g., Docker Hub, Azure Container Registry).
+     ```bash
+     docker tag essedum_app_backend:latest <your-registry>/essedum_app_backend:latest
+     docker push <your-registry>/essedum_app_backend:latest
+     ```
+
+3. **Deploy to Kubernetes**:
+   - The `aks-deployment/` directory contains sample Kubernetes manifests for deploying the Essedum platform.
+   - Update the manifests to use your container registry and image tags.
+   - Apply the manifests to your Kubernetes cluster:
+     ```bash
+     kubectl apply -f aks-deployment/
+     ```
 
 ## 4. Usage
 
