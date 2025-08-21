@@ -24,11 +24,43 @@ Nginx is used as a reverse proxy to serve the frontend application and route API
 
 The Python Job Executor is a separate service responsible for executing Python-based jobs, such as data processing and machine learning tasks. It listens for job requests from the backend and executes them in a controlled environment. The code for this component is in the `py-job-executer/` directory. For more details, see the [Python Job Executor documentation](py-job-executer/README.md).
 
-## 3. Installation
+## 3. Platform Design
+
+The Essedum platform is designed with a modular and extensible architecture that allows for seamless integration of various AI/ML tools and services. The following components represent the core concepts of the platform's design.
+
+### 3.1. Connections
+
+Connections establish a communication link or interface between different software systems. This allows for the exchange of data, the ability to perform actions, and access to resources from various environments.
+
+### 3.2. Datasets
+
+Datasets allow you to ingest and manage training data from a variety of sources, including Storage Buckets, databases, and REST APIs.
+
+### 3.3. Adapters
+
+Adapters integrate and utilize various services and capabilities of endpoints without needing to provide host details. Adapters simplify the process of interacting with different services.
+
+### 3.4. Pipelines
+
+Pipelines allow you to create and manage both training and inferencing pipelines. These pipelines are essential for fine-tuning, training, deploying, and registering models as endpoints.
+
+### 3.5. Remote Executor
+
+The Remote Executor executes pipelines or programs on a remote server or virtual machine. This powerful tool allows for the efficient use of computational resources for demanding AI/ML tasks.
+
+### 3.6. Models
+
+Models provide access to and management of all your models from configured connections.
+
+### 3.7. Endpoints
+
+Endpoints allow you to view and manage all endpoints from your connected services. This includes REST APIs, model endpoints, and more, providing a centralized view of your deployed services.
+
+## 4. Installation
 
 There are two ways to install and run the Essedum platform: a manual developer setup or a containerized setup using Docker.
 
-### 3.1. Developer Setup
+### 4.1. Developer Setup
 
 This setup is ideal for developers who want to work on the source code and contribute to the platform.
 
@@ -83,7 +115,7 @@ This setup is ideal for developers who want to work on the source code and contr
      python app.py
      ```
 
-### 3.2. Docker-Based Setup
+### 4.2. Docker-Based Setup
 
 This setup is recommended for users who want to quickly deploy and run the Essedum platform in a containerized environment.
 
@@ -124,7 +156,7 @@ This setup is recommended for users who want to quickly deploy and run the Essed
      kubectl apply -f aks-deployment/
      ```
 
-## 4. Usage
+## 5. Usage
 
 Once the platform is up and running, you can access the frontend in your browser. The application allows you to:
 
@@ -133,10 +165,10 @@ Once the platform is up and running, you can access the frontend in your browser
 - **Build Pipelines**: Design and execute ML pipelines for training, inference, and deployment.
 - **Interact with Apps**: Use Streamlit and Gradio applications to interact with your deployed models.
 
-## 5. Change Log
+## 6. Change Log
 
 - **v1.0.0**: Initial version of the Essedum platform.
 
-## 6. License
+## 7. License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
