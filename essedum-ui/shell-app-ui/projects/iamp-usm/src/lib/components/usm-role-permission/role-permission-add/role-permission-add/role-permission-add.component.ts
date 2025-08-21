@@ -46,10 +46,9 @@ export class RolePermissionAddComponent implements OnInit {
   roleArray = [];
   dbsViewFlag: boolean = false;
   examplerole: Role = new Role();
-    examplepermission: UsmPermissions = new UsmPermissions();
-    lazyload = { first: 0, rows: 5000, sortField: null, sortOrder: null };
-  
-  // Validation flags
+  examplepermission: UsmPermissions = new UsmPermissions();
+  lazyload = { first: 0, rows: 5000, sortField: null, sortOrder: null };
+
   showRoleError: boolean = false;
   showPermissionError: boolean = false;  busy: Subscription;
   
@@ -63,10 +62,9 @@ export class RolePermissionAddComponent implements OnInit {
     private messageService: MessageService,
     private usmRolePermissionsService: UsmRolePermissionsService
   ) {}ngOnInit(): void {
-    // Load data from APIs
+
     this.loadRolesAndPermissions();
-    
-    // Initialize rolePermission with default values
+
     if (!this.rolePermission.permission) {
       this.rolePermission.permission = [];
     }
@@ -76,7 +74,6 @@ export class RolePermissionAddComponent implements OnInit {
         this.rolePermission =
           this.data.rolePermission || new UsmRolePermissions();
 
-        // Ensure permission is always an array
         if (this.rolePermission.permission && !Array.isArray(this.rolePermission.permission)) {
           this.rolePermission.permission = [this.rolePermission.permission];
         } else if (!this.rolePermission.permission) {
@@ -85,8 +82,7 @@ export class RolePermissionAddComponent implements OnInit {
 
         this.view = this.data.mode === "view";
         this.edit = true;
-        
-        // Reset validation errors when in edit/view mode with existing data
+
         if (this.rolePermission.role) {
           this.showRoleError = false;
         }
@@ -148,7 +144,6 @@ loadRoles() {
         project = JSON.parse(sessionStorage.getItem("project"));
       } catch (e) {
         project = null;
-        //console.error("JSON.parse error - ", e.message);
       }
       this.modulepermissionarray = response.content;
       this.modulepermissionarray = this.modulepermissionarray.filter(
@@ -159,16 +154,8 @@ loadRoles() {
         a.module.toLowerCase() > b.module.toLowerCase() ? 1 : -1
       );
       this.modulepermissionarrayFilter=this.modulepermissionarray
-    
-      // this.permissionarray = response.content;
-      // this.permissionarray = this.permissionarray.filter(
-      //   (arr, index, self) => index === self.findIndex((t) => t.permission === arr.permission)
-      // );
-      // this.permissionarray = this.permissionarray.sort((a, b) => (a.permission.toLowerCase() > b.permission.
-      //toLowerCase() ? 1 : -1));
-      // this.permissionarraycopy=this.permissionarray;
+
     });
-    // this.loadPage({ first: 0, rows: 5000, sortField: null, sortOrder: null });
   
   }
 
@@ -189,8 +176,7 @@ loadRoles() {
       this.modulepermissionarrayFilter = [...this.modulepermissionarray];
       return;
     }
-    
-    // Filter the permissions based on search value
+  
     this.modulepermissionarrayFilter = this.search(value);
     console.log("searched usm-permission", this.modulepermissionarrayFilter);
     this.changeDetectionRef.detectChanges();
@@ -211,7 +197,6 @@ loadRoles() {
   }
   
   roleSelectionChanged(event) {
-    // Update validation flag for role
     this.showRoleError = !this.rolePermission.role;
   }
 
@@ -223,93 +208,90 @@ loadRoles() {
       this.view = true;
       this.edit = false;
     }
-  }  validateForm(): boolean {
-    // Reset validation flags
+  }  
+  
+  validateForm(): boolean {    
     this.showRoleError = false;
     this.showPermissionError = false;
-    
-    // Check role validation
+
     if (!this.rolePermission.role) {
       this.showRoleError = true;
     }
     
-    // Check permissions validation - ensure it's always treated as an array
     const permissions = this.rolePermission.permission;
     if (!permissions || permissions.length === 0) {
       this.showPermissionError = true;
     }
     
-    // Return true if form is valid
     return !this.showRoleError && !this.showPermissionError;
-  }
-  onSave() {
-    // Validate the form
-    if (!this.validateForm()) {
-      return;
-    }
-    
-    // Get project information if needed
+  }  onSave() {
     let project: Project;
     try {
       project = JSON.parse(sessionStorage.getItem("project"));
     } catch (e) {
       project = null;
-    }
-    
-    // Process role permissions based on mode
-    if (this.edit) {
-      this.performUpdateRolePermission();
+    }  
+
+    if (this.rolePermission.role == undefined || this.rolePermission.role == null) {
+      this.messageService.error("Please Select A Role", "LEAP");
+    } else if (
+      this.rolePermission.permission == undefined ||
+      this.rolePermission.permission == null
+    ) {
+      this.messageService.error("Please Select A Module and Permission", "LEAP");
     } else {
-      this.performCreateRolePermission();
+      if (this.edit) {
+        this.performUpdateRolePermission();
+      } else {
+        this.performCreateRolePermission();
+      }
     }
   }
+
   performCreateRolePermission() {
-    // Create array of role permissions
     const rolePermissionsArray = new Array<UsmRolePermissions>();
     const permissions: UsmPermissions[] = this.rolePermission.permission as UsmPermissions[];
     
     if (permissions && permissions.length > 0) {
-      // Process each permission
       permissions.forEach((element) => {
         const temp = new UsmRolePermissions();
-        // Ensure permissions is always an array
         temp.permission = [element];
         temp.role = this.rolePermission.role;
-        
-        // Make sure the role is properly set
+   
         if (!temp.role || !temp.role.id) {
           console.error('Invalid role object', temp.role);
         }
         
         rolePermissionsArray.push(temp);
       });
-      
-      // Debug the payload
       console.log('About to send role permissions data:', JSON.stringify(rolePermissionsArray));
-      
-      // Call API to create role permissions
-      this.busy = this.usmRolePermissionsService.createAll(rolePermissionsArray).subscribe(        (response) => {
+
+      this.busy = this.usmRolePermissionsService.createAll(rolePermissionsArray).subscribe(
+        (response) => {
           console.log('Role permissions created successfully:', response);
           this.messageService.info("Role-Permissions Saved Successfully", "LEAP");
           
-          // Close dialog or return to list view based on context
+
           if (this.dialogRef) {
             this.dialogRef.close(true);
+          } else {
+            this.rolePermissionModelClosed.emit();
           }
         },
         (error) => {
           console.error('Error creating role permissions:', error);
-          
-          // Provide more detailed error message if available
-          const errorMsg = error?.error?.message || "Could not create Role-Permissions";
-          this.messageService.error(errorMsg, "LEAP");
-          
-          // Try with direct single object if array approach failed
+
+          const errorMsg = error?.error?.message || error?.statusText || "Could not create Role-Permissions";
+          const statusCode = error?.status || "Unknown";
+          this.messageService.error(`Error ${statusCode}: ${errorMsg}`, "LEAP");
+
           if (rolePermissionsArray.length === 1) {
             console.log('Trying alternative approach with single object...');
             const singlePermission = rolePermissionsArray[0];
+              if (!Array.isArray(singlePermission.permission)) {
+              singlePermission.permission = [singlePermission.permission];
+            }
             
-            // Try with direct create method instead
             this.usmRolePermissionsService.create(singlePermission).subscribe(
               (resp) => {
                 console.log('Single permission created successfully:', resp);
@@ -317,10 +299,11 @@ loadRoles() {
                 if (this.dialogRef) {
                   this.dialogRef.close(true);
                 }
-              },
-              (err) => {
+              },              (err) => {
                 console.error('Single permission creation also failed:', err);
-                this.messageService.error("All attempts to create Role-Permissions failed", "LEAP");
+      
+                const errDetails = err?.error?.message || err?.statusText || JSON.stringify(err);
+                this.messageService.error(`All attempts failed. Last error: ${errDetails}`, "LEAP");
               }
             );
           }
@@ -330,23 +313,19 @@ loadRoles() {
   }
   
   performUpdateRolePermission() {
-    // Create array of role permissions to update
     if (!this.rolePermission.id) {
       this.messageService.error("Cannot update: No role permission ID found", "LEAP");
       return;
     }
-    
-    // Ensure permission is always an array
+
     if (this.rolePermission.permission && !Array.isArray(this.rolePermission.permission)) {
       this.rolePermission.permission = [this.rolePermission.permission];
     }
-    
-    // Call API to update role permission
+
     this.busy = this.usmRolePermissionsService.update(this.rolePermission).subscribe(
       (response) => {
         this.messageService.info("Role-Permission Updated Successfully", "LEAP");
-        
-        // Close dialog if in dialog mode
+
         if (this.dialogRef) {
           this.dialogRef.close(true);
         }
@@ -359,17 +338,14 @@ loadRoles() {
 
 
   clearWave() {
-    // Reset the form fields
     this.rolePermission = new UsmRolePermissions();
     
-    // Reset validation flags
     this.showRoleError = false;
     this.showPermissionError = false;
   }  permissionCheck(event) {
     let flag: boolean = false;
     let permissions = this.rolePermission.permission;
-    
-    // Ensure permissions is always an array
+
     if (!Array.isArray(permissions)) {
       this.rolePermission.permission = permissions ? [permissions] : [];
       permissions = this.rolePermission.permission;
@@ -383,8 +359,6 @@ loadRoles() {
     }
     
     this.dbsViewFlag = flag;
-      
-    // Update validation flag for permissions
     this.showPermissionError = !permissions || permissions.length === 0;
   }
 }

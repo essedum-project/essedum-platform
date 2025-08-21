@@ -30,10 +30,20 @@ export class UsmRolePermissionsService {
   /**
    * Create a new  UsmRolePermissions.
    */
-
   create(usm_role_permissions: UsmRolePermissions): Observable<UsmRolePermissions> {
-      let headers = this.createRequestHeaders();
+    let headers = this.createRequestHeaders();
+    // Add Content-Type header - critical for POST requests
+    headers = headers.append('Content-Type', 'application/json');
+    
+    // Log what's being sent for debugging
+    console.log('Creating single role permission with data:', JSON.stringify(usm_role_permissions));
+    
+    // Ensure permission is always an array
     const copy = this.convert(usm_role_permissions);
+    if (!Array.isArray(copy.permission)) {
+      copy.permission = copy.permission ? [copy.permission] : [];
+    }
+    
     return this.https
       .post("/api/usm-role-permissionss", copy, {
         observe: "response",
@@ -41,11 +51,13 @@ export class UsmRolePermissionsService {
       })
       .pipe(
         map((response) => {
-          return new UsmRolePermissions(response);
+          console.log('Single create succeeded:', response);
+          return new UsmRolePermissions(response.body);
         })
       )
       .pipe(
         catchError((err) => {
+          console.error('Single create failed:', err);
           return this.handleError(err);
         })
       );
@@ -70,23 +82,33 @@ export class UsmRolePermissionsService {
         })
       );
   }
-
   /**
-   * Update the passed usm_role_permissions.
+   * Update the passed usm_role_permissions.as per aip
    */
   update(usm_role_permissions: UsmRolePermissions): Observable<UsmRolePermissions> {
-      let headers = this.createRequestHeaders();
-    let body;
-    try {
-      body = JSON.stringify(usm_role_permissions);
-    } catch (e : any)  {
-      console.error("JSON.stringify error - ", e.message);
+    let headers = this.createRequestHeaders();
+    // Add Content-Type header - critical for PUT requests
+    headers = headers.append('Content-Type', 'application/json');
+    
+    // Format the data properly for the API (similar to createAll method)
+    const copy: any = {
+      id: usm_role_permissions.id,
+      role: usm_role_permissions.role
+    };
+    
+    // The API expects permission to be a single object, not an array
+    if (Array.isArray(usm_role_permissions.permission) && usm_role_permissions.permission.length > 0) {
+      copy.permission = usm_role_permissions.permission[0];
+    } else {
+      copy.permission = usm_role_permissions.permission;
     }
-
+    
+    console.log('Updating role permission with data:', JSON.stringify(copy));
+    
     return this.https
-      .put("/api/usm-role-permissionss", body, {
+      .put("/api/usm-role-permissionss", copy, {
         observe: "response",
-        headers:headers
+        headers: headers
       })
       .pipe(
         map((response) => {
@@ -293,19 +315,37 @@ export class UsmRolePermissionsService {
         })
       );
   }   
+
   /**
-   * Create a List of UsmRolePermissions.
-   */  
+   * Create a List of  UsmRolePermissions.
+   */
   createAll(usm_role_permissions: UsmRolePermissions[]): Observable<UsmRolePermissions[]> {
     let headers = this.createRequestHeaders();
+    // Add Content-Type header for POST requests
+    headers = headers.append('Content-Type', 'application/json');
     
- 
+    // Format the data properly for the API
+    const copy = usm_role_permissions.map(item => {
+      // Create a new copy to avoid modifying the original
+      const newItem: any = {
+        role: item.role,
+        id: item.id
+      };
+      
+      // The API expects permission to be a single object, not an array
+      if (Array.isArray(item.permission) && item.permission.length > 0) {
+        newItem.permission = item.permission[0]; 
+      } else {
+        newItem.permission = item.permission;
+      }
+      
+      return newItem;
+    });
     
-    // Create a properly formatted copy of the data
-    const copy: UsmRolePermissions[] = Object.assign([], usm_role_permissions);      // Try the batch endpoint (for creating multiple records)
-    console.log('Sending data to create multiple role permissions:', JSON.stringify(copy));
+    console.log('Sending formatted data to API:', JSON.stringify(copy));
+    
     return this.https
-      .post("/api/usm-role-permissionss/batch", copy, {
+      .post("/api/usm-role-permissionss-list", copy, {
         observe: "response",
         headers: headers
       })
@@ -313,42 +353,14 @@ export class UsmRolePermissionsService {
         map((response) => {
           let a: any = response.body;
           return UsmRolePermissions.toArray(a);
-        }),        catchError((err) => {          console.log('Batch endpoint failed, trying individual creation', err);
-          
-          // Try creating individual permissions sequentially
-          if (copy.length === 1) {
-            console.log('Trying single record with standard endpoint');
-            return this.https
-              .post("/api/usm-role-permissionss", copy[0], {
-                observe: "response",
-                headers: headers
-              })
-              .pipe(
-                map(response => {
-                  let a: any = response.body;
-                  return [new UsmRolePermissions(a)];
-                })
-              );          } else {
-            console.log('Trying standard endpoint with array');
-            return this.https
-              .post("/api/usm-role-permissionss", copy, {
-                observe: "response",
-                headers: headers
-              })
-              .pipe(
-                map((response) => {
-                  let a: any = response.body;
-                  return UsmRolePermissions.toArray(a);
-                }),
-                catchError((secondError) => {
-                  console.error('Both createAll attempts failed:', secondError);
-                  return this.handleError(secondError);
-                })
-              );
-          }
+        }),
+        catchError((err) => {
+          console.error('Error creating role permissions:', err);
+          return this.handleError(err);
         })
       );
-  }
+    }
+
 
   // sample method from angular doc
   private handleError(error: any) {
@@ -365,6 +377,9 @@ export class UsmRolePermissionsService {
     const copy: UsmRolePermissions = Object.assign({}, usm_role_permissions);
     return copy;
   }
+
+
+
   // Helper method to create standardized request headers with all required values
   private createRequestHeaders(): HttpHeaders {
     let headers = new HttpHeaders();
