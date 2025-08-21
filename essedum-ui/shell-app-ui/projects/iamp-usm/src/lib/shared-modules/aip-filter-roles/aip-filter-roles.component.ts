@@ -49,49 +49,104 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
   isFilterExpanded: boolean = false;
   selectedRoleList: string[] = [];
   selectedProjectList: string[] = [];
-  selectedDescriptionList: string[] = [];
+  selectedUserList: string[] = [];
   selectedPortfolioList: string[] = [];
   
   // Filter properties
   roleOptions: any[] = [];
   projectOptions: any[] = [];
-  descriptionOptions: any[] = [];
+  userOptions: any[] = [];
   portfolioOptions: any[] = [];
   
   constructor() {}
 
   ngOnInit(): void {
+    console.log('Component initialized with filter options:', this.filterOptions);
     this.initializeFilterOptions();
+    
+    // Add debug HTML to show options in DOM for debugging
+    if (typeof document !== 'undefined') {
+      const debugDiv = document.createElement('div');
+      debugDiv.style.display = 'none'; // Hide from view but keep in DOM
+      debugDiv.id = 'filter-debug-data';
+      debugDiv.setAttribute('data-role-options', JSON.stringify(this.roleOptions || []));
+      debugDiv.setAttribute('data-project-options', JSON.stringify(this.projectOptions || []));
+      document.body.appendChild(debugDiv);
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['filterOptions'] && !changes['filterOptions'].firstChange) {
+    console.log('Changes detected in filter component:', changes);
+    
+    if (changes['filterOptions']) {
+      console.log('Filter options changed:', this.filterOptions);
+      // Initialize on all changes, not just non-first changes
       this.initializeFilterOptions();
     }
     
-    if (changes['selectedFilterValues'] && !changes['selectedFilterValues'].firstChange) {
+    if (changes['selectedFilterValues']) {
+      console.log('Selected filter values changed:', this.selectedFilterValues);
       this.updateSelectedFilters();
     }
   }
 
   private initializeFilterOptions(): void {
+    console.log('Initializing filter options with:', JSON.stringify(this.filterOptions));
+    
+    // Reset existing options
+    this.roleOptions = [];
+    this.projectOptions = [];
+    this.userOptions = [];
+    this.portfolioOptions = [];
+    
     if (this.filterOptions && this.filterOptions.length > 0) {
-      this.roleOptions = this.filterOptions.filter(option => option.type === 'role');
-      this.projectOptions = this.filterOptions.filter(option => option.type === 'project');
-      this.descriptionOptions = this.filterOptions.filter(option => option.type === 'description');
-      this.portfolioOptions = this.filterOptions.filter(option => option.type === 'portfolio');
-      
-      // Log for debugging
-      console.log('Portfolio options:', this.portfolioOptions);
+      // Extract and process each filter type
+      this.filterOptions.forEach(filter => {
+        if (!filter || !filter.type || !filter.options) {
+          console.warn('Invalid filter:', filter);
+          return;
+        }
+        
+        switch (filter.type) {
+          case 'role':
+            this.roleOptions = [...filter.options];
+            console.log('Set role options:', this.roleOptions.length);
+            break;
+          case 'project':
+            this.projectOptions = [...filter.options];
+            console.log('Set project options:', this.projectOptions.length);
+            break;
+          case 'user':
+            this.userOptions = [...filter.options];
+            console.log('Set user options:', this.userOptions.length);
+            break;
+          case 'portfolio':
+            this.portfolioOptions = [...filter.options];
+            console.log('Set portfolio options:', this.portfolioOptions.length);
+            break;
+          default:
+            console.warn('Unknown filter type:', filter.type);
+        }
+      });
     }
+    
+    // Update any selected filters
     this.updateSelectedFilters();
+    
+    // Diagnose issues if no options
+    if (this.roleOptions.length === 0) {
+      console.warn('No role options found after initialization');
+    }
+    if (this.projectOptions.length === 0) {
+      console.warn('No project options found after initialization');
+    }
   }
 
   private updateSelectedFilters(): void {
     if (this.selectedFilterValues) {
       this.selectedRoleList = this.selectedFilterValues.roles || [];
       this.selectedProjectList = this.selectedFilterValues.projects || [];
-      this.selectedDescriptionList = this.selectedFilterValues.descriptions || [];
+      this.selectedUserList = this.selectedFilterValues.users || [];
       this.selectedPortfolioList = this.selectedFilterValues.portfolios || [];
     }
   }
@@ -110,7 +165,8 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
     return (
       this.selectedRoleList.length > 0 ||
       this.selectedProjectList.length > 0 ||
-      this.selectedDescriptionList.length > 0
+      this.selectedUserList.length > 0 ||
+      this.selectedPortfolioList.length > 0
     );
   }
 
@@ -125,8 +181,12 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
       filters.push(`Projects (${this.selectedProjectList.length})`);
     }
     
-    if (this.selectedDescriptionList.length > 0) {
-      filters.push(`Descriptions (${this.selectedDescriptionList.length})`);
+    if (this.selectedUserList.length > 0) {
+      filters.push(`Users (${this.selectedUserList.length})`);
+    }
+    
+    if (this.selectedPortfolioList.length > 0) {
+      filters.push(`Portfolios (${this.selectedPortfolioList.length})`);
     }
     
     return filters.join(', ');
@@ -148,10 +208,10 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
     }
   }
 
-  descriptionSelected(event: any): void {
+  userSelected(event: any): void {
     const selectedValue = event.value;
-    if (selectedValue && !this.selectedDescriptionList.includes(selectedValue)) {
-      this.selectedDescriptionList.push(selectedValue);
+    if (selectedValue && !this.selectedUserList.includes(selectedValue)) {
+      this.selectedUserList.push(selectedValue);
       this.emitFilterChange();
     }
   }
@@ -174,8 +234,8 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
     this.emitFilterChange();
   }
 
-  removeDescription(description: string): void {
-    this.selectedDescriptionList = this.selectedDescriptionList.filter(d => d !== description);
+  removeUser(user: string): void {
+    this.selectedUserList = this.selectedUserList.filter(u => u !== user);
     this.emitFilterChange();
   }
 
@@ -192,8 +252,8 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
       case 'project':
         this.selectedProjectList = [];
         break;
-      case 'description':
-        this.selectedDescriptionList = [];
+      case 'user':
+        this.selectedUserList = [];
         break;
       case 'portfolio':
         this.selectedPortfolioList = [];
@@ -201,7 +261,7 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
       default:
         this.selectedRoleList = [];
         this.selectedProjectList = [];
-        this.selectedDescriptionList = [];
+        this.selectedUserList = [];
         this.selectedPortfolioList = [];
         break;
     }
@@ -212,7 +272,7 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
     this.filterSelected.emit({
       roles: this.selectedRoleList,
       projects: this.selectedProjectList,
-      descriptions: this.selectedDescriptionList,
+      users: this.selectedUserList,
       portfolios: this.selectedPortfolioList
     });
     

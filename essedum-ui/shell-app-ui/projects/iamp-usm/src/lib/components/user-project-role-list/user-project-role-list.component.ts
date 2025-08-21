@@ -113,29 +113,72 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
    * Initialize filter options based on loaded data
    */
   initializeFilterOptions() {
-    this.filterOptions = [
-      {
-        id: 'users',
-        displayName: 'Users',
-        options: this.usersList.map(user => ({ id: user.id, name: user.user_login }))
-      },
-      {
-        id: 'roles',
-        displayName: 'Roles',
-        options: this.roleList.map(role => ({ id: role.id, name: role.name }))
-      },
-      {
-        id: 'projects',
-        displayName: 'Projects',
-        options: this.projectList.map(project => ({ id: project.id, name: project.name }))
-      }
-    ];
+    // Create filter options from loaded data
+    const filterOptions = [];
+    
+    // Add user filter options if available - show when project or selectedRole is defined
+    if (this.usersList && this.usersList.length > 0 && (this.project != undefined || this.selectedRole != undefined)) {
+      filterOptions.push({
+        type: 'user',
+        options: this.usersList.map(user => ({ 
+          value: user.id, 
+          label: user.user_login || user.user_f_name || 'Unnamed User'
+        }))
+      });
+    }
+    
+    // Add role filter options if available - show when project or selectedUser is defined
+    if (this.roleList && this.roleList.length > 0 && (this.project != undefined || this.selectedUser != undefined)) {
+      filterOptions.push({
+        type: 'role',
+        options: this.roleList.map(role => ({ 
+          value: role.id, 
+          label: role.name || 'Unnamed Role'
+        }))
+      });
+    }
+    
+    // Add project filter options if available - show when selectedRole is defined or when selectedUser is defined and not projectadmin
+    if (this.projectList && this.projectList.length > 0 && 
+        (this.selectedRole != undefined || (this.selectedUser != undefined && (!this.role || !this.role.projectadmin)))) {
+      filterOptions.push({
+        type: 'project',
+        options: this.projectList.map(project => ({ 
+          value: project.id, 
+          label: project.name || 'Unnamed Project'
+        }))
+      });
+    }
+    
+    // Add portfolio filter options if available - only when user is a roleadmin
+    if (this.usm_portfolio_idArray && this.usm_portfolio_idArray.length > 0 && this.role && this.role.roleadmin) {
+      filterOptions.push({
+        type: 'portfolio',
+        options: this.usm_portfolio_idArray.map(portfolio => ({ 
+          value: portfolio.id, 
+          label: portfolio.portfolioName || 'Unnamed Portfolio'
+        }))
+      });
+    }
+    
+    // Update filter options
+    this.filterOptions = filterOptions;
+    
+    console.log('Filter options initialized:', this.filterOptions);
+    
+    // Force change detection after setting filter options
+    setTimeout(() => {
+      this.filterOptions = [...this.filterOptions];
+      console.log('Filter options refreshed with change detection');
+    }, 0);
   }
+  
 
   /**
    * Handler for filter selection events
    */
   onFilterSelected(event: any) {
+    console.log('Filter selected:', event);
     // Update selected filter values
     this.selectedFilterValues = event;
     // Apply filters to the data
@@ -153,24 +196,39 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
    * Apply selected filters to the data
    */
   applyFilters() {
+    console.log('Applying filters:', this.selectedFilterValues);
     let filteredData = [...this.usersCopy]; // Start with a copy of the original data
 
     // Filter by users if any are selected
     if (this.selectedFilterValues.users && this.selectedFilterValues.users.length > 0) {
-      const userIds = this.selectedFilterValues.users.map(u => u.id);
-      filteredData = filteredData.filter(item => userIds.includes(item.user_id?.id));
+      const userValues = this.selectedFilterValues.users;
+      filteredData = filteredData.filter(item => 
+        userValues.some(u => u === item.user_id?.id)
+      );
     }
 
     // Filter by roles if any are selected
-    if (this.selectedFilterValues.roles && this.selectedFilterValues.roles.length > 0) {
-      const roleIds = this.selectedFilterValues.roles.map(r => r.id);
-      filteredData = filteredData.filter(item => roleIds.includes(item.role_id?.id));
+    if (this.selectedFilterValues.role && this.selectedFilterValues.role.length > 0) {
+      const roleValues = this.selectedFilterValues.role;
+      filteredData = filteredData.filter(item => 
+        roleValues.some(r => r === item.role_id?.id)
+      );
     }
 
     // Filter by projects if any are selected
-    if (this.selectedFilterValues.projects && this.selectedFilterValues.projects.length > 0) {
-      const projectIds = this.selectedFilterValues.projects.map(p => p.id);
-      filteredData = filteredData.filter(item => projectIds.includes(item.project_id?.id));
+    if (this.selectedFilterValues.project && this.selectedFilterValues.project.length > 0) {
+      const projectValues = this.selectedFilterValues.project;
+      filteredData = filteredData.filter(item => 
+        projectValues.some(p => p === item.project_id?.id)
+      );
+    }
+    
+    // Filter by portfolios if any are selected
+    if (this.selectedFilterValues.portfolio && this.selectedFilterValues.portfolio.length > 0) {
+      const portfolioValues = this.selectedFilterValues.portfolio;
+      filteredData = filteredData.filter(item => 
+        portfolioValues.some(p => p === item.portfolio_id?.id)
+      );
     }
 
     // Update the displayed data
@@ -180,6 +238,8 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
     if (this.UserList) {
       this.UserList.data = filteredData;
     }
+    
+    console.log('Filtered data length:', filteredData.length);
   }
 
   // listView() {
@@ -275,9 +335,16 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
         this.fromProjectFlag = true;
         this.fromProject = changes["project"].currentValue;
       }
-
     }
-
+    
+    // Refresh filter options if any of the key inputs change
+    if (changes["project"] || changes["selectedUser"] || changes["selectedRole"]) {
+      console.log("Key input changed, refreshing filter options");
+      // Wait for the next tick to ensure data is processed
+      setTimeout(() => {
+        this.initializeFilterOptions();
+      }, 0);
+    }
   }
 
   createView() {
@@ -304,7 +371,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
    */
 
   ngOnInit() {
-  console.log("THIS WORKSSSS")
+    console.log("THIS WORKSSSS")
     if (sessionStorage.getItem("usmAuthority")) {
       sessionStorage.removeItem("usmAuthority");
       this.auth = "";
@@ -372,6 +439,15 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
       this.changeView.emit(false);
       this.fetchApis();
     } else this.fetchUserProjectRoles(null);
+    
+    // Initialize empty filter options until data is loaded
+    this.filterOptions = [];
+    
+    // Wait for data to be loaded, then initialize filter options
+    setTimeout(() => {
+      this.fetchApis();
+    }, 0);
+    
     // this.loadPage({ first: 0, rows: 5000, sortField: null, sortOrder: null });
     this.usersFilterCtrl.valueChanges.pipe(takeUntil(this._onDestroy)).subscribe(() => {
       this.filterusers();
@@ -528,6 +604,11 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
         this.pagesCount = Math.ceil(this.totalItems / this.pageSize);
         this.lastPage = this.pagesCount - 1;
         
+        // Load other required data for filters if not already loaded
+        if (this.filterOptions.length === 0) {
+          this.fetchApis();
+        }
+        
         // Apply any active filters
         if (this.selectedFilterValues && 
             (this.selectedFilterValues.users?.length > 0 || 
@@ -595,9 +676,10 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
         );
         this.usersListSearch.next(this.usersList.slice());
         
-        // Initialize filter options after all data is loaded
-        if (this.roleList.length > 0 && this.projectList.length > 0) {
-          this.initializeFilterOptions();
+        console.log('Users loaded:', this.usersList.length);
+        // Call the data loaded counter
+        if (typeof this.checkAllDataLoaded === 'function') {
+          this.checkAllDataLoaded();
         }
       });
 
@@ -610,12 +692,14 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
         );
         this.usersListSearch.next(this.usersList.slice());
         
-        // Initialize filter options after users are loaded
-        this.initializeFilterOptions();
+        console.log('Users loaded:', this.usersList.length);
+        // Call the data loaded counter
+        if (typeof this.checkAllDataLoaded === 'function') {
+          this.checkAllDataLoaded();
+        }
       });
 
     }
-    
   }
 
   fetchProjects() {
@@ -636,15 +720,25 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
         a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
       );
       
-      // Initialize filter options if other data is loaded
-      if (this.usersList.length > 0 && this.roleList.length > 0) {
-        this.initializeFilterOptions();
+      console.log('Projects loaded:', this.projectList.length);
+      
+      // Call checkAllDataLoaded if it exists
+      if (typeof this.checkAllDataLoaded === 'function') {
+        this.checkAllDataLoaded();
       }
+      
+      // Force filter initialization after projects are loaded
+      // This is a backup in case checkAllDataLoaded doesn't work
+      setTimeout(() => {
+        this.initializeFilterOptions();
+        console.log('Filter options initialized after projects loaded');
+      }, 0);
+    });
       
       if (this.selectedRole != undefined) this.fetchRelatedProjects();
       if (this.selectedUser != undefined) this.fetchRoles();
-    });
-  }
+    }
+  
 
   fetchRoles() {
 
@@ -1605,22 +1699,31 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
       (error) => this.messageService.error("Could not delete", "IAMP")
     );
   }
-  getportfolio_id() {
-    if (this.project && this.project.portfolioId) {
-      this.usm_portfolio_idArray = [];
-      this.usm_portfolio_idArray.push(this.project.portfolioId);
-    } else {
-      this.usm_portfolio_idObject = null;
-      this.usm_portfolio
-        .findAll(this.usm_portfolio_idObject, { first: 0, rows: 1000, sortField: null, sortOrder: null })
-        .subscribe((pageResponse) => {
-          this.usm_portfolio_idArray = pageResponse.content;
-          this.usm_portfolio_idArray = this.usm_portfolio_idArray.sort((a, b) =>
-            a.portfolioName.toLowerCase() > b.portfolioName.toLowerCase() ? 1 : -1
+  getportfolio_id(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (this.project && this.project.portfolioId) {
+        this.usm_portfolio_idArray = [];
+        this.usm_portfolio_idArray.push(this.project.portfolioId);
+        resolve();
+      } else {
+        this.usm_portfolio_idObject = null;
+        this.usm_portfolio
+          .findAll(this.usm_portfolio_idObject, { first: 0, rows: 1000, sortField: null, sortOrder: null })
+          .subscribe(
+            (pageResponse) => {
+              this.usm_portfolio_idArray = pageResponse.content;
+              this.usm_portfolio_idArray = this.usm_portfolio_idArray.sort((a, b) =>
+                a.portfolioName.toLowerCase() > b.portfolioName.toLowerCase() ? 1 : -1
+              );
+              resolve();
+            },
+            (error) => {
+              this.messageService.error("Could not get the portfolio results", error);
+              reject(error);
+            }
           );
-        }),
-        (error) => this.messageService.error("Could not get the results", error);
-    }
+      }
+    });
   }
 
   // checkEnterPressed(event: any, val: any) {
@@ -1691,25 +1794,133 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
 this.specificRoleList = roleSpecific;
 this.filterroles();
 }
-  ngAfterViewInit() {}
+  /**
+   * Initialize filter options if all required data is loaded
+   */
+  initializeFilterOptionsIfAllLoaded() {
+    if (this.usersList && this.usersList.length > 0 &&
+        this.roleList && this.roleList.length > 0 &&
+        this.projectList && this.projectList.length > 0) {
+      
+      console.log('All data loaded, initializing filter options');
+      // Force an update to refresh the data
+      setTimeout(() => {
+        this.initializeFilterOptions();
+      }, 0);
+    } else {
+      console.log('Not all data loaded yet, waiting for more data...');
+    }
+  }
+  // Data loading completion counter
+  private dataLoadedCount = 0;
+  private  totalDataToLoad = 4; // portfolio, roles, users, projects
+
+  // Check if all data is loaded and initialize filters if it is
+  private checkAllDataLoaded(): void {
+    this.dataLoadedCount++;
+    console.log(`Data loaded: ${this.dataLoadedCount}/${this.totalDataToLoad}`);
+    if (this.dataLoadedCount >= this.totalDataToLoad) {
+      console.log("All data loaded, initializing filter options");
+      this.initializeFilterOptions();
+      // Reset counter for next time
+      this.dataLoadedCount = 0;
+    }
+  }
+
   fetchApis() {
+    console.log("Fetching APIs for filter data");
+    
+    // Reset counter at the start of loading
+    this.dataLoadedCount = 0;
+    this.totalDataToLoad = 4; // We're loading 4 different data sets
+    
+    this.fetchPortfolios();
+    this.fetchUsers();
+    this.fetchProjects();
+    this.fetchRoles();
+    
+    // Backup: Ensure filter options are initialized even if some data fails to load
+    setTimeout(() => {
+      console.log("Backup filter initialization after timeout");
+      this.initializeFilterOptions();
+    }, 2000);
+  }
+  
+  fetchPortfolios() {
     /*If the list is already populated dont need to call the api again*/
-    if (!(this.usm_portfolio_idArray && this.usm_portfolio_idArray.length)) this.getportfolio_id();
-    if (this.project != undefined) {
-      if (!(this.roleList && this.roleList.length)) this.fetchRoles();
-      if (!(this.usersList && this.usersList.length)) this.fetchUsers();
+    if (!(this.usm_portfolio_idArray && this.usm_portfolio_idArray.length)) {
+      this.getportfolio_id().then(() => {
+        this.checkAllDataLoaded();
+      }).catch(() => {
+        this.checkAllDataLoaded(); // Still increment counter even if failed
+      });
+    } else {
+      this.checkAllDataLoaded();
     }
-    if (this.selectedUser != undefined) {
-      if (!(this.projectList && this.projectList.length) || !(this.roleList && this.roleList.length))
-        this.fetchProjects();
-      // if(this.role.projecadmin){
-      //     this.filterRolesForProject();
-      // }
-    }
-    if (this.selectedRole != undefined) {
-      if (!(this.projectList && this.projectList.length)) this.fetchProjects();
-      if (!(this.usersList && this.usersList.length)) this.fetchUsers();
-    }
+  
+      
+  }
+  
+  // Fetch all roles for filter
+  fetchAllRoles(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let allRole = new Role();
+      allRole.projectId = null;
+      
+      this.roleService.findAll(allRole, this.lazyload).subscribe(
+        (res) => {
+          this.roleList = res.content;
+          this.rolesToBeFiltered = res.content;
+          this.roleList = this.roleList.sort((a, b) => 
+            (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
+          );
+          resolve();
+        },
+        (error) => {
+          console.error("Error fetching roles:", error);
+          reject(error);
+        }
+      );
+    });
+  }
+  
+  // Fetch all users for filter
+  fetchAllUsers(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.userService.findAll(new Users(), this.lazyload).subscribe(
+        (res) => {
+          this.usersList = res.content;
+          this.usersList = this.usersList.sort((a, b) =>
+            a.user_login.toLowerCase() > b.user_login.toLowerCase() ? 1 : -1
+          );
+          this.usersListSearch.next(this.usersList.slice());
+          resolve();
+        },
+        (error) => {
+          console.error("Error fetching users:", error);
+          reject(error);
+        }
+      );
+    });
+  }
+  
+  // Fetch all projects for filter
+  fetchAllProjects(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.projectService.findAll(new Project(), this.lazyload).subscribe(
+        (res) => {
+          this.projectList = res.content;
+          this.projectList = this.projectList.sort((a, b) =>
+            a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+          );
+          resolve();
+        },
+        (error) => {
+          console.error("Error fetching projects:", error);
+          reject(error);
+        }
+      );
+    });
   }
   trackByMethod(index, item) {}
   onPageFired(event) {
