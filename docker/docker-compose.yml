@@ -6,7 +6,7 @@ services:
       context: ../sv
       dockerfile: Dockerfile
     ports:
-      - "8082:8082"
+      - "${BACKEND_PORT:-8082}:8082"
     env_file:
       - .env
     environment:
@@ -30,7 +30,7 @@ services:
       context: ../essedum-ui
       dockerfile: Dockerfile
     ports:
-      - "8084:8084"
+      - "${FRONTEND_PORT:-8084}:8084"
     depends_on:
       - backend
 
@@ -39,7 +39,7 @@ services:
       context: ../py-job-executer
       dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - "${PYJOB_EXECUTOR_PORT:-5000}:5000"
     depends_on:
       - mysql
 
@@ -53,27 +53,26 @@ services:
       - ./mysql-init:/docker-entrypoint-initdb.d
       - mysql-data:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT:-3306}:3306"
 
   qdrant:
     image: qdrant/qdrant:latest
     ports:
-      - "6333:6333"
+      - "${QDRANT_PORT:-6333}:6333"
     volumes:
       - qdrant-data:/qdrant/storage
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.2.3
+    image: quay.io/keycloak/keycloak:25.0.1
     env_file:
       - .env
     environment:
-      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN_USER}
-      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_BOOTSTRAP_ADMIN_USERNAME=${KEYCLOAK_ADMIN_USER}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
     ports:
-      - "8180:8180"
+      - "${KEYCLOAK_PORT:-8180}:8080"
     command:
       - "start-dev"
-      - "--http-port=8180"
 
 volumes:
   mysql-data:
