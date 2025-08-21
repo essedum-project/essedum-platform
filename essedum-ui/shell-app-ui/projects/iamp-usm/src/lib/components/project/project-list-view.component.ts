@@ -1,4 +1,21 @@
 
+/**
+ * PROJECT LIST VIEW COMPONENT
+ * 
+ * IMPORTANT: Client-side Filtering Implementation
+ * ----------------------------------------------
+ * This component has been updated to use client-side filtering instead of making API calls when
+ * filter options are selected. Key changes include:
+ * 
+ * 1. Initial data load in fetchWave() loads all records at once with a large page size
+ * 2. All projects are stored in projectsCopy for client-side filtering
+ * 3. onFilterSelected() and Search() methods filter data locally without API calls
+ * 4. updateTableData() handles client-side pagination
+ * 5. onPageFired() manages pagination state
+ * 
+ * This approach reduces server load and improves performance by avoiding redundant API calls.
+ */
+
 import {
   Component,
   Input,
@@ -85,6 +102,9 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
   activeFilters: any = {};
   sortActive = 'name';
   sortDirection = 'asc';
+  
+  // Add emitter for filter panel status changes
+  filterStatusChange = new EventEmitter<boolean>();
   
   isLoading = false;
   wavesData = [];
@@ -439,23 +459,25 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
 
   // Add portfolio data to filter options
   updatePortfolioFilterOptions() {
-    // Create portfolio filter options
-    const portfolioOptions = this.usm_portfolio_idArray.map(portfolio => {
-      return {
-        key: 'portfolioId',
-        label: portfolio.portfolioName,
-        value: portfolio.id,
-        type: 'portfolio'
-      };
-    });
-
-    // Update the filter options with portfolio data
-    const updatedFilterOptions = [
-      ...this.filterOptions.filter(option => option.type !== 'portfolio'),
-      ...portfolioOptions
-    ];
-
-    this.filterOptions = updatedFilterOptions;
+    if (this.usm_portfolio_idArray && this.usm_portfolio_idArray.length > 0) {
+      // Create individual portfolio filter options
+      const portfolioOptions = this.usm_portfolio_idArray.map(portfolio => {
+        return {
+          key: 'portfolioName',
+          label: portfolio.portfolioName,
+          value: portfolio.portfolioName,
+          type: 'portfolio'
+        };
+      });
+      
+      // Update filter options array by removing existing portfolio options and adding new ones
+      this.filterOptions = [
+        ...this.filterOptions.filter(option => option.type !== 'portfolio'),
+        ...portfolioOptions
+      ];
+      
+      console.log('Updated filter options with portfolios:', this.filterOptions);
+    }
   }
 
   updateWave() {
@@ -623,6 +645,8 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
       }
     );
 
+    // Always load portfolio data for filter options
+    this.getid();
 
     if (window.location.href.includes("project") && window.location.href.includes("true")) {
       this.showCreate = true;
@@ -634,7 +658,6 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
         if (res && res.projectid) {
           this.getProjects(res.projectid);
         }
-        this.getid();
         this.loadPage({ first: 0, rows: 3000, sortField: null, sortOrder: null });
       });
     } else if (window.location.href.includes("project") && window.location.href.includes("false")) {
@@ -647,7 +670,6 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
         if (res && res.projectid) {
           this.getProjects(res.projectid);
         }
-        this.getid();
         this.loadPage({ first: 0, rows: 3000, sortField: null, sortOrder: null });
       });
     } else {
@@ -689,16 +711,18 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
   }
 
   onFilterSelected(event: any) {
+    console.log('Filter selected:', event);
     this.selectedFilterValues = { ...this.selectedFilterValues, ...event };
     
     // Handle portfolio filter specifically
     if (event.portfolios && event.portfolios.length > 0) {
-      // Find the matching portfolio from the usm_portfolio_idArray
-      const portfolioId = event.portfolios[0];
-      const selectedPortfolio = this.usm_portfolio_idArray.find(p => p.id.toString() === portfolioId);
+      const portfolioName = event.portfolios[0];
+      const selectedPortfolio = this.usm_portfolio_idArray.find(p => 
+        p.portfolioName === portfolioName || p.id.toString() === portfolioName);
       
       if (selectedPortfolio) {
         this.filterProject = selectedPortfolio;
+        console.log('Selected portfolio:', selectedPortfolio);
       }
     } else if (event.portfolios && event.portfolios.length === 0) {
       // If portfolios were cleared, reset filterProject
@@ -713,7 +737,49 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
       this.filterProjectName = undefined;
     }
     
-    this.Search(null);
+    // Ensure we have a copy of the original data for filtering
+    if (!this.projectsCopy || this.projectsCopy.length === 0) {
+      this.projectsCopy = JSON.parse(JSON.stringify(this.projects));
+    }
+    
+    // If no filters are selected, restore original data
+    if ((!event.portfolios || event.portfolios.length === 0) && 
+        (!event.projects || event.projects.length === 0)) {
+      this.projects = JSON.parse(JSON.stringify(this.projectsCopy));
+      this.wavesLength = this.projects.length;
+      this.updateTableData();
+      return;
+    }
+    
+    // Apply client-side filtering based on selected filters
+    this.projects = this.projectsCopy.filter(project => {
+      let matchesPortfolio = true;
+      let matchesProjectName = true;
+      
+      // Filter by portfolio if selected
+      if (event.portfolios && event.portfolios.length > 0) {
+        const portfolioName = event.portfolios[0];
+        matchesPortfolio = 
+          (project.portfolioId?.portfolioName === portfolioName) || 
+          (project.portfolioId?.id.toString() === portfolioName);
+      }
+      
+      // Filter by project name if selected
+      if (event.projects && event.projects.length > 0) {
+        const projectName = event.projects[0].toLowerCase();
+        matchesProjectName = 
+          (project.name && project.name.toLowerCase().includes(projectName)) ||
+          (project.projectdisplayname && project.projectdisplayname.toLowerCase().includes(projectName));
+      }
+      
+      // Return true only if all selected filters match
+      return matchesPortfolio && matchesProjectName;
+    });
+    
+    // Update table and pagination
+    this.wavesLength = this.projects.length;
+    this.page = 0;
+    this.updateTableData();
   }
 
   onFilterStatusChange(isExpanded: boolean) {
@@ -762,9 +828,20 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
    * Updates the table data source and pagination
    */
   updateTableData() {
-    this.ProjectList = new MatTableDataSource(this.projects);
+    // Calculate the start and end indices for the current page
+    const startIndex = this.page * this.pageSize;
+    const endIndex = Math.min(startIndex + this.pageSize, this.projects.length);
+    
+    // Get the slice of data for the current page
+    const paginatedData = this.projects.slice(startIndex, endIndex);
+    
+    // Update the table data source
+    this.ProjectList = new MatTableDataSource(paginatedData);
     this.ProjectList.sort = this.sort;
     this.ProjectList.paginator = this.paginator;
+    
+    // Update pagination info
+    this.wavesLength = this.projects.length;
   }
 
   getPageNumbers(): number[] {
@@ -907,8 +984,11 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
       this.example.portfolioId = portfolio;
     }
     if (pageEvent == null || !pageEvent) {
-      pageEvent = { page: 0, size: this.pageSize };
+      pageEvent = { page: 0, size: 1000 }; // Use a large page size to get most or all records at once
     }
+    
+    console.log('Fetching projects from API');
+    
     this.projectService.FindAll(this.example, pageEvent).subscribe(
       (pageResponse) => {
         (this.currentPage = pageResponse),
@@ -916,12 +996,19 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
             a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
           ));
         this.projects = this.currentPage.content;
-        // Store a deep copy of the original projects for filtering
+        
+        // Store a deep copy of the original projects for client-side filtering
         this.projectsCopy = JSON.parse(JSON.stringify(this.projects));
+        console.log(`Loaded ${this.projectsCopy.length} projects for client-side filtering`);
+        
         this.wavesLength = this.currentPage.totalElements;
-        this.ProjectList = new MatTableDataSource(this.currentPage.content);
-        this.ProjectList.paginator = this.paginator;
-        this.ProjectList.sort = this.sort;
+        
+        // Update pagination state
+        this.page = pageEvent.page;
+        this.pageSize = pageEvent.size;
+        
+        // Use client-side pagination
+        this.updateTableData();
       },
       (error) => this.messageService.error("Could not get the results", "IAMP")
     );
@@ -1020,89 +1107,92 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
       return;
     }
     
+    // Ensure we have a copy of the original data for filtering
+    if (!this.projectsCopy || this.projectsCopy.length === 0) {
+      // If no cached data, fetch all projects first
+      if (!this.projects || this.projects.length === 0) {
+        this.fetchWave(null);
+        return;
+      }
+      this.projectsCopy = JSON.parse(JSON.stringify(this.projects));
+    }
+    
     let params = {};
     
-    // Check for portfolios in selectedFilterValues
-    if (this.selectedFilterValues.portfolios && this.selectedFilterValues.portfolios.length > 0) {
-      const portfolioId = this.selectedFilterValues.portfolios[0];
-      params['portfolioId'] = portfolioId;
-      this.filterFlag = true;
-    }
-    
-    // Check for project name filter
-    if (this.selectedFilterValues.projects && this.selectedFilterValues.projects.length > 0) {
-      params['name'] = this.selectedFilterValues.projects[0];
-      this.filterFlag = true;
-    }
-    
     // If no filters are applied, reset everything
-    if (Object.keys(params).length === 0 && 
+    if ((this.selectedFilterValues.portfolios === undefined || this.selectedFilterValues.portfolios.length === 0) && 
+        (this.selectedFilterValues.projects === undefined || this.selectedFilterValues.projects.length === 0) &&
         (this.filterProjectName == undefined || this.filterProjectName == "") &&
         (this.filterProject == undefined || this.filterProject == "")) {
+      // Clear filters and show all data
       this.Clear();
       this.filterFlag = false;
-    }
-    
-    // Use traditional filters if they exist
-    else if (
-      this.filterProjectName != undefined &&
-      (this.filterProject == undefined || this.filterProject == "") &&
-      !params['name']
-    ) {
-      params['name'] = this.filterProjectName;
-      this.filterFlag = true;
-    } else if (
-      (this.filterProjectName == undefined || this.filterProjectName == "") &&
-      this.filterProject != undefined &&
-      !params['portfolioId']
-    ) {
-      params['portfolioId'] = this.filterProject;
-      this.filterFlag = true;
-    } else if (
-      this.filterProjectName != undefined && 
-      this.filterProject != undefined &&
-      !params['name'] && !params['portfolioId']
-    ) {
-      params['name'] = this.filterProjectName;
-      params['portfolioId'] = this.filterProject;
-      this.filterFlag = true;
-    }
-    
-    if (this.role.roleadmin) {
-      let portfolio: UsmPortfolio;
-      try {
-        portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
-      } catch (e: any) {
-        portfolio = null;
-        console.error("JSON.parse error - ", e.message);
-      }
-      params['portfolioId'] = portfolio;
-    }
-
-    if (this.filterFlag) {
-      // Convert the params object to a Project instance
-      let searchProject = new Project();
-      if (params['name']) searchProject.name = params['name'];
-      if (params['portfolioId']) searchProject.portfolioId = params['portfolioId'];
       
-      this.projectService.search(searchProject, pageEvent).subscribe((res) => {
-        this.projects = res.content;
-        // Store a deep copy of the original projects for filtering
-        this.projectsCopy = JSON.parse(JSON.stringify(this.projects));
-        this.wavesLength = res.totalElements;
-        this.ProjectList = new MatTableDataSource(res.content);
-        this.ProjectList.sort = this.sort;
-        this.ProjectList.paginator = this.paginator;
-      });
+      // Reset to original data from cache
+      this.projects = [...this.projectsCopy];
+      this.wavesLength = this.projects.length;
+      this.page = 0;
+      this.updateTableData();
+      return;
     }
+    
+    // Use client-side filtering for all filter scenarios
+    this.projects = this.projectsCopy.filter(project => {
+      let matchesPortfolio = true;
+      let matchesProjectName = true;
+      
+      // Filter by portfolio
+      if (this.selectedFilterValues.portfolios && this.selectedFilterValues.portfolios.length > 0) {
+        const portfolioName = this.selectedFilterValues.portfolios[0];
+        const portfolioObj = this.usm_portfolio_idArray.find(p => 
+          p.portfolioName === portfolioName || p.id.toString() === portfolioName);
+          
+        if (portfolioObj) {
+          matchesPortfolio = 
+            (project.portfolioId?.id === portfolioObj.id) || 
+            (project.portfolioId?.portfolioName === portfolioObj.portfolioName);
+        } else {
+          matchesPortfolio = 
+            (project.portfolioId?.portfolioName === portfolioName);
+        }
+      } else if (this.filterProject) {
+        matchesPortfolio = 
+          (project.portfolioId?.id === this.filterProject.id) || 
+          (project.portfolioId?.portfolioName === this.filterProject.portfolioName);
+      }
+      
+      // Filter by project name
+      if (this.selectedFilterValues.projects && this.selectedFilterValues.projects.length > 0) {
+        const projectName = this.selectedFilterValues.projects[0].toLowerCase();
+        matchesProjectName = 
+          (project.name && project.name.toLowerCase().includes(projectName)) ||
+          (project.projectdisplayname && project.projectdisplayname.toLowerCase().includes(projectName));
+      } else if (this.filterProjectName) {
+        const projectName = this.filterProjectName.toLowerCase();
+        matchesProjectName = 
+          (project.name && project.name.toLowerCase().includes(projectName)) ||
+          (project.projectdisplayname && project.projectdisplayname.toLowerCase().includes(projectName));
+      }
+      
+      // Return true only if all selected filters match
+      return matchesPortfolio && matchesProjectName;
+    });
+    
+    this.wavesLength = this.projects.length;
+    this.page = 0;
+    this.updateTableData();
   }
 
   Clear() {
+    console.log('Clearing all filters');
+    
+    // Reset filter values
     this.filterProject = undefined;
     this.filterProjectName = undefined;
     this.projectSearched = undefined;
     this.filterFlag1 = false;
     this.selectedFilterValues = {}; // Reset selected filter values
+    this.activeFilters = {}; // Reset active filters
     
     // Clear search field if it exists
     if (this.myInputReference && this.myInputReference.nativeElement) {
@@ -1230,13 +1320,36 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
   trackByMethod(index, item) { }
 
   onPageFired(event) {
-    if (this.filterFlag == false && this.filterFlag1 == false) {
-      this.fetchWave({ page: event.pageIndex, size: this.pageSize });
-      this.pageIndex = event.pageIndex;
+    this.pageIndex = event.pageIndex;
+    
+    // Store the current pagination state
+    this.page = event.pageIndex;
+    this.pageSize = event.pageSize;
+    
+    // If we have projectsCopy, we can do client-side pagination
+    if (this.projectsCopy && this.projectsCopy.length > 0) {
+      // Only make API calls if we need to load more data
+      if (this.filterFlag == false && this.filterFlag1 == false && 
+          this.projects.length < this.projectsCopy.length) {
+        this.fetchWave({ page: event.pageIndex, size: this.pageSize });
+      }
+      // Otherwise, just update the UI with the filtered data we already have
+      else {
+        this.updateTableData();
+      }
+    } else {
+      // If we don't have a cache of all projects, we need to get data from the server
+      if (this.filterFlag == false && this.filterFlag1 == false) {
+        this.fetchWave({ page: event.pageIndex, size: this.pageSize });
+      }
+      else if (this.filterFlag == true) {
+        // Use client-side filtering with the data we already have
+        this.Search({ page: event.pageIndex, size: this.pageSize });
+      }
+      else if (this.filterFlag1 == true) {
+        this.filterItem(this.projectSearched, { page: event.pageIndex, size: this.pageSize });
+      }
     }
-    else if (this.filterFlag == true) this.Search({ page: event.pageIndex, size: this.pageSize });
-    else if (this.filterFlag1 == true)
-      this.filterItem(this.projectSearched, { page: event.pageIndex, size: this.pageSize });
   }
 
   checkProjectNameMaxLength() {

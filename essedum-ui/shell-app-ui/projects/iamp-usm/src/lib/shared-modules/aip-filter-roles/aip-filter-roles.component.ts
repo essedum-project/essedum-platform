@@ -215,5 +215,11 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
       descriptions: this.selectedDescriptionList,
       portfolios: this.selectedPortfolioList
     });
+    
+    // Collapse the filter panel after any change
+    setTimeout(() => {
+      this.isFilterExpanded = false;
+      this.filterStatusChange.emit(false);
+    }, 300);
   }
 }

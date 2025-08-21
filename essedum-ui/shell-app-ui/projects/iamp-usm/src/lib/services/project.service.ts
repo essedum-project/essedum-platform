@@ -22,7 +22,7 @@ export class ProjectService {
   create(project: Project): Observable<Project> {
     // Get a copy of the project to modify
     const copy = this.convert(project);
-    
+
     // Ensure required fields are present (use properties from the model)
     copy.is_active = true; // Now this property exists in the model
     copy.projectdisplayname = copy.projectdisplayname || copy.name; // Use name as display name if not set
@@ -30,11 +30,11 @@ export class ProjectService {
     copy.defaultrole = copy.defaultrole === undefined ? false : copy.defaultrole;
     copy.disableExcel = copy.disableExcel === undefined ? false : copy.disableExcel;
     copy.timeZone = copy.timeZone || "Asia/Calcutta";
-    
+
     // Get context from session storage
     const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Ensure portfolioId is valid
     if (!copy.portfolioId || !copy.portfolioId.id) {
       try {
@@ -46,7 +46,7 @@ export class ProjectService {
         console.error("Error getting portfolio data from session:", e);
       }
     }
-    
+
     // Create headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -57,9 +57,9 @@ export class ProjectService {
       'roleid': userRole.id || '',
       'rolename': userRole.name || ''
     });
-    
+
     console.log('Creating project with payload:', JSON.stringify(copy));
-    
+
     return this.https
       .post<any>("/api/projects", copy, {
         headers: headers
@@ -83,7 +83,7 @@ export class ProjectService {
     // Get project and role from sessionStorage for headers
     const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers with only essential data
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -94,10 +94,10 @@ export class ProjectService {
       'roleid': userRole.id || '',
       'rolename': userRole.name || ''
     });
-    
+
     return this.https
-      .get<any>(`/api/projects/${id}`, { 
-        headers: headers 
+      .get<any>(`/api/projects/${id}`, {
+        headers: headers
       })
       .pipe(
         map((response) => {
@@ -116,18 +116,18 @@ export class ProjectService {
    */
   update(project: Project): Observable<Project> {
     let body;
-        let headerValue;
+    let headerValue;
 
     try {
       body = JSON.stringify(project);
-            headerValue = Buffer.from(body, 'utf8').toString('base64');
+      headerValue = Buffer.from(body, 'utf8').toString('base64');
 
     } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
-const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-  
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -243,15 +243,37 @@ const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
   search(project: Project, event: any): Observable<PageResponse<Project>> {
     let req = new PageRequestByExample(project, event);
     let body;
+    let headerValue;
+
     try {
       body = JSON.stringify(req);
+      headerValue = Buffer.from(body, 'utf8').toString('base64');
+
     } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
+    // headers = headers.append('example', headerValue);
+    // Get project and role from sessionStorage
+    const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project1.id || '',
+      'projectname': project1.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || '',
+      example: headerValue
+    });
     return this.https
       .post(`/api/search/projects/page?page=${event.page}&size=${event.size}`, body,
         {
-          observe: "response"
+          observe: "response",
+          headers: headers
         })
       .pipe(
         map((response) => {
@@ -297,7 +319,7 @@ const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
    * Delete an Project by id.
    */
   delete(id: any) {
-     let req = new PageRequestByExample(id, event);
+    let req = new PageRequestByExample(id, event);
     let body;
     let headerValue;
     try {
@@ -328,7 +350,7 @@ const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
     return this.https
       .delete("/api/projects/" + id, {
         observe: "response",
-        headers:headers
+        headers: headers
       })
       .pipe(
         catchError((err) => {
