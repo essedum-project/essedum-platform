@@ -613,27 +613,29 @@ export class RoleListComponent implements OnInit, OnDestroy {
   }
 
   private initializeFilterOptions(): void {
-    // Initialize role filter options from existing roles data
+    const filterOptions: any[] = [];
+
     if (this.rolesContent && this.rolesContent.length > 0) {
-      const roleOptions = this.rolesContent.map(role => ({
+      filterOptions.push({
         type: 'role',
-        label: role.name,
-        value: role.name,
-        selected: false
-      }));
-      this.filterOptions = [...this.filterOptions, ...roleOptions];
+        options: this.rolesContent.map(role => ({
+          label: role.name,
+          value: role.name
+        }))
+      });
     }
-    
-    // Initialize project filter options from existing projects
+
     if (this.ProjectList && this.ProjectList.length > 0) {
-      const projectOptions = this.ProjectList.map(project => ({
+      filterOptions.push({
         type: 'project',
-        label: project.name,
-        value: project.id,
-        selected: false
-      }));
-      this.filterOptions = [...this.filterOptions, ...projectOptions];
+        options: this.ProjectList.map(project => ({
+          label: project.name,
+          value: project.name
+        }))
+      });
     }
+
+    this.filterOptions = filterOptions;
   }
 
   onFilterSelected(event: any): void {

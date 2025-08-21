@@ -15,6 +15,7 @@
       <div class="aip-container lfx-u-pad-lr-30">
  <app-aip-filter-roles
           *ngIf="filterOptions && filterOptions.length > 0"
+          [componentName]="'user-project-role-list'"
           [filterOptions]="filterOptions"
           [selectedFilterValues]="selectedFilterValues"
           (filterSelected)="onFilterSelected($event)"

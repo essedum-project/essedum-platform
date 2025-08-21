@@ -259,6 +259,7 @@
       <div class="aip-container lfx-u-pad-lr-30">
         <!-- Filter Component -->
         <app-aip-filter-roles
+          [componentName]="'role-list'"
           [filterOptions]="filterOptions" 
           [selectedFilterValues]="selectedFilterValues"
           (filterSelected)="onFilterSelected($event)"

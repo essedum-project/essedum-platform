@@ -4,39 +4,20 @@ import {
   Input,
   OnInit,
   OnChanges,
-  Output,
   SimpleChanges,
+  Output
 } from '@angular/core';
-import { animate, style, transition, trigger } from '@angular/animations';
-
-// Interface for filter items
-export interface FilterItem {
-  category: string;
-  label: string;
-  value: string;
-  selected: boolean;
-}
 
 @Component({
   selector: 'app-aip-filter-roles',
   templateUrl: './aip-filter-roles.component.html',
-  styleUrls: ['./aip-filter-roles.component.scss'],
-  animations: [
-    trigger('slideToggle', [
-      transition(':enter', [
-        style({ height: 0, opacity: 0 }),
-        animate('600ms ease-out', style({ height: '*', opacity: 1 })),
-      ]),
-      transition(':leave', [
-        animate('600ms ease-in', style({ height: 0, opacity: 0 })),
-      ]),
-    ]),
-  ],
+  styleUrls: ['./aip-filter-roles.component.scss']
 })
 export class AipFilterRolesComponent implements OnInit, OnChanges {
   // Input properties
   @Input() filterOptions: any[] = [];
   @Input() selectedFilterValues: any = {};
+  @Input() componentName: string;
 
   // Output properties
   @Output() filterSelected = new EventEmitter<any>();
@@ -91,55 +72,38 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
   }
 
   private initializeFilterOptions(): void {
-    console.log('Initializing filter options with:', JSON.stringify(this.filterOptions));
-    
-    // Reset existing options
+    // Reset options
     this.roleOptions = [];
     this.projectOptions = [];
     this.userOptions = [];
     this.portfolioOptions = [];
-    
-    if (this.filterOptions && this.filterOptions.length > 0) {
-      // Extract and process each filter type
-      this.filterOptions.forEach(filter => {
-        if (!filter || !filter.type || !filter.options) {
-          console.warn('Invalid filter:', filter);
-          return;
-        }
-        
-        switch (filter.type) {
+
+    if (!this.filterOptions || this.filterOptions.length === 0) {
+      return;
+    }
+
+    this.filterOptions.forEach(filterGroup => {
+      if (filterGroup && filterGroup.type && filterGroup.options) {
+        switch (filterGroup.type) {
           case 'role':
-            this.roleOptions = [...filter.options];
-            console.log('Set role options:', this.roleOptions.length);
+            this.roleOptions = filterGroup.options;
             break;
           case 'project':
-            this.projectOptions = [...filter.options];
-            console.log('Set project options:', this.projectOptions.length);
+            this.projectOptions = filterGroup.options;
             break;
           case 'user':
-            this.userOptions = [...filter.options];
-            console.log('Set user options:', this.userOptions.length);
+            this.userOptions = filterGroup.options;
             break;
           case 'portfolio':
-            this.portfolioOptions = [...filter.options];
-            console.log('Set portfolio options:', this.portfolioOptions.length);
+            this.portfolioOptions = filterGroup.options;
             break;
-          default:
-            console.warn('Unknown filter type:', filter.type);
         }
-      });
-    }
-    
-    // Update any selected filters
+      } else {
+        console.warn('Invalid filter group received:', filterGroup);
+      }
+    });
+
     this.updateSelectedFilters();
-    
-    // Diagnose issues if no options
-    if (this.roleOptions.length === 0) {
-      console.warn('No role options found after initialization');
-    }
-    if (this.projectOptions.length === 0) {
-      console.warn('No project options found after initialization');
-    }
   }
 
   private updateSelectedFilters(): void {

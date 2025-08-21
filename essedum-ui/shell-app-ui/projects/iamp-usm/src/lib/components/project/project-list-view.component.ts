@@ -93,11 +93,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
   
   // New properties for updated UI
   isFilterExpanded = false;
-  filterOptions = [
-    { key: 'name', label: 'Project Name', type: 'text' },
-    { key: 'description', label: 'Description', type: 'text' },
-    { key: 'portfolioName', label: 'Portfolio', type: 'portfolio' }
-  ];
+  filterOptions: any[] = [];
   selectedFilterValues: any = {};
   activeFilters: any = {};
   sortActive = 'name';
@@ -460,23 +456,10 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
   // Add portfolio data to filter options
   updatePortfolioFilterOptions() {
     if (this.usm_portfolio_idArray && this.usm_portfolio_idArray.length > 0) {
-      // Create individual portfolio filter options
-      const portfolioOptions = this.usm_portfolio_idArray.map(portfolio => {
-        return {
-          key: 'portfolioName',
-          label: portfolio.portfolioName,
-          value: portfolio.portfolioName,
-          type: 'portfolio'
-        };
-      });
-      
-      // Update filter options array by removing existing portfolio options and adding new ones
-      this.filterOptions = [
-        ...this.filterOptions.filter(option => option.type !== 'portfolio'),
-        ...portfolioOptions
-      ];
-      
-      console.log('Updated filter options with portfolios:', this.filterOptions);
+      this.filterOptions = [{
+        type: 'portfolio',
+        options: this.usm_portfolio_idArray.map(p => ({ label: p.portfolioName, value: p.portfolioName }))
+      }];
     }
   }
 

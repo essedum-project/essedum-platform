@@ -29,8 +29,8 @@
   </div>
 
   <div class="filter-panel__content" *ngIf="isFilterExpanded" @slideToggle>
-    <div>
-      <div class="filter-options">
+    <div [ngSwitch]="componentName">
+      <div class="filter-options" *ngSwitchCase="'user-project-role-list'">
         <!-- Role Filter -->
         <div class="filter-group" *ngIf="roleOptions && roleOptions.length > 0">
           <div class="filter-control">
@@ -178,12 +178,143 @@
             </mat-chip-set>
           </div>
         </div>
-                <ng-container *ngFor="let option of portfolioOptions">
-                  <mat-option *ngIf="!selectedPortfolioList.includes(option.value)" [value]="option.value">
+      </div>
+      <div class="filter-options" *ngSwitchCase="'role-list'">
+        <!-- Role Filter -->
+        <div class="filter-group" *ngIf="roleOptions && roleOptions.length > 0">
+          <div class="filter-control">
+            <mat-form-field appearance="fill" class="w-100">
+              <label>Role</label>
+              <mat-select id="role-select"
+                data-select-type="role-type" (selectionChange)="roleSelected($event)"
+                aria-labelledby="role-label" placeholder="All">
+                <mat-option *ngIf="selectedRoleList?.length > 0" value="" (click)="clearAllFilters('role')">
+                  All
+                </mat-option>
+                <ng-container *ngFor="let option of roleOptions">
+                  <mat-option [value]="option.value">
                     {{ option.label }}
                   </mat-option>
                 </ng-container>
-          
+                <!-- Fallback option if no options available -->
+                <mat-option *ngIf="roleOptions.length === 0" value="" disabled>
+                  No roles available
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="selected-items" *ngIf="selectedRoleList?.length > 0">
+            <mat-chip-set id="role-chips-set"
+              aria-label="Selected roles">
+              <mat-chip data-chip-type="role"
+                *ngFor="let role of selectedRoleList; let i = index" removable="true"
+                (removed)="removeRole(role)">
+                {{ role }}
+                <mat-icon data-icon-type="chip-remove-role" matChipRemove>close</mat-icon>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
+
+        <!-- Project Filter -->
+        <!-- <div class="filter-group" *ngIf="projectOptions && projectOptions.length > 0">
+          <div class="filter-control">
+            <mat-form-field appearance="fill" class="w-100">
+              <label>Project</label>
+              <mat-select id="project-select"
+                data-select-type="project-type" (selectionChange)="projectSelected($event)"
+                aria-labelledby="project-label" placeholder="All">
+                <mat-option *ngIf="selectedProjectList?.length > 0" value="" (click)="clearAllFilters('project')">
+                  All
+                </mat-option>
+                <ng-container *ngFor="let option of projectOptions">
+                  <mat-option [value]="option.value">
+                    {{ option.label }}
+                  </mat-option>
+                </ng-container>
+                <mat-option *ngIf="projectOptions.length === 0" value="" disabled>
+                  No projects available
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="selected-items" *ngIf="selectedProjectList?.length > 0">
+            <mat-chip-set id="project-chips-set"
+              aria-label="Selected projects">
+              <mat-chip data-chip-type="project"
+                *ngFor="let project of selectedProjectList; let i = index" removable="true"
+                (removed)="removeProject(project)">
+                {{ project }}
+                <mat-icon data-icon-type="chip-remove-project" matChipRemove>close</mat-icon>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div> -->
+      </div>
+      <div class="filter-options" *ngSwitchCase="'role-role'">
+        <!-- Role Filter -->
+        <div class="filter-group" *ngIf="roleOptions && roleOptions.length > 0">
+          <div class="filter-control">
+            <mat-form-field appearance="fill" class="w-100">
+              <label>Role</label>
+              <mat-select id="role-select"
+                data-select-type="role-type" (selectionChange)="roleSelected($event)"
+                aria-labelledby="role-label" placeholder="All">
+                <mat-option *ngIf="selectedRoleList?.length > 0" value="" (click)="clearAllFilters('role')">
+                  All
+                </mat-option>
+                <ng-container *ngFor="let option of roleOptions">
+                  <mat-option [value]="option.value">
+                    {{ option.label }}
+                  </mat-option>
+                </ng-container>
+                <!-- Fallback option if no options available -->
+                <mat-option *ngIf="roleOptions.length === 0" value="" disabled>
+                  No roles available
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="selected-items" *ngIf="selectedRoleList?.length > 0">
+            <mat-chip-set id="role-chips-set"
+              aria-label="Selected roles">
+              <mat-chip data-chip-type="role"
+                *ngFor="let role of selectedRoleList; let i = index" removable="true"
+                (removed)="removeRole(role)">
+                {{ role }}
+                <mat-icon data-icon-type="chip-remove-role" matChipRemove>close</mat-icon>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
+      </div>
+      <div class="filter-options" *ngSwitchCase="'project-list'">
+        <!-- Portfolio Filter -->
+        <div class="filter-group" *ngIf="portfolioOptions && portfolioOptions.length > 0">
+          <div class="filter-control">
+            <mat-form-field appearance="fill" class="w-100">
+              <label>Portfolio</label>
+              <mat-select id="portfolio-select"
+                data-select-type="portfolio-type" (selectionChange)="portfolioSelected($event)"
+                aria-labelledby="portfolio-label" placeholder="All">
+                <mat-option *ngIf="selectedPortfolioList?.length > 0" value="" (click)="clearAllFilters('portfolio')">
+                  All
+                </mat-option>
+                <ng-container *ngFor="let option of portfolioOptions">
+                  <mat-option [value]="option.value">
+                    {{ option.label }}
+                  </mat-option>
+                </ng-container>
+                <!-- Fallback option if no options available -->
+                <mat-option *ngIf="portfolioOptions.length === 0" value="" disabled>
+                  No portfolios available
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
 
           <div class="selected-items" *ngIf="selectedPortfolioList?.length > 0">
             <mat-chip-set id="portfolio-chips-set"

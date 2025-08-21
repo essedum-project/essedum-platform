@@ -321,17 +321,15 @@ import {
       
       // Add role options if available
       if (this.roletorolearray && this.roletorolearray.length > 0) {
-        const roleOptions = this.roletorolearray.map(role => ({
+        this.filterOptions.push({
           type: 'role',
-          label: role.name,
-          value: role.name,
-          selected: false
-        }));
-        this.filterOptions = [...this.filterOptions, ...roleOptions];
+          options: this.roletorolearray.map(role => ({
+            label: role.name,
+            value: role.name
+          }))
+        });
       }
-    }
-    
-    onFilterSelected(event: any): void {
+  }    onFilterSelected(event: any): void {
       this.selectedFilterValues = event;
       this.applyFilters();
     }
