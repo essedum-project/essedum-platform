@@ -106,19 +106,29 @@
 }
 
 .filter-options {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
   margin-top: 16px;
   max-height: 400px;
   overflow-y: auto;
   padding-right: 8px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-bottom: 1.5rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .filter-control {
@@ -140,6 +150,17 @@
 
 .w-100 {
   width: 100%;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 :host ::ng-deep {
