@@ -182,3 +182,10 @@
   color: #666;
   font-family:"Roboto", "Segoe UI", sans-serif !important;
 }
+/* Back icon styling */
+.back-icon {
+  font-size: 24px;
+  cursor: pointer;
+  margin-right: 10px;
+  vertical-align: middle;
+}

@@ -120,18 +120,17 @@
 <div class="lfx-u-pad-t-8">
     <div class="lfx-l-level2-middle-col">
         <div class="d-flex justify-content-between align-items-center">
-            <div class="align-items-center d-flex">
-                <span *ngIf="edit || view" style="display: flex; align-items: center;">
-                    <span (click)="listView()" style="cursor: pointer; font-size: 22px; 
-                        font-weight: bold; font-family: 'Roboto', 'Segoe UI', sans-serif;
-                        display: inline-block; vertical-align: middle; margin-right: 8px; line-height: 1;"
-                        [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" 
-                        title="Back" (mouseenter)="isBackHovered = true"
-                        (mouseleave)="isBackHovered = false">&#8592;</span>
+            
+                        <div class="align-items-center d-flex">
+                <span *ngIf="edit || view" style="cursor: pointer; margin-right: 10px;">
+                    <mat-icon class="back-icon" (click)="listView()"
+                        [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back to Project List"
+                        matTooltipPosition="above" (mouseenter)="isBackHovered = true"
+                        (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
+                </span>
                 
                     <h2 class="header-title" style="font-family: 'Roboto', 'Segoe UI', sans-serif; display: inline-block; margin: 0; vertical-align: middle;" *ngIf="edit">Edit Role</h2>
                     <h2 class="header-title" style="font-family: 'Roboto', 'Segoe UI', sans-serif; display: inline-block; margin: 0; vertical-align: middle;" *ngIf="view">View Role</h2>
-                </span>
                 <h2 class="header-title lfx-u-mar-l-8" style="font-family: 'Roboto', 'Segoe UI', sans-serif;" *ngIf="!edit &amp;&amp; !view">Create Role</h2>
             </div>
 
