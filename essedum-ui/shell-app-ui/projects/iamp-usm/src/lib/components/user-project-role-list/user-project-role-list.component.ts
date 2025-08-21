@@ -208,16 +208,16 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
     }
 
     // Filter by roles if any are selected
-    if (this.selectedFilterValues.role && this.selectedFilterValues.role.length > 0) {
-      const roleValues = this.selectedFilterValues.role;
+    if (this.selectedFilterValues.roles && this.selectedFilterValues.roles.length > 0) {
+      const roleValues = this.selectedFilterValues.roles;
       filteredData = filteredData.filter(item => 
         roleValues.some(r => r === item.role_id?.id)
       );
     }
 
     // Filter by projects if any are selected
-    if (this.selectedFilterValues.project && this.selectedFilterValues.project.length > 0) {
-      const projectValues = this.selectedFilterValues.project;
+    if (this.selectedFilterValues.projects && this.selectedFilterValues.projects.length > 0) {
+      const projectValues = this.selectedFilterValues.projects;
       filteredData = filteredData.filter(item => 
         projectValues.some(p => p === item.project_id?.id)
       );

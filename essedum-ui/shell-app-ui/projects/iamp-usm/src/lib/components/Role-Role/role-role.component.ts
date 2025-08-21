@@ -349,21 +349,16 @@ import {
         );
       }
       
-      // Apply parent role filters if needed
-      if (this.selectedFilterValues.parentRoles && this.selectedFilterValues.parentRoles.length > 0) {
-        filteredRoleRoles = filteredRoleRoles.filter(roleRole => 
-          roleRole.parentRoleId && this.selectedFilterValues.parentRoles.includes(roleRole.parentRoleId.name)
-        );
-      }
-      
-      // Update the table data
-      this.roletorolemappinglist = filteredRoleRoles;
+      // Update the display data
+      this.roletorolelistcopy.data = filteredRoleRoles;
       this.totalrecords = filteredRoleRoles.length;
-      this.lastPage = Math.ceil(this.totalrecords / this.rowsPerPage) - 1;
-      this.updatePagedRoles();
+      
+      // Reset page to 0 when applying new filters
+      this.page = 0;
+      
+      // Update pagination
+      this.updatePagination();
     }
-  
-
 
     ngOnDestroy() {
       // let activeSpan = this.openTelemetryService.fetchActiveSpan();
@@ -662,7 +657,7 @@ import {
     updatePagedData() {
       const startIndex = this.page * this.rowsPerPage;
       const endIndex = Math.min(startIndex + this.rowsPerPage, this.totalrecords);
-      this.pagedRoles = this.roletorolemappinglist.slice(startIndex, endIndex);
+      this.pagedRoles = this.roletorolelistcopy.data.slice(startIndex, endIndex);
     }
 
     // getPageNumbers() {
