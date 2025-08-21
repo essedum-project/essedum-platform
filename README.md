@@ -115,16 +115,53 @@ This setup is ideal for developers who want to work on the source code and contr
      python app.py
      ```
 
-### 4.2. Docker-Based Setup
+### 3.2. Containerized Setup
 
-This setup is recommended for users who want to quickly deploy and run the Essedum platform in a containerized environment.
+This section describes two ways to deploy the Essedum platform in a containerized environment: using Docker Compose for a simple, local setup, or using Kubernetes for a more robust, scalable deployment.
 
-#### Prerequisites
+#### 3.2.1. Docker Compose Setup
+
+This setup is recommended for users who want to quickly deploy and run the Essedum platform on a local machine.
+
+##### Prerequisites
+
+- Docker
+- Docker Compose
+
+##### Deployment Steps
+
+1. **Navigate to the `docker` directory**:
+   ```bash
+   cd docker
+   ```
+
+2. **Build and run the services**:
+   ```bash
+   docker-compose up --build
+   ```
+   This command will build the Docker images for all the services and start them in the correct order.
+
+3. **Accessing the application**:
+   - Once all the services are running, you can access the frontend application in your browser at `http://localhost:8084`.
+   - The backend API will be available at `http://localhost:8082`.
+   - The Keycloak admin console will be available at `http://localhost:8180`.
+
+4. **Stopping the application**:
+   - To stop the services, press `Ctrl+C` in the terminal where `docker-compose` is running, or run the following command from the `docker` directory:
+   ```bash
+   docker-compose down
+   ```
+
+#### 3.2.2. Kubernetes Setup
+
+This setup is ideal for deploying the Essedum platform to a production-like environment.
+
+##### Prerequisites
 
 - Docker
 - Kubernetes (e.g., Docker Desktop, Minikube, or a cloud-based provider like AKS)
 
-#### Deployment Steps
+##### Deployment Steps
 
 1. **Build Docker Images**:
    - For each component (backend, frontend, py-job-executor), build the Docker image using the provided `Dockerfile`.
