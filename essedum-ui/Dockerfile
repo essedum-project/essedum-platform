@@ -24,8 +24,6 @@ RUN npm run build-prod
 COPY nginx_ui.conf /
 
 FROM nginx:alpine
-#FROM --platform=linux/amd64 nginx:alpine
-
 
 COPY /nginx_ui.conf /etc/nginx/nginx.conf
 

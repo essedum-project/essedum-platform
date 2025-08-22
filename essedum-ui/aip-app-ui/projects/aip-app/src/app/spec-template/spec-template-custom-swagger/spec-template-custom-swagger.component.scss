@@ -16,6 +16,7 @@
   box-shadow: 0px 2px 4px #00000029;
   border-radius: 0px 0px 8px 8px;
   opacity: 1;
+  padding: 4px 16px;
 }
 
 .spec-header.title {
@@ -31,10 +32,7 @@
   opacity: 1;
 }
 
-::ng-deep
-  .le-c-form-field.le-c-form-field--select-withbg
-  .mat-mdc-select
-  .mat-mdc-select-value {
+::ng-deep .le-c-form-field.le-c-form-field--select-withbg .mat-mdc-select .mat-mdc-select-value {
   max-width: none;
 }
 
@@ -48,7 +46,7 @@
   align-items: center;
 }
 
-.example-headers-align .mat-mdc-form-field + .mat-mdc-form-field {
+.example-headers-align .mat-mdc-form-field+.mat-mdc-form-field {
   margin-left: 8px;
 }
 
@@ -66,7 +64,7 @@ small {
 
 pre {
   color: #fff;
-  font-family: var(--font-type) !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
   margin: 0;
   padding: 0;
 }
@@ -116,7 +114,7 @@ pre {
   border-radius: 4px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   color: #3b4151;
-  font-family: var(--font-type) !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
   font-size: 14px;
   font-weight: 700;
   padding: 5px 23px;
@@ -162,7 +160,7 @@ pre {
   background: #49cc90;
   border-radius: 3px;
   color: #fff;
-  font-family: var(--font-type) !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
   font-size: 14px;
   font-weight: 700;
   min-width: 80px;
@@ -180,7 +178,7 @@ pre {
   align-items: center;
   cursor: pointer;
   display: flex;
-  font-family: var(--font-type) !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
   font-size: 16px;
   margin: 0;
   padding: 10px 20px 10px 10px;
@@ -202,7 +200,7 @@ pre {
   border-radius: 4px;
   box-shadow: 0 1px 2px rgb(0, 0, 10);
   color: #3b4151;
-  font-family: var(--font-type) !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
   font-size: 14px;
   font-weight: 700;
   padding: 5px 23px;
@@ -217,11 +215,16 @@ pre {
   background-color: transparent;
   border-color: #ff6060;
   color: #ff6060;
-  font-family: var(--font-type) !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
 }
 
 section.models.is-open {
   padding: 0 0 20px;
+}
+
+.col-12 {
+  padding-right: 16px;
+  padding-left: 16px;
 }
 
 section.models {

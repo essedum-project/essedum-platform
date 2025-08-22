@@ -22,7 +22,6 @@ import { DatasetConfigComponent } from './dataset/dataset-config/dataset-config.
 import { environment } from '../environments/environment';
 import { Services } from './services/service';
 import { PipelineService } from './services/pipeline.service';
-import { CommonModule } from '@angular/common';
 import { AipInterceptorService } from './services/interceptor';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ModelEditsComponent } from './model/model-edit/model-edit.component';
@@ -37,7 +36,6 @@ import { ModelDeployComponent } from './model/model-deploy/model-deploy.componen
 import { JsonFormsModule } from '@jsonforms/angular';
 import { JsonFormsAngularMaterialModule } from '@jsonforms/angular-material';
 import { TagsComponent } from './tags/tags.component';
-import { TaggingComponentComponent } from './tagging-component/tagging-component.component';
 import { SchemaComponent } from './schema/schema.component';
 import { AdapterComponent } from './adapter/adapter.component';
 import { InstanceComponent } from './instance/instance.component';
@@ -56,7 +54,6 @@ import { JobDataViewerComponent } from './pipeline.description/job-data-viewer/j
 import { CreateSpecTemplateComponent } from './spec-template/create-spec-template/create-spec-template.component';
 import { EditSpecTemplateComponent } from './spec-template/edit-spec-template/edit-spec-template.component';
 import { AdapterDescriptionComponent } from './adapter/adapter-description/adapter-description.component';
-import { SwaggerCustomComponent } from './swagger-custom/swagger-custom.component';
 import { NgJsonEditorModule } from 'ang-jsoneditor';
 import { JobsComponent } from './jobs/jobs.component';
 import { SpecTemplateCustomSwaggerComponent } from './spec-template/spec-template-custom-swagger/spec-template-custom-swagger.component';
@@ -65,7 +62,6 @@ import { NativeScriptComponent } from './native-script/native-script.component';
 import { MatTreeModule } from '@angular/material/tree';
 import { NativeScriptDialogComponent } from './native-script/native-script-dialog/native-script-dialog.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MethodCreateEditComponent } from './adapter/method-create-edit/method-create-edit.component';
 import { encKey } from './services/encKey';
 import { DashConstantService } from './services/dash-constant.service';
 import { RaiservicesService } from './services/raiservices.service';
@@ -116,10 +112,8 @@ import { DragDropModule as CdkDragDropModule } from '@angular/cdk/drag-drop';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { QuillModule } from 'ngx-quill';
 import { DatasetByNameComponent } from './dataset/dataset-by-name/dataset-by-name.component';
-import { AdapterServices } from './adapter/adapter-service';
+import { AdapterServices } from './sharedModule/services/adapter-service';
 import { MatIconModule } from '@angular/material/icon';
-import { CustomSnackbarComponent } from './sharedModule/custom-snackbar/custom-snackbar.component';
-import { CustomSnackbarService } from './sharedModule/services/custom-snackbar.service';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -136,8 +130,14 @@ import { AipPaginationComponent } from './sharedModule/aip-pagination/aip-pagina
 import { AipHeaderComponent } from './sharedModule/aip-header/aip-header.component';
 import { AipEmptyStateComponent } from './sharedModule/aip-empty-state/aip-empty-state.component';
 import { AipFilterComponent } from './sharedModule/aip-filter/aip-filter.component';
+import { AipSnackbarCustomComponent } from './sharedModule/aip-snackbar-custom/aip-snackbar-custom.component';
+import { AipSnackbarCustomService } from './sharedModule/services/aip-snackbar-custom.service';
 import { AipLoadingComponent } from './sharedModule/aip-loading/aip-loading.component';
+import { ModalConfigComponent } from './model/modal-config/modal-config.component';
 import { ModalConfigSchemaHeaderComponent } from './schema/modal-config-schema/modal-config-schema-header/modal-config-schema-header.component';
+import { AipDeleteConfirmationComponent } from './sharedModule/aip-delete-confirmation/aip-delete-confirmation.component';
+import { AipSwaggerCustomComponent } from './sharedModule/aip-swagger-custom/aip-swagger-custom.component';
+import { AipMethodCreateEditComponent } from './sharedModule/aip-swagger-custom/aip-method-create-edit/aip-method-create-edit.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 const dbConfig: DBConfig = {
@@ -198,12 +198,10 @@ const dbConfig: DBConfig = {
     CreateSpecTemplateComponent,
     EditSpecTemplateComponent,
     AdapterDescriptionComponent,
-    SwaggerCustomComponent,
     JobsComponent,
     SpecTemplateCustomSwaggerComponent,
     NativeScriptComponent,
     NativeScriptDialogComponent,
-    MethodCreateEditComponent,
     InstanceDescriptionComponent,
     JsonTreeComponent,
     JsonNodeComponent,
@@ -224,18 +222,20 @@ const dbConfig: DBConfig = {
     PaginationComponent,
     PipelineDialogComponent,
     DatasetByNameComponent,
-    CustomSnackbarComponent,
+    AipSnackbarCustomComponent,
     AipCardComponent,
     AipPaginationComponent,
     AipHeaderComponent,
     AipEmptyStateComponent,
-    TaggingComponentComponent,
     AipFilterComponent,
     AipLoadingComponent,
+    AipDeleteConfirmationComponent,
+    AipSwaggerCustomComponent,
+    AipMethodCreateEditComponent,
     ModalConfigSchemaHeaderComponent,
+    ModalConfigComponent
   ],
   imports: [
-    CommonModule,
     AipRouting,
     MatCardModule,
     MatToolbarModule,
@@ -312,11 +312,11 @@ const dbConfig: DBConfig = {
     RaiservicesService,
     SemanticService,
     DynamicRemoteLoad,
-    CustomSnackbarService,
+    AipSnackbarCustomService,
     { provide: MatDialogRef, useValue: {} },
     { provide: MAT_DIALOG_DATA, useValue: {} },
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AipComponent],
 })
-export class AipModule {}
+export class AipModule { }

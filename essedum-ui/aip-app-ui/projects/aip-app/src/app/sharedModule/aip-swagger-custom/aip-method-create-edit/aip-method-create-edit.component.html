@@ -1,0 +1,554 @@
+<div class="dialog-header lfx-u-pad-lr-24 lfx-u-pad-t-8">
+    <app-aip-header [cardTitle]="cardTitle" [action]="action" [closeAction]="true" (close)="closePopup()">
+    </app-aip-header>
+</div>
+<div *ngIf="dataset" class="aip-container lfx-u-pad-lr-24 lfx-u-pad-tb-16">
+
+    <div>
+        <div *ngIf="!proceed" class="selector-693-2">
+
+            <!-- Name Field -->
+            <div class="lfx-u-pad-b-8">
+                <div class="lfx-u-sub-header-alias">
+                    Name
+                    <span class="required-indicator">*</span>
+                </div>
+                <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
+                    <input matInput id="schm-modal-alias" [(ngModel)]="dataset.alias" [disabled]="false"
+                        class="custom-alias-input" required readonly>
+                </mat-form-field>
+            </div>
+
+            <!-- Description Field -->
+            <div class="lfx-u-mar-t-16 lfx-u-pad-b-8">
+                <div class="lfx-u-sub-header-alias">Description</div>
+                <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
+                    <input matInput id="schm-modal-description" [(ngModel)]="dataset.description"
+                        placeholder="Description" class="custom-alias-input">
+                </mat-form-field>
+            </div>
+
+            <!-- Implementation Select -->
+            <div class="lfx-u-mar-t-16 lfx-u-pad-b-16">
+                <div class="lfx-u-sub-header-alias">
+                    Select Implementation
+                    <span class="required-indicator">*</span>
+                </div>
+                <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
+                    <mat-select id="column-type-select" [(value)]="dataset.adaptername" required [disabled]="true">
+                        <mat-option *ngFor="let option of adapterOptions" [value]="option.value">
+                            {{ option.viewValue }}
+                        </mat-option>
+                    </mat-select>
+
+                </mat-form-field>
+            </div>
+
+            <div mat-dialog-actions class="dialog-actions justify-content-end">
+                <button mat-raised-button color="primary" class="action-button" (click)="next()" [disabled]="false">
+                    <mat-icon>arrow_forward</mat-icon>
+                    <span>NEXT</span>
+                </button>
+            </div>
+
+        </div>
+
+        <div *ngIf="proceed">
+            <div *ngIf="dataset" class="container-fluid">
+                <div *ngIf="formType=='API'">
+
+                    <div class="row">
+
+                        <!-- Request Method -->
+                        <div class="col-md-4 lfx-u-pad-b-8">
+                            <div class="lfx-u-sub-header-alias">
+                                Request Method
+                                <span class="required-indicator">*</span>
+                            </div>
+                            <mat-form-field appearance="fill" class="w-100 custom-alias-field"
+                                subscriptSizing="dynamic">
+                                <mat-select [(value)]="dataset['attributes']['RequestMethod']" [disabled]="true"
+                                    required>
+                                    <mat-option *ngFor="let option of requestMethodOptions" [value]="option.value">
+                                        {{ option.value }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-md-8 lfx-u-pad-b-8">
+                            <div class="lfx-u-sub-header-alias">
+                                URL
+                            </div>
+                            <mat-form-field appearance="fill" class="w-100 custom-alias-field"
+                                subscriptSizing="dynamic">
+                                <input matInput placeholder="URL" [(ngModel)]="dataset.attributes['Url']"
+                                    [disabled]="false" [required]="false">
+                            </mat-form-field>
+                        </div>
+
+                        <mat-tab-group id="schema-modal-tabs" class="tabs-left-aligned"
+                            (selectedIndexChange)="basicReqTabChange($event)">
+                            <mat-tab label="Query Parameters" data-tab-id="adapter-method-query-params">
+                                <div class="lfx-u-pad-16">
+                                    <div [ngClass]="{'container' : isInEdit}">
+                                        <table class="table table-striped table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th style="color: #0094ff ; width: 9%;">Action</th>
+                                                    <th style="color: #0094ff ;">Key</th>
+                                                    <th style="color: #0094ff ;">Value</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let dynamic of dynamicParamsArray; let i = index;">
+                                                    <td style="text-align: center;" (click)="deleteParamsRow(i)">
+
+                                                        <mat-icon class="aip-led-icons icon-color">
+                                                            delete </mat-icon>
+                                                    </td>
+                                                    <td>
+                                                        <input style="padding: 0.3em;"
+                                                            [(ngModel)]="dynamicParamsArray[i].key" class="form-control"
+                                                            type="text" />
+                                                    </td>
+                                                    <td>
+                                                        <input style="padding: 0.3em;"
+                                                            [(ngModel)]="dynamicParamsArray[i].value"
+                                                            class="form-control" type="text" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: center;" (click)="addParamsRow()">
+                                                        <mat-icon class="aip-led-icons icon-color"> add
+                                                        </mat-icon>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </mat-tab>
+                            <mat-tab label="Headers" data-tab-id="adapter-method-headers">
+                                <div class="lfx-u-pad-16">
+                                    <div [ngClass]="{'container' : isInEdit}">
+                                        <table class="table table-striped table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th style="color: #0094ff ; width: 9%">Action</th>
+                                                    <th style="color: #0094ff ;">Key</th>
+                                                    <th style="color: #0094ff ;">Value</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let dynamic of dynamicHeadersArray; let i = index;">
+                                                    <td style="text-align: center;" (click)="deleteHeadersRow(i)">
+                                                        <mat-icon class="aip-led-icons icon-color">
+                                                            delete </mat-icon>
+                                                    </td>
+                                                    <td>
+                                                        <input style="padding: 0.3em;"
+                                                            [(ngModel)]="dynamicHeadersArray[i].key"
+                                                            class="form-control" type="text" />
+                                                    </td>
+                                                    <td>
+                                                        <input style="padding: 0.3em;"
+                                                            [(ngModel)]="dynamicHeadersArray[i].value"
+                                                            class="form-control" type="text" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: center;" (click)="addHeadersRow()">
+                                                        <mat-icon class="aip-led-icons icon-color"> add
+                                                        </mat-icon>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </mat-tab>
+                            <mat-tab label="Pre Transform Script" data-tab-id="adapter-method-pre-transform">
+                                <div class="lfx-u-pad-16">
+                                    <div [ngClass]="{'container' : isInEdit}">
+                                        <mat-slide-toggle [(ngModel)]="pretransformData" (change)="presetValue($event)">
+                                            Transform data</mat-slide-toggle><br />
+                                        <textarea style="width: 100% !important; border-color: #0094ff ;" rows="5"
+                                            cols="30" pInputTextarea autoResize="autoResize"
+                                            [(ngModel)]="prescript"></textarea>
+                                    </div>
+                                </div>
+                            </mat-tab>
+                            <mat-tab label="Post Transform Script" data-tab-id="adapter-method-post-transform">
+                                <div class="lfx-u-pad-16">
+                                    <div [ngClass]="{'container' : isInEdit}">
+                                        <mat-slide-toggle [(ngModel)]="transformData" (change)="setValue($event)">
+                                            Transform data</mat-slide-toggle><br />
+                                        <textarea style="width: 100% !important; border-color: #0094ff ;" rows="5"
+                                            cols="30" pInputTextarea autoResize="autoResize"
+                                            [(ngModel)]="script"></textarea>
+                                    </div>
+                                </div>
+                            </mat-tab>
+                            <mat-tab label="Path Variables" data-tab-id="adapter-method-path-vars">
+                                <div class="lfx-u-pad-16">
+                                    <div [ngClass]="{'container' : isInEdit}">
+                                        <table class="table table-striped table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th style="color: #0094ff ; width: 9%">Action</th>
+                                                    <th style="color: #0094ff ;">Key</th>
+                                                    <th style="color: #0094ff ;">Value</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let dynamic of dynamicPathVariablesArray; let i = index;">
+                                                    <td style="text-align: center;" (click)="deletePathVariablesRow(i)">
+                                                        <mat-icon class="aip-led-icons icon-color">
+                                                            delete </mat-icon>
+                                                    </td>
+                                                    <td>
+                                                        <input style="padding: 0.3em;"
+                                                            [(ngModel)]="dynamicPathVariablesArray[i].key"
+                                                            class="form-control" type="text" />
+                                                    </td>
+                                                    <td>
+                                                        <input style="padding: 0.3em;"
+                                                            [(ngModel)]="dynamicPathVariablesArray[i].value"
+                                                            class="form-control" type="text" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: center;" (click)="addPathVariablesRow()">
+                                                        <mat-icon class="aip-led-icons icon-color"> add
+                                                        </mat-icon>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                            </mat-tab>
+                            <mat-tab label="Config Variables" data-tab-id="adapter-method-config-vars">
+                                <div class="lfx-u-pad-16">
+                                    <div [ngClass]="{'container' : isInEdit}">
+                                        <table class="table table-striped table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th style="color: #0094ff ; width: 9%">Action</th>
+                                                    <th style="color: #0094ff ;">Key</th>
+                                                    <th style="color: #0094ff ;">Value</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let dynamic of dynamicConfigVariablesArray; let i = index;">
+                                                    <td style="text-align: center;"
+                                                        (click)="deleteConfigVariablesRow(i)">
+                                                        <mat-icon class="aip-led-icons icon-color">
+                                                            delete </mat-icon>
+                                                    </td>
+                                                    <td>
+                                                        <input style="padding: 0.3em;"
+                                                            [(ngModel)]="dynamicConfigVariablesArray[i].key"
+                                                            class="form-control" type="text" />
+                                                    </td>
+                                                    <td>
+                                                        <input style="padding: 0.3em;"
+                                                            [(ngModel)]="dynamicConfigVariablesArray[i].value"
+                                                            class="form-control" type="text" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: center;" (click)="addConfigVariablesRow()">
+                                                        <mat-icon class="aip-led-icons icon-color"> add
+                                                        </mat-icon>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </mat-tab>
+                            <mat-tab data-tab-id="adapter-method-body"
+                                *ngIf="dataset['attributes']['RequestMethod'] && (((dataset['attributes']['RequestMethod']).toLowerCase()==='post') || ((dataset['attributes']['RequestMethod']).toLowerCase()==='put'))"
+                                label="Body">
+                                <div class="lfx-u-pad-16">
+                                    <div [ngClass]="{'container' : isInEdit}">
+                                        <!-- Label -->
+                                        <div>
+
+                                            <mat-form-field appearance="fill" class="custom-alias-field"
+                                                subscriptSizing="dynamic">
+                                                <mat-select [(value)]="selectedOption"
+                                                    (selectionChange)="optionChange($event)">
+                                                    <mat-option *ngFor="let option of options"
+                                                        [value]="option.value">{{option.value}}</mat-option>
+                                                </mat-select>
+
+
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div *ngIf="bodyOption === 'x-www-form-urlencoded'">
+                                            <table class="table table-striped table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="color: #0094ff ; width: 9%">Action</th>
+                                                        <th style="color: #0094ff ;">Key</th>
+                                                        <th style="color: #0094ff ;">Value</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr *ngFor="let dynamic of urlEncodedArray; let i = index;">
+                                                        <td style="text-align: center;"
+                                                            (click)="deleteUrlEncodedRow(i)">
+                                                            <mat-icon class="aip-led-icons icon-color">
+                                                                delete </mat-icon>
+                                                        </td>
+                                                        <td>
+                                                            <input [(ngModel)]="urlEncodedArray[i].key"
+                                                                class="form-control" type="text" />
+                                                        </td>
+                                                        <td>
+                                                            <input [(ngModel)]="urlEncodedArray[i].value"
+                                                                class="form-control" type="text" />
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="text-align: center;" (click)="addUrlEncodedRow()">
+                                                            <mat-icon class="aip-led-icons icon-color"> add
+                                                            </mat-icon>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <div *ngIf="bodyOption === 'raw'">
+                                            <div *ngIf="selectedOption === 'JSON'">
+                                                <json-editor [options]="editorOptions" [data]="schemaForm"
+                                                    style="max-height: 365px;" #formJsonEditor
+                                                    class="cipJSONEditor"></json-editor>
+                                            </div>
+
+                                            <!-- File Param Name -->
+                                            <div *ngIf="selectedOption === 'FILE'" class="lfx-u-mar-t-16 lfx-u-pad-b-8">
+                                                <div class="lfx-u-sub-header-alias">
+                                                    File Param Name
+                                                    <span class="required-indicator">*</span>
+                                                </div>
+                                                <mat-form-field appearance="fill" class="w-100 custom-alias-field"
+                                                    subscriptSizing="dynamic">
+                                                    <input matInput [disabled]="false"
+                                                        [(ngModel)]="dataset.attributes['fileParamName']" required
+                                                        (ngModelChange)="adapterNameChangesOccur($event)"
+                                                        placeholder="File Param Name" class="custom-alias-input">
+                                                </mat-form-field>
+                                                <input type="file" class="file-input" style="display:none;"
+                                                    (change)="handleFileInput($event)" #fileUpload>
+                                                <div class="file-upload lfx-u-pad-t-4 lfx-u-pad-b-8">
+                                                    <button mat-mini-fab color="primary" class="upload-btn"
+                                                        (click)="fileUpload.click()">
+                                                        <mat-icon>attach_file</mat-icon>
+                                                    </button>
+                                                    {{fileName || "No file uploaded yet."}}
+                                                </div>
+                                            </div>
+
+
+                                            <div *ngIf="selectedOption != 'JSON' && selectedOption != 'FILE'">
+                                                <textarea style="width: 100% !important; border-color: #0094ff ;"
+                                                    rows="5" cols="30" pInputTextarea autoResize="autoResize"
+                                                    [(ngModel)]="body"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </mat-tab>
+                        </mat-tab-group>
+                    </div>
+
+                    <button mat-raised-button color="primary" *ngIf="action !== 'view'" class="action-button"
+                        (click)="testConnection()" [disabled]="false">
+                        <span>TEST</span>
+                    </button>
+                    <button mat-raised-button color="primary" *ngIf="action !== 'view'" class="action-button"
+                        (click)="saveDataset()" [disabled]="false">
+                        <span>SAVE</span>
+                    </button>
+
+                </div>
+                <div *ngIf="formType=='Script'">
+
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-4">
+
+                                <!-- Script Type -->
+                                <div class="lfx-u-pad-b-16">
+                                    <div class="lfx-u-sub-header-alias">
+                                        Script Type
+                                        <span class="required-indicator">*</span>
+                                    </div>
+                                    <mat-form-field appearance="fill" class="w-100 custom-alias-field"
+                                        subscriptSizing="dynamic">
+                                        <mat-select [(ngModel)]="dataset['attributes']['ScriptType']" required>
+                                            <mat-option *ngFor="let rm of scriptType" [selected]="selectedScipt === rm"
+                                                [value]="rm">{{rm}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 lfx-u-mar-t-16 ">
+                                <mat-slide-toggle *ngIf="dataset['attributes']['ScriptType'] === 'Python'"
+                                    [(ngModel)]="isRemoteExecution" (change)="remoteExecutorsetValue($event)">
+                                    Use Remote Executor</mat-slide-toggle><br />
+                            </div>
+                        </div>
+                        <div class="row" *ngIf="isRemoteExecution">
+                            <div class="col-md-4">
+                                <!-- Executor Select  -->
+                                <div *ngIf="remotePromise|async" class="lfx-u-mar-t-16 lfx-u-pad-b-16">
+                                    <div class="lfx-u-sub-header-alias">
+                                        Select Executor
+                                        <span class="required-indicator">*</span>
+                                    </div>
+                                    <mat-form-field appearance="fill" class="w-100 custom-alias-field"
+                                        subscriptSizing="dynamic">
+                                        <mat-select [(value)]="selectedConnection.alias"
+                                            (selectionChange)="connectionNameSelectChange($event)"
+                                            placeholder="Select Executor" required>
+                                            <mat-option *ngFor="let option of connectionOptions" [value]="option.value">
+                                                {{ option.value }}
+                                            </mat-option>
+                                        </mat-select>
+
+                                    </mat-form-field>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div
+                            *ngIf="dataset['attributes']['ScriptType'] && (((dataset['attributes']['ScriptType']).toLowerCase()==='python'))">
+                            <div class="row"></div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div [ngClass]="{'container' : isInEdit}">
+                                        <table class="table table-striped table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th style="color: #0094ff ; width: 9%">Action
+                                                    </th>
+                                                    <th style="color: #0094ff ;">Import package</th>
+                                                    <!-- <th style="color: #0094ff ;">Value</th> -->
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let dynamic of dynamicImportsArray; let i = index;">
+                                                    <td style="text-align: center;" (click)="deleteImportsRow(i)">
+                                                        <mat-icon class="aip-led-icons icon-color">
+                                                            delete </mat-icon>
+                                                    </td>
+                                                    <td>
+                                                        <input style="padding: 0.3em;"
+                                                            [(ngModel)]="dynamicImportsArray[i].key"
+                                                            class="form-control" type="text" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: center;" (click)="addImortsRow()">
+                                                        <mat-icon class="aip-led-icons icon-color">
+                                                            add </mat-icon>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-md-6" [hidden]="!isRemoteExecution">
+                                    <div [ngClass]="{'container' : isInEdit}">
+                                        <table class="table table-striped table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th style="color: #0094ff ; width: 9%">Action
+                                                    </th>
+                                                    <th style="color: #0094ff ;">Requirements</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let dynamic of dynamicRequirementsArray; let i = index;">
+                                                    <td style="text-align: center;" (click)="deleteRequirementsRow(i)">
+                                                        <mat-icon class="aip-led-icons icon-color">
+                                                            delete </mat-icon>
+                                                    </td>
+                                                    <td>
+                                                        <input style="padding: 0.3em;"
+                                                            [(ngModel)]="dynamicRequirementsArray[i].key"
+                                                            class="form-control" type="text" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="text-align: center;" (click)="addRequirementsRow()">
+                                                        <mat-icon class="aip-led-icons icon-color">
+                                                            add </mat-icon>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div [ngClass]="{'container' : isInEdit}" style="margin-left: 0px; padding-left: 0px;">
+                                <mat-slide-toggle [(ngModel)]="transformScriptData"
+                                    (change)="transformScriptsetValue($event)">
+                                    Transform data</mat-slide-toggle><br />
+                                <textarea style="width: 100% !important; border-color: #0094ff ;" rows="10" cols="30"
+                                    pInputTextarea autoResize="autoResize"
+                                    [(ngModel)]="transformScriptPython"></textarea>
+                            </div>
+                        </div>
+                        <div
+                            *ngIf="dataset['attributes']['ScriptType'] && (((dataset['attributes']['ScriptType']).toLowerCase()==='groovy'))">
+                            <div [ngClass]="{'container' : isInEdit}" style="margin-left: 0px; padding-left: 0px;">
+                                <mat-slide-toggle [(ngModel)]="transformScriptData"
+                                    (change)="transformScriptsetValue($event)">
+                                    Transform data</mat-slide-toggle><br />
+
+                                <textarea rows="10" cols="30" style="width: 100% !important; border-color: #0094ff ;"
+                                    pInputTextarea autoResize="autoResize" [(ngModel)]="transformScript"></textarea>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="lfx-u-header-xl"> Sample Request Body</p>
+                            <json-editor [options]="editorOptions" [data]="schemaForm" style="max-height: 365px;"
+                                #formJsonEditor class="cipJSONEditor"></json-editor>
+                        </div>
+                    </div>
+
+                    <div *ngIf="methodType">
+                        <button mat-raised-button color="primary" *ngIf="action !== 'view'" class="action-button"
+                            (click)="testConnection()" [disabled]="false">
+                            <span>TEST</span>
+                        </button>
+                    </div>
+
+                    <button mat-raised-button color="primary" *ngIf="action !== 'view'" class="action-button"
+                        (click)="saveDataset()" [disabled]="false">
+                        <span>SAVE</span>
+                    </button>
+
+                </div>
+            </div>
+            <div mat-dialog-actions class="dialog-actions justify-content-start">
+                <button mat-raised-button color="primary" class="action-button" (click)="previous()" [disabled]="false">
+                    <mat-icon>arrow_backward</mat-icon>
+                    <span>PREV</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>

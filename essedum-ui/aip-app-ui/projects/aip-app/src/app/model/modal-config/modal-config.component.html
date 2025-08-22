@@ -1,0 +1,74 @@
+<div class="container-fluid backgroud-color">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="lfx-l-level1-middle-col">
+                <div class="col-5">
+                    <span style="cursor: pointer;">
+                        <mat-icon class="aip-led-icons" (click)="routeBackToList()" matTooltip="Back"
+                            matTooltipPosition="above" (mouseenter)="true" (mouseleave)="false">arrow_back</mat-icon>
+                    </span>
+                    <span class="lfx-u-mar-l-8 header-p-title">Models: </span><span class="header-title">
+                        <span *ngIf="!isInEdit">Create Model</span>
+                        <span *ngIf="isInEdit">Edit Model</span>
+                    </span>
+                </div>
+                <mat-card class="lfx-card ml-12">
+                    <div class="align-items-center d-flex">
+                        <span class="lfx-u-mar-l-8 header-p-title">Models Properties </span>
+                    </div>
+                    <br>
+                    <mat-card-content>
+                        <form>
+                            <div class="lfx-flex-row lfx-mb-16"
+                                style="display: flex; gap: 16px; align-items: flex-start;">
+                                <mat-form-field appearance="fill" floatLabel="always" class="lfx-field"
+                                    style="flex: 1;">
+                                    <mat-label>Model Name</mat-label>
+                                    <input class="text-transform" matInput placeholder="Enter Name..." required [(ngModel)]="data.modelName"
+                                        name="displayName" />
+                                    <mat-error class="ml-10">This field is required</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="fill" floatLabel="always" class="lfx-field"
+                                    style="flex: 1;">
+                                    <mat-label>Version</mat-label>
+                                    <input matInput type="number" placeholder="Enter Version..." required
+                                        [(ngModel)]="data.version" name="version" min="1" />
+                                    <mat-error class="ml-10">This field is required</mat-error>
+                                </mat-form-field>
+                            </div>
+                            <mat-form-field appearance="fill" floatLabel="always" class="lfx-field">
+                                <mat-label>Description</mat-label>
+                                <input class="text-transform" matInput placeholder="Enter Description..." [(ngModel)]="data.description"
+                                    name="description" />
+                            </mat-form-field>
+                            <div class="lfx-flex-row lfx-mb-16">
+                                <div class="lfx-field lfx-half-col">
+                                    <div class="custom-select-wrapper">
+                                        <mat-form-field appearance="fill" class="custom-mat-select" floatLabel="always">
+                                            <mat-label>Datasource</mat-label>
+                                            <mat-select [(ngModel)]="data_datasource" name="datasource" required
+                                                [disabled]="isAuth" placeholder="Select Datasource"
+                                                (selectionChange)="onChanginDatasource($event.value)">
+                                                <mat-option *ngFor="let opt of datasourcesOpt" [value]="opt">
+                                                    {{ opt }}
+                                                </mat-option>
+                                            </mat-select>
+                                            <mat-error class="ml-10">This field is required</mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <div *ngIf="data_datasource">
+                            <app-default [dataset]="data" (action)="eventHandler($event)"
+                                [testSuccessful]="testSuccessful" [edit]="contentVal" [model]="'true'"
+                                [schemaVal]="schemaBol" (cache)="getCache($event)">
+                            </app-default>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+    </div>
+</div>

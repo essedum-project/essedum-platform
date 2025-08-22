@@ -99,6 +99,7 @@ export class NativeScriptComponent implements OnInit, OnChanges {
     isHoveredSave=false;
     isHoveredRun=false;
     isHoveredTag=false;
+    defaultRuntimeFromDB: any;
   constructor(
     @Inject('envi') private baseUrl: string,
     private service: Services,
@@ -169,10 +170,16 @@ export class NativeScriptComponent implements OnInit, OnChanges {
           this.dynamicEnvArray=JSON.parse(this.streamItem.jsonContent).environment;
 
         } else {
+          if (this.streamItem.json_content) {
+            this.dynamicEnvArray = JSON.parse(this.streamItem.json_content).environment;
+            this.defaultRuntimeFromDB = JSON.parse(this.streamItem.json_content).default_runtime;
+            this.selectedRunType = this.defaultRuntimeFromDB;
+          }
           this.data = JSON.parse(
             this.streamItem.json_content
           ).elements[0].attributes;
           this.dynamicEnvArray=JSON.parse(this.streamItem.json_content).environment;
+          
 
         }
         if (this.data.dataset) {
@@ -286,7 +293,6 @@ export class NativeScriptComponent implements OnInit, OnChanges {
   fetchRunTypes() {
     this.runTypes = [];
     this.service.fetchJobRunTypes().subscribe((resp) => {
-      // let rt = JSON.parse(JSON.stringify(resp))
       resp.forEach((ele) => {
         this.runTypes.push(new OptionsDTO(ele.type + '-' + ele.dsAlias, ele));
       });
@@ -295,10 +301,29 @@ export class NativeScriptComponent implements OnInit, OnChanges {
           new OptionsDTO('Local-', { dsAlias: '', dsName: '', type: 'Local' })
         );
       }
-      // resp.forEach(e=>{console.log(new OptionsDTO(e.type+"-"+e.dsAlias, e))})
-      this.selectedRunType = this.runTypes[0].value;
-      this.runtypesCheck = false;
+      if (!this.defaultRuntimeFromDB) {
+        this.selectedRunType = this.runTypes[0].value;
+      }
+      else {
+        // Set default selection
+        if (this.defaultRuntimeFromDB) {
+          // Find the matching runtime option
+          const matchingOption = this.runTypes.find(
+            (option: any) => option.value.dsName === this.defaultRuntimeFromDB.dsName &&
+              option.value.type === this.defaultRuntimeFromDB.type
+          );
 
+          if (matchingOption) {
+            this.selectedRunType = matchingOption.value;
+            this.defaultRuntime = matchingOption.value;
+          } else {
+            this.selectedRunType = this.runTypes[0]?.value;
+          }
+        } else {
+          this.selectedRunType = this.runTypes[0]?.value;
+        }
+      }
+      this.runtypesCheck = false;
     });
   }
   onInputTypeChange(filetype) {
@@ -494,12 +519,15 @@ export class NativeScriptComponent implements OnInit, OnChanges {
         )
         .subscribe((response) => {
           this.streamItem.name = pname;
+          console.log('this.streamItem:',this.streamItem);
+          console.log('selectedRunType:',this.selectedRunType);
           this.data.files[0] = response;
           this.data.arguments = this.treeData;
           this.data.usedSecrets=this.dynamicSecretsArray;
           this.streamItem.json_content = JSON.stringify({
             elements: [{ attributes: this.data }],
             environment:this.dynamicEnvArray,
+            default_runtime: this.selectedRunType
           });
           this.service.update(this.streamItem).subscribe(
             (response) => {
