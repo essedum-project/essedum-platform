@@ -708,7 +708,18 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
 
     console.log("filterUsmRolePermissions", this.filterUsmRolePermissions);
 
-    this.SearchedPage(false, "", "", value);
+    // Check if value is a Role object or a string or the value 'All'
+    let roleName;
+    if (value === 'All') {
+      roleName = ""; // Empty string means no filter
+    } else if (typeof value === 'object' && value !== null) {
+      roleName = value.name || "All";
+    } else {
+      roleName = value || "All";
+    }
+    
+    console.log("Filtering by role name:", roleName);
+    this.SearchedPage(false, "", "", roleName);
     this.paginator.firstPage();
   }
 
@@ -717,68 +728,102 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
     if (event.keyCode === 13) {
       this.filterItem(val);
     }
-  }
-
-  Search() {
-    let module =
-      this.filterUsmRolePermissions.module == "All"
-        ? ""
-        : this.filterUsmRolePermissions.module.module;
-    let permission =
-      this.filterUsmRolePermissions.module == "All"
-        ? ""
-        : this.filterUsmRolePermissions.module.permission;
-    let role =
-      this.filterUsmRolePermissions.role == "All"
-        ? "All"
-        : this.filterUsmRolePermissions.role.name;
+  }  Search() {
+    // Extract module value - could be a string or an object with a module property
+    let module = "";
+    if (this.filterUsmRolePermissions.module && this.filterUsmRolePermissions.module !== "All") {
+      // Check if module is a string or an object
+      if (typeof this.filterUsmRolePermissions.module === 'string') {
+        module = this.filterUsmRolePermissions.module;
+      } else if (this.filterUsmRolePermissions.module.module) {
+        module = this.filterUsmRolePermissions.module.module;
+      }
+    }
+    
+    // Extract permission values - handle both array and single object cases
+    let permission = "";
+    if (this.filterUsmRolePermissions.permission) {
+      if (Array.isArray(this.filterUsmRolePermissions.permission) && this.filterUsmRolePermissions.permission.length > 0) {
+        // For API filtering, we'll use the first permission's value
+        // The full array is used in the UI display
+        permission = this.filterUsmRolePermissions.permission[0].permission || "";
+      } else if (typeof this.filterUsmRolePermissions.permission === 'object') {
+        permission = this.filterUsmRolePermissions.permission.permission || "";
+      }
+    }
+    
+    // Extract role value
+    let role = "";
+    if (this.filterUsmRolePermissions.role) {
+      if (this.filterUsmRolePermissions.role === "All") {
+        role = "";
+      } else if (typeof this.filterUsmRolePermissions.role === 'object') {
+        role = this.filterUsmRolePermissions.role.name || "";
+      } else {
+        role = this.filterUsmRolePermissions.role;
+      }
+    }
+    
+    console.log("Search with params:", { module, permission, role });
     this.SearchedPage(false, module, permission, role);
     this.paginator.firstPage();
-  }
-
-  SearchedPage(flag, module, permission, role) {
+  }  SearchedPage(flag, module, permission, role) {
     let index = flag ? this.pageEvent.pageIndex : 0;
-    if (role == "All") {
-      this.usmRolePermissionsService
-        .findAllSearched(
-          module,
-          permission,
-          "",
-          index,
-          this.pageSize,
-          null,
-          null
-        )
-        .subscribe(
-          (pageResponse) => {
-            this.loadData(pageResponse);
-          },
-          (error) => {
-            this.testCreate = false;
-            this.messageService.error("Could not get the results", "LEAP");
-          }
-        );
-    } else {
-      this.usmRolePermissionsService
-        .findAllSearched(
-          module,
-          permission,
-          role,
-          index,
-          this.pageSize,
-          null,
-          null
-        )
-        .subscribe(
-          (pageResponse) => {
-            this.loadData(pageResponse);
-          },
-          (error) => {
-            this.testCreate = false;
-            this.messageService.error("Could not get the results", "LEAP");
-          }
-        );
+    
+    // Handle various formats of role parameter
+    let roleName = "";
+    if (role === "All") {
+      roleName = "";
+    } else if (typeof role === 'object' && role !== null) {
+      // If role is an object, extract the name
+      roleName = role.name || "";
+      console.log("Using role name from object:", roleName);
+    } else if (typeof role === 'string') {
+      // If role is already a string but not "All"
+      roleName = role;
+      console.log("Using role name from string:", roleName);
     }
+    
+    // Handle permission parameter - could be a string, array, or object
+    let permissionName = "";
+    if (permission) {
+      if (Array.isArray(permission) && permission.length > 0) {
+        // Use the first permission's value for API filtering
+        permissionName = permission[0].permission || "";
+      } else if (typeof permission === 'object') {
+        permissionName = permission.permission || "";
+      } else if (typeof permission === 'string') {
+        permissionName = permission;
+      }
+    }
+    
+    console.log("SearchedPage params:", { 
+      module, 
+      permission: permissionName, 
+      roleName,
+      index, 
+      pageSize: this.pageSize 
+    });
+      this.usmRolePermissionsService
+      .findAllSearched(
+        module,
+        permissionName,
+        roleName,
+        index,
+        this.pageSize,
+        null,
+        null
+      )
+      .subscribe(
+        (pageResponse) => {
+          this.loadData(pageResponse);
+        },
+        (error) => {
+          this.testCreate = false;
+          this.messageService.error("Could not get the results", "LEAP");
+          console.error("Error in SearchedPage:", error);
+        }
+      );
   }
 
   updateWave() {
@@ -1143,8 +1188,51 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
       this.lastRefreshedTime = new Date();
     }, 1000);
   }
-
-  onTagSelected(event: TagEventDTO) {}
+  onTagSelected(event: TagEventDTO) {
+    console.log('onTagSelected event received:', event);
+    
+    // Check if we have role filter information
+    if (event && event['roleFilter']) {
+      const roleFilter = event['roleFilter'];
+      console.log('Role filter received in event:', roleFilter);
+      
+      // Get module and permission filters if present
+      const moduleFilter = event['moduleFilter'] || 'All';
+      const permissionFilter = event['permissionFilter'] || [];
+      
+      console.log('Module filter received in event:', moduleFilter);
+      console.log('Permission filter received in event:', permissionFilter);
+      
+      // Set filters in the filterUsmRolePermissions object
+      this.filterUsmRolePermissions.role = roleFilter;
+      this.filterUsmRolePermissions.module = moduleFilter;
+      
+      // Determine role name for filtering
+      let roleName;
+      if (roleFilter === 'All') {
+        roleName = ""; // Empty string means no filter
+      } else if (typeof roleFilter === 'object' && roleFilter !== null) {
+        roleName = roleFilter.name || "All";
+      } else {
+        roleName = roleFilter || "All";
+      }
+      
+      // Determine module name for filtering
+      let moduleName = "";
+      if (moduleFilter !== 'All') {
+        moduleName = moduleFilter;
+      }
+        // Pass the entire permission filter array to allow proper handling in SearchedPage
+      console.log("Filtering by role, module, permission:", roleName, moduleName, permissionFilter);
+      
+      // Pass the full array to SearchedPage which will handle extracting the appropriate value
+      this.SearchedPage(false, moduleName, permissionFilter, roleName);
+      this.paginator.firstPage();
+    } else {
+      // If no filters, show all
+      this.SearchedPage(false, "", "", "");
+    }
+  }
 
   nextPage() {
     if (this.pageNumber + 1 <= this.noOfPages) {

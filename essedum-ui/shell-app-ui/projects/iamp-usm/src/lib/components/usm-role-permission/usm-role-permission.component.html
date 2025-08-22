@@ -3,11 +3,10 @@
     <!-- Header Section -->
     <app-aip-header [cardTitle]="title" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="true"
       (search)="filterItem($event)" (refresh)="ngOnInit()" (add)="createRolePermission()">
-    </app-aip-header>
-    <!-- Filter Section -->
-    <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="SERVICE_V1" [selectedPortfolioList]="{ 
+    </app-aip-header>    <!-- Filter Section -->
+    <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="SERVICE_V1" [selectedRolePermissionList]="{ 
                         selectedAdapterType: selectedAdapterType
-                      }" (tagSelected)="onTagSelected($event)" (filterStatusChange)="filterItem($event)">
+                      }" (tagSelected)="onTagSelected($event)">
     </app-aip-filter>
 
     <div>

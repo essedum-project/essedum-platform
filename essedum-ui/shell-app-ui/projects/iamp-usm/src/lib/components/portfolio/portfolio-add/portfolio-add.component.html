@@ -39,7 +39,7 @@
                   [disabled]="view" placeholder="Enter Portfolio Name..."
                   [(ngModel)]="usmPortfolio.portfolioName" maxlength="255" required />
                 <mat-error class="ml-4" *ngIf="!usmPortfolio.portfolioName">This field is required</mat-error>
-                <mat-hint class="ml-4" *ngIf="!edit">
+                <mat-hint class="ml-4 hint" *ngIf="!edit">
                   Note: Alpha numeric characters and _ allowed
                 </mat-hint>
                 <mat-error class="ml-4" *ngIf="showNameLengthErrorMessage">
@@ -55,7 +55,7 @@
                 placeholder="Enter Portfolio Description..." [(ngModel)]="usmPortfolio.description"
                 (keyup)="checkDescriptionMaxLength()" />
 
-              <mat-hint class="ml-4" *ngIf="!view">
+              <mat-hint class="ml-4 hint" *ngIf="!view">
                 Note: Alpha numeric and special characters -_. allowed
               </mat-hint>
               <mat-error class="ml-4" *ngIf="showDescLengthErrorMessage">

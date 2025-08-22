@@ -6,23 +6,25 @@ import {
   OnChanges,
   Output,
   SimpleChanges,
-} from '@angular/core';
-import { TagEventDTO } from '../../models/tagEventDTO.model';
-import { HttpParams } from '@angular/common/http';
-import { ActivatedRoute, Router } from '@angular/router';
-import { animate, style, transition, trigger } from '@angular/animations';
-import { of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatSelectModule } from '@angular/material/select';
-
+} from "@angular/core";
+import { TagEventDTO } from "../../models/tagEventDTO.model";
+import { HttpParams } from "@angular/common/http";
+import { ActivatedRoute, Router } from "@angular/router";
+import { animate, style, transition, trigger } from "@angular/animations";
+import { MatIconModule } from "@angular/material/icon";
+import { MatTooltipModule } from "@angular/material/tooltip";
+import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
+import { MatInputModule } from "@angular/material/input";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatButtonModule } from "@angular/material/button";
+import { MatChipsModule } from "@angular/material/chips";
+import { MatSelectModule } from "@angular/material/select";
+import { UsmPermissionsService } from "../../services/usm-permission.service";
+import { RoleService } from "../../services/role.service";
+import { Project } from "../../models/project";
+import { Role } from "../../models/role";
+import { UsmPermissions } from "../../models/usm-permissions";
 
 // Interface for filter items
 interface FilterItem {
@@ -34,36 +36,32 @@ interface FilterItem {
 
 // Enum for service types
 enum ServiceType {
-  PORTFOLIO = 'Portfolio',
-  ROLEPERMISSION = 'RolePermission',
+  PORTFOLIO = "Portfolio",
+  ROLEPERMISSION = "RolePermission",
 }
 
 // Enum for filter types
 enum FilterType {
-  CATEGORY = 'category',
-  ADAPTER_TYPE = 'adapterType',
-  ADAPTER_INSTANCE = 'adapterInstance',
-  PIPELINE_TYPE = 'pipelineType',
-  TOPIC = 'topic',
-  TAG = 'tag',
-
+  CATEGORY = "category",
+  ROLENAME = "roleName",
 }
 
 @Component({
-  selector: 'app-aip-filter',
-  templateUrl: './aip-filter.component.html',
-  styleUrls: ['./aip-filter.component.scss'],  animations: [
-    trigger('slideToggle', [
-      transition(':enter', [
+  selector: "app-aip-filter",
+  templateUrl: "./aip-filter.component.html",
+  styleUrls: ["./aip-filter.component.scss"],
+  animations: [
+    trigger("slideToggle", [
+      transition(":enter", [
         style({ height: 0, opacity: 0 }),
-        animate('600ms ease-out', style({ height: '*', opacity: 1 })),
+        animate("600ms ease-out", style({ height: "*", opacity: 1 })),
       ]),
-      transition(':leave', [
-        animate('600ms ease-in', style({ height: 0, opacity: 0 })),
+      transition(":leave", [
+        animate("600ms ease-in", style({ height: 0, opacity: 0 })),
       ]),
     ]),
   ],
-    standalone: true,
+  standalone: true,
   imports: [
     MatIconModule,
     MatTooltipModule,
@@ -73,14 +71,15 @@ enum FilterType {
     MatFormFieldModule,
     MatButtonModule,
     MatChipsModule,
-    MatSelectModule
+    MatSelectModule,
   ],
 })
-export class AipFilterComponent implements OnInit, OnChanges {  // Input properties
+export class AipFilterComponent implements OnInit, OnChanges {
+  // Input properties
   @Input() tagrefresh = false;
-  @Input() servicev1 = '';
-  @Input() selectedAdpImplCombinedLists: any;
+  @Input() servicev1 = "";
   @Input() selectedPortfolioList: any;
+  @Input() selectedRolePermissionList: any;
 
 
   // Output properties
@@ -88,7 +87,7 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
   @Output() filterStatusChange = new EventEmitter<boolean>();
 
   // Constants
-  readonly TOOLTIP_POSITION = 'above';
+  readonly TOOLTIP_POSITION = "above";
   readonly ServiceType = ServiceType;
   readonly FilterType = FilterType;
 
@@ -100,143 +99,85 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
   // Filter arrays and maps
   category: string[] = [];
   tags: Record<string, any[]> = {};
-  tagsBackup: Record<string, any[]> = {};
-  allTags: any[] = [];
   tagStatus: Record<string, boolean> = {};
   catStatus: Record<string, boolean> = {};
 
   // Portfolio filter inputs
-  searchedName: string = '';
-  filterUsmPortfolio: string = '';
+  searchedName: string = "";
+  filterUsmPortfolio: string = "";
 
   // Selected filters
-  selectedTag: any[] = [];
-  selectedTagList: any[] = [];
   selectedType: string[] = [];
   selectedAdapterType: string[] = [];
+  selectedRoleName: string[] = [];
+
   selectedAdapterList: string[] = [];
-  selectedAdapterInstance: string[] = [];
-  selectedTagsType: any[] = [];
 
-  
-
-  // URL param lists
-  type: string[] = [];
-  categoryList: string[] = [];
-  connectionList: string[] = [];
-  specList: string[] = [];
-  specCapabilityList: string[] = [];
-  instanceConnectionList: string[] = [];
-  instanceImplementationList: string[] = [];
-  instance: string[] = [];
-  pipelineType: string[] = [];
-  toolsType: string[] = [];
-  chainType: string[] = [];
-  instanceType: string[] = [];
-  appType: string[] = [];
 
   selectedMlAppType: string[] = [];
   selectedMlIncType: string[] = [];
   appsTypeList = [];
-  selectedPortfolioDescriptionList:string[]=[];
-  selectedPortfolioNameList:string[]=[];
-  portfolioDescription:string[]=[];
-  portfolioName:string[]=[];
-  modulepermissionarrayFilter: { id: number; module: string; permission: string }[] = [];
-  roleArray: { id: number; name: string; description: string; projectId: any; }[];
-  rolePermission: { role: any; permission: any } = { role: null, permission: null };
+  selectedPortfolioDescriptionList: string[] = [];
+  selectedPortfolioNameList: string[] = [];
+  portfolioDescription: string[] = [];  portfolioName: string[] = [];    rolePermission: { role: any; module: string; permission: any } = {
+    role: null,
+    module: 'All',
+    permission: [],
+  };
+  
+  uniqueModules: string[] = [];
+  filteredPermissions: any[] = [];
   showRoleError: boolean = false;
   view: boolean = false;
-  
+
+  modulepermissionarrayFilter = [];
+  modulepermissionarray = [];
+  roleArray = [];
+  examplerole: Role = new Role();
+  examplepermission: UsmPermissions = new UsmPermissions();
+  lazyload = { first: 0, rows: 5000, sortField: null, sortOrder: null };
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private roleService: RoleService,
+    private usmPermissionsService: UsmPermissionsService
   ) {}
 
   ngOnInit(): void {
     this.loadPreselectedFilters();
-    this.loadQueryParams();
-    this.initializeSelectedLists();
     this.initializeServiceBasedFilters();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-  
-  }
+  ngOnChanges(changes: SimpleChanges): void {}
 
   /**
    * Loads preselected filters from input properties
    */
   private loadPreselectedFilters(): void {
-    if (this.selectedAdpImplCombinedLists) {
-      this.categoryList =
-        this.selectedAdpImplCombinedLists.selectedCategoryList ?? [];
-      this.connectionList =
-        this.selectedAdpImplCombinedLists.selectedConnectionNamesList ?? [];
-      this.specList = this.selectedAdpImplCombinedLists.selectedSpecList ?? [];
-      this.specCapabilityList =
-        this.selectedAdpImplCombinedLists.selectedCapabilityType ?? [];
-      this.instanceConnectionList =
-        this.selectedAdpImplCombinedLists.selectedInstanceConnectionList ?? [];
-      this.instanceImplementationList =
-        this.selectedAdpImplCombinedLists.selectedInstanceImplementationList ??
-        [];
-    }    if (this.selectedPortfolioNameList) {
+
+    if (this.selectedPortfolioNameList) {
       this.portfolioName = this.selectedPortfolioNameList ?? [];
     }
 
     if (this.selectedPortfolioDescriptionList) {
       this.portfolioDescription = this.selectedPortfolioDescriptionList ?? [];
     }
-    
+
     if (this.selectedPortfolioList) {
-      this.selectedAdapterType = this.selectedPortfolioList.selectedAdapterType ?? [];
+      this.selectedAdapterType =
+        this.selectedPortfolioList.selectedAdapterType ?? [];
     }
+
+     if (this.selectedRolePermissionList) {
+      this.selectedRoleName =
+        this.selectedRolePermissionList.selectedRoleName ?? [];
+    }
+
+    
   }
 
-  /**
-   * Loads filters from URL query parameters
-   */
-  private loadQueryParams(): void {
-    this.route.queryParams.subscribe((params) => {
-      this.type = params['type'] ? params['type'].split(',') : [];
-      this.appType = params['type'] ? params['type'].split(',') : [];
-      this.pipelineType = params['pipelineType']
-        ? params['pipelineType'].split(',')
-        : [];
 
-      this.pipelineType = params['toolsType']
-        ? params['toolsType'].split(',')
-        : [];
-
-      this.instance = params['adapterInstance']
-        ? params['adapterInstance'].split(',')
-        : [];
-      this.chainType = params['chainType']
-        ? params['chainType'].split(',')
-        : [];
-      this.instanceType = params['adapterList']
-        ? params['adapterList'].split(',')
-        : [];
-    });
-  }
-
-  /**
-   * Initializes selected filter arrays from URL params
-   */
-  private initializeSelectedLists(): void {
-    this.selectedAdapterType = [
-      ...this.type,
-      ...this.appType,
-      ...this.pipelineType,
-      ...this.toolsType,
-      ...this.chainType,
-    ];
-
-    this.selectedAdapterList = [...this.instanceType];
-    this.selectedAdapterInstance = [...this.instance];
-  }
 
   /**
    * Initializes filters based on the service type
@@ -244,17 +185,15 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
   private initializeServiceBasedFilters(): void {
     this.isLoading = true;
 
-    switch (this.servicev1) {   
+    switch (this.servicev1) {
       case ServiceType.PORTFOLIO:
       case ServiceType.ROLEPERMISSION:
-        this.initializeMockData();
-      
+        this.loadPermissions();
+        this.loadRoles();
         break;
-      default:        
+      default:
         this.fetchAdapters();
     }
-
-    // Apply refresh if needed
     if (this.tagrefresh) {
       this.refresh();
     }
@@ -267,8 +206,7 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
    */
   private handleTagRefreshChange(): void {
     if (this.servicev1 === ServiceType.PORTFOLIO) {
-    
-    }  else {
+    } else {
       this.refresh();
     }
   }
@@ -310,13 +248,11 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
    */
   fetchAdapters(): boolean {
     const params = new HttpParams().set(
-      'project',
-      sessionStorage.getItem('organization') || ''
+      "project",
+      sessionStorage.getItem("organization") || ""
     );
-
-    this.selectedAdapterInstance = [];
     return true;
-  } 
+  }
 
   /**
    * Toggles an item in a selection array
@@ -342,14 +278,8 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
    * Refreshes all filters
    */
   refresh(): void {
-    // Reset all selection arrays
     this.resetAllFilters();
-
-    // Emit empty selections
     this.emitSelectionChanges();
-
-   
-    // Initialize service-specific filters
     this.initializeServiceSpecificFilters();
   }
 
@@ -357,88 +287,18 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
    * Resets all filter arrays
    */
   private resetAllFilters(): void {
-    this.tagStatus = {};
-    this.selectedTagList = [];   
     this.portfolioDescription = [];
     this.portfolioName = [];
-
-   
   }
 
   /**
    * Initializes service-specific filters
    */
   private initializeServiceSpecificFilters(): void {
-    if (
-      this.servicev1 === ServiceType.PORTFOLIO     
-    ) {
-      
+    if (this.servicev1 === ServiceType.PORTFOLIO) {
     }
-
   }
 
-
-  /**
-   * Shows more tags for a category
-   */
-  showMore(category: string): void {
-    this.catStatus[category] = !this.catStatus[category];
-
-    this.tags[category] = this.catStatus[category]
-      ? this.allTags.filter((tag) => tag.category === category)
-      : this.allTags.filter((tag) => tag.category === category).slice(0, 10);
-  }
-
-  /**
-   * Gets selected tags for a category
-   */
-  getSelectedTagsForCategory(category: string): any[] {
-    return this.selectedTag.filter((tag) => tag.category === category);
-  }
-
-  /**
-   * Clears all tags for a category
-   */
-  clearAllTagsForCategory(category: string): void {
-    // Remove tags for this category
-    this.selectedTag = this.selectedTag.filter(
-      (tag) => tag.category !== category
-    );
-
-    // Update tag statuses
-    this.allTags?.forEach((tag) => {
-      if (tag.category === category) {
-        this.tagStatus[`${tag.category} - ${tag.label}`] = false;
-      }
-    });
-
-    // Update selected tag list
-    this.selectedTagList = this.selectedTag.map((tag) => tag.id);
-
-    // Emit changes
-    this.emitSelectionChanges();
-    this.updateFilterStatus();
-  }
-
-  /**
-   * Removes a tag from selection
-   */
-  removeTag(tag: any): void {
-    const index = this.selectedTag.indexOf(tag);
-
-    if (index !== -1) {
-      this.selectedTag.splice(index, 1);
-      this.tagStatus[`${tag.category} - ${tag.label}`] = false;
-
-      // Update selected tag list
-      this.selectedTagList = this.selectedTag.map((tag) => tag.id);
-
-      // Emit changes
-      this.emitSelectionChanges();
-    }
-
-    this.updateFilterStatus();
-  }
 
 
   /**
@@ -454,50 +314,47 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
     });
   }
 
-  /**
-   * Filters by tag
-   */
-  filterByTag(tag: any): void {
-    const tagKey = `${tag.category} - ${tag.label}`;
-    this.tagStatus[tagKey] = !this.tagStatus[tagKey];
 
-    if (!this.selectedTag.includes(tag)) {
-      this.selectedTag.push(tag);
-    } else {
-      this.selectedTag.splice(this.selectedTag.indexOf(tag), 1);
-    }
-
-    // Update selected tag list
-    this.selectedTagList = this.selectedTag.map((tag) => tag.id);
-
-    // Emit changes
-    this.emitSelectionChanges();
-  }
 
   /**
    * Creates a tag event DTO
-   */  geteventtagsdto(): TagEventDTO {
+   */  
+  geteventtagsdto(): TagEventDTO {
+    // For portfolio filtering, pass the current search field values directly
+    const portfolioName = this.searchedName ? [this.searchedName] : [];
+    const portfolioDesc = this.filterUsmPortfolio ? [this.filterUsmPortfolio] : [];
+    
     const dto = new TagEventDTO(
-      this.selectedTagList,
       this.selectedAdapterType,
-      this.selectedAdapterInstance,
-      this.selectedMlAppType ?? [],
-      this.selectedMlIncType ?? [],
-      this.portfolioName ?? [],
-      this.portfolioDescription ?? [],
-      this.categoryList ?? [],
-      this.connectionList ?? [],
-      this.specList ?? [],
-      this.searchedName ? [this.searchedName] : [],
-      this.filterUsmPortfolio ? [this.filterUsmPortfolio] : []
+      portfolioName,
+      portfolioDesc,
+      this.selectedRoleName ?? []
     );
     
-    // Add role permission filters
-    if (this.servicev1 === ServiceType.ROLEPERMISSION) {
-      dto['roleFilter'] = this.rolePermission.role;
-      dto['permissionFilter'] = this.rolePermission.permission;
+    if (this.servicev1 === ServiceType.PORTFOLIO) {
+      console.log("Portfolio filter values being emitted:", {
+        searchedName: this.searchedName,
+        filterUsmPortfolio: this.filterUsmPortfolio,
+        portfolioName: dto.portfolioName,
+        portfolioDescription: dto.portfolioDescription
+      });
     }
-    
+    if (this.servicev1 === ServiceType.ROLEPERMISSION) {
+      dto["roleFilter"] = this.rolePermission.role || "All";
+      if (typeof this.rolePermission.module === 'object') {
+        dto["moduleFilter"] = String(this.rolePermission.module);
+      } else {
+        dto["moduleFilter"] = this.rolePermission.module || "All";
+      }
+      
+      dto["permissionFilter"] = this.rolePermission.permission || [];
+      console.log("Role permission filter being emitted:", {
+        role: this.rolePermission.role,
+        module: dto["moduleFilter"],
+        permission: this.rolePermission.permission,
+      });
+    }
+
     return dto;
   }
 
@@ -514,123 +371,155 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
   toggleFilterExpanded(): void {
     this.isFilterExpanded = !this.isFilterExpanded;
   }
+
   /**
    * Applies the current filter values and emits filter change event
-   */  applyFilters(): void {
-    switch (this.servicev1) {
+   */ 
+  applyFilters(): void {    switch (this.servicev1) {
       case ServiceType.PORTFOLIO:
-        // Set portfolio filters from input values
-        this.portfolioName = this.searchedName ? [this.searchedName] : [];
-        this.portfolioDescription = this.filterUsmPortfolio ? [this.filterUsmPortfolio] : [];
+        // Make sure we're working with clean string values
+        if (this.searchedName) {
+          this.searchedName = this.searchedName.trim();
+        }
+        if (this.filterUsmPortfolio) {
+          this.filterUsmPortfolio = this.filterUsmPortfolio.trim();
+        }
         
-        console.log('AipFilterComponent: Applying portfolio filters', {
-          portfolioName: this.portfolioName,
-          portfolioDescription: this.portfolioDescription
+        console.log("AipFilterComponent: Applying portfolio filters", {
+          searchedName: this.searchedName,
+          filterUsmPortfolio: this.filterUsmPortfolio,
         });
         break;
-        
       case ServiceType.ROLEPERMISSION:
-        // Handle role permission filters
-        console.log('AipFilterComponent: Applying role permission filters', {
-          role: this.rolePermission.role ? this.rolePermission.role.name : 'All',
-          permission: this.rolePermission.permission ? 
-            `${this.rolePermission.permission.module}-${this.rolePermission.permission.permission}` : 'All'
+        console.log("AipFilterComponent: Applying role permission filters", {
+          role: this.rolePermission.role
+            ? this.rolePermission.role.name
+            : "All",
+          permission:
+            this.rolePermission.permission &&
+            this.rolePermission.permission.length > 0
+              ? this.rolePermission.permission
+                  .map((p) => `${p.module}-${p.permission}`)
+                  .join(", ")
+              : "All",
         });
         break;
-        
+
       default:
-        // Handle other filter types
-        console.log('AipFilterComponent: Applying adapter filters', {
-          selectedAdapterType: this.selectedAdapterType
+        console.log("AipFilterComponent: Applying adapter filters", {
+          selectedAdapterType: this.selectedAdapterType,
         });
         break;
     }
-    
-    // Emit the filter changes
+
     this.emitSelectionChanges();
-    
-    // Update filter status
     this.updateFilterStatus();
-    this.isFilterExpanded=!this.isFilterExpanded;
+    this.isFilterExpanded = !this.isFilterExpanded;
   }
 
   /**
    * Checks if there are active filters
-   */    hasActiveFilters(): boolean {
+   */ 
+  hasActiveFilters(): boolean {
     if (this.servicev1 === ServiceType.PORTFOLIO) {
-      return (
-        this.selectedAdapterType?.length > 0 ||
-        this.portfolioName?.length > 0 ||
-        this.portfolioDescription?.length > 0 ||
-        Boolean(this.searchedName) ||
-        Boolean(this.filterUsmPortfolio)
-      );
-    }
-    
-    if (this.servicev1 === ServiceType.ROLEPERMISSION) {
-      return (
-        Boolean(this.rolePermission.role) || 
-        Boolean(this.rolePermission.permission)
-      );
+      const hasTypeFilter = this.selectedAdapterType && this.selectedAdapterType.length > 0;
+      const hasNameFilter = Boolean(this.searchedName && this.searchedName.trim());
+      const hasDescFilter = Boolean(this.filterUsmPortfolio && this.filterUsmPortfolio.trim());
+      
+      console.log('Portfolio filter status:', {
+        hasTypeFilter,
+        hasNameFilter,
+        hasDescFilter,
+        searchedName: this.searchedName,
+        filterUsmPortfolio: this.filterUsmPortfolio
+      });
+      
+      return hasTypeFilter || hasNameFilter || hasDescFilter;
+    }if (this.servicev1 === ServiceType.ROLEPERMISSION) {
+      const hasRoleFilter = this.rolePermission.role && this.rolePermission.role !== 'All';
+      const hasModuleFilter = this.rolePermission.module && this.rolePermission.module !== 'All';
+      const hasPermissionFilter = this.rolePermission.permission && 
+         Array.isArray(this.rolePermission.permission) && 
+         this.rolePermission.permission.length > 0;
+      
+      console.log('Active filters check:', {
+        hasRoleFilter,
+        hasModuleFilter,
+        hasPermissionFilter
+      });
+      
+      return hasRoleFilter || hasModuleFilter || hasPermissionFilter;
     }
 
-    // Default case for other service types
     return (
-      this.selectedAdapterType?.length > 0 ||
-      this.selectedAdapterInstance?.length > 0 ||
-      this.selectedTagList?.length > 0
+      this.selectedRoleName?.length > 0 
     );
   }
 
   /**
    * Gets a summary of active filters for display
-   */  getActiveFiltersSummary(): string {
+   */ 
+  getActiveFiltersSummary(): string {
     if (this.servicev1 === ServiceType.PORTFOLIO) {
       const filterSummary = [];
-      
-      // Add portfolio name filter if present
-      if (this.searchedName || this.portfolioName?.length > 0) {
-        filterSummary.push(`Name: ${this.searchedName || this.portfolioName[0]}`);
+
+      // Prioritize search field values over arrays
+      if (this.searchedName && this.searchedName.trim()) {
+        filterSummary.push(`Name: ${this.searchedName}`);
+      } else if (this.portfolioName?.length > 0) {
+        filterSummary.push(`Name: ${this.portfolioName[0]}`);
       }
-      
-      // Add portfolio description filter if present
-      if (this.filterUsmPortfolio || this.portfolioDescription?.length > 0) {
-        filterSummary.push(`Description: ${this.filterUsmPortfolio || this.portfolioDescription[0]}`);
+
+      if (this.filterUsmPortfolio && this.filterUsmPortfolio.trim()) {
+        filterSummary.push(`Description: ${this.filterUsmPortfolio}`);
+      } else if (this.portfolioDescription?.length > 0) {
+        filterSummary.push(`Description: ${this.portfolioDescription[0]}`);
       }
-      
-      // Add other filters if present
+
       if (this.selectedAdapterType?.length > 0) {
-        filterSummary.push(`Type: ${this.selectedAdapterType.join(', ')}`);
+        filterSummary.push(`Type: ${this.selectedAdapterType.join(", ")}`);
       }
-      
-      return filterSummary.join(' | ');
-    }
-    
-    if (this.servicev1 === ServiceType.ROLEPERMISSION) {
+
+      return filterSummary.join(" | ");
+    }    if (this.servicev1 === ServiceType.ROLEPERMISSION) {
       const filterSummary = [];
-      
-      // Add role filter if present
-      if (this.rolePermission.role) {
-        filterSummary.push(`Role: ${this.rolePermission.role.name}`);
+
+      if (this.rolePermission.role && this.rolePermission.role !== 'All') {
+        filterSummary.push(`Role: ${this.rolePermission.role.name || this.rolePermission.role}`);
       }
       
-      // Add permission filter if present
-      if (this.rolePermission.permission) {
-        filterSummary.push(`Permission: ${this.rolePermission.permission.module}-${this.rolePermission.permission.permission}`);
+      if (this.rolePermission.module && this.rolePermission.module !== 'All') {
+        filterSummary.push(`Module: ${this.rolePermission.module}`);
       }
-      
-      return filterSummary.join(' | ');
+
+      if (
+        this.rolePermission.permission &&
+        Array.isArray(this.rolePermission.permission) &&
+        this.rolePermission.permission.length > 0
+      ) {
+        const permLabels = this.rolePermission.permission.map(
+          (perm) => `${perm.module}-${perm.permission}`
+        );
+        filterSummary.push(`Permission: ${permLabels.join(", ")}`);
+      }
+
+      return filterSummary.join(" | ");
     }
-    
-    // Default summary for other service types
-    return this.selectedAdapterType?.length > 0 ? `Types: ${this.selectedAdapterType.join(', ')}` : '';
+
+    return this.selectedAdapterType?.length > 0
+      ? `Types: ${this.selectedAdapterType.join(", ")}`
+      : "";
   }
+
   /**
    * Updates filter status
    */
   private updateFilterStatus(): void {
     const hasFilters = this.hasActiveFilters();
-    console.log('AipFilterComponent: Emitting filter status change:', hasFilters);
+    console.log(
+      "AipFilterComponent: Emitting filter status change:",
+      hasFilters
+    );
     this.filterStatusChange.emit(hasFilters);
   }
 
@@ -645,63 +534,173 @@ export class AipFilterComponent implements OnInit, OnChanges {  // Input propert
     }
   }
 
-  initializeMockData() {
-    // Mock data for roles
-    this.roleArray = [
-      { id: 1, name: 'Admin', description: 'Administrator role', projectId: null },
-      { id: 2, name: 'User', description: 'Standard user role', projectId: null },
-      { id: 3, name: 'Manager', description: 'Manager role', projectId: null },
-      { id: 4, name: 'Viewer', description: 'Read-only role', projectId: null },
-      { id: 5, name: 'Developer', description: 'Developer role', projectId: null }
-    ];
-
-    // Mock data for module permissions
-    this.modulepermissionarrayFilter = [
-      { id: 1, module: 'usm', permission: 'create' },
-      { id: 2, module: 'usm', permission: 'view' },
-      { id: 3, module: 'usm', permission: 'edit' },
-      { id: 4, module: 'usm', permission: 'delete' },
-      { id: 5, module: 'dbs', permission: 'view' },
-      { id: 6, module: 'dbs', permission: 'edit' },
-      { id: 7, module: 'portfolio', permission: 'create' },
-      { id: 8, module: 'portfolio', permission: 'view' },
-      { id: 9, module: 'portfolio', permission: 'edit' },
-      { id: 10, module: 'portfolio', permission: 'delete' }
-    ];
-
-    // Initialize the filtered array with all permissions
-    this.modulepermissionarrayFilter = [...this.modulepermissionarrayFilter];
-  }
-  // Method to handle role selection change
-  roleSelectionChanged(event: any) {
-    console.log('Role selection changed:', event);
-    
-    // Handle the "All" selection case
-    if (event && event.value === undefined) {
-      // If "All" was selected for roles
-      if (event.source.placeholder === "Select Role") {
-        this.rolePermission.role = null;
-      }
-      // If "All" was selected for permissions
-      else if (event.source.placeholder === "Select Permission") {
-        this.rolePermission.permission = null;
-      }
-    }
-    
-    // Apply filters only when a specific value is selected or explicitly set to "All"
+  /**
+   * Removes the role filter
+   */
+  removeRoleFilter(): void {
+    this.rolePermission.role = 'All';
     this.applyFilters();
   }
-  // Method to compare objects for mat-select
+  
+  /**
+   * Removes a specific permission filter
+   */
+  removePermissionFilter(permission: any): void {
+    if (this.rolePermission.permission && Array.isArray(this.rolePermission.permission)) {
+      const index = this.rolePermission.permission.findIndex(
+        p => p.module === permission.module && p.permission === permission.permission
+      );
+      
+      if (index !== -1) {
+        this.rolePermission.permission.splice(index, 1);
+        this.applyFilters();
+      }
+    }
+  }
+
   compareObjects(o1: any, o2: any): boolean {
-    // Handle null or undefined values
     if (!o1 || !o2) {
       return o1 === o2;
     }
-    // Handle "All" option case
     if (o1 === "All" || o2 === "All") {
       return o1 === o2;
     }
-    // Compare by id for objects
     return o1.id === o2.id;
+  }
+
+  roleSelectionChanged(event: any): void {
+    this.showRoleError = !this.rolePermission.role;
+    this.applyFilters();
+  }
+
+  /**
+   * Load all roles from the API
+   */
+  loadRoles() {
+    this.roleArray = [];
+    this.examplerole.projectId = null;
+    this.roleService
+      .findAll(this.examplerole, this.lazyload)
+      .subscribe((response) => {
+        let project: Project;
+        try {
+          project = JSON.parse(sessionStorage.getItem("project"));
+        } catch (e) {
+          project = null;
+        }
+        this.roleArray = response.content;
+        this.roleArray = response.content.filter((role) => role.id != 8);
+        let role = JSON.parse(sessionStorage.getItem("role"));
+        if (role.roleadmin) {
+          this.roleArray = response.content.filter(
+            (value) =>
+              (!value.projectId || value.projectId == project.id) &&
+              value.id != 6
+          );
+        }
+        this.roleArray = this.roleArray.sort((a, b) =>
+          a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+        );
+      });
+  }
+
+  /**
+   * Load all permissions from the API
+   */  
+  loadPermissions() {
+    this.modulepermissionarray = [];
+    this.uniqueModules = [];
+    this.filteredPermissions = [];
+    this.usmPermissionsService
+      .findAll(this.examplepermission, this.lazyload)
+      .subscribe((response) => {
+        let project: Project;
+        try {
+          project = JSON.parse(sessionStorage.getItem("project"));
+        } catch (e) {
+          project = null;
+        }
+        this.modulepermissionarray = response.content;
+        this.modulepermissionarray = this.modulepermissionarray.filter(
+          (arr, index, self) =>
+            index ===
+            self.findIndex(
+              (t) => t.module === arr.module && t.permission === arr.permission
+            )
+        );
+        this.modulepermissionarray = this.modulepermissionarray.sort((a, b) =>
+          a.module.toLowerCase() > b.module.toLowerCase() ? 1 : -1
+        );
+        this.modulepermissionarrayFilter = this.modulepermissionarray;
+        this.filteredPermissions = this.modulepermissionarray;
+     
+        this.uniqueModules = Array.from(
+          new Set(this.modulepermissionarray.map(item => item.module))
+        ).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+      });
+  }
+
+  /**
+   * Clears all filters of a specific type
+   */
+  clearAllFilters(filterType: FilterType): void {
+    switch (filterType) {
+      case FilterType.ROLENAME:
+        this.clearFilterList(this.selectedAdapterType, this.roleArray || []);
+        break;
+    }
+    this.emitSelectionChanges();
+    this.updateFilterStatus();
+  }
+  
+  /**
+   * Gets permissions filtered by selected module
+   */
+  getPermissionsByModule(): any[] {
+    if (!this.rolePermission.module) {
+      this.rolePermission.module = 'All';
+      return this.modulepermissionarray || [];
+    }
+
+    if (typeof this.rolePermission.module === 'object') {
+      this.rolePermission.module = String(this.rolePermission.module);
+    }
+    
+    if (this.rolePermission.module === 'All') {
+      return this.modulepermissionarray || [];
+    }    
+    const filteredPerms = (this.modulepermissionarray || []).filter(
+      permission => permission.module === this.rolePermission.module
+    );    
+    console.log(`Filtered ${filteredPerms.length} permissions for module: ${this.rolePermission.module}`);    
+    return filteredPerms;
+  }
+  
+  /**
+   * Handles module selection change
+   */ 
+  onModuleChange(): void {
+    this.rolePermission.permission = [];
+    if (!this.rolePermission.module) {
+      this.rolePermission.module = 'All';
+    } else if (typeof this.rolePermission.module === 'object' && this.rolePermission.module !== null) {
+      this.rolePermission.module = this.rolePermission.module ? String(this.rolePermission.module) : 'All';
+    }
+    this.filteredPermissions = this.getPermissionsByModule();
+    
+    console.log('Module changed to:', this.rolePermission.module);
+    console.log('Filtered permissions updated:', this.filteredPermissions ? this.filteredPermissions.length : 0, 'items');
+    this.applyFilters();
+  }
+  
+  /**
+   * Removes the module filter
+   */
+  removeModuleFilter(): void {
+    this.rolePermission.module = 'All';
+    this.rolePermission.permission = [];
+    this.filteredPermissions = this.modulepermissionarray;    
+    console.log('Module filter removed, reset to:', this.rolePermission.module);
+    this.applyFilters();
   }
 }

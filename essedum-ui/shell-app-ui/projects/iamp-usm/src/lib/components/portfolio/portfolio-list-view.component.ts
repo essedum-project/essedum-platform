@@ -16,7 +16,6 @@ import {
   Component,
   Input,
   Output,
-  OnChanges,
   EventEmitter,
   SimpleChanges,
   OnInit,
@@ -29,9 +28,7 @@ import { Router, ActivatedRoute } from "@angular/router";
 import { PageResponse } from "../../support/paging";
 import { MessageService } from "../../services/message.service";
 import {
-  MatDialog,
-  MatDialogRef,
-  MAT_DIALOG_DATA,
+  MatDialog
 } from "@angular/material/dialog";
 import { ConfirmDeleteDialogComponent } from "../../support/confirm-delete-dialog.component";
 import { HelperService } from "../../services/helper.service";
@@ -89,8 +86,6 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator1: MatPaginator;
   example: Portfolio = new Portfolio();
   exampleProject: Project = new Project();
-
-  // list is paginated
   currentPage: PageResponse<Portfolio> = new PageResponse<Portfolio>(
     0,
     0,
@@ -178,8 +173,6 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
     this.pageNumber = 1;
     this.startIndex = 0;
     this.endIndex = 5;
-
-    // Reset filter values
     this.searchedName = "";
     this.filterUsmPortfolio = "";
     this.selectedAdapterType = [];
@@ -231,7 +224,6 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
       this.viewUsmPortfolio = true;
       this.buttonFlag = true;
       this.route.params.subscribe((res: any) => {
-        //res.id
         this.getUsmPortfolios(res.id);
       });
       this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
@@ -244,7 +236,6 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
       this.view = false;
       this.buttonFlag = false;
       this.route.params.subscribe((res: any) => {
-        //res.id
         this.getUsmPortfolios(res.id);
       });
       this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
@@ -392,7 +383,6 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
   }
 
   createPortfolioKey() {
-    // Get all projects first
     this.exampleProject = new Project();
     this.projectService.findAll(this.exampleProject, this.lazyload).subscribe(
       (pageResponse) => {
@@ -420,8 +410,6 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
       (error) => {
         console.error("Error loading projects:", error);
         this.messageService.error("Could not get the projects", "IAMP");
-
-        // Open dialog even if projects fail to load
         const dialogRef = this.dialog.open(PortfolioAddComponent, {
           height: "67%",
           width: "50%",
@@ -562,7 +550,6 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
             );
           }
           let diff = this.compareTodiff(this.usmPortfolio, arr1[0]);
-          // this.telemetryService.audit(this.usmPortfolio, arr1[0],diff);
         }
         this.busy = this.portfolioService
           .update(this.usmPortfolio)
@@ -624,9 +611,18 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
 
   search() {
     if (!this.sub) {
+      console.log("Search called with filter values:", {
+        searchedName: this.searchedName,
+        filterUsmPortfolio: this.filterUsmPortfolio,
+        selectedAdapterType: this.selectedAdapterType,
+        hasActiveFilters: this.hasActiveFilters()
+      });
+      
       if (this.hasActiveFilters()) {
+        console.log("Active filters detected, applying portfolio filters");
         this.filterPortfolios();
       } else {
+        console.log("No active filters detected, loading all portfolios");
         this.loadPage({
           first: 0,
           rows: 1000,
@@ -797,8 +793,6 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
   Clear() {
     this.filterUsmPortfolio = undefined;
     this.searchedName = undefined;
-
-    // Add null check to prevent error when myInputReference is not available
     if (this.myInputReference && this.myInputReference.nativeElement) {
       this.myInputReference.nativeElement.value = null;
     }
@@ -922,7 +916,6 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    // Clean up subscriptions
     if (this.busy) {
       this.busy.unsubscribe();
     }
@@ -989,11 +982,19 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
   }
 
   hasActiveFilters(): boolean {
-    return (
-      (this.selectedAdapterType && this.selectedAdapterType.length > 0) ||
-      (this.searchedName && this.searchedName.trim() !== "") ||
-      (this.filterUsmPortfolio && this.filterUsmPortfolio.trim() !== "")
-    );
+    const hasTypeFilter = this.selectedAdapterType && this.selectedAdapterType.length > 0;
+    const hasNameFilter = this.searchedName && this.searchedName.trim() !== "";
+    const hasDescFilter = this.filterUsmPortfolio && this.filterUsmPortfolio.trim() !== "";
+    
+    console.log("Portfolio component active filters check:", {
+      hasTypeFilter,
+      hasNameFilter, 
+      hasDescFilter,
+      searchedName: this.searchedName,
+      filterUsmPortfolio: this.filterUsmPortfolio
+    });
+    
+    return hasTypeFilter || hasNameFilter || hasDescFilter;
   }
 
   getActiveFiltersSummary(): string {
@@ -1021,37 +1022,37 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
     console.log("Filter status changed:", event);
 
     if (event === false) {
-      // When filters are cleared in the filter component
       if (this.hasActiveFilters() === false) {
         this.fetchWave({ page: 0, size: this.pageSize });
       }
     } else {
-      // When filters are active, search using the current filter values
       this.search();
     }
   }
   onTagSelected(event: TagEventDTO) {
     if (event) {
-      // Update filter values from the event
+      console.log("Portfolio component received TagEventDTO:", event);
       this.selectedAdapterType = event.selectedAdapterType || [];
-
-      // Get portfolio name and description from the event if available
-      if (event.portfolioName && event.portfolioName.length > 0) {
+      this.searchedName = "";
+      this.filterUsmPortfolio = "";
+      if (Array.isArray(event.portfolioName) && event.portfolioName.length > 0) {
         this.searchedName = event.portfolioName[0];
-      } else {
-        this.searchedName = "";
+        console.log("Portfolio name set to:", this.searchedName);
       }
 
-      if (event.portfolioDescription && event.portfolioDescription.length > 0) {
+      if (Array.isArray(event.portfolioDescription) && event.portfolioDescription.length > 0) {
         this.filterUsmPortfolio = event.portfolioDescription[0];
-      } else {
-        this.filterUsmPortfolio = "";
+        console.log("Portfolio description set to:", this.filterUsmPortfolio);
       }
 
       this.tagrefresh = false;
-
-      // Apply the filters
-      this.filterPortfolios();
+      if (this.hasActiveFilters()) {
+        console.log("Applying portfolio filters with active filters");
+        this.filterPortfolios();
+      } else {
+        console.log("No active filters, fetching all portfolios");
+        this.fetchWave({ page: 0, size: this.pageSize });
+      }
 
       console.log(
         "Filter applied with selected types:",
@@ -1060,30 +1061,42 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
     }
   }
   private filterPortfolios(): void {
+    console.log("filterPortfolios called with values:", {
+      searchedName: this.searchedName,
+      filterUsmPortfolio: this.filterUsmPortfolio,
+      selectedAdapterType: this.selectedAdapterType,
+      hasActiveFilters: this.hasActiveFilters()
+    });
+    
     if (!this.hasActiveFilters()) {
+      console.log("No active filters, fetching all portfolios");
       this.fetchWave({ page: this.pageNumber - 1, size: this.pageSize });
       return;
     }
 
     let params: any = {};
 
-    // Add portfolio type filter if present
     if (this.selectedAdapterType && this.selectedAdapterType.length > 0) {
       params.portfolioType = this.selectedAdapterType.join(",");
     }
 
-    // Add name and description filters from AipFilterComponent
-    if (this.filterUsmPortfolio && this.filterUsmPortfolio.trim() !== "") {
-      params.description = this.filterUsmPortfolio;
+    if (this.filterUsmPortfolio) {
+      const trimmedDesc = this.filterUsmPortfolio.trim();
+      if (trimmedDesc !== "") {
+        params.description = trimmedDesc;
+      }
     }
 
-    if (this.searchedName && this.searchedName.trim() !== "") {
-      params.portfolioName = this.searchedName;
+    if (this.searchedName) {
+      const trimmedName = this.searchedName.trim();
+      if (trimmedName !== "") {
+        params.portfolioName = trimmedName;
+      }
     }
 
-    this.filterFlag = true; // Set filter flag to true to maintain filter state during pagination
+    this.filterFlag = true;
 
-    console.log("Applying filters with params:", params);
+    console.log("Applying portfolio filters with params:", params);
 
     this.portfolioService
       .search(params, { page: 0, size: this.pageSize })
@@ -1111,8 +1124,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
           this.endIndex = Math.min(5, this.noOfPages);
 
           this.pageChanged.emit(this.pageNumber);
-          this.lastRefreshTime(); // Update the last refresh time
-
+          this.lastRefreshTime(); 
           console.log(
             "Filter results loaded, found:",
             this.currentPage.totalElements,
