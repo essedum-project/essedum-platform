@@ -15,7 +15,7 @@
 	<name>common-app</name>
 	<properties>
 		
-		<spring-security.version>6.2.4</spring-security.version>
+
 		<!--suppress UnresolvedMavenProperty -->
 		<sonar.coverage.jacoco.xmlReportPaths>
 			${basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
