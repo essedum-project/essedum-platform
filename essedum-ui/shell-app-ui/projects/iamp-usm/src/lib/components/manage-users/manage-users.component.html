@@ -1,11 +1,11 @@
 <!-- NEW LAYOUT -->
 <div>
-  <div class="aip-container lfx-u-pad-lr-30">
+  <div class="aip-container lfx-u-pad-lr-30" *ngIf="!showCreate">
     <!-- Header Section -->
     <app-aip-header 
       [cardTitle]="'User List'" 
       [lastRefreshedTime]="lastRefreshedTime" 
-      [showAddButton]="createFlag"
+      [showAddButton]="false"
       (search)="onSearchInput($event)" 
       (refresh)="Refresh()" 
       (add)="addNewUser()">
@@ -46,12 +46,7 @@
                   <td>
                     <i class="fa fa-info-circle fa-lg header-action-icon" aria-hidden="true"
                       matTooltip="View User" *ngIf="viewFlag" (click)="viewUser(user)"></i>
-                    <i class="fa fa-pencil fa-lg header-action-icon" aria-hidden="true"
-                      matTooltip="Edit User" style="padding-left: 5px" 
-                      *ngIf="editFlag && user.user_email !='demouser@infosys.com'" (click)="editUser(user)"></i>
-                    <i class="fa fa-trash fa-lg header-action-icon" aria-hidden="true"
-                      matTooltip="Delete User" style="padding-left: 5px" 
-                      *ngIf="deleteFlag && user.user_email !='demouser@infosys.com'" (click)="deleteUser(user)"></i>
+                  
                   </td>
                 </tr>
               </tbody>
@@ -82,7 +77,6 @@
       </div>
     </div>
   </div>
-</div>
 
 <!--create/edit/view users-->
 <div class="paddingBottom selector-663-99" *ngIf="showCreate" #waveForm="ngForm" ngForm="">
@@ -92,13 +86,7 @@
     <span class="ams_back pull-right linkMar selector-663-101" (click)="listUsers()">Back to Users</span>
     <i class="fa fa-caret-square-o-left create-icon-color pull-right linkMar selector-663-102" (click)="listUsers()" aria-hidden="true"></i>
     </div>
-    <div class="selector-663-103">
-      <span class="ams_back pull-right linkMar selector-663-104" *ngIf="edit &amp;&amp; !view &amp;&amp; viewuser" (click)="view = true; buttonFlag = true">View User</span>
-      <i class="fa fa-eye create-icon-color pull-right linkMar selector-663-105" *ngIf="edit &amp;&amp; !view &amp;&amp; viewuser" (click)="view = true; buttonFlag = true" aria-hidden="true"></i>
-      <span class="ams_back pull-right linkMar selector-663-106" *ngIf="edit &amp;&amp; view &amp;&amp; editFlag &amp;&amp; !demoUserFlag" (click)="view = false; buttonFlag = false">Edit User
-      </span>
-      <i class="fa fa-pencil-square-o create-icon-color pull-right linkMar selector-663-107" *ngIf="edit &amp;&amp; view &amp;&amp; editFlag &amp;&amp; !demoUserFlag" (click)="view = false; buttonFlag = false" aria-hidden="true"></i>
-    </div>
+
     </div>
 
     <h4 class="ams_h2 h2Mar crud-header selector-663-108" style="padding-left: 11%" *ngIf="!edit &amp;&amp; !view">Create User</h4>
@@ -251,4 +239,5 @@
       </mat-tab>
     </mat-tab-group>
   </div>
+</div>
 </div>

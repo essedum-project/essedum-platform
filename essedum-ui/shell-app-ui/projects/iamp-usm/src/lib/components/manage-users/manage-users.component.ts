@@ -172,9 +172,11 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     // this.openTelemetryService.endTelemetry(activeSpan);
   }
 
-  ngOnInit() {
+  ngOnInit() {    
+
     // this.lazyloadevent.rows=this.dashConstantService.getrowCount();
     if (sessionStorage.getItem("usmAuthority")) {
+
       sessionStorage.removeItem("usmAuthority");
       this.auth = "";
     }
@@ -223,10 +225,13 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
       }
     );
     this.getAllUsers();
-    this.params_subscription = this.route.params.subscribe((params) => {
-      this.id = params["uid"];
-      this.view = params["view"];
+    this.params_subscription = this.route.paramMap.subscribe((paramMap) => {
+    
+      
+      this.id = paramMap.get("uid");
+      this.view = paramMap.get("view") === "true";
       if (this.id == "new") {
+
         this.showCreate = true;
         this.edit = false;
         this.view = false;
@@ -234,7 +239,8 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         this.buttonFlag = false;
         this.user = new Users();
         this.user.isUiInactivityTracked=true;
-      } else if (this.id != null && this.id != undefined && params["view"] == "false") {
+      } else if (this.id != null && this.id != undefined && paramMap.get("view") === "false") {
+
         this.showCreate = true;
         this.edit = true;
         this.view = false;
@@ -262,7 +268,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
           if(this.user && this.user.timezone)
             this.tzNames.push(this.user.timezone)
         });
-      } else if (this.id != null && this.id != undefined && params["view"] == "true") {
+      } else if (this.id != null && this.id != undefined && paramMap.get("view") === "true") {
         this.showCreate = true;
         this.edit = true;
         this.view = true;
@@ -270,6 +276,8 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         this.viewWave = true;
         this.buttonFlag = true;
         this.usersService.getUsers(this.id).subscribe((res) => {
+
+          
           this.user = res;
           if (this.user.user_email == "demouser@infosys.com") {
             this.demoUserFlag = true;
@@ -296,10 +304,11 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
             this.tzNames.push(this.user.timezone)
         });
       } else {
+
         this.getAllUserss(null);
       }
     });
-    
+
       this.fetchCountries();
     
   }

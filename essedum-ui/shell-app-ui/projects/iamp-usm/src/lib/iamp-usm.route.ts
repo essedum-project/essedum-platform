@@ -41,17 +41,9 @@ const routes: Routes = [
         ],
     },
     { path: "projectlist/:projectid/:view", component: ProjectDetailComponent },
-    {
-        path: "",
-        component: ManageUsersComponent,
-        children: [
-
-            { path: "manageUsers", component: ManageUsersComponent },
-            { path: "manageUsers/:uid/:view", component: ManageUsersComponent },
-
-
-        ],
-    },
+    { path: "manageUsers", component: ManageUsersComponent },
+    { path: "manageUsers/:uid/:view", component: ManageUsersComponent },
+    
 ];
 
 @NgModule({
