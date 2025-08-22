@@ -24,43 +24,11 @@ Nginx is used as a reverse proxy to serve the frontend application and route API
 
 The Python Job Executor is a separate service responsible for executing Python-based jobs, such as data processing and machine learning tasks. It listens for job requests from the backend and executes them in a controlled environment. The code for this component is in the `py-job-executer/` directory. For more details, see the [Python Job Executor documentation](py-job-executer/README.md).
 
-## 3. Platform Design
-
-The Essedum platform is designed with a modular and extensible architecture that allows for seamless integration of various AI/ML tools and services. The following components represent the core concepts of the platform's design.
-
-### 3.1. Connections
-
-Connections establish a communication link or interface between different software systems. This allows for the exchange of data, the ability to perform actions, and access to resources from various environments.
-
-### 3.2. Datasets
-
-Datasets allow you to ingest and manage training data from a variety of sources, including Storage Buckets, databases, and REST APIs.
-
-### 3.3. Adapters
-
-Adapters integrate and utilize various services and capabilities of endpoints without needing to provide host details. Adapters simplify the process of interacting with different services.
-
-### 3.4. Pipelines
-
-Pipelines allow you to create and manage both training and inferencing pipelines. These pipelines are essential for fine-tuning, training, deploying, and registering models as endpoints.
-
-### 3.5. Remote Executor
-
-The Remote Executor executes pipelines or programs on a remote server or virtual machine. This powerful tool allows for the efficient use of computational resources for demanding AI/ML tasks.
-
-### 3.6. Models
-
-Models provide access to and management of all your models from configured connections.
-
-### 3.7. Endpoints
-
-Endpoints allow you to view and manage all endpoints from your connected services. This includes REST APIs, model endpoints, and more, providing a centralized view of your deployed services.
-
-## 4. Installation
+## 3. Installation
 
 There are two ways to install and run the Essedum platform: a manual developer setup or a containerized setup using Docker.
 
-### 4.1. Developer Setup
+### 3.1. Developer Setup
 
 This setup is ideal for developers who want to work on the source code and contribute to the platform.
 
@@ -115,16 +83,57 @@ This setup is ideal for developers who want to work on the source code and contr
      python app.py
      ```
 
-### 4.2. Docker-Based Setup
+### 3.2. Containerized Setup
 
-This setup is recommended for users who want to quickly deploy and run the Essedum platform in a containerized environment.
+This section describes two ways to deploy the Essedum platform in a containerized environment: using Docker Compose for a simple, local setup, or using Kubernetes for a more robust, scalable deployment.
 
-#### Prerequisites
+#### 3.2.1. Docker Compose Setup
+
+This setup is recommended for users who want to quickly deploy and run the Essedum platform on a local machine.
+
+##### Prerequisites
+
+- Docker
+- Docker Compose
+
+##### Deployment Steps
+
+1. **Configure your environment**:
+   - Navigate to the `docker` directory.
+   - Create a copy of the `.env.sample` file and name it `.env`.
+     ```bash
+     cp .env.sample .env
+     ```
+   - Open the `.env` file and customize the variables as needed. You can change the external ports for the services, update credentials, etc.
+
+2. **Build and run the services**:
+   - Once you have configured your `.env` file, you can build and run the services using Docker Compose.
+     ```bash
+     docker-compose up --build
+     ```
+   This command will build the Docker images for all the services and start them in the correct order.
+
+3. **Accessing the application**:
+   - Once all the services are running, you can access the frontend application in your browser at `http://localhost:8084`.
+   - The backend API will be available at `http://localhost:8082`.
+   - The Keycloak admin console will be available at `http://localhost:8180`.
+
+4. **Stopping the application**:
+   - To stop the services, press `Ctrl+C` in the terminal where `docker-compose` is running, or run the following command from the `docker` directory:
+   ```bash
+   docker-compose down
+   ```
+
+#### 3.2.2. Kubernetes Setup
+
+This setup is ideal for deploying the Essedum platform to a production-like environment.
+
+##### Prerequisites
 
 - Docker
 - Kubernetes (e.g., Docker Desktop, Minikube, or a cloud-based provider like AKS)
 
-#### Deployment Steps
+##### Deployment Steps
 
 1. **Build Docker Images**:
    - For each component (backend, frontend, py-job-executor), build the Docker image using the provided `Dockerfile`.
@@ -156,7 +165,7 @@ This setup is recommended for users who want to quickly deploy and run the Essed
      kubectl apply -f aks-deployment/
      ```
 
-## 5. Usage
+## 4. Usage
 
 Once the platform is up and running, you can access the frontend in your browser. The application allows you to:
 
@@ -165,10 +174,10 @@ Once the platform is up and running, you can access the frontend in your browser
 - **Build Pipelines**: Design and execute ML pipelines for training, inference, and deployment.
 - **Interact with Apps**: Use Streamlit and Gradio applications to interact with your deployed models.
 
-## 6. Change Log
+## 5. Change Log
 
 - **v1.0.0**: Initial version of the Essedum platform.
 
-## 7. License
+## 6. License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
