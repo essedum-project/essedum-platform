@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  backend:
+  leap-app-backend-service:
     build:
       context: ../sv
       dockerfile: Dockerfile
@@ -32,7 +32,7 @@ services:
     ports:
       - "${FRONTEND_PORT:-8084}:8084"
     depends_on:
-      - backend
+      - leap-app-backend-service
 
   py-job-executor:
     build:
