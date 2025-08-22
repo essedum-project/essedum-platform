@@ -1,13 +1,18 @@
 /**
- * @ 2021 - 2022 Infosys Limited, Bangalore, India. All Rights Reserved.
- * Version: 1.0
- * Except for any free or open source software components embedded in this Infosys proprietary software program (Program),
- * this Program is protected by copyright laws,international treaties and  other pending or existing intellectual property
- * rights in India,the United States, and other countries.Except as expressly permitted, any unauthorized reproduction,storage,
- * transmission in any form or by any means(including without limitation electronic,mechanical, printing,photocopying,
- * recording, or otherwise), or any distribution of this program, or any portion of it,may result in severe civil and
- * criminal penalties, and will be prosecuted to the maximum extent possible under the law.
+ * The MIT License (MIT)
+ * Copyright © 2025 Infosys Limited
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”),
+ * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package com.infosys.icets.icip.icipwebeditor.service.impl;
 
 import java.io.File;
@@ -16,6 +21,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -26,10 +35,18 @@ import java.util.stream.Collectors;
 
 import javax.sql.rowset.serial.SerialBlob;
 
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
+import org.apache.hc.core5.ssl.TrustStrategy;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -45,8 +62,15 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.Gson;
 import com.infosys.icets.ai.comm.lib.util.ICIPUtils;
@@ -54,6 +78,8 @@ import com.infosys.icets.ai.comm.lib.util.annotation.LeapProperty;
 import com.infosys.icets.ai.comm.lib.util.annotation.service.ConstantsService;
 import com.infosys.icets.ai.comm.lib.util.domain.NameAndAliasDTO;
 import com.infosys.icets.ai.comm.lib.util.service.dto.support.NameEncoderService;
+import com.infosys.icets.icip.dataset.model.ICIPDatasource;
+import com.infosys.icets.icip.dataset.repository.ICIPDatasourceRepository;
 import com.infosys.icets.icip.icipwebeditor.job.enums.RuntimeType;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedRuntime;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPStreamingServices;
@@ -113,6 +139,12 @@ public class ICIPStreamingServiceService implements IICIPStreamingServiceService
 
 	@Autowired
 	ICIPMLFederatedRuntimeRepository icipmlfedRuntimeRepository;
+	
+	@Autowired
+	private ICIPDatasourceRepository icipDatasourceRepository;
+
+	/** The rest template. */
+	private RestTemplate restTemplate;
 
 	/**
 	 * Instantiates a new ICIP streaming service service.
@@ -121,16 +153,20 @@ public class ICIPStreamingServiceService implements IICIPStreamingServiceService
 	 * @param nativeScriptService         the native script service
 	 * @param binaryFilesService          the binary files service
 	 * @param ncs                         the ncs
+	 * @throws KeyStoreException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws KeyManagementException 
 	 */
 	public ICIPStreamingServiceService(ICIPStreamingServicesRepository streamingServicesRepository,
 			IICIPNativeScriptService nativeScriptService, ICIPBinaryFilesService binaryFilesService,
-			NameEncoderService ncs, Environment environment) {
+			NameEncoderService ncs, Environment environment) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		super();
 		this.streamingServicesRepository = streamingServicesRepository;
 		this.nativeScriptService = nativeScriptService;
 		this.binaryFilesService = binaryFilesService;
 		this.ncs = ncs;
 		this.environment = environment;
+		this.restTemplate = getResttemplate();
 	}
 
 	/**
@@ -373,7 +409,73 @@ public class ICIPStreamingServiceService implements IICIPStreamingServiceService
 		}
 		if (type.equals(RuntimeType.NATIVESCRIPT)) {
 			nativeScriptService.deleteByNameAndOrg(fetched.getName(), fetched.getOrganization());
+			if (fetched.getJsonContent() != null && !fetched.getJsonContent().isEmpty())
+				deleteVirtualEnvironment(fetched);
 		}
+	}
+	
+	private void deleteVirtualEnvironment(ICIPStreamingServices fetched) {
+		try {
+			JSONObject json_content = new JSONObject(fetched.getJsonContent());
+			JSONObject json_content1 = json_content.getJSONObject("default_runtime");
+			if (json_content1 != null) {
+				String dsName = json_content1.getString("dsName");
+				ICIPDatasource iCIPDatasource = icipDatasourceRepository.findByNameAndOrganization(dsName,
+						fetched.getOrganization());
+				JSONObject connectionObj = new JSONObject(iCIPDatasource.getConnectionDetails());
+				String url = connectionObj.getString("Url");
+				String host = url;
+				try {
+					java.net.URL urlObj = new java.net.URL(url);
+					host = urlObj.getProtocol() + "://" + urlObj.getHost();
+					if (urlObj.getPort() != -1) {
+						host += ":" + urlObj.getPort();
+					}
+				} catch (java.net.MalformedURLException e) {
+					logger.warn("Invalid URL format: {}, using original URL", url);
+					int pathStartIndex = url.indexOf("/", 8);
+					if (pathStartIndex != -1) {
+						host = url.substring(0, pathStartIndex);
+					}
+				}
+				String deleteApiUrl = host + "/venvs";
+				JSONArray requestBody = new JSONArray();
+				requestBody.put("script_venv_" + fetched.getName());
+				try {
+					HttpHeaders headers = new HttpHeaders();
+					headers.setContentType(MediaType.APPLICATION_JSON);
+					HttpEntity<String> entity = new HttpEntity<>(requestBody.toString(), headers);
+					ResponseEntity<String> response = restTemplate.exchange(deleteApiUrl, HttpMethod.DELETE, entity,
+							String.class);
+
+					if (response.getStatusCode().is2xxSuccessful()) {
+						logger.info("Successfully deleted virtual environment: script_venv_{}", fetched.getName());
+					} else {
+						logger.warn("Failed to delete virtual environment. Status: {}", response.getStatusCode());
+					}
+
+				} catch (Exception e) {
+					logger.error("Error occurred while deleting virtual environment: {}", e.getMessage(), e);
+				}
+			}
+		} catch (Exception exp) {
+			logger.error("Error occurred while deleting virtual environment: {}", exp.getMessage(), exp);
+		}
+	}
+
+	private RestTemplate getResttemplate() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException {
+		TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
+		CloseableHttpClient httpClient = HttpClients.custom()
+				.setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
+						.setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
+								.setSslContext(
+										SSLContextBuilder.create().loadTrustMaterial(acceptingTrustStrategy).build())
+								.setHostnameVerifier(NoopHostnameVerifier.INSTANCE).build())
+						.build())
+				.build();
+		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+		requestFactory.setHttpClient(httpClient);
+		return new RestTemplate(requestFactory);
 	}
 
 	/**

@@ -27,12 +27,25 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.infosys.icets.icip.dataset.constants.ICIPPluginConstants;
+import com.infosys.icets.icip.dataset.model.ICIPDataset;
+import com.infosys.icets.icip.dataset.model.ICIPDatasource;
+import com.infosys.icets.icip.dataset.service.IICIPDatasourceService;
+import com.infosys.icets.icip.dataset.service.impl.ICIPDatasetPluginsService;
+import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedModel;
+import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPMLFederatedModelDTO;
+import com.infosys.icets.icip.icipwebeditor.repository.ICIPMLFederatedModelsRepository;
+import com.infosys.icets.icip.icipwebeditor.service.IICIPMLFederatedModelService;
 
 @Service
 public class ICIPMlOpsRestAdapterService {
@@ -44,6 +57,18 @@ public class ICIPMlOpsRestAdapterService {
 	/** The icip pathPrefix. */
 	@Value("${icip.pathPrefix}")
 	private String icipPathPrefix;
+	
+	@Autowired
+	private ICIPDatasetPluginsService pluginService;
+	
+	@Autowired
+	private IICIPMLFederatedModelService fedModelService;
+	
+	@Autowired
+	private IICIPDatasourceService datasourceService;
+	
+	@Autowired
+	private ICIPMLFederatedModelsRepository fedModelRepo;
 
 	/** The Constant logger. */
 	private static final Logger logger = LoggerFactory.getLogger(ICIPMlOpsRestAdapterService.class);
@@ -165,4 +190,64 @@ public class ICIPMlOpsRestAdapterService {
 		}
 		return hostFromHeader;
 	}
+
+	public ResponseEntity<?> getS3FileData(String modelName, String fileName, String org) {
+		try {
+			ICIPDataset datasetForModel = new ICIPDataset();
+			ICIPDatasource datasource = new ICIPDatasource();
+			List<ICIPMLFederatedModel> iCIPMLFederatedModels = fedModelRepo.getModelByModelNameAndOrganisation(modelName, org);
+			ICIPMLFederatedModel iCIPMLFederatedModel = iCIPMLFederatedModels.getFirst();
+			datasource = datasourceService.getDatasource(iCIPMLFederatedModel.getDatasource(), org);
+			datasetForModel.setDatasource(datasource);
+			datasetForModel.setOrganization(org);
+			datasetForModel.setAttributes(iCIPMLFederatedModel.getAttributes());
+			return new ResponseEntity<>(pluginService.getS3FileData(datasetForModel, fileName), new HttpHeaders(),
+					HttpStatus.OK);
+		} catch (Exception e) {
+			logger.error("EXCEPTION:", e);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	public ResponseEntity<?> uploadModel(ICIPMLFederatedModel requestBody, String fileUploaded) {
+		try {
+			ICIPDataset datasetForModel = new ICIPDataset();
+			ICIPDatasource datasource = datasourceService.getDatasource(requestBody.getDatasource(),
+					requestBody.getOrganisation());
+			datasetForModel.setDatasource(datasource);
+			datasetForModel.setOrganization(requestBody.getOrganisation());
+			datasetForModel.setAttributes(requestBody.getAttributes());
+			Boolean fileAttached = false;
+			List<Object> data = new ArrayList<>();
+			if (fileUploaded != null && !fileUploaded.isBlank()) {
+				try {
+					data = pluginService.getS3FileData(datasetForModel, fileUploaded);
+					fileAttached = true;
+				} catch (Exception exc) {
+					return new ResponseEntity<>("FAILED", HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+			}
+
+			if (!fileAttached || data.get(0) == null) {
+				Boolean testSuccess = false;
+				try {
+					testSuccess = pluginService.getDataSetService(datasetForModel).testConnection(datasetForModel);
+				} catch (Exception e) {
+					return new ResponseEntity<>("FAILED", HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+				if (testSuccess)
+					return new ResponseEntity<>("SUCCESS", new HttpHeaders(), HttpStatus.OK);
+				else
+					return new ResponseEntity<>("FAILED", HttpStatus.INTERNAL_SERVER_ERROR);
+			} else {
+				return new ResponseEntity<>(
+						"Model already present in the specified path, Please upload a different file",
+						HttpStatus.BAD_REQUEST);
+			}
+		} catch (Exception e) {
+			logger.error("EXCEPTION:", e);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
 }

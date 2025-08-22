@@ -1,12 +1,18 @@
-/* @ 2021 - 2022 Infosys Limited, Bangalore, India. All Rights Reserved.
- * Version: 1.0
- * Except for any free or open source software components embedded in this Infosys proprietary software program (Program),
- * this Program is protected by copyright laws,international treaties and  other pending or existing intellectual property
- * rights in India,the United States, and other countries.Except as expressly permitted, any unauthorized reproduction,storage,
- * transmission in any form or by any means(including without limitation electronic,mechanical, printing,photocopying,
- * recording, or otherwise), or any distribution of this program, or any portion of it,may result in severe civil and
- * criminal penalties, and will be prosecuted to the maximum extent possible under the law.
+/**
+ * The MIT License (MIT)
+ * Copyright © 2025 Infosys Limited
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”),
+ * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package com.infosys.icets.icip.mlops.rest;
 
 import java.awt.image.BufferedImage;
@@ -99,11 +105,13 @@ import com.infosys.icets.icip.icipwebeditor.model.ICIPJobs;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPJobsPartial;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedEndpoint;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedModel;
+import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedModelDS;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPPartialAgentJobs;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPPartialGroups;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPPlugin;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPPluginScript;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPStreamingServices;
+import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPDatasourceFilterDTO;
 import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPMLFederatedEndpointDTO;
 import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPMLFederatedModelDTO;
 import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPStreamingServices2DTO;
@@ -127,6 +135,7 @@ import com.infosys.icets.icip.icipwebeditor.service.IICIPStreamingServiceService
 import com.infosys.icets.icip.icipwebeditor.service.IICIPTaggingService;
 import com.infosys.icets.icip.icipwebeditor.service.impl.GitHubService;
 import com.infosys.icets.icip.icipwebeditor.service.impl.ICIPPipelineService;
+import com.infosys.icets.icip.icipwebeditor.util.ICIPFedModelUtil;
 import com.infosys.icets.icip.mlops.constants.ICIPMlOpsConstants;
 import com.infosys.icets.icip.mlops.rest.service.impl.ICIPMlOpsRestAdapterService;
 
@@ -389,62 +398,19 @@ public class ICIPMlopsController {
 	}
 
 	@DeleteMapping("/models/delete/{model_id}")
-	public ResponseEntity<String> deleteModel(@PathVariable(name = "model_id", required = true) String modelId,
-			@RequestParam(name = "version", required = false) String version,
-			@RequestParam(name = "adapter_instance", required = true) String adapterInstance,
+	public ResponseEntity<String> deleteModel(@PathVariable(name = "model_id", required = true) int modelId,
 			@RequestParam(name = "project", required = true) String project,
-			@RequestParam(name = "isCached", required = true) Boolean isCached,
-			@RequestParam(name = "isInstance", required = false) String isInstance,
 			@RequestHeader Map<String, String> headers) throws IOException {
-		Map<String, String> params = new HashMap<String, String>();
-		if (isCached) {
-			ICIPPolyAIRequestWrapper request = new ICIPPolyAIRequestWrapper();
-			request.setHeader(headers);
-			request.setOrganization(project);
-			request.setName(adapterInstance);
-			JSONObject content = new JSONObject();
-			content.put("modelId", modelId);
-			content.put("version", version);
-			request.setRequest(content.toString());
-			ICIPPolyAIResponseWrapper results = null;
+		     JSONObject jsonObject =  new JSONObject();
 			try {
-				ICIPDatasource datasource = getDatasource(adapterInstance, project);
-				if (datasource == null) {
-					ICIPMLFederatedModelDTO modelDto = new ICIPMLFederatedModelDTO();
-					modelDto.setAdapterId(adapterInstance);
-					modelDto.setOrganisation(project);
-					modelDto.setSourceId(modelId);
-					fedModelService.updateIsDelModel(modelDto);
-					JSONObject respObj = new JSONObject();
-					respObj.put("msg", "Model is deleted");
-					return ResponseEntity.status(200).body(respObj.toString());
-				}
-				ICIPPolyAIResponseWrapper results1 = modelPluginService
-						.getModelService(getDatasource(adapterInstance, project).getType()).deleteModel(request);
-				if (results1 != null && results1.getType() != null
-						&& results1.getType().contains(ICIPMlOpsConstants.VM)) {
-					if (ICIPMlOpsConstants.VM_SUCCESS.equalsIgnoreCase(results1.getType()))
-						return ResponseEntity.status(200).body(results1.getResponse());
-					else if (ICIPMlOpsConstants.VM_FAILED.equalsIgnoreCase(results1.getType()))
-						return ResponseEntity.status(500).body(results1.getResponse());
-				}
-				logger.info("Response - DeleteEndpoint:{} ", results1.toString());
-				return ResponseEntity.status(200).body(new JSONObject(results1).toString());
+			fedModelService.deleteModel(modelId, project);
+			jsonObject.put("status", "Model is deleted");
+			return ResponseEntity.status(200).body(jsonObject.toString());
 			} catch (Exception e) {
-				logger.error(e.getMessage());
-				return ResponseEntity.status(500).body(e.getMessage());
+				log.error("Error occured while deleting the model either model not found: "+ e.getMessage());
+				jsonObject.put("status", "Model deletion failed");
+				return ResponseEntity.status(500).body(jsonObject.toString());
 			}
-		} else {
-			try {
-				params.put(ICIPMlOpsConstants.IS_INSTANCE, isInstance);
-				params.put(ICIPMlOpsConstants.MODEL_ID, modelId);
-				String results = iCIPMlOpsRestAdapterService.callDeleteMethod(adapterInstance,
-						ICIPMlOpsConstants.PROJECTS_MODELS_DELETE, project, headers, params);
-				return ResponseEntity.status(200).body(results);
-			} catch (Exception e) {
-				return ResponseEntity.status(500).body(e.getMessage());
-			}
-		}
 	}
 
 	@PostMapping("/datasets/{dataset_id}/export")
@@ -484,11 +450,10 @@ public class ICIPMlopsController {
 			@RequestParam(name = "adapter_instance", required = true) String adapterInstance,
 			@RequestParam(name = "project", required = true) String project,
 			@RequestParam(name = "isInstance", required = false) String isInstance,
-			@RequestParam(name = "isCached", required = true) Boolean isCached,
+			@RequestParam(name = "isCached", required = false) Boolean isCached,
 			@RequestHeader Map<String, String> headers) {
 
-		Map<String, String> params = new HashMap<String, String>();
-		if (isCached) {
+		    Map<String, String> params = new HashMap<String, String>();
 			ICIPPolyAIRequestWrapper request = new ICIPPolyAIRequestWrapper();
 			request.setOrganization(project);
 			request.setName(adapterInstance);
@@ -497,8 +462,7 @@ public class ICIPMlopsController {
 			ICIPMLFederatedEndpoint results;
 			logger.info("Request for CreateEndpoint: " + request.toString());
 			try {
-//				results = modelPluginService.getModelService(getDatasource(adapterInstance, project).getType())
-//						.createEndpoint(request);
+
 				if (adapterInstance.equals("local")) {
 					results = modelPluginService.getModelService(adapterInstance).createEndpoint(request);
 
@@ -526,17 +490,7 @@ public class ICIPMlopsController {
 				return ResponseEntity.status(500).body(e.getMessage());
 
 			}
-		} else {
-			try {
-				params.put(ICIPMlOpsConstants.IS_INSTANCE, isInstance);
-				String results = iCIPMlOpsRestAdapterService.callPostMethod(adapterInstance,
-						ICIPMlOpsConstants.PROJECTS_ENDPOINTS_CREATE, project, headers, params, endpointstbody);
-				return ResponseEntity.status(200).body(results);
-			} catch (Exception e) {
-				return ResponseEntity.status(500).body(e.getMessage());
-			}
-		}
-
+		
 	}
 
 	@GetMapping("/endpoints/list")
@@ -911,49 +865,38 @@ public class ICIPMlopsController {
 		}
 	}
 
-	/* Model */
-
-	@GetMapping("/models/list")
-	public ResponseEntity<?> listModels(@RequestParam(name = "project", required = true) String project,
-			@RequestParam(name = "type", required = false) String type,
-			@RequestParam(name = "instance", required = false) String instance,
-			@RequestParam(name = "tags", required = false) String tags,
-			@RequestParam(name = "query", required = false) String query,
-			@RequestParam(name = "page", required = false) String page,
-			@RequestParam(name = "size", required = false) String size,
-			@RequestParam(name = "orderBy", required = false) String orderBy,
-			@RequestParam(name = "isCached", required = true) Boolean isCached,
-			@RequestParam(name = "adapter_instance", required = false) String adapterInstance,
-			@RequestParam(name = "isInstance", required = false) String isInstance,
+	@GetMapping("/models/list/{org}")
+	public ResponseEntity<String> listModels(@PathVariable(name = "org") String org,
+			@RequestParam(name = "connectionname", required = false) String connectionName,
+			@RequestParam(name = "searchquery", required = false) String searchQuery,
+			@RequestParam(name = "page", required = false) Integer page,
+			@RequestParam(name = "size", required = false) Integer size,
 			@RequestHeader Map<String, String> headers) throws IOException {
-		Map<String, String> params = new HashMap<String, String>();
-		if (isCached) {
-			logger.info("fetch models for org: {}", project);
-			Pageable paginate = PageRequest.of(Integer.valueOf(page) - 1, Integer.valueOf(size));
-			List<Integer> tagList = new ArrayList<>();
-			if (tags != null) {
-				String[] splitValues = tags.split(",");
-				for (String t : splitValues) {
-					tagList.add(Integer.parseInt(t));
-				}
-			} else
-				tagList = null;
-
-			List<ICIPMLFederatedModelDTO> results = fedModelService.getAllModelsByAdpateridAndOrganisation(instance,
-					project, paginate, tagList, query, orderBy, type);
+			logger.info("fetch models for org: {}", org );
+			Pageable pageable = (page==null||size==null) ? null : PageRequest.of(Math.max(page - 1, 0), size);
+			List<ICIPMLFederatedModelDS> results = fedModelService.getAllOptionalModelsByOrg(org,connectionName, searchQuery, pageable);
 			String response = new JSONArray(results).toString();
 			return ResponseEntity.status(200).body(response);
-		} else {
-			try {
-				params.put(ICIPMlOpsConstants.IS_INSTANCE, isInstance);
-				String results = iCIPMlOpsRestAdapterService.callGetMethod(adapterInstance,
-						ICIPMlOpsConstants.PROJECTS_MODELS_LIST, project, headers, params);
-				return ResponseEntity.status(200).body(results);
-			} catch (Exception e) {
-				return ResponseEntity.status(500).body(e.getMessage());
-			}
-		}
+    }
+	
+	@GetMapping("/models/getfilters/{org}")
+	public ResponseEntity<String> getModelFilters(@PathVariable("org") String org)
+	{
+		List<ICIPDatasourceFilterDTO> results = fedModelService.getModelFilters(org);
+		String response = new JSONArray(results).toString();
+		return ResponseEntity.status(200).body(response);
 	}
+	
+	@GetMapping("/models/count/{org}")
+	public ResponseEntity<Long> getAllModelsCount(@PathVariable(name = "org") String org,
+			@RequestParam(name = "connectionname", required = false) String connectionName,
+			@RequestParam(name = "searchquery", required = false) String searchQuery) {
+		Long results = fedModelService.getAllModelsCountByOrganisationOptionals(org, connectionName, searchQuery);
+		return ResponseEntity.status(200).body(results);
+	}
+
+			
+	
 
 	@GetMapping("/models/getAll/{org}")
 	public ResponseEntity<String> getAllModelByOrg(@PathVariable(name = "org") String org) {
@@ -964,22 +907,20 @@ public class ICIPMlopsController {
 
 	@GetMapping("/models/getModel")
 	public ResponseEntity<String> getModel(
-
-			@RequestParam(name = "adapter_instance", required = false) String adapterInstance,
-			@RequestParam(name = "fed_id", required = false) String fedId,
+			@RequestParam(name = "modelid", required = true) int modelId,
 			@RequestParam(name = "project", required = true) String project) throws IOException {
-		ICIPMLFederatedModelDTO response = fedModelService.getModelByAdapterIdAndFedId(adapterInstance, fedId, project);
-		if (response != null)
+		ICIPMLFederatedModelDS response = fedModelService.getModelByModelId(modelId, project);
+		if (response != null) {
 			return ResponseEntity.status(200).body(new JSONObject(response).toString());
-		else
+		}
+		else {
 			return ResponseEntity.status(500).body("");
+		}
 	}
 
 	@PostMapping("/models/updateModel")
-	public ResponseEntity<String> updateModel(@RequestBody Map<String, String> fedObj) throws IOException {
-		ObjectMapper mapper = new ObjectMapper();
-		ICIPMLFederatedModelDTO fedDto = mapper.convertValue(fedObj, ICIPMLFederatedModelDTO.class);
-		ICIPMLFederatedModelDTO response = fedModelService.updateModel(fedDto);
+	public ResponseEntity<String> updateModel(@RequestBody ICIPMLFederatedModelDTO fedModelObj) throws IOException {
+		ICIPMLFederatedModelDTO response = fedModelService.updateModel(fedModelObj);
 		if (response != null)
 			return ResponseEntity.status(200).body(new JSONObject(response).toString());
 		else
@@ -991,7 +932,6 @@ public class ICIPMlopsController {
 
 			@RequestParam(name = "adapter_instance", required = false) String adapterInstance,
 			@RequestParam(name = "project", required = true) String project) throws IOException {
-		ICIPPolyAIResponseWrapper response = new ICIPPolyAIResponseWrapper();
 		if (adapterInstance.equals("local")) {
 
 			JSONObject results = modelPluginService.getModelService(adapterInstance).getRegisterModelJson();
@@ -1007,10 +947,8 @@ public class ICIPMlopsController {
 
 	@GetMapping("/endpoints/getRegisterEndpointJson")
 	public ResponseEntity<String> getEndpointJson(
-
 			@RequestParam(name = "adapter_instance", required = false) String adapterInstance,
 			@RequestParam(name = "project", required = true) String project) throws IOException {
-		ICIPPolyAIResponseWrapper response = new ICIPPolyAIResponseWrapper();
 		ICIPDatasource datasource = getDatasource(adapterInstance, project);
 		JSONObject results = new JSONObject();
 		if (adapterInstance.equals("local")) {
@@ -1051,56 +989,38 @@ public class ICIPMlopsController {
 	}
 
 	@PostMapping("/models/register")
-	public ResponseEntity<String> registerModels(@RequestBody String registerModelsbody,
-			@RequestParam(name = "adapter_instance", required = true) String adapterInstance,
-			@RequestParam(name = "project", required = true) String project,
-			@RequestParam(name = "isCached", required = true) Boolean isCached,
-			@RequestParam(name = "isInstance", required = false) String isInstance,
-			@RequestHeader Map<String, String> headers) throws IOException, NoSuchFieldException {
-		Map<String, String> params = new HashMap<String, String>();
-		if (isCached) {
-			ICIPPolyAIRequestWrapper request = new ICIPPolyAIRequestWrapper();
-//		request.setHeader(headers);
-			request.setOrganization(project);
-			request.setName(adapterInstance);
-			request.setParams(params);
-			request.setBody(registerModelsbody);
-			logger.info("Request for RegisterModel: " + request.toString());
-			try {
-				ICIPMLFederatedModel results;
-				if (adapterInstance.equals("local")) {
-					results = modelPluginService.getModelService(adapterInstance).registerModel(request);
+	public ResponseEntity<String> registerModels(@RequestBody ICIPMLFederatedModelDTO fedModeldto,
+			@RequestParam(name = "project", required = true) String project) throws IOException, NoSuchFieldException {
+		if (fedModeldto.getId() != null) {
+			fedModeldto.setCreatedBy(ICIPUtils.getUser(claim));
+			fedModeldto.setCreatedOn(Timestamp.from(Instant.now()));
 
-				} else {
-					results = modelPluginService.getModelService(getDatasource(adapterInstance, project).getType())
-							.registerModel(request);
-				}
-
-				logger.info("Response for RegisterModel " + results.toString());
-				if (results != null && results.getName() != null) {
-						int id = fedModelService.savemodel(results);
-						if(id == 0) return ResponseEntity.status(500).body("Error occurred while saving model");
-						results.setId(id);
-				}		
-				else {
-					if (results.getStatus() != null)
-						return ResponseEntity.status(500).body(results.getStatus());
-				}
-				return ResponseEntity.status(200).body(new JSONObject(results).toString());
-			} catch (Exception e) {
-				logger.error(e.getMessage());
-				return ResponseEntity.status(500).body(e.getMessage());
-			}
 		} else {
-			try {
-				params.put(ICIPMlOpsConstants.IS_INSTANCE, isInstance);
-				String results = iCIPMlOpsRestAdapterService.callPostMethod(adapterInstance,
-						ICIPMlOpsConstants.PROJECTS_MODELS_REGISTER_CREATE, project, headers, params,
-						registerModelsbody);
-				return ResponseEntity.status(200).body(results);
-			} catch (Exception e) {
-				return ResponseEntity.status(500).body(e.getMessage());
+			fedModeldto.setModifiedBy(ICIPUtils.getUser(claim));
+			fedModeldto.setModifiedDate(Timestamp.from(Instant.now()));
+		}
+		fedModeldto.setOrganisation(project);
+		ICIPMLFederatedModel federatedModetToAdd = ICIPFedModelUtil.MapDtoToModel(fedModeldto);
+		logger.info("Request for RegisterModel: ");
+		try {
+			List<ICIPMLFederatedModelDTO> fedModels = fedModelService
+					.getModelByFedModelNameAndOrg(fedModeldto.getName(), project);
+			if (fedModels != null && fedModels.size() > 0) {
+				if ((fedModeldto.getId() != null && fedModels.size() > 1) || (fedModeldto.getId() == null))
+					return new ResponseEntity<>("Model with name '" + fedModeldto.getName() + "' already exists",
+							HttpStatus.BAD_REQUEST);
+				else if (fedModeldto.getId() != null && fedModels.size() == 1
+						&& !fedModels.getFirst().getId().equals(fedModeldto.getId())) {
+					return new ResponseEntity<>(
+							"Another Model with name '" + fedModeldto.getName() + "' already exists",
+							HttpStatus.BAD_REQUEST);
+				}
 			}
+			ICIPMLFederatedModel response = fedModelService.savemodel(federatedModetToAdd);
+			return ResponseEntity.status(201).body(new JSONObject(response).toString());
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			return ResponseEntity.status(500).body(e.getMessage());
 		}
 	}
 
@@ -1256,6 +1176,48 @@ public class ICIPMlopsController {
 			}
 		});
 		return ResponseEntity.status(200).body(adapterTypeList.toString());
+	}
+	
+	/**
+	 * Gets the searched objects.
+	 *
+	 * @param datasetName        the dataset name
+	 * @param projectName        the project name
+	 * @param size               the size
+	 * @param page               the page
+	 * @param sortEvent          the sort event
+	 * @param sortOrder          the sort order
+	 * @param searchParams       the search params
+	 * @param selectClauseParams the select clause params
+	 * @return the searched objects
+	 */
+	@GetMapping(path = "models/fileData")
+	public ResponseEntity<?> getfileData(@RequestParam(required = true, name = "modelName") String modelName,
+			@RequestParam(required = true, name = "fileName") String fileName,
+	        @RequestParam(required = true, name = "org") String org)
+			 {
+		ResponseEntity<?> resp;
+		try {
+			return iCIPMlOpsRestAdapterService.getS3FileData(modelName,fileName,org);
+			
+		} catch (Exception e) {
+			resp = new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+			logger.error("EXCEPTION:", e.getMessage());
+		}
+		return resp;
+	}
+	
+	@PostMapping(path = "models/upload")
+	public ResponseEntity<?> uploadModel(@RequestBody ICIPMLFederatedModel requestBody,
+			@RequestParam(required = false, name = "fileUploaded") String fileUploaded){
+		ResponseEntity<?> resp;
+		try {
+			return iCIPMlOpsRestAdapterService.uploadModel(requestBody,fileUploaded);	
+		} catch (Exception e) {
+			resp = new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			logger.error("EXCEPTION:", e.getMessage());
+		}
+		return resp;
 	}
 
 	@GetMapping("endpoints/listAdapters")
@@ -1686,28 +1648,6 @@ public class ICIPMlopsController {
 	public ICIPDatasource getDatasource(String datasource, String org) {
 		return datasourceService.getDatasource(datasource, org);
 
-	}
-
-	@GetMapping("/models/list/count")
-	public ResponseEntity<Long> getAllModelsCount(@RequestParam(name = "project", required = true) String project,
-			@RequestParam(name = "type", required = false) String type,
-			@RequestParam(name = "instance", required = false) String instance,
-			@RequestParam(name = "tags", required = false) String tags,
-			@RequestParam(name = "query", required = false) String query,
-			@RequestParam(name = "orderBy", required = false) String orderBy,
-			@RequestParam(name = "isCached", required = true) Boolean isCached) throws IOException {
-		List<Integer> tagList = new ArrayList<>();
-		if (tags != null) {
-			String[] splitValues = tags.split(",");
-			for (String t : splitValues) {
-				tagList.add(Integer.parseInt(t));
-			}
-		} else
-			tagList = null;
-
-		Long results = fedModelService.getAllModelsCountByAdpateridAndOrganisation(instance, project, tagList, query,
-				orderBy, type);
-		return ResponseEntity.status(200).body(results);
 	}
 
 	@GetMapping("/endpoints/list/count")
@@ -2675,7 +2615,7 @@ public class ICIPMlopsController {
 	public ResponseEntity<String> getModelsByFedId(@RequestParam(name = "org", required = true) String org,
 			@RequestParam(name = "fed_Name", required = true) String fedName) {
 		try {
-			List<ICIPMLFederatedModelDTO> results = fedModelService.getModelByFedNameAndOrg(fedName, org);
+			List<ICIPMLFederatedModelDTO> results = fedModelService.getModelByFedModelNameAndOrg(fedName, org);
 			String response = new JSONArray(results).toString();
 			return ResponseEntity.status(200).body(response);
 

@@ -24,46 +24,27 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.pdfbox</groupId>
-			<artifactId>pdfbox</artifactId>
-			<version>3.0.3</version>
-		</dependency>
-		<dependency>
 			<groupId>com.infosys.icets.icip</groupId>
 			<artifactId>icip-lib-iai</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.10.5</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.10.5</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-xml</artifactId>
-			<version>2.17.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.testng</groupId>
-			<artifactId>testng</artifactId>
-			<version>7.9.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.james</groupId>
-			<artifactId>apache-mime4j-core</artifactId>
-			<version>0.8.11</version>
 		</dependency>
 		<dependency>
 			<groupId>org.liquibase</groupId>
@@ -90,15 +71,10 @@
 			<groupId>io.netty</groupId>
 			<artifactId>netty-handler</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.azure</groupId>
-			<artifactId>azure-core-http-okhttp</artifactId>
-			<version>1.12.0</version>
-		</dependency>
+
 		<dependency>
 			<groupId>com.azure</groupId>
 			<artifactId>azure-identity</artifactId>
-			<version>1.14.0</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
@@ -107,23 +83,13 @@
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
-			<version>1.12.773</version>
 		</dependency>
-		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-core</artifactId>
-			<version>1.12.773</version>
-		</dependency>
+
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.squareup.okio</groupId>
-			<artifactId>okio-jvm</artifactId>
-			<version>3.4.0</version>
-			<scope>runtime</scope>
-		</dependency>
+
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-core</artifactId>
@@ -135,44 +101,71 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-config</artifactId>
-			<version>6.3.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			<version>6.1.14</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-			<version>3.3.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-core</artifactId>
-			<version>6.3.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.23.1</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.5.12</version>
 			<scope>test</scope>
 		</dependency>	
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-compress</artifactId>
-			<version>1.26.1</version>
-		</dependency>
+        
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.17.2</version>
 		</dependency>
+		
+		<dependency>
+		    <groupId>org.apache.pdfbox</groupId>
+		    <artifactId>pdfbox</artifactId>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.testng</groupId>
+		    <artifactId>testng</artifactId>
+		    <scope>test</scope>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.apache.james</groupId>
+		    <artifactId>apache-mime4j-core</artifactId>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.azure</groupId>
+		    <artifactId>azure-core-http-okhttp</artifactId>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.amazonaws</groupId>
+		    <artifactId>aws-java-sdk-core</artifactId>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.squareup.okio</groupId>
+		    <artifactId>okio-jvm</artifactId>
+		    <scope>runtime</scope>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-compress</artifactId>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>

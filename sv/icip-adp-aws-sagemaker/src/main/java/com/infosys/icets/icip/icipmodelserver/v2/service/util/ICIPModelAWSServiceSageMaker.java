@@ -344,14 +344,13 @@ public class ICIPModelAWSServiceSageMaker implements IICIPModelServiceUtil {
 			if (results != null && !results.isEmpty() && results.startsWith("{")) {
 				responseJsonObj = new JSONObject(results);
 			} else {
-				modelFromVm.setStatus(results);
+				
 				return modelFromVm;
 			}
 			modelFromVm = parseMLFedModel(responseJsonObj, datasource, datasource.getOrganization());
 			return modelFromVm;
 		} catch (Exception e) {
 			logger.info("error due to:{}", e.getMessage());
-			modelFromVm.setStatus("Some error occured while trying to register Model");
 			return modelFromVm;
 		}
 	}
@@ -1065,30 +1064,15 @@ public class ICIPModelAWSServiceSageMaker implements IICIPModelServiceUtil {
 	private ICIPMLFederatedModel parseMLFedModel(JSONObject jsonObj, String dsource, String dsrcAlias, String org)
 			throws ParseException {
 		ICIPMLFederatedModel dto = new ICIPMLFederatedModel();
-		dto.setSourceName(jsonObj.getString("ModelName"));
-		dto.setName(jsonObj.getString("ModelName"));
+		dto.setModelName(jsonObj.getString("ModelName"));
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");// 1.688643147483E9
 		Date finishedTime = sdf.parse(jsonObj.getString("CreationTime"));
 		Timestamp ts2 = new Timestamp(finishedTime.getTime());
 		dto.setCreatedOn(ts2);
 		dto.setCreatedBy("admin");
 		FedModelsID fedmodid = new FedModelsID();
-		fedmodid.setAdapterId(dsource);
-		fedmodid.setOrganisation(org);
-		fedmodid.setSourceId(jsonObj.getString("ModelName"));
-		dto.setSourceModelId(fedmodid);
-
-		dto.setType("AWSSAGEMAKER");
-		dto.setAdapter(dsrcAlias);
-		dto.setRawPayload(jsonObj.toString());
-		dto.setSourceOrg("NULL");
-		dto.setArtifacts(jsonObj.getString("ModelArn"));
-		dto.setContainer(jsonObj.getString("ModelArn"));
-		dto.setSourceStatus("Registered");
-		dto.setStatus("Registered");		
+		dto.setModelType("AWSSAGEMAKER");
 		Date date1 = new Date();
-		Timestamp ts1 = new Timestamp(date1.getTime());
-		dto.setSyncDate(ts1);
 		return dto;
 	}
 
@@ -1175,20 +1159,18 @@ public class ICIPModelAWSServiceSageMaker implements IICIPModelServiceUtil {
 			throws ParseException {
 		ICIPMLFederatedModel dto = new ICIPMLFederatedModel();
 		FedModelsID fedmodid = new FedModelsID();
-		fedmodid.setAdapterId(ds.getName());
 		String srcId = jsonObject.optString("sourceId");
 		if (srcId == null || srcId.isEmpty())
 			srcId = jsonObject.optString("sourceID");
 		fedmodid.setSourceId(srcId);
 		fedmodid.setOrganisation(org);
-		dto.setSourceModelId(fedmodid);
-		Optional<ICIPMLFederatedModel> modObj = fedModelRepo.findById(fedmodid);
+		dto.setDatasource(ds.getName());
+		ICIPMLFederatedModel modObj = fedModelRepo.findByDatasourceNameModelNameAndOrganisaton(jsonObject.getString("ModelName"), ds.getName(), org);
 		Object description = jsonObject.get("description");
-		if (modObj.isPresent()) {
-			dto = modObj.get();
+		if (modObj!=null) {
+			dto = modObj;
 		} else {
-			dto.setLikes(0);
-			dto.setName(jsonObject.optString("name"));
+			dto.setModelName(jsonObject.optString("name"));
 			dto.setDescription(description != null ? description.toString() : "");
 		}
 		String modifiedOn = jsonObject.optString("modifiedOn");
@@ -1210,23 +1192,10 @@ public class ICIPModelAWSServiceSageMaker implements IICIPModelServiceUtil {
 			}
 		}
 		Object value = jsonObject.get("artifacts");
-		if (value instanceof String) {
-			String strArti = jsonObject.getString("artifacts");
-			dto.setArtifacts(strArti);
-		} else if (value instanceof JSONObject) {
-			JSONObject artifacts = jsonObject.getJSONObject("artifacts");
-			dto.setArtifacts(artifacts.toString());
-		}
+		
 
 		Object containerValue = jsonObject.get("container");
-		if (containerValue instanceof String) {
-			String containerstr = jsonObject.getString("container");
-			dto.setContainer(containerstr);
-		} else if (containerValue instanceof JSONObject) {
-			JSONObject containerObj = jsonObject.getJSONObject("container");
-			dto.setContainer(containerObj.toString());
-		}
-
+		
 		dto.setCreatedBy(jsonObject.optString("createdBy"));
 		String createdon = jsonObject.optString("createdOn");
 		Timestamp ts2 = null;
@@ -1249,39 +1218,17 @@ public class ICIPModelAWSServiceSageMaker implements IICIPModelServiceUtil {
 				logger.error("error while parsing createdOn with Zone:{}", e);
 			}
 		}
-		dto.setSourceDescription(description != null ? description.toString() : "");
-		String updatedBy = jsonObject.optString("updatedBy");
-		dto.setSourceModifiedBy(updatedBy != null ? updatedBy : "");
-		dto.setSourceModifiedDate(ts);
-		dto.setSourceName(jsonObject.getString("name"));
-		dto.setSourceOrg(jsonObject.optString("projectId"));
-		if (dto.getSourceOrg() == null || dto.getSourceOrg().isEmpty())
-			dto.setSourceOrg(jsonObject.optString("sourceOrg"));
-		dto.setIsDeleted(jsonObject.optBoolean("isDeleted"));
-		dto.setSourceStatus(jsonObject.optString("status"));
-		dto.setStatus(jsonObject.optString("status"));
+		
 		Date date1 = new Date();
 		Timestamp ts1 = new Timestamp(date1.getTime());
-		dto.setSyncDate(ts1);
 		if (dto.getCreatedOn() == null)
 			dto.setCreatedOn(ts1);
 		Integer version = jsonObject.optInt("version");
 		if (version != null)
 			dto.setVersion(Integer.toString(version));
 		else
-			dto.setVersion("1");
-		dto.setType("AWSSAGEMAKER");
-		dto.setAdapter(ds.getAlias());
-		if (dto.getStatus() != null && dto.getStatus().equalsIgnoreCase("inprogress") && dto.getStatus() != null
-				&& dto.getStatus().equalsIgnoreCase("Registered")) {
-			dto.setStatus("InProgress");
-		} else {
-			dto.setStatus(dto.getStatus());
-		}
-		if ("undeployed".equalsIgnoreCase(jsonObject.optString("status"))) {
-			dto.setDeployment("");
-		}
-		dto.setRawPayload(jsonObject.toString());
+		dto.setVersion("1");
+		dto.setModelType("AWSSAGEMAKER");
 		return dto;
 	}
 
@@ -1499,10 +1446,9 @@ public class ICIPModelAWSServiceSageMaker implements IICIPModelServiceUtil {
 		JSONObject reqJsonObj = new JSONObject(request.getRequest());
 		ICIPMLFederatedModel dto = new ICIPMLFederatedModel();
 		FedModelsID fedmodid = new FedModelsID();
-		fedmodid.setAdapterId(request.getName());
 		fedmodid.setSourceId(reqJsonObj.optString("modelId"));
 		fedmodid.setOrganisation(request.getOrganization());
-		Optional<ICIPMLFederatedModel> modObj = fedModelRepo.findById(fedmodid);
+		Optional<ICIPMLFederatedModel> modObj = fedModelRepo.findById(Integer.parseInt(reqJsonObj.optString("modelId")));
 		if (modObj.isPresent()) {
 			dto = modObj.get();
 			Map<String, String> responseFromVM = deleteModelFromRemoteVM(fedmodid.getAdapterId(),
