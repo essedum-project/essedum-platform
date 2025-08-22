@@ -7,8 +7,6 @@ COPY aip-app-ui/ ./
 
 RUN yarn config set registry https://registry.npmjs.org && yarn install --network-timeout 100000
 
-#RUN yarn install
-
 RUN npm run build-prod
 
 WORKDIR /shell-app-ui
@@ -17,15 +15,11 @@ COPY shell-app-ui/ ./
 
 RUN yarn config set registry https://registry.npmjs.org && yarn install --network-timeout 100000
 
-#RUN yarn install
-
 RUN npm run build-prod
 
 COPY nginx_ui.conf /
 
 FROM nginx:alpine
-#FROM --platform=linux/amd64 nginx:alpine
-
 
 COPY /nginx_ui.conf /etc/nginx/nginx.conf
 
