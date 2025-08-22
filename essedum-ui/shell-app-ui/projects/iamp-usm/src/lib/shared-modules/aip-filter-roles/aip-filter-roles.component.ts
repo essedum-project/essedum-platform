@@ -33,11 +33,18 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
   selectedUserList: string[] = [];
   selectedPortfolioList: string[] = [];
   
+  // New properties for manage-users component
+  selectedUserLoginList: string[] = [];
+  selectedEmailList: string[] = [];
+  
   // Filter properties
   roleOptions: any[] = [];
   projectOptions: any[] = [];
   userOptions: any[] = [];
   portfolioOptions: any[] = [];
+  // New filter options for manage-users
+  userLoginOptions: any[] = [];
+  emailOptions: any[] = [];
   
   constructor() {}
 
@@ -77,6 +84,8 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
     this.projectOptions = [];
     this.userOptions = [];
     this.portfolioOptions = [];
+    this.userLoginOptions = [];
+    this.emailOptions = [];
 
     if (!this.filterOptions || this.filterOptions.length === 0) {
       return;
@@ -97,6 +106,12 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
           case 'portfolio':
             this.portfolioOptions = filterGroup.options;
             break;
+          case 'userlogins':
+            this.userLoginOptions = filterGroup.options;
+            break;
+          case 'emails':
+            this.emailOptions = filterGroup.options;
+            break;
         }
       } else {
         console.warn('Invalid filter group received:', filterGroup);
@@ -112,6 +127,8 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
       this.selectedProjectList = this.selectedFilterValues.projects || [];
       this.selectedUserList = this.selectedFilterValues.users || [];
       this.selectedPortfolioList = this.selectedFilterValues.portfolios || [];
+      this.selectedUserLoginList = this.selectedFilterValues.userLogins || [];
+      this.selectedEmailList = this.selectedFilterValues.emails || [];
     }
   }
 
@@ -130,7 +147,9 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
       this.selectedRoleList.length > 0 ||
       this.selectedProjectList.length > 0 ||
       this.selectedUserList.length > 0 ||
-      this.selectedPortfolioList.length > 0
+      this.selectedPortfolioList.length > 0 ||
+      this.selectedUserLoginList.length > 0 ||
+      this.selectedEmailList.length > 0
     );
   }
 
@@ -151,6 +170,14 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
     
     if (this.selectedPortfolioList.length > 0) {
       filters.push(`Portfolios (${this.selectedPortfolioList.length})`);
+    }
+    
+    if (this.selectedUserLoginList.length > 0) {
+      filters.push(`User Logins (${this.selectedUserLoginList.length})`);
+    }
+    
+    if (this.selectedEmailList.length > 0) {
+      filters.push(`Emails (${this.selectedEmailList.length})`);
     }
     
     return filters.join(', ');
@@ -188,6 +215,22 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
     }
   }
 
+  userLoginSelected(event: any): void {
+    const selectedValue = event.value;
+    if (selectedValue && !this.selectedUserLoginList.includes(selectedValue)) {
+      this.selectedUserLoginList.push(selectedValue);
+      this.emitFilterChange();
+    }
+  }
+
+  emailSelected(event: any): void {
+    const selectedValue = event.value;
+    if (selectedValue && !this.selectedEmailList.includes(selectedValue)) {
+      this.selectedEmailList.push(selectedValue);
+      this.emitFilterChange();
+    }
+  }
+
   removeRole(role: string): void {
     this.selectedRoleList = this.selectedRoleList.filter(r => r !== role);
     this.emitFilterChange();
@@ -208,6 +251,16 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
     this.emitFilterChange();
   }
 
+  removeUserLogin(userLogin: string): void {
+    this.selectedUserLoginList = this.selectedUserLoginList.filter(u => u !== userLogin);
+    this.emitFilterChange();
+  }
+
+  removeEmail(email: string): void {
+    this.selectedEmailList = this.selectedEmailList.filter(e => e !== email);
+    this.emitFilterChange();
+  }
+
   clearAllFilters(filterType: string): void {
     switch (filterType) {
       case 'role':
@@ -222,11 +275,19 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
       case 'portfolio':
         this.selectedPortfolioList = [];
         break;
+      case 'userLogin':
+        this.selectedUserLoginList = [];
+        break;
+      case 'email':
+        this.selectedEmailList = [];
+        break;
       default:
         this.selectedRoleList = [];
         this.selectedProjectList = [];
         this.selectedUserList = [];
         this.selectedPortfolioList = [];
+        this.selectedUserLoginList = [];
+        this.selectedEmailList = [];
         break;
     }
     this.emitFilterChange();
@@ -237,7 +298,9 @@ export class AipFilterRolesComponent implements OnInit, OnChanges {
       roles: this.selectedRoleList,
       projects: this.selectedProjectList,
       users: this.selectedUserList,
-      portfolios: this.selectedPortfolioList
+      portfolios: this.selectedPortfolioList,
+      userLogins: this.selectedUserLoginList,
+      emails: this.selectedEmailList
     });
     
     // Collapse the filter panel after any change

@@ -329,5 +329,80 @@
           </div>
         </div>
       </div>
+
+      <!-- Manage Users Filter -->
+      <div class="filter-options" *ngSwitchCase="'manage-users'">
+        <!-- User Login Filter -->
+        <div class="filter-group" *ngIf="userLoginOptions && userLoginOptions.length > 0">
+          <div class="filter-control">
+            <mat-form-field appearance="fill" class="w-100">
+              <label>User Login</label>
+              <mat-select id="userlogin-select"
+                data-select-type="userlogin-type" (selectionChange)="userLoginSelected($event)"
+                aria-labelledby="userlogin-label" placeholder="All">
+                <mat-option *ngIf="selectedUserLoginList?.length > 0" value="" (click)="clearAllFilters('userlogin')">
+                  All
+                </mat-option>
+                <ng-container *ngFor="let option of userLoginOptions">
+                  <mat-option [value]="option.value">
+                    {{ option.label }}
+                  </mat-option>
+                </ng-container>
+                <!-- Fallback option if no options available -->
+                <mat-option *ngIf="userLoginOptions.length === 0" value="" disabled>
+                  No user logins available
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="selected-items" *ngIf="selectedUserLoginList?.length > 0">
+            <mat-chip-set id="userlogin-chips-set" aria-label="Selected user logins">
+              <mat-chip data-chip-type="userlogin"
+                *ngFor="let userLogin of selectedUserLoginList; let i = index" removable="true"
+                (removed)="removeUserLogin(userLogin)">
+                {{ userLogin }}
+                <mat-icon data-icon-type="chip-remove-userlogin" matChipRemove>close</mat-icon>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
+
+        <!-- Email Filter -->
+        <div class="filter-group" *ngIf="emailOptions && emailOptions.length > 0">
+          <div class="filter-control">
+            <mat-form-field appearance="fill" class="w-100">
+              <label>Email</label>
+              <mat-select id="email-select"
+                data-select-type="email-type" (selectionChange)="emailSelected($event)"
+                aria-labelledby="email-label" placeholder="All">
+                <mat-option *ngIf="selectedEmailList?.length > 0" value="" (click)="clearAllFilters('email')">
+                  All
+                </mat-option>
+                <ng-container *ngFor="let option of emailOptions">
+                  <mat-option [value]="option.value">
+                    {{ option.label }}
+                  </mat-option>
+                </ng-container>
+                <!-- Fallback option if no options available -->
+                <mat-option *ngIf="emailOptions.length === 0" value="" disabled>
+                  No emails available
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="selected-items" *ngIf="selectedEmailList?.length > 0">
+            <mat-chip-set id="email-chips-set" aria-label="Selected emails">
+              <mat-chip data-chip-type="email"
+                *ngFor="let email of selectedEmailList; let i = index" removable="true"
+                (removed)="removeEmail(email)">
+                {{ email }}
+                <mat-icon data-icon-type="chip-remove-email" matChipRemove>close</mat-icon>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
+      </div>
     </div>
   </div>

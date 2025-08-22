@@ -40,9 +40,12 @@ import { RoleDetailComponent } from "./components/role-detail/role-detail.compon
 import { RoleRoleComponent } from "./components/Role-Role/role-role.component";
 import { UserProjectRoleListComponent } from "./components/user-project-role-list/user-project-role-list.component";
 import { RoleroleService } from "./services/role-role.service";
+import { OrgUnitService } from "./services/org-unit.service";
+import { UserUnitService } from "./services/user-unit.service";
 import { AipHeaderComponent } from "./components/aip-header/aip-header.component";
 import { ProjectListViewComponent } from "./components/project/project-list-view.component";
 import { ProjectDetailComponent } from "./components/project-detail/project-detail.component";
+import { ManageUsersComponent } from "./components/manage-users/manage-users.component";
 import { MatTableModule } from "@angular/material/table";
 import { MatTreeModule } from "@angular/material/tree";
 import { RouterModule } from "@angular/router";
@@ -106,6 +109,7 @@ import { MatTabsModule } from "@angular/material/tabs";
         ConfirmProjectDeleteDialogComponent,
         ProjectListViewComponent,
         ProjectDetailComponent,
+        ManageUsersComponent,
 
         ConfirmRevokeDialogComponent,
         ConfirmRegenerateDialogComponent,
@@ -119,6 +123,8 @@ import { MatTabsModule } from "@angular/material/tabs";
         UsersService,
         UsmPortfolioService,
         RoleroleService,
+        OrgUnitService,
+        UserUnitService,
         DashConstantService,
         { provide: BusyConfig, useFactory: busyConfigFactory },
         IampUsmService,
@@ -126,7 +132,7 @@ import { MatTabsModule } from "@angular/material/tabs";
         DatePipe,
         encKey,
     ],
-    exports: [IampUsmComponent, SecretsComponent, RoleListComponent, RoleDetailComponent, RoleRoleComponent, UserProjectRoleListComponent, ProjectDetailComponent],
+    exports: [IampUsmComponent, SecretsComponent, RoleListComponent, RoleDetailComponent, RoleRoleComponent, UserProjectRoleListComponent, ManageUsersComponent],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
 export class IampUsmModule { }
