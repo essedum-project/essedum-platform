@@ -33,7 +33,7 @@
 		<mssql-jdbc.version>9.2.0.jre11</mssql-jdbc.version>
 		<json-path.version>2.9.0</json-path.version>
 		<log4j2.version>2.17.1</log4j2.version>
-		<spring-security.version>6.4.3</spring-security.version>
+		<spring-security.version>6.3.4</spring-security.version>
 		<spring.cloud.version>4.1.3</spring.cloud.version>
 	</properties>
 	<modules>
