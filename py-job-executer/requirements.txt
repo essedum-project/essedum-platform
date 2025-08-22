@@ -9,4 +9,5 @@ psutil
 gradio
 pandas
 pmdarima
+dotenv
 boto3==1.34.117
