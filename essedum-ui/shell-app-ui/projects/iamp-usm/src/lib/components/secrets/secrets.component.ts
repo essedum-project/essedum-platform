@@ -40,7 +40,7 @@ export class SecretsComponent {
   hidePass: boolean = true;
   title: string;
   showLoader: boolean;
-  search: string[] = [];
+  search: string = "";
   pageArr: number[] = [];
   pageNumberInput: number = 1;
   noOfPages: number = 0;
@@ -168,23 +168,12 @@ export class SecretsComponent {
 
     if (searchText === null || searchText === "") {
       this.refreshComplete();
-      // this.keys="";
     } else {
       let filterData: any = [];
       this.noOfPages = 0;
       searchText = searchText.toLowerCase().trim();
-      // if(!value.startsWith("app_")){
-      //   var k = "app_";
-      //   value=k.concat(value);
-      // }
-      // if(value.startsWith("app_")){
-      this.data.forEach((e: any) => {
-        var eKey = e.key;
-        eKey = eKey.toLowerCase(eKey);
-        if (eKey === searchText) {
-          filterData.push(e);
-        }
-      });
+      this.search=searchText;
+      this.getList();
       if (filterData.length !== 0) {
         this.noOfItems = filterData.length;
         this.dashConstantList = filterData;
@@ -195,12 +184,7 @@ export class SecretsComponent {
         this.messageService.message("No Records Found");
         this.keys = "";
       }
-    }
-    //}
-    // else{
-    //   this.messageService.message("Invalid Input")
-    //   this.keys="";
-    // }
+    }   
   }
 
   getList(): void {
@@ -223,6 +207,7 @@ export class SecretsComponent {
       this.pageArr = [...Array(this.noOfPages).keys()];
     });
     this.pageSize = this.pageSize || 6;
+    this.lastRefreshTime();
   }
 
   getCount() {
@@ -292,8 +277,8 @@ export class SecretsComponent {
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        // this.refresh();
-      }
+        this.refreshComplete();
+        }
     });
   }
 
@@ -329,7 +314,7 @@ export class SecretsComponent {
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        // this.refresh();
+        this.refreshComplete();
       }
     });
   }
@@ -346,7 +331,7 @@ export class SecretsComponent {
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        // this.refresh();
+        this.refreshComplete();
       }
     });
   }
@@ -398,13 +383,14 @@ export class SecretsComponent {
   }
 
   refreshComplete() {
-    this.search = [];
+    this.search = "";
     this.onClear();
     this.noOfPages = 0;
     this.getCount();
     setTimeout(() => {
       this.getList();
     }, 500);
+    this.lastRefreshTime();
   }
 
   lastRefreshTime() {

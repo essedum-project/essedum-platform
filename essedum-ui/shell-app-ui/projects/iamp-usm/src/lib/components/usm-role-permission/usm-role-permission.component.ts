@@ -345,6 +345,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
     this.viewUsmRolePermissions = false;
     this.loadPaginated(0, this.pageSize, null, null);
     this.router.navigate(["../../"], { relativeTo: this.route });
+    this.lastRefreshTime();
   }
 
   checkUsmRolePermissions() {
@@ -398,14 +399,14 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
       this.usmRolePermissions.role == undefined ||
       this.usmRolePermissions.role == null
     ) {
-      this.messageService.error("Please Select A Role", "LEAP");
+      this.messageService.error("Please Select A Role", "");
     } else if (
       this.usmRolePermissions.permission == undefined ||
       this.usmRolePermissions.permission == null
     ) {
       this.messageService.error(
         "Please Select A Module and Permission",
-        "LEAP"
+        ""
       );
     } else {
       if (this.edit) this.updateWave();
@@ -438,7 +439,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
               (response) => {
                 this.messageService.info(
                   "Role-Permissions Saved Successfully",
-                  "LEAP"
+                  ""
                 );
                 this.saveDashConstant();
                 this.loadPaginated(0, this.pageSize, null, null);
@@ -447,12 +448,13 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
                 this.testCreate = true;
                 this.errorMessage = false;
                 this.listView();
+
               },
               (error) => {
                 this.testCreate = false;
                 this.messageService.error(
                   "Could not create Role-Permissions",
-                  "LEAP"
+                  ""
                 );
               }
             );
@@ -600,7 +602,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
       },
       (error) => {
         this.testCreate = false;
-        this.messageService.error("Could not get the results", "LEAP");
+        this.messageService.error("Could not get the results", "");
       }
     );
   }
@@ -622,16 +624,16 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
 
               // If the response is empty, show an info message
               if (pageResponse.content.length === 0) {
-                this.messageService.info(
+                this.messageService.message(
                   "No role-permission records found",
-                  "LEAP"
+                  ""
                 );
               }
             } else {
               // Handle null or invalid response
               this.messageService.error(
                 "Invalid response received from API",
-                "LEAP"
+                ""
               );
               // Initialize empty data structure
               this.loadData({ content: [], totalElements: 0, totalPages: 0 });
@@ -642,7 +644,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
             this.messageService.error(
               "Failed to load role-permissions: " +
                 (error.message || "Unknown error"),
-              "LEAP"
+              ""
             );
             this.testCreate = false;
             // Initialize empty data structure
@@ -651,7 +653,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
         );
     } catch (error) {
       console.error("Exception occurred while loading data:", error);
-      this.messageService.error("An error occurred while loading data", "LEAP");
+      this.messageService.error("An error occurred while loading data", "");
       this.testCreate = false;
       // Initialize empty data structure
       this.loadData({ content: [], totalElements: 0, totalPages: 0 });
@@ -689,6 +691,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
     }
 
     if (this.currentPage.totalPages > 0) this.testCreate = true;
+    this.lastRefreshTime()
   }
 
   onPageFired(event) {
@@ -721,6 +724,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
     console.log("Filtering by role name:", roleName);
     this.SearchedPage(false, "", "", roleName);
     this.paginator.firstPage();
+    this.lastRefreshTime();    
   }
 
   checkEnterPressed(event: any, val: any) {
@@ -767,7 +771,9 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
     console.log("Search with params:", { module, permission, role });
     this.SearchedPage(false, module, permission, role);
     this.paginator.firstPage();
-  }  SearchedPage(flag, module, permission, role) {
+  }  
+  
+  SearchedPage(flag, module, permission, role) {
     let index = flag ? this.pageEvent.pageIndex : 0;
     
     // Handle various formats of role parameter
@@ -820,7 +826,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
         },
         (error) => {
           this.testCreate = false;
-          this.messageService.error("Could not get the results", "LEAP");
+          this.messageService.error("Could not get the results", "");
           console.error("Error in SearchedPage:", error);
         }
       );
@@ -866,9 +872,9 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
             this.testId = rs.id;
             this.testCreate = true;
             this.updateDashConstant();
-            this.messageService.info(
-              "Role-Permission updated successfully",
-              "LEAP"
+            this.messageService.message(
+             rs, "Role-Permission updated successfully",
+              
             );
             this.clearWave();
             this.showCreate = false;
@@ -876,7 +882,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
           },
           (error) => {
             this.testCreate = false;
-            this.messageService.error("Could not update", "LEAP");
+            this.messageService.error("Could not update", "");
           }
         );
     }
@@ -896,12 +902,13 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
         this.loadPaginated(0, this.pageSize, null, null);
         this.currentPage.remove(usmRolePermissionsToDelete);
         this.deletedashconstant(usmRolePermissionsToDelete);
-        this.messageService.info(
-          "Role-Permission Deleted successfully",
-          "LEAP!"
+        this.messageService.message(
+          "Role-Permission Deleted successfully",""
+          
         );
 
         this.Clear();
+        this.lastRefreshTime();
       },
       (error) => {
         console.error(`Error deleting role permission with ID ${id}:`, error);
@@ -909,7 +916,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
         const errorMessage =
           error?.error?.message ||
           "Could not delete! Server returned an error.";
-        this.messageService.error(errorMessage, "LEAP");
+        this.messageService.error(errorMessage, "");
         this.loadPaginated(0, this.pageSize, null, null);
       }
     );
@@ -996,15 +1003,15 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
     dashConstant.project_name = project.name;
     this.busy = this.dashConstantService.create(dashConstant).subscribe(
       (response) => {
-        this.messageService.info(
-          "Configuration for Dbs-view added successfully",
-          "LEAP!"
+        this.messageService.message(
+         response, "Configuration for Dbs-view added successfully"
+         
         );
       },
       (error) => {
         this.messageService.error(
           "Could not Add Configuration for Dbs-view!",
-          "LEAP"
+          ""
         );
       }
     );
@@ -1031,13 +1038,13 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
       (response) => {
         this.messageService.info(
           "Configuration for Dbs-view updated successfully",
-          "LEAP!"
+          ""
         );
       },
       (error) => {
         this.messageService.error(
           "Could not Add Configuration for Dbs-view!",
-          "LEAP"
+          ""
         );
       }
     );
@@ -1076,13 +1083,13 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
               (res) => {
                 this.messageService.info(
                   "Configuration for Dbs-view deleted successfully",
-                  "LEAP!"
+                  ""
                 );
               },
               (error) => {
                 this.messageService.error(
                   "Could not delete Configuration for Dbs-view!",
-                  "LEAP"
+                  ""
                 );
               }
             );
@@ -1104,6 +1111,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.loadPaginated(0, this.pageSize, null, null);
+        this.lastRefreshTime();
       }
     });
   }
@@ -1120,9 +1128,9 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
       if (this.usmRolePermissionss && this.usmRolePermissionss.length > 0) {
         rolePermission = this.usmRolePermissionss[0];
       } else {
-        this.messageService.info(
+        this.messageService.message(
           "No role permissions available to edit",
-          "LEAP"
+          ""
         );
         return;
       }
@@ -1140,6 +1148,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.loadPaginated(0, this.pageSize, null, null);
+        this.lastRefreshTime();
       }
     });
   }
@@ -1158,7 +1167,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
       } else {
         this.messageService.info(
           "No role permissions available to view",
-          "LEAP"
+          ""
         );
         return;
       }
