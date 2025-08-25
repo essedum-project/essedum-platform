@@ -39,6 +39,17 @@ import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
 import { MatCardModule } from "@angular/material/card";
 import { MatTooltipModule } from "@angular/material/tooltip";
+import { DashConstantComponent } from "./entities/dash-constant/dash-constant.component";
+import { DashConstantService } from "./services/dash-constant.service";
+import { ProjectService } from "./services/project.service";
+import { RoleService } from "./services/role.service";
+import { UsersService } from "./services/users.service";
+import { encKey } from "./models/encKey";
+import { AipHeaderComponent } from "./shared-modules/aip-header/aip-header.component";
+import { AipPaginationComponent } from "./shared-modules/aip-pagination/aip-pagination.component";
+import { ThemeMgmtComponent } from "./components/theme-mgmt/theme-mgmt.component";
+
+
 @NgModule({
     imports: [
         NgBusyModule,
@@ -46,9 +57,9 @@ import { MatTooltipModule } from "@angular/material/tooltip";
         FormsModule,
         SharedModule,
         NgxPaginationModule,
-   
+
         IampUsmRouteModule,
- MatDialogModule,
+        MatDialogModule,
         FieldsetModule,
         NgxMatDatetimePickerModule,
         NgxMatTimepickerModule,
@@ -60,35 +71,44 @@ import { MatTooltipModule } from "@angular/material/tooltip";
         MatTreeModule,
         MatTableModule,
         MatButtonModule,
-       
+
         ReactiveFormsModule,
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
-    
+
         MatCardModule,
-     
+
         MatTooltipModule,
-     
+
     ],
     declarations: [
-  IampUsmComponent,
+        IampUsmComponent,
         SecretsComponent,
+        DashConstantComponent,
+        ThemeMgmtComponent,
+        AipHeaderComponent,
+        AipPaginationComponent
 
-      
-     
+
+
     ],
     providers: [
 
         MessageService,
+        DashConstantService,
+        ProjectService,
+        RoleService,
+        UsersService,
+        encKey,
 
         { provide: BusyConfig, useFactory: busyConfigFactory },
         IampUsmService,
         Ng4LoadingSpinnerService,
-     
-        
+
+
     ],
-    exports: [IampUsmComponent,SecretsComponent],
+    exports: [IampUsmComponent, SecretsComponent],
     // entryComponents: [ConfirmDeleteDialogComponent, ConfirmProjectDeleteDialogComponent,ConfirmRevokeDialogComponent,ConfirmRegenerateDialogComponent,],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })

@@ -176,7 +176,7 @@ export class AipSwaggerCustomComponent implements OnInit {
     const generatedSpec = {
       openapi: '3.0.1',
       info: {
-        title: 'Infosys AI Platform',
+        title: 'Essedum Platform',
         description: restConnection.description || '',
         version: 'vi',
       },
