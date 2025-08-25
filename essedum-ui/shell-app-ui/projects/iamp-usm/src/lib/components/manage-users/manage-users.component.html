@@ -79,22 +79,44 @@
   </div>
 
 <!--create/edit/view users-->
-<div class="paddingBottom selector-663-99" *ngIf="showCreate" #waveForm="ngForm" ngForm="">
-  <div class="padTop20 selector-663-100" style="width: 98%; padding-left: 20px">
-    <div>
-      <div class="backIconcrud">
-    <span class="ams_back pull-right linkMar selector-663-101" (click)="listUsers()">Back to Users</span>
-    <i class="fa fa-caret-square-o-left create-icon-color pull-right linkMar selector-663-102" (click)="listUsers()" aria-hidden="true"></i>
+<div class="paddingBottom selector-663-99" *ngIf="showCreate">
+  <div class="aip-container lfx-u-pad-lr-30">
+    <!-- <div class="lfx-u-pad-t-8" *ngIf="showCreate">
+    <div class="lfx-l-level2-middle-col"> -->
+    
+    <!-- Header Section matching project details -->
+             <div class="d-flex justify-content-between align-items-center">
+
+                 <div class="align-items-center d-flex">
+<!-- 
+    <div class="header-section">
+      <div class="header-content">
+        <div class="header-left"> -->
+          <span *ngIf="edit || view" class="back-button" (click)="listUsers()">
+            <mat-icon class="back-icon" 
+              [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" 
+              matTooltip="Back to User List"
+              matTooltipPosition="above" 
+              (mouseenter)="isBackHovered = true"
+              (mouseleave)="isBackHovered = false">
+              arrow_back
+            </mat-icon>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+          </span>
+          
+          <div class="header-title-section">
+            <h2 class="header-title" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">
+              <span *ngIf="!edit && !view">Create User</span>
+              <span *ngIf="edit && !view">Edit User</span>
+              <span *ngIf="view">View User</span>
+            </h2>
+          </div>
+        <!-- </div>
+      </div>
+    </div> -->
     </div>
-
     </div>
-
-    <h4 class="ams_h2 h2Mar crud-header selector-663-108" style="padding-left: 11%" *ngIf="!edit &amp;&amp; !view">Create User</h4>
-    <h4 class="ams_h2 h2Mar crud-header selector-663-109" [ngStyle]="{ 'padding-left': edit &amp;&amp; !view &amp;&amp; viewuser ? '15%' : '5%' }" *ngIf="edit &amp;&amp; !view">
-      Edit User
-    </h4>
-    <h4 class="ams_h2 h2Mar crud-header selector-663-110" style="padding-left: 15%" *ngIf="edit &amp;&amp; view">View User</h4>
-
+  <br>
     <div class="noPad selector-663-111">
       <div class="selector-663-112">
         <div class="row rwMAr selector-663-113">
@@ -108,7 +130,7 @@
           <div class="col-md-6 selector-663-118">
             <label class="formLabel selector-663-119">User Email*</label>
             <input [disabled]="view" type="text" maxlength="255" required="" [ngModelOptions]="{ standalone: true }" [(ngModel)]="user.user_email" class="txtInput selector-663-120" (keyup)="checkEmailMaxLength()" />
-            <span class="error selector-663-121" style="font-size: 1.6vmin">Note: Valid email patterns: email&#64;example.com, _email&#64;.example.aaaaa, .email&#64;-EXAMPLE.in,
+            <span class="selector-663-121 note-text" style="font-size: 1.6vmin">Note: Valid email patterns: email&#64;example.com, _email&#64;.example.aaaaa, .email&#64;-EXAMPLE.in,
               EMAIL&#64;_EXAMPLE.COM </span><br class="selector-663-122" />
             <span class="error selector-663-123" style="font-size: 1.6vmin" *ngIf="showEmailErrorMessage == true">{{
               lengthNameErrorMessage
@@ -119,7 +141,7 @@
           <div class="col-md-6 selector-663-125">
             <label class="formLabel selector-663-126">User First Name*</label>
             <input [disabled]="view" type="text" class="txtInput selector-663-127" maxlength="255" required="" [ngModelOptions]="{ standalone: true }" [(ngModel)]="user.user_f_name" (keyup)="checkFirstNameMaxLength()" />
-            <span class="error selector-663-128" style="font-size: 1.6vmin">
+            <span class=" selector-663-128 note-text" style="font-size: 1.6vmin">
               Note: Alpha numeric and special characters -_. allowed </span><br class="selector-663-129" />
             <span class="error selector-663-130" style="font-size: 1.6vmin" *ngIf="showfNameLengthErrorMessage == true">{{
               lengthNameErrorMessage
@@ -128,7 +150,7 @@
           <div class="col-md-6 selector-663-131">
             <label class="formLabel selector-663-132">User Middle Name</label>
             <input [disabled]="view" type="text" maxlength="255" [ngModelOptions]="{ standalone: true }" [(ngModel)]="user.user_m_name" class="txtInput selector-663-133" (keyup)="checkMiddleNameMaxLength()" />
-            <span class="error selector-663-134" style="font-size: 1.6vmin">
+            <span class=" selector-663-134 note-text" style="font-size: 1.6vmin">
               Note: Alpha numeric and special characters -_. allowed </span><br class="selector-663-135" />
             <span class="error selector-663-136" style="font-size: 1.6vmin" *ngIf="showmNameLengthErrorMessage == true">{{
               lengthNameErrorMessage
@@ -139,7 +161,7 @@
           <div class="col-md-6 selector-663-138">
             <label class="formLabel selector-663-139">User Last Name</label>
             <input [disabled]="view" type="text" maxlength="255" [ngModelOptions]="{ standalone: true }" [(ngModel)]="user.user_l_name" class="txtInput selector-663-140" (keyup)="checkLastNameMaxLength()" />
-            <span class="error selector-663-141" style="font-size: 1.6vmin">
+            <span class="selector-663-141 note-text" style="font-size: 1.6vmin">
               Note: Alpha numeric and special characters -_. allowed </span><br class="selector-663-142" />
             <span class="error selector-663-143" style="font-size: 1.6vmin" *ngIf="showlNameLengthErrorMessage == true">{{
               lengthNameErrorMessage
@@ -231,12 +253,9 @@
   <div *ngIf="edit" class="selector-663-166">
     <mat-tab-group class="selector-663-167">
       <mat-tab label="Portfolio-Project-Role" class="selector-663-168">
-        <user-project-role-list *ngIf="user &amp;&amp; user.id" [selectedUser]="user" class="selector-663-169"></user-project-role-list>
+        <lib-user-project-role-list *ngIf="user &amp;&amp; user.id" [selectedUser]="user" class="selector-663-169"></lib-user-project-role-list>
       </mat-tab>
-      <mat-tab label="User-User" class="selector-663-168">
-        <lib-user-user *ngIf="user &amp;&amp; user.id" [selectedUser]="user" class="selector-663-169">
-        </lib-user-user>
-      </mat-tab>
+  
     </mat-tab-group>
   </div>
 </div>

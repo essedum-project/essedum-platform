@@ -159,3 +159,9 @@
   margin-top: 16px;
   background-color: white;
 }
+  /* Note text */
+  .note-text {
+    font-style: italic !important;
+    display: block !important;
+    width: 100% !important;
+  }

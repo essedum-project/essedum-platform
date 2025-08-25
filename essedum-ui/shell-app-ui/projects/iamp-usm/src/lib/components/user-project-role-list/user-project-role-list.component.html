@@ -1,8 +1,9 @@
 
 <!-- NEW LAYOUT -->
    <div>
-  <div class="aip-container lfx-u-pad-lr-30">
+  <div class="aip-container lfx-u-pad-lr-30" >
     <!-- Header -->
+     <div  *ngIf="!showCreate">
     <app-aip-header 
       [cardTitle]="'User Project Role List'" 
       [lastRefreshedTime]="lastRefreshedTime" 
@@ -182,7 +183,7 @@
       
     </div>
   </div>
-
+</div>
   
 
 <div *ngIf="showCreate" #userProjectRoleForm="ngForm" class="selector-673-159" ngForm="">
@@ -201,7 +202,7 @@
                 <h2 class="header-title lfx-u-mar-l-8" style="font-family: 'Roboto', 'Segoe UI', sans-serif;" *ngIf="edit ">Edit Portfolio-Project-Role</h2>
                 <h2 class="header-title lfx-u-mar-l-8" style="font-family: 'Roboto', 'Segoe UI', sans-serif;" *ngIf="view">View Portfolio-Project-Role</h2>
               </div>
-   
+   <br> <br>
       <div class="noPad selector-673-188">
         <div class="row rwMAr selector-673-189">
           <div class="col-md-6 select-style selector-673-190" *ngIf="
