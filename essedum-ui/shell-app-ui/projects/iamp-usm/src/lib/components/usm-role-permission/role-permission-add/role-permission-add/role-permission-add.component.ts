@@ -61,8 +61,9 @@ export class RolePermissionAddComponent implements OnInit {
     private usmPermissionsService: UsmPermissionsService,
     private messageService: MessageService,
     private usmRolePermissionsService: UsmRolePermissionsService
-  ) {}ngOnInit(): void {
-
+  ) {}
+  
+  ngOnInit(): void {
     this.loadRolesAndPermissions();
 
     if (!this.rolePermission.permission) {
@@ -192,6 +193,7 @@ loadRoles() {
   compareObjects(o1: any, o2: any): boolean {
     return o1 && o2 && o1.id == o2.id;
   }
+
   compareObjects1(o1: any, o2: any): boolean {
     return o1 && o2 && o1.module === o2.module && o1.permission === o2.permission;
   }
@@ -224,7 +226,9 @@ loadRoles() {
     }
     
     return !this.showRoleError && !this.showPermissionError;
-  }  onSave() {
+  }  
+  
+  onSave() {
     let project: Project;
     try {
       project = JSON.parse(sessionStorage.getItem("project"));
@@ -336,13 +340,14 @@ loadRoles() {
     );
   }
 
-
   clearWave() {
     this.rolePermission = new UsmRolePermissions();
     
     this.showRoleError = false;
     this.showPermissionError = false;
-  }  permissionCheck(event) {
+  }  
+  
+  permissionCheck(event) {
     let flag: boolean = false;
     let permissions = this.rolePermission.permission;
 

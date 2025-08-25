@@ -33,15 +33,21 @@
         <div class="row">
           <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
             <mat-form-field appearance="fill" style="width: 100%;" floatLabel="always">
-              <mat-label>{{ roleLabel }} <span class="text-danger">*</span></mat-label> <mat-select
-                [(ngModel)]="rolePermission.role" [compareWith]="compareObjects" placeholder="Select Role"
-                [disabled]="view" (blur)="showRoleError = !rolePermission.role"
+              <mat-label>{{ roleLabel }} </mat-label>
+              <mat-select
+                [(ngModel)]="rolePermission.role"
+                [compareWith]="compareObjects"
+                placeholder="Select Role"
+                [disabled]="view"
+                required
+                name="roleSelect"
+                #roleSelect="ngModel"
                 (selectionChange)="roleSelectionChanged($event)">
                 <mat-option *ngFor="let option of roleArray" [value]="option">
                   {{ option.name }}
                 </mat-option>
               </mat-select>
-              <mat-error *ngIf="showRoleError">
+              <mat-error *ngIf="roleSelect.invalid && (roleSelect.touched || roleSelect.dirty)">
                 Role is required
               </mat-error>
               <mat-hint class="hint">
@@ -51,11 +57,16 @@
             </mat-form-field>
 
           </div>
-          <div class="col-lg-12 col-md-12 lfx-u-mar-b-16"> <mat-form-field appearance="fill" style="width: 100%;"
+          <div class="col-lg-12 col-md-12 lfx-u-mar-b-16"> 
+            <mat-form-field appearance="fill" style="width: 100%;"
               floatLabel="always">
-              <mat-label>{{ modulePermissionLabel }} <span class="text-danger">*</span></mat-label> <mat-select
+              <mat-label>{{ modulePermissionLabel }}</mat-label> 
+              <mat-select
                 [(ngModel)]="rolePermission.permission" multiple [compareWith]="compareObjects1"
-                placeholder="Select Module-Permission" [disabled]="view" (blur)="permissionCheck($event)"
+                placeholder="Select Module-Permission" [disabled]="view" required
+                name="permissionSelect"
+                #permissionSelect="ngModel"
+                (blur)="permissionCheck($event)"
                 (selectionChange)="permissionCheck($event)">
                 <mat-option>
                   <ngx-mat-select-search placeholderLabel="Search module-permission..."
@@ -66,16 +77,15 @@
                   {{ item.module }}-{{ item.permission }}
                 </mat-option>
               </mat-select>
-              <mat-error *ngIf="showPermissionError">
+              <mat-error *ngIf="!rolePermission.permission || rolePermission.permission.length === 0">
                 Module-Permission is required
               </mat-error>
             </mat-form-field>
           </div>
         </div>
       </div>
-      <hr /> <!--footer part-->
-      <div class="d-flex lfx-u-mar-b-16 ml-24" *ngIf="!view"> <button *ngIf="!edit" mat-raised-button
-          [disabled]="!validateForm()" (click)="onSave()" class="save-btn">
+      <hr /> <!--footer part-->      <div class="d-flex lfx-u-mar-b-16 ml-24" *ngIf="!view"> <button *ngIf="!edit" mat-raised-button
+            [disabled]="!validateForm()" (click)="onSave()" class="save-btn">
           {{ saveRolePermissionLabel }}
         </button>
         <button *ngIf="edit" mat-raised-button [disabled]="!validateForm()" (click)="onSave()" class="save-btn">

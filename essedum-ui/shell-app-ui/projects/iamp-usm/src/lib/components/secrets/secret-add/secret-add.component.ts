@@ -28,6 +28,7 @@ export class SecretAddComponent implements OnInit {
   showLoader: boolean;
   showCreate: boolean = false;
   hidePassword: boolean = true;
+  clearLabel = "Clear";
 
   @Output() secretModelClosed = new EventEmitter<void>();
 
@@ -100,9 +101,14 @@ export class SecretAddComponent implements OnInit {
     this.hidePass = false;
     this.showPass = true;
   }
-  
+
   hideValue() {
     this.hidePass = true;
     this.showPass = false;
+  }
+
+  clearWave() {
+    this.key = "";
+    this.passcode = "";
   }
 }
