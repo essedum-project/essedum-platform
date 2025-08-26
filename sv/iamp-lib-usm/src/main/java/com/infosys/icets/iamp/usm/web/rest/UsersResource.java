@@ -355,7 +355,7 @@ public class UsersResource {
 	 */
 	@GetMapping("/userss/{id}")
 	@Timed
-	public ResponseEntity<?> getUsers(@PathVariable Integer id)
+	public ResponseEntity<?> getUsers(@PathVariable("id") Integer id)
 			throws JsonProcessingException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException,
 			BadPaddingException, InvalidKeySpecException, NoSuchAlgorithmException {
 		try {
