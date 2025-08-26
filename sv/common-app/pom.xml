@@ -45,6 +45,15 @@
 			<artifactId>comm-lib-util</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.infosys.icets.ai</groupId>
+			<artifactId>comm-lib-licval</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.infosys.icets.icip.plugins</groupId>
+			<artifactId>icip-adp-azure</artifactId>
+			<version>3.3-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>com.infosys</groupId>
 			<artifactId>iamp-lib-usm</artifactId>
 		</dependency>
@@ -317,12 +326,12 @@
 			<version>6.0.0</version>
 			<scope>provided</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>jakarta.xml.bind</groupId>
 			<artifactId>jakarta.xml.bind-api</artifactId>
 			<version>3.0.0</version>
 		</dependency>
+		
 
 
 	</dependencies>
