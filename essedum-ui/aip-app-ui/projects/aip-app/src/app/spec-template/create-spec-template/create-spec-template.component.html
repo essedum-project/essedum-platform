@@ -1,65 +1,56 @@
-<div class="container-fluid backgroud-color">
-    <div class="lfx-l-level1-wrapper">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="lfx-l-level1-middle-col lfx-l-base-layout-center">
-                    <div class="table-responsive selector-693-2 " style=" margin: 0rem 0rem 1rem 1.5rem;">
-                        <div class="align-items-center flex">
-                            <span class="">
-                                <mat-icon class="aip-led-icons aip-cursor" (click)="back()"
-                                    [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
-                                    matTooltipPosition="above" (mouseenter)="isBackHovered = true"
-                                    (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
-                            </span>
-                            <span class="lfx-u-pad-l-8 aip-desc-title lfx-u-header-xxl">Create Spec</span>
-                        </div>
-                        <div class="lfx-u-pad-lr-16">
+<div class="aip-container lfx-u-pad-lr-24">
+    <app-aip-header [cardTitle]="CARD_TITLE" [action]="'create'" [backAction]="true" (navigateBack)="navigateBack()">
+    </app-aip-header>
 
-                            <!-- Name Field -->
-                            <mat-form-field appearance="fill" class="w-100 description-no-underline"
-                                subscriptSizing="dynamic">
-                                <mat-label>Name</mat-label>
-                                <input matInput placeholder="Name" [(ngModel)]="data.domainname" required
-                                    [disabled]="false" (ngModelChange)="domainNameChanges($event)" autocomplete="off" />
-                            </mat-form-field>
-                            <div class="mat-error" *ngIf="errMsgFlag && errMsg"
-                                style="font-size: 12px; color: #f44336; margin-top: 0px; margin-bottom: -16px;">
-                                {{ errMsg }}
-                            </div>
-                            <!-- Description Field (no underline) -->
-                            <mat-form-field appearance="fill" class="w-100 description-no-underline"
-                                subscriptSizing="dynamic">
-                                <mat-label>Description</mat-label>
-                                <textarea matInput placeholder="Description" [(ngModel)]="data.description"
-                                    rows="1"></textarea>
-                            </mat-form-field>
 
-                            <!-- Capability Field -->
-                            <mat-form-field appearance="fill" class="w-100" subscriptSizing="dynamic">
-                                <mat-label>Capability</mat-label>
-                                <mat-select [(ngModel)]="data.capability" (selectionChange)="selectChange($event)"
-                                    (openChange)="openChange($event)">
-                                    <mat-option *ngFor="let option of capabilityList" [value]="option.value">
-                                        {{ option.value }}
-                                    </mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                            <!-- JSON Editor -->
-                            <div style="margin-top: 20px;">
-                                <json-editor [options]="editorOptions" [data]="data.apispectemplate"
-                                    style="height: 300px;" #formJsonEditor class="cipJSONEditor"></json-editor>
-                            </div>
-
-                        </div>
-                        <div class="m-2 flex justify-content-end lfx-u-pad-lr-16 lfx-u-pad-t-8">
-                            <button mat-raised-button color="primary" class="ml-2" [disabled]="!nameFlag"
-                                (click)="createSpecTemplate()">
-                                Create
-                            </button>
-                        </div>
-                    </div>
-                </div>
+    <div>
+        <!-- Name Field -->
+        <div class="lfx-u-mar-t-16 lfx-u-pad-b-8">
+            <div class="lfx-u-sub-header-alias">
+                Name
+                <span class="required-indicator">*</span>
             </div>
+            <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
+                <input matInput id="schm-modal-alias" [disabled]="false" [(ngModel)]="data.domainname" required
+                    (ngModelChange)="domainNameChanges($event)" placeholder="Name" #nameRef="ngModel"
+                    class="custom-alias-input">
+                <mat-error *ngIf="errMsgFlag && errMsg" class="custom-hint-or-error">{{errMsg}}</mat-error>
+
+            </mat-form-field>
+        </div>
+
+        <!-- Description Field -->
+        <div class="lfx-u-mar-t-8 lfx-u-pad-b-8">
+            <div class="lfx-u-sub-header-alias">Description</div>
+            <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
+                <input matInput id="schm-modal-description" [(ngModel)]="data.description" placeholder="Description"
+                    class="custom-alias-input">
+            </mat-form-field>
+        </div>
+
+        <!-- Capability Field -->
+        <div class="lfx-u-pad-b-8">
+            <div class="lfx-u-sub-header-alias"> Capability </div>
+            <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
+                <mat-select id="column-type-select" [(ngModel)]="data.capability" placeholder="Select Capability"
+                    (selectionChange)="selectChange($event)">
+                    <mat-option *ngFor="let option of capabilityList" [value]="option.value">
+                        {{ option.viewValue }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <!-- JSON Editor -->
+        <json-editor [options]="editorOptions" [data]="data.apispectemplate" #formJsonEditor
+            class="cipJSONEditor"></json-editor>
+
+
+        <div mat-dialog-actions class="dialog-actions">
+            <button mat-raised-button color="primary" class="action-button" [disabled]="!nameFlag"
+                (click)="createSpecTemplate()">
+                Create
+            </button>
         </div>
     </div>
 </div>

@@ -1,6 +1,5 @@
 <mat-card class="mat-mdc-card mdc-card lfx-c-card lfx-c-card--hover h-100" appearance="outlined"
     (mouseenter)="card.hover = true" (mouseleave)="card.hover = false">
-
     <!-- Card category header -->
     <div class="d-flex align-items-center justify-content-between lfx-u-mar-b-8">
         <div class="d-flex align-items-center card-category">
@@ -8,15 +7,19 @@
                 {{ getCategory() | uppercase }}
             </div>
         </div>
-        <div *ngIf="servicev1 === 'model'" class="lfx-c-card__container-right">
-            <span class="lfx-c-badge float-end"
-                [ngClass]="[card.status=='Registered'?'lfx-c-badge--blue ':'lfx-c-badge--active',card.status=='Undeployed' || card.status == 'Failed'?'lfx-c-badge--warning ':'lfx-c-badge--active']">{{card.status}}</span>
+        <div *ngIf="servicev1 === 'model'" style="display: flex; align-items: center; gap: 6px">
+            <span class="lfx-c-badge">
+                <mat-icon [matTooltip]="'Download'" matTooltipPosition="above" (click)="onModelDownload(card)"
+                    style="font-size: 18px; line-height: 1" class="header-action-icon"
+                    style="justify-content: flex-end">download</mat-icon>
+            </span>
         </div>
+
         <div *ngIf="servicev1 === 'Datasets'">
             <mat-icon [matTooltip]="'View Details'" matTooltipPosition="above" (click)="onViewDetails(card)"
-                class="header-action-icon" style="justify-content: flex-end; ">visibility</mat-icon>
+                class="header-action-icon" style="justify-content: flex-end">visibility</mat-icon>
             <mat-icon [matTooltip]="'Download'" matTooltipPosition="above" (click)="onDownload(card)"
-                class="header-action-icon" style="justify-content: flex-end; ">download</mat-icon>
+                class="header-action-icon" style="justify-content: flex-end">download</mat-icon>
         </div>
     </div>
 
@@ -26,12 +29,13 @@
             <mat-card-title class="lfx-c-card__container clearfix">
                 <div class="lfx-c-card__container-left w-100">
                     <h2 class="lfx-u-header-xl lfx-u-ellipsis aip-fullname-card">
-                        {{ getTitle() | titlecase }}</h2>
+                        {{ getTitle() | titlecase }}
+                    </h2>
                 </div>
             </mat-card-title>
 
             <mat-card-subtitle class="lfx-u-body-sm lfx-u-text-neutral-80 lfx-u-ellipsis">
-                {{ getDate()| date: 'fullDate' }}
+                {{ getDate() | date : "fullDate" }}
             </mat-card-subtitle>
         </div>
     </mat-card-header>
@@ -46,7 +50,6 @@
 
     <mat-card-actions *ngIf="servicev1 !== 'Datasets'"
         class="lfx-c-card__action-hover d-flex justify-content-between card-actions-hover">
-
         <div class="button-placeholder">
             <button mat-raised-button class="view-details-btn" *ngIf="card.hover" (click)="onViewDetails()"
                 [@fadeInOut]="'in'">
@@ -55,9 +58,9 @@
         </div>
 
         <!-- Created by avatar -->
-        <div class="aip-cursor ">
+        <div class="aip-cursor">
             <div class="lfx-c-avatar lfx-c-avatar--sm aip-hover-avatar"
-                [ngStyle]="{'--avatar-bg-color': getAvatarBackgroundColor()}">
+                [ngStyle]="{ '--avatar-bg-color': getAvatarBackgroundColor() }">
                 {{ getAvatar() | firstCharacter }}
             </div>
             <div class="aip-hover-detail">
@@ -70,22 +73,26 @@
         <!-- Actions menu (conditionally shown) -->
         <div *ngIf="editAuth || deployAuth || deleteAuth" class="dropdown d-inline-block float-end">
             <mat-icon class="aip-cursor aip-more-actions-icon" [matMenuTriggerFor]="menu"
-                style="font-size: 24px; padding: 0px; color: #a5aaad; font-weight: 300;"
-                [ngStyle]="{'color': isMenuHovered ? '#0094ff' : '#737373'}" (mouseenter)="isMenuHovered = true"
+                style="font-size: 24px; padding: 0px; color: #a5aaad; font-weight: 300"
+                [ngStyle]="{ color: isMenuHovered ? '#0094ff' : '#737373' }" (mouseenter)="isMenuHovered = true"
                 (mouseleave)="isMenuHovered = false">
                 more_vert
             </mat-icon>
             <mat-menu #menu="matMenu">
                 <button mat-menu-item *ngIf="editAuth" (click)="onEdit()">
+                    <mat-icon class="aip-menu-icon">edit</mat-icon>
                     Edit
                 </button>
                 <button mat-menu-item *ngIf="servicev1 === 'connections'" (click)="onViewDatasets(card.type)">
+                    <mat-icon class="aip-menu-icon">storage</mat-icon>
                     View Datasets
                 </button>
                 <button mat-menu-item *ngIf="deleteAuth" (click)="onDelete()">
+                    <mat-icon class="aip-menu-delete">delete</mat-icon>
                     Delete
                 </button>
                 <button mat-menu-item *ngIf="servicev1 === 'pipeline' && card.type == 'REMOTE'" (click)="jobConsole()">
+                    <mat-icon class="aip-menu-icon">terminal</mat-icon>
                     Job Console
                 </button>
             </mat-menu>
@@ -107,5 +114,4 @@
             <mat-icon class="action-icon">delete</mat-icon>
         </button>
     </mat-card-actions>
-
 </mat-card>

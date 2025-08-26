@@ -2,48 +2,37 @@ package com.infosys.icets.icip.icipwebeditor.service;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
+import org.springframework.data.domain.Pageable;
 import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedModel;
+import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedModelDS;
+import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPDatasourceFilterDTO;
 import com.infosys.icets.icip.icipwebeditor.model.dto.ICIPMLFederatedModelDTO;
 
 public interface IICIPMLFederatedModelService {
 
 
-	  List<ICIPMLFederatedModelDTO>   getAllModelsByOrganisation(String org ,Pageable pageable, String filter);
-	  
-	  List<ICIPMLFederatedModelDTO>   getAllModelsByAdpateridAndOrganisation(String adapterId,String org,String page, String size);
+	List<ICIPMLFederatedModelDTO>   getAllModelsByOrganisation(String org ,Pageable pageable, String filter);
 	 
-     ICIPMLFederatedModelDTO  getModelByAdapterIdAndFedId(String adapterId,String fedId, String project);
+	ICIPMLFederatedModelDS  getModelByModelId(int fedId, String project);
 
-     ICIPMLFederatedModelDTO  updateModel(ICIPMLFederatedModelDTO fedModeDTO);
+    ICIPMLFederatedModelDTO  updateModel(ICIPMLFederatedModelDTO fedModeDTO);
 
-	List<ICIPMLFederatedModelDTO> getAllModelsByAdpateridAndOrganisation(String adapterId, String org,
-			Pageable pageable, String filter);
+	List<ICIPMLFederatedModelDS> getAllOptionalModelsByOrg(String org, String dataSources, String searchInput, Pageable paginate);
 
-	Long getCountOfAllModelsByAdpateridAndOrganisation(String adapterId, String org);
+	Long getAllModelsCountByOrganisationOptionals(String org, String dataSources, String searchInput);
+	
+	public List<ICIPDatasourceFilterDTO> getModelFilters(String org);
 
-	Long getCountOfAllModelsByOrganisation(String org);
-
-	List<ICIPMLFederatedModelDTO> getAllModelsByAdpateridAndOrganisation(String adapterInstance, String project,
-			Pageable paginate,  List<Integer>  tags, String query, String orderBy, String type);
-
-	List<ICIPMLFederatedModelDTO> getAllModelsByOrganisation(String project, Pageable paginate);
-
-	Long getAllModelsCountByAdpateridAndOrganisation(String instance, String project,
-			List<Integer> tagList, String query, String orderBy, String type);
-
-	int savemodel(ICIPMLFederatedModel model);
-
-	void updateIsDelModel(ICIPMLFederatedModelDTO modelDto);
+	ICIPMLFederatedModel savemodel(ICIPMLFederatedModel model);
 
 	List<ICIPMLFederatedModelDTO> getAllModelsByOrganisation(String org);
 
-	List<ICIPMLFederatedModelDTO> getModelByFedNameAndOrg(String fedName, String org);
+	List<ICIPMLFederatedModelDTO> getModelByFedModelNameAndOrg(String fedName, String org);
+	
+	void deleteModel(int modelId,String organisation);
 
 
      
 }
-
 

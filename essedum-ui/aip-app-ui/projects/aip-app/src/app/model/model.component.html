@@ -1,20 +1,24 @@
 <div class="aip-top">
     <div class="clearfix js-bodywrapper" id="mainCtr">
-        <div class="col-sm-12 col-md-12 col-lg-12  lfx-u-pad-lr-30" id="mainrightCnt">
+        <div class="col-sm-12 col-md-12 col-lg-12  lfx-u-pad-lr-30 mb-100" id="mainrightCnt">
             <!-- Header Section -->
             <div class="aip-content">
                 <!-- Header -->
                 <app-aip-header [cardTitle]="cardTitle" [lastRefreshedTime]="lastRefreshedTime"
                     [showAddButton]="createAuth" (search)="filterz($event)" (refresh)="refreshComplete()"
-                    (add)="selectChange('local')">
+                    (add)="createModel()">
                 </app-aip-header>
 
                 <!-- Filter Section -->
-                <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="servicev1" [selectedConnectionTypeList]="{ 
-                            selectedAdapterType: selectedAdapterType
-                          }" (tagSelected)="tagSelectedEvent($event)"
-                    (filterStatusChange)="onFilterStatusChange($event)"></app-aip-filter>
+                <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="servicev1" 
+                    [selectedModelDataSourceList]="{
+                        dataSourceList: dataSourceList
+                    }" 
+                    (tagSelected)="tagSelectedEvent($event)"
+                    (filterStatusChange)="onFilterStatusChange($event)">
+                </app-aip-filter>
             </div>
+
 
             <!-- Cards container -->
             <div class="lfx-c-card__action-ul aip-card-container lfx-u-pad-b-90">
@@ -23,8 +27,8 @@
                     <div class="card-wrapper h-100">
                         <app-aip-card [servicev1]="servicev1" [card]="card" [editAuth]="editAuth"
                             [deployAuth]="deployAuth" [deleteAuth]="deleteAuth"
-                            (viewDetails)="redirection(card,'preview')" (edit)="redirection(card,'edit')"
-                            (delete)="deleteModels(card)">
+                            (viewDetails)="viewDetails(card,'preview')" (edit)="editModel(card)"
+                            (delete)="deleteModels(card)" (downloadModel)="downloadModel(card)">
                         </app-aip-card>
                     </div>
                 </div>

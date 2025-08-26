@@ -67,10 +67,10 @@ export class ModelComponent implements OnInit, OnChanges {
   selectedTag = [];
   selectedTagList: any[];
   selectedType: string[] = [];
-  adapterTypes: any;
-  selectedAdapterType: string[] = [];
+  datasource: any;
+  selectedDatasource: string[] = [];
   selectedAdapterInstance: string[] = [];
-  adapterTypeList: any[] = [];
+  dataSourceList: any[] = [];
   adapterInstanceList: any[] = [];
   servicev1 = 'model';
   tagrefresh: boolean = false;
@@ -98,8 +98,8 @@ export class ModelComponent implements OnInit, OnChanges {
       if (params['page']) {
         this.pageNumber = params['page'];
         this.filter = params['search'];
-        this.selectedAdapterType = params['type']
-          ? params['type'].split(',')
+        this.selectedDatasource = params['datasource']
+          ? params['datasource'].split(',')
           : [];
         this.selectedAdapterInstance = params['adapterInstance']
           ? params['adapterInstance'].split(',')
@@ -114,8 +114,8 @@ export class ModelComponent implements OnInit, OnChanges {
     this.getCountModels();
     this.getCards();
     this.Authentications();
-    this.fetchAdapters();
     this.lastRefreshTime();
+    this.fetchDatasourceFilterList();
   }
 
   updateQueryParam(
@@ -187,46 +187,24 @@ export class ModelComponent implements OnInit, OnChanges {
     this.cardToggled = event;
   }
 
-  fetchAdapters(): boolean {
-    let params: HttpParams = new HttpParams();
-    this.adapterInstanceList = [];
-    //this.selectedAdapterInstance = [];
-    if (this.selectedAdapterType.length >= 1)
-      params = params.set('adapterType', this.selectedAdapterType.toString());
-    params = params.set('project', sessionStorage.getItem('organization'));
-    this.service.getModelListAdapters(params).subscribe((res) => {
-      let test = res.body;
-      this.alias = test.map((item: any) => item.alias);
-      this.options = test;
-      test.forEach((element: any) => {
-        this.adapterInstanceList.push({
-          category: 'Instance',
-          label: element.alias,
-          value: element.name,
-          selected: false,
-        });
-      });
-    });
-    return true;
-  }
   tagchange() {
-    this.tagService.tags.forEach((element: any) => {
-      // console.log(element, 'element');
+    this.tagService.tags.forEach((element: any) => {    
     });
   }
+
   getCards(): void {
     let params: HttpParams = new HttpParams();
-    if (this.selectedTag.length >= 1)
-      params = params.set('tags', this.selectedTag.toString());
-    if (this.filter.length >= 1) params = params.set('query', this.filter);
-    if (this.selectedAdapterType.length >= 1)
-      params = params.set('type', this.selectedAdapterType.toString());
-    if (this.selectedAdapterInstance.length >= 1)
-      params = params.set('instance', this.selectedAdapterInstance.toString());
+
+    if (this.selectedDatasource.length >= 1)
+      params = params.set('connectionname', this.selectedDatasource.toString());
+
+    if (this.filter && this.filter.length > 0) {
+      params = params.set('searchquery', this.filter);
+    }
+
+    // Set page and size
     params = params.set('page', this.pageNumber);
     params = params.set('size', this.pageSize);
-    params = params.set('project', sessionStorage.getItem('organization'));
-    params = params.set('isCached', true);
 
     this.service.getModelCards(params).subscribe((res) => {
       let data: any = [];
@@ -241,27 +219,24 @@ export class ModelComponent implements OnInit, OnChanges {
       } else {
         this.records = false;
       }
-      // console.log('DATA', this.cards);
     });
 
     this.updateQueryParam(
       this.pageNumber,
       this.filter,
-      this.selectedAdapterType.toString(),
+      this.selectedDatasource.toString(),
       this.selectedAdapterInstance.toString()
     );
   }
+
   getCountModels() {
     let params: HttpParams = new HttpParams();
-    if (this.selectedTag.length >= 1)
-      params = params.set('tags', this.selectedTag.toString());
-    if (this.filter.length >= 1) params = params.set('query', this.filter);
-    if (this.selectedAdapterType.length >= 1)
-      params = params.set('type', this.selectedAdapterType.toString());
-    if (this.selectedAdapterInstance.length >= 1)
-      params = params.set('instance', this.selectedAdapterInstance.toString());
-    params = params.set('project', sessionStorage.getItem('organization'));
-    params = params.set('isCached', false);
+
+    if (this.filter.length >= 1)
+      params = params.set('searchquery', this.filter);
+    if (this.selectedDatasource.length >= 1)
+      params = params.set('connectionname', this.selectedDatasource.toString());
+
     this.service.getCountModels(params).subscribe((res) => {
       this.noOfItems = res;
       this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
@@ -285,22 +260,31 @@ export class ModelComponent implements OnInit, OnChanges {
       relativeTo: this.route,
     });
   }
-  redirection(card: any, type: string) {
-    this.router.navigate(['./' + type + '/' + card.sourceName], {
-      queryParams: {
-        page: this.pageNumber,
-        search: this.filter,
-        adapterType: this.selectedAdapterType.toString(),
-        adapterInstance: this.selectedAdapterInstance.toString(),
-        org: sessionStorage.getItem('organization'),
-        roleId: JSON.parse(sessionStorage.getItem('role')).id,
-      },
-      queryParamsHandling: 'merge',
-      state: {
-        card,
-      },
-      relativeTo: this.route,
-    });
+
+  downloadModel(card: any) {
+    let obj = JSON.parse(card.attributes).object;
+    let extension = obj.split('.').pop();
+    let fileName = obj.split('/').toString();
+    if (extension.match('mkv')) {
+      this.service.messageService('This file cannot be downloaded currently');
+    } else {
+      this.service.messageNotificaionService('success', 'Download initiated');
+
+      this.service
+        .getModelFileData(card.modelName, `${fileName}`, card.organisation)
+        .subscribe(blob=> {
+              const linkA = document.createElement('a');
+              const url = window.URL.createObjectURL(blob);
+              linkA.href = url
+              linkA.download = fileName;
+              linkA.click();
+              window.URL.revokeObjectURL(url);
+            },
+              err => {
+              this.service.message('Download Failed. Invalid Data', 'error');
+            });
+          
+    }
   }
 
   selectChange(value: string): void {
@@ -308,10 +292,21 @@ export class ModelComponent implements OnInit, OnChanges {
     this.redirect();
   }
 
+  createModel() {
+    this.router.navigate(['./create'], {
+      relativeTo: this.route,
+    });
+  }
+
   editModel(card: any) {
-    // console.log(card);
-    this.router.navigate(['./edit'], {
-      queryParams: { data: card },
+    console.log(card);
+    this.router.navigate(['./edit-model', card.id], {
+      relativeTo: this.route,
+    });
+  }
+
+  viewDetails(card: any, type: string) {
+    this.router.navigate(['./' + type + '/' + card.id], {
       relativeTo: this.route,
     });
   }
@@ -319,18 +314,15 @@ export class ModelComponent implements OnInit, OnChanges {
   clickactive(eventObj: any) {}
   refresh() {
     this.getCountModels();
-    this.fetchAdapters();
-
     this.getCards();
   }
+  
   refreshComplete() {
     this.tagrefresh = true;
     this.filter = '';
-    this.selectedAdapterType = [];
+    this.selectedDatasource = [];
     this.selectedTag = [];
     this.getCountModels();
-    this.fetchAdapters();
-
     this.getCards();
     this.lastRefreshTime();
   }
@@ -343,40 +335,16 @@ export class ModelComponent implements OnInit, OnChanges {
   }
 
   tagSelectedEvent(event) {
-    this.selectedAdapterInstance = event.getSelectedAdapterInstance();
-    this.selectedAdapterType = event.getSelectedAdapterType();
+    console.log('TagSelectedEvent received:', event);
+    if (event && typeof event.getSelectedModelDatasource === 'function') {
+      this.selectedDatasource = event.getSelectedModelDatasource();
+    } else {
+      this.selectedDatasource = [];
+    }
+    console.log('Selected datasources:', this.selectedDatasource);
     this.pageNumber = 1;
-    this.selectedTag = event.getSelectedTagList();
     this.tagrefresh = false;
     this.refresh();
-  }
-
-  deleteDeployment(card) {
-    // console.log('deletecard', card);
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent);
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result === 'delete') {
-        this.service
-          .undeployModel(
-            card.adapterId,
-            card.version,
-            card.sourceId,
-            card.deployment
-          )
-          .subscribe(
-            (res) => {
-              this.service.message(
-                'Done!  Model Un-deployed Successfully '+ res,
-                'success'
-              );
-              this.refresh();
-            },
-            (error) => {
-              this.service.message('Error '+error, 'error');
-            }
-          );
-      }
-    });
   }
 
   deleteModels(card) {
@@ -384,7 +352,7 @@ export class ModelComponent implements OnInit, OnChanges {
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'delete') {
         this.service
-          .deleteModels(card.sourceId, card.adapterId, card.version)
+          .deleteModels(card.id, card.adapterId, card.version)
           .subscribe(
             (res) => {
               this.service.message('Done!  Model deleted Successfully');
@@ -432,5 +400,22 @@ export class ModelComponent implements OnInit, OnChanges {
       this.initializePagination();
       this.getCards();
     }
+  }
+
+  fetchDatasourceFilterList() {
+    let params: HttpParams = new HttpParams();
+    params = params.set('project', sessionStorage.getItem('organization'));
+    this.service.getModelDatasourceList(params).subscribe((res) => {
+      this.datasource = res;
+      this.dataSourceList = [];
+      this.datasource.forEach((element: any) => {
+        this.dataSourceList.push({
+          category: 'Datasource',
+          label: element.alias,
+          value: element.name,
+          selected: false,
+        });
+      });
+    });
   }
 }

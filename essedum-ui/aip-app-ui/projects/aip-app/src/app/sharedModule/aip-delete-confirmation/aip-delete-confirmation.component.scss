@@ -1,0 +1,71 @@
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 2.4rem;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 1.5rem;
+}
+
+.delete-button {
+  color: #ffffff;
+  background-color: #d32f2f;
+  height: 36px;
+  min-height: 36px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  border-radius: 6px;
+  border: 1px solid #b71c1c;
+  transition: all 0.2s ease-in-out;
+  min-width: 80px;
+
+  &:hover:not(:disabled) {
+    background-color: #e53935;
+    border-color: #d32f2f;
+  }
+
+  &:active:not(:disabled) {
+    background-color: #b71c1c;
+    border-color: #8a1c1c;
+  }
+
+  &:disabled {
+    background-color: #ffcdd2;
+    border-color: #e57373;
+    cursor: not-allowed;
+  }
+}
+
+.cancel-button {
+  color: #333;
+  background-color: #ffffff;
+  height: 36px;
+  min-height: 36px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  border-radius: 6px;
+  border: 1px solid #d0d7de;
+  transition: all 0.2s ease-in-out;
+  min-width: 80px;
+
+  &:focus,
+  &:focus:hover {
+    background-color: #ffffff !important;
+    border-color: #d0d7de !important;
+    outline: none !important;
+  }
+
+  &:hover {
+    background-color: #f6f8fa;
+    border-color: #8c959f;
+  }
+
+  &:active {
+    background-color: #e9ecef;
+    border-color: #6c757d;
+  }
+}

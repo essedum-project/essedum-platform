@@ -9,16 +9,16 @@ export interface SnackbarData {
 }
 
 @Component({
-  selector: 'app-custom-snackbar',
-  templateUrl: './custom-snackbar.component.html',
-  styleUrls: ['./custom-snackbar.component.scss']
+  selector: 'app-aip-snackbar-custom',
+  templateUrl: './aip-snackbar-custom.component.html',
+  styleUrls: ['./aip-snackbar-custom.component.scss']
 })
-export class CustomSnackbarComponent {
-  
+export class AipSnackbarCustomComponent {
+
   constructor(
-    public snackBarRef: MatSnackBarRef<CustomSnackbarComponent>,
+    public snackBarRef: MatSnackBarRef<AipSnackbarCustomComponent>,
     @Inject(MAT_SNACK_BAR_DATA) public data: SnackbarData
-  ) {}
+  ) { }
 
   onAction(): void {
     this.snackBarRef.dismissWithAction();

@@ -62,6 +62,7 @@ export class AipCardComponent {
   @Output() jobConsole?: EventEmitter<any> = new EventEmitter<any>();
   @Output() viewDatasets = new EventEmitter<any>();
   @Output() download = new EventEmitter<any>();
+    @Output() downloadModel = new EventEmitter<any>();
   @Output() copy = new EventEmitter<any>();
 
   // UI state variables
@@ -87,7 +88,9 @@ export class AipCardComponent {
   onDownload(card: any): void {
     this.download.emit(card);
   }
-
+  onModelDownload(card:any): void {
+    this.downloadModel.emit(card);
+  }
   onCopy(card: any): void {
     this.copy.emit(card);
   }
@@ -111,7 +114,7 @@ export class AipCardComponent {
       [SERVICE_TYPES.SPECS]: this.card?.domainname,
       [SERVICE_TYPES.INSTANCES]: this.card?.adaptername,
       [SERVICE_TYPES.SCHEMAS]: this.card?.name,
-      [SERVICE_TYPES.MODEL]: this.card?.type,
+      [SERVICE_TYPES.MODEL]: `${this.card?.datasource?.category} - ${this.card?.datasource?.alias}`,
       [SERVICE_TYPES.PIPELINE]: this.card?.type,
       [SERVICE_TYPES.CONNECTIONS]: this.card?.type,
       [SERVICE_TYPES.DATASETS]: `${this.card?.datasource?.category} - ${this.card?.datasource?.alias}`,
@@ -127,7 +130,7 @@ export class AipCardComponent {
       [SERVICE_TYPES.SCHEMAS]: this.card?.alias,
       [SERVICE_TYPES.PIPELINE]: this.card?.alias,
       [SERVICE_TYPES.CONNECTIONS]: this.card?.alias,
-      [SERVICE_TYPES.MODEL]: this.card?.name || this.card?.sourceName,
+      [SERVICE_TYPES.MODEL]: this.card?.modelName,
       [SERVICE_TYPES.DATASETS]: this.card?.alias,
     };
     return titleMap[this.servicev1];
