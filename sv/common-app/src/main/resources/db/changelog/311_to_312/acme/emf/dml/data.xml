@@ -9,45 +9,45 @@
 
 	
 	
-<changeSet id = "16832223644477-2-1-310-81" author = "nandakumar.r03">
+<changeSet id = "16832223644477-2-1-310-81" author = "essedum">
 	<delete tableName = "emf_workflow_state">
 	<where>project_id is NULL </where>
 	</delete>
 </changeSet>
 
-<changeSet id = "16832223644477-2-1-310-91" author = "nandakumar.r03">
+<changeSet id = "16832223644477-2-1-310-91" author = "essedum">
 	<delete tableName = "emf_event">
 	<where>project_id is NULL </where>
 	</delete>
 </changeSet>
 	
-<changeSet id = "16832223644477-2-1-310-101" author = "nandakumar.r03">
+<changeSet id = "16832223644477-2-1-310-101" author = "essedum">
 <delete tableName = "emf_workflow">
 <where>project_id is NULL </where>
 </delete>
 </changeSet>			
 
 
-<changeSet id = "16832223644477-2-1-310-111" author = "nandakumar.r03">
+<changeSet id = "16832223644477-2-1-310-111" author = "essedum">
 	<delete tableName = "emf_event_type">
 	<where>project_id is NULL </where>
 	</delete>
 </changeSet>
 
-<changeSet id = "16832223644477-2-1-310-121" author = "nandakumar.r03">
+<changeSet id = "16832223644477-2-1-310-121" author = "essedum">
 	<delete tableName = "emf_workflow_type">
 	<where>project_id is NULL </where>
 	</delete>
 </changeSet>
 
-<changeSet id = "16832223644477-2-1-310-131" author = "nandakumar.r03">
+<changeSet id = "16832223644477-2-1-310-131" author = "essedum">
 	<delete tableName = "emf_custom_actions">
 	<where>project_id is NULL </where>
 	</delete>
 </changeSet>
 
 	
-<changeSet author="nandakumar.r03"
+<changeSet author="essedum"
 		id="1683222364377-2-1-310-3">
 		<sql dbms="mssql">
 			SET IDENTITY_INSERT emf_event_type ON;
@@ -65,7 +65,7 @@
 		</sql>
 	</changeSet>
 	
-	<changeSet author="nandakumar.r03"
+	<changeSet author="essedum"
 		id="1683222364377-2-1-310-7">
 		<sql dbms="mssql">
 			SET IDENTITY_INSERT emf_workflow_type ON;
@@ -85,7 +85,7 @@
 		</sql>
 	</changeSet>
 	
-	<changeSet author="nandakumar.r03"
+	<changeSet author="essedum"
 		id="1683222364377-2-1-310-2">
 		<sql dbms="mssql">
 			SET IDENTITY_INSERT emf_event ON;
@@ -111,7 +111,7 @@
 		</sql>
 	</changeSet>
 	
-	<changeSet author="nandakumar.r03"
+	<changeSet author="essedum"
 		id="1683222364377-2-1-310-5">
 		<sql dbms="mssql">
 			SET IDENTITY_INSERT emf_workflow ON;
@@ -132,7 +132,7 @@
 			SET IDENTITY_INSERT emf_workflow OFF;
 		</sql>
 	</changeSet>
-	<changeSet author="nandakumar.r03"
+	<changeSet author="essedum"
 		id="1683222364377-2-1-310-6">
 		<sql dbms="mssql">
 			SET IDENTITY_INSERT emf_workflow_state ON;
@@ -156,7 +156,7 @@
 		</sql>
 	</changeSet>
 
-	<changeSet author="nandakumar.r03"
+	<changeSet author="essedum"
 		id="1683222364377-2-1-310-8">
 		<sql dbms="mssql">
 			SET IDENTITY_INSERT emf_custom_actions ON;
@@ -179,7 +179,7 @@
 			SET IDENTITY_INSERT emf_custom_actions OFF;
 		</sql>
 	</changeSet>
-			<changeSet author="nandakumar.r03"
+			<changeSet author="essedum"
 		id="1683222364377-2-1-310-9">
 		<sql dbms="mssql">
 			SET IDENTITY_INSERT emf_custom_action_parameters ON;

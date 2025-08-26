@@ -2,7 +2,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     
 	<!-- 1.3.12 changes -->
-	<changeSet author="Leap (generated)" id="1312v0-btf-11">
+	<changeSet author="Essedum (generated)" id="1312v0-btf-11">
 	<sql dbms="mssql">
 			SET IDENTITY_INSERT tad_adapter_purpose ON;
 		</sql>
@@ -15,18 +15,18 @@
 			SET IDENTITY_INSERT tad_adapter_purpose OFF;
 		</sql>
     </changeSet>
-	<changeSet author="Leap" id="1312v0-btf-33">
+	<changeSet author="Essedum" id="1312v0-btf-33">
 		<sql dbms="mysql"> 
 		INSERT IGNORE INTO tad_adapter_config(id,configuration_name,project_id,purpose,tool,url,admin,admin_password,tool_user,user_password,proxy_host,proxy_port,last_updated,purpose_id,tool_id,filter,team,organization,region_name,grant_type)
-		VALUES(7,'Vault',(SELECT id FROM usm_project WHERE NAME='leo1311'),'aut','cap','http://localhost','ICSP_icap_user','fZIwiFVA5g6AapAphfBN2uDtHXwm5XkP','admin@infosys.com','ZTLiPW70rwTT/6VoFmw0zg==','indblrb06intpxy02.ad.infosys.com','80',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+		VALUES(7,'Vault',(SELECT id FROM usm_project WHERE NAME='leo1311'),'aut','cap','http://localhost','ICSP_icap_user','fZIwiFVA5g6AapAphfBN2uDtHXwm5XkP','admin@lfn.com','ZTLiPW70rwTT/6VoFmw0zg==','indblrb06intpxy02.ad.infosys.com','80',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 		</sql>
 		<sql dbms="mssql"> 
 		IF NOT EXISTS ( SELECT * FROM tad_adapter_config WHERE tool='cap' and project_id=(SELECT id FROM usm_project WHERE NAME='leo1311'))
         INSERT INTO tad_adapter_config(configuration_name,project_id,purpose,tool,url,admin,admin_password,tool_user,user_password,proxy_host,proxy_port,last_updated,purpose_id,tool_id,filter,team,organization,region_name,grant_type,scope) 
-        VALUES('Vault',(SELECT id FROM usm_project WHERE NAME='leo1311'),'aut','cap','http://localhost','ICSP_icap_user','fZIwiFVA5g6AapAphfBN2uDtHXwm5XkP','admin@infosys.com','ZTLiPW70rwTT/6VoFmw0zg==','indblrb06intpxy02.ad.infosys.com','80',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+        VALUES('Vault',(SELECT id FROM usm_project WHERE NAME='leo1311'),'aut','cap','http://localhost','ICSP_icap_user','fZIwiFVA5g6AapAphfBN2uDtHXwm5XkP','admin@lfn.com','ZTLiPW70rwTT/6VoFmw0zg==','indblrb06intpxy02.ad.infosys.com','80',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
         </sql>
 	</changeSet>
-	<changeSet author="Leap" id="1312v0-btf-35">
+	<changeSet author="Essedum" id="1312v0-btf-35">
 		<sql dbms="mysql"> 
 		INSERT IGNORE INTO tad_adapter_config(id,configuration_name,project_id,purpose,tool,url,admin,admin_password,tool_user,user_password,proxy_host,proxy_port,last_updated,purpose_id,tool_id,filter,team,organization,region_name,grant_type)
 		VALUES(8,'Vault',(SELECT id FROM usm_project WHERE NAME='leo1311'),'aut','Hashicorp','http://xxxx','xxxx','xxxx','xxxx','xxxx','xxxx','xx',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
@@ -37,7 +37,7 @@
         VALUES('Vault',(SELECT id FROM usm_project WHERE NAME='leo1311'),'aut','Hashicorp','http://xxxx','xxxx','xxxx','xxxx','xxxx','xxxx','xx',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 		</sql>	
 	</changeSet>
-	<changeSet author="Leap" id="1312v0-btf-34">
+	<changeSet author="Essedum" id="1312v0-btf-34">
 		<sql dbms="mssql,mysql" splitStatements="true" stripComments="true"> 
 		INSERT INTO tad_adapter_config(configuration_name,project_id,purpose,tool,url,admin,admin_password,tool_user,user_password,proxy_host,proxy_port,last_updated,purpose_id,tool_id,filter,team,organization,region_name,grant_type,scope) 
 		VALUES('NiaChatbot',(SELECT id FROM usm_project where name='leo1311'),'chatbotauth','nia','http://xxxx','xxxx','xxxx','xxxx','xxxx',NULL,NULL,NULL,'4',NULL,NULL,NULL,NULL,NULL,'client_credentials','openid profile email')

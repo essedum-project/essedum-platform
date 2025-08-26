@@ -2,7 +2,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
     
-	<changeSet dbms="mysql,mssql" author="saqlain" id="3v1-cfm-20241023-1">
+	<changeSet dbms="mysql,mssql" author="essedum" id="3v1-cfm-20241023-1">
   <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item_type" columnName="dbs_threshold_id" />
@@ -13,7 +13,7 @@
 		</addColumn>
 	</changeSet>
 
-	  <changeSet dbms="mysql,mssql" author="Leap (generated)" id="3v1-cfm-20241023-2">
+	  <changeSet dbms="mysql,mssql" author="Essedum (generated)" id="3v1-cfm-20241023-2">
      <preConditions onFail="MARK_RAN">
         <not>
         <indexExists indexName="dbs_threshold_id_fk" tableName="cfm_configuration_item_type"/>
@@ -31,7 +31,7 @@
 			referencedColumnNames="id" referencedTableName="dbs_threshold" />
 	</changeSet>
   
-	  <changeSet author="saqlain" id="3v1-cfm-20241023-3-1">
+	  <changeSet author="essedum" id="3v1-cfm-20241023-3-1">
 		<preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item" columnName="spoc" />
@@ -42,7 +42,7 @@
     </sql> 
 	</changeSet>
 
-  <changeSet author="saqlain" id="3v1-cfm-20241023-3-2">
+  <changeSet author="essedum" id="3v1-cfm-20241023-3-2">
 		<preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item" columnName="description" />
@@ -56,7 +56,7 @@
     </sql>  
 	</changeSet>
 
-  <changeSet author="saqlain" id="3v1-cfm-20241023-3-3">
+  <changeSet author="essedum" id="3v1-cfm-20241023-3-3">
 		<preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item_type" columnName="spoc" />
@@ -68,7 +68,7 @@
 	</changeSet>
 
 
-  <changeSet author="saqlain" id="3v1-cfm-20241023-3-4">
+  <changeSet author="essedum" id="3v1-cfm-20241023-3-4">
 		<preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item_type" columnName="description" />
@@ -82,7 +82,7 @@
     </sql>
 	</changeSet>
 
-  <changeSet author="saqlain" id="3v1-cfm-20241023-3-5">
+  <changeSet author="essedum" id="3v1-cfm-20241023-3-5">
 		<preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item_type" columnName="citype_image" />
@@ -96,7 +96,7 @@
     </sql>
 	</changeSet>
 
-  <changeSet author="saqlain" id="3v1-cfm-20241023-3-6">
+  <changeSet author="essedum" id="3v1-cfm-20241023-3-6">
 		<preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item_type" columnName="citype_image_name" />
@@ -107,7 +107,7 @@
            </sql>
 	</changeSet>
 
-  <changeSet author="saqlain" id="3v1-cfm-20241023-3-7">
+  <changeSet author="essedum" id="3v1-cfm-20241023-3-7">
 		<preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item_type" columnName="citype_icon" />
@@ -121,7 +121,7 @@
            </sql>  
 	</changeSet>
 
-   <changeSet author="saqlain" id="3v1-cfm-20241023-3-8">
+   <changeSet author="essedum" id="3v1-cfm-20241023-3-8">
 		<preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item_type" columnName="citype_default" />
@@ -136,7 +136,7 @@
 	</changeSet>
 
 
-   <changeSet author="saqlain" id="3v1-cfm-20241023-3-10">
+   <changeSet author="essedum" id="3v1-cfm-20241023-3-10">
 		<preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item" columnName="location" />
@@ -147,7 +147,7 @@
       </sql> 
 	</changeSet>
 
-  <changeSet author="saqlain" id="3v1-cfm-20241023-3-11">
+  <changeSet author="essedum" id="3v1-cfm-20241023-3-11">
 		<preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item" columnName="status" />
@@ -158,7 +158,7 @@
     </sql> 
 	</changeSet>
 
-  <changeSet author="saqlain" id="3v1-cfm-20241023-3-12">
+  <changeSet author="essedum" id="3v1-cfm-20241023-3-12">
 		<preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item" columnName="sub_category" />
@@ -169,7 +169,7 @@
     </sql>
 	</changeSet>
 
-	<changeSet author="Leap" id="3v1-cfm-20241023-4">
+	<changeSet author="Essedum" id="3v1-cfm-20241023-4">
 		<sql dbms="h2, mysql" splitStatements="true" stripComments="true">  
           UPDATE cfm_configuration_item_type SET citype_default = TRUE WHERE ctype IN ('BP_L1','BP_SP','BP_SSP','BD_L1');
 	     </sql>
@@ -179,7 +179,7 @@
 	</changeSet>
 			
 	
-	<changeSet author="Leap" id="3v1-cfm-20241023-5-1">
+	<changeSet author="Essedum" id="3v1-cfm-20241023-5-1">
 		 <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item" columnName="cmdb_ci_sys_id" />
@@ -189,7 +189,7 @@
            ALTER TABLE cfm_configuration_item ADD cmdb_ci_sys_id VARCHAR(150)
            </sql> 
 	</changeSet>
-  <changeSet author="Leap" id="3v1-cfm-20241023-5-2">
+  <changeSet author="Essedum" id="3v1-cfm-20241023-5-2">
 		 <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item" columnName="sys_updated_on" />
@@ -200,7 +200,7 @@
            </sql> 
 	</changeSet>
 
-   <changeSet author="Leap" id="3v1-cfm-20241023-5-3">
+   <changeSet author="Essedum" id="3v1-cfm-20241023-5-3">
 		 <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item" columnName="managed_by" />
@@ -210,7 +210,7 @@
            ALTER TABLE cfm_configuration_item ADD managed_by VARCHAR(150)
            </sql> 
 	</changeSet>
-  <changeSet author="Leap" id="3v1-cfm-20241023-5-3-1">
+  <changeSet author="Essedum" id="3v1-cfm-20241023-5-3-1">
 		 <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item" columnName="owned_by" />
@@ -221,7 +221,7 @@
            </sql>
 	</changeSet>
 
-   <changeSet author="Leap" id="3v1-cfm-20241023-5-4">
+   <changeSet author="Essedum" id="3v1-cfm-20241023-5-4">
 		 <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item" columnName="sys_class_name" />
@@ -231,7 +231,7 @@
            ALTER TABLE cfm_configuration_item ADD sys_class_name VARCHAR(150)
            </sql>  
 	</changeSet>
-   <changeSet author="Leap" id="3v1-cfm-20241023-5-5">
+   <changeSet author="Essedum" id="3v1-cfm-20241023-5-5">
 		 <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item_type" columnName="sys_class_name" />
@@ -242,7 +242,7 @@
            </sql>  
 	</changeSet>
 
-    	 <changeSet author="Leap" id="3v1-cfm-20241023-6">
+    	 <changeSet author="Essedum" id="3v1-cfm-20241023-6">
       <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item_type" columnName="sys_id" />
@@ -253,7 +253,7 @@
            </sql> 
 	</changeSet>
 
-   <changeSet author="Leap" id="3v1-cfm-20241023-7-1">
+   <changeSet author="Essedum" id="3v1-cfm-20241023-7-1">
       <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item" columnName="eprid" />
@@ -264,7 +264,7 @@
            </sql> 
 	</changeSet>
 
-  <changeSet author="Leap" id="3v1-cfm-20241023-7-2">
+  <changeSet author="Essedum" id="3v1-cfm-20241023-7-2">
       <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_xw_ci_mapping" columnName="parent_sys_id" />
@@ -275,7 +275,7 @@
            </sql> 
 	</changeSet>
 
-   <changeSet author="Leap" id="3v1-cfm-20241023-7-3">
+   <changeSet author="Essedum" id="3v1-cfm-20241023-7-3">
       <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_xw_ci_mapping" columnName="child_sys_id" />
@@ -286,7 +286,7 @@
            </sql>  
 	</changeSet>
 
- <changeSet author="Leap" id="3v1-cfm-20241023-7-4">
+ <changeSet author="Essedum" id="3v1-cfm-20241023-7-4">
       <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_xw_ci_mapping" columnName="eprid" />
@@ -297,7 +297,7 @@
            </sql> 
 	</changeSet>
 
-  <changeSet author="Leap" id="3v1-cfm-20241023-7-5">
+  <changeSet author="Essedum" id="3v1-cfm-20241023-7-5">
       <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_xw_ci_mapping" columnName="sys_created_on" />
@@ -308,7 +308,7 @@
            </sql> 
 	</changeSet>
 
-   <changeSet author="Leap" id="3v1-cfm-20241023-7-6">
+   <changeSet author="Essedum" id="3v1-cfm-20241023-7-6">
       <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_xw_ci_mapping" columnName="sys_updated_on" />
@@ -320,7 +320,7 @@
 	</changeSet>
 
   
-   <changeSet author="Leap" id="3v1-cfm-20241023-7-7">
+   <changeSet author="Essedum" id="3v1-cfm-20241023-7-7">
       <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_xw_ci_mapping" columnName="sys_created_on" />
@@ -331,7 +331,7 @@
            </sql> 
 	</changeSet>
 
-  <changeSet author="Leap" id="3v1-cfm-20241023-7-8">
+  <changeSet author="Essedum" id="3v1-cfm-20241023-7-8">
       <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_xw_ci_mapping" columnName="sys_updated_on" />
@@ -342,7 +342,7 @@
            </sql> 
 	</changeSet>
 
-   <changeSet author="Leap" id="3v1-cfm-20241023-7-9">
+   <changeSet author="Essedum" id="3v1-cfm-20241023-7-9">
       <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item" columnName="asset" />
@@ -353,7 +353,7 @@
            </sql> 
 	</changeSet>
 
-   <changeSet author="Leap" id="3v1-cfm-20241023-7-10">
+   <changeSet author="Essedum" id="3v1-cfm-20241023-7-10">
       <preConditions onFail="MARK_RAN">
         <not>
           <columnExists tableName="cfm_configuration_item" columnName="category" />
@@ -364,13 +364,13 @@
            </sql> 
 	</changeSet>
 
-	<changeSet author="Leap" id="3v1-cfm-20241023-8">
+	<changeSet author="Essedum" id="3v1-cfm-20241023-8">
 	    <sql dbms="h2,mysql,mssql" splitStatements="true" stripComments="true">  
            ALTER TABLE cfm_configuration_item ADD prioritization_score INT
            </sql> 
 	</changeSet>
 	
- <changeSet author="Leap" id="3v1-cfm-20241023-9" dbms="h2,mysql,mssql">
+ <changeSet author="Essedum" id="3v1-cfm-20241023-9" dbms="h2,mysql,mssql">
         <preConditions onFail="MARK_RAN">
           <not>
             <columnExists tableName="cfm_configuration_item" columnName="alert_count" />
@@ -381,7 +381,7 @@
         </addColumn>
     </changeSet>
 
-    <changeSet author="Leap" id="3v1-cfm-20241023-10" dbms="h2,mysql,mssql">
+    <changeSet author="Essedum" id="3v1-cfm-20241023-10" dbms="h2,mysql,mssql">
         <preConditions onFail="MARK_RAN">
           <not>
             <columnExists tableName="cfm_configuration_item" columnName="incident_count" />
@@ -392,7 +392,7 @@
         </addColumn>
     </changeSet>
 
-    <changeSet author="Leap" id="3v1-cfm-20241023-11" dbms="h2,mysql,mssql">
+    <changeSet author="Essedum" id="3v1-cfm-20241023-11" dbms="h2,mysql,mssql">
         <preConditions onFail="MARK_RAN">
           <not>
             <columnExists tableName="cfm_configuration_item" columnName="log_count" />
@@ -405,42 +405,42 @@
 
        <!-- create Trigges statement for mssql database need to add here -->
 
- <changeSet author="Leap" id="3v1-cfm-20241023-12" dbms="h2,mysql,mssql">
+ <changeSet author="Essedum" id="3v1-cfm-20241023-12" dbms="h2,mysql,mssql">
         <preConditions onFail="MARK_RAN">
             <indexExists indexName="idx_cmdb_ci_sys_id_ci_name_ctype_location" tableName="cfm_configuration_item"/>
         </preConditions>
         <dropIndex indexName="idx_cmdb_ci_sys_id_ci_name_ctype_location" tableName="cfm_configuration_item"/>
   </changeSet>
 
-    <changeSet author="Leap" id="3v1-cfm-20241023-13" dbms="h2,mysql,mssql">
+    <changeSet author="Essedum" id="3v1-cfm-20241023-13" dbms="h2,mysql,mssql">
         <preConditions onFail="MARK_RAN">
             <indexExists indexName="idx_cmdb_ci_sys_id_ci_name_ctype" tableName="cfm_configuration_item"/>
         </preConditions>
         <dropIndex indexName="idx_cmdb_ci_sys_id_ci_name_ctype" tableName="cfm_configuration_item"/>
     </changeSet>
 
-    <changeSet author="Leap" id="3v1-cfm-20241023-14" dbms="h2,mysql,mssql">
+    <changeSet author="Essedum" id="3v1-cfm-20241023-14" dbms="h2,mysql,mssql">
         <preConditions onFail="MARK_RAN">
             <indexExists indexName="idx_cmdb_ci_sys_id" tableName="cfm_configuration_item"/>
         </preConditions>
         <dropIndex indexName="idx_cmdb_ci_sys_id" tableName="cfm_configuration_item"/>
     </changeSet>
 
-    <changeSet author="Leap" id="3v1-cfm-20241023-15" dbms="h2,mysql,mssql">
+    <changeSet author="Essedum" id="3v1-cfm-20241023-15" dbms="h2,mysql,mssql">
         <preConditions onFail="MARK_RAN">
             <indexExists indexName="idx_parent_sys_id" tableName="cfm_xw_ci_mapping"/>
         </preConditions>
         <dropIndex indexName="idx_parent_sys_id" tableName="cfm_xw_ci_mapping"/>
     </changeSet>
 
-    <changeSet author="Leap" id="3v1-cfm-20241023-16" dbms="h2,mysql,mssql">
+    <changeSet author="Essedum" id="3v1-cfm-20241023-16" dbms="h2,mysql,mssql">
         <preConditions onFail="MARK_RAN">
             <indexExists indexName="idx_child_sys_id" tableName="cfm_xw_ci_mapping"/>
         </preConditions>
         <dropIndex indexName="idx_child_sys_id" tableName="cfm_xw_ci_mapping"/>
     </changeSet>
 
-    <changeSet author="Leap" id="3v1-cfm-20241023-17" dbms="h2,mysql,mssql">
+    <changeSet author="Essedum" id="3v1-cfm-20241023-17" dbms="h2,mysql,mssql">
 		<createIndex indexName="idx_cmdb_ci_sys_id_ci_name_ctype_location"
 			tableName="cfm_configuration_item" >
 			<column name="cmdb_ci_sys_id" />
@@ -450,7 +450,7 @@
 		</createIndex>
 	</changeSet>
 
-    <changeSet author="Leap" id="3v1-cfm-20241023-18" dbms="h2,mysql,mssql">
+    <changeSet author="Essedum" id="3v1-cfm-20241023-18" dbms="h2,mysql,mssql">
 		<createIndex indexName="idx_cmdb_ci_sys_id_ci_name_ctype"
 			tableName="cfm_configuration_item" >
 			<column name="cmdb_ci_sys_id" />
@@ -459,21 +459,21 @@
 		</createIndex>
 	</changeSet>
 
-    <changeSet author="Leap" id="3v1-cfm-20241023-19" dbms="h2,mysql,mssql">
+    <changeSet author="Essedum" id="3v1-cfm-20241023-19" dbms="h2,mysql,mssql">
 		<createIndex indexName="idx_cmdb_ci_sys_id"
 			tableName="cfm_configuration_item" >
 			<column name="cmdb_ci_sys_id" />		
 		</createIndex>
 	</changeSet>
 
-    <changeSet author="Leap" id="3v1-cfm-20241023-20" dbms="h2,mysql,mssql">
+    <changeSet author="Essedum" id="3v1-cfm-20241023-20" dbms="h2,mysql,mssql">
 		<createIndex indexName="idx_parent_sys_id"
 			tableName="cfm_xw_ci_mapping" >
 			<column name="parent_sys_id" />		
 		</createIndex>
 	</changeSet>
 
-    <changeSet author="Leap" id="3v1-cfm-20241023-21" dbms="h2,mysql,mssql">
+    <changeSet author="Essedum" id="3v1-cfm-20241023-21" dbms="h2,mysql,mssql">
 		<createIndex indexName="idx_child_sys_id"
 			tableName="cfm_xw_ci_mapping" >
 			<column name="child_sys_id" />		
@@ -481,7 +481,7 @@
 	</changeSet>
  
 
-	<changeSet author="Leap" id="3v1-cfm-20241023-22">
+	<changeSet author="Essedum" id="3v1-cfm-20241023-22">
            <sql dbms="h2, mysql" splitStatements="true" stripComments="true">  
            ALTER TABLE cfm_configuration_item_type ADD configurableIcons BOOLEAN default FALSE
            </sql> 

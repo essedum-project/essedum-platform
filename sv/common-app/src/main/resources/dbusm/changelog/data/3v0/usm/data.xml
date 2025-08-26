@@ -1,6 +1,6 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="Leap (generated)" id="3v0-usm-100">
+    <changeSet author="Essedum (generated)" id="3v0-usm-100">
     <sql dbms="mssql">
 			SET IDENTITY_INSERT usm_portfolio ON;
 		</sql>	
@@ -14,7 +14,7 @@
 			SET IDENTITY_INSERT usm_portfolio OFF;
 		</sql>	
     </changeSet>
-    <changeSet author="Leap (generated)" id="3v0-usm-101">
+    <changeSet author="Essedum (generated)" id="3v0-usm-101">
      <sql dbms="mssql">
 			SET IDENTITY_INSERT usm_project ON;
 		</sql>

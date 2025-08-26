@@ -1,27 +1,27 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-	<changeSet author="Leap" id="2v1-usm-180522">
+	<changeSet author="Essedum" id="2v1-usm-180522">
 		<sql dbms="h2,mysql,mssql,postgresql" splitStatements="true" stripComments="true">
 			UPDATE usm_constant SET item_value = '{"label":"Admin","icon":"user","url":"","children":[{"label":"Monitor","icon":"assets/icons/Component_156_1.svg","url":"./iamp-btf/Cockpit","children":[],"_id":2},{"label":"Bot Execution Audit Trails","icon":"assets/icons/icon_audit.svg","url":"./iamp-btf/entity/bot-execution-audit-trails","children":[],"_id":3},{"label":"Schedule Background Process","icon":"assets/icons/icon_BCMS.svg","url":"./iamp-btf/entity/bot-factory-scheduler","children":[],"_id":4},{"label":"Refresh Jobs","icon":"sync","url":"./iamp-btf/refreshjobs","children":[],"_id":5},{"label":"API","icon":"sync","url":"./iamp-btf/docs","children":[],"_id":6},{"label":"Status Permission","icon":"","url":"./iamp-btf/entity/bot-status-permission","children":[{"label":"Status","icon":"","url":"./iamp-btf/entity/bot-status","children":[],"_id":8},{"label":"Status Permission Mapping","icon":"","url":"./iamp-btf/entity/bot-status-permission","children":[],"_id":9}],"_id":7}]}' WHERE item ='Bot Admin Side' AND item_value LIKE '%Admin%' AND project_name= 'leo1311';
 		</sql>
 	</changeSet>
-    <changeSet author="Leap" id="2v1-usm-310528">
+    <changeSet author="Essedum" id="2v1-usm-310528">
 		<sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">  
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'kg.expandNodeCount','leo1311','500',a.id FROM usm_project a WHERE name='leo1311';
 		</sql> 
 	</changeSet>
-    	<changeSet author="Leap" id="2v1-usm-310526">
+    	<changeSet author="Essedum" id="2v1-usm-310526">
 		<sql dbms="h2,mssql,mysql,postgresql" splitStatements="true" stripComments="true">
 			INSERT INTO usm_constant (item,project_name,item_value,project_id)  SELECT 'ItsmDetails','leo1311','Tickets',a.id FROM usm_project a WHERE name='leo1311';
             INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'ItsmCreate','leo1311','CreateTicket',a.id FROM usm_project a WHERE name='leo1311';
 		</sql>
 	</changeSet>
-    <changeSet author="Leap" id="2v1-usm-310529">
+    <changeSet author="Essedum" id="2v1-usm-310529">
 		<sql dbms="h2,mssql,mysql,postgresql" splitStatements="true" stripComments="true">
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'license_notification_role','leo1311','1,6',a.id FROM usm_project a WHERE name='leo1311';
 		</sql>
 	</changeSet>
-    <changeSet author="Leap" id="2v1-usm-310542">
+    <changeSet author="Essedum" id="2v1-usm-310542">
 		<sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">  		
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CAP.CreateWorkflow','leo1311','xlsx,csv,docx,image/png,zip,xaml,jpg,image/jpeg,pdf,txt,atr',a.id FROM usm_project a WHERE name='leo1311';
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CAP.OnlyExcel','leo1311','xlsx,xls',a.id FROM usm_project a WHERE name='leo1311';
@@ -29,29 +29,29 @@
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.Depth.CAP','leo1311','5',a.id FROM usm_project a WHERE name='leo1311';
 		</sql>
 	</changeSet>
-    <changeSet author="Leap" id="2v1-usm-31050038">
+    <changeSet author="Essedum" id="2v1-usm-31050038">
 		<sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension', 'leo1311', '{"allowedFileExtension":"xlsx,csv,docx,png,jpg,jpeg","allowedFileTypes":"application/xml","allowedDepth":"2"}', a.id FROM usm_project a WHERE name='leo1311';
 		</sql>
 	</changeSet>
-    <changeSet author="Leap" id="2v1-usm-310543">
+    <changeSet author="Essedum" id="2v1-usm-310543">
         <sql dbms="h2,mssql,mysql,postgresql" splitStatements="true" stripComments="true">	
 	        INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.DBS.AddImage','leo1311','{"allowedFileExtension":"png,jpeg,jpg,svg","allowedFileTypes":"image/png,image/jpeg,image/jpg,image/svg+xml","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='leo1311';
 	    </sql>
     </changeSet>
-    <changeSet author="Leap" id="2v1-usm-310536">
+    <changeSet author="Essedum" id="2v1-usm-310536">
         <sql dbms="h2,mssql,mysql,postgresql" splitStatements="true" stripComments="true">
 	        INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.USM.AddImage','leo1311','{"allowedFileExtension":"png,jpeg,jpg","allowedFileTypes":"image/png,image/jpeg,image/jpg","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='leo1311';	 
 	        INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.USM.ImportData','leo1311','{"allowedFileExtension":"txt","allowedFileTypes":"text/plain,text/binary,application/octet-stream","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='leo1311';
         </sql>
     </changeSet>
-    <changeSet author="Leap" id="2v1-usm-310546">
+    <changeSet author="Essedum" id="2v1-usm-310546">
         <sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">       
          INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CCL.UploadDocument','leo1311','{"allowedFileExtension":"png,jpg,jpeg,xlsx,csv","allowedFileTypes":"image/png,image/jpeg,image/jpg,.xlsx,.csv","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='leo1311';
          INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CCL.UploadImage','leo1311','{"allowedFileExtension":"png,jpg,jpeg","allowedFileTypes":"image/png,image/jpeg,image/jpg","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='leo1311';
         </sql>
      </changeSet>
-     <changeSet author="Leap" id="2v1-usm-310548">
+     <changeSet author="Essedum" id="2v1-usm-310548">
         <sql dbms="h2,mssql,mysql,postgresql" splitStatements="true" stripComments="true">    
             INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CFM.UploadSvg','leo1311','{"allowedFileExtension":"svg","allowedFileTypes":"image/svg+xml","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='leo1311';
             INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CFM.UploadImage','leo1311','{"allowedFileExtension":"png,jpeg,jpg","allowedFileTypes":"image/png,image/jpg,image/jpeg","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='leo1311';
@@ -59,7 +59,7 @@
             INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.WFLW.CreateProcess','leo1311','{"allowedFileExtension":"bpmn","allowedFileTypes":"bpmn","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='leo1311';
         </sql>
     </changeSet>
-    <changeSet author="Leap" id="2v1-usm-310549">
+    <changeSet author="Essedum" id="2v1-usm-310549">
         <sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">       
          INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CIP.EditProject','leo1311','{"allowedFileExtension":"png,jpg,jpeg","allowedFileTypes":"image/png,image/jpeg,image/jpg","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='leo1311';
 		 INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CIP.CreateProject','leo1311','{"allowedFileExtension":"png,jpg,jpeg","allowedFileTypes":"image/png,image/jpeg,image/jpg","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='leo1311';
