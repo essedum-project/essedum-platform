@@ -192,38 +192,27 @@
 				<tableExists tableName="mlfederatedmodels" />
 			</not>
 		</preConditions>
-		<createTable tableName="mlfederatedmodels">
-			<column autoIncrement="true" name="id" type="INT">
-				<constraints primaryKey="true" />
-			</column>
-			<column name="fed_id" type="VARCHAR(255)" />
-			<column name="adapter_id" type="VARCHAR(255)" />
-			<column name="app_name" type="VARCHAR(255)" />
-			<column name="fed_name" type="VARCHAR(255)" />
-			<column name="fed_org" type="VARCHAR(255)" />
-			<column name="app_org" type="VARCHAR(255)" />
-			<column name="status" type="VARCHAR(255)" />
-			<column name="adapter_alias" type="VARCHAR(255)" />
-			<column name="created_by" type="VARCHAR(255)" />
-			<column name="created_on" type="datetime(6)" />
-			<column name="is_deleted" type="boolean" />
-			<column name="app_modified_by" type="VARCHAR(255)" />
-			<column name="fed_modified_by" type="VARCHAR(255)" />
-			<column name="app_modified_date" type="VARCHAR(255)" />
-			<column name="fed_modified_date" type="datetime(6)" />
-			<column name="sync_date" type="datetime(6)" />
-			<column name="model_type" type="VARCHAR(255)" />
-			<column name="model_likes" type="INT" />
-			<column name="model_metadata" type="TEXT" />
-			<column name="raw_payload" type="TEXT" />
-			<column name="artifacts" type="TEXT" />
-			<column name="container" type="TEXT" />
-			<column name="app_description" type="TEXT" />
-			<column name="fed_description" type="TEXT" />
-			<column name="version" type="VARCHAR(255)" />
-			<column name="app_status" type="VARCHAR(255)" />
-			<column name="model_deployment" type="VARCHAR(255)" />
-		</createTable>
+		
+    	<createTable tableName="mlfederatedmodels">
+	        <column name="id" type="INT" autoIncrement="true">
+	            <constraints primaryKey="true" nullable="false"/>
+	        </column>
+	        <column name="model_name" type="VARCHAR(255)"/>
+	        <column name="description" type="VARCHAR(255)"/>
+	        <column name="version" type="VARCHAR(255)"/>
+	        <column name="data_source" type="VARCHAR(255)"/>
+	        <column name="attributes" type="VARCHAR(255)"/>
+	        <column name="organisation" type="VARCHAR(255)"/>
+	        <column name="model_type" type="VARCHAR(255)"/>
+	        <column name="created_on" type="timestamp">
+	            <constraints nullable="false"/>
+	        </column>
+	        <column name="created_by" type="VARCHAR(255)"/>
+	        <column name="app_modified_date" type="timestamp"/>
+	        <column name="app_modified_by" type="VARCHAR(255)"/>
+    	</createTable>
+
+
 	</changeSet>
 
 	<changeSet author="Essedum (generated)" id="3v0-cip-19" >

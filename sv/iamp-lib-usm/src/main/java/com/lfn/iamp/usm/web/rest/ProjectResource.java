@@ -344,7 +344,7 @@ public class ProjectResource {
 	 */
 	@GetMapping("/projects/{id}")
 	@Timed
-	public ResponseEntity<?> getProject(@PathVariable Integer id) {
+	public ResponseEntity<?> getProject(@PathVariable("id") Integer id) {
 		try {
 			log.info("getProject : Request to get Project ID:{} ",id); 
 			Project project = projectService.findOne(id);
@@ -372,7 +372,7 @@ public class ProjectResource {
 	 */
 	@DeleteMapping("/projects/{id}")
 	@Timed
-	public ResponseEntity<?> deleteProject(@PathVariable Integer id) throws SQLException {
+	public ResponseEntity<?> deleteProject(@PathVariable("id") Integer id) throws SQLException {
 		Project project = projectService.findOne(id);
 		log.info("deleteProject : Request to delete Project by ID: {}",project.getId());
 		try {

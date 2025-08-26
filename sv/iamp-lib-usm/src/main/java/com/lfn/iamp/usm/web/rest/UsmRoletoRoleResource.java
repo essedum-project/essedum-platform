@@ -201,7 +201,7 @@ public class UsmRoletoRoleResource {
 	 */
 	@GetMapping("/usm-role-role/{id}")
 	@Timed
-	public ResponseEntity<?> getRoletoRoleMappings(@PathVariable Integer id) {
+	public ResponseEntity<?> getRoletoRoleMappings(@PathVariable("id") Integer id) {
 		try {
 			log.info("getRoletoRoleMappings : Request to get Role Mapping by ID: {}",id);
 			RoletoRole role_to_role = usm_role_to_roleService.findOne(id);
@@ -228,7 +228,7 @@ public class UsmRoletoRoleResource {
 	 */
 	@DeleteMapping("/usm-role-role/{id}")
 	@Timed
-	public ResponseEntity<?> deleteRoletoRoleMappings(@PathVariable Integer id) {
+	public ResponseEntity<?> deleteRoletoRoleMappings(@PathVariable("id") Integer id) {
 		try {
 			log.info("deleteRoletoRoleMappings : Request to delete Role to Role Mappings by ID: {}",id);
 			usm_role_to_roleService.delete(id);

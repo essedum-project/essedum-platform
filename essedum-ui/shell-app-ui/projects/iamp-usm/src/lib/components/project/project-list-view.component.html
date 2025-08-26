@@ -1,0 +1,589 @@
+<!-- NEW LAYOUT -->
+<div>
+  <div class="aip-container lfx-u-pad-lr-30">
+    <!-- Header Section -->
+
+    <!-- Header -->
+    <app-aip-header [cardTitle]="'Project List'" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createFlag"
+      (search)="onSearchInput($event)" (refresh)="Refresh()" (add)="createView()">
+    </app-aip-header>
+    <div>
+      <div class="aip-container lfx-u-pad-lr-30">
+        <!-- Filter Component -->
+        <app-aip-filter-roles
+          [componentName]="'project-list'"
+          [filterOptions]="filterOptions" 
+          [selectedFilterValues]="selectedFilterValues"
+          (filterSelected)="onFilterSelected($event)"
+          (filterStatusChange)="onFilterStatusChange($event)">
+        </app-aip-filter-roles>
+
+        <!-- Table Layout  -->
+        <div class="table-card">
+          <div class="table-scroll-container">
+            <table class="styled-table" *ngIf="projects.length; else noData">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Project ID</th>
+                  <th>Project Name</th>
+                  <th>Project Display Name</th>
+                  <th>Portfolio Name</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let project of projects; let i = index">
+                  <td>{{page * pageSize + i + 1}}</td>
+                  <td (click)="view_Project(project)" style="color: #0094ff; cursor: pointer;">{{ project.id ? project.id : "--" }}</td>
+                  <td>{{ project.name ? project.name : "--" }}</td>
+                  <td>{{ project.projectdisplayname ? project.projectdisplayname : "--" }}</td>
+                  <td>{{ project.portfolioId?.portfolioName ? project.portfolioId?.portfolioName : "--" }}</td>
+                  <td>{{ project.description ? project.description : "--" }}</td>
+                  <td>
+                    <i class="fa fa-info-circle fa-lg header-action-icon" aria-hidden="true"
+                      matTooltip="View Project" *ngIf="viewFlag" (click)="view_Project(project)"></i>
+                    <i class="fa fa-pencil fa-lg header-action-icon" aria-hidden="true"
+                      matTooltip="Edit Project" (click)="editProject(project)" style="padding-left: 5px" 
+                      *ngIf="editFlag && project.name != 'Core'"></i>
+                    <i class="fa fa-trash fa-lg header-action-icon" aria-hidden="true"
+                      style="padding-left: 5px" matTooltip="Delete Project" (click)="showDeleteDialog(project)"
+                      *ngIf="deleteFlag && project.name != 'Core'"></i>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <ng-template #noData>
+              <div class="no-data">No data available</div>
+            </ng-template>
+          </div>
+          <!-- Pagination -->
+
+          <div class="pagination-wrapper d-flex justify-content-end">
+            <ul class="custom-pagination">
+              <li class="custom-pagination-arrow" [class.disabled]="page === 0" (click)="navigatePage('Prev')">
+                <span>&lsaquo;</span>
+              </li>
+
+              <li *ngFor="let p of getPageNumbers()" class="custom-pagination-number" [class.active]="p === page"
+                (click)="changePage(p)">
+                <span>{{ p + 1 }}</span>
+              </li>
+
+              <li class="custom-pagination-arrow" [class.disabled]="page === lastPage" (click)="navigatePage('Next')">
+                <span>&rsaquo;</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+            <!-- <div class="row rwMAr selector-665-17">
+              <div class="col-md-6 selector-665-18">
+                <label class="formLabel selector-665-19" style="margin: 3px">Project Name</label>
+                <div class="input-group ams_datetime selector-665-20" style="margin-top: 1%">
+                  <input [(ngModel)]="filterProjectName" type="text" class="form-control selector-665-21" />
+                </div>
+              </div>
+              <div class="col-md-6 clearboth selector-665-22" *ngIf="!role.roleadmin">
+                <mat-form-field style="width: 85%; margin-top: -1%" class="selector-665-23">
+                  <label class="formLabel selector-665-24">Portfolio</label>
+                  <mat-select [(ngModel)]="filterProject" name="portfolio" class="selector-665-25" style="padding:0.8vh">
+                    <mat-option *ngFor="let item of usm_portfolio_idArray; trackBy: trackByMethod" [value]="item" class="selector-665-26">
+                      <div  class="td-span td-ellipsis pull-left selector-665-261" matTooltipClass="crud-tooltip" [matTooltip]="item.portfolioName">{{ item.portfolioName }}</div>
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+            <div class="ams_panelFooter selector-665-27">
+              <button type="button" class="genBtn marRght30 selector-665-28" (click)="Search(null)">Submit</button>
+              <button type="button" class="secBtn selector-665-29" (click)="Clear()">Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="selector-665-30">
+        <div class="ams_panelCnt formRow relative selector-665-31">
+          <div style="float: right; cursor: pointer" class="selector-665-32">
+            <i class="fa fa-list-ul fa-lg icon1 selector-665-33" aria-hidden="true" matTooltip="Table View" (click)="showList = false"></i>
+            <i class="fa fa-th-large fa-lg icon1 selector-665-34" aria-hidden="true" matTooltip="Card View" (click)="showList = true"></i>
+          </div>
+          <br class="selector-665-35" />
+          <br class="selector-665-36" />
+          <div class="row selector-665-37" *ngIf="showList &amp;&amp; projects.length >= 0">
+            <div class="col-md-6 selector-665-38" *ngFor="
+                let project of projects | paginate: { itemsPerPage: 8, currentPage: p };
+                trackBy: trackByMethod
+              ">
+              <div class="ams_cardCtr ams_cardfooterCtr selector-665-39">
+                <div class="ams_cardBorder clearfix selector-665-40">
+                  <h4 class="td-ellipsis selector-665-41" (click)="view_Project(project)" style="cursor:pointer" [matTooltip]="project.name" matTooltipClass="crud-tooltip">
+                    {{ project.name }}
+                  </h4>
+                  <div class="ams_cardCnt selector-665-42">
+                    <div class="row rwMAr selector-665-43">
+                      <div class="col-md-6 selector-665-44">
+                        <label class="formLabel selector-665-45" (click)="view_Project(project)" style="cursor:pointer">Project Id</label>
+                        <span class="formSpan selector-665-46" (click)="view_Project(project)" style="cursor:pointer" [matTooltip]="project.id" matTooltipClass="crud-tooltip">{{ project.id ? project.id : "--" }}</span>
+                      </div>
+                      <div class="col-md-6 selector-665-47">
+                        <label class="formLabel selector-665-48" (click)="view_Project(project)" style="cursor:pointer">Project Display Name</label>
+                        <span class="formSpan selector-665-49" (click)="view_Project(project)" style="cursor:pointer" [matTooltip]="project.projectdisplayname" matTooltipClass="crud-tooltip">{{ project.projectdisplayname ? project.projectdisplayname : "--" }}</span>
+                      </div>
+                    </div>
+                    <div class="row rwMAr selector-665-262">
+                      <div class="col-md-6 selector-665-50">
+                        <label class="formLabel selector-665-51" (click)="view_Project(project)" style="cursor:pointer">Portfolio Name</label>
+                        <span class="formSpan selector-665-52" (click)="view_Project(project)" style="cursor:pointer" [matTooltip]="project.portfolioId?.portfolioName" matTooltipClass="crud-tooltip">{{
+                            project.portfolioId?.portfolioName ? project.portfolioId?.portfolioName : "--"
+                          }}</span>
+                      </div>
+                      <div class="col-md-6 selector-665-53">
+                        <label class="formLabel selector-665-54" (click)="view_Project(project)" style="cursor:pointer">Description</label>
+                        <span class="formSpan selector-665-55" (click)="view_Project(project)" style="cursor:pointer" [matTooltip]="project.description" matTooltipClass="crud-tooltip">{{ project.description ? project.description : "--" }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="selector-665-56">
+                  <div class="selector-665-57">
+                    <div class="ams_cardfooter text-center selector-665-58">
+                      <i class="fa fa-info-circle fa-lg create-icon-color selector-665-59" aria-hidden="true" matTooltip="View Project" *ngIf="viewFlag" (click)="view_Project(project)"></i>
+                      <i class="fa fa-pencil fa-lg create-icon-color selector-665-60" aria-hidden="true" matTooltip="Edit Project" *ngIf="editFlag && project.name!='Core'" (click)="editProject(project)" style="padding-left: 5px"></i>
+                      <i class="fa fa-trash fa-lg create-icon-color selector-665-61" aria-hidden="true" style="padding-left: 5px" *ngIf="deleteFlag  && project.name!='Core'" (click)="showDeleteDialog(project)" matTooltip="Delete Project"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="showList &amp;&amp; wavesLength > 0" class="selector-665-62">
+            <mat-paginator [pageSize]="pageSize" [length]="wavesLength" (page)="onPageFired($event)" showFirstLastButtons="" class="selector-665-63"></mat-paginator>
+          </div>
+
+          <div class="ContentSideSections Implementation selector-665-64" style="padding: 1%" *ngIf="!showList &amp;&amp; wavesLength >= 0">
+            <mat-card appearance="outlined" class="selector-665-65">
+              <mat-card-content class="selector-665-66">
+                <div class="table-responsive selector-665-67">
+                  <table aria-label="" mat-table="" [dataSource]="ProjectList" class="table table-hover list-table selector-665-68">
+                    <ng-container matColumnDef="id" class="selector-665-69">
+                      <th mat-header-cell="" *matHeaderCellDef="" class="number-col selector-665-70">
+                        <strong class="selector-665-71"> Project Id </strong>
+                      </th>
+                      <td mat-cell="" *matCellDef="let task" (click)="view_Project(task)" style="cursor:pointer" class="td-ellipsis number-col selector-665-72">
+                        <div class="td-span td-ellipsis pull-right td-padding selector-665-73" [matTooltip]="task.id" matTooltipClass="crud-tooltip">
+                          {{ task.id ? task.id : "--" }}
+                        </div>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="name" class="selector-665-74">
+                      <th mat-header-cell="" *matHeaderCellDef="" class="selector-665-75">
+                        <strong class="selector-665-76"> Project Name </strong>
+                      </th>
+                      <td mat-cell="" *matCellDef="let task" (click)="view_Project(task)" style="cursor:pointer" class="td-ellipsis selector-665-77">
+                        <div class="td-span td-ellipsis pull-left td-padding selector-665-78" [matTooltip]="task.name" matTooltipClass="crud-tooltip">
+                          {{ task.name ? task.name : "--" }}
+                        </div>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="Project Display Name" class="selector-665-79">
+                      <th mat-header-cell="" *matHeaderCellDef="" class="selector-665-80">
+                        <strong class="selector-665-81"> Project Display Name</strong>
+                      </th>
+                      <td mat-cell="" *matCellDef="let task" (click)="view_Project(task)" style="cursor:pointer" class="td-ellipsis selector-665-82">
+                        <div class="td-span td-ellipsis pull-left td-padding selector-665-83" [matTooltip]="task.projectdisplayname" matTooltipClass="crud-tooltip">
+                          {{ task.projectdisplayname ? task.projectdisplayname : "--" }}
+                        </div>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="portfolio Name" class="selector-665-84">
+                      <th mat-header-cell="" *matHeaderCellDef="" class="selector-665-85">
+                        <strong class="selector-665-86"> Project Portfolio Name</strong>
+                      </th>
+                      <td mat-cell="" *matCellDef="let task" (click)="view_Project(task)" style="cursor:pointer" class="td-ellipsis selector-665-87">
+                        <div class="td-span td-ellipsis pull-left td-padding selector-665-88" [matTooltip]="task.portfolioId?.portfolioName" matTooltipClass="crud-tooltip">
+                          {{ task.portfolioId?.portfolioName ? task.portfolioId?.portfolioName : "--" }}
+                        </div>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="description" class="selector-665-89">
+                      <th mat-header-cell="" *matHeaderCellDef="" class="selector-665-90">
+                        <strong class="selector-665-91"> Project Description </strong>
+                      </th>
+                      <td mat-cell="" *matCellDef="let task" (click)="view_Project(task)" style="cursor:pointer" class="td-ellipsis selector-665-92">
+                        <div class="td-span td-ellipsis pull-left td-padding selector-665-93" [matTooltip]="task.description" matTooltipClass="crud-tooltip">
+                          {{ task.description ? task.description : "--" }}
+                        </div>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="actions" class="selector-665-94">
+                      <th mat-header-cell="" *matHeaderCellDef="" class="actions-col selector-665-95">
+                        <strong class="selector-665-96"> Actions </strong>
+                      </th>
+                      <td mat-cell="" *matCellDef="let task" class="actions-col selector-665-97" style="padding-top: 1em !important">
+                        <i class="fa fa-info-circle fa-lg create-icon-color selector-665-98" aria-hidden="true" matTooltip="View Project" *ngIf="viewFlag" (click)="view_Project(task)"></i>
+                        <i class="fa fa-pencil fa-lg create-icon-color selector-665-99" aria-hidden="true" matTooltip="Edit Project" *ngIf="editFlag  &amp;&amp; task.name!='Core'" (click)="editProject(task)" style="padding-left: 5px"></i>
+                        <i class="fa fa-trash fa-lg create-icon-color selector-665-100" aria-hidden="true" style="padding-left: 5px" *ngIf="deleteFlag  &amp;&amp; task.name!='Core'" (click)="showDeleteDialog(task)" matTooltip="Delete Project"></i>
+                      </td>
+                    </ng-container>
+
+                    <tr mat-header-row="" *matHeaderRowDef="displayedColumns" class="selector-665-101"></tr>
+                    <tr mat-row="" *matRowDef="let row; columns: displayedColumns" class="selector-665-102"></tr>
+                  </table>
+                  <div *ngIf="wavesLength > 0" class="selector-665-103">
+                    <mat-paginator [pageSize]="pageSize" [pageIndex]="pageIndex" [length]="wavesLength" (page)="onPageFired($event)" showFirstLastButtons="" class="selector-665-104"></mat-paginator>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+
+          <div *ngIf="wavesLength == 0" id="noRecordsMsg" class="selector-665-105">No Records Found</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showCreate" #projectForm="ngForm" class="selector-665-106" ngForm="">
+    <div class="padTop20 paddingBottom selector-665-107">
+      <div>
+        <div class="backIconcrud">
+      <span class="ams_back pull-right linkMar selector-665-108" (click)="listView()">Back to Project</span>
+      <i class="fa fa-caret-square-o-left create-icon-color pull-right linkMar selector-665-109" (click)="listView()" aria-hidden="true"></i>
+      </div>
+      <div class="selector-665-110">
+        <span class="ams_back pull-right linkMar selector-665-111" *ngIf="edit &amp;&amp; !view &amp;&amp; viewProject" (click)="view = true; buttonFlag = true">View Project</span>
+        <i class="fa fa-eye create-icon-color pull-right linkMar selector-665-112" *ngIf="edit &amp;&amp; !view &amp;&amp; viewProject" (click)="view = true; buttonFlag = true" aria-hidden="true"></i>
+        <span class="ams_back pull-right linkMar selector-665-113" *ngIf="edit &amp;&amp; view &amp;&amp; editFlag &amp;&amp; !coreProjectFlag" (click)="view = false; buttonFlag = false">Edit Project</span>
+        <i class="fa fa-pencil-square-o create-icon-color pull-right linkMar selector-665-114" *ngIf="edit &amp;&amp; view &amp;&amp; editFlag  &amp;&amp; !coreProjectFlag" (click)="view = false; buttonFlag = false" aria-hidden="true"></i>
+      </div>
+      </div>
+      <h4 class="ams_h2 h2Mar crud-header selector-665-115" style="padding-left: 11%" *ngIf="!edit">Create Project</h4>
+      <h4 class="ams_h2 h2Mar crud-header selector-665-116" [ngStyle]="{ 'padding-left': edit &amp;&amp; !view &amp;&amp; viewProject ? '15%' : '5%' }" *ngIf="edit &amp;&amp; !view">
+        Edit Project
+      </h4>
+      <h4 class="ams_h2 h2Mar crud-header selector-665-117" style="padding-left: 15%" *ngIf="edit &amp;&amp; view">View Project</h4>
+      <div class="noPad selector-665-118">
+        <div class="selector-665-119">
+          <div class="row rwMAr selector-665-120">
+            <div class="col-md-6 selector-665-121">
+              <label class="formLabel selector-665-122">Project Name *</label>
+              <input (keypress)="deleteSpecialChars($event)" [disabled]="view || edit" type="text" class="txtInput selector-665-123" maxlength="255" required="" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.name" (keyup)="checkProjectNameMaxLength()" />
+              <span class="error selector-665-124" style="font-size: 1.6vmin">
+                Note: Alpha numeric characters  and _ allowed </span><br class="selector-665-125" />
+              <span class="error selector-665-126" style="font-size: 1.6vmin" *ngIf="showNameLengthErrorMessage == true">{{
+                lengthNameErrorMessage
+              }}</span>
+            </div>
+            <div class="col-md-6 selector-665-127" *ngIf="view || edit">
+              <label class="formLabel selector-665-128">Project Display Name *</label>
+              <input [disabled]="view" type="text" class="txtInput selector-665-129" maxlength="255" required="" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.projectdisplayname" (keyup)="checkProjectDisplayNameMaxLength()" />
+              <span class="error selector-668-19" style="font-size: 1.6vmin">
+                Note: Alpha numeric and special characters -_. allowed </span><br class="selector-668-20" />
+              <span class="error selector-665-130" style="font-size: 1.6vmin" *ngIf="showDisplayNameLengthErrorMessage == true">{{
+                lengthNameErrorMessage
+              }}</span>
+            </div>
+            <div class="col-md-6 selector-665-131" *ngIf="!(view || edit)">
+              <label class="formLabel selector-665-132">Project Description</label>
+              <textarea [disabled]="view" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.description" class="txtInput selector-665-133" maxlength="255" (keyup)="checkDescriptionMaxLength()">
+              </textarea>
+              <span class="error selector-668-19" style="font-size: 1.6vmin">
+                Note: Alpha numeric and special characters -_. allowed </span><br class="selector-668-20" />
+              <span class="error selector-665-134" style="font-size: 1.6vmin" *ngIf="showDescLengthErrorMessage == true">{{
+                lengthNameErrorMessage
+              }}</span>
+            </div>
+          </div>
+          <div class="row rwMAr selector-665-135">
+            <div class="col-md-6 selector-665-136" *ngIf="view || edit">
+              <label class="formLabel selector-665-137">Project Description</label>
+              <textarea [disabled]="view" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.description" class="txtInput selector-665-138" maxlength="255" (keyup)="checkDescriptionMaxLength()">
+              </textarea>
+              <span class="error selector-668-19" style="font-size: 1.6vmin">
+                Note: Alpha numeric and special characters -_. allowed </span><br class="selector-668-20" />
+              <span class="error selector-665-139" style="font-size: 1.6vmin" *ngIf="showDescLengthErrorMessage == true">{{
+                lengthNameErrorMessage
+              }}</span>
+            </div>
+            <div class="col-md-6 select-style selector-665-140" *ngIf="!role.roleadmin">
+              <mat-form-field style="width: 85%" class="selector-665-141">
+                <label class="formLabel selector-665-142">Portfolio Name*</label>
+                <mat-select [(ngModel)]="project.portfolioId" [compareWith]="compareObjects" [disabled]="view" required="" [ngModelOptions]="{ standalone: true }" class="selector-665-143">
+                  <mat-option *ngFor="let item of usm_portfolio_idArray; trackBy: trackByMethod" [value]="item" class="selector-665-145" [matTooltip]="item.portfolioName">{{
+                    item.portfolioName
+                  }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="col-md-6 selector-665-146" *ngIf="!(view || edit)">
+              <label class="formLabel selector-665-147">Project Theme</label>
+              <input [disabled]="view" type="color" [(ngModel)]="project.theme" [ngModelOptions]="{ standalone: true }" class="selector-665-148" style="padding:4px" />
+              <br class="selector-665-149" />
+              <span class="error selector-665-150" style="font-size: 1.6vmin">Note : Selecting Project theme as black/white is not recommended</span>
+            </div>
+            <div class="col-md-6 selector-665-151" *ngIf="!(view || edit) &amp;&amp; role.roleadmin">
+              <label class="formLabel selector-665-152">Use Default Roles</label>
+              <input [disabled]="view" type="checkbox" [(ngModel)]="project.defaultrole" [ngModelOptions]="{ standalone: true }" class="formCheckBox selector-665-153" />
+            </div>
+            <div class="col-md-6 selector-665-154" *ngIf="(view || edit) &amp;&amp; role.roleadmin">
+              <label class="formLabel selector-665-155">Use Default Roles</label>
+              <input [disabled]="view" type="checkbox" [(ngModel)]="project.defaultrole" [ngModelOptions]="{ standalone: true }" class="formCheckBox selector-665-156" />
+            </div>
+          </div>
+          <div class="row rwMAr selector-665-157">
+            <div class="col-md-6 selector-665-158" *ngIf="(view || edit) &amp;&amp; !role.roleadmin">
+              <label class="formLabel selector-665-159">Use Default Roles</label>
+              <input [disabled]="view" type="checkbox" [(ngModel)]="project.defaultrole" [ngModelOptions]="{ standalone: true }" class="formCheckBox selector-665-160" />
+            </div>
+
+            <div class="col-md-6 selector-665-161" *ngIf="view || edit">
+              <label class="formLabel selector-665-162">Project Theme</label>
+              <input [disabled]="view" type="color" [(ngModel)]="project.theme" [ngModelOptions]="{ standalone: true }" class="selector-665-163" style="padding:4px" />
+              <br class="selector-665-164" />
+              <span class="error selector-665-165" style="font-size: 1.6vmin">Note : Selecting Project theme as black/white is not recommended</span>
+            </div>
+
+            <div class="col-md-6" *ngIf="(view || edit) &amp;&amp; !role.roleadmin">
+              <label class="formLabel">Autologin to Project?</label>
+              <input [disabled]="view" type="checkbox" [(ngModel)]="project.projectAutologin" [ngModelOptions]="{ standalone: true }" class="formCheckBox selector-665-160" />
+              <div>
+                <span class="error" style="font-size: 1.6vmin">Note: With this option users can autologin to the project using URL
+                </span>
+              </div>
+              <label class="formLabel">Assign to auto user project?</label>
+              <input [disabled]="view" type="checkbox" [(ngModel)]="project.autoUserProject" [ngModelOptions]="{ standalone: true }" class="formCheckBox selector-665-249" />
+              <div>
+                <span class="error" style="font-size: 1.6vmin">Note: With this option the project will be assigned to autouser.
+                </span>
+              </div>
+            </div>
+          
+            <div class="col-md-6 selector-665-166" style="margin-top: 1%" *ngIf="view || edit">
+              <label class="formLabel selector-665-167">Project Logo</label>
+              <input id="filename" [disabled]="view" type="file" name="file" [accept]="extension" [disabled]="!extension || !allowedTypes" (change)="profileImageAdded($event)" class="selector-665-168 chooseFileLabel" />
+              <label for="filename" class="selector-665-169 inputLabel" [ngStyle]="{'cursor':!extension || !allowedTypes ?  'default':'pointer'} ">
+                {{ project.logoName ? project.logoName : "No File Chosen" }}
+              </label>
+              <img *ngIf="url" [src]="url" class="imageView img-responsive selector-665-170" alt=""/>
+            </div>
+            <div class="col-md-6" *ngIf="(view || edit) &amp;&amp; project.projectAutologin">
+              <mat-form-field style="width: 85%">
+                <label class="formLabel">Autologin Role</label>
+                <mat-select [(value)]="project.autologinRole" [compareWith]="compareObjects" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.autologinRole" [disabled]="view">
+                  <mat-option *ngFor="let role of rolesArray" [value]="role">{{role.name}}</mat-option>
+                </mat-select>   
+              </mat-form-field>             
+              <div>
+                <span class="error" style="font-size: 1.6vmin">Note: Role with which autologin to Project will occur
+                </span>
+              </div>
+            </div>
+            <div class="col-md-6 selector-665-222" *ngIf="(view || edit) &amp;&amp; !role.roleadmin">
+              
+              <label class="formLabel selector-665-223">Disable Excel Download?</label>
+              <input [disabled]="view" type="checkbox" [(ngModel)]="project.disableExcel" [ngModelOptions]="{ standalone: true }" (ngModelChange)="excelValueChanged($event)" class="formCheckBox selector-665-224" />
+
+              <div class="selector-665-225">
+                <span class="error selector-665-226" style="font-size: 1.6vmin">Note: With this option excel functionality in dashboard can be disabled
+                </span>
+              </div>
+            </div>
+            <div class="col-md-6 select-style selector-665-171" *ngIf="view || edit">
+              <mat-form-field style="width: 85%" class="selector-665-172">
+                <label class="formLabel selector-665-173">Time Zone</label>
+                <mat-select [disabled]="view" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.timeZone" (ngModelChange)="timeZoneChanged($event)" class="selector-665-174">
+                  <mat-option class="selector-665-175">---NULL---</mat-option>
+                  <mat-option *ngFor="let item of tzNames; trackBy: trackByMethod" [value]="item" class="selector-665-176">
+                    {{ item }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <div style="margin-top: -2%" class="selector-665-177">
+                <span class="error selector-665-178" style="font-size: 1.6vmin">Note: Used for Dashboard Date Filters to work as per Time Zone<br class="selector-665-179" />Value "Asia/Calcutta" is
+                  used if option is null or empty
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="row rwMAr selector-665-180">
+            <div class="col-md-6 selector-665-181" *ngIf="!(view || edit) &amp;&amp; !role.roleadmin">
+              <label class="formLabel selector-665-182">Use Default Roles</label>
+              <input [disabled]="view" type="checkbox" [(ngModel)]="project.defaultrole" [ngModelOptions]="{ standalone: true }" class="formCheckBox selector-665-183" />
+            </div>
+
+            <div class="col-md-6 selector-665-184" *ngIf="!(view || edit) &amp;&amp; role.roleadmin">
+              <label class="formLabel selector-665-185">Project Logo</label>
+              <input id="filename" [disabled]="view" type="file" name="file" [accept]="extension" [disabled]="!extension || !allowedTypes" (change)="profileImageAdded($event)" class="selector-665-186 chooseFileLabel" />
+              <label for="filename" class="selector-665-187 inputLabel" [ngStyle]="{'cursor':!extension || !allowedTypes ?  'default':'pointer'} ">
+                {{ project.logoName ? project.logoName : "No File Chosen" }}
+              </label>
+              <img *ngIf="url" [src]="url" class="imageView img-responsive selector-665-188" alt=""/>
+            </div>
+            <div class="col-md-6 selector-665-189" *ngIf="!(view || edit) &amp;&amp; !role.roleadmin">
+              <label class="formLabel selector-665-190">Project Logo</label>
+              <input id="filename" [disabled]="view" type="file" name="file" [accept]="extension" [disabled]="!extension || !allowedTypes" (change)="profileImageAdded($event)" class="selector-665-191 chooseFileLabel" />
+              <label for="filename" class="selector-665-192 inputLabel" [ngStyle]="{'cursor':!extension || !allowedTypes ?  'default':'pointer'} ">
+                {{ project.logoName ? project.logoName : "No File Chosen" }}
+              </label>
+              <img *ngIf="url" [src]="url" class="imageView img-responsive selector-665-193" alt=""/>
+            </div>
+            <div class="col-md-6" *ngIf="!(view || edit) &amp;&amp; !role.roleadmin" style="margin-top:10px">
+              <label class="formLabel">Autologin to Project?</label>
+              <input [disabled]="view" type="checkbox" [(ngModel)]="project.projectAutologin" [ngModelOptions]="{ standalone: true }" class="formCheckBox selector-665-183" />
+              <div>
+                <span class="error" style="font-size: 1.6vmin">Note: With this option users can autologin to the project using URL
+                </span>
+              </div>
+              <label class="formLabel">Assign to auto user project?</label>
+              <input [disabled]="view" type="checkbox" [(ngModel)]="project.autoUserProject" [ngModelOptions]="{ standalone: true }" class="formCheckBox selector-665-248" />
+              <div>
+                <span class="error" style="font-size: 1.6vmin">Note: With this option the project will be assigned to autouser.
+                </span>
+              </div>
+            </div>
+            <div class="col-md-6 selector-665-212" *ngIf="!(view || edit) &amp;&amp; role.roleadmin">
+              
+              <label class="formLabel selector-665-213">Disable Excel Download?</label>
+              <input [disabled]="view" type="checkbox" [(ngModel)]="project.disableExcel" [ngModelOptions]="{ standalone: true }" (ngModelChange)="excelValueChanged($event)" class="formCheckBox selector-665-214" />
+              
+
+              <div class="selector-665-215">
+                <span class="error selector-665-216" style="font-size: 1.6vmin">Note: With this option excel functionality in dashboard can be disabled
+                </span>
+              </div>
+            </div>
+            <div class="col-md-6 select-style selector-665-194" style="margin-top: -2%" *ngIf="!(view || edit) &amp;&amp; role.roleadmin">
+              <mat-form-field style="width: 85%" class="selector-665-195">
+                <label class="formLabel selector-665-196">Time Zone</label>
+                <mat-select [disabled]="view" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.timeZone" (ngModelChange)="timeZoneChanged($event)" class="selector-665-197">
+                  <mat-option class="selector-665-198">---NULL---</mat-option>
+                  <mat-option *ngFor="let item of tzNames; trackBy: trackByMethod" [value]="item" class="selector-665-199">
+                    {{ item }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <div style="margin-top: -2%" class="selector-665-200">
+                <span class="error selector-665-201" style="font-size: 1.6vmin">Note: Used for Dashboard Date Filters to work as per Time Zone<br class="selector-665-202" />Value "Asia/Calcutta" is
+                  used if option is null or empty
+                </span>
+              </div>
+            </div>
+            <div class="col-md-6 selector-665-227" *ngIf="!(view || edit) &amp;&amp; !role.roleadmin" style="margin-top:10px">
+              
+              <label  class="formLabel selector-665-228">Disable Excel Download?</label>
+              <input [disabled]="view" type="checkbox" [(ngModel)]="project.disableExcel" [ngModelOptions]="{ standalone: true }" (ngModelChange)="excelValueChanged($event)" class="formCheckBox selector-665-229" />
+
+              <div class="selector-665-230">
+                <span class="error selector-665-231" style="font-size: 1.6vmin">Note: With this option excel functionality in dashboard can be disabled
+                </span>
+              </div>
+            </div>
+            <div class="col-md-6 select-style selector-665-203" *ngIf="!(view || edit) &amp;&amp; !role.roleadmin">
+              <mat-form-field style="width: 85%" class="selector-665-204">
+                <label class="formLabel selector-665-205">Time Zone</label>
+                <mat-select [disabled]="view" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.timeZone" (ngModelChange)="timeZoneChanged($event)" class="selector-665-206">
+                  <mat-option class="selector-665-207">---NULL---</mat-option>
+                  <mat-option *ngFor="let item of tzNames; trackBy: trackByMethod" [value]="item" class="selector-665-208">
+                    {{ item }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <div style="margin-top: -2%" class="selector-665-209">
+                <span class="error selector-665-210" style="font-size: 1.6vmin">Note: Used for Dashboard Date Filters to work as per Time Zone<br class="selector-665-211" />Value "Asia/Calcutta" is
+                  used if option is null or empty
+                </span>
+              </div>
+            </div>
+
+             <div class="col-md-6" *ngIf="!(view || edit) &amp;&amp; !role.roleadmin &amp;&amp; project.projectAutologin">
+              <mat-form-field style="width: 85%">
+                <label class="formLabel">Autologin Role</label>
+                <mat-select [(value)]="project.autologinRole" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.autologinRole">
+                  <mat-option *ngFor="let role of rolesArray" [value]="role">{{role.name}}</mat-option>
+                </mat-select>   
+              </mat-form-field>             
+              <div>
+                <span class="error" style="font-size: 1.6vmin">Note: Role with which autologin to Project will occur
+                </span>
+              </div>
+            </div>
+            
+
+            
+
+            
+
+            
+          </div>
+          <div id="btnMargin" class="selector-665-232">
+            <button [ngBusy]="{ busy: busy, message: 'Saving Project...' }" *ngIf="!edit &amp;&amp; !buttonFlag" type="button" class="genBtn marRght30 selector-665-233" (click)="check(project)" [disabled]="!projectForm.form.valid">
+              Save
+            </button>
+            <button *ngIf="edit &amp;&amp; !buttonFlag" [ngBusy]="{ busy: busy, message: 'Updating Project...' }" type="button" class="genBtn marRght30 selector-665-234" (click)="check(project)" [disabled]="!projectForm.form.valid">
+              Update
+            </button>
+            <button *ngIf="!buttonFlag" type="button" class="secBtn marRght30 selector-665-235" (click)="clearWave()">Clear</button>
+            <button *ngIf="!buttonFlag &amp;&amp; project.logo" type="button" class="secBtn marRght30 selector-665-236" (click)="removelogo()">
+              Remove Logo
+            </button>
+           
+            <mat-menu #menu="matMenu" class="selector-665-238">
+              <div mat-menu-item="" (click)="showCreateUserRole = false; showBluePrint = true; callProjects()" class="selector-665-239">
+                <mat-icon class="create-icon-color selector-665-240">file_copy</mat-icon>
+                <span class="selector-665-241">Copy Blueprint</span>
+              </div>
+             
+            </mat-menu>
+          </div>
+          <div *ngIf="edit" class="selector-665-242">
+            <mat-tab-group class="selector-665-243">
+              <mat-tab *ngIf="!showBluePrint" label="Portfolio-User-Role" class="selector-665-244">
+                <user-project-role-list *ngIf="showCreateUserRole &amp;&amp; project.id" [showCreateUserRole]="showCreateUserRole" [project]="project" class="selector-665-245"></user-project-role-list>
+                <user-project-role-list *ngIf="!showCreateUserRole &amp;&amp; project.id" [showCreateUserRole]="showCreateUserRole" [project]="project" class="selector-665-246"></user-project-role-list>
+              </mat-tab>
+              <mat-tab *ngIf="showBluePrint" label="Copy Blue Print" class="selector-665-247">
+                <div class="ams_panelCnt formRow relative selector-665-248">
+                  <span class="ams_back pull-right linkMar selector-665-249" style="float: right" (click)="showBluePrint = false">Back to Portfolio-User-Role</span>
+                  <i class="fa fa-caret-square-o-left create-icon-color pull-right linkMar selector-665-250" (click)="showBluePrint = false" aria-hidden="true"></i>
+                  <div class="row rwMAr selector-665-251">
+                    <div class="col-md-6 select-style selector-665-252">
+                      <mat-form-field style="width: 85%" class="selector-665-253">
+                        <label class="formLabel selector-665-254">From Project*</label>
+                        <mat-select [disabled]="view" [ngModelOptions]="{ standalone: true }" [(ngModel)]="fromProject" required="" class="selector-665-255">
+                          <mat-option *ngFor="let item of copyblueprintProjects; trackBy: trackByMethod" [value]="item.name" class="selector-665-256">
+                            {{ item.name }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <div class="selector-665-257">
+                 
+                    <button mat-raised-button=""  [ngBusy]="{ busy: busy1, message: 'Copy Blueprint Processing...' }" (click)="copyblueprint()"  [disabled]="clickedcopyblueprint" class="marRght30 selector-665-258">
+                      Copy
+                    </button>
+                  </div>
+                  <div class="col-md-12 noteAlign selector-665-259">
+                    <p style="color: red" class="selector-665-260">
+                      **Note: Copy Blueprint can be done only once for a project and only dashboards and data
+                      related to dashboards will get copied.
+                    </p>
+                  </div>
+                </div>
+              </mat-tab>
+            </mat-tab-group>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>  -->
