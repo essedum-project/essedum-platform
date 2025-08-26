@@ -114,7 +114,7 @@ export class AipCardComponent {
       [SERVICE_TYPES.SPECS]: this.card?.domainname,
       [SERVICE_TYPES.INSTANCES]: this.card?.adaptername,
       [SERVICE_TYPES.SCHEMAS]: this.card?.name,
-      [SERVICE_TYPES.MODEL]: this.card?.datasource,
+      [SERVICE_TYPES.MODEL]: `${this.card?.datasource?.category} - ${this.card?.datasource?.alias}`,
       [SERVICE_TYPES.PIPELINE]: this.card?.type,
       [SERVICE_TYPES.CONNECTIONS]: this.card?.type,
       [SERVICE_TYPES.DATASETS]: `${this.card?.datasource?.category} - ${this.card?.datasource?.alias}`,

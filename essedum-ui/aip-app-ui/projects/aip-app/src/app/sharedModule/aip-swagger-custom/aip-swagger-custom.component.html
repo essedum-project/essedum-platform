@@ -1,0 +1,316 @@
+<div>
+    <div class="spec-view-slider">
+        <div class="lfx-u-pad-r-16" [ngStyle]="{'color': (!swaggerView) ? 'grey' : '#0094ff'}">SWAGGER VIEW</div>
+        <mat-slider [disabled]="disabled" class="slider-toggle-width" min="0" max="1" step="1">
+            <input matSliderThumb [value]="checked ? 1 : 0" (input)="toggle()" aria-label="Toggle" />
+        </mat-slider>
+        <div class="lfx-u-pad-l-16" [ngStyle]="{'color': (swaggerView) ? 'grey' : '#0094ff'}">JSON VIEW
+        </div>
+    </div>
+
+    <div class="spec-view-content">
+        <div *ngIf="swaggerView">
+            <div *ngIf="apispecTemplate">
+                <div class="spec-header">
+                    <section class="block col-12">
+                        <div *ngIf="apispecTemplate && apispecTemplate.info">
+                            <h2 class="spec-header.title" style="padding-top: 10px;color: #FFFFFF;">
+                                {{apispecTemplate && apispecTemplate.info.title}}
+                                <span>
+                                    <small>
+                                        <pre>{{apispecTemplate && apispecTemplate.info.version}}</pre>
+                                    </small>
+                                    <small>
+                                        <pre>OAS3</pre>
+                                    </small>
+                                </span>
+                            </h2>
+                        </div>
+                        <div *ngIf="!apispecTemplate || !apispecTemplate.info">
+                            <h2 class="spec-header.title" style="padding-top: 10px;color: #FFFFFF;">
+                                Empty or Invalid Api Spec
+                                <span>
+                                    <small>
+                                        <pre>0</pre>
+                                    </small>
+                                    <small>
+                                        <pre>OAS3</pre>
+                                    </small>
+                                </span>
+                            </h2>
+                        </div>
+                    </section>
+                </div>
+                <div class="spec-body">
+
+                    <div class="lfx-u-mar-tb-8">
+                        <span class="lfx-u-servers">
+                            Servers                           
+                        </span>
+                        <mat-form-field appearance="fill" class="wd-350 custom-alias-field" subscriptSizing="dynamic">
+                            <mat-select data-select-type="server-url" [(value)]="serverUrl"
+                                (selectionChange)="selectChange($event)" (openChange)="onServerUrlChange($event)">
+                                <mat-option *ngFor="let option of serverUrls" [value]="option.value">
+                                    {{ option.value }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <mat-accordion class="example-headers-align" multi>
+                        <mat-expansion-panel *ngFor="let spec of formattedapispec;let i=index">
+                            <mat-expansion-panel-header class="exp-header" style="height: 45px;margin-bottom: 1%"
+                                [ngStyle]="{'background-color': existingPaths.indexOf(spec.path+spec.requestType)>-1? '': 'lightgray'}">
+                                <mat-panel-title>
+                                    <span class="opblock-summary-method">{{spec.requestType}}</span>
+                                </mat-panel-title>
+                                <mat-panel-description>
+                                    {{spec.path}}
+                                </mat-panel-description>
+                            </mat-expansion-panel-header>
+                            <div class="opblock-section-header">
+                                <div class="tab-header">
+                                    <h4 class="opblock-title">Parameters</h4>
+                                </div>
+                                <div *ngIf="existingPaths.indexOf(spec.path+spec.requestType)===-1"
+                                    [ngStyle]="{'margin-left': isInstance || !createAuth || isRemoteExecution? '60%': '70%'}">
+                                    <div *ngIf="!isRemoteExecution && !isInstance && createAuth"
+                                        class="lfx-u-pad-24 aip-icon_text">
+                                        <mat-menu #overflowMenu="matMenu">
+                                            <button mat-menu-item *ngFor="let opt of alias"
+                                                (click)="addMethod(specData, opt)">
+                                                <span class="lfx-u-mar-l-8">{{ opt }}</span>
+                                            </button>
+                                        </mat-menu>
+
+                                        <button mat-icon-button [matMenuTriggerFor]="overflowMenu"
+                                            aria-label="overflow menu">
+                                            <mat-icon>add</mat-icon>
+                                        </button>
+
+                                        <ng-template #specData let-method>
+                                            <app-aip-method-create-edit [data]=spec [action]="createAction"
+                                                [formType]="formType" [adapter]="adapter"
+                                                [apiSpecServerUrl]="apiSpecServerUrl"></app-aip-method-create-edit>
+                                        </ng-template>
+                                    </div>
+                                    <div *ngIf="isInstance || !createAuth" class="lfx-u-pad-24 aip-icon_text">Method Not
+                                        Implemented</div>
+                                    <div *ngIf="isRemoteExecution && !isInstance && createAuth" class="lfx-u-pad-24"
+                                        (click)="addRemoteMethod(spec)">
+                                        <mat-icon class="aip-led-icons  aip-cursor mx-2" (click)="addRemoteMethod(spec)"
+                                            matTooltip="'Implement Method'" [matTooltipPosition]="tooltipPosition"
+                                            style="cursor: pointer">
+                                            add
+                                        </mat-icon>
+                                    </div>
+                                </div>
+                                <button *ngIf="existingPaths.indexOf(spec.path+spec.requestType)>-1"
+                                    class="btn try-out_btn" (click)="clickBtn(spec)" style="margin-left:55%;">
+                                    {{spec['button']}}
+                                </button>&nbsp;&nbsp;
+                                <div>
+                                    <div *ngIf="existingPaths.indexOf(spec.path+spec.requestType)>-1"
+                                        style="display: flex;">
+                                        <ul class="d-flex justify-content-between align-items-center">
+                                            <li *ngIf="!isRemoteExecution && editAuth && !isInstance"><mat-icon
+                                                    class="aip-led-icons  aip-cursor mx-2"
+                                                    (click)="editMethod(specDataForEdit)" matTooltip="Edit"
+                                                    [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
+                                                    edit
+                                                </mat-icon>
+                                                <ng-template #specDataForEdit let-method>
+                                                    <app-aip-method-create-edit [data]=spec [action]="editAction"
+                                                        [adapter]="adapter"></app-aip-method-create-edit>
+                                                </ng-template>
+                                            </li>
+                                            <li *ngIf="deleteAuth && !isInstance && !isEndpoint">
+                                                <mat-icon class="aip-led-icons  aip-cursor mx-2"
+                                                    (click)="deleteMethod(spec)" matTooltip="Delete"
+                                                    [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
+                                                    delete
+                                                </mat-icon>
+                                            </li>
+                                            <li
+                                                *ngIf="!isRemoteExecution && !editAuth || (isInstance && !isRemoteExecution)">
+                                                <mat-icon class="aip-led-icons  aip-cursor mx-2"
+                                                    (click)="editMethod(specDataForView)" matTooltip="View"
+                                                    [matTooltipPosition]="tooltipPosition" style="cursor: pointer">
+                                                    visibility
+                                                </mat-icon>
+                                                <ng-template #specDataForView let-method>
+                                                    <app-aip-method-create-edit [data]=spec [action]="'view'"
+                                                        [adapter]="adapter"></app-aip-method-create-edit>
+                                                </ng-template>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div *ngIf="spec.parameters || spec.requestBody" class="exp-header">
+                                <div style="height:50px;padding-top:2%">
+                                    <span style="font-weight: 700;margin: 1.7%;">Name</span>
+                                    <span style="margin-left:20%;">Description</span>
+                                </div>
+                                <mat-divider></mat-divider>
+                                <div *ngIf="spec.parameters">
+                                    <div *ngFor=" let param of spec.parameters" style="margin-top: 1%;">
+                                        <span
+                                            style="font-weight:700;margin-left: 1.7%;word-wrap: break-word;color:#3b4151;font-family: 'Roboto', 'Segoe UI', sans-serif !important;font-size: 16px;">{{param.name}}</span>
+
+                                        <span style="margin-left: 16%;">{{param.description}}</span><br>
+
+                                        <div *ngIf="spec['button']=='Try it out'" style="margin-bottom:1%">
+                                            <input type="text" class="param-input" disabled placeholder=""
+                                                value="{{param.name}}" style=" cursor: not-allowed;opacity: 0.5;">
+                                        </div>
+                                        <div *ngIf="spec['button'] =='Cancel'" style="margin-bottom:1%">
+                                            <input type="text" class="param-input" placeholder="" value="{{param.name}}"
+                                                [(ngModel)]="param['value']" style="opacity: 0.5;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div *ngIf="spec.requestBody && spec.requestType=='POST'">
+                                    <span
+                                        style="font-weight:700;margin-left: 1.7%;word-wrap: break-word;color:#3b4151;font-family: 'Roboto', 'Segoe UI', sans-serif !important;font-size: 16px;">body</span>
+                                    <span style="margin-left: 21%;">{{spec.requestBody.description}}</span><br>
+                                    <div *ngIf="spec.requestBody.content['application/json']">
+                                        <textarea [(ngModel)]="spec.requestBody['value']" disabled
+                                            *ngIf="spec['button']=='Try it out'"
+                                            style="background-color: black;  color: white; height: 100px;margin-left:26%; margin-top:1%; width:60%"></textarea>
+                                        <textarea [(ngModel)]="spec.requestBody['value']"
+                                            *ngIf="spec['button']=='Cancel'"
+                                            style="background-color: white;  height: 100px;margin-left:26%; margin-top:1%; width:60%"></textarea>
+                                    </div>
+                                    <div *ngIf="spec.requestBody.content['multipart/form-data']">
+                                        <input type="file" class="file-input" style="display:none;"
+                                            (change)="handleFileInput($event)" #fileUpload>
+                                        <div class="file-upload lfx-u-pad-t-4 lfx-u-pad-b-8"
+                                            *ngIf="spec['button']=='Try it out'" style="margin-left:26%;">
+                                            <button mat-mini-fab color="primary" class="upload-btn"
+                                                (click)="fileUpload.click()" disabled>
+                                                <mat-icon>attach_file</mat-icon>
+                                            </button>
+                                            {{fileName || "No file uploaded yet."}}
+                                        </div>
+                                        <div class="file-upload lfx-u-pad-t-4 lfx-u-pad-b-8"
+                                            *ngIf="spec['button']=='Cancel'" style="margin-left:26%;">
+                                            <button mat-mini-fab color="primary" class="upload-btn"
+                                                (click)="fileUpload.click()">
+                                                <mat-icon>attach_file</mat-icon>
+                                            </button>
+                                            {{fileName || "No file uploaded yet."}}
+                                        </div>
+                                    </div>
+                                    <div style="margin-left:26%; margin-bottom:1%">
+                                        <select style="max-width: 100%;min-width: 130px;">
+                                            <option value="application/json"
+                                                *ngIf="spec.requestBody.content['application/json']">application/json
+                                            </option>
+                                            <option value="multipart/form-data"
+                                                *ngIf="spec.requestBody.content['multipart/form-data']">
+                                                multipart/form-data</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div *ngIf="!spec.parameters && !spec.requestBody">No Parameters</div>
+                                <div *ngIf="spec['button'] =='Cancel'">
+                                    <button
+                                        style="cursor: pointer;width:96%;padding:8px 40px;color:white;background-color:#4990e2;border-color:#4990e2;margin:1% 2%;"
+                                        (click)="execute(spec)">
+                                        Execute
+                                    </button>
+                                    <button *ngIf="spec['executeFlag']"
+                                        style="cursor: pointer;width:96%;padding:8px 40px;color:black;background-color:whitesmoke;border-color:black;margin:1% 2%;"
+                                        (click)="spec['executeFlag']=false">Clear</button>
+                                </div>
+                            </div>
+                            <div *ngIf="spec.responses">
+                                <div>
+                                    <div class="opblock-section-header">
+                                        <div class="tab-header">
+                                            <h4 class="opblock-title">Responses</h4>
+                                        </div>
+                                    </div>
+                                    <div class="exp-header">
+                                        <div style="height:50px;padding-top:2%">
+                                            <span style="font-weight: 700;margin: 1.7%;">Code</span>
+                                            <span style="margin-left:20%;">Details</span>
+                                        </div>
+                                        <mat-divider></mat-divider>
+                                        <pre *ngIf="spec['executeFlag']"
+                                            style="background-color: black;  color: white;margin-top:1%;height: 450px;margin-left: 8%;">{{response | json}}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                            <div *ngIf="isInstance && cURL && spec['executeFlag']">
+                                <div>
+                                    <div class="opblock-section-header">
+                                        <div class="tab-header">
+                                            <h4 class="opblock-title">CURL Request</h4>
+                                        </div>
+                                    </div>
+                                    <div class="exp-header">
+                                        <div style="height:50px;display: flex;">
+                                            <span style="font-weight: 700;margin: 1.7%;">CURL</span>
+                                            <span class="mx-4" style="padding-left: 65%;margin: 1.7%;">
+                                                <mat-icon class="aip-led-icons x-32 copy-icon aip-cursor mx-2"
+                                                    (click)="copyCURL()" matTooltip="Copy"
+                                                    [matTooltipPosition]="tooltipPosition" style="cursor: pointer;">
+                                                    content_copy
+                                                </mat-icon>
+                                            </span>
+                                        </div>
+                                        <mat-divider></mat-divider>
+                                        <pre
+                                            style="background-color: black;  color: white;margin-top:1%;margin-left: 8%;">{{cURL}}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </mat-expansion-panel>
+                    </mat-accordion>
+                    <section class="models">
+                        <mat-accordion>
+                            <mat-expansion-panel>
+                                <mat-expansion-panel-header>
+                                    <mat-panel-title>
+                                        <h4>Schemas</h4>
+                                    </mat-panel-title>
+                                </mat-expansion-panel-header>
+                                <mat-divider></mat-divider>
+                                <div class="model-container">
+                                    <mat-expansion-panel>
+                                        <mat-expansion-panel-header>
+                                            <mat-panel-title
+                                                style="font-size: 16px; font-family: 'Roboto', 'Segoe UI', sans-serif !important;font-weight:600;font-color:#505050;border-radius: 4px;">
+                                                <h5>input</h5>
+                                            </mat-panel-title>
+                                        </mat-expansion-panel-header>
+                                        <mat-panel-description>
+                                            {{schema && schema.input}}
+                                        </mat-panel-description>
+                                    </mat-expansion-panel>&nbsp;&nbsp;
+                                    <mat-expansion-panel>
+                                        <mat-expansion-panel-header>
+                                            <mat-panel-title
+                                                style="font-size: 16px; font-family: 'Roboto', 'Segoe UI', sans-serif !important;font-weight:600;font-color:#505050;border-radius: 4px;">
+                                                <h5>output</h5>
+                                            </mat-panel-title>
+                                        </mat-expansion-panel-header>
+                                        <mat-panel-description>
+                                            {{schema && schema.output}}
+                                        </mat-panel-description>
+                                    </mat-expansion-panel>
+                                </div>
+                            </mat-expansion-panel>
+                        </mat-accordion>
+                    </section>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="!swaggerView">
+            <json-editor [options]="editorOptions" [data]="apispecTemplate" style="height: 450px;" #formJsonEditor=""
+                class="cipJSONEditor"></json-editor>
+        </div>
+    </div>
+</div>

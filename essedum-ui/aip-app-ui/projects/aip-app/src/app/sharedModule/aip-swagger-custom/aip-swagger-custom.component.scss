@@ -1,0 +1,533 @@
+.spec-view-slider {
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 48px;
+  align-items: center;
+}
+
+.spec-view-content {
+  margin: 10px;
+}
+
+.spec-header {
+  top: 461px;
+  left: 57px;
+  height: 40px;
+  background: var(---0094ff) 0% 0% no-repeat padding-box;
+  background: #0094ff 0% 0% no-repeat padding-box;
+  border-radius: 8px 8px 0px 0px;
+  opacity: 1;
+}
+
+.spec-body {
+  top: 501px;
+  left: 57px;
+  background: var(---ffffff) 0% 0% no-repeat padding-box;
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 0px 2px 4px #00000029;
+  border-radius: 0px 0px 8px 8px;
+  opacity: 1;
+  padding: 4px 16px;
+}
+
+.spec-header.title {
+  top: 472px;
+  left: 81px;
+  width: 108px;
+  height: 19px;
+  color: var(---ffffff);
+  text-align: left;
+  font: normal normal 600 18px/24px Myriad Pro;
+  letter-spacing: 0px;
+  color: #ffffff;
+  opacity: 1;
+}
+
+::ng-deep .le-c-form-field.le-c-form-field--select-withbg .mat-mdc-select .mat-mdc-select-value {
+  max-width: none;
+}
+
+.example-headers-align .mat-expansion-panel-header-title,
+.example-headers-align .mat-expansion-panel-header-description {
+  flex-grow: 0;
+}
+
+.example-headers-align .mat-expansion-panel-header-description {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.example-headers-align .mat-mdc-form-field+.mat-mdc-form-field {
+  margin-left: 8px;
+}
+
+small {
+  background: #7d8492;
+  border-radius: 57px;
+  display: inline-block;
+  font-size: 10px;
+  margin: 0 0 0 5px;
+  padding: 2px 4px;
+  position: relative;
+  top: -5px;
+  vertical-align: super;
+}
+
+pre {
+  color: #fff;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  margin: 0;
+  padding: 0;
+}
+
+.scheme-container {
+  background: #fff;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 15%);
+  margin: 0 0 20px;
+  padding: 1%;
+}
+
+.scheme-container .schemes {
+  align-items: flex-end;
+  display: flex;
+}
+
+.wrapper {
+  box-sizing: border-box;
+  margin: 0 auto;
+  max-width: 1460px;
+  padding: 0 20px;
+  width: 100%;
+}
+
+.servers-title {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.auth-wrapper {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.btn1.authorize {
+  background-color: transparent;
+  border-color: #49cc90;
+  color: #49cc90;
+  display: inline;
+  line-height: 1;
+}
+
+.btn1 {
+  background: transparent;
+  border: 2px solid grey;
+  border-radius: 4px;
+  box-shadow: 0 1px 2pxrgba (0, 0, 0, 0.1);
+  color: #3b4151;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 5px 23px;
+  transition: all 0.3s;
+}
+
+.wrapper {
+  box-sizing: border-box;
+  margin: 0 auto;
+  max-width: 1460px;
+  padding: 0 20px;
+  width: 100%;
+}
+
+.no-margin {
+  border: none;
+  height: auto;
+  margin: 0;
+  padding: 0;
+}
+
+.opblock.opblock-post {
+  background: rgba(73, 204, 144, 0.1);
+  border-color: #49cc90;
+}
+
+.opblock {
+  border: 1px solid #000;
+  border-radius: 4px;
+  box-shadow: 0 0 3px rgb(0 0 0 / 19%);
+  margin: 0 0 15px;
+}
+
+.opblock-summary-control {
+  all: inherit;
+  border-bottom: 0;
+  cursor: pointer;
+  flex: 1;
+  padding: 0;
+}
+
+.opblock-summary-method {
+  background: #49cc90;
+  border-radius: 3px;
+  color: #fff;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-size: 14px;
+  font-weight: 700;
+  min-width: 80px;
+  padding: 6px 0;
+  text-align: center;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 10%);
+}
+
+.opblock-summary-path {
+  flex-shrink: 0;
+  max-width: calc(100% - 110px - 15rem);
+}
+
+.swagger-ui section.models h4 {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-size: 16px;
+  margin: 0;
+  padding: 10px 20px 10px 10px;
+  transition: all 0.2s;
+}
+
+.opblock-section-header {
+  align-items: center;
+  background: hsla(0, 0%, 100%, 0.8);
+  //   box-shadow: 0 1px 2px rgb(0, 0, 0 / 10%);
+  display: flex;
+  min-height: 50px;
+  padding: 0px 20px;
+}
+
+.btn {
+  background: transparent;
+  border: 2px solid grey;
+  border-radius: 4px;
+  //   box-shadow: 0 1px 2 px rgb(0, 0, 0 / 10%);
+  color: #3b4151;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 5px 23px;
+  transition: all 0.3s;
+}
+
+.try-out_btn {
+  margin-left: 1.2rem;
+}
+
+.btn.cancel {
+  background-color: transparent;
+  border-color: #ff6060;
+  color: #ff6060;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+section.models.is-open {
+  padding: 0 0 20px;
+}
+
+section.models {
+  border: 1px solid rgba(59, 65, 81, 0.3);
+  border-radius: 4px;
+  margin: 30px 0;
+}
+
+section.models .model-container {
+  margin: 0 20px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  position: relative;
+  transition: all 0.5s;
+}
+
+.exp-header {
+  border-color: #49cc90;
+  border: 1px solid #49cc90;
+  background: rgba(73, 204, 144, 0.1);
+}
+
+.mat-expansion-indicator::after {
+  color: black;
+}
+
+.param-input {
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  margin: 5px 0;
+  min-width: 100px;
+  padding: 8px 10px;
+  max-width: 340px;
+  width: 100%;
+  margin-left: 26%;
+  margin-top: 1%;
+}
+
+.param-desc {
+  margin-bottom: 2em;
+  width: 99%;
+}
+
+pre {
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+
+::ng-deep .jsoneditor {
+  border: thin solid #0094ff;
+}
+
+::ng-deep .jsoneditor-menu {
+  background: #0094ff;
+}
+
+.flex {
+  display: flex;
+}
+
+ul,
+li {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+::ng-deep .mat-slide-toggle-ripple {
+  display: none !important;
+}
+
+::ng-deep .mat-slide-toggle-bar .mat-slide-toggle-thumb {
+  background-image: none !important;
+  /* Remove check icon */
+}
+
+.lfx-u-pad-l-16 {
+  padding-left: 16px !important;
+}
+
+.lfx-u-pad-r-16 {
+  padding-right: 16px !important;
+}
+
+.lfx-u-mar-tb-8 {
+  margin-top: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+.lfx-u-pad-24 {
+  padding: 24px !important;
+}
+
+.lfx-u-mar-l-8 {
+  margin-left: 8px !important;
+}
+
+.lfx-u-pad-t-4 {
+  padding-top: 4px !important;
+}
+
+.lfx-u-pad-b-8 {
+  padding-bottom: 8px !important;
+}
+
+.lfx-u-mar-b-32 {
+  margin-bottom: 32px !important;
+}
+
+.lfx-u-pad-lr-16 {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+
+.lfx-u-pad-t-8 {
+  padding-top: 8px !important;
+}
+
+.col-12 {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.slider-toggle-width {
+  width: 24px !important;
+  min-width: 0 !important;
+  max-width: 64px !important;
+  padding: 0 !important;
+}
+
+::ng-deep .mdc-slider__thumb-knob {
+  border-color: #0094ff !important;
+  background-color: #0094ff !important;
+}
+
+::ng-deep .mat-mdc-slider .mdc-slider__track--active_fill {
+  background-color: #0094ff !important;
+  border-color: #0094ff !important;
+}
+
+::ng-deep .mat-mdc-slider .mdc-slider__track--inactive {
+  background-color: #0094ff !important;
+  border-color: #0094ff !important;
+}
+
+::ng-deep .mdc-slider__track--active {
+  height: 0px !important;
+  top: 0 !important;
+}
+
+
+::ng-deep .cdk-overlay-container,
+.cdk-global-overlay-wrapper {
+  overflow-y: auto !important;
+}
+
+::ng-deep .mat-mdc-dialog-surface {
+  margin-top: 45px !important;
+  margin-bottom: 45px !important;
+}
+
+
+
+::ng-deep .mat-mdc-menu-panel {
+  border-radius: 16px;
+
+  font-size: 1.6rem !important;
+  line-height: 24px !important;
+  font-weight: 600 !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-style: normal !important;
+}
+
+::ng-deep .mat-mdc-menu-item {
+  min-height: 40px !important;
+}
+
+
+
+
+
+.lfx-u-servers {
+  font-size: 1.6rem;
+  font-weight: 400;
+  font-family: "Roboto", "Segoe UI", sans-serif;
+  line-height: 24px;
+  color: #00000099
+}
+
+::ng-deep .custom-alias-field {
+  .mat-mdc-form-field-flex {
+    height: 21px !important;
+    background-color: #fafafa !important;
+    padding: 0 4px !important;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    height: 21px !important;
+    background-color: #fafafa !important;
+    padding: 2px 0 !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    padding: 0px !important;
+  }
+}
+
+::ng-deep .custom-alias-input {
+  text-align: left;
+  font-size: 1.6rem;
+  font-weight: 400;
+  font-family: "Roboto", "Segoe UI", sans-serif;
+  font-style: normal;
+  line-height: 21px;
+  color: #737373;
+
+  background-color: #fafafa;
+  height: 21px;
+
+  &::placeholder,
+  &::-webkit-input-placeholder,
+  &::-moz-placeholder,
+  &:-ms-input-placeholder {
+    text-align: left;
+    font-size: 1.6rem;
+    font-weight: 400;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
+    font-style: normal;
+    line-height: 24px;
+    color: #737373;
+    opacity: 0.7;
+  }
+}
+
+::ng-deep .mat-mdc-input-element {
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+::ng-deep .mat-mdc-select {
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-size: 1.6rem !important;
+  font-weight: 400 !important;
+  line-height: 24px !important;
+  color: #737373 !important;
+}
+
+::ng-deep .mat-mdc-form-field {
+
+  .mat-mdc-form-field-hint-wrapper,
+  .mat-mdc-form-field-error-wrapper {
+    position: absolute !important;
+    padding: 1px !important;
+  }
+}
+
+.wd-350 {
+  width: 350px !important;
+}
+
+::ng-deep .mat-mdc-form-field {
+  height: 28px !important;
+
+
+  // State variations
+  &.mat-focused {
+    .mdc-line-ripple::after {
+      border-bottom: 2px solid #0094ff !important;
+      transform: scaleX(1);
+    }
+
+    .mat-mdc-floating-label {
+      color: #0094ff;
+    }
+  }
+
+  &.mat-form-field-invalid {
+    .mdc-line-ripple::before {
+      border-bottom: 2px solid #f44336 !important;
+    }
+
+    .mat-mdc-floating-label {
+      color: #f44336;
+    }
+  }
+}
+
+// Input element global override
+::ng-deep .mat-mdc-input-element {
+  border-bottom: none !important;
+}
+
+// Remove default underlines
+.mdc-line-ripple::before,
+.mdc-line-ripple::after {
+  border-bottom: none !important;
+}

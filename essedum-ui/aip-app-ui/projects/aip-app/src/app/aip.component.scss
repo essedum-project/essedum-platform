@@ -8,7 +8,7 @@
 
 body,
 html {
-  font-family: "Roboto", Arial, Helvetica, sans-serif;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
 }
 
 ::ng-deep {
@@ -17,7 +17,7 @@ html {
   }
   body,
   html {
-    font-family: "Roboto", Arial, Helvetica, sans-serif !important;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
   }
 
   .le-c-dropdown__list li > a,
@@ -786,7 +786,7 @@ div {
   .lfx-u-body-md {
     font-size: 1.4rem;
     font-weight: 400;
-    font-family: "roboto", Arial, sans-serif !important;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
     font-style: normal;
   }
 
@@ -855,7 +855,7 @@ div {
   }
 
   .lfx-c-badge {
-    line-height: 14px;
+    line-height: 16px;
     max-height: 16px;
     padding: 0px 8px;
     font-size: 1rem;
@@ -906,7 +906,7 @@ div {
   .lfx-u-header-md {
     font-size: 1.4rem;
     font-weight: 600;
-    font-family: "myriad-pro", Arial, sans-serif !important;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
     font-style: normal;
   }
 
@@ -921,7 +921,7 @@ div {
     text-align: center;
     vertical-align: middle;
     font-weight: 500;
-    font-family: "roboto", Arial, sans-serif !important;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
     font-style: normal;
     float: left;
     width: 38px !important;
@@ -937,7 +937,7 @@ div {
   .lfx-u-body-lg {
     font-size: 1.6rem;
     font-weight: 400;
-    font-family: "roboto", Arial, sans-serif !important;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
     font-style: normal;
   }
 
@@ -988,7 +988,7 @@ div {
   .lfx-u-body-sm {
     font-size: 1.2rem;
     font-weight: 400;
-    font-family: "roboto", Arial, sans-serif !important;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
     font-style: normal;
   }
 
@@ -1038,20 +1038,6 @@ div {
     line-height: 1.2;
     font-weight: 500;
   }
-
-  // .card-title-wrapper {
-  //   display: block;
-  //   overflow: hidden;
-  // }
-  // .card-title {
-  //   line-height: 1.4em;
-  //   display: -webkit-box;
-  //   -webkit-box-orient: vertical;
-  //   overflow: hidden;
-  //   text-overflow: ellipsis;
-  //   -webkit-line-clamp: 1;
-  //   transition: -webkit-line-clamp 0.3s ease;
-  // }
 
   .card-title-wrapper:hover .card-title {
     -webkit-line-clamp: 2;
@@ -1294,7 +1280,7 @@ div {
 
   .aip-card-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, 28.8rem);
+    grid-template-columns: repeat(auto-fit, 27rem);
     grid-template-rows: repeat(auto-fit, 15rem);
     justify-content: center;
     grid-row-gap: 2.4rem;
@@ -1303,7 +1289,7 @@ div {
   }
 
   .aip-card-wrapper {
-    min-width: 28.8rem;
+    min-width: 27em;
     min-height: 15rem;
 
     @media (max-width: 576px) {
@@ -1320,10 +1306,9 @@ div {
     margin-bottom: 50px !important;
   }
 
-.lfx-u-mar-b-10{
-  margin-bottom: 10px !important;
-}
-
+  .lfx-u-mar-b-10 {
+    margin-bottom: 10px !important;
+  }
 }
 
 ::ng-deep {
@@ -1344,6 +1329,10 @@ div {
 
   .lfx-u-mar-8 {
     margin: 8px !important;
+  }
+
+  .lfx-u-pad-t-10 {
+    padding-top: 10px;
   }
 
   .lfx-u-header-xxl {

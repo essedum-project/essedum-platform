@@ -455,7 +455,7 @@
               </div>
               <ng-template #elseBlockDefault>
                 <div class="mb-4"
-                  *ngIf="!((servicev1 === ServiceType.APPS) || (servicev1 === ServiceType.WORKER_TOOLS))">
+                  *ngIf="!((servicev1 === ServiceType.APPS) || (servicev1 === ServiceType.WORKER_TOOLS) || (servicev1 === ServiceType.MODEL))">
                   <div class="filter-options">
 
                     <!-- Type -->
@@ -584,6 +584,40 @@
                         <mat-chip *ngFor="let inc of selectedAdapterType" removable="true"
                           (removed)="removeAppTypeFilter(inc)">
                           {{ inc }}
+                          <mat-icon matChipRemove>close</mat-icon>
+                        </mat-chip>
+                      </mat-chip-set>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-4" *ngIf="servicev1 === ServiceType.MODEL">
+                  <div class="filter-group">
+                    <div class="filter-control">
+                      <mat-form-field appearance="fill" class="w-100">
+                        <label>Datasource</label>
+                        <mat-select [id]="'model-datasource-select-' + (servicev1 || 'default') + '-model'"
+                          (selectionChange)="modelDatasourceSelected($event.value)" aria-labelledby="datasource-label"
+                          placeholder="All">
+                          <mat-option *ngIf="selectedModelDatasource?.length > 0" value=""
+                            (click)="clearAllFilters('datasource')">
+                            All
+                          </mat-option>
+                          <ng-container *ngFor="let option of modelDataSourceList">
+                            <mat-option *ngIf="!option.selected" [value]="option">
+                              {{ option.label }}
+                            </mat-option>
+                          </ng-container>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="selected-items" *ngIf="selectedModelDatasource?.length > 0">
+                      <mat-chip-set [id]="'datasource-chip-set-' + (servicev1 || 'default') + '-model'"
+                        aria-label="Selected Datasource">
+                        <mat-chip *ngFor="let datasource of selectedModelDatasource" removable="true"
+                          (removed)="removeModelDatasourceFilter(datasource)">
+                          {{ getDatasourceLabel(datasource) }}
                           <mat-icon matChipRemove>close</mat-icon>
                         </mat-chip>
                       </mat-chip-set>
