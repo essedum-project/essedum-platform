@@ -1,0 +1,58 @@
+/* Common styles for role screens */
+* {
+  font-family: "Roboto", "Segoe UI", sans-serif;
+}
+
+.header-title {
+  font-size: 1.6rem;
+  font-weight: 400;
+  font-family: "Roboto", "Segoe UI", sans-serif;
+  line-height: 22px;
+  color: #000000;
+}
+
+.back-icon {
+  cursor: pointer;
+  color: #0a142f;
+}
+
+.back-icon:hover {
+  color: #0094ff;
+}
+
+.crud-header {
+  font-family: "Roboto", "Segoe UI", sans-serif;
+  font-size: 1.4rem;
+  font-weight: 500;
+}
+
+input, select, button, mat-label, .mat-style-label {
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+.formLabel {
+  font-family: "Roboto", "Segoe UI", sans-serif;
+}
+
+.save-btn {
+  background-color: #238636;
+  color: #ffffff;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  margin-right: 10px;
+}
+
+.save-btn:hover:not(:disabled) {
+  background-color: #2ea043;
+}
+
+.cancel-btn {
+  background-color: #ffffff;
+  color: #333;
+  border: 1px solid #d0d7de;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+.cancel-btn:hover {
+  background-color: #f6f8fa;
+  border-color: #8c959f;
+}
