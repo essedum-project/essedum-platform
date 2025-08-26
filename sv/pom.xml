@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.infosys.icets.ai</groupId>
-	<artifactId>aip</artifactId>
+	<groupId>com.lfn.ai</groupId>
+	<artifactId>essedum</artifactId>
 	<version>3.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<properties>
@@ -487,102 +487,102 @@
 			</dependency>
 			
 			<dependency>
-				<groupId>com.infosys.icets.ai</groupId>
+				<groupId>com.lfn.ai</groupId>
 				<artifactId>comm-lib-util</artifactId>
 				<version>${com.infosys.icets.ai.comm-lib-util.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys</groupId>
+				<groupId>com.lfn</groupId>
 				<artifactId>iamp-lib-usm</artifactId>
 				<version>${com.infosys.iamp-lib-usm.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip</groupId>
+				<groupId>com.lfn.icip</groupId>
 				<artifactId>icip-lib-evt</artifactId>
 				<version>${com.infosys.icets.icip.icip-lib-evt.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip</groupId>
+				<groupId>com.lfn.icip</groupId>
 				<artifactId>icip-lib-jobs</artifactId>
 				<version>${com.infosys.icets.icip.icip-lib-jobs.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip</groupId>
+				<groupId>com.lfn.icip</groupId>
 				<artifactId>icip-lib-fsvr</artifactId>
 				<version>${com.infosys.icets.icip.icip-lib-fsvr.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip</groupId>
+				<groupId>com.lfn.icip</groupId>
 				<artifactId>icip-lib-search</artifactId>
 				<version>${com.infosys.icets.icip.icip-lib-search.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.ai</groupId>
+				<groupId>com.lfn.ai</groupId>
 				<artifactId>comm-secrets-app</artifactId>
 				<version>${com.infosys.icets.ai.comm-secrets-app.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.ai</groupId>
+				<groupId>com.lfn.ai</groupId>
 				<artifactId>comm-lib-secrets</artifactId>
 				<version>${com.infosys.icets.ai.comm-lib-secrets.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip</groupId>
+				<groupId>com.lfn.icip</groupId>
 				<artifactId>icip-lib-adp</artifactId>
 				<version>${com.infosys.icets.icip.icip-lib-adp.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys</groupId>
+				<groupId>com.lfn</groupId>
 				<artifactId>common-lib-rest</artifactId>
 				<version>${com.infosys.common-lib-rest.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip</groupId>
+				<groupId>com.lfn.icip</groupId>
 				<artifactId>icip-lib-mod</artifactId>
 				<version>${com.infosys.icets.icip.icip-lib-mod.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip</groupId>
+				<groupId>com.lfn.icip</groupId>
 				<artifactId>icip-lib-iai</artifactId>
 				<version>${com.infosys.icets.icip.icip-lib-iai.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip</groupId>
+				<groupId>com.lfn.icip</groupId>
 				<artifactId>icip-lib-mlops</artifactId>
 				<version>${com.infosys.icets.icip.icip-lib-mlops.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip.plugins</groupId>
+				<groupId>com.lfn.icip.plugins</groupId>
 				<artifactId>icip-adp-rest</artifactId>
 				<version>${com.infosys.icets.icip.plugins.icip-adp-rest.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip.plugins</groupId>
+				<groupId>com.lfn.icip.plugins</groupId>
 				<artifactId>icip-adp-remote</artifactId>
 				<version>${com.infosys.icets.icip.plugins.icip-adp-remote.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip.plugins</groupId>
+				<groupId>com.lfn.icip.plugins</groupId>
 				<artifactId>icip-adp-s3</artifactId>
 				<version>${com.infosys.icets.icip.plugins.icip-adp-s3.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip.plugins</groupId>
+				<groupId>com.lfn.icip.plugins</groupId>
 				<artifactId>icip-adp-aicloud</artifactId>
 				<version>${com.infosys.icets.icip.plugins.icip-adp-aicloud.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip.plugins</groupId>
+				<groupId>com.lfn.icip.plugins</groupId>
 				<artifactId>icip-adp-aws-sagemaker</artifactId>
 				<version>${com.infosys.icets.icip.plugins.icip-adp-aws-sagemaker.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip.plugins</groupId>
+				<groupId>com.lfn.icip.plugins</groupId>
 				<artifactId>icip-adp-mysql</artifactId>
 				<version>${com.infosys.icets.icip.plugins.icip-adp-mysql.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip.plugins</groupId>
+				<groupId>com.lfn.icip.plugins</groupId>
 				<artifactId>icip-adp-postgresql</artifactId>
 				<version>${com.infosys.icets.icip.plugins.icip-adp-postgresql.version}</version>
 			</dependency>

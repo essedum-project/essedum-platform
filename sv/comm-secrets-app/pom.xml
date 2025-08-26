@@ -2,11 +2,11 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.infosys.icets.ai</groupId>
-		<artifactId>aip</artifactId>
+		<groupId>com.lfn.ai</groupId>
+		<artifactId>essedum</artifactId>
 		<version>3.3-SNAPSHOT</version>
 	</parent>
-	<groupId>com.infosys.icets.ai</groupId>
+	<groupId>com.lfn.ai</groupId>
 	<artifactId>comm-secrets-app</artifactId>
 	<name>comm-secrets-app</name>
 	<url>http://maven.apache.org</url>
@@ -15,7 +15,7 @@
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>com.infosys.icets.ai</groupId>
+			<groupId>com.lfn.ai</groupId>
 			<artifactId>comm-lib-secrets</artifactId>
 		</dependency>
 		<dependency>
@@ -24,7 +24,7 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys</groupId>
+			<groupId>com.lfn</groupId>
 			<artifactId>iamp-lib-usm</artifactId>
 		</dependency>
 	</dependencies>

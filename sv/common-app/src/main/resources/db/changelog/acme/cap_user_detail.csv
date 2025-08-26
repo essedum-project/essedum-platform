@@ -1,4 +1,4 @@
 "User_ID","User_Name","Rec_Act_Ind","Last_Updated_Dts","Rec_Created_Dts","User_Super_Admin_Ind","User_Password_Encr","User_Email_ID","Is_First_Login"
 "1","admin","true","2019-04-14T17:56:20","2019-04-14T17:56:20","true","ZTLiPW70rwTT/6VoFmw0zg==","admin","false"
-"2","admin","true","2021-02-18T18:12:09","2021-02-18T18:12:09","true","ZTLiPW70rwTT/6VoFmw0zg==","admin@infosys.com","false"
-"3","admincapBaseUrl=https://myzul02o:6032/urlPart=api/portfolio/CheckUser?userName=ITLINFOSYS","true","2020-04-14T21:07:01","2020-04-14T21:07:01","false","ZTLiPW70rwTT/6VoFmw0zg==","admincapBaseUrl=https://myzul02o:6032/urlPart=api/portfolio/CheckUser?userName=ITLINFOSYS@infosys.com","true"
+"2","admin","true","2021-02-18T18:12:09","2021-02-18T18:12:09","true","ZTLiPW70rwTT/6VoFmw0zg==","admin@lfn.com","false"
+"3","admincapBaseUrl=https://myzul02o:6032/urlPart=api/portfolio/CheckUser?userName=ITLINFOSYS","true","2020-04-14T21:07:01","2020-04-14T21:07:01","false","ZTLiPW70rwTT/6VoFmw0zg==","admincapBaseUrl=https://myzul02o:6032/urlPart=api/portfolio/CheckUser?userName=ITLINFOSYS@lfn.com","true"

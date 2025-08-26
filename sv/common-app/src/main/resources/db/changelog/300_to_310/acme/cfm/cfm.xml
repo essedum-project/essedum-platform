@@ -1,13 +1,13 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
-<changeSet author="Leap" id="3v1-cfm-20241029-1-x">
+<changeSet author="Essedum" id="3v1-cfm-20241029-1-x">
         <sql dbms="h2, mysql, mssql" splitStatements="true" stripComments="true">
         update cfm_configuration_item_type set description = 'Application &amp; Middleware', citype_icon = 'assessment',sys_class_name='cmdb_ci_Application &amp; Middleware',sys_id='ICC1' where ctype='Application &amp; MiddleWare' and project_id=(SELECT id FROM usm_project WHERE NAME='leo1311')
         </sql>
     </changeSet>
 
-    <changeSet author="Leap" id="3v1-cfm-20241029-2">
+    <changeSet author="Essedum" id="3v1-cfm-20241029-2">
         <sql dbms="h2, mysql, mssql" splitStatements="true" stripComments="true">
         insert into cfm_configuration_item_type (background_colour, ctype, order_value, dashboard_id, project_id, active_color, row_count, dbs_threshold_id, spoc, description, citype_image, citype_image_name, citype_icon, citype_default, sys_class_name, sys_id, configurableIcons) values(NULL,'Application','0',NULL, (SELECT id FROM usm_project WHERE NAME='leo1311')  ,NULL,NULL,NULL,NULL,'Application',NULL,'App.png','domain','0','cmdb_ci_Application','061334c58764ca50a79462ce8bbb3509',NULL);
         </sql>
@@ -19,14 +19,14 @@
         </sql>
     </changeSet>
 
-    <changeSet id="3v1-cfm-20241029-3-01" author="Leap">
+    <changeSet id="3v1-cfm-20241029-3-01" author="Essedum">
         <preConditions onFail="MARK_RAN">
                  <indexExists indexName="sys_id" tableName="cfm_configuration_item_type"/>
         </preConditions>
         <dropIndex indexName="sys_id" tableName="cfm_configuration_item_type"/>
     </changeSet>
 
-    <changeSet author="Leap" id="3v1-cfm-20241029-3">
+    <changeSet author="Essedum" id="3v1-cfm-20241029-3">
         <sql dbms="h2, mysql, mssql" splitStatements="true" stripComments="true">
         insert into cfm_configuration_item_type (background_colour, ctype, order_value, dashboard_id, project_id, active_color, row_count, dbs_threshold_id, spoc, description, citype_image, citype_image_name, citype_icon, citype_default, sys_class_name, sys_id, configurableIcons) values(NULL,'Database','0',NULL, (SELECT id FROM usm_project WHERE NAME='leo1311')  ,NULL,NULL,NULL,NULL,'Database',NULL,'icon-database.png','storage','0','cmdb_ci_Database','14ab928dc6112275008c6e047597484d',NULL);
         </sql>
@@ -44,7 +44,7 @@
         </sql>
     </changeSet>
 
-    <changeSet author="Leap" id="3v1-cfm-20241029-4-x">
+    <changeSet author="Essedum" id="3v1-cfm-20241029-4-x">
         <sql dbms="h2, mysql, mssql" splitStatements="true" stripComments="true">
         insert into cfm_configuration_item (project_id, ci_image, ci_image_name, ci_name, dcount, dtype, icon, order_value, ssp_color, url, views, ctype, dashboard, thershold_mapping, spoc, description, location, status, sub_category, cmdb_ci_sys_id, sys_updated_on, owned_by, managed_by, sys_class_name, eprid, asset, category, prioritization_score, alert_count, incident_count, log_count) values( (SELECT id FROM usm_project WHERE NAME='leo1311'),NULL,NULL,'EC2 Instances App Servers',NULL,NULL,NULL,'1',NULL,NULL,NULL,(SELECT max(id) FROM cfm_configuration_item_type WHERE ctype = 'Application Servers' AND project_id=(SELECT id FROM usm_project WHERE NAME='leo1311')),NULL,NULL,NULL,'60e2f0c58764ca50a79462ce8bbb35e9A1',' ','Operational','Application Servers','60e2f0c58764ca50a79462ce8bbb35e9A1','2024-02-21 23:15:44','','','Application Servers',NULL,'','Resource',NULL,'0','0','0');
         </sql>
@@ -65,7 +65,7 @@
         </sql>
     </changeSet>
 
-    <changeSet author="Leap" id="3v1-cfm-20241029-5">
+    <changeSet author="Essedum" id="3v1-cfm-20241029-5">
         <sql dbms="h2, mysql, mssql" splitStatements="true" stripComments="true">
         insert into cfm_configuration_item (project_id, ci_image, ci_image_name, ci_name, dcount, dtype, icon, order_value, ssp_color, url, views, ctype, dashboard, thershold_mapping, spoc, description, location, status, sub_category, cmdb_ci_sys_id, sys_updated_on, owned_by, managed_by, sys_class_name, eprid, asset, category, prioritization_score, alert_count, incident_count, log_count) values( (SELECT id FROM usm_project WHERE NAME='leo1311'),NULL,NULL,'CAP',NULL,NULL,NULL,NULL,NULL,NULL,NULL,(SELECT max(id) FROM cfm_configuration_item_type WHERE ctype = 'Application' AND project_id=(SELECT id FROM usm_project WHERE NAME='leo1311')),NULL,NULL,NULL,'','','Operational','Application','061334c58764ca50a79462ce8bbb3509','2024-02-21 23:16:27','','','Application',NULL,'','Resource',NULL,'0','0','0');
         </sql>
@@ -101,7 +101,7 @@
         </sql>
     </changeSet>
 
-    <changeSet author="Leap" id="3v1-cfm-20241029-6">
+    <changeSet author="Essedum" id="3v1-cfm-20241029-6">
         <sql dbms="h2, mysql, mssql" splitStatements="true" stripComments="true">
         insert into cfm_xw_ci_mapping (project_id, ci_item1_name, ci_item2_name, relation_type, ci_item1, ci_item2, parent_sys_id, child_sys_id, eprid, sys_created_on, sys_updated_on) values( (SELECT id FROM usm_project WHERE NAME='leo1311'),'Amazon RDS Database','Amazon Elastic Cache Service','Consumes::Consumed by',(SELECT id FROM cfm_configuration_item WHERE ci_name = 'Amazon RDS Database' AND project_id = (SELECT id FROM usm_project WHERE NAME='leo1311')),(SELECT id FROM cfm_configuration_item WHERE ci_name = 'Amazon Elastic Cache Service' AND project_id = (SELECT id FROM usm_project WHERE NAME='leo1311')),(SELECT cmdb_ci_sys_id FROM cfm_configuration_item WHERE ci_name = 'Amazon RDS Database' AND project_id = (SELECT id FROM usm_project WHERE NAME='leo1311')),(SELECT cmdb_ci_sys_id FROM cfm_configuration_item WHERE ci_name = 'Amazon Elastic Cache Service' AND project_id = (SELECT id FROM usm_project WHERE NAME='leo1311')),NULL,'2024-02-21 23:19:14','2024-02-21 23:19:14');
         </sql>

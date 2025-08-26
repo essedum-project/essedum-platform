@@ -4,7 +4,7 @@
 	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
-    <changeSet author="Leap" id="3v0-usm-202329091" runInTransaction="true">
+    <changeSet author="Essedum" id="3v0-usm-202329091" runInTransaction="true">
         <comment>to be udpated</comment>
         <sqlFile relativeToChangelogFile="true" splitStatements="true" stripComments="true"
             path="usm_role_permission.sql" />

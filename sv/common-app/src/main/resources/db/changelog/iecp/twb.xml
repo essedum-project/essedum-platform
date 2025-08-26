@@ -5,7 +5,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-	<changeSet author="Leap (generated)" id="1614785155891-123">
+	<changeSet author="Essedum (generated)" id="1614785155891-123">
 		<createTable tableName="twb_question">
 			<column autoIncrement="true" name="id" type="SMALLINT(6)">
 				<constraints primaryKey="true" />

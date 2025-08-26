@@ -158,148 +158,148 @@ id,project_id,color_type,colour,dataset_name,datasource_name,y_axis,chart_type,w
 194,2,dynamic,NULL,Cluster_Count,leo1311,NULL,NULL,188
 195,2,dynamic,NULL,Cluster_Count,leo1311,NULL,NULL,189
 283,2,fixed,#7B39B1,TotalTickets,leo1311,NULL,NULL,277
-305,2,dynamic,,Acme_bjm2_Failed_Job_Instances_Name,leapmaster,NULL,12,299
+305,2,dynamic,,Acme_bjm2_Failed_Job_Instances_Name,essedummaster,NULL,12,299
 306,2,fixed,#7B39B1,OpenTickets,leo1311,NULL,NULL,300
-307,2,fixed,#7B39B1,Acme_bjm1_Total_Groups,leapmaster,NULL,NULL,301
+307,2,fixed,#7B39B1,Acme_bjm1_Total_Groups,essedummaster,NULL,NULL,301
 308,2,fixed,#7B39B1,CriticalPriorityTickets,leo1311,NULL,NULL,302
 309,2,fixed,#7B39B1,HighPriorityTickets,leo1311,NULL,NULL,303
-310,2,fixed,#7B39B1,Acme_bjm1_Total_Jobs,leapmaster,NULL,NULL,304
+310,2,fixed,#7B39B1,Acme_bjm1_Total_Jobs,essedummaster,NULL,NULL,304
 311,2,fixed,#7b39b1,SLAPercentage,leo1311,NULL,NULL,305
 312,2,fixed,#7b39b1,TicketsBreachedResolutionSLA,leo1311,NULL,NULL,306
-313,2,dynamic,,Acme_bjm2_dependent_running_instances_detail,leapmaster,NULL,12,307
+313,2,dynamic,,Acme_bjm2_dependent_running_instances_detail,essedummaster,NULL,12,307
 314,2,fixed,#7B39B1,map_data,leo1311,0,14,308
-315,2,fixed,#7B39B1,Acme_bjm1_Total_Jobs,leapmaster,NULL,NULL,309
-316,2,fixed,#7b39b1,active_application,leapmaster,NULL,NULL,310
-317,2,fixed,#7b39b1,failed_application,leapmaster,NULL,NULL,311
-318,2,fixed,#7b39b1,unsuccessful_count,leapmaster,NULL,NULL,313
+315,2,fixed,#7B39B1,Acme_bjm1_Total_Jobs,essedummaster,NULL,NULL,309
+316,2,fixed,#7b39b1,active_application,essedummaster,NULL,NULL,310
+317,2,fixed,#7b39b1,failed_application,essedummaster,NULL,NULL,311
+318,2,fixed,#7b39b1,unsuccessful_count,essedummaster,NULL,NULL,313
 319,2,fixed,#7b39b1,Active_Bots_,AcmeBTF,NULL,NULL,314
 320,2,fixed,#7B39B1,ClaimCountFreq,leo1311,NULL,NULL,315
 321,2,fixed,#7B39B1,ClaimCountFreq,leo1311,NULL,NULL,316
 322,2,fixed,#7B39B1,Total_bots,AcmeBTF,NULL,NULL,317
-323,2,palette,NULL,Acme_bjm1_Total_Job_Instances,leapmaster,NULL,NULL,318
+323,2,palette,NULL,Acme_bjm1_Total_Job_Instances,essedummaster,NULL,NULL,318
 324,2,fixed,#7B39B1,workflowcount,AcmeBTF,NULL,NULL,319
-325,2,palette,NULL,Acme_bjm1_Total_dependent_job_Instances,leapmaster,NULL,NULL,320
+325,2,palette,NULL,Acme_bjm1_Total_dependent_job_Instances,essedummaster,NULL,NULL,320
 326,2,fixed,#7b39b1,ClaimFreqVariation,leo1311,0,3,321
-327,2,palette,NULL,Acme_bjm1_TotalJobAvgPredictedDuration,leapmaster,NULL,NULL,322
-328,2,palette,NULL,Acme_bjm1_TotalJobAvgCompletionDuration,leapmaster,NULL,NULL,323
-329,2,dynamic,NULL,Acme_L3_JobInstance_Status,leapmaster,NULL,NULL,324
-330,2,palette,NULL,Acme_bjm1_scheduled_jobs,leapmaster,NULL,NULL,325
+327,2,palette,NULL,Acme_bjm1_TotalJobAvgPredictedDuration,essedummaster,NULL,NULL,322
+328,2,palette,NULL,Acme_bjm1_TotalJobAvgCompletionDuration,essedummaster,NULL,NULL,323
+329,2,dynamic,NULL,Acme_L3_JobInstance_Status,essedummaster,NULL,NULL,324
+330,2,palette,NULL,Acme_bjm1_scheduled_jobs,essedummaster,NULL,NULL,325
 331,2,fixed,#7b39b1,ClaimFreqPercent,leo1311,0,3,326
-332,2,fixed,#d71919,Acme_bjm1_TotalFailedJobInstances,leapmaster,NULL,NULL,327
-333,2,fixed,#7B39B1,Acme_bjm1_TotalFailedJobInstances,leapmaster,NULL,NULL,328
-334,2,dynamic,NULL,Acme_L3_FailedJobTicket,leapmaster,NULL,NULL,329
+332,2,fixed,#d71919,Acme_bjm1_TotalFailedJobInstances,essedummaster,NULL,NULL,327
+333,2,fixed,#7B39B1,Acme_bjm1_TotalFailedJobInstances,essedummaster,NULL,NULL,328
+334,2,dynamic,NULL,Acme_L3_FailedJobTicket,essedummaster,NULL,NULL,329
 335,2,fixed,#7b39b1,ClaimFreqDesk,leo1311,0,3,330
 336,2,fixed,#7B39B1,Performance,leo1311,0,15,331
-337,2,dynamic,NULL,Acme_bjm2_GroupsTotalJobs,leapmaster,NULL,NULL,332
-338,2,dynamic,NULL,Acme_L3_JobInstanceStartTime,leapmaster,NULL,NULL,333
+337,2,dynamic,NULL,Acme_bjm2_GroupsTotalJobs,essedummaster,NULL,NULL,332
+338,2,dynamic,NULL,Acme_L3_JobInstanceStartTime,essedummaster,NULL,NULL,333
 339,2,fixed,#7b39b1,ClaimVariantAvgDurBar,leo1311,0,3,334
-340,2,dynamic,NULL,Acme_bjm2_GroupsTotalJobInstances,leapmaster,NULL,NULL,335
-341,2,dynamic,NULL,Acme_L3_JobInstance_EndTime,leapmaster,NULL,NULL,336
+340,2,dynamic,NULL,Acme_bjm2_GroupsTotalJobInstances,essedummaster,NULL,NULL,335
+341,2,dynamic,NULL,Acme_L3_JobInstance_EndTime,essedummaster,NULL,NULL,336
 342,2,fixed,#7b39b1,ClaimAvgDurationDesk,leo1311,0,3,337
 343,2,dynamic,,ClaimGraphTbl,leo1311,NULL,12,338
-344,2,dynamic,,Acme_bjm3_ticket_details,leapmaster,NULL,12,339
-345,2,dynamic,,Acme_bjm2_GroupsTotalJobInstanceNames,leapmaster,0,3,340
-346,2,fixed,#7b39b1,probe_run_unsc,leapmaster,0,2,341
-347,2,fixed,#7B39B1,succesful_prob_run_by_app,leapmaster,0,2,341
+344,2,dynamic,,Acme_bjm3_ticket_details,essedummaster,NULL,12,339
+345,2,dynamic,,Acme_bjm2_GroupsTotalJobInstanceNames,essedummaster,0,3,340
+346,2,fixed,#7b39b1,probe_run_unsc,essedummaster,0,2,341
+347,2,fixed,#7B39B1,succesful_prob_run_by_app,essedummaster,0,2,341
 348,2,dynamic,,botUsageStat,AcmeBTF,0,3,342
-350,2,dynamic,,Acme_bjm2_StatuswiseJobInstancesCount,leapmaster,0,10,344
-351,2,dynamic,,Acme_bjm2_Statewise_Job_Instances_Count,leapmaster,0,10,345
-352,2,palette,NULL,Acme_bjm1_Groupwise_count_of_Job_Instances,leapmaster,0,3,346
-353,2,dynamic,,L2_Forecast_of_job,leapmaster,NULL,12,347
-354,2,palette,NULL,Acme_bjm1_Jobwise_count_of_Job_Instances,leapmaster,0,3,348
-356,2,dynamic,,Acme_bjm2_Job_Instance_table_data,leapmaster,NULL,12,350
-357,2,palette,NULL,Acme_bjm1_JobPredictedDuration,leapmaster,0,1,351
-358,2,fixed,#7B39B1,NGAcme_bjm1_JobActualDuration,leapmaster,0,1,351
+350,2,dynamic,,Acme_bjm2_StatuswiseJobInstancesCount,essedummaster,0,10,344
+351,2,dynamic,,Acme_bjm2_Statewise_Job_Instances_Count,essedummaster,0,10,345
+352,2,palette,NULL,Acme_bjm1_Groupwise_count_of_Job_Instances,essedummaster,0,3,346
+353,2,dynamic,,L2_Forecast_of_job,essedummaster,NULL,12,347
+354,2,palette,NULL,Acme_bjm1_Jobwise_count_of_Job_Instances,essedummaster,0,3,348
+356,2,dynamic,,Acme_bjm2_Job_Instance_table_data,essedummaster,NULL,12,350
+357,2,palette,NULL,Acme_bjm1_JobPredictedDuration,essedummaster,0,1,351
+358,2,fixed,#7B39B1,NGAcme_bjm1_JobActualDuration,essedummaster,0,1,351
 359,2,fixed,#7b39b1,On_Time_Delivery,leo1311,0,1,352
-360,2,dynamic,,Acme_bjm1_Table_data,leapmaster,NULL,12,353
+360,2,dynamic,,Acme_bjm1_Table_data,essedummaster,NULL,12,353
 361,2,fixed,#7B39B1,Online_Orders_Minute,leo1311,0,17,354
 362,2,fixed,#7b39b1,On_Time_Shipment,leo1311,0,3,355
 363,2,dynamic,#7B39B1,heat_map_data,leo1311,0,16,356
-365,2,dynamic,NULL,Acme_bjm3_NetworkGraph,leapmaster,NULL,NULL,358
+365,2,dynamic,NULL,Acme_bjm3_NetworkGraph,essedummaster,NULL,NULL,358
 366,2,fixed,#7B39B1,Overall_efficiency,leo1311,0,17,359
 367,2,fixed,#7b39b1,Water_Raising,leo1311,0,3,360
-371,2,dynamic,,Acme_L3_CountPredecessors,leapmaster,0,3,364
-374,2,dynamic,,Acme_L3_CountSuccessors,leapmaster,0,3,367
-375,2,dynamic,,Acme_L3_PastJobInstance_Details,leapmaster,NULL,12,368
-376,2,dynamic,,Acme_L3_FutureJobInstance_Details,leapmaster,NULL,12,369
-377,2,dynamic,NULL,Acme_L3_PredecessorNetworkGraph,leapmaster,NULL,NULL,370
-378,2,dynamic,NULL,Acme_L3_PredecessorNetworkGraph,leapmaster,NULL,NULL,371
-379,2,dynamic,NULL,Acme_L3_SuccessorNetworkGraph,leapmaster,NULL,NULL,372
-380,2,dynamic,NULL,Acme_L3_JobInstanceGroupName,leapmaster,NULL,NULL,373
-388,2,fixed,#7B39B1,TWBTransitionDuration,leapmaster,NULL,NULL,381
-389,2,fixed,#7B39B1,CurrentTransitionWeekInProgress,leapmaster,NULL,NULL,383
-390,2,fixed,#7B39B1,TWBTotSessions,leapmaster,NULL,NULL,384
-391,2,fixed,#7B39B1,TWBSessCompleted,leapmaster,NULL,NULL,385
-392,2,fixed,#7B39B1,TWBPercentComplete,leapmaster,NULL,NULL,386
-393,2,fixed,#7B39B1,TWBSessResch,leapmaster,NULL,NULL,387
-394,2,fixed,#7B39B1,TWBSessInProgress,leapmaster,NULL,NULL,388
-395,2,fixed,#7B39B1,TWBCancelledSess,leapmaster,NULL,NULL,389
-396,2,fixed,#7B39B1,TWBGrpBySess,leapmaster,0,3,394
-397,2,fixed,#7B39B1,TwbPlannedSession,leapmaster,NULL,NULL,393
-398,2,dynamic,,TWBTaskDetails,leapmaster,NULL,12,391
-399,2,fixed,#7B39B1,Application_Count,leapmaster,NULL,NULL,395
-400,2,fixed,#7B39B1,Application_group_running_count,leapmaster,NULL,NULL,398
-401,2,fixed,#7B39B1,Run_successful,leapmaster,NULL,NULL,399
-402,2,fixed,#7B39B1,Run_unsuccessful,leapmaster,NULL,NULL,400
-403,2,fixed,#7B39B1,Average_of_run_time,leapmaster,NULL,NULL,401
-404,2,fixed,#7B39B1,Failed_Applications,leapmaster,NULL,NULL,"396	"
-405,2,fixed,#7B39B1,UnsuccessfulProbeRunbyApplication,leapmaster,0,2,402
-406,2,palette,NULL,ApplicationCountByApplicationGroup,leapmaster,0,6,404
-407,2,fixed,#7B39B1,SuccesfulProbebyApplication,leapmaster,0,2,405
-408,2,palette,NULL,ApplicationGroup,leapmaster,0,3,408
-409,2,dynamic,,ApplicationTable,leapmaster,NULL,12,410
-411,2,dynamic,,testapplicationgroupwithactiveprobe,leapmaster,NULL,12,412
-413,2,dynamic,,testsuccessproberuns,leapmaster,NULL,12,414
-412,2,dynamic,,testfailedprobename,leapmaster,NULL,12,413
-410,2,dynamic,,Failed_Applications_Name,leapmaster,NULL,12,411
-415,2,dynamic,,TestApplicationGrpCount,leapmaster,NULL,12,416
-416,2,dynamic,,testfailedproberuns,leapmaster,NULL,12,417
-414,2,dynamic,,AllApplicationsPerc,leapmaster,NULL,12,415
-417,2,fixed,#7b39b1,ProbeLocationGraph,leapmaster,NULL,3,418
-418,2,fixed,#7B39B1,RunTestFailed,leapmaster,NULL,12,419
-419,2,dynamic,,ApplicationTable,leapmaster,NULL,12,420
-420,2,fixed,#7B39B1,ApplicationTable,leapmaster,0,3,421
-421,2,fixed,#7b39b1,ProbeRunTime,leapmaster,0,3,422
-422,2,fixed,#7b39b1,ProbeRunTime1,leapmaster,0,3,422
-423,2,fixed,#7b39b1,ProbeRunTime2,leapmaster,0,3,422
-424,2,fixed,#7B39B1,ApplicationDetails,leapmaster,NULL,NULL,423
-425,2,dynamic,,KtSession,leapmaster,NULL,12,424
-426,2,palette,#7B39B1,TE_Transition_count,leapmaster,NULL,NULL,425
-427,2,palette,,TE_KT_Chart,leapmaster,0,7,426
-428,2,dynamic,NULL,TE_Planned_line,leapmaster,0,3,427
-429,2,dynamic,NULL,TE_COmpleted_LIne,leapmaster,0,3,427
-430,2,palette,NULL,Total_kt_count,leapmaster,NULL,NULL,428
-431,2,dynamic,NULL,New_InProgress_wave_status,leapmaster,0,3,429
-432,2,dynamic,NULL,New_completed_wave_status,leapmaster,0,3,429
-433,2,dynamic,NULL,New_cancelled_wave_status,leapmaster,0,3,429
-434,2,dynamic,NULL,New_NotRequired_wave_status,leapmaster,0,3,429
-435,2,dynamic,NULL,New_Planned_wave_status,leapmaster,0,3,429
-436,2,palette,NULL,New_Action_Chart1,leapmaster,0,6,430
-437,2,palette,NULL,new_risk_chart1,leapmaster,0,6,431
-438,2,palette,NULL,New_Issue_chart1,leapmaster,0,6,432
-439,2,dynamic,,Rev_new_total_kt_Chart,leapmaster,0,7,433
-440,2,dynamic,,Rev_Total_Wave_chart,leapmaster,0,19,434
-441,2,dynamic,,New_Total_KT_CHart,leapmaster,0,7,435
-442,2,dynamic,,Total_Wave_chart,leapmaster,0,19,436
-443,2,dynamic,NULL,PlannedLine,leapmaster,0,3,437
-444,2,dynamic,NULL,CompletedLine,leapmaster,0,3,437
-445,2,dynamic,NULL,Scheduled_new_req,leapmaster,0,1,438
-446,2,dynamic,NULL,Completed_new_req,leapmaster,0,1,438
-447,2,dynamic,NULL,Rev_Scheduled_new_req,leapmaster,0,1,439
-448,2,dynamic,NULL,Rev_Completed_new_Req,leapmaster,0,1,439
-453,2,dynamic,NULL,WeeklyStatus,leapmaster,0,3,440
-454,2,dynamic,,Action_table1,leapmaster,NULL,12,441
-455,2,dynamic,,Risk_table1,leapmaster,NULL,12,442
-456,2,dynamic,,Issue_table1,leapmaster,NULL,12,443
-457,2,dynamic,,Rev_Feedback_Table,leapmaster,NULL,12,444
-458,2,dynamic,,Feedback_table,leapmaster,NULL,12,445
-459,2,dynamic,,Rev_Feedback_Based_Vendor_Chart,leapmaster,0,7,446
-460,2,dynamic,,Feedback_based_on_vendor_chart,leapmaster,0,7,447
-461,2,dynamic,,Rev_KT_table,leapmaster,NULL,12,448
-462,2,dynamic,,KT_Table,leapmaster,NULL,12,449
-463,2,palette,,Weekly_status_report_chart,leapmaster,NULL,7,450
-464,2,dynamic,,WeeklystatusReport_table,leapmaster,NULL,12,451
-465,2,dynamic,,TE_KT_Table1,leapmaster,NULL,12,452
+371,2,dynamic,,Acme_L3_CountPredecessors,essedummaster,0,3,364
+374,2,dynamic,,Acme_L3_CountSuccessors,essedummaster,0,3,367
+375,2,dynamic,,Acme_L3_PastJobInstance_Details,essedummaster,NULL,12,368
+376,2,dynamic,,Acme_L3_FutureJobInstance_Details,essedummaster,NULL,12,369
+377,2,dynamic,NULL,Acme_L3_PredecessorNetworkGraph,essedummaster,NULL,NULL,370
+378,2,dynamic,NULL,Acme_L3_PredecessorNetworkGraph,essedummaster,NULL,NULL,371
+379,2,dynamic,NULL,Acme_L3_SuccessorNetworkGraph,essedummaster,NULL,NULL,372
+380,2,dynamic,NULL,Acme_L3_JobInstanceGroupName,essedummaster,NULL,NULL,373
+388,2,fixed,#7B39B1,TWBTransitionDuration,essedummaster,NULL,NULL,381
+389,2,fixed,#7B39B1,CurrentTransitionWeekInProgress,essedummaster,NULL,NULL,383
+390,2,fixed,#7B39B1,TWBTotSessions,essedummaster,NULL,NULL,384
+391,2,fixed,#7B39B1,TWBSessCompleted,essedummaster,NULL,NULL,385
+392,2,fixed,#7B39B1,TWBPercentComplete,essedummaster,NULL,NULL,386
+393,2,fixed,#7B39B1,TWBSessResch,essedummaster,NULL,NULL,387
+394,2,fixed,#7B39B1,TWBSessInProgress,essedummaster,NULL,NULL,388
+395,2,fixed,#7B39B1,TWBCancelledSess,essedummaster,NULL,NULL,389
+396,2,fixed,#7B39B1,TWBGrpBySess,essedummaster,0,3,394
+397,2,fixed,#7B39B1,TwbPlannedSession,essedummaster,NULL,NULL,393
+398,2,dynamic,,TWBTaskDetails,essedummaster,NULL,12,391
+399,2,fixed,#7B39B1,Application_Count,essedummaster,NULL,NULL,395
+400,2,fixed,#7B39B1,Application_group_running_count,essedummaster,NULL,NULL,398
+401,2,fixed,#7B39B1,Run_successful,essedummaster,NULL,NULL,399
+402,2,fixed,#7B39B1,Run_unsuccessful,essedummaster,NULL,NULL,400
+403,2,fixed,#7B39B1,Average_of_run_time,essedummaster,NULL,NULL,401
+404,2,fixed,#7B39B1,Failed_Applications,essedummaster,NULL,NULL,"396	"
+405,2,fixed,#7B39B1,UnsuccessfulProbeRunbyApplication,essedummaster,0,2,402
+406,2,palette,NULL,ApplicationCountByApplicationGroup,essedummaster,0,6,404
+407,2,fixed,#7B39B1,SuccesfulProbebyApplication,essedummaster,0,2,405
+408,2,palette,NULL,ApplicationGroup,essedummaster,0,3,408
+409,2,dynamic,,ApplicationTable,essedummaster,NULL,12,410
+411,2,dynamic,,testapplicationgroupwithactiveprobe,essedummaster,NULL,12,412
+413,2,dynamic,,testsuccessproberuns,essedummaster,NULL,12,414
+412,2,dynamic,,testfailedprobename,essedummaster,NULL,12,413
+410,2,dynamic,,Failed_Applications_Name,essedummaster,NULL,12,411
+415,2,dynamic,,TestApplicationGrpCount,essedummaster,NULL,12,416
+416,2,dynamic,,testfailedproberuns,essedummaster,NULL,12,417
+414,2,dynamic,,AllApplicationsPerc,essedummaster,NULL,12,415
+417,2,fixed,#7b39b1,ProbeLocationGraph,essedummaster,NULL,3,418
+418,2,fixed,#7B39B1,RunTestFailed,essedummaster,NULL,12,419
+419,2,dynamic,,ApplicationTable,essedummaster,NULL,12,420
+420,2,fixed,#7B39B1,ApplicationTable,essedummaster,0,3,421
+421,2,fixed,#7b39b1,ProbeRunTime,essedummaster,0,3,422
+422,2,fixed,#7b39b1,ProbeRunTime1,essedummaster,0,3,422
+423,2,fixed,#7b39b1,ProbeRunTime2,essedummaster,0,3,422
+424,2,fixed,#7B39B1,ApplicationDetails,essedummaster,NULL,NULL,423
+425,2,dynamic,,KtSession,essedummaster,NULL,12,424
+426,2,palette,#7B39B1,TE_Transition_count,essedummaster,NULL,NULL,425
+427,2,palette,,TE_KT_Chart,essedummaster,0,7,426
+428,2,dynamic,NULL,TE_Planned_line,essedummaster,0,3,427
+429,2,dynamic,NULL,TE_COmpleted_LIne,essedummaster,0,3,427
+430,2,palette,NULL,Total_kt_count,essedummaster,NULL,NULL,428
+431,2,dynamic,NULL,New_InProgress_wave_status,essedummaster,0,3,429
+432,2,dynamic,NULL,New_completed_wave_status,essedummaster,0,3,429
+433,2,dynamic,NULL,New_cancelled_wave_status,essedummaster,0,3,429
+434,2,dynamic,NULL,New_NotRequired_wave_status,essedummaster,0,3,429
+435,2,dynamic,NULL,New_Planned_wave_status,essedummaster,0,3,429
+436,2,palette,NULL,New_Action_Chart1,essedummaster,0,6,430
+437,2,palette,NULL,new_risk_chart1,essedummaster,0,6,431
+438,2,palette,NULL,New_Issue_chart1,essedummaster,0,6,432
+439,2,dynamic,,Rev_new_total_kt_Chart,essedummaster,0,7,433
+440,2,dynamic,,Rev_Total_Wave_chart,essedummaster,0,19,434
+441,2,dynamic,,New_Total_KT_CHart,essedummaster,0,7,435
+442,2,dynamic,,Total_Wave_chart,essedummaster,0,19,436
+443,2,dynamic,NULL,PlannedLine,essedummaster,0,3,437
+444,2,dynamic,NULL,CompletedLine,essedummaster,0,3,437
+445,2,dynamic,NULL,Scheduled_new_req,essedummaster,0,1,438
+446,2,dynamic,NULL,Completed_new_req,essedummaster,0,1,438
+447,2,dynamic,NULL,Rev_Scheduled_new_req,essedummaster,0,1,439
+448,2,dynamic,NULL,Rev_Completed_new_Req,essedummaster,0,1,439
+453,2,dynamic,NULL,WeeklyStatus,essedummaster,0,3,440
+454,2,dynamic,,Action_table1,essedummaster,NULL,12,441
+455,2,dynamic,,Risk_table1,essedummaster,NULL,12,442
+456,2,dynamic,,Issue_table1,essedummaster,NULL,12,443
+457,2,dynamic,,Rev_Feedback_Table,essedummaster,NULL,12,444
+458,2,dynamic,,Feedback_table,essedummaster,NULL,12,445
+459,2,dynamic,,Rev_Feedback_Based_Vendor_Chart,essedummaster,0,7,446
+460,2,dynamic,,Feedback_based_on_vendor_chart,essedummaster,0,7,447
+461,2,dynamic,,Rev_KT_table,essedummaster,NULL,12,448
+462,2,dynamic,,KT_Table,essedummaster,NULL,12,449
+463,2,palette,,Weekly_status_report_chart,essedummaster,NULL,7,450
+464,2,dynamic,,WeeklystatusReport_table,essedummaster,NULL,12,451
+465,2,dynamic,,TE_KT_Table1,essedummaster,NULL,12,452
 466,2,dynamic,NULL,ClaimEdgeAvgDur,leo1311,NULL,NULL,312
 467,2,fixed,#7B39B1,ACMND_TL37751,leo1311,0,19,453
 480,2,palette,#7B39B1,Out_Of_Stock,leo1311,0,3,464
@@ -310,41 +310,41 @@ id,project_id,color_type,colour,dataset_name,datasource_name,y_axis,chart_type,w
 486,2,dynamic,#00AD94,Top_Segments,leo1311,NULL,12,470
 488,2,fixed,#7B39B1,map_data,leo1311,0,14,472
 489,2,palette,#00AD94,Interface_Health,leo1311,0,13,473
-170,2,palette,NULL,Monitor_bots_count,leapmaster,NULL,NULL,164
-172,2,palette,NULL,icap_resolved_tickets,leapmaster,NULL,NULL,166
-175,2,dynamic,,monitor_bot_table,leapmaster,NULL,12,169
-178,2,dynamic,,monitor_bot_table,leapmaster,NULL,12,172
-181,2,dynamic,,Resolved_Incident_dashboard,leapmaster,NULL,12,175
-364,2,palette,NULL,CAP_Nodes,leapmaster,NULL,NULL,357
-368,2,palette,NULL,CAP_BotCount,leapmaster,NULL,NULL,361
-369,2,palette,NULL,CAP_Total_Workflow,leapmaster,NULL,NULL,362
-372,2,palette,NULL,CAP_Tickets_Solved_By_Automation,leapmaster,NULL,NULL,365
-373,2,palette,NULL,CAP_average_time_to_Resolve_ticket,leapmaster,NULL,NULL,366
-381,2,palette,,CAP_Status_Wise_Ticket_Distribution,leapmaster,0,3,374
-382,2,palette,,CAP_Workflow_Status_Count,leapmaster,0,3,375
-383,2,palette,,CAP_Agent_Status_Wise,leapmaster,0,3,376
-384,2,palette,,CAP_Workflow_Execution_Trend,leapmaster,0,1,377
-385,2,palette,,CAP_Workflow_Executed_On_Each_Node,leapmaster,0,3,378
-386,2,palette,,CAP_Workflow_type_wise_distribution,leapmaster,0,6,379
-387,2,palette,,CAP_Average_Workflow_Execution_Time_For_last7days,leapmaster,0,1,380
+170,2,palette,NULL,Monitor_bots_count,essedummaster,NULL,NULL,164
+172,2,palette,NULL,icap_resolved_tickets,essedummaster,NULL,NULL,166
+175,2,dynamic,,monitor_bot_table,essedummaster,NULL,12,169
+178,2,dynamic,,monitor_bot_table,essedummaster,NULL,12,172
+181,2,dynamic,,Resolved_Incident_dashboard,essedummaster,NULL,12,175
+364,2,palette,NULL,CAP_Nodes,essedummaster,NULL,NULL,357
+368,2,palette,NULL,CAP_BotCount,essedummaster,NULL,NULL,361
+369,2,palette,NULL,CAP_Total_Workflow,essedummaster,NULL,NULL,362
+372,2,palette,NULL,CAP_Tickets_Solved_By_Automation,essedummaster,NULL,NULL,365
+373,2,palette,NULL,CAP_average_time_to_Resolve_ticket,essedummaster,NULL,NULL,366
+381,2,palette,,CAP_Status_Wise_Ticket_Distribution,essedummaster,0,3,374
+382,2,palette,,CAP_Workflow_Status_Count,essedummaster,0,3,375
+383,2,palette,,CAP_Agent_Status_Wise,essedummaster,0,3,376
+384,2,palette,,CAP_Workflow_Execution_Trend,essedummaster,0,1,377
+385,2,palette,,CAP_Workflow_Executed_On_Each_Node,essedummaster,0,3,378
+386,2,palette,,CAP_Workflow_type_wise_distribution,essedummaster,0,6,379
+387,2,palette,,CAP_Average_Workflow_Execution_Time_For_last7days,essedummaster,0,1,380
 490,2,fixed,#7B39B1,botSpecificationCategory,AcmeBTF,0,9,474
-491,2,palette,NULL,CAP_Total_Incidents,leapmaster,NULL,NULL,363
-556,2,dynamic,,CAP_Bot_Details,leapmaster,NULL,12,524
-557,2,dynamic,,CAP_Workflow_Details,leapmaster,NULL,12,525
-558,2,dynamic,,CAP_Workflow_Details_By_Execution_Status,leapmaster,NULL,12,526
-559,2,dynamic,,CAP_Workflow_Details_By_Type,leapmaster,NULL,12,527
-560,2,dynamic,,Acme_bjm2_monthwise_failed_job_instances,leapmaster,0,1,528
+491,2,palette,NULL,CAP_Total_Incidents,essedummaster,NULL,NULL,363
+556,2,dynamic,,CAP_Bot_Details,essedummaster,NULL,12,524
+557,2,dynamic,,CAP_Workflow_Details,essedummaster,NULL,12,525
+558,2,dynamic,,CAP_Workflow_Details_By_Execution_Status,essedummaster,NULL,12,526
+559,2,dynamic,,CAP_Workflow_Details_By_Type,essedummaster,NULL,12,527
+560,2,dynamic,,Acme_bjm2_monthwise_failed_job_instances,essedummaster,0,1,528
 561,2,fixed,#7b39b1,ACMMNLCL47649,leo1311,0,6,529
 562,2,fixed,#7b39b1,ACMSNDXC88406,leo1311,0,6,530
 563,2,fixed,#7b39b1,ACMNGRMC77467,leo1311,0,6,531
 564,2,fixed,#7b39b1,ACMLDCLS41479,leo1311,0,6,532
 565,2,fixed,#7b39b1,ACMKYPHR29686,leo1311,0,6,533
-566,2,fixed,#7B39B1,CAP_Total_Bots_On_Node,leapmaster,NULL,NULL,534
-567,2,dynamic,,CAP_Details_Workflow_Executed_On_Node,leapmaster,NULL,12,535
-568,2,dynamic,,CAP_D2_BotwiseTicketDistribution,leapmaster,0,7,536
-569,2,dynamic,,CAP_D2_BotwiseUtilization,leapmaster,0,1,537
-570,2,dynamic,,CAP_D2_NodewiseUtilization,leapmaster,0,1,538
-572,2,dynamic,,CAP_D2_Statuswise_Bot_Distribution,leapmaster,0,7,540
+566,2,fixed,#7B39B1,CAP_Total_Bots_On_Node,essedummaster,NULL,NULL,534
+567,2,dynamic,,CAP_Details_Workflow_Executed_On_Node,essedummaster,NULL,12,535
+568,2,dynamic,,CAP_D2_BotwiseTicketDistribution,essedummaster,0,7,536
+569,2,dynamic,,CAP_D2_BotwiseUtilization,essedummaster,0,1,537
+570,2,dynamic,,CAP_D2_NodewiseUtilization,essedummaster,0,1,538
+572,2,dynamic,,CAP_D2_Statuswise_Bot_Distribution,essedummaster,0,7,540
 581,2,dynamic,NULL,Network_ProcessTemplate_Edge,leo1311,NULL,NULL,549
 582,2,dynamic,NULL,IC_ProcessTemplate_Graph,leo1311,NULL,NULL,550
 583,2,dynamic,,Variation_ProcessTemplate_Graph,leo1311,0,3,551
@@ -352,9 +352,9 @@ id,project_id,color_type,colour,dataset_name,datasource_name,y_axis,chart_type,w
 585,2,dynamic,,VAverage_ProcessTemplate_Graph,leo1311,0,3,553
 586,2,dynamic,,ProcessTemplate_Graph,leo1311,NULL,12,554
 587,2,dynamic,,IC_ProcessTemplate_Graph,leo1311,NULL,NULL,541
-616,2,dynamic,,CAP_D2_WF_MinExecutionTime,leapmaster,0,3,581
-617,2,dynamic,,CAP_D2_WF_MaxExecutionTime,leapmaster,0,3,581
-618,2,dynamic,,CAP_D2_WF_AVGExecutionTime,leapmaster,0,3,581
+616,2,dynamic,,CAP_D2_WF_MinExecutionTime,essedummaster,0,3,581
+617,2,dynamic,,CAP_D2_WF_MaxExecutionTime,essedummaster,0,3,581
+618,2,dynamic,,CAP_D2_WF_AVGExecutionTime,essedummaster,0,3,581
 1022,2,fixed,#7b39b1,Actual VM Type,leo1311,NULL,1,958
 1021,2,fixed,#7b39b1,Predicted VM_Type,leo1311,NULL,1,958
 1020,2,fixed,#7b39b1,VM Type Count,leo1311,NULL,NULL,957
@@ -370,74 +370,74 @@ id,project_id,color_type,colour,dataset_name,datasource_name,y_axis,chart_type,w
 1009,2,fixed,#7b39b1,Status Count,leo1311,NULL,NULL,950
 1008,2,fixed,#7b39b1,Actual Status,leo1311,NULL,1,949
 1007,2,fixed,#7b39b1,PredictedStatus,leo1311,NULL,1,949
-1023,2,fixed,#7B39B1,support_total_inflow_count,leapmaster,NULL,NULL,959
-1024,2,fixed,#7B39B1,Support_asgn_to_infy_count,leapmaster,NULL,NULL,960
-1025,2,fixed,#7B39B1,Support_infosys_resolved_count,leapmaster,NULL,NULL,961
-1026,2,fixed,#7B39B1,support_infyIndResol_count,leapmaster,NULL,NULL,962
-1027,2,fixed,#7B39B1,support_RWHelp_count,leapmaster,NULL,NULL,963
-1028,2,palette,NULL,test_Sup_sec_asgn_to_infy,leapmaster,0,3,964
-1029,2,fixed,#7B39B1,test_Sup_sec_infy_Resolved,leapmaster,0,3,964
-1030,2,palette,NULL,test_Sup_pri_asgn_to_infy,leapmaster,0,3,965
-1031,2,fixed,#7B39B1,test_Sup_pri_infy_resolved,leapmaster,0,3,965
-1032,2,palette,NULL,test_Support_infy_asgn_target_per,leapmaster,0,1,966
-1033,2,fixed,#7B39B1,test_Support_asgn_to_infy_per,leapmaster,0,1,966
-1034,2,palette,NULL,test_Support_Indepen_target,leapmaster,0,1,967
-1035,2,fixed,#7B39B1,test_Support_Indepen_res_per,leapmaster,0,1,967
-1036,2,palette,NULL,test_Support_total_inflow,leapmaster,0,3,968
-1037,2,fixed,#7B39B1,test_Support_assigned_to_infosys,leapmaster,0,3,968
-1038,2,fixed,#7B39B1,supportSecClusterchart,leapmaster,0,3,969
-1039,2,fixed,#7B39B1,SecSupportClusterTable,leapmaster,NULL,12,970
-1040,2,fixed,#7B39B1,PriSupportClusterTable,leapmaster,NULL,12,971
-1041,2,fixed,#7B39B1,supportPriClusterchart,leapmaster,0,3,972
-1042,2,fixed,#7B39B1,Support_InflowTarget_dd_chart,leapmaster,0,3,973
-1043,2,fixed,#7B39B1,Support_InflowTarget_dd_table,leapmaster,0,12,974
-1044,2,fixed,#7B39B1,Support_IndepTarget_dd_chart,leapmaster,0,3,975
-1045,2,fixed,#7B39B1,Support_IndepTarget_dd_table,leapmaster,0,12,976
+1023,2,fixed,#7B39B1,support_total_inflow_count,essedummaster,NULL,NULL,959
+1024,2,fixed,#7B39B1,Support_asgn_to_infy_count,essedummaster,NULL,NULL,960
+1025,2,fixed,#7B39B1,Support_infosys_resolved_count,essedummaster,NULL,NULL,961
+1026,2,fixed,#7B39B1,support_infyIndResol_count,essedummaster,NULL,NULL,962
+1027,2,fixed,#7B39B1,support_RWHelp_count,essedummaster,NULL,NULL,963
+1028,2,palette,NULL,test_Sup_sec_asgn_to_infy,essedummaster,0,3,964
+1029,2,fixed,#7B39B1,test_Sup_sec_infy_Resolved,essedummaster,0,3,964
+1030,2,palette,NULL,test_Sup_pri_asgn_to_infy,essedummaster,0,3,965
+1031,2,fixed,#7B39B1,test_Sup_pri_infy_resolved,essedummaster,0,3,965
+1032,2,palette,NULL,test_Support_infy_asgn_target_per,essedummaster,0,1,966
+1033,2,fixed,#7B39B1,test_Support_asgn_to_infy_per,essedummaster,0,1,966
+1034,2,palette,NULL,test_Support_Indepen_target,essedummaster,0,1,967
+1035,2,fixed,#7B39B1,test_Support_Indepen_res_per,essedummaster,0,1,967
+1036,2,palette,NULL,test_Support_total_inflow,essedummaster,0,3,968
+1037,2,fixed,#7B39B1,test_Support_assigned_to_infosys,essedummaster,0,3,968
+1038,2,fixed,#7B39B1,supportSecClusterchart,essedummaster,0,3,969
+1039,2,fixed,#7B39B1,SecSupportClusterTable,essedummaster,NULL,12,970
+1040,2,fixed,#7B39B1,PriSupportClusterTable,essedummaster,NULL,12,971
+1041,2,fixed,#7B39B1,supportPriClusterchart,essedummaster,0,3,972
+1042,2,fixed,#7B39B1,Support_InflowTarget_dd_chart,essedummaster,0,3,973
+1043,2,fixed,#7B39B1,Support_InflowTarget_dd_table,essedummaster,0,12,974
+1044,2,fixed,#7B39B1,Support_IndepTarget_dd_chart,essedummaster,0,3,975
+1045,2,fixed,#7B39B1,Support_IndepTarget_dd_table,essedummaster,0,12,976
 
-1046,2,fixed,#7B39B1,workflow_count,leapmaster,NULL,NULL,977
-1047,2,fixed,#7B39B1,bots_count,leapmaster,NULL,NULL,978
-1048,2,fixed,#7B39B1,cases_count,leapmaster,NULL,NULL,979
-1049,2,fixed,#7B39B1,node_count,leapmaster,NULL,NULL,980
-1050,2,fixed,#7B39B1,bots_count,leapmaster,NULL,NULL,981
-1051,2,palette,NULL,cases by status,leapmaster,0,19,982
-1052,2,palette,NULL,cases by bots,leapmaster,0,19,983
-1057,2,fixed,#7B39B1,cases by source,leapmaster,NULL,NULL,985
-1058,2,palette,NULL,SLA overall,leapmaster,0,6,986
-1059,2,fixed,#7B39B1,SLA by priority,leapmaster,NULL,NULL,987
-1060,2,fixed,#7B39B1,SLA by category,leapmaster,NULL,NULL,988
-1061,2,fixed,#7B39B1,Least used bot,leapmaster,NULL,NULL,989
-1062,2,fixed,#7B39B1,Least used node,leapmaster,NULL,NULL,990
-1063,2,fixed,#7B39B1,Least used tool,leapmaster,NULL,NULL,991
-1064,2,fixed,#7B39B1,Least used workflow,leapmaster,NULL,NULL,992
-1065,2,palette,NULL,fastest workflows,leapmaster,0,19,993
-1066,2,palette,NULL,slowest workflows,leapmaster,0,19,994
-1067,2,palette,NULL,most executed workflows,leapmaster,0,19,995
-1068,2,palette,NULL,least executed workflows,leapmaster,0,19,996
-1069,2,palette,NULL,workflow_types,leapmaster,0,13,997
-1070,2,palette,NULL,incident_by_tool,leapmaster,0,1,998
-1071,2,palette,NULL,Day for AcmeBot,leapmaster,0,19,999
-1072,2,palette,NULL,Day for ICASbot,leapmaster,0,19,1000
-1073,2,palette,NULL,Day for TestBot,leapmaster,0,19,1001
-1074,2,palette,NULL,Day for TestBot2,leapmaster,0,19,1002
-1075,2,palette,NULL,Weekly for AcmeBot,leapmaster,0,19,1003
-1076,2,palette,NULL,Weekly for ICASBot,leapmaster,0,19,1004
-1077,2,palette,NULL,Weekly for ICASBot,leapmaster,0,19,1005
-1078,2,palette,NULL,Weekly for TestBot2,leapmaster,0,19,1006
-1079,2,palette,NULL,Monthly for AcmeBot,leapmaster,0,19,1007
-1080,2,palette,NULL,Monthly for ICASBot,leapmaster,0,19,1008
-1081,2,palette,NULL,Monthly for TestBot,leapmaster,0,19,1009
-1082,2,palette,NULL,Monthly for TestBot2,leapmaster,0,19,1010
-1083,2,palette,NULL,node_utilisation,leapmaster,0,3,1011
-1084,2,fixed,#7B39B1,Nodewise status,leapmaster,NULL,NULL,1012
-1085,2,fixed,#7B39B1,cases_count,leapmaster,NULL,NULL,1013
-1086,2,fixed,#7B39B1,Critical Cases,leapmaster,NULL,NULL,1014
-1087,2,fixed,#7B39B1,High Priority Cases,leapmaster,NULL,NULL,1015
-1088,2,fixed,#7B39B1,Low priority cases,leapmaster,NULL,NULL,1016
-1089,2,palette,NULL,cases by category,leapmaster,0,19,1017
-1090,2,palette,NULL,cases by state,leapmaster,0,19,1018
-1091,2,fixed,#7B39B1,P1 cases with SLA percentage,leapmaster,NULL,NULL,1019
-1092,2,dynamic,,Cluster_feeback_table,leapmaster,NULL,12,1020
-1093,2,dynamic,,Rev_Cluster_feeback_table,leapmaster,NULL,12,1021
+1046,2,fixed,#7B39B1,workflow_count,essedummaster,NULL,NULL,977
+1047,2,fixed,#7B39B1,bots_count,essedummaster,NULL,NULL,978
+1048,2,fixed,#7B39B1,cases_count,essedummaster,NULL,NULL,979
+1049,2,fixed,#7B39B1,node_count,essedummaster,NULL,NULL,980
+1050,2,fixed,#7B39B1,bots_count,essedummaster,NULL,NULL,981
+1051,2,palette,NULL,cases by status,essedummaster,0,19,982
+1052,2,palette,NULL,cases by bots,essedummaster,0,19,983
+1057,2,fixed,#7B39B1,cases by source,essedummaster,NULL,NULL,985
+1058,2,palette,NULL,SLA overall,essedummaster,0,6,986
+1059,2,fixed,#7B39B1,SLA by priority,essedummaster,NULL,NULL,987
+1060,2,fixed,#7B39B1,SLA by category,essedummaster,NULL,NULL,988
+1061,2,fixed,#7B39B1,Least used bot,essedummaster,NULL,NULL,989
+1062,2,fixed,#7B39B1,Least used node,essedummaster,NULL,NULL,990
+1063,2,fixed,#7B39B1,Least used tool,essedummaster,NULL,NULL,991
+1064,2,fixed,#7B39B1,Least used workflow,essedummaster,NULL,NULL,992
+1065,2,palette,NULL,fastest workflows,essedummaster,0,19,993
+1066,2,palette,NULL,slowest workflows,essedummaster,0,19,994
+1067,2,palette,NULL,most executed workflows,essedummaster,0,19,995
+1068,2,palette,NULL,least executed workflows,essedummaster,0,19,996
+1069,2,palette,NULL,workflow_types,essedummaster,0,13,997
+1070,2,palette,NULL,incident_by_tool,essedummaster,0,1,998
+1071,2,palette,NULL,Day for AcmeBot,essedummaster,0,19,999
+1072,2,palette,NULL,Day for ICASbot,essedummaster,0,19,1000
+1073,2,palette,NULL,Day for TestBot,essedummaster,0,19,1001
+1074,2,palette,NULL,Day for TestBot2,essedummaster,0,19,1002
+1075,2,palette,NULL,Weekly for AcmeBot,essedummaster,0,19,1003
+1076,2,palette,NULL,Weekly for ICASBot,essedummaster,0,19,1004
+1077,2,palette,NULL,Weekly for ICASBot,essedummaster,0,19,1005
+1078,2,palette,NULL,Weekly for TestBot2,essedummaster,0,19,1006
+1079,2,palette,NULL,Monthly for AcmeBot,essedummaster,0,19,1007
+1080,2,palette,NULL,Monthly for ICASBot,essedummaster,0,19,1008
+1081,2,palette,NULL,Monthly for TestBot,essedummaster,0,19,1009
+1082,2,palette,NULL,Monthly for TestBot2,essedummaster,0,19,1010
+1083,2,palette,NULL,node_utilisation,essedummaster,0,3,1011
+1084,2,fixed,#7B39B1,Nodewise status,essedummaster,NULL,NULL,1012
+1085,2,fixed,#7B39B1,cases_count,essedummaster,NULL,NULL,1013
+1086,2,fixed,#7B39B1,Critical Cases,essedummaster,NULL,NULL,1014
+1087,2,fixed,#7B39B1,High Priority Cases,essedummaster,NULL,NULL,1015
+1088,2,fixed,#7B39B1,Low priority cases,essedummaster,NULL,NULL,1016
+1089,2,palette,NULL,cases by category,essedummaster,0,19,1017
+1090,2,palette,NULL,cases by state,essedummaster,0,19,1018
+1091,2,fixed,#7B39B1,P1 cases with SLA percentage,essedummaster,NULL,NULL,1019
+1092,2,dynamic,,Cluster_feeback_table,essedummaster,NULL,12,1020
+1093,2,dynamic,,Rev_Cluster_feeback_table,essedummaster,NULL,12,1021
 220307,2,"fixed","#7B39B1","LEONGRM_56554","leo1311","NULL","NULL",212859
 220308,2,"dynamic","","LEONGRM_30206","leo1311","NULL",12,212860
 220309,2,"dynamic","","LEONGRMC78819","leo1311",0,19,212861
@@ -468,20 +468,20 @@ id,project_id,color_type,colour,dataset_name,datasource_name,y_axis,chart_type,w
 219630,2,"dynamic","","LEOMNL_N19320","leo1311",0,1,212231
 219631,2,"dynamic","","LEOMNL_C47729","leo1311",0,6,212232
 219632,2,"dynamic","","LEOMNL_C63843","leo1311","NULL",12,212233
-220987,2,dynamic,NULL,emf_workflow,leapmaster,NULL,NULL,213492
-220989,2,dynamic,NULL,emf_workflow_state,leapmaster,NULL,NULL,213490
-220997,2,dynamic,"",worfkow_count,leapmaster,NULL,NULL,213500
-220998,2,fixed,#42b37,workflow_success,leapmaster,NULL,NULL,213501
-220999,2,fixed,#ea3434,workflow_failed,leapmaster,NULL,NULL,213502
-221000,2,fixed,#749bb4,workflow_start,leapmaster,NULL,NULL,213503
-221001,2,fixed,#dcee59,workfow_inprogress,leapmaster,NULL,NULL,213504
-221002,2,dynamic,"",event_count,leapmaster,NULL,NULL,213505
-221003,2,fixed,#dfd030,event_inprogress,leapmaster,NULL,NULL,213506
-221004,2,fixed,#2bca68,events_completed,leapmaster,NULL,NULL,213507
-221006,2,fixed,#db1414,events_failed,leapmaster,NULL,NULL,213509
-221016,2,dynamic,"",workflow_typeCount,leapmaster,NULL,NULL,213519
-221017,2,dynamic,#000000,event_typeCount,leapmaster,NULL,NULL,213520
-221018,2,dynamic,"",emf_workflow_type,leapmaster,NULL,NULL,213521
-221019,2,dynamic,"",emf_event_type,leapmaster,NULL,NULL,213522
-221023,2,dynamic,"",event_details,leapmaster,NULL,NULL,213526
-221024,2,dynamic,NULL,event_time,leapmaster,0,24,213527
+220987,2,dynamic,NULL,emf_workflow,essedummaster,NULL,NULL,213492
+220989,2,dynamic,NULL,emf_workflow_state,essedummaster,NULL,NULL,213490
+220997,2,dynamic,"",worfkow_count,essedummaster,NULL,NULL,213500
+220998,2,fixed,#42b37,workflow_success,essedummaster,NULL,NULL,213501
+220999,2,fixed,#ea3434,workflow_failed,essedummaster,NULL,NULL,213502
+221000,2,fixed,#749bb4,workflow_start,essedummaster,NULL,NULL,213503
+221001,2,fixed,#dcee59,workfow_inprogress,essedummaster,NULL,NULL,213504
+221002,2,dynamic,"",event_count,essedummaster,NULL,NULL,213505
+221003,2,fixed,#dfd030,event_inprogress,essedummaster,NULL,NULL,213506
+221004,2,fixed,#2bca68,events_completed,essedummaster,NULL,NULL,213507
+221006,2,fixed,#db1414,events_failed,essedummaster,NULL,NULL,213509
+221016,2,dynamic,"",workflow_typeCount,essedummaster,NULL,NULL,213519
+221017,2,dynamic,#000000,event_typeCount,essedummaster,NULL,NULL,213520
+221018,2,dynamic,"",emf_workflow_type,essedummaster,NULL,NULL,213521
+221019,2,dynamic,"",emf_event_type,essedummaster,NULL,NULL,213522
+221023,2,dynamic,"",event_details,essedummaster,NULL,NULL,213526
+221024,2,dynamic,NULL,event_time,essedummaster,0,24,213527

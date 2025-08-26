@@ -1,4 +1,4 @@
 "id","activated","client_details","force_password_change","last_updated_dts","onboarded","password","profile_image","profile_image_name","user_act_ind","user_added_by","user_email","user_f_name","user_l_name","user_login","user_m_name","context"
-"1","true","NULL","false","NULL","true","$2a$10$PE2MZmyq5YLuO66ggpnuLO6jsxZZbowj3h4WPEJ6ToDlW5Do88YhW","NULL","NULL","false","NULL","admin@infosys.com","Admin","NULL","admin","NULL","NULL"
-"2","true","NULL","false","NULL","true","$2a$10$PE2MZmyq5YLuO66ggpnuLO6jsxZZbowj3h4WPEJ6ToDlW5Do88YhW","NULL","NULL","false","NULL","demouser@infosys.com","DemoUser","NULL","demouser","NULL","NULL"
-"3","true","NULL","false","NULL","true","$2a$10$PE2MZmyq5YLuO66ggpnuLO6jsxZZbowj3h4WPEJ6ToDlW5Do88YhW","NULL","NULL","false","NULL","TestUser@infosys.com","testuser","NULL","testuser","NULL","NULL"
+"1","true","NULL","false","NULL","true","$2a$10$PE2MZmyq5YLuO66ggpnuLO6jsxZZbowj3h4WPEJ6ToDlW5Do88YhW","NULL","NULL","false","NULL","admin@lfn.com","Admin","NULL","admin","NULL","NULL"
+"2","true","NULL","false","NULL","true","$2a$10$PE2MZmyq5YLuO66ggpnuLO6jsxZZbowj3h4WPEJ6ToDlW5Do88YhW","NULL","NULL","false","NULL","demouser@lfn.com","DemoUser","NULL","demouser","NULL","NULL"
+"3","true","NULL","false","NULL","true","$2a$10$PE2MZmyq5YLuO66ggpnuLO6jsxZZbowj3h4WPEJ6ToDlW5Do88YhW","NULL","NULL","false","NULL","TestUser@lfn.com","testuser","NULL","testuser","NULL","NULL"
