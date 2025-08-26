@@ -5,7 +5,7 @@ import { MessageService } from "../services/message.service";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { PageResponse } from "../support/paging";
 import { PageRequestByExample } from "../support/page-request";
-import { UsmPortfolio } from "../models/usm-portfolio";
+import { Portfolio } from "../models/portfolio";
 
 // import { throwError, pipe } from "rxjs";
 // import { map, catchError } from "rxjs/operators";
@@ -18,10 +18,10 @@ export class UsmPortfolioService {
   }
 
   /**
-   * Create a new  UsmPortfolio.
+   * Create a new  Portfolio.
    */
 
-  create(usm_portfolio: UsmPortfolio): Observable<UsmPortfolio> {
+  create(usm_portfolio: Portfolio): Observable<Portfolio> {
     const copy = this.convert(usm_portfolio);
     return this.https
       .post("/api/usm-portfolios", copy, {
@@ -29,7 +29,7 @@ export class UsmPortfolioService {
       })
       .pipe(
         map((response) => {
-          return new UsmPortfolio(response.body);
+          return new Portfolio(response.body);
         })
       )
       .pipe(
@@ -40,16 +40,16 @@ export class UsmPortfolioService {
   }
 
   /**
-   * Get a UsmPortfolio by id.
+   * Get a Portfolio by id.
    */
-  getUsmPortfolio(id: any): Observable<UsmPortfolio> {
+  getUsmPortfolio(id: any): Observable<Portfolio> {
     return this.https
       .get("/api/usm-portfolios/" + id, {
         observe: "response",
       })
       .pipe(
         map((response) => {
-          return new UsmPortfolio(response.body);
+          return new Portfolio(response.body);
         })
       )
       .pipe(
@@ -62,7 +62,7 @@ export class UsmPortfolioService {
   /**
    * Update the passed usm_portfolio.
    */
-  update(usm_portfolio: UsmPortfolio): Observable<UsmPortfolio> {
+  update(usm_portfolio: Portfolio): Observable<Portfolio> {
     let body;
     try {
       body = JSON.stringify(usm_portfolio);
@@ -77,7 +77,7 @@ export class UsmPortfolioService {
       .pipe(
         map((response) => {
 
-          return new UsmPortfolio(response.body);
+          return new Portfolio(response.body);
         })
       )
       .pipe(
@@ -88,10 +88,10 @@ export class UsmPortfolioService {
   }
 
   /**
-   * Load a page (for paginated datatable) of UsmPortfolio using the passed
+   * Load a page (for paginated datatable) of Portfolio using the passed
    * usm_portfolio as an example for the search by example facility.
    */
-  findAll(usm_portfolio: UsmPortfolio, event: any): Observable<PageResponse<UsmPortfolio>> {
+  findAll(usm_portfolio: Portfolio, event: any): Observable<PageResponse<Portfolio>> {
     let req = new PageRequestByExample(usm_portfolio, event);
     let body;
     let headerValue;
@@ -121,7 +121,7 @@ export class UsmPortfolioService {
       .pipe(
         map((response) => {
           let pr: any = response.body;
-          return new PageResponse<UsmPortfolio>(pr.totalPages, pr.totalElements, UsmPortfolio.toArray(pr.content));
+          return new PageResponse<Portfolio>(pr.totalPages, pr.totalElements, Portfolio.toArray(pr.content));
         })
       )
       .pipe(
@@ -130,7 +130,7 @@ export class UsmPortfolioService {
         })
       );
   }
-  FindAll(usm_portfolio: UsmPortfolio, event: any): Observable<PageResponse<UsmPortfolio>> {
+  FindAll(usm_portfolio: Portfolio, event: any): Observable<PageResponse<Portfolio>> {
     let req = new PageRequestByExample(usm_portfolio, event);
     let body;
     let headerValue;
@@ -149,7 +149,7 @@ export class UsmPortfolioService {
       .pipe(
         map((response) => {
           let pr: any = response.body;
-          return new PageResponse<UsmPortfolio>(pr.totalPages, pr.totalElements, UsmPortfolio.toArray(pr.content));
+          return new PageResponse<Portfolio>(pr.totalPages, pr.totalElements, Portfolio.toArray(pr.content));
         })
       )
       .pipe(
@@ -158,7 +158,7 @@ export class UsmPortfolioService {
         })
       );
   }
-  search(usm_portfolio: UsmPortfolio, event: any): Observable<PageResponse<UsmPortfolio>> {
+  search(usm_portfolio: Portfolio, event: any): Observable<PageResponse<Portfolio>> {
     let req = new PageRequestByExample(usm_portfolio, event);
     let body;
     try {
@@ -174,7 +174,7 @@ export class UsmPortfolioService {
       .pipe(
         map((response) => {
           let pr: any = response.body;
-          return new PageResponse<UsmPortfolio>(pr.totalPages, pr.totalElements, UsmPortfolio.toArray(pr.content));
+          return new PageResponse<Portfolio>(pr.totalPages, pr.totalElements, Portfolio.toArray(pr.content));
         })
       )
       .pipe(
@@ -187,7 +187,7 @@ export class UsmPortfolioService {
    * Performs a search by example on 1 attribute (defined on server side) and returns at most 10 results.
    * Used by UsmPortfolioCompleteComponent.
    */
-  complete(query: string): Observable<UsmPortfolio[]> {
+  complete(query: string): Observable<Portfolio[]> {
     let body;
     try {
       body = JSON.stringify({ query: query, maxResults: 10 });
@@ -201,7 +201,7 @@ export class UsmPortfolioService {
       .pipe(
         map((response) => {
           let a: any = response.body;
-          return UsmPortfolio.toArray(a);
+          return Portfolio.toArray(a);
         })
       )
       .pipe(
@@ -212,7 +212,7 @@ export class UsmPortfolioService {
   }
 
   /**
-   * Delete an UsmPortfolio by id.
+   * Delete an Portfolio by id.
    */
   delete(id: any) {
     return this.https
@@ -241,8 +241,8 @@ export class UsmPortfolioService {
     return throwError(errMsg)
   }
 
-  private convert(usm_portfolio: UsmPortfolio): UsmPortfolio {
-    const copy: UsmPortfolio = Object.assign({}, usm_portfolio);
+  private convert(usm_portfolio: Portfolio): Portfolio {
+    const copy: Portfolio = Object.assign({}, usm_portfolio);
     return copy;
   }
 }

@@ -54,6 +54,8 @@ import { MatPaginatorModule } from "@angular/material/paginator";
 import { MatSortModule } from "@angular/material/sort";
 import { MatTabsModule } from "@angular/material/tabs";
 import { AipPaginationComponent } from "./components/aip-pagination/aip-pagination.component";
+import { PortfolioAddComponent } from "./components/portfolio/portfolio-add/portfolio-add.component";
+import { PortfolioListViewComponent } from "./components/portfolio/portfolio-list-view.component";
 @NgModule({
     imports: [
         NgBusyModule,
@@ -79,10 +81,10 @@ import { AipPaginationComponent } from "./components/aip-pagination/aip-paginati
         MatInputModule,
         MatSelectModule,
         MatCardModule,
-        MatTooltipModule,        MatPaginatorModule,
-        MatSortModule,
+        MatTooltipModule,        MatPaginatorModule,        MatSortModule,
         MatTabsModule,
         AipPaginationComponent,
+        PortfolioAddComponent,AipFilterComponent
      
     ],
     declarations: [
@@ -96,10 +98,10 @@ import { AipPaginationComponent } from "./components/aip-pagination/aip-paginati
         ConfirmDeleteDialogComponent,
         ConfirmProjectDeleteDialogComponent,
         ProjectListViewComponent,
-        ProjectDetailComponent,
-        ManageUsersComponent,
+        ProjectDetailComponent,        ManageUsersComponent,
         ConfirmRevokeDialogComponent,
         ConfirmRegenerateDialogComponent,
+        PortfolioListViewComponent,
     ],
     providers: [
         MessageService,
@@ -119,7 +121,7 @@ import { AipPaginationComponent } from "./components/aip-pagination/aip-paginati
         DatePipe,
         encKey,
     ],
-    exports: [IampUsmComponent, SecretsComponent, RoleListComponent, RoleDetailComponent, RoleRoleComponent, UserProjectRoleListComponent, ManageUsersComponent, AipPaginationComponent],
+    exports: [IampUsmComponent, SecretsComponent, RoleListComponent, RoleDetailComponent, RoleRoleComponent, UserProjectRoleListComponent, ManageUsersComponent, AipPaginationComponent, PortfolioAddComponent,AipFilterComponent, PortfolioListViewComponent],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
 export class IampUsmModule { }

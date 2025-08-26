@@ -42,7 +42,7 @@ import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
 import { FormControl } from "@angular/forms";
 import { Subscription } from "rxjs";
-import { UsmPortfolio } from "../../models/usm-portfolio";
+import { Portfolio } from "../../models/portfolio";
 import { UsersService } from "../../services/users.service";
 import { UsmPortfolioService } from "../../services/usm-portfolio.service";
 import { DeleteComponent } from "../../shared-modules/confirm-delete/delete.component";
@@ -138,9 +138,9 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
 
   // list is paginated
   currentPage: PageResponse<Project> = new PageResponse<Project>(0, 0, []);
-  usm_portfolio_idArray: UsmPortfolio[] = [];
-  usm_portfolio_idObject: UsmPortfolio = new UsmPortfolio();
-  private _id: UsmPortfolio;
+  usm_portfolio_idArray: Portfolio[] = [];
+  usm_portfolio_idObject: Portfolio = new Portfolio();
+  private _id: Portfolio;
 
   pointerevent: string = "auto";
   opacity: number = 1;
@@ -174,7 +174,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
   buttonFlag: boolean = false;
   viewProject: boolean = false;
   edit: boolean = false;
-  selectedPortfolio = new UsmPortfolio();
+  selectedPortfolio = new Portfolio();
   lazyload = { first: 0, rows: 1000, sortField: null, sortOrder: null };
   project = new Project();
   currentProject = new Project();
@@ -345,7 +345,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
       this.project.name = this.project.name.trim();
     }
     if(this.project.autoUserProject==null) this.project.autoUserProject=false;
-    let portfolio: UsmPortfolio;
+    let portfolio: Portfolio;
     try {
       portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
     } catch (e: any) {
@@ -911,7 +911,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
 
   loadPage(event) {
     if (this.role.roleadmin) {
-      let portfolio: UsmPortfolio;
+      let portfolio: Portfolio;
       try {
         portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
       } catch (e: any) {
@@ -957,7 +957,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
   }
   fetchWave(pageEvent) {
     if (this.role.roleadmin) {
-      let portfolio: UsmPortfolio;
+      let portfolio: Portfolio;
       try {
         portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
       } catch (e: any) {
@@ -1210,7 +1210,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
         name: this.projectSearched,
       };
       if (this.role.roleadmin) {
-        let portfolio: UsmPortfolio;
+        let portfolio: Portfolio;
         try {
           portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
         } catch (e: any) {

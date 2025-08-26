@@ -18,11 +18,15 @@ import {
   MAT_DIALOG_DATA,
   MatDialog,
 } from "@angular/material/dialog";
+import { SharedMaterialModule } from "../../../shared-modules/material/material.module";
+
 
 @Component({
   selector: "portfolio-add",
   templateUrl: "./portfolio-add.component.html",
   styleUrls: ["./portfolio-add.component.scss"],
+  standalone: true,
+  imports: [SharedMaterialModule],
 })
 export class PortfolioAddComponent implements OnInit, OnDestroy {
   usmPortfolio: Portfolio = new Portfolio();
