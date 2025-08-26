@@ -11,7 +11,9 @@ import { Project } from "../models/project";
 
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 // import { map, catchError } from "rxjs/operators";
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class ProjectService {
   constructor(private https: HttpClient) { }
 
@@ -457,7 +459,7 @@ export class ProjectService {
     // if (error.status === 401) {
     //   window.location.href = "/";
     // }
-    return throwError(errMsg)
+    return throwError(errMsg);
   }
 
   private convert(project: Project): Project {
