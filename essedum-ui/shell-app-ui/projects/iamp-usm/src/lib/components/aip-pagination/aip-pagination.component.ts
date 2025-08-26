@@ -1,9 +1,13 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-aip-pagination',
   templateUrl: './aip-pagination.component.html',
   styleUrls: ['./aip-pagination.component.scss'],
+  standalone: true,
+  imports: [CommonModule, MatIconModule]
 })
 export class AipPaginationComponent {
   @Input() pageNumber!: number;
