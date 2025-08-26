@@ -1,8 +1,8 @@
 # Sample setup with keycloak
 security:
-  issuer-uri: http://localhost:8180/realms/LFN
-  jwk-set-uri: http://localhost:8180//realms/LFN/protocol/openid-connect/certs
-  clientId: lfn-45
+  issuer-uri: https://aiplatform.az.ad.idemo-ppc.com:8443/realms/ESSEDUM
+  jwk-set-uri: https://aiplatform.az.ad.idemo-ppc.com:8443/realms/ESSEDUM/protocol/openid-connect/certs
+  clientId: essedum-45
   scope: email
   claim: email||admin
   createUserIfNotExist: true

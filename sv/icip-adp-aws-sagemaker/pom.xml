@@ -33,46 +33,34 @@
 			<artifactId>comm-lib-util</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>regions</artifactId>
-			<version>2.20.23</version>
+		    <groupId>software.amazon.awssdk</groupId>
+		    <artifactId>regions</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>auth</artifactId>
-			<version>2.20.23</version>
+		    <groupId>software.amazon.awssdk</groupId>
+		    <artifactId>auth</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>regions</artifactId>
-			<version>2.20.23</version>
+		    <groupId>software.amazon.awssdk</groupId>
+		    <artifactId>sagemaker</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>sagemaker</artifactId>
-			<version>2.20.23</version>
+		    <groupId>software.amazon.awssdk</groupId>
+		    <artifactId>cloudwatchlogs</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>cloudwatchlogs</artifactId>
-			<version>2.20.24</version>
+		    <groupId>software.amazon.awssdk</groupId>
+		    <artifactId>s3</artifactId>
 		</dependency>
 		<dependency>
-        <groupId>software.amazon.awssdk</groupId>
-        <artifactId>s3</artifactId>
-        <version>2.17.0</version>
-    </dependency>
-		<!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-sagemaker -->
-		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-sagemaker</artifactId>
-			<version>1.12.158</version>
+		    <groupId>com.amazonaws</groupId>
+		    <artifactId>aws-java-sdk-sagemaker</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-s3</artifactId>
-			<version>1.11.923</version>
+		    <groupId>com.amazonaws</groupId>
+		    <artifactId>aws-java-sdk-s3</artifactId>
 		</dependency>
+
 
 	</dependencies>
 	<build>
