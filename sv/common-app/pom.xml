@@ -4,12 +4,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.lfn.ai</groupId>
-		<artifactId>essedum</artifactId>
+		<groupId>com.infosys.icets.ai</groupId>
+		<artifactId>aip</artifactId>
 		<version>3.3-SNAPSHOT</version>
 	</parent>
 
-	<groupId>com.lfn</groupId>
+	<groupId>com.infosys</groupId>
 	<artifactId>common-app</artifactId>
 	<packaging>jar</packaging>
 	<name>common-app</name>
@@ -41,115 +41,115 @@
             <version>1.14.0</version>
         </dependency>
 		<dependency>
-			<groupId>com.lfn.ai</groupId>
+			<groupId>com.infosys.icets.ai</groupId>
 			<artifactId>comm-lib-util</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.ai</groupId>
+			<groupId>com.infosys.icets.ai</groupId>
 			<artifactId>comm-lib-licval</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip.plugins</groupId>
+			<groupId>com.infosys.icets.icip.plugins</groupId>
 			<artifactId>icip-adp-azure</artifactId>
 			<version>3.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn</groupId>
+			<groupId>com.infosys</groupId>
 			<artifactId>iamp-lib-usm</artifactId>
 		</dependency>
 		<!--		<dependency>-->
-		<!--			<groupId>com.lfn</groupId>-->
+		<!--			<groupId>com.infosys</groupId>-->
 		<!--			<artifactId>iamp-lib-dbs</artifactId>-->
 		<!--		</dependency>-->
 		<!--<dependency>
-			<groupId>com.lfn.icip</groupId>
+			<groupId>com.infosys.icets.icip</groupId>
 			<artifactId>icip-lib-fsvr</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip</groupId>
+			<groupId>com.infosys.icets.icip</groupId>
 			<artifactId>icip-lib-adp</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip.plugins</groupId>
+			<groupId>com.infosys.icets.icip.plugins</groupId>
 			<artifactId>icip-adp-mysql</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip</groupId>
+			<groupId>com.infosys.icets.icip</groupId>
 			<artifactId>icip-lib-jobs</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip</groupId>
+			<groupId>com.infosys.icets.icip</groupId>
 			<artifactId>icip-lib-evt</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>com.lfn.icip</groupId>
+			<groupId>com.infosys.icets.icip</groupId>
 			<artifactId>icip-lib-mod</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip</groupId>
+			<groupId>com.infosys.icets.icip</groupId>
 			<artifactId>icip-lib-mlops</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip</groupId>
+			<groupId>com.infosys.icets.icip</groupId>
 			<artifactId>icip-lib-iai</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip</groupId>
+			<groupId>com.infosys.icets.icip</groupId>
 			<artifactId>icip-lib-adp</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip</groupId>
+			<groupId>com.infosys.icets.icip</groupId>
 			<artifactId>icip-lib-jobs</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip.plugins</groupId>
+			<groupId>com.infosys.icets.icip.plugins</groupId>
 			<artifactId>icip-adp-rest</artifactId> 
 		</dependency>-->
 		
 		
 		
 		<dependency>
-			<groupId>com.lfn.icip</groupId>
+			<groupId>com.infosys.icets.icip</groupId>
 			<artifactId>icip-lib-mlops</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip</groupId>
+			<groupId>com.infosys.icets.icip</groupId>
 			<artifactId>icip-lib-iai</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip</groupId>
+			<groupId>com.infosys.icets.icip</groupId>
 			<artifactId>icip-lib-adp</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip.plugins</groupId>
+			<groupId>com.infosys.icets.icip.plugins</groupId>
 			<artifactId>icip-adp-rest</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip.plugins</groupId>
+			<groupId>com.infosys.icets.icip.plugins</groupId>
 			<artifactId>icip-adp-remote</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip.plugins</groupId>
+			<groupId>com.infosys.icets.icip.plugins</groupId>
 			<artifactId>icip-adp-s3</artifactId>
 		</dependency>
 				<dependency>
-			<groupId>com.lfn.icip.plugins</groupId>
+			<groupId>com.infosys.icets.icip.plugins</groupId>
 			<artifactId>icip-adp-aicloud</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip.plugins</groupId>
+			<groupId>com.infosys.icets.icip.plugins</groupId>
 			<artifactId>icip-adp-aws-sagemaker</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip.plugins</groupId>
+			<groupId>com.infosys.icets.icip.plugins</groupId>
 			<artifactId>icip-adp-mysql</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.icip.plugins</groupId>
+			<groupId>com.infosys.icets.icip.plugins</groupId>
 			<artifactId>icip-adp-postgresql</artifactId>
 		</dependency>
 			
@@ -204,7 +204,7 @@
 			<version>3.1.1</version>
 		</dependency>
 		<!--<dependency>
-			<groupId>com.lfn.icip.plugins</groupId>
+			<groupId>com.infosys.icets.icip.plugins</groupId>
 			<artifactId>icip-adp-postgresql</artifactId>
 			<version>${project.version}</version>
 		</dependency>-->
@@ -255,11 +255,11 @@
     		<artifactId>spring-boot-starter-logging</artifactId>
 		</dependency>
 		<!--<dependency>
-			<groupId>com.lfn</groupId>
+			<groupId>com.infosys</groupId>
 			<artifactId>iamp-lib-eda</artifactId>
 		</dependency>
         <dependency>
-			<groupId>com.lfn</groupId>
+			<groupId>com.infosys</groupId>
 			<artifactId>iamp-lib-ied</artifactId>
 		</dependency>-->
 		<!-- Test dependencies -->
