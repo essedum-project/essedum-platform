@@ -17,7 +17,9 @@ import { Subject } from "rxjs";
 import { MatSnackBar } from "@angular/material/snack-bar";
 // import { Observable } from "rxjs/Observable";
 //import { MessageBarComponent } from 'leds-lib';
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class MessageService {
  constructor(private snackBar: MatSnackBar) {}
 

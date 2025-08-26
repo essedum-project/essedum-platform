@@ -3,14 +3,14 @@ import { Users } from "./users";
 import { Project } from "./project";
 
 import { Role } from "./role";
-import { UsmPortfolio } from "./usm-portfolio";
+import { Portfolio } from "./portfolio";
 
 export class UserProjectRole {
  id: number;
  user_id: Users;
  project_id: Project;
  role_id: Role;
- portfolio_id: UsmPortfolio;
+ portfolio_id: Portfolio;
  time_stamp: Date;
  constructor(json?: any) {
   if (json != null) {

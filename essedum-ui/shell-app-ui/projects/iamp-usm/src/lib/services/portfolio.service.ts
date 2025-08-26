@@ -1,24 +1,40 @@
+//
+// Copyright © 2016-2017 Infosys Limited, Bangalore, India. All Rights Reserved.
+// * Except for any open source software components embedded in this
+// * Infosys proprietary software program (Program), this Program is protected
+// * by copyright laws, international treaties and other pending or existing
+// * intellectual property rights in India, the United States and other countries.
+// * Except as expressly permitted, any unauthorized reproduction, storage,
+// * transmission in any form or by any means (including without limitation
+// * electronic, mechanical, printing, photocopying, recording or otherwise),
+// * or any distribution of this Program, or any portion of it,
+// * may result in severe civil and criminal penalties, and
+// * will be prosecuted to the maximum extent possible under the law.
+// Template pack-angular:web/src/app/entities/entity.service.ts.e.vm
+//
 import { Injectable, SkipSelf } from "@angular/core";
 import { Observable, map, catchError, throwError } from "rxjs";
 // import { Observable } from "rxjs/Observable";
-import { MessageService } from "../services/message.service";
+import { MessageService } from "./message.service";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { PageResponse } from "../support/paging";
 import { PageRequestByExample } from "../support/page-request";
 import { Portfolio } from "../models/portfolio";
+import { AuthService } from "./auth.service";
 
 // import { throwError, pipe } from "rxjs";
 // import { map, catchError } from "rxjs/operators";
-@Injectable()
-export class UsmPortfolioService {
+@Injectable({
+  providedIn: 'root'
+})
+export class PortfolioService {
 
-
-  constructor(private https: HttpClient, private messageService: MessageService) {
+  constructor(private https: HttpClient, private messageService: MessageService, public auth: AuthService) {
 
   }
 
   /**
-   * Create a new  Portfolio.
+   * Create a new  UsmPortfolio.
    */
 
   create(usm_portfolio: Portfolio): Observable<Portfolio> {
@@ -101,19 +117,8 @@ export class UsmPortfolioService {
     } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
-     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
-    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-   const headers = new HttpHeaders({
-      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
-      'Content-Type': 'application/json',
-      'Accept': 'application/json,text/plain, */*',
-      'Priority': 'u=1, i',
-      'project': project.id || '',
-      'projectname': project.name || '',
-      'roleid': userRole.id || '',
-      'rolename': userRole.name || '',
-      'example': headerValue 
-    });
+    let headers = new HttpHeaders();
+    headers = headers.append('example', headerValue);
     return this.https
       .get("/api/usm-portfolios/page", {
         observe: "response", headers: headers
@@ -212,7 +217,7 @@ export class UsmPortfolioService {
   }
 
   /**
-   * Delete an Portfolio by id.
+   * Delete an UsmPortfolio by id.
    */
   delete(id: any) {
     return this.https

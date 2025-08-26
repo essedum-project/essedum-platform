@@ -33,7 +33,7 @@ import { FormControl } from "@angular/forms";
 import { Msg } from "../../shared-modules/services/msg";
 import * as _ from "lodash";
 import { UsmPortfolioService } from "../../services/usm-portfolio.service";
-import { UsmPortfolio } from "../../models/usm-portfolio";
+import { Portfolio } from "../../models/portfolio";
 import { Observable, ReplaySubject, Subject, Subscription } from "rxjs";
 import { DeleteComponent } from "../../shared-modules/confirm-delete/delete.component";
 import { IampUsmService } from "../../iamp-usm.service";
@@ -266,9 +266,9 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
   rolesToBeFiltered = new Array<Role>();
   usersList = new Array<Users>();
   userProjectRole = new UserProjectRole();
-  usm_portfolio_idArray: UsmPortfolio[] = [];
-  usm_portfolio_idObject: UsmPortfolio = new UsmPortfolio();
-  private _portfolio_id: UsmPortfolio;
+  usm_portfolio_idArray: Portfolio[] = [];
+  usm_portfolio_idObject: Portfolio = new Portfolio();
+  private _portfolio_id: Portfolio;
   specificProjectList = new Array<Project>();
   specificRoleList = new Array<Role>();
   existingUserProjectRoles = new Array<UserProjectRole>();
@@ -567,14 +567,14 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
     }
  
       if (this.role.roleadmin) {
-        let portfolio: UsmPortfolio;
+        let portfolio: Portfolio;
         try {
           portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
         } catch (e : any)  {
           portfolio = null;
           console.error("JSON.parse error - ", e.message);
         }
-        tempUserProjectRole.portfolio_id = new UsmPortfolio({ id: portfolio.id });
+        tempUserProjectRole.portfolio_id = new Portfolio({ id: portfolio.id });
       }
 
     this.userRoleService.FindAll(tempUserProjectRole, pageEvent).subscribe(
@@ -705,14 +705,14 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
   fetchProjects() {
     let project = new Project();
     if (this.role.roleadmin) {
-      let portfolio: UsmPortfolio;
+      let portfolio: Portfolio;
       try {
         portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
       } catch (e : any)  {
         portfolio = null;
         console.error("JSON.parse error - ", e.message);
       }
-      project.portfolioId = new UsmPortfolio({ id: portfolio.id });
+      project.portfolioId = new Portfolio({ id: portfolio.id });
     }
     this.projectService.findAll(project, this.lazyload).subscribe((res) => {
       this.projectList = res.content;
@@ -744,7 +744,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
 
     let userprojectrole = new UserProjectRole();
 
-    let portfolio: UsmPortfolio;
+    let portfolio: Portfolio;
     let project: Project;
     let user: Users;
     let allRole = new Role(); /** To fetch all the roles */
@@ -764,7 +764,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
     if (this.role.roleadmin) {
 
 
-      userprojectrole.portfolio_id = new UsmPortfolio({ id: portfolio.id });
+      userprojectrole.portfolio_id = new Portfolio({ id: portfolio.id });
       userprojectrole.project_id = new Project({ id: project.id });
       userprojectrole.user_id = new Users({ id: user.id });
       // this.userRoleService.findAll(userprojectrole, this.lazyload).subscribe(res => {
@@ -1133,7 +1133,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
     }
   }
   onSave() {
-    let portfolioForSave: UsmPortfolio;
+    let portfolioForSave: Portfolio;
     // if(this.edit){
       this.userProjectRole.time_stamp = new Date();
     this.errorMessage = false;
@@ -1141,24 +1141,24 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
     else if (this.selectedRole != undefined) this.userProjectRole.role_id = this.selectedRole;
     if (this.project != undefined) this.userProjectRole.project_id = this.project;
     if (this.role.roleadmin) {
-      let portfolio: UsmPortfolio;
+      let portfolio: Portfolio;
       try {
         portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
       } catch (e : any)  {
         portfolio = null;
         console.error("JSON.parse error - ", e.message);
       }
-      this.userProjectRole.portfolio_id = new UsmPortfolio({ id: portfolio.id });
+      this.userProjectRole.portfolio_id = new Portfolio({ id: portfolio.id });
     }
     if (this.role.projectadmin) {
-      let portfolio: UsmPortfolio;
+      let portfolio: Portfolio;
       try {
         portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
       } catch (e : any)  {
         portfolio = null;
         console.error("JSON.parse error - ", e.message);
       }
-      this.userProjectRole.portfolio_id = new UsmPortfolio({ id: portfolio.id });
+      this.userProjectRole.portfolio_id = new Portfolio({ id: portfolio.id });
       let project: Project;
       try {
         project = JSON.parse(sessionStorage.getItem("project"));
@@ -1170,7 +1170,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
     }
     if(this.enablePortfolioAdminView){
       if(this.selectedRole){
-        this.userProjectRole.portfolio_id = new UsmPortfolio({ id: this.selectedRole.portfolioId });
+        this.userProjectRole.portfolio_id = new Portfolio({ id: this.selectedRole.portfolioId });
       }
     }
     if(this.enableProjectAdminView){
@@ -1184,7 +1184,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
             }
           });
 
-          this.userProjectRole.portfolio_id = new UsmPortfolio({ id: portfolioForSave.id });
+          this.userProjectRole.portfolio_id = new Portfolio({ id: portfolioForSave.id });
         }
       }
     }
@@ -1278,17 +1278,17 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
         }
       });
       if (this.role.roleadmin) {
-        let portfolio: UsmPortfolio;
+        let portfolio: Portfolio;
         try {
           portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
         } catch (e : any)  {
           portfolio = null;
           console.error("JSON.parse error - ", e.message);
         }
-        this.userProjectRole.portfolio_id = new UsmPortfolio({ id: portfolio.id });
+        this.userProjectRole.portfolio_id = new Portfolio({ id: portfolio.id });
       }
       if (this.role.projectadmin) {
-        let portfolio: UsmPortfolio;
+        let portfolio: Portfolio;
         try {
           portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
         } catch (e : any)  {

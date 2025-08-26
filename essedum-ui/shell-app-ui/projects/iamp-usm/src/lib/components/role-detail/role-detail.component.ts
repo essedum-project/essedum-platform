@@ -13,7 +13,7 @@ import { HelperService } from "../../services/helper.service";
 import { ProjectService } from "../../services/project.service";
 import { Project } from "../../models/project";
 // import { UsersService } from "../../services/users.service";
-import { UsmPortfolio } from "../../models/usm-portfolio";
+import { Portfolio } from "../../models/portfolio";
 import { Subscription } from "rxjs";
 import { IampUsmService } from "../../iamp-usm.service";
 // import { LeapTelemetryService } from "../../telemetry-util/telemetry.service";
@@ -47,8 +47,8 @@ export class RoleDetailComponent implements OnInit {
   viewFlag: boolean = true;
   deleteFlag: boolean = false;
   createFlag: boolean = false;
-  usm_portfolio_idArray: UsmPortfolio[] = [];
-  usm_portfolio_idObject: UsmPortfolio = new UsmPortfolio();
+  usm_portfolio_idArray: Portfolio[] = [];
+  usm_portfolio_idObject: Portfolio = new Portfolio();
   rolePermissions: any;
   normalRole: boolean = false;
   portfolioAdminBoolean: boolean = false;
@@ -227,7 +227,7 @@ export class RoleDetailComponent implements OnInit {
     }
     if (role.roleadmin) {
       this.portfolioAdminBoolean = true;
-      var portfolio: UsmPortfolio;
+      var portfolio: Portfolio;
       try {
         portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));
       } catch (e: any) {

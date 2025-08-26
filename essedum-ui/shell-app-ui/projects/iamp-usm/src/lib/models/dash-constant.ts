@@ -14,7 +14,7 @@
 //
 
 import { Project } from "./project";
-import { UsmPortfolio } from "./usm-portfolio";
+import { Portfolio } from "./portfolio";
 
 export class DashConstant {
  id: number;
@@ -22,7 +22,7 @@ export class DashConstant {
  keys: string;
  value: string;
  project_id: Project;
- portfolio_id: UsmPortfolio;
+ portfolio_id: Portfolio;
  constructor(json?: any) {
   if (json != null) {
    this.id = json.id;

@@ -13,7 +13,7 @@ import { ProjectService } from "../../services/project.service";
 import { saveAs as importedSaveAs } from "file-saver";
 import { UserProjectRole } from "../../models/user-project-role";
 import { UserProjectRoleService } from "../../services/user-project-role.service";
-import { UsmPortfolio } from "../../models/usm-portfolio";
+import { Portfolio } from "../../models/portfolio";
 import { Project } from "../../models/project";
 import { Users } from "../../models/users";
 // import { LeapTelemetryService } from "../../telemetry-util/telemetry.service";
@@ -249,7 +249,7 @@ export class RoleListComponent implements OnInit, OnDestroy {
 
           let userprojectrole = new UserProjectRole();
 
-          let portfolio: UsmPortfolio;
+          let portfolio: Portfolio;
           let project: Project;
           let user: Users;
 
@@ -268,7 +268,7 @@ export class RoleListComponent implements OnInit, OnDestroy {
             console.error("JSON.parse error - ", e.message);
           }
 
-          userprojectrole.portfolio_id = new UsmPortfolio({ id: portfolio.id });
+          userprojectrole.portfolio_id = new Portfolio({ id: portfolio.id });
           userprojectrole.project_id = new Project({ id: project.id });
           userprojectrole.user_id = new Users({ id: user.id });
 
@@ -327,7 +327,7 @@ export class RoleListComponent implements OnInit, OnDestroy {
 
   checkPerms(roleSent: any) {
     let role: Role;
-    let portfolio: UsmPortfolio;
+    let portfolio: Portfolio;
     try {
       role = JSON.parse(sessionStorage.getItem("role"));
       portfolio = JSON.parse(sessionStorage.getItem("portfoliodata"));

@@ -12,7 +12,7 @@
 // * will be prosecuted to the maximum extent possible under the law.
 // Template pack-angular:web/src/app/base-entities/entity.ts.e.vm
 //
-export class UsmPortfolio {
+export class Portfolio {
  id: number;
  portfolioName: string;
  description: string;
@@ -28,11 +28,11 @@ export class UsmPortfolio {
 
  // Utils
 
- static toArray(jsons: any[]): UsmPortfolio[] {
-  let usm_portfolios: UsmPortfolio[] = [];
+ static toArray(jsons: any[]): Portfolio[] {
+  let usm_portfolios: Portfolio[] = [];
   if (jsons != null) {
    for (let json of jsons) {
-    usm_portfolios.push(new UsmPortfolio(json));
+    usm_portfolios.push(new Portfolio(json));
    }
   }
   return usm_portfolios;
