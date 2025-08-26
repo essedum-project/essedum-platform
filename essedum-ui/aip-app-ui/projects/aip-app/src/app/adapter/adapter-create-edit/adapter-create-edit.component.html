@@ -1,119 +1,83 @@
-<div class="container-fluid backgroud-color">
-    <div class="lfx-l-level1-wrapper">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="flex align-items-center lfx-u-pad-t-8" style="justify-content: space-between;">
-                    <div class="align-items-center flex">
-                        <span class="mx-2 aip-cursor" *ngIf="action==='create'">
-                            <mat-icon class="aip-led-icons" (click)="routeBackToAdapters()"
-                                [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
-                                matTooltipPosition="above" (mouseenter)="isBackHovered = true"
-                                (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
-                        </span>
-                        <span *ngIf="action==='create'" class="lfx-u-mar-l-8 lfx-u-header-xxl">{{cardTitle}} -
-                            Create</span>
-                        <span *ngIf="action==='edit'" class="lfx-u-mar-l-8 lfx-u-header-xxl">{{cardTitle}} - Edit</span>
-                    </div>
+<div class="aip-container lfx-u-pad-lr-24" [ngClass]="{'lfx-u-pad-tb-16': action === 'edit'}">
+    <app-aip-header [cardTitle]="CARD_TITLE" [action]="action" [backAction]="action==='create'"
+        [closeAction]="action==='edit'" (navigateBack)="routeBackToAdapters()" (close)="closeAdapterPopup()">
+    </app-aip-header>
 
-                    <mat-icon *ngIf="action==='edit'" class="aip-cursor"
-                        [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Close"
-                        matTooltipPosition="above" (click)="closeAdapterPopup()" (mouseenter)="isBackHovered = true"
-                        (mouseleave)="isBackHovered = false">close</mat-icon>
-
-                </div>
-
-                <div class="lfx-u-mar-b-32">
-                    <div class="row lfx-u-mar-8 lfx-u-pad-t-16">
-                        <div class=" selector-693-2">
-
-                            <!-- Name Field -->
-                            <mat-form-field *ngIf="action==='create'" appearance="fill"
-                                class="w-100 description-no-underline no-subscript-space">
-                                <mat-label>Name</mat-label>
-                                <input matInput placeholder="Name" [(ngModel)]="data.name" [disabled]="false"
-                                    [required]="true" (ngModelChange)="adapterNameChangesOccur($event)">
-
-                            </mat-form-field>
-                            <mat-error *ngIf="!errMsgFlag && action==='create'" class="custom-hint">Please enter Name in
-                                Alphanumeric value, accepted special characters are _ and -</mat-error>
-                            <mat-error *ngIf="errMsgFlag && action==='create'"
-                                class="custom-hint-or-error">{{errMsg}}</mat-error>
-
-                            <mat-form-field *ngIf="action==='edit'" appearance="fill"
-                                class="w-100 description-no-underline no-subscript-space">
-                                <mat-label>Name</mat-label>
-                                <input matInput placeholder="Name" [(ngModel)]="data.name" [disabled]="true" readonly
-                                    [required]="true">
-
-                            </mat-form-field>
-                            <mat-hint class="custom-hint-or-error"></mat-hint>
-
-                            <!-- Description Field -->
-                            <mat-form-field appearance="fill" class="w-100 description-no-underline no-subscript-space">
-                                <mat-label>Description</mat-label>
-                                <textarea matInput placeholder="Description" [(ngModel)]="data.description"
-                                    rows="1"></textarea>
-                            </mat-form-field>
-                            <mat-hint class="custom-hint-or-error"></mat-hint>
-
-                            <mat-form-field *ngIf="connectionPromise|async" appearance="fill"
-                                class="w-100 subscript-space">
-                                <mat-label>Select Connection</mat-label>
-                                <mat-select [(value)]="data.connectionname"
-                                    (selectionChange)="connectionNameSelectChange($event)" required>
-                                    <mat-option *ngFor="let option of connectionOptions" [value]="option.value">
-                                        {{ option.viewValue }}
-                                    </mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                            <mat-hint *ngIf="data.connectionname" class="custom-hint-or-error"></mat-hint>
-                            <mat-error *ngIf="!data.connectionname" class="custom-hint-or-error">Connection is required
-                                field.</mat-error>
-
-                            <!-- Spec Select (Create) -->
-                            <mat-form-field *ngIf="action==='create'" appearance="fill" class="w-100 subscript-space">
-                                <mat-label>Select Spec</mat-label>
-                                <mat-select [(value)]="data.spectemplatedomainname" required>
-                                    <mat-option *ngFor="let option of specTemplatesOptions"
-                                        [value]="option.value">{{option.value}}</mat-option>
-                                </mat-select>
-
-                            </mat-form-field>
-                            <mat-hint *ngIf="data.spectemplatedomainname" class="custom-hint-or-error"></mat-hint>
-                            <mat-error *ngIf="!data.spectemplatedomainname" class="custom-hint-or-error">Spec is
-                                required
-                                field.</mat-error>
-
-                            <!-- Spec Select (Edit) -->
-                            <mat-form-field *ngIf="action==='edit'" appearance="fill" class="w-100 subscript-space">
-                                <mat-label>Select Spec</mat-label>
-                                <mat-select [(ngModel)]="data.spectemplatedomainname" [disabled]="true" required>
-                                    <mat-option *ngFor="let option of specTemplatesOptions"
-                                        [value]="option.value">{{option.value}}</mat-option>
-                                </mat-select>
-
-                            </mat-form-field>
-                            <mat-hint *ngIf="action==='edit'" class="custom-hint-or-error"></mat-hint>
-
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div *ngIf="action==='create'" class="m-2 flex justify-content-end lfx-u-pad-t-8 lfx-u-pad-r-8">
-
-                        <button mat-raised-button color="primary" class="ml-2"
-                            [disabled]="!nameFlag || !createAuth || !data.connectionname || !data.spectemplatedomainname || (data.isChain ? !data.chainName : false)"
-                            (click)="createAdapter()">
-                            Create
-                        </button>
-                    </div>
-                    <div *ngIf="action==='edit'" class="flex justify-content-end lfx-u-pad-t-8 lfx-u-pad-r-8">
-                        <button mat-raised-button color="primary" [disabled]="false" (click)="updateAdapter()">
-                            Update
-                        </button>
-                    </div>
-                </div>
+    <div>
+        <!-- Name Field -->
+        <div class="lfx-u-mar-t-16 lfx-u-pad-b-8">
+            <div class="lfx-u-sub-header-alias">
+                Name
+                <span class="required-indicator">*</span>
             </div>
+            <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
+                <input matInput id="schm-modal-alias" [disabled]="false" [(ngModel)]="data.name" required
+                    (ngModelChange)="adapterNameChangesOccur($event)" placeholder="Name" #nameRef="ngModel"
+                    class="custom-alias-input" [disabled]="action==='edit'" [readonly]="action==='edit'">
+                <mat-hint *ngIf="!errMsgFlag && action==='create'" class="custom-hint">Please enter Name in Alphanumeric
+                    value, accepted special characters are _ and -</mat-hint>
+                <mat-error *ngIf="errMsgFlag && action==='create'" class="custom-hint-or-error"> {{errMsg}} </mat-error>
+            </mat-form-field>
+        </div>
+
+        <!-- Description Field -->
+        <div class="lfx-u-mar-t-16 lfx-u-pad-b-8">
+            <div class="lfx-u-sub-header-alias">Description</div>
+            <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
+                <input matInput id="schm-modal-description" [(ngModel)]="data.description" placeholder="Description"
+                    class="custom-alias-input">
+            </mat-form-field>
+        </div>
+
+        <!-- Connection Select -->
+        <div *ngIf="connectionPromise|async" class="lfx-u-mar-t-16 lfx-u-pad-b-16">
+            <div class="lfx-u-sub-header-alias">
+                Select Connection
+                <span class="required-indicator">*</span>
+            </div>
+            <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
+                <mat-select id="column-type-select" placeholder="Select Connection" [(ngModel)]="data.connectionname"
+                    (selectionChange)="connectionNameSelectChange($event)" required>
+                    <mat-option *ngFor="let option of connectionOptions" [value]="option.value">
+                        {{ option.viewValue }}
+                    </mat-option>
+                </mat-select>
+                <mat-hint *ngIf="data.connectionname" class="custom-hint-or-error"></mat-hint>
+                <mat-error *ngIf="!data.connectionname" class="custom-hint-or-error">Connection is required
+                    field.</mat-error>
+            </mat-form-field>
+        </div>
+
+        <!-- Spec Select (Create) -->
+        <div *ngIf="connectionPromise|async" class="lfx-u-mar-t-16 lfx-u-pad-b-16">
+            <div class="lfx-u-sub-header-alias">
+                Select Spec
+                <span class="required-indicator">*</span>
+            </div>
+            <mat-form-field appearance="fill" class="w-100 custom-alias-field" subscriptSizing="dynamic">
+                <mat-select id="column-type-select" placeholder="Select Spec" [(ngModel)]="data.spectemplatedomainname"
+                    [disabled]="action==='edit'" required>
+                    <mat-option *ngFor="let option of specTemplatesOptions" [value]="option.value">
+                        {{ option.viewValue }}
+                    </mat-option>
+                </mat-select>
+                <mat-hint *ngIf="data.spectemplatedomainname" class="custom-hint-or-error"></mat-hint>
+                <mat-error *ngIf="!data.spectemplatedomainname" class="custom-hint-or-error">Spec is required
+                    field.</mat-error>
+            </mat-form-field>
+        </div>
+
+        <div mat-dialog-actions class="dialog-actions">
+
+            <button *ngIf="action==='create'" mat-raised-button color="primary" class="action-button"
+                (click)="createAdapter()"
+                [disabled]="!nameFlag || !createAuth || !data.connectionname || !data.spectemplatedomainname">
+                Create
+            </button>
+
+            <button *ngIf="action==='edit'" mat-raised-button class="action-button" (click)="updateAdapter()">
+                Update
+            </button>
         </div>
     </div>
 </div>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
-	<changeSet author="Leap (generated)" id="1618555289443-1">
+	<changeSet author="Essedum (generated)" id="1618555289443-1">
 		<createTable tableName="tad_adapter_config">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints nullable="false" primaryKey="true" />
@@ -35,7 +35,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap (generated)" id="1618555289443-2">
+	<changeSet author="Essedum (generated)" id="1618555289443-2">
 		<createTable tableName="tad_adapter_purpose">
 			<column autoIncrement="true" name="purpose_id" type="INT">
 				<constraints nullable="false" primaryKey="true" />
@@ -48,7 +48,7 @@
 			</column>
 		</createTable>
 	</changeSet>
-	<changeSet author="jay.thanki (generated)" id="1622121390932-4">
+	<changeSet author="essedum (generated)" id="1622121390932-4">
 	<sql dbms="mssql">
 			SET IDENTITY_INSERT tad_adapter_purpose ON;
 		</sql>
@@ -61,7 +61,7 @@
 			SET IDENTITY_INSERT tad_adapter_purpose OFF;
 		</sql>
     </changeSet>
-    <changeSet author="Leap (generated)" id="1312v0-btf-2">
+    <changeSet author="Essedum (generated)" id="1312v0-btf-2">
 		<addColumn tableName="tad_adapter_config">
 			<column name="grant_type" type="VARCHAR(50)" />
 			<column name="scope" type="VARCHAR(50)" />
@@ -73,19 +73,19 @@
 			<column name="vault_key_type" type="VARCHAR(30)" />
 	</addColumn>
 	</changeSet>
-	<changeSet author="Leap" id="1312v0-btf-32">
+	<changeSet author="Essedum" id="1312v0-btf-32">
 		<sql dbms="mssql,mysql" splitStatements="true" stripComments="true"> 
 		DELETE FROM tad_adapter_config WHERE project_id NOT IN (SELECT id FROM usm_project)
 		</sql>
 	</changeSet> 
 	<!-- 2.0 changes -->
-	<changeSet author="Leap" id="2v0-tad-1">
+	<changeSet author="Essedum" id="2v0-tad-1">
 		<sql dbms="mysql,mssql" splitStatements="true" stripComments="true"> 
 		ALTER TABLE tad_adapter_config DROP COLUMN active_user_role
 		</sql>
 	</changeSet>
 <!-- 2.1 changes -->
-	<changeSet author="Leap" id="2v1-tad-1">
+	<changeSet author="Essedum" id="2v1-tad-1">
 		<sql dbms="mysql,mssql" splitStatements="true" stripComments="true"> 
 		ALTER TABLE tad_adapter_config DROP COLUMN auth_type;
 	    ALTER TABLE tad_adapter_config DROP COLUMN vault_key_type;

@@ -15,18 +15,39 @@ export class RoleService {
   /**
    * Create a new  Role.
    */
-
   create(role: Role): Observable<Role> {
     const copy = this.convert(role);
+    
+    // Get project and role from sessionStorage
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || ''
+    });
+    
+    console.log("Creating role:", copy);
+    console.log("Headers:", headers);
+    
     return this.https
-      .post("/api/roles", copy, { observe: "response" })
+      .post("/api/roles", copy, { observe: "response", headers: headers })
       .pipe(
         map((response) => {
+          console.log("Create role response:", response);
           return new Role(response.body);
         })
       )
       .pipe(
         catchError((err) => {
+          console.error("Error creating role:", err);
           return this.handleError(err);
         })
       );
@@ -36,15 +57,52 @@ export class RoleService {
    * Get a Role by id.
    */
   getRole(id: any): Observable<Role> {
+    console.log("Getting role with ID:", id);
+    
+    // Get a simpler set of headers for troubleshooting
+     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || ''
+    });
+
+    // Try a different URL format - some APIs use different patterns
+    const url = `/api/roles/${id}`;
+    console.log("Making request to:", url);
+ 
     return this.https
-      .get("/api/roles/" + id, { observe: "response" })
+      .get(url, { 
+        observe: "response", 
+        headers: headers,
+        // Add withCredentials to ensure cookies are sent
+        withCredentials: true
+      })
       .pipe(
         map((response) => {
+          console.log("Role response:", response);
           return new Role(response.body);
         })
       )
       .pipe(
         catchError((err) => {
+          console.error("Error getting role:", err);
+          // Try to get more specific error details
+          if (err.error instanceof ErrorEvent) {
+            // Client-side error
+            console.error('Client-side error:', err.error.message);
+          } else {
+            // Server-side error
+            console.error(`Server returned code ${err.status}, error:`, err.error);
+          }
           return this.handleError(err);
         })
       );
@@ -57,21 +115,43 @@ export class RoleService {
     let body;
     try {
       body = JSON.stringify(role);
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
+
+    // Get project and role from sessionStorage
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || ''
+    });
+    
+    console.log("Updating role:", role);
+    console.log("Headers:", headers);
 
     return this.https
       .put("/api/roles", body, {
         observe: "response",
+        headers: headers
       })
       .pipe(
         map((response) => {
+          console.log("Update role response:", response);
           return new Role(response.body);
         })
       )
       .pipe(
         catchError((err) => {
+          console.error("Error updating role:", err);
           return this.handleError(err);
         })
       );
@@ -81,7 +161,7 @@ export class RoleService {
    *Download Roles.
    */
   download(id: any): Observable<any> {
-    
+
     return this.https.get("/api/getUserRolesInExcel/" + id, { responseType: "blob" as "json" });
   }
 
@@ -89,33 +169,49 @@ export class RoleService {
    * Load a page (for paginated datatable) of Role using the passed
    * role as an example for the search by example facility.
    */
-  findAll(role: Role, event: any): Observable<PageResponse<Role>> {    let req = new PageRequestByExample(role, event);
+  findAll(role: Role, event: any): Observable<PageResponse<Role>> {
+    let req = new PageRequestByExample(role, event);
     let body;
     let headerValue;
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
 
-    // Get base headers from createRequestHeaders, then add the example header
-    let headers = this.createRequestHeaders();
-    headers = headers.append('example', headerValue);
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || '',
+      'example': headerValue 
+    });
+
+ 
+
     return this.https
       .get("/api/roles/page", {
-        observe: "response", headers: headers
+        observe: "response", 
+        headers: headers
       })
       .pipe(
         map((response) => {
-
+          console.log('API Response:', response);
           let pr: any = response.body;
-
           return new PageResponse<Role>(pr.totalPages, pr.totalElements, Role.toArray(pr.content));
         })
       )
       .pipe(
         catchError((err) => {
+          console.error('API Error:', err);
           return this.handleError(err);
         })
       );
@@ -129,7 +225,7 @@ export class RoleService {
     let body;
     try {
       body = JSON.stringify({ query: query, maxResults: 10 });
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -153,8 +249,35 @@ export class RoleService {
    * Delete an Role by id.
    */
   delete(id: any) {
-    return this.https.delete("/api/roles/" + id, { observe: "response" }).pipe(
+    // Get project and role from sessionStorage
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || ''
+    });
+    
+    console.log("Deleting role with ID:", id);
+    console.log("Headers:", headers);
+    
+    return this.https.delete("/api/roles/" + id, { 
+      observe: "response",
+      headers: headers 
+    }).pipe(
+      map(response => {
+        console.log("Delete role response:", response);
+        return response;
+      }),
       catchError((err) => {
+        console.error("Error deleting role:", err);
         return this.handleError(err);
       })
     );
@@ -162,7 +285,11 @@ export class RoleService {
 
   // sample method from angular doc
   private handleError(error: any) {
-    // TODO: seems we cannot use messageService from here...
+    // More detailed error logging
+    console.error('Error status:', error.status);
+    console.error('Error status text:', error.statusText);
+    console.error('Error details:', error);
+    
     let errMsg = error.error;
     error.status ? `Status: ${error.status} - Text: ${error.statusText}` : "Server error";
     console.error(errMsg); // log to console instead
@@ -177,12 +304,12 @@ export class RoleService {
     return copy;
   }
 
-  getAllRolesByProcessId(processId,filterType,roleId): Observable<Role[]>{
+  getAllRolesByProcessId(processId, filterType, roleId): Observable<Role[]> {
 
     return this.https
       .get("/api/rolesByProcessId/" + processId + '/' + filterType + '/' + roleId, { observe: "response" })
       .pipe(
-        map((response) => {  
+        map((response) => {
           let a: any = response.body;
           return Role.toArray(a);
         })
@@ -195,12 +322,12 @@ export class RoleService {
 
   }
 
-  getAllRolesOfProcess(process: string): Observable<Role[]>{
+  getAllRolesOfProcess(process: string): Observable<Role[]> {
 
     return this.https
       .get("/api/rolesByProcess/" + process, { observe: "response" })
       .pipe(
-        map((response) => {  
+        map((response) => {
           let a: any = response.body;
           return Role.toArray(a);
         })
@@ -213,12 +340,12 @@ export class RoleService {
 
   }
 
-  getAllRoleByNameAndProject(roleName: string): Observable<Role[]>{
+  getAllRoleByNameAndProject(roleName: string): Observable<Role[]> {
 
     return this.https
-      .get("/api/rolesByNameAndProjectId/" + roleName +"/"+JSON.parse(sessionStorage.getItem("project"))?.id, { observe: "response" })
+      .get("/api/rolesByNameAndProjectId/" + roleName + "/" + JSON.parse(sessionStorage.getItem("project"))?.id, { observe: "response" })
       .pipe(
-        map((response) => {  
+        map((response) => {
           let a: any = response.body;
           return Role.toArray(a);
         })
@@ -231,12 +358,12 @@ export class RoleService {
 
   }
 
-  getRoleByName(roleName: string): Observable<Role[]>{
+  getRoleByName(roleName: string): Observable<Role[]> {
 
     return this.https
       .get("/api/roleByName/" + roleName, { observe: "response" })
       .pipe(
-        map((response) => {  
+        map((response) => {
           let a: any = response.body;
           return Role.toArray(a);
         })

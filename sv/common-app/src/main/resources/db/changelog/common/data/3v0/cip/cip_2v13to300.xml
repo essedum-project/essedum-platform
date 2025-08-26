@@ -3,13 +3,13 @@
 	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
     <!--  3v0 changes -->
-	<changeSet author="Leap" id="3v0-cip-1">
+	<changeSet author="Essedum" id="3v0-cip-1">
 		<addColumn tableName="mldataset">
 			<column name="tags" type="varchar(255)" />
 			<column name="interfacetype" type="varchar(255)" />
 		</addColumn>
 	</changeSet>
-	<changeSet author="Leap" id="3v0-cip-2">
+	<changeSet author="Essedum" id="3v0-cip-2">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -26,28 +26,28 @@
 			</column>
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap" id="3v0-cip-3">
+	<changeSet author="Essedum" id="3v0-cip-3">
 		<addColumn tableName="mldatasource">
 			<column name="interfacetype" type="varchar(255)" />
 		</addColumn>
 	</changeSet>
-	<changeSet author="Leap" id="3v0-cip-4">
+	<changeSet author="Essedum" id="3v0-cip-4">
 		<addColumn tableName="mlplugin">
 			<column name="org" type="varchar(255)" />
 		</addColumn>
 	</changeSet>
-	<changeSet author="Leap" id="3v0-cip-5">
+	<changeSet author="Essedum" id="3v0-cip-5">
 		<addColumn tableName="mlpipeline">
 			<column name="tags" type="varchar(255)" />
 			<column name="interfacetype" type="varchar(255)" />
 		</addColumn>
 	</changeSet>
-	<changeSet author="Leap" id="3v0-cip-6">
+	<changeSet author="Essedum" id="3v0-cip-6">
 		<addColumn tableName="mlmashups">
 			<column name="interfacetype" type="varchar(255)" />
 		</addColumn>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="3v0-cip-7">
+	<changeSet author="Essedum (generated)" id="3v0-cip-7">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -71,20 +71,20 @@
 			<column name="organization" type="VARCHAR(255)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap" id="3v0-cip-8">
+	<changeSet author="Essedum" id="3v0-cip-8">
 		<addColumn tableName="mlmodels">
 			<column name="tags" type="varchar(255)" />
 		</addColumn>
 	</changeSet>
-	<changeSet author="Leap" id="3v0-cip-9">
+	<changeSet author="Essedum" id="3v0-cip-9">
 		<renameColumn columnDataType="TEXT" tableName="mlmodels" oldColumnName="explanation" newColumnName="description"/>
 	</changeSet>
-	<changeSet author="Leap" id="3v0-cip-10">
+	<changeSet author="Essedum" id="3v0-cip-10">
 		<addColumn tableName="mlpipeline">
 			<column name="pipeline_metadata" type="TEXT" />
 		</addColumn>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="3v0-cip-11">
+	<changeSet author="Essedum (generated)" id="3v0-cip-11">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -101,12 +101,12 @@
 			<column name="pluginname" type="VARCHAR(255)" />
 		</createTable>
 	</changeSet>
-	<changeSet id="3v0-cip-12" author="Leap" >
+	<changeSet id="3v0-cip-12" author="Essedum" >
 		<sql dbms="mysql" splitStatements="true" stripComments="true">
 	       ALTER TABLE mldatasource MODIFY extras LONGTEXT; 
 		</sql>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="3v0-cip-13">
+	<changeSet author="Essedum (generated)" id="3v0-cip-13">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -129,23 +129,23 @@
 			<column name="type" type="VARCHAR(255)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap" id="3v0-cip-14">
+	<changeSet author="Essedum" id="3v0-cip-14">
 		<addColumn tableName="mleventjobmapping">
 			<column name="interfacetype" type="varchar(255)" />
 		</addColumn>
 	</changeSet>
 
-	<changeSet author="Leap" id="3v0-cip-15">
+	<changeSet author="Essedum" id="3v0-cip-15">
 		<addColumn tableName="mlendpoints">
 			<column name="tryoutlink" type="varchar(255)" />
 		</addColumn>
 	</changeSet>
-	<changeSet author="Leap" id="3v0-cip-16">
+	<changeSet author="Essedum" id="3v0-cip-16">
 		<addColumn tableName="mlplugin">
 			<column name="editortype" type="varchar(255)" />
 		</addColumn>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="3v0-cip-17">
+	<changeSet author="Essedum (generated)" id="3v0-cip-17">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -185,48 +185,37 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap (generated)" id="3v0-cip-18" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-18" >
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
 				<tableExists tableName="mlfederatedmodels" />
 			</not>
 		</preConditions>
-		<createTable tableName="mlfederatedmodels">
-			<column autoIncrement="true" name="id" type="INT">
-				<constraints primaryKey="true" />
-			</column>
-			<column name="fed_id" type="VARCHAR(255)" />
-			<column name="adapter_id" type="VARCHAR(255)" />
-			<column name="app_name" type="VARCHAR(255)" />
-			<column name="fed_name" type="VARCHAR(255)" />
-			<column name="fed_org" type="VARCHAR(255)" />
-			<column name="app_org" type="VARCHAR(255)" />
-			<column name="status" type="VARCHAR(255)" />
-			<column name="adapter_alias" type="VARCHAR(255)" />
-			<column name="created_by" type="VARCHAR(255)" />
-			<column name="created_on" type="datetime(6)" />
-			<column name="is_deleted" type="boolean" />
-			<column name="app_modified_by" type="VARCHAR(255)" />
-			<column name="fed_modified_by" type="VARCHAR(255)" />
-			<column name="app_modified_date" type="VARCHAR(255)" />
-			<column name="fed_modified_date" type="datetime(6)" />
-			<column name="sync_date" type="datetime(6)" />
-			<column name="model_type" type="VARCHAR(255)" />
-			<column name="model_likes" type="INT" />
-			<column name="model_metadata" type="TEXT" />
-			<column name="raw_payload" type="TEXT" />
-			<column name="artifacts" type="TEXT" />
-			<column name="container" type="TEXT" />
-			<column name="app_description" type="TEXT" />
-			<column name="fed_description" type="TEXT" />
-			<column name="version" type="VARCHAR(255)" />
-			<column name="app_status" type="VARCHAR(255)" />
-			<column name="model_deployment" type="VARCHAR(255)" />
-		</createTable>
+		
+    	<createTable tableName="mlfederatedmodels">
+	        <column name="id" type="INT" autoIncrement="true">
+	            <constraints primaryKey="true" nullable="false"/>
+	        </column>
+	        <column name="model_name" type="VARCHAR(255)"/>
+	        <column name="description" type="VARCHAR(255)"/>
+	        <column name="version" type="VARCHAR(255)"/>
+	        <column name="data_source" type="VARCHAR(255)"/>
+	        <column name="attributes" type="VARCHAR(255)"/>
+	        <column name="organisation" type="VARCHAR(255)"/>
+	        <column name="model_type" type="VARCHAR(255)"/>
+	        <column name="created_on" type="timestamp">
+	            <constraints nullable="false"/>
+	        </column>
+	        <column name="created_by" type="VARCHAR(255)"/>
+	        <column name="app_modified_date" type="timestamp"/>
+	        <column name="app_modified_by" type="VARCHAR(255)"/>
+    	</createTable>
+
+
 	</changeSet>
 
-	<changeSet author="Leap (generated)" id="3v0-cip-19" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-19" >
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -244,7 +233,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap (generated)" id="3v0-cip-20" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-20" >
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -267,7 +256,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap (generated)" id="3v0-cip-21" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-21" >
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -294,7 +283,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap (generated)" id="3v0-cip-22" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-22" >
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -320,7 +309,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap" id="3v0-cip-23" >
+	<changeSet author="Essedum" id="3v0-cip-23" >
 		<addColumn tableName="mldataset">
 			<column name="adaptername" type="VARCHAR(255)" />
 			<column name="isadapteractive" type="VARCHAR(20)" />
@@ -329,19 +318,19 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet author="Leap" id="3v0-cip-24" >
+	<changeSet author="Essedum" id="3v0-cip-24" >
 		<addColumn tableName="mlpipeline">
 			<column name="is_template" defaultValueBoolean="false" type="boolean" />
 		</addColumn>
 	</changeSet>
 
-	<changeSet author="Leap" id="3v0-cip-25" >
+	<changeSet author="Essedum" id="3v0-cip-25" >
 		<addColumn tableName="mlchains">
 			<column name="flowjson" type="text" />
 		</addColumn>
 	</changeSet>
 
-	<changeSet author="Leap" id="3v0-cip-26" >
+	<changeSet author="Essedum" id="3v0-cip-26" >
 		<preConditions onFail="MARK_RAN">
 			<tableExists tableName="mlapps"/>
 		</preConditions>
@@ -349,7 +338,7 @@
 	</changeSet>
 
 
-	<changeSet author="Leap" id="3v0-cip-27" >
+	<changeSet author="Essedum" id="3v0-cip-27" >
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -369,7 +358,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap" id="3v0-cip-28" >
+	<changeSet author="Essedum" id="3v0-cip-28" >
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -389,7 +378,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap" id="3v0-cip-29" >
+	<changeSet author="Essedum" id="3v0-cip-29" >
 		<addColumn tableName="mldatasource">
 			<column name="fordataset" defaultValue="0" type="TINYINT(1)" />
 			<column name="foradapter" defaultValue="0" type="TINYINT(1)" />
@@ -398,38 +387,38 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet author="Leap" id="3v0-cip-30" >
+	<changeSet author="Essedum" id="3v0-cip-30" >
 		<addColumn tableName="mladapters">
 			<column name="executiontype" defaultValue="REST" type="VARCHAR(255)" />
 		</addColumn>
 	</changeSet>
 
-	<changeSet author="Leap" id="3v0-cip-31" >
+	<changeSet author="Essedum" id="3v0-cip-31" >
 		<addColumn tableName="mlintstance">
 			<column name="executiontype" defaultValue="REST" type="VARCHAR(255)" />
 		</addColumn>
 	</changeSet>
 
-	<changeSet author="Leap" id="3v0-cip-32" >
+	<changeSet author="Essedum" id="3v0-cip-32" >
 		<addColumn tableName="mlapps">
 			<column name="file" type="VARCHAR(255)" />
 			<column name="job_name" type="VARCHAR(255)" />
 		</addColumn>
 	</changeSet>
 
-	<changeSet id="3v0-cip-postgresql-0" author="Leap" >
+	<changeSet id="3v0-cip-postgresql-0" author="Essedum" >
 		<sql dbms="postgresql" splitStatements="true" stripComments="true">
 	        ALTER TABLE core.mlpipelinenativescriptentity ALTER COLUMN filescript TYPE bytea USING filescript::TEXT::BYTEA; 
 		</sql>
 	</changeSet>
 
-	<changeSet id="3v0-cip-postgresql-1" author="Leap" >
+	<changeSet id="3v0-cip-postgresql-1" author="Essedum" >
 		<sql dbms="postgresql" splitStatements="true" stripComments="true">
 	        ALTER TABLE core.mlpipeline ALTER COLUMN deleted TYPE boolean USING deleted::int::boolean; 
 		</sql>
 	</changeSet>
 
-	<changeSet author="Leap (generated)" id="3v0-cip-33" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-33" >
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -447,14 +436,14 @@
 			<column name="organization" type="VARCHAR(255)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap" id="3v0-cip-34" >
+	<changeSet author="Essedum" id="3v0-cip-34" >
 		<addColumn tableName="mladapters">
 			<column name="isChain" type="BOOLEAN" />
 			<column name="chainName" type="VARCHAR(255)" />
 		</addColumn>
 	</changeSet>
 
-	<changeSet author="Leap" id="3v0-cip-35" >
+	<changeSet author="Essedum" id="3v0-cip-35" >
 		<addColumn tableName="mlintstance">
 			<column name="jobid" type="VARCHAR(255)" />
 			<column name="status" type="VARCHAR(255)" />
@@ -462,7 +451,7 @@
 		</addColumn>
 	</changeSet>
 
-	<changeSet author="Leap (generated)" id="3v0-cip-36" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-36" >
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -499,7 +488,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap (generated)" id="3v0-cip-37" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-37" >
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -518,11 +507,11 @@
 		</createTable>
 	</changeSet>
 
-	<!--changeSet author="Leap (generated)" id="3v0-cip-38" >
+	<!--changeSet author="Essedum (generated)" id="3v0-cip-38" >
 		<addUniqueConstraint columnNames="key_, project_id" constraintName="UK2g9h4pvhmhcxts8m2rxu566l83vo" tableName="usm_secrets" />
 	</changeSet-->
 
-	<changeSet author="Leap (generated)" id="3v0-cip-39" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-39" >
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -539,7 +528,7 @@
 	</changeSet>
 
 
-	<changeSet author="Leap (generated)" id="3v0-cip-40" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-40" >
 		<validCheckSum>ANY</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -555,7 +544,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap (generated)" id="3v0-cip-41" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-41" >
 		<validCheckSum>ANY</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -574,7 +563,7 @@
 	</changeSet>
 
 
-	<changeSet author="Leap (generated)" id="3v0-cip-42" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-42" >
 		<validCheckSum>ANY</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -596,7 +585,7 @@
 	</changeSet>
 
 
-	<changeSet author="Leap (generated)" id="3v0-cip-43" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-43" >
 		<validCheckSum>ANY</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -619,7 +608,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap (generated)" id="3v0-cip-44" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-44" >
 		<validCheckSum>ANY</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -651,7 +640,7 @@
 	</changeSet>
 
 
-	<changeSet author="Leap (generated)" id="3v0-cip-45" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-45" >
 		<validCheckSum>ANY</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -670,7 +659,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap (generated)" id="3v0-cip-46" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-46" >
 		<validCheckSum>ANY</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -689,7 +678,7 @@
 	</changeSet>
 
 
-	<changeSet author="Leap (generated)" id="3v0-cip-47" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-47" >
 		<validCheckSum>ANY</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -710,7 +699,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap (generated)" id="3v0-cip-48" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-48" >
 		<validCheckSum>ANY</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -729,7 +718,7 @@
 	</changeSet>
 
 
-	<changeSet author="Leap (generated)" id="3v0-cip-49" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-49" >
 		<validCheckSum>ANY</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -750,7 +739,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap (generated)" id="3v0-cip-50" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-50" >
 		<validCheckSum>ANY</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -766,7 +755,7 @@
 			<column name="last_updated_ts" type="datetime(6)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="3v0-cip-51" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-51" >
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -782,7 +771,7 @@
 			<column name="adapterinstance" type="VARCHAR(255)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="3v0-cip-52" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-52" >
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -804,7 +793,7 @@
 			<column name="duration" type="VARCHAR(255)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="3v0-cip-53" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-53" >
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -822,7 +811,7 @@
 			<column name="expires_on" type="datetime(6)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="3v0-cip-54" >
+	<changeSet author="Essedum (generated)" id="3v0-cip-54" >
 		<addColumn tableName="mlapps">
 			<column name="video_file" type="VARCHAR(255)" />
 		</addColumn>

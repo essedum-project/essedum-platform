@@ -1945,6 +1945,6 @@ INSERT INTO usm_permission_api (api,permission_id,type,is_whitelisted,descriptio
 INSERT INTO usm_permission_api (api,permission_id,type,is_whitelisted,description) SELECT '/api/dash-constants/page',28,'ALL',1,'For all Dashboard-Constant Page';
 INSERT INTO usm_permission_api (api,permission_id,type,is_whitelisted,description) SELECT '/api/get-dash-constants?projectId=1',28,'ALL',1,'For all Project';
 INSERT INTO usm_permission_api (api,permission_id,type,is_whitelisted,description) SELECT '/api/get-dash-constants?projectId=2',28,'ALL',1,'For all Project';
-INSERT INTO usm_permission_api (api,permission_id,type,is_whitelisted,description) SELECT '/api/leap/logout',28,'ALL',1,'to logout from leap';
-INSERT INTO usm_permission_api (api,permission_id,type,is_whitelisted,description) SELECT '/api/leap/authorize',28,'ALL',1,'For all Project';
+INSERT INTO usm_permission_api (api,permission_id,type,is_whitelisted,description) SELECT '/api/essedum/logout',28,'ALL',1,'to logout from essedum';
+INSERT INTO usm_permission_api (api,permission_id,type,is_whitelisted,description) SELECT '/api/essedum/authorize',28,'ALL',1,'For all Project';
 INSERT INTO usm_permission_api (api,permission_id,type,is_whitelisted,description) SELECT '/api/registerUser',28,'POST',1,'This is the initial step before user login. So, frontend unable to send project id in request headers';

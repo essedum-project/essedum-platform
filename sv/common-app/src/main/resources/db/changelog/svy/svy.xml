@@ -1,7 +1,7 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
  
-    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-22">
+    <changeSet author="essedum (generated)" id="2v0-svy-22">
         <createTable tableName="svy_answer">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -14,7 +14,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-23">
+    <changeSet author="essedum (generated)" id="2v0-svy-23">
         <createTable tableName="svy_answer_option">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -30,7 +30,7 @@
             </column>
         </createTable>
     </changeSet>
-    <!-- <changeSet author="sai.ragavendran (generated)" id="2v0-svy-24">
+    <!-- <changeSet author="essedum (generated)" id="2v0-svy-24">
         <createTable tableName="svy_box_plot">
             <column name="company" type="VARCHAR(20)"/>
             <column name="department" type="VARCHAR(20)"/>
@@ -39,7 +39,7 @@
             <column name="Resilience" type="DOUBLE"/>
         </createTable>
     </changeSet> -->
-    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-25">
+    <changeSet author="essedum (generated)" id="2v0-svy-25">
         <createTable tableName="svy_client_details">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -64,7 +64,7 @@
             <column name="ip" type="VARCHAR(50)"/>
         </createTable>
     </changeSet>
-    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-26">
+    <changeSet author="essedum (generated)" id="2v0-svy-26">
         <createTable tableName="svy_client_score">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -81,7 +81,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-27">
+    <changeSet author="essedum (generated)" id="2v0-svy-27">
         <createTable tableName="svy_client_score_per_question">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -103,7 +103,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-28">
+    <changeSet author="essedum (generated)" id="2v0-svy-28">
         <createTable tableName="svy_country">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -116,7 +116,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-29">
+    <changeSet author="essedum (generated)" id="2v0-svy-29">
         <createTable tableName="svy_dimension">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -131,7 +131,7 @@
             <column name="dimension_details" type="TEXT"/>
         </createTable>
     </changeSet>
-    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-30">
+    <changeSet author="essedum (generated)" id="2v0-svy-30">
         <createTable tableName="svy_industry">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -145,14 +145,14 @@
             <column name="low_quartile" type="DECIMAL(10, 2)"/>
         </createTable>
     </changeSet>
-    <!-- <changeSet author="sai.ragavendran (generated)" id="2v0-svy-31">
+    <!-- <changeSet author="essedum (generated)" id="2v0-svy-31">
         <createTable tableName="svy_industry_maturity_percentage">
             <column name="industry" type="VARCHAR(100)"/>
             <column name="maturity" type="VARCHAR(100)"/>
             <column name="percentage" type="INT"/>
         </createTable>
     </changeSet> -->
-    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-32">
+    <changeSet author="essedum (generated)" id="2v0-svy-32">
         <createTable tableName="svy_lk_question_type">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -163,7 +163,7 @@
             <column name="project_id" type="INT"/>
         </createTable>
     </changeSet>
-    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-33">
+    <changeSet author="essedum (generated)" id="2v0-svy-33">
         <createTable tableName="svy_maturity_level">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -175,14 +175,14 @@
             </column>
         </createTable>
     </changeSet>
-    <!-- <changeSet author="sai.ragavendran (generated)" id="2v0-svy-34">
+    <!-- <changeSet author="essedum (generated)" id="2v0-svy-34">
         <createTable tableName="svy_pie">
             <column name="name" type="VARCHAR(20)"/>
             <column name="value" type="INT"/>
             <column name="type" type="VARCHAR(20)"/>
         </createTable>
     </changeSet> -->
-    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-35">
+    <changeSet author="essedum (generated)" id="2v0-svy-35">
         <createTable tableName="svy_post_your_query">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -196,7 +196,7 @@
             <column name="project_id" type="INT"/>
         </createTable>
     </changeSet>
-    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-36">
+    <changeSet author="essedum (generated)" id="2v0-svy-36">
         <createTable tableName="svy_question">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -222,7 +222,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-37">
+    <changeSet author="essedum (generated)" id="2v0-svy-37">
         <createTable tableName="svy_question_option">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -235,7 +235,7 @@
             <column name="score" type="DECIMAL(10, 2)"/>
         </createTable>
     </changeSet>
-    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-38">
+    <changeSet author="essedum (generated)" id="2v0-svy-38">
         <createTable tableName="svy_questionnaire">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -246,7 +246,7 @@
             <column name="project_id" type="INT"/>
         </createTable>
     </changeSet>
-    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-39">
+    <changeSet author="essedum (generated)" id="2v0-svy-39">
         <createTable tableName="svy_questionnaire_instance">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -263,7 +263,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="sai.ragavendran (generated)" id="2v0-svy-40">
+    <changeSet author="essedum (generated)" id="2v0-svy-40">
         <createTable tableName="svy_region">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints nullable="false" primaryKey="true"/>

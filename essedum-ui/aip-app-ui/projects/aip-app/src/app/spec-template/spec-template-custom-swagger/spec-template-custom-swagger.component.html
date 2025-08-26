@@ -104,7 +104,7 @@
                                 <div *ngIf="spec.parameters">
                                     <div *ngFor=" let param of spec.parameters" style="margin-top: 1%;">
                                         <span
-                                            style="font-weight:700;margin-left: 1.7%;word-wrap: break-word;color:#3b4151;font-family: var(--font-type) !important;font-size: 16px;">{{param.name}}</span>
+                                            style="font-weight:700;margin-left: 1.7%;word-wrap: break-word;color:#3b4151;font-family: 'Roboto', 'Segoe UI', sans-serif !important;font-size: 16px;">{{param.name}}</span>
 
                                         <span style="margin-left: 16%;">{{param.description}}</span><br>
 
@@ -120,7 +120,7 @@
                                 </div>
                                 <div *ngIf="spec.requestBody && spec.requestType=='POST'">
                                     <span
-                                        style="font-weight:700;margin-left: 1.7%;word-wrap: break-word;color:#3b4151;font-family: var(--font-type) !important;font-size: 16px;">body</span>
+                                        style="font-weight:700;margin-left: 1.7%;word-wrap: break-word;color:#3b4151;font-family: 'Roboto', 'Segoe UI', sans-serif !important;font-size: 16px;">body</span>
                                     <span style="margin-left: 21%;">{{spec.requestBody.description}}</span><br>
                                     <textarea [(ngModel)]="spec.requestBody['value']" disabled
                                         *ngIf="spec['button']=='Try it out'"
@@ -178,7 +178,7 @@
                                     <mat-expansion-panel>
                                         <mat-expansion-panel-header>
                                             <mat-panel-title
-                                                style="font-size: 16px; font-family:sans-serif;font-weight:600;font-color:#505050;border-radius: 4px;">
+                                                style="font-size: 16px; font-family: 'Roboto', 'Segoe UI', sans-serif !important;font-weight:600;font-color:#505050;border-radius: 4px;">
                                                 <h5>input</h5>
                                             </mat-panel-title>
                                         </mat-expansion-panel-header>
@@ -189,7 +189,7 @@
                                     <mat-expansion-panel>
                                         <mat-expansion-panel-header>
                                             <mat-panel-title
-                                                style="font-size: 16px; font-family:sans-serif;font-weight:600;font-color:#505050;border-radius: 4px;">
+                                                style="font-size: 16px; font-family: 'Roboto', 'Segoe UI', sans-serif !important;font-weight:600;font-color:#505050;border-radius: 4px;">
                                                 <h5>output</h5>
                                             </mat-panel-title>
                                         </mat-expansion-panel-header>

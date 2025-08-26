@@ -1,0 +1,82 @@
+config: 
+  quartz-db-url: ${config.datasourceurl}?currentSchema=quartz
+  icip-db-url: ${config.datasourceurl}?currentSchema=core
+spring:
+  quartz:
+        job-store-type: jdbc
+        enabled: true
+        properties: 
+            org.quartz.threadPool.threadCount: 5
+            org.quartz.jobStore.class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+            org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            org.quartz.jobStore.isClustered: true
+            org.quartz.jobStore.clusterCheckinInterval: 5000
+            org.quartz.scheduler.instanceId: AUTO
+#            org.quartz.jobStore.selectWithLockSQL: SELECT * FROM {0}LOCKS UPDLOCK WHERE LOCK_NAME = ?  # for MSSQL   
+icip:
+  datasource: 
+    driverClassName: ${spring.datasource.driverClassName}
+    jdbcUrl: ${config.icip-db-url}
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    maximum-pool-size: 300
+    minimumIdle: 3
+    idleTimeout: 60000
+    platform: mysql
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      auto-commit: false
+  pathPrefix: api/aip
+  pythonpath: /usr/local/bin/python3
+  sparkhome: /venv/lib/python3.7/site-packages/pyspark
+  
+
+quartz:
+    liquibase:
+        enabled: true
+        change-log: "classpath:db/changelog/aip/quartz.xml"
+    datasource:
+        type: com.zaxxer.hikari.HikariDataSource
+        driverClassName: ${config.driverClassName}
+        jdbcUrl: ${config.datasourceurl}?currentSchema=quartz
+        url: ${config.datasourceurl}?currentSchema=quartz1
+        username: ${config.leap-db-username}
+        password: ${config.leap-db-password}
+        maximum-pool-size: 8
+        minimumIdle: 3
+        idleTimeout: 60000
+    jpa:    
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+        generate-ddl: false
+        database: POSTGRESQL            
+        show-sql: false
+        properties:
+          hibernate:
+            enable_lazy_load_no_trans: true
+            id.new_generator_mappings: true
+            cache:
+                use_second_level_cache: false
+                use_query_cache: false
+            region.factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory
+            generate_statistics: true
+            jdbc.batch_size: 500
+            order_inserts: true
+            order_updates: true
+            jdbc:
+                batch_versioned_data: true
+                time_zone: UTC
+            ddl-auto: none
+            physical_naming_strategy : com.infosys.icets.icip.icipwebeditor.job.config.UpperCaseStrategy
+            implicit_naming_strategy : org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy      
+
+mailserver:
+  accesstoken: bg9126c2-c913-iof6-9r5x-90ecf001h00a
+
+fileserver:
+  local:
+    accesstoken: aec127c2-c984-33f6-9a3a-355xd1dof097
+  minio:
+    secret-key: qmzm4b7n85s5r2p54xkz6gbx79ljsmw4fmvqnf2h28s4g4sggltbns
+    access-key: admin
+  azure:
+    connection:

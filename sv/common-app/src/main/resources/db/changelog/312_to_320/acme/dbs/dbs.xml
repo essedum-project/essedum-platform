@@ -3,7 +3,7 @@
 
 
 
-<changeSet author="Leap" id="3v1-cip-2-6-25-1-0101">
+<changeSet author="Essedum" id="3v1-cip-2-6-25-1-0101">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 
 UPDATE mldataset SET attributes = '{"filter":"","mode":"query","Query":"SELECT count(*) AS ''COUNT'', probe_run_app_id,run_description,SUT,run_start_time,run_end_time,run_result FROM sre_location INNER JOIN sre_probe_run_app ON sre_probe_run_app.location_id=sre_location.location_id INNER JOIN ccl_app ON  sre_probe_run_app.application_id=ccl_app.application_id INNER JOIN ccl_app_grp ON ccl_app_grp.application_grp_id=ccl_app.application_grp_id WHERE location_name IN (location_name) AND application_name IN (application_name) AND (run_date BETWEEN  ''2019-09-01'' AND ''2023-12-30'') and run_result IN (''0'',''1'') AND application_grp_name IN (application_grp_name) group by probe_run_app_id,run_description,SUT,run_start_time,run_end_time,run_result;","Cacheable":"false","isStreaming":"false","defaultValues":"","writeMode":"append","params":"" ,"tableName":"","uniqueIdentifier":""}' 
@@ -13,7 +13,7 @@ UPDATE mldataset SET attributes = '{"filter":"","mode":"query","Query":"SELECT c
 	</changeSet>
 
 
-<changeSet author="Leap" id="3v1-cip-2-6-25-1-0102">
+<changeSet author="Essedum" id="3v1-cip-2-6-25-1-0102">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 
 UPDATE dbs_widget_configuration SET count_column='COUNT' WHERE widget_name='Probe Runs - Total Count';
@@ -23,7 +23,7 @@ UPDATE dbs_widget_configuration SET count_column='COUNT' WHERE widget_name='Prob
 	</changeSet>
 
 
-	<changeSet author="Leap" id="3v1-cip-2-6-25-1-0103-01">
+	<changeSet author="Essedum" id="3v1-cip-2-6-25-1-0103-01">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 
 UPDATE dbs_widget_configuration SET count_column='column1' WHERE widget_name='Total Issues' and dashboard=41945;
@@ -33,7 +33,7 @@ UPDATE dbs_widget_configuration SET count_column='column1' WHERE widget_name='To
 	</changeSet>
 
 
-<changeSet author="Leap" id="3v1-cip-2-6-25-1-0104-02">
+<changeSet author="Essedum" id="3v1-cip-2-6-25-1-0104-02">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 
 
@@ -43,14 +43,14 @@ UPDATE dbs_widget_configuration SET y_param='count' WHERE widget_name='Issue Cou
     </sql> 
 	</changeSet>
 
-	<changeSet author="Leap" id="3v1-cip-2-6-25-01-0105-03">
+	<changeSet author="Essedum" id="3v1-cip-2-6-25-01-0105-03">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 
 UPDATE dbs_widget_configuration SET count_column='COUNT' WHERE widget_name='Total Incidents' and dashboard=42306;
 
  </sql> 
 	</changeSet>	
-	<changeSet author="Leap" id="3v1-dbs-25-02-11-01">
+	<changeSet author="Essedum" id="3v1-dbs-25-02-11-01">
 		 <sql dbms="mssql" splitStatements="true" stripComments="true">
 	   SET IDENTITY_INSERT dbs_dashboard_configuration ON;
 		</sql>
@@ -61,7 +61,7 @@ UPDATE dbs_widget_configuration SET count_column='COUNT' WHERE widget_name='Tota
 	   SET IDENTITY_INSERT dbs_dashboard_configuration OFF;
 		</sql>
 		</changeSet>
-	<changeSet dbms="mysql,postgresql,mssql" author="Leap (generated)" id="3v1-dbs-25-02-14-01">
+	<changeSet dbms="mysql,postgresql,mssql" author="Essedum (generated)" id="3v1-dbs-25-02-14-01">
 			<sql dbms="mssql" splitStatements="true" stripComments="true">
 		SET IDENTITY_INSERT dbs_widget_configuration ON;
 		</sql>
@@ -122,7 +122,7 @@ UPDATE dbs_widget_configuration SET count_column='COUNT' WHERE widget_name='Tota
 	   SET IDENTITY_INSERT dbs_widget_configuration OFF;
 		</sql>
     </changeSet>
-	<changeSet author="Leap" id="3v1-dbs-25-02-11-04">
+	<changeSet author="Essedum" id="3v1-dbs-25-02-11-04">
 	 <sql dbms="mssql" splitStatements="true" stripComments="true">
 	   SET IDENTITY_INSERT dbs_sequence_widget ON;
 		</sql>
@@ -161,7 +161,7 @@ insert into dbs_sequence_widget (id, project_id, color_type, colour, dataset_nam
 	   SET IDENTITY_INSERT dbs_sequence_widget OFF;
 		</sql>
 		</changeSet>
-    <changeSet author="sumanth.kota" id="CAS-2025-02-26-3">
+    <changeSet author="essedum" id="CAS-2025-02-26-3">
         <sql dbms="mssql" splitStatements="true" stripComments="true">
             SET IDENTITY_INSERT dbs_dashboard_configuration ON;
         </sql>
@@ -174,7 +174,7 @@ insert into dbs_sequence_widget (id, project_id, color_type, colour, dataset_nam
 		</sql>
 	</changeSet>
 
-    <changeSet author="sumanth.kota" id="CAS-2025-02-26-4">
+    <changeSet author="essedum" id="CAS-2025-02-26-4">
         <sql dbms="mssql" splitStatements="true" stripComments="true">
             SET IDENTITY_INSERT dbs_widget_configuration ON;
         </sql>
@@ -186,7 +186,7 @@ insert into dbs_sequence_widget (id, project_id, color_type, colour, dataset_nam
 	        SET IDENTITY_INSERT dbs_widget_configuration OFF;
 		</sql>
 	</changeSet>
- <changeSet author="sumanth.kota" id="3v2-CAS-20250403-1">
+ <changeSet author="essedum" id="3v2-CAS-20250403-1">
 	<sql dbms="mssql" splitStatements="true" stripComments="true">
 		SET IDENTITY_INSERT dbs_sequence_widget ON;
 	</sql>

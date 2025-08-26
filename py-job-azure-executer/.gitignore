@@ -1,0 +1,5 @@
+cloud/
+azuremlops/
+**/__pycache__/
+__pycache__/
+logfile.log

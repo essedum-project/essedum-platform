@@ -6,30 +6,30 @@
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 	
 	<!-- uuid changes -->
-	<changeSet author="Leap (generated)" id="1311v0-bjm-3000">
+	<changeSet author="Essedum (generated)" id="1311v0-bjm-3000">
 		<dropColumn columnName="uid"
 			tableName="bjm_job_instance_group" />
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1311v0-bjm-3001">
+	<changeSet author="Essedum (generated)" id="1311v0-bjm-3001">
 		<dropColumn columnName="uid" tableName="bjm_job" />
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1311v0-bjm-3002">
+	<changeSet author="Essedum (generated)" id="1311v0-bjm-3002">
 		<dropColumn columnName="uid" tableName="bjm_job_instance" />
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1311v0-bjm-3003">
+	<changeSet author="Essedum (generated)" id="1311v0-bjm-3003">
 		<dropColumn columnName="uid" tableName="bjm_ji_ji_mapping" />
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1311v0-bjm-3004">
+	<changeSet author="Essedum (generated)" id="1311v0-bjm-3004">
 		<dropColumn columnName="uid" tableName="bjm_ji_jig_mapping" />
 	</changeSet>
-	<!-- <changeSet author="Leap (generated)" id="1311v0-bjm-3005" >
+	<!-- <changeSet author="Essedum (generated)" id="1311v0-bjm-3005" >
 		<dropPrimaryKey constraintName="PRIMARY_bjm_master_data" tableName="bjm_master_data"  />
 	</changeSet> -->
-	<!-- <changeSet author="Leap (generated)" id="1311v0-bjm-3006">
+	<!-- <changeSet author="Essedum (generated)" id="1311v0-bjm-3006">
 		<dropColumn columnName="id" tableName="bjm_master_data" />
 	</changeSet> -->
     
-	 <!-- <changeSet author="Leap (generated)" id="1311v0-bjm-3007" dbms="!h2" >
+	 <!-- <changeSet author="Essedum (generated)" id="1311v0-bjm-3007" dbms="!h2" >
 		<addColumn tableName="bjm_master_data">
 			<column autoIncrement="true" name="id" type="INT">
 			
@@ -37,18 +37,18 @@
 		</addColumn>
 	</changeSet> -->
 
-	<!-- <changeSet author="Leap (generated)" id="1311v0-bjm-3009" dbms="h2" >
+	<!-- <changeSet author="Essedum (generated)" id="1311v0-bjm-3009" dbms="h2" >
 		<addColumn tableName="bjm_master_data">
 			<column autoIncrement="true" name="id" type="INT" />
 		</addColumn>
 	</changeSet> -->
 	
-	<changeSet author="Leap (generated)" id="1311v0-bjm-3011">
+	<changeSet author="Essedum (generated)" id="1311v0-bjm-3011">
 		<renameColumn columnDataType="varchar(255)"
 			newColumnName="filter_data" oldColumnName="filter"
 			tableName="bjm_summary" />
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1311v0-bjm-3013">
+	<changeSet author="Essedum (generated)" id="1311v0-bjm-3013">
 		<modifyDataType columnName="description"
 			newDataType="TEXT" tableName="bjm_summary" />
 	</changeSet>

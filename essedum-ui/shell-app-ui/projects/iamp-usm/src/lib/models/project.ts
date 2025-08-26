@@ -32,6 +32,7 @@ export class Project {
   projectAutologin: Boolean;
   autoUserProject: Boolean;
   autologinRole : Role;
+  is_active: boolean;
   constructor(json?: any) {
     if (json != null) {
       this.id = json.id;
@@ -48,6 +49,7 @@ export class Project {
       this.disableExcel = json.disableExcel;
       this.createdDate = json.createdDate
       this.projectAutologin = json.projectAutologin
+      this.is_active = json.is_active !== undefined ? json.is_active : true;
       if(json.autoUserProject==null) this.autoUserProject = false;
       this.autologinRole = json.autologinRole
     }

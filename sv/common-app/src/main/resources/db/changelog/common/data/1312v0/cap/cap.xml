@@ -5,7 +5,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 	
-    <changeSet author="Leap (generated)" id="1312v0-cap-1003" dbms="mysql">
+    <changeSet author="Essedum (generated)" id="1312v0-cap-1003" dbms="mysql">
         <sqlFile encoding="utf8"
         path="dbdatediff.sql"
         relativeToChangelogFile="true"
@@ -14,7 +14,7 @@
         />
      </changeSet>
      
-      <changeSet author="Leap (generated)" id="1312v0-cap-10003" dbms="mssql">
+      <changeSet author="Essedum (generated)" id="1312v0-cap-10003" dbms="mssql">
         <sqlFile encoding="utf8"
         path="dbdatediff_mssql.sql"
         relativeToChangelogFile="true"
@@ -23,7 +23,7 @@
         />
      </changeSet>
      
-     <changeSet author="Leap (generated)" id="1312v0-cap-1005" dbms="mysql,mssql">
+     <changeSet author="Essedum (generated)" id="1312v0-cap-1005" dbms="mysql,mssql">
      <preConditions onFail="MARK_RAN">
 		<not>
 		<columnExists tableName="cap_event_detail" columnName="Event_Attributes"/>
@@ -34,10 +34,10 @@
 	</addColumn>
 	</changeSet>
      
-	<changeSet author="Leap (generated)" id="1312v0-cap-10004" dbms="mysql">
+	<changeSet author="Essedum (generated)" id="1312v0-cap-10004" dbms="mysql">
         <sqlFile relativeToChangelogFile="true" splitStatements="true" stripComments="true" path="1312.sql" /> 
      </changeSet>
-     <changeSet author="Leap (generated)" id="1312v0-cap-1004" dbms="mssql">
+     <changeSet author="Essedum (generated)" id="1312v0-cap-1004" dbms="mssql">
         <sqlFile relativeToChangelogFile="true" splitStatements="true" stripComments="true" path="1312_mssql.sql" /> 
      </changeSet>
 </databaseChangeLog>

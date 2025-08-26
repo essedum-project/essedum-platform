@@ -1,0 +1,18 @@
+spring:
+  cloud:
+    vault:
+      enabled: true
+      uri: http://10.85.12.206:31854
+      token: hvs.HnrDFMDqj3SJuGxlEShfAbfU
+      scheme: http
+  #      kv:
+  #        enabled: true
+  #        backend: kv
+      config:
+        lifecycle:
+          min-renewal: 120s
+          expiry-threshold: 90s
+  config:
+    import: vault://secret/${spring.application.name}
+    
+ 

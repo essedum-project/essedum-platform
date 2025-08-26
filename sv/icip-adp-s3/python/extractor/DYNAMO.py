@@ -1,11 +1,11 @@
 from requests import auth
-from leap.core.iExtractor import Extractor
+from essedum.core.iExtractor import Extractor
 from urllib.parse import urlparse
 import requests
 from requests.auth import HTTPBasicAuth
-from leap.utils import configVariables
-from leap.utils.Utilities import Utilities
-from leap.utils import vault
+from essedum.utils import configVariables
+from essedum.utils.Utilities import Utilities
+from essedum.utils import vault
 import json
 import logging as logger
 import sys, os, base64, datetime, hashlib, hmac

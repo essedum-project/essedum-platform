@@ -5,14 +5,14 @@
 	xmlns:pro="http://www.liquibase.org/xml/ns/pro"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-	<!--<changeSet author="Leap (generated)" id="1615300415555-661">
+	<!--<changeSet author="Essedum (generated)" id="1615300415555-661">
 		<addForeignKeyConstraint
 			baseColumnNames="experiment_type" baseTableName="sbx_project"
 			constraintName="fk_experiment_type" deferrable="false"
 			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
 			referencedColumnNames="id" referencedTableName="sbx_experiment_type" />
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-778">
+	<changeSet author="Essedum (generated)" id="1614785155891-778">
 		<addForeignKeyConstraint
 			baseColumnNames="solution_id" baseTableName="sbx_solution_github"
 			constraintName="FK31yw1xee632xi9ecygt2o8ahe" deferrable="false"
@@ -21,7 +21,7 @@
 	</changeSet>
 	
 	
-	<changeSet author="Leap (generated)" id="1312v0-sbx-779">
+	<changeSet author="Essedum (generated)" id="1312v0-sbx-779">
 		<addForeignKeyConstraint
 			baseColumnNames="projectid" baseTableName="sbx_experiment_configuration"
 			constraintName="fk_experiment_config" deferrable="false"
@@ -30,73 +30,73 @@
 	</changeSet>
 	
 	
-	<changeSet author="Leap" id="2v1-sbx-26">
+	<changeSet author="Essedum" id="2v1-sbx-26">
 		<createIndex indexName="comment_idx"
 			tableName="sbx_discussion_comment">
 			<column name="discussion_id" />
 		</createIndex>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-27">
+	<changeSet author="Essedum" id="2v1-sbx-27">
 		<createIndex indexName="discussion_idx" tableName="sbx_discussion">
 			<column name="owner_id" />
 		</createIndex>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-28">
+	<changeSet author="Essedum" id="2v1-sbx-28">
 		<createIndex indexName="discussion_reaction_idx"
 			tableName="sbx_discussion_reaction">
 			<column name="discussion_id" />
 		</createIndex>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-29">
+	<changeSet author="Essedum" id="2v1-sbx-29">
 		<createIndex indexName="shared_with_idx"
 			tableName="sbx_discussion_shares">
 			<column name="shared_with" />
 		</createIndex>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-30">
+	<changeSet author="Essedum" id="2v1-sbx-30">
 		<createIndex indexName="shares_idx"
 			tableName="sbx_discussion_shares">
 			<column name="discussion_id" />
 		</createIndex>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-31">
+	<changeSet author="Essedum" id="2v1-sbx-31">
 		<createIndex indexName="tags_idx"
 			tableName="sbx_discussion_tags">
 			<column name="discussion_id" />
 		</createIndex>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-55">
+	<changeSet author="Essedum" id="2v1-sbx-55">
 		<createIndex indexName="user_idx"
 			tableName="sbx_discussion_comment">
 			<column name="user_id" />
 		</createIndex>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-32">
+	<changeSet author="Essedum" id="2v1-sbx-32">
 		<createIndex indexName="user_dr_idx"
 			tableName="sbx_discussion_reaction">
 			<column name="user_id" />
 		</createIndex>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-33">
+	<changeSet author="Essedum" id="2v1-sbx-33">
 		<createIndex indexName="user_ds_idx"
 			tableName="sbx_discussion_shares">
 			<column name="user_id" />
 		</createIndex>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-34">
+	<changeSet author="Essedum" id="2v1-sbx-34">
 		<createIndex indexName="arteid_idx" tableName="sbx_artefact">
 			<column name="id" />
 		</createIndex>
 	</changeSet>
 
-	<changeSet author="Leap" id="2v1-sbx-35">
+	<changeSet author="Essedum" id="2v1-sbx-35">
 		<addForeignKeyConstraint
 			baseColumnNames="discussion_id" baseTableName="sbx_discussion_comment"
 			constraintName="comment" deferrable="false" initiallyDeferred="false"
 			onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
 			referencedTableName="sbx_discussion" validate="true" />
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-36">
+	<changeSet author="Essedum" id="2v1-sbx-36">
 		<addForeignKeyConstraint
 			baseColumnNames="owner_id" baseTableName="sbx_discussion"
 			constraintName="id" deferrable="false" initiallyDeferred="false"
@@ -104,7 +104,7 @@
 			referencedTableName="usm_users" validate="true" />
 	</changeSet>
 
-	<changeSet author="Leap" id="2v1-sbx-37">
+	<changeSet author="Essedum" id="2v1-sbx-37">
 		<addForeignKeyConstraint
 			baseColumnNames="orgid" baseTableName="sbx_discussion"
 			constraintName="org" deferrable="false" initiallyDeferred="false"
@@ -112,7 +112,7 @@
 			referencedTableName="usm_project" validate="true" />
 	</changeSet>
 	
-	<changeSet author="Leap" id="2v1-sbx-38">
+	<changeSet author="Essedum" id="2v1-sbx-38">
 		<addForeignKeyConstraint
 			baseColumnNames="discussion_id" baseTableName="sbx_discussion_reaction"
 			constraintName="reaction" deferrable="false"
@@ -120,7 +120,7 @@
 			referencedColumnNames="id" referencedTableName="sbx_discussion"
 			validate="true" />
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-39">
+	<changeSet author="Essedum" id="2v1-sbx-39">
 		<addForeignKeyConstraint
 			baseColumnNames="shared_with" baseTableName="sbx_discussion_shares"
 			constraintName="shared_with" deferrable="false"
@@ -128,28 +128,28 @@
 			referencedColumnNames="id" referencedTableName="usm_users"
 			validate="true" />
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-40">
+	<changeSet author="Essedum" id="2v1-sbx-40">
 		<addForeignKeyConstraint
 			baseColumnNames="discussion_id" baseTableName="sbx_discussion_shares"
 			constraintName="shares" deferrable="false" initiallyDeferred="false"
 			onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
 			referencedTableName="sbx_discussion" validate="true" />
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-41">
+	<changeSet author="Essedum" id="2v1-sbx-41">
 		<addForeignKeyConstraint
 			baseColumnNames="discussion_id" baseTableName="sbx_discussion_tags"
 			constraintName="tags" deferrable="false" initiallyDeferred="false"
 			onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
 			referencedTableName="sbx_discussion" validate="true" />
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-42">
+	<changeSet author="Essedum" id="2v1-sbx-42">
 		<addForeignKeyConstraint
 			baseColumnNames="user_id" baseTableName="sbx_discussion_comment"
 			constraintName="user" deferrable="false" initiallyDeferred="false"
 			onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
 			referencedTableName="usm_users" validate="true" />
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-43">
+	<changeSet author="Essedum" id="2v1-sbx-43">
 		<addForeignKeyConstraint
 			baseColumnNames="user_id" baseTableName="sbx_discussion_reaction"
 			constraintName="user_reaction" deferrable="false"
@@ -157,7 +157,7 @@
 			referencedColumnNames="id" referencedTableName="usm_users"
 			validate="true" />
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-44">
+	<changeSet author="Essedum" id="2v1-sbx-44">
 		<addForeignKeyConstraint
 			baseColumnNames="user_id" baseTableName="sbx_discussion_shares"
 			constraintName="user_shares" deferrable="false"
@@ -165,7 +165,7 @@
 			referencedColumnNames="id" referencedTableName="usm_users"
 			validate="true" />
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-45">
+	<changeSet author="Essedum" id="2v1-sbx-45">
 		<addForeignKeyConstraint
 			baseColumnNames="user_id" baseTableName="sbx_comment_reaction"
 			constraintName="user_comment_reaction" deferrable="false"
@@ -173,7 +173,7 @@
 			referencedColumnNames="id" referencedTableName="usm_users"
 			validate="true" />
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-46">
+	<changeSet author="Essedum" id="2v1-sbx-46">
 		<addForeignKeyConstraint
 			baseColumnNames="comment_id" baseTableName="sbx_comment_reaction"
 			constraintName="comment_reaction" deferrable="false"
@@ -182,7 +182,7 @@
 			validate="true" />
 	</changeSet>
 	
-	<changeSet author="Leap" id="2v1-sbx-47">
+	<changeSet author="Essedum" id="2v1-sbx-47">
 		<addForeignKeyConstraint
 			baseColumnNames="user_id" baseTableName="sbx_user_subscription"
 			constraintName="user_subscription" deferrable="false"
@@ -191,7 +191,7 @@
 			validate="true" />
 	</changeSet>
 	
-	<changeSet author="Leap" id="2v1-sbx-48">
+	<changeSet author="Essedum" id="2v1-sbx-48">
 		<addForeignKeyConstraint
 			baseColumnNames="category_id" baseTableName="sbx_user_subscription"
 			constraintName="user_subscription_category" deferrable="false"
@@ -200,7 +200,7 @@
 			validate="true" />
 	</changeSet>
 	
-	<changeSet author="Leap" id="2v1-sbx-49">
+	<changeSet author="Essedum" id="2v1-sbx-49">
 		<addForeignKeyConstraint
 			baseColumnNames="category_id" baseTableName="sbx_discussion_category"
 			constraintName="category_discussion_mapping" deferrable="false"
@@ -209,7 +209,7 @@
 			validate="true" />
 	</changeSet>
 	
-	<changeSet author="Leap" id="2v1-sbx-50">
+	<changeSet author="Essedum" id="2v1-sbx-50">
 		<addForeignKeyConstraint
 			baseColumnNames="discussion_id" baseTableName="sbx_discussion_category"
 			constraintName="discussion_category" deferrable="false"
@@ -217,7 +217,7 @@
 			referencedColumnNames="id" referencedTableName="sbx_discussion"
 			validate="true" />
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-51">
+	<changeSet author="Essedum" id="2v1-sbx-51">
 		<addForeignKeyConstraint
 			baseColumnNames="upload_artefact_id" baseTableName="sbx_artefact_tags"
 			constraintName="fk_upload_artefact_id" deferrable="false"
@@ -225,7 +225,7 @@
 			referencedColumnNames="id" referencedTableName="sbx_artefact"
 			validate="true" />
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-52">
+	<changeSet author="Essedum" id="2v1-sbx-52">
 		<addForeignKeyConstraint
 			baseColumnNames="tag_id" baseTableName="sbx_artefact_tags"
 			constraintName="fk_tag_id" deferrable="false"
@@ -233,14 +233,14 @@
 			referencedColumnNames="id" referencedTableName="sbx_tags"
 			validate="true" />
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-53">
+	<changeSet author="Essedum" id="2v1-sbx-53">
 		<addForeignKeyConstraint
 			baseColumnNames="orgid" baseTableName="sbx_basket"
 			constraintName="org_basket" deferrable="false" initiallyDeferred="false"
 			onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
 			referencedTableName="usm_project" validate="true" />
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-54">
+	<changeSet author="Essedum" id="2v1-sbx-54">
 		<addForeignKeyConstraint
 			baseColumnNames="created_by" baseTableName="sbx_basket"
 			constraintName="basket_created_by" deferrable="false" initiallyDeferred="false"

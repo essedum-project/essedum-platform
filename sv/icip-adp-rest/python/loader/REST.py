@@ -1,12 +1,12 @@
-from leap.core.iLoader import Loader
-from leap.utils.Utilities import Utilities
+from essedum.core.iLoader import Loader
+from essedum.utils.Utilities import Utilities
 import requests
 from urllib.parse import urlparse, urljoin
 from requests.auth import HTTPBasicAuth
 import json
-from leap.utils import configVariables
+from essedum.utils import configVariables
 import logging as logger
-from leap.utils import vault
+from essedum.utils import vault
 
 class REST(Loader):
     def __init__(self, datasource_attributes, dataset_attributes):
