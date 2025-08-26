@@ -902,7 +902,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
         this.loadPaginated(0, this.pageSize, null, null);
         this.currentPage.remove(usmRolePermissionsToDelete);
         this.deletedashconstant(usmRolePermissionsToDelete);
-        this.messageService.message(
+        this.messageService.messageNotification(
           "Role-Permission Deleted successfully",""
           
         );
@@ -916,7 +916,7 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
         const errorMessage =
           error?.error?.message ||
           "Could not delete! Server returned an error.";
-        this.messageService.error(errorMessage, "");
+        this.messageService.messageNotification(errorMessage, "error");       
         this.loadPaginated(0, this.pageSize, null, null);
       }
     );

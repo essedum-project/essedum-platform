@@ -273,7 +273,7 @@ loadRoles() {
       this.busy = this.usmRolePermissionsService.createAll(rolePermissionsArray).subscribe(
         (response) => {
           console.log('Role permissions created successfully:', response);
-          this.messageService.message("Role-Permissions Saved Successfully", "");
+          this.messageService.messageNotification("Role-Permissions Saved Successfully");
           
 
           if (this.dialogRef) {
@@ -328,14 +328,14 @@ loadRoles() {
 
     this.busy = this.usmRolePermissionsService.update(this.rolePermission).subscribe(
       (response) => {
-        this.messageService.message("Role-Permission Updated Successfully",response.permission[0].permission);
+        this.messageService.messageNotification("Role-Permission Updated Successfully",response.permission[0].permission);
 
         if (this.dialogRef) {
           this.dialogRef.close(true);
         }
       },
       (error) => {
-        this.messageService.error("Could not update Role-Permission", "");
+        this.messageService.messageNotification("Could not update Role-Permission", "error");
       }
     );
   }
