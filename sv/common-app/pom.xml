@@ -45,13 +45,8 @@
 			<artifactId>comm-lib-util</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lfn.ai</groupId>
-			<artifactId>comm-lib-licval</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.lfn.icip.plugins</groupId>
 			<artifactId>icip-adp-azure</artifactId>
-			<version>3.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.lfn</groupId>

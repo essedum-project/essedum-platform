@@ -1,14 +1,18 @@
 /**
- * @ 2020 - 2021 Infosys Limited, Bangalore, India. All Rights Reserved.
- * Version: 1.0
- * Except for any free or open source software components embedded in this Infosys proprietary software program (Program),
- * this Program is protected by copyright laws,international treaties and  other pending or existing intellectual property
- * rights in India,the United States, and other countries.Except as expressly permitted, any unauthorized reproduction,storage,
- * transmission in any form or by any means(including without limitation electronic,mechanical, printing,photocopying,
- * recording, or otherwise), or any distribution of this program, or any portion of it,may result in severe civil and
- * criminal penalties, and will be prosecuted to the maximum extent possible under the law.
+ * The MIT License (MIT)
+ * Copyright © 2025 Infosys Limited
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”),
+ * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.infosys.icets.icip.dataset.service.util;
+package com.lfn.icip.dataset.service.util;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,26 +22,20 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.infosys.icets.icip.dataset.properties.ProxyProperties;
+import com.lfn.icip.dataset.properties.ProxyProperties;
 
 //
 /**
  * The Class ICIPDataSetServiceUtilFireeye.
  *
- * @author icets
+ * @author lfn
  */
 @Component("azureds")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ICIPDataSetServiceUtilAzure extends ICIPDataSetServiceUtilRestAbstract {
 	
-	/** The proxy properties. */
-	private ProxyProperties proxyProperties;
-
 	/** The Constant logger. */
 	private static final Logger logger = LoggerFactory.getLogger(ICIPDataSetServiceUtilAzure.class);
-	
-	/** The Constant AUTHURL. */
-	private static final String AUTHURL = "authUrl";
 	
 	/** The Constant API. */
 	private static final String API = "EndPoint";
@@ -47,15 +45,11 @@ public class ICIPDataSetServiceUtilAzure extends ICIPDataSetServiceUtilRestAbstr
 	
 	private static final String SCRIPT = "TransformationScript";
 	
-	/** The Constant METHOD. */
-	private static final String METHOD = "API Type";
-	
 	/** The Constant BODY. */
 	private static final String BODY = "Request Body";
 	
 	public ICIPDataSetServiceUtilAzure(ProxyProperties proxyProperties) {
 		super(proxyProperties);
-		this.proxyProperties = proxyProperties;
 	}
 	
 	/**
