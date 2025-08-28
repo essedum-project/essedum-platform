@@ -237,12 +237,12 @@ loadRoles() {
     }  
 
     if (this.rolePermission.role == undefined || this.rolePermission.role == null) {
-      this.messageService.error("Please Select A Role",'');
+      this.messageService.messageNotification("Please Select A Role",'warning');
     } else if (
       this.rolePermission.permission == undefined ||
       this.rolePermission.permission == null
     ) {
-      this.messageService.error("Please Select A Module and Permission", "");
+      this.messageService.messageNotification("Please Select A Module and Permission", "warning");
     } else {
       if (this.edit) {
         this.performUpdateRolePermission();
@@ -287,7 +287,7 @@ loadRoles() {
 
           const errorMsg = error?.error?.message || error?.statusText || "Could not create Role-Permissions";
           const statusCode = error?.status || "Unknown";
-          this.messageService.error(`Error ${statusCode}: ${errorMsg}`, "");
+          this.messageService.messageNotification(`Error ${statusCode}: ${errorMsg}`, "error");
 
           if (rolePermissionsArray.length === 1) {
             console.log('Trying alternative approach with single object...');
@@ -299,7 +299,7 @@ loadRoles() {
             this.usmRolePermissionsService.create(singlePermission).subscribe(
               (resp) => {
                 console.log('Single permission created successfully:', resp);
-                this.messageService.info("Role-Permission Saved Successfully", "");
+                this.messageService.messageNotification("Role-Permission Saved Successfully");
                 if (this.dialogRef) {
                   this.dialogRef.close(true);
                 }
@@ -307,7 +307,7 @@ loadRoles() {
                 console.error('Single permission creation also failed:', err);
       
                 const errDetails = err?.error?.message || err?.statusText || JSON.stringify(err);
-                this.messageService.error(`All attempts failed. Last error: ${errDetails}`, "");
+                this.messageService.messageNotification(`All attempts failed. Last error: ${errDetails}`, "error");
               }
             );
           }
@@ -318,7 +318,7 @@ loadRoles() {
   
   performUpdateRolePermission() {
     if (!this.rolePermission.id) {
-      this.messageService.error("Cannot update: No role permission ID found", "");
+      this.messageService.messageNotification("Cannot update: No role permission ID found", "warning");
       return;
     }
 
@@ -328,7 +328,7 @@ loadRoles() {
 
     this.busy = this.usmRolePermissionsService.update(this.rolePermission).subscribe(
       (response) => {
-        this.messageService.messageNotification("Role-Permission Updated Successfully",response.permission[0].permission);
+        this.messageService.messageNotification("Role-Permission Updated Successfully");
 
         if (this.dialogRef) {
           this.dialogRef.close(true);

@@ -77,12 +77,12 @@ export class SecretAddComponent implements OnInit {
   onCreate() {
     this.secretsService.createKey(this.key, this.passcode).subscribe(
       (res) => {
-        this.messageService.message(res, res.body);
+        this.messageService.messageNotification(`Successfully created`);
         this.closeSecretAddDialog();
       },
       (err) => {
         console.log(err);
-        this.messageService.message(err);
+        this.messageService.messageNotification(`error  ${err} `,"error");
       }
     );
   }
@@ -91,7 +91,7 @@ export class SecretAddComponent implements OnInit {
     this.secretsService
       .updateKey(this.key, this.passcode)
       .subscribe((res: any) => {
-        this.messageService.message(res, "Updated Successfully");
+        this.messageService.messageNotification("Updated Successfully");
         this.closeSecretAddDialog();
         this.hideValue();
       });

@@ -181,7 +181,7 @@ export class SecretsComponent {
         this.pageArr = [...Array(this.noOfPages).keys()];
         this.pageSize = this.pageSize || 6;
       } else {
-        this.messageService.message("No Records Found");
+        this.messageService.messageNotification("No Records Found",'info');
         this.keys = "";
       }
     }   
@@ -238,11 +238,11 @@ export class SecretsComponent {
       if (result === "yes") {
         this.secretsService.deleteKey(secrets.key).subscribe(
           (resp) => {
-            this.messageService.message(resp, "Key Deleted Successfully");
+            this.messageService.messageNotification(`Secret Key Deleted Successfully`);
             this.refreshComplete();
           },
           (error) => {
-            this.messageService.message(error);
+            this.messageService.messageNotification(`Error while deleting ${error}`,"error");
           }
         );
       }
@@ -339,13 +339,13 @@ export class SecretsComponent {
   onCreate() {
     this.secretsService.createKey(this.keys, this.passcode).subscribe(
       (res) => {
-        this.messageService.message(res, res.body);
+        this.messageService.messageNotification(`${res}, ${res.body}`);
         this.listView();
         this.refreshComplete();
       },
       (err) => {
         console.log(err);
-        this.messageService.message(err);
+        this.messageService.messageNotification(`Error ${err}`,"error");
       }
     );
   }
@@ -354,7 +354,7 @@ export class SecretsComponent {
     this.secretsService
       .updateKey(this.keys, this.passcode)
       .subscribe((res: any) => {
-        this.messageService.message(res, "Updated Successfully");
+        this.messageService.messageNotification(`Updated Successfully ${res}`);
         this.hideValue();
       });
   }

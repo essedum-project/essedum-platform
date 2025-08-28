@@ -142,7 +142,7 @@ export class PortfolioAddComponent implements OnInit, OnDestroy {
         this.usmPortfolio = portfolio;
       },
       (error) => {
-        this.messageService.error("Could not load portfolio details", "");
+        this.messageService.messageNotification("Could not load portfolio details", "error");
       }
     );
   }
@@ -156,14 +156,14 @@ export class PortfolioAddComponent implements OnInit, OnDestroy {
       !this.usmPortfolio.portfolioName ||
       this.usmPortfolio.portfolioName.trim().length === 0
     ) {
-      this.messageService.info("Portfolio name can't be empty", "");
+      this.messageService.messageNotification("Portfolio name can't be empty", "warning");
       return;
     }
 
     if (this.usmPortfolio.portfolioName.length > 100) {
-      this.messageService.info(
+      this.messageService.messageNotification(
         "Portfolio name cannot be more than 100 characters",
-        ""
+        "warning"
       );
       return;
     }
@@ -173,7 +173,7 @@ export class PortfolioAddComponent implements OnInit, OnDestroy {
         this.usmPortfolio.portfolioName
       )
     ) {
-      this.messageService.error("Portfolio name format is incorrect", "");
+      this.messageService.messageNotification("Portfolio name format is incorrect", "warning");
       return;
     }
 
@@ -187,7 +187,7 @@ export class PortfolioAddComponent implements OnInit, OnDestroy {
   createPortfolio() {
     this.busy = this.portfolioService.create(this.usmPortfolio).subscribe(
       (response) => {
-        this.messageService.message("Portfolio Saved Successfully",'');
+        this.messageService.messageNotification("Portfolio Saved Successfully");
         if (this.dialogRef) {
           this.dialogRef.close(true); 
         } else {
@@ -195,7 +195,7 @@ export class PortfolioAddComponent implements OnInit, OnDestroy {
         }
       },
       (error) => {
-        this.messageService.error("Could not create Portfolio", "");
+        this.messageService.messageNotification("Could not create Portfolio", "error");
       }
     );
   }
@@ -203,7 +203,7 @@ export class PortfolioAddComponent implements OnInit, OnDestroy {
   updatePortfolio() {
     this.busy = this.portfolioService.update(this.usmPortfolio).subscribe(
       (response) => {
-        this.messageService.message("Portfolio updated successfully",'');
+        this.messageService.messageNotification("Portfolio updated successfully");
         if (this.dialogRef) {
           this.dialogRef.close(true); 
         } else {
@@ -211,7 +211,7 @@ export class PortfolioAddComponent implements OnInit, OnDestroy {
         }
       },
       (error) => {
-        this.messageService.error("Could not update Portfolio", "");
+        this.messageService.messageNotification("Could not update Portfolio", "error");
       }
     );
   }

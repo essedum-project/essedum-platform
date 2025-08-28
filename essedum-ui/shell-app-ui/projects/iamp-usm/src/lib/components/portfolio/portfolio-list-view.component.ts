@@ -292,8 +292,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
               console.log("Projects processed, count:", this.projects.length);
             },
             (error) => {
-              console.error("Error loading projects:", error);
-              this.messageService.error("Could not get the projects", "");
+              this.messageService.messageNotification("Could not get the projects", "error");
               // Initialize with empty array to prevent null reference errors
               this.projects = [];
               this.projectsCopy = [];
@@ -302,8 +301,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
           );
       },
       (error) => {
-        console.error("Error loading portfolio:", error);
-        this.messageService.error("Could not load portfolio details", "");
+        this.messageService.messageNotification("Could not load portfolio details", "error");
         // Reset data on error
         this.currentUsmPortfolio = new Portfolio();
         this.projects = [];
@@ -408,8 +406,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
         });
       },
       (error) => {
-        console.error("Error loading projects:", error);
-        this.messageService.error("Could not get the projects", "");
+        this.messageService.messageNotification("Could not get the projects", "error");
         const dialogRef = this.dialog.open(PortfolioAddComponent, {
           height: "67%",
           width: "50%",
@@ -440,25 +437,25 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
       this.usmPortfolio.portfolioName == null ||
       this.usmPortfolio.portfolioName.trim().length == 0
     ) {
-      this.messageService.info("Portfolio name can't be empty", "");
+      this.messageService.messageNotification("Portfolio name can't be empty", "warning");
     } else if (this.usmPortfolio.portfolioName.length > 100) {
-      this.messageService.message(
+      this.messageService.messageNotification(
         "Portfolio name cannot be more than 100 characters",
-        ""
+        "warning"
       );
     } else if (
       !/^[a-zA-Z][a-zA-Z0-9 \@\%\!\#\*\-\_\&\$\(\)\=\+\/\.\?\\]*?$/.test(
         this.usmPortfolio.portfolioName
       )
     ) {
-      this.messageService.error("Portfolio name format is incorrect", "");
+      this.messageService.messageNotification("Portfolio name format is incorrect", "warning");
     } else if (
       this.usmPortfolio.description &&
       !/^[a-zA-Z0-9][a-zA-Z0-9 \-\_\.]*?$/.test(this.usmPortfolio.description)
     ) {
-      this.messageService.error(
+      this.messageService.messageNotification(
         "Portfolio description format is incorrect",
-        ""
+        "warning"
       );
     } else {
       let flag: boolean = false;
@@ -468,7 +465,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
           this.usmPortfolio.portfolioName.trim().toLowerCase()
         ) {
           flag = true;
-          this.messageService.info("Portfolio Name Already Exists", "");
+          this.messageService.messageNotification("Portfolio Name Already Exists", "warning");
         }
       });
       if (!flag) {
@@ -479,7 +476,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
           .subscribe(
             (response) => {
               this.testId = response.id;
-              this.messageService.info("Portfolio Saved Successfully", "");
+              this.messageService.messageNotification("Portfolio Saved Successfully");
               this.clearWave();
               this.showCreate = false;
               this.testCreate = true;
@@ -487,7 +484,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
             },
             (error) => {
               this.testCreate = false;
-              this.messageService.error("Could not create Portfolio", "");
+              this.messageService.messageNotification("Could not create Portfolio", "error");
             }
           );
       }
@@ -509,25 +506,25 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
       this.usmPortfolio.portfolioName == null ||
       this.usmPortfolio.portfolioName.trim().length == 0
     ) {
-      this.messageService.info("Portfolio name can't be empty", "");
+      this.messageService.messageNotification("Portfolio name can't be empty", "warning");
     } else if (this.usmPortfolio.portfolioName.length > 255) {
-      this.messageService.info(
+      this.messageService.messageNotification(
         "Portfolio name cannot be more than 255 characters",
-        ""
+        "warning"
       );
     } else if (
       !/^[a-zA-Z][a-zA-Z0-9 \@\%\!\#\*\-\_\&\$\(\)\=\+\/\.\?\\]*?$/.test(
         this.usmPortfolio.portfolioName
       )
     ) {
-      this.messageService.error("Portfolio name format is incorrect", "");
+      this.messageService.messageNotification("Portfolio name format is incorrect", "warning");
     } else if (
       this.usmPortfolio.description &&
       !/^[a-zA-Z0-9][a-zA-Z0-9 \-\_\.]*?$/.test(this.usmPortfolio.description)
     ) {
-      this.messageService.error(
+      this.messageService.messageNotification(
         "Portfolio description format is incorrect",
-        ""
+        "warning"
       );
     } else {
       let flag: boolean = false;
@@ -538,7 +535,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
             this.usmPortfolio.portfolioName.trim().toLowerCase()
         ) {
           flag = true;
-          this.messageService.info("Portfolio Name Already Exists", "");
+          this.messageService.messageNotification("Portfolio Name Already Exists", "warning");
         }
       });
       if (!flag) {
@@ -558,9 +555,9 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
               sessionStorage.setItem("UpdatedUser", "true");
               this.testId = rs.id;
               this.testCreate = true;
-              this.messageService.info(
-                "Portfolio updated successfully",
-                ""
+              this.messageService.messageNotification(
+                "Portfolio updated successfully"
+                
               );
               this.clearWave();
               this.showCreate = false;
@@ -568,7 +565,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
             },
             (error) => {
               this.testCreate = false;
-              this.messageService.error("Could not update", "");
+              this.messageService.messageNotification("Could not update", "error");
             }
           );
       }
@@ -583,11 +580,11 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
         sessionStorage.setItem("UpdatedUser", "true");
         this.currentPage.remove(usmPortfolioToDelete);
         this.Clear();
-        this.messageService.message(response,"Portfolio deleted successfully");
+        this.messageService.messageNotification("Portfolio deleted successfully");
       },
       (error) => {
         this.testCreate = false;
-        this.messageService.error("Could not delete!", "");
+        this.messageService.messageNotification("Could not delete!", "error");
       }
     );
   }
@@ -653,7 +650,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
       },
       (error) => {
         this.testCreate = false;
-        this.messageService.error("Could not get the results", "");
+        this.messageService.messageNotification("Could not get the results", "error");
       }
     );
   }
@@ -702,7 +699,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
         if (!this.UsmPortfolioList) {
           this.UsmPortfolioList = new MatTableDataSource([]);
         }
-        this.messageService.error("Could not get the results", "");
+        this.messageService.messageNotification("Could not get the results", "error");
       }
     );
   }
@@ -865,7 +862,7 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
           if (!this.UsmPortfolioList) {
             this.UsmPortfolioList = new MatTableDataSource([]);
           }
-          this.messageService.error("Could not get search results", "");
+          this.messageService.messageNotification("Could not get search results", "error");
         }
       );
     }
@@ -1132,11 +1129,10 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
           );
         },
         (error) => {
-          console.error("Error applying filters:", error);
           if (!this.UsmPortfolioList) {
             this.UsmPortfolioList = new MatTableDataSource([]);
           }
-          this.messageService.error("Could not apply filters", "");
+          this.messageService.messageNotification("Could not apply filters", "info");
         }
       );
   }
