@@ -11,7 +11,7 @@ telemetry:
     driverClassName: com.mysql.cj.jdbc.Driver
     jdbcurl: jdbc:mysql://mysql-local:3306/telemetrydb
     username: root
-    password: Lfn@123
+    password: password
  
 config:
   active-profiles: mysql,dbjwt,btf,dbconstants,vault
@@ -20,7 +20,7 @@ config:
   
   datasourceurl: jdbc:mysql://mysql-local:3306
   datasourceuser: root
-  datasourcepass: Lfn@123
+  datasourcepass: password
   essedumcoredb: essedum_coredb
   essedumquartzdb: essedum_quartzdb
   
@@ -210,7 +210,7 @@ csrf:
 proxy:
   httpProxyConfiguration:
     proxyScheme: http
-    proxyHost: blrproxy.ad.infosys.com
+    proxyHost: blrproxy.ad.lfn.com
     proxyPort: 8080
     proxyUser: null
     proxyPassword: null
@@ -370,7 +370,7 @@ metrics:
 github:
   gitPathStudio : /app/gitRepo/studio/
   gitPathStore : /app/gitRepo/store/
-  username: your.username_infosys
+  username: your_username
   password: your_generated_token
  
 security:

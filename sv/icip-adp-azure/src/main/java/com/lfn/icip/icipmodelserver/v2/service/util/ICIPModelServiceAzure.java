@@ -1,4 +1,18 @@
-package com.infosys.icets.icip.icipmodelserver.v2.service.util;
+/**
+ * The MIT License (MIT)
+ * Copyright © 2025 Infosys Limited
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”),
+ * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+package com.lfn.icip.icipmodelserver.v2.service.util;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -22,24 +36,24 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import com.infosys.icets.ai.comm.lib.util.exceptions.LeapException;
-import com.infosys.icets.icip.dataset.constants.ICIPPluginConstants;
-import com.infosys.icets.icip.dataset.model.ICIPDataset;
-import com.infosys.icets.icip.dataset.model.ICIPDatasource;
-import com.infosys.icets.icip.dataset.service.IICIPDatasourceService;
-import com.infosys.icets.icip.dataset.service.impl.ICIPDatasetPluginsService;
-import com.infosys.icets.icip.dataset.service.util.IICIPDataSetServiceUtil.DATATYPE;
-import com.infosys.icets.icip.dataset.service.util.IICIPDataSetServiceUtil.SQLPagination;
-import com.infosys.icets.icip.icipmodelserver.v2.model.dto.ICIPPolyAIRequestWrapper;
-import com.infosys.icets.icip.icipmodelserver.v2.model.dto.ICIPPolyAIResponseWrapper;
-import com.infosys.icets.icip.icipwebeditor.model.FedEndpointID;
-import com.infosys.icets.icip.icipwebeditor.model.FedModelsID;
-import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedEndpoint;
-import com.infosys.icets.icip.icipwebeditor.model.ICIPMLFederatedModel;
-import com.infosys.icets.icip.icipwebeditor.repository.ICIPMLFederatedEndpointRepository;
-import com.infosys.icets.icip.icipwebeditor.repository.ICIPMLFederatedModelsRepository;
-import com.infosys.icets.icip.icipwebeditor.service.impl.ICIPMLFederatedEndpointService;
-import com.infosys.icets.icip.icipwebeditor.service.impl.ICIPMLFederatedModelService;
+import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
+import com.lfn.icip.dataset.constants.ICIPPluginConstants;
+import com.lfn.icip.dataset.model.ICIPDataset;
+import com.lfn.icip.dataset.model.ICIPDatasource;
+import com.lfn.icip.dataset.service.IICIPDatasourceService;
+import com.lfn.icip.dataset.service.impl.ICIPDatasetPluginsService;
+import com.lfn.icip.dataset.service.util.IICIPDataSetServiceUtil.DATATYPE;
+import com.lfn.icip.dataset.service.util.IICIPDataSetServiceUtil.SQLPagination;
+import com.lfn.icip.icipmodelserver.v2.model.dto.ICIPPolyAIRequestWrapper;
+import com.lfn.icip.icipmodelserver.v2.model.dto.ICIPPolyAIResponseWrapper;
+import com.lfn.icip.icipwebeditor.model.FedEndpointID;
+import com.lfn.icip.icipwebeditor.model.FedModelsID;
+import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedEndpoint;
+import com.lfn.icip.icipwebeditor.model.ICIPMLFederatedModel;
+import com.lfn.icip.icipwebeditor.repository.ICIPMLFederatedEndpointRepository;
+import com.lfn.icip.icipwebeditor.repository.ICIPMLFederatedModelsRepository;
+import com.lfn.icip.icipwebeditor.service.impl.ICIPMLFederatedEndpointService;
+import com.lfn.icip.icipwebeditor.service.impl.ICIPMLFederatedModelService;
 
 @Component("azuremodelservice")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -52,23 +66,14 @@ public class ICIPModelServiceAzure implements IICIPModelServiceUtil {
 	private IICIPDatasourceService dsService;
 	
 	@Autowired
-	private ICIPMLFederatedModelService fedModelService;
-
-	@Autowired
-	private ICIPMLFederatedEndpointService fedEndpointService;
-
-	@Autowired
 	private ICIPMLFederatedEndpointRepository fedEndpointRepo;
 
 	/** The plugin service. */
 	@Autowired
 	private ICIPDatasetPluginsService pluginService;
 
-	@Autowired
-	private ICIPMLFederatedModelsRepository fedModelRepo;
-
-	/** The leap url. */
-	@Value("${LEAP_ULR}")
+	/** The essedum url. */
+	@Value("${ESSEDUM_URL}")
 	private String referer;
 
 	@Override
@@ -163,9 +168,7 @@ public class ICIPModelServiceAzure implements IICIPModelServiceUtil {
 			srcId = jsonObject.optString("sourceId");
 		fedmodid.setSourceId(srcId);
 		fedmodid.setOrganisation(org);
-		//dto.setSourceModelId(fedmodid);
-		//Optional<ICIPMLFederatedModel> modObj = fedModelRepo.findById(fedmodid);
-		Object description = jsonObject.optString("description");
+		jsonObject.optString("description");
 //		if (modObj.isPresent()) {
 //			dto = modObj.get();
 //		} else {
@@ -175,19 +178,15 @@ public class ICIPModelServiceAzure implements IICIPModelServiceUtil {
 //		}
 		Object value = jsonObject.get("artifacts");
 		if (value instanceof String) {
-			String strArti = jsonObject.getString("artifacts");
-			//dto.setArtifacts(strArti);
+			jsonObject.getString("artifacts");
 		} else if (value instanceof JSONObject) {
-			JSONObject artifacts = jsonObject.getJSONObject("artifacts");
-			//dto.setArtifacts(artifacts.toString());
+			jsonObject.getJSONObject("artifacts");
 		}
 		Object containerValue = jsonObject.get("container");
 		if (containerValue instanceof String) {
-			String containerstr = jsonObject.getString("container");
-			//dto.setContainer(containerstr);
+			jsonObject.getString("container");
 		} else if (containerValue instanceof JSONObject) {
-			JSONObject containerObj = jsonObject.getJSONObject("container");
-			//dto.setContainer(containerObj.toString());
+			jsonObject.getJSONObject("container");
 		}
 		dto.setCreatedBy(jsonObject.optString("createdBy"));
 		String createdon = jsonObject.optString("createdOn");
@@ -314,7 +313,7 @@ public class ICIPModelServiceAzure implements IICIPModelServiceUtil {
 	 * This Method is defined for Register/Create Model
 	 */
 	@Override
-	public ICIPMLFederatedModel registerModel(ICIPPolyAIRequestWrapper request) throws IOException, LeapException {
+	public ICIPMLFederatedModel registerModel(ICIPPolyAIRequestWrapper request) throws IOException, EssedumException {
 		ICIPDatasource datasource = dsService.getDatasource(request.getName(), request.getOrganization());
 		Boolean isRemoteVMexecutionRequired = false;
 		if (!ICIPPluginConstants.REST.equalsIgnoreCase(datasource.getType())) {
@@ -337,7 +336,7 @@ public class ICIPModelServiceAzure implements IICIPModelServiceUtil {
 			payload.setRequest(content.toString());
 			JSONObject listJSON = new JSONObject();
 			
-			saveModel = parseMLFedModel(listJSON, request.getName(), datasource.getAlias(), request.getOrganization());
+			saveModel = parseMLFedModel1(listJSON, request.getName(), request.getOrganization());
 		
 		} catch (JSONException e) {
 			logger.error("Exception:" + e.getMessage());
@@ -347,7 +346,7 @@ public class ICIPModelServiceAzure implements IICIPModelServiceUtil {
 		return saveModel;
 	}
 
-	private ICIPMLFederatedModel parseMLFedModel(JSONObject jsonObj, String dsource, String dsrcAlias, String org)
+	private ICIPMLFederatedModel parseMLFedModel1(JSONObject jsonObj, String dsource, String org)
 			throws ParseException {
 		ICIPMLFederatedModel dto = new ICIPMLFederatedModel();
 //		dto.setSourceName(jsonObj.getString("sourceId"));
@@ -371,7 +370,7 @@ public class ICIPModelServiceAzure implements IICIPModelServiceUtil {
 //		dto.setSourceStatus("Registered");
 //		dto.setStatus("Registered");
 		Date date1 = new Date();
-		Timestamp ts1 = new Timestamp(date1.getTime());
+		new Timestamp(date1.getTime());
 //		dto.setSyncDate(ts1);
 		return dto;
 	}
@@ -564,7 +563,7 @@ public class ICIPModelServiceAzure implements IICIPModelServiceUtil {
 
 	
 	@Override
-	public ICIPMLFederatedEndpoint createEndpoint(ICIPPolyAIRequestWrapper request) throws IOException, LeapException {
+	public ICIPMLFederatedEndpoint createEndpoint(ICIPPolyAIRequestWrapper request) throws IOException, EssedumException {
 		ICIPDatasource datasource = dsService.getDatasource(request.getName(), request.getOrganization());
 		String reqBody = request.getBody();
 		Boolean isRemoteVMexecutionRequired = false;
@@ -589,7 +588,7 @@ public class ICIPModelServiceAzure implements IICIPModelServiceUtil {
 			ICIPPolyAIResponseWrapper response = this.listEndpoints(payload);
 			String str = response.getResponse();
 			JSONObject resJSON = new JSONObject(str);
-			JSONArray endpointArray = resJSON.getJSONArray("Endpoints");
+			resJSON.getJSONArray("Endpoints");
 			JSONObject listJSON = new JSONObject();
 			try {
 				saveModel = parseFedEndpoint(listJSON, request.getName(), datasource.getAlias(),
@@ -764,10 +763,10 @@ public class ICIPModelServiceAzure implements IICIPModelServiceUtil {
 
 	@Override
 	public ICIPPolyAIResponseWrapper deleteModel(ICIPPolyAIRequestWrapper request)
-			throws LeapException, JSONException, IOException {
+			throws EssedumException, JSONException, IOException {
 		ICIPPolyAIResponseWrapper modelObj = new ICIPPolyAIResponseWrapper();
 		JSONObject reqJsonObj = new JSONObject(request.getRequest());
-		ICIPMLFederatedModel dto = new ICIPMLFederatedModel();
+		new ICIPMLFederatedModel();
 		FedModelsID fedmodid = new FedModelsID();
 		fedmodid.setAdapterId(request.getName());
 		fedmodid.setSourceId(reqJsonObj.optString("modelId"));
@@ -892,7 +891,7 @@ public class ICIPModelServiceAzure implements IICIPModelServiceUtil {
 	
 	@Override
 	public ICIPPolyAIResponseWrapper deleteEndpoint(ICIPPolyAIRequestWrapper request)
-			throws IOException, LeapException {
+			throws IOException, EssedumException {
 		ICIPPolyAIResponseWrapper modelObj = new ICIPPolyAIResponseWrapper();
 		ICIPMLFederatedEndpoint dto = new ICIPMLFederatedEndpoint();
 		FedEndpointID fedendpointid = new FedEndpointID();
@@ -1017,7 +1016,7 @@ public class ICIPModelServiceAzure implements IICIPModelServiceUtil {
 
 	@Override
 	public ICIPPolyAIResponseWrapper deleteDeployment(ICIPPolyAIRequestWrapper request)
-			throws IOException, LeapException {
+			throws IOException, EssedumException {
 		// TODO Auto-generated method stub
 		return null;
 	}
