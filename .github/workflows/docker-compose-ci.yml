@@ -1,0 +1,31 @@
+name: Docker Compose CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create .env file
+        working-directory: ./docker
+        run: cp .env.sample .env
+
+      - name: Build and start services
+        run: docker-compose -f docker/docker-compose.yml up --build -d
+
+      - name: Wait for services to start
+        run: sleep 30
+
+      - name: Verify services
+        run: docker-compose -f docker/docker-compose.yml ps
+
+      - name: Stop services
+        run: docker-compose -f docker/docker-compose.yml down
