@@ -12,8 +12,13 @@
       {{ data.action }}
     </button>
     
-      <mat-icon class="snackbar-close-btn aip-cursor"
-      (click)="onDismiss()"
-      aria-label="Close">close</mat-icon>   
+   
+       <button
+        mat-button
+        class="snackbar-close-btn aip-cursor"
+        aria-label="Close"
+        (click)="onDismiss()">
+        <mat-icon>close</mat-icon>
+      </button>  
   </div>
 </div>

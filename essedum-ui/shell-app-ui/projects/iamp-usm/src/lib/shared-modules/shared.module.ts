@@ -8,11 +8,25 @@ import { FormsModule } from "@angular/forms";
 import { CustomSnackbarModule } from "./custom-snackbar/custom-snackbar.module";
 
 @NgModule({
- imports: [CommonModule, SharedMaterialModule,FormsModule, CustomSnackbarModule],
- declarations: [DeleteComponent, ConfirmationDialogComponent,AipFilterRolesComponent],
- providers: [],
- exports: [SharedMaterialModule, AipFilterRolesComponent, CustomSnackbarModule,FormsModule],
+  imports: [
+    CommonModule,
+    SharedMaterialModule,
+    FormsModule,
+    CustomSnackbarModule,
+  ],
+  declarations: [
+    DeleteComponent,
+    ConfirmationDialogComponent,
+    AipFilterRolesComponent,
+  ],
+  providers: [],
+  exports: [
+    SharedMaterialModule,
+    AipFilterRolesComponent,
+    CustomSnackbarModule,
+    FormsModule,
+  ],
 
-//  entryComponents: [DeleteComponent, ConfirmationDialogComponent],
+  //  entryComponents: [DeleteComponent, ConfirmationDialogComponent],
 })
 export class SharedModule {}

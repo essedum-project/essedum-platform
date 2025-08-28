@@ -133,7 +133,7 @@ export class UsmRolePermissionsService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e : any)  {
+    } catch (e: any)  {
       console.error("JSON.stringify error - ", e.message);
     }    // Get base headers from createRequestHeaders, then add the example header
     let headers = this.createRequestHeaders();
