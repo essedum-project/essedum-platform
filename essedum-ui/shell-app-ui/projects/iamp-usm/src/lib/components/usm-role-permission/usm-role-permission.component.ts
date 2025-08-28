@@ -899,15 +899,15 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
       (response) => {
         console.log(`Delete response for ID ${id}:`, response);
         this.testCreate = true;
-        this.loadPaginated(0, this.pageSize, null, null);
         this.currentPage.remove(usmRolePermissionsToDelete);
-        this.deletedashconstant(usmRolePermissionsToDelete);
+        this.deletedashconstant(usmRolePermissionsToDelete);        
         this.messageService.messageNotification(
           "Role-Permission Deleted successfully"
         );
 
         this.Clear();
         this.lastRefreshTime();
+        this.loadPaginated(0, this.pageSize, null, null);
       },
       (error) => {
         console.error(`Error deleting role permission with ID ${id}:`, error);

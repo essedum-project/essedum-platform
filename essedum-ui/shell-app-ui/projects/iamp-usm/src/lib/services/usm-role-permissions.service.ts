@@ -269,19 +269,17 @@ export class UsmRolePermissionsService {
           return this.handleError(err);
         })
       );
-  }  /**
+  }  
+  
+  /**
    * Delete an UsmRolePermissions by id.
    */
   delete(id: any) {
-    let headers = this.createRequestHeaders();
-    
+    let headers = this.createRequestHeaders();    
     // Set content type to application/json
     headers = headers.append('Content-Type', 'application/json');
-    
     // Log the request for debugging
     console.log(`Deleting role permission with ID: ${id}`);
-    
-    // First try the original endpoint (plural form)
     return this.https
       .delete("/api/usm-role-permissionss/" + id, {
         observe: "response",
@@ -289,32 +287,11 @@ export class UsmRolePermissionsService {
       })
       .pipe(
         catchError((err) => {
-          // If the first attempt fails, try the fallback endpoint
-          console.log(`First delete attempt failed, trying fallback endpoint for ID ${id}`);
-          return this.deleteWithFallback(id, headers);
-        })
-      );
-  }
-  
-  /**
-   * Fallback method to delete UsmRolePermissions if the first attempt fails.
-   * This tries alternative endpoint formats that might be correct.
-   */
-  private deleteWithFallback(id: any, headers: HttpHeaders) {
-    // Try singular form of endpoint
-    return this.https
-      .delete("/api/usm-role-permissions/" + id, {
-        observe: "response",
-        
-      })
-      .pipe(
-        catchError((err) => {
-          // Log the error from the fallback attempt
-          console.error(`Both delete attempts failed for ID ${id}:`, err);
+          console.error(`Delete attempt failed for ID ${id}:`, err);
           return this.handleError(err);
         })
       );
-  }   
+  }
 
   /**
    * Create a List of  UsmRolePermissions.
