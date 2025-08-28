@@ -25,6 +25,16 @@
 		<dependency>
 			<groupId>com.lfn.ai</groupId>
 			<artifactId>comm-lib-util</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+				<exclusion>
+					<artifactId>tika-parsers-standard</artifactId>
+					<groupId>org.apache.tika</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.lfn</groupId>
