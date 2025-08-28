@@ -22,6 +22,19 @@
   cursor: pointer;
   gap: 2rem;
 }
+ /* Dialog buttons */
+  .dialog-buttons {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px 24px 24px;
+    box-sizing: border-box;
+    width: 100% !important;
+    margin-top: 16px !important; /* Extra margin at the top */
+  }
+
+  .dialog-buttons button {
+    margin-left: 8px;
+  }
 
 .save-btn {
   color: #ffffff !important;
@@ -52,11 +65,8 @@
   border-radius: 16px;
   background: #dadada 0% 0% no-repeat padding-box;
   opacity: 1;
-  font-family: "Roboto", sans-serif !important;
-  border-radius: 16px;
-  background: #dadada 0% 0% no-repeat padding-box;
-  opacity: 1;
 }
+
 .no-data {
   display: flex;
   justify-content: center;

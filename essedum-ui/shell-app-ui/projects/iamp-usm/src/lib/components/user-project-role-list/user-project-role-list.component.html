@@ -315,14 +315,14 @@
           </div>
         </div>
       </div>
-      <div id="btnMargin" class="selector-673-230">
-        <button [ngBusy]="{ busy: busy, message: 'Saving UserProjectRoles...' }" *ngIf="!edit &amp;&amp; !view" type="button" class="save-btn" (click)="onSave()" [disabled]="!userProjectRoleForm.form.valid">
+      <div id="btnMargin" class="dialog-buttons">
+        <button [ngBusy]="{ busy: busy, message: 'Saving UserProjectRoles...' }" *ngIf="!edit && !view" type="button" mat-raised-button class="save-btn" (click)="onSave()" [disabled]="!userProjectRoleForm.form.valid" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">
           Save
         </button>
-        <button *ngIf="edit" [ngBusy]="{ busy: busy, message: 'Updating UserProjectRole...' }" type="button" class="save-btn" (click)="update()" [disabled]="!userProjectRoleForm.form.valid">
+        <button *ngIf="edit" [ngBusy]="{ busy: busy, message: 'Updating UserProjectRole...' }" type="button" mat-raised-button class="save-btn" (click)="update()" [disabled]="!userProjectRoleForm.form.valid" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">
           Update
         </button>
-        <button *ngIf="!view" type="button" class="cancel-btn" (click)="clear()">Clear</button>
+        <button *ngIf="!view" type="button" mat-raised-button class="cancel-btn" (click)="clear()" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">Clear</button>
       </div>
       <div *ngIf="errorMessage" class="selector-673-234">
         <h4 class="ams_h2 h2Mar crud-header selector-673-235" style="margin-left: -6rem" *ngIf="errorMessage">
