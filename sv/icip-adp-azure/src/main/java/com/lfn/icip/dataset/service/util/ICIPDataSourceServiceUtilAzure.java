@@ -1,14 +1,18 @@
 /**
- * @ 2020 - 2021 Infosys Limited, Bangalore, India. All Rights Reserved.
- * Version: 1.0
- * Except for any free or open source software components embedded in this Infosys proprietary software program (Program),
- * this Program is protected by copyright laws,international treaties and  other pending or existing intellectual property
- * rights in India,the United States, and other countries.Except as expressly permitted, any unauthorized reproduction,storage,
- * transmission in any form or by any means(including without limitation electronic,mechanical, printing,photocopying,
- * recording, or otherwise), or any distribution of this program, or any portion of it,may result in severe civil and
- * criminal penalties, and will be prosecuted to the maximum extent possible under the law.
+ * The MIT License (MIT)
+ * Copyright © 2025 Infosys Limited
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”),
+ * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.infosys.icets.icip.dataset.service.util;
+package com.lfn.icip.dataset.service.util;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
@@ -40,8 +44,6 @@ import java.security.InvalidKeyException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -68,22 +70,22 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Base64Utils;
 
 import com.google.gson.JsonObject;
-import com.infosys.icets.ai.comm.lib.util.ICIPUtils;
-import com.infosys.icets.icip.dataset.constants.ICIPPluginConstants;
-import com.infosys.icets.icip.dataset.model.ICIPDataset;
-import com.infosys.icets.icip.dataset.model.ICIPDatasource;
-import com.infosys.icets.icip.dataset.properties.HttpClientUtil;
-import com.infosys.icets.icip.dataset.properties.ProxyProperties;
-import com.infosys.icets.icip.dataset.service.impl.ICIPDatasetPluginsService;
-import com.infosys.icets.icip.dataset.service.util.IICIPDataSetServiceUtil.DATATYPE;
-import com.infosys.icets.icip.dataset.service.util.IICIPDataSetServiceUtil.SQLPagination;
-import com.infosys.icets.icip.dataset.util.ICIPRestPluginUtils;
+import com.lfn.ai.comm.lib.util.ICIPUtils;
+import com.lfn.icip.dataset.constants.ICIPPluginConstants;
+import com.lfn.icip.dataset.model.ICIPDataset;
+import com.lfn.icip.dataset.model.ICIPDatasource;
+import com.lfn.icip.dataset.properties.HttpClientUtil;
+import com.lfn.icip.dataset.properties.ProxyProperties;
+import com.lfn.icip.dataset.service.impl.ICIPDatasetPluginsService;
+import com.lfn.icip.dataset.service.util.IICIPDataSetServiceUtil.DATATYPE;
+import com.lfn.icip.dataset.service.util.IICIPDataSetServiceUtil.SQLPagination;
+import com.lfn.icip.dataset.util.ICIPRestPluginUtils;
 
 //
 /**
  * The Class ICIPDataSourceServiceUtilAzure.
  *
- * @author icets
+ * @author lfn
  */
 @Component("azuresource")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -97,9 +99,6 @@ public class ICIPDataSourceServiceUtilAzure extends ICIPDataSourceServiceUtilRes
 	
 	/** The Constant PSTR. */
 	private static final String PSTR = "password"; // Compliant
-	
-	/** The Constant AUTHURL. */
-	private static final String AUTHURL = "authUrl";
 	
 	/** The proxy properties. */
 	private ProxyProperties proxyProperties;
@@ -122,7 +121,7 @@ public class ICIPDataSourceServiceUtilAzure extends ICIPDataSourceServiceUtilRes
 	@Override
 	public boolean testConnection(ICIPDatasource datasource) {
 		JSONObject connectionDetails = new JSONObject(datasource.getConnectionDetails());
-		JSONObject authDetails = connectionDetails.optJSONObject("AuthDetails");
+		connectionDetails.optJSONObject("AuthDetails");
 		
 		String executionEnvironment = connectionDetails.optString("executionEnvironment");
 		if (ICIPPluginConstants.REMOTE.equalsIgnoreCase(executionEnvironment)) {

@@ -8,7 +8,7 @@
  * recording, or otherwise), or any distribution of this program, or any portion of it,may result in severe civil and
  * criminal penalties, and will be prosecuted to the maximum extent possible under the law.
  */
-package com.infosys.icets.iamp.usm.web.rest;
+package com.lfn.iamp.usm.web.rest;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;

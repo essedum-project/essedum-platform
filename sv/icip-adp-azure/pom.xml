@@ -3,7 +3,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.infosys.icets.icip.plugins</groupId>
+	<groupId>com.lfn.icip.plugins</groupId>
 	<version>3.3-SNAPSHOT</version>
 	<artifactId>icip-adp-azure</artifactId>
 	<name>icip-adp-azure</name>
@@ -13,19 +13,19 @@
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-adp</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-mod</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.ai</groupId>
+			<groupId>com.lfn.ai</groupId>
 			<artifactId>comm-lib-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>
