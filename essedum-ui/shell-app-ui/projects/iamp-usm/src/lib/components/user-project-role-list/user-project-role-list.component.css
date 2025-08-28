@@ -378,3 +378,105 @@ th[mat-header-cell] {
   margin-right: 10px;
   vertical-align: middle;
 }
+
+/* Delete Dialog Specific Styling */
+::ng-deep .delete-dialog-panel .mat-mdc-dialog-container {
+  width: 400px !important;
+  height: auto !important;
+  max-height: 300px !important;
+  min-width: 400px !important;
+  max-width: 400px !important;
+  padding: 0 !important;
+}
+
+::ng-deep .delete-dialog-panel .mdc-dialog__surface {
+  width: 400px !important;
+  height: auto !important;
+  max-height: 300px !important;
+  min-width: 400px !important;
+  max-width: 400px !important;
+}
+
+::ng-deep .delete-dialog-panel mat-dialog-content {
+  padding: 20px !important;
+  max-height: none !important;
+  overflow: visible !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  font-size: 14px !important;
+  color: #333 !important;
+  line-height: 1.5 !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  min-height: 20px !important;
+  white-space: normal !important;
+}
+
+::ng-deep .delete-dialog-panel h2[mat-dialog-title] {
+  padding: 20px 20px 0 20px !important;
+  margin: 0 !important;
+  font-size: 18px !important;
+  font-weight: 500 !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #333 !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+::ng-deep .delete-dialog-panel mat-dialog-actions {
+  padding: 0 20px 20px 20px !important;
+  margin: 0 !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Material Icon specific fixes for delete dialog */
+::ng-deep .delete-dialog-panel mat-icon {
+  font-family: 'Material Icons' !important;
+  font-weight: normal !important;
+  font-style: normal !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  display: inline-block !important;
+  white-space: nowrap !important;
+  word-wrap: normal !important;
+  direction: ltr !important;
+  color: orange !important;
+  margin-bottom: -7px !important;
+  vertical-align: middle !important;
+  -webkit-font-feature-settings: 'liga' !important;
+  font-feature-settings: 'liga' !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+/* Additional overrides to ensure content is always visible */
+::ng-deep .delete-dialog-panel .mat-mdc-dialog-content,
+::ng-deep .delete-dialog-panel .mdc-dialog__content {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #333 !important;
+  font-size: 14px !important;
+  padding: 20px !important;
+  margin: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Override any potential z-index or positioning issues */
+::ng-deep .delete-dialog-panel {
+  z-index: 9999 !important;
+}
+
+::ng-deep .delete-dialog-panel * {
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+/* Ensure mat-icon doesn't inherit other font families */
+::ng-deep .delete-dialog-panel mat-icon * {
+  font-family: 'Material Icons' !important;
+}
