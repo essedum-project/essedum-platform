@@ -234,8 +234,7 @@ public class UsmRolePermissionsResource {
 		}
 
 	}
-	
-	/**
+		/**
 	 * DELETE /usm-role-permissionss/:id : delete the "id" usm-role-permissionss.
 	 *
 	 * @param id the id of the usm-role-permissionss to delete
@@ -243,7 +242,7 @@ public class UsmRolePermissionsResource {
 	 */
 	@DeleteMapping("/usm-role-permissionss/{id}")
 	@Timed
-	public ResponseEntity<?> deleteRolePermissions(@PathVariable Integer id) {
+	public ResponseEntity<?> deleteRolePermissions(@PathVariable(name = "id", required = true) Integer id) {
 		try {
 			log.info("deleteRolePermissions : Request to delete Role Permissions by ID: {}",id);
 			usm_role_permissionsService.delete(id);
