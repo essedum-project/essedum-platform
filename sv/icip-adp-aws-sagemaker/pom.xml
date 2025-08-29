@@ -35,6 +35,12 @@
 		<dependency>
 		    <groupId>software.amazon.awssdk</groupId>
 		    <artifactId>regions</artifactId>
+		    <exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>	 
 		</dependency>
 		<dependency>
 		    <groupId>software.amazon.awssdk</groupId>
@@ -43,6 +49,12 @@
 		<dependency>
 		    <groupId>software.amazon.awssdk</groupId>
 		    <artifactId>sagemaker</artifactId>
+		    <exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 		    <groupId>software.amazon.awssdk</groupId>
