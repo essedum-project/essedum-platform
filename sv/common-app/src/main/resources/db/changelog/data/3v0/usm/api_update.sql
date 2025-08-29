@@ -7,7 +7,7 @@ UPDATE usm_permission_api SET api='/api/projectss/page.*' WHERE permission_id =(
 UPDATE usm_permission_api SET api='/api/user-project-roless/page.*' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm' AND permission ='user-project-roless-view' LIMIT 1) AND api='/api/user-project-roless/page';
 UPDATE usm_permission_api SET api='/api/projects' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm' AND permission ='projects-create' LIMIT 1) AND api='/api/projects/';
 UPDATE usm_permission_api SET api='/api/user-project-roles-list' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm' AND permission ='user-project-roles-list-create' LIMIT 1) AND api='/api/user-project-roles-list/';
-UPDATE usm_permission_api SET api='/api/user-project-roles/' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm' AND permission ='user-project-roles-edit' LIMIT 1) AND api='/api/user-project-roles';
+UPDATE usm_permission_api SET api='/api/user-project-roles' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm' AND permission ='user-project-roles-edit' LIMIT 1) AND api='/api/user-project-roles';
 UPDATE usm_permission_api SET api='/api/projects' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm' AND permission ='project-edit' LIMIT 1) AND api='/api/projects/';
 UPDATE usm_permission_api SET api='/api/roles' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm' AND permission ='role-edit' LIMIT 1) AND api='/api/roles/';
 UPDATE usm_permission_api SET api='/api/users/page.*' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm' AND permission ='users-view' LIMIT 1) AND api='/api/users/page';
