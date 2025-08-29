@@ -1,4 +1,4 @@
-import { Injectable, SkipSelf } from "@angular/core";
+import { Injectable, SkipSelf, Inject, Optional } from "@angular/core";
 import { Observable, map, catchError, throwError } from "rxjs";
 import { MessageService } from "./message.service";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
@@ -12,8 +12,16 @@ import { AuthService } from "./auth.service";
 })
 export class PortfolioService {
 
-  constructor(private https: HttpClient, private messageService: MessageService, public auth: AuthService) {
-
+  constructor(
+    private https: HttpClient, 
+    private messageService: MessageService, 
+    @Optional() public auth: AuthService) {
+    // If AuthService is not provided, create a minimal implementation
+    if (!auth) {
+      this.auth = {
+        getToken: () => sessionStorage.getItem("jwtToken") || ""
+      } as AuthService;
+    }
   }
 
   /**

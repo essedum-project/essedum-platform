@@ -37,6 +37,7 @@ import { encKey } from "./models/encKey";
 import { UsmRolePermissionsService } from "./services/usm-role-permissions.service";
 import { UsmPermissionsService } from "./services/usm-permission.service";
 import { DashConstantService } from "./services/dash-constant.service";
+import { AuthService } from "./services/auth.service";
 
 import { SecretsComponent } from "./components/secrets/secrets.component";
 import { RoleListComponent } from "./components/role-list/role-list.component";
@@ -137,8 +138,7 @@ import { ThemeMgmtComponent } from "./components/theme-mgmt/theme-mgmt.component
         AipPaginationsComponent,
         ThemeMgmtComponent,
         AipHeaderComponent,
-    ],
-    providers: [
+    ],    providers: [
         MessageService,
         UserProjectRoleService,
         HelperService,
@@ -158,12 +158,10 @@ import { ThemeMgmtComponent } from "./components/theme-mgmt/theme-mgmt.component
         RoleService,
         UsersService,
         encKey,
-
+        AuthService,
         { provide: BusyConfig, useFactory: busyConfigFactory },
         IampUsmService,
         Ng4LoadingSpinnerService,
-
-
     ],
     exports: [
         IampUsmComponent,
