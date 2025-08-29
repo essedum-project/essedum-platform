@@ -1,19 +1,14 @@
 import { Injectable, Inject, SkipSelf } from "@angular/core";
 import { Observable, map, catchError, throwError } from "rxjs";
-// import { Observable } from "rxjs/Observable";
-// import { MessageService } from './message.service';
 import { PageResponse } from "../support/paging";
 import { PageRequestByExample } from "../support/page-request";
 import { Project } from "../models/project";
-//import { environment } from '../../../../../src/environments/environment';
-// import { AuthService } from "./auth.service";
-// import { throwError } from "rxjs";
-
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-// import { map, catchError } from "rxjs/operators";
+
 @Injectable({
   providedIn: 'root'
 })
+
 export class ProjectService {
   constructor(private https: HttpClient) { }
 
@@ -22,6 +17,7 @@ export class ProjectService {
    */
 
   create(project: Project): Observable<Project> {
+
     // Get a copy of the project to modify
     const copy = this.convert(project);
 
@@ -82,6 +78,7 @@ export class ProjectService {
    * Get a Project by id.
    */
   getProject(id: any): Observable<Project> {
+
     // Get project and role from sessionStorage for headers
     const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
@@ -118,6 +115,7 @@ export class ProjectService {
    */
   update(project: Project): Observable<Project> {
     let body;
+
     let headerValue;
 
     try {
@@ -206,6 +204,7 @@ export class ProjectService {
     } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
+
     // let headers = new HttpHeaders();
 
     // headers = headers.append('example', headerValue);
@@ -225,6 +224,7 @@ export class ProjectService {
       'rolename': userRole.name || '',
       example: headerValue
     });
+
     return this.https
       .get(`/api/projectss/page?page=${event.page}&size=${event.size}`, {
         observe: "response", headers: headers

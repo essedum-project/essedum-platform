@@ -1,27 +1,10 @@
-//
-// Copyright © 2016-2017 Infosys Limited, Bangalore, India. All Rights Reserved.
-// * Except for any open source software components embedded in this
-// * Infosys proprietary software program (Program), this Program is protected
-// * by copyright laws, international treaties and other pending or existing
-// * intellectual property rights in India, the United States and other countries.
-// * Except as expressly permitted, any unauthorized reproduction, storage,
-// * transmission in any form or by any means (including without limitation
-// * electronic, mechanical, printing, photocopying, recording or otherwise),
-// * or any distribution of this Program, or any portion of it,
-// * may result in severe civil and criminal penalties, and
-// * will be prosecuted to the maximum extent possible under the law.
-// Template pack-angular:web/src/app/entities/entity.service.ts.e.vm
-//
 import { Injectable, SkipSelf } from "@angular/core";
 import { Observable, map, catchError, throwError } from "rxjs";
-// import { Observable } from "rxjs/Observable";
 import { PageResponse } from "../support/paging";
 import { PageRequestByExample } from "../support/page-request";
-
 import { of } from "rxjs";
 import { DashConstant } from "../models/dash-constant";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-// import { map, catchError } from "rxjs/operators";
 import { Project } from "../models/project";
 import { Portfolio } from "../models/portfolio";
 
@@ -29,7 +12,7 @@ import { Portfolio } from "../models/portfolio";
 export class DashConstantService {
 
   private dashconstants: any[];
-  private fetchConst:boolean=false;
+  private fetchConst: boolean = false;
 
   constructor(@SkipSelf() private https: HttpClient) { }
 
@@ -43,7 +26,7 @@ export class DashConstantService {
       .post("/api/dash-constants", copy, { observe: "response" })
       .pipe(
         map((response) => {
-          if (!isDefault){
+          if (!isDefault) {
             sessionStorage.setItem("CacheDashConstant", "true");
             sessionStorage.setItem("AppCacheDashConstant", "true");
           }
@@ -99,7 +82,7 @@ export class DashConstantService {
     let body;
     try {
       body = JSON.stringify(dash_constant);
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
 
@@ -109,7 +92,7 @@ export class DashConstantService {
       })
       .pipe(
         map((response) => {
-          if (!isDefault){
+          if (!isDefault) {
             sessionStorage.setItem("CacheDashConstant", "true");
             sessionStorage.setItem("AppCacheDashConstant", "true");
           }
@@ -132,7 +115,7 @@ export class DashConstantService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     const headerValue = Buffer.from(body, 'utf8').toString('base64');
@@ -168,30 +151,29 @@ export class DashConstantService {
           //if project has no mapping then first key after filtering out default keys will be core so 
           //so we need to fetch mapping from db only once remaining time return from cache.fetchConst will let us
           //know whether it was fetched once or not.
-          else if(this.fetchConst && projectname!="Core" && tempDashConst[0].project_id.name == "Core")
+          else if (this.fetchConst && projectname != "Core" && tempDashConst[0].project_id.name == "Core")
             return of(this.dashconstants);
-          else 
-          {
+          else {
             //if we are switching the projects then dashconstant will be available for the old projects
             //so we need to call the api again to fetch for the new project and only once its needed to be called
-            this.fetchConst=false;
-            let result= this.getDashConsts(project);
-            this.fetchConst=true;
+            this.fetchConst = false;
+            let result = this.getDashConsts(project);
+            this.fetchConst = true;
             return result
           }
         } else //if leap is loaded for first time dashconstant is undefined so call api
-        return this.getDashConsts(project);
+          return this.getDashConsts(project);
       }
     } catch (error) { }
   }
 
   getDashConsts(project: Project): Observable<DashConstant[]> {
     let portfolio: Portfolio;
-      try {
-        portfolio = JSON.parse(sessionStorage.getItem("project") || "").portfolioId;
-      } catch (e: any) {
-        console.error("JSON.parse error - ", e.message);
-      }
+    try {
+      portfolio = JSON.parse(sessionStorage.getItem("project") || "").portfolioId;
+    } catch (e: any) {
+      console.error("JSON.parse error - ", e.message);
+    }
     return this.https
       .get("/api/get-dash-constants?projectId=" + project.id + "&portfolioId=" + portfolio.id, {
         observe: "response",
@@ -221,7 +203,7 @@ export class DashConstantService {
     let body;
     try {
       body = JSON.stringify({ query: query, maxResults: 10 });
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -260,34 +242,34 @@ export class DashConstantService {
       );
   }
 
-   /**
-   * save theme constant
-   */
-    saveTheme(dash_constant: DashConstant): Observable<any[]> {
-      let body;
-      try {
-        body = JSON.stringify(dash_constant);
-      } catch (e : any)  {
-        console.error("JSON.stringify error - ", e.message);
-      }
-      return this.https
-        .post("/api/save-theme", body, {
-          observe: "response",
-          responseType:"text"
-        })
-        .pipe(
-          map((response) => {
-            console.log("response received")
-            let pr: any = response.body;
-            return pr;
-          })
-        )
-        .pipe(
-          catchError((err) => {
-            return this.handleError(err);
-          })
-        );
+  /**
+  * save theme constant
+  */
+  saveTheme(dash_constant: DashConstant): Observable<any[]> {
+    let body;
+    try {
+      body = JSON.stringify(dash_constant);
+    } catch (e: any) {
+      console.error("JSON.stringify error - ", e.message);
     }
+    return this.https
+      .post("/api/save-theme", body, {
+        observe: "response",
+        responseType: "text"
+      })
+      .pipe(
+        map((response) => {
+          console.log("response received")
+          let pr: any = response.body;
+          return pr;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
 
   // sample method from angular doc
   private handleError(error: any) {

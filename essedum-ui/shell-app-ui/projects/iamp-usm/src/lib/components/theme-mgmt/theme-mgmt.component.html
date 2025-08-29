@@ -1,0 +1,1085 @@
+<mat-card appearance="outlined" class="theme-management-card">
+  <mat-card-header>
+    <mat-card-title>
+      <h1 class="theme-title">Theme Configuration</h1>
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <!-- Project Theme Section -->
+    <section class="theme-section" aria-labelledby="project-theme-header">
+      <p-fieldset [toggleable]="true" [collapsed]="false">
+        <ng-template pTemplate="header">
+          <h2 id="project-theme-header">Project</h2>
+        </ng-template>
+        
+        <div class="color-grid">
+          <!-- Row 1 -->
+          <div class="color-row">
+            <div class="color-field">
+              <label for="projecttheme" class="color-label required">Project Theme Color *</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="projecttheme"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.apptheme.themecolor"
+                  name="projecttheme"
+                  required
+                  aria-describedby="projecttheme-help" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.apptheme?.themecolor"
+                  (click)="theme.apptheme.themecolor = null"
+                  aria-label="Clear project theme color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small id="projecttheme-help" class="color-help" *ngIf="theme.apptheme?.themecolor">
+                {{ theme.apptheme.themecolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="headercolor" class="color-label">Header Background Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="headercolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.apptheme.headercolor"
+                  name="headercolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.apptheme?.headercolor"
+                  (click)="theme.apptheme.headercolor = null"
+                  aria-label="Clear header color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.apptheme?.headercolor">
+                {{ theme.apptheme.headercolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="headericoncolor" class="color-label">Header Icon Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="headericoncolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.apptheme.headericoncolor"
+                  name="headericoncolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.apptheme?.headericoncolor"
+                  (click)="theme.apptheme.headericoncolor = null"
+                  aria-label="Clear header icon color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.apptheme?.headericoncolor">
+                {{ theme.apptheme.headericoncolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="sidebarcolor" class="color-label">Sidebar Background Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="sidebarcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.apptheme.sidebarbackgroundcolor"
+                  name="sidebarcolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.apptheme?.sidebarbackgroundcolor"
+                  (click)="theme.apptheme.sidebarbackgroundcolor = null"
+                  aria-label="Clear sidebar background color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.apptheme?.sidebarbackgroundcolor">
+                {{ theme.apptheme.sidebarbackgroundcolor }}
+              </small>
+            </div>
+          </div>
+
+          <!-- Row 2 -->
+          <div class="color-row">
+            <div class="color-field">
+              <label for="sidebartextcolor" class="color-label">Sidebar Text Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="sidebartextcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.apptheme.sidebartextcolor"
+                  name="sidebartextcolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.apptheme?.sidebartextcolor"
+                  (click)="theme.apptheme.sidebartextcolor = null"
+                  aria-label="Clear sidebar text color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.apptheme?.sidebartextcolor">
+                {{ theme.apptheme.sidebartextcolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="sidebarhovercolor" class="color-label">Sidebar Hover Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="sidebarhovercolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.apptheme.sidebarhovercolor"
+                  name="sidebarhovercolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.apptheme?.sidebarhovercolor"
+                  (click)="theme.apptheme.sidebarhovercolor = null"
+                  aria-label="Clear sidebar hover color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.apptheme?.sidebarhovercolor">
+                {{ theme.apptheme.sidebarhovercolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="sidebartexticonhovercolor" class="color-label">Sidebar Text/Icon Hover Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="sidebartexticonhovercolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.apptheme.sidebartexticonhovercolor"
+                  name="sidebartexticonhovercolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.apptheme?.sidebartexticonhovercolor"
+                  (click)="theme.apptheme.sidebartexticonhovercolor = null"
+                  aria-label="Clear sidebar text/icon hover color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.apptheme?.sidebartexticonhovercolor">
+                {{ theme.apptheme.sidebartexticonhovercolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="sidebaractivecolor" class="color-label">Sidebar Highlight Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="sidebaractivecolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.apptheme.sidebaractivecolor"
+                  name="sidebaractivecolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.apptheme?.sidebaractivecolor"
+                  (click)="theme.apptheme.sidebaractivecolor = null"
+                  aria-label="Clear sidebar highlight color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.apptheme?.sidebaractivecolor">
+                {{ theme.apptheme.sidebaractivecolor }}
+              </small>
+            </div>
+          </div>
+
+          <!-- Row 3 -->
+          <div class="color-row">
+            <div class="color-field">
+              <label for="sidebariconcolor" class="color-label">Sidebar Icon Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="sidebariconcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.apptheme.sidebariconcolor"
+                  name="sidebariconcolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.apptheme?.sidebariconcolor"
+                  (click)="theme.apptheme.sidebariconcolor = null"
+                  aria-label="Clear sidebar icon color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.apptheme?.sidebariconcolor">
+                {{ theme.apptheme.sidebariconcolor }}
+              </small>
+            </div>
+          </div>
+        </div>
+      </p-fieldset>
+    </section>
+    <!-- BCC Theme Section -->
+    <section class="theme-section" aria-labelledby="bcc-theme-header">
+      <p-fieldset [toggleable]="true" [collapsed]="false">
+        <ng-template pTemplate="header">
+          <h2 id="bcc-theme-header">BCC</h2>
+        </ng-template>
+        
+        <div class="color-grid">
+          <div class="color-row">
+            <div class="color-field">
+              <label for="bccheaderbackgroundcolor" class="color-label">Header Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="bccheaderbackgroundcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.bcctheme.bccheaderbackgroundcolor"
+                  name="bccheaderbackgroundcolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.bcctheme?.bccheaderbackgroundcolor"
+                  (click)="theme.bcctheme.bccheaderbackgroundcolor = null"
+                  aria-label="Clear BCC header color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.bcctheme?.bccheaderbackgroundcolor">
+                {{ theme.bcctheme.bccheaderbackgroundcolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="bccheadertextcolor" class="color-label">Header Icon/Text Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="bccheadertextcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.bcctheme.bccheadertextcolor"
+                  name="bccheadertextcolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.bcctheme?.bccheadertextcolor"
+                  (click)="theme.bcctheme.bccheadertextcolor = null"
+                  aria-label="Clear BCC header text color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.bcctheme?.bccheadertextcolor">
+                {{ theme.bcctheme.bccheadertextcolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="bccsidebarbackgroundcolor" class="color-label">Sidebar Background Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="bccsidebarbackgroundcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.bcctheme.bccsidebarbackgroundcolor"
+                  name="bccsidebarbackgroundcolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.bcctheme?.bccsidebarbackgroundcolor"
+                  (click)="theme.bcctheme.bccsidebarbackgroundcolor = null"
+                  aria-label="Clear BCC sidebar background color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.bcctheme?.bccsidebarbackgroundcolor">
+                {{ theme.bcctheme.bccsidebarbackgroundcolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="bccsidebarcolor" class="color-label">Sidebar Text Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="bccsidebarcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.bcctheme.bccsidebarcolor"
+                  name="bccsidebarcolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.bcctheme?.bccsidebarcolor"
+                  (click)="theme.bcctheme.bccsidebarcolor = null"
+                  aria-label="Clear BCC sidebar text color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.bcctheme?.bccsidebarcolor">
+                {{ theme.bcctheme.bccsidebarcolor }}
+              </small>
+            </div>
+          </div>
+
+          <div class="color-row">
+            <div class="color-field">
+              <label for="bccsidebarhighlightcolor" class="color-label">Sidebar Highlight Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="bccsidebarhighlightcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.bcctheme.bccsidebarhighlightcolor"
+                  name="bccsidebarhighlightcolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.bcctheme?.bccsidebarhighlightcolor"
+                  (click)="theme.bcctheme.bccsidebarhighlightcolor = null"
+                  aria-label="Clear BCC sidebar highlight color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.bcctheme?.bccsidebarhighlightcolor">
+                {{ theme.bcctheme.bccsidebarhighlightcolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="bccsidebariconcolor" class="color-label">Sidebar Icon Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="bccsidebariconcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.bcctheme.bccsidebariconcolor"
+                  name="bccsidebariconcolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.bcctheme?.bccsidebariconcolor"
+                  (click)="theme.bcctheme.bccsidebariconcolor = null"
+                  aria-label="Clear BCC sidebar icon color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.bcctheme?.bccsidebariconcolor">
+                {{ theme.bcctheme.bccsidebariconcolor }}
+              </small>
+            </div>
+          </div>
+        </div>
+      </p-fieldset>
+    </section>
+    <!-- Dashboard Theme Section -->
+    <section class="theme-section" aria-labelledby="dashboard-theme-header">
+      <p-fieldset [toggleable]="true" [collapsed]="false">
+        <ng-template pTemplate="header">
+          <h2 id="dashboard-theme-header">Dashboard</h2>
+        </ng-template>
+        
+        <div class="color-grid">
+          <!-- Row 1 -->
+          <div class="color-row">
+            <div class="color-field">
+              <label for="dashboardbackgroundcolor" class="color-label">Dashboard Background Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="dashboardbackgroundcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.dashboardtheme.dashboardbackgroundcolor"
+                  name="dashboardbackgroundcolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.dashboardtheme?.dashboardbackgroundcolor"
+                  (click)="theme.dashboardtheme.dashboardbackgroundcolor = null"
+                  aria-label="Clear dashboard background color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.dashboardtheme?.dashboardbackgroundcolor">
+                {{ theme.dashboardtheme.dashboardbackgroundcolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="iconcolor" class="color-label">Dashboard Icon and Filter Apply Button Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="iconcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.dashboardtheme.iconcolor"
+                  name="iconcolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.dashboardtheme?.iconcolor"
+                  (click)="theme.dashboardtheme.iconcolor = null"
+                  aria-label="Clear icon color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.dashboardtheme?.iconcolor">
+                {{ theme.dashboardtheme.iconcolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="applybuttontextcolor" class="color-label">Filter Apply Button Text Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="applybuttontextcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.dashboardtheme.applybuttontextcolor"
+                  name="applybuttontextcolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.dashboardtheme?.applybuttontextcolor"
+                  (click)="theme.dashboardtheme.applybuttontextcolor = null"
+                  aria-label="Clear apply button text color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.dashboardtheme?.applybuttontextcolor">
+                {{ theme.dashboardtheme.applybuttontextcolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="bgcolor" class="color-label">Header Background Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="bgcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.dashboardtheme.backgroundcolor"
+                  name="bgcolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.dashboardtheme?.backgroundcolor"
+                  (click)="theme.dashboardtheme.backgroundcolor = null"
+                  aria-label="Clear header background color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.dashboardtheme?.backgroundcolor">
+                {{ theme.dashboardtheme.backgroundcolor }}
+              </small>
+            </div>
+          </div>
+
+          <!-- Row 2 -->
+          <div class="color-row">
+            <div class="color-field">
+              <label for="titlecolor" class="color-label">Header Text Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="titlecolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.dashboardtheme.titlecolor"
+                  name="titlecolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.dashboardtheme?.titlecolor"
+                  (click)="theme.dashboardtheme.titlecolor = null"
+                  aria-label="Clear title color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.dashboardtheme?.titlecolor">
+                {{ theme.dashboardtheme.titlecolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="filtercolor" class="color-label">Filter Name Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="filtercolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.dashboardtheme.filtercolor"
+                  name="filtercolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.dashboardtheme?.filtercolor"
+                  (click)="theme.dashboardtheme.filtercolor = null"
+                  aria-label="Clear filter color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.dashboardtheme?.filtercolor">
+                {{ theme.dashboardtheme.filtercolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="filtertextcolor" class="color-label">Filter Text Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="filtertextcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.dashboardtheme.filtertextcolor"
+                  name="filtertextcolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.dashboardtheme?.filtertextcolor"
+                  (click)="theme.dashboardtheme.filtertextcolor = null"
+                  aria-label="Clear filter text color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.dashboardtheme?.filtertextcolor">
+                {{ theme.dashboardtheme.filtertextcolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="filterbackgroundcolor" class="color-label">Filter Background Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="filterbackgroundcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.dashboardtheme.filterbackgroundcolor"
+                  name="filterbackgroundcolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.dashboardtheme?.filterbackgroundcolor"
+                  (click)="theme.dashboardtheme.filterbackgroundcolor = null"
+                  aria-label="Clear filter background color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.dashboardtheme?.filterbackgroundcolor">
+                {{ theme.dashboardtheme.filterbackgroundcolor }}
+              </small>
+            </div>
+          </div>
+
+          <!-- Row 3 -->
+          <div class="color-row">
+            <div class="checkbox-field" 
+                 *ngIf="theme.dashboardtheme && (theme.dashboardtheme.filtercolor || theme.dashboardtheme.filterbackgroundcolor)">
+              <mat-checkbox 
+                [(ngModel)]="theme.dashboardtheme.widgetfilterapply"
+                name="widgetfilterapply">
+                Apply to Widget Filters
+              </mat-checkbox>
+            </div>
+
+            <div class="color-field">
+              <label for="dashboarddropdowncolor" class="color-label">Dashboard Dropdown Text Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="dashboarddropdowncolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.dashboardtheme.dashboarddropdowncolor"
+                  name="dashboarddropdowncolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.dashboardtheme?.dashboarddropdowncolor"
+                  (click)="theme.dashboardtheme.dashboarddropdowncolor = null"
+                  aria-label="Clear dashboard dropdown color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.dashboardtheme?.dashboarddropdowncolor">
+                {{ theme.dashboardtheme.dashboarddropdowncolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="toggleinactivecolor" class="color-label">Toggle Inactive Text Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="toggleinactivecolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.dashboardtheme.toggleinactivecolor"
+                  name="toggleinactivecolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.dashboardtheme?.toggleinactivecolor"
+                  (click)="theme.dashboardtheme.toggleinactivecolor = null"
+                  aria-label="Clear toggle inactive color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.dashboardtheme?.toggleinactivecolor">
+                {{ theme.dashboardtheme.toggleinactivecolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="toggleinactivebackgroundcolor" class="color-label">Toggle Inactive Background Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="toggleinactivebackgroundcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.dashboardtheme.toggleinactivebackgroundcolor"
+                  name="toggleinactivebackgroundcolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.dashboardtheme?.toggleinactivebackgroundcolor"
+                  (click)="theme.dashboardtheme.toggleinactivebackgroundcolor = null"
+                  aria-label="Clear toggle inactive background color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.dashboardtheme?.toggleinactivebackgroundcolor">
+                {{ theme.dashboardtheme.toggleinactivebackgroundcolor }}
+              </small>
+            </div>
+          </div>
+
+          <!-- Row 4 -->
+          <div class="color-row">
+            <div class="color-field">
+              <label for="toggleactivecolor" class="color-label">Toggle Active Text Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="toggleactivecolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.dashboardtheme.toggleactivecolor"
+                  name="toggleactivecolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.dashboardtheme?.toggleactivecolor"
+                  (click)="theme.dashboardtheme.toggleactivecolor = null"
+                  aria-label="Clear toggle active color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.dashboardtheme?.toggleactivecolor">
+                {{ theme.dashboardtheme.toggleactivecolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="toggleactivebackgroundcolor" class="color-label">Toggle Active Background Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="toggleactivebackgroundcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.dashboardtheme.toggleactivebackgroundcolor"
+                  name="toggleactivebackgroundcolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.dashboardtheme?.toggleactivebackgroundcolor"
+                  (click)="theme.dashboardtheme.toggleactivebackgroundcolor = null"
+                  aria-label="Clear toggle active background color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.dashboardtheme?.toggleactivebackgroundcolor">
+                {{ theme.dashboardtheme.toggleactivebackgroundcolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="toggleactiveunderlinecolor" class="color-label">Toggle Active Underline Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="toggleactiveunderlinecolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.dashboardtheme.toggleactiveunderlinecolor"
+                  name="toggleactiveunderlinecolor" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.dashboardtheme?.toggleactiveunderlinecolor"
+                  (click)="theme.dashboardtheme.toggleactiveunderlinecolor = null"
+                  aria-label="Clear toggle active underline color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.dashboardtheme?.toggleactiveunderlinecolor">
+                {{ theme.dashboardtheme.toggleactiveunderlinecolor }}
+              </small>
+            </div>
+          </div>
+        </div>
+      </p-fieldset>
+    </section>
+    <!-- Widget Theme Section -->
+    <section class="theme-section" aria-labelledby="widget-theme-header">
+      <p-fieldset [toggleable]="true" [collapsed]="false">
+        <ng-template pTemplate="header">
+          <h2 id="widget-theme-header">Widget</h2>
+        </ng-template>
+        
+        <div class="color-grid">
+          <!-- Row 1 - Color Configuration -->
+          <div class="color-row">
+            <div class="color-field">
+              <label for="wbgcolor" class="color-label">Background Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="wbgcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.widgettheme.backgroundcolor"
+                  name="wbgcolor"
+                  (click)="addThemeAttr('background')" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.widgettheme?.backgroundcolor"
+                  (click)="theme.widgettheme.backgroundcolor = null; removeThemeAttr('background')"
+                  aria-label="Clear background color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.widgettheme?.backgroundcolor">
+                {{ theme.widgettheme.backgroundcolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="wbordercolor" class="color-label">Border Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="wbordercolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.widgettheme.bordercolor"
+                  name="wbordercolor"
+                  (click)="addThemeAttr('border')" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.widgettheme?.bordercolor"
+                  (click)="theme.widgettheme.bordercolor = null; removeThemeAttr('border')"
+                  aria-label="Clear border color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.widgettheme?.bordercolor">
+                {{ theme.widgettheme.bordercolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="wtextcolor" class="color-label">Text Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="wtextcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.widgettheme.textcolor"
+                  name="wtextcolor"
+                  (click)="addThemeAttr('text')" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.widgettheme?.textcolor"
+                  (click)="theme.widgettheme.textcolor = null; removeThemeAttr('text')"
+                  aria-label="Clear text color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.widgettheme?.textcolor">
+                {{ theme.widgettheme.textcolor }}
+              </small>
+            </div>
+
+            <div class="color-field">
+              <label for="wbackgroundcolor" class="color-label">Tile Widget Background Color</label>
+              <div class="color-input-wrapper">
+                <input
+                  id="wbackgroundcolor"
+                  type="color"
+                  class="color-input"
+                  [(ngModel)]="theme.widgettheme.tilebackgroundcolor"
+                  name="wbackgroundcolor"
+                  (click)="addThemeAttr('tilebackground')" />
+                <button
+                  type="button"
+                  class="clear-btn"
+                  *ngIf="theme.widgettheme?.tilebackgroundcolor"
+                  (click)="theme.widgettheme.tilebackgroundcolor = null; removeThemeAttr('tilebackground')"
+                  aria-label="Clear tile background color"
+                  matTooltip="Clear color">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <small class="color-help" *ngIf="theme.widgettheme?.tilebackgroundcolor">
+                {{ theme.widgettheme.tilebackgroundcolor }}
+              </small>
+            </div>
+          </div>
+
+          <!-- Row 2 - Other Settings -->
+          <div class="color-row">
+            <div class="input-field">
+              <label for="fontfamily" class="input-label">Font Family</label>
+              <mat-form-field appearance="outline" class="full-width">
+                <input 
+                  matInput
+                  id="fontfamily"
+                  [(ngModel)]="theme.widgettheme.fontfamily"
+                  pattern="^[A-Za-z0-9,][A-Za-z0-9, ]{0,}"
+                  name="wfontfamily"
+                  (click)="addThemeAttr('fontfamily')"
+                  placeholder="e.g., Arial, sans-serif" />
+              </mat-form-field>
+            </div>
+
+            <div class="input-field">
+              <label for="borderradius" class="input-label">Border Radius</label>
+              <mat-form-field appearance="outline" class="full-width">
+                <input 
+                  matInput
+                  id="borderradius"
+                  type="number"
+                  min="0"
+                  max="50"
+                  [(ngModel)]="theme.widgettheme.borderradius"
+                  name="wborderradius"
+                  (click)="addThemeAttr('borderradius')"
+                  placeholder="0-50" />
+                <span matSuffix>px</span>
+              </mat-form-field>
+            </div>
+
+            <div class="checkbox-field">
+              <mat-checkbox 
+                [(ngModel)]="theme.widgettheme.boldtitle"
+                name="wboldtitle"
+                (change)="changeBoltTitle()">
+                Bold Title
+              </mat-checkbox>
+            </div>
+
+            <div class="checkbox-field">
+              <mat-checkbox 
+                [(ngModel)]="theme.widgettheme.bordershadow"
+                name="bordershadow"
+                (change)="changeBorderShadow()">
+                Border Shadow
+              </mat-checkbox>
+            </div>
+          </div>
+
+          <!-- Row 3 - Priority Settings -->
+          <div class="color-row" 
+               *ngIf="hasWidgetThemeSettings()">
+            <div class="checkbox-field">
+              <mat-checkbox 
+                [(ngModel)]="theme.widgettheme.proritizeThemeColor"
+                name="proritizeThemeColor">
+                Prioritize Theme
+              </mat-checkbox>
+            </div>
+
+            <div class="input-field" 
+                 *ngIf="theme.widgettheme?.proritizeThemeColor">
+              <label for="priorityTheme" class="input-label">Priority Theme Options</label>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-select
+                  id="priorityTheme"
+                  [(ngModel)]="theme.widgettheme.proritizeThemeColorArr"
+                  name="proritizeThemeColorArr"
+                  multiple
+                  placeholder="Select theme priorities">
+                  <mat-option 
+                    *ngIf="theme.widgettheme?.backgroundcolor"
+                    value="background">
+                    Background
+                  </mat-option>
+                  <mat-option 
+                    *ngIf="theme.widgettheme?.textcolor"
+                    value="text">
+                    Text
+                  </mat-option>
+                  <mat-option 
+                    *ngIf="theme.widgettheme?.bordercolor"
+                    value="border">
+                    Border
+                  </mat-option>
+                  <mat-option 
+                    *ngIf="theme.widgettheme?.bordershadow"
+                    value="bordershadow">
+                    Border Shadow
+                  </mat-option>
+                  <mat-option 
+                    *ngIf="theme.widgettheme?.tilebackgroundcolor"
+                    value="tilebackground">
+                    Tile Background
+                  </mat-option>
+                  <mat-option 
+                    *ngIf="theme.widgettheme?.fontfamily"
+                    value="fontfamily">
+                    Font Family
+                  </mat-option>
+                  <mat-option 
+                    *ngIf="theme.widgettheme?.borderradius"
+                    value="borderradius">
+                    Border Radius
+                  </mat-option>
+                  <mat-option 
+                    *ngIf="theme.widgettheme?.boldtitle"
+                    value="boldtitle">
+                    Bold Title
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart Color Palette Configuration -->
+        <div class="palette-section">
+          <h3 class="palette-title">Chart Color Palette Configuration</h3>
+          <div class="palette-container">
+            <div 
+              *ngFor="let color of paletteArray; let i = index; trackBy: trackByMethod"
+              class="palette-item"
+              [attr.aria-label]="'Color palette item ' + (i + 1)">
+              
+              <div class="palette-controls">
+                <label [for]="'palette-color-' + i" class="palette-label">
+                  Color {{ i + 1 }}
+                </label>
+                
+                <div class="palette-input-group">
+                  <input
+                    [id]="'palette-color-' + i"
+                    type="color"
+                    [(ngModel)]="paletteArray[i]"
+                    [name]="'color' + i"
+                    class="palette-color-input"
+                    required />
+                  
+                  <button
+                    type="button"
+                    class="palette-reset-btn"
+                    *ngIf="paletteArray[i] !== 'Black'"
+                    (click)="paletteArray[i] = 'Black'"
+                    [attr.aria-label]="'Reset color ' + (i + 1) + ' to black'"
+                    matTooltip="Reset to black">
+                    <mat-icon>refresh</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <div class="palette-actions">
+                <button
+                  type="button"
+                  class="palette-action-btn delete-btn"
+                  *ngIf="paletteArray.length > 1"
+                  (click)="paletteArray.splice(i, 1)"
+                  [attr.aria-label]="'Delete color ' + (i + 1)"
+                  matTooltip="Delete palette color">
+                  <mat-icon>delete</mat-icon>
+                </button>
+
+                <button
+                  type="button"
+                  class="palette-action-btn add-btn"
+                  *ngIf="i === paletteArray.length - 1"
+                  (click)="paletteArray.push('Black')"
+                  aria-label="Add new palette color"
+                  matTooltip="Add palette color">
+                  <mat-icon>add</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </p-fieldset>
+    </section>
+  </mat-card-content>
+
+  <!-- Action Buttons -->
+  <mat-card-actions class="action-buttons">
+    <button 
+      mat-raised-button 
+      color="primary"
+      [ngBusy]="{ busy: busy, message: 'Saving Theme...' }"
+      (click)="save()"
+      [attr.aria-label]="'Save theme configuration'">
+      <mat-icon>save</mat-icon>
+      Save
+    </button>
+    
+    <button 
+      mat-raised-button
+      color="warn"
+      (click)="clear()"
+      [attr.aria-label]="'Clear all theme settings'">
+      <mat-icon>clear</mat-icon>
+      Clear
+    </button>
+  </mat-card-actions>
+</mat-card>

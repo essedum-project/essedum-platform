@@ -1,12 +1,10 @@
 import { Injectable } from "@angular/core";
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class AuthService {
- public getToken(): string {
-  if (sessionStorage.getItem("jwtToken") !== undefined) {
-   return sessionStorage.getItem("jwtToken");
-  }
-  return "";
- }
+    public getToken(): string {
+        if (sessionStorage.getItem("jwtToken") !== undefined) {
+            return sessionStorage.getItem("jwtToken");
+        }
+        return "";
+    }
 }

@@ -3,6 +3,7 @@ import { RouterModule, Routes } from "@angular/router";
 import { RoleListComponent } from "./components/role-list/role-list.component";
 import { RoleDetailComponent } from "./components/role-detail/role-detail.component";
 import { SecretsComponent } from "./components/secrets/secrets.component";
+import { DashConstantComponent } from "./entities/dash-constant/dash-constant.component";
 import { ProjectListViewComponent } from "./components/project/project-list-view.component";
 import { ProjectDetailComponent } from "./components/project-detail/project-detail.component";
 import { ManageUsersComponent } from "./components/manage-users/manage-users.component";
@@ -12,10 +13,17 @@ import { UsmRolePermissionComponent } from "./components/usm-role-permission/usm
 import { IampUsmComponent } from "./iamp-usm.component";
 
 const routes: Routes = [
+    { path: "dashconstant", component: DashConstantComponent },
+    { path: "dashconstant/:dashconstantid/:dashconstantview", component: DashConstantComponent },
+    { path: "dashconstant/:configtype/:dashconstantid/:dashconstantview", component: DashConstantComponent },
+    { path: "dashconstant/:configtype", component: DashConstantComponent },
     {
         path: "",
         component: IampUsmComponent,
         children: [
+
+            { path: "secret", component: SecretsComponent },
+            { path: "secret/:key/:type", component: SecretsComponent },
             { path: "manageUsers", component: ManageUsersComponent },
             { path: "manageUsers/:uid/:view", component: ManageUsersComponent },
             { path: "projectlist", component: ProjectListViewComponent },
@@ -35,8 +43,6 @@ const routes: Routes = [
         ],
     },
 ];
-
-
 
 @NgModule({
     exports: [RouterModule],

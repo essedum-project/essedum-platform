@@ -1,16 +1,10 @@
 import { Injectable, Inject, SkipSelf } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable, map, catchError, throwError } from "rxjs";
-// import { Observable } from "rxjs/Observable";
 import { MessageService } from "./message.service";
 import { PageResponse } from "../support/paging";
 import { PageRequestByExample } from "../support/page-request";
 import { UserProjectRole } from "../models/user-project-role";
-//import { environment } from '../../../../../src/environments/environment';
-// import { AuthService } from "./auth.service";
-// import { throwError } from "rxjs";
-// import { map } from "rxjs/operators";
-// import { catchError } from "rxjs/operators";
 import { Users } from "../models/users";
 
 @Injectable()
@@ -18,7 +12,7 @@ export class UserProjectRoleService {
 
   constructor(
     private https: HttpClient
-  ) {}
+  ) { }
 
   /**
    * Create a new  UserProjectRole.
@@ -26,11 +20,11 @@ export class UserProjectRoleService {
 
   create(user_project_role: UserProjectRole): Observable<UserProjectRole> {
     const copy = this.convert(user_project_role);
-    
+
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -42,10 +36,10 @@ export class UserProjectRoleService {
       'roleid': userRole.id || '',
       'rolename': userRole.name || ''
     });
-    
+
     console.log("Creating user project role:", copy);
     console.log("Headers:", headers);
-    
+
     return this.https
       .post("/api/user-project-roles", copy, {
         observe: "response",
@@ -70,7 +64,7 @@ export class UserProjectRoleService {
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -82,10 +76,10 @@ export class UserProjectRoleService {
       'roleid': userRole.id || '',
       'rolename': userRole.name || ''
     });
-    
+
     console.log("Getting user project role with ID:", id);
     console.log("Headers:", headers);
-    
+
     return this.https
       .get("/api/user-project-roles/" + id, {
         observe: "response",
@@ -111,14 +105,14 @@ export class UserProjectRoleService {
     let result;
     try {
       body = JSON.stringify(user_project_role);
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
 
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -130,7 +124,7 @@ export class UserProjectRoleService {
       'roleid': userRole.id || '',
       'rolename': userRole.name || ''
     });
-    
+
     console.log("Updating user project role:", user_project_role);
     console.log("Headers:", headers);
 
@@ -163,14 +157,14 @@ export class UserProjectRoleService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, "utf8").toString("base64");
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
-    
+
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -185,7 +179,7 @@ export class UserProjectRoleService {
     });
 
     console.log("Fetching user project roles with token:", localStorage.getItem('jwtToken'));
-    
+
     return this.https
       .get("/api/user-project-roles/page", {
         observe: "response",
@@ -206,9 +200,9 @@ export class UserProjectRoleService {
           return this.handleError(err);
         })
       )
-    
-      
-      
+
+
+
       .pipe(
         catchError((err) => {
           return this.handleError(err);
@@ -223,14 +217,14 @@ export class UserProjectRoleService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, "utf8").toString("base64");
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
-    
+
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -247,7 +241,7 @@ export class UserProjectRoleService {
     console.log("Fetching user project roles with FindAll");
     console.log("Headers:", headers);
     console.log("URL:", `/api/user-project-roless/page?page=${event.page}&size=${event.size}`);
-    
+
     return this.https
       .get(`/api/user-project-roless/page?page=${event.page}&size=${event.size}`, {
         observe: "response",
@@ -275,14 +269,14 @@ export class UserProjectRoleService {
     let result;
     try {
       body = JSON.stringify(req);
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
-    
+
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -298,7 +292,7 @@ export class UserProjectRoleService {
     console.log("Searching user project roles");
     console.log("Headers:", headers);
     console.log("URL:", `/api/search/user-project-roles/page?page=${event.page}&size=${event.size}`);
-    
+
     return this.https
       .post(`/api/search/user-project-roles/page?page=${event.page}&size=${event.size}`, body, {
         observe: "response",
@@ -330,14 +324,14 @@ export class UserProjectRoleService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, "utf8").toString("base64");
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
-    
+
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -350,10 +344,10 @@ export class UserProjectRoleService {
       'rolename': userRole.name || '',
       'example': headerValue
     });
-    
+
     console.log("findAllTwb for user project roles");
     console.log("Headers:", headers);
-    
+
     return this.https
       .get("/api/user-project-roles/page", {
         observe: "response",
@@ -384,7 +378,7 @@ export class UserProjectRoleService {
     let body;
     try {
       body = JSON.stringify({ query: query, maxResults: 10 });
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
 
@@ -413,7 +407,7 @@ export class UserProjectRoleService {
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -425,10 +419,10 @@ export class UserProjectRoleService {
       'roleid': userRole.id || '',
       'rolename': userRole.name || ''
     });
-    
+
     console.log("Deleting user project role with ID:", id);
     console.log("Headers:", headers);
-    
+
     return this.https
       .delete("/api/user-project-roles/" + id, {
         observe: "response",
@@ -447,11 +441,11 @@ export class UserProjectRoleService {
   createAll(user_project_role: UserProjectRole[]): Observable<UserProjectRole[]> {
     let result;
     const copy: UserProjectRole[] = Object.assign([], user_project_role);
-    
+
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -463,10 +457,10 @@ export class UserProjectRoleService {
       'roleid': userRole.id || '',
       'rolename': userRole.name || ''
     });
-    
+
     console.log("Creating multiple user project roles:", copy);
     console.log("Headers:", headers);
-    
+
     return this.https
       .post("/api/user-project-roles-list", copy, {
         observe: "response",
@@ -485,11 +479,11 @@ export class UserProjectRoleService {
       );
   }
 
-  getUsersByRoleId(roleId, projectId): Observable<Users[]>{
+  getUsersByRoleId(roleId, projectId): Observable<Users[]> {
     return this.https
       .get("/api/user-project-roles-by-roleid/" + roleId + '/' + projectId, { observe: "response" })
       .pipe(
-        map((response) => {  
+        map((response) => {
           let a: any = response.body;
           return Users.toArray(a);
         })
@@ -515,7 +509,7 @@ export class UserProjectRoleService {
   }
 
 
-  
+
   private convert(user_project_role: UserProjectRole): UserProjectRole {
     const copy: UserProjectRole = Object.assign({}, user_project_role);
     return copy;

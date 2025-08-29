@@ -4,7 +4,7 @@ export class Theme {
     projectid: Project;
     id: number;
     apptheme: AppTheme;
-    bcctheme:BCCTheme;
+    bcctheme: BCCTheme;
     dashboardtheme: DashboardTheme;
     widgettheme: WidgetTheme;
 
@@ -37,7 +37,7 @@ export class AppTheme {
     sidebariconcolor: string;
     sidebaractivecolor: string;
     sidebarhovercolor: string;
-    sidebartexticonhovercolor:string;
+    sidebartexticonhovercolor: string;
     headercolor: string;
     headericoncolor: string;
 }
@@ -53,20 +53,20 @@ export class BCCTheme {
 export class DashboardTheme {
     backgroundcolor: string;
     dashboardbackgroundcolor: string;
-    iconcolor:string;
+    iconcolor: string;
     titlecolor: string;
-    filtercolor:string;
-    filtertextcolor:string;
-    applybuttontextcolor:string;
-    filterapplybuttonbackgroundcolor:string;
-    widgetfilterapply:boolean;
-    filterbackgroundcolor:boolean;
-    dashboarddropdowncolor:string;
-    toggleactivecolor:string;
-    toggleactivebackgroundcolor:string;
-    toggleinactivecolor:string;
-    toggleinactivebackgroundcolor:string;
-    toggleactiveunderlinecolor:string;
+    filtercolor: string;
+    filtertextcolor: string;
+    applybuttontextcolor: string;
+    filterapplybuttonbackgroundcolor: string;
+    widgetfilterapply: boolean;
+    filterbackgroundcolor: boolean;
+    dashboarddropdowncolor: string;
+    toggleactivecolor: string;
+    toggleactivebackgroundcolor: string;
+    toggleinactivecolor: string;
+    toggleinactivebackgroundcolor: string;
+    toggleactiveunderlinecolor: string;
 }
 
 export class WidgetTheme {
@@ -75,11 +75,11 @@ export class WidgetTheme {
     bordercolor: string;
     titlecolor: string;
     colorpalette: string[];
-    proritizeThemeColor:boolean;
+    proritizeThemeColor: boolean;
     proritizeThemeColorArr: string[];
     tilebackgroundcolor: string;
-    fontfamily:string;
-    borderradius:number;
-    boldtitle:boolean;
-    bordershadow:boolean;
+    fontfamily: string;
+    borderradius: number;
+    boldtitle: boolean;
+    bordershadow: boolean;
 }

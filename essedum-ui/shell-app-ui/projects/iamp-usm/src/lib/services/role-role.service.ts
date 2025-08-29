@@ -1,15 +1,13 @@
 
 import { Injectable, SkipSelf } from "@angular/core";
 import { Observable, map, catchError, throwError } from "rxjs";
-// import { Observable } from "rxjs/Observable";
 import { MessageService } from "./message.service";
 import { PageResponse } from "../support/paging";
 import { PageRequestByExample } from "../support/page-request";
 import { Roletorole } from "../models/role-role";
 import { UsmPermissions } from "../models/usm-permissions";
-// import { map, catchError } from "rxjs/operators";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-// import { throwError } from "rxjs";
+
 @Injectable()
 export class RoleroleService {
   constructor(private https: HttpClient, private messageService: MessageService) { }
@@ -20,11 +18,11 @@ export class RoleroleService {
 
   create(usm_role_permissions: Roletorole): Observable<Roletorole> {
     const copy = this.convert(usm_role_permissions);
-    
+
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -36,10 +34,10 @@ export class RoleroleService {
       'roleid': userRole.id || '',
       'rolename': userRole.name || ''
     });
-    
+
     console.log("Creating role-role:", copy);
     console.log("Headers:", headers);
-    
+
     return this.https
       .post("/api/usm-role-role", copy, {
         observe: "response",
@@ -64,7 +62,7 @@ export class RoleroleService {
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -76,10 +74,10 @@ export class RoleroleService {
       'roleid': userRole.id || '',
       'rolename': userRole.name || ''
     });
-    
+
     console.log("Getting role-role with ID:", id);
     console.log("Headers:", headers);
-    
+
     return this.https
       .get("/api/usm-role-role/" + id, {
         observe: "response",
@@ -104,14 +102,14 @@ export class RoleroleService {
     let body;
     try {
       body = JSON.stringify(usm_role_permissions);
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
 
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -123,7 +121,7 @@ export class RoleroleService {
       'roleid': userRole.id || '',
       'rolename': userRole.name || ''
     });
-    
+
     console.log("Updating role-role:", usm_role_permissions);
     console.log("Headers:", headers);
 
@@ -155,14 +153,14 @@ export class RoleroleService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
-    
+
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -175,7 +173,7 @@ export class RoleroleService {
       'rolename': userRole.name || '',
       'example': headerValue
     });
-    
+
     console.log("Finding role-roles");
     console.log("Headers:", headers);
 
@@ -209,14 +207,14 @@ export class RoleroleService {
     let body;
     try {
       body = JSON.stringify({ query: query, maxResults: 10 });
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
-    
+
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -228,10 +226,10 @@ export class RoleroleService {
       'roleid': userRole.id || '',
       'rolename': userRole.name || ''
     });
-    
+
     console.log("Complete search for role-roles with query:", query);
     console.log("Headers:", headers);
-    
+
     return this.https
       .post("/api/usm-role-role/complete", body, {
         observe: "response",
@@ -257,7 +255,7 @@ export class RoleroleService {
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -269,10 +267,10 @@ export class RoleroleService {
       'roleid': userRole.id || '',
       'rolename': userRole.name || ''
     });
-    
+
     console.log("Deleting role-role with ID:", id);
     console.log("Headers:", headers);
-    
+
     return this.https
       .delete("/api/usm-role-role/" + id, {
         observe: "response",
@@ -285,14 +283,14 @@ export class RoleroleService {
       );
   }
 
-   /**
-   * Create a List of  Rolerole.
-   */
+  /**
+  * Create a List of  Rolerole.
+  */
   createAll(usm_role_permissions: Roletorole[]): Observable<Roletorole[]> {
     const copy: Roletorole[] = Object.assign([], usm_role_permissions);
-     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -307,7 +305,7 @@ export class RoleroleService {
     return this.https
       .post("/api/usm-role-role-list", copy, {
         observe: "response",
-                headers: headers
+        headers: headers
 
       })
       .pipe(
@@ -350,15 +348,15 @@ export class RoleroleService {
     console.error('Error status text:', error.statusText);
     console.error('Error message:', error.message);
     console.error('Error URL:', error.url);
-    
+
     // Log request details if available
     if (error.error && error.error.message) {
       console.error('Server error message:', error.error.message);
     }
-    
+
     // Log the full error object for debugging
     console.error('Full error object:', JSON.stringify(error, null, 2));
-    
+
     let errMsg = error.error || error.statusText || 'Unknown server error';
     return throwError(errMsg);
   }
