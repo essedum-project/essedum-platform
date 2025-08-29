@@ -1,4 +1,3 @@
-
 import {
     Component,
     Input,
@@ -310,7 +309,7 @@ import {
         },
         (error) => {
           console.error("Error fetching roles:", error);
-          this.messageService.error("Error loading roles", "LEAP");
+          this.messageService.messageNotification("Error loading roles", "error");
         }
       );
     }
@@ -431,10 +430,10 @@ import {
         );
       }
       if (this.roletoroleitem.childRoleId == undefined || this.roletoroleitem.childRoleId == null) {
-        this.messageService.error("Please Select A Role", "LEAP");
+        this.messageService.messageNotification("Please Select A Role", "warning");
       } 
       else if (arr.length>0 || (!temp.length && temp.name==this.selectedRole.name)) {
-        this.messageService.error("Parent and Child Role cannot be same", "LEAP");
+        this.messageService.messageNotification("Parent and Child Role cannot be same", "warning");
       } 
       else {
         if (this.edit) this.updateWave();
@@ -463,13 +462,13 @@ import {
           //     item.permission.permission == this.roletoroleitem.permission.permission
           // );
           // if (arr.length > 0) {
-          //   this.messageService.error("Duplicate Role Permission cannot be created", "IAMP");
+          //   this.messageService.messageNotification("Duplicate Role Permission cannot be created", "IAMP");
           //   return;
           // }
           if (!flag) {
             this.busy = this.roleroleService.createAll(this.roletorolecopyarraylist).subscribe(
               (response) => {
-                this.messageService.info("Role-Role Mapping Saved Successfully", "LEAP");
+                this.messageService.messageNotification("Role-Role Mapping Saved Successfully", "success");
                 this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
                 this.clearWave();
                 this.showCreate = false;
@@ -479,13 +478,13 @@ import {
               },
               (error) => {
                 this.testCreate = false;
-                this.messageService.error("Could not create Role-Role Mapping", "LEAP");
+                this.messageService.messageNotification("Could not create Role-Role Mapping", "error");
               }
             );
           } else {
-            this.messageService.info(
+            this.messageService.messageNotification(
               "Could not save " + this.existingUsertouserlists.length + " Mapping(s) Already Exists",
-              "IAMP"
+              "error"
             );
           }
         }
@@ -536,7 +535,7 @@ import {
       },
       (error) => {
         console.error("Error fetching role-to-role data:", error);
-        this.messageService.error("Error loading role details", "LEAP");
+        this.messageService.messageNotification("Error loading role details", "error");
       }
     );
   }
@@ -639,7 +638,7 @@ import {
         },
         (error) => {
           this.testCreate = false;
-          this.messageService.error("Could not get the results", "LEAP");
+          this.messageService.messageNotification("Could not get the results", "error");
         }
       );
     }
@@ -693,21 +692,21 @@ import {
         item.parentRoleId.id == this.roletoroleitem.parentRoleId.id 
       );
       if (arr.length > 0) {
-        this.messageService.error("Duplicate Role Permission cannot be created", "IAMP");
+        this.messageService.messageNotification("Duplicate Role Permission cannot be created", "error");
         return;
       } else {
         this.busy = this.roleroleService.update(this.roletoroleitem).subscribe(
           (rs) => {
             this.testId = rs.id;
             this.testCreate = true;
-            this.messageService.info("Role-Role Mapping updated successfully", "LEAP");
+            this.messageService.messageNotification("Role-Role Mapping updated successfully", "success");
             this.clearWave();
             this.showCreate = false;
             this,this.Refresh();
           },
           (error) => {
             this.testCreate = false;
-            this.messageService.error("Could not update", "LEAP");
+            this.messageService.messageNotification("Could not update", "error");
           }
         );
       }
@@ -720,12 +719,12 @@ import {
           this.testCreate = true;
           this.currentPage.remove(usmRolePermissionsToDelete);
           this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
-          this.messageService.info("Role-Role Mapping Deleted successfully", "LEAP!");
+          this.messageService.messageNotification("Role-Role Mapping Deleted successfully", "success");
           this.Clear();
         },
         (error) => {
           this.testCreate = false;
-          this.messageService.error("Could not delete!", "LEAP");
+          this.messageService.messageNotification("Could not delete", "error");
         }
       );
     }
@@ -840,4 +839,4 @@ import {
       this.updatePagedRoles();
     }
   }
-  
+

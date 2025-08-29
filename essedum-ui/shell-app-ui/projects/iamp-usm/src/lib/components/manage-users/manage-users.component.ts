@@ -382,7 +382,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         // Update table data
         this.updateTableData();
       }),
-        (error) => this.messageService.error(error, Msg.APP);
+        (error) => this.messageService.messageNotification(error,"error");
     }
     else{
       this.usersService.findAll(new Users(), this.lazyloadevent).subscribe((response) => {
@@ -410,7 +410,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         // Update table data
         this.updateTableData();
       }),
-        (error) => this.messageService.error(error, Msg.APP);
+        (error) => this.messageService.messageNotification(error,"error");
     }
   }
   callApi() {
@@ -429,7 +429,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         this.useremails = this.useremails.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
         this.userlogins = this.userlogins.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
       }),
-        (error) => this.messageService.error(error, Msg.APP);
+        (error) => this.messageService.messageNotification(error,"error");
     } else {
       this.usersService.findAll(new Users(), this.lazyloadevent).subscribe((response) => {
         let users = response.content;
@@ -443,7 +443,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         this.useremails = this.useremails.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
         this.userlogins = this.userlogins.sort((a, b) => (a.toLowerCase() > b.toLowerCase() ? 1 : -1));
       }),
-        (error) => this.messageService.error(error, Msg.APP);
+        (error) => this.messageService.messageNotification(error,"error");
     }
     //}
   }
@@ -504,7 +504,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         this.UserProjectRoleList.sort = this.sort;
         this.UserProjectRoleList.paginator = this.paginator;
       }),
-        (error) => this.messageService.error(error, Msg.APP);
+        (error) => this.messageService.messageNotification(error,"error");
 
     } else {
       this.usersService.FindAll(this.example, pageEvent).subscribe((response) => {
@@ -518,7 +518,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         this.UserProjectRoleList.sort = this.sort;
         this.UserProjectRoleList.paginator = this.paginator;
       }),
-        (error) => this.messageService.error(error, Msg.APP);
+        (error) => this.messageService.messageNotification(error,"error");
     }
   }
 
@@ -540,7 +540,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
           this.allRoleList.push({ rolename: role, userlist: userList });
         });
       },
-      (error) => this.messageService.error(error, Msg.APP)
+      (error) => this.messageService.messageNotification(error,"error")
     );
   }
 
@@ -549,9 +549,9 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     this.usersService.update(user).subscribe(
       (response) => {
         this.user = response;
-        this.messageService.info("User authorized to change password", "IAMP");
+        this.messageService.messageNotification("User authorized to change password", "success");
       },
-      (error) => this.messageService.error(error, Msg.APP)
+      (error) => this.messageService.messageNotification(error,"error")
     );
   }
 
@@ -576,46 +576,45 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
       this.user.user_login.trim().length == 0 ||
       this.user.user_login == null
     ) {
-      this.messageService.error("Please Provide User Login", Msg.APP);
+      this.messageService.messageNotification("Please Provide User Login", "warning");
     } else if (
       this.user.user_email == undefined ||
       this.user.user_email == null ||
       this.user.user_email.trim().length == 0
     ) {
-      this.messageService.error("Please Provide User Email", Msg.APP);
+      this.messageService.messageNotification("Please Provide User Email", "warning");
     } else if (!this.user.user_email.match(/^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,10})$/)) {
-      this.messageService.error("This User Email does not match the required pattern", Msg.APP);
+      this.messageService.messageNotification("This User Email does not match the required pattern", "error");
     } else if (
       this.user.user_f_name == undefined ||
       this.user.user_f_name == null ||
       this.user.user_f_name.trim().length == 0
     ) {
-      this.messageService.error("Please Provide User First Name", Msg.APP);
+      this.messageService.messageNotification("Please Provide User First Name", "warning");
     } else if (this.user.user_f_name.length > 255) {
-      this.messageService.info("User first name cannot be more than 255 characters", Msg.APP);
+      this.messageService.messageNotification("User first name cannot be more than 255 characters", "info");
     } else if (this.user.user_m_name && this.user.user_m_name.length > 255) {
-      this.messageService.info("User middle name cannot be more than 255 characters", Msg.APP);
+      this.messageService.messageNotification("User middle name cannot be more than 255 characters", "info");
     } else if (this.user.user_l_name && this.user.user_l_name.length > 255) {
-      this.messageService.info("User last name cannot be more than 255 characters", Msg.APP);
-    } else if (
-      this.user.user_f_name &&
+      this.messageService.messageNotification("User last name cannot be more than 255 characters", "info");
+    } else if (this.user.user_f_name &&
       !/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(this.user.user_f_name)
     ) {
-      this.messageService.error("User First Name format is incorrect", Msg.APP);
+      this.messageService.messageNotification("User First Name format is incorrect", "error");
     } else if (
       this.user.user_m_name &&
       !/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(this.user.user_m_name)
     ) {
-      this.messageService.error("User Middle Name format is incorrect", Msg.APP);
+      this.messageService.messageNotification("User Middle Name format is incorrect", "error");
     } else if (
       this.user.user_l_name &&
       !/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(this.user.user_l_name)
     ) {
-      this.messageService.error("User Last Name format is incorrect", Msg.APP);
+      this.messageService.messageNotification("User Last Name format is incorrect", "error");
     } else if(this.user.other_details && this.user.other_details.length > 100){
-      this.messageService.info("Other details cannot be more than 100 characters", Msg.APP);
+      this.messageService.messageNotification("Other details cannot be more than 100 characters", "info");
     } else if(this.user.contact_number && this.user.contact_number.length > 15){
-      this.messageService.info("Contact number cannot be more than 100 characters", Msg.APP)
+      this.messageService.messageNotification("Contact number cannot be more than 100 characters", "info")
     }else if (this.user.user_login != "") {
       //Validating user.user_f_name with directory
       var user = [{ employeeName: this.user.user_login }];
@@ -636,7 +635,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
             (item) => item.user_email.toLowerCase() == this.user.user_email.toLowerCase()
           );
           if (arr.length > 0) {
-            this.messageService.error("User Email already exists", "IAMP");
+            this.messageService.messageNotification("User Email already exists", "error");
             return;
           }
         }
@@ -664,7 +663,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
             this.userDetailJson.forEach((ele) => {
               if (ele.pointer == "" || ele.value == "") {
                 flag = true;
-                this.messageService.info("User Details cannot be empty", "LEAP");
+                this.messageService.messageNotification("User Details cannot be empty", "info");
               }
             });
           }
@@ -684,14 +683,14 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
             this.addUser(this.newUser);
           }
         } else {
-          this.messageService.error("User Already Exists", Msg.APP);
+          this.messageService.messageNotification("User Already Exists", "error");
         }
       });
       // }
       // , error => this.messageService.error(error, Msg.APP)
       // )
     } else {
-      this.messageService.error(Msg.ERR021, Msg.APP);
+      this.messageService.messageNotification(Msg.ERR021, "error");
     }
   }
 
@@ -704,7 +703,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         this.newUser = response;
         this.addUserUnit(this.newUser);
       },
-      (error) => this.messageService.error(error, Msg.APP)
+      (error) => this.messageService.messageNotification(error,"error")
     );
   }
 
@@ -719,15 +718,15 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
 
         this.userUnitService.create(userUnit).subscribe(
           (res) => {
-            this.messageService.info("Created Successfully", "IAMP");
+            this.messageService.messageNotification("Created Successfully", "success");
             this.ClearInfo();
             this.showCreate = false;
             this.listUsers();
           },
-          (error) => this.messageService.error(error, Msg.APP)
+          (error) => this.messageService.messageNotification(error,"error")
         );
       },
-      (error) => this.messageService.error(error, Msg.APP)
+      (error) => this.messageService.messageNotification(error,"error")
     );
   }
 
@@ -743,13 +742,13 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         this.userProjectRoleService.create(userAuthority).subscribe(
           (res) => {
             this.getAllUserAuthorities();
-            this.messageService.info(Msg.INF012, Msg.APP);
+            this.messageService.messageNotification(Msg.INF012, "info");
             this.ClearInfo();
           },
-          (error) => this.messageService.error(error, Msg.APP)
+          (error) => this.messageService.messageNotification(error,"error")
         );
       },
-      (error) => this.messageService.error(error, Msg.APP)
+      (error) => this.messageService.messageNotification(error,"error")
     );
   }
   Cancel($event) { }
@@ -771,7 +770,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
           this.delete(user);
         }
       },
-      (error) => this.messageService.error(error, Msg.APP)
+      (error) => this.messageService.messageNotification(error,"error")
     );
   }
   // editUserProjectRole(user: UserProjectRole){
@@ -811,7 +810,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     if (user.id == JSON.parse(sessionStorage.getItem("user")).id) {
       this.busy = this.usersService.delete(user.id).subscribe(
         (response) => {
-          this.messageService.info(Msg.INF013, Msg.APP);
+          this.messageService.messageNotification(Msg.INF013, "info");
           if (sessionStorage.getItem("telemetry") == "true") {
           // this.telemetryService.audit(user,"DELETE");
           }
@@ -822,7 +821,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
             console.error("JSON.parse error - ", e.message);
           }
         },
-        (error) => this.messageService.error("Could not Delete", Msg.APP)
+        (error) => this.messageService.messageNotification(error,"error")
       );
     } else {
       this.busy = this.usersService.delete(user.id).subscribe(
@@ -830,7 +829,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
           if (sessionStorage.getItem("telemetry") == "true") {
           // this.telemetryService.audit(user,"DELETE");
           }
-          this.messageService.info(Msg.INF013, Msg.APP);
+          this.messageService.messageNotification(Msg.INF013, "info");
           let sessionUser: Users;
           try {
             sessionUser = JSON.parse(sessionStorage.getItem("user"));
@@ -845,7 +844,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
           this.deleteItem = true;
           this.ClearFilter();
         },
-        (error) => this.messageService.error("Could not Delete", Msg.APP)
+        (error) => this.messageService.messageNotification(error,"error")
       );
     }
   }
@@ -1180,42 +1179,42 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     }
 
     if (user.user_login == undefined || user.user_login.trim().length == 0 || user.user_login == null) {
-      this.messageService.error("Please Provide User Login", Msg.APP);
+      this.messageService.messageNotification("Please Provide User Login", "error");
     } else if (
       user.user_email == undefined ||
       user.user_email == null ||
       user.user_email.trim().length == 0
     ) {
-      this.messageService.error("Please Provide User Email", Msg.APP);
+      this.messageService.messageNotification("Please Provide User Email", "error");
     } else if (!user.user_email.match(/^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/)) {
-      this.messageService.error("This User Email does not match the required pattern", Msg.APP);
+      this.messageService.messageNotification("This User Email does not match the required pattern", "error");
     } else if (
       user.user_f_name == undefined ||
       user.user_f_name == null ||
       user.user_f_name.trim().length == 0
     ) {
-      this.messageService.error("Please Provide User First Name", Msg.APP);
+      this.messageService.messageNotification("Please Provide User First Name", "error");
     } else if (user.user_f_name.length > 255) {
-      this.messageService.info("User first name cannot be more than 255 characters", Msg.APP);
+      this.messageService.messageNotification("User first name cannot be more than 255 characters", "info");
     } else if (user.user_m_name && user.user_m_name.length > 255) {
-      this.messageService.info("User middle name cannot be more than 255 characters", Msg.APP);
+      this.messageService.messageNotification("User middle name cannot be more than 255 characters", "info");
     } else if (user.user_l_name && user.user_l_name.length > 255) {
-      this.messageService.info("User last name cannot be more than 255 characters", Msg.APP);
+      this.messageService.messageNotification("User last name cannot be more than 255 characters", "info");
     } else if (
       user.user_f_name &&
       !/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(user.user_f_name)
     ) {
-      this.messageService.error("User First Name format is incorrect", Msg.APP);
+      this.messageService.messageNotification("User First Name format is incorrect", "error");
     } else if (
       user.user_m_name &&
       !/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(user.user_m_name)
     ) {
-      this.messageService.error("User Middle Name format is incorrect", Msg.APP);
+      this.messageService.messageNotification("User Middle Name format is incorrect", "error");
     } else if (
       user.user_l_name &&
       !/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(user.user_l_name)
     ) {
-      this.messageService.error("User Last Name format is incorrect", Msg.APP);
+      this.messageService.messageNotification("User Last Name format is incorrect", "error");
     } else if (user.user_login != "") {
       let flag: boolean = false;
       if (this.userss) {
@@ -1227,12 +1226,12 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         );
         if (arr1.length > 0) {
           flag = true;
-          this.messageService.error("User Already Exists", "IAMP");
+          this.messageService.messageNotification("User Already Exists", "error");
           return;
         }
         if (arr2.length > 0) {
           flag = true;
-          this.messageService.error("User Email already exists", "IAMP");
+          this.messageService.messageNotification("User Email already exists", "error");
           return;
         }
       }
@@ -1241,22 +1240,12 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         this.userDetailJson.forEach((ele) => {
           if (ele.pointer == "" || ele.value == "" || ele.pointer == null || ele.value == null) {
             flag = true;
-            this.messageService.info("User Details cannot be empty", "LEAP");
+            this.messageService.messageNotification("User Details cannot be empty", "info");
           }
         });
       } else {
         user.clientDetails = null;
       }
-      if (!flag) {
-        try {
-          if (this.userDetailCheck && this.userDetailJson[0].pointer != "" && this.userDetailJson[0].value != "")
-            user.clientDetails = JSON.stringify(this.userDetailJson);
-        } catch (e : any)  {
-          user.clientDetails = null;
-        }
-      }
-      user.activated = true;
-      user.user_act_ind = false;
       if (!flag) {
         if (sessionStorage.getItem("telemetry") == "true") {
         let arr1=[];
@@ -1270,7 +1259,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
       }
         this.busy = this.usersService.update(user).subscribe(
           (res) => {
-            this.messageService.info("Updated Successfully", "IAMP");
+            this.messageService.messageNotification("Updated Successfully", "success");
             if (sessionStorage.getItem("user")) {
               let user: Users;
               try {
@@ -1294,7 +1283,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
             this.showCreate = false;
             this.listUsers();
           },
-          (error) => this.messageService.info("Could not Update", "IAMP")
+          (error) => this.messageService.messageNotification("Could not Update", "error")
         );
       }
     }
@@ -1325,7 +1314,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
       child.pointer == null ||
       child.value == null
     )
-      this.messageService.error("Enter all mandatory fields", "IAMP");
+      this.messageService.messageNotification("Enter all mandatory fields", "error");
     else this.userDetailJson.push({ pointer: "", value: "" });
   }
   trackByMethod(index, item) { }

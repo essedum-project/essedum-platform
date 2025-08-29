@@ -241,7 +241,7 @@ export class RoleListComponent implements OnInit, OnDestroy {
         this.ProjectList = pageResponse.content;
 
       },
-      (error) => this.messageService.error("Could not get the results", "IAMP"),
+      (error) => this.messageService.messageNotification("Could not get the results", "error"),
       () => {
 
         if (role.roleadmin) {
@@ -318,7 +318,7 @@ export class RoleListComponent implements OnInit, OnDestroy {
               this.initializeFilterOptions();
 
             },
-            (error) => this.messageService.error("could not fetch", "IAMP")
+            (error) => this.messageService.messageNotification("Could not fetch", "error")
           );
         }
       }
@@ -467,10 +467,10 @@ export class RoleListComponent implements OnInit, OnDestroy {
   updateRole() {
     this.roleService.update(this.currentRole).subscribe(
       (rs) => {
-        this.messageService.info("Role updated successfully", "IAMP");
+        this.messageService.messageNotification("Role updated successfully", "success");
         this.clear();
       },
-      (error) => this.messageService.error("Could not update", "IAMP")
+      (error) => this.messageService.messageNotification("Could not update", "error")
     );
   }
 
@@ -518,7 +518,7 @@ export class RoleListComponent implements OnInit, OnDestroy {
           this.delete(role);
         }
       },
-      (error) => this.messageService.error(error, Msg.APP)
+      (error) => this.messageService.messageNotification(error, "error")
     );
   }
   delete(role: Role) {
@@ -528,13 +528,13 @@ export class RoleListComponent implements OnInit, OnDestroy {
           // this.telemetryService.audit(role,"DELETE");
         }
         sessionStorage.setItem("UpdatedUser", "true");
-        this.messageService.info("Role Deleted successfully", "IAMP");
+        this.messageService.messageNotification("Role Deleted successfully", "success");
         this.fetchRole();
         if (this.myInputReference.nativeElement) {
           this.myInputReference.nativeElement.value = null;
         }
       },
-      (error) => this.messageService.error("Could not delete", "IAMP")
+      (error) => this.messageService.messageNotification("Could not delete", "error")
     );
   }
   compareObjects(o1: any, o2: any): boolean {

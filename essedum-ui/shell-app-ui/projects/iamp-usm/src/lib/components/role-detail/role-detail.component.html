@@ -118,7 +118,10 @@
 <!-- NEW CODE -->
 
 <div class="lfx-u-pad-t-8">
+          <mat-card class="form-card" >
+     <mat-card-content>
     <div class="lfx-l-level2-middle-col">
+      
         <div class="d-flex justify-content-between align-items-center">
             
                         <div class="align-items-center d-flex">
@@ -258,7 +261,10 @@
         </mat-card>
  
     </div>
-      <div *ngIf="edit || view" class="selector-668-46">
+  </mat-card-content>
+</mat-card>
+          <mat-card class="form-card"  *ngIf="edit || view">
+     <mat-card-content>
     <mat-tab-group class="selector-668-47">
       <mat-tab label="Portfolio-Project-User" class="selector-668-48">
         <lib-user-project-role-list *ngIf="role.id" [selectedRole]="role" class="selector-668-49"></lib-user-project-role-list>
@@ -268,6 +274,7 @@
         </lib-role-role>
       </mat-tab>
     </mat-tab-group>
+  </mat-card-content>
+</mat-card>
   </div>
-</div>
         
