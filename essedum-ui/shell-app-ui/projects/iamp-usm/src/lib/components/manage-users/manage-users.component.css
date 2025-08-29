@@ -14,6 +14,21 @@
    overflow: hidden;
    font-family: var(--font-type) !important;
  }
+
+/* Form Card Styling */
+.form-card {
+  margin: 20px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+   overflow: hidden;
+  max-width: 100%;
+}
+
+.form-card .mat-card-content {
+  padding: 24px !important;
+}
+
 /* Table Styling */
 .table-card {
   background: #fff;

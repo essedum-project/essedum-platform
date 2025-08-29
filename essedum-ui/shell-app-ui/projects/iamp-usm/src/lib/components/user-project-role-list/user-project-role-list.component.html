@@ -203,6 +203,10 @@
                 <h2 class="header-title lfx-u-mar-l-8" style="font-family: 'Roboto', 'Segoe UI', sans-serif; display: inline-block; margin: 0; vertical-align: middle;" *ngIf="view">View Portfolio-Project-Role</h2>
               </div>
    <br> <br>
+   
+   <!-- Form Content Card -->
+   <mat-card class="form-card">
+     <mat-card-content>
       <div class="noPad selector-673-188">
         <div class="row rwMAr selector-673-189">
           <div class="col-md-6 select-style selector-673-190" *ngIf="
@@ -324,6 +328,11 @@
         </button>
         <button *ngIf="!view" type="button" mat-raised-button class="cancel-btn" (click)="clear()" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">Clear</button>
       </div>
+    
+     </mat-card-content>
+   </mat-card>
+             </div>
+      </div>
       <div *ngIf="errorMessage" class="selector-673-234">
         <h4 class="ams_h2 h2Mar crud-header selector-673-235" style="margin-left: -6rem" *ngIf="errorMessage">
           Duplicate Mappings
@@ -355,4 +364,3 @@
       </div>
     </div>
   </div>
-</div>

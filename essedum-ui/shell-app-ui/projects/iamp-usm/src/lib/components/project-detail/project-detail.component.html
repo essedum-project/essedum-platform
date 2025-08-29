@@ -22,7 +22,7 @@
         <!-- Added mat-dialog-content wrapper for scrollable content -->
         <mat-dialog-content [ngClass]="{'no-scroll-content': edit}">
             <mat-card #projectForm="ngForm" ngForm="">
-            <div class="lfx-u-pad-t-32 lfx-u-pad-r-24 p-20">
+            <div class="lfx-u-pad-t-32 lfx-u-pad-r-24 p-20" [ngClass]="{'form-card': edit}">
                 <div class="row rwMAr">
                     <div class="col-md-6">
                         <div>

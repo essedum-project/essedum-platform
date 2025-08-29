@@ -349,6 +349,10 @@
           Edit Role-Role Mapping
         </h4>
         <h4 class="ams_h2 h2Mar crud-header selector-675-115" style="padding-left: 19%" *ngIf="edit &amp;&amp; view">View Role-Role Mapping</h4> -->
+        
+        <!-- Form Content Card -->
+        <mat-card class="form-card">
+          <mat-card-content>
         <div class="noPad selector-675-116">
           <div class="selector-675-117">
             <div class="row rwMAr selector-675-118">
@@ -373,6 +377,9 @@
             </div>
           </div>
         </div>
+          </mat-card-content>
+        </mat-card>
+        
         <div id="btnMargin" class="dialog-buttons" style="text-align: right;">
           <button *ngIf="!edit &amp;&amp; !buttonFlag" [ngBusy]="{ busy: busy, message: 'Saving Role-Role Mapping...' }" type="button" mat-raised-button class="save-btn" (click)="onSave()" [disabled]="!RoletoRoleForm.form.valid" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">
             Save

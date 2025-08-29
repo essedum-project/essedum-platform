@@ -1,5 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
+/* Form Card Styling - Only for Edit Mode */
+.form-card {
+  margin: 20px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.form-card .mat-card-content {
+  padding: 24px !important;
+}
+
 :host ::ng-deep body,
 :host ::ng-deep html {
   font-family: "Roboto", sans-serif !important;
