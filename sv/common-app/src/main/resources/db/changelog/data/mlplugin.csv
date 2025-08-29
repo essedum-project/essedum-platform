@@ -1188,7 +1188,7 @@
 			\"mlflowdataset\": \"api\",
 			\"api\": \"http://victlptst-19:8000/dataset/fetchalldataset/\",
 			\"payload\":  {
-				\"userId\":\"demo_mlflow@infosys.com\"
+				\"userId\":\"demo_mlflow@lfn.com\"
 			},
 			\"response\":\"displayName\"
 		},
@@ -1211,7 +1211,7 @@
 			\"classifierconfig\": \"api\",
 			\"api\":\"http://10.177.28.36:9090/model/list_models/\",
 			\"payload\":{
-				\"userId\":\"demo_mlflow@infosys.com\"
+				\"userId\":\"demo_mlflow@lfn.com\"
 			},
 			\"label\": \"api1\",
 			\"api1\": \"http://10.217.10.232:8102/configuration/getalltrainingsets/\",
@@ -1569,7 +1569,7 @@
 			\"type\":\"MlflowAutoml\",
 			\"api\": \"http://victlptst-19:8000/training/automl_training/\",
 			\"payload\":  {
-				\"userId\":\"admin@infosys.com\",
+				\"userId\":\"admin@lfn.com\",
 				\"platform\":\"mlflow\",
 				\"domain\": \"\",
 				\"experiment_name\" : \"\",
@@ -1612,7 +1612,7 @@
 			\"api\": \"http://victlptst-19:8000/endpoints/create_endpoint/\",
 			\"type\": \"MlflowEndpoint\",
 			\"payload\":  {
-				\"userId\":\"admin@infosys.com\",
+				\"userId\":\"admin@lfn.com\",
 				\"platform\":\"mlflow\",
 				\"name\": \"\",
 				\"model_name\" : \"\",
@@ -1645,7 +1645,7 @@
 			\"api\": \"http://victlptst-19:8000/endpoints/batchpredict/\",
 			\"type\":\"BatchPrediction\",
 			\"payload\":  {
-				\"userId\":\"admin@infosys.com\",
+				\"userId\":\"admin@lfn.com\",
 				\"platform\":\"mlflow\",
 				\"name\": \"\",
 				\"batch_data\": \"\"
@@ -1653,7 +1653,7 @@
 			\"endpoint_name\": \"api1\",
 			\"api1\":\"http://victlptst-19:8000/endpoints/list_endpoints/\",
 			\"payload\": {
-				\"userId\": \"admin@infosys.com\",
+				\"userId\": \"admin@lfn.com\",
 				\"platform\": \"mlflow\"
 			},
 			\"response1\":\"displayName\",

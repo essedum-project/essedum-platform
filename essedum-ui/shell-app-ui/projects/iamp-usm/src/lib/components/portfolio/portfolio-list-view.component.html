@@ -1,0 +1,56 @@
+<div class="mt-10">
+  <div class="aip-container lfx-u-pad-lr-30">
+    <!-- Header Section -->
+    <app-aip-header [cardTitle]="title" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="true"
+      (search)="filterItem($event)" (refresh)="ngOnInit()" (add)="createPortfolioKey()">
+    </app-aip-header>
+    <!-- Filter Section --> 
+     <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="SERVICE_V1" [selectedPortfolioList]="{ 
+                        selectedAdapterType: selectedAdapterType
+                      }" (tagSelected)="onTagSelected($event)"
+      (filterStatusChange)="onFilterStatusChange($event)"></app-aip-filter>
+
+    <div>
+      <div class="aip-container lfx-u-pad-lr-30 mt-m16"></div>
+      <!-- Table Layout  -->
+      <div class="table-card">
+        <div class="table-scroll-container">
+          <table class="styled-table"
+            *ngIf="UsmPortfolioList && UsmPortfolioList.data && UsmPortfolioList.data.length>0; else noData">
+            <thead>
+              <tr>
+                <th *ngFor="let obj of displayedColumns">{{obj}}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let obj of usmPortfolios; let i =index">
+                <td>{{getRowNumber(i)}}</td>
+                <td style="color: #0052cc; cursor: pointer;">{{ obj.id}}</td>
+                <td>{{ obj.portfolioName}}</td>
+                <td>{{obj.description}}</td>
+                <td>
+                  <i class="fa fa-info-circle fa-lg selector-669-71 header-action-icon" aria-hidden="true"
+                    matTooltip="View" (click)="view_UsmPortfolio(obj)"></i>&nbsp; &nbsp;
+
+                  <i class="fa fa-pencil fa-lg selector-669-72 header-action-icon" aria-hidden="true" matTooltip="Edit"
+                    style="padding-left: 5px" (click)="editUsmPortfolio(obj)"></i>
+                  &nbsp; &nbsp;
+                  <i class="fa fa-trash fa-lg selector-669-73 header-action-icon" aria-hidden="true"
+                    style="padding-left: 5px" matTooltip="Delete" (click)="showDeleteDialog(obj)"></i>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #noData>
+            <div class="no-data">No data available</div>
+          </ng-template>
+        </div>
+        <!-- Pagination -->
+        <app-aip-pagination [pageNumber]="pageNumber" [noOfPages]="noOfPages" [pageArr]="pageArr"
+          [startIndex]="startIndex" [endIndex]="endIndex" [hoverStates]="hoverStates" (prevPage)="prevPage()"
+          (nextPage)="nextPage()" (changePage)="changePage($event)">
+        </app-aip-pagination>
+      </div>
+    </div>
+  </div>
+</div>

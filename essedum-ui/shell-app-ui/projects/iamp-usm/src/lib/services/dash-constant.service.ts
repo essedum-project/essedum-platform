@@ -23,7 +23,7 @@ import { DashConstant } from "../models/dash-constant";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 // import { map, catchError } from "rxjs/operators";
 import { Project } from "../models/project";
-import { UsmPortfolio } from "../models/usm-portfolio";
+import { Portfolio } from "../models/portfolio";
 
 @Injectable()
 export class DashConstantService {
@@ -186,7 +186,7 @@ export class DashConstantService {
   }
 
   getDashConsts(project: Project): Observable<DashConstant[]> {
-    let portfolio: UsmPortfolio;
+    let portfolio: Portfolio;
       try {
         portfolio = JSON.parse(sessionStorage.getItem("project") || "").portfolioId;
       } catch (e: any) {

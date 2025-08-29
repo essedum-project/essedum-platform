@@ -428,8 +428,22 @@ export class ApisService {
     try {
       body = JSON.stringify(req);
       let headerValue = Buffer.from(body, "utf8").toString("base64");
-      let headers = new HttpHeaders();
-      headers = headers.append("example", headerValue);
+      const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+      const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+      // Set headers
+      const headers = new HttpHeaders({
+        'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+        'Content-Type': 'application/json',
+        'Accept': 'application/json,text/plain, */*',
+        'Priority': 'u=1, i',
+        'project': project.id || '',
+        'projectname': project.name || '',
+        'roleid': userRole.id || '',
+        'rolename': userRole.name || '',
+        'example': headerValue
+      });
+
       return this.https
         .get("/api/userss/page", {
           observe: "response",
@@ -1054,7 +1068,7 @@ export class ApisService {
   }
 
   revokeRecursive(retryCount): Observable<any> {
-    return this.https.get("/api/leap/logout",
+    return this.https.get("/api/essedum/logout",
       { observe: "response", responseType: "text", })
       .pipe(map((response) => {
         if (response.status == 200) {

@@ -13,7 +13,7 @@
 // Template pack-angular:web/src/app/base-entities/entity.ts.e.vm
 //
 import { Role } from "./role";
-import { UsmPortfolio } from "./usm-portfolio";
+import { Portfolio } from "./portfolio";
 
 export class Project {
   id: number;
@@ -22,7 +22,7 @@ export class Project {
   lastUpdated: any;
   logo: any;
   defaultrole: Boolean;
-  portfolioId: UsmPortfolio;
+  portfolioId: Portfolio;
   projectdisplayname: string;
   theme: string;
   logoName: string;
@@ -32,6 +32,7 @@ export class Project {
   projectAutologin: Boolean;
   autoUserProject: Boolean;
   autologinRole : Role;
+  is_active: boolean;
   constructor(json?: any) {
     if (json != null) {
       this.id = json.id;
@@ -48,6 +49,7 @@ export class Project {
       this.disableExcel = json.disableExcel;
       this.createdDate = json.createdDate
       this.projectAutologin = json.projectAutologin
+      this.is_active = json.is_active !== undefined ? json.is_active : true;
       if(json.autoUserProject==null) this.autoUserProject = false;
       this.autologinRole = json.autologinRole
     }

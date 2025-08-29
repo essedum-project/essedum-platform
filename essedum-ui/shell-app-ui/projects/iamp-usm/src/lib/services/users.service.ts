@@ -12,7 +12,8 @@ import { MessageService } from "./message.service";
 
 // import { throwError, pipe } from "rxjs";
 // import { map, catchError, switchMap } from "rxjs/operators";
-import { encKey } from '../models/encKey'
+import {encKey} from '../models/encKey'
+
 
 @Injectable()
 export class UsersService {
@@ -32,7 +33,8 @@ export class UsersService {
     let body;
     try {
       body = JSON.stringify(formdata);
-    } catch (e: any) {
+
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -101,10 +103,36 @@ export class UsersService {
   getUsers(id: any): Observable<Users> {
     let result;
     let temp;
+
+      let req = new PageRequestByExample(id, event);
+    let body;
+    let headerValue;
+    try {
+      body = JSON.stringify(req);
+      headerValue = Buffer.from(body, 'utf8').toString('base64');
+    } catch (e : any)  {
+      console.error("JSON.stringify error - ", e.message);
+    }
+     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || '',
+      'example': headerValue
+    });
+
     return this.https
-      .get("/api/userss/" + id, { observe: "response" })
+      .get("/api/userss/" + id, { observe: "response" , headers: headers})
       .pipe(
-        map((response) => {
+        map((response) => {  
           return new Users(response.body);
         })
       )
@@ -119,7 +147,8 @@ export class UsersService {
     let body;
     try {
       body = JSON.stringify(user);
-    } catch (e: any) {
+
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -168,7 +197,8 @@ export class UsersService {
     let body;
     try {
       body = JSON.stringify(user);
-    } catch (e: any) {
+
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -198,7 +228,8 @@ export class UsersService {
     let result;
     try {
       body = JSON.stringify(users);
-    } catch (e: any) {
+
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
 
@@ -223,7 +254,7 @@ export class UsersService {
     let body;
     try {
       body = JSON.stringify(users);
-    } catch (e: any) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
 
@@ -256,24 +287,26 @@ export class UsersService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e: any) {
+
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
-
-    const project1 = JSON.parse(sessionStorage.getItem("project") || '{}');
+ const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-
+    
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
       'Content-Type': 'application/json',
       'Accept': 'application/json,text/plain, */*',
       'Priority': 'u=1, i',
-      'project': project1.id || '',
-      'projectname': project1.name || '',
+
+      'project': project.id || '',
+      'projectname': project.name || '',
       'roleid': userRole.id || '',
       'rolename': userRole.name || '',
-      example: headerValue
+              'example': headerValue
+
     });
 
     return this.https
@@ -283,7 +316,7 @@ export class UsersService {
       })
       .pipe(
         switchMap(async (response) => {
-          result = JSON.parse(await this.decryptUsingAES256(response.body, this.getKey()));
+          result=JSON.parse(await this.decryptUsingAES256(response.body,this.getKey()));
           let pr: any = result;
           return new PageResponse<Users>(pr.totalPages, pr.totalElements, Users.toArray(pr.content));
         })
@@ -303,20 +336,36 @@ export class UsersService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e: any) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
-    let headers = new HttpHeaders();
-    headers = headers.append('example', headerValue);
+   // Get project and role from sessionStorage
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
+    
+    // Set headers
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json,text/plain, */*',
+      'Priority': 'u=1, i',
+      'project': project.id || '',
+      'projectname': project.name || '',
+      'roleid': userRole.id || '',
+      'rolename': userRole.name || '',
+            'example': headerValue 
+
+    });
     return this.https
       .get(`/api/users/page?page=${event.page}&size=${event.size}`, {
         observe: "response", headers: headers,
-        responseType: "text"
+        responseType : "text"
       })
       .pipe(
         switchMap(async (response) => {
           let key = this.getKey();
-          result = JSON.parse(await this.decryptUsingAES256(response.body, key));
+
+          result=JSON.parse(await this.decryptUsingAES256(response.body,key));
           let pr: any = result;
           return new PageResponse<Users>(pr.totalPages, pr.totalElements, Users.toArray(pr.content));
         })
@@ -336,7 +385,8 @@ export class UsersService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e: any) {
+
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     let headers = new HttpHeaders();
@@ -344,12 +394,13 @@ export class UsersService {
     return this.https
       .get(`/api/users/pagination/${flag}/${id}/page?page=${event.page}&size=${event.size}`, {
         observe: "response", headers: headers,
-        responseType: "text"
+
+        responseType : "text"
       })
       .pipe(
         switchMap(async (response) => {
           let key = this.getKey();
-          result = JSON.parse(await this.decryptUsingAES256(response.body, key));
+          result=JSON.parse(await this.decryptUsingAES256(response.body,key));
           let pr: any = result;
           return new PageResponse<Users>(pr.totalPages, pr.totalElements, Users.toArray(pr.content));
         })
@@ -370,7 +421,8 @@ export class UsersService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e: any) {
+
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     let headers = new HttpHeaders();
@@ -378,12 +430,14 @@ export class UsersService {
     return this.https
       .get(`/api/users/filter/${flag}/${id}/page`, {
         observe: "response", headers: headers,
-        responseType: "text"
+
+        responseType : "text"
       })
       .pipe(
         switchMap(async (response) => {
           let key = this.getKey();
-          result = JSON.parse(await this.decryptUsingAES256(response.body, key));
+
+          result=JSON.parse(await this.decryptUsingAES256(response.body,key));
           let pr: any = result;
           return new PageResponse<Users>(pages, result.length, Users.toArray(result));
         })
@@ -401,7 +455,8 @@ export class UsersService {
     let result;
     try {
       body = JSON.stringify(req);
-    } catch (e: any) {
+
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -429,7 +484,8 @@ export class UsersService {
     let result;
     try {
       body = JSON.stringify(req);
-    } catch (e: any) {
+
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -458,7 +514,7 @@ export class UsersService {
     let body;
     try {
       body = JSON.stringify({ query: query, maxResults: 10 });
-    } catch (e: any) {
+    } catch (e : any)  {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -528,7 +584,8 @@ export class UsersService {
 
   async decryptUsingAES256(cipherResponse, password) {
 
-    let cipherJson = JSON.parse(cipherResponse);
+    
+    let cipherJson = JSON.parse(cipherResponse);    
     let output = await this.decryptgcm(cipherJson["ciphertext"], cipherJson["iv"], password);
     return output;
 
@@ -584,19 +641,21 @@ export class UsersService {
     const encodedText = new TextEncoder().encode(plaintext);
     const ciphertext = await crypto.subtle.encrypt(algorithm, importedKey, encodedText);
 
-    const ciphertextArray = Array.from(new Uint8Array(ciphertext));
+
+    const ciphertextArray = Array.from(new Uint8Array(ciphertext)); 
     // Convert Uint8Array to regular array 
     const encodedCiphertext = btoa(String.fromCharCode.apply(null, ciphertextArray));
     // const encodedIV = btoa(Array.from(iv));
     // const encodedIV = btoa(String.fromCharCode.apply(null, iv));
-    const encodedIV = btoa(Array.from(iv).map((byte) => String.fromCharCode(byte)).join(''));
+
+    const encodedIV = btoa( Array.from(iv) .map((byte) => String.fromCharCode(byte)) .join('') );
 
     const encryptedJSON = { ciphertext: encodedCiphertext, iv: encodedIV }
 
     return encryptedJSON;
   }
 
-  getKey() {
+  getKey(){
     return this.encKey.getSalt();
   }
 }

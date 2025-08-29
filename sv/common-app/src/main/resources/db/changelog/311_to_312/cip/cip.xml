@@ -3,7 +3,7 @@
 
 
 
-  <changeSet author="Leap" id="3v1-cip-20241218-0010">
+  <changeSet author="Essedum" id="3v1-cip-20241218-0010">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT spa.probe_run_app_id AS \"RunID\",spa.run_description AS \"RunDescription\",spa.SUT,CONVERT(VARCHAR(8), spa.run_start_time, 108) AS \"StartTime\",CONVERT(VARCHAR(8), spa.run_end_time, 108) AS \"EndTime\",spa.run_result AS \"RunResult\",spa.run_time AS \"RunTime\" FROM sre_probe_run_app spa INNER JOIN sre_location sl ON spa.location_id = sl.location_id INNER JOIN ccl_app ca ON spa.application_id = ca.application_id WHERE spa.run_result = 0;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{}","tableName":"","uniqueIdentifier":""}'WHERE name = 'ApplicationTable' AND organization = 'Upgrade_Test';
 		</sql> 
@@ -12,7 +12,7 @@
 
 
 
-<changeSet author="Leap" id="3v1-cip-20241218-0020">
+<changeSet author="Essedum" id="3v1-cip-20241218-0020">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT DISTINCT(application_name) AS ''ApplicationName'' , convert(varchar,MAX(sre_probe_run_app.run_start_time),8) AS ''StartTime'' , convert(varchar,sre_probe_run_app.run_end_time,8) AS ''EndTime'' FROM ccl_app INNER JOIN  sre_probe_run_app ON sre_probe_run_app.application_id =ccl_app.application_id AND project_id=project_id AND run_result=0 GROUP BY ccl_app.application_name,sre_probe_run_app.run_start_time,sre_probe_run_app.run_end_time","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"application\":\"FALSE\",\"endDate\":\"''2019-12-30''\",\"applicationGroup\":\"FALSE\",\"location\":\"FALSE\",\"availability\":\"''0'',''1''\",\"startDate\":\"''2019-09-01''\"}","tableName":"","uniqueIdentifier":""}'WHERE name = 'Failed_Applications_Name' AND organization = 'Upgrade_Test';
 		</sql> 
@@ -21,7 +21,7 @@
 
 
 
-<changeSet author="Leap" id="3v1-cip-20241218-0030">
+<changeSet author="Essedum" id="3v1-cip-20241218-0030">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT application_name AS ''APPLICATION_NAME'' ,run_description AS ''PROBE NAME'' , run_date AS ''RUN DATE'' ,   LEFT(run_start_time,8) AS ''START TIME'' ,LEFT(run_end_time,8) AS ''END TIME'' FROM  sre_probe_run_app INNER JOIN ccl_app ON sre_probe_run_app.application_id= ccl_app.application_id WHERE project_id=project_id AND application_name IN (application_name) AND run_result=1;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"application_name\":\"application_name\",\"projectId\":\"3\"}","tableName":"","uniqueIdentifier":""}'WHERE name = 'testsuccessproberuns' AND organization = 'Upgrade_Test';
 		</sql> 
@@ -30,28 +30,28 @@
 
 
 
-<changeSet author="Leap" id="3v1-cip-20241218-0040">
+<changeSet author="Essedum" id="3v1-cip-20241218-0040">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT application_grp_name AS ''Application_Group_Name'', location_name AS ''Location Name'', convert(varchar,run_start_time,8) AS ''Run Start Time'', convert(varchar,run_end_time,8) AS ''Run End Time'' ,  run_time AS ''Run Time''  FROM sre_probe_run_app  INNER JOIN ccl_app ON sre_probe_run_app.application_id=ccl_app.application_id INNER JOIN  ccl_app_grp ON ccl_app.application_grp_id=ccl_app_grp.application_grp_id INNER JOIN sre_location ON  sre_probe_run_app.location_id = sre_location.location_id WHERE run_result=1  AND ccl_app.project_id=ccl_app.project_id  GROUP BY application_grp_name,location_name,run_start_time,run_end_time,run_time;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"projectId\":\"3\"}","tableName":"","uniqueIdentifier":""}'WHERE name = 'testapplicationgroupwithactiveprobe' AND organization = 'Upgrade_Test';
 		</sql> 
 	</changeSet>
 
 
-	<changeSet author="Leap" id="3v1-sre-20241218-12-19-42-1">
+	<changeSet author="Essedum" id="3v1-sre-20241218-12-19-42-1">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 		update mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT COUNT(*) AS "COUNT" FROM ccl_app,ccl_app_grp WHERE ccl_app.application_grp_id=ccl_app_grp.application_grp_id
 AND ccl_app.project_id=3;","Cacheable":"false","isStreaming":"false","defaultValues":"","writeMode":"append","params":"" ,"tableName":"","uniqueIdentifier":""}' where alias = 'Application_Count' and organization = 'Upgrade_Test'; 
 	    </sql> 
 	</changeSet>
 
-	<changeSet author="Leap" id="3v1-sre-20241218-12-19-42-2">
+	<changeSet author="Essedum" id="3v1-sre-20241218-12-19-42-2">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 	update mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT COUNT(rp.application_id) AS "COUNT" FROM sre_probe_run_app rp INNER JOIN 
 ccl_app ca ON ca.application_id = rp.application_id WHERE run_result = 0 AND 
 ca.project_id =3;","Cacheable":"false","isStreaming":"false","defaultValues":"","writeMode":"append","params":"" ,"tableName":"","uniqueIdentifier":""}' where alias = 'Run_unsuccessful' and organization = 'Upgrade_Test';
 	    </sql> 
 	</changeSet>
-	<changeSet author="Leap (generated)" id="3v12-cip-0054" >
+	<changeSet author="Essedum (generated)" id="3v12-cip-0054" >
 		<addColumn tableName="mlchainjobs">
 		<column name="runtime" type="VARCHAR(255)" />
 		</addColumn>

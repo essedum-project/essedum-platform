@@ -1,5 +1,3 @@
-// import { Context } from "./context";
-
 import { Context } from "./context";
 
 export class Users {

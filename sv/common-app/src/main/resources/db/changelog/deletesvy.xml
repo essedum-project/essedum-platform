@@ -4,7 +4,7 @@
 	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
-	<changeSet author="sai.ragavendran (generated)" id="2v0-svy-400" dbms="mysql">
+	<changeSet author="essedum (generated)" id="2v0-svy-400" dbms="mysql">
 		  <sqlFile path="db/changelog/svy/drop_tables_svy.sql"  endDelimiter="#" splitStatements="true"/>
 		  <sql splitStatements="true" stripComments="true">
 		  	call drop_tables_svy()

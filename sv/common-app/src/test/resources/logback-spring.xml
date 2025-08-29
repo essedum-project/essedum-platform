@@ -14,7 +14,7 @@
 		<encoder name="enc"
 			class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
 			<layout
-				class="com.infosys.icets.ai.comm.lib.util.logger.PatternLayoutWithUserContext">
+				class="com.lfn.ai.comm.lib.util.logger.PatternLayoutWithUserContext">
 				<param name="Pattern"
 					value="%d{HH:mm:ss.SSS} %-5level %logger{10} [%user %session] - %msg%n" />
 			</layout>
@@ -30,7 +30,7 @@
 		<encoder name="enc"
 			class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
 			<layout
-				class="com.infosys.icets.ai.comm.lib.util.logger.PatternLayoutWithUserContext">
+				class="com.lfn.ai.comm.lib.util.logger.PatternLayoutWithUserContext">
 				<param name="Pattern"
 					value="%d{HH:mm:ss.SSS} %-5level %logger{10} [%user %session] - %msg%n" />
 			</layout>
@@ -43,7 +43,7 @@
 		<appender-ref ref="FILE" />
 	</appender>	
 
-	<logger name="com.infosys" level="DEBUG" />
+	<logger name="com.lfn" level="DEBUG" />
 	<logger name="javax.activation" level="ERROR" />
 	<logger name="javax.mail" level="ERROR" />
 	<logger name="javax.xml.bind" level="ERROR" />
@@ -74,7 +74,7 @@
 	<logger name="sun.rmi" level="ERROR" />
 	<logger name="sun.rmi.transport" level="ERROR" />
 	<logger name="org.quartz.core" level="ERROR" />
-	<logger	name="com.infosys.icets.ai.comm.lib.util.logger.JobLogger" level="INFO">
+	<logger	name="com.lfn.ai.comm.lib.util.logger.JobLogger" level="INFO">
 		<appender-ref ref="FILE" />
 	</logger>
 

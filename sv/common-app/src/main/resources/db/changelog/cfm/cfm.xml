@@ -4,7 +4,7 @@
 	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-	<changeSet author="Leap (generated)" id="1614785155891-36">
+	<changeSet author="Essedum (generated)" id="1614785155891-36">
 	     <validCheckSum>any</validCheckSum>
             <preConditions onFail="MARK_RAN">
                <not>
@@ -33,7 +33,7 @@
 			<column name="thershold_mapping" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-37">
+	<changeSet author="Essedum (generated)" id="1614785155891-37">
 	<validCheckSum>any</validCheckSum>
             <preConditions onFail="MARK_RAN">
                <not>
@@ -53,7 +53,7 @@
 			<column name="project_id" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-38">
+	<changeSet author="Essedum (generated)" id="1614785155891-38">
 	<validCheckSum>any</validCheckSum>
             <preConditions onFail="MARK_RAN">
                <not>
@@ -77,12 +77,12 @@
 			<column name="active_color" type="VARCHAR(25)" />
 		</addColumn>
 	</changeSet>
-		<changeSet author="rishita.ari" id="1312v0-cfm-1">
+		<changeSet author="essedum" id="1312v0-cfm-1">
 		<addColumn tableName="cfm_configuration_item_type">
 			<column name="row_count" type="INT" />
 		</addColumn>
 	</changeSet>
-	<changeSet author="edlin.edwinjacob" id="2v1-cfm-1">
+	<changeSet author="essedum" id="2v1-cfm-1">
 	 <modifyDataType  
             columnName="url"  
             newDataType="VARCHAR(1000)"
