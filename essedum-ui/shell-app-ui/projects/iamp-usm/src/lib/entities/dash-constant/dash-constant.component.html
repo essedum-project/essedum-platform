@@ -1,218 +1,204 @@
-<div>
+<div class="dash-constant-container">
   <div class="aip-container lfx-u-pad-lr-30">
-    <div *ngIf="!showCreate && !configureTheme" class="selector-374-2">
-      <div *ngIf="!heading && configtype == 'side'">
-        <app-aip-header [cardTitle]="'Menu List'" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="true"
-          [searchPlaceholder]="'Search by Key/Value'" [addMatTooltip]="'Create Menu'" (search)="filterItem($event)"
+    <!-- List View Section -->
+    <section *ngIf="!showCreate && !configureTheme" class="list-view-section" aria-label="Configuration List">
+      <!-- Header Section -->
+      <div *ngIf="!heading" class="page-header">
+        <app-aip-header [cardTitle]="getHeaderTitle()" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="true"
+          [searchPlaceholder]="'Search by Key/Value'" [addMatTooltip]="getAddTooltip()" (search)="filterItem($event)"
           (refresh)="ngOnInit()" (add)="createView()">
         </app-aip-header>
       </div>
-      <div *ngIf="!heading && configtype != 'side'">
-        <app-aip-header [cardTitle]="'Configuration'" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="true"
-          [searchPlaceholder]="'Search by Key/Value'" [addMatTooltip]="'Create Configuration'"
-          (search)="filterItem($event)" (refresh)="ngOnInit()" (add)="createView()">
-        </app-aip-header>
-      </div>
-      <br>
-      <br>
-      <!-- Table Layout  -->
-      <div class="table-card">
-        <div *ngIf="dashConstantLength >= 0 && showList" class="table-scroll-container">
-          <table class="styled-table">
-            <thead>
-              <tr>
-                <th>Id</th>
-                <th style="width: 310px;">Key</th>
-                <th style="width: 550px;">Value</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let constants of pagedDashConstantList; let i = index">
-                <td (click)="ViewDashConstants(constants)" style="color: #0094ff; cursor: pointer;"
-                  class="td-ellipsis number-col selector-374-48" matTooltipClass="crud-tooltip"
-                  [matTooltip]="constants.id">
-                  {{ constants.id }}
-                </td>
-                <td (click)="ViewDashConstants(constants)" class="td-ellipsis selector-374-53"
-                  matTooltipClass="crud-tooltip" [matTooltip]="constants.keys">
-                  {{ constants.keys }}
-                </td>
-                <td (click)="ViewDashConstants(constants)" class=" td-ellipsis selector-374-53"
-                  matTooltipClass="crud-tooltip" [matTooltip]="constants.value">
-                  {{ constants.value }}
-                </td>
-                <td class="actions-col selector-374-63">
-                  <ng-container *ngIf="configtype == 'side'">
+
+      <!-- Data Table Section -->
+      <main class="data-table-section" aria-label="Configuration Data">
+        <div *ngIf="dashConstantLength >= 0 && showList" class="table-card">
+          <div class="table-scroll-container">
+            <table class="styled-table" role="table" aria-label="Configuration data table">
+              <thead>
+                <tr role="row">
+                  <th scope="col" class="id-column">Id</th>
+                  <th scope="col" class="key-column">Key</th>
+                  <th scope="col" class="value-column">Value</th>
+                  <th scope="col" class="actions-column">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let constants of pagedDashConstantList; let i = index; trackBy: trackByConstantId"
+                  role="row" [attr.aria-rowindex]="i + 1">
+                  <td (click)="ViewDashConstants(constants)" class="td-ellipsis number-col clickable-cell"
+                    matTooltipClass="crud-tooltip" [matTooltip]="constants.id"
+                    [attr.aria-describedby]="'id-tooltip-' + i" role="gridcell" tabindex="0"
+                    (keydown.enter)="ViewDashConstants(constants)" (keydown.space)="ViewDashConstants(constants)">
+                    {{ constants.id }}
+                  </td>
+                  <td (click)="ViewDashConstants(constants)" class="td-ellipsis clickable-cell"
+                    matTooltipClass="crud-tooltip" [matTooltip]="constants.keys"
+                    [attr.aria-describedby]="'key-tooltip-' + i" role="gridcell" tabindex="0"
+                    (keydown.enter)="ViewDashConstants(constants)" (keydown.space)="ViewDashConstants(constants)">
+                    {{ constants.keys }}
+                  </td>
+                  <td (click)="ViewDashConstants(constants)" class="td-ellipsis clickable-cell"
+                    matTooltipClass="crud-tooltip" [matTooltip]="constants.value"
+                    [attr.aria-describedby]="'value-tooltip-' + i" role="gridcell" tabindex="0"
+                    (keydown.enter)="ViewDashConstants(constants)" (keydown.space)="ViewDashConstants(constants)">
+                    {{ constants.value }}
+                  </td>
+                  <td class="actions-col" role="gridcell">
+
                     <div class="action-icon">
                       <mat-icon [ngClass]="{'active': isInfoHovered[i]}" (click)="ViewDashConstants(constants)"
-                        matTooltip="View Menu" [matTooltipPosition]="TOOLTIP_POSITION"
-                        (mouseenter)="isInfoHovered[i] = true" (mouseleave)="isInfoHovered[i] = false">info</mat-icon>
+                        [matTooltip]="getViewTooltip()" [matTooltipPosition]="TOOLTIP_POSITION"
+                        (mouseenter)="isInfoHovered[i] = true" (mouseleave)="isInfoHovered[i] = false"
+                        [attr.aria-label]="getViewTooltip()">info</mat-icon>
                       <mat-icon [ngClass]="{'active': isEditHovered[i]}" (click)="editDashConstants(constants)"
-                        matTooltip="Edit Menu" [matTooltipPosition]="TOOLTIP_POSITION"
-                        (mouseenter)="isEditHovered[i] = true" (mouseleave)="isEditHovered[i] = false">edit</mat-icon>
+                        [matTooltip]="getEditTooltip()" [matTooltipPosition]="TOOLTIP_POSITION"
+                        (mouseenter)="isEditHovered[i] = true" (mouseleave)="isEditHovered[i] = false"
+                        [attr.aria-label]="getEditTooltip()">edit</mat-icon>
                       <mat-icon [ngClass]="{'active': isDeleteHovered[i]}" (click)="deleteDashConstants(constants)"
-                        matTooltip="Delete Menu" [matTooltipPosition]="TOOLTIP_POSITION"
-                        (mouseenter)="isDeleteHovered[i] = true"
-                        (mouseleave)="isDeleteHovered[i] = false">delete</mat-icon>
-                    </div>
+                        [matTooltip]="getDeleteTooltip()" [matTooltipPosition]="TOOLTIP_POSITION"
+                        (mouseenter)="isDeleteHovered[i] = true" (mouseleave)="isDeleteHovered[i] = false"
+                        [attr.aria-label]="getDeleteTooltip()">delete</mat-icon>
 
-                  </ng-container>
-                  <ng-container *ngIf="configtype != 'side'">
-                    <div class="action-icon">
-                      <mat-icon [ngClass]="{'active': isInfoHovered[i]}" (click)="ViewDashConstants(constants)"
-                        matTooltip="View Configuration" [matTooltipPosition]="TOOLTIP_POSITION"
-                        (mouseenter)="isInfoHovered[i] = true" (mouseleave)="isInfoHovered[i] = false">info</mat-icon>
-                      <mat-icon [ngClass]="{'active': isEditHovered[i]}" (click)="editDashConstants(constants)"
-                        matTooltip="Edit Configuration" [matTooltipPosition]="TOOLTIP_POSITION"
-                        (mouseenter)="isEditHovered[i] = true" (mouseleave)="isEditHovered[i] = false">edit</mat-icon>
-                      <mat-icon [ngClass]="{'active': isDeleteHovered[i]}" (click)="deleteDashConstants(constants)"
-                        matTooltip="Delete Configuration" [matTooltipPosition]="TOOLTIP_POSITION"
-                        (mouseenter)="isDeleteHovered[i] = true"
-                        (mouseleave)="isDeleteHovered[i] = false">delete</mat-icon>
-                    </div>
 
-                  </ng-container>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <ng-template #noData>
-            <div class="no-data">No data available</div>
-          </ng-template>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <app-aip-pagination [pageNumber]="pageNumber" [noOfPages]="noOfPages" [pageArr]="pageArr"
+            [startIndex]="startIndex" [endIndex]="endIndex" [hoverStates]="hoverStates" (prevPage)="onPrevPage()"
+            (nextPage)="onNextPage()" (changePage)="onChangePage($event)" aria-label="Pagination controls">
+          </app-aip-pagination>
         </div>
 
-        <!-- Pagination -->
-        <app-aip-pagination [pageNumber]="pageNumber" [noOfPages]="noOfPages" [pageArr]="pageArr"
-          [startIndex]="startIndex" [endIndex]="endIndex" [hoverStates]="hoverStates" (prevPage)="onPrevPage()"
-          (nextPage)="onNextPage()" (changePage)="onChangePage($event)">
-        </app-aip-pagination>
+        <!-- No Records Message -->
+        <div *ngIf="dashConstantLength === 0" class="no-records-message" role="status" aria-live="polite">
+          No Records Found
+        </div>
+      </main>
+    </section>
 
 
-      </div>
-
-      <div *ngIf="dashConstantLength == 0" id="noRecordsMsg" class="selector-374-70">No Records Found</div>
-    </div>
-
-
-
-    <div *ngIf="showCreate && !configureTheme">
-      <div *ngIf="!edit && configtype == 'side'">
-        <app-aip-header [cardTitle]="'Create Menu'" [action]="'add-constants'" [backAction]="true"
-          [backMatTooltip]="'Back to Menu'" [closeAction]="false" (navigateBack)="listView()">
+    <!-- Create/Edit View Section -->
+    <section *ngIf="showCreate && !configureTheme" class="form-view-section" aria-label="Configuration Form">
+      <!-- Dynamic Header Section -->
+      <div class="form-header">
+        <app-aip-header [cardTitle]="getFormHeaderTitle()" [action]="getFormAction()" [backAction]="true"
+          [backMatTooltip]="getBackTooltip()" [closeAction]="false" (navigateBack)="listView()"
+          (view)="toggleViewMode()" (edit)="toggleEditMode()">
         </app-aip-header>
       </div>
 
-      <div *ngIf="!edit && configtype !='side'">
-        <app-aip-header [cardTitle]="'Create Configuration'" [action]="'add-constants'" [backAction]="true"
-          [backMatTooltip]="'Back to Configurations'" [closeAction]="false" (navigateBack)="listView()">
-        </app-aip-header>
-      </div>
-
-      <div *ngIf="edit &amp;&amp; !view &amp;&amp; configtype == 'side'">
-        <app-aip-header [cardTitle]="'Edit Menu'" [action]="'edit-constants'" [backAction]="true"
-          [backMatTooltip]="'Back to Menu'" (navigateBack)="listView()" (view)="view = true; buttonFlag = true">
-        </app-aip-header>
-      </div>
-
-      <div *ngIf="edit &amp;&amp; !view &amp;&amp; configtype != 'side'">
-        <app-aip-header [cardTitle]="'Edit Configuration'" [action]="'edit-constants'" [backAction]="true"
-          [backMatTooltip]="'Back to Configurations'" (navigateBack)="listView()"
-          (view)="view = true; buttonFlag = true">
-        </app-aip-header>
-      </div>
-      <div *ngIf="edit &amp;&amp; view &amp;&amp; configtype == 'side'">
-        <app-aip-header [cardTitle]="'View Menu'" [action]="'view-constants'" [backAction]="true"
-          [backMatTooltip]="'Back to Menu'" (navigateBack)="listView()" (edit)="view = false; buttonFlag = false">
-        </app-aip-header>
-      </div>
-      <div *ngIf="edit &amp;&amp; view &amp;&amp; configtype != 'side'">
-        <app-aip-header [cardTitle]="'View Configuration'" [action]="'view-constants'" [backAction]="true"
-          [backMatTooltip]="'Back to Configurations'" (navigateBack)="listView()"
-          (edit)="view = false; buttonFlag = false">
-        </app-aip-header>
-      </div>
-
-    </div>
 
 
-    <!-- create-constants -->
-    <div *ngIf="showCreate && !configureTheme" #dashConstantForm="ngForm" class="selector-374-71" ngForm=""
-      [ngBusy]="{ busy: busy, message: 'Saving Menu...', backdrop: true }">
-      <div class="padTop20 selector-374-72">
-        <div class="noPad selector-374-84">
-          <div *ngIf="sideCheck == false || sideCheck == undefined" class="selector-374-85">
-            <div class="row rwMAr selector-374-86"
-              *ngIf="!defaultCheck &amp;&amp; !defaultsidebar &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap">
-              <div class="col-md-6 selector-374-87" *ngIf="!configureUserLand">
-                <label class="formLabel selector-374-88">Key*</label>
-                <input [disabled]="view" type="text" maxlength="250" [ngModelOptions]="{ standalone: true }"
-                  [(ngModel)]="dashConstant.keys" class="txtInput selector-374-89" (keydown)="checkMaxlengthForKey()"
-                  required="" />
-                <span class="error selector-374-90" style="font-size: 1.6vmin">
+      <!-- Form Content -->
+      <form #dashConstantForm="ngForm" class="dash-constant-form" [ngBusy]="getBusyConfig()"
+        aria-label="Configuration form" role="form">
+
+        <div class="form-content">
+          <!-- Basic Configuration Fields -->
+          <fieldset *ngIf="shouldShowBasicFields()" class="basic-fields-section"
+            [attr.aria-label]="getBasicFieldsLabel()">
+            <legend class="visually-hidden">{{ getBasicFieldsLabel() }}</legend>
+
+            <div class="form-row">
+              <div class="form-group" *ngIf="!configureUserLand">
+                <label for="dashConstantKey" class="form-label required">Key</label>
+                <input id="dashConstantKey" type="text" maxlength="250" [ngModelOptions]="{ standalone: true }"
+                  [(ngModel)]="dashConstant.keys" class="form-input" (keydown)="checkMaxlengthForKey()"
+                  [readonly]="view" [attr.aria-describedby]="'key-help key-error'" required />
+                <div id="key-help" class="field-help">
                   Note: Value should start with alpha numeric characters and can contain special characters
-                  &#64;%!#*-_&amp;$()=+/.?\ </span><br class="selector-374-91" />
-                <span class="error selector-374-92" style="font-size: 1.6vmin" *ngIf="showKeyLengthErrorMessage">{{
-                  lengthNameErrorMessage
-                  }}</span>
+                  %!#*-_&$()=+/.?\
+                </div>
+                <div id="key-error" class="field-error" *ngIf="showKeyLengthErrorMessage" role="alert"
+                  aria-live="polite">
+                  {{ lengthNameErrorMessage }}
+                </div>
               </div>
 
-              <div class="col-md-6 selector-374-98" *ngIf="!configureUserLand"
-                [ngStyle]="{'margin-top':configureUserLand?'19px':''}">
-                <label class="formLabel selector-374-99">Value*</label>
-                <input [disabled]="view" type="text" [ngModelOptions]="{ standalone: true }"
-                  [(ngModel)]="dashConstant.value" class="txtInput selector-374-100" required="" /><br>
+              <div class="form-group" *ngIf="!configureUserLand"
+                [ngStyle]="{'margin-top': configureUserLand ? '19px' : ''}">
+                <label for="dashConstantValue" class="form-label required">Value</label>
+                <input id="dashConstantValue" type="text" [ngModelOptions]="{ standalone: true }"
+                  [(ngModel)]="dashConstant.value" class="form-input" [readonly]="view" required />
               </div>
             </div>
-          </div>
-          <br class="selector-374-145">
-          <mat-checkbox color="primary" [disabled]="view"
-            *ngIf="configtype &amp;&amp; !defaultCheck &amp;&amp; !defaultsidebar &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
-            [(ngModel)]="sideCheck" name="sideCheck" (change)="sideCheckChange($event)" class="selector-374-146">
-            <label class="formLabel selector-374-147">Configure Sidebar</label>
-          </mat-checkbox>
-          <mat-checkbox color="primary"
-            *ngIf="!configtype &amp;&amp; !defaultsidebar &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
-            [disabled]="view" [(ngModel)]="defaultCheck" name="defaultCheck" (change)="defaultCheckChange($event)"
-            class="selector-374-148">
-            <label class="formLabel selector-374-149">Default Project/Role in Landing</label>
-          </mat-checkbox>
-          <mat-checkbox color="primary" [disabled]="view" [(ngModel)]="defaultsidebar"
-            *ngIf="configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
-            name="defaultsidebar" (change)="defaultsidebarroles($event)" class="selector-374-150">
-            <label class="formLabel selector-374-151">Default Sidebar</label>
-          </mat-checkbox>
-          <mat-checkbox [ngStyle]="{'padding-left': configureUserLand ? '2%' : '3%'}" color="primary" [disabled]="view"
-            [(ngModel)]="configureUserLand"
-            *ngIf="!configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !defaultsidebar &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
-            name="configureUserLand" (change)="configureUserLandRole($event)" class="selector-374-152">
-            <label class="formLabel selector-374-153">Configure User Landing</label>
-          </mat-checkbox>
-          <mat-checkbox style="padding-left: 3%" color="primary" [disabled]="view" [(ngModel)]="rearrangesidebar"
-            *ngIf="configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !defaultsidebar &amp;&amp; !configureUserLand &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
-            name="rearrangesidebar" (change)="rearrangesidebarfun($event)" class="selector-374-252">
-            <label class="formLabel selector-374-253">Rearrange Sidebar</label>
-          </mat-checkbox>
-          <mat-checkbox style="padding-left: 3%" color="primary" [disabled]="view" [(ngModel)]="configureTheme"
-            *ngIf="!configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !defaultsidebar &amp;&amp; !configureUserLand &amp;&amp;!rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
-            name="configureTheme" class="selector-374-1152">
-            <label class="formLabel selector-374-153">Configure Theme for Project</label>
-          </mat-checkbox>
-          <mat-checkbox style="padding-left: 2%" color="primary" [disabled]="view" [(ngModel)]="iconsidebar"
-            *ngIf="configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !defaultsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
-            name="defaultsidebar" (change)="iconsidebarroles($event)" class="selector-374-150">
-            <label class="formLabel selector-374-151">Icon Sidebar</label>
-          </mat-checkbox>
-          <mat-checkbox style="padding-left: 2%" color="primary" [disabled]="view" [(ngModel)]="configureFileUpload"
-            *ngIf="!configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !defaultsidebar  &amp;&amp; !iconsidebar"
-            name="defaultsidebar" (change)="configureFileUploadChanges($event)" class="selector-374-150">
-            <label class="formLabel selector-374-151">Configure File Upload</label>
-          </mat-checkbox>
-          <mat-checkbox style="padding-left: 2%" color="primary" [disabled]="view" [(ngModel)]="projectRoleMap"
-            *ngIf="!configtype &amp;&amp; !defaultsidebar &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !defaultCheck"
-            name="projectRoleMap" (change)="projectRoleMapChange($event)" class="selector-374-158">
-            <label class="formLabel selector-374-149">Project Role Mapping</label>
-          </mat-checkbox>
+          </fieldset>
+
+          <!-- Configuration Options -->
+          <fieldset class="configuration-options" aria-label="Configuration Options">
+            <legend class="visually-hidden">Configuration Options</legend>
+
+            <div class="checkbox-group" role="group" aria-label="Configuration type selection">
+              <mat-checkbox
+                *ngIf="configtype &amp;&amp; !defaultCheck &amp;&amp; !defaultsidebar &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
+                color="primary" [disabled]="view" [(ngModel)]="sideCheck" name="sideCheck"
+                (change)="sideCheckChange($event)" class="config-checkbox">
+                <span class="checkbox-label">Configure Sidebar</span>
+              </mat-checkbox>
+
+              <mat-checkbox
+                *ngIf="!configtype &amp;&amp; !defaultsidebar &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
+                color="primary" [disabled]="view" [(ngModel)]="defaultCheck" name="defaultCheck"
+                (change)="defaultCheckChange($event)" class="config-checkbox">
+                <span class="checkbox-label">Default Project/Role in Landing</span>
+              </mat-checkbox>
+
+              <mat-checkbox
+                *ngIf="configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
+                color="primary" [disabled]="view" [(ngModel)]="defaultsidebar" name="defaultsidebar"
+                (change)="defaultsidebarroles($event)" class="config-checkbox">
+                <span class="checkbox-label">Default Sidebar</span>
+              </mat-checkbox>
+
+              <mat-checkbox
+                *ngIf="!configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !defaultsidebar &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
+                color="primary" [disabled]="view" [(ngModel)]="configureUserLand" name="configureUserLand"
+                (change)="configureUserLandRole($event)" class="config-checkbox">
+                <span class="checkbox-label">Configure User Landing</span>
+              </mat-checkbox>
+
+              <mat-checkbox
+                *ngIf="configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !defaultsidebar &amp;&amp; !configureUserLand &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
+                color="primary" [disabled]="view" [(ngModel)]="rearrangesidebar" name="rearrangesidebar"
+                (change)="rearrangesidebarfun($event)" class="config-checkbox">
+                <span class="checkbox-label">Rearrange Sidebar</span>
+              </mat-checkbox>
+
+              <mat-checkbox
+                *ngIf="!configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !defaultsidebar &amp;&amp; !configureUserLand &amp;&amp;!rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
+                color="primary" [disabled]="view" [(ngModel)]="configureTheme" name="configureTheme"
+                class="config-checkbox">
+                <span class="checkbox-label">Configure Theme for Project</span>
+              </mat-checkbox>
+
+              <mat-checkbox
+                *ngIf="configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !defaultsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !projectRoleMap"
+                color="primary" [disabled]="view" [(ngModel)]="iconsidebar" name="iconsidebar"
+                (change)="iconsidebarroles($event)" class="config-checkbox">
+                <span class="checkbox-label">Icon Sidebar</span>
+              </mat-checkbox>
+
+              <mat-checkbox
+                *ngIf="!configtype &amp;&amp; !defaultCheck &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !defaultsidebar  &amp;&amp; !iconsidebar"
+                color="primary" [disabled]="view" [(ngModel)]="configureFileUpload" name="configureFileUpload"
+                (change)="configureFileUploadChanges($event)" class="config-checkbox">
+                <span class="checkbox-label">Configure File Upload</span>
+              </mat-checkbox>
+
+              <mat-checkbox
+                *ngIf="!configtype &amp;&amp; !defaultsidebar &amp;&amp; !sideCheck &amp;&amp; !configureUserLand &amp;&amp; !rearrangesidebar &amp;&amp; !iconsidebar &amp;&amp;  !configureFileUpload &amp;&amp; !defaultCheck"
+                color="primary" [disabled]="view" [(ngModel)]="projectRoleMap" name="projectRoleMap"
+                (change)="projectRoleMapChange($event)" class="config-checkbox">
+                <span class="checkbox-label">Project Role Mapping</span>
+              </mat-checkbox>
+            </div>
+          </fieldset>
 
           <div *ngIf="sideCheck == true &amp;&amp; !defaultsidebar" class="selector-374-101">
             <div class="row rwMAr selector-374-102">
@@ -580,38 +566,45 @@
           </div>
         </div>
 
-        <!-- Dialog Actions -->
-        <div mat-dialog-actions class="dialog-actions">
-          <button mat-raised-button *ngIf="!edit &amp;&amp; !buttonFlag &amp;&amp; !rearrangesidebar" type="button"
-            class="action-button" (click)="onSave()" [class.disabled-button]="mandatoryFileValidationCheck"
-            [disabled]="!dashConstantForm.form.valid || mandatoryFileValidationCheck">
-            Save
+        <!-- Form Actions -->
+        <footer class="form-actions" role="group" aria-label="Form actions">
+          <button *ngIf="shouldShowSaveButton()" type="button" mat-raised-button class="action-button primary-button"
+            (click)="onSave()" [class.disabled-button]="mandatoryFileValidationCheck"
+            [disabled]="!dashConstantForm.form.valid || mandatoryFileValidationCheck"
+            [attr.aria-label]="getSaveButtonLabel()">
+            {{ getSaveButtonText() }}
           </button>
-          <button mat-raised-button *ngIf="edit &amp;&amp; !buttonFlag &amp;&amp; !rearrangesidebar" type="button"
-            class="action-button" (click)="onSave()" [class.disabled-button]="mandatoryFileValidationCheck"
-            [disabled]="!dashConstantForm.form.valid || mandatoryFileValidationCheck">
-            Update
-          </button>
-          <button mat-raised-button *ngIf="rearrangesidebar" type="button" class="action-button"
-            (click)="convertmappings()" [disabled]="!rearrangesidebarrole">
+
+          <button *ngIf="shouldShowConvertButton()" type="button" mat-raised-button class="action-button primary-button"
+            (click)="convertmappings()" [disabled]="!rearrangesidebarrole" aria-label="Convert sidebar arrangements">
             Convert
           </button>
-          <button mat-raised-button *ngIf="!buttonFlag &amp;&amp; !view" type="button" class="cancel-button"
-            (click)="clear()">Clear</button>
-        </div>
-      </div>
-    </div>
 
-    <div *ngIf="configureTheme">
-      <div class="header-left">
-        <mat-icon [class.active]="isBackHovered" (click)="configureTheme=false;listView()" matTooltip="Back to
-          Menu" [matTooltipPosition]="TOOLTIP_POSITION" (mouseenter)="isBackHovered = true"
-          (mouseleave)="isBackHovered = false" tabindex="0" role="button"
-          aria-label="Navigate back">arrow_back</mat-icon>
+          <button *ngIf="shouldShowClearButton()" type="button" mat-raised-button class="cancel-button secondary-button"
+            (click)="clear()" aria-label="Clear form data">
+            Clear
+          </button>
+        </footer>
+      </form>
+    </section>
+
+    <!-- Theme Configuration Section -->
+    <section *ngIf="configureTheme" class="theme-config-section" aria-label="Theme Configuration">
+
+      <div class="theme-header">
+        <button type="button" mat-icon-button [class.active]="isBackHovered"
+          (click)="configureTheme = false; listView()" [matTooltip]="getBackTooltip()"
+          [matTooltipPosition]="TOOLTIP_POSITION" (mouseenter)="isBackHovered = true"
+          (mouseleave)="isBackHovered = false" tabindex="0" [attr.aria-label]="getBackTooltip()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+
+        <h2 class="theme-title">Theme Configuration</h2>
       </div>
-      <div class="padTop20">
+
+      <main class="theme-content">
         <lib-theme-mgmt></lib-theme-mgmt>
-      </div>
-    </div>
+      </main>
+    </section>
   </div>
 </div>

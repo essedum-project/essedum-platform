@@ -1,3 +1,390 @@
+/* Global Font Family for Component */
+:host {
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+:host * {
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+/* Material Icons Exception - Keep Material Icons font */
+:host mat-icon {
+  font-family: 'Material Icons' !important;
+}
+
+/* Component Container */
+.dash-constant-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+/* Section Layout */
+.list-view-section,
+.form-view-section,
+.theme-config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+  min-height: 100%;
+}
+
+/* Header Styles */
+.page-header,
+.form-header {
+  margin-bottom: 1rem;
+}
+
+.theme-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.theme-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--primary-text-color, #333);
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+/* Table Styles */
+.data-table-section {
+  flex: 1;
+  overflow: auto;
+}
+
+.table-card {
+  background: var(--surface-color, #fff);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.table-scroll-container {
+  overflow-x: auto;
+  /* min-height: 400px; */
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+.styled-table th {
+  background-color: var(--header-bg-color, #f5f5f5);
+  color: var(--header-text-color, #333);
+  font-weight: 600;
+  padding: 1rem 0.75rem;
+  text-align: left;
+  border-bottom: 2px solid var(--border-color, #e0e0e0);
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+.styled-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+  vertical-align: middle;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+/* Column Widths */
+.id-column {
+  width: 80px;
+  min-width: 80px;
+}
+
+.key-column {
+  width: 260px;
+  min-width: 200px;
+}
+
+.value-column {
+  width: 400px;
+  min-width: 300px;
+}
+
+.actions-column {
+  width: 140px;
+  min-width: 140px;
+}
+
+/* Cell Styles */
+.td-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 0;
+}
+
+.clickable-cell {
+  color: var(--primary-color, #0094ff);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.clickable-cell:hover,
+.clickable-cell:focus {
+  color: var(--primary-hover-color, #0076cc);
+  text-decoration: underline;
+}
+
+.clickable-cell:focus {
+  outline: 2px solid var(--focus-color, #0094ff);
+  outline-offset: 2px;
+}
+
+/* Action Buttons */
+.action-icon {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.action-icon button {
+  border: none;
+  background: transparent;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+.action-icon button:hover,
+.action-icon button.active {
+  background-color: var(--action-hover-bg, rgba(0, 148, 255, 0.1));
+  color: var(--primary-color, #0094ff);
+}
+
+.action-icon button:focus {
+  outline: 2px solid var(--focus-color, #0094ff);
+  outline-offset: 2px;
+}
+
+/* Ensure Material Icons are displayed correctly */
+.action-icon mat-icon {
+  font-size: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  color: #737373 !important;
+  transition: color 0.2s ease !important;
+  cursor: pointer !important;
+  font-family: 'Material Icons' !important;
+}
+
+.action-icon mat-icon:hover,
+.action-icon mat-icon.active {
+  color: #0094ff !important;
+}
+
+/* No Records Message */
+.no-records-message {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--secondary-text-color, #666);
+  font-size: 1.125rem;
+  background: var(--surface-color, #fff);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+/* Form Styles */
+.dash-constant-form {
+  max-width: 100%;
+  padding: 1.5rem;
+  background: var(--surface-color, #fff);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Fieldset Styles */
+.basic-fields-section,
+.configuration-options {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.basic-fields-section legend,
+.configuration-options legend {
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+  color: var(--primary-text-color, #333);
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+/* Form Layout */
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Form Controls */
+.form-label {
+  font-weight: 500;
+  color: var(--primary-text-color, #333);
+  font-size: 0.875rem;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+.form-label.required::after {
+  content: ' *';
+  color: var(--error-color, #f44336);
+}
+
+.form-input {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary-color, #0094ff);
+  box-shadow: 0 0 0 2px var(--focus-ring-color, rgba(0, 148, 255, 0.2));
+}
+
+.form-input:read-only {
+  background-color: var(--disabled-bg, #f5f5f5);
+  color: var(--disabled-text, #999);
+  cursor: not-allowed;
+}
+
+/* Field Help and Error Messages */
+.field-help {
+  font-size: 0.75rem;
+  color: var(--secondary-text-color, #666);
+  line-height: 1.4;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+.field-error {
+  font-size: 0.75rem;
+  color: var(--error-color, #f44336);
+  font-weight: 500;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+/* Checkbox Styles */
+.checkbox-group {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+.config-checkbox {
+  margin: 0;
+}
+
+.checkbox-label {
+  font-weight: 500;
+  color: var(--primary-text-color, #333);
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-start;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color, #e0e0e0);
+  margin-top: 1rem;
+}
+
+.primary-button {
+  background-color: var(--primary-color, #0094ff);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+.primary-button:hover:not(:disabled) {
+  background-color: var(--primary-hover-color, #0076cc);
+}
+
+.primary-button:disabled {
+  background-color: var(--disabled-bg, #ccc);
+  color: var(--disabled-text, #999);
+  cursor: not-allowed;
+}
+
+.secondary-button {
+  background-color: transparent;
+  color: var(--primary-color, #0094ff);
+  border: 1px solid var(--primary-color, #0094ff);
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+.secondary-button:hover {
+  background-color: var(--primary-color, #0094ff);
+  color: white;
+}
+
+/* Accessibility */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus Management */
+*:focus {
+  outline: 2px solid var(--focus-color, #0094ff);
+  outline-offset: 2px;
+}
+
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline-offset: 2px;
+}
+
+/* Legacy Classes (keeping for compatibility) */
 .mainContainer {
   padding-left: 15px;
   padding-right: 15px;
@@ -12,6 +399,7 @@
   margin-top: 0;
   margin-bottom: 0;
   list-style-type: none;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
 }
 
 .resetOverflow {
@@ -21,6 +409,7 @@
 .treeBox {
   width: 600px;
   overflow: auto;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
 }
 
 .example-container {
@@ -108,7 +497,7 @@ input[type="radio"].radioButtonColor {
 .table-card {
   background: #fff;
   border-radius: 8px;
-  padding: 16px;
+  /* padding: 16px; */
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   max-width: 100%;
@@ -396,16 +785,97 @@ input[type="radio"].radioButtonColor {
   position: relative;
 
   mat-icon {
-    font-size: 24px;
-    height: 24px;
-    width: 24px;
-    cursor: pointer;
-    font-weight: 400;
-    color: #737373;
-    transition: color 0.2s ease, transform 0.2s ease;
+    font-size: 24px !important;
+    height: 24px !important;
+    width: 24px !important;
+    cursor: pointer !important;
+    font-weight: 400 !important;
+    color: #737373 !important;
+    transition: color 0.2s ease, transform 0.2s ease !important;
+    font-family: 'Material Icons' !important;
 
     &.active {
-      color: #0094ff;
+      color: #0094ff !important;
+    }
+
+    &:hover {
+      color: #0094ff !important;
     }
   }
+}
+
+/* Material UI Font Family Overrides */
+::ng-deep .mat-mdc-form-field,
+::ng-deep .mat-mdc-input-element,
+::ng-deep .mat-mdc-select,
+::ng-deep .mat-mdc-option,
+::ng-deep .mat-mdc-checkbox,
+::ng-deep .mat-mdc-button,
+::ng-deep .mat-mdc-raised-button,
+::ng-deep .mat-mdc-outlined-button,
+::ng-deep .mat-mdc-unelevated-button,
+::ng-deep .mat-mdc-fab,
+::ng-deep .mat-mdc-mini-fab,
+::ng-deep .mat-mdc-icon-button,
+::ng-deep .mat-mdc-tab,
+::ng-deep .mat-mdc-tab-label,
+::ng-deep .mat-mdc-dialog-title,
+::ng-deep .mat-mdc-dialog-content,
+::ng-deep .mat-mdc-dialog-actions,
+::ng-deep .mat-mdc-snack-bar-label,
+::ng-deep .mat-mdc-tooltip,
+::ng-deep .mat-tree,
+::ng-deep .mat-tree-node,
+::ng-deep .mat-nested-tree-node,
+::ng-deep .mat-paginator,
+::ng-deep .mat-paginator-page-size-label,
+::ng-deep .mat-paginator-range-label,
+::ng-deep .mat-sort-header,
+::ng-deep .mat-cell,
+::ng-deep .mat-header-cell,
+::ng-deep .mat-footer-cell {
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+/* Specific Material UI text elements */
+::ng-deep .mat-mdc-form-field-label,
+::ng-deep .mat-mdc-form-field-hint,
+::ng-deep .mat-mdc-form-field-error,
+::ng-deep .mat-mdc-select-value,
+::ng-deep .mat-mdc-select-value-text,
+::ng-deep .mat-mdc-option-text,
+::ng-deep .mdc-checkbox__label,
+::ng-deep .mdc-button__label,
+::ng-deep .mat-mdc-button-base .mdc-button__label,
+::ng-deep .mat-mdc-tab-label-content {
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+/* Input and textarea elements inside Material components */
+::ng-deep .mat-mdc-form-field input,
+::ng-deep .mat-mdc-form-field textarea,
+::ng-deep .mat-mdc-input-element {
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+/* Override Angular Material typography */
+::ng-deep .mat-typography,
+::ng-deep .mat-typography h1,
+::ng-deep .mat-typography h2,
+::ng-deep .mat-typography h3,
+::ng-deep .mat-typography h4,
+::ng-deep .mat-typography h5,
+::ng-deep .mat-typography h6,
+::ng-deep .mat-typography p,
+::ng-deep .mat-typography span,
+::ng-deep .mat-typography div,
+::ng-deep .mat-typography label {
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+/* Ensure Material Icons keep their proper font */
+::ng-deep mat-icon,
+::ng-deep .mat-icon,
+::ng-deep .material-icons {
+  font-family: 'Material Icons' !important;
 }

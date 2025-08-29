@@ -109,38 +109,85 @@ export class ThemeMgmtComponent implements OnInit {
     })
   }
 
-  trackByMethod(index, item) { }
-  clear() {
-    this.theme.apptheme = new AppTheme()
-    this.theme.bcctheme = new BCCTheme()
-    this.theme.dashboardtheme = new DashboardTheme()
-    this.theme.widgettheme = new WidgetTheme()
-    this.theme.widgettheme.colorpalette = []
-    this.paletteArray = ['Black']
+  /**
+   * Checks if any widget theme settings are configured
+   */
+  hasWidgetThemeSettings(): boolean {
+    return !!(this.theme.widgettheme && (
+      this.theme.widgettheme.backgroundcolor ||
+      this.theme.widgettheme.bordercolor ||
+      this.theme.widgettheme.textcolor ||
+      this.theme.widgettheme.tilebackgroundcolor ||
+      this.theme.widgettheme.borderradius ||
+      this.theme.widgettheme.fontfamily ||
+      this.theme.widgettheme.bordershadow ||
+      this.theme.widgettheme.boldtitle
+    ));
   }
-  removeThemeAttr(type) {
-    this.theme.widgettheme.proritizeThemeColorArr.splice(this.theme.widgettheme.proritizeThemeColorArr.indexOf(type), 1)
+
+  /**
+   * Track by function for palette array
+   */
+  trackByMethod(index: number, item: string): number {
+    return index;
   }
-  addThemeAttr(type) {
-    if (this.theme.widgettheme.proritizeThemeColorArr == undefined)
-      this.theme.widgettheme.proritizeThemeColorArr = []
-    if (this.theme.widgettheme.proritizeThemeColorArr?.length > 0) {
-      if (!this.theme.widgettheme.proritizeThemeColorArr.includes(type))
-        this.theme.widgettheme.proritizeThemeColorArr.push(type);
-    } else {
-      this.theme.widgettheme.proritizeThemeColorArr.push(type)
+
+  /**
+   * Clear all theme settings
+   */
+  clear(): void {
+    this.theme.apptheme = new AppTheme();
+    this.theme.bcctheme = new BCCTheme();
+    this.theme.dashboardtheme = new DashboardTheme();
+    this.theme.widgettheme = new WidgetTheme();
+    this.theme.widgettheme.colorpalette = [];
+    this.paletteArray = ['Black'];
+  }
+
+  /**
+   * Remove theme attribute from priority array
+   */
+  removeThemeAttr(type: string): void {
+    if (this.theme.widgettheme.proritizeThemeColorArr) {
+      const index = this.theme.widgettheme.proritizeThemeColorArr.indexOf(type);
+      if (index > -1) {
+        this.theme.widgettheme.proritizeThemeColorArr.splice(index, 1);
+      }
     }
   }
-  changeBoltTitle() {
-    if (this.theme.widgettheme.boldtitle)
-      this.removeThemeAttr('boldtitle');
-    else
-      this.addThemeAttr('boldtitle');
+
+  /**
+   * Add theme attribute to priority array
+   */
+  addThemeAttr(type: string): void {
+    if (!this.theme.widgettheme.proritizeThemeColorArr) {
+      this.theme.widgettheme.proritizeThemeColorArr = [];
+    }
+    
+    if (!this.theme.widgettheme.proritizeThemeColorArr.includes(type)) {
+      this.theme.widgettheme.proritizeThemeColorArr.push(type);
+    }
   }
-  changeBorderShadow() {
-    if (!this.theme.widgettheme.bordershadow)
-      this.removeThemeAttr('bordershadow');
-    else
+
+  /**
+   * Toggle bold title setting
+   */
+  changeBoltTitle(): void {
+    if (this.theme.widgettheme.boldtitle) {
+      this.addThemeAttr('boldtitle');
+    } else {
+      this.removeThemeAttr('boldtitle');
+    }
+  }
+
+  /**
+   * Toggle border shadow setting
+   */
+  changeBorderShadow(): void {
+    if (this.theme.widgettheme.bordershadow) {
       this.addThemeAttr('bordershadow');
+    } else {
+      this.removeThemeAttr('bordershadow');
+    }
   }
 }

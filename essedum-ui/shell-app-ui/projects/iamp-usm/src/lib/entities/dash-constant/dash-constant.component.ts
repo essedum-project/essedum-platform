@@ -2142,4 +2142,198 @@ export class DashConstantComponent implements OnInit {
       this.initializePagination();
     }
   }
+
+  // Helper methods for improved template readability and maintainability
+  
+  /**
+   * Get header title based on config type
+   */
+  getHeaderTitle(): string {
+    return this.configtype === 'side' ? 'Menu List' : 'Configuration';
+  }
+
+  /**
+   * Get add button tooltip based on config type
+   */
+  getAddTooltip(): string {
+    return this.configtype === 'side' ? 'Create Menu' : 'Create Configuration';
+  }
+
+  /**
+   * Get form header title based on current state
+   */
+  getFormHeaderTitle(): string {
+    if (!this.edit) {
+      return this.configtype === 'side' ? 'Create Menu' : 'Create Configuration';
+    }
+    if (this.view) {
+      return this.configtype === 'side' ? 'View Menu' : 'View Configuration';
+    }
+    return this.configtype === 'side' ? 'Edit Menu' : 'Edit Configuration';
+  }
+
+  /**
+   * Get form action based on current state
+   */
+  getFormAction(): string {
+    if (!this.edit) return 'add-constants';
+    if (this.view) return 'view-constants';
+    return 'edit-constants';
+  }
+
+  /**
+   * Get back tooltip based on config type
+   */
+  getBackTooltip(): string {
+    return this.configtype === 'side' ? 'Back to Menu' : 'Back to Configurations';
+  }
+
+  /**
+   * Get view tooltip based on config type
+   */
+  getViewTooltip(): string {
+    return this.configtype === 'side' ? 'View Menu' : 'View Configuration';
+  }
+
+  /**
+   * Get edit tooltip based on config type
+   */
+  getEditTooltip(): string {
+    return this.configtype === 'side' ? 'Edit Menu' : 'Edit Configuration';
+  }
+
+  /**
+   * Get delete tooltip based on config type
+   */
+  getDeleteTooltip(): string {
+    return this.configtype === 'side' ? 'Delete Menu' : 'Delete Configuration';
+  }
+
+  /**
+   * Get actions aria label
+   */
+  getActionsAriaLabel(): string {
+    return this.configtype === 'side' ? 'Menu actions' : 'Configuration actions';
+  }
+
+  /**
+   * Toggle view mode
+   */
+  toggleViewMode(): void {
+    this.view = true;
+    this.buttonFlag = true;
+  }
+
+  /**
+   * Toggle edit mode
+   */
+  toggleEditMode(): void {
+    this.view = false;
+    this.buttonFlag = false;
+  }
+
+  /**
+   * Get busy configuration for loading state
+   */
+  getBusyConfig(): any {
+    return {
+      busy: this.busy,
+      message: this.configtype === 'side' ? 'Saving Menu...' : 'Saving Configuration...',
+      backdrop: true
+    };
+  }
+
+  /**
+   * Check if basic fields should be shown
+   */
+  shouldShowBasicFields(): boolean {
+    return (this.sideCheck === false || this.sideCheck === undefined) &&
+           !this.defaultCheck && !this.defaultsidebar && !this.rearrangesidebar &&
+           !this.iconsidebar && !this.configureFileUpload && !this.projectRoleMap;
+  }
+
+  /**
+   * Get basic fields label
+   */
+  getBasicFieldsLabel(): string {
+    return this.configtype === 'side' ? 'Menu Details' : 'Configuration Details';
+  }
+
+  /**
+   * Check if config option should be shown
+   */
+  shouldShowConfigOption(option: string): boolean {
+    const baseConditions = !this.defaultCheck && !this.defaultsidebar && !this.configureUserLand &&
+                          !this.rearrangesidebar && !this.iconsidebar && !this.configureFileUpload &&
+                          !this.projectRoleMap;
+
+    switch (option) {
+      case 'sidebar':
+        return this.configtype && baseConditions;
+      case 'defaultProjectRole':
+        return !this.configtype && !this.sideCheck && baseConditions;
+      case 'defaultSidebar':
+        return this.configtype && !this.sideCheck && baseConditions;
+      case 'userLanding':
+        return !this.configtype && !this.sideCheck && baseConditions;
+      case 'rearrangeSidebar':
+        return this.configtype && !this.sideCheck && baseConditions;
+      case 'theme':
+        return !this.configtype && !this.sideCheck && baseConditions;
+      case 'iconSidebar':
+        return this.configtype && !this.sideCheck && !this.defaultsidebar && baseConditions;
+      case 'fileUpload':
+        return !this.configtype && !this.sideCheck && !this.defaultsidebar && !this.iconsidebar && baseConditions;
+      case 'projectRoleMap':
+        return !this.configtype && !this.sideCheck && !this.defaultsidebar && !this.iconsidebar &&
+               !this.configureFileUpload && !this.defaultCheck;
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Check if save button should be shown
+   */
+  shouldShowSaveButton(): boolean {
+    return (!this.edit && !this.buttonFlag && !this.rearrangesidebar) ||
+           (this.edit && !this.buttonFlag && !this.rearrangesidebar);
+  }
+
+  /**
+   * Check if convert button should be shown
+   */
+  shouldShowConvertButton(): boolean {
+    return this.rearrangesidebar;
+  }
+
+  /**
+   * Check if clear button should be shown
+   */
+  shouldShowClearButton(): boolean {
+    return !this.buttonFlag && !this.view;
+  }
+
+  /**
+   * Get save button text
+   */
+  getSaveButtonText(): string {
+    return this.edit ? 'Update' : 'Save';
+  }
+
+  /**
+   * Get save button label
+   */
+  getSaveButtonLabel(): string {
+    const action = this.edit ? 'Update' : 'Save';
+    const type = this.configtype === 'side' ? 'menu' : 'configuration';
+    return `${action} ${type}`;
+  }
+
+  /**
+   * Track by function for constants list
+   */
+  trackByConstantId(index: number, item: any): any {
+    return item?.id || index;
+  }
 }
