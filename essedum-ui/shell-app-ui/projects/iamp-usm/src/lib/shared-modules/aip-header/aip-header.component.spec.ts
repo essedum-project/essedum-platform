@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AipHeaderComponent } from './aip-header.component';
+import { AipHeadersComponent } from './aip-header.component';
 
-describe('AipHeaderComponent', () => {
-  let component: AipHeaderComponent;
-  let fixture: ComponentFixture<AipHeaderComponent>;
+describe('AipHeadersComponent', () => {
+  let component: AipHeadersComponent;
+  let fixture: ComponentFixture<AipHeadersComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AipHeaderComponent],
+      imports: [AipHeadersComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AipHeaderComponent);
+    fixture = TestBed.createComponent(AipHeadersComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

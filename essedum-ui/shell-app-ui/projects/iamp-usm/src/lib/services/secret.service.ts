@@ -8,45 +8,46 @@ import { catchError, map } from 'rxjs/operators';
 })
 export class SecretService {
 
-  dataUrl="/api/secrets"
+  dataUrl = "/api/secrets"
   constructor(private https: HttpClient) { }
 
 
-  deleteKey(key:any){
-    let session:any = sessionStorage.getItem('organization');
-    let params =new HttpParams()
-    .set('project',session)
-    .set('key',key)
+  deleteKey(key: any) {
+    let session: any = sessionStorage.getItem('organization');
+    let params = new HttpParams()
+      .set('project', session)
+      .set('key', key)
     return this.https
-        .delete(this.dataUrl+"/delete",
+      .delete(this.dataUrl + "/delete",
         {
           observe: 'response',
           params: params,
-          responseType:'text'
+          responseType: 'text'
         }
-        ).pipe(
-          map((response) => {
-            return response;
-          })
-        )
-        .pipe(
-          catchError((err) => {
-            return this.handleError(err);
-          })
-        );
+      ).pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
 
   }
-    getPasscode(key:any) :Observable <any>{
-      let session:any = sessionStorage.getItem('organization');
-      let param = new HttpParams()
-      .set('project',session)
+  getPasscode(key: any): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let param = new HttpParams()
+      .set('project', session)
       .set('key', key);
 
-      return this.https
-      .get(this.dataUrl + '/resolve', { 
-        observe: 'response' , 
-        params:param,
-        responseType:'text' })
+    return this.https
+      .get(this.dataUrl + '/resolve', {
+        observe: 'response',
+        params: param,
+        responseType: 'text'
+      })
       .pipe(
         map((response) => {
           return response.body;
@@ -57,17 +58,18 @@ export class SecretService {
           return this.handleError(err);
         })
       );
-    }
-    getSecreteCount() :Observable <any>{
-      let session:any = sessionStorage.getItem('organization');
-      let param = new HttpParams()
-      .set('project',session)
-      // .set('key', key);
+  }
+  getSecreteCount(): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let param = new HttpParams()
+      .set('project', session)
+    // .set('key', key);
 
-      return this.https
-      .get(this.dataUrl + '/count', { 
-        observe: 'response' , 
-        params:param })
+    return this.https
+      .get(this.dataUrl + '/count', {
+        observe: 'response',
+        params: param
+      })
       .pipe(
         map((response) => {
           return response.body;
@@ -78,72 +80,74 @@ export class SecretService {
           return this.handleError(err);
         })
       );
-    }
-    getSecretsList(param: HttpParams): Observable<any> {
-      return this.https
-        .get(this.dataUrl + '/list', {
-          observe: 'response',
-          params: param,
+  }
+  getSecretsList(param: HttpParams): Observable<any> {
+    return this.https
+      .get(this.dataUrl + '/list', {
+        observe: 'response',
+        params: param,
+      })
+      .pipe(
+        map((response) => {
+          return response.body;
         })
-        .pipe(
-          map((response) => {
-            return response.body;
-          })
-        )
-        .pipe(
-          catchError((err) => {
-            return this.handleError(err);
-          })
-        );
-    }
-    createKey(key:any,value:any):Observable<any>{
-      let session:any = sessionStorage.getItem('organization');
-      let param = new HttpParams()
-          .set('project',session)
-          .set('key',key)
-          .set('value',value);
-          let body={};
-        return this.https
-          .put(this.dataUrl + '/add',body, {
-            observe: 'response',
-            params:param,
-            responseType:'text' })
-          .pipe(
-            map((response) => {
-              return response;
-            })
-          )
-          .pipe(
-            catchError((err) => {
-              return this.handleError(err);
-            })
-          );
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
+  createKey(key: any, value: any): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let param = new HttpParams()
+      .set('project', session)
+      .set('key', key)
+      .set('value', value);
+    let body = {};
+    return this.https
+      .put(this.dataUrl + '/add', body, {
+        observe: 'response',
+        params: param,
+        responseType: 'text'
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
 
 
-    }
-    updateKey(key:any,value:any) :  Observable<any>{
-      let session:any = sessionStorage.getItem('organization');
-      let param = new HttpParams()
-          .set('project',session)
-          .set('key',key)
-          .set('value',value);
-          let body=[]
-        return this.https
-          .put(this.dataUrl + '/update',body, { 
-            observe: 'response',
-            params:param,
-            responseType:'text'})
-          .pipe(
-            map((response) => {
-              return response;
-            })
-          )
-          .pipe(
-            catchError((err) => {
-              return this.handleError(err);
-            })
-          );    
-    }
+  }
+  updateKey(key: any, value: any): Observable<any> {
+    let session: any = sessionStorage.getItem('organization');
+    let param = new HttpParams()
+      .set('project', session)
+      .set('key', key)
+      .set('value', value);
+    let body = []
+    return this.https
+      .put(this.dataUrl + '/update', body, {
+        observe: 'response',
+        params: param,
+        responseType: 'text'
+      })
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      )
+      .pipe(
+        catchError((err) => {
+          return this.handleError(err);
+        })
+      );
+  }
   private handleError(error: any) {
     // TODO: seems we cannot use messageService from here...
     const errMsg = error.error;

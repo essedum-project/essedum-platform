@@ -1,13 +1,11 @@
 import { Injectable, Inject } from "@angular/core";
 import { Observable, map, catchError, throwError } from "rxjs";
-// import { Observable } from "rxjs/Observable";
-// import { throwError } from "rxjs";
 import { MessageService } from "./message.service";
 import { PageResponse } from "../support/paging";
 import { PageRequestByExample } from "../support/page-request";
 import { Role } from "../models/role";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-// import { map, catchError } from "rxjs/operators";
+
 @Injectable()
 export class RoleService {
   constructor(private https: HttpClient, private messageService: MessageService) { }
@@ -17,11 +15,11 @@ export class RoleService {
    */
   create(role: Role): Observable<Role> {
     const copy = this.convert(role);
-    
+
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -33,10 +31,10 @@ export class RoleService {
       'roleid': userRole.id || '',
       'rolename': userRole.name || ''
     });
-    
+
     console.log("Creating role:", copy);
     console.log("Headers:", headers);
-    
+
     return this.https
       .post("/api/roles", copy, { observe: "response", headers: headers })
       .pipe(
@@ -60,11 +58,11 @@ export class RoleService {
   getRole(id: any): Observable<Role> {
 
     console.log("Getting role with ID:", id);
-    
+
     // Get a simpler set of headers for troubleshooting
-     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -80,10 +78,10 @@ export class RoleService {
     // Try a different URL format - some APIs use different patterns
     const url = `/api/roles/${id}`;
     console.log("Making request to:", url);
- 
+
     return this.https
-      .get(url, { 
-        observe: "response", 
+      .get(url, {
+        observe: "response",
         headers: headers,
         // Add withCredentials to ensure cookies are sent
         withCredentials: true
@@ -127,7 +125,7 @@ export class RoleService {
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -139,7 +137,7 @@ export class RoleService {
       'roleid': userRole.id || '',
       'rolename': userRole.name || ''
     });
-    
+
     console.log("Updating role:", role);
     console.log("Headers:", headers);
 
@@ -200,14 +198,14 @@ export class RoleService {
       'projectname': project.name || '',
       'roleid': userRole.id || '',
       'rolename': userRole.name || '',
-      'example': headerValue 
+      'example': headerValue
     });
 
- 
+
 
     return this.https
       .get("/api/roles/page", {
-        observe: "response", 
+        observe: "response",
         headers: headers
       })
       .pipe(
@@ -262,7 +260,7 @@ export class RoleService {
     // Get project and role from sessionStorage
     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-    
+
     // Set headers
     const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
@@ -274,13 +272,13 @@ export class RoleService {
       'roleid': userRole.id || '',
       'rolename': userRole.name || ''
     });
-    
+
     console.log("Deleting role with ID:", id);
     console.log("Headers:", headers);
-    
-    return this.https.delete("/api/roles/" + id, { 
+
+    return this.https.delete("/api/roles/" + id, {
       observe: "response",
-      headers: headers 
+      headers: headers
     }).pipe(
       map(response => {
         console.log("Delete role response:", response);
@@ -300,7 +298,7 @@ export class RoleService {
     console.error('Error status:', error.status);
     console.error('Error status text:', error.statusText);
     console.error('Error details:', error);
-    
+
     let errMsg = error.error;
     error.status ? `Status: ${error.status} - Text: ${error.statusText}` : "Server error";
     console.error(errMsg); // log to console instead
@@ -388,10 +386,10 @@ export class RoleService {
   }
 
 
-   // Helper method to create standardized request headers with all required values
+  // Helper method to create standardized request headers with all required values
   private createRequestHeaders(): HttpHeaders {
     let headers = new HttpHeaders();
-    
+
     // Add all required headers as shown in the curl example
     headers = headers.append('Accept', 'application/json, text/plain, */*');
     headers = headers.append('Accept-Language', 'en-US,en;q=0.9');
@@ -405,23 +403,23 @@ export class RoleService {
     headers = headers.append('sec-ch-ua', '"Not;A=Brand";v="99", "Microsoft Edge";v="139", "Chromium";v="139"');
     headers = headers.append('sec-ch-ua-mobile', '?0');
     headers = headers.append('sec-ch-ua-platform', '"Windows"');
-    
+
     // Add User-Agent header
     headers = headers.append('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0');
-    
+
     // Add Referer header - matching the exact format in the curl example
     if (typeof window !== 'undefined') {
       // Use the actual origin like in the curl example
       headers = headers.append('Referer', window.location.origin + '/');
     }
-    
+
     // Add authorization header if available
     if (sessionStorage.getItem("authToken")) {
       headers = headers.append('Authorization', 'Bearer ' + sessionStorage.getItem("authToken"));
     } else if (localStorage.getItem("jwtToken")) {
       headers = headers.append('Authorization', 'Bearer ' + localStorage.getItem("jwtToken"));
     }
-    
+
     // Add Project headers - exact casing as in the curl example
     if (sessionStorage.hasOwnProperty("project") && sessionStorage.getItem("project") !== "") {
       try {
@@ -436,7 +434,7 @@ export class RoleService {
         console.error("Error parsing project from sessionStorage:", e);
       }
     }
-    
+
     // Add role headers - exact casing as in the curl example
     if (sessionStorage.hasOwnProperty("role") && sessionStorage.getItem("role") !== "") {
       try {
@@ -451,12 +449,12 @@ export class RoleService {
         console.error("Error parsing role from sessionStorage:", e);
       }
     }
-    
+
     // Try to add Cookie header if available from document.cookie
     if (typeof document !== 'undefined' && document.cookie) {
       headers = headers.append('Cookie', document.cookie);
     }
-    
+
     return headers;
   }
 

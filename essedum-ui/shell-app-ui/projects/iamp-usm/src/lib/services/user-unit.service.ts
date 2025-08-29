@@ -1,21 +1,14 @@
 import { Injectable, Inject, SkipSelf } from "@angular/core";
 import { Observable, map, catchError, throwError } from "rxjs";
-// import { Observable } from "rxjs/Observable";
-// import { AuthService } from "./auth.service";
 import { MessageService } from "./message.service";
 import { UserUnit } from "../models/user-unit";
 import { PageResponse } from "../support/paging";
 import { PageRequestByExample } from "../support/page-request";
 import { CustomErrorHandlerService } from "../shared-modules/custom-error-handler/custom-error-handler.service";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-// import { map } from "rxjs/operators";
-// import { catchError } from "rxjs/operators";
-// import { throwError } from "rxjs";
-
 
 @Injectable()
 export class UserUnitService {
-
 
   constructor(
     private https: HttpClient,
@@ -74,7 +67,7 @@ export class UserUnitService {
     let body;
     try {
       body = JSON.stringify(user_unit);
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
 
@@ -106,7 +99,7 @@ export class UserUnitService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     let headers = new HttpHeaders();
@@ -161,7 +154,7 @@ export class UserUnitService {
     let body;
     try {
       body = JSON.stringify({ query: query, maxResults: 10 });
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     return (<any>this).https

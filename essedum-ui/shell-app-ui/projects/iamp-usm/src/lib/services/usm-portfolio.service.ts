@@ -1,21 +1,16 @@
 import { Injectable, SkipSelf } from "@angular/core";
 import { Observable, map, catchError, throwError } from "rxjs";
-// import { Observable } from "rxjs/Observable";
+
 import { MessageService } from "../services/message.service";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { PageResponse } from "../support/paging";
 import { PageRequestByExample } from "../support/page-request";
 import { Portfolio } from "../models/portfolio";
 
-// import { throwError, pipe } from "rxjs";
-// import { map, catchError } from "rxjs/operators";
 @Injectable()
 export class UsmPortfolioService {
 
-
-  constructor(private https: HttpClient, private messageService: MessageService) {
-
-  }
+  constructor(private https: HttpClient, private messageService: MessageService) { }
 
   /**
    * Create a new  Portfolio.
@@ -66,7 +61,7 @@ export class UsmPortfolioService {
     let body;
     try {
       body = JSON.stringify(usm_portfolio);
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
 
@@ -98,12 +93,12 @@ export class UsmPortfolioService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
-     const project = JSON.parse(sessionStorage.getItem("project") || '{}');
+    const project = JSON.parse(sessionStorage.getItem("project") || '{}');
     const userRole = JSON.parse(sessionStorage.getItem("role") || '{}');
-   const headers = new HttpHeaders({
+    const headers = new HttpHeaders({
       'Authorization': 'Bearer ' + localStorage.getItem('jwtToken'),
       'Content-Type': 'application/json',
       'Accept': 'application/json,text/plain, */*',
@@ -112,7 +107,7 @@ export class UsmPortfolioService {
       'projectname': project.name || '',
       'roleid': userRole.id || '',
       'rolename': userRole.name || '',
-      'example': headerValue 
+      'example': headerValue
     });
     return this.https
       .get("/api/usm-portfolios/page", {
@@ -137,7 +132,7 @@ export class UsmPortfolioService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     let headers = new HttpHeaders();
@@ -163,7 +158,7 @@ export class UsmPortfolioService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -191,7 +186,7 @@ export class UsmPortfolioService {
     let body;
     try {
       body = JSON.stringify({ query: query, maxResults: 10 });
-    } catch (e : any)  {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https

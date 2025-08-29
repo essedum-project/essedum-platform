@@ -4,10 +4,10 @@
     <section *ngIf="!showCreate && !configureTheme" class="list-view-section" aria-label="Configuration List">
       <!-- Header Section -->
       <div *ngIf="!heading" class="page-header">
-        <app-aip-header [cardTitle]="getHeaderTitle()" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="true"
+        <app-aip-headers [cardTitle]="getHeaderTitle()" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="true"
           [searchPlaceholder]="'Search by Key/Value'" [addMatTooltip]="getAddTooltip()" (search)="filterItem($event)"
           (refresh)="ngOnInit()" (add)="createView()">
-        </app-aip-header>
+        </app-aip-headers>
       </div>
 
       <!-- Data Table Section -->
@@ -69,10 +69,10 @@
           </div>
 
           <!-- Pagination -->
-          <app-aip-pagination [pageNumber]="pageNumber" [noOfPages]="noOfPages" [pageArr]="pageArr"
+          <app-aip-paginations [pageNumber]="pageNumber" [noOfPages]="noOfPages" [pageArr]="pageArr"
             [startIndex]="startIndex" [endIndex]="endIndex" [hoverStates]="hoverStates" (prevPage)="onPrevPage()"
             (nextPage)="onNextPage()" (changePage)="onChangePage($event)" aria-label="Pagination controls">
-          </app-aip-pagination>
+          </app-aip-paginations>
         </div>
 
         <!-- No Records Message -->
@@ -87,10 +87,10 @@
     <section *ngIf="showCreate && !configureTheme" class="form-view-section" aria-label="Configuration Form">
       <!-- Dynamic Header Section -->
       <div class="form-header">
-        <app-aip-header [cardTitle]="getFormHeaderTitle()" [action]="getFormAction()" [backAction]="true"
+        <app-aip-headers [cardTitle]="getFormHeaderTitle()" [action]="getFormAction()" [backAction]="true"
           [backMatTooltip]="getBackTooltip()" [closeAction]="false" (navigateBack)="listView()"
           (view)="toggleViewMode()" (edit)="toggleEditMode()">
-        </app-aip-header>
+        </app-aip-headers>
       </div>
 
 

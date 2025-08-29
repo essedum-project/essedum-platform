@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AipPaginationComponent } from './aip-pagination.component';
+import { AipPaginationsComponent } from './aip-pagination.component';
 
 describe('AipPaginationComponent', () => {
-  let component: AipPaginationComponent;
-  let fixture: ComponentFixture<AipPaginationComponent>;
+  let component: AipPaginationsComponent;
+  let fixture: ComponentFixture<AipPaginationsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AipPaginationComponent],
+      imports: [AipPaginationsComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AipPaginationComponent);
+    fixture = TestBed.createComponent(AipPaginationsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

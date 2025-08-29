@@ -1,7 +1,7 @@
 import {
-  NgModule,
-  CUSTOM_ELEMENTS_SCHEMA,
-  NO_ERRORS_SCHEMA,
+    NgModule,
+    CUSTOM_ELEMENTS_SCHEMA,
+    NO_ERRORS_SCHEMA,
 } from "@angular/core";
 import { NgBusyModule, BusyConfig } from "ng-busy";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
@@ -19,16 +19,16 @@ import { IampUsmComponent } from "./iamp-usm.component";
 import { FieldsetModule } from "primeng/fieldset";
 import { CommonModule } from "@angular/common";
 import {
-  NgxMatDatetimePickerModule,
-  NgxMatTimepickerModule,
+    NgxMatDatetimePickerModule,
+    NgxMatTimepickerModule,
 } from "@angular-material-components/datetime-picker";
 import { QuillModule } from "ngx-quill";
 import { MatDialogModule } from "@angular/material/dialog";
 import { NgxMatSelectSearchModule } from "ngx-mat-select-search";
 import {
-  HttpClientModule,
-  HttpClientXsrfModule,
-  HTTP_INTERCEPTORS,
+    HttpClientModule,
+    HttpClientXsrfModule,
+    HTTP_INTERCEPTORS,
 } from "@angular/common/http";
 import { IampUsmService } from "./iamp-usm.service";
 import { HelperService } from "./services/helper.service";
@@ -74,92 +74,85 @@ import { UsmRolePermissionComponent } from "./components/usm-role-permission/usm
 import { RolePermissionAddComponent } from "./components/usm-role-permission/role-permission-add/role-permission-add/role-permission-add.component";
 import { PortfolioListViewComponent } from "./components/portfolio/portfolio-list-view.component";
 import { DashConstantComponent } from "./entities/dash-constant/dash-constant.component";
-import { DashConstantService } from "./services/dash-constant.service";
-import { ProjectService } from "./services/project.service";
-import { RoleService } from "./services/role.service";
-import { UsersService } from "./services/users.service";
-import { encKey } from "./models/encKey";
-import { AipHeaderComponent } from "./shared-modules/aip-header/aip-header.component";
-import { AipPaginationComponent } from "./shared-modules/aip-pagination/aip-pagination.component";
+import { AipHeadersComponent } from "./shared-modules/aip-header/aip-header.component";
+import { AipPaginationsComponent } from "./shared-modules/aip-pagination/aip-pagination.component";
 import { ThemeMgmtComponent } from "./components/theme-mgmt/theme-mgmt.component";
 
 
 @NgModule({
     imports: [
-       NgBusyModule,
-    CommonModule,
-    FormsModule,
-    SharedModule,
-    NgxPaginationModule,
-    IampUsmRouteModule,
-    MatDialogModule,
-    FieldsetModule,
-    NgxMatDatetimePickerModule,
-    NgxMatTimepickerModule,
-    NgxMatSelectSearchModule,
-    QuillModule.forRoot(),
-    HttpClientModule,
-    HttpClientXsrfModule,
-    RouterModule,
-    MatTreeModule,
-    MatTableModule,
-    MatButtonModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatCardModule,
-    MatTooltipModule,
-    MatPaginatorModule,
-    MatSortModule,
-    MatTabsModule,
-    AipPaginationComponent,
-    PortfolioAddComponent,
-    AipFilterComponent,
-    MatIconModule,
+        NgBusyModule,
+        CommonModule,
+        FormsModule,
+        SharedModule,
+        NgxPaginationModule,
+        IampUsmRouteModule,
+        MatDialogModule,
+        FieldsetModule,
+        NgxMatDatetimePickerModule,
+        NgxMatTimepickerModule,
+        NgxMatSelectSearchModule,
+        QuillModule.forRoot(),
+        HttpClientModule,
+        HttpClientXsrfModule,
+        RouterModule,
+        MatTreeModule,
+        MatTableModule,
+        MatButtonModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatCardModule,
+        MatTooltipModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatTabsModule,
+        AipPaginationComponent,
+        PortfolioAddComponent,
+        AipFilterComponent,
+        MatIconModule,
 
     ],
     declarations: [
-      IampUsmComponent,
-    SecretsComponent,
-    RoleListComponent,
-    RoleDetailComponent,
-    RoleRoleComponent,
-    UserProjectRoleListComponent,
-    AipHeaderComponent,
-    ConfirmDeleteDialogComponent,
-    ConfirmProjectDeleteDialogComponent,
-    ProjectListViewComponent,
-    ProjectDetailComponent,
-    ManageUsersComponent,
-    ConfirmRevokeDialogComponent,
-    ConfirmRegenerateDialogComponent,
-    PortfolioListViewComponent,
-    UsmRolePermissionComponent,
-    RolePermissionAddComponent,
+        IampUsmComponent,
+        SecretsComponent,
+        RoleListComponent,
+        RoleDetailComponent,
+        RoleRoleComponent,
+        UserProjectRoleListComponent,
+        AipHeaderComponent,
+        ConfirmDeleteDialogComponent,
+        ConfirmProjectDeleteDialogComponent,
+        ProjectListViewComponent,
+        ProjectDetailComponent,
+        ManageUsersComponent,
+        ConfirmRevokeDialogComponent,
+        ConfirmRegenerateDialogComponent,
+        PortfolioListViewComponent,
+        UsmRolePermissionComponent,
+        RolePermissionAddComponent,
         DashConstantComponent,
+        AipHeadersComponent,
+        AipPaginationsComponent,
         ThemeMgmtComponent,
         AipHeaderComponent,
-        AipPaginationComponent
-
-
-
     ],
     providers: [
-  MessageService,
-    UserProjectRoleService,
-    HelperService,
-    UsersService,
-    UsmPortfolioService,
-    RoleroleService,
-    OrgUnitService,
-    UserUnitService,
-    UsmRolePermissionsService,
-    UsmPermissionsService,
-    { provide: BusyConfig, useFactory: busyConfigFactory },
-    IampUsmService,
-    Ng4LoadingSpinnerService,
-    DatePipe,      
+        MessageService,
+        UserProjectRoleService,
+        HelperService,
+        UsersService,
+        UsmPortfolioService,
+        RoleroleService,
+        OrgUnitService,
+        UserUnitService,
+        UsmRolePermissionsService,
+        UsmPermissionsService,
+        { provide: BusyConfig, useFactory: busyConfigFactory },
+        IampUsmService,
+        Ng4LoadingSpinnerService,
+        DatePipe,
         DashConstantService,
         ProjectService,
         RoleService,
@@ -172,27 +165,27 @@ import { ThemeMgmtComponent } from "./components/theme-mgmt/theme-mgmt.component
 
 
     ],
-exports: [
-    IampUsmComponent,
-    SecretsComponent,
-    RoleListComponent,
-    RoleDetailComponent,
-    RoleRoleComponent,
-    UserProjectRoleListComponent,
-    ManageUsersComponent,
-    AipPaginationComponent,
-    PortfolioAddComponent,
-    AipFilterComponent,
-    PortfolioListViewComponent,
-    UsmRolePermissionComponent,
-    RolePermissionAddComponent,
-  ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
+    exports: [
+        IampUsmComponent,
+        SecretsComponent,
+        RoleListComponent,
+        RoleDetailComponent,
+        RoleRoleComponent,
+        UserProjectRoleListComponent,
+        ManageUsersComponent,
+        AipPaginationComponent,
+        PortfolioAddComponent,
+        AipFilterComponent,
+        PortfolioListViewComponent,
+        UsmRolePermissionComponent,
+        RolePermissionAddComponent,
+    ],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
 })
-export class IampUsmModule {}
+export class IampUsmModule { }
 export function busyConfigFactory() {
-  return new BusyConfig({
-    message: "Loading...",
-    wrapperClass: "centerDiv",
-  });
+    return new BusyConfig({
+        message: "Loading...",
+        wrapperClass: "centerDiv",
+    });
 }

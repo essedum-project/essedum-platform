@@ -1,27 +1,11 @@
-//
-// Copyright © 2016-2017 Infosys Limited, Bangalore, India. All Rights Reserved.
-// * Except for any open source software components embedded in this
-// * Infosys proprietary software program (Program), this Program is protected
-// * by copyright laws, international treaties and other pending or existing
-// * intellectual property rights in India, the United States and other countries.
-// * Except as expressly permitted, any unauthorized reproduction, storage,
-// * transmission in any form or by any means (including without limitation
-// * electronic, mechanical, printing, photocopying, recording or otherwise),
-// * or any distribution of this Program, or any portion of it,
-// * may result in severe civil and criminal penalties, and
-// * will be prosecuted to the maximum extent possible under the law.
-// Template pack-angular:web/src/app/entities/entity.service.ts.e.vm
-//
 import { Injectable, SkipSelf } from "@angular/core";
 import { Observable, map, catchError, throwError } from "rxjs";
-// import { Observable } from "rxjs/Observable";
 import { MessageService } from "./message.service";
 import { PageResponse } from "../support/paging";
 import { PageRequestByExample } from "../support/page-request";
 import { UsmPermissions } from "../models/usm-permissions";
-// import { map, catchError } from "rxjs/operators";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-// import { throwError } from "rxjs";
+
 @Injectable()
 export class UsmPermissionsService {
   constructor(private https: HttpClient, private messageService: MessageService) { }
@@ -75,7 +59,7 @@ export class UsmPermissionsService {
     let body;
     try {
       body = JSON.stringify(usm_permissions);
-    } catch (e : any) {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
 
@@ -106,11 +90,11 @@ export class UsmPermissionsService {
     try {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
-    } catch (e : any) {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     //let headers = new HttpHeaders();
-     let headers = this.createRequestHeaders();
+    let headers = this.createRequestHeaders();
     headers = headers.append('example', headerValue);
     return this.https
       .get("/api/usm-permissionss/page", {
@@ -142,7 +126,7 @@ export class UsmPermissionsService {
       body = JSON.stringify(req);
       headerValue = Buffer.from(body, 'utf8').toString('base64');
 
-    } catch (e : any) {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     let headers = new HttpHeaders();
@@ -171,7 +155,7 @@ export class UsmPermissionsService {
     let body;
     try {
       body = JSON.stringify({ query: query, maxResults: 10 });
-    } catch (e : any) {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -195,7 +179,7 @@ export class UsmPermissionsService {
    * Delete an UsmPermissions by id.
    */
   delete(id: any) {
-     let headers = this.createRequestHeaders();
+    let headers = this.createRequestHeaders();
     return this.https
       .delete("/api/usm-permissionss/" + id, {
         observe: "response",
@@ -213,7 +197,7 @@ export class UsmPermissionsService {
     let body;
     try {
       body = JSON.stringify(req);
-    } catch (e : any) {
+    } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
     return this.https
@@ -251,7 +235,7 @@ export class UsmPermissionsService {
     return copy;
   }
 
-    // Helper method to create standardized request headers with all required values
+  // Helper method to create standardized request headers with all required values
   private createRequestHeaders(): HttpHeaders {
     let headers = new HttpHeaders();
     // Add Referer header - matching the exact format in the curl example
@@ -259,14 +243,14 @@ export class UsmPermissionsService {
       // Use the actual origin like in the curl example
       headers = headers.append('Referer', window.location.origin + '/');
     }
-    
+
     // Add authorization header if available
     if (sessionStorage.getItem("authToken")) {
       headers = headers.append('Authorization', 'Bearer ' + sessionStorage.getItem("authToken"));
     } else if (localStorage.getItem("jwtToken")) {
       headers = headers.append('Authorization', 'Bearer ' + localStorage.getItem("jwtToken"));
     }
-    
+
     // Add Project headers - exact casing as in the curl example
     if (sessionStorage.hasOwnProperty("project") && sessionStorage.getItem("project") !== "") {
       try {
@@ -281,7 +265,7 @@ export class UsmPermissionsService {
         console.error("Error parsing project from sessionStorage:", e);
       }
     }
-    
+
     // Add role headers - exact casing as in the curl example
     if (sessionStorage.hasOwnProperty("role") && sessionStorage.getItem("role") !== "") {
       try {
@@ -296,12 +280,12 @@ export class UsmPermissionsService {
         console.error("Error parsing role from sessionStorage:", e);
       }
     }
-    
+
     // Try to add Cookie header if available from document.cookie
     if (typeof document !== 'undefined' && document.cookie) {
       headers = headers.append('Cookie', document.cookie);
     }
-    
+
     return headers;
   }
 }

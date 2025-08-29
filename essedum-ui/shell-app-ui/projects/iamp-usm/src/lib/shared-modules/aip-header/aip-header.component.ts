@@ -14,7 +14,7 @@ import {
 } from '@angular/animations';
 
 @Component({
-  selector: 'app-aip-header',
+  selector: 'app-aip-headers',
   templateUrl: './aip-header.component.html',
   styleUrls: ['./aip-header.component.scss'],
   animations: [
@@ -53,7 +53,7 @@ import {
     ]),
   ],
 })
-export class AipHeaderComponent {
+export class AipHeadersComponent {
   @Input() cardTitle: string = '';
   @Input() cardName: string = '';
   @Input() action: string = '';

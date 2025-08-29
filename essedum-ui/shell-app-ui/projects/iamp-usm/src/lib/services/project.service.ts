@@ -1,16 +1,9 @@
 import { Injectable, Inject, SkipSelf } from "@angular/core";
 import { Observable, map, catchError, throwError } from "rxjs";
-// import { Observable } from "rxjs/Observable";
-// import { MessageService } from './message.service';
 import { PageResponse } from "../support/paging";
 import { PageRequestByExample } from "../support/page-request";
 import { Project } from "../models/project";
-//import { environment } from '../../../../../src/environments/environment';
-import { AuthService } from "./auth.service";
-// import { throwError } from "rxjs";
-
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-// import { map, catchError } from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
