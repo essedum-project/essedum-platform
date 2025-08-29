@@ -274,97 +274,6 @@ border: none !important;
   }
 
 
-  
-
-/* Table Styling */
-.projects-section {
-  max-height: 400px;
-  margin-top: 16px;
-
-  padding: 0 16px;
-  display: flex;
-  flex-direction: column;
-}
-
-.table-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 0 16px 0 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  overflow: visible; 
-  max-width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.table-scroll-container {
-  overflow-x: auto;
-  overflow-y: auto;
-}
-
-.styled-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed; 
-  min-width: 600px; 
-}
-
-.styled-table th {
-  padding: 12px 14px;
-  text-align: left;
-  border-bottom: 1px solid #e0e0e0;
-  white-space: normal;
-  word-break: break-word;
-  font-family: "Roboto", "Segoe UI", sans-serif !important;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.styled-table td {
-  padding: 12px 14px;
-  text-align: left;
-  border-bottom: 1px solid #e0e0e0;
-  white-space: normal;
-  word-break: break-word;
-  font-family: "Roboto", "Segoe UI", sans-serif !important;
-  font-size: 12px;
-  font-weight: 400;
-}
-
-
-.styled-table th:nth-child(1),
-.styled-table td:nth-child(1) {
-  width: 60px;
-  max-width: 60px;
-}
-
-.styled-table th:nth-child(2),
-.styled-table td:nth-child(2) {
-  width:90px; 
-  max-width: 90px;
-}
-
-.styled-table th:nth-child(3),
-.styled-table td:nth-child(3),
-.styled-table th:nth-child(4),
-.styled-table td:nth-child(4) {
-  width: auto; 
-  min-width: 150px;
-}
-
-.styled-table thead {
-  background-color: #f4f4f4;
-}
-
-.styled-table tr:hover {
-  background-color: #f9f9f9;
-
-}
-
-.styled-table tr.selected {
-  background-color: #e6f4ff;
-}
-
 ::ng-deep .mat-mdc-form-field-error-wrapper{
     padding: 0px !important;
 }
@@ -378,116 +287,6 @@ border: none !important;
     padding: 0px !important;
 }
 
-
-.pagination-container {
-  margin: 0.2rem 0;
-  display: flex;
-  justify-content: flex-end;
-
-  .paginator-buttons {
-    display: flex;
-    justify-content: flex-end;
-    width: 100%;
-  }
-
-  .pages-details {
-    display: flex;
-  }
-
-  .pagination-arrow {
-    cursor: pointer;
-    color: #737373;
-
-    &.disabled {
-      color: #cccccc;
-      cursor: unset;
-    }
-
-    &.active {
-      color: #0094ff;
-    }
-  }
-
-  .page-numbers {
-    display: flex;
-
-    .pg {
-      margin: 4px;
-      width: 24px !important;
-      height: 24px !important;
-      display: flex !important;
-      justify-content: center !important;
-      align-items: center !important;
-      font-size: 1.4rem;
-      font-weight: 400;
-      font-family: "Roboto", "Segoe UI", sans-serif !important;
-      font-style: normal;
-      box-shadow: 0px 2px 4px #00000029;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-
-      &.selected-page {
-        background-color: #0052cc;
-        color: white;
-      }
-
-      &.hover:not(.selected-page) {
-        background-color: #f0f0f0;
-      }
-    }
-  }
-}
-
-
-.pagination-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 8px 0;
-}
-
-.paginator-buttons {
-  display: flex;
-  align-items: center;
-}
-
-.pages-details {
-  display: flex;
-  align-items: center;
-}
-
-.pagination-arrow {
-  cursor: pointer;
-  
-  &.disabled {
-    opacity: 0.5;
-    pointer-events: none;
-  }
-  
-  &.active {
-    color: #0052cc;
-  }
-}
-
-.page-numbers {
-  display: flex; 
-}
-
-.pg {
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  
-  &.selected-page {
-    background-color: #0052cc !important; // Add !important
-    color: white !important;
-  }
-  
-  &.hover:not(.selected-page) {
-    background-color: #e8e8e8;
-  }
-}
 
 
 .fixed-header{
@@ -507,7 +306,6 @@ border: none !important;
 .key-filter{
   border: none;
   background: white;
-  // color:#0052cc;
   font-size: 22px;
 }
 
@@ -521,6 +319,34 @@ border: none !important;
 
 .icon-color:hover{
   color:#0052cc !important;
+}
+::ng-deep .mat-mdc-select-arrow {
+  display: none !important; 
+}
+
+::ng-deep .mat-mdc-select-trigger {
+  position: relative;
+}
+
+::ng-deep .mat-mdc-select-trigger::after {
+  content: "";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background-image: url("/assets/images/Accordion_open.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+}
+
+::ng-deep .mat-mdc-select {
+  background-color: #f7f7f7ed !important;
+  border-radius: 4px !important;
+  margin-left: 4px !important;
 }
 
 .hint{

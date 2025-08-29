@@ -432,12 +432,12 @@ export class RoleDetailComponent implements OnInit {
   }
   compareObjects(o1: any, o2: any): boolean {
     return o1.name === o2.name && o1.id === o2.id;
-  }
+  }  
+  
   listView() {
     this.showNameLengthErrorMessage = false;
     this.showDescLengthErrorMessage = false;
-    if (this.edit || this.view) this.router.navigate(["./../../list"], { relativeTo: this.route });
-    else this.router.navigate(["./../list"], { relativeTo: this.route });
+    this.router.navigate(["/landing/iamp-usm/role/list"]);
   }
   clearRole() {
     if (this.edit || this.view) {
