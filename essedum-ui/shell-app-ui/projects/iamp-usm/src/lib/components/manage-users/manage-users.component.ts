@@ -756,6 +756,10 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
   deleteUser(user: any) {
     let dialogRef = this.confirmDeleteDialog.open(DeleteComponent, {
       disableClose: true,
+      width: '400px',
+      height: 'auto',
+      maxHeight: '300px',
+      panelClass: 'delete-dialog-panel',
       data: {
         title: "Delete User",
         message: "Are you sure you want to delete?",

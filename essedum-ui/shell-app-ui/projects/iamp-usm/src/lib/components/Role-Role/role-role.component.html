@@ -42,7 +42,7 @@
                   </mat-form-field>
                 </div>
               </div>
-              <div class="ams_panelFooter selector-675-30">
+              <div class="ams_panelFooter selector-675-30" style="text-align: right;">
                 <button type="button" class="genBtn marRght30 selector-675-31" (click)="Search()">Submit</button>
                 <button type="button" class="secBtn selector-675-32" (click)="Clear()">Clear</button>
               </div>
@@ -250,6 +250,8 @@
    <div>
   <div class="aip-container lfx-u-pad-lr-30">
     <!-- Header -->
+           <div *ngIf="!showCreate" >
+
     <app-aip-header [cardTitle]="'Role-Role Mapping List'" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createFlag"
       (search)="Search()" (refresh)="Refresh()" (add)="createView()">
     </app-aip-header>
@@ -264,7 +266,7 @@
             (filterStatusChange)="onFilterStatusChange($event)">
           </app-aip-filter-roles>
         <!-- Table Layout  -->
-        <div *ngIf="!showCreate" class="table-card">
+        <div  class="table-card">
           <div class="table-scroll-container">
             <table class="styled-table" *ngIf="roletorolemappinglist.length; else noData">
               <thead>
@@ -319,7 +321,13 @@
             </ul>
           </div>
         </div>
+        </div>
+        </div>
+        </div>
+        </div>
         <div *ngIf="showCreate" #RoletoRoleForm="ngForm" class="selector-675-104" ngForm="">
+                <div class="aip-container lfx-u-pad-lr-30">
+
       <div class="padTop20 selector-675-105">
         <div>
  
@@ -341,6 +349,10 @@
           Edit Role-Role Mapping
         </h4>
         <h4 class="ams_h2 h2Mar crud-header selector-675-115" style="padding-left: 19%" *ngIf="edit &amp;&amp; view">View Role-Role Mapping</h4> -->
+        
+        <!-- Form Content Card -->
+        <mat-card class="form-card">
+          <mat-card-content>
         <div class="noPad selector-675-116">
           <div class="selector-675-117">
             <div class="row rwMAr selector-675-118">
@@ -365,14 +377,17 @@
             </div>
           </div>
         </div>
-        <div id="btnMargin" style="margin-top: 95px" class="selector-675-134">
-          <button *ngIf="!edit &amp;&amp; !buttonFlag" [ngBusy]="{ busy: busy, message: 'Saving Role-Role Mapping...' }" type="button" class="save-btn" (click)="onSave()" [disabled]="!RoletoRoleForm.form.valid">
+          </mat-card-content>
+        </mat-card>
+        
+        <div id="btnMargin" class="dialog-buttons" style="text-align: right;">
+          <button *ngIf="!edit &amp;&amp; !buttonFlag" [ngBusy]="{ busy: busy, message: 'Saving Role-Role Mapping...' }" type="button" mat-raised-button class="save-btn" (click)="onSave()" [disabled]="!RoletoRoleForm.form.valid" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">
             Save
           </button>
-          <button *ngIf="edit &amp;&amp; !buttonFlag" [ngBusy]="{ busy: busy, message: 'Updating Role-Role Mapping...' }" type="button" class="save-btn" (click)="onSave()" [disabled]="!RoletoRoleForm.form.valid">
+          <button *ngIf="edit &amp;&amp; !buttonFlag" [ngBusy]="{ busy: busy, message: 'Updating Role-Role Mapping...' }" type="button" mat-raised-button class="save-btn" (click)="onSave()" [disabled]="!RoletoRoleForm.form.valid" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">
             Update
           </button>
-          <button *ngIf="!buttonFlag" type="button" class="cancel-btn" (click)="clearWave()">Clear</button>
+          <button *ngIf="!buttonFlag" type="button" mat-raised-button class="cancel-btn" (click)="clearWave()" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">Clear</button>
         </div>
         <div *ngIf="errorMessage" class="selector-675-138">
           <h4 class="ams_h2 h2Mar crud-header selector-675-139" *ngIf="errorMessage">Duplicate Mappings</h4>
@@ -399,7 +414,6 @@
     </div>
 </div>
 
-      </div>
-    </div>
+   
   </div>
   

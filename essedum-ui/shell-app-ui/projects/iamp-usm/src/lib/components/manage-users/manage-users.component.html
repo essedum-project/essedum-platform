@@ -80,6 +80,8 @@
 
 <!--create/edit/view users-->
 <div class="paddingBottom selector-663-99" *ngIf="showCreate">
+    <mat-card class="form-card">
+      <mat-card-content>
   <div class="aip-container lfx-u-pad-lr-30">
     <!-- <div class="lfx-u-pad-t-8" *ngIf="showCreate">
     <div class="lfx-l-level2-middle-col"> -->
@@ -117,6 +119,10 @@
     </div>
     </div>
   <br>
+  
+    <!-- Form Content Card -->
+    <mat-card class="form-card">
+      <mat-card-content>
     <div class="noPad selector-663-111">
       <div class="selector-663-112">
         <div class="row rwMAr selector-663-113">
@@ -236,27 +242,37 @@
         </div>
       </div>
     </div>
-    <div id="btnMargin" class="selector-663-161">
-      <button *ngIf="!edit &amp;&amp; !buttonFlag" [ngBusy]="{ busy: busy, message: 'Saving User...' }" type="button" class="genBtn marRght30 selector-663-162" (click)="SaveUserInfo()" [disabled]="!waveForm.form.valid">
+      </mat-card-content>
+    </mat-card>
+    
+    <div id="btnMargin" class="dialog-buttons" style="text-align: right;">
+      <button *ngIf="!edit &amp;&amp; !buttonFlag" [ngBusy]="{ busy: busy, message: 'Saving User...' }" type="button" mat-raised-button class="save-btn" (click)="SaveUserInfo()" [disabled]="!waveForm.form.valid" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">
         Save
       </button>
-      <button *ngIf="edit &amp;&amp; !buttonFlag" [ngBusy]="{ busy: busy, message: 'Updating User...' }" type="button" class="genBtn marRght30 selector-663-163" (click)="UpdateUser(user)" [disabled]="!waveForm.form.valid">
+      <button *ngIf="edit &amp;&amp; !buttonFlag" [ngBusy]="{ busy: busy, message: 'Updating User...' }" type="button" mat-raised-button class="save-btn" (click)="UpdateUser(user)" [disabled]="!waveForm.form.valid" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">
         Update
       </button>
-      <button *ngIf="!buttonFlag" type="button" class="secBtn selector-663-164" (click)="ClearInfo()">Clear</button>
+      <button *ngIf="!buttonFlag" type="button" mat-raised-button class="cancel-btn" (click)="ClearInfo()" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">Clear</button>
       <button *ngIf="!buttonFlag &amp;&amp; user?.profileImage" type="button" style="margin-left: 1rem" class="genBtn marRght30 selector-663-165" (click)="removelogo()">
         Remove Profile Image
       </button>
     </div>
     <!--  <div *ngIf="!edit && !buttonFlag" class="star">* marked are required fields</div> -->
   </div>
-  <div *ngIf="edit" class="selector-663-166">
+  </mat-card-content>
+  </mat-card>
+
+  <!-- <div *ngIf="edit" class="selector-663-166"> -->
+      <mat-card class="form-card"  *ngIf="edit">
+      <mat-card-content>
     <mat-tab-group class="selector-663-167">
       <mat-tab label="Portfolio-Project-Role" class="selector-663-168">
         <lib-user-project-role-list *ngIf="user &amp;&amp; user.id" [selectedUser]="user" class="selector-663-169"></lib-user-project-role-list>
       </mat-tab>
   
     </mat-tab-group>
-  </div>
+  <!-- </div> -->
+      </mat-card-content>
+      </mat-card>
 </div>
 </div>

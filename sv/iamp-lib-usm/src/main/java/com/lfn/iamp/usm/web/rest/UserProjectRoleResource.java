@@ -319,7 +319,7 @@ public class UserProjectRoleResource {
 	 */
 	@DeleteMapping("/user-project-roles/{id}")
 	@Timed
-	public ResponseEntity<?> deleteUserProjectRole(@PathVariable Integer id) {
+	public ResponseEntity<?> deleteUserProjectRole(@PathVariable("id") Integer id) {
 		try {
 			log.info("deleteUserProjectRole : Request to delete User Project Role by ID: {}",id);
 			
