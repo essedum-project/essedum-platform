@@ -80,6 +80,8 @@
 
 <!--create/edit/view users-->
 <div class="paddingBottom selector-663-99" *ngIf="showCreate">
+    <mat-card class="form-card">
+      <mat-card-content>
   <div class="aip-container lfx-u-pad-lr-30">
     <!-- <div class="lfx-u-pad-t-8" *ngIf="showCreate">
     <div class="lfx-l-level2-middle-col"> -->
@@ -257,14 +259,20 @@
     </div>
     <!--  <div *ngIf="!edit && !buttonFlag" class="star">* marked are required fields</div> -->
   </div>
-  
-  <div *ngIf="edit" class="selector-663-166">
+  </mat-card-content>
+  </mat-card>
+
+  <!-- <div *ngIf="edit" class="selector-663-166"> -->
+      <mat-card class="form-card"  *ngIf="edit">
+      <mat-card-content>
     <mat-tab-group class="selector-663-167">
       <mat-tab label="Portfolio-Project-Role" class="selector-663-168">
         <lib-user-project-role-list *ngIf="user &amp;&amp; user.id" [selectedUser]="user" class="selector-663-169"></lib-user-project-role-list>
       </mat-tab>
   
     </mat-tab-group>
-  </div>
+  <!-- </div> -->
+      </mat-card-content>
+      </mat-card>
 </div>
 </div>

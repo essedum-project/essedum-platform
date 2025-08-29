@@ -334,9 +334,7 @@
                         </div>
                     </div>
                 </div>
-                
-            </div>
-            <div *ngIf="!view" class="dialog-buttons">
+                   <div *ngIf="!view" class="dialog-buttons">
                 <button *ngIf="!edit && !view" (click)="check(project)" [disabled]="!projectForm.form.valid" mat-raised-button class="save-btn" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">
                     Save Project
                 </button>
@@ -348,11 +346,14 @@
                     Cancel
                 </button>
             </div>
+            </div>
+         
         </mat-card>
         </mat-dialog-content>
     </div>
-              <div *ngIf="edit" class="selector-665-242">
-            <mat-tab-group class="selector-665-243">
+    
+     <mat-card class="form-card"  *ngIf="edit">
+      <mat-card-content>            <mat-tab-group class="selector-665-243">
               <mat-tab *ngIf="!showBluePrint" label="Portfolio-User-Role" class="selector-665-244">
                 <lib-user-project-role-list *ngIf="showCreateUserRole &amp;&amp; project.id" [showCreateUserRole]="showCreateUserRole" [project]="project" class="selector-665-245"></lib-user-project-role-list>
                 <lib-user-project-role-list *ngIf="!showCreateUserRole &amp;&amp; project.id" [showCreateUserRole]="showCreateUserRole" [project]="project" class="selector-665-246"></lib-user-project-role-list>
@@ -388,5 +389,6 @@
                 </div>
               </mat-tab>
             </mat-tab-group>
-          </div>
+</mat-card-content>
+</mat-card>
 </div>
