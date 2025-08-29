@@ -1,4 +1,3 @@
-
 /**
  * PROJECT LIST VIEW COMPONENT
  * 
@@ -355,27 +354,27 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
 
     if (this.role.roleadmin) tool.portfolioId = portfolio;
     if (tool.name == undefined || tool.name == null || tool.name.trim().length == 0) {
-      this.messageService.info("Project name can't be empty", "IAMP");
+      this.messageService.messageNotification("Project name can't be empty", "warning");
     } else if (tool.name.length > 255)
-      this.messageService.info("Project name cannot be more than 255 characters", "IAMP");
+      this.messageService.messageNotification("Project name cannot be more than 255 characters", "warning");
     else if (!/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(tool.name)) {
-      this.messageService.info("Project name format is incorrect", "IAMP");
+      this.messageService.messageNotification("Project name format is incorrect", "warning");
     } else if (tool.description && (!/^[a-zA-Z0-9][a-zA-Z0-9 \-\_\.]*?$/.test(tool.description))) {
-      this.messageService.info("Project description format is incorrect", "IAMP");
+      this.messageService.messageNotification("Project description format is incorrect", "warning");
     }
     else if (tool.portfolioId == undefined || tool.portfolioId == null) {
-      this.messageService.info("Portfolio can't be empty", "IAMP");
+      this.messageService.messageNotification("Portfolio can't be empty", "warning");
     } else if (
       this.edit &&
       (tool.projectdisplayname == undefined ||
         tool.projectdisplayname == null ||
         tool.projectdisplayname.trim().length == 0)
     ) {
-      this.messageService.info("Project Display Name can't be empty", "IAMP");
+      this.messageService.messageNotification("Project Display Name can't be empty", "warning");
     } else if (this.edit && tool.projectdisplayname > 255) {
-      this.messageService.info("Project Display name cannot be more than 255 characters", "IAMP");
+      this.messageService.messageNotification("Project Display name cannot be more than 255 characters", "warning");
     } else if (this.edit && !/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(tool.projectdisplayname)) {
-      this.messageService.info("Project Display Name format is incorrect", "IAMP");
+      this.messageService.messageNotification("Project Display Name format is incorrect", "warning");
     }
      else {
       if (tool.defaultrole == undefined || tool.defaultrole == null)
@@ -401,7 +400,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
       let arr1 = this.projects.filter((item) => item.name != undefined);
       let arr = arr1.filter((item) => item.name.toLowerCase() == this.project.name.toLowerCase());
       if (arr.length > 0) {
-        this.messageService.error("Project Name already exists", "IAMP");
+        this.messageService.messageNotification("Project Name already exists", "warning");
         return;
       } else {
         this.project.projectdisplayname = this.project.name;
@@ -411,13 +410,13 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
         this.busy = this.projectService.create(this.project).subscribe(
           (response) => {
             this.getDashConstant(this.project.theme, response)
-            this.messageService.info("Project Saved Successfully", "IAMP");
+            this.messageService.messageNotification("Project Saved Successfully", "success");
             // this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
             this.fetchWave(null);
             this.clearWave();
             this.showCreate = false;
           },
-          (error) => this.messageService.error("Could not create project", "IAMP")
+          (error) => this.messageService.messageNotification("Could not create project", "error")
         );
       }
     }
@@ -441,7 +440,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
           // Update filter options with portfolio data
           this.updatePortfolioFilterOptions();
         },
-        (error) => this.messageService.error("Could not get the results", error)
+        (error) => this.messageService.messageNotification("Could not get the results", "error")
       );
   }
   compareTodiff(curr: any, prev: any) {
@@ -465,7 +464,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
 
   updateWave() {
     if (this.project && this.project.name == "Core") {
-      this.messageService.error("Unauthorized Operation!!", "ERROR");
+      this.messageService.messageNotification("Unauthorized Operation!!", "error");
       return;
     }
     let arr1 = this.projects.filter((item) => item.projectdisplayname != undefined);
@@ -475,7 +474,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
         item.projectdisplayname.toLowerCase() == this.project.projectdisplayname.toLowerCase()
     );
     if (arr.length > 0) {
-      this.messageService.error("Project Display Name already exists", "IAMP");
+      this.messageService.messageNotification("Project Display Name already exists", "warning");
       return;
     } else {
       if (sessionStorage.getItem("telemetry") == "true") {
@@ -496,7 +495,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
             project = null;
             console.error("JSON.parse error - ", e.message);
           }
-          this.messageService.info("Project updated successfully", "IAMP");
+          this.messageService.messageNotification("Project updated successfully", "success");
           if (sessionStorage.getItem("project")) {
             let currentproject = project;
             if (rs.id == currentproject.id) {
@@ -520,7 +519,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
             console.error("Error removing project from session storage:", e);
           }
         },
-        (error) => this.messageService.error("Could not update", "IAMP")
+        (error) => this.messageService.messageNotification("Could not update", "error")
       );
     }
   }
@@ -540,10 +539,14 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
         // this.loadPage({ first: 0, rows: 1000, sortField: null, sortOrder: null });
         this.Clear();
         //this.initUserSettings();
-        this.messageService.info("Project deleted successfully", "IAMP!");
+        this.messageService.messageNotification("Project deleted successfully", "success");
         this.Refresh();
       },
-      (error) => this.messageService.error("Could not delete!", "IAMP")
+      (error) => {
+        this.messageService.messageNotification(error, "error");
+        this.messageService.messageNotification("Deleted Successfully", "info");
+        this.messageService.messageNotification("Could not Delete", "error");
+      }
     );
   }
   clearWave() {
@@ -937,7 +940,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
         this.wavesLength = this.currentPage.totalElements;
         this.updateTableData();
       },
-      (error) => this.messageService.error("Could not get the results", "IAMP")
+      (error) => this.messageService.messageNotification("Could not get the results", "error")
     );
 
     let allRole = new Role(); /** To fetch all roles */
@@ -993,7 +996,7 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
         // Use client-side pagination
         this.updateTableData();
       },
-      (error) => this.messageService.error("Could not get the results", "IAMP")
+      (error) => this.messageService.messageNotification("Could not get the results", "error")
     );
   }
 
@@ -1023,9 +1026,9 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
   //         subscribe(
   //             response => {
   //                 this.currentPage.remove(projectToDelete);
-  //                 this.messageService.info('Deleted OK', 'IAMP!');
+  //                 this.messageService.messageNotification('Deleted OK', 'IAMP!');
   //             },
-  //             error => this.messageService.error('Could not delete!', "IAMP")
+  //             error => this.messageService.messageNotification('Could not delete!', "IAMP")
   //         );
   // }
   rowSelected(item: Project) {
@@ -1239,11 +1242,11 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
   copyblueprint() {
     this.clickedcopyblueprint = true;
     if (this.fromProject == "" || this.fromProject == null || this.fromProject == undefined) {
-      this.messageService.info("Project Should be Selected", "IAMP");
+      this.messageService.messageNotification("Project Should be Selected", "warning");
       this.clickedcopyblueprint = false;
     }
     else if (this.fromProject == this.project.name) {
-      this.messageService.info("Source Project and Destination Project cannot be same", "IAMP");
+      this.messageService.messageNotification("Source Project and Destination Project cannot be same", "warning");
       this.clickedcopyblueprint = false;
     }
     else {
@@ -1251,12 +1254,12 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
         .copyBluePrint(this.fromProject, this.project.name, this.project.id)
         .subscribe(
           (res) => {
-            this.messageService.info("Copy Blue Print Pipeline has started. Please check the Job Status", "IAMP");
+            this.messageService.messageNotification("Copy Blue Print Pipeline has started. Please check the Job Status", "success");
           },
           (error) => {
             if (error instanceof TypeError)
-              this.messageService.error("Copy Blueprint has already been done for this project", "IAMP");
-            else this.messageService.error("Copy blueprint failed", "IAMP");
+              this.messageService.messageNotification("Copy Blueprint has already been done for this project", "info");
+            else this.messageService.messageNotification("Copy blueprint failed", "error");
           }
         );
     }
@@ -1265,13 +1268,13 @@ export class ProjectListViewComponent implements OnInit, OnDestroy {
   profileImageAdded(event) {
     if (event && event.target.files && event.target.files[0]) {
       if (event.target.files[0].size > 5 * 1000000) {
-        this.messageService.error("Image file size exceeds 5 MB", "IAMP");
+        this.messageService.messageNotification("Image file size exceeds 5 MB", "warning");
         return;
       } else if (event.target.files[0].name.length > 100) {
-        this.messageService.error("Image Name  cannot be more than 100 characters", "IAMP");
+        this.messageService.messageNotification("Image Name  cannot be more than 100 characters", "warning");
         return;
       } else if (!this.extensionArray?.includes(event.target.files[0].type)) {
-        this.messageService.error("File type should be " + this.allowedTypes + " ", "IAMP");
+        this.messageService.messageNotification("File type should be " + this.allowedTypes + " ", "info");
         return;
       }
       else {

@@ -170,7 +170,7 @@ export class RoleDetailComponent implements OnInit {
             }
     
           },
-          (error) => this.messageService.error("Could not fetch role", "IAMP")
+          (error) => this.messageService.messageNotification("Could not fetch role", "error")
         );
       }  else {
         this.edit = false;
@@ -199,7 +199,7 @@ export class RoleDetailComponent implements OnInit {
             if (this.role.projectId == undefined || this.role.projectId == null) this.displayProjectDropdown = false;
             else this.displayProjectDropdown = true;
           },
-          (error) => this.messageService.error("Could not fetch role", "IAMP")
+          (error) => this.messageService.messageNotification("Could not fetch role", "error")
         );
       } else {
         this.edit = false;
@@ -285,7 +285,7 @@ export class RoleDetailComponent implements OnInit {
             a.portfolioName.toLowerCase() > b.portfolioName.toLowerCase() ? 1 : -1
           );
         },
-        (error) => this.messageService.error("Could not get the results", error)
+        (error) => this.messageService.messageNotification("Could not get the results", "error")
       );
   }
 
@@ -294,18 +294,18 @@ export class RoleDetailComponent implements OnInit {
       this.role.name = this.role.name.trim();
     }
     if (tool.name == undefined || tool.name == null || tool.name.trim().length == 0) {
-      this.messageService.info("Role name can't be empty", "IAMP");
+      this.messageService.messageNotification("Role name can't be empty", "warning");
     } else if (!/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(tool.name)) {
-      this.messageService.info("Role name format is incorrect", "IAMP");
+      this.messageService.messageNotification("Role name format is incorrect", "warning");
     }
     else if (tool.description && (!/^[a-zA-Z0-9][a-zA-Z0-9 \-\_\.]*?$/.test(tool.description))) {
-      this.messageService.info("Role description format is incorrect", "IAMP");
+      this.messageService.messageNotification("Role description format is incorrect", "warning");
     }
     // else if (tool.permission == undefined || tool.permission == null) {
-    //   this.messageService.info("Type of access can't be empty", "IAMP");
+    //   this.messageService.messageNotification("Type of access can't be empty", "IAMP");
     // }
     else if (tool.projectadmin == true && !tool.projectAdminId) {
-      this.messageService.info("Please select the project", "IAMP")
+      this.messageService.messageNotification("Please select the project", "warning")
     }
     else {
       if (this.displayProjectDropdown == false)
@@ -338,7 +338,7 @@ export class RoleDetailComponent implements OnInit {
       let arr1 = this.rolesArray?.filter((item) => item.name != undefined);
       let arr2 = arr1?.filter((item) => item.name.toLowerCase() == this.role.name.toLowerCase());
       if (arr2?.length > 0) {
-        this.messageService.error("Role already exists", "IAMP");
+        this.messageService.messageNotification("Role already exists", "error");
         return;
       } else {
         // if (sessionStorage.getItem("telemetry") == "true") {
@@ -347,7 +347,7 @@ export class RoleDetailComponent implements OnInit {
         this.busy = this.roleService.create(this.role).subscribe((roles) => {
           this.role = new Role();
           this.displayProjectDropdown = false;
-          this.messageService.info("Role created", "IAMP");
+          this.messageService.messageNotification("Created Successfully", "success");
           this.closeRoleAddDialog();
         });
       }
@@ -368,7 +368,7 @@ export class RoleDetailComponent implements OnInit {
       (item) => item.id != this.role.id && item.name.toLowerCase() == this.role.name.toLowerCase()
     );
     if (arr2.length > 0) {
-      this.messageService.error("Role already exists", "IAMP");
+      this.messageService.messageNotification("Role already exists", "error");
       return;
     } else {
       if (sessionStorage.getItem("telemetry") == "true") {
@@ -382,7 +382,7 @@ export class RoleDetailComponent implements OnInit {
       this.busy = this.roleService.update(this.role).subscribe(
         (roles) => {
           this.role = roles;
-          this.messageService.info("Role updated", "IAMP");
+          this.messageService.messageNotification("Updated Successfully", "success");
           this.clearRole();
           if (sessionStorage.getItem("role")) {
             let role: Role;
@@ -426,7 +426,7 @@ export class RoleDetailComponent implements OnInit {
           }
           this.listView();
         },
-        (error) => this.messageService.error("Could not update", "IAMP")
+        (error) => this.messageService.messageNotification("Could not update", "error")
       );
     }
   }

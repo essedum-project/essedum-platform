@@ -1,6 +1,3 @@
-
-
-
 import {
   Component,
   Input,
@@ -525,7 +522,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
         //     this.UserList.sort = this.sort;
         // }
       },
-      (error) => this.messageService.error("Could not get the results", "IAMP")
+      (error) => this.messageService.messageNotification("Could not get the results", "error")
     );
   }
 
@@ -617,7 +614,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
           this.applyFilters();
         }
       },
-      (error) => this.messageService.error("Could not get the results", "IAMP")
+      (error) => this.messageService.messageNotification("Could not get the results", "error")
     );
   }
   onRowSelect(event: any) {
@@ -1193,7 +1190,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
       this.userProjectRole.project_id == undefined ||
       this.userProjectRole.user_id == undefined
     ) {
-      this.messageService.info("All fields are mandatory", "IAMP");
+      this.messageService.messageNotification("All fields are mandatory", "warning");
     } else {
       this.saveuserprojectrole();
       let flag: boolean = false;
@@ -1213,7 +1210,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
         }
         this.busy = this.userRoleService.createAll(this.userProjectRoles).subscribe(
           (res) => {
-            this.messageService.info("Mapping(s) Created", "IAMP");
+            this.messageService.messageNotification("Mapping(s) Created", "success");
             let user: Users;
             try {
               user = JSON.parse(sessionStorage.getItem("user"));
@@ -1235,12 +1232,12 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
               });
             }
           },
-          (error) => this.messageService.error("Could not save", "IAMP")
+          (error) => this.messageService.messageNotification("Could not save", "error")
         );
       } else {
-        this.messageService.info(
+        this.messageService.messageNotification(
           "Could not save " + this.existingUserProjectRoles.length + " Mapping(s) Already Exists",
-          "IAMP"
+          "error"
         );
       }
     }
@@ -1263,7 +1260,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
       this.userProjectRole.user_id == undefined ||
       this.userProjectRole.portfolio_id == undefined
     ) {
-      this.messageService.info("All fields are mandatory", "IAMP");
+      this.messageService.messageNotification("All fields are mandatory", "warning");
     } else {
       let flag: boolean = false;
       this.users.forEach((element) => {
@@ -1318,7 +1315,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
         }
         this.busy = this.userRoleService.update(this.userProjectRole).subscribe(
           (res) => {
-            this.messageService.info("Mapping updated", "IAMP");
+            this.messageService.messageNotification("Mapping updated", "success");
             let user: Users;
             try {
               user = JSON.parse(sessionStorage.getItem("user"));
@@ -1333,10 +1330,10 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
             this.userProjectRole = new UserProjectRole();
             this.showCreate = false;
           },
-          (error) => this.messageService.error("Could not update", "IAMP")
+          (error) => this.messageService.messageNotification("Could not update", "error")
         );
       } else {
-        this.messageService.info("Mapping Already Exists", "IAMP");
+        this.messageService.messageNotification("Mapping Already Exists", "error");
       }
     }
   }
@@ -1430,7 +1427,6 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
           }
           tempUserProjectRole.project_id = new Project({ id: project.id });
           tempUserProjectRole.user_id = new Users({ id: this.selectedUser.id });
-          tempUserProjectRole.role_id = new Role({ name: this.projectSearched });
         } else {
           tempUserProjectRole.project_id = new Project({ name: this.projectSearched });
           tempUserProjectRole.user_id = new Users({ id: this.selectedUser.id });
@@ -1679,7 +1675,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
           this.delete(role);
         }
       },
-      (error) => this.messageService.error(error, Msg.APP)
+      (error) => this.messageService.messageNotification(error, "error")
     );
   }
   delete(upr: UserProjectRole) {
@@ -1688,7 +1684,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
         if (sessionStorage.getItem("telemetry") == "true") {
         // this.telemetryService.audit(upr,"DELETE");
         }
-        this.messageService.info("User project Role Mapping Deleted successfully", "IAMP");
+        this.messageService.messageNotification("User project Role Mapping Deleted successfully", "success");
         let user: Users;
         try {
           user = JSON.parse(sessionStorage.getItem("user"));
@@ -1700,7 +1696,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
         this.clearFilters();
         // this.loadPage({ first: 0, rows: 5000, sortField: null, sortOrder: null });
       },
-      (error) => this.messageService.error("Could not delete", "IAMP")
+      (error) => this.messageService.messageNotification("Could not delete", "error")
     );
   }
   getportfolio_id(): Promise<void> {
@@ -1722,7 +1718,7 @@ export class UserProjectRoleListComponent implements OnInit, OnChanges {
               resolve();
             },
             (error) => {
-              this.messageService.error("Could not get the portfolio results", error);
+              this.messageService.messageNotification("Could not get the portfolio results", "error");
               reject(error);
             }
           );
@@ -1971,7 +1967,7 @@ this.filterroles();
   navigatePage(direction: string): void {
     if (direction === 'Next' && this.page < this.lastPage) {
       this.changePage(this.page + 1);
-    } else if (direction === 'Prev' && this.page > 0) {
+    } else if (direction === 'Prev' && this.page >  0) {
       this.changePage(this.page - 1);
     }
   }

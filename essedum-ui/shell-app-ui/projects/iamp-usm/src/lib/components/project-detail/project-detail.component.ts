@@ -162,7 +162,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
               this.url = this.project.logo;
             }
           },
-          (error) => this.messageService.error("Could not fetch project", "IAMP")
+          (error) => this.messageService.messageNotification("Could not fetch project", "error")
         );
       }
     });
@@ -176,7 +176,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
             this.url = this.project.logo;
           }
         },
-        (error) => this.messageService.error("Could not fetch project", "IAMP")
+        (error) => this.messageService.messageNotification("Could not fetch project", "error")
       );
     } else if (this.project && this.project.logo) {
       // If the project was passed directly and has a logo, update the url for display
@@ -212,7 +212,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
             a.portfolioName.toLowerCase() > b.portfolioName.toLowerCase() ? 1 : -1
           );
         },
-        (error) => this.messageService.error("Could not get the portfolios", error)
+        (error) => this.messageService.messageNotification("Could not get the portfolios", "error")
       );
   }
 
@@ -221,15 +221,15 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
       this.project.name = this.project.name.trim();
     }
     if (project.name == undefined || project.name == null || project.name.trim().length == 0) {
-      this.messageService.info("Project name can't be empty", "IAMP");
+      this.messageService.messageNotification("Project name can't be empty", "warning");
     } else if (!/^[a-zA-Z][a-zA-Z0-9 \-\_\.]*?$/.test(project.name)) {
-      this.messageService.info("Project name format is incorrect", "IAMP");
+      this.messageService.messageNotification("Project name format is incorrect", "warning");
     }
     else if (project.description && (!/^[a-zA-Z0-9][a-zA-Z0-9 \-\_\.]*?$/.test(project.description))) {
-      this.messageService.info("Project description format is incorrect", "IAMP");
+      this.messageService.messageNotification("Project description format is incorrect", "warning");
     }
     else if (!project.portfolioId) {
-      this.messageService.info("Please select a portfolio", "IAMP");
+      this.messageService.messageNotification("Please select a portfolio", "warning");
     }
     else {
       this.onSave();
@@ -259,12 +259,12 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
       let arr1 = this.projectsArray?.filter((item) => item.name != undefined);
       let arr2 = arr1?.filter((item) => item.name.toLowerCase() == this.project.name.toLowerCase());
       if (arr2?.length > 0) {
-        this.messageService.error("Project already exists", "IAMP");
+        this.messageService.messageNotification("Project name already exists", "info");
         return;
       } else {
         this.busy = this.projectService.create(this.project).subscribe((project) => {
           this.project = new Project();
-          this.messageService.info("Project created", "IAMP");
+          this.messageService.messageNotification("Created Successfully", "success");
           this.closeProjectAddDialog();
         });
       }
@@ -286,17 +286,17 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
       (item) => item.id != this.project.id && item.name.toLowerCase() == this.project.name.toLowerCase()
     );
     if (arr2.length > 0) {
-      this.messageService.error("Project already exists", "IAMP");
+      this.messageService.messageNotification("Project name already exists", "info");
       return;
     } else {
       this.busy = this.projectService.update(this.project).subscribe(
         (project) => {
           this.project = project;
-          this.messageService.info("Project updated", "IAMP");
+          this.messageService.messageNotification("Updated Successfully", "success");
           this.clearProject();
           this.navigateToList();
         },
-        (error) => this.messageService.error("Could not update", "IAMP")
+        (error) => this.messageService.messageNotification("Could not update", "error")
       );
     }
   }
@@ -384,7 +384,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
         };
       } else {
         this.allowedTypes = false;
-        this.messageService.error("Only PNG, JPG and JPEG image formats are allowed", "IAMP");
+        this.messageService.messageNotification("Only PNG, JPG and JPEG image formats are allowed", "warning");
         this.fileInput.nativeElement.value = "";
         this.project.logoName = null;
       }
@@ -409,7 +409,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
         (response) => {
           this.rolesArray = response.content;
         },
-        (error) => this.messageService.error("Could not fetch roles", "IAMP")
+        (error) => this.messageService.messageNotification("Could not fetch roles", "error")
       );
   }
   
