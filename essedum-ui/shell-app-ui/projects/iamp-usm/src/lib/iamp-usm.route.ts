@@ -8,6 +8,7 @@ import { ProjectDetailComponent } from "./components/project-detail/project-deta
 import { ManageUsersComponent } from "./components/manage-users/manage-users.component";
 import { PortfolioListViewComponent } from "./components/portfolio/portfolio-list-view.component";
 import { PortfolioAddComponent } from "./components/portfolio/portfolio-add/portfolio-add.component";
+import { UsmRolePermissionComponent } from "./components/usm-role-permission/usm-role-permission.component";
 import { IampUsmComponent } from "./iamp-usm.component";
 
 const routes: Routes = [
@@ -26,6 +27,9 @@ const routes: Routes = [
             { path: "portfoliolist", component: PortfolioListViewComponent },
             { path: "portfoliolist/:id/:view", component: PortfolioAddComponent },
             { path: "portfoliolist/create", component: PortfolioAddComponent },
+            { path: "permissionlist", component: UsmRolePermissionComponent },
+            { path: "permissionlist/create/permission", component: UsmRolePermissionComponent },
+            { path: "permissionlist/:id/:view", component: UsmRolePermissionComponent },
             { path: "secret", component: SecretsComponent },
             { path: "secret/:key/:type", component: SecretsComponent },
         ],

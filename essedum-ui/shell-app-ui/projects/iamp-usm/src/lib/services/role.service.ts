@@ -375,4 +375,76 @@ export class RoleService {
       );
 
   }
+
+   // Helper method to create standardized request headers with all required values
+  private createRequestHeaders(): HttpHeaders {
+    let headers = new HttpHeaders();
+    
+    // Add all required headers as shown in the curl example
+    headers = headers.append('Accept', 'application/json, text/plain, */*');
+    headers = headers.append('Accept-Language', 'en-US,en;q=0.9');
+    headers = headers.append('Content-Type', 'application/json');
+    headers = headers.append('Connection', 'keep-alive');
+    headers = headers.append('X-Requested-With', 'Leap');
+    headers = headers.append('charset', 'utf-8');
+    headers = headers.append('Sec-Fetch-Dest', 'empty');
+    headers = headers.append('Sec-Fetch-Mode', 'cors');
+    headers = headers.append('Sec-Fetch-Site', 'same-origin');
+    headers = headers.append('sec-ch-ua', '"Not;A=Brand";v="99", "Microsoft Edge";v="139", "Chromium";v="139"');
+    headers = headers.append('sec-ch-ua-mobile', '?0');
+    headers = headers.append('sec-ch-ua-platform', '"Windows"');
+    
+    // Add User-Agent header
+    headers = headers.append('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0');
+    
+    // Add Referer header - matching the exact format in the curl example
+    if (typeof window !== 'undefined') {
+      // Use the actual origin like in the curl example
+      headers = headers.append('Referer', window.location.origin + '/');
+    }
+    
+    // Add authorization header if available
+    if (sessionStorage.getItem("authToken")) {
+      headers = headers.append('Authorization', 'Bearer ' + sessionStorage.getItem("authToken"));
+    } else if (localStorage.getItem("jwtToken")) {
+      headers = headers.append('Authorization', 'Bearer ' + localStorage.getItem("jwtToken"));
+    }
+    
+    // Add Project headers - exact casing as in the curl example
+    if (sessionStorage.hasOwnProperty("project") && sessionStorage.getItem("project") !== "") {
+      try {
+        const project = JSON.parse(sessionStorage.getItem("project") || "{}");
+        if (project.id) {
+          headers = headers.append('Project', project.id.toString());
+        }
+        if (project.name) {
+          headers = headers.append('ProjectName', project.name.toString());
+        }
+      } catch (e) {
+        console.error("Error parsing project from sessionStorage:", e);
+      }
+    }
+    
+    // Add role headers - exact casing as in the curl example
+    if (sessionStorage.hasOwnProperty("role") && sessionStorage.getItem("role") !== "") {
+      try {
+        const role = JSON.parse(sessionStorage.getItem("role") || "{}");
+        if (role.id) {
+          headers = headers.append('roleId', role.id.toString());
+        }
+        if (role.name) {
+          headers = headers.append('roleName', role.name.toString());
+        }
+      } catch (e) {
+        console.error("Error parsing role from sessionStorage:", e);
+      }
+    }
+    
+    // Try to add Cookie header if available from document.cookie
+    if (typeof document !== 'undefined' && document.cookie) {
+      headers = headers.append('Cookie', document.cookie);
+    }
+    
+    return headers;
+  }
 }

@@ -40,7 +40,7 @@ export class SecretsComponent {
   hidePass: boolean = true;
   title: string;
   showLoader: boolean;
-  search: string[] = [];
+  search: string = "";
   pageArr: number[] = [];
   pageNumberInput: number = 1;
   noOfPages: number = 0;
@@ -168,23 +168,12 @@ export class SecretsComponent {
 
     if (searchText === null || searchText === "") {
       this.refreshComplete();
-      // this.keys="";
     } else {
       let filterData: any = [];
       this.noOfPages = 0;
       searchText = searchText.toLowerCase().trim();
-      // if(!value.startsWith("app_")){
-      //   var k = "app_";
-      //   value=k.concat(value);
-      // }
-      // if(value.startsWith("app_")){
-      this.data.forEach((e: any) => {
-        var eKey = e.key;
-        eKey = eKey.toLowerCase(eKey);
-        if (eKey === searchText) {
-          filterData.push(e);
-        }
-      });
+      this.search=searchText;
+      this.getList();
       if (filterData.length !== 0) {
         this.noOfItems = filterData.length;
         this.dashConstantList = filterData;
@@ -192,15 +181,10 @@ export class SecretsComponent {
         this.pageArr = [...Array(this.noOfPages).keys()];
         this.pageSize = this.pageSize || 6;
       } else {
-        this.messageService.message("No Records Found");
+        this.messageService.messageNotification("No Records Found",'info');
         this.keys = "";
       }
-    }
-    //}
-    // else{
-    //   this.messageService.message("Invalid Input")
-    //   this.keys="";
-    // }
+    }   
   }
 
   getList(): void {
@@ -223,6 +207,7 @@ export class SecretsComponent {
       this.pageArr = [...Array(this.noOfPages).keys()];
     });
     this.pageSize = this.pageSize || 6;
+    this.lastRefreshTime();
   }
 
   getCount() {
@@ -253,11 +238,11 @@ export class SecretsComponent {
       if (result === "yes") {
         this.secretsService.deleteKey(secrets.key).subscribe(
           (resp) => {
-            this.messageService.message(resp, "Key Deleted Successfully");
+            this.messageService.messageNotification(`Secret Key Deleted Successfully`);
             this.refreshComplete();
           },
           (error) => {
-            this.messageService.message(error);
+            this.messageService.messageNotification(`Error while deleting ${error}`,"error");
           }
         );
       }
@@ -292,8 +277,8 @@ export class SecretsComponent {
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        // this.refresh();
-      }
+        this.refreshComplete();
+        }
     });
   }
 
@@ -329,7 +314,7 @@ export class SecretsComponent {
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        // this.refresh();
+        this.refreshComplete();
       }
     });
   }
@@ -346,7 +331,7 @@ export class SecretsComponent {
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        // this.refresh();
+        this.refreshComplete();
       }
     });
   }
@@ -354,13 +339,13 @@ export class SecretsComponent {
   onCreate() {
     this.secretsService.createKey(this.keys, this.passcode).subscribe(
       (res) => {
-        this.messageService.message(res, res.body);
+        this.messageService.messageNotification(`${res}, ${res.body}`);
         this.listView();
         this.refreshComplete();
       },
       (err) => {
         console.log(err);
-        this.messageService.message(err);
+        this.messageService.messageNotification(`Error ${err}`,"error");
       }
     );
   }
@@ -369,7 +354,7 @@ export class SecretsComponent {
     this.secretsService
       .updateKey(this.keys, this.passcode)
       .subscribe((res: any) => {
-        this.messageService.message(res, "Updated Successfully");
+        this.messageService.messageNotification(`Updated Successfully ${res}`);
         this.hideValue();
       });
   }
@@ -398,13 +383,14 @@ export class SecretsComponent {
   }
 
   refreshComplete() {
-    this.search = [];
+    this.search = "";
     this.onClear();
     this.noOfPages = 0;
     this.getCount();
     setTimeout(() => {
       this.getList();
     }, 500);
+    this.lastRefreshTime();
   }
 
   lastRefreshTime() {
