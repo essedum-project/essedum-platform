@@ -150,7 +150,7 @@
 	    <commons-compress.version>1.26.1</commons-compress.version>	    
 	    <jython.version>2.7.4</jython.version>
 	    <httpmime.version>4.5.14</httpmime.version>
-	    <groovy-all.version>4.0.0</groovy-all.version>
+	    <groovy-all.version>4.0.23</groovy-all.version>
 	    <google-auth.version>1.24.1</google-auth.version>
 	    <lucene-analyzers-common.version>8.9.0</lucene-analyzers-common.version>	    
         <aws-java-sdk.version>1.11.163</aws-java-sdk.version>
