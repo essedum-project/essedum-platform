@@ -313,60 +313,114 @@ export class PortfolioListViewComponent implements OnInit, OnDestroy {
     sessionStorage.setItem("usmPortfolioid", usmPortfolio.id.toString());
     sessionStorage.setItem("pageview", "usmPortfolio");
 
-    // First get the full portfolio data
-    this.getUsmPortfolios(usmPortfolio.id);
+    // Get the full portfolio data and open dialog only after data is loaded
+    this.busy = this.portfolioService.getUsmPortfolio(usmPortfolio.id).subscribe(
+      (res) => {
+        this.currentUsmPortfolio = res;
+        this.usmPortfolio = res;
+        this.exampleProject.portfolioId = this.usmPortfolio;
 
-    // Wait a bit to ensure data is loaded
-    setTimeout(() => {
-      console.log("Opening edit dialog with projects:", this.projects);
-      const dialogRef = this.dialog.open(PortfolioAddComponent, {
-        height: "80%",
-        width: "70%",
-        disableClose: true,
-        data: {
-          mode: "edit",
-          portfolio: this.currentUsmPortfolio,
-          projectList: this.projects,
-        },
-      });
+        this.projectService.findAll(this.exampleProject, this.lazyload).subscribe(
+          (pageResponse) => {
+            this.currentPageProject = pageResponse;
+            this.projects = this.currentPageProject.content.sort((a, b) =>
+              a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+            );
+            this.projectsCopy = this.projects;
+            this.ProjectList = new MatTableDataSource(this.currentPageProject.content);
+            this.length = this.projects.length;
+            this.ProjectList.paginator = this.paginator1;
 
-      dialogRef.afterClosed().subscribe((result) => {
-        if (result) {
-          this.fetchWave(null);
-          this.lastRefreshTime();
-        }
-      });
-    }, 300);
+            // Now open the dialog with the latest data
+            const dialogRef = this.dialog.open(PortfolioAddComponent, {
+              height: "80%",
+              width: "70%",
+              disableClose: true,
+              data: {
+                mode: "edit",
+                portfolio: this.currentUsmPortfolio,
+                projectList: this.projects,
+              },
+            });
+
+            dialogRef.afterClosed().subscribe((result) => {
+              if (result) {
+                this.fetchWave(null);
+                this.lastRefreshTime();
+              }
+            });
+          },
+          (error) => {
+            this.messageService.messageNotification("Could not get the projects", "error");
+            this.projects = [];
+            this.projectsCopy = [];
+            this.ProjectList = new MatTableDataSource([]);
+          }
+        );
+      },
+      (error) => {
+        this.messageService.messageNotification("Could not load portfolio details", "error");
+        this.currentUsmPortfolio = new Portfolio();
+        this.projects = [];
+      }
+    );
   }
 
   view_UsmPortfolio(usmPortfolio: Portfolio) {
     sessionStorage.setItem("usmPortfolioid", usmPortfolio.id.toString());
     sessionStorage.setItem("pageview", "usmPortfolio");
 
-    // First get the full portfolio data
-    this.getUsmPortfolios(usmPortfolio.id);
+    // Get the full portfolio data and open dialog only after data is loaded
+    this.busy = this.portfolioService.getUsmPortfolio(usmPortfolio.id).subscribe(
+      (res) => {
+        this.currentUsmPortfolio = res;
+        this.usmPortfolio = res;
+        this.exampleProject.portfolioId = this.usmPortfolio;
 
-    // Wait a bit to ensure data is loaded
-    setTimeout(() => {
-      console.log("Opening view dialog with projects:", this.projects);
-      const dialogRef = this.dialog.open(PortfolioAddComponent, {
-        height: "80%", // Use fixed height
-        width: "70%", // Use fixed width
-        disableClose: true,
-        data: {
-          mode: "view",
-          portfolio: this.currentUsmPortfolio,
-          projectList: this.projects,
-        },
-      });
+        this.projectService.findAll(this.exampleProject, this.lazyload).subscribe(
+          (pageResponse) => {
+            this.currentPageProject = pageResponse;
+            this.projects = this.currentPageProject.content.sort((a, b) =>
+              a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+            );
+            this.projectsCopy = this.projects;
+            this.ProjectList = new MatTableDataSource(this.currentPageProject.content);
+            this.length = this.projects.length;
+            this.ProjectList.paginator = this.paginator1;
 
-      dialogRef.afterClosed().subscribe((result) => {
-        if (result) {
-          this.fetchWave(null);
-          this.lastRefreshTime();
-        }
-      });
-    }, 300);
+            // Now open the dialog with the latest data
+            const dialogRef = this.dialog.open(PortfolioAddComponent, {
+              height: "80%",
+              width: "70%",
+              disableClose: true,
+              data: {
+                mode: "view",
+                portfolio: this.currentUsmPortfolio,
+                projectList: this.projects,
+              },
+            });
+
+            dialogRef.afterClosed().subscribe((result) => {
+              if (result) {
+                this.fetchWave(null);
+                this.lastRefreshTime();
+              }
+            });
+          },
+          (error) => {
+            this.messageService.messageNotification("Could not get the projects", "error");
+            this.projects = [];
+            this.projectsCopy = [];
+            this.ProjectList = new MatTableDataSource([]);
+          }
+        );
+      },
+      (error) => {
+        this.messageService.messageNotification("Could not load portfolio details", "error");
+        this.currentUsmPortfolio = new Portfolio();
+        this.projects = [];
+      }
+    );
   }
 
   createView() {

@@ -239,7 +239,7 @@ export class DashConstantComponent implements OnInit {
 
   editDataToTree() {
     if (this.dataForm.value.label == "") {
-      this.messageService.error("All * marked fields are mandatory", "IAMP");
+      this.messageService.messageNotification("All * marked fields are mandatory", "error");
       return;
     }
     this.isSavedUpdated = true;
@@ -257,7 +257,7 @@ export class DashConstantComponent implements OnInit {
       const node = this.treeControl.dataNodes.find((n) => Number(n._id) == Number(_id));
       this.treeControl.expand(node);
     });
-    this.messageService.info("Please click on Update button to save the changes", "IAMP");
+    this.messageService.messageNotification("Please click on Update button to save the changes", "success");
   }
 
   private fetchChildren(treeData, node) {
@@ -391,7 +391,7 @@ export class DashConstantComponent implements OnInit {
 
   addChildToTree() {
     if (this.dataForm.value.label == "") {
-      this.messageService.error("All * marked fields are mandatory", "IAMP");
+      this.messageService.messageNotification("All * marked fields are mandatory", "error");
       return;
     }
     let treeData = this.dataSource.data;
@@ -418,9 +418,9 @@ export class DashConstantComponent implements OnInit {
     });
     this.isSavedUpdated = true;
     if (this.edit) {
-      this.messageService.info("Please click on Update button to save the changes", "IAMP");
+      this.messageService.messageNotification("Please click on Update button to save the changes", "success");
     } else {
-      this.messageService.info("Please click on Save button to save the changes", "IAMP");
+      this.messageService.messageNotification("Please click on Save button to save the changes", "success");
     }
   }
 
@@ -786,6 +786,11 @@ export class DashConstantComponent implements OnInit {
         }
       }
     })
+    this.noOfItems = this.dashConstantList.data.length;
+    this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
+    this.pageArr = Array.from({ length: this.noOfPages }, (_, i) => i);
+    this.hoverStates = new Array(this.pageArr.length).fill(false);
+    this.initializePagination()
     this.dashConstantsPageList = this.dashConstantList.data;
     this.dashConstantList.sort = this.sort;
     this.dashConstantList.paginator = this.paginator;
@@ -813,7 +818,7 @@ export class DashConstantComponent implements OnInit {
     return invalidEle;
   }
   async showPopup() {
-    this.messageService.error("Sidebar Mapping already exists for " + this.currentRole, "IAMP")
+    this.messageService.messageNotification("Sidebar Mapping already exists for " + this.currentRole, "error")
   }
   flag: boolean = false;
   isAlreadyPresent: boolean = false;
@@ -850,13 +855,13 @@ export class DashConstantComponent implements OnInit {
       this.isAlreadyPresent = true;
     }
     if (this.flag) {
-      this.messageService.error("Sidebar Mapping already exists for " + this.currentSCRole, "IAMP")
+      this.messageService.messageNotification("Sidebar Mapping already exists for " + this.currentSCRole, "error")
       this.flag = false;
       return;
     }
 
     if (!this.isSavedUpdated && this.sideCheck && !this.isAlreadyPresent) {
-      this.messageService.error("Please Submit/Update configurations first ", "IAMP");
+      this.messageService.messageNotification("Please Submit/Update configurations first ", "error");
       return;
     }
     this.isSavedUpdated = false;
@@ -871,7 +876,7 @@ export class DashConstantComponent implements OnInit {
     }
     else if (this.projectRoleMap) {
       if (this.defaultArray[0].role == null || this.defaultArray[0].role == "") {
-        this.messageService.error("Enter Role field", "IAMP");
+        this.messageService.messageNotification("Enter Role field", "error");
         return;
       }
       else {
@@ -883,7 +888,7 @@ export class DashConstantComponent implements OnInit {
       this.assignObject();
       let invalidURLLabels = this.validateURL(this.sideJson);
       if (this.dashConstant && this.dashConstant.keys && this.dashConstant.keys.endsWith("SideConfigurations") && this.sideJson && this.sideJson.length == 0) {
-        this.messageService.error("Create mapping before saving", "IAMP");
+        this.messageService.messageNotification("Create mapping before saving", "error");
         f = 1
         return;
       }
@@ -901,7 +906,7 @@ export class DashConstantComponent implements OnInit {
               str = str + invalidURLLabels[item]
               str = str + ","
             }
-            this.messageService.error("Url is mandatory for " + str.slice(0, -1), "IAMP");
+            this.messageService.messageNotification("Url is mandatory for " + str.slice(0, -1), "error");
             f = 1;
             return;
           }
@@ -913,7 +918,7 @@ export class DashConstantComponent implements OnInit {
             role = temp[0]
           this.dashConstants.forEach(element => {
             if (element.keys == role + "SideConfigurations" && element.id != this.dashConstant.id) {
-              this.messageService.error("Sidebar Mapping already exists for " + role, "IAMP");
+              this.messageService.messageNotification("Sidebar Mapping already exists for " + role, "error");
               f = 1;
               return;
             }
@@ -923,7 +928,7 @@ export class DashConstantComponent implements OnInit {
       if (this.defaultCheck) {
         this.defaultArray.forEach((element) => {
           if (!element.project || !element.role) {
-            this.messageService.error("Enter values for all added default project role", "IAMP");
+            this.messageService.messageNotification("Enter values for all added default project role", "error");
             f = 1;
             return;
           }
@@ -939,7 +944,7 @@ export class DashConstantComponent implements OnInit {
           this.dashConstant.keys.trim().length == 0 ||
           this.dashConstant.value.trim().length == 0
         ) {
-          this.messageService.error("All fields are mandatory", "IAMP");
+          this.messageService.messageNotification("All fields are mandatory", "error");
           f = 1;
           return;
         }
@@ -952,7 +957,7 @@ export class DashConstantComponent implements OnInit {
           this.sideRole.trim().length == 0 ||
           !this.sideJson
         ) {
-          this.messageService.error("All * marked fields are mandatory", "IAMP");
+          this.messageService.messageNotification("All * marked fields are mandatory", "error");
           f = 1;
           return;
         }
@@ -971,10 +976,7 @@ export class DashConstantComponent implements OnInit {
             this.dashConstantService.findAll(dashconstant, this.lazyload).subscribe((res) => {
 
               if (res.content.length) {
-                this.messageService.info(
-                  "Default Configuration for landing already exists for this portfolio in Project: " + res.content[0].project_name,
-                  "IAMP"
-                );
+                this.messageService.messageNotification("Default Configuration for landing already exists for this portfolio in Project: " + res.content[0].project_name, "success");
                 return;
               }
               this.createMapping();
@@ -986,10 +988,7 @@ export class DashConstantComponent implements OnInit {
                 duplicateCheck = true;
             });
             if (duplicateCheck) {
-              this.messageService.info(
-                "Duplicate entry cannot be created",
-                "IAMP"
-              );
+              this.messageService.messageNotification("Duplicate entry cannot be created", "success");
               return;
             }
             else
@@ -1014,7 +1013,7 @@ export class DashConstantComponent implements OnInit {
         dashconstant.keys = this.dashConstant.keys;
         this.dashConstantService.findAll(dashconstant, this.lazyload).subscribe((obj) => {
           if (obj.content.length) {
-            this.messageService.info("Role already mapped for this project", "IAMP");
+            this.messageService.messageNotification("Role already mapped for this project", "success");
             return;
           }
           this.keyvaluemapping();
@@ -1031,18 +1030,18 @@ export class DashConstantComponent implements OnInit {
       if (obj1.content.length > 0) {
         let defp1 = JSON.parse(obj1.content[0].value).defaultproject;
         if (defp == defp1) {
-          this.messageService.info("Already Default landing mapped for this project", "IAMP");
+          this.messageService.messageNotification("Already Default landing mapped for this project", "success");
           return;
         }
       }
       this.busy = this.dashConstantService.create(this.dashConstant, this.projectRoleMap).subscribe(
         (response) => {
-          this.messageService.info("Configuration for Project Role Map Saved Successfully", "IAMP");
+          this.messageService.messageNotification("Configuration for Project Role Map Saved Successfully", "success");
           this.fetchDashConstant();
           this.clear();
           this.listView();
         },
-        (error) => this.messageService.error("Could not save", "IAMP"),
+        (error) => this.messageService.messageNotification("Could not save", "error"),
         () => {
           this.dashConstantService.refresh().subscribe(res => { });
         }
@@ -1060,7 +1059,7 @@ export class DashConstantComponent implements OnInit {
     let temp = this.defaultArray.filter((item) => item.project == child.project);
     if (temp && temp.length > 1) {
       child.project = null;
-      this.messageService.error("Default role already mapped for this project", "IAMP");
+      this.messageService.messageNotification("Default role already mapped for this project", "error");
     }
   }
 
@@ -1129,16 +1128,16 @@ export class DashConstantComponent implements OnInit {
         if (obj1.content.length > 0) {
           let defp1 = JSON.parse(obj1.content[0].value).defaultproject;
           if (defp == defp1) {
-            this.messageService.info("Already Default landing mapped for this project, Delete this", "IAMP");
+            this.messageService.messageNotification("Already Default landing mapped for this project, Delete this", "success");
             return;
           }
         }
         this.busy = this.dashConstantService.update(this.dashConstant, this.projectRoleMap).subscribe(
           (rs) => {
-            this.messageService.info("Configuration  updated successfully", "IAMP");
+            this.messageService.messageNotification("Configuration  updated successfully", "success");
             this.listView();
           },
-          (error) => this.messageService.error("Could not update", "IAMP"),
+          (error) => this.messageService.messageNotification("Could not update", "error"),
           () => {
             this.dashConstantService.refresh().subscribe(res => { });
           }
@@ -1178,7 +1177,7 @@ export class DashConstantComponent implements OnInit {
         }
       })
       if (this.flag) {
-        this.messageService.error("Sidebar Mapping already exists for " + this.currentSCRole, "IAMP")
+        this.messageService.messageNotification("Sidebar Mapping already exists for " + this.currentSCRole, "error")
         this.flag = false;
         return;
       }
@@ -1192,16 +1191,16 @@ export class DashConstantComponent implements OnInit {
         for (let i = 0; i < item1.length; i++) {
           let arr = JSON.parse(item1[i].value).defaultprojectroles.project;
           if (defaultpro == arr) {
-            this.messageService.error("Configuration already mapped for project role mapping, Delete First", "IAMP");
+            this.messageService.messageNotification("Configuration already mapped for project role mapping, Delete First", "error");
             return;
           }
         }
         this.busy = this.dashConstantService.update(this.dashConstant, this.defaultCheck).subscribe(
           (rs) => {
-            this.messageService.info("Configuration  updated successfully", "IAMP");
+            this.messageService.messageNotification("Configuration  updated successfully", "success");
             this.listView();
           },
-          (error) => this.messageService.error("Could not update", "IAMP"),
+          (error) => this.messageService.messageNotification("Could not update", "error"),
           () => {
             this.dashConstantService.refresh().subscribe(res => { });
           }
@@ -1218,18 +1217,18 @@ export class DashConstantComponent implements OnInit {
         }
       });
       if (duplicateCheck) {
-        this.messageService.info(
-          "Duplicate entry cannot be created", "IAMP"
+        this.messageService.messageNotification(
+          "Duplicate entry cannot be created", "success"
         );
         return;
       }
       else {
         this.busy = this.dashConstantService.update(this.dashConstant, this.defaultCheck).subscribe(
           (rs) => {
-            this.messageService.info("Configuration  updated successfully", "IAMP");
+            this.messageService.messageNotification("Configuration  updated successfully", "success");
             this.listView();
           },
-          (error) => this.messageService.error("Could not update", "IAMP"),
+          (error) => this.messageService.messageNotification("Could not update", "error"),
           () => {
             this.dashConstantService.refresh().subscribe(res => { });
           }
@@ -1245,12 +1244,12 @@ export class DashConstantComponent implements OnInit {
       this.dashConstant.keys == null ||
       this.dashConstant.keys.trim().length == 0
     ) {
-      this.messageService.error("Key cannot be empty", "IAMP");
+      this.messageService.messageNotification("Key cannot be empty", "error");
       return false;
     } else if (
       !/^[a-zA-Z0-9 ][a-zA-Z0-9 \@\%\!\#\*\-\_\&\$\(\)\=\+\/\.\?\\]*?$/.test(this.dashConstant.keys)
     ) {
-      this.messageService.error("Key format is incorrect", "IAMP");
+      this.messageService.messageNotification("Key format is incorrect", "error");
       return false;
     }
     return true;
@@ -1354,11 +1353,11 @@ export class DashConstantComponent implements OnInit {
       if (result === "yes") {
         this.dashConstantService.delete(dashConstant.id).subscribe(
           (Response) => {
-            this.messageService.info("Configuration Deleted successfully", "IAMP");
+            this.messageService.messageNotification("Configuration Deleted successfully", "success");
             this.fetchDashConstant();
             this.clear();
           },
-          (error) => this.messageService.error("Could not delete", "IAMP"),
+          (error) => this.messageService.messageNotification("Could not delete", "error"),
           () => {
             this.dashConstantService.refresh().subscribe(res => { });
           }
@@ -1528,7 +1527,7 @@ export class DashConstantComponent implements OnInit {
       child.label.trim().length < 1 ||
       child.url.trim().length < 1
     )
-      this.messageService.error("Enter all mandatory fields", "IAMP");
+      this.messageService.messageNotification("Enter all mandatory fields", "error");
     else this.sideChildrenArray.push({ label: "", icon: "", url: "", _id: "" });
   }
   FirstLetterWord(str) {
@@ -1561,7 +1560,7 @@ export class DashConstantComponent implements OnInit {
 
   addMapping(child: any) {
     if (child.project == undefined || child.role == undefined || child.project == null || child.role == null)
-      this.messageService.error("Enter project-role fields", "IAMP");
+      this.messageService.messageNotification("Enter project-role fields", "error");
     else this.defaultArray.push({ project: "", role: "" });
   }
 
@@ -1721,20 +1720,20 @@ export class DashConstantComponent implements OnInit {
         for (let i = 0; i < item1.length; i++) {
           let arr = JSON.parse(item1[i].value).defaultprojectroles.project;
           if (defaultpro == arr) {
-            this.messageService.error("Configuration already mapped for project role mapping, Delete First", "IAMP");
+            this.messageService.messageNotification("Configuration already mapped for project role mapping, Delete First", "error");
             return;
           }
         }
         this.busy = this.dashConstantService.create(this.dashConstant, this.defaultCheck).subscribe(
           (response) => {
-            this.messageService.info("Configuration Saved Successfully", "IAMP");
+            this.messageService.messageNotification("Configuration Saved Successfully", "success");
             this.fetchDashConstant();
             this.clear();
             this.listView();
 
 
           },
-          (error) => this.messageService.error("Could not save", "IAMP"),
+          (error) => this.messageService.messageNotification("Could not save", "error"),
           () => {
             this.dashConstantService.refresh().subscribe(res => { });
           }
@@ -1745,14 +1744,14 @@ export class DashConstantComponent implements OnInit {
     else {
       this.busy = this.dashConstantService.create(this.dashConstant, this.defaultCheck).subscribe(
         (response) => {
-          this.messageService.info("Configuration Saved Successfully", "IAMP");
+          this.messageService.messageNotification("Configuration Saved Successfully", "success");
           this.fetchDashConstant();
           this.clear();
           this.listView();
 
 
         },
-        (error) => this.messageService.error("Could not save", "IAMP"),
+        (error) => this.messageService.messageNotification("Could not save", "error"),
         () => {
           this.dashConstantService.refresh().subscribe(res => { });
         }
@@ -1769,7 +1768,7 @@ export class DashConstantComponent implements OnInit {
         this.createMapping()
     }
     else {
-      this.messageService.error("All fields are mandatory", "IAMP");
+      this.messageService.messageNotification("All fields are mandatory", "error");
       return;
     }
   }
@@ -1783,7 +1782,7 @@ export class DashConstantComponent implements OnInit {
           this.dashConstants.forEach(element => {
             if (element.keys == "Iconsidebar") {
               flag = false
-              this.messageService.error("Iconsidebar Mapping already exists", "IAMP");
+              this.messageService.messageNotification("Iconsidebar Mapping already exists", "error");
               return;
             }
           });
@@ -1793,7 +1792,7 @@ export class DashConstantComponent implements OnInit {
       }
     }
     else {
-      this.messageService.error("All fields are mandatory", "IAMP");
+      this.messageService.messageNotification("All fields are mandatory", "error");
       return;
     }
   }
@@ -1807,7 +1806,7 @@ export class DashConstantComponent implements OnInit {
           this.dashConstants.forEach(element => {
             if (element.keys == this.configureuserlandusers + " " + this.configureuserlandrole + " " + "USLand") {
               flag = false
-              this.messageService.error("User Landing Configuration Already Exists", "IAMP");
+              this.messageService.messageNotification("User Landing Configuration Already Exists", "error");
               return;
             }
           });
@@ -1817,7 +1816,7 @@ export class DashConstantComponent implements OnInit {
       }
     }
     else {
-      this.messageService.error("All fields are mandatory", "IAMP");
+      this.messageService.messageNotification("All fields are mandatory", "error");
       return;
     }
   }
@@ -1861,7 +1860,7 @@ export class DashConstantComponent implements OnInit {
     const node = event.item.data;
     let isValidDrop = Boolean(siblings.filter((item) => item._id == node._id).length)
     if (!isValidDrop) {
-      this.messageService.info("Items can only be moved within the same level", "LEAP");
+      this.messageService.messageNotification("Items can only be moved within the same level", "success");
       return;
     }
     const siblingIndex = siblings.findIndex(n => n._id === node._id);
@@ -1915,7 +1914,7 @@ export class DashConstantComponent implements OnInit {
         (res) => {
           let oldmappings = res.filter((item) => (item.keys == this.rearrangesidebarrole + " Side" && item.project_name == project.name));
           if (!oldmappings || (oldmappings && oldmappings.length < 1))
-            this.messageService.error("No mappings available to convert", "IAMP");
+            this.messageService.messageNotification("No mappings available to convert", "error");
           else {
             let dashConstant = new DashConstant();
             let newmapping = []
@@ -1931,18 +1930,18 @@ export class DashConstantComponent implements OnInit {
                 oldmappings.forEach(element => {
                   this.dashConstantService.delete(element.id).subscribe(
                     (Response) => {
-                      this.messageService.info("Configurations Converted successfully", "IAMP");
+                      this.messageService.messageNotification("Configurations Converted successfully", "success");
                       this.fetchDashConstant();
                       this.clear();
                     },
-                    (error) => this.messageService.error("Could not delete", "IAMP")
+                    (error) => this.messageService.messageNotification("Could not delete", "error")
                   );
                 });
                 this.fetchDashConstant();
                 this.clear();
                 this.listView();
               },
-              (error) => this.messageService.error("Could not save", "IAMP")
+              (error) => this.messageService.messageNotification("Could not save", "error")
             );
           }
         })
@@ -1968,11 +1967,11 @@ export class DashConstantComponent implements OnInit {
         !/^image\/jpg/.test(event.target.files[0].type) &&
         !/^image\/jpeg/.test(event.target.files[0].type) &&
         !/^image\/svg/.test(event.target.files[0].type)) {
-        this.messageService.error("Image must be SVG,JPEG, JPG or PNG type", "IAMP");
+        this.messageService.messageNotification("Image must be SVG,JPEG, JPG or PNG type", "error");
         return;
       }
       if (event.target.files[0].size > 500000) {
-        this.messageService.error("Image file size exceeds 500 KB", "IAMP");
+        this.messageService.messageNotification("Image file size exceeds 500 KB", "error");
         return;
       } else {
 
@@ -2144,7 +2143,7 @@ export class DashConstantComponent implements OnInit {
   }
 
   // Helper methods for improved template readability and maintainability
-  
+
   /**
    * Get header title based on config type
    */
@@ -2248,8 +2247,8 @@ export class DashConstantComponent implements OnInit {
    */
   shouldShowBasicFields(): boolean {
     return (this.sideCheck === false || this.sideCheck === undefined) &&
-           !this.defaultCheck && !this.defaultsidebar && !this.rearrangesidebar &&
-           !this.iconsidebar && !this.configureFileUpload && !this.projectRoleMap;
+      !this.defaultCheck && !this.defaultsidebar && !this.rearrangesidebar &&
+      !this.iconsidebar && !this.configureFileUpload && !this.projectRoleMap;
   }
 
   /**
@@ -2264,8 +2263,8 @@ export class DashConstantComponent implements OnInit {
    */
   shouldShowConfigOption(option: string): boolean {
     const baseConditions = !this.defaultCheck && !this.defaultsidebar && !this.configureUserLand &&
-                          !this.rearrangesidebar && !this.iconsidebar && !this.configureFileUpload &&
-                          !this.projectRoleMap;
+      !this.rearrangesidebar && !this.iconsidebar && !this.configureFileUpload &&
+      !this.projectRoleMap;
 
     switch (option) {
       case 'sidebar':
@@ -2286,7 +2285,7 @@ export class DashConstantComponent implements OnInit {
         return !this.configtype && !this.sideCheck && !this.defaultsidebar && !this.iconsidebar && baseConditions;
       case 'projectRoleMap':
         return !this.configtype && !this.sideCheck && !this.defaultsidebar && !this.iconsidebar &&
-               !this.configureFileUpload && !this.defaultCheck;
+          !this.configureFileUpload && !this.defaultCheck;
       default:
         return false;
     }
@@ -2297,7 +2296,7 @@ export class DashConstantComponent implements OnInit {
    */
   shouldShowSaveButton(): boolean {
     return (!this.edit && !this.buttonFlag && !this.rearrangesidebar) ||
-           (this.edit && !this.buttonFlag && !this.rearrangesidebar);
+      (this.edit && !this.buttonFlag && !this.rearrangesidebar);
   }
 
   /**
