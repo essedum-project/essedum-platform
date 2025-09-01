@@ -786,6 +786,11 @@ export class DashConstantComponent implements OnInit {
         }
       }
     })
+    this.noOfItems = this.dashConstantList.data.length;
+    this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
+    this.pageArr = Array.from({ length: this.noOfPages }, (_, i) => i);
+    this.hoverStates = new Array(this.pageArr.length).fill(false);
+    this.initializePagination()
     this.dashConstantsPageList = this.dashConstantList.data;
     this.dashConstantList.sort = this.sort;
     this.dashConstantList.paginator = this.paginator;
