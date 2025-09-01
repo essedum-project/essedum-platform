@@ -655,18 +655,18 @@ input[type="radio"].radioButtonColor {
 }
 
 .action-button {
-  color: #ffffff;
-  background-color: #238636;
-  height: 36px;
-  min-height: 36px;
-  font-size: 1.2rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  color: #ffffff !important;
+  background-color: #238636 !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  font-size: 1.2rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
   font-family: "Roboto", "Segoe UI", sans-serif !important;
-  border-radius: 6px;
-  border: 1px solid #1a7f37;
-  transition: all 0.2s ease-in-out;
-  min-width: 80px;
+  border-radius: 6px !important;
+  border: 1px solid #1a7f37 !important;
+  transition: all 0.2s ease-in-out !important;
+  min-width: 80px !important;
 
   &:hover:not(:disabled) {
     background-color: #2ea043 !important;
@@ -717,27 +717,27 @@ input[type="radio"].radioButtonColor {
 }
 
 .cancel-button {
-  color: #333;
-  background-color: #ffffff;
-  height: 36px;
-  min-height: 36px;
-  font-size: 1.2rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  color: #333 !important;
+  background-color: #ffffff !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  font-size: 1.2rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
   font-family: "Roboto", "Segoe UI", sans-serif !important;
-  border-radius: 6px;
-  border: 1px solid #d0d7de;
-  transition: all 0.2s ease-in-out;
-  min-width: 80px;
+  border-radius: 6px !important;
+  border: 1px solid #d0d7de !important;
+  transition: all 0.2s ease-in-out !important;
+  min-width: 80px !important;
 
   &:hover {
-    background-color: #f6f8fa;
-    border-color: #8c959f;
+    background-color: #f6f8fa !important;
+    border-color: #8c959f !important;
   }
 
   &:active {
-    background-color: #e9ecef;
-    border-color: #6c757d;
+    background-color: #e9ecef !important;
+    border-color: #6c757d !important;
   }
 }
 
