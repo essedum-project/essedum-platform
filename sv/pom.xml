@@ -62,7 +62,6 @@
 		<org.springdoc.springdoc-openapi-ui.version>${springdoc-openapi-ui}</org.springdoc.springdoc-openapi-ui.version>
 		<joda-time.joda-time.version>2.10.6</joda-time.joda-time.version>
 		<org.modelmapper.modelmapper.version>${modelmapper.version}</org.modelmapper.modelmapper.version>
-		<org.json.json.version>${json.version}</org.json.json.version>
 		<com.openpojo.openpojo.version>${openpojo.version}</com.openpojo.openpojo.version>
 		<org.apache.commons.commons-collections4.version>4.4</org.apache.commons.commons-collections4.version>
 		<org.apache.poi.poi-ooxml.version>5.2.2</org.apache.poi.poi-ooxml.version>
@@ -157,7 +156,6 @@
 	    <lucene-analyzers-common.version>8.9.0</lucene-analyzers-common.version>	    
         <aws-java-sdk.version>1.11.163</aws-java-sdk.version>
         <minio.version>8.2.0</minio.version>       
-	    <azure-core.version>1.50.0</azure-core.version>
 	    <commons-fileupload.version>1.5</commons-fileupload.version>
 	    <jakarta.interceptor-api.version>2.1.0</jakarta.interceptor-api.version>
 	    <spring-mock.version>2.0.4</spring-mock.version>
@@ -171,7 +169,6 @@
 	    <reflections.version>0.9.12</reflections.version>
 	    <javax.interceptor.version>1.2</javax.interceptor.version>
 	    <slf4j.version>2.0.9</slf4j.version>
-	    <logback.version>1.4.14</logback.version>
 
 		</properties>
 	<modules>
@@ -845,11 +842,6 @@
 			    <version>${org.postgresql.postgresql.version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.json</groupId>
-			    <artifactId>json</artifactId>
-			    <version>${org.json.json.version}</version>
-			</dependency>
-			<dependency>
 			    <groupId>com.sun.xml.bind</groupId>
 			    <artifactId>jaxb-impl</artifactId>
 			    <version>${com.sun.xml.bind.jaxb-impl.version}</version>
@@ -1051,17 +1043,6 @@
 	            <groupId>io.minio</groupId>
 	            <artifactId>minio</artifactId>
 	            <version>${minio.version}</version>
-	        </dependency>	        
-		    <dependency>
-	            <groupId>com.azure</groupId>
-	            <artifactId>azure-core</artifactId>
-	            <version>${azure-core.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-api</artifactId>
-					</exclusion>
-				</exclusions>	
 	        </dependency>
 	        <dependency>
 	            <groupId>commons-fileupload</groupId>
@@ -1140,11 +1121,6 @@
 		      <artifactId>slf4j-api</artifactId>
 		      <version>${slf4j.version}</version>
 		    </dependency>
-		    <dependency>
-		      <groupId>ch.qos.logback</groupId>
-		      <artifactId>logback-classic</artifactId>
-		      <version>${logback.version}</version>
-		    </dependency>
 
 		    <!-- Explicit Spring Framework version control -->
 		    <dependency>
@@ -1195,17 +1171,7 @@
 		      <version>${jackson.version}</version>
 		    </dependency>
 
-		    <!-- Maven Build Tools Exclusions - Should not be in runtime -->
-		    <dependency>
-		      <groupId>org.apache.maven.surefire</groupId>
-		      <artifactId>*</artifactId>
-		      <scope>test</scope>
-		    </dependency>
-		    <dependency>
-		      <groupId>org.apache.maven</groupId>
-		      <artifactId>*</artifactId>
-		      <scope>provided</scope>
-		    </dependency>
+		    <!-- Note: Maven build tools exclusions handled via Dockerfile jar filtering -->
 
 		</dependencies>
 	</dependencyManagement>
