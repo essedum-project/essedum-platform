@@ -881,6 +881,20 @@
 	            <groupId>com.microsoft.graph</groupId>
 	            <artifactId>microsoft-graph</artifactId>
 	            <version>${microsoft-graph.version}</version>
+	            <exclusions>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-core</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-annotations</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-databind</artifactId>
+	                </exclusion>
+	            </exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>com.squareup.okio</groupId>
@@ -928,11 +942,39 @@
 	            <groupId>com.amazonaws</groupId>
 	            <artifactId>aws-java-sdk-sagemaker</artifactId>
 	            <version>${aws.java.sdk.sagemaker.version}</version>
+	            <exclusions>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-core</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-annotations</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-databind</artifactId>
+	                </exclusion>
+	            </exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>com.amazonaws</groupId>
 	            <artifactId>aws-java-sdk-s3</artifactId>
 	            <version>${aws.java.sdk.s3.version}</version>
+	            <exclusions>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-core</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-annotations</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-databind</artifactId>
+	                </exclusion>
+	            </exclusions>
 	        </dependency>
 		    <dependency>
 	            <groupId>org.apache.lucene</groupId>
@@ -997,6 +1039,20 @@
 	            <groupId>com.amazonaws</groupId>
 	            <artifactId>aws-java-sdk-core</artifactId>
 	            <version>${aws-java-sdk-core.version}</version>
+	            <exclusions>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-core</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-annotations</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-databind</artifactId>
+	                </exclusion>
+	            </exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>com.squareup.okio</groupId>
@@ -1038,6 +1094,20 @@
 	            <groupId>com.amazonaws</groupId>
 	            <artifactId>aws-java-sdk</artifactId>
 	            <version>${aws-java-sdk.version}</version>
+	            <exclusions>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-core</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-annotations</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-databind</artifactId>
+	                </exclusion>
+	            </exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>io.minio</groupId>
@@ -1168,6 +1238,11 @@
 		    <dependency>
 		      <groupId>com.fasterxml.jackson.core</groupId>
 		      <artifactId>jackson-databind</artifactId>
+		      <version>${jackson.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>com.fasterxml.jackson.dataformat</groupId>
+		      <artifactId>jackson-dataformat-xml</artifactId>
 		      <version>${jackson.version}</version>
 		    </dependency>
 
