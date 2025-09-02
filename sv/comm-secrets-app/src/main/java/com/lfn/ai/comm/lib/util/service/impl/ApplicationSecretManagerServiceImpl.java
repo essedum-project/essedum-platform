@@ -146,7 +146,7 @@ public class ApplicationSecretManagerServiceImpl implements ApplicationSecretMan
 	    
 	    List<UsmSecret> usmSecretList;
 	    
-	    if (StringUtils.hasText(secret.getSearch()) && secret.getSearch().trim().length() > 0) {
+	    if (StringUtils.hasText(secret.getSearch())) {
 	        int offset = secret.getPageable().getPageNumber() * secret.getPageable().getPageSize();
 	        int limit = secret.getPageable().getPageSize();
 	        usmSecretList = smRepository.findAllByProjectIdAndSearch(project.getId(), secret.getSearch().trim(), offset, limit);
@@ -180,8 +180,12 @@ public class ApplicationSecretManagerServiceImpl implements ApplicationSecretMan
 	public Long countByProjectIdAndSearch(Secret secret) {
 		Project project = projectService.findByName(secret.getOrganization());
 
-		Long count = smRepository.countByProjectIdAndSearch(project.getId(), secret.getSearch());
-
+		Long count;
+		if (StringUtils.hasText(secret.getSearch()) && secret.getSearch().trim().length() > 0) {
+			count = smRepository.countByProjectIdAndSearch(project.getId(), secret.getSearch().trim());
+		} else {
+			count = smRepository.countByProject(project.getId());
+		}
 		return count;
 	}
 }

@@ -12,10 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.lfn.iamp.usm.domain.Project;
 import com.lfn.iamp.usm.domain.UsmSecret;
 import org.springframework.data.jpa.repository.Query;
-
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import java.util.List;
 
 
 @NoRepositoryBean
