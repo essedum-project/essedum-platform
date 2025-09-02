@@ -24,6 +24,7 @@ import com.lfn.iamp.usm.domain.Project;
 import com.lfn.iamp.usm.domain.UsmSecret;
 import com.lfn.iamp.usm.repository.SecretsManagerRepository;
 import com.lfn.iamp.usm.service.ProjectService;
+import org.springframework.util.StringUtils;
 
 @Service
 public class ApplicationSecretManagerServiceImpl implements ApplicationSecretManagerService {
@@ -141,20 +142,29 @@ public class ApplicationSecretManagerServiceImpl implements ApplicationSecretMan
 
 	@Override
 	public List<Secret> listSecret(Secret secret) {
-		Project project = projectService.findByName(secret.getOrganization());
-		List<UsmSecret> usmSecretList = smRepository.findAllByProjectId( project,secret.getPageable());
-		List<Secret> secretList= new ArrayList();
-		usmSecretList.forEach(x->{
-			Secret localSecret= new Secret();
-			localSecret.setKey(x.getKey());
-			localSecret.setId(x.getId());
-			localSecret.setOrganization(x.getProjectId().getName());
-			secretList.add(localSecret);
-
-		});
-		
-		
-		return secretList;
+	    Project project = projectService.findByName(secret.getOrganization());
+	    
+	    List<UsmSecret> usmSecretList;
+	    
+	    if (StringUtils.hasText(secret.getSearch()) && secret.getSearch().trim().length() > 0) {
+	        int offset = secret.getPageable().getPageNumber() * secret.getPageable().getPageSize();
+	        int limit = secret.getPageable().getPageSize();
+	        usmSecretList = smRepository.findAllByProjectIdAndSearch(project.getId(), secret.getSearch().trim(), offset, limit);
+	    } else {
+	        usmSecretList = smRepository.findAllByProjectId(project, secret.getPageable());
+	    }
+	    
+	    // Convert to Secret objects (your existing code)
+	    List<Secret> secretList = new ArrayList<>();
+	    usmSecretList.forEach(x -> {
+	        Secret localSecret = new Secret();
+	        localSecret.setKey(x.getKey());
+	        localSecret.setId(x.getId());
+	        localSecret.setOrganization(x.getProjectId().getName());
+	        secretList.add(localSecret);
+	    });
+	    
+	    return secretList;
 	}
 
 	@Override
@@ -162,6 +172,15 @@ public class ApplicationSecretManagerServiceImpl implements ApplicationSecretMan
 		Project project = projectService.findByName(secret.getOrganization());
 
 		Long count = smRepository.countByProject(project.getId());
+
+		return count;
+	}
+	
+	@Override
+	public Long countByProjectIdAndSearch(Secret secret) {
+		Project project = projectService.findByName(secret.getOrganization());
+
+		Long count = smRepository.countByProjectIdAndSearch(project.getId(), secret.getSearch());
 
 		return count;
 	}
