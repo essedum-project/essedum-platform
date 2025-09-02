@@ -296,6 +296,20 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-starter</artifactId>
 				<version>${org.springframework.boot.spring-boot-starter.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>ch.qos.logback</groupId>
+						<artifactId>logback-classic</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
@@ -327,6 +341,12 @@
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
 				<version>${com.google.code.gson.gson.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.liquibase</groupId>
@@ -337,11 +357,23 @@
 				<groupId>org.ehcache</groupId>
 				<artifactId>ehcache</artifactId>
 				<version>${org.ehcache.ehcache.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.springdoc</groupId>
 				<artifactId>springdoc-openapi-ui</artifactId>
 				<version>${org.springdoc.springdoc-openapi-ui.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>joda-time</groupId>
@@ -413,11 +445,23 @@
 				<groupId>com.azure</groupId>
 				<artifactId>azure-core</artifactId>
 				<version>${com.azure.azure-core.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>	
 			</dependency>
 			<dependency>
 				<groupId>com.azure</groupId>
 				<artifactId>azure-storage-blob</artifactId>
 				<version>${com.azure.azure-storage-blob.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>io.netty</groupId>
@@ -434,6 +478,12 @@
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
 				<version>${ch.qos.logback.logback-classic.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
@@ -464,6 +514,12 @@
 				<groupId>org.eclipse.jgit</groupId>
 				<artifactId>org.eclipse.jgit</artifactId>
 				<version>${org.eclipse.jgit.org.eclipse.jgit.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
@@ -630,31 +686,83 @@
 			    <groupId>org.apache.tika</groupId>
 			    <artifactId>tika-core</artifactId>
 			    <version>${org.apache.tika.tika-core.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>xml-apis</groupId>
+						<artifactId>xml-apis</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 			    <groupId>org.apache.tika</groupId>
 			    <artifactId>tika-parsers</artifactId>
 			    <version>${org.apache.tika.tika-parsers.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 			    <groupId>org.apache.tika</groupId>
 			    <artifactId>tika-parsers-standard-package</artifactId>
 			    <version>${org.apache.tika.tika-parsers-standard-package.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>xml-apis</groupId>
+						<artifactId>xml-apis</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.commons</groupId>
+						<artifactId>commons-compress</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 			    <groupId>io.swagger.core.v3</groupId>
 			    <artifactId>swagger-core</artifactId>
 			    <version>${io.swagger.core.v3.swagger-core.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 			    <groupId>com.azure.spring</groupId>
 			    <artifactId>spring-cloud-azure-starter-keyvault-secrets</artifactId>
 			    <version>${com.azure.spring.spring-cloud-azure-starter-keyvault-secrets.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>	
 			</dependency>
 			<dependency>
 			    <groupId>com.azure</groupId>
 			    <artifactId>azure-identity</artifactId>
 			    <version>${com.azure.azure-identity.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>	
 			</dependency>
 			<dependency>
 			    <groupId>org.springframework.vault</groupId>
@@ -705,6 +813,12 @@
 	            <groupId>org.apache.httpcomponents.client5</groupId>
 	            <artifactId>httpclient5</artifactId>
 	            <version>${httpclient5.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>	
 	        </dependency>
 	        <dependency>
 	            <groupId>com.microsoft.graph</groupId>
@@ -720,6 +834,12 @@
 	            <groupId>software.amazon.awssdk</groupId>
 	            <artifactId>regions</artifactId>
 	            <version>${aws.sdk.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>	 
 	        </dependency>
 	        <dependency>
 	            <groupId>software.amazon.awssdk</groupId>
@@ -730,6 +850,12 @@
 	            <groupId>software.amazon.awssdk</groupId>
 	            <artifactId>sagemaker</artifactId>
 	            <version>${aws.sdk.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>software.amazon.awssdk</groupId>
@@ -793,6 +919,12 @@
 	            <artifactId>testng</artifactId>
 	            <version>${testng.version}</version>
 	            <scope>test</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>	
 	        </dependency>
 	        <dependency>
 	            <groupId>org.apache.james</groupId>
@@ -859,6 +991,12 @@
 	            <groupId>com.azure</groupId>
 	            <artifactId>azure-core</artifactId>
 	            <version>${azure-core.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>	
 	        </dependency>
 	        <dependency>
 	            <groupId>commons-fileupload</groupId>
@@ -884,11 +1022,23 @@
 	            <groupId>software.amazon.awssdk</groupId>
 	            <artifactId>bedrock</artifactId>
 	            <version>${aws-sdk-bedrock.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>dev.langchain4j</groupId>
 	            <artifactId>langchain4j-bedrock</artifactId>
 	            <version>${langchain4j-bedrock.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>dev.langchain4j</groupId>
