@@ -298,16 +298,8 @@
 				<version>${org.springframework.boot.spring-boot-starter.version}</version>
 				<exclusions>
 					<exclusion>
-						<groupId>ch.qos.logback</groupId>
-						<artifactId>logback-classic</artifactId>
-					</exclusion>
-					<exclusion>
 						<groupId>org.apache.logging.log4j</groupId>
 						<artifactId>log4j-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-api</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -478,12 +470,6 @@
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
 				<version>${ch.qos.logback.logback-classic.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-api</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
@@ -1074,6 +1060,11 @@
 		      <groupId>org.slf4j</groupId>
 		      <artifactId>slf4j-api</artifactId>
 		      <version>${slf4j.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>ch.qos.logback</groupId>
+		      <artifactId>logback-classic</artifactId>
+		      <version>${logback.version}</version>
 		    </dependency>
 
 		</dependencies>
