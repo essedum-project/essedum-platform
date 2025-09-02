@@ -1,5 +1,18 @@
 # Stage 1: Build with Maven
-FROM maven:3.9.6-eclipse-temurin-21 AS builder
+FROM eclipse-temurin:21-jdk AS builder
+ 
+# Install Maven 3.6.3
+ENV MAVEN_VERSION=3.6.3
+ENV MAVEN_HOME=/opt/maven
+ENV PATH=$MAVEN_HOME/bin:$PATH
+ 
+RUN apt-get update && \
+    apt-get install -y curl unzip && \
+    curl -fsSL https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.zip -o maven.zip && \
+    unzip maven.zip -d /opt && \
+    mv /opt/apache-maven-${MAVEN_VERSION} $MAVEN_HOME && \
+    rm maven.zip && \
+    apt-get clean
 
 WORKDIR /sv
 
