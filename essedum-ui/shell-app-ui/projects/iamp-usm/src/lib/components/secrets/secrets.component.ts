@@ -86,7 +86,7 @@ export class SecretsComponent {
     }
     this.pageSize = this.itemsPerPage[0];
     this.pageNumber = 1;
-    this.getCount();
+    this.getCountBySearch();
     this.getList();
     this.indexChanged();
     this.route.params.subscribe((params) => {
@@ -172,8 +172,9 @@ export class SecretsComponent {
       let filterData: any = [];
       this.noOfPages = 0;
       searchText = searchText.toLowerCase().trim();
-      this.search=searchText;
+      this.search = searchText;
       this.getList();
+      this.getCountBySearch();
       if (filterData.length !== 0) {
         this.noOfItems = filterData.length;
         this.dashConstantList = filterData;
@@ -181,10 +182,10 @@ export class SecretsComponent {
         this.pageArr = [...Array(this.noOfPages).keys()];
         this.pageSize = this.pageSize || 6;
       } else {
-        this.messageService.messageNotification("No Records Found",'info');
+        this.messageService.messageNotification("No Records Found", "info");
         this.keys = "";
       }
-    }   
+    }
   }
 
   getList(): void {
@@ -194,15 +195,12 @@ export class SecretsComponent {
     param = param.set("size", this.pageSize);
     param = param.set("search", this.search.toString());
     param = param.set("project", sessionStorage.getItem("organization"));
-    // param = param.set('isCached', true);
 
     this.secretsService.getSecretsList(param).subscribe((res) => {
       res.forEach((secret) => {
         this.data.push(secret);
       });
       this.dashConstantList = this.data;
-      // Assign to your MatTableDataSource
-      //this.dashConstantList.data = this.mockDashConstants;
       this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
       this.pageArr = [...Array(this.noOfPages).keys()];
     });
@@ -213,6 +211,15 @@ export class SecretsComponent {
   getCount() {
     this.secretsService.getSecreteCount().subscribe((res) => {
       console.log("count", res);
+      this.noOfItems = res;
+    });
+  }
+
+  getCountBySearch() {
+    let param: HttpParams = new HttpParams();
+    param = param.set("search", this.search.toString());
+    this.secretsService.getSecreteCountBySearch(param).subscribe((res) => {
+      console.log("getCountBySearch", res);
       this.noOfItems = res;
     });
   }
@@ -238,11 +245,16 @@ export class SecretsComponent {
       if (result === "yes") {
         this.secretsService.deleteKey(secrets.key).subscribe(
           (resp) => {
-            this.messageService.messageNotification(`Secret Key Deleted Successfully`);
+            this.messageService.messageNotification(
+              `Secret Key Deleted Successfully`
+            );
             this.refreshComplete();
           },
           (error) => {
-            this.messageService.messageNotification(`Error while deleting ${error}`,"error");
+            this.messageService.messageNotification(
+              `Error while deleting ${error}`,
+              "error"
+            );
           }
         );
       }
@@ -278,7 +290,7 @@ export class SecretsComponent {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.refreshComplete();
-        }
+      }
     });
   }
 
@@ -345,7 +357,7 @@ export class SecretsComponent {
       },
       (err) => {
         console.log(err);
-        this.messageService.messageNotification(`Error ${err}`,"error");
+        this.messageService.messageNotification(`Error ${err}`, "error");
       }
     );
   }
@@ -386,7 +398,7 @@ export class SecretsComponent {
     this.search = "";
     this.onClear();
     this.noOfPages = 0;
-    this.getCount();
+    this.getCountBySearch();
     setTimeout(() => {
       this.getList();
     }, 500);
