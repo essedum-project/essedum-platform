@@ -22,4 +22,15 @@ public class Secret {
 	Project project;
 	Pageable pageable;
 	
+	private String search;
+
+	// Add getter and setter methods
+	public String getSearch() {
+	    return search;
+	}
+
+	public void setSearch(String search) {
+	    this.search = search;
+	}
+	
 }
