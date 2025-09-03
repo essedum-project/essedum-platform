@@ -686,32 +686,32 @@ input[type="radio"].radioButtonColor {
 }
 
 .delete-button {
-  color: #ffffff;
-  background-color: #d32f2f;
-  height: 36px;
-  min-height: 36px;
-  font-size: 1.2rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  color: #ffffff !important;
+  background-color: #d32f2f !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  font-size: 1.2rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
   font-family: "Roboto", "Segoe UI", sans-serif !important;
-  border-radius: 6px;
+  border-radius: 6px !important;
   border: 1px solid #b71c1c;
-  transition: all 0.2s ease-in-out;
-  min-width: 80px;
+  transition: all 0.2s ease-in-out !important;
+  min-width: 80px !important;
 
   &:hover:not(:disabled) {
-    background-color: #e53935;
-    border-color: #d32f2f;
+    background-color: #e53935 !important;
+    border-color: #d32f2f !important;
   }
 
   &:active:not(:disabled) {
-    background-color: #b71c1c;
-    border-color: #8a1c1c;
+    background-color: #b71c1c !important;
+    border-color: #8a1c1c !important;
   }
 
   &:disabled {
-    background-color: #ffcdd2;
-    border-color: #e57373;
+    background-color: #ffcdd2 !important;
+    border-color: #e57373 !important;
     cursor: not-allowed;
   }
 }
