@@ -910,6 +910,10 @@
 						<groupId>org.slf4j</groupId>
 						<artifactId>slf4j-api</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>software.amazon.awssdk</groupId>
+						<artifactId>third-party-jackson-core</artifactId>
+					</exclusion>
 				</exclusions>	 
 	        </dependency>
 	        <dependency>
@@ -925,6 +929,10 @@
 					<exclusion>
 						<groupId>org.slf4j</groupId>
 						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>software.amazon.awssdk</groupId>
+						<artifactId>third-party-jackson-core</artifactId>
 					</exclusion>
 				</exclusions>
 	        </dependency>
@@ -1250,4 +1258,29 @@
 
 		</dependencies>
 	</dependencyManagement>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.7.0</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>install</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>false</overWriteSnapshots>
+							<overWriteIfNewer>true</overWriteIfNewer>
+							<excludeArtifactIds>lombok</excludeArtifactIds>
+							<outputDirectory>${project.basedir}/../app/lib</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
