@@ -46,7 +46,7 @@ file_handler.setFormatter(formatter)
 # add file handler to logger
 logger.addHandler(file_handler)
 def token_generate():
-  url = "https://login.microsoftonline.com/1a484722-7609-45f3-89fc-e8cad131d18f/oauth2/token"
+  url = f"https://login.microsoftonline.com/{os.environ.get('tenant_id')}/oauth2/token"
 
   payload = f'grant_type=client_credentials&client_id={os.environ.get('client_id')}&client_secret={os.environ.get('client_secret')}&resource={os.environ.get('resource')}'
   headers = {
