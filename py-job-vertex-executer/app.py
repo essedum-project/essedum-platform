@@ -360,10 +360,10 @@ def projects_datasets_create():
             return jsonify(result), 400
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
-        if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
-            result = "Please check if connection details are present in DB."
-            return jsonify(result), 400
+        # if not connections:
+        #     logger.info(f"Connections details is empty. {str(connections)}")
+        #     result = "Please check if connection details are present in DB."
+        #     return jsonify(result), 400
         request_body = request.get_json()
         logger.info(f"Request body is: {str(request_body)}")
         result, status_code = vertex.projects_datasets_create(adapter_instance, project, isCached, isInstance, connections, request_body)
@@ -394,10 +394,10 @@ def projects_datasets_list_list():
             return jsonify(result), 400
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
-        if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
-            result = "Please check if connection details are present in DB."
-            return jsonify(result), 400
+        # if not connections:
+        #     logger.info(f"Connections details is empty. {str(connections)}")
+        #     result = "Please check if connection details are present in DB."
+        #     return jsonify(result), 400
         result, status_code = vertex.projects_datasets_list_list(adapter_instance, project, isCached, isInstance, connections)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
@@ -425,10 +425,10 @@ def projects_datasets_get(dataset_id):
             return jsonify(result), 400
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
-        if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
-            result = "Please check if connection details are present in DB."
-            return jsonify(result), 400
+        # if not connections:
+        #     logger.info(f"Connections details is empty. {str(connections)}")
+        #     result = "Please check if connection details are present in DB."
+        #     return jsonify(result), 400
         result, status_code = vertex.projects_datasets_get(adapter_instance, project, isCached, isInstance, connections, dataset_id)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
@@ -457,10 +457,10 @@ def projects_datasets_delete(dataset_id):
             return jsonify(result), 400
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
-        if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
-            result = "Please check if connection details are present in DB."
-            return jsonify(result), 400
+        # if not connections:
+        #     logger.info(f"Connections details is empty. {str(connections)}")
+        #     result = "Please check if connection details are present in DB."
+        #     return jsonify(result), 400
         result, status_code = vertex.projects_datasets_delete(adapter_instance, project, isCached, isInstance, connections, dataset_id)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
@@ -557,10 +557,10 @@ def projects_endpoints_list_list():
             return jsonify(result), 400
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
-        if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
-            result = "Please check if connection details are present in DB."
-            return jsonify(result), 400
+        # if not connections:
+        #     logger.info(f"Connections details is empty. {str(connections)}")
+        #     result = "Please check if connection details are present in DB."
+        #     return jsonify(result), 400
         result, status_code = vertex.projects_endpoints_list_list(adapter_instance, project, isCached, isInstance, connections)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
@@ -590,10 +590,10 @@ def projects_endpoints_get(endpoint_id):
             return jsonify(result), 400
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
-        if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
-            result = "Please check if connection details are present in DB."
-            return jsonify(result), 400
+        # if not connections:
+        #     logger.info(f"Connections details is empty. {str(connections)}")
+        #     result = "Please check if connection details are present in DB."
+        #     return jsonify(result), 400
         result, status_code = vertex.projects_endpoints_get(adapter_instance, project, isCached, isInstance, connections, endpoint_id)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
@@ -622,10 +622,10 @@ def projects_endpoints_delete(endpoint_id):
             return jsonify(result), 400
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
-        if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
-            result = "Please check if connection details are present in DB."
-            return jsonify(result), 400
+        # if not connections:
+        #     logger.info(f"Connections details is empty. {str(connections)}")
+        #     result = "Please check if connection details are present in DB."
+        #     return jsonify(result), 400
         result, status_code = vertex.projects_endpoints_delete(adapter_instance, project, isCached, isInstance, connections, endpoint_id)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
@@ -759,10 +759,10 @@ def projects_endpoints_undeploy_models_create(endpoint_id):
             return jsonify(result), 400
 
         connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
-        if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
-            result = "Please check if connection details are present in DB."
-            return jsonify(result), 400
+        # if not connections:
+        #     logger.info(f"Connections details is empty. {str(connections)}")
+        #     result = "Please check if connection details are present in DB."
+        #     return jsonify(result), 400
         request_body = request.get_json()
         logger.info(f"Request body is: {str(request_body)}")
         result, status_code = vertex.projects_endpoints_undeploy_models_create(adapter_instance, project, isCached, isInstance, connections, endpoint_id, request_body)
@@ -795,10 +795,10 @@ def projects_models_list():
             return jsonify(result), 400
         
         connections = get_connection_details_with_token(referer, adapter_instance, project, isInstance)
-        if not connections:
-            logger.info(f"Connections details is empty. {str(connections)}")
-            result = "Please check if connection details are present in DB."
-            return jsonify(result), 400
+        # if not connections:
+        #     logger.info(f"Connections details is empty. {str(connections)}")
+        #     result = "Please check if connection details are present in DB."
+        #     return jsonify(result), 400
         result, status_code = vertex.projects_models_list(adapter_instance, project, isCached, isInstance, connections)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code

@@ -20,10 +20,12 @@ from azure.ai.ml.constants import AssetTypes, BatchDeploymentOutputAction
 from azureml.train.automl.run import AutoMLRun
 from azure.ai.ml import MLClient, Input, load_component
 from azure.identity import ClientSecretCredential
-
+from dotenv import load_dotenv
 import logging
 from utils import *
 import os
+
+load_dotenv()
 
 os.environ['http_proxy'] = PROXY
 os.environ['https_proxy'] = PROXY
@@ -46,7 +48,7 @@ logger.addHandler(file_handler)
 def token_generate():
   url = "https://login.microsoftonline.com/1a484722-7609-45f3-89fc-e8cad131d18f/oauth2/token"
 
-  payload = 'grant_type=client_credentials&client_id=2d37ea3b-afdc-49bb-859d-867bd44acdd1&client_secret=DuV8Q~FFw2fqoWqhqwz8RlQ-IxmfaWyFzYz7fdaY&resource=https%3A%2F%2Fmanagement.azure.com'
+  payload = f'grant_type=client_credentials&client_id={os.environ.get('client_id')}&client_secret={os.environ.get('client_secret')}&resource={os.environ.get('resource')}'
   headers = {
   'Content-Type': 'application/x-www-form-urlencoded',
   'Cookie': 'fpc=AnhFZJgHdUZBh0ZeIH62qTPRTIEqAQAAAENpn9wOAAAA; stsservicecookie=estsfd; x-ms-gateway-slice=estsfd'
@@ -117,7 +119,6 @@ def responseFormat(adapter_instance,project,values):
     return response_format
               
 def projects_datasets_create(adapter_instance, project, isCached, isInstance, connections, payload):
-  #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -158,8 +159,8 @@ def projects_datasets_create(adapter_instance, project, isCached, isInstance, co
   except Exception as e:
     logger.error(f"an error occured:{str(e)}")  
     return e
+
 def projects_datasets_list_list(adapter_instance, project, isCached, isInstance, connections):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -191,7 +192,6 @@ def projects_datasets_list_list(adapter_instance, project, isCached, isInstance,
     
 
 def projects_datasets_get(adapter_instance, project, isCached, isInstance, connections,dataset_name):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -219,8 +219,8 @@ def projects_datasets_get(adapter_instance, project, isCached, isInstance, conne
   except Exception as e:
     logger.error(f"an error occured:{str(e)}")  
     return e
+
 def projects_datasets_delete(adapter_instance, project, isCached, isInstance, connections, dataset_name):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -248,9 +248,9 @@ def projects_datasets_delete(adapter_instance, project, isCached, isInstance, co
         
   except Exception as e:
     logger.error(f"an error occured:{str(e)}")  
-    return e                                 
+    return e  
+                               
 def projects_models_list(adapter_instance, project, isCached, isInstance, connections):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -278,6 +278,7 @@ def projects_models_list(adapter_instance, project, isCached, isInstance, connec
   except Exception as e:
     logger.error(f"an error occured:{str(e)}")  
     return e
+
 def projects_models_register_create(adapter_instance, project, isCached, isInstance, connections, payload):
   experiment_name=payload.get("experiment_name")
   runId=payload.get("runId")
@@ -318,7 +319,6 @@ def projects_models_register_create(adapter_instance, project, isCached, isInsta
 
           
 def projects_models_get(adapter_instance, project, isCached, isInstance, connections,model_name):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -346,8 +346,8 @@ def projects_models_get(adapter_instance, project, isCached, isInstance, connect
   except Exception as e:
     logger.error(f"an error occured:{str(e)}")  
     return e
+
 def projects_models_delete(adapter_instance, project, isCached, isInstance, connections,model_name):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -377,7 +377,6 @@ def projects_models_delete(adapter_instance, project, isCached, isInstance, conn
         
         
 def projects_endpoints_list_list(adapter_instance, project, isCached, isInstance, connections):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -405,9 +404,9 @@ def projects_endpoints_list_list(adapter_instance, project, isCached, isInstance
         
   except Exception as e:
     logger.error(f"an error occured:{str(e)}")  
-    return e                                
+    return e  
+                              
 def projects_endpoints_create(adapter_instance, project, isCached, isInstance, connections, payload):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -438,8 +437,8 @@ def projects_endpoints_create(adapter_instance, project, isCached, isInstance, c
   except Exception as e:
     logger.error(f"an error occured:{str(e)}")  
     return e
+
 def projects_endpoints_get(adapter_instance, project, isCached, isInstance, connections, endpoint_name):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -466,9 +465,9 @@ def projects_endpoints_get(adapter_instance, project, isCached, isInstance, conn
         
   except Exception as e:
     logger.error(f"an error occured:{str(e)}")  
-    return e         
+    return e 
+        
 def projects_endpoints_delete(adapter_instance, project, isCached, isInstance, connections, endpoint_name):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -494,8 +493,8 @@ def projects_endpoints_delete(adapter_instance, project, isCached, isInstance, c
   except Exception as e:
     logger.error(f"an error occured:{str(e)}")  
     return e
+
 def training_istlist(adapter_instance, project, isCached, isInstance, connections):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -523,9 +522,9 @@ def training_istlist(adapter_instance, project, isCached, isInstance, connection
         
   except Exception as e:
     logger.error(f"an error occured:{str(e)}")  
-    return e    
+    return e  
+  
 def training_get_list(adapter_instance, project, isCached, isInstance, connections, training_job_id):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -553,7 +552,7 @@ def training_get_list(adapter_instance, project, isCached, isInstance, connectio
     logger.error(f"an error occured:{str(e)}")  
     return e 
 
-def ConfigEnvironment(tenant_id_param='1a484722-7609-45f3-89fc-e8cad131d18f',service_principal_id_param='2d37ea3b-afdc-49bb-859d-867bd44acdd1',service_principal_password_param='DuV8Q~FFw2fqoWqhqwz8RlQ-IxmfaWyFzYz7fdaY',subscription_id_param='70c4fc73-c3e2-4c56-90bf-ba167adf0d5d',resource_group_param='aiplatform_apis',workspace_name_param='aiplatform_apis',):
+def ConfigEnvironment():
     dirname = './AzurePipeline'
     if os.path.exists(dirname):
         shutil.rmtree(dirname)
@@ -563,24 +562,22 @@ def ConfigEnvironment(tenant_id_param='1a484722-7609-45f3-89fc-e8cad131d18f',ser
     os.chdir(dirname)
     global workspace_glob
     svc_pr = ServicePrincipalAuthentication(
-        tenant_id=tenant_id_param,
-        service_principal_id=service_principal_id_param,
-        service_principal_password=service_principal_password_param,
+        tenant_id=os.environ.get('tenant_id'),
+        service_principal_id=os.environ.get('service_principal_id'),
+        service_principal_password=os.environ.get('service_principal_password'),
     )
 
     workspace = Workspace(
-        subscription_id=subscription_id_param,
-        resource_group=resource_group_param,
-        workspace_name=workspace_name_param,
+        subscription_id=os.environ.get('subscription_id'),
+        resource_group=os.environ.get('resource_group'),
+        workspace_name=os.environ.get('workspace_name'),
         auth=svc_pr,
     )
     workspace_glob = workspace
     return workspace 
 
 def training_train_create(adapter_instance, project, isCached, isInstance, connections, payload):
-  print(payload)
-  ws=ConfigEnvironment(tenant_id_param='1a484722-7609-45f3-89fc-e8cad131d18f',service_principal_id_param='2d37ea3b-afdc-49bb-859d-867bd44acdd1',service_principal_password_param='DuV8Q~FFw2fqoWqhqwz8RlQ-IxmfaWyFzYz7fdaY',subscription_id_param='70c4fc73-c3e2-4c56-90bf-ba167adf0d5d',resource_group_param='aiplatform_apis',workspace_name_param='aiplatform_apis')
-  print(ws)
+  ws=ConfigEnvironment()
   #list_vms = AmlCompute.supported_vmsizes(workspace=ws)
   compute_name=payload.get("compute")
   vm_size=payload.get("vm_size")
@@ -621,9 +618,7 @@ def training_train_create(adapter_instance, project, isCached, isInstance, conne
                       enable_default_metrics_output=False,
                       allow_reuse='True')
   pipeline = Pipeline(ws, automl_step)
-  print('pipeline', pipeline)
   experiment = Experiment(name=name, workspace=ws)
-  print('expt ',experiment)
   run = experiment.submit(pipeline,show_output=True)
   step_run_ids = [step.id for step in run.get_children()]
 
@@ -652,11 +647,9 @@ def training_train_create(adapter_instance, project, isCached, isInstance, conne
   values=json.loads(response.text)
   values=responseFormat(adapter_instance,project,values)
   values["run_id"]=step_run_id
-  print(values,"11111")
   return values,response.status_code 
 
 def training_delete(adapter_instance, project, isCached, isInstance, connections, training_job_id):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -682,9 +675,9 @@ def training_delete(adapter_instance, project, isCached, isInstance, connections
         
   except Exception as e:
     logger.error(f"an error occured:{str(e)}")  
-    return e  
+    return e 
+ 
 def training_cancel_list(adapter_instance, project, isCached, isInstance, connections, training_job_id):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -708,9 +701,9 @@ def training_cancel_list(adapter_instance, project, isCached, isInstance, connec
       return f"Request failed with status code:{response.status_code}"
   except Exception as e:
     logger.error(f"an error occured:{str(e)}") 
-    return e 
+    return e
+
 def projects_endpoints_deploy_model_create(adapter_instance, project, isCached, isInstance, connections, endpoint_id, payload):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   #batchEndpointsName=connections.get('batchEndpointsName',None)
@@ -768,7 +761,6 @@ def projects_endpoints_deploy_model_create(adapter_instance, project, isCached, 
       settings=deploymentConfig
   )
   response=ml_client.begin_create_or_update(deployment).result()
-  print(response)
   Authorization=value["access_token"]
   subscriptionId=connections.get('subscriptionId',None)
   resourceGroupName=connections.get('resourceGroupName',None)
@@ -789,7 +781,7 @@ def projects_endpoints_deploy_model_create(adapter_instance, project, isCached, 
   return values,response.status_code   
  
 
-def ConnectClient(tenant_id_param='1a484722-7609-45f3-89fc-e8cad131d18f',service_principal_id_param='2d37ea3b-afdc-49bb-859d-867bd44acdd1',service_principal_password_param='DuV8Q~FFw2fqoWqhqwz8RlQ-IxmfaWyFzYz7fdaY',subscription_id_param='70c4fc73-c3e2-4c56-90bf-ba167adf0d5d',resource_group_param='aiplatform_apis',workspace_name_param='aiplatform_apis'):
+def ConnectClient():
     global ml_client
     # dirname = './AzurePipelinePredict'
     # if os.path.exists(dirname):
@@ -798,12 +790,12 @@ def ConnectClient(tenant_id_param='1a484722-7609-45f3-89fc-e8cad131d18f',service
     # else:
     #     os.mkdir(dirname)
     # os.chdir(dirname)
-    tenant = tenant_id_param
-    serv_id = service_principal_id_param
-    sec_key = service_principal_password_param
-    res_grp = resource_group_param
-    ws = workspace_name_param
-    subs_id = subscription_id_param
+    tenant = os.environ.get('tenant_id')
+    serv_id = os.environ.get('service_principal_id')
+    sec_key = os.environ.get('service_principal_password')
+    res_grp = os.environ.get('resource_group')
+    ws = os.environ.get('workspace_name')
+    subs_id = os.environ.get('subscription_id')
     ml_client = MLClient(ClientSecretCredential(tenant,serv_id,sec_key),subs_id, res_grp, ws)
     print('MLCLIENT CONNECTED')
     return ml_client
@@ -855,9 +847,9 @@ def projects_inferencePipelines_create(adapter_instance, project, isCached, isIn
   
   values=json.loads(response.text)
   values=responseFormat(adapter_instance,project,values)
-  return values,response.status_code    
+  return values,response.status_code   
+ 
 def projects_inferencePipelines_delete(adapter_instance, project, isCached, isInstance, connections, training_job_id):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -883,9 +875,9 @@ def projects_inferencePipelines_delete(adapter_instance, project, isCached, isIn
         
   except Exception as e:
     logger.error(f"an error occured:{str(e)}")  
-    return e  
+    return e 
+ 
 def projects_inferencePipelines_cancel(adapter_instance, project, isCached, isInstance, connections, training_job_id):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -910,8 +902,8 @@ def projects_inferencePipelines_cancel(adapter_instance, project, isCached, isIn
   except Exception as e:
     logger.error(f"an error occured:{str(e)}") 
     return e 
+
 def projects_inferencePipelines_list_list(adapter_instance, project, isCached, isInstance, connections):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -922,7 +914,6 @@ def projects_inferencePipelines_list_list(adapter_instance, project, isCached, i
   url=f"https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MachineLearningServices/workspaces/{workspaceName}/jobs?api-version={api_version}"
   headers = {
   "Authorization" : "Bearer "+str(Authorization)
-
   }
   response = requests.request("GET", url, headers=headers)
   try:
@@ -939,9 +930,9 @@ def projects_inferencePipelines_list_list(adapter_instance, project, isCached, i
         
   except Exception as e:
     logger.error(f"an error occured:{str(e)}")  
-    return e    
+    return e 
+   
 def projects_inferencePipelines_get(adapter_instance, project, isCached, isInstance, connections, training_job_id):
-    #TO DO
   connect=token_generate()
   value=json.loads(connect)
   Authorization=value["access_token"]
@@ -967,7 +958,8 @@ def projects_inferencePipelines_get(adapter_instance, project, isCached, isInsta
       return f"Request failed with status code:{response.status_code}"
   except Exception as e:
     logger.error(f"an error occured:{str(e)}")  
-    return e                                         
+    return e   
+                                      
 def cloudconnect(subscriptionId,resourceGroupName,workspaceName):
   connect=token_generate()
   value=json.loads(connect)
