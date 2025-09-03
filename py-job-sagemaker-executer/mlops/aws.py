@@ -44,7 +44,6 @@ def projects_datasets_list_list(adapter_instance, project, isCached, isInstance,
 
             dataset_dict_info = []
             for obj in response.get('Contents', []):
-                project = 'Demo'
                 dataset_info = {
                     'sourceID' : obj.get('Key'),
                     'container' : obj.get('Amazon Resource Name', ''),
@@ -89,7 +88,6 @@ def projects_datasets_get(adapter_instance, project, isCached, isInstance, conne
             logger.info("Dataset get is in progress")
             response = s3_client.head_object(Bucket = os.environ.get('bucket_name'),Key = dataset_id)
             logger.info("Dataset Details")
-            project = 'Demo'
             dataset_info = {
                 'sourceID' : dataset_id,
                 'container' : response.get('Amazon Resource Name'),
@@ -137,7 +135,6 @@ def projects_datasets_create(adapter_instance, project, isCached, isInstance, co
             bucket = request_body.get("Bucket")
             response = s3_client.put_object(Body = data.to_csv(index = False), Bucket = bucket, Key = s3_key)
             
-            project = 'Demo'
             dataset_info = {
                 'sourceID' : s3_key,
                 'container' : response.get('Amazon Resource Name'),
@@ -282,8 +279,6 @@ def projects_models_get(adapter_instance, project, isCached, isInstance, connect
             else:
                 model_type = 'AWSSAGEMAKER'
 
-
-            project = 'Demo'
             model_info = {
                 'sourceID' : model_id,
                 'container' : response.get('ModelArn'),
