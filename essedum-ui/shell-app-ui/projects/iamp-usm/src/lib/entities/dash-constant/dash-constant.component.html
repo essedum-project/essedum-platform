@@ -248,9 +248,11 @@
                           (keyup)="setLogoText()">
                       </label>
                       <div *ngIf="logoText">
-                        <button (click)="removeImageText()" class="genBtn marRght30 selector-374-122"
-                          type="button">Clear
-                          Logo</button>
+                        <button type="button" mat-raised-button class="delete-button primary-button"
+                          (click)="removeImageText()">
+                          Clear
+                          Logo
+                        </button>
                       </div>
                     </div>
                     <br class="selector-374-117">
@@ -315,10 +317,9 @@
                 </div>
               </div>
               <div cdkDropListGroup class="col-md-6 selector-374-125">
-                <i style="margin-left: 25px;" class="fa fa-plus icon1 pad-betw-icon selector-374-131"
-                  (click)="displayAddSiblingForm()"
-                  *ngIf="!view && addsiblings && dataSource && dataSource.data && dataSource.data.length>0"
-                  title="Add Sibling"></i>
+                <mat-icon *ngIf="!view && addsiblings && dataSource && dataSource.data && dataSource.data.length>0"
+                  style="cursor: pointer;" (click)="displayAddSiblingForm()" matTooltip="Add Sibling"
+                  [matTooltipPosition]="TOOLTIP_POSITION" [attr.aria-label]="getViewTooltip()">add</mat-icon>
                 <mat-tree cdkDropList (cdkDropListDropped)="drop($event)" *ngIf="sideCheck" [dataSource]="dataSource"
                   [treeControl]="treeControl" class="example-tree treeBox selector-374-126">
                   <!-- This is the tree node template for leaf nodes -->
@@ -328,13 +329,17 @@
                       <li class="mat-tree-node resetOverflow selector-374-128" style="cursor: all-scroll;">
                         <!-- use a disabled button to provide padding for tree leaf -->
                         <button mat-icon-button="" disabled="" class="selector-374-129"></button>
+
                         <span style="white-space: nowrap;" class="selector-374-130">{{node.label}}</span>
-                        <i style="margin-left: 25px;" class="fa fa-plus icon1 pad-betw-icon selector-374-131"
-                          (click)="displayAddChildForm(node)" *ngIf="!view" title="Add Child"></i>
-                        <i class="fa fa-pencil icon1 pad-betw-icon selector-374-132" title="Edit" *ngIf="!view"
-                          (click)="displayEditForm(node)"></i>
-                        <i class="fa fa-trash icon1 pad-betw-icon selector-374-133" title="Delete Child" *ngIf="!view"
-                          (click)="deleteChildFromTree(node)"></i>
+                        <mat-icon *ngIf="!view" style="cursor: pointer;" (click)="displayAddChildForm(node)"
+                          matTooltip="Add Child" [matTooltipPosition]="TOOLTIP_POSITION"
+                          [attr.aria-label]="getViewTooltip()">add</mat-icon>
+                        <mat-icon *ngIf="!view" style="cursor: pointer;" (click)="displayEditForm(node)"
+                          matTooltip="Edit" [matTooltipPosition]="TOOLTIP_POSITION"
+                          [attr.aria-label]="getEditTooltip()">edit</mat-icon>
+                        <mat-icon *ngIf="!view" style="cursor: pointer;" (click)="deleteChildFromTree(node)"
+                          matTooltip="Delete Child" [matTooltipPosition]="TOOLTIP_POSITION"
+                          [attr.aria-label]="getDeleteTooltip()">delete</mat-icon>
                       </li>
                     </ul>
                   </mat-tree-node>
@@ -352,12 +357,15 @@
                             </mat-icon>
                           </button>
                           <span style="white-space: nowrap;" class="selector-374-139">{{node.label}}</span>
-                          <i style="margin-left: 25px;" class="fa fa-plus icon1 pad-betw-icon selector-374-140"
-                            (click)="displayAddChildForm(node)" *ngIf="!view" title="Add Child"></i>
-                          <i class="fa fa-pencil icon1 pad-betw-icon selector-374-141" title="Edit" *ngIf="!view"
-                            (click)="displayEditForm(node)"></i>
-                          <i class="fa fa-trash icon1 pad-betw-icon selector-374-142" title="Delete Child" *ngIf="!view"
-                            (click)="deleteChildFromTree(node)"></i>
+                          <mat-icon *ngIf="!view" style="cursor: pointer;" (click)="displayAddChildForm(node)"
+                            matTooltip="Add Child" [matTooltipPosition]="TOOLTIP_POSITION"
+                            [attr.aria-label]="getViewTooltip()">add</mat-icon>
+                          <mat-icon *ngIf="!view" style="cursor: pointer;" (click)="displayEditForm(node)"
+                            matTooltip="Edit" [matTooltipPosition]="TOOLTIP_POSITION"
+                            [attr.aria-label]="getEditTooltip()">edit</mat-icon>
+                          <mat-icon *ngIf="!view" style="cursor: pointer;" (click)="deleteChildFromTree(node)"
+                            matTooltip="Delete Child" [matTooltipPosition]="TOOLTIP_POSITION"
+                            [attr.aria-label]="getDeleteTooltip()">delete</mat-icon>
                         </div>
                         <ul [class.example-tree-invisible]="!treeControl.isExpanded(node)" class="selector-374-143">
                           <ng-container matTreeNodeOutlet="" class="selector-374-144"></ng-container>

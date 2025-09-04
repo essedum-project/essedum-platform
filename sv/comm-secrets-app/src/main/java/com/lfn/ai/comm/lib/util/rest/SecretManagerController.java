@@ -67,6 +67,7 @@ public class SecretManagerController {
 		Pageable pageable = PageRequest.of(Integer.valueOf(page) - 1, Integer.valueOf(size));
 		secret.setOrganization(project);
 		secret.setPageable(pageable);
+		secret.setSearch(search);
 
 			List<Secret> secretList = asmSevice.listSecret(secret);
 			
@@ -129,4 +130,15 @@ public class SecretManagerController {
 		Long response = asmSevice.getSecreteCount(secret);
 		return ResponseEntity.status(200).body(response);
     }
+	
+	@GetMapping("/countBySearch")
+    public ResponseEntity<Long> countByProjectIdAndSearch(@RequestParam(name="project",required = true) String project, @RequestParam(name="search", required = false) String search){
+
+		Secret secret = new Secret();
+		secret.setOrganization(project);
+		secret.setSearch(search); 
+		Long response = asmSevice.countByProjectIdAndSearch(secret);
+		return ResponseEntity.status(200).body(response);
+    }
+
 }

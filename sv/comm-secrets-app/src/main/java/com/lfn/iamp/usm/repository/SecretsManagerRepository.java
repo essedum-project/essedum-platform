@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 
 import com.lfn.iamp.usm.domain.Project;
 import com.lfn.iamp.usm.domain.UsmSecret;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 
 @NoRepositoryBean
@@ -24,5 +26,21 @@ public List<UsmSecret> findAllByProjectId(Project project,Pageable page);
 	
 	
 public Long countByProject(Integer project);
+
+@Query(value = "SELECT * FROM usm_secrets t1 WHERE t1.project_id = :projectId " +
+        "AND LOWER(t1.key_) LIKE LOWER(CONCAT('%', :search, '%')) " +
+        "ORDER BY t1.id " +
+        "LIMIT :limit OFFSET :offset",
+nativeQuery = true)
+List<UsmSecret> findAllByProjectIdAndSearch(@Param("projectId") Integer projectId, 
+                                    @Param("search") String search, 
+                                    @Param("offset") Integer offset,
+                                    @Param("limit") Integer limit);
+
+@Query(value = "SELECT COUNT(*) FROM usm_secrets t1 WHERE t1.project_id = :projectId " +
+        "AND LOWER(t1.key_) LIKE LOWER(CONCAT('%', :search, '%'))",
+nativeQuery = true)
+Long countByProjectIdAndSearch(@Param("projectId") Integer projectId, 
+                       @Param("search") String search);
 	
 }

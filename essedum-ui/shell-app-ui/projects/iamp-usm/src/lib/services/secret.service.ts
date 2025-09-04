@@ -81,6 +81,21 @@ export class SecretService {
         })
       );
   }
+
+  getSecreteCountBySearch(param: HttpParams): Observable<any> {
+    let session: any = sessionStorage.getItem("organization");
+    param = param.append("project", session);
+    return this.https
+      .get(this.dataUrl + "/countBySearch", {
+        observe: "response",
+        params: param,
+      })
+      .pipe(
+        map((response) => response.body),
+        catchError((err) => this.handleError(err))
+      );
+  }
+
   getSecretsList(param: HttpParams): Observable<any> {
     return this.https
       .get(this.dataUrl + '/list', {

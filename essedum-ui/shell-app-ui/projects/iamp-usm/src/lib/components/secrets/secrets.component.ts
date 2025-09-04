@@ -13,7 +13,7 @@ import { MessageService } from "../../services/message.service";
 import { SecretService } from "../../services/secret.service";
 import { DeleteComponent } from "../../shared-modules/confirm-delete/delete.component";
 import { SecretAddComponent } from "./secret-add/secret-add.component";
-import { Observable } from "rxjs";
+import { debounceTime, Observable, Subject } from "rxjs";
 
 @Component({
   selector: "lib-secrets",
@@ -62,6 +62,7 @@ export class SecretsComponent {
   rowsPerPage: number = 5;
   totalrecords: number = 0;
   lastPage: number = 0;
+  searchSubject = new Subject<string>();
 
   constructor(
     private router: Router,
@@ -86,7 +87,7 @@ export class SecretsComponent {
     }
     this.pageSize = this.itemsPerPage[0];
     this.pageNumber = 1;
-    this.getCount();
+    this.getCountBySearch();
     this.getList();
     this.indexChanged();
     this.route.params.subscribe((params) => {
@@ -113,6 +114,14 @@ export class SecretsComponent {
     console.log("data", this.data);
     this.dashConstantList = this.data;
     this.lastRefreshTime();
+
+    this.searchSubject
+      .pipe(
+        debounceTime(300) // wait 300ms after last keystroke
+      )
+      .subscribe((searchText) => {
+        this.filterItem(searchText);
+      });
   }
 
   indexChanged() {
@@ -161,58 +170,52 @@ export class SecretsComponent {
     }
   }
 
+  onSearchInput(event: any) {
+    this.searchSubject.next(event.target.value);
+  }
+
   filterItem(searchText: string) {
-    if (searchText !== undefined) {
-      this.filterKey = searchText;
+    this.search = searchText?.toLowerCase().trim() || "";
+
+    if (!this.search) {
+      this.refreshComplete();
+      return;
     }
 
-    if (searchText === null || searchText === "") {
-      this.refreshComplete();
-    } else {
-      let filterData: any = [];
-      this.noOfPages = 0;
-      searchText = searchText.toLowerCase().trim();
-      this.search=searchText;
-      this.getList();
-      if (filterData.length !== 0) {
-        this.noOfItems = filterData.length;
-        this.dashConstantList = filterData;
-        this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
-        this.pageArr = [...Array(this.noOfPages).keys()];
-        this.pageSize = this.pageSize || 6;
-      } else {
-        this.messageService.messageNotification("No Records Found",'info');
-        this.keys = "";
-      }
-    }   
+    this.noOfPages = 0;
+    this.noOfItems = 0;
+    this.getList();
+    this.getCountBySearch();
   }
 
   getList(): void {
     this.data = [];
-    let param: HttpParams = new HttpParams();
-    param = param.set("page", this.pageNumber);
-    param = param.set("size", this.pageSize);
-    param = param.set("search", this.search.toString());
-    param = param.set("project", sessionStorage.getItem("organization"));
-    // param = param.set('isCached', true);
+    let param: HttpParams = new HttpParams()
+      .set("page", this.pageNumber)
+      .set("size", this.pageSize)
+      .set("search", this.search)
+      .set("project", sessionStorage.getItem("organization"));
 
     this.secretsService.getSecretsList(param).subscribe((res) => {
-      res.forEach((secret) => {
-        this.data.push(secret);
-      });
-      this.dashConstantList = this.data;
-      // Assign to your MatTableDataSource
-      //this.dashConstantList.data = this.mockDashConstants;
+      this.data = res || [];
+      this.dashConstantList = this.data; // just set data
       this.noOfPages = Math.ceil(this.noOfItems / this.pageSize);
       this.pageArr = [...Array(this.noOfPages).keys()];
+      this.pageSize = this.pageSize || 5;
+      this.lastRefreshTime();
     });
-    this.pageSize = this.pageSize || 6;
-    this.lastRefreshTime();
   }
-
   getCount() {
     this.secretsService.getSecreteCount().subscribe((res) => {
       console.log("count", res);
+      this.noOfItems = res;
+    });
+  }
+
+  getCountBySearch() {
+    let param: HttpParams = new HttpParams();
+    param = param.set("search", this.search.toString());
+    this.secretsService.getSecreteCountBySearch(param).subscribe((res) => {
       this.noOfItems = res;
     });
   }
@@ -238,11 +241,16 @@ export class SecretsComponent {
       if (result === "yes") {
         this.secretsService.deleteKey(secrets.key).subscribe(
           (resp) => {
-            this.messageService.messageNotification(`Secret Key Deleted Successfully`);
+            this.messageService.messageNotification(
+              `Secret Key Deleted Successfully`
+            );
             this.refreshComplete();
           },
           (error) => {
-            this.messageService.messageNotification(`Error while deleting ${error}`,"error");
+            this.messageService.messageNotification(
+              `Error while deleting ${error}`,
+              "error"
+            );
           }
         );
       }
@@ -278,7 +286,7 @@ export class SecretsComponent {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.refreshComplete();
-        }
+      }
     });
   }
 
@@ -345,7 +353,7 @@ export class SecretsComponent {
       },
       (err) => {
         console.log(err);
-        this.messageService.messageNotification(`Error ${err}`,"error");
+        this.messageService.messageNotification(`Error ${err}`, "error");
       }
     );
   }
@@ -386,7 +394,7 @@ export class SecretsComponent {
     this.search = "";
     this.onClear();
     this.noOfPages = 0;
-    this.getCount();
+    this.getCountBySearch();
     setTimeout(() => {
       this.getList();
     }, 500);

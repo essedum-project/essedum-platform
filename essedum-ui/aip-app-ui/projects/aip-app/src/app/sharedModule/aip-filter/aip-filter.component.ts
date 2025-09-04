@@ -1873,25 +1873,105 @@ export class AipFilterComponent implements OnInit, OnChanges {
    * Gets active filters summary
    */
   getActiveFiltersSummary(): string {
-    if (this.servicev1 !== ServiceType.ADAPTERS) {
-      return '';
+    const activeFilters: string[] = [];
+
+    switch (this.servicev1) {
+      case ServiceType.ADAPTERS:
+        if (this.selectedMlAdapterCategoryType?.length > 0) {
+          activeFilters.push('Category');
+        }
+        if (this.selectedMlAdapterSpecType?.length > 0) {
+          activeFilters.push('Spec');
+        }
+        if (this.selectedMlAdapterConnectionType?.length > 0) {
+          activeFilters.push('Connection');
+        }
+        break;
+      case ServiceType.CONNECTIONS:
+        if (this.selectedAdapterType?.length > 0) {
+          activeFilters.push('Type');
+        }
+        if (this.selectedAdapterInstance?.length > 0) {
+          activeFilters.push('Instance');
+        }
+        break;
+      case ServiceType.PIPELINE:
+      case ServiceType.CHAIN:
+        if (this.selectedAdapterType?.length > 0) {
+          activeFilters.push('Type');
+        }
+        if (this.selectedAdapterInstance?.length > 0) {
+          activeFilters.push('Instance');
+        }
+        break;
+      case ServiceType.APPS:
+        if (this.selectedAdapterType?.length > 0) {
+          activeFilters.push('Type');
+        }
+        if (this.selectedAdapterInstance?.length > 0) {
+          activeFilters.push('Instance');
+        }
+        break;
+      case ServiceType.MODEL:
+        if (this.selectedModelDatasource?.length > 0) {
+          activeFilters.push('Datasource');
+        }
+        if (this.selectedTagList?.length > 0) {
+          activeFilters.push('Tag');
+        }
+        if (this.selectedAdapterInstance?.length > 0) {
+          activeFilters.push('Instance');
+        }
+        break;
+      case ServiceType.DATASETS:
+        if (this.selectedAdapterType?.length > 0) {
+          activeFilters.push('Type');
+        }
+        if (this.selectedTagList?.length > 0) {
+          activeFilters.push('Tag');
+        }
+        if (this.selectedDatasetTopicType?.length > 0) {
+          activeFilters.push('Topic');
+        }
+        break;
+      case ServiceType.SPECS:
+        if (this.selectedMlSpecTemplateCapabilityType?.length > 0) {
+          activeFilters.push('Capability');
+        }
+        break;
+      case ServiceType.INSTANCES:
+        if (this.selectedMlInstancesAdapterType?.length > 0) {
+          activeFilters.push('Adapter');
+        }
+        if (this.selectedMlInstancesConnectionType?.length > 0) {
+          activeFilters.push('Connection');
+        }
+        break;
+      case ServiceType.WORKER_TOOLS:
+        if (this.selectedAdapterType?.length > 0) {
+          activeFilters.push('Type');
+        }
+        break;
+      default:
+        if (this.selectedAdapterType?.length > 0) {
+          activeFilters.push('Type');
+        }
+        if (this.selectedAdapterInstance?.length > 0) {
+          activeFilters.push('Instance');
+        }
+        if (this.selectedTagList?.length > 0) {
+          activeFilters.push('Tag');
+        }
+        if (this.selectedDatasetTopicType?.length > 0) {
+          activeFilters.push('Topic');
+        }
+        if (this.selectedModelDatasource?.length > 0) {
+          activeFilters.push('Datasource');
+        }
+        break;
     }
 
-    const activeFilters = [];
-
-    if (this.selectedMlAdapterCategoryType?.length > 0) {
-      activeFilters.push('Category');
-    }
-
-    if (this.selectedMlAdapterSpecType?.length > 0) {
-      activeFilters.push('Spec');
-    }
-
-    if (this.selectedMlAdapterConnectionType?.length > 0) {
-      activeFilters.push('Connection');
-    }
-
-    return activeFilters.join(' | ');
+    return activeFilters.length > 0 ? activeFilters.join(' | ') : '';
   }
 
   /**

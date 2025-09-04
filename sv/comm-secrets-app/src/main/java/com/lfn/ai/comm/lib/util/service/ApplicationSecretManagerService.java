@@ -21,6 +21,8 @@ public interface ApplicationSecretManagerService extends SecretsManager{
 	public String deleteSecret(Secret secret) throws KeyException;
 
 	public List<Secret> listSecret(Secret secret);
+	
 	public Long getSecreteCount(Secret secret);
 	
+	public Long countByProjectIdAndSearch(Secret secret);
 }
