@@ -14,3 +14,4 @@ azureml-dataset-runtime==1.60.0
 azureml-core
 azureml-pipeline
 azure-ai-ml
+python-dotenv

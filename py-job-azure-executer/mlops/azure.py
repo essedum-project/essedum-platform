@@ -48,7 +48,7 @@ logger.addHandler(file_handler)
 def token_generate():
   url = f"https://login.microsoftonline.com/{os.environ.get('tenant_id')}/oauth2/token"
 
-  payload = f'grant_type=client_credentials&client_id={os.environ.get('client_id')}&client_secret={os.environ.get('client_secret')}&resource={os.environ.get('resource')}'
+  payload = f"grant_type=client_credentials&client_id={os.environ.get('client_id')}&client_secret={os.environ.get('client_secret')}&resource={os.environ.get('resource')}"
   headers = {
   'Content-Type': 'application/x-www-form-urlencoded',
   'Cookie': 'fpc=AnhFZJgHdUZBh0ZeIH62qTPRTIEqAQAAAENpn9wOAAAA; stsservicecookie=estsfd; x-ms-gateway-slice=estsfd'
