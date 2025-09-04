@@ -1,5 +1,6 @@
 # imports
 import sys
+import os
 from pathlib import Path
 from azureml.core.authentication import ServicePrincipalAuthentication
 from azureml.core import Workspace
@@ -7,9 +8,12 @@ from azureml.core import ScriptRunConfig, Experiment, Environment
 from azureml.core.compute import ComputeTarget, AmlCompute
 from azureml.core.compute_target import ComputeTargetException
 from azureml.data import OutputFileDatasetConfig
+from dotenv import load_dotenv
 from utils import *
 import json
 import logging
+
+load_dotenv()
 
 # Gets or creates a logger
 logger = logging.getLogger(__name__)  
@@ -49,15 +53,15 @@ except:
     logger.info(f"configs file not found")
     configs = {}
 
-tenant_id=configs.get('tenant_id', "1a484722-7609-45f3-89fc-e8cad131d18f")
-service_principal_id=configs.get('service_principal_id', "2d37ea3b-afdc-49bb-859d-867bd44acdd1")
-service_principal_password=configs.get('service_principal_password', "DuV8Q~FFw2fqoWqhqwz8RlQ-IxmfaWyFzYz7fdaY")
-subscription_id=configs.get('subscription_id', "70c4fc73-c3e2-4c56-90bf-ba167adf0d5d")
-resource_group=configs.get('resource_group', "aiplatform_apis")
-workspace_name=configs.get('workspace_name', "aiplatform_apis")
-compute_name = configs.get('compute_name', "cpu-cluster-aiplat")
-vm_size=configs.get('vm_size', "STANDARD_DS2_V2")
-max_nodes=configs.get('max_nodes', 2)
+tenant_id=os.environ.get('tenant_id')
+service_principal_id=os.environ.get('service_principal_id')
+service_principal_password=os.environ.get('service_principal_password')
+subscription_id=os.environ.get('subscription_id')
+resource_group=os.environ.get('resource_group')
+workspace_name=os.environ.get('workspace_name')
+compute_name = os.environ.get('compute_name')
+vm_size=os.environ.get('vm_size')
+max_nodes=os.environ.get('max_nodes')
 
 # get workspace
 svc_pr = ServicePrincipalAuthentication(
