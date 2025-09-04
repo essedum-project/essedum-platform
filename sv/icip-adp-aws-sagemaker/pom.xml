@@ -40,6 +40,10 @@
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-api</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>software.amazon.awssdk</groupId>
+					<artifactId>third-party-jackson-core</artifactId>
+				</exclusion>
 			</exclusions>	 
 		</dependency>
 		<dependency>
@@ -53,6 +57,10 @@
 				<exclusion>
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>software.amazon.awssdk</groupId>
+					<artifactId>third-party-jackson-core</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

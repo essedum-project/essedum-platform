@@ -12,6 +12,8 @@
 		<spring-boot-dependencies.version>3.3.5</spring-boot-dependencies.version>
 		<spring-cloud-dependencies.version>2022.0.5</spring-cloud-dependencies.version>
 		<spring-version>6.3.4</spring-version>
+		<spring-framework.version>6.1.14</spring-framework.version>
+		<jackson.version>2.17.2</jackson.version>
 		<spring-vault-core.version>3.1.1</spring-vault-core.version>
 		<springdoc-openapi-ui>1.6.6</springdoc-openapi-ui>
 		<springfox.version>2.9.2</springfox.version>
@@ -60,7 +62,6 @@
 		<org.springdoc.springdoc-openapi-ui.version>${springdoc-openapi-ui}</org.springdoc.springdoc-openapi-ui.version>
 		<joda-time.joda-time.version>2.10.6</joda-time.joda-time.version>
 		<org.modelmapper.modelmapper.version>${modelmapper.version}</org.modelmapper.modelmapper.version>
-		<org.json.json.version>${json.version}</org.json.json.version>
 		<com.openpojo.openpojo.version>${openpojo.version}</com.openpojo.openpojo.version>
 		<org.apache.commons.commons-collections4.version>4.4</org.apache.commons.commons-collections4.version>
 		<org.apache.poi.poi-ooxml.version>5.2.2</org.apache.poi.poi-ooxml.version>
@@ -150,12 +151,11 @@
 	    <commons-compress.version>1.26.1</commons-compress.version>	    
 	    <jython.version>2.7.4</jython.version>
 	    <httpmime.version>4.5.14</httpmime.version>
-	    <groovy-all.version>4.0.0</groovy-all.version>
+	    <groovy-all.version>4.0.23</groovy-all.version>
 	    <google-auth.version>1.24.1</google-auth.version>
 	    <lucene-analyzers-common.version>8.9.0</lucene-analyzers-common.version>	    
         <aws-java-sdk.version>1.11.163</aws-java-sdk.version>
         <minio.version>8.2.0</minio.version>       
-	    <azure-core.version>1.50.0</azure-core.version>
 	    <commons-fileupload.version>1.5</commons-fileupload.version>
 	    <jakarta.interceptor-api.version>2.1.0</jakarta.interceptor-api.version>
 	    <spring-mock.version>2.0.4</spring-mock.version>
@@ -169,7 +169,6 @@
 	    <reflections.version>0.9.12</reflections.version>
 	    <javax.interceptor.version>1.2</javax.interceptor.version>
 	    <slf4j.version>2.0.9</slf4j.version>
-	    <logback.version>1.4.14</logback.version>
 
 		</properties>
 	<modules>
@@ -296,6 +295,12 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-starter</artifactId>
 				<version>${org.springframework.boot.spring-boot-starter.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
@@ -316,6 +321,44 @@
 						<groupId>org.springframework.amqp</groupId>
 						<artifactId>spring-amqp</artifactId>
 					</exclusion>
+					<!-- Fix Spring Framework Version Conflicts -->
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring-context</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring-beans</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring-aop</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring-expression</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring-jcl</artifactId>
+					</exclusion>
+					<!-- Fix Jackson Version Conflicts -->
+					<exclusion>
+						<groupId>com.fasterxml.jackson.core</groupId>
+						<artifactId>jackson-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.fasterxml.jackson.core</groupId>
+						<artifactId>jackson-annotations</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.fasterxml.jackson.core</groupId>
+						<artifactId>jackson-databind</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -327,6 +370,12 @@
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
 				<version>${com.google.code.gson.gson.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.liquibase</groupId>
@@ -337,11 +386,23 @@
 				<groupId>org.ehcache</groupId>
 				<artifactId>ehcache</artifactId>
 				<version>${org.ehcache.ehcache.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.springdoc</groupId>
 				<artifactId>springdoc-openapi-ui</artifactId>
 				<version>${org.springdoc.springdoc-openapi-ui.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>joda-time</groupId>
@@ -413,11 +474,23 @@
 				<groupId>com.azure</groupId>
 				<artifactId>azure-core</artifactId>
 				<version>${com.azure.azure-core.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>	
 			</dependency>
 			<dependency>
 				<groupId>com.azure</groupId>
 				<artifactId>azure-storage-blob</artifactId>
 				<version>${com.azure.azure-storage-blob.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>io.netty</groupId>
@@ -464,6 +537,12 @@
 				<groupId>org.eclipse.jgit</groupId>
 				<artifactId>org.eclipse.jgit</artifactId>
 				<version>${org.eclipse.jgit.org.eclipse.jgit.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
@@ -630,31 +709,122 @@
 			    <groupId>org.apache.tika</groupId>
 			    <artifactId>tika-core</artifactId>
 			    <version>${org.apache.tika.tika-core.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>xml-apis</groupId>
+						<artifactId>xml-apis</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 			    <groupId>org.apache.tika</groupId>
 			    <artifactId>tika-parsers</artifactId>
 			    <version>${org.apache.tika.tika-parsers.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 			    <groupId>org.apache.tika</groupId>
 			    <artifactId>tika-parsers-standard-package</artifactId>
 			    <version>${org.apache.tika.tika-parsers-standard-package.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>xml-apis</groupId>
+						<artifactId>xml-apis</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.commons</groupId>
+						<artifactId>commons-compress</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-api</artifactId>
+					</exclusion>
+					<!-- Exclude conflicting POI versions -->
+					<exclusion>
+						<groupId>org.apache.poi</groupId>
+						<artifactId>poi</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.poi</groupId>
+						<artifactId>poi-ooxml</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.poi</groupId>
+						<artifactId>poi-ooxml-lite</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.poi</groupId>
+						<artifactId>poi-scratchpad</artifactId>
+					</exclusion>
+					<!-- Exclude conflicting Jackson versions -->
+					<exclusion>
+						<groupId>com.fasterxml.jackson.core</groupId>
+						<artifactId>jackson-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.fasterxml.jackson.core</groupId>
+						<artifactId>jackson-annotations</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.fasterxml.jackson.core</groupId>
+						<artifactId>jackson-databind</artifactId>
+					</exclusion>
+					<!-- Exclude conflicting commons versions -->
+					<exclusion>
+						<groupId>commons-codec</groupId>
+						<artifactId>commons-codec</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-io</groupId>
+						<artifactId>commons-io</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 			    <groupId>io.swagger.core.v3</groupId>
 			    <artifactId>swagger-core</artifactId>
 			    <version>${io.swagger.core.v3.swagger-core.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 			    <groupId>com.azure.spring</groupId>
 			    <artifactId>spring-cloud-azure-starter-keyvault-secrets</artifactId>
 			    <version>${com.azure.spring.spring-cloud-azure-starter-keyvault-secrets.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>	
 			</dependency>
 			<dependency>
 			    <groupId>com.azure</groupId>
 			    <artifactId>azure-identity</artifactId>
 			    <version>${com.azure.azure-identity.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>	
 			</dependency>
 			<dependency>
 			    <groupId>org.springframework.vault</groupId>
@@ -670,11 +840,6 @@
 			    <groupId>org.postgresql</groupId>
 			    <artifactId>postgresql</artifactId>
 			    <version>${org.postgresql.postgresql.version}</version>
-			</dependency>
-			<dependency>
-			    <groupId>org.json</groupId>
-			    <artifactId>json</artifactId>
-			    <version>${org.json.json.version}</version>
 			</dependency>
 			<dependency>
 			    <groupId>com.sun.xml.bind</groupId>
@@ -705,11 +870,31 @@
 	            <groupId>org.apache.httpcomponents.client5</groupId>
 	            <artifactId>httpclient5</artifactId>
 	            <version>${httpclient5.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>	
 	        </dependency>
 	        <dependency>
 	            <groupId>com.microsoft.graph</groupId>
 	            <artifactId>microsoft-graph</artifactId>
 	            <version>${microsoft-graph.version}</version>
+	            <exclusions>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-core</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-annotations</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-databind</artifactId>
+	                </exclusion>
+	            </exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>com.squareup.okio</groupId>
@@ -720,6 +905,16 @@
 	            <groupId>software.amazon.awssdk</groupId>
 	            <artifactId>regions</artifactId>
 	            <version>${aws.sdk.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>software.amazon.awssdk</groupId>
+						<artifactId>third-party-jackson-core</artifactId>
+					</exclusion>
+				</exclusions>	 
 	        </dependency>
 	        <dependency>
 	            <groupId>software.amazon.awssdk</groupId>
@@ -730,6 +925,16 @@
 	            <groupId>software.amazon.awssdk</groupId>
 	            <artifactId>sagemaker</artifactId>
 	            <version>${aws.sdk.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>software.amazon.awssdk</groupId>
+						<artifactId>third-party-jackson-core</artifactId>
+					</exclusion>
+				</exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>software.amazon.awssdk</groupId>
@@ -745,11 +950,39 @@
 	            <groupId>com.amazonaws</groupId>
 	            <artifactId>aws-java-sdk-sagemaker</artifactId>
 	            <version>${aws.java.sdk.sagemaker.version}</version>
+	            <exclusions>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-core</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-annotations</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-databind</artifactId>
+	                </exclusion>
+	            </exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>com.amazonaws</groupId>
 	            <artifactId>aws-java-sdk-s3</artifactId>
 	            <version>${aws.java.sdk.s3.version}</version>
+	            <exclusions>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-core</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-annotations</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-databind</artifactId>
+	                </exclusion>
+	            </exclusions>
 	        </dependency>
 		    <dependency>
 	            <groupId>org.apache.lucene</groupId>
@@ -793,6 +1026,12 @@
 	            <artifactId>testng</artifactId>
 	            <version>${testng.version}</version>
 	            <scope>test</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>	
 	        </dependency>
 	        <dependency>
 	            <groupId>org.apache.james</groupId>
@@ -808,6 +1047,20 @@
 	            <groupId>com.amazonaws</groupId>
 	            <artifactId>aws-java-sdk-core</artifactId>
 	            <version>${aws-java-sdk-core.version}</version>
+	            <exclusions>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-core</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-annotations</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-databind</artifactId>
+	                </exclusion>
+	            </exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>com.squareup.okio</groupId>
@@ -849,16 +1102,25 @@
 	            <groupId>com.amazonaws</groupId>
 	            <artifactId>aws-java-sdk</artifactId>
 	            <version>${aws-java-sdk.version}</version>
+	            <exclusions>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-core</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-annotations</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-databind</artifactId>
+	                </exclusion>
+	            </exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>io.minio</groupId>
 	            <artifactId>minio</artifactId>
 	            <version>${minio.version}</version>
-	        </dependency>	        
-		    <dependency>
-	            <groupId>com.azure</groupId>
-	            <artifactId>azure-core</artifactId>
-	            <version>${azure-core.version}</version>
 	        </dependency>
 	        <dependency>
 	            <groupId>commons-fileupload</groupId>
@@ -884,11 +1146,23 @@
 	            <groupId>software.amazon.awssdk</groupId>
 	            <artifactId>bedrock</artifactId>
 	            <version>${aws-sdk-bedrock.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>dev.langchain4j</groupId>
 	            <artifactId>langchain4j-bedrock</artifactId>
 	            <version>${langchain4j-bedrock.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>dev.langchain4j</groupId>
@@ -926,6 +1200,87 @@
 		      <version>${slf4j.version}</version>
 		    </dependency>
 
+		    <!-- Explicit Spring Framework version control -->
+		    <dependency>
+		      <groupId>org.springframework</groupId>
+		      <artifactId>spring-core</artifactId>
+		      <version>${spring-framework.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>org.springframework</groupId>
+		      <artifactId>spring-context</artifactId>
+		      <version>${spring-framework.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>org.springframework</groupId>
+		      <artifactId>spring-beans</artifactId>
+		      <version>${spring-framework.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>org.springframework</groupId>
+		      <artifactId>spring-aop</artifactId>
+		      <version>${spring-framework.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>org.springframework</groupId>
+		      <artifactId>spring-expression</artifactId>
+		      <version>${spring-framework.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>org.springframework</groupId>
+		      <artifactId>spring-jcl</artifactId>
+		      <version>${spring-framework.version}</version>
+		    </dependency>
+
+		    <!-- Explicit Jackson version control -->
+		    <dependency>
+		      <groupId>com.fasterxml.jackson.core</groupId>
+		      <artifactId>jackson-core</artifactId>
+		      <version>${jackson.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>com.fasterxml.jackson.core</groupId>
+		      <artifactId>jackson-annotations</artifactId>
+		      <version>${jackson.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>com.fasterxml.jackson.core</groupId>
+		      <artifactId>jackson-databind</artifactId>
+		      <version>${jackson.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>com.fasterxml.jackson.dataformat</groupId>
+		      <artifactId>jackson-dataformat-xml</artifactId>
+		      <version>${jackson.version}</version>
+		    </dependency>
+
+		    <!-- Note: Maven build tools exclusions handled via Dockerfile jar filtering -->
+
 		</dependencies>
 	</dependencyManagement>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.7.0</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>install</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>false</overWriteSnapshots>
+							<overWriteIfNewer>true</overWriteIfNewer>
+							<excludeArtifactIds>lombok</excludeArtifactIds>
+							<outputDirectory>${project.basedir}/../app/lib</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
