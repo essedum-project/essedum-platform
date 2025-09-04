@@ -40,65 +40,54 @@ logger.addHandler(file_handler)
 
 
 def get_access_token(connection):
-    print(connection)
-    credentials_json = {
-          'type': connection.get("type", None),
-          'project_id': connection.get("project_id", None),
-          'private_key_id': connection.get("private_key_id", None),
-          'private_key': connection.get("private_key", None).replace('\\n', '\n'),
-          'client_email': connection.get("client_email", None),
-          'client_id': connection.get("client_id", None),
-          'auth_uri': connection.get("auth_uri", None),
-          'token_uri': connection.get("token_uri", None),
-          'auth_provider_x509_cert_url': connection.get("auth_provider_x509_cert_url", None),
-          'client_x509_cert_url': connection.get("client_x509_cert_url", None),
-          'regionName' : connection.get('regionName', None)
-    }
-    with open(os.path.join('.', 'poc-icets-mlservices-16306-ea675cf09c2b.json'), 'w') as f:
-      json.dump(credentials_json, f, indent = 2)
-    connection["service_account_file"] = os.path.join('.', 'poc-icets-mlservices-16306-ea675cf09c2b.json')
-    connection["scopes"] = ['https://www.googleapis.com/auth/cloud-platform', "https://www.googleapis.com/auth/cloud-platform.read-only"]
-    logger.info(f"Connection inside get access token: {str(connection)}")
-    s = connection.get("service_account_file", None)
-    scope = connection.get("scopes", None)
-    logger.info(f"Connection inside get access token: {str(s)}, {str(scope)}")
-    credentials = service_account.Credentials.from_service_account_file(connection["service_account_file"], scopes=connection["scopes"])
+
+    credentials_info = {
+            'type': connection.get("type"),
+            'project_id': connection.get("project_id"),
+            'private_key_id': connection.get("private_key_id"),
+            'private_key': connection.get("private_key", "").replace('\\n', '\n'),
+            'client_email': connection.get("client_email"),
+            'client_id': connection.get("client_id"),
+            'auth_uri': connection.get("auth_uri"),
+            'token_uri': connection.get("token_uri"),
+            'auth_provider_x509_cert_url': connection.get("auth_provider_x509_cert_url"),
+            'client_x509_cert_url': connection.get("client_x509_cert_url")
+        }
+
+    scopes = [
+        'https://www.googleapis.com/auth/cloud-platform',
+        'https://www.googleapis.com/auth/cloud-platform.read-only'
+    ]
+
+    credentials = service_account.Credentials.from_service_account_info(credentials_info, scopes=scopes)
     auth_req = google.auth.transport.requests.Request()
     credentials.refresh(auth_req)
+
     return credentials.token
 
 #cloud connect part
 def cloudconnect(payload):
-  try:
-    credentials_json = {
-          'type': payload.get("type", None),
-          'project_id': payload.get("project_id", None),
-          'private_key_id': payload.get("private_key_id", None),
-          'private_key': payload.get("private_key", None),
-          'client_email': payload.get("client_email", None),
-          'client_id': payload.get("client_id", None),
-          'auth_uri': payload.get("auth_uri", None),
-          'token_uri': payload.get("token_uri", None),
-          'auth_provider_x509_cert_url': payload.get("auth_provider_x509_cert_url", None),
-          'client_x509_cert_url': payload.get("client_x509_cert_url", None),
-          'regionName' : payload.get('regionName', None)
-    }
-    with open(os.path.join('.', 'poc-icets-mlservices-16306-ea675cf09c2b.json'), 'w') as f:
-      json.dump(credentials_json, f, indent = 2)
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r".\poc-icets-mlservices-16306-ea675cf09c2b.json"
-    PROJECT_ID = payload.get("project_id", None)
-    REGION = payload.get("region", None)
-    storage_client = storage.Client(project=PROJECT_ID)
-    buckets = storage_client.list_buckets()
-    os.remove(os.path.join('.', 'poc-icets-mlservices-16306-ea675cf09c2b.json'))
-    return True
-  except Exception as err:
-    message = "Uanble to connect"
-  try:
-      os.remove(os.path.join('.', 'poc-icets-mlservices-16306-ea675cf09c2b.json'))
-  except OSError as error:
-      message=False
-  return False
+    try:
+        credentials_info = {
+            'type': payload.get("type"),
+            'project_id': payload.get("project_id"),
+            'private_key_id': payload.get("private_key_id"),
+            'private_key': payload.get("private_key", "").replace('\\n', '\n'),
+            'client_email': payload.get("client_email"),
+            'client_id': payload.get("client_id"),
+            'auth_uri': payload.get("auth_uri"),
+            'token_uri': payload.get("token_uri"),
+            'auth_provider_x509_cert_url': payload.get("auth_provider_x509_cert_url"),
+            'client_x509_cert_url': payload.get("client_x509_cert_url")
+        }
+
+        credentials = service_account.Credentials.from_service_account_info(credentials_info)
+        storage_client = storage.Client(project=payload.get("project_id"), credentials=credentials)
+        buckets = list(storage_client.list_buckets())
+        return True
+    except Exception as err:
+        logger.error(f"Unable to connect: {str(err)}")
+        return False
 
 
 '''----------------------------------------DATASETS-------------------------------------------------------------------------------------------'''

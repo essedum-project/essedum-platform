@@ -11,6 +11,9 @@ import os
 import io
 import pandas as pd
 from sagemaker.automl.automl import AutoML, AutoMLInput
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # dec 4
 
@@ -37,12 +40,10 @@ def projects_datasets_list_list(adapter_instance, project, isCached, isInstance,
                                 aws_secret_access_key=connections.get("secretKey"),
                                 region_name=connections.get("region")
                                 )
-            response = s3_client.list_objects(Bucket = 'aiplatdata6oct1', Prefix = 'aws_sagemaker', MaxKeys = 4)
+            response = s3_client.list_objects(Bucket = os.environ.get('bucket_name'), Prefix = 'aws_sagemaker', MaxKeys = 4)
 
             dataset_dict_info = []
             for obj in response.get('Contents', []):
-                adapter_instance = "AWS-Sagemaker-Adapter"
-                project = 'Demo'
                 dataset_info = {
                     'sourceID' : obj.get('Key'),
                     'container' : obj.get('Amazon Resource Name', ''),
@@ -59,7 +60,6 @@ def projects_datasets_list_list(adapter_instance, project, isCached, isInstance,
                     #"modifiedBy": "",
                     'id' : obj.get('ID'),
                     'sourcename' : obj.get('Key'),
-                    #"adapterId": "DEMAWSRH51496",
                     'status': 'Registered',
                     #"likes": 0,
                     'artifacts':obj.get('Amazon Resource Name', ''),
@@ -86,10 +86,8 @@ def projects_datasets_get(adapter_instance, project, isCached, isInstance, conne
                         region_name=connections.get("region")
                         )
             logger.info("Dataset get is in progress")
-            response = s3_client.head_object(Bucket = 'aiplatdata6oct1',Key = dataset_id)
+            response = s3_client.head_object(Bucket = os.environ.get('bucket_name'),Key = dataset_id)
             logger.info("Dataset Details")
-            adapter_instance = "AWS-Sagemaker-Adapter"
-            project = 'Demo'
             dataset_info = {
                 'sourceID' : dataset_id,
                 'container' : response.get('Amazon Resource Name'),
@@ -106,7 +104,6 @@ def projects_datasets_get(adapter_instance, project, isCached, isInstance, conne
                 #"modifiedBy": "",
                 'id' : response.get('ID'),
                 'sourcename' : dataset_id,
-                #"adapterId": "DEMAWSRH51496",
                 'status': 'Registered',
                 #"likes": 0,
                 'artifacts':response.get('Amazon Resource Name'),
@@ -138,8 +135,6 @@ def projects_datasets_create(adapter_instance, project, isCached, isInstance, co
             bucket = request_body.get("Bucket")
             response = s3_client.put_object(Body = data.to_csv(index = False), Bucket = bucket, Key = s3_key)
             
-            adapter_instance = "AWS-Sagemaker-Adapter"
-            project = 'Demo'
             dataset_info = {
                 'sourceID' : s3_key,
                 'container' : response.get('Amazon Resource Name'),
@@ -156,7 +151,6 @@ def projects_datasets_create(adapter_instance, project, isCached, isInstance, co
                 #"modifiedBy": "",
                 'id' : response.get(''),
                 'sourcename' : s3_key,
-                #"adapterId": "DEMAWSRH51496",
                 'status': 'Registered',
                 #"likes": 0,
                 'artifacts':response.get('Amazon Resource Name'),
@@ -178,7 +172,7 @@ def projects_datasets_delete(adapter_instance, project, isCached, isInstance, co
         access_key = connections.get("accessKey", None)
         if access_key is not None:
             s3_client = boto3.client('s3', aws_access_key_id = connections.get("accessKey"), aws_secret_access_key = connections.get("secretKey"), region_name = connections.get("region"))
-            response = s3_client.delete_object(Bucket = 'aiplatdata6oct1',Key = dataset_id)
+            response = s3_client.delete_object(Bucket = os.environ.get('bucket_name'),Key = dataset_id)
             logger.info("Dataset deleted successfully")
             return {"message": f"Dataset {dataset_id} deleted successfully."}, 200
               
@@ -252,7 +246,6 @@ def projects_models_list(adapter_instance, project, isCached, isInstance, connec
                     #"modifiedBy": "",
                     'id' : model.get(''),
                     'sourcename' : model.get('ModelName'),
-                    #"adapterId": "DEMAWSRH51496",
                     'status': 'Registered',
                     'artifacts': model.get('ModelArn'),
                     'deployment': ''
@@ -286,9 +279,6 @@ def projects_models_get(adapter_instance, project, isCached, isInstance, connect
             else:
                 model_type = 'AWSSAGEMAKER'
 
-
-            adapter_instance = "AWS-Sagemaker-Adapter"
-            project = 'Demo'
             model_info = {
                 'sourceID' : model_id,
                 'container' : response.get('ModelArn'),
@@ -345,8 +335,6 @@ def projects_models_register_create(adapter_instance, project, isCached, isInsta
                 model_type = 'AWSSAGEMAKER'
             
             
-            adapter_instance = "AWS-Sagemaker-Adapter"
-            project = 'Demo'
             model_info = {
                 'sourceID' : model_name,
                 'container' : response.get('ModelArn'),
@@ -363,7 +351,6 @@ def projects_models_register_create(adapter_instance, project, isCached, isInsta
                 #"modifiedBy": "",
                 'id' : '',
                 'sourcename' : model_name,
-                #"adapterId": "DEMAWSRH51496",
                 'status': 'Registered',
                 #"likes": 0,
                 'artifacts': response.get('ModelArn'),
@@ -444,8 +431,6 @@ def projects_endpoints_list_list(adapter_instance, project, isCached, isInstance
                     endpoint_type = 'AWSSAGEMAKER'
                 
                 
-                adapter_instance = "AWS-Sagemaker-Adapter"
-                project = 'Demo'
                 endpoint_info = {
                     'sourceID' : endpoint.get('EndpointName'),
                     'container' : endpoint.get('EndpointArn'),
@@ -462,7 +447,6 @@ def projects_endpoints_list_list(adapter_instance, project, isCached, isInstance
                     #"modifiedBy": "",
                     'id' : endpoint.get(''),
                     'sourcename' : endpoint.get('EndpointName'),
-                    #"adapterId": "DEMAWSRH51496",
                     'status': 'Registered',
                     #"likes": 0,
                     'artifacts': endpoint.get('EndpointArn'),
@@ -497,8 +481,6 @@ def projects_endpoints_get(adapter_instance, project, isCached, isInstance, conn
                 endpoint_type = 'AWSSAGEMAKER'
             
             
-            adapter_instance = "AWS-Sagemaker-Adapter"
-            project = 'Demo'
             endpoint_info = {
                 'sourceID' : endpoint_id,
                 'container' : response.get('EndpointArn'),
@@ -515,7 +497,6 @@ def projects_endpoints_get(adapter_instance, project, isCached, isInstance, conn
                 #"modifiedBy": "",
                 'id' : '',
                 'sourcename' : endpoint_id,
-                #"adapterId": "DEMAWSRH51496",
                 'status': 'Registered',
                 #"likes": 0,
                 'artifacts': response.get('EndpointArn'),
@@ -566,8 +547,6 @@ def projects_endpoints_create(adapter_instance, project, isCached, isInstance, c
                 endpoint_type = 'AWSSAGEMAKER'
             
             
-            adapter_instance = "AIPlat"
-            project = 'Demo'
             endpoint_info = {
                 'sourceID' : endpoint_config_name,
                 'container' : response.get('EndpointConfigArn'),
@@ -584,7 +563,6 @@ def projects_endpoints_create(adapter_instance, project, isCached, isInstance, c
                 #"modifiedBy": "",
                 'id' : '',
                 'sourcename' : endpoint_config_name,
-                #"adapterId": "DEMAWSRH51496",
                 'status': 'Registered',
                 #"likes": 0,
                 'artifacts': response.get('EndpointConfigArn'),
@@ -648,8 +626,6 @@ def projects_endpoints_deploy_model_create(adapter_instance, project, isCached, 
                 endpoint_type = 'AWSSAGEMAKER'
             
             
-            adapter_instance = "AWS-Sagemaker-Adapter"
-            project = 'Demo'
             endpoint_info = {
                 'sourceID' : endpoint_id,
                 'container' : response.get('EndpointArn'),
@@ -666,7 +642,6 @@ def projects_endpoints_deploy_model_create(adapter_instance, project, isCached, 
                 #"modifiedBy": "",
                 'id' : '',
                 'sourcename' : endpoint_id,
-                #"adapterId": "DEMAWSRH51496",
                 'status': 'Registered',
                 #"likes": 0,
                 'artifacts': response.get('EndpointArn'),
@@ -760,8 +735,6 @@ def training_istlist(adapter_instance, project, isCached, isInstance, connection
             response = client.list_training_jobs(MaxResults=10)
             training_job_info = []
             for obj in response.get('TrainingJobSummaries', []):
-                adapter_instance = "AIPlat"
-                project = 'Demo'
                 training_info = {
                     'sourceID' : obj.get('TrainingJobName'),
                     'container' : obj.get('TrainingJobArn', ''),
@@ -778,7 +751,6 @@ def training_istlist(adapter_instance, project, isCached, isInstance, connection
                     #"modifiedBy": "",
                     'id' : obj.get('ID'),
                     'sourcename' : obj.get('TrainingJobName'),
-                    #"adapterId": "DEMAWSRH51496",
                     'status': 'Registered',
                     #"likes": 0,
                     'artifacts':obj.get('TrainingJobArn', ''),
@@ -805,9 +777,6 @@ def training_train_create(adapter_instance, project, isCached, isInstance, conne
                             region_name=connections.get("region")
                             ))
 
-            # bucket = 'aiplatdata6oct1'
-            # prefix = 'aws_sagemaker'
-            # role = 'arn:aws:iam::451256804668:role/Semi-Structured-Annotation-SageMakerExecutionRole-1K8KPZUU2Y3YE'
             role = request_body.get("RoleArn", "")
             logger.info(role)
             bucket = request_body.get("Bucket","")
@@ -832,8 +801,7 @@ def training_train_create(adapter_instance, project, isCached, isInstance, conne
             best_model = automl.best_candidate()
             print(best_model)
 
-            adapter_instance = "AIPlat"
-            project = 'Demo'
+
             model_info = {
                 'sourceID' : best_model.get('CandidateName', ''),
                 'container' : best_model.get('ARN', ' '),
@@ -850,7 +818,6 @@ def training_train_create(adapter_instance, project, isCached, isInstance, conne
                 #"modifiedBy": "",
                 'id' : best_model.get('ID'),
                 'sourcename' : best_model.get('CandidateName', []),
-                #"adapterId": "DEMAWSRH51496",
                 'status': 'Registered',
                 #"likes": 0,
                 'artifacts':best_model.get('ARN'),
@@ -882,8 +849,6 @@ def training_get_list(adapter_instance, project, isCached, isInstance, connectio
 
             response = client.describe_training_job(TrainingJobName = training_job_id)
 
-            adapter_instance = "AWS-Sagemaker-Adapter"
-            project = 'Demo'
             dataset_info = {
                 'sourceID' : training_job_id,
                 'container' : response.get('TrainingJobArn', ' '),
@@ -900,7 +865,6 @@ def training_get_list(adapter_instance, project, isCached, isInstance, connectio
                 #"modifiedBy": "",
                 'id' : response.get('ID'),
                 'sourcename' : training_job_id,
-                #"adapterId": "DEMAWSRH51496",
                 'status': 'Registered',
                 #"likes": 0,
                 'artifacts':response.get('TrainingJobArn'),
@@ -933,9 +897,7 @@ def training_delete(adapter_instance, project, isCached, isInstance, connections
             else:
                 pipeline_type = 'AWSSAGEMAKER'
             
-            
-            adapter_instance = "AIPlat"
-            project = 'Demo'
+
             pipeline_info = {
                 'sourceID' : training_job_id,
                 'container' : response.get('PipelineArn'),
@@ -952,7 +914,6 @@ def training_delete(adapter_instance, project, isCached, isInstance, connections
                 #"modifiedBy": "",
                 'id' : '',
                 'sourcename' : training_job_id,
-                #"adapterId": "DEMAWSRH51496",
                 'status':'Registered',
                 #"likes": 0,
                 'artifacts': response.get('PipelineArn'),
@@ -984,9 +945,7 @@ def projects_inferencePipelines_list_list(adapter_instance, project, isCached, i
 
             dataset_dict_info = []
             for obj in response.get('Contents', []):
-                #arn = f'arn:aws:s3:::{bucket_name}/{prefix}/{obj.get('Key')}'
-                adapter_instance = "AWS-Sagemaker-Adapter"
-                project = 'Demo'
+
                 dataset_info = {
                     'sourceID' : obj.get('Prefix'),
                     'container' : arn,
@@ -1003,7 +962,6 @@ def projects_inferencePipelines_list_list(adapter_instance, project, isCached, i
                     #"modifiedBy": "",
                     'id' : obj.get('ID'),
                     'sourcename' : obj.get('Prefix'),
-                    #"adapterId": "DEMAWSRH51496",
                     'status': 'Registered',
                     #"likes": 0,
                     'artifacts':arn,
@@ -1030,10 +988,9 @@ def projects_inferencePipelines_get(adapter_instance, project, isCached, isInsta
                         region_name=connections.get("region")
                         )
             logger.info("Dataset get is in progress")
-            response = s3_client.head_object(Bucket = 'aiplatdata6oct1',Key = inference_job_id)
+            response = s3_client.head_object(Bucket = os.environ.get('bucket_name'),Key = inference_job_id)
             logger.info("Dataset Details")
-            adapter_instance = "AWS-Sagemaker-Adapter"
-            project = 'Demo'
+
             dataset_info = {
                 'sourceID' : inference_job_id,
                 'container' : response.get('Amazon Resource Name'),
@@ -1050,7 +1007,6 @@ def projects_inferencePipelines_get(adapter_instance, project, isCached, isInsta
                 #"modifiedBy": "",
                 'id' : response.get('ID'),
                 'sourcename' : inference_job_id,
-                #"adapterId": "DEMAWSRH51496",
                 'status': 'Registered',
                 #"likes": 0,
                 'artifacts':response.get('Amazon Resource Name'),
@@ -1096,9 +1052,7 @@ def projects_inferencePipelines_create(adapter_instance, project, isCached, isIn
             else:
                 pipeline_type = 'AWSSAGEMAKER'
             
-            
-            adapter_instance = "AIPlat"
-            project = 'Demo'
+
             pipeline_info = {
                 'sourceID' : transform_job_name,
                 'container' : response.get('TransformJobArn'),
@@ -1115,7 +1069,6 @@ def projects_inferencePipelines_create(adapter_instance, project, isCached, isIn
                 #"modifiedBy": "",
                 'id' : '',
                 'sourcename' : transform_job_name,
-                #"adapterId": "DEMAWSRH51496",
                 'status': 'Registered',
                 #"likes": 0,
                 'artifacts': response.get('TransformJobArn'),
