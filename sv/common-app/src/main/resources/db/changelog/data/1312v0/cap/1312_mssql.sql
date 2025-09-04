@@ -75,8 +75,8 @@ Thanks
 IAMP Team',NULL,1,'2021-10-14T15:43:57',1,1);
 
 INSERT INTO cap_config VALUES ('API','KEight','false',NULL,0,NULL,NULL),
-                              ('API','LeapUrl','update-leap-url',NULL,0,NULL,NULL),
-                              ('Generic','UserEmailId','admin@infosys.com',NULL,0,NULL,NULL),
+                              ('API','LeapUrl','update-essedum-url',NULL,0,NULL,NULL),
+                              ('Generic','UserEmailId','admin@lfn.com',NULL,0,NULL,NULL),
                               ('Generic','UserVaultName','testv',NULL,0,NULL,NULL),
                               ('Generic','ApplicationId','2',NULL,0,NULL,NULL),
                               ('Generic','PortfolioId','2',NULL,0,NULL,NULL),

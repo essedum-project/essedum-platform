@@ -5,8 +5,8 @@ export class MLOpsSwaggerAPISpec {
     apispec = {
         "openapi": "3.0.1",
         "info": {
-            "title": "Infosys AI Platform - MLOps",
-            "description": "API documentation for Infosys AI Platform",
+            "title": "LFN AI Platform - MLOps",
+            "description": "API documentation for LFN AI Platform",
             "version": "vi"
         },
         "servers": [
@@ -140,7 +140,7 @@ export class MLOpsSwaggerAPISpec {
                                         },
                                         "cloud_explain_model_config": {
                                             "type": "object",
-                                            "description": "Config for the Infosys AI Cloud"
+                                            "description": "Config for the LFN AI Cloud"
                                         }
                                     }
                                 }
@@ -173,7 +173,7 @@ export class MLOpsSwaggerAPISpec {
                                             },
                                             "cloud_explain_model_config": {
                                                 "type": "object",
-                                                "description": "Config for the Infosys AI Cloud"
+                                                "description": "Config for the LFN AI Cloud"
                                             }
                                         }
                                     }
@@ -249,7 +249,7 @@ export class MLOpsSwaggerAPISpec {
                                         },
                                         "cloud_infer_model_config": {
                                             "type": "object",
-                                            "description": "Config for the Infosys AI Cloud"
+                                            "description": "Config for the LFN AI Cloud"
                                         }
                                     }
                                 }
@@ -282,7 +282,7 @@ export class MLOpsSwaggerAPISpec {
                                             },
                                             "cloud_infer_model_config": {
                                                 "type": "object",
-                                                "description": "Config for the Infosys AI Cloud"
+                                                "description": "Config for the LFN AI Cloud"
                                             }
                                         }
                                     }
@@ -349,8 +349,8 @@ export class MLOpsSwaggerAPISpec {
     apispec3 = {
         "openapi": "3.0.1",
         "info": {
-            "title": "Infosys AI Platform - AICLOUD",
-            "description": "Infosys AI Platform - AICLOUD",
+            "title": "LFN AI Platform - AICLOUD",
+            "description": "LFN AI Platform - AICLOUD",
             "version": "vi"
         },
         "servers": [
@@ -385,8 +385,8 @@ export class MLOpsSwaggerAPISpec {
         {
             "openapi": "3.0.1",
             "info": {
-              "title": "Infosys AI Platform",
-              "description": "Infosys AI Platform",
+              "title": "LFN AI Platform",
+              "description": "LFN AI Platform",
               "version": "vi"
             },
             "servers": [

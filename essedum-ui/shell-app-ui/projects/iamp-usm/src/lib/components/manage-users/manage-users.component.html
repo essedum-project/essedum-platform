@@ -1,0 +1,278 @@
+<!-- NEW LAYOUT -->
+<div>
+  <div class="aip-container lfx-u-pad-lr-30" *ngIf="!showCreate">
+    <!-- Header Section -->
+    <app-aip-header 
+      [cardTitle]="'User List'" 
+      [lastRefreshedTime]="lastRefreshedTime" 
+      [showAddButton]="false"
+      (search)="onSearchInput($event)" 
+      (refresh)="Refresh()" 
+      (add)="addNewUser()">
+    </app-aip-header>
+    
+    <div>
+      <div class="aip-container lfx-u-pad-lr-30">
+        <!-- Filter Component -->
+        <app-aip-filter-roles
+          [componentName]="'manage-users'"
+          [filterOptions]="filterOptions" 
+          [selectedFilterValues]="selectedFilterValues"
+          (filterSelected)="onFilterSelected($event)"
+          (filterStatusChange)="onFilterStatusChange($event)">
+        </app-aip-filter-roles>
+
+        <!-- Table Layout  -->
+        <div class="table-card">
+          <div class="table-scroll-container">
+            <table class="styled-table" *ngIf="users.length; else noData">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>User ID</th>
+                  <th>User Name</th>
+                  <th>User Login</th>
+                  <th>User Email</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let user of users; let i = index">
+                  <td>{{page * pageSize + i + 1}}</td>
+                  <td (click)="viewUser(user)" style="color: #0094ff; cursor: pointer;">{{ user.id ? user.id : "--" }}</td>
+                  <td>{{ getUserName(user) ? getUserName(user) : "--" }}</td>
+                  <td>{{ user.user_login ? user.user_login : "--" }}</td>
+                  <td>{{ user.user_email ? user.user_email : "--" }}</td>
+                  <td>
+                    <i class="fa fa-info-circle fa-lg header-action-icon" aria-hidden="true"
+                      matTooltip="View User" *ngIf="viewFlag" (click)="viewUser(user)"></i>
+                  
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <ng-template #noData>
+              <div class="no-data">No data available</div>
+            </ng-template>
+          </div>
+          
+          <!-- Pagination -->
+          <div class="pagination-wrapper d-flex justify-content-end">
+            <ul class="custom-pagination">
+              <li class="custom-pagination-arrow" [class.disabled]="page === 0" (click)="navigatePage('Prev')">
+                <span>&lsaquo;</span>
+              </li>
+
+              <li *ngFor="let p of getPageNumbers()" class="custom-pagination-number" [class.active]="p === page"
+                (click)="changePage(p)">
+                <span>{{ p + 1 }}</span>
+              </li>
+
+              <li class="custom-pagination-arrow" [class.disabled]="page === lastPage" (click)="navigatePage('Next')">
+                <span>&rsaquo;</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!--create/edit/view users-->
+<div class="paddingBottom selector-663-99" *ngIf="showCreate">
+    <mat-card class="form-card">
+      <mat-card-content>
+  <div class="aip-container lfx-u-pad-lr-30">
+    <!-- <div class="lfx-u-pad-t-8" *ngIf="showCreate">
+    <div class="lfx-l-level2-middle-col"> -->
+    
+    <!-- Header Section matching project details -->
+             <div class="d-flex justify-content-between align-items-center">
+
+                 <div class="align-items-center d-flex">
+<!-- 
+    <div class="header-section">
+      <div class="header-content">
+        <div class="header-left"> -->
+          <span *ngIf="edit || view" class="back-button" (click)="listUsers()">
+            <mat-icon class="back-icon" 
+              [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" 
+              matTooltip="Back to User List"
+              matTooltipPosition="above" 
+              (mouseenter)="isBackHovered = true"
+              (mouseleave)="isBackHovered = false">
+              arrow_back
+            </mat-icon>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+          </span>
+          
+          <div class="header-title-section">
+            <h2 class="header-title" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">
+              <span *ngIf="!edit && !view">Create User</span>
+              <span *ngIf="edit && !view">Edit User</span>
+              <span *ngIf="view">View User</span>
+            </h2>
+          </div>
+        <!-- </div>
+      </div>
+    </div> -->
+    </div>
+    </div>
+  <br>
+  
+    <!-- Form Content Card -->
+    <mat-card class="form-card">
+      <mat-card-content>
+    <div class="noPad selector-663-111">
+      <div class="selector-663-112">
+        <div class="row rwMAr selector-663-113">
+          <div class="col-md-6 selector-663-114">
+            <label class="formLabel selector-663-115">User Login*</label>
+            <input [disabled]="view || edit" type="text" class="txtInput selector-663-116" maxlength="255" required="" [ngModelOptions]="{ standalone: true }" [(ngModel)]="user.user_login" (keyup)="checkLoginNameMaxLength()" />
+            <span class="error selector-663-117" style="font-size: 1.6vmin" *ngIf="showLoginNameErrorMessage == true">{{
+              lengthNameErrorMessage
+            }}</span>
+          </div>
+          <div class="col-md-6 selector-663-118">
+            <label class="formLabel selector-663-119">User Email*</label>
+            <input [disabled]="view" type="text" maxlength="255" required="" [ngModelOptions]="{ standalone: true }" [(ngModel)]="user.user_email" class="txtInput selector-663-120" (keyup)="checkEmailMaxLength()" />
+            <span class="selector-663-121 note-text" style="font-size: 1.6vmin">Note: Valid email patterns: email&#64;example.com, _email&#64;.example.aaaaa, .email&#64;-EXAMPLE.in,
+              EMAIL&#64;_EXAMPLE.COM </span><br class="selector-663-122" />
+            <span class="error selector-663-123" style="font-size: 1.6vmin" *ngIf="showEmailErrorMessage == true">{{
+              lengthNameErrorMessage
+            }}</span>
+          </div>
+        </div>
+        <div class="row rwMAr selector-663-124">
+          <div class="col-md-6 selector-663-125">
+            <label class="formLabel selector-663-126">User First Name*</label>
+            <input [disabled]="view" type="text" class="txtInput selector-663-127" maxlength="255" required="" [ngModelOptions]="{ standalone: true }" [(ngModel)]="user.user_f_name" (keyup)="checkFirstNameMaxLength()" />
+            <span class=" selector-663-128 note-text" style="font-size: 1.6vmin">
+              Note: Alpha numeric and special characters -_. allowed </span><br class="selector-663-129" />
+            <span class="error selector-663-130" style="font-size: 1.6vmin" *ngIf="showfNameLengthErrorMessage == true">{{
+              lengthNameErrorMessage
+            }}</span>
+          </div>
+          <div class="col-md-6 selector-663-131">
+            <label class="formLabel selector-663-132">User Middle Name</label>
+            <input [disabled]="view" type="text" maxlength="255" [ngModelOptions]="{ standalone: true }" [(ngModel)]="user.user_m_name" class="txtInput selector-663-133" (keyup)="checkMiddleNameMaxLength()" />
+            <span class=" selector-663-134 note-text" style="font-size: 1.6vmin">
+              Note: Alpha numeric and special characters -_. allowed </span><br class="selector-663-135" />
+            <span class="error selector-663-136" style="font-size: 1.6vmin" *ngIf="showmNameLengthErrorMessage == true">{{
+              lengthNameErrorMessage
+            }}</span>
+          </div>
+        </div>
+        <div class="row rwMAr selector-663-137">
+          <div class="col-md-6 selector-663-138">
+            <label class="formLabel selector-663-139">User Last Name</label>
+            <input [disabled]="view" type="text" maxlength="255" [ngModelOptions]="{ standalone: true }" [(ngModel)]="user.user_l_name" class="txtInput selector-663-140" (keyup)="checkLastNameMaxLength()" />
+            <span class="selector-663-141 note-text" style="font-size: 1.6vmin">
+              Note: Alpha numeric and special characters -_. allowed </span><br class="selector-663-142" />
+            <span class="error selector-663-143" style="font-size: 1.6vmin" *ngIf="showlNameLengthErrorMessage == true">{{
+              lengthNameErrorMessage
+            }}</span>
+          </div>
+          <div class="col-md-6 selector-663-144">
+            <label class="formLabel selector-663-145">User Profile Image</label>
+            <input id="filename" [disabled]="view" type="file" accept="image/jpg,image/jpeg,image/png" (change)="profileImageAdded($event)" style="margin-left: unset; display: -webkit-inline-box; width: 96px" class="selector-663-146" />
+            <label for="filename" style="cursor: pointer; text-overflow: ellipsis; overflow: hidden; margin-bottom: -0.5rem; width: 200px" class="selector-663-147">
+              {{ user &amp;&amp; user.profileImageName ? user.profileImageName : "No File Chosen" }}
+            </label>
+            <img *ngIf="url" [src]="url" class="imageView img-responsive selector-663-148" />
+            <span class="error selector-663-143" style="font-size: 1.6vmin" *ngIf="nonallowedExtention == true">
+              Please upload file having extensions .jpeg/.jpg/.png only.
+            </span>
+            <span class="error selector-663-143" style="font-size: 1.6vmin" *ngIf="imageSizeExceeded == true">
+              {{imageSizeExceededErrMsg}}
+            </span>
+          </div>
+          <div class="col-md-6">
+            <label class="formLabel">Country</label>
+            <mat-select class="txtInput" style="width: 85%" [disabled]="view" [ngModelOptions]="{ standalone: true }" [(ngModel)]="user.country" 
+            (selectionChange)="fetchTimezone($event)">
+              <mat-option>---NULL---</mat-option>
+              <mat-option *ngFor="let item of countryNames; trackBy: trackByMethod" 
+              [value]="item" [matTooltip]="item">
+                {{ item }}
+              </mat-option>
+            </mat-select>
+          </div>
+        </div>
+        <div class="row rwMAr">
+          <div class="col-md-6">
+            <label class="formLabel">Time Zone</label>
+            <mat-select class="txtInput" style="width: 85%" [disabled]="view" [ngModelOptions]="{ standalone: true }" [(ngModel)]="user.timezone">
+              <mat-option>---NULL---</mat-option>
+              <mat-option *ngFor="let item of tzNames; trackBy: trackByMethod" [value]="item" [matTooltip]="item">
+                {{ item }}
+              </mat-option>
+            </mat-select>
+          </div>
+          <div class="col-md-6">
+            <label class="formLabel">Other Details</label>
+            <input type="text" id="otherdetails" name="otherdetails" class="txtInput" [(ngModel)]="user.other_details" [ngModelOptions]="{ standalone: true }">
+          </div>
+        </div>
+        <div class="row rwMAr">    
+          <div class="col-md-6">
+              <label class="formLabel">Contact Number</label>
+              <input type="number" id="phoneNo" name="phoneNo" class="txtInput" [(ngModel)]="user.contact_number" [ngModelOptions]="{ standalone: true }">
+          </div>
+        </div>
+        <mat-checkbox color="primary" [disabled]="view" [(ngModel)]="userDetailCheck" (ngModelChange) = "resetChanges($event,'userDetailCheck')" name="userDetailCheck" class="selector-663-149">
+          <label class="formLabel selector-663-150">User Details</label>
+        </mat-checkbox>
+        <mat-checkbox color="primary" [disabled]="view" [ngModel]="this.user ? this.user.isUiInactivityTracked : true" (ngModelChange)="this.user && (this.user.isUiInactivityTracked = $event)"  name="acitvityCheck" class="selector-663-149" matTooltip="If not checked, the inactivity window will not appear.">
+          <label class="formLabel selector-663-150">Acitvity Check</label>
+        </mat-checkbox>
+        <div *ngIf="userDetailCheck" class="selector-663-151">
+          <div class="row rwMAr selector-663-152" *ngFor="let detail of userDetailJson; let i = index; let j = index; trackBy: trackByMethod">
+            <div class="col-md-4 selector-663-153">
+              <label class="formLabel selector-663-154">Key *</label>
+              <input [disabled]="view" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="detail.key" [(ngModel)]="detail.pointer" class="txtInput selector-663-155" required="" />
+            </div>
+            <div class="col-md-4 selector-663-156">
+              <label class="formLabel selector-663-157">Value *</label>
+              <input [disabled]="view" type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="detail.value" class="txtInput selector-663-158" required="" />
+            </div>
+            <i *ngIf="userDetailJson.length > 1 &amp;&amp; !view" style="float: right; padding-top: 20px; cursor: pointer; margin-left: 1%" class="fa fa-trash fa-lg selector-663-159" (click)="deleteChild(i)" aria-hidden="true"></i>
+            <i *ngIf="j == userDetailJson.length - 1 &amp;&amp; !view" style="float: right; padding-top: 20px; cursor: pointer; margin-left: 1%" class="fa fa-plus fa-lg selector-663-160" (click)="addChild(detail)" aria-hidden="true"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+      </mat-card-content>
+    </mat-card>
+    
+    <div id="btnMargin" class="dialog-buttons" style="text-align: right;">
+      <button *ngIf="!edit &amp;&amp; !buttonFlag" [ngBusy]="{ busy: busy, message: 'Saving User...' }" type="button" mat-raised-button class="save-btn" (click)="SaveUserInfo()" [disabled]="!waveForm.form.valid" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">
+        Save
+      </button>
+      <button *ngIf="edit &amp;&amp; !buttonFlag" [ngBusy]="{ busy: busy, message: 'Updating User...' }" type="button" mat-raised-button class="save-btn" (click)="UpdateUser(user)" [disabled]="!waveForm.form.valid" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">
+        Update
+      </button>
+      <button *ngIf="!buttonFlag" type="button" mat-raised-button class="cancel-btn" (click)="ClearInfo()" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">Clear</button>
+      <button *ngIf="!buttonFlag &amp;&amp; user?.profileImage" type="button" style="margin-left: 1rem" class="genBtn marRght30 selector-663-165" (click)="removelogo()">
+        Remove Profile Image
+      </button>
+    </div>
+    <!--  <div *ngIf="!edit && !buttonFlag" class="star">* marked are required fields</div> -->
+  </div>
+  </mat-card-content>
+  </mat-card>
+
+  <!-- <div *ngIf="edit" class="selector-663-166"> -->
+      <mat-card class="form-card"  *ngIf="edit">
+      <mat-card-content>
+    <mat-tab-group class="selector-663-167">
+      <mat-tab label="Portfolio-Project-Role" class="selector-663-168">
+        <lib-user-project-role-list *ngIf="user &amp;&amp; user.id" [selectedUser]="user" class="selector-663-169"></lib-user-project-role-list>
+      </mat-tab>
+  
+    </mat-tab-group>
+  <!-- </div> -->
+      </mat-card-content>
+      </mat-card>
+</div>
+</div>

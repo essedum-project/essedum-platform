@@ -1,0 +1,53 @@
+<div class="lfx-header">
+    <!-- Title section -->
+    <div class="header-left">
+        <h3>{{cardTitle}}</h3>
+    </div>
+
+    <!-- Right section -->
+    <div class="header-right">
+        <!-- Action icons section -->
+        <div class="header-actions">
+            <p>Last refreshed on: {{ lastRefreshedTime | date:'medium' }}</p>
+
+            <div class="header-search lfx-panel d-flex" [@searchAnimation]="isSearchVisible ? 'visible' : 'hidden'"
+                [style.display]="isSearchVisible ? 'flex' : 'none'">
+                <!-- Input field -->
+                <input type="text" placeholder="Search by Name" class="lfx-panel-input" [(ngModel)]="searchText"
+                    (keyup)="onSearch()" (blur)="onInputBlur()" aria-label="Search input">
+                <mat-icon [ngClass]="{'active': isSearchHovered}" class="lfx-u-mar-r-8"
+                    (mouseenter)="isSearchHovered = true" (mouseleave)="isSearchHovered = false">
+                    search
+                </mat-icon>
+            </div>
+
+            <!-- Search icon with animation -->
+            <div *ngIf="!isSearchVisible && !isAnimating" class="action-button">
+                <mat-icon [ngClass]="{'active': isSearchHovered}" matTooltip="Search" [matTooltipPosition]="TOOLTIP_POSITION"
+                    (mouseenter)="isSearchHovered = true" (mouseleave)="isSearchHovered = false"
+                    (click)="toggleSearch($event)" aria-label="Toggle search">
+                    search
+                </mat-icon>
+            </div>
+
+            <!-- Add button (conditionally shown) -->
+            <div *ngIf="showAddButton" class="action-button">
+                <mat-icon [ngClass]="{'active': isAddHovered}" (click)="onAddClick()" matTooltip="Add"
+                    [matTooltipPosition]="TOOLTIP_POSITION" (mouseenter)="isAddHovered = true" (mouseleave)="isAddHovered = false"
+                    aria-label="Add new item">
+                    add
+                </mat-icon>
+            </div>
+
+            <!-- Refresh button -->
+            <div class="action-button">
+                <mat-icon [ngClass]="{'active': isRefreshHovered, 'rotate-icon': isRefreshing}"
+                    (click)="onRefreshClick()" matTooltip="Refresh" [matTooltipPosition]="TOOLTIP_POSITION"
+                    (mouseenter)="isRefreshHovered = true" (mouseleave)="isRefreshHovered = false"
+                    aria-label="Refresh data">
+                    autorenew
+                </mat-icon>
+            </div>
+        </div>
+    </div>
+</div>

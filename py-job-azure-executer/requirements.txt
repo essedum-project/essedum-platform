@@ -1,0 +1,17 @@
+flask
+boto3
+sagemaker
+minio
+flask_swagger_ui
+dateutils
+gitpython
+psutil
+gradio
+pandas
+sqlalchemy
+pymysql
+azureml-dataset-runtime==1.60.0
+azureml-core
+azureml-pipeline
+azure-ai-ml
+python-dotenv

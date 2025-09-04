@@ -1,0 +1,394 @@
+<div class="lfx-u-pad-t-8">
+    <div class="lfx-l-level2-middle-col">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="align-items-center d-flex">
+                <span *ngIf="edit" style="cursor: pointer; margin-right: 10px;">
+                    <mat-icon class="back-icon" (click)="navigateToList()"
+                        [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back to Project List"
+                        matTooltipPosition="above" (mouseenter)="isBackHovered = true"
+                        (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
+                </span>
+                <h2 class="header-title" style="font-family: 'Roboto', 'Segoe UI', sans-serif; display: inline-block; margin: 0; vertical-align: middle;" *ngIf="edit">Edit Project</h2>
+                <h2 class="header-title" style="font-family: 'Roboto', 'Segoe UI', sans-serif; display: inline-block; margin: 0; vertical-align: middle;" *ngIf="view">View Project</h2>
+                <h2 class="header-title lfx-u-mar-l-8" style="font-family: 'Roboto', 'Segoe UI', sans-serif;" *ngIf="!edit && !view">Create Project</h2>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button *ngIf="!edit" type="button" class="btn-close" aria-label="Close" (click)="closeProjectAddDialog()">
+                    <i class="icon x-16 close-icon"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Added mat-dialog-content wrapper for scrollable content -->
+        <mat-dialog-content [ngClass]="{'no-scroll-content': edit}">
+            <mat-card #projectForm="ngForm" ngForm="">
+            <div class="lfx-u-pad-t-32 lfx-u-pad-r-24 p-20" [ngClass]="{'form-card': edit}">
+                <div class="row rwMAr">
+                    <div class="col-md-6">
+                        <div>
+                            <mat-form-field appearance="fill" style="width: 90%" floatLabel="always">
+                                <mat-label class="mat-style-label">Project Name</mat-label>
+                                <input matInput class="ml-4" [disabled]="view" placeholder="Enter Project Name..." type="text" maxlength="255" required="" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.name" (keyup)="checkNameMaxLength()" (keypress)="deleteSpecialChars($event)" />
+                                <span class="error note-text" style="font-size: 1.6vmin">
+                                    Note: Alpha numeric characters and _ allowed </span>
+                                <mat-error class="ml-4" *ngIf="showNameLengthErrorMessage == true">{{lengthNameErrorMessage}}</mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="view || edit">
+                        <div>
+                            <mat-form-field appearance="fill" style="width: 90%" floatLabel="always">
+                                <mat-label class="mat-style-label">Project Display Name</mat-label>
+                                <input matInput class="ml-4" [disabled]="view" placeholder="Enter Display Name..." type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.projectdisplayname" maxlength="255" (keyup)="checkProjectDisplayNameMaxLength()" />
+                                <span class="error note-text" style="font-size: 1.6vmin">
+                                    Note: Alpha numeric and special characters -_. allowed </span>
+                                <mat-error class="ml-4" *ngIf="showDisplayNameLengthErrorMessage == true">{{lengthNameErrorMessage}}</mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="!(view || edit)">
+                        <div>
+                            <mat-form-field appearance="fill" style="width: 90%" floatLabel="always">
+                                <mat-label class="mat-style-label">Project Description</mat-label>
+                                <input matInput class="ml-4" [disabled]="view" placeholder="Enter Description..." type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.description" maxlength="255" (keyup)="checkDescriptionMaxLength()" />
+                                <span class="error note-text" style="font-size: 1.6vmin">
+                                    Note: Alpha numeric and special characters -_. allowed </span>
+                                <mat-error class="ml-4" *ngIf="showDescLengthErrorMessage == true">{{lengthNameErrorMessage}}</mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row rwMAr">
+                    <div class="col-md-6" *ngIf="view || edit">
+                        <div>
+                            <mat-form-field appearance="fill" style="width: 90%" floatLabel="always">
+                                <mat-label class="mat-style-label">Project Description</mat-label>
+                                <input matInput class="ml-4" [disabled]="view" placeholder="Enter Description..." type="text" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.description" maxlength="255" (keyup)="checkDescriptionMaxLength()" />
+                                <span class="error note-text" style="font-size: 1.6vmin">
+                                    Note: Alpha numeric and special characters -_. allowed </span>
+                                <mat-error class="ml-4" *ngIf="showDescLengthErrorMessage == true">{{lengthNameErrorMessage}}</mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="!role?.roleadmin">
+                        <div>
+                            <mat-form-field appearance="fill" style="width: 90%" floatLabel="always">
+                                <mat-label class="mat-style-label">Portfolio Name</mat-label>
+                                <mat-select [(ngModel)]="project.portfolioId" [compareWith]="compareObjects" [disabled]="view" required="" [ngModelOptions]="{ standalone: true }">
+                                    <mat-option *ngFor="let item of usm_portfolio_idArray; trackBy: trackByMethod" [value]="item" [matTooltip]="item.portfolioName">
+                                        {{item.portfolioName}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="!(view || edit)">
+                        <div>
+                            <mat-label class="mat-style-label">Project Theme</mat-label>
+                            <div class="theme-input-container">
+                                <input [disabled]="view" type="color" [(ngModel)]="project.theme" [ngModelOptions]="{ standalone: true }" style="padding:4px; width: 90%" />
+                                <span class="error note-text" style="font-size: 1.6vmin">Note: Selecting Project theme as black/white is not recommended</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row rwMAr">
+                    <div class="col-md-6" *ngIf="!(view || edit) && role?.roleadmin">
+                        <div class="checkbox-field">
+                            <div class="label-checkbox-container">
+                                <mat-label class="mat-style-label">Use Default Roles</mat-label>
+                                <mat-checkbox color="primary" [disabled]="view" [(ngModel)]="project.defaultrole" [ngModelOptions]="{ standalone: true }"></mat-checkbox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="(view || edit) && role?.roleadmin">
+                        <div class="checkbox-field">
+                            <div class="label-checkbox-container">
+                                <mat-label class="mat-style-label">Use Default Roles</mat-label>
+                                <mat-checkbox color="primary" [disabled]="view" [(ngModel)]="project.defaultrole" [ngModelOptions]="{ standalone: true }"></mat-checkbox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="(view || edit) && !role?.roleadmin">
+                        <div class="checkbox-field">
+                            <div class="label-checkbox-container">
+                                <mat-label class="mat-style-label">Use Default Roles</mat-label>
+                                <mat-checkbox color="primary" [disabled]="view" [(ngModel)]="project.defaultrole" [ngModelOptions]="{ standalone: true }"></mat-checkbox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="view || edit">
+                        <div>
+                            <mat-label class="mat-style-label">Project Theme</mat-label>
+                            <div class="theme-input-container">
+                                <input [disabled]="view" type="color" [(ngModel)]="project.theme" [ngModelOptions]="{ standalone: true }" style="padding:4px; width: 90%" />
+                                <span class="error note-text" style="font-size: 1.6vmin">Note: Selecting Project theme as black/white is not recommended</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row rwMAr">
+                    <div class="col-md-6" *ngIf="(view || edit) && !role?.roleadmin">
+                        <div class="checkbox-container">
+                            <div class="checkbox-field">
+                                <div class="label-checkbox-container">
+                                    <mat-label class="mat-style-label">Autologin to Project?</mat-label>
+                                    <mat-checkbox color="primary" [disabled]="view" [(ngModel)]="project.projectAutologin" [ngModelOptions]="{ standalone: true }"></mat-checkbox>
+                                </div>
+                                <span class="error note-text" style="font-size: 1.6vmin">Note: With this option users can autologin to the project using URL</span>
+                            </div>
+                            <div class="checkbox-field mt-3">
+                                <div class="label-checkbox-container">
+                                    <mat-label class="mat-style-label">Assign to auto user project?</mat-label>
+                                    <mat-checkbox color="primary" [disabled]="view" [(ngModel)]="project.autoUserProject" [ngModelOptions]="{ standalone: true }"></mat-checkbox>
+                                </div>
+                                <span class="error note-text" style="font-size: 1.6vmin">Note: With this option the project will be assigned to autouser.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="view || edit">
+                        <div>
+                            <mat-label class="mat-style-label">Project Logo</mat-label>
+                            <div class="file-input-container">
+                                <input id="filename" [disabled]="view" type="file" name="file" [accept]="extension" [disabled]="!extension || !allowedTypes" (change)="profileImageAdded($event)" hidden #fileInput />
+                                <div class="file-input-wrapper">
+                                    <button type="button" mat-stroked-button (click)="fileInput.click()" [disabled]="view || !extension || !allowedTypes">
+                                        Choose File
+                                    </button>
+                                    <span class="file-name">{{ project.logoName ? project.logoName : "No File Chosen" }}</span>
+                                </div>
+                                <img *ngIf="url" [src]="url" class="logo-preview" alt=""/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row rwMAr">
+                    <div class="col-md-6" *ngIf="(view || edit) && project.projectAutologin">
+                        <div>
+                            <mat-form-field appearance="fill" style="width: 90%" floatLabel="always">
+                                <mat-label class="mat-style-label">Autologin Role</mat-label>
+                                <mat-select [(value)]="project.autologinRole" [compareWith]="compareObjects" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.autologinRole" [disabled]="view">
+                                    <mat-option *ngFor="let role of rolesArray" [value]="role">{{role.name}}</mat-option>
+                                </mat-select>
+                                <span class="error note-text" style="font-size: 1.6vmin">Note: Role with which autologin to Project will occur</span>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="(view || edit) && !role?.roleadmin">
+                        <div class="checkbox-field">
+                            <div class="label-checkbox-container">
+                                <mat-label class="mat-style-label">Disable Excel Download?</mat-label>
+                                <mat-checkbox color="primary" [disabled]="view" [(ngModel)]="project.disableExcel" [ngModelOptions]="{ standalone: true }" (ngModelChange)="excelValueChanged($event)"></mat-checkbox>
+                            </div>
+                            <span class="error note-text" style="font-size: 1.6vmin">Note: With this option excel functionality in dashboard can be disabled</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row rwMAr">
+                    <div class="col-md-6" *ngIf="view || edit">
+                        <div>
+                            <mat-form-field appearance="fill" style="width: 90%" floatLabel="always">
+                                <mat-label class="mat-style-label">Time Zone</mat-label>
+                                <mat-select [disabled]="view" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.timeZone" (ngModelChange)="timeZoneChanged($event)">
+                                    <mat-option>---NULL---</mat-option>
+                                    <mat-option *ngFor="let item of tzNames; trackBy: trackByMethod" [value]="item">
+                                        {{ item }}
+                                    </mat-option>
+                                </mat-select>
+                                <span class="error note-text" style="font-size: 1.6vmin">Note: Used for Dashboard Date Filters to work as per Time Zone<br />Value "Asia/Calcutta" is used if option is null or empty</span>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Additional fields for create mode -->
+                <div class="row rwMAr" *ngIf="!(view || edit)">
+                    <div class="col-md-6" *ngIf="!role?.roleadmin">
+                        <div class="checkbox-field">
+                            <div class="label-checkbox-container">
+                                <mat-label class="mat-style-label">Use Default Roles</mat-label>
+                                <mat-checkbox color="primary" [disabled]="view" [(ngModel)]="project.defaultrole" [ngModelOptions]="{ standalone: true }"></mat-checkbox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="!(view || edit) && role?.roleadmin">
+                        <div>
+                            <mat-label class="mat-style-label">Project Logo</mat-label>
+                            <div class="file-input-container">
+                                <input id="filename" [disabled]="view" type="file" name="file" [accept]="extension" [disabled]="!extension || !allowedTypes" (change)="profileImageAdded($event)" hidden #fileInput2 />
+                                <div class="file-input-wrapper">
+                                    <button type="button" mat-stroked-button (click)="fileInput2.click()" [disabled]="view || !extension || !allowedTypes">
+                                        Choose File
+                                    </button>
+                                    <span class="file-name">{{ project.logoName ? project.logoName : "No File Chosen" }}</span>
+                                </div>
+                                <img *ngIf="url" [src]="url" class="logo-preview" alt=""/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row rwMAr" *ngIf="!(view || edit)">
+                    <div class="col-md-6" *ngIf="!role?.roleadmin">
+                        <div>
+                            <mat-label class="mat-style-label">Project Logo</mat-label>
+                            <div class="file-input-container">
+                                <input id="filename" [disabled]="view" type="file" name="file" [accept]="extension" [disabled]="!extension || !allowedTypes" (change)="profileImageAdded($event)" hidden #fileInput3 />
+                                <div class="file-input-wrapper">
+                                    <button type="button" mat-stroked-button (click)="fileInput3.click()" [disabled]="view || !extension || !allowedTypes">
+                                        Choose File
+                                    </button>
+                                    <span class="file-name">{{ project.logoName ? project.logoName : "No File Chosen" }}</span>
+                                </div>
+                                <img *ngIf="url" [src]="url" class="logo-preview" alt=""/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="!(view || edit) && !role?.roleadmin" style="margin-top:10px">
+                        <div class="checkbox-container">
+                            <div class="checkbox-field">
+                                <div class="label-checkbox-container">
+                                    <mat-label class="mat-style-label">Autologin to Project?</mat-label>
+                                    <mat-checkbox color="primary" [disabled]="view" [(ngModel)]="project.projectAutologin" [ngModelOptions]="{ standalone: true }"></mat-checkbox>
+                                </div>
+                                <span class="error note-text" style="font-size: 1.6vmin">Note: With this option users can autologin to the project using URL</span>
+                            </div>
+                            <div class="checkbox-field mt-3">
+                                <div class="label-checkbox-container">
+                                    <mat-label class="mat-style-label">Assign to auto user project?</mat-label>
+                                    <mat-checkbox color="primary" [disabled]="view" [(ngModel)]="project.autoUserProject" [ngModelOptions]="{ standalone: true }"></mat-checkbox>
+                                </div>
+                                <span class="error note-text" style="font-size: 1.6vmin">Note: With this option the project will be assigned to autouser.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row rwMAr" *ngIf="!(view || edit)">
+                    <div class="col-md-6" *ngIf="role?.roleadmin">
+                        <div class="checkbox-field">
+                            <div class="label-checkbox-container">
+                                <mat-label class="mat-style-label">Disable Excel Download?</mat-label>
+                                <mat-checkbox color="primary" [disabled]="view" [(ngModel)]="project.disableExcel" [ngModelOptions]="{ standalone: true }" (ngModelChange)="excelValueChanged($event)"></mat-checkbox>
+                            </div>
+                            <span class="error note-text" style="font-size: 1.6vmin">Note: With this option excel functionality in dashboard can be disabled</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="role?.roleadmin">
+                        <div>
+                            <mat-form-field appearance="fill" style="width: 90%" floatLabel="always">
+                                <mat-label class="mat-style-label">Time Zone</mat-label>
+                                <mat-select [disabled]="view" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.timeZone" (ngModelChange)="timeZoneChanged($event)">
+                                    <mat-option>---NULL---</mat-option>
+                                    <mat-option *ngFor="let item of tzNames; trackBy: trackByMethod" [value]="item">
+                                        {{ item }}
+                                    </mat-option>
+                                </mat-select>
+                                <span class="error note-text" style="font-size: 1.6vmin">Note: Used for Dashboard Date Filters to work as per Time Zone<br />Value "Asia/Calcutta" is used if option is null or empty</span>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row rwMAr" *ngIf="!(view || edit)">
+                    <div class="col-md-6" *ngIf="!role?.roleadmin" style="margin-top:10px">
+                        <div class="checkbox-field">
+                            <div class="label-checkbox-container">
+                                <mat-label class="mat-style-label">Disable Excel Download?</mat-label>
+                                <mat-checkbox color="primary" [disabled]="view" [(ngModel)]="project.disableExcel" [ngModelOptions]="{ standalone: true }" (ngModelChange)="excelValueChanged($event)"></mat-checkbox>
+                            </div>
+                            <span class="error note-text" style="font-size: 1.6vmin">Note: With this option excel functionality in dashboard can be disabled</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="!role?.roleadmin">
+                        <div>
+                            <mat-form-field appearance="fill" style="width: 90%" floatLabel="always">
+                                <mat-label class="mat-style-label">Time Zone</mat-label>
+                                <mat-select [disabled]="view" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.timeZone" (ngModelChange)="timeZoneChanged($event)">
+                                    <mat-option>---NULL---</mat-option>
+                                    <mat-option *ngFor="let item of tzNames; trackBy: trackByMethod" [value]="item">
+                                        {{ item }}
+                                    </mat-option>
+                                </mat-select>
+                                <span class="error note-text" style="font-size: 1.6vmin">Note: Used for Dashboard Date Filters to work as per Time Zone<br />Value "Asia/Calcutta" is used if option is null or empty</span>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row rwMAr" *ngIf="!(view || edit) && !role?.roleadmin && project.projectAutologin">
+                    <div class="col-md-6">
+                        <div>
+                            <mat-form-field appearance="fill" style="width: 90%" floatLabel="always">
+                                <mat-label class="mat-style-label">Autologin Role</mat-label>
+                                <mat-select [(value)]="project.autologinRole" [ngModelOptions]="{ standalone: true }" [(ngModel)]="project.autologinRole">
+                                    <mat-option *ngFor="let role of rolesArray" [value]="role">{{role.name}}</mat-option>
+                                </mat-select>
+                                <span class="error note-text" style="font-size: 1.6vmin">Note: Role with which autologin to Project will occur</span>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </div>
+                   <div *ngIf="!view" class="dialog-buttons">
+                <button *ngIf="!edit && !view" (click)="check(project)" [disabled]="!projectForm.form.valid" mat-raised-button class="save-btn" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">
+                    Save Project
+                </button>
+                <button *ngIf="edit" (click)="check(project)" [disabled]="!projectForm.form.valid" mat-raised-button class="save-btn" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">
+                    Update Project
+                </button>
+                <button class="lfx-u-pad-r-16" mat-raised-button [disabled]="false" *ngIf="!view" (click)="closeProjectAddDialog()"
+                    class="cancel-btn" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">
+                    Cancel
+                </button>
+            </div>
+            </div>
+         
+        </mat-card>
+        </mat-dialog-content>
+    </div>
+    
+     <mat-card class="form-card"  *ngIf="edit">
+      <mat-card-content>            <mat-tab-group class="selector-665-243">
+              <mat-tab *ngIf="!showBluePrint" label="Portfolio-User-Role" class="selector-665-244">
+                <lib-user-project-role-list *ngIf="showCreateUserRole &amp;&amp; project.id" [showCreateUserRole]="showCreateUserRole" [project]="project" class="selector-665-245"></lib-user-project-role-list>
+                <lib-user-project-role-list *ngIf="!showCreateUserRole &amp;&amp; project.id" [showCreateUserRole]="showCreateUserRole" [project]="project" class="selector-665-246"></lib-user-project-role-list>
+              </mat-tab>
+              <mat-tab *ngIf="showBluePrint" label="Copy Blue Print" class="selector-665-247">
+                <div class="ams_panelCnt formRow relative selector-665-248">
+                  <span class="ams_back pull-right linkMar selector-665-249" style="float: right" (click)="showBluePrint = false">Back to Portfolio-User-Role</span>
+                  <i class="fa fa-caret-square-o-left create-icon-color pull-right linkMar selector-665-250" (click)="showBluePrint = false" aria-hidden="true"></i>
+                  <div class="row rwMAr selector-665-251">
+                    <div class="col-md-6 select-style selector-665-252">
+                      <mat-form-field style="width: 85%" class="selector-665-253">
+                        <label class="formLabel selector-665-254">From Project*</label>
+                        <mat-select [disabled]="view" [ngModelOptions]="{ standalone: true }" [(ngModel)]="fromProject" required="" class="selector-665-255">
+                          <mat-option *ngFor="let item of copyblueprintProjects; trackBy: trackByMethod" [value]="item.name" class="selector-665-256">
+                            {{ item.name }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <div class="selector-665-257">
+                 
+                    <button mat-raised-button=""  [ngBusy]="{ busy: busy1, message: 'Copy Blueprint Processing...' }" (click)="copyblueprint()"  [disabled]="clickedcopyblueprint" class="marRght30 selector-665-258">
+                      Copy
+                    </button>
+                  </div>
+                  <div class="col-md-12 noteAlign selector-665-259">
+                    <p style="color: red" class="selector-665-260">
+                      **Note: Copy Blueprint can be done only once for a project and only dashboards and data
+                      related to dashboards will get copied.
+                    </p>
+                  </div>
+                </div>
+              </mat-tab>
+            </mat-tab-group>
+</mat-card-content>
+</mat-card>
+</div>

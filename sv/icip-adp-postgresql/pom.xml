@@ -3,11 +3,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.infosys.icets.ai</groupId>
-		<artifactId>aip</artifactId>
+		<groupId>com.lfn.ai</groupId>
+		<artifactId>essedum</artifactId>
 		<version>3.3-SNAPSHOT</version>
 	</parent>
-	<groupId>com.infosys.icets.icip.plugins</groupId>
+	<groupId>com.lfn.icip.plugins</groupId>
 	<artifactId>icip-adp-postgresql</artifactId>
 	<name>icip-adp-postgresql</name>
 	<properties>
@@ -15,7 +15,7 @@
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-adp</artifactId>
 			<scope>provided</scope>
 		</dependency>
@@ -31,6 +31,10 @@
 				<exclusion>
 					<artifactId>json-smart</artifactId>
 					<groupId>net.minidev</groupId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -58,6 +62,12 @@
 	  <dependency>
 	    <groupId>ch.qos.logback</groupId>
 	    <artifactId>logback-classic</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 	  </dependency>
 
 	</dependencies>
@@ -87,7 +97,7 @@
 							<overWriteReleases>false</overWriteReleases>
 							<overWriteSnapshots>false</overWriteSnapshots>
 							<overWriteIfNewer>true</overWriteIfNewer>
-							<excludeGroupIds>com.infosys.icets.icip,com.infosys,com.infosys.icets.icip.plugins,com.infosys.icets.ai</excludeGroupIds>
+							<excludeGroupIds>com.lfn.icip,com.lfn,com.lfn.icip.plugins,com.lfn.ai</excludeGroupIds>
 							<outputDirectory>${project.build.directory}/lib</outputDirectory>
 						</configuration>
 					</execution>
@@ -102,7 +112,7 @@
 							<overWriteSnapshots>false</overWriteSnapshots>
 							<overWriteIfNewer>true</overWriteIfNewer>
 							<excludeScope></excludeScope>
-							<includeGroupIds>com.infosys.icets.icip,com.infosys,com.infosys.icets.ai</includeGroupIds>
+							<includeGroupIds>com.lfn.icip,com.lfn,com.lfn.ai</includeGroupIds>
 							<outputDirectory>${project.build.directory}/modules</outputDirectory>
 						</configuration>
 					</execution>

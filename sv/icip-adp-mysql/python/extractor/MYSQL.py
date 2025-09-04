@@ -13,19 +13,19 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from leap.core.iExtractor import Extractor
-from leap.utils.Utilities import Utilities
+from essedum.core.iExtractor import Extractor
+from essedum.utils.Utilities import Utilities
 import ast
 import logging as logger
 import mysql.connector
 from urllib.parse import urlparse
-from leap.utils import vault
-from leap.core.iExtractor import Extractor
-from leap.utils.Utilities import Utilities
+from essedum.utils import vault
+from essedum.core.iExtractor import Extractor
+from essedum.utils.Utilities import Utilities
 import ast
 import logging as logger
 from urllib.parse import urlparse
-from leap.utils import vault
+from essedum.utils import vault
 
 class MYSQL(Extractor):
     def __init__(self, datasource_attributes, dataset_attributes):

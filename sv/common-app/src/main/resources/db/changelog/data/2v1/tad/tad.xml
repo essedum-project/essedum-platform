@@ -2,12 +2,12 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 	
 	<!-- 2.1 changes --> 
-	<changeSet author="Leap" id="2v1-tad-1">
+	<changeSet author="Essedum" id="2v1-tad-1">
 		<sql dbms="mysql,mssql" splitStatements="true" stripComments="true"> 
 		UPDATE tad_adapter_config SET configuration_name='Chatbot', tool='chat' WHERE configuration_name='NiaChatbot'
 		</sql>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-tad-2">
+	<changeSet author="Essedum" id="2v1-tad-2">
 		<sql dbms="mysql,mssql" splitStatements="true" stripComments="true"> 
 		UPDATE tad_adapter_config SET purpose_id=2 WHERE tool='Hashicorp' OR tool='CAP' OR tool='cap'
 		</sql>

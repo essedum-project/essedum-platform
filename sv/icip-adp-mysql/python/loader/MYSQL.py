@@ -1,8 +1,8 @@
-from leap.core.iLoader import Loader
+from essedum.core.iLoader import Loader
 from urllib.parse import urlparse
-from leap.utils.Utilities import Utilities
+from essedum.utils.Utilities import Utilities
 import logging as logger
-from leap.utils import vault
+from essedum.utils import vault
 import mysql.connector
 
 class MYSQL(Loader):

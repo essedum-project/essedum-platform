@@ -4,7 +4,7 @@
 	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-	<!--<changeSet author="Leap (generated)" id="1615300415555-80">
+	<!--<changeSet author="Essedum (generated)" id="1615300415555-80">
 		<createTable tableName="sbx_assessment">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -13,7 +13,7 @@
 			<column name="project_id" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-81">
+	<changeSet author="Essedum (generated)" id="1615300415555-81">
 		<createTable tableName="sbx_configuration">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -25,7 +25,7 @@
 			<column name="team_size" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-82">
+	<changeSet author="Essedum (generated)" id="1615300415555-82">
 		<createTable tableName="sbx_criteria">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -34,7 +34,7 @@
 			<column name="type" type="VARCHAR(255)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-83">
+	<changeSet author="Essedum (generated)" id="1615300415555-83">
 		<createTable tableName="sbx_criteria_options">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -43,7 +43,7 @@
 			<column name="criteria_id" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-84">
+	<changeSet author="Essedum (generated)" id="1615300415555-84">
 		<createTable tableName="sbx_datasets_approval">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -57,7 +57,7 @@
 			<column name="userid" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-85">
+	<changeSet author="Essedum (generated)" id="1615300415555-85">
 		<createTable tableName="sbx_individual_participation">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -66,7 +66,7 @@
 			<column name="projectid" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-86">
+	<changeSet author="Essedum (generated)" id="1615300415555-86">
 		<createTable tableName="sbx_project">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -87,7 +87,7 @@
 			<column name="experiment_type" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-87">
+	<changeSet author="Essedum (generated)" id="1615300415555-87">
 		<createTable tableName="sbx_project_datasets">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -96,7 +96,7 @@
 			<column name="projectid" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-88">
+	<changeSet author="Essedum (generated)" id="1615300415555-88">
 		<createTable tableName="sbx_project_evaluators">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -105,7 +105,7 @@
 			<column name="userid" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-89">
+	<changeSet author="Essedum (generated)" id="1615300415555-89">
 		<createTable tableName="sbx_project_img">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -117,7 +117,7 @@
 			<column name="url" type="VARCHAR(255)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-90">
+	<changeSet author="Essedum (generated)" id="1615300415555-90">
 		<createTable tableName="sbx_project_joinstatus">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -129,7 +129,7 @@
 			<column name="teamid" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-91">
+	<changeSet author="Essedum (generated)" id="1615300415555-91">
 		<createTable tableName="sbx_project_owners">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -138,7 +138,7 @@
 			<column name="userid" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-92">
+	<changeSet author="Essedum (generated)" id="1615300415555-92">
 		<createTable tableName="sbx_project_viewstatus">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -152,7 +152,7 @@
 			<column name="projectid" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-93">
+	<changeSet author="Essedum (generated)" id="1615300415555-93">
 		<createTable tableName="sbx_solution">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -167,7 +167,7 @@
 			<column name="final_score" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-94">
+	<changeSet author="Essedum (generated)" id="1615300415555-94">
 		<createTable tableName="sbx_solution_assessment">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -178,7 +178,7 @@
 			<column name="solutionid" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-95">
+	<changeSet author="Essedum (generated)" id="1615300415555-95">
 		<createTable tableName="sbx_solution_files">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -191,7 +191,7 @@
 			<column name="url" type="VARCHAR(255)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-96">
+	<changeSet author="Essedum (generated)" id="1615300415555-96">
 		<createTable tableName="sbx_team">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -203,7 +203,7 @@
 			<column name="owner" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-97">
+	<changeSet author="Essedum (generated)" id="1615300415555-97">
 		<createTable tableName="sbx_team_joinstatus">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -217,7 +217,7 @@
 			<column name="teamid" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-98">
+	<changeSet author="Essedum (generated)" id="1615300415555-98">
 		<createTable tableName="sbx_team_members">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -226,7 +226,7 @@
 			<column name="teamid" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-99">
+	<changeSet author="Essedum (generated)" id="1615300415555-99">
 		<createTable tableName="sbx_team_projects">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -235,7 +235,7 @@
 			<column name="teamid" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-101">
+	<changeSet author="Essedum (generated)" id="1615300415555-101">
 		<createTable tableName="sbx_experiment_type">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -244,7 +244,7 @@
 			<column name="allowed_file_types" type="VARCHAR(255)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1615300415555-102">
+	<changeSet author="Essedum (generated)" id="1615300415555-102">
 		<createTable tableName="sbx_solution_github">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -268,7 +268,7 @@
 	</changeSet>
 	
 	
-	<changeSet author="Leap (generated)" id="1312v0-sbx-104">
+	<changeSet author="Essedum (generated)" id="1312v0-sbx-104">
 		<createTable tableName="sbx_experiment_configuration">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -279,7 +279,7 @@
 	</changeSet>
 	
 	
-	<changeSet author="Leap" id="2v1-sbx-12">
+	<changeSet author="Essedum" id="2v1-sbx-12">
 		<createTable tableName="sbx_discussion">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -295,7 +295,7 @@
 			<column name="orgid" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-13">
+	<changeSet author="Essedum" id="2v1-sbx-13">
 		<createTable tableName="sbx_discussion_comment">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -308,7 +308,7 @@
 			<column name="artefacts" type="VARCHAR(45)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-14">
+	<changeSet author="Essedum" id="2v1-sbx-14">
 		<createTable tableName="sbx_discussion_reaction">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -320,7 +320,7 @@
 			<column name="last_updated_ts" type="datetime" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-15">
+	<changeSet author="Essedum" id="2v1-sbx-15">
 		<createTable tableName="sbx_discussion_shares">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -332,7 +332,7 @@
 			<column name="last_updated_ts" type="datetime" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-16">
+	<changeSet author="Essedum" id="2v1-sbx-16">
 		<createTable tableName="sbx_discussion_tags">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -343,7 +343,7 @@
 			<column name="last_updated_ts" type="datetime" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-17">
+	<changeSet author="Essedum" id="2v1-sbx-17">
 		<createTable tableName="sbx_artefact">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -356,7 +356,7 @@
 			<column name="metadata" type="VARCHAR(255)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-18">
+	<changeSet author="Essedum" id="2v1-sbx-18">
 		<createTable tableName="sbx_comment_reaction">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -368,12 +368,12 @@
 			<column name="last_updated_ts" type="datetime" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-19">	
+	<changeSet author="Essedum" id="2v1-sbx-19">	
 		<addColumn tableName="sbx_discussion_comment">
 			<column name="parent_comment" type="INT" />
 		</addColumn>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-20">
+	<changeSet author="Essedum" id="2v1-sbx-20">
 		<createTable tableName="sbx_category">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -384,7 +384,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap" id="2v1-sbx-21">
+	<changeSet author="Essedum" id="2v1-sbx-21">
 		<createTable tableName="sbx_discussion_category">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -394,7 +394,7 @@
 		</createTable>
 	</changeSet>
 	
-	<changeSet author="Leap" id="2v1-sbx-22">
+	<changeSet author="Essedum" id="2v1-sbx-22">
 		<createTable tableName="sbx_user_subscription">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -403,7 +403,7 @@
 			<column name="category_id" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-23">
+	<changeSet author="Essedum" id="2v1-sbx-23">
 		<createTable tableName="sbx_tags">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -415,7 +415,7 @@
 			<column name="artefact" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-24">
+	<changeSet author="Essedum" id="2v1-sbx-24">
 		<createTable tableName="sbx_artefact_tags">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />
@@ -424,7 +424,7 @@
 			<column name="tag_id" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-sbx-25">
+	<changeSet author="Essedum" id="2v1-sbx-25">
 		<createTable tableName="sbx_basket">
 			<column autoIncrement="true" name="id" type="INT">
 				<constraints primaryKey="true" />

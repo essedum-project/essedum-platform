@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
 /* You can add global styles to this file, and also import other style files */
 $text-primary-80: #333333;
 $bg-neutral-40: #f4f4f4;
@@ -22,6 +24,7 @@ $font-700: 700;
 @import "./assets/css/common-app-styles.css";
 @import "./assets/css/responsive-styles.css";
 @import "~font-awesome/css/font-awesome.min.css";
+@import url("https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap");
 
 .successbackground .mat-mdc-dialog-container {
   background-color: #0b8043;
