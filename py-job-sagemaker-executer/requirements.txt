@@ -10,5 +10,5 @@ gradio
 pandas
 sqlalchemy
 pymysql
-psycopg2
 setuptools
+python-dotenv

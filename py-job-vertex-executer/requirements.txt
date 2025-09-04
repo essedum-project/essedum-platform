@@ -10,6 +10,5 @@ gradio
 pandas
 sqlalchemy
 pymysql
-psycopg2
 google-cloud-aiplatform==1.32.0
 google-cloud-logging==3.6.0
