@@ -117,7 +117,7 @@
                           (click)="onEdit(task)" style="padding-left: 5px"></i>
                         <i class="fa fa-trash fa-lg header-action-icon" aria-hidden="true" style="padding-left: 5px"
                           matTooltip="Delete Portfolio Project Role"
-                          *ngIf="deleteFlag && task.user_id.user_email != 'demouser@infosys.com' && task.project_id.name!='Core'"
+                          *ngIf="deleteFlag && task.user_id.user_email != 'demouser@infosys.com'"
                           (click)="deleteUserProjectRole(task)"></i>
                       </td>
                     </ng-container>
@@ -170,7 +170,7 @@
                           (click)="onEdit(task)" style="padding-left: 5px"></i>
                         <i class="fa fa-trash fa-lg header-action-icon" aria-hidden="true" style="padding-left: 5px"
                           matTooltip="Delete Portfolio User Project"
-                          *ngIf="deleteFlag && task.user_id.user_email != 'demouser@infosys.com' && task.project_id.name!='Core'"
+                          *ngIf="deleteFlag && task.user_id.user_email != 'demouser@infosys.com'"
                           (click)="deleteUserProjectRole(task)"></i>
                       </td>
                     </ng-container>
