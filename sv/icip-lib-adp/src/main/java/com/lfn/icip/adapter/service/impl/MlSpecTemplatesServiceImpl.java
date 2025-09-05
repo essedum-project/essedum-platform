@@ -147,13 +147,23 @@ public class MlSpecTemplatesServiceImpl implements MlSpecTemplatesService {
 		mlSpecTemplates.forEach((spec -> {
 			if (spec.getCapability() != null) {
 				Object capability = JSONValue.parse(spec.getCapability());
-				@SuppressWarnings("unchecked")
-				List<String> capabilityList = (List<String>) capability;
-				capabilityList.forEach((cap) -> {
-					if (!capabilityFilters.contains(cap)) {
-						capabilityFilters.add(cap);
-					}
-				});
+				if (capability instanceof List<?>) {
+				    List<?> rawList = (List<?>) capability;
+				    for (Object item : rawList) {
+				        if (item instanceof String) {
+				            String cap = (String) item;
+				            if (!capabilityFilters.contains(cap)) {
+				                capabilityFilters.add(cap);
+				            }
+				        }
+				    }
+				} else if (capability instanceof String) {
+				    String cap = (String) capability;
+				    if (!capabilityFilters.contains(cap)) {
+				        capabilityFilters.add(cap);
+				    }
+				}
+
 			}
 		}));
 		filters.put("capability", capabilityFilters);
