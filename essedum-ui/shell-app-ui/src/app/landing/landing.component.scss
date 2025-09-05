@@ -70,12 +70,10 @@ mat-drawer-container {
   top: 0;
   bottom: 0;
   left: 0;
-  right: 0;
-  // height: calc(100vh - var(--footerHeight, 35px));
-  margin-top: 43px;
-  /* Same as header height */
-  height: calc(100vh - 88px);
-  /* Adjust main content height */
+  right: 0;  // height: calc(100vh - var(--footerHeight, 35px));
+  margin-top: 43px;  /* Same as header height */
+  height: calc(100vh - 88px);  /* Adjust main content height */
+  scrollbar-width: thin;
   overflow: auto;
 }
 

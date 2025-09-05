@@ -23,7 +23,7 @@
                   <th scope="col" class="actions-column">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody *ngIf="!loading">
                 <tr *ngFor="let constants of pagedDashConstantList; let i = index; trackBy: trackByConstantId"
                   role="row" [attr.aria-rowindex]="i + 1">
                   <td (click)="ViewDashConstants(constants)" class="td-ellipsis number-col clickable-cell"
@@ -64,6 +64,16 @@
                     </div>
                   </td>
                 </tr>
+              </tbody>
+              <tbody *ngIf="loading">
+
+                <div class="aip-loading-container">
+                  <div class="aip-spinner">
+                    <div class="spinner-circle"></div>
+                    <div class="spinner-circle spinner-circle-outer"></div>
+                  </div>
+                </div>
+
               </tbody>
             </table>
           </div>
