@@ -10,20 +10,16 @@
                 </app-aip-header>
 
                 <!-- Filter Section -->
-                <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="servicev1" 
-                    [selectedModelDataSourceList]="{
+                <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="servicev1" [selectedModelDataSourceList]="{
                         dataSourceList: dataSourceList
-                    }" 
-                    (tagSelected)="tagSelectedEvent($event)"
-                    (filterStatusChange)="onFilterStatusChange($event)">
+                    }" (tagSelected)="tagSelectedEvent($event)" (filterStatusChange)="onFilterStatusChange($event)">
                 </app-aip-filter>
             </div>
 
 
             <!-- Cards container -->
-            <div class="lfx-c-card__action-ul aip-card-container lfx-u-pad-b-90">
-                <div class="col-md-8 col-lg-6 col-xl-5 aip-card-wrapper" 
-                    *ngFor="let card of cards">
+            <div class="lfx-c-card__action-ul aip-card-container lfx-u-pad-b-40">
+                <div class="col-md-8 col-lg-6 col-xl-5 aip-card-wrapper" *ngFor="let card of cards">
                     <div class="card-wrapper h-100">
                         <app-aip-card [servicev1]="servicev1" [card]="card" [editAuth]="editAuth"
                             [deployAuth]="deployAuth" [deleteAuth]="deleteAuth"

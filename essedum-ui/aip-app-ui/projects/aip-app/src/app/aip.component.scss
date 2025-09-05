@@ -1282,17 +1282,17 @@ div {
 
   .aip-card-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, 27rem);
-    grid-template-rows: repeat(auto-fit, 15rem);
+    grid-template-columns: repeat(auto-fit, 26.5rem);
+    grid-template-rows: repeat(auto-fit, 14rem);
     justify-content: center;
-    grid-row-gap: 2.4rem;
-    grid-column-gap: 2.4rem;
+    grid-row-gap: 2rem;
+    grid-column-gap: 2rem;
     // padding-bottom: 56px;
   }
 
   .aip-card-wrapper {
-    min-width: 27rem;
-    min-height: 15rem;
+    min-width: 26.5rem;
+    min-height: 14rem;
 
     @media (max-width: 576px) {
       width: 100%;
@@ -1307,6 +1307,11 @@ div {
   .lfx-u-pad-b-40 {
     padding-bottom: 40px !important;
   }
+
+  .lfx-u-pad-b-45 {
+    padding-bottom: 45px !important;
+  }
+
 
   .lfx-u-mar-b-50 {
     margin-bottom: 50px !important;
