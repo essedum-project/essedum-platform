@@ -37,6 +37,7 @@ $font-700: 700;
   width: 100px !important;
   margin-right: 18px;
 }
+
 .carousel-control-next-icon {
   background-image: url(./assets/images/caurosel/next.png) !important;
   height: 70px !important;
@@ -97,29 +98,22 @@ $font-700: 700;
 .mdc-tab .mdc-tab__ripple::after {
   background-color: white;
 }
+
 .mdc-tab .mdc-tab__ripple::before {
   background-color: white;
 }
 
-.cdk-overlay-pane:not(.mat-mdc-select-panel-above)
-  .mdc-menu-surface.mat-mdc-select-panel {
+.cdk-overlay-pane:not(.mat-mdc-select-panel-above) .mdc-menu-surface.mat-mdc-select-panel {
   min-width: 222.312px !important;
 }
 
-// .mat-mdc-select-value-text {
-//   font-family: 'UniversLTStd';
-// }
-
-.mat-primary
-  .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled)
-  .mdc-list-item__primary-text {
+.mat-primary .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) .mdc-list-item__primary-text {
   color: black;
   // font-family: 'UniversLTStd';
 }
 
 .mat-primary .mat-pseudo-checkbox-checked.mat-pseudo-checkbox-minimal::after,
-.mat-primary
-  .mat-pseudo-checkbox-indeterminate.mat-pseudo-checkbox-minimal::after {
+.mat-primary .mat-pseudo-checkbox-indeterminate.mat-pseudo-checkbox-minimal::after {
   color: black;
 }
 
@@ -168,10 +162,12 @@ app-footer .container-fluid {
 .mat-mdc-tab-labels {
   margin-left: 0 !important;
 }
+
 .mat-mdc-tab .mdc-tab__text-label {
   font-size: 1.2rem;
   font-weight: 600;
 }
+
 .mat-mdc-tab-header-pagination-controls-enabled .mat-mdc-tab-header-pagination {
   display: none !important;
 }
@@ -179,6 +175,7 @@ app-footer .container-fluid {
 .lfx-u-mar-b-24 {
   margin-bottom: 24px !important;
 }
+
 .lfx-u-text-white {
   color: #fff !important;
 }
@@ -192,7 +189,7 @@ app-footer .container-fluid {
 }
 
 .lfx-u-body-xxl {
-  font-family: "Myriad Pro", "Myriad Apple Text", "Open Sans", sans-serif !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
   font-size: 2.8rem;
   font-weight: 600;
   font-style: normal;
@@ -211,6 +208,7 @@ app-footer .container-fluid {
   height: 16px;
   font-size: 16px;
 }
+
 .icon-inline {
   display: inline-block;
 }
@@ -252,6 +250,7 @@ app-footer .container-fluid {
   display: flex;
   transition: height 500ms cubic-bezier(0.35, 0, 0.25, 1);
 }
+
 .mat-mdc-tab-header {
   display: flex;
   overflow: hidden;
@@ -311,12 +310,12 @@ app-footer .container-fluid {
 }
 
 .sidebar-menu-open {
-  margin-left: 170px; /* or the width of your sidebar-menu-popup */
+  margin-left: 170px;  /* or the width of your sidebar-menu-popup */
   transition: margin-left 0.3s;
 }
 
 .sidebar-menu-open {
-  width: calc(100% - 170px); /* adjust 170px to your sidebar width */
+  width: calc(100% - 30px);  /* adjust 170px to your sidebar width */
   transition: width 0.3s;
 }
 

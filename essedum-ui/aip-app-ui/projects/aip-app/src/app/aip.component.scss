@@ -15,13 +15,14 @@ html {
   body {
     background-color: var(--background-colour) !important;
   }
+
   body,
   html {
     font-family: "Roboto", "Segoe UI", sans-serif !important;
   }
 
-  .le-c-dropdown__list li > a,
-  .le-c-dropdown__list li > span {
+  .le-c-dropdown__list li>a,
+  .le-c-dropdown__list li>span {
     padding: 0.4rem 1.6rem;
   }
 
@@ -192,7 +193,7 @@ html {
     outline: none;
   }
 
-  .aip-select-adapter-dropDown > option {
+  .aip-select-adapter-dropDown>option {
     // background-color: white;
     background-color: var(--background-colour) !important;
   }
@@ -604,8 +605,7 @@ html {
   padding-right: 0.3rem;
 }
 
-@media (width<=576px) {
-}
+@media (width<=576px) {}
 
 .ace_print-margin ::ng-deep {
   left: 0 !important;
@@ -643,7 +643,7 @@ html {
   word-break: break-all;
 }
 
-::ng-deep.aip-hover-avatar:hover ~ .aip-hover-detail {
+::ng-deep.aip-hover-avatar:hover~.aip-hover-detail {
   display: block;
   transition: display 1s ease-out 0.5s;
 }
@@ -719,6 +719,7 @@ div {
 }
 
 ::ng-deep {
+
   //for global CSS datasets, connections , model
   .lfx-u-pad-8 {
     padding: 8px !important;
@@ -1096,15 +1097,11 @@ div {
   }
 
   // Show underline only for readonly input fields, hide for normal fields
-  .mat-mdc-form-field.mat-mdc-form-field-type-mat-input:not(
-      .mat-form-field-readonly
-    )
-    .mdc-line-ripple {
+  .mat-mdc-form-field.mat-mdc-form-field-type-mat-input:not(.mat-form-field-readonly) .mdc-line-ripple {
     display: none !important;
   }
 
-  .mat-mdc-form-field.mat-mdc-form-field-type-mat-input.mat-form-field-readonly
-    .mdc-line-ripple {
+  .mat-mdc-form-field.mat-mdc-form-field-type-mat-input.mat-form-field-readonly .mdc-line-ripple {
     display: block !important;
   }
 
@@ -1123,10 +1120,12 @@ div {
   .lfx-u-mar-r-16 {
     margin-right: 16px !important;
   }
+
   .lfx-u-pad-lr-16 {
     padding-left: 16px !important;
     padding-right: 16px !important;
   }
+
   .lfx-u-mar-t-16 {
     margin-top: 16px !important;
   }
@@ -1156,6 +1155,7 @@ div {
     padding: 30px 20px;
     min-height: 500px;
   }
+
   .lfx-l-level1-wrapper .lfx-l-whiteBG {
     background: #ffffff;
   }
@@ -1229,6 +1229,7 @@ div {
   .lfx-u-pad-l-16 {
     padding-left: 16px !important;
   }
+
   .lfx-u-pad-l-4 {
     padding-left: 4px !important;
   }
@@ -1267,6 +1268,7 @@ div {
 }
 
 ::ng-deep {
+
   // Dashboard Styles
   #mainCtr {
     width: 100%;
@@ -1280,17 +1282,17 @@ div {
 
   .aip-card-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, 27rem);
-    grid-template-rows: repeat(auto-fit, 15rem);
+    grid-template-columns: repeat(auto-fit, 26.5rem);
+    grid-template-rows: repeat(auto-fit, 14rem);
     justify-content: center;
-    grid-row-gap: 2.4rem;
-    grid-column-gap: 2.4rem;
+    grid-row-gap: 2rem;
+    grid-column-gap: 2rem;
     // padding-bottom: 56px;
   }
 
   .aip-card-wrapper {
-    min-width: 27em;
-    min-height: 15rem;
+    min-width: 26.5rem;
+    min-height: 14rem;
 
     @media (max-width: 576px) {
       width: 100%;
@@ -1302,6 +1304,15 @@ div {
     padding-right: 30px !important;
   }
 
+  .lfx-u-pad-b-40 {
+    padding-bottom: 40px !important;
+  }
+
+  .lfx-u-pad-b-45 {
+    padding-bottom: 45px !important;
+  }
+
+
   .lfx-u-mar-b-50 {
     margin-bottom: 50px !important;
   }
@@ -1312,6 +1323,7 @@ div {
 }
 
 ::ng-deep {
+
   .container,
   .container-fluid {
     padding-right: 16px;
@@ -1379,6 +1391,7 @@ div {
   .ml-10 {
     margin-left: 10px !important;
   }
+
   .ml-20 {
     margin-left: 20px !important;
   }
