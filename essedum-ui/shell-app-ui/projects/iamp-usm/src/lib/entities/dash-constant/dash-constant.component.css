@@ -407,7 +407,7 @@ textarea:focus {
 }
 
 .treeBox {
-  width: 600px;
+  width: 500px;
   overflow: auto;
   font-family: "Roboto", "Segoe UI", sans-serif !important;
 }
@@ -878,4 +878,16 @@ input[type="radio"].radioButtonColor {
 ::ng-deep .mat-icon,
 ::ng-deep .material-icons {
   font-family: 'Material Icons' !important;
+}
+
+.hover-blue:hover {
+  color: #0094ff !important;
+}
+
+.hover-red:hover {
+  color: #ff0000 !important;
+}
+
+.lfx-u-pad-b-40 {
+  padding-bottom: 40px !important;
 }
