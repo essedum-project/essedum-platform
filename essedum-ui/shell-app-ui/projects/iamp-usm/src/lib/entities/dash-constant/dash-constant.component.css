@@ -394,11 +394,21 @@ textarea:focus {
   display: none;
 }
 
+/* Remove ul/li styles since we're not using them anymore for tree nodes */
 .example-tree ul,
 .example-tree li {
   margin-top: 0;
   margin-bottom: 0;
   list-style-type: none;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+/* Ensure tree nodes have proper structure */
+.mat-tree-node {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding-left: 16px;
   font-family: "Roboto", "Segoe UI", sans-serif !important;
 }
 
