@@ -89,6 +89,10 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
   pageSize: number = 5;
   pageInde = 0;
   pageEvent: any;
+  module = "";
+  permission:any;
+  role:any;
+
 
   private sort: MatSort;
   selectedAdapterType: any;
@@ -614,8 +618,38 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
     orderBy: string
   ) {
     try {
+  // Handle various formats of role parameter
+    let roleName = "";
+    if (this.role === "All") {
+      roleName = "";
+    } else if (typeof this.role === 'object' && this.role !== null) {
+      // If role is an object, extract the name
+      roleName = this.role.name || "";
+    } else if (typeof this.role === 'string') {
+      // If role is already a string but not "All"
+      roleName = this.role;
+    }
+
+ // Handle permission parameter - could be a string, array, or object
+    let permissionName = "";
+    if (this.permission) {
+      if (Array.isArray(this.permission) && this.permission.length > 0) {
+        // Use the first permission's value for API filtering
+        permissionName = this.permission[0].permission || "";
+      } else if (typeof this.permission === 'object') {
+        permissionName = this.permission.permission || "";
+      } else if (typeof this.permission === 'string') {
+        permissionName = this.permission;
+      }
+    }
       this.usmRolePermissionsService
-        .findAllPaginated(pageIndex, pageSize, sortField, orderBy)
+        .findAllSearched( this.module,
+        permissionName,
+        roleName,
+        pageIndex,
+        pageSize,
+        null,
+        null)
         .subscribe(
           (pageResponse) => {
             // Check if we received valid data
@@ -899,13 +933,14 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
       (response) => {
         console.log(`Delete response for ID ${id}:`, response);
         this.testCreate = true;
+        this.loadPaginated(0, this.pageSize, null, null);
         this.currentPage.remove(usmRolePermissionsToDelete);
-        this.deletedashconstant(usmRolePermissionsToDelete);        
+        this.deletedashconstant(usmRolePermissionsToDelete);
         this.messageService.messageNotification(
           "Role-Permission Deleted successfully"
         );
-  this.loadPaginated(0, this.pageSize, null, null);
         this.Clear();
+        this.lastRefreshTime();
       },
       (error) => {
         console.error(`Error deleting role permission with ID ${id}:`, error);
@@ -1232,6 +1267,9 @@ export class UsmRolePermissionComponent implements OnInit, OnDestroy {
       console.log("Filtering by role, module, permission:", roleName, moduleName, permissionFilter);
       
       // Pass the full array to SearchedPage which will handle extracting the appropriate value
+      this.role=roleName;
+      this.permission=permissionFilter;
+      this.module=moduleName;
       this.SearchedPage(false, moduleName, permissionFilter, roleName);
       this.paginator.firstPage();
     } else {

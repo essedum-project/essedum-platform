@@ -20,6 +20,7 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatButtonModule } from "@angular/material/button";
 import { MatChipsModule } from "@angular/material/chips";
 import { MatSelectModule } from "@angular/material/select";
+import { NgxMatSelectSearchModule } from "ngx-mat-select-search";
 import { UsmPermissionsService } from "../../services/usm-permission.service";
 import { RoleService } from "../../services/role.service";
 import { Project } from "../../models/project";
@@ -72,6 +73,7 @@ enum FilterType {
     MatButtonModule,
     MatChipsModule,
     MatSelectModule,
+    NgxMatSelectSearchModule,
   ],
 })
 export class AipFilterComponent implements OnInit, OnChanges {
@@ -567,6 +569,16 @@ export class AipFilterComponent implements OnInit, OnChanges {
     }
     return o1.id === o2.id;
   }
+  
+  compareObjects1(o1: any, o2: any): boolean {
+    if (!o1 || !o2) {
+      return o1 === o2;
+    }
+    if (o1 === "All" || o2 === "All") {
+      return o1 === o2;
+    }
+    return o1.id === o2.id && o1.module === o2.module && o1.permission === o2.permission;
+  }
 
   roleSelectionChanged(event: any): void {
     this.showRoleError = !this.rolePermission.role;
@@ -702,5 +714,24 @@ export class AipFilterComponent implements OnInit, OnChanges {
     this.filteredPermissions = this.modulepermissionarray;    
     console.log('Module filter removed, reset to:', this.rolePermission.module);
     this.applyFilters();
+  }
+
+  /**
+   * Filter permissions based on search text
+   */
+  onKey(searchValue: string): void {
+    const search = searchValue.toLowerCase().trim();
+    if (!search) {
+      // If search is cleared, show all permissions based on current module selection
+      this.filteredPermissions = this.getPermissionsByModule();
+      return;
+    }
+
+    // Filter permissions based on search text and current module selection
+    const baseList = this.getPermissionsByModule();
+    this.filteredPermissions = baseList.filter(item => {
+      return item.permission.toLowerCase().includes(search) || 
+             item.module.toLowerCase().includes(search);
+    });
   }
 }
