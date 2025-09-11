@@ -6,7 +6,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 	
-	<changeSet author="Essedum (generated)" id="161855528233234443-3">
+<!--	<changeSet author="Essedum (generated)" id="161855528233234443-3">
 		<preConditions onFail="MARK_RAN">
 		<not>
 		<indexExists indexName="adp_config_fk_project_id" />
@@ -37,6 +37,6 @@
 	<changeSet author="Essedum (generated)" id="1312v0-tad-10004">
 	 <preConditions onFail="MARK_RAN"> <not> <foreignKeyConstraintExists foreignKeyName="purpose_fk" /> </not> </preConditions>
 		<addForeignKeyConstraint baseColumnNames="purpose_id" baseTableName="tad_adapter_config" constraintName="purpose_fk" deferrable="false" initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE" referencedColumnNames="purpose_id" referencedTableName="tad_adapter_purpose" />
-	</changeSet>
+	</changeSet>-->
 
 </databaseChangeLog>	
