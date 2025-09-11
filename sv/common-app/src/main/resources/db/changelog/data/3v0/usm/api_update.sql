@@ -12,15 +12,6 @@ UPDATE usm_permission_api SET api='/api/projects' WHERE permission_id =(SELECT i
 UPDATE usm_permission_api SET api='/api/roles' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm' AND permission ='role-edit' LIMIT 1) AND api='/api/roles/';
 UPDATE usm_permission_api SET api='/api/users/page.*' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm' AND permission ='users-view' LIMIT 1) AND api='/api/users/page';
 UPDATE usm_permission_api SET api='/api/userss' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm' AND permission ='userss-edit' LIMIT 1) AND api='/api/userss/';
-UPDATE usm_permission_api SET api='/api/bcc-configuration-item-types/' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'cfm' AND permission ='bcc-configuration-item-types-create' LIMIT 1) AND api='/api/bcc-configuration-item-types';
-UPDATE usm_permission_api SET api='/api/bcc-configuration-item-types/' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'cfm' AND permission ='bcc-configuration-item-types-edit' LIMIT 1) AND api='/api/bcc-configuration-item-types';
-UPDATE usm_permission_api SET api='/api/bcc-configuration-items/' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'cfm' AND permission ='bcc-configuration-items-create' LIMIT 1) AND api='/api/bcc-configuration-items';
-UPDATE usm_permission_api SET api='/api/bcc-configuration-items/' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'cfm' AND permission ='bcc-configuration-items-edit' LIMIT 1) AND api='/api/bcc-configuration-items';
-UPDATE usm_permission_api SET api='/api/bcc-metrics-masters/' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'bcc' AND permission ='metrics-masters-create' LIMIT 1) AND api='/api/bcc-metrics-masters';
-UPDATE usm_permission_api SET api='/api/bcc-metrics-masters/' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'bcc' AND permission ='metrics-masters-edit' LIMIT 1) AND api='/api/bcc-metrics-masters';
-UPDATE usm_permission_api SET api='/api/bcc-svgs/' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'bcc' AND permission ='svgs-create' LIMIT 1) AND api='/api/bcc-svgs';
-UPDATE usm_permission_api SET api='/api/bcc-svg-elementss-list/' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'bcc' AND permission ='svg-elementss-list-create' LIMIT 1) AND api='/api/bcc-svg-elementss-list';
-UPDATE usm_permission_api SET api='/api/bcc-svg-dashboard-mappings/' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'bcc' AND permission ='svg-dashboard-mappings-create' LIMIT 1) AND api='/api/bcc-svg-dashboard-mappings';
 UPDATE usm_permission_api SET api='/api/dash-constants/' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm' AND permission ='dash-constants-create' LIMIT 1) AND api='/api/dash-constants';
 UPDATE usm_permission_api SET api='/api/get-extension-key?.*' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm' AND permission ='get-extension-key-view' LIMIT 1) AND api='/api/get-extension-key';
 UPDATE usm_permission_api SET api='/api/roles' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm' AND permission ='roles-create' LIMIT 1) AND api='/api/roles/';
@@ -40,8 +31,7 @@ UPDATE usm_permission_api SET api='/api/search/usm-portfolios/page.*' WHERE perm
 UPDATE usm_permission_api SET api='/api/search/projects/page.*' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm' AND permission ='projects-page-create' LIMIT 1) AND api='/api/search/projects/page';
 UPDATE usm_permission_api SET api='/api/widget-configurations/.*' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'dbs' AND permission ='widget-configurations-delete' LIMIT 1) AND api='/api/widget-configurations/[0-9]{0,6}/[A-Za-z0-9-_ ]*';
 UPDATE usm_permission_api SET api='/api/widget-configurations/' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'dbs' AND permission ='widget-configurations-edit' LIMIT 1) AND api='/api/widget-configurations';
-INSERT INTO usm_permissions (module,permission) VALUES ('cfm','dashboard-configurations-page');
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/dashboard-configurations-page', 'GET', 1, 'get the page of dashboard-configurations', id FROM usm_permissions WHERE module = 'cfm'  AND permission ='dashboard-configurations-page' LIMIT 1;
+
 INSERT INTO usm_permissions (module,permission) VALUES ('dbs','get-dashboard-data');
 INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/dashboard-configurations/get-data/.*/.*', 'POST', 1, 'get Dashboard data in Excel', id FROM usm_permissions WHERE module = 'dbs'  AND permission ='get-dashboard-data' LIMIT 1;
 INSERT INTO usm_permissions (module,permission) VALUES ('dbs','dashboard-configurations-update');
@@ -50,20 +40,6 @@ INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permissio
 INSERT INTO usm_permissions (module,permission) VALUES ('usm','get-startup-constants');
 INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/get-startup-constants/[A-Za-z0-9- _.]*/[A-Za-z0-9- _]*', 'GET', 1, 'get the startup-constants', id FROM usm_permissions WHERE module = 'usm'  AND permission ='get-startup-constants' LIMIT 1;
 
-UPDATE usm_permission_api SET api='/iegp/configurationApp/Account/CreatePortfolio/', permission_id=(SELECT id FROM usm_permissions WHERE module = 'iegp'  AND permission ='dashboard-view' LIMIT 1) WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'iegp'  AND permission ='account create' LIMIT 1) AND api='/iegp/configurationApp/Account/CreatePortfolio';
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/iegp/configurationApp/Account/RegisterNewAdmin/', 'POST', 0, 'create the new admin user', id FROM usm_permissions WHERE module = 'iegp'  AND permission ='dashboard-view' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/iegp/configurationApp/Sprint/FetchDataFromSource/', 'POST', 0, 'CopySprint', id FROM usm_permissions WHERE module = 'iegp'  AND permission ='sprint-view' LIMIT 1;
-INSERT INTO usm_permissions (module,permission) Values('iegp','resource-view');
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/iegp/configurationApp/ConstraintResource/GetConstraintResources/', 'POST', 0, 'ConstraintResource', id FROM usm_permissions WHERE module = 'iegp'  AND permission ='resource-view' LIMIT 1;
-INSERT INTO usm_permissions (module,permission) Values('iegp','resource-create');
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/iegp/configurationApp/ConstraintResource/CreateConstraintResource/', 'POST', 0, 'CreateConstraintResource', id FROM usm_permissions WHERE module = 'iegp'  AND permission ='resource-create' LIMIT 1;
-INSERT INTO usm_permissions (module,permission) Values('iegp','resource-edit');
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/iegp/configurationApp/ConstraintResource/UpdateConstraintResource/', 'POST', 0, 'UpdateConstraintResource', id FROM usm_permissions WHERE module = 'iegp'  AND permission ='resource-edit' LIMIT 1;
-INSERT INTO usm_permissions (module,permission) Values('iegp','resource-delete');
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/iegp/configurationApp/ConstraintResource/RemoveConstraintResource/', 'POST', 0, 'RemoveConstraintResource', id FROM usm_permissions WHERE module = 'iegp'  AND permission ='resource-delete' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/iegp/configurationApp/Sprint/FetchUserTargetForEachSprintMetricEntity/', 'POST', 1, 'View the Sprint metric entity', id FROM usm_permissions WHERE module = 'iegp'  AND permission ='sprint-view' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/iegp/configurationApp/Sprint/CopySprintFromSrcToDest/', 'POST', 1, 'copy sprint ', id FROM usm_permissions WHERE module = 'iegp'  AND permission ='sprint-edit' LIMIT 1;
-UPDATE usm_permission_api SET type='POST' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'iegp' AND permission ='dashboard-view' LIMIT 1) AND api='/iegp/configurationApp/Account/CreatePortfolio/';
 
 
 UPDATE usm_permission_api SET api='/api/usm-permissionss/' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm'  AND permission ='permission-create' LIMIT 1) AND api='/api/usm-permissionss';
@@ -261,460 +237,14 @@ UPDATE usm_permission_api SET api='/api/internaljob/jobname/[A-Za-z0-9- _.]*/[A-
 UPDATE usm_permission_api SET api='/api/pipeline/getPipelines/[A-Za-z0-9- _]*.*' where permission_id =(SELECT id FROM usm_permissions WHERE module = 'is_whitelisted'  AND permission ='pipeline-getPipelines' LIMIT 1) and api="/api/pipeline/getPipelines/[A-Za-z0-9- _]*";
 
 
--- for sre module permissions
-INSERT INTO usm_permissions (module,permission) Values('sre','view-txn-availability');
-INSERT INTO usm_permissions (module,permission) Values('sre','edit-txn-availability');
-INSERT INTO usm_permissions (module,permission) Values('sre','upload-txn-availability');
-INSERT INTO usm_permissions (module,permission) Values('sre','upload-txn-availability-page');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-txn-availability-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','delete-txn-availability-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probes-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','delete-probes-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','create-probes');
-INSERT INTO usm_permissions (module,permission) Values('sre','edit-probes');
-INSERT INTO usm_permissions (module,permission) Values('sre','upload-probes');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probes-in-excel-projectId');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-app-downtimes-all-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-app-downtimes-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','delete-app-downtimes-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','create-app-downtimes');
-INSERT INTO usm_permissions (module,permission) Values('sre','edit-app-downtimes');
-INSERT INTO usm_permissions (module,permission) Values('sre','upload-sre-downtime');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-downtimes-in-excel-projectid');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-locations-all-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-locations-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','create-locations');
-INSERT INTO usm_permissions (module,permission) Values('sre','edit-locations');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-locations');
-INSERT INTO usm_permissions (module,permission) Values('sre','upload-locations-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-locations-in-excel-projectId');
-INSERT INTO usm_permissions (module,permission) Values('sre','create-probe-locations');
-INSERT INTO usm_permissions (module,permission) Values('sre','edit-probe-locations');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probe-locations');
-INSERT INTO usm_permissions (module,permission) Values('sre','delete-probe-locations-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probe-locations-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probe-locations-all-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probes-environment-applicationId');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probes-operating-system-applicationId');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probes-version-applicationId');
-INSERT INTO usm_permissions (module,permission) Values('sre','edit-probe-run-apps-page');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probe-run-app-n-page');
-INSERT INTO usm_permissions (module,permission) Values('sre','create-probe-run-apps');
-INSERT INTO usm_permissions (module,permission) Values('sre','edit-probe-run-apps');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probe-run-apps');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probe-run-apps-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','delete-probe-run-apps-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','create-probe-run-app-txns-page');
-INSERT INTO usm_permissions (module,permission) Values('sre','create-probe-run-apps-txns');
-INSERT INTO usm_permissions (module,permission) Values('sre','edit-probe-run-app-txns');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probe-run-app-txns');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probe-run-app-txns-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','delete-probe-run-app-txns-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probe-run-rundetailss-page');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probe-run-rundetailss-n-probeRunAppId');
-INSERT INTO usm_permissions (module,permission) Values('sre','create-probe-run-rundetailss');
-INSERT INTO usm_permissions (module,permission) Values('sre','edit-probe-run-rundetailss');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probe-run-rundetailss');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probe-run-rundetailss-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','delete-probe-run-rundetailss-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','create-app-txn-availabilitys-page');
-INSERT INTO usm_permissions (module,permission) Values('sre','edit-app-txn-availabiltitys');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-app-txn-availabilitys');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-app-txn-availabilitys-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','delete-app-txn-availabilitys-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-app-availability-n');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-app-availability-probe-location-n');
-INSERT INTO usm_permissions (module,permission) Values('sre','upload-downtime');
-INSERT INTO usm_permissions (module,permission) Values('sre','upload-app-grps');
-INSERT INTO usm_permissions (module,permission) Values('sre','upload-app');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-ccl-grps-page');
-INSERT INTO usm_permissions (module,permission) Values('sre','create-ccl-app-grps');
-INSERT INTO usm_permissions (module,permission) Values('sre','edit-ccl-app-grps');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-ccl-app-grps');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-ccl-app-grps-app-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-ccl-app-grps-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','delete-ccl-app-grps');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-ccl-apps-page');
-INSERT INTO usm_permissions (module,permission) Values('sre','create-ccl-apps');
-INSERT INTO usm_permissions (module,permission) Values('sre','edit-ccl-apps');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-ccl-apps');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-ccl-apps-all-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-ccl-apps-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','delete-ccl-apps-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-ccl-app-txns-page');
-INSERT INTO usm_permissions (module,permission) Values('sre','create-ccl-app-txns');
-INSERT INTO usm_permissions (module,permission) Values('sre','edit-ccl-app-txns');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-ccl-app-txns');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-ccl-app-txns-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','delete-ccl-app-txns-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','upload-probes-locations-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-probes-all-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','create-app-downtime-page');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-app-downtimes');
-INSERT INTO usm_permissions (module,permission) Values('sre','create-app-txn-availabilitys');
-INSERT INTO usm_permissions (module,permission) Values('sre','delete-locations-id');
-INSERT INTO usm_permissions (module,permission) Values('sre','view-dst-display-probe-locations');
 
 
--- for sre module api's
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/app-txn-availability','GET',0,'view application transaction avaialability',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-txn-availability' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/app-txn-availability','PUT',0,'edit application transaction availability',id FROM usm_permissions WHERE module = 'sre' AND permission  ='edit-txn-availability' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/app-txn-availability','POST',0,'create application transaction availability',id FROM usm_permissions WHERE module = 'sre' AND permission  ='upload-txn-availability' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/app-txn-availability/page','POST',0,'create application transaction availability by page',id FROM usm_permissions WHERE module = 'sre' AND permission  ='upload-txn-availability-page' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/app-txn-availability/[0-9]*','GET',0,'view application transaction avaialability by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-txn-availability-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/app-txn-availability/[0-9]*','DELETE',0,'delete application transaction availability by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='delete-txn-availability-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probes/[0-9]*','GET',0,'view sre-probes by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probes-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probes/[0-9]*','DELETE',0,'delete sre-probes by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='delete-probes-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probes/','POST',0,'create sre-probes',id FROM usm_permissions WHERE module = 'sre' AND permission  ='create-probes' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probes','PUT',0,'edit sre-probes',id FROM usm_permissions WHERE module = 'sre' AND permission  ='edit-probes' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/uploadProbes','POST',0,'create by upload sre-probes',id FROM usm_permissions WHERE module = 'sre' AND permission  ='upload-probes' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/getProbesInExcel/[0-9]*','GET',0,'view sre-probes-in-excel by projectId',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probes-in-excel-projectId' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-app-downtimes-all/[0-9]*','GET',0,'view sre-app-downtimes-all by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-app-downtimes-all-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-app-downtimes/[0-9]*','GET',0,'view sre-app-downtimes by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-app-downtimes-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-app-downtimes/[0-9]*','DELETE',0,'delete sre-app-downtimes by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='delete-app-downtimes-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-app-downtimes','POST',0,'create sre-app-downtimes',id FROM usm_permissions WHERE module = 'sre' AND permission  ='create-app-downtimes' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-app-downtimes','PUT',0,'edit sre-app-downtimes',id FROM usm_permissions WHERE module = 'sre' AND permission  ='edit-app-downtimes' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/uploadSreDowntime','POST',0,'create uploadSreDowntime',id FROM usm_permissions WHERE module = 'sre' AND permission  ='upload-sre-downtime' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/getDowntimesInExcel/[0-9]*','GET',0,'view sre-downtimes-in excel by project id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-downtimes-in-excel-projectid' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-locations-all/[0-9]*','GET',0,'view sre-locations-all by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-locations-all-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-locations/[0-9]*','GET',0,'view sre-locations-id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-locations-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-locations','POST',0,'create sre-locations',id FROM usm_permissions WHERE module = 'sre' AND permission  ='create-locations' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-locations','PUT',0,'edit sre-locations',id FROM usm_permissions WHERE module = 'sre' AND permission  ='edit-locations' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-locations','GET',0,'view sre-locations',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-locations' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/uploadLocations/[0-9]*','POST',0,'create byupload sre-locations',id FROM usm_permissions WHERE module = 'sre' AND permission  ='upload-locations-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/getLocationsInExcel/[0-9]*','GET',0,'view sre-locations-in-excel by projectid',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-locations-in-excel-projectId' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-locations','POST',0,'create sre-probe-locations',id FROM usm_permissions WHERE module = 'sre' AND permission  ='create-probe-locations' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-locations','PUT',0,'edit sre-probe-locations',id FROM usm_permissions WHERE module = 'sre' AND permission  ='edit-probe-locations' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-locations','GET',0,'view sre-probe-locations',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probe-locations' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-locations/[0-9]*','DELETE',0,'delete sre-probe-locations by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='delete-probe-locations-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-locations/[0-9]*','GET',0,'view sre-probe-locations by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probe-locations-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-locations-all/[0-9]*','GET',0,'view sre-probe-locations-all by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probe-locations-all-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probes-environment/[0-9]*','GET',0,'view sre-probes-environment by applicationId',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probes-environment-applicationId' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probes-operating-system/[0-9]*','GET',0,'view sre-probes-operating-system by applicationId',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probes-operating-system-applicationId' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probes-version/[0-9]*','GET',0,'view sre-probes-version by applicationId',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probes-version-applicationId' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-apps/page','POST',0,'create sre-probe-run-apps page',id FROM usm_permissions WHERE module = 'sre' AND permission  ='edit-probe-run-apps-page' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-apps-n/page','GET',0,'view-sre-probe-run-apps-n page',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probe-run-app-n-page' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-apps','POST',0,'create sre-probe-run-apps -n page',id FROM usm_permissions WHERE module = 'sre' AND permission  ='create-probe-run-apps' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-apps','PUT',0,'edit sre-probe-run-apps',id FROM usm_permissions WHERE module = 'sre' AND permission  ='edit-probe-run-apps' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-apps','GET',0,'view sre-probe-run-apps',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probe-run-apps' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-apps/[0-9]*','GET',0,'view sre-probe-run-apps by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probe-run-apps-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-apps/[0-9]*','DELETE',0,'delete sre-probe-run-apps by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='delete-probe-run-apps-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-app-txns/page','POST',0,'create sre-probe-run-app-txns page',id FROM usm_permissions WHERE module = 'sre' AND permission  ='create-probe-run-app-txns-page' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-app-txns','POST',0,'create sre-probe-run-app-txns',id FROM usm_permissions WHERE module = 'sre' AND permission  ='create-probe-run-apps-txns' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-app-txns','PUT',0,'edit sre-probe-run-app-txns',id FROM usm_permissions WHERE module = 'sre' AND permission  ='edit-probe-run-app-txns' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-app-txns','GET',0,'view sre-probe-run-app-txns',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probe-run-app-txns' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-app-txns/[0-9]*','GET',0,'view sre-probe-run-app-txns by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probe-run-app-txns-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-app-txns/[0-9]*','DELETE',0,'delete sre-probe-run-app-txns by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='delete-probe-run-app-txns-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-rundetailss/page','GET',0,'view sre-probe-run-rundetailss page',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probe-run-rundetailss-page' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-rundetailss-n/[0-9]*','GET',0,'view sre-probe-run-rundetailss-n by probeRunAppid',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probe-run-rundetailss-n-probeRunAppId' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-rundetailss','POST',0,' create sre-probe-run-rundetailss',id FROM usm_permissions WHERE module = 'sre' AND permission  ='create-probe-run-rundetailss' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-rundetailss','PUT',0,'edit sre-probe-run-rundetailss',id FROM usm_permissions WHERE module = 'sre' AND permission  ='edit-probe-run-rundetailss' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-rundetailss','GET',0,'view sre-probe-run-rundetailss',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probe-run-rundetailss' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-rundetailss/[0-9]*','GET',0,'view sre-probe-run-rundetailss by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probe-run-rundetailss-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probe-run-rundetailss/[0-9]*','DELETE',0,'delete sre-probe-run-rundetailss by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='delete-probe-run-rundetailss-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-app-txn-availabilitys/page','POST',0,'create sre-app-txn-availabilitys page',id FROM usm_permissions WHERE module = 'sre' AND permission  ='create-app-txn-availabilitys-page' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-app-txn-availabilitys','PUT',0,'edit sre-app-txn-availabilitys',id FROM usm_permissions WHERE module = 'sre' AND permission  ='edit-app-txn-availabiltitys' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-app-txn-availabilitys','GET',0,'view sre-app-txn-availabilitys',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-app-txn-availabilitys' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-app-txn-availabilitys/[0-9]*','GET',0,'view sre-app-txn-availabilitys by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-app-txn-availabilitys-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-app-txn-availabilitys/[0-9]*','DELETE',0,'delete sre-app-txn-availabilitys by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='delete-app-txn-availabilitys-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-app-availability-n','GET',0,'view-sre-app-availability-n',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-app-availability-n' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-app-availability-probe-location-n','GET',0,'view-sre-app-availability-probe-location-n',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-app-availability-probe-location-n' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/uploadSreDowntime','POST',0,'create uploadSreDowntime',id FROM usm_permissions WHERE module = 'sre' AND permission  ='upload-downtime' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/uploadSreAppGrps','POST',0,'create uploadSreAppGrps',id FROM usm_permissions WHERE module = 'sre' AND permission  ='upload-app-grps' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/uploadSreApps','POST',0,'create uploadSreApps',id FROM usm_permissions WHERE module = 'sre' AND permission  ='upload-app' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-app-grps/page','GET',0,'view all the ccl-app-grps pages',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-ccl-grps-page' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-app-grps/','POST',0,'create new ccl-app-grps',id FROM usm_permissions WHERE module = 'sre' AND permission  ='create-ccl-app-grps' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-app-grps','PUT',0,'edit ccl-app-grps',id FROM usm_permissions WHERE module = 'sre' AND permission  ='edit-ccl-app-grps' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-app-grps','GET',0,'view all the ccl-app-grps ',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-ccl-app-grps' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-app-grps-all/[0-9]*','GET',0,'view ccl-app-grps-all by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-ccl-app-grps-app-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-app-grps/[0-9]*','GET',0,'view ccl-app-grps by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-ccl-app-grps-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-app-grps/[0-9]*','DELETE',0,'delete ccl-app-grps by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='delete-ccl-app-grps' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-apps/page','GET',0,'view ccl-apps by page',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-ccl-apps-page' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-apps/','POST',0,'create ccl-apps',id FROM usm_permissions WHERE module = 'sre' AND permission  ='create-ccl-apps' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-apps','PUT',0,'edit ccl-apps',id FROM usm_permissions WHERE module = 'sre' AND permission  ='edit-ccl-apps' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-apps','GET',0,'view ccl-apps ',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-ccl-apps' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-apps-all/[0-9]*','GET',0,'view ccl-apps-all by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-ccl-apps-all-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-apps/[0-9]*','GET',0,'view ccl-apps by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-ccl-apps-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-apps/[0-9]*','DELETE',0,'delete ccl-apps by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='delete-ccl-apps-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-app-txns/page','GET',0,'view ccl-app-txns page',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-ccl-app-txns-page' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-app-txns','POST',0,'create ccl-app-txns',id FROM usm_permissions WHERE module = 'sre' AND permission  ='create-ccl-app-txns' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-app-txns','PUT',0,'edit ccl-app-txns',id FROM usm_permissions WHERE module = 'sre' AND permission  ='edit-ccl-app-txns' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-app-txns','GET',0,'view ccl-app-txns',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-ccl-app-txns' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-app-txns/[0-9]*','GET',0,'view ccl-app-txns by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-ccl-app-txns-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/ccl-app-txns/[0-9]*','DELETE',0,'delete ccl-app-txns by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='delete-ccl-app-txns-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/uploadProbeLocations/[0-9]*','POST',0,'create by upload sre-probe-locations by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='upload-probes-locations-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-probes-all/[0-9]*','GET',0,'view sre-probes-all by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-probes-all-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-app-downtimes/page','POST',0,'create sre-app-downtimes page',id FROM usm_permissions WHERE module = 'sre' AND permission  ='create-app-downtime-page' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-app-downtimes','GET',0,'view sre-app-downtimes',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-app-downtimes' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-app-txn-availabilitys','POST',0,'create sre-app-txn-availabilitys',id FROM usm_permissions WHERE module = 'sre' AND permission  ='create-app-txn-availabilitys' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/sre-locations/[0-9]*','DELETE',0,'delete sre-locations by id',id FROM usm_permissions WHERE module = 'sre' AND permission  ='delete-locations-id' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/sre/dst/','GET',0,'view DST display sre probe locations',id FROM usm_permissions WHERE module = 'sre' AND permission  ='view-dst-display-probe-locations' limit 1;
+
+
 
 UPDATE usm_permission_api SET api='/api/exp/discussions/subscription/[0-9a-zA-Z-_ .]*/.*' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'cip' AND permission ='discussion-subscription' LIMIT 1) AND api='/api/exp/discussions/subscription/{userId}/{orgId}';
 
--- cap-api changes
-UPDATE usm_permission_api SET api='api/Agent/AddAgentMappingBinaryStatus' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/AddAgentMappingBinaryStatus/[0-9]{0,6}/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Agent/GetXwAgentNodeMapping' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/GetXwAgentNodeMapping/[A-Za-z.-.0-9]*/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/GetMappedIdByBaseDirectory' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/GetMappedIdByBaseDirectory/[A-Z.:.A-Z./.A-Za-z]*/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/CheckForUpgrade' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/CheckForUpgrade/[0-9]';
-UPDATE usm_permission_api SET api='api/Agent/GetReleaseContent' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/GetReleaseContent/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/TakeScreenShotCheck' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/TakeScreenShotCheck/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/AgentScreenShotWithData' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/AgentScreenShotWithData/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[A-Za-Z]*';
-UPDATE usm_permission_api SET api='api/Agent/AgentScreenShotForIncidents' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/AgentScreenShotForIncidents/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/DecryptString' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/DecryptString/[A-Za-Z0-9]*';
-UPDATE usm_permission_api SET api='api/Agent/GetMappedAgents' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/GetMappedAgents/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/CheckMappedAgentStatus' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/CheckMappedAgentStatus/[A-Za-z.-.0-9]*/[0-9]';
-UPDATE usm_permission_api SET api='api/Agent/SaveAgentStatus' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/SaveAgentStatus/[A-Za-z.-.0-9]*/[A-Za-z]*/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/GetAgentStatus' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/GetAgentStatus/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/GetAgentForServer' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/GetAgentForServer/[A-Za-z0-9]*/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/GetAgentListForServer' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/GetAgentListForServer/[A-Za-z0-9]*/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/AgentBinaryDownloadStaus' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/AgentBinaryDownloadStaus/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/GetMappedAgentByID' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/GetMappedAgentByID/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/GetDeactivatedMappedAgentByID' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/GetDeactivatedMappedAgentByID/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/CheckValidAgentID' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/CheckValidAgentID/[0-9]{0,6}/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Agent/GetAgent' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/GetAgent/[0-9]{0,6}/[A-Za-z]*/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/GetBulkNodeAgentMapping' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/GetBulkNodeAgentMapping/[A-Za-z0-9]*/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/GetAgentNodeMapping' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/GetAgentNodeMapping/[A-Za-z0-9]*/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/DeactivateAgentNodeMapping' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/DeactivateAgentNodeMapping/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/DeactivateAgent' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/DeactivateAgent/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/DownloadLog' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/DownloadLog/[0-9]{0,6}/[[0-9]{2}/[0-9]{2}/[0-9]{4}]/[0-9]{0,6}/[0-9]{0,6}/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Agent/VirtualAgentLogDates' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/VirtualAgentLogDates/[0-9]{0,6}/[0-9]{2}/[0-9]{2}/[0-9]{4}/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/AgentScreenShotFilters' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/AgentScreenShotFilters/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/AgentScreenShotForlatestData' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-view' limit 1) AND api='/api/Agent/AgentScreenShotForlatestData/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Agent/ChangeStatusforRelease' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-edit' limit 1) AND api='/api/Agent/ChangeStatusforRelease';
-UPDATE usm_permission_api SET api='api/Agent/AgentScreenShot' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-edit' limit 1) AND api='/api/Agent/AgentScreenShot';
-UPDATE usm_permission_api SET api='api/Agent/AddAgent' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-edit' limit 1) AND api='/api/Agent/AddAgent';
-UPDATE usm_permission_api SET api='api/Agent/SendMailfromVA' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-edit' limit 1) AND api='/api/Agent/SendMailfromVA';
-UPDATE usm_permission_api SET api='api/Agent/SaveAgentNodeMapping' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Agent-edit' limit 1) AND api='/api/Agent/SaveAgentNodeMapping';
-UPDATE usm_permission_api SET api='api/Classifier/Classify' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Classifier-edit' limit 1) AND api='/api/Classifier/Classify';
-UPDATE usm_permission_api SET api='api/Common/ConvertVideoToImages' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-edit' limit 1) AND api='/api/Common/ConvertVideoToImages';
-UPDATE usm_permission_api SET api='api/Common/DownloadFile' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-edit' limit 1) AND api='/api/Common/DownloadFile';
-UPDATE usm_permission_api SET api='api/Common/DetectVacancy' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-edit' limit 1) AND api='/api/Common/DetectVacancy';
-UPDATE usm_permission_api SET api='api/Common/FaceDetectAPI' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-edit' limit 1) AND api='/api/Common/FaceDetectAPI';
-UPDATE usm_permission_api SET api='api/Common/SaveConfig' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-edit' limit 1) AND api='/api/Common/SaveConfig';
-UPDATE usm_permission_api SET api='api/Common/DeactivateConfig' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-edit' limit 1) AND api='/api/Common/DeactivateConfig';
-UPDATE usm_permission_api SET api='api/Common/UpdateConfig' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-edit' limit 1) AND api='/api/Common/UpdateConfig';
-UPDATE usm_permission_api SET api='api/Common/UpdateEvent' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-edit' limit 1) AND api='/api/Common/UpdateEvent';
-UPDATE usm_permission_api SET api='api/Common/GetDataFromExternalURL' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-edit' limit 1) AND api='/api/Common/GetDataFromExternalURL';
-UPDATE usm_permission_api SET api='api/Common/AddEmailtemplate' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-edit' limit 1) AND api='/api/Common/AddEmailtemplate';
-UPDATE usm_permission_api SET api='api/Common/UpdateEmailTemplate' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-edit' limit 1) AND api='/api/Common/UpdateEmailTemplate';
-UPDATE usm_permission_api SET api='api/Common/DeactivateEmail' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-edit' limit 1) AND api='/api/Common/DeactivateEmail';
-UPDATE usm_permission_api SET api='api/Common/DeactivateHeadless' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-edit' limit 1) AND api='/api/Common/DeactivateHeadless';
-UPDATE usm_permission_api SET api='api/Common/SaveHeadlessDatatoDB' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-edit' limit 1) AND api='/api/Common/SaveHeadlessDatatoDB';
-UPDATE usm_permission_api SET api='api/Common/UpdateHeadlessconfig' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-edit' limit 1) AND api='/api/Common/UpdateHeadlessconfig';
-UPDATE usm_permission_api SET api='api/Common/FaceVerifyAPI' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-view' limit 1) AND api='/api/Common/FaceVerifyAPI/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Common/AppendToFile' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-view' limit 1) AND api='/api/Common/AppendToFile/[A-Z][.:][A-Z]*[..][A-Z]*/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Common/GetConfig' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-view' limit 1) AND api='/api/Common/GetConfig/[A-Za-z]*/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Common/GetAllConfig' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-view' limit 1) AND api='/api/Common/GetAllConfig';
-UPDATE usm_permission_api SET api='api/Common/ViewConfig' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-view' limit 1) AND api='/api/Common/ViewConfig/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Common/GetAllAppNames' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-view' limit 1) AND api='/api/Common/GetAllAppNames';
-UPDATE usm_permission_api SET api='api/Common/GetConfigNamesByAppName' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-view' limit 1) AND api='/api/Common/GetConfigNamesByAppName/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Common/GetConfigByConfigId' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-view' limit 1) AND api='/api/Common/GetConfigByConfigId/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Common/GetEmailTemplate' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-view' limit 1) AND api='/api/Common/GetEmailTemplate';
-UPDATE usm_permission_api SET api='api/Common/GetEmailTemplateByTemplateId' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-view' limit 1) AND api='/api/Common/GetEmailTemplateByTemplateId/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Common/getEmailTemplateByAppName' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-view' limit 1) AND api='/api/Common/getEmailTemplateByAppName/[A-Za-z]*/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Common/GetEventDetailsByEventName*' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-view' limit 1) AND api='/api/Common/GetEventDetailsByEventName/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Common/GetEventDetails' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-view' limit 1) AND api='/api/Common/GetEventDetails';
-UPDATE usm_permission_api SET api='api/Common/GetHeadlessConfig' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-view' limit 1) AND api='/api/Common/GetHeadlessConfig/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Common/GetConfigByHeadlessName' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-view' limit 1) AND api='/api/Common/GetConfigByHeadlessName/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Common/GetHeadlessDetails' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Common-view' limit 1) AND api='/api/Common/GetHeadlessDetails/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Editor/SaveImageJsonToFile' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Editor-edit' limit 1) AND api='/api/Editor/SaveImageJsonToFile';
-UPDATE usm_permission_api SET api='api/Extractors/ServiceNow' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Extractor-edit' limit 1) AND api='/api/Extractors/ServiceNow';
-UPDATE usm_permission_api SET api='api/License/DisplayLicenseCount' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='License-view' limit 1) AND api='/api/License/DisplayLicenseCount';
-UPDATE usm_permission_api SET api='api/License/CreateLicense' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='License-view' limit 1) AND api='/api/License/CreateLicense/[A-Za-z]*/[A-Za-z]*/[0-9]{2}/[0-9]{2}/[0-9]{4}/[0-9]{0,6}/[A-Za-z.-.0-9]*/[a-z?a-z]*';
-UPDATE usm_permission_api SET api='api/License/GetLicenseDetails' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='License-view' limit 1) AND api='/api/License/GetLicenseDetails';
-UPDATE usm_permission_api SET api='api/License/GetLicenseType' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='License-view' limit 1) AND api='/api/License/GetLicenseType';
-UPDATE usm_permission_api SET api='api/License/ValidateLicense' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='License-view' limit 1) AND api='/api/License/ValidateLicense/{License}/{HostName}/{applicationName}/{UserName}';
-UPDATE usm_permission_api SET api='api/License/VirtualAgentLicenseValidation' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='License-view' limit 1) AND api='/api/License/VirtualAgentLicenseValidation/[0-9]{0,6}/[A-Za-z0-9]*';
-UPDATE usm_permission_api SET api='api/License/AllocateLicense' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Liicense-edit' limit 1) AND api='/api/License/AllocateLicense';
-UPDATE usm_permission_api SET api='api/License/EditLicense' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Liicense-edit' limit 1) AND api='/api/License/EditLicense';
-UPDATE usm_permission_api SET api='api/License/DeactivateLicense' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Liicense-edit' limit 1) AND api='/api/License/DeactivateLicense';
-UPDATE usm_permission_api SET api='api/Node/GetNodeName' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Node-view' limit 1) AND api='/api/Node/GetNodeName/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Node/GetNodeDetail' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Node-view' limit 1) AND api='/api/Node/GetNodeDetail/[A-Za-z0-9]*/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Node/AddArchitectureType' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Node-view' limit 1) AND api='/api/Node/AddArchitectureType/[A-Za-z]*/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Node/AddOSType' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Node-view' limit 1) AND api='/api/Node/AddOSType/{OS_Name}/[0-9]*';
-UPDATE usm_permission_api SET api='api/Node/GetType' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Node-view' limit 1) AND api='/api/Node/GetType/{Ind}';
-UPDATE usm_permission_api SET api='api/Node/DeactivateNode' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Node-view' limit 1) AND api='/api/Node/DeactivateNode/[0-9]{0,6}/[0-9]{0,6}/[A-Za-z0-9]*';
-UPDATE usm_permission_api SET api='api/Node/GetIPHostName' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Node-view' limit 1) AND api='/api/Node/GetIPHostName';
-UPDATE usm_permission_api SET api='api/Node/AddNode' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Node-edit' limit 1) AND api='/api/Node/AddNode';
-UPDATE usm_permission_api SET api='api/Node/EditNode' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Node-edit' limit 1) AND api='/api/Node/EditNode';
-UPDATE usm_permission_api SET api='api/Node/EditNodeAgent' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Node-edit' limit 1) AND api='/api/Node/EditNodeAgent';
-UPDATE usm_permission_api SET api='api/Portfolio/GetAllCategories' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1) AND api='/api/Portfolio/GetAllCategories/{jObject}';
-UPDATE usm_permission_api SET api='api/Portfolio/GetApplicationDetail' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1) AND api='/api/Portfolio/GetApplicationDetail/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Portfolio/GetApplicationId' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1) AND api='/api/Portfolio/GetApplicationId/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Portfolio/GetPortfolioApplicationDetail' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1) AND api='/api/Portfolio/GetPortfolioApplicationDetail/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Portfolio/GetPortfolioDetail' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1) AND api='/api/Portfolio/GetPortfolioDetail';
-UPDATE usm_permission_api SET api='api/Portfolio/GetPortfolioDetails' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1) AND api='/api/Portfolio/GetPortfolioDetails';
-UPDATE usm_permission_api SET api='api/Portfolio/GetApplication' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1) AND api='/api/Portfolio/GetApplication';
-UPDATE usm_permission_api SET api='api/Portfolio/CategoryMapping' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1) AND api='/api/Portfolio/CategoryMapping/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Portfolio/GetApplicationIdforIAMP' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1) AND api='/api/Portfolio/GetApplicationIdforIAMP/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Portfolio/ValidateUserAccessToApplication' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1) AND api='/api/Portfolio/ValidateUserAccessToApplication/^[w-.]+@([w-]+.)+[w-]{2,}$/[0-9]{0,6}/[A-Za-z0-9]*';
-UPDATE usm_permission_api SET api='api/Portfolio/GetUserDetail' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1) AND api='/api/Portfolio/GetUserDetail/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Portfolio/GetUserDetailOld' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1) AND api='/api/Portfolio/GetUserDetailOld/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Portfolio/DeactivateUser' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1) AND api='/api/Portfolio/DeactivateUser/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Portfolio/DeactivateApplication' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1) AND api='/api/Portfolio/DeactivateApplication/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Portfolio/DeactivatePortfolio' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1) AND api='/api/Portfolio/DeactivatePortfolio/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Portfolio/DeactivateCategory' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1) AND api='/api/Portfolio/DeactivateCategory';
-UPDATE usm_permission_api SET api='api/Portfolio/AddPortfolio' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-edit' limit 1) AND api='/api/Portfolio/AddPortfolio';
-UPDATE usm_permission_api SET api='api/Portfolio/AddRole' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-edit' limit 1) AND api='/api/Portfolio/AddRole';
-UPDATE usm_permission_api SET api='api/Portfolio/EditCategory' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-edit' limit 1) AND api='/api/Portfolio/EditCategory';
-UPDATE usm_permission_api SET api='api/Portfolio/AddCategory' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-edit' limit 1) AND api='/api/Portfolio/AddCategory';
-UPDATE usm_permission_api SET api='api/Portfolio/EditPortfolio' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-edit' limit 1) AND api='/api/Portfolio/EditPortfolio';
-UPDATE usm_permission_api SET api='api/Portfolio/ChangePassword' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-edit' limit 1) AND api='/api/Portfolio/ChangePassword';
-UPDATE usm_permission_api SET api='api/Portfolio/AddUser' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-edit' limit 1) AND api='/api/Portfolio/AddUser';
-UPDATE usm_permission_api SET api='api/Portfolio/EditUser' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-edit' limit 1) AND api='/api/Portfolio/EditUser';
-UPDATE usm_permission_api SET api='api/Portfolio/ValidateUser' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-edit' limit 1) AND api='/api/Portfolio/ValidateUser';
-UPDATE usm_permission_api SET api='api/Portfolio/ValidateVaultUser' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-edit' limit 1) AND api='/api/Portfolio/ValidateVaultUser';
-UPDATE usm_permission_api SET api='api/Portfolio/AddApplication' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-edit' limit 1) AND api='/api/Portfolio/AddApplication';
-UPDATE usm_permission_api SET api='api/Portfolio/EditApplication' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-edit' limit 1) AND api='/api/Portfolio/EditApplication';
-UPDATE usm_permission_api SET api='api/Portfolio/SendMail' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfolio-edit' limit 1) AND api='/api/Portfolio/SendMail';
-UPDATE usm_permission_api SET api='api/Portfolio/DeleteDetailsUsingProjectId' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Portfoilio-edit' limit 1) AND api='/api/Portfolio/DeleteDetailsUsingProjectId';
-UPDATE usm_permission_api SET api='api/Probe/GetAppIdForProbes' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Probe-view' limit 1) AND api='/api/Probe/GetAppIdForProbes';
-UPDATE usm_permission_api SET api='api/Probe/GetProbeStatus' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Probe-view' limit 1) AND api='/api/Probe/GetProbeStatus/[A-Za-z.-.0-9]*';
-UPDATE usm_permission_api SET api='api/Probe/ServerStatus' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Probe-view' limit 1) AND api='/api/Probe/ServerStatus/[A-Za-z0-9]*';
-UPDATE usm_permission_api SET api='api/Probe/getemailexclusion' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Probe-view' limit 1) AND api='/api/Probe/getemailexclusion/{type}/{value}';
-UPDATE usm_permission_api SET api='api/Probe/AddExclusionDetail' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Probe-view' limit 1) AND api='/api/Probe/AddExclusionDetail/{name}/{level}/{user}/{expiry}';
-UPDATE usm_permission_api SET api='api/Probe/GetProbes' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Probe-view' limit 1) AND api='/api/Probe/GetProbes/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Probe/GetDownTime' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Probe-view' limit 1) AND api='/api/Probe/GetDownTime';
-UPDATE usm_permission_api SET api='api/Probe/DeactivateDownTime' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Probe-view' limit 1) AND api='/api/Probe/DeactivateDownTime/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Probe/GetFilterList' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Probe-view' limit 1) AND api='/api/Probe/GetFilterList/{filterValue}';
-UPDATE usm_permission_api SET api='api/Probe/GetScreenshots' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Probe-view' limit 1) AND api='/api/Probe/GetScreenshots/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Probe/GetLogs' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Probe-view' limit 1) AND api='/api/Probe/GetLogs/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Probe/GetApiLogs' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Probe-view' limit 1) AND api='/api/Probe/GetApiLogs/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Probe/GetProbeRunAppAgent' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Probe-view' limit 1) AND api='/api/Probe/GetProbeRunAppAgent/[0-9]{0,6}/[0-/[0-9]{0,6}/[0-9]{0,6}9]{0,6}/[0-9]{2}/[0-9]{2}/[0-9]{4}/[0-9]{0,6}/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Probe/AddDownTimeDetail' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Porbe-edit' limit 1) AND api='/api/Probe/AddDownTimeDetail';
-UPDATE usm_permission_api SET api='api/Probe/EditDowntime' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Porbe-edit' limit 1) AND api='/api/Probe/EditDowntime';
-UPDATE usm_permission_api SET api='api/Schedule/AddSchedule' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Schedule-edit' limit 1) AND api='/api/Schedule/AddSchedule';
-UPDATE usm_permission_api SET api='api/Schedule/EditSchedule' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Schedule-edit' limit 1) AND api='/api/Schedule/EditSchedule';
-UPDATE usm_permission_api SET api='api/Schedule/DeactivateExpiredSchedules' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Schedule-view' limit 1) AND api='/api/Schedule/DeactivateExpiredSchedules';
-UPDATE usm_permission_api SET api='api/Schedule/TriggerScheduleExpireNotification' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Schedule-view' limit 1) AND api='/api/Schedule/TriggerScheduleExpireNotification';
-UPDATE usm_permission_api SET api='api/Schedule/GetAllSchedule' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Schedule-view' limit 1) AND api='/api/Schedule/GetAllSchedule';
-UPDATE usm_permission_api SET api='api/Schedule/GetSchedule' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Schedule-view' limit 1) AND api='/api/Schedule/GetSchedule/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Schedule/DeactivateSchedule' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Schedule-view' limit 1) AND api='/api/Schedule/DeactivateSchedule/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Schedule/GetEventNotificationDetail' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Schedule-view' limit 1) AND api='/api/Schedule/GetEventNotificationDetail/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Script/AddScriptInputData' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-edit' limit 1) AND api='/api/Script/AddScriptInputData';
-UPDATE usm_permission_api SET api='api/Script/AddScript' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-edit' limit 1) AND api='/api/Script/AddScript';
-UPDATE usm_permission_api SET api='api/Script/AddVault' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-edit' limit 1) AND api='/api/Script/AddVault';
-UPDATE usm_permission_api SET api='api/Script/AddBotFactoryVault' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-edit' limit 1) AND api='/api/Script/AddBotFactoryVault';
-UPDATE usm_permission_api SET api='api/Script/EditBotFactoryVault' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-edit' limit 1) AND api='/api/Script/EditBotFactoryVault';
-UPDATE usm_permission_api SET api='api/Script/DeactivateBotFactoryVault' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-edit' limit 1) AND api='/api/Script/DeactivateBotFactoryVault';
-UPDATE usm_permission_api SET api='api/Script/EditVault' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-edit' limit 1) AND api='/api/Script/EditVault';
-UPDATE usm_permission_api SET api='api/Script/EditScript' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-edit' limit 1) AND api='/api/Script/EditScript';
-UPDATE usm_permission_api SET api='api/Script/DeactiveVault' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-edit' limit 1) AND api='/api/Script/DeactiveVault';
-UPDATE usm_permission_api SET api='api/Script/UpdateScriptExecutionStatus' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-edit' limit 1) AND api='/api/Script/UpdateScriptExecutionStatus';
-UPDATE usm_permission_api SET api='api/Script/GetBotFactoryVault' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/GetBotFactoryVault/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Script/GetBotFactoryVaultDetail' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/GetBotFactoryVaultDetail/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Script/GetHashiCorpVault' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/GetHashiCorpVault/{VaultName}/{token}';
-UPDATE usm_permission_api SET api='api/Script/GetAllScript' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/GetAllScript//[0-9]{0,6}[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Script/getScriptByName' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/getScriptByName/[A-Za-z0-9]*';
-UPDATE usm_permission_api SET api='api/Script/GetScriptFilesById' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/GetScriptFilesById/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Script/GetScriptFilesByName' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/GetScriptFilesByName/[A-Za-z0-9]*/[A-Za-z]*/^[w-.]+@([w-]+.)+[w-]{2,}$/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Script/ViewScript' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/ViewScript/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Script/GetScriptTypes' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/GetScriptTypes';
-UPDATE usm_permission_api SET api='api/Script/GetEncodedStringForFile' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/GetEncodedStringForFile/{filePath}';
-UPDATE usm_permission_api SET api='api/Script/DownloadScript' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/DownloadScript/{url}/{localPath}';
-UPDATE usm_permission_api SET api='api/Script/LogOut' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/LogOut/{userIdentification}';
-UPDATE usm_permission_api SET api='api/Script/GetVaultDetail' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/GetVaultDetail/[A-Za-z0-9]*/[0-9]{0,6}/[A-Za-z.-.0-9]*/[A-Za-z0-9]*';
-UPDATE usm_permission_api SET api='api/Script/GetVault' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/GetVault/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Script/GetScriptExecutionData' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/GetScriptExecutionData/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[A-Za-z0-9]*';
-UPDATE usm_permission_api SET api='api/Script/MonitorScriptExecutionResult' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/MonitorScriptExecutionResult/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[A-Za-z0-9]*';
-UPDATE usm_permission_api SET api='api/Script/DeactivateScript' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/DeactivateScript';
-UPDATE usm_permission_api SET api='api/Script/DeactivateExecutionScript' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/DeactivateExecutionScript';
-UPDATE usm_permission_api SET api='api/Script/AssignScriptToExecute' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/AssignScriptToExecute/[0-9]{0,6}/[A-Za-z.-.0-9]*/[A-Za-z]*/[A-Za-z]*/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Script/GetScriptExecutionLogInfo' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/GetScriptExecutionLogInfo/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[A-Za-z0-9]*/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Script/GetVaultNotification' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Script-view' limit 1) AND api='/api/Script/GetVaultNotification/{userIdentification}';
-UPDATE usm_permission_api SET api='api/Utilities/AddUtility' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Utilities-edit' limit 1) AND api='/api/Utilities/AddUtility';
-UPDATE usm_permission_api SET api='api/Utilities/AddUtilityRunHistory' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Utilities-edit' limit 1) AND api='/api/Utilities/AddUtilityRunHistory';
-UPDATE usm_permission_api SET api='api/Utilities/CheckUpdateHeartbeat' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Utilities-view' limit 1) AND api='/api/Utilities/CheckUpdateHeartbeat/{name}/{type}/{heartbeatThreshold}';
-UPDATE usm_permission_api SET api='api/Utilities/GetUtility' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Utilities-view' limit 1) AND api='/api/Utilities/GetUtility/{utilityName}';
-UPDATE usm_permission_api SET api='api/Utilities/UtilityOperations' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Utilities-view' limit 1) AND api='/api/Utilities/UtilityOperations/{utilityName}/{operation}';
-UPDATE usm_permission_api SET api='api/Workflow/AddJSONParseVBScript' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/AddJSONParseVBScript';
-UPDATE usm_permission_api SET api='api/Workflow/SaveLastExecutionTime' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/SaveLastExecutionTime/[A-Za-z]*/[A-Za-z]*/[A-Za-z0-9]*/[0-9]{2}/[0-9]{2}/[0-9]{4}';
-UPDATE usm_permission_api SET api='api/Workflow/AddSAPScriptXAML' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/AddSAPScriptXAML';
-UPDATE usm_permission_api SET api='api/Workflow/AddAnalyticsFieldMapping' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/AddAnalyticsFieldMapping';
-UPDATE usm_permission_api SET api='api/Workflow/AddTicketFieldMapping' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/AddTicketFieldMapping';
-UPDATE usm_permission_api SET api='api/Workflow/EditTicketFieldMapping' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/EditTicketFieldMapping';
-UPDATE usm_permission_api SET api='api/Workflow/AppendToInputJson' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/AppendToInputJson';
-UPDATE usm_permission_api SET api='api/Workflow/SaveWorkflowImages' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/SaveWorkflowImages';
-UPDATE usm_permission_api SET api='api/Workflow/GetWorkflows' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/GetWorkflows';
-UPDATE usm_permission_api SET api='api/Workflow/UpdateWorkFlow' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/UpdateWorkFlow';
-UPDATE usm_permission_api SET api='api/Workflow/AddProbeData' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/AddProbeData';
-UPDATE usm_permission_api SET api='api/Workflow/AddWorkFlow' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/AddWorkFlow';
-UPDATE usm_permission_api SET api='api/Workflow/SaveWorkflowDetails' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/SaveWorkflowDetails';
-UPDATE usm_permission_api SET api='api/Workflow/SaveExtractedTicket' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/SaveExtractedTicket';
-UPDATE usm_permission_api SET api='api/Workflow/FilterInput' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/FilterInput';
-UPDATE usm_permission_api SET api='api/Workflow/ResetPassword' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/ResetPassword';
-UPDATE usm_permission_api SET api='api/Workflow/SaveWorkflowInputData' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/SaveWorkflowInputData';
-UPDATE usm_permission_api SET api='api/Workflow/SaveTask' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/SaveTask';
-UPDATE usm_permission_api SET api='api/Workflow/SaveTaskId' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/SaveTaskId';
-UPDATE usm_permission_api SET api='api/Workflow/SaveTicket' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/SaveTicket';
-UPDATE usm_permission_api SET api='api/Workflow/GetCollectiondata' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/GetCollectiondata';
-UPDATE usm_permission_api SET api='api/Workflow/UpdateCollectiondata' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/UpdateCollectiondata';
-UPDATE usm_permission_api SET api='api/Workflow/ProcessWorkflowfromBTF' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/ProcessWorkflowfromBTF';
-UPDATE usm_permission_api SET api='api/Workflow/EditInputDetail' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/EditInputDetail';
-UPDATE usm_permission_api SET api='api/Workflow/UploadTickets' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/UploadTickets/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/DeactivateAnalyticsFieldMapping' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/DeactivateAnalyticsFieldMapping';
-UPDATE usm_permission_api SET api='api/Workflow/UpdateInputJsoninWFInput' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-edit' limit 1) AND api='/api/Workflow/UpdateInputJsoninWFInput/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[A-Za-z]*/[A-Za-z0-9]*';
-UPDATE usm_permission_api SET api='api/Workflow/GetTickets' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetTickets/[0-9]{0,6}0[0-9]{0,6}/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Workflow/GetVBScriptClass' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetVBScriptClass/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Workflow/GetLastExecutionTime' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetLastExecutionTime/[A-Za-z]*/[A-Za-z]*/[A-Za-z0-9]*';
-UPDATE usm_permission_api SET api='api/Workflow/GetExecutionLogsData' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetExecutionLogsData/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[A-Za-z0-9]*/[0-9]{2}/[0-9]{2}/[0-9]{4}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/GetIncidentMetaDataMapping' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetIncidentMetaDataMapping';
-UPDATE usm_permission_api SET api='api/Workflow/GetExecutionLogInfo' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetExecutionLogInfo/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[A-Za-z0-9]*/[0-9]{0,6}/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Workflow/GetWFInputData' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetWFInputData/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/GetWorkflowInputDet' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetWorkflowInputDet/[A-Za-z0-9]*';
-UPDATE usm_permission_api SET api='api/Workflow/GetParentWFInputData' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetParentWFInputData/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/UpdateWFInputNodeAgentInprogress' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/UpdateWFInputNodeAgentInprogress/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[A-Za-z]*/[A-Za-z.-.0-9]*';
-UPDATE usm_permission_api SET api='api/Workflow/GetNewRunID' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetNewRunID/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/GetAllTickets' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetAllTickets/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/WFBinaryStatus' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/WFBinaryStatus/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/DeactivateAgentMapping' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/DeactivateAgentMapping/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/GetLatestBinaryID' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetLatestBinaryID';
-UPDATE usm_permission_api SET api='api/Workflow/GetReleaseStream2' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetReleaseStream2/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/GetReleaseStream' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetReleaseStream/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/UpdateWFStatus' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/UpdateWFStatus//[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[A-Za-z]*/[A-Za-z]*/[A-Za-z0-9]*/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Workflow/UpdateParentWorkflowStatus' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/UpdateParentWorkflowStatus/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Workflow/DeleteCategoryStatus' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/DeleteCategoryStatus/[0-9]{0,6}/[A-Za-z]*/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/UpdateTicketStatusAndCategory' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/UpdateTicketStatusAndCategory/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[A-Za-z]*/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Workflow/DeactivateInput' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/DeactivateInput/[0-9]{0,6}/[0-9]{0,6}/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Workflow/DeactivateTicket' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/DeactivateTicket/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/DeactivateWorkFlow' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/DeactivateWorkFlow/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/UpdateAgentWorkFlowStatus' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/UpdateAgentWorkFlowStatus/[0-9]{0,6}/[0-9]{0,6}/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Workflow/GetWorkFlowInputJson' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetWorkFlowInputJson/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/GetIncidentInputData' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetIncidentInputData/[0-9]{0,6}/[0-9]{0,6}/[A-Za-z0-9]*/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Workflow/GetWorkFlowNames' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetWorkFlowNames/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/GetWFStatus' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetWFStatus/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/GetWFExecutionStatus' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetWFExecutionStatus/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/GetWorkFlowRunIds' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetWorkFlowRunIds/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/GetWorkflowImages' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetWorkflowImages//[0-9]{0,6}/[0-9]{0,6}[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/ResetPrefetchData' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/ResetPrefetchData';
-UPDATE usm_permission_api SET api='api/Workflow/DistributeWorkflow' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/DistributeWorkflow/[A-Za-z]*/[A-Za-z]*/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Workflow/GetApplicationId' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetApplicationId/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/IncidentDashbord' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/IncidentDashbord/[0-9]{0,6}/[0-9]{0,6}/[0-9]{2}/[0-9]{2}/[0-9]{4}/[0-9]{2}/[0-9]{2}/[0-9]{4}/[0-9]{2}/[0-9]{2}/[0-9]{4}/[A-Za-z]*';
-UPDATE usm_permission_api SET api='api/Workflow/GetWorkflowExecutionDetails' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetWorkflowExecutionDetails/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[A-Za-z0-9]*/[0-9]{2}/[0-9]{2}/[0-9]{4}/[0-9]{2}/[0-9]{2}/[0-9]{4}';
-UPDATE usm_permission_api SET api='api/Workflow/GetSAPScriptXAML' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetSAPScriptXAML/{name}';
-UPDATE usm_permission_api SET api='api/Workflow/CheckStatus' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/CheckStatus/[0-9]{0,6}/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/DashBoardData' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/DashBoardData/[0-9]{0,6}/[0-9]{0,6}/[0-9]{0,6}/[0-9]{2}/[0-9]{2}/[0-9]{4}/[0-9]{2}/[0-9]{2}/[0-9]{4}';
-UPDATE usm_permission_api SET api='api/Workflow/AssignWFToExecute' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/AssignWFToExecute1/[0-9]{0,6}/[A-Za-z.-.0-9]*/[A-Za-z]*/[A-Za-z]/[0-9]*';
-UPDATE usm_permission_api SET api='api/Workflow/AssignWFToExecuteWithScheduler' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/AssignWFToExecuteWithScheduler/[0-9]{0,6}/[A-Za-z.-.0-9]*/[A-Za-z]*/[A-Za-z]/[0-9]*';
-UPDATE usm_permission_api SET api='api/Workflow/AssignWFToExecuteWithSchedulernew' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/AssignWFToExecuteWithSchedulernew/[0-9]{0,6}/[A-Za-z.-.0-9]*/[A-Za-z]*/[A-Za-z]/[0-9]*';
-UPDATE usm_permission_api SET api='api/Workflow/AssignWFToExecute' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/AssignWFToExecute/[0-9]{0,6}/[A-Za-z.-.0-9]*/[A-Za-z]*/[A-Za-z]/[0-9]*';
-UPDATE usm_permission_api SET api='api/Workflow/WorkFlowDetail' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/WorkFlowDetail/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/DownloadWorkFlow' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/DownloadWorkFlow/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/GetAppCategoryDetails' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetAppCategoryDetails/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/GetFieldMappings' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetFieldMappings/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/GetSendNotifDetails' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetSendNotifDetails/[0-9]{0,6}';
-UPDATE usm_permission_api SET api='api/Workflow/GetTicketDetails' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetTicketDetails/{applicationId}/{userId}/{Status}/{ticketId}/{category}/{createdDate}';
-UPDATE usm_permission_api SET api='api/Workflow/GetTicketDetail' WHERE permission_id =(SELECT id FROM usm_permissions  WHERE module = 'cap'  AND permission ='Workflow-view' limit 1) AND api='/api/Workflow/GetTicketDetail/{applicationId}/{userId}/{Status}/{ticketId}';
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT 'api/Workflow/GetAllIncidentMetaDataMapping', 'GET', 0, 'get all incidentmetadata mapping', id FROM usm_permissions WHERE module = 'cap'  AND permission ='Workflow-view' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT 'api/Common/GetAllConfigTransaction', 'GET', 0, 'Fetch all config transaction', id FROM usm_permissions WHERE module = 'cap'  AND permission ='Common-view' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT 'api/Common/GetConfigDescByConfigName', 'GET', 0, 'Get config desc by config name', id FROM usm_permissions WHERE module = 'cap'  AND permission ='Common-view' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT 'api/Portfolio/GetCategories', 'GET', 0, 'get categories', id FROM usm_permissions WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT 'api/Portfolio/GetApplicationDetailConfig', 'GET', 0, 'get application details config', id FROM usm_permissions WHERE module = 'cap'  AND permission ='Portfolio-view' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT 'api/Common/GetConfigByConfigName', 'GET', 0, 'Fetch all config by config name', id FROM usm_permissions WHERE module = 'cap'  AND permission ='Common-view' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT 'api/Agent/EditAgent', 'POST', 0, 'edit-agent', id FROM usm_permissions WHERE module = 'cap'  AND permission ='Agent-edit' limit 1;
 
-UPDATE usm_permission_api SET api='/api/workflowTypeByEvent/[0-9a-zA-Z-_]*' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'emf' AND permission ='emf_view' LIMIT 1) AND api='/api/workflowTypeByEvent/{eventName}';
 
 INSERT INTO `usm_permissions` (module, permission) VALUES ('usm','usm-read');
 INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
@@ -740,110 +270,7 @@ INSERT INTO `usm_permissions` (module, permission) VALUES ('cip','cip-all');
 INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
 SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='cip-all')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'cip' AND permission !='cip-read');
 
-INSERT INTO `usm_permissions` (module, permission) VALUES ('sbx','sbx-read');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='sbx-read')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE TYPE='GET' AND permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'sbx');
- 
-INSERT INTO `usm_permissions` (module, permission) VALUES ('sbx','sbx-all');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='sbx-all')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'sbx' AND permission !='sbx-read');
 
-INSERT INTO `usm_permissions` (module, permission) VALUES ('icm','icm-read');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='icm-read')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE TYPE='GET' AND permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'icm');
- 
-INSERT INTO `usm_permissions` (module, permission) VALUES ('icm','icm-all');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='icm-all')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'icm' AND permission !='icm-read');
-
-INSERT INTO `usm_permissions` (module, permission) VALUES ('bcc','bcc-read');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='bcc-read')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE TYPE='GET' AND permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'bcc');
- 
-INSERT INTO `usm_permissions` (module, permission) VALUES ('bcc','bcc-all');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='bcc-all')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'bcc' AND permission !='bcc-read');
-
-INSERT INTO `usm_permissions` (module, permission) VALUES ('bjm','bjm-read');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='bjm-read')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE TYPE='GET' AND permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'bjm');
- 
-INSERT INTO `usm_permissions` (module, permission) VALUES ('bjm','bjm-all');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='bjm-all')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'bjm' AND permission !='bjm-read');
-
-INSERT INTO `usm_permissions` (module, permission) VALUES ('cap','cap-read');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='cap-read')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE TYPE='GET' AND permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'cap');
- 
-INSERT INTO `usm_permissions` (module, permission) VALUES ('cap','cap-all');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='cap-all')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'cap' AND permission !='cap-read');
-
-
-INSERT INTO `usm_permissions` (module, permission) VALUES ('cas','cas-read');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='cas-read')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE TYPE='GET' AND permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'cas');
- 
-INSERT INTO `usm_permissions` (module, permission) VALUES ('cas','cas-all');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='cas-all')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'cas' AND permission !='cas-read');
-
-INSERT INTO `usm_permissions` (module, permission) VALUES ('ccl','ccl-read');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='ccl-read')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE TYPE='GET' AND permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'ccl');
- 
-INSERT INTO `usm_permissions` (module, permission) VALUES ('ccl','ccl-all');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='ccl-all')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'ccl' AND permission !='ccl-read');
-
-INSERT INTO `usm_permissions` (module, permission) VALUES ('cfm','cfm-read');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='cfm-read')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE TYPE='GET' AND permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'cfm');
- 
-INSERT INTO `usm_permissions` (module, permission) VALUES ('cfm','cfm-all');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='cfm-all')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'cfm' AND permission !='cfm-read');
-
-INSERT INTO `usm_permissions` (module, permission) VALUES ('common','common-read');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='common-read')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE TYPE='GET' AND permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'common');
- 
-INSERT INTO `usm_permissions` (module, permission) VALUES ('common','common-all');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='common-all')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'common' AND permission !='common-read');
-
-INSERT INTO `usm_permissions` (module, permission) VALUES ('emf','emf-read');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='emf-read')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE TYPE='GET' AND permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'emf');
- 
-INSERT INTO `usm_permissions` (module, permission) VALUES ('emf','emf-all');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='emf-all')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'emf' AND permission !='emf-read');
-
-INSERT INTO `usm_permissions` (module, permission) VALUES ('grh','grh-read');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='grh-read')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE TYPE='GET' AND permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'grh');
- 
-INSERT INTO `usm_permissions` (module, permission) VALUES ('grh','grh-all');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='grh-all')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'grh' AND permission !='grh-read');
-
-INSERT INTO `usm_permissions` (module, permission) VALUES ('ied','ied-read');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='ied-read')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE TYPE='GET' AND permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'ied');
- 
-INSERT INTO `usm_permissions` (module, permission) VALUES ('ied','ied-all');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='ied-all')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'ied' AND permission !='ied-read');
-
-INSERT INTO `usm_permissions` (module, permission) VALUES ('iegp','iegp-read');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='iegp-read')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE TYPE='GET' AND permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'iegp');
- 
-INSERT INTO `usm_permissions` (module, permission) VALUES ('iegp','iegp-all');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='iegp-all')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'iegp' AND permission !='iegp-read');
 
 INSERT INTO `usm_permissions` (module, permission) VALUES ('ivm','ivm-read');
 INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
@@ -853,20 +280,11 @@ INSERT INTO `usm_permissions` (module, permission) VALUES ('ivm','ivm-all');
 INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
 SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='ivm-all')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'ivm' AND permission !='ivm-read');
 
-INSERT INTO `usm_permissions` (module, permission) VALUES ('sre','sre-read');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='sre-read')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE TYPE='GET' AND permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'sre');
- 
-INSERT INTO `usm_permissions` (module, permission) VALUES ('sre','sre-all');
-INSERT INTO usm_permission_api (api,TYPE,permission_id,is_whitelisted,DESCRIPTION)
-SELECT api,TYPE,(SELECT id FROM `usm_permissions` WHERE permission='sre-all')permission_id,0,DESCRIPTION FROM `usm_permission_api` WHERE permission_id IN (SELECT id FROM `usm_permissions` WHERE module = 'sre' AND permission !='sre-read');
+
 
 INSERT INTO usm_permissions (module,permission) Values('cip','adapterBy-adapterName-methodName-org');
 INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) 
 SELECT '/api/adapters/[A-Za-z0-9- _]*/[A-Za-z0-9- _]*/[A-Za-z0-9- _]*', 'ALL', 0, 'to enable permission for backend to backend api calls', id FROM usm_permissions WHERE module = 'cip'  AND permission ='adapterBy-adapterName-methodName-org' limit 1;
-
-UPDATE usm_permission_api SET api='/api/get-table-paginated-data/.*/.*/.*/.*/.*' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'cap' AND permission ='dashboard-view' LIMIT 1) AND api='/api/get-table-paginated-data/.*/[0-9]{0,3}/[0-9]{0,3}/[0-9]{0,3}/[0-9]{0,3}\?sortEvent=[A-Za-z0-9-_]*';
-UPDATE usm_permission_api SET api='/api/get-table-paginated-data/.*/.*/.*/.*/.*' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'bjm' AND permission ='bjm-dashboard-view' LIMIT 1) AND api='/api/get-table-paginated-data/.*/[0-9]{0,3}/[0-9]{0,3}/[0-9]{0,3}/[0-9]{0,3}\?sortEvent=[A-Za-z0-9-_]*';
 
 
 -- for ivm module new permissions api
@@ -908,16 +326,6 @@ UPDATE usm_permission_api SET api='/api/ivm/svy-(questions|questionnaires|questi
 
 UPDATE usm_permission_api SET api='/api/ivm/(initiatives-all|initiative-intelligence|initiative-intelligence-chart|initiative-tasks|initiativeSubTasksByTaskId|initiativeSubTasks|org-vs-benchmark-details).*' WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'ivm'  AND permission ='view' LIMIT 1) AND api="/api/ivm/(initiatives-all|initiative-intelligence|initiative-intelligence-chart|initiative-tasks|initiativeSubTasksByTaskId|initiativeSubTasks|org-vs-benchmark-details)/[0-9]{0,6}";
 
-
-
-
-
-UPDATE usm_permission_api SET api='/api/sre/sre-app-availability-n.*' where permission_id =(SELECT id FROM usm_permissions WHERE module = 'sre'  AND permission ='view-app-availability-n' limit 1) and api='/api/sre/sre-app-availability-n';
-UPDATE usm_permission_api SET api='/api/sre/sre-app-availability-probe-location-n.*' where permission_id =(SELECT id FROM usm_permissions WHERE module = 'sre'  AND permission ='view-app-availability-probe-location-n' limit 1) and api='/api/sre/sre-app-availability-probe-location-n';
-UPDATE usm_permission_api SET api='/api/workflowType/page.*' where permission_id =(SELECT id FROM usm_permissions WHERE module = 'emf'  AND permission ='emf_view' limit 1) and api='/api/workflowType/page';
-UPDATE usm_permission_api SET api='/api/eventType/page.*' where permission_id =(SELECT id FROM usm_permissions WHERE module = 'emf'  AND permission ='emf_view' limit 1) and api='/api/eventType/page';
-UPDATE usm_permission_api SET api='/api/get-table-paginated-data/.*/.*/.*/.*/.*' where permission_id =(SELECT id FROM usm_permissions WHERE module = 'bjm'  AND permission ='bjm-dashboard-view' limit 1) and api='/api/get-table-paginated-data/.*/[0-9]{0,3}/[0-9]{0,3}/[0-9]{0,3}/[0-9]{0,3}?sortEvent=[A-Za-z0-9-_]*';
-UPDATE usm_permission_api SET api='/api/sre/sre-probe-run-apps-n/page.*' where permission_id =(SELECT id FROM usm_permissions WHERE module = 'sre'  AND permission ='view-probe-run-app-n-page' limit 1) and api='/api/sre/sre-probe-run-apps-n/page';
 INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/dashboard-configurations/[0-9]{0,6}', 'GET', 0, 'dbs-get-api-dashboard-configurations by id for Dashboard configurations', id FROM usm_permissions WHERE module = 'dbs'  AND permission ='dashboard-configurations-page-view' limit 1;
 
 
@@ -925,18 +333,7 @@ UPDATE usm_permission_api SET api='/api/exp/solution/submitSolution/' WHERE api=
 UPDATE usm_permission_api SET TYPE='PUT' WHERE api='/api/exp/project/editProject/[A-Za-z0-9- _]*';
 
 
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/test-data/[A-Za-z0-9-_]+', 'DELETE', 0, 'delete test-data by id', id FROM usm_permissions WHERE module = 'cas'  AND permission ='delete-test-data' limit 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/test-data/[A-Za-z0-9-_]+', 'GET', 0, 'get  test-data by id', id FROM usm_permissions WHERE module = 'cas'  AND permission ='get-test-data' limit 1;
-INSERT INTO usm_permission_api (api, TYPE,  is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/calendar-workflows-all/{id}','get',0,'btf-get-api-calendar-workflows-allByid for schedule-dashboard-resource',id  FROM usm_permissions WHERE  module='btf' AND permission='btf-get-api-calendar-workflows-allByid' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE,is_whitelisted , DESCRIPTION,permission_id) SELECT'/api/adapter-configs/page','get',0,'Gets the paginated adapter configs list',id  FROM usm_permissions WHERE  module='tad' AND permission='adapter-view' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/adapter-purposes/page','get',0,'Gets the paginated adapter property list',id  FROM usm_permissions WHERE  module='tad' AND permission='adapter-view' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/automation/orchestrate/getVaultChannels\?userId=[0-9]*&projectName=[A-Za-z0-9]*&purpose=[A-Za-z0-9]*','get',0,'Gets the vault channels  list',id  FROM usm_permissions WHERE  module='bot' AND permission='vault-view' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/automation/orchestrate/GetAllvaults\?projectName=[A-Za-z0-9]*&purpose=[A-Za-z0-9]*&userId=[A-Za-z0-9]*','get',0,'Gets the all vault list',id  FROM usm_permissions WHERE  module='bot' AND permission='vault-view' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/icm_sops/btf/page','get',0,'Gets all process model list', id FROM usm_permissions WHERE module ='icm' AND permission='sop-create-edit' LIMIT 1;
 INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/ivm/surveyupload', 'GET', 0, 'get api for survey_upload', id FROM usm_permissions WHERE module = 'ivm'  AND permission ='view' limit 1;
-INSERT INTO usm_permissions (module, permission) VALUES ('tad','tad-edit');
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/adapter-purposes','PUT',0,'edit-adapter-purpose',id  FROM usm_permissions WHERE  module='tad' AND permission='tad-edit' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/adapter-configs','PUT',0,'edit-adapter-config',id  FROM usm_permissions WHERE  module='tad' AND permission='tad-edit' LIMIT 1;
 
 
 INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/ivm/svy-usm-constants-(view|show-on-score-zero|reportTitle|recommendInitiativeBasis|uploadSurveyButton|titleComparison|surveyComment|showReportScore|showQuartileValues|approvalworkflowneeded|selectQuestionnaireDropdownView|notice|coverage|DisableAnswersAfterSubmit|showDimensionExclusion|industyBenchmark-button-text|showDescription|getCanvasType|qualitativeMetrics|quartilename|showAllQuestionnaires)','GET',0,'usm-constant for ivm',id FROM usm_permissions WHERE module='ivm' AND permission='ivm-all' LIMIT 1;
@@ -947,12 +344,7 @@ INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permissio
 INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/ivm/add-metrics-hierarchy/[0-9]{0,6}','GET',0,'add-metrics-hierarchy api for ivm',id FROM usm_permissions WHERE module='ivm' AND permission='ivm-all' LIMIT 1;
 INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/ivm/organization-details','GET',0,'organization-details api for ivm',id FROM usm_permissions WHERE module='ivm' AND permission='ivm-all' LIMIT 1;
 INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/ivm/update-status-metric-lever-initiatives/.*','PUT',0,'update-status-metric-lever-initiatives api for ivm',id FROM usm_permissions WHERE module='ivm' AND permission='ivm-all' LIMIT 1;
-INSERT INTO usm_permissions (module, permission) VALUES ('cas','create-process-model');
-INSERT INTO usm_permissions (module, permission) VALUES ('cas','update-process-model');
-INSERT INTO usm_permissions (module, permission) VALUES ('cas','delete-process-model');
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/btf/icm_sops','POST',0,'create-process-model',id FROM usm_permissions WHERE module='cas' AND permission='create-process-model' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/btf/icm_sops/[A-Za-z0-9-_]+', 'DELETE', 0, 'delete process-model by id', id FROM usm_permissions WHERE module = 'cas'  AND permission ='delete-process-model' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/btf/icm_sops','PUT',0,'update-process-model',id FROM usm_permissions WHERE module='cas' AND permission='update-process-model' LIMIT 1;
+
 INSERT INTO `usm_permission_api` (`api`, `type`, `permission_id`, `is_whitelisted`, `description`) VALUES('/api/exp/workbench/update','PUT','2010','0',NULL);
 INSERT INTO `usm_permission_api` (`api`, `type`, `permission_id`, `is_whitelisted`, `description`) VALUES('/api/exp/workbench/update','PUT','3228','0',NULL);
 INSERT INTO `usm_permission_api` (`api`, `type`, `permission_id`, `is_whitelisted`, `description`) VALUES('/api/exp/workbench/update','PUT','2233','0',NULL);
@@ -960,29 +352,4 @@ INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permissio
 UPDATE usm_permission_api SET is_whitelisted=TRUE WHERE permission_id =(SELECT id FROM usm_permissions WHERE module = 'usm' AND permission ='role-permissionss-view' LIMIT 1) AND api='/api/usm-role-permissionss/formodule/.*';
 INSERT INTO `usm_permission_api` (`api`, `type`, `permission_id`, `is_whitelisted`, `description`) VALUES('/api/exp/project/featureProject','PUT','2959','0',NULL);
 
-INSERT INTO usm_permissions (module, permission) VALUES ('bizops','bizops-all');
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/getEmailCountByCaseId/.*','GET',1,'get-emails',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/emailsDetailsById/.*','GET',1,'get-emails',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/xmlToLabelMapping.json','GET',1,'get-emails',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/emailsByCaseId/.*','GET',1,'get-emails',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/datasets/getExtras/.*','GET',1,'get-emails',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/datasets/getDatasetAttachments/.*','GET',1,'get-emails',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/getEmailCountByCaseId/.*','GET',1,'get-emails',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/datasets/viewData/.*','GET',1,'view-dataset',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/holidayConfiguration','POST',1,'save holidayConfiguration',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/holidayConfiguration/.*','GET',1,'view holidayConfiguration',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/UserProcessMapping/.*','GET',1,'save-user-process-mapping',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/change-histories.*','ALL',1,'save-user-process-mapping',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/datasets/datasetform/.*','ALL',1,'fetch dataset form',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/bots/categoryList.*','GET',1,'save-user-process-mapping',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/servers.*','GET',1,'fetch dataset form',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/artifactsDownload/.*','GET',1,'fetch dataset form',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/inbox/.*','POST',1,'fetch dataset form',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/automation-work-flows.*','PUT',1,'fetch dataset form',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/automation-work-flow/bpmnNew','POST',1,'fetch dataset form',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/inbox/.*','GET',1,'fetch dataset form',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/UserProcessMapping','POST',1,'fetch dataset form',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/hierarchy/.*','GET',1,'fetch dataset form',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/GetUserProcessMapping.*','GET',1,'fetch dataset form',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/inbox/importDeployment/[A-Za-z0-9-_]+/[A-Za-z0-9-_]+/[A-Za-z0-9-_]+','POST',1,'fetch dataset form',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
-INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT'/api/inbox/sseEventInitiator','GET',1,'fetch dataset form',id  FROM usm_permissions WHERE  module='bizops' AND  permission='bizops-all' LIMIT 1;
+

@@ -17,10 +17,5 @@
 "18","cip","job-run"
 "19","cip","event-edit"
 "20","cip","event-run"
-"21","sbx","ds-approver"
-"22","sbx","exp-creator"
-"23","sbx","admin"
 "24","cip","model-edit"
-"25","icm","cluster-create-edit"
-"26","icm","problemtype-create-edit"
-"27","icm","sop-create-edit"
+
