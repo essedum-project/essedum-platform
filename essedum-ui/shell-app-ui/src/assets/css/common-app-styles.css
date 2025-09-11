@@ -18,7 +18,7 @@ var(--base-color)*/
     background-color: var(--base-color);
     color: white;
     margin: 3px;
-    font-family: var(--font-type) !important;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
     /* font-size: 2.25vmin; */
 }
 
@@ -3485,7 +3485,7 @@ pre {
 .ui-paginator-pages,
 mat-label,
 .mat-mdc-card {
-    font-family: var(--font-type) !important;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
 }
 
 .btnmargin2 {

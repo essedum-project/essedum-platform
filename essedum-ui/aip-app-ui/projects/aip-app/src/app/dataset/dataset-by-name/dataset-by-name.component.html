@@ -25,7 +25,7 @@
         <ng-container *ngIf="!loading">
 
             <!-- Cards container -->
-            <div *ngIf="filteredCards.length > 0" class="aip-card-container" aria-label="Adapter cards">
+            <div *ngIf="filteredCards.length > 0" class="aip-card-container lfx-u-pad-b-45" aria-label="Adapter cards">
                 <div class="aip-card-wrapper" *ngFor="let card of filteredCards">
                     <!-- Cards  -->
                     <app-aip-card [servicev1]="servicev1" [card]="card" [editAuth]="editAuth" [deployAuth]="deployAuth"
@@ -64,23 +64,23 @@
 </div>
 <div *ngIf="copyDataset" class="mt-5 mx-5">
 
-     <div class="col-5">
-                    <span *ngIf="!customCreate" style="cursor: pointer;">
-                        <mat-icon class="aip-led-icons" (click)="routeBackToList()"
-                            [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
-                            matTooltipPosition="above" (mouseenter)="isBackHovered = true"
-                            (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
-                    </span>
-                    <span class="lfx-u-mar-l-8 header-p-title">Datasets: </span><span class="header-title">Copy
-                        Dataset
-                    </span>
-                </div>
-                    <mat-card  *ngIf="copyDataset" class="lfx-card">
-                        <mat-card-content>
-                            <app-dataset-config *ngIf="copyDataset" [dataset]="selectedCard" [copyDataset]="copyDataset"
-                                class="selector-680-92"></app-dataset-config>
+    <div class="col-5">
+        <span *ngIf="!customCreate" style="cursor: pointer;">
+            <mat-icon class="aip-led-icons" (click)="routeBackToList()"
+                [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back"
+                matTooltipPosition="above" (mouseenter)="isBackHovered = true"
+                (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
+        </span>
+        <span class="lfx-u-mar-l-8 header-p-title">Datasets: </span><span class="header-title">Copy
+            Dataset
+        </span>
+    </div>
+    <mat-card *ngIf="copyDataset" class="lfx-card">
+        <mat-card-content>
+            <app-dataset-config *ngIf="copyDataset" [dataset]="selectedCard" [copyDataset]="copyDataset"
+                class="selector-680-92"></app-dataset-config>
 
-                        </mat-card-content>
-                    </mat-card>
-            
+        </mat-card-content>
+    </mat-card>
+
 </div>

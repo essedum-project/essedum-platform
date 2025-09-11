@@ -394,6 +394,7 @@ textarea:focus {
   display: none;
 }
 
+/* Remove ul/li styles since we're not using them anymore for tree nodes */
 .example-tree ul,
 .example-tree li {
   margin-top: 0;
@@ -402,12 +403,21 @@ textarea:focus {
   font-family: "Roboto", "Segoe UI", sans-serif !important;
 }
 
+/* Ensure tree nodes have proper structure */
+.mat-tree-node {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding-left: 16px;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
 .resetOverflow {
   overflow: visible !important;
 }
 
 .treeBox {
-  width: 600px;
+  width: 500px;
   overflow: auto;
   font-family: "Roboto", "Segoe UI", sans-serif !important;
 }
@@ -878,4 +888,58 @@ input[type="radio"].radioButtonColor {
 ::ng-deep .mat-icon,
 ::ng-deep .material-icons {
   font-family: 'Material Icons' !important;
+}
+
+.hover-blue:hover {
+  color: #0094ff !important;
+}
+
+.hover-red:hover {
+  color: #ff0000 !important;
+}
+
+.lfx-u-pad-b-40 {
+  padding-bottom: 40px !important;
+}
+
+.aip-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  width: 100rem;
+}
+
+.aip-spinner {
+  position: relative;
+  width: 60px;
+  height: 60px;
+}
+
+.spinner-circle {
+  position: absolute;
+  border: 3px solid transparent;
+  border-top-color: var(--primary-color, #0073e6);
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  animation: spin 1s cubic-bezier(0.17, 0.49, 0.96, 0.76) infinite;
+}
+
+.spinner-circle-outer {
+  border-top-color: transparent;
+  border-right-color: var(--primary-color, #0073e6);
+  animation-duration: 1.25s;
+  animation-direction: reverse;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
