@@ -2,187 +2,182 @@
 
 ## 1. Project Description
 
- Essedum is a modular, microservices-based framework designed to simplify the development, training, and deployment of AI-powered applications. It enables seamless connectivity between systems via REST APIs, Azure OpenAI, and AWS Bedrock, and supports data ingestion from sources like PostgreSQL, MySQL, S3, and Azure Blob Storage. Users can build and execute training and inference pipelines using Python-based services, manage models across platforms like SageMaker, Azure ML, and GCP Vertex AI, and deploy them as endpoints. The architecture includes a Java Spring Boot backend, Angular frontend, and containerized pipeline executors managed by Kubernetes for scalability and high availability.
+Essedum is a modular, microservices-based framework designed to simplify the development, training, and deployment of AI-powered applications. It enables seamless connectivity between systems via REST APIs, Azure OpenAI, and AWS Bedrock, and supports data ingestion from sources like PostgreSQL, MySQL, S3, and Azure Blob Storage. Users can build and execute training and inference pipelines using Python-based services, manage models across platforms like SageMaker, Azure ML, and GCP Vertex AI, and deploy them as endpoints.
 
-## 2. Installation 
+## 2. Platform Components
 
+The Essedum platform is composed of four main components that work together to provide a comprehensive AI development and deployment solution.
 
-###  Required Software’s and tools
-#### Backend:
-  •	JDK version 21 or higher
-  •	Maven 3.9.6
-  •	Mysql server V 8.3 or higher
-  •	Mysql workbench V 8.3 pr higher
-  •	Eclipse or STS IDE for Code editing
-  •	keycloak 26.2.3 (OPTIONAL)
+### 2.1. Backend (`sv/`)
 
-#### Front End:
-  •	Noje Js 
-  •	VS Code
+The backend is a Java Spring Boot application that forms the core of the Essedum platform. It provides RESTful APIs for the frontend, manages business logic, and handles data persistence. It is a multi-module Maven project located in the `sv/` directory. For more details, see the [backend documentation](sv/README.md).
 
-#### Pyjob Executor:
-  • Python 3.12
+### 2.2. Frontend (`essedum-ui/`)
 
-### 2.1 . Backend Setup Steps
-    #### 2.1.1 Java setup
-      •	Download java Standard Edition and add Java_Home environment Variable
-      •	Add java bin path in the system environment variables path variable
-      •	Check java is added configured correctly in system environment variables using command java -version
-    #### 2.1.2 Maven setup
-      •	Go to the official Maven website: https://maven.apache.org/download.cgi
-      •	Download the binary zip archive (e.g., apache-maven-3.9.x-bin.zip)
-      •	Extract the ZIP file to a directory C:\Program Files\Apache\Maven\apache-maven-3.9.x
-      •	Open Start Menu → search for Environment Variables → click Edit the system environment variables
-      •	In the System Properties window, click Environment Variables
-      •	Click New under System variables
-      •	Variable name: MAVEN_HOME
-      •	Variable value: C:\Program Files\Apache\Maven\apache-maven-3.9.x
-      •	Find the Path variable under System variables and click Edit
-      •	Click New and add: C:\Program Files\Apache\Maven\apache-maven-3.9.x\bin
- 
+The frontend is an Angular-based single-page application that provides the user interface for the Essedum platform. It allows users to interact with the platform's features, such as creating pipelines, managing datasets, and deploying models. The frontend code is located in the `essedum-ui/` directory.
 
-    #### 2.1.3 MySQL server setup 
-      •	Go to the official site: https://dev.mysql.com/downloads/installer/
-      •	Right-click the downloaded .msi file → Run as Administrator
-      •	Select Developer Default (includes MySQL Server, Workbench, Shell, and connectors)
-      •	The installer will check for dependencies (e.g., Visual C++ Redistributable). Install if prompted.
-      •	Version: Choose the latest available (e.g., 9.2 or 8.3)
-      •	Config Type: Development Computer
-      •	Port: Default is 3306 (you can change if needed)
-      •	Authentication Method: Use Strong Password Encryption (recommended)
-      •	Root Password: Set a secure root password
-      •	Optionally, add a MySQL user account
-      •	Click Execute to apply server configuration
-      •	Wait for the configuration steps to complete
-      •	Once complete, you can launch MySQL Workbench or MySQL Shell to connect to the server using user credentials created while server setup.
-      •	Once connection is successful create schemas with database names for Core & Quartz mentioned in the Common-App application.yaml under config property.
-                                       
-    #### 2.1.4 Clone code from repository
-      •	Clone existing code from existing repository in development branch
-      •	Backend related code placed in SV path
-      •	Front End related code placed in UI folder
+### 2.3. Nginx (`nginx/`)
 
-    #### 2.1.5 Crate Maven Build
-      •	Run below maven command in SV directory “ai-platform/sv” 
-      •	mvn clean install -Dmaven.test.skip=true -Dlicense.skip=true
-      •	Maven build can also be created directly form the Eclipse or STS Ide
-      •	To create Maven build from Eclipse below are the steps
-      •	Import code into eclipse as a maven import
-      •	Right click on Aip project->Run as-> maven build->paste the command in goals as shown below                          
-      •	Once build was success you will see below output
+Nginx is used as a reverse proxy to serve the frontend application and route API requests to the backend services. This decouples the frontend from the backend and simplifies deployment. The Nginx configuration is located in the `nginx/` directory. For more details, see the [Nginx documentation](nginx/README.md).
 
-    #### 2.1.5 Keycloak setup (OPTIONAL)
-      •	Go to the official site: https://www.keycloak.org/downloads
-      •	Download the zip file and unzip it.
-      •	Goto keycloak\bin directory.
-      •	Start the server with command  "kc.bat start-dev"
-      •	Access the admin console browsing http://localhost:8080
-      •	Create realm with name 'ESSEDUM' and enable it from admin console.
-      •	Select ESSEDUM realm and create client with name 'essedum-45' and client type 'OpenID Connect'.
-      •	Select 'Standard flow' in Authentication flow, Set ROOT URL, Web origins to essedum-ui domain and add Valid redirect URLs to essedum-ui domain with wild card.
-    
-    While creating build might fail because of improper Lombok dependency detection. To avoid that configure Lombok dependency in to eclipse by following below steps
-    1.	Copy the lombok.jar into the root Eclipse folder and run the below command
-    “java -jar lombok-1.16.12.jar” 
-    2.	This will open a small UI, where the location of the Eclipse installation can be specified. Usually,the Eclipse installation will be found automatically and lombok can be installed or updated. If not found IDE location specify manually
-    3.	 Just press the Install / Update button and restart the IDE. 
-    
-    
-    
-    #### 2.6 Run application in Eclipse IDE
-      •	Do Maven force update before running project.
-      •	Open Application.Yaml under Resource folder of Common-app and keep Liquibase enabled as true if you are running application for the first time.
-       •	Configure MYSQL server user and password in application.yaml highlighted in yellow
-      •	Create schemas highlighted in red in MYSQL server using MYSQL Work Bench
-               
-      •	Right click on common-app->click on run-> select run configuration->select java application 
-      •	Provide “com.infosys.Common” as input in Main Class.
-      •	Provide “-Dencryption.key=leap$123## -Dencryption.salt=salt-token -Dspring.config.location=../common-app/src/main/resources/application.yml -DLOG_PATH=/app/log -Dlogging.config=../common-app/src/main/resources/logback-spring.xml” as input in the VM arguments.
-                           
-      •	Click on run to start the application
-      •	Application startup will take some time if we are doing it for the first time it will create all the required tables and populate data within it.
-  
-  
+### 2.4. Python Job Executor (`py-job-executer/`)
 
-### 2.3. Front End Setup Steps
-  •	Run “npm run build” command in shell-app-UI & aip-app-ui directory
-  •	Once Node Modules are crated and dist file is generated in those directories.  Copy both dist files path.        
- 
-  #### 2.3.1. Configuring and Starting Nginix
-    •	Go to the path "nginx-1.23.3\conf\nginx.conf" and open conf folder
-    •	Place the path of dist file generated for both shell app, and aip app in nginx.conf
-    •	Now open nginx.exe application. This starts nginx in port 8087 
+The Python Job Executor is a separate service responsible for executing Python-based jobs, such as data processing and machine learning tasks. It listens for job requests from the backend and executes them in a controlled environment. The code for this component is in the `py-job-executer/` directory. For more details, see the [Python Job Executor documentation](py-job-executer/README.md).
 
-### 2.4. Pyjob Executor:
-    • Go to pyjob-executor folder and run below command
-        pip install -r requirements.tx
-    • Run python app.py
-    • Pyjob Executor will be running in port 5000. 
-   
+## 3. Installation
 
-### 2.5. Docker Build and Deployment in AKS Cluster :
+There are two ways to install and run the Essedum platform: a manual developer setup or a containerized setup using Docker.
 
-#### 2.5.1 Backend:
-sudo docker build -t essedum_app_backend:latest -f Dockerfile_dbjwt . (This uses dbjwt for authentication, keycloak server not required)
-sudo docker build -t essedum_app_backend:latest -f Dockerfile_oauth2 . (This uses oauth2 for authentication, keycloak server needs to be installed)
-sudo docker tag essedum_app_backend:latest 
-sudo docker push acrreq.azurecr.io/essedum_app_backend:latest
-kubectl delete -f leap_app_backend-azure.yaml
-kubectl apply -f leap_app_backend-azure.yaml
+### 3.1. Developer Setup
 
-#### 2.5.2 Frontend:
-sudo docker build -t essedum_app_ui:latest .
-sudo docker tag essedum_app_ui:latest 
-sudo docker push acrreq.azurecr.io/essedum_app_ui:latest
-kubectl delete -f leap-ui-azure.yaml
-kubectl delete -f leap-ui-service.yaml
-kubectl apply -f leap-ui-azure.yaml
-kubectl apply -f leap-ui-service.yaml
+This setup is ideal for developers who want to work on the source code and contribute to the platform.
 
+#### Prerequisites
 
+- **Backend**:
+  - JDK 21 or higher
+  - Maven 3.9.6 or higher
+  - MySQL Server 8.3 or higher
+- **Frontend**:
+  - Node.js and npm
+- **Python Job Executor**:
+  - Python 3.12 or higher
 
-## 3. Usage
+#### Step-by-Step Guide
 
-  ### 3.1. Connection
-  This module allows users to configure and manage connections to various resources essential for pipeline execution. These include:
-  Pipeline Execution Environment: Choose where your ML pipeline will run (e.g., local, cloud, or containerized environments).
-  Log Storage: Define where logs generated during pipeline execution will be stored for monitoring and debugging.
-  Dataset Storage: Connect to data sources or storage systems where training and inference datasets are located.
-  
-  ### 3.2. Dataset
-  The dataset module enables users to:
-  Create and manage datasets used in ML pipelines.
-  Upload, preprocess, and organize data for training and evaluation.
-  Ensure datasets are versioned and accessible for reproducibility.
-  
-  ### 3.3. Pipeline
-  This is the core of the application where users can:
-  Create and configure ML pipelines for training models, performing inference, and deploying applications.
-  Integrate Python scripts to define custom steps in the pipeline.
-  Automate workflows including data loading, model training, evaluation, and deployment.
-  
-  ### 3.4. Apps
-  This module hosts interactive applications built using:
-  Streamlit and Gradio: These apps provide intuitive UIs for model interaction, visualization, and testing.
-  Users can launch these apps directly from the platform to explore model predictions, adjust parameters, and share results.
- 
-  To use this application:
-  Set up your connections to data sources and execution environments.
-  Create or upload datasets for training.
-  Build your ML pipeline using Python scripts or predefined templates.
-  Deploy and interact with your models through Streamlit or Gradio apps.
+1. **Clone the Repository**:
+   ```bash
+   git clone <repository-url>
+   cd essedum-platform
+   ```
 
+2. **Backend Setup**:
+   - Navigate to the `sv/` directory.
+   - Configure your MySQL database credentials in `common-app/src/main/resources/application.yml`.
+   - Build the backend services:
+     ```bash
+     cd sv
+     mvn clean install -Dmaven.test.skip=true -Dlicense.skip=true
+     ```
+   - Run the main application from your IDE or using the generated JAR file.
 
-## 4. Change Log:
-  Initial Version
+3. **Frontend Setup**:
+   - Navigate to the `essedum-ui/shell-app-ui` and `essedum-ui/aip-app-ui` directories and install the dependencies:
+     ```bash
+     npm install
+     npm run build
+     ```
 
- 
-## 5. License Info:
-The MIT License (MIT)
-Copyright © 2025 Infosys Limited
+4. **Nginx Setup**:
+   - Configure the `nginx/nginx.conf` file to point to the `dist` folders of the frontend applications.
+   - Start the Nginx server.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+5. **Python Job Executor Setup**:
+   - Navigate to the `py-job-executer/` directory.
+   - Install the required Python packages:
+     ```bash
+     pip install -r requirements.txt
+     ```
+   - Start the executor service:
+     ```bash
+     python app.py
+     ```
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+### 3.2. Containerized Setup
 
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+This section describes two ways to deploy the Essedum platform in a containerized environment: using Docker Compose for a simple, local setup, or using Kubernetes for a more robust, scalable deployment.
+
+#### 3.2.1. Docker Compose Setup
+
+This setup is recommended for users who want to quickly deploy and run the Essedum platform on a local machine.
+
+##### Prerequisites
+
+- Docker
+- Docker Compose
+
+##### Deployment Steps
+
+1. **Configure your environment**:
+   - Navigate to the `docker` directory.
+   - Create a copy of the `.env.sample` file and name it `.env`.
+     ```bash
+     cp .env.sample .env
+     ```
+   - Open the `.env` file and customize the variables as needed. You can change the external ports for the services, update credentials, etc.
+
+2. **Build and run the services**:
+   - Once you have configured your `.env` file, you can build and run the services using Docker Compose.
+     ```bash
+     docker-compose up --build
+     ```
+   This command will build the Docker images for all the services and start them in the correct order.
+
+3. **Accessing the application**:
+   - Once all the services are running, you can access the frontend application in your browser at `http://localhost:8084`.
+   - The backend API will be available at `http://localhost:8082`.
+   - The Keycloak admin console will be available at `http://localhost:8180`.
+
+4. **Stopping the application**:
+   - To stop the services, press `Ctrl+C` in the terminal where `docker-compose` is running, or run the following command from the `docker` directory:
+   ```bash
+   docker-compose down
+   ```
+
+#### 3.2.2. Kubernetes Setup
+
+This setup is ideal for deploying the Essedum platform to a production-like environment.
+
+##### Prerequisites
+
+- Docker
+- Kubernetes (e.g., Docker Desktop, Minikube, or a cloud-based provider like AKS)
+
+##### Deployment Steps
+
+1. **Build Docker Images**:
+   - For each component (backend, frontend, py-job-executor), build the Docker image using the provided `Dockerfile`.
+   - **Backend**:
+     ```bash
+     docker build -t essedum_app_backend:latest ./sv
+     ```
+   - **Frontend**:
+     ```bash
+     docker build -t essedum_app_ui:latest ./essedum-ui
+     ```
+   - **Python Job Executor**:
+     ```bash
+     docker build -t essedum_py_job_executor:latest ./py-job-executer
+     ```
+
+2. **Push Images to a Registry**:
+   - Tag and push the images to a container registry (e.g., Docker Hub, Azure Container Registry).
+     ```bash
+     docker tag essedum_app_backend:latest <your-registry>/essedum_app_backend:latest
+     docker push <your-registry>/essedum_app_backend:latest
+     ```
+
+3. **Deploy to Kubernetes**:
+   - The `aks-deployment/` directory contains sample Kubernetes manifests for deploying the Essedum platform.
+   - Update the manifests to use your container registry and image tags.
+   - Apply the manifests to your Kubernetes cluster:
+     ```bash
+     kubectl apply -f aks-deployment/
+     ```
+
+## 4. Usage
+
+Once the platform is up and running, you can access the frontend in your browser. The application allows you to:
+
+- **Manage Connections**: Configure connections to data sources and execution environments.
+- **Handle Datasets**: Create, upload, and manage datasets for your ML pipelines.
+- **Build Pipelines**: Design and execute ML pipelines for training, inference, and deployment.
+- **Interact with Apps**: Use Streamlit and Gradio applications to interact with your deployed models.
+
+## 5. Change Log
+
+- **v1.0.0**: Initial version of the Essedum platform.
+
+## 6. License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

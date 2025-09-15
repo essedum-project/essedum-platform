@@ -11,3 +11,4 @@ pandas
 pmdarima
 dotenv
 boto3==1.34.117
+python-dotenv

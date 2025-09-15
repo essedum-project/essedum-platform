@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  leap-app-backend-service:
+    build:
+      context: ../sv
+      dockerfile: Dockerfile
+    ports:
+      - "${BACKEND_PORT:-8082}:8082"
+    env_file:
+      - .env
+    environment:
+      - LEAP_HOME=/app
+      - spring.config.location=/app/conf/
+      - encryption.key=${ENCRYPTION_KEY}
+      - encryption.salt=${ENCRYPTION_SALT}
+      - LOG_PATH=/app/log
+      - license=${LICENSE}
+      - publickey=${PUBLIC_KEY}
+      - logging.level.com.springframework.security=DEBUG
+      - logging.level.com.infosys.icets.ai.comm.lib.util.logger=ERROR
+      - spring.profiles.active=mysql,dbjwt,btf,dbconstants,vault
+    depends_on:
+      - mysql
+      - qdrant
+      - keycloak
+
+  frontend:
+    build:
+      context: ../essedum-ui
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT:-8084}:8084"
+    depends_on:
+      - leap-app-backend-service
+
+  py-job-executor:
+    build:
+      context: ../py-job-executer
+      dockerfile: Dockerfile
+    ports:
+      - "${PYJOB_EXECUTOR_PORT:-5000}:5000"
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0
+    env_file:
+      - .env
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ./mysql-init:/docker-entrypoint-initdb.d
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+    volumes:
+      - qdrant-data:/qdrant/storage
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.1
+    env_file:
+      - .env
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=${KEYCLOAK_ADMIN_USER}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+    ports:
+      - "${KEYCLOAK_PORT:-8180}:8080"
+    command:
+      - "start-dev"
+
+volumes:
+  mysql-data:
+  qdrant-data:
