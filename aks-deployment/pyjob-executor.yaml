@@ -15,12 +15,10 @@ spec:
     spec:
       containers:
       - name: pyjob-executor-container
-        image: acrreq0762935.azurecr.io/pyjob-excecutor:latest # Updated to use the ACR image
+        image: 10.200.111.174:5000/pyjob-excecutor:latest # Updated to use the ACR image
         imagePullPolicy: Always
         ports:
         - containerPort: 5000 # Flask app listens on port 5000
-      imagePullSecrets:
-      - name: acr-secret # Secret to authenticate with ACR
 ---
 apiVersion: v1
 kind: Service

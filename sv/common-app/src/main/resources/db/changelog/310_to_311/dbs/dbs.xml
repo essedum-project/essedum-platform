@@ -1,21 +1,21 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
      <!--
-     <changeSet author="Leap (generated)" id="3v1-dbs-20241120-1">
+     <changeSet author="Essedum (generated)" id="3v1-dbs-20241120-1">
 		<sql dbms="mysql,h2,postgres" splitStatements="true" stripComments="true">
                   UPDATE mldataset SET attributes = '{"filter":"","mode":"query","Query":"SELECT \'\Total Portfolios\'\ AS Metrics, COUNT(DISTINCT(portfolio_id)) AS COUNT FROM usm_user_project_role WHERE project_id={projectId} UNION ALL SELECT \'\Total Projects\'\ AS Metrics,COUNT(DISTINCT(project_id)) AS COUNT  FROM usm_user_project_role WHERE project_id={projectId} UNION ALL SELECT \'\No of Users\'\ AS Metrics,COUNT(DISTINCT(user_id)) AS COUNT  FROM usm_user_project_role WHERE project_id={projectId} UNION ALL SELECT \'\Total Dashboards\'\ AS Metrics,COUNT(*) AS COUNT FROM dbs_dashboard_configuration WHERE project={projectId} UNION ALL SELECT \'\BCC Metrics Count\'\ AS Metrics, COUNT(*) AS COUNT FROM bcc_metrics_master WHERE project_id = {projectId}","Cacheable":false,"isStreaming":"false","Headers":"","defaultValues":"","QueryParams":"","writeMode":"append","params":"{projectId:2}","tableName":"","uniqueIdentifier":""}',NAME = 'LEOMTRCC36403',
-                  datasource = 'leapmaster' WHERE alias = 'MetricCounts';
+                  datasource = 'essedummaster' WHERE alias = 'MetricCounts';
 		</sql>
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
                    UPDATE mldataset SET attributes = '{"filter":"","mode":"query","Query":"SELECT ''Total Portfolios'' AS Metrics, COUNT(DISTINCT(portfolio_id)) AS COUNT FROM usm_user_project_role WHERE project_id={projectId} UNION ALL SELECT ''Total Projects'' AS Metrics,COUNT(DISTINCT(project_id)) AS COUNT  FROM usm_user_project_role WHERE project_id={projectId} UNION ALL SELECT ''No of Users'' AS Metrics,COUNT(DISTINCT(user_id)) AS COUNT  FROM usm_user_project_role WHERE project_id={projectId} UNION ALL SELECT ''Total Dashboards'' AS Metrics,COUNT(*) AS COUNT FROM dbs_dashboard_configuration WHERE project={projectId} UNION ALL SELECT ''BCC Metrics Count'' AS Metrics, COUNT(*) AS COUNT FROM bcc_metrics_master WHERE project_id = {projectId}","Cacheable":false,"isStreaming":"false","Headers":"","defaultValues":"","QueryParams":"","writeMode":"append","params":"{projectId:2}","tableName":"","uniqueIdentifier":""}',NAME = 'LEOMTRCC36403',
-                   datasource = 'leapmaster' WHERE alias = 'MetricCounts';
+                   datasource = 'essedummaster' WHERE alias = 'MetricCounts';
         </sql>
         <sql dbms="mysql,mssql,h2,postgres" splitStatements="true" stripComments="true">
                    UPDATE mldataset SET attributes = '{"filter":"","mode":"query","Query":"SELECT actor_type,context_channel,COUNT(DISTINCT actor_id) AS total_logged_in_users FROM   telemetry_impressions GROUP BY actor_type,   context_channel","Cacheable":false,"isStreaming":"false","Headers":"","defaultValues":"","QueryParams":"","writeMode":"append","params":"{}","tableName":"","uniqueIdentifier":""}',
-                   NAME = 'LEOUSRSC31594',datasource = 'leapmaster' WHERE alias = 'UsersCount';
+                   NAME = 'LEOUSRSC31594',datasource = 'essedummaster' WHERE alias = 'UsersCount';
 
                    UPDATE mldataset SET attributes = '{"filter":"","mode":"query","Query":"SELECT actor_type, context_channel, actor_id, AVG(time_spent) AS average_time_spent_seconds FROM (SELECT actor_type,context_channel,actor_id,TIMESTAMPDIFF(SECOND,MIN(ets_datetime),MAX(ets_datetime)) AS time_spent FROM  telemetry_impressions GROUP BY actor_type,context_channel,actor_id ) AS subquery GROUP BY actor_type, context_channel, actor_id","Cacheable":false,"isStreaming":"false","Headers":"","defaultValues":"","QueryParams":"","writeMode":"append","params":"","tableName":"","uniqueIdentifier":"{}"}',
-                   NAME = 'LEOUSRVG17014',datasource = 'leapmaster' WHERE alias = 'UserAvgTime';
+                   NAME = 'LEOUSRVG17014',datasource = 'essedummaster' WHERE alias = 'UserAvgTime';
 		</sql>
 	</changeSet> 
 	-->

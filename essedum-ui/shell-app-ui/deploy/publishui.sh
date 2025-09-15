@@ -7,7 +7,7 @@ releaseVersion=3.2
 
 rm -rf *.tgz
 
-resultAsJson=$(curl -u ${ARTIFACTORY_REPO_USER}:${ARTIFACTORY_REPO_PASS} -X POST   -H "content-type: text/plain" -d 'items.find({ "repo": {"$eq":"icets-ai_npm_virtual"}, "name": {"$match" : "'"$moduleName"'-'"$releaseVersion"'.*.tgz"}}).sort({"$desc":["modified","created"]}).limit(5)')
+resultAsJson=$(curl -u ${ARTIFACTORY_REPO_USER}:${ARTIFACTORY_REPO_PASS} -X POST   -H "content-type: text/plain" -d 'items.find({ "repo": {"$eq":"essedum-ai_npm_virtual"}, "name": {"$match" : "'"$moduleName"'-'"$releaseVersion"'.*.tgz"}}).sort({"$desc":["modified","created"]}).limit(5)')
 echo $resultAsJson
 latestFile=$(echo $resultAsJson | jq -r '.results | sort_by(.updated) [length-1].name')
 echo $latestFile

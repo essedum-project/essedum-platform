@@ -1,4 +1,4 @@
-LEAP_HOME: /app
+ESSEDUM_HOME: /app
 logging:
     path: /var/log/ilead
 config: 
@@ -8,7 +8,7 @@ config:
   cn_required: false
   driverClassName: com.mysql.cj.jdbc.Driver
   datasourceurl: jdbc:mysql://CVICTLPTST1:3306
-  datasourceuser: leapadmin
+  datasourceuser: essedumadmin
   datasourcepass: Pr@d$Le@p2023
 
   service-auth:
@@ -16,9 +16,9 @@ config:
     token: aec127c2-c984-33f6-9a3a-355xd1dof097
 
 
-  leap-db-url: ${config.datasourceurl}/leapmaster_21
-  leap-db-username: ${config.datasourceuser}
-  leap-db-password: ${config.datasourcepass}
+  essedum-db-url: ${config.datasourceurl}/essedummaster_21
+  essedum-db-username: ${config.datasourceuser}
+  essedum-db-password: ${config.datasourcepass}
 spring:
   resources:
     static-locations: ${config.static-locations}
@@ -35,7 +35,7 @@ spring:
     contexts: test
     change-log: "classpath:db/aip/master.xml"
   application:
-    name: leap
+    name: essedum
   cloud:
     vault:
       enabled: false
@@ -60,9 +60,9 @@ spring:
   datasource:
        type: com.zaxxer.hikari.HikariDataSource
        driverClassName: ${config.driverClassName}
-       url: ${config.leap-db-url}
-       username: ${config.leap-db-username}
-       password: ${config.leap-db-password}
+       url: ${config.essedum-db-url}
+       username: ${config.essedum-db-username}
+       password: ${config.essedum-db-password}
        maximum-pool-size: 8
        minimumIdle: 3
        idleTimeout: 60000

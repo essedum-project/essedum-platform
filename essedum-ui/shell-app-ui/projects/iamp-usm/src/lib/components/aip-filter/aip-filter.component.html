@@ -1,0 +1,136 @@
+<div class="filter-panel">
+  <div class="filter-panel__header" (click)="toggleFilterExpanded()">
+    <div class="filter-panel__icon-container">
+      <mat-icon id="filter-expand-icon" data-icon-type="filter-expand" class="filter-panel__icon"
+        (click)="toggleExpand()" [matTooltip]="isFilterExpanded ? 'Collapse Filters' : 'Expand Filters'"
+        [matTooltipPosition]="TOOLTIP_POSITION">
+        filter_list
+      </mat-icon>
+    </div>
+
+    <div class="filter-panel__title-container">
+      <h3 class="filter-panel__title">
+        Filter by:
+        <span *ngIf="!isFilterExpanded && hasActiveFilters()" class="filter-summary">
+          {{ getActiveFiltersSummary() }}
+        </span>
+      </h3>
+    </div>
+
+    <div class="filter-panel__toggle-container">
+      <mat-icon id="filter-toggle-icon" data-icon-type="filter-toggle" class="filter-panel__toggle-icon"
+        [matTooltip]="isFilterExpanded ? 'Collapse Filters' : 'Expand Filters'" [matTooltipPosition]="TOOLTIP_POSITION">
+        keyboard_arrow_down
+      </mat-icon>
+    </div>
+  </div>
+  <div class="filter-panel__content" *ngIf="isFilterExpanded" @slideToggle>
+    <div *ngIf="(servicev1 === ServiceType.PORTFOLIO)">
+      <div class="filter-options">
+        <div class="filter-row" style="display:flex">
+          <div class="filter-field">
+            <mat-form-field appearance="fill" floatLabel="always" class="w-100">
+              <mat-label>Portfolio Name</mat-label>
+              <input matInput [(ngModel)]="searchedName" placeholder="Enter portfolio name"
+                (keyup.enter)="applyFilters()">
+              <button *ngIf="searchedName" matSuffix mat-icon-button aria-label="Clear"
+                (click)="searchedName=''; applyFilters()">
+                <mat-icon>close</mat-icon>
+              </button>
+            </mat-form-field>
+          </div>
+          <div class="filter-field">
+            <mat-form-field appearance="fill" floatLabel="always" class="w-100">
+              <mat-label>Portfolio Description</mat-label>
+              <input matInput [(ngModel)]="filterUsmPortfolio" placeholder="Enter description"
+                (keyup.enter)="applyFilters()">
+              <button *ngIf="filterUsmPortfolio" matSuffix mat-icon-button aria-label="Clear"
+                (click)="filterUsmPortfolio=''; applyFilters()">
+                <mat-icon>close</mat-icon>
+              </button>
+            </mat-form-field>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <div *ngIf="(servicev1 === ServiceType.ROLEPERMISSION)">
+      <div class="filter-options">
+        <!-- Role Filter -->
+        <div class="filter-group">
+          <div class="filter-control">
+            <mat-form-field appearance="fill" class="w-100">
+              <label>Role Name</label>
+              <mat-select [(ngModel)]="rolePermission.role" [compareWith]="compareObjects" placeholder="Select Role"
+                [disabled]="view" (selectionChange)="applyFilters()">
+                <mat-option [value]="'All'">All</mat-option>
+                <mat-option *ngFor="let option of roleArray" [value]="option">
+                  {{ option.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="selected-items" *ngIf="rolePermission.role && rolePermission.role !== 'All'">
+            <mat-chip-set [id]="'role-chip-set-' + (servicev1 || 'default')" aria-label="Selected role">
+              <mat-chip data-chip-type="role" removable="true" (removed)="removeRoleFilter(rolePermission.role)">
+                {{ rolePermission.role.name }}
+                <mat-icon data-icon-type="chip-remove-role" matChipRemove>close</mat-icon>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
+
+        <!-- Module Filter -->
+        <div class="filter-group">
+          <div class="filter-control">
+            <mat-form-field appearance="fill" class="w-100">
+              <label>Module</label> <mat-select [(ngModel)]="rolePermission.module" placeholder="Select Module"
+                [disabled]="view" (selectionChange)="onModuleChange()">
+                <mat-option [value]="'All'">All</mat-option>
+                <mat-option *ngFor="let moduleName of uniqueModules" [value]="moduleName">
+                  {{ moduleName }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="selected-items" *ngIf="rolePermission.module && rolePermission.module !== 'All'">
+            <mat-chip-set [id]="'module-chip-set-' + (servicev1 || 'default')" aria-label="Selected module">
+              <mat-chip data-chip-type="module" removable="true" (removed)="removeModuleFilter()">
+                {{ rolePermission.module }}
+                <mat-icon data-icon-type="chip-remove-module" matChipRemove>close</mat-icon>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
+
+        <!-- Permission Filter -->
+        <div class="filter-group">
+          <div class="filter-control">
+            <mat-form-field appearance="fill" class="w-100">
+              <label>Permission</label>
+              <mat-select [(ngModel)]="rolePermission.permission" multiple [compareWith]="compareObjects"
+                placeholder="Select Permission" [disabled]="view" (selectionChange)="applyFilters()">
+                <mat-option [value]="'All'">All</mat-option>
+                <mat-option *ngFor="let option of filteredPermissions" [value]="option">
+                  {{ option.permission }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="selected-items" *ngIf="rolePermission.permission && rolePermission.permission.length > 0">
+            <mat-chip-set [id]="'permission-chip-set-' + (servicev1 || 'default')" aria-label="Selected permissions">
+              <mat-chip data-chip-type="permission" *ngFor="let perm of rolePermission.permission; let i = index"
+                removable="true" (removed)="removePermissionFilter(perm)">
+                {{ perm.permission }}
+                <mat-icon data-chip-type="chip-remove-permission" matChipRemove>close</mat-icon>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

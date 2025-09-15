@@ -1,0 +1,14 @@
+flask
+boto3
+sagemaker==2.183.0
+minio
+flask_swagger_ui
+dateutils
+gitpython
+psutil
+gradio
+pandas
+sqlalchemy
+pymysql
+setuptools
+python-dotenv

@@ -1,26 +1,26 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-	<changeSet author="Leap" id="1312v0-1019">
+	<changeSet author="Essedum" id="1312v0-1019">
 		<sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">  
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'application.mailNotificationUserCreation','Core','false',a.id FROM usm_project a WHERE name='Core';
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'kg.neo4j.url','Core','bolt://localhost',a.id FROM usm_project a WHERE name='Core';
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'kg.neo4j.username','Core','neo4j',a.id FROM usm_project a WHERE name='Core';
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'kg.neo4j.password','Core','admin',a.id FROM usm_project a WHERE name='Core';
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'kg.neo4j.connectionpool.size','Core','50',a.id FROM usm_project a WHERE name='Core';
-			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'kg.source','Core','leap',a.id FROM usm_project a WHERE name='Core';
+			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'kg.source','Core','essedum',a.id FROM usm_project a WHERE name='Core';
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'application.uiconfig.processdashid','Core','6',a.id FROM usm_project a WHERE name='Core';
-			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'application.uiconfig.enckeydefault','Core','leapAppInfosys12',a.id FROM usm_project a WHERE name='Core';
+			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'application.uiconfig.enckeydefault','Core','essedumAppLfn123',a.id FROM usm_project a WHERE name='Core';
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'kg.neo4j.url','leo1311','bolt://localhost',a.id FROM usm_project a WHERE name='leo1311';
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'kg.neo4j.username','leo1311','neo4j',a.id FROM usm_project a WHERE name='leo1311';
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'kg.neo4j.password','leo1311','admin',a.id FROM usm_project a WHERE name='leo1311';
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'kg.neo4j.connectionpool.size','leo1311','50',a.id FROM usm_project a WHERE name='leo1311';
-			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'kg.source','leo1311','leap',a.id FROM usm_project a WHERE name='leo1311';
-			update usm_constant set item_value='1.3.12' where item='application.uiconfig.leapVersion' and project_name='Core' and item_value='1.3.11';
+			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'kg.source','leo1311','essedum',a.id FROM usm_project a WHERE name='leo1311';
+			update usm_constant set item_value='1.3.12' where item='application.uiconfig.essedumVersion' and project_name='Core' and item_value='1.3.11';
 			UPDATE usm_constant SET item='application.uiconfig.dstFlag' WHERE item LIKE '%dst%' AND project_name IN ('Core', 'leo1311');
 		</sql> 
 			
 	</changeSet>
-	<changeSet author="Leap" id="1312v0-1020">
+	<changeSet author="Essedum" id="1312v0-1020">
 	<sql splitStatements="true" stripComments="true">
 		UPDATE usm_constant SET item_value='{"label":"Admin Mgmt","icon":"user","horizontal":true,"children":[{"label":"Portfolio Management","icon":"file-powerpoint-o","url":"./iamp-usm/portfoliolist","children":[]},{"label":"Project Management","icon":"file-powerpoint-o","url":"./iamp-usm/projectlist","children":[]},{"label":"Role Management","icon":"registered","url":"./iamp-usm/role/list","children":[]},{"label":"User Management","icon":"users","url":"./iamp-usm/manageUsers","children":[]},{"label":"Dashboard Management","icon":"exchange","url":"./iamp-usm/export-import","children":[]},{"label":"Dashboard Mapping","icon":"desktop","url":"./dynamicDashboard/dashboardMapping","children":[]},{"label":"Theme","icon":"palette","url":"./iamp-usm/theme","children":[],"_id":9},{"label":"Copy Blueprint","icon":"palette","url":"./iamp-usm/copy-blueprint","children":[],"_id":10}]}' WHERE item_value LIKE '%Admin Mgmt%' AND project_name='Core';
 		update usm_constant set item_value='{"label":"AI Brain","icon":"assets/icons/digital-ai-brain.svg","children":[{"label":"Datasources","icon":"","url":"./aibrain/datasources","children":[],"_id":2},{"label":"Data Market Place","icon":"","url":"./aibrain/datasets","children":[],"_id":3},{"label":"Analytics Pipelines","icon":"","url":"./aibrain/pipelines","children":[],"_id":4},{"label":"Workflows","icon":"","url":"./workflows/create/specification","children":[{"label":"Volume Forecast","icon":"","url":"./workflows/VolumeForecast","children":[],"_id":6},{"label":"EASE","icon":"","url":"./workflows/EASE","children":[],"_id":7},{"label":"Ticket Clustering","icon":"","url":"./workflows/TicketClustering","_id":8},{"label":"Shift Roster","icon":"","url":"./workflows/ShiftRoster","children":[],"_id":18}],"_id":5},{"label":"Model Market Place","icon":"","url":"./aibrain/models","children":[],"_id":9},{"label":"Agents","icon":"","url":"./aibrain/agents","children":[],"_id":10},{"label":"Data Models","icon":"","url":"./aibrain/schemas","children":[{"label":"Schemas","icon":"","url":"./aibrain/schemas","children":[],"_id":12},{"label":"Relationships","icon":"","url":"./aibrain/schemas/relationship","children":[],"_id":13}],"_id":11},{"label":"Events","icon":"","url":"./aibrain/events","children":[],"_id":14},{"label":"Chains","icon":"","url":"./aibrain/jobs/chain","children":[],"_id":15},{"label":"Schedule","icon":"","url":"./aibrain/jobs/scheduled","children":[],"_id":16},{"label":"Logs","icon":"","url":"./aibrain/jobs/logs","children":[],"_id":17}],"horizontal":true}' where item='IT Portfolio Manager Side' and project_name='leo1311' and item_value LIKE '%AI Brain%';
@@ -29,7 +29,7 @@
 	</sql>
 	
 	</changeSet>
-	<changeSet author="Leap" id="1312v0-1021">
+	<changeSet author="Essedum" id="1312v0-1021">
 		<sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">  
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'icip.fileserver.enabled','Core','true',a.id FROM usm_project a WHERE name='Core';
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'icip.fileserver.active.server','Core','local',a.id FROM usm_project a WHERE name='Core';
@@ -39,13 +39,13 @@
 		</sql>
 			
 	</changeSet>
-	<changeSet author="Leap" id="1312v0-1022">
+	<changeSet author="Essedum" id="1312v0-1022">
 		<sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">  
 			DELETE FROM usm_constant WHERE item='SBX Admin Side' AND item_value LIKE '%"label":"Workbench"%' AND item_value NOT LIKE '%"url":"./sandbox/config/workbench"%';
 		</sql>
 	</changeSet>
 
-	<changeSet author="Leap" id="1312v0-1023">
+	<changeSet author="Essedum" id="1312v0-1023">
 		<sql splitStatements="true" stripComments="true">
 		UPDATE usm_constant SET item_value='{"label":"Configure","icon":"cog","url":"","children":[{"label":"Configuration Dashboard","icon":"assets/icons/Component_155_2.svg","url":"./iamp-btf/entity/config-screen","children":[],"_id":2},{"label":"Configuration Entry","icon":"assets/icons/icon_LaptopGatepass.svg","url":"./iamp-btf/entity/configuration-entry","children":[],"_id":3},{"label":"Key Words","icon":"assets/icons/icon_keywords.svg","url":"./iamp-btf/entity/key-words","children":[],"_id":4},{"label":"Schedule","icon":"assets/icons/icon-calendar.svg","url":"./iamp-btf/entity/schedule","children":[],"_id":5},{"label":"Server","icon":"assets/icons/Group_106664.svg","url":"./iamp-btf/entity/server","children":[],"_id":6},{"label":"Technology","icon":"assets/icons/icon_hint_idea.svg","url":"./iamp-btf/entity/technology","children":[],"_id":7},{"label":"Workflow Params","icon":"assets/icons/icon_flow_tree.svg","url":"./iamp-btf/entity/workflow-params","children":[],"_id":8},{"label":"Groups","icon":"users","url":"./iamp-btf/entity/group","children":[],"_id":9},{"label":"Tool Adapter","icon":"","url":"","children":[{"label":"Adapter Purpose","icon":"list","url":"./iamp-tad/adapterPurpose-list","children":[],"_id":11},{"label":"Adapter Config","icon":"cog","url":"./iamp-tad/adapterConfig-list","children":[],"_id":12}],"_id":10},{"label":"Technology Property","icon":"","url":"./iamp-btf/entity/technology-properties","children":[],"_id":13}]}' WHERE item_value LIKE '%Configure%' AND project_name='Core' AND item LIKE '%Bot Admin Side%'
 	</sql>

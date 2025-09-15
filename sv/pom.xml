@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.infosys.icets.ai</groupId>
-	<artifactId>aip</artifactId>
+	<groupId>com.lfn.ai</groupId>
+	<artifactId>essedum</artifactId>
 	<version>3.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<properties>
@@ -12,6 +12,8 @@
 		<spring-boot-dependencies.version>3.3.5</spring-boot-dependencies.version>
 		<spring-cloud-dependencies.version>2022.0.5</spring-cloud-dependencies.version>
 		<spring-version>6.3.4</spring-version>
+		<spring-framework.version>6.1.14</spring-framework.version>
+		<jackson.version>2.17.2</jackson.version>
 		<spring-vault-core.version>3.1.1</spring-vault-core.version>
 		<springdoc-openapi-ui>1.6.6</springdoc-openapi-ui>
 		<springfox.version>2.9.2</springfox.version>
@@ -60,7 +62,6 @@
 		<org.springdoc.springdoc-openapi-ui.version>${springdoc-openapi-ui}</org.springdoc.springdoc-openapi-ui.version>
 		<joda-time.joda-time.version>2.10.6</joda-time.joda-time.version>
 		<org.modelmapper.modelmapper.version>${modelmapper.version}</org.modelmapper.modelmapper.version>
-		<org.json.json.version>${json.version}</org.json.json.version>
 		<com.openpojo.openpojo.version>${openpojo.version}</com.openpojo.openpojo.version>
 		<org.apache.commons.commons-collections4.version>4.4</org.apache.commons.commons-collections4.version>
 		<org.apache.poi.poi-ooxml.version>5.2.2</org.apache.poi.poi-ooxml.version>
@@ -85,27 +86,27 @@
 		<org.springframework.spring-webmvc.version>6.1.14</org.springframework.spring-webmvc.version>
 		<org.springframework.spring-web.version>6.1.14</org.springframework.spring-web.version>
 		<org.apache.tomcat.embed.tomcat-embed-core.version>10.1.34</org.apache.tomcat.embed.tomcat-embed-core.version>
-		<com.infosys.icets.ai.comm-lib-util.version>${project.version}</com.infosys.icets.ai.comm-lib-util.version>
-		<com.infosys.iamp-lib-usm.version>${project.version}</com.infosys.iamp-lib-usm.version>
-		<com.infosys.icets.icip.icip-lib-evt.version>${project.version}</com.infosys.icets.icip.icip-lib-evt.version>
-		<com.infosys.icets.icip.icip-lib-jobs.version>${project.version}</com.infosys.icets.icip.icip-lib-jobs.version>
-		<com.infosys.icets.icip.icip-lib-fsvr.version>${project.version}</com.infosys.icets.icip.icip-lib-fsvr.version>
-		<com.infosys.icets.icip.icip-lib-search.version>${project.version}</com.infosys.icets.icip.icip-lib-search.version>
-		<com.infosys.icets.ai.comm-secrets-app.version>${project.version}</com.infosys.icets.ai.comm-secrets-app.version>
-		<com.infosys.icets.ai.comm-lib-secrets.version>${project.version}</com.infosys.icets.ai.comm-lib-secrets.version>
-		<com.infosys.icets.icip.icip-lib-adp.version>${project.version}</com.infosys.icets.icip.icip-lib-adp.version>
-		<com.infosys.common-lib-rest.version>${project.version}</com.infosys.common-lib-rest.version>
-		<com.infosys.icets.icip.icip-lib-mod.version>${project.version}</com.infosys.icets.icip.icip-lib-mod.version>
-		<com.infosys.icets.icip.icip-lib-iai.version>${project.version}</com.infosys.icets.icip.icip-lib-iai.version>
-		<com.infosys.icets.icip.icip-lib-mlops.version>${project.version}</com.infosys.icets.icip.icip-lib-mlops.version>
-		<com.infosys.icets.icip.plugins.icip-adp-rest.version>${project.version}</com.infosys.icets.icip.plugins.icip-adp-rest.version>
-		<com.infosys.icets.icip.plugins.icip-adp-remote.version>${project.version}</com.infosys.icets.icip.plugins.icip-adp-remote.version>
-		<com.infosys.icets.icip.plugins.icip-adp-s3.version>${project.version}</com.infosys.icets.icip.plugins.icip-adp-s3.version>
-		<com.infosys.icets.icip.plugins.icip-adp-aicloud.version>${project.version}</com.infosys.icets.icip.plugins.icip-adp-aicloud.version>
-		<com.infosys.icets.icip.plugins.icip-adp-aws-sagemaker.version>${project.version}</com.infosys.icets.icip.plugins.icip-adp-aws-sagemaker.version>
-		<com.infosys.icets.icip.plugins.icip-adp-mysql.version>${project.version}</com.infosys.icets.icip.plugins.icip-adp-mysql.version>
-		<com.infosys.icets.icip.plugins.icip-adp-postgresql.version>${project.version}</com.infosys.icets.icip.plugins.icip-adp-postgresql.version>
-		<junit.junit.version>3.8.1</junit.junit.version>
+		<com.lfn.ai.comm-lib-util.version>${project.version}</com.lfn.ai.comm-lib-util.version>
+		<com.lfn.iamp-lib-usm.version>${project.version}</com.lfn.iamp-lib-usm.version>
+		<com.lfn.icip.icip-lib-evt.version>${project.version}</com.lfn.icip.icip-lib-evt.version>
+		<com.lfn.icip.icip-lib-jobs.version>${project.version}</com.lfn.icip.icip-lib-jobs.version>
+		<com.lfn.icip.icip-lib-fsvr.version>${project.version}</com.lfn.icip.icip-lib-fsvr.version>
+		<com.lfn.icip.icip-lib-search.version>${project.version}</com.lfn.icip.icip-lib-search.version>
+		<com.lfn.ai.comm-secrets-app.version>${project.version}</com.lfn.ai.comm-secrets-app.version>
+		<com.lfn.ai.comm-lib-secrets.version>${project.version}</com.lfn.ai.comm-lib-secrets.version>
+		<com.lfn.icip.icip-lib-adp.version>${project.version}</com.lfn.icip.icip-lib-adp.version>
+		<com.lfn.common-lib-rest.version>${project.version}</com.lfn.common-lib-rest.version>
+		<com.lfn.icip.icip-lib-mod.version>${project.version}</com.lfn.icip.icip-lib-mod.version>
+		<com.lfn.icip.icip-lib-iai.version>${project.version}</com.lfn.icip.icip-lib-iai.version>
+		<com.lfn.icip.icip-lib-mlops.version>${project.version}</com.lfn.icip.icip-lib-mlops.version>
+		<com.lfn.icip.plugins.icip-adp-rest.version>${project.version}</com.lfn.icip.plugins.icip-adp-rest.version>
+		<com.lfn.icip.plugins.icip-adp-remote.version>${project.version}</com.lfn.icip.plugins.icip-adp-remote.version>
+		<com.lfn.icip.plugins.icip-adp-s3.version>${project.version}</com.lfn.icip.plugins.icip-adp-s3.version>
+		<com.lfn.icip.plugins.icip-adp-aicloud.version>${project.version}</com.lfn.icip.plugins.icip-adp-aicloud.version>
+		<com.lfn.icip.plugins.icip-adp-aws-sagemaker.version>${project.version}</com.lfn.icip.plugins.icip-adp-aws-sagemaker.version>
+		<com.lfn.icip.plugins.icip-adp-mysql.version>${project.version}</com.lfn.icip.plugins.icip-adp-mysql.version>
+		<com.lfn.icip.plugins.icip-adp-postgresql.version>${project.version}</com.lfn.icip.plugins.icip-adp-postgresql.version>
+		<junit.version>4.13.2</junit.version>
 		<net.java.dev.jna.jna-platform.version>5.6.0</net.java.dev.jna.jna-platform.version>
 		<org.jsoup.jsoup.version>1.15.3</org.jsoup.jsoup.version>
 		<org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
@@ -139,7 +140,7 @@
 	    <aws.java.sdk.s3.version>1.11.923</aws.java.sdk.s3.version>	    
 	    <lucene.version>8.11.1</lucene.version>
 	    <protobuf-java.version>3.24.4</protobuf-java.version>
-	    <junit.jupiter.version>5.7.1</junit.jupiter.version>
+	    <junit.jupiter.version>5.10.1</junit.jupiter.version>
 	    <nimbus-jose-jwt.version>9.37.2</nimbus-jose-jwt.version>	    
 	    <pdfbox.version>3.0.3</pdfbox.version>
 	    <testng.version>7.9.0</testng.version>
@@ -150,12 +151,11 @@
 	    <commons-compress.version>1.26.1</commons-compress.version>	    
 	    <jython.version>2.7.4</jython.version>
 	    <httpmime.version>4.5.14</httpmime.version>
-	    <groovy-all.version>4.0.0</groovy-all.version>
+	    <groovy-all.version>4.0.23</groovy-all.version>
 	    <google-auth.version>1.24.1</google-auth.version>
 	    <lucene-analyzers-common.version>8.9.0</lucene-analyzers-common.version>	    
         <aws-java-sdk.version>1.11.163</aws-java-sdk.version>
         <minio.version>8.2.0</minio.version>       
-	    <azure-core.version>1.50.0</azure-core.version>
 	    <commons-fileupload.version>1.5</commons-fileupload.version>
 	    <jakarta.interceptor-api.version>2.1.0</jakarta.interceptor-api.version>
 	    <spring-mock.version>2.0.4</spring-mock.version>
@@ -169,8 +169,6 @@
 	    <reflections.version>0.9.12</reflections.version>
 	    <javax.interceptor.version>1.2</javax.interceptor.version>
 	    <slf4j.version>2.0.9</slf4j.version>
-	    <logback.version>1.4.14</logback.version>
-	    <junit4.version>4.13.2</junit4.version>
 
 		</properties>
 	<modules>
@@ -195,6 +193,7 @@
 		<module>icip-adp-aws-sagemaker</module>
 		<module>icip-adp-mysql</module>
 		<module>icip-adp-postgresql</module>
+		<module>icip-adp-azure</module>
 		
 		<module>common-app</module>
 	</modules>
@@ -296,6 +295,12 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-starter</artifactId>
 				<version>${org.springframework.boot.spring-boot-starter.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
@@ -316,6 +321,44 @@
 						<groupId>org.springframework.amqp</groupId>
 						<artifactId>spring-amqp</artifactId>
 					</exclusion>
+					<!-- Fix Spring Framework Version Conflicts -->
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring-context</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring-beans</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring-aop</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring-expression</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring-jcl</artifactId>
+					</exclusion>
+					<!-- Fix Jackson Version Conflicts -->
+					<exclusion>
+						<groupId>com.fasterxml.jackson.core</groupId>
+						<artifactId>jackson-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.fasterxml.jackson.core</groupId>
+						<artifactId>jackson-annotations</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.fasterxml.jackson.core</groupId>
+						<artifactId>jackson-databind</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -327,6 +370,12 @@
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
 				<version>${com.google.code.gson.gson.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.liquibase</groupId>
@@ -337,11 +386,23 @@
 				<groupId>org.ehcache</groupId>
 				<artifactId>ehcache</artifactId>
 				<version>${org.ehcache.ehcache.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.springdoc</groupId>
 				<artifactId>springdoc-openapi-ui</artifactId>
 				<version>${org.springdoc.springdoc-openapi-ui.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>joda-time</groupId>
@@ -413,11 +474,23 @@
 				<groupId>com.azure</groupId>
 				<artifactId>azure-core</artifactId>
 				<version>${com.azure.azure-core.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>	
 			</dependency>
 			<dependency>
 				<groupId>com.azure</groupId>
 				<artifactId>azure-storage-blob</artifactId>
 				<version>${com.azure.azure-storage-blob.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>io.netty</groupId>
@@ -464,6 +537,12 @@
 				<groupId>org.eclipse.jgit</groupId>
 				<artifactId>org.eclipse.jgit</artifactId>
 				<version>${org.eclipse.jgit.org.eclipse.jgit.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
@@ -487,109 +566,114 @@
 			</dependency>
 			
 			<dependency>
-				<groupId>com.infosys.icets.ai</groupId>
+				<groupId>com.lfn.ai</groupId>
 				<artifactId>comm-lib-util</artifactId>
-				<version>${com.infosys.icets.ai.comm-lib-util.version}</version>
+				<version>${com.lfn.ai.comm-lib-util.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys</groupId>
+				<groupId>com.lfn</groupId>
 				<artifactId>iamp-lib-usm</artifactId>
-				<version>${com.infosys.iamp-lib-usm.version}</version>
+				<version>${com.lfn.iamp-lib-usm.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip</groupId>
+				<groupId>com.lfn.icip</groupId>
 				<artifactId>icip-lib-evt</artifactId>
-				<version>${com.infosys.icets.icip.icip-lib-evt.version}</version>
+				<version>${com.lfn.icip.icip-lib-evt.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip</groupId>
+				<groupId>com.lfn.icip</groupId>
 				<artifactId>icip-lib-jobs</artifactId>
-				<version>${com.infosys.icets.icip.icip-lib-jobs.version}</version>
+				<version>${com.lfn.icip.icip-lib-jobs.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip</groupId>
+				<groupId>com.lfn.icip</groupId>
 				<artifactId>icip-lib-fsvr</artifactId>
-				<version>${com.infosys.icets.icip.icip-lib-fsvr.version}</version>
+				<version>${com.lfn.icip.icip-lib-fsvr.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip</groupId>
+				<groupId>com.lfn.icip</groupId>
 				<artifactId>icip-lib-search</artifactId>
-				<version>${com.infosys.icets.icip.icip-lib-search.version}</version>
+				<version>${com.lfn.icip.icip-lib-search.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.ai</groupId>
+				<groupId>com.lfn.ai</groupId>
 				<artifactId>comm-secrets-app</artifactId>
-				<version>${com.infosys.icets.ai.comm-secrets-app.version}</version>
+				<version>${com.lfn.ai.comm-secrets-app.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.ai</groupId>
+				<groupId>com.lfn.ai</groupId>
 				<artifactId>comm-lib-secrets</artifactId>
-				<version>${com.infosys.icets.ai.comm-lib-secrets.version}</version>
+				<version>${com.lfn.ai.comm-lib-secrets.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip</groupId>
+				<groupId>com.lfn.icip</groupId>
 				<artifactId>icip-lib-adp</artifactId>
-				<version>${com.infosys.icets.icip.icip-lib-adp.version}</version>
+				<version>${com.lfn.icip.icip-lib-adp.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys</groupId>
+				<groupId>com.lfn</groupId>
 				<artifactId>common-lib-rest</artifactId>
-				<version>${com.infosys.common-lib-rest.version}</version>
+				<version>${com.lfn.common-lib-rest.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip</groupId>
+				<groupId>com.lfn.icip</groupId>
 				<artifactId>icip-lib-mod</artifactId>
-				<version>${com.infosys.icets.icip.icip-lib-mod.version}</version>
+				<version>${com.lfn.icip.icip-lib-mod.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip</groupId>
+				<groupId>com.lfn.icip</groupId>
 				<artifactId>icip-lib-iai</artifactId>
-				<version>${com.infosys.icets.icip.icip-lib-iai.version}</version>
+				<version>${com.lfn.icip.icip-lib-iai.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip</groupId>
+				<groupId>com.lfn.icip</groupId>
 				<artifactId>icip-lib-mlops</artifactId>
-				<version>${com.infosys.icets.icip.icip-lib-mlops.version}</version>
+				<version>${com.lfn.icip.icip-lib-mlops.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip.plugins</groupId>
+				<groupId>com.lfn.icip.plugins</groupId>
 				<artifactId>icip-adp-rest</artifactId>
-				<version>${com.infosys.icets.icip.plugins.icip-adp-rest.version}</version>
+				<version>${com.lfn.icip.plugins.icip-adp-rest.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip.plugins</groupId>
+				<groupId>com.lfn.icip.plugins</groupId>
 				<artifactId>icip-adp-remote</artifactId>
-				<version>${com.infosys.icets.icip.plugins.icip-adp-remote.version}</version>
+				<version>${com.lfn.icip.plugins.icip-adp-remote.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip.plugins</groupId>
+				<groupId>com.lfn.icip.plugins</groupId>
 				<artifactId>icip-adp-s3</artifactId>
-				<version>${com.infosys.icets.icip.plugins.icip-adp-s3.version}</version>
+				<version>${com.lfn.icip.plugins.icip-adp-s3.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip.plugins</groupId>
+				<groupId>com.lfn.icip.plugins</groupId>
 				<artifactId>icip-adp-aicloud</artifactId>
-				<version>${com.infosys.icets.icip.plugins.icip-adp-aicloud.version}</version>
+				<version>${com.lfn.icip.plugins.icip-adp-aicloud.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip.plugins</groupId>
+				<groupId>com.lfn.icip.plugins</groupId>
 				<artifactId>icip-adp-aws-sagemaker</artifactId>
-				<version>${com.infosys.icets.icip.plugins.icip-adp-aws-sagemaker.version}</version>
+				<version>${com.lfn.icip.plugins.icip-adp-aws-sagemaker.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip.plugins</groupId>
+				<groupId>com.lfn.icip.plugins</groupId>
 				<artifactId>icip-adp-mysql</artifactId>
-				<version>${com.infosys.icets.icip.plugins.icip-adp-mysql.version}</version>
+				<version>${com.lfn.icip.plugins.icip-adp-mysql.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.infosys.icets.icip.plugins</groupId>
+				<groupId>com.lfn.icip.plugins</groupId>
 				<artifactId>icip-adp-postgresql</artifactId>
-				<version>${com.infosys.icets.icip.plugins.icip-adp-postgresql.version}</version>
+				<version>${com.lfn.icip.plugins.icip-adp-postgresql.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.lfn.icip.plugins</groupId>
+				<artifactId>icip-adp-azure</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>${junit.junit.version}</version>
+                <version>${junit.version}</version>
             </dependency>
 			<dependency>
 			    <groupId>net.java.dev.jna</groupId>
@@ -625,31 +709,122 @@
 			    <groupId>org.apache.tika</groupId>
 			    <artifactId>tika-core</artifactId>
 			    <version>${org.apache.tika.tika-core.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>xml-apis</groupId>
+						<artifactId>xml-apis</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 			    <groupId>org.apache.tika</groupId>
 			    <artifactId>tika-parsers</artifactId>
 			    <version>${org.apache.tika.tika-parsers.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 			    <groupId>org.apache.tika</groupId>
 			    <artifactId>tika-parsers-standard-package</artifactId>
 			    <version>${org.apache.tika.tika-parsers-standard-package.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>xml-apis</groupId>
+						<artifactId>xml-apis</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.commons</groupId>
+						<artifactId>commons-compress</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-api</artifactId>
+					</exclusion>
+					<!-- Exclude conflicting POI versions -->
+					<exclusion>
+						<groupId>org.apache.poi</groupId>
+						<artifactId>poi</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.poi</groupId>
+						<artifactId>poi-ooxml</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.poi</groupId>
+						<artifactId>poi-ooxml-lite</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.poi</groupId>
+						<artifactId>poi-scratchpad</artifactId>
+					</exclusion>
+					<!-- Exclude conflicting Jackson versions -->
+					<exclusion>
+						<groupId>com.fasterxml.jackson.core</groupId>
+						<artifactId>jackson-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.fasterxml.jackson.core</groupId>
+						<artifactId>jackson-annotations</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.fasterxml.jackson.core</groupId>
+						<artifactId>jackson-databind</artifactId>
+					</exclusion>
+					<!-- Exclude conflicting commons versions -->
+					<exclusion>
+						<groupId>commons-codec</groupId>
+						<artifactId>commons-codec</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-io</groupId>
+						<artifactId>commons-io</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 			    <groupId>io.swagger.core.v3</groupId>
 			    <artifactId>swagger-core</artifactId>
 			    <version>${io.swagger.core.v3.swagger-core.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 			    <groupId>com.azure.spring</groupId>
 			    <artifactId>spring-cloud-azure-starter-keyvault-secrets</artifactId>
 			    <version>${com.azure.spring.spring-cloud-azure-starter-keyvault-secrets.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>	
 			</dependency>
 			<dependency>
 			    <groupId>com.azure</groupId>
 			    <artifactId>azure-identity</artifactId>
 			    <version>${com.azure.azure-identity.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>	
 			</dependency>
 			<dependency>
 			    <groupId>org.springframework.vault</groupId>
@@ -665,11 +840,6 @@
 			    <groupId>org.postgresql</groupId>
 			    <artifactId>postgresql</artifactId>
 			    <version>${org.postgresql.postgresql.version}</version>
-			</dependency>
-			<dependency>
-			    <groupId>org.json</groupId>
-			    <artifactId>json</artifactId>
-			    <version>${org.json.json.version}</version>
 			</dependency>
 			<dependency>
 			    <groupId>com.sun.xml.bind</groupId>
@@ -700,11 +870,31 @@
 	            <groupId>org.apache.httpcomponents.client5</groupId>
 	            <artifactId>httpclient5</artifactId>
 	            <version>${httpclient5.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>	
 	        </dependency>
 	        <dependency>
 	            <groupId>com.microsoft.graph</groupId>
 	            <artifactId>microsoft-graph</artifactId>
 	            <version>${microsoft-graph.version}</version>
+	            <exclusions>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-core</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-annotations</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-databind</artifactId>
+	                </exclusion>
+	            </exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>com.squareup.okio</groupId>
@@ -715,6 +905,16 @@
 	            <groupId>software.amazon.awssdk</groupId>
 	            <artifactId>regions</artifactId>
 	            <version>${aws.sdk.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>software.amazon.awssdk</groupId>
+						<artifactId>third-party-jackson-core</artifactId>
+					</exclusion>
+				</exclusions>	 
 	        </dependency>
 	        <dependency>
 	            <groupId>software.amazon.awssdk</groupId>
@@ -725,6 +925,16 @@
 	            <groupId>software.amazon.awssdk</groupId>
 	            <artifactId>sagemaker</artifactId>
 	            <version>${aws.sdk.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>software.amazon.awssdk</groupId>
+						<artifactId>third-party-jackson-core</artifactId>
+					</exclusion>
+				</exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>software.amazon.awssdk</groupId>
@@ -740,11 +950,39 @@
 	            <groupId>com.amazonaws</groupId>
 	            <artifactId>aws-java-sdk-sagemaker</artifactId>
 	            <version>${aws.java.sdk.sagemaker.version}</version>
+	            <exclusions>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-core</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-annotations</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-databind</artifactId>
+	                </exclusion>
+	            </exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>com.amazonaws</groupId>
 	            <artifactId>aws-java-sdk-s3</artifactId>
 	            <version>${aws.java.sdk.s3.version}</version>
+	            <exclusions>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-core</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-annotations</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-databind</artifactId>
+	                </exclusion>
+	            </exclusions>
 	        </dependency>
 		    <dependency>
 	            <groupId>org.apache.lucene</groupId>
@@ -788,6 +1026,12 @@
 	            <artifactId>testng</artifactId>
 	            <version>${testng.version}</version>
 	            <scope>test</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>	
 	        </dependency>
 	        <dependency>
 	            <groupId>org.apache.james</groupId>
@@ -803,6 +1047,20 @@
 	            <groupId>com.amazonaws</groupId>
 	            <artifactId>aws-java-sdk-core</artifactId>
 	            <version>${aws-java-sdk-core.version}</version>
+	            <exclusions>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-core</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-annotations</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-databind</artifactId>
+	                </exclusion>
+	            </exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>com.squareup.okio</groupId>
@@ -844,16 +1102,25 @@
 	            <groupId>com.amazonaws</groupId>
 	            <artifactId>aws-java-sdk</artifactId>
 	            <version>${aws-java-sdk.version}</version>
+	            <exclusions>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-core</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-annotations</artifactId>
+	                </exclusion>
+	                <exclusion>
+	                    <groupId>com.fasterxml.jackson.core</groupId>
+	                    <artifactId>jackson-databind</artifactId>
+	                </exclusion>
+	            </exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>io.minio</groupId>
 	            <artifactId>minio</artifactId>
 	            <version>${minio.version}</version>
-	        </dependency>	        
-		    <dependency>
-	            <groupId>com.azure</groupId>
-	            <artifactId>azure-core</artifactId>
-	            <version>${azure-core.version}</version>
 	        </dependency>
 	        <dependency>
 	            <groupId>commons-fileupload</groupId>
@@ -879,11 +1146,23 @@
 	            <groupId>software.amazon.awssdk</groupId>
 	            <artifactId>bedrock</artifactId>
 	            <version>${aws-sdk-bedrock.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>dev.langchain4j</groupId>
 	            <artifactId>langchain4j-bedrock</artifactId>
 	            <version>${langchain4j-bedrock.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 	        </dependency>
 	        <dependency>
 	            <groupId>dev.langchain4j</groupId>
@@ -919,15 +1198,89 @@
 		      <groupId>org.slf4j</groupId>
 		      <artifactId>slf4j-api</artifactId>
 		      <version>${slf4j.version}</version>
-		    </dependency>        
-		    <dependency>
-		      <groupId>junit</groupId>
-		      <artifactId>junit</artifactId>
-		      <version>${junit4.version}</version>
-		      <scope>test</scope>
 		    </dependency>
 
+		    <!-- Explicit Spring Framework version control -->
+		    <dependency>
+		      <groupId>org.springframework</groupId>
+		      <artifactId>spring-core</artifactId>
+		      <version>${spring-framework.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>org.springframework</groupId>
+		      <artifactId>spring-context</artifactId>
+		      <version>${spring-framework.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>org.springframework</groupId>
+		      <artifactId>spring-beans</artifactId>
+		      <version>${spring-framework.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>org.springframework</groupId>
+		      <artifactId>spring-aop</artifactId>
+		      <version>${spring-framework.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>org.springframework</groupId>
+		      <artifactId>spring-expression</artifactId>
+		      <version>${spring-framework.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>org.springframework</groupId>
+		      <artifactId>spring-jcl</artifactId>
+		      <version>${spring-framework.version}</version>
+		    </dependency>
+
+		    <!-- Explicit Jackson version control -->
+		    <dependency>
+		      <groupId>com.fasterxml.jackson.core</groupId>
+		      <artifactId>jackson-core</artifactId>
+		      <version>${jackson.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>com.fasterxml.jackson.core</groupId>
+		      <artifactId>jackson-annotations</artifactId>
+		      <version>${jackson.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>com.fasterxml.jackson.core</groupId>
+		      <artifactId>jackson-databind</artifactId>
+		      <version>${jackson.version}</version>
+		    </dependency>
+		    <dependency>
+		      <groupId>com.fasterxml.jackson.dataformat</groupId>
+		      <artifactId>jackson-dataformat-xml</artifactId>
+		      <version>${jackson.version}</version>
+		    </dependency>
+
+		    <!-- Note: Maven build tools exclusions handled via Dockerfile jar filtering -->
 
 		</dependencies>
 	</dependencyManagement>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.7.0</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>install</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>false</overWriteSnapshots>
+							<overWriteIfNewer>true</overWriteIfNewer>
+							<excludeArtifactIds>lombok</excludeArtifactIds>
+							<outputDirectory>${project.basedir}/../app/lib</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

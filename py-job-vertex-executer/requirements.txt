@@ -1,0 +1,14 @@
+flask
+boto3
+sagemaker
+minio
+flask_swagger_ui
+dateutils
+gitpython
+psutil
+gradio
+pandas
+sqlalchemy
+pymysql
+google-cloud-aiplatform==1.32.0
+google-cloud-logging==3.6.0

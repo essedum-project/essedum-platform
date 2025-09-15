@@ -1,0 +1,63 @@
+<div class="mt-10">
+  <div class="aip-container lfx-u-pad-lr-30">
+    <!-- Header Section -->
+    <app-aip-header [cardTitle]="title" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="true"
+      (search)="filterItem($event)" (refresh)="ngOnInit()" (add)="createRolePermission()">
+    </app-aip-header>    <!-- Filter Section -->
+    <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="SERVICE_V1" [selectedRolePermissionList]="{ 
+                        selectedAdapterType: selectedAdapterType
+                      }" (tagSelected)="onTagSelected($event)">
+    </app-aip-filter>
+
+    <div>
+      <div class="aip-container lfx-u-pad-lr-30 mt-m16"></div>
+      <!-- New Table Layout for Role Permissions -->
+      <div class="table-card">
+        <div class="table-scroll-container">
+          <table class="styled-table"
+            *ngIf="UsmRolePermissionsList && UsmRolePermissionsList.data && UsmRolePermissionsList.data.length>0; else noData">
+            <thead>
+              <tr>
+                <th *ngFor="let obj of displayedColumns">{{obj}}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let obj of usmRolePermissionss; let i =index">
+                <td>{{getRowNumber(i)}}</td>
+                <td style="color: #0052cc; cursor: pointer;">{{ obj.id}}</td>
+                <td>{{ obj.role?.name || 'No role name available' }}</td>
+                <td>
+                  {{ (obj.permission && obj.permission.length > 0) ? (obj.permission[0].module) : 'No module available'
+                  }}
+                </td>
+                <td>
+                  {{ (obj.permission && obj.permission.length > 0) ? (obj.permission[0].permission) : 'No
+                  module-permission available' }}
+                </td>
+                <td>
+                  <i class="fa fa-info-circle fa-lg selector-669-71 header-action-icon" aria-hidden="true"
+                    matTooltip="View" (click)="view_UsmRolePermissions(obj)"></i>&nbsp; &nbsp;
+
+                  <i class="fa fa-pencil fa-lg selector-669-72 header-action-icon" aria-hidden="true" matTooltip="Edit"
+                    style="padding-left: 5px" (click)="editUsmRolePermissions(obj)"></i>
+                  &nbsp; &nbsp;
+                  <i class="fa fa-trash fa-lg selector-669-73 header-action-icon" aria-hidden="true"
+                    style="padding-left: 5px" matTooltip="Delete" (click)="showDeleteDialog(obj)"></i>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #noData>
+            <div class="no-data">No data available</div>
+          </ng-template>
+        </div> <!-- Pagination -->
+        <app-aip-pagination
+          *ngIf="noOfPages > 0 || (UsmRolePermissionsList && UsmRolePermissionsList.data && UsmRolePermissionsList.data.length > 0)"
+          [pageNumber]="pageNumber" [noOfPages]="noOfPages || 1" [pageArr]="pageArr.length > 0 ? pageArr : [0]"
+          [startIndex]="startIndex" [endIndex]="endIndex" [hoverStates]="hoverStates" (prevPage)="prevPage()"
+          (nextPage)="nextPage()" (changePage)="changePage($event)">
+        </app-aip-pagination>
+      </div>
+    </div>
+  </div>
+</div>

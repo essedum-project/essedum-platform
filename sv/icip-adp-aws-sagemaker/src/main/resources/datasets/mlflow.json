@@ -46,7 +46,7 @@
 				}
               },
               "example": {
-                "userId": "admin@infosys.com",
+                "userId": "admin@lfn.com",
                 "platform": "mlflow"
               }
             }
@@ -95,7 +95,7 @@
 				}
               },
               "example": {
-                "userId": "admin@infosys.com",
+                "userId": "admin@lfn.com",
                 "platform": "mlflow"
               }
             }
@@ -147,7 +147,7 @@
 				}
               },
               "example": {
-                "userId": "admin@infosys.com",
+                "userId": "admin@lfn.com",
                 "platform": "mlflow",
 				"experiment_name": "mlflow_tabular12"
               }
@@ -218,7 +218,7 @@
 				}
               },
               "example": {
-                "userId": "admin@infosys.com",
+                "userId": "admin@lfn.com",
                 "platform": "mlflow",
 				"domain": "tabular",
 				"experiment_name": "",
@@ -277,7 +277,7 @@
 				}
               },
               "example": {
-                "userId": "admin@infosys.com",
+                "userId": "admin@lfn.com",
                 "platform": "mlflow",
 				"run_id": "3263d6c400624afd99c78ae8bd0501d6"
               }
@@ -330,7 +330,7 @@
 				}
               },
               "example": {
-                "userId": "admin@infosys.com",
+                "userId": "admin@lfn.com",
                 "platform": "mlflow",
 				"run_id": ""
               }
@@ -380,7 +380,7 @@
 				}
               },
               "example": {
-                "userId": "admin@infosys.com",
+                "userId": "admin@lfn.com",
                 "platform": "mlflow"
               }
             }
@@ -438,7 +438,7 @@
 				}
               },
               "example": {
-                "userId": "admin@infosys.com",
+                "userId": "admin@lfn.com",
                 "platform": "mlflow",
 				"name": "",
 				"run_id": "",
@@ -493,7 +493,7 @@
 				}
               },
               "example": {
-                "userId": "admin@infosys.com",
+                "userId": "admin@lfn.com",
                 "platform": "mlflow",
 				"name": ""
               }
@@ -546,7 +546,7 @@
 				}
               },
               "example": {
-                "userId": "admin@infosys.com",
+                "userId": "admin@lfn.com",
                 "platform": "mlflow",
 				"name": ""
               }
@@ -596,7 +596,7 @@
 				}
               },
               "example": {
-                "userId": "admin@infosys.com",
+                "userId": "admin@lfn.com",
                 "platform": "mlflow"
               }
             }
@@ -654,7 +654,7 @@
 				}
               },
               "example": {
-                "userId": "admin@infosys.com",
+                "userId": "admin@lfn.com",
                 "platform": "mlflow",
 				"name": "",
 				"model_name": "",
@@ -709,7 +709,7 @@
 				}
               },
               "example": {
-                "userId": "admin@infosys.com",
+                "userId": "admin@lfn.com",
                 "platform": "mlflow",
 				"name": ""
               }
@@ -765,7 +765,7 @@
 				}
               },
               "example": {
-                "userId": "admin@infosys.com",
+                "userId": "admin@lfn.com",
                 "platform": "mlflow",
 				"name": "",
 				"instances": ""
@@ -823,7 +823,7 @@
 				}
               },
               "example": {
-                "userId": "admin@infosys.com",
+                "userId": "admin@lfn.com",
                 "platform": "mlflow",
 				"name": "",
 				"batch_data" : ""
@@ -877,7 +877,7 @@
 				}
               },
               "example": {
-                "userId": "admin@infosys.com",
+                "userId": "admin@lfn.com",
                 "platform": "mlflow",
 				"name": ""
               }

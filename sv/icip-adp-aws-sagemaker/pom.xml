@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.infosys.icets.ai</groupId>
-		<artifactId>aip</artifactId>
+		<groupId>com.lfn.ai</groupId>
+		<artifactId>essedum</artifactId>
 		<version>3.3-SNAPSHOT</version>
 	</parent>
-	<groupId>com.infosys.icets.icip.plugins</groupId>
+	<groupId>com.lfn.icip.plugins</groupId>
 	<artifactId>icip-adp-aws-sagemaker</artifactId>
 	<name>icip-adp-aws-sagemaker</name>
 	<properties>
@@ -19,22 +19,32 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-adp</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-mod</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.ai</groupId>
+			<groupId>com.lfn.ai</groupId>
 			<artifactId>comm-lib-util</artifactId>
 		</dependency>
 		<dependency>
 		    <groupId>software.amazon.awssdk</groupId>
 		    <artifactId>regions</artifactId>
+		    <exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>software.amazon.awssdk</groupId>
+					<artifactId>third-party-jackson-core</artifactId>
+				</exclusion>
+			</exclusions>	 
 		</dependency>
 		<dependency>
 		    <groupId>software.amazon.awssdk</groupId>
@@ -43,6 +53,16 @@
 		<dependency>
 		    <groupId>software.amazon.awssdk</groupId>
 		    <artifactId>sagemaker</artifactId>
+		    <exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>software.amazon.awssdk</groupId>
+					<artifactId>third-party-jackson-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 		    <groupId>software.amazon.awssdk</groupId>

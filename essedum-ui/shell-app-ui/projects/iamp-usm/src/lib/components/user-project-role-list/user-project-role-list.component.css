@@ -1,0 +1,496 @@
+/* Form Card Styling */
+.form-card {
+  margin: 20px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+   overflow: hidden;
+  max-width: 100%;
+}
+
+.form-card .mat-card-content {
+  padding: 24px !important;
+}
+
+.header-with-back {
+  display: flex;
+  align-items: center;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  margin-bottom: 20px;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin-right: 10px;
+  padding: 5px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+}
+.header-action-icon {
+  font-size: 16px;
+  height: 16px;
+  color: #002966;
+  cursor: pointer;
+  gap: 2rem;
+}
+ /* Dialog buttons */
+  .dialog-buttons {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px 24px 24px;
+    box-sizing: border-box;
+    width: 100% !important;
+    margin-top: 16px !important; /* Extra margin at the top */
+  }
+
+  .dialog-buttons button {
+    margin-left: 8px;
+  }
+
+.save-btn {
+  color: #ffffff !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+      no-repeat,
+    #0052cc padding-box !important;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+    no-repeat padding-box !important;
+}
+
+::ng-deep .cancel-btn {
+  color: #002966 !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: #dadada 0% 0% no-repeat padding-box;
+  opacity: 1;
+}
+
+.no-data {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px;
+  font-size: 16px;
+  color: #666;
+  font-family:"Roboto", "Segoe UI", sans-serif !important;
+}
+
+.header-action-icon:hover {
+  color: #0094ff;
+}
+
+.back-button:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.back-button i {
+  margin-right: 5px;
+}
+
+.back-hovered {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.header-title {
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Header styling for Map/View/Edit Portfolio-Project-User */
+.ams_h2.h2Mar.crud-header {
+  text-align: left;
+  font: normal normal 600 18px/24px "Roboto", sans-serif !important;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  margin-left: 16px !important;
+}
+
+/* General font styling */
+h1, h2, h3, h4, h5, h6, p, span, div, button, input, select, option, label, a {
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+}
+
+/* Table styling */
+.list-item {
+  cursor: pointer;
+}
+
+.actions-col {
+  width: 160px;
+  text-align: center;
+}
+
+.td-ellipsis {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.td-span {
+  max-width: 100%;
+}
+
+.td-padding {
+  padding: 5px 10px;
+}
+
+.pull-left {
+  float: left;
+}
+
+.table-scroll-container {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  min-width: 800px;
+}
+
+/* Adding list-table styling to match role-role component */
+.table.table-hover.list-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  min-width: 800px;
+  margin-bottom: 0;
+}
+
+.table-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  max-width: 100%;
+}
+
+/* Make card shadow lighter to match role-role component */
+.selector-673-93 {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid #e0e0e0 !important;
+}
+
+/* Table header styling */
+.mat-header-cell, 
+th[mat-header-cell] {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  white-space: normal;
+  word-break: break-word;
+  max-width: 200px;
+  font-family:"Roboto", "Segoe UI", sans-serif !important;
+  font-size: 16px;
+  font-weight: 600;
+  background-color: #f4f4f4;
+}
+
+/* Apply styling to the mat-table headers */
+.table.table-hover.list-table th {
+  background-color: #f4f4f4;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-size: 16px;
+}
+
+/* Table cell styling */
+.mat-cell {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  white-space: normal;
+  word-break: break-word;
+  max-width: 200px;
+  font-family:"Roboto", "Segoe UI", sans-serif !important;
+  font-size: 15px;
+  font-weight: 350;
+}
+
+/* Row hover effect */
+.mat-row:hover {
+  background-color: #f9f9f9;
+}
+
+.mat-row.selected {
+  background-color: #e6f4ff;
+}
+
+/* Icon styling */
+.create-icon-color {
+  color: #002966;
+  cursor: pointer;
+}
+
+.create-icon-color:hover {
+  color: #0094ff;
+}
+/* Pagination */
+.custom-pagination {
+  list-style: none;
+  display: flex;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+}
+
+/* Number Buttons */
+.custom-pagination-number {
+  margin: 4px;
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  font-size: 1.4rem;
+  font-weight: 400;
+  font-family:"Roboto", "Segoe UI", sans-serif !important;
+  font-style: normal;
+  box-shadow: 0px 2px 4px #00000029;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.custom-pagination-number:hover {
+  background-color: #f2f2f2;
+}
+
+.custom-pagination-number.active {
+  background-color: #0052cc;
+  color: white;
+}
+
+.custom-pagination-number.disabled {
+  background-color: #f0f0f0;
+}
+
+.custom-pagination-arrow {
+  margin: 4px;
+  padding: 0;
+  width: auto !important;
+  height: 24px !important;
+  background: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: #737373;
+  cursor: pointer;
+  font-family:"Roboto", "Segoe UI", sans-serif !important;
+
+}
+
+.custom-pagination-arrow:hover {
+  color: #0052cc;
+}
+
+.custom-pagination-arrow.disabled {
+  color: #cccccc;
+  cursor: default;
+}
+
+.pagination-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 10px;
+  margin-top: 16px;
+  background-color: white;
+}
+
+/* Mat-paginator styling to match role-role component */
+.mat-paginator {
+  background: transparent;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+::ng-deep .mat-paginator-container {
+  min-height: 48px;
+  padding: 0 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+::ng-deep .mat-paginator-page-size {
+  margin-right: 8px;
+}
+
+::ng-deep .mat-paginator-range-label {
+  margin: 0 32px 0 24px;
+  font-size: 14px;
+}
+
+
+/* Adjustments for mat-card to match role-role component */
+::ng-deep .mat-mdc-card.selector-673-93 {
+  --mdc-elevated-card-container-color: white;
+  border: 1px solid #e0e0e0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  border-radius: 8px;
+}
+
+::ng-deep .mat-mdc-card-content.selector-673-94 {
+  padding: 16px;
+}
+
+/* Style for mat-paginator to match role-role component */
+::ng-deep .selector-673-91 .mat-mdc-paginator-container,
+::ng-deep .selector-673-157 .mat-mdc-paginator-container {
+  background-color: transparent;
+  padding: 0 16px;
+}
+
+::ng-deep .selector-673-91 .mat-mdc-paginator-range-label,
+::ng-deep .selector-673-157 .mat-mdc-paginator-range-label {
+  margin: 0 24px;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+::ng-deep .selector-673-91 .mat-mdc-icon-button,
+::ng-deep .selector-673-157 .mat-mdc-icon-button {
+  color: #002966;
+}
+
+::ng-deep .selector-673-91 .mat-mdc-paginator-page-size,
+::ng-deep .selector-673-157 .mat-mdc-paginator-page-size {
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+/* Back icon styling */
+.back-icon {
+  font-size: 24px;
+  cursor: pointer;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+/* Delete Dialog Specific Styling */
+::ng-deep .delete-dialog-panel .mat-mdc-dialog-container {
+  width: 400px !important;
+  height: auto !important;
+  max-height: 300px !important;
+  min-width: 400px !important;
+  max-width: 400px !important;
+  padding: 0 !important;
+}
+
+::ng-deep .delete-dialog-panel .mdc-dialog__surface {
+  width: 400px !important;
+  height: auto !important;
+  max-height: 300px !important;
+  min-width: 400px !important;
+  max-width: 400px !important;
+}
+
+::ng-deep .delete-dialog-panel mat-dialog-content {
+  padding: 20px !important;
+  max-height: none !important;
+  overflow: visible !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  font-size: 14px !important;
+  color: #333 !important;
+  line-height: 1.5 !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  min-height: 20px !important;
+  white-space: normal !important;
+}
+
+::ng-deep .delete-dialog-panel h2[mat-dialog-title] {
+  padding: 20px 20px 0 20px !important;
+  margin: 0 !important;
+  font-size: 18px !important;
+  font-weight: 500 !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #333 !important;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+::ng-deep .delete-dialog-panel mat-dialog-actions {
+  padding: 0 20px 20px 20px !important;
+  margin: 0 !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Material Icon specific fixes for delete dialog */
+::ng-deep .delete-dialog-panel mat-icon {
+  font-family: 'Material Icons' !important;
+  font-weight: normal !important;
+  font-style: normal !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  display: inline-block !important;
+  white-space: nowrap !important;
+  word-wrap: normal !important;
+  direction: ltr !important;
+  color: orange !important;
+  margin-bottom: -7px !important;
+  vertical-align: middle !important;
+  -webkit-font-feature-settings: 'liga' !important;
+  font-feature-settings: 'liga' !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+/* Additional overrides to ensure content is always visible */
+::ng-deep .delete-dialog-panel .mat-mdc-dialog-content,
+::ng-deep .delete-dialog-panel .mdc-dialog__content {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #333 !important;
+  font-size: 14px !important;
+  padding: 20px !important;
+  margin: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Override any potential z-index or positioning issues */
+::ng-deep .delete-dialog-panel {
+  z-index: 9999 !important;
+}
+
+::ng-deep .delete-dialog-panel * {
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+}
+
+/* Ensure mat-icon doesn't inherit other font families */
+::ng-deep .delete-dialog-panel mat-icon * {
+  font-family: 'Material Icons' !important;
+}

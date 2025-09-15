@@ -1,7 +1,7 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
-	<changeSet author="Leap" id="3v1-cip-241125-1">
+	<changeSet author="Essedum" id="3v1-cip-241125-1">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter": "","mode": "query","Query": "SELECT display_name AS \'Host\', ci_name, CASE WHEN (SELECT COUNT(*) FROM sre_event WHERE rootCauseEntity = a.ci_name AND startTime BETWEEN UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 1 DAY)) * 1000 AND UNIX_TIMESTAMP(NOW()) * 1000 AND project_id = {project_id} AND apmType = \'DT\' AND STATUS = \'OPEN\') > 0 THEN \'red\' ELSE \'green\' END AS \'status\' FROM sre_ci_metadata a WHERE a.project_id = {project_id} AND apm_type = \'DT\' AND ci_type = \'Host\' GROUP BY ci_name, display_name, ci_last_updated ORDER BY STATUS DESC, ci_last_updated DESC","Cacheable": "false","isStreaming": "false","writeMode": "append","params": "{\\"project_id\\": \\"project_id\\", \\"hostgroup\\": \\"host_groupName\\"}","tableName": ""}' 
@@ -14,7 +14,7 @@ WHERE name = 'StatusHost_DT' AND organization = 'leo1311';
   
    
 
-<changeSet author="Leap" id="3v1-cip-241125-2">
+<changeSet author="Essedum" id="3v1-cip-241125-2">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT display_name AS \'App\',ci_name,CASE WHEN (SELECT COUNT(*) FROM sre_event WHERE rootCauseEntity = a.ci_name AND startTime BETWEEN UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 1 DAY))*1000  AND  UNIX_TIMESTAMP(NOW())*1000 AND  project_id = {project_id} AND apmType = \'DT\' AND STATUS=\'OPEN\' )>0  THEN \'red\' ELSE \'green\' END AS `status`  FROM `sre_ci_metadata` a WHERE a.project_id = {project_id} AND apm_type=\'DT\' AND ci_type=\'Application\' GROUP BY ci_name,display_name,ci_last_updated ORDER BY `status` DESC,ci_last_updated DESC","Cacheable":"false","isStreaming":"false","writeMode":"append","params":"{\\"project_id\\":\\"project_id\\",\\"hostgroup\\":\\"host_groupName\\"}","tableName":""}' 
@@ -26,7 +26,7 @@ WHERE name = 'StatusApp_DT' AND organization = 'leo1311';
   
   
   
-<changeSet author="Leap" id="3v1-cip-241125-3">
+<changeSet author="Essedum" id="3v1-cip-241125-3">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"   SELECT DATE_FORMAT((FROM_UNIXTIME(startTime/1000)),\"%m/%d/%y %H:%i:%s\") AS \'Date\', COUNT(DISTINCT eventId) AS COUNT FROM `sre_event` e INNER JOIN sre_ci_metadata c ON c.ci_name = e.rootcauseentity WHERE e.project_id = {project_id}  AND e.eventType=\'Issue\' AND apmtype = "DT" AND startTime BETWEEN UNIX_TIMESTAMP({startDate})*1000  AND  UNIX_TIMESTAMP({endDate})*1000 GROUP BY startTime, HOUR(FROM_UNIXTIME(startTime/1000)) ORDER BY startTime DESC","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"e.project_id\\",\\"endDate\\":\\"NOW()\\",\\"hostgroup\\":\\"host_groupName\\",\\"startDate\\":\\"DATE_SUB(NOW(), INTERVAL 2 YEAR)\\"}","tableName":"","uniqueIdentifier":""}' 
@@ -38,7 +38,7 @@ WHERE name = 'IssuetrendhourlyHG_DT' AND organization = 'leo1311';
   
   
   
-<changeSet author="Leap" id="3v1-cip-241212-04">
+<changeSet author="Essedum" id="3v1-cip-241212-04">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter": "","mode": "query","Query": "SELECT DATE_FORMAT((FROM_UNIXTIME(startTime/1000)),\'%m/%d/%y %H:%i:%s\') AS \'Date\', COUNT(DISTINCT eventId) AS COUNT FROM `sre_event` e INNER JOIN sre_ci_metadata c ON c.ci_name = e.rootcauseentity WHERE e.project_id = {project_id} AND e.eventType=\'Alert\' AND e.apmtype = \'DT\' AND startTime BETWEEN UNIX_TIMESTAMP({startDate})*1000 AND UNIX_TIMESTAMP({endDate})*1000 GROUP BY startTime, HOUR(FROM_UNIXTIME(startTime/1000)) ORDER BY startTime DESC","Cacheable": false,"isStreaming": "false","defaultValues": "","writeMode": "append","params": "{\\"project_id\\":\\"e.project_id\\",\\"endDate\\":\\"NOW()\\",\\"hostgroup\\":\\"host_groupName\\",\\"startDate\\":\\"DATE_SUB(NOW(), INTERVAL 2 YEAR)\\"}","tableName": "","uniqueIdentifier": ""}' 
@@ -51,7 +51,7 @@ WHERE name = 'alertstrendhourlyHG_DT' AND organization = 'leo1311';
  
 
 
-<changeSet author="Leap" id="3v1-cip-241125-5">
+<changeSet author="Essedum" id="3v1-cip-241125-5">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT COUNT(DISTINCT number) AS \'count\',state  FROM @projectname_tickets WHERE openedDate BETWEEN {startDate} AND {endDate} AND  description LIKE \'%DT%\' AND configurationItem LIKE \'CPU_Issue%\' GROUP BY state","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"endDate\\":\\"NOW()\\",\\"startDate\\":\\"DATE_SUB(NOW(), INTERVAL 2 YEAR)\\"}","tableName":"","uniqueIdentifier":""}' 
@@ -63,7 +63,7 @@ WHERE name = 'OpenClosedTicketsCount_DT' AND organization = 'leo1311';
   
 
 
-<changeSet author="Leap" id="3v1-cip-241125-6">
+<changeSet author="Essedum" id="3v1-cip-241125-6">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT display_name AS \'Service\',ci_name,CASE WHEN (SELECT COUNT(*) FROM sre_event WHERE rootCauseEntity = a.ci_name AND startTime BETWEEN UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 1 DAY))*1000  AND  UNIX_TIMESTAMP(NOW())*1000 AND  project_id = {project_id} AND apmType = \'DT\' AND STATUS=\'OPEN\' )>0  THEN \'red\' ELSE \'green\' END AS \'status\'  FROM `sre_ci_metadata` a WHERE a.project_id = {project_id} AND ci_type=\'Service\' GROUP BY ci_name,display_name,ci_last_updated ORDER BY STATUS DESC,ci_last_updated DESC","Cacheable":"false","isStreaming":"false","writeMode":"append","params":"{\\"project_id\\":\\"project_id\\",\\"hostgroup\\":\\"host_groupName\\"}","tableName":""}' 
@@ -73,26 +73,26 @@ WHERE name = 'StatusService_DT' AND organization = 'leo1311';
   </changeSet>
   
 	
-   <changeSet author="Leap" id="3v1-cip-20241125-1">
+   <changeSet author="Essedum" id="3v1-cip-20241125-1">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
-        UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT t1.number,t1.cmdb_ci_sys_id,t1.configurationItem as ci_name,t1.shortdescription,t1.createdDate,t1.priority,t1.type,t1.sysId  FROM [leapmaster_ref_data_new].[dbo].leo1311_tickets t1 join [master_310_fresh].[dbo].[cfm_configuration_item] ci on t1.cmdb_ci_sys_id=ci.cmdb_ci_sys_id  WHERE t1.[state] IN (''Open'',''On Hold'',''New'',''In Progress'',''Re-Warn'',''Re-Triggered'',''Triggered'',''Warn'') and ci.cmdb_ci_sys_id in ({cmdb_ci_sys_id}) and ({searchKey} IS NULL OR (configurationItem LIKE {searchKey} OR NUMBER LIKE {searchKey})) and ci.project_id= {project_id} and ci.location IN ({location}) and t1.type IN ({ticketstype}) and (ci.alert_count>0 OR ci.incident_count >0 OR ci.log_count >0) AND t1.severity in ({severity}) AND ci.sys_class_name = ({sys_class_name}) union all SELECT cast(t1.id as varchar) AS NUMBER,t1.cmdb_ci_sys_id ,t1.ci_name,t1.logs AS shortdescription, t1.createdDate,t1.priority, t1.type,NULL AS sysId FROM [leapmaster_ref_data_new].[dbo].leo1311_tickets_logs t1 WHERE t1.type IN ({ticketstype}) AND t1.ci_type IN ({ci_type}) AND t1.cmdb_ci_sys_id IN ({cmdb_ci_sys_id_log}) and ({searchKey} IS NULL OR (ci_name LIKE {searchKey} OR id LIKE {searchKey})) ","Cacheable":false,"isStreaming":"false","Headers":"","defaultValues":"","QueryParams":"","writeMode":"append","params":"{''cmdb_ci_sys_id'':''ci.cmdb_ci_sys_id'',''ticketstype'':''t1.type'',''location'':''ci.location'',''project_id'':''2'',''ci_type'':''t1.ci_type'',''cmdb_ci_sys_id_log'':''t1.cmdb_ci_sys_id'',''severity'':''t1.severity'',''sys_class_name'':''ci.sys_class_name'',''searchKey'':''NULL''}","tableName":"","uniqueIdentifier":"priority,createdDate"}'  WHERE name = 'TicketsData' and ORGANIZATION = 'leo1311' and alias = 'TicketsData';
+        UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT t1.number,t1.cmdb_ci_sys_id,t1.configurationItem as ci_name,t1.shortdescription,t1.createdDate,t1.priority,t1.type,t1.sysId  FROM [essedummaster_ref_data_new].[dbo].leo1311_tickets t1 join [master_310_fresh].[dbo].[cfm_configuration_item] ci on t1.cmdb_ci_sys_id=ci.cmdb_ci_sys_id  WHERE t1.[state] IN (''Open'',''On Hold'',''New'',''In Progress'',''Re-Warn'',''Re-Triggered'',''Triggered'',''Warn'') and ci.cmdb_ci_sys_id in ({cmdb_ci_sys_id}) and ({searchKey} IS NULL OR (configurationItem LIKE {searchKey} OR NUMBER LIKE {searchKey})) and ci.project_id= {project_id} and ci.location IN ({location}) and t1.type IN ({ticketstype}) and (ci.alert_count>0 OR ci.incident_count >0 OR ci.log_count >0) AND t1.severity in ({severity}) AND ci.sys_class_name = ({sys_class_name}) union all SELECT cast(t1.id as varchar) AS NUMBER,t1.cmdb_ci_sys_id ,t1.ci_name,t1.logs AS shortdescription, t1.createdDate,t1.priority, t1.type,NULL AS sysId FROM [essedummaster_ref_data_new].[dbo].leo1311_tickets_logs t1 WHERE t1.type IN ({ticketstype}) AND t1.ci_type IN ({ci_type}) AND t1.cmdb_ci_sys_id IN ({cmdb_ci_sys_id_log}) and ({searchKey} IS NULL OR (ci_name LIKE {searchKey} OR id LIKE {searchKey})) ","Cacheable":false,"isStreaming":"false","Headers":"","defaultValues":"","QueryParams":"","writeMode":"append","params":"{''cmdb_ci_sys_id'':''ci.cmdb_ci_sys_id'',''ticketstype'':''t1.type'',''location'':''ci.location'',''project_id'':''2'',''ci_type'':''t1.ci_type'',''cmdb_ci_sys_id_log'':''t1.cmdb_ci_sys_id'',''severity'':''t1.severity'',''sys_class_name'':''ci.sys_class_name'',''searchKey'':''NULL''}","tableName":"","uniqueIdentifier":"priority,createdDate"}'  WHERE name = 'TicketsData' and ORGANIZATION = 'leo1311' and alias = 'TicketsData';
         </sql>  
 	</changeSet>
 
-    <changeSet author="Leap" id="3v1-cip-20241125-2">
+    <changeSet author="Essedum" id="3v1-cip-20241125-2">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
-		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT type FROM [leapmaster_ref_data].[dbo].@projectname_tickets WHERE state IN(''open'',''In Progress'') AND type IN (''Incidents'',''Alerts'',''Incident'',''MI'') GROUP BY type UNION SELECT type FROM [leapmaster_ref_data].[dbo].@projectname_tickets_logs GROUP BY type ","Cacheable":false,"isStreaming":"false","Headers":"","defaultValues":"","QueryParams":"","writeMode":"append","params":"{}","tableName":"","uniqueIdentifier":""}' WHERE name = 'TicketsTypes' and ORGANIZATION = 'leo1311' and alias = 'TicketsTypes';
+		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT type FROM [essedum_ref_data].[dbo].@projectname_tickets WHERE state IN(''open'',''In Progress'') AND type IN (''Incidents'',''Alerts'',''Incident'',''MI'') GROUP BY type UNION SELECT type FROM [essedum_ref_data].[dbo].@projectname_tickets_logs GROUP BY type ","Cacheable":false,"isStreaming":"false","Headers":"","defaultValues":"","QueryParams":"","writeMode":"append","params":"{}","tableName":"","uniqueIdentifier":""}' WHERE name = 'TicketsTypes' and ORGANIZATION = 'leo1311' and alias = 'TicketsTypes';
         </sql> 
 	</changeSet>
 
-    <changeSet author="Leap" id="3v1-cip-20241125-3">
+    <changeSet author="Essedum" id="3v1-cip-20241125-3">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
-		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT t1.number,t1.cmdb_ci_sys_id,t1.configurationItem as ci_name,t1.shortdescription,t1.createdDate,t1.priority,t1.type,t1.sysId  FROM [leapmaster_ref_data_new].[dbo].leo1311_tickets t1 join [master_310_fresh].[dbo].[cfm_configuration_item] ci on t1.cmdb_ci_sys_id=ci.cmdb_ci_sys_id  WHERE t1.[state] IN (''Open'',''On Hold'',''New'',''In Progress'',''Re-Warn'',''Re-Triggered'',''Triggered'',''Warn'',''Closed'') and ci.cmdb_ci_sys_id in ({cmdb_ci_sys_id}) and ({searchKey} IS NULL OR (configurationItem LIKE {searchKey} OR NUMBER LIKE {searchKey})) and ci.project_id= {project_id} and ci.location IN ({location}) and t1.type IN ({ticketstype}) AND t1.severity in ({severity}) AND ci.sys_class_name = ({sys_class_name}) union all SELECT t1.id AS NUMBER,t1.cmdb_ci_sys_id ,t1.ci_name,t1.logs AS shortdescription, t1.createdDate,t1.priority, t1.type,NULL AS sysId FROM [leapmaster_ref_data_new].[dbo].leo1311_tickets_logs t1 WHERE t1.type IN ({ticketstype}) AND t1.ci_type IN ({ci_type}) AND t1.cmdb_ci_sys_id IN ({cmdb_ci_sys_id_log}) and ({searchKey} IS NULL OR (ci_name LIKE {searchKey} OR id LIKE {searchKey})) ","Cacheable":false,"isStreaming":"false","Headers":"","defaultValues":"","QueryParams":"","writeMode":"append","params":"{''cmdb_ci_sys_id'':''ci.cmdb_ci_sys_id'',''ticketstype'':''t1.type'',''location'':''ci.location'',''project_id'':''2'',''ci_type'':''t1.ci_type'',''cmdb_ci_sys_id_log'':''t1.cmdb_ci_sys_id'',''severity'':''t1.severity'',''sys_class_name'':''ci.sys_class_name'',''searchKey'':''NULL''}","tableName":"","uniqueIdentifier":"priority,createdDate"}'  WHERE name = 'TicketsDataAllCis' and ORGANIZATION = 'leo1311' and alias = 'TicketsDataAllCis';
+		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT t1.number,t1.cmdb_ci_sys_id,t1.configurationItem as ci_name,t1.shortdescription,t1.createdDate,t1.priority,t1.type,t1.sysId  FROM [essedummaster_ref_data_new].[dbo].leo1311_tickets t1 join [master_310_fresh].[dbo].[cfm_configuration_item] ci on t1.cmdb_ci_sys_id=ci.cmdb_ci_sys_id  WHERE t1.[state] IN (''Open'',''On Hold'',''New'',''In Progress'',''Re-Warn'',''Re-Triggered'',''Triggered'',''Warn'',''Closed'') and ci.cmdb_ci_sys_id in ({cmdb_ci_sys_id}) and ({searchKey} IS NULL OR (configurationItem LIKE {searchKey} OR NUMBER LIKE {searchKey})) and ci.project_id= {project_id} and ci.location IN ({location}) and t1.type IN ({ticketstype}) AND t1.severity in ({severity}) AND ci.sys_class_name = ({sys_class_name}) union all SELECT t1.id AS NUMBER,t1.cmdb_ci_sys_id ,t1.ci_name,t1.logs AS shortdescription, t1.createdDate,t1.priority, t1.type,NULL AS sysId FROM [essedummaster_ref_data_new].[dbo].leo1311_tickets_logs t1 WHERE t1.type IN ({ticketstype}) AND t1.ci_type IN ({ci_type}) AND t1.cmdb_ci_sys_id IN ({cmdb_ci_sys_id_log}) and ({searchKey} IS NULL OR (ci_name LIKE {searchKey} OR id LIKE {searchKey})) ","Cacheable":false,"isStreaming":"false","Headers":"","defaultValues":"","QueryParams":"","writeMode":"append","params":"{''cmdb_ci_sys_id'':''ci.cmdb_ci_sys_id'',''ticketstype'':''t1.type'',''location'':''ci.location'',''project_id'':''2'',''ci_type'':''t1.ci_type'',''cmdb_ci_sys_id_log'':''t1.cmdb_ci_sys_id'',''severity'':''t1.severity'',''sys_class_name'':''ci.sys_class_name'',''searchKey'':''NULL''}","tableName":"","uniqueIdentifier":"priority,createdDate"}'  WHERE name = 'TicketsDataAllCis' and ORGANIZATION = 'leo1311' and alias = 'TicketsDataAllCis';
 		</sql> 
 	</changeSet>
 
 
-	<changeSet author="Leap" id="3v1-cip-241126-1">
+	<changeSet author="Essedum" id="3v1-cip-241126-1">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT COUNT(*) AS \\"COUNT\\", CONCAT(DATE(FROM_UNIXTIME(startTime/1000)), \' \', HOUR(FROM_UNIXTIME(startTime/1000)), \':00\') AS \\"DATE\\", HOUR(FROM_UNIXTIME(startTime/1000)) AS \'hourlyValue\' FROM sre_event p INNER JOIN sre_ci_metadata c ON c.ci_name = p.rootcauseentity  WHERE p.project_id = {project_id} AND c.project_id = {project_id} AND apmType = \\"AppD\\"  AND p.severityLevel=\'CRITICAL\' AND c.ci_type IN (\'Service\',\'Host\') AND startTime BETWEEN UNIX_TIMESTAMP({startDate})*1000  AND  UNIX_TIMESTAMP({endDate})*1000 GROUP BY DATE,hourlyValue,startTime ORDER BY startTime DESC","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"endDate\\":\\"NOW()\\",\\"project_id\\":\\"(SELECT id from usm_project where name = \'@projectname\')\\",\\"startDate\\":\\"DATE_SUB(NOW(), INTERVAL 2 YEAR)\\"}","tableName":"","uniqueIdentifier":""}'
@@ -103,7 +103,7 @@ WHERE name = 'IssuesHourlyTrend' AND organization = 'leo1311';
   </changeSet>
   
   
-<changeSet author="Leap" id="3v1-cip-241126-2">
+<changeSet author="Essedum" id="3v1-cip-241126-2">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT DISTINCT (countApp.Host), countApp.status AS STATUS FROM ((SELECT DISTINCT(c.ci_name) AS `HOST`,c.ci_name,d.color AS STATUS FROM sre_ci_metadata c INNER JOIN (SELECT c.ci_id,c.ci_name AS `status`,c.ci_name, CASE WHEN (SELECT COUNT(*) FROM sre_event WHERE rootCauseEntity = c.ci_name AND startTime BETWEEN UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 2 YEAR))*1000 AND UNIX_TIMESTAMP(NOW())*1000 AND project_id = {project_id} AND apmType = \'Appd\' AND STATUS=\'OPEN\' AND severityLevel=\'CRITICAL\')>0 THEN \'red\' ELSE \'green\' END AS COLOR FROM sre_ci_metadata c WHERE c.project_id = {project_id} AND c.ci_type IN (\'Service\') GROUP BY c.ci_name,ci_id ORDER BY COLOR DESC) AS d ON c.service_type=d.status AND c.project_id = {project_id} AND c.apm_type=\'Appd\' AND c.service_type LIKE \'auth-services\' ORDER BY STATUS DESC) UNION ALL (SELECT c.ci_name AS `HOST`,c.ci_name, CASE WHEN (SELECT COUNT(*) FROM sre_event WHERE rootCauseEntity = c.ci_name AND startTime BETWEEN UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 2 YEAR))*1000 AND UNIX_TIMESTAMP(NOW())*1000 AND project_id = {project_id} AND apmType = \'Appd\' AND STATUS=\'OPEN\' AND severityLevel=\'CRITICAL\')>0 THEN \'red\' ELSE \'green\' END AS STATUS FROM sre_ci_metadata c WHERE c.project_id = {project_id} AND c.apm_type=\'AppD\' AND c.ci_type IN (\'Host\') AND c.ci_name NOT LIKE (\'auth-services%\') GROUP BY c.ci_name ORDER BY STATUS DESC)) AS countApp ORDER BY countApp.status DESC","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"(SELECT id from usm_project where name = \'@projectname\')\\"}","tableName":"","uniqueIdentifier":""}'
@@ -114,7 +114,7 @@ WHERE name = 'NodeStatus' AND organization = 'leo1311';
   </changeSet>
   
   
-<changeSet author="Leap" id="3v1-cip-241126-3">
+<changeSet author="Essedum" id="3v1-cip-241126-3">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT CONCAT(DATE(FROM_UNIXTIME(startTime/1000)), \' \', HOUR(FROM_UNIXTIME(startTime/1000)), \':00\') AS \\"DATE\\", HOUR(FROM_UNIXTIME(startTime/1000)) AS \'hourlyValue\', COUNT(eventId) AS \\"COUNT\\"  FROM `sre_event` e INNER JOIN sre_ci_metadata c ON c.ci_name = e.rootCauseEntity WHERE  apmType = \\"AppD\\" AND e.project_id = {project_id} AND apmType = \\"AppD\\"  AND startTime BETWEEN UNIX_TIMESTAMP({startDate})*1000  AND  UNIX_TIMESTAMP({endDate})*1000 AND e.severityLevel=\'WARNING\' AND c.ci_type=\'Host\' GROUP BY DATE,startTime,hourlyValue ORDER BY startTime DESC","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"endDate\\":\\"NOW()\\",\\"project_id\\":\\"(SELECT id from usm_project where name = \'@projectname\')\\",\\"startDate\\":\\"DATE_SUB(NOW(),  INTERVAL 2 YEAR)\\"}","tableName":"","uniqueIdentifier":""}'
@@ -124,7 +124,7 @@ WHERE name = 'AlertTrendHourly' AND organization = 'leo1311';
     </sql> 
   </changeSet>
 
-	<changeSet author="Leap" id="3v1-sre-112724-17">
+	<changeSet author="Essedum" id="3v1-sre-112724-17">
     <preConditions onFail="MARK_RAN">
       <sqlCheck expectedResult="0">            
           SELECT COUNT(*) FROM mleventjobmapping WHERE eventname='AppD_Problem_Emulator' and organization='leo1311';       
@@ -136,7 +136,7 @@ WHERE name = 'AlertTrendHourly' AND organization = 'leo1311';
 	
     </changeSet>
 	
-		<changeSet author="Leap" id="3v1-sre-112724-17-1">
+		<changeSet author="Essedum" id="3v1-sre-112724-17-1">
   <preConditions onFail="MARK_RAN">
       <sqlCheck expectedResult="0">            
           SELECT COUNT(*) FROM mleventjobmapping WHERE eventname='AppD_Problem_Emulator' and organization='leo1311';       
@@ -148,7 +148,7 @@ WHERE name = 'AlertTrendHourly' AND organization = 'leo1311';
 	
     </changeSet>
     
-   <changeSet author="Leap" id="3v1-sre-112724-18">
+   <changeSet author="Essedum" id="3v1-sre-112724-18">
       <preConditions onFail="MARK_RAN">
           <sqlCheck expectedResult="0">           
               SELECT COUNT(*) FROM mleventjobmapping WHERE eventname='AppD_self_heal' and organization='leo1311';       
@@ -159,7 +159,7 @@ WHERE name = 'AlertTrendHourly' AND organization = 'leo1311';
       </sql>   
       </changeSet>
 	  
-	   <changeSet author="Leap" id="3v1-sre-112724-18-1">
+	   <changeSet author="Essedum" id="3v1-sre-112724-18-1">
     <preConditions onFail="MARK_RAN"><not>
     <sqlCheck expectedResult="1">           
      SELECT COUNT(*) FROM mleventjobmapping WHERE eventname='AppD_self_heal';       
@@ -176,7 +176,7 @@ WHERE name = 'AlertTrendHourly' AND organization = 'leo1311';
 	  
 	  
 
-<changeSet author="Leap" id="3v1-cip-241205-1">
+<changeSet author="Essedum" id="3v1-cip-241205-1">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT DATE_FORMAT((FROM_UNIXTIME(startTime/1000)),\\"%m/%d/%y %H:%i:%s\\") AS \'Date\', COUNT(DISTINCT eventId) AS COUNT FROM `sre_event` e INNER JOIN sre_ci_metadata c ON c.ci_name = e.rootcauseentity WHERE e.project_id = {project_id}  AND e.eventType=\'Alert\' AND apmtype = \\"DT\\" AND startTime BETWEEN UNIX_TIMESTAMP({startDate})*1000  AND  UNIX_TIMESTAMP({endDate})*1000 GROUP BY startTime, HOUR(FROM_UNIXTIME(startTime/1000)) ORDER BY startTime DESC","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"e.project_id\\",\\"endDate\\":\\"NOW()\\",\\"hostgroup\\":\\"host_groupName\\",\\"startDate\\":\\"DATE_SUB(NOW(), INTERVAL 2 YEAR)\\"}","tableName":"","uniqueIdentifier":""}'WHERE name = 'alertstrendhourlyHG' AND organization = 'leo1311';
@@ -190,7 +190,7 @@ SET attributes = '{"filter":"","mode":"query","Query":"SELECT DATE_FORMAT((FROM_
 
 
 
-<changeSet author="Leap" id="3v1-cip-241205-2">
+<changeSet author="Essedum" id="3v1-cip-241205-2">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"   SELECT DATE_FORMAT((FROM_UNIXTIME(startTime/1000)),\\"%m/%d/%y %H:%i:%s\\") AS \'Date\', COUNT(DISTINCT eventId) AS COUNT FROM `sre_event` e INNER JOIN sre_ci_metadata c ON c.ci_name = e.rootcauseentity WHERE e.project_id = {project_id}  AND e.eventType=\'Issue\' AND apmtype = \\"DT\\" AND startTime BETWEEN UNIX_TIMESTAMP({startDate})*1000  AND  UNIX_TIMESTAMP({endDate})*1000 GROUP BY startTime, HOUR(FROM_UNIXTIME(startTime/1000)) ORDER BY startTime DESC","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"e.project_id\\",\\"endDate\\":\\"NOW()\\",\\"hostgroup\\":\\"host_groupName\\",\\"startDate\\":\\"DATE_SUB(NOW(), INTERVAL 2 YEAR)\\"}","tableName":"","uniqueIdentifier":""}'WHERE name = 'IssuetrendhourlyHG_DT' AND organization = 'leo1311';
@@ -200,7 +200,7 @@ SET attributes = '{"filter":"","mode":"query","Query":"   SELECT DATE_FORMAT((FR
 
 
 
-<changeSet author="Leap" id="3v1-cip-241205-3">
+<changeSet author="Essedum" id="3v1-cip-241205-3">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter": "","mode": "query","Query": "SELECT rootCauseEntity AS \'Entity ID\', c.ci_name AS \'Entity Name\', COUNT(DISTINCT eventId) AS \'Issue Count\', MAX(startTime) AS \'Latest StartTime\' FROM sre_event p JOIN sre_ci_metadata c ON c.ci_name = p.rootCauseEntity WHERE apmType = \\"AppD\\" AND p.project_id = {project_id} AND startTime BETWEEN UNIX_TIMESTAMP({startDate})*1000 AND UNIX_TIMESTAMP({endDate})*1000 GROUP BY rootCauseEntity, c.ci_name HAVING COUNT(DISTINCT eventId) > 1 ORDER BY COUNT(DISTINCT eventId) DESC, MAX(startTime) DESC","Cacheable": false,"isStreaming": "false","defaultValues": "","writeMode": "append","params": "{\\"endDate\\":\\"NOW()\\",\\"project_id\\":\\"(SELECT id from usm_project where name = \'@projectname\')\\",\\"startDate\\":\\"DATE_SUB(NOW(), INTERVAL 2 YEAR)\\"}","tableName": "","uniqueIdentifier": ""}'WHERE name = 'CommonIssueClustering' AND organization = 'leo1311';
@@ -213,7 +213,7 @@ SET attributes = '{"filter": "","mode": "query","Query": "SELECT rootCauseEntity
 
 
 
-<changeSet author="Leap" id="3v1-cip-241205-4">
+<changeSet author="Essedum" id="3v1-cip-241205-4">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    rootCauseEntity AS \'Entity ID\',\\n    c.display_Name AS \'Entity Name\',\\n    COUNT(DISTINCT eventId) AS \'Issue Count\',\\n    startTime  \\nFROM \\n    sre_event p\\nJOIN \\n    sre_ci_metadata c ON c.ci_name = p.rootCauseEntity\\nWHERE \\n    apmtype = \\"DT\\" \\n    AND eventtype = \'Issue\' \\n    AND p.project_id = {project_id} \\n    AND startTime BETWEEN UNIX_TIMESTAMP({startDate}) * 1000 AND UNIX_TIMESTAMP({endDate}) * 1000\\nGROUP BY \\n    rootCauseEntity, c.display_Name, startTime \\nHAVING \\n    COUNT(DISTINCT eventId) > 1\\nORDER BY \\n    COUNT(DISTINCT eventId) DESC, \\n    startTime DESC;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"p.project_id\\",\\"endDate\\":\\"NOW()\\",\\"hostgroup\\":\\"host_groupName\\",\\"startDate\\":\\"DATE_SUB(NOW(), INTERVAL 2 YEAR)\\"}","tableName":"","uniqueIdentifier":""}'WHERE name = 'commonIssue_DT' AND organization = 'leo1311';
@@ -228,7 +228,7 @@ SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    rootCauseEn
 
 
 
-<changeSet author="Leap" id="3v1-cip-241205-5">
+<changeSet author="Essedum" id="3v1-cip-241205-5">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT DISTINCT \\n    eventId AS \'PID\',\\n    displayId AS \'Issue Id\',\\n    title AS \'Description\',\\n    rootCauseEntity AS \'Origin Entity\',\\n    impactLevel AS \'ImpactLevel\',\\n    STATUS AS \'Status\',\\n    DATE_FORMAT(FROM_UNIXTIME(startTime / 1000), \\"%m/%d/%y %H:%i:%s\\") AS \'Raised Time\',\\n    DATE_FORMAT(FROM_UNIXTIME(endTime / 1000), \\"%m/%d/%y %H:%i:%s\\") AS \'Resolution Time\',\\n    incidentId AS \'Incident Id\',\\n    startTime \\nFROM \\n    `sre_event` p \\nINNER JOIN \\n    sre_ci_metadata c ON c.ci_name = p.rootcauseentity \\nWHERE \\n    p.project_id = {project_id} \\n    AND startTime BETWEEN UNIX_TIMESTAMP({startDate}) * 1000 AND UNIX_TIMESTAMP({endDate}) * 1000\\n    AND eventtype = \'Issue\'  \\n    AND apmtype = \'DT\' \\n    AND impactLevel = {Impact Level} \\n    AND rootCauseEntity = {rootCauseEntity} \\n    AND severityLevel = {severityLevel} \\n    AND STATUS = {status} \\n    AND eventId = {eventId} \\nORDER BY \\n    startTime DESC;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"p.project_id\\",\\"Impact Level\\":\\"impactLevel\\",\\"rootCauseEntity\\":\\"rootCauseEntity\\",\\"severityLevel\\":\\"severityLevel\\",\\"eventId\\":\\"eventId\\",\\"endDate\\":\\"NOW()\\",\\"hostgroup\\":\\"host_groupName\\",\\"startDate\\":\\"DATE_SUB(NOW(), INTERVAL 2 YEAR)\\",\\"status\\":\\"status\\"}","tableName":"","uniqueIdentifier":""}'WHERE name = 'IssueDetails_DT' AND organization = 'leo1311';
@@ -242,7 +242,7 @@ SET attributes = '{"filter":"","mode":"query","Query":"SELECT DISTINCT \\n    ev
 
 
 
-<changeSet author="Leap" id="3v1-cip-241205-6">
+<changeSet author="Essedum" id="3v1-cip-241205-6">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT COUNT(*), DATE_FORMAT(\'2021-01-01\'+INTERVAL (WEEK(FROM_UNIXTIME(startTime/1000))-WEEK(\'2021-01-01\', 1))*7 - WEEKDAY(\'2021-01-01\')DAY,\\"%m/%d/%y\\") AS \'Date\' FROM  `sre_event` e INNER JOIN sre_ci_metadata c ON c.ci_name = e.rootcauseentity  WHERE  e.project_id = {project_id} AND eventType=\'Issue\' and apmtype = \\"DT\\" GROUP BY startTime,DATE ORDER BY ((FROM_UNIXTIME(startTime/1000))) DESC;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"e.project_id\\",\\"hostgroup\\":\\"host_groupName\\"}","tableName":"","uniqueIdentifier":""}'WHERE name = 'IssuesTrendWeekly_DT' AND organization = 'leo1311';
@@ -255,7 +255,7 @@ SET attributes = '{"filter":"","mode":"query","Query":"SELECT COUNT(*), DATE_FOR
 
 
 
-<changeSet author="Leap" id="3v1-cip-241205-7">
+<changeSet author="Essedum" id="3v1-cip-241205-7">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT COUNT(*), DATE_FORMAT(\'2021-01-01\'+INTERVAL (WEEK(FROM_UNIXTIME(startTime/1000))-WEEK(\'2021-01-01\', 1))*7 - WEEKDAY(\'2021-01-01\')DAY,\\"%m/%d/%y\\") AS \'Date\' FROM  `sre_event` e INNER JOIN sre_ci_metadata c ON c.ci_name = e.rootcauseentity  WHERE  e.project_id = {project_id} AND eventType=\'Alert\' and apmtype = \\"DT\\" GROUP BY startTime,DATE ORDER BY ((FROM_UNIXTIME(startTime/1000))) DESC;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"e.project_id\\",\\"hostgroup\\":\\"host_groupName\\"}","tableName":"","uniqueIdentifier":""}'WHERE name = 'AlertTrendWeekly_DT' AND organization = 'leo1311';
@@ -267,7 +267,7 @@ SET attributes = '{"filter":"","mode":"query","Query":"SELECT COUNT(*), DATE_FOR
 
 
 
-<changeSet author="Leap" id="3v1-cip-241205-8">
+<changeSet author="Essedum" id="3v1-cip-241205-8">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT DISTINCT \\n    eventId AS \'Event ID\',\\n    title AS \'Description\',\\n    rootCauseEntity AS \'Origin Entity\',\\n    impactLevel AS \'ImpactLevel\',\\n    STATUS AS \'Status\',\\n    DATE_FORMAT(FROM_UNIXTIME(startTime / 1000), \\"%m/%d/%y %H:%i:%s\\") AS \'Raised Time\',\\n    DATE_FORMAT(FROM_UNIXTIME(endTime / 1000), \\"%m/%d/%y %H:%i:%s\\") AS \'Resolution Time\',\\n    startTime\\nFROM \\n    sre_event p \\nINNER JOIN \\n    sre_ci_metadata c ON c.ci_name = p.rootcauseentity \\nWHERE \\n    p.project_id = {project_id} \\n    AND startTime BETWEEN UNIX_TIMESTAMP({startDate}) * 1000 AND UNIX_TIMESTAMP({endDate}) * 1000\\n    AND eventtype = \'Alert\'  \\n    AND apmtype = \'DT\' \\n    AND impactLevel = {impactLevel} \\n    AND rootCauseEntity = {Entity ID} \\n    AND severityLevel = {severityLevel} \\n    AND STATUS = {Event Status} \\nORDER BY \\n    startTime DESC;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"p.project_id\\",\\"impactLevel\\":\\"impactLevel\\",\\"Entity ID\\":\\"rootCauseEntity\\",\\"Event Status\\":\\"status\\",\\"severityLevel\\":\\"severityLevel\\",\\"endDate\\":\\"NOW()\\",\\"hostgroup\\":\\"host_groupName\\",\\"startDate\\":\\"DATE_SUB(NOW(), INTERVAL 2 YEAR)\\"}","tableName":"","uniqueIdentifier":""}' WHERE name = 'AlertDetails_DT' AND organization = 'leo1311';
@@ -280,7 +280,7 @@ SET attributes = '{"filter":"","mode":"query","Query":"SELECT DISTINCT \\n    ev
 
 
 
-<changeSet author="Leap" id="3v1-cip-241205-9">
+<changeSet author="Essedum" id="3v1-cip-241205-9">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    DATE_FORMAT(\'2021-01-01\' + INTERVAL (WEEK(FROM_UNIXTIME(MAX(startTime/1000))) - WEEK(\'2021-01-01\', 1)) * 7 - WEEKDAY(\'2021-01-01\') DAY, \\"%m/%d/%y\\") AS \'Date\',\\n    WEEK(FROM_UNIXTIME(MAX(startTime/1000))), \\n    COUNT(*) AS COUNT \\nFROM  \\n    `sre_event` e \\nINNER JOIN \\n    sre_ci_metadata c ON c.ci_name = e.rootcauseentity  \\nWHERE  \\n    e.project_id = {project_id} \\n    AND apmtype = \\"DT\\"   \\n    AND severityLevel = \'AVAILABILITY\' \\n    AND eventtype = \'Issue\' \\nGROUP BY \\n    WEEK(FROM_UNIXTIME(startTime/1000)) \\nORDER BY \\n    MAX(FROM_UNIXTIME(startTime/1000)) DESC;\\n","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"e.project_id\\",\\"hostgroup\\":\\"host_groupName\\"}","tableName":"","uniqueIdentifier":""}'WHERE name = 'IssuesTrendweeklyAvailablity_DT' AND organization = 'leo1311';
@@ -292,7 +292,7 @@ SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    DATE_FORMAT
 
 
 
-<changeSet author="Leap" id="3v1-cip-241205-10">
+<changeSet author="Essedum" id="3v1-cip-241205-10">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    DATE_FORMAT(\'2021-01-01\' + INTERVAL (WEEK(FROM_UNIXTIME(MAX(startTime/1000))) - WEEK(\'2021-01-01\', 1)) * 7 - WEEKDAY(\'2021-01-01\') DAY, \\"%m/%d/%y\\") AS \'Date\',\\n    WEEK(FROM_UNIXTIME(MAX(startTime/1000))), \\n    COUNT(*) AS COUNT \\nFROM  \\n    `sre_event` e \\nINNER JOIN \\n    sre_ci_metadata c ON c.ci_name = e.rootcauseentity  \\nWHERE  \\n    e.project_id = {project_id} \\n    AND eventtype = \'Issue\'   \\n    AND apmtype = \\"DT\\" \\n    AND severityLevel = \'ERROR\'  \\nGROUP BY \\n    WEEK(FROM_UNIXTIME(startTime/1000)) \\nORDER BY \\n    MAX(FROM_UNIXTIME(startTime/1000)) DESC;\\n","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"e.project_id\\",\\"hostgroup\\":\\"host_groupName\\"}","tableName":"","uniqueIdentifier":""}'WHERE name = 'issuesTrendError_DT' AND organization = 'leo1311';
@@ -303,7 +303,7 @@ SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    DATE_FORMAT
 
 
 
-<changeSet author="Leap" id="3v1-cip-241205-11">
+<changeSet author="Essedum" id="3v1-cip-241205-11">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    DATE_FORMAT(\'2021-01-01\' + INTERVAL (WEEK(FROM_UNIXTIME(MAX(startTime/1000))) - WEEK(\'2021-01-01\', 1)) * 7 - WEEKDAY(\'2021-01-01\') DAY, \\"%m/%d/%y\\") AS \'Date\',\\n    WEEK(FROM_UNIXTIME(MAX(startTime/1000))), \\n    COUNT(*) AS COUNT \\nFROM \\n    sre_event  \\nWHERE  \\n    project_id = {project_id} \\n    AND eventtype = \'Issue\'   \\n    AND apmtype = \\"DT\\" \\n    AND severityLevel = \'PERFORMANCE\' \\nGROUP BY \\n    WEEK(FROM_UNIXTIME(startTime/1000)) \\nORDER BY \\n    MAX(FROM_UNIXTIME(startTime/1000)) DESC;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"project_id\\",\\"hostgroup\\":\\"host_groupName\\"}","tableName":"","uniqueIdentifier":""}'WHERE name = 'trendIssueWeeklyperformance_DT' AND organization = 'leo1311';
@@ -313,7 +313,7 @@ SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    DATE_FORMAT
 
 
 
-<changeSet author="Leap" id="3v1-cip-241205-12">
+<changeSet author="Essedum" id="3v1-cip-241205-12">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    DATE_FORMAT(\'2021-01-01\' + INTERVAL (WEEK(FROM_UNIXTIME(MAX(startTime/1000))) - WEEK(\'2021-01-01\', 1)) * 7 - WEEKDAY(\'2021-01-01\') DAY, \\"%m/%d/%y\\") AS \'Date\',\\n    WEEK(FROM_UNIXTIME(MAX(startTime/1000))), \\n    COUNT(*) AS COUNT \\nFROM  \\n    `sre_event` e \\nINNER JOIN \\n    sre_ci_metadata c ON c.ci_name = e.rootcauseentity  \\nWHERE  \\n    e.project_id = {project_id}  \\n    AND eventtype = \'Issue\' \\n    AND apmtype = \\"DT\\" \\n    AND severityLevel = \'RESOURCE_CONTENTION\'  \\nGROUP BY \\n    WEEK(FROM_UNIXTIME(startTime/1000)) \\nORDER BY \\n    MAX(FROM_UNIXTIME(startTime/1000)) DESC;\\n","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"e.project_id\\",\\"hostgroup\\":\\"host_groupName\\"}","tableName":"","uniqueIdentifier":""}'WHERE name = 'IssuesTrendweeklyresource_DT' AND organization = 'leo1311';
@@ -326,7 +326,7 @@ SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    DATE_FORMAT
 
 
 
-<changeSet author="Leap" id="3v1-cip-241205-13">
+<changeSet author="Essedum" id="3v1-cip-241205-13">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    DATE_FORMAT(\\n        \'2021-01-01\' + INTERVAL (WEEK(FROM_UNIXTIME(MAX(startTime/1000))) - WEEK(\'2021-01-01\', 1)) * 7 - WEEKDAY(\'2021-01-01\') DAY, \\n        \\"%m/%d/%y\\"\\n    ) AS \'Date\',\\n    WEEK(FROM_UNIXTIME(MAX(startTime/1000))) AS \'Week\',\\n    COUNT(*) AS COUNT\\nFROM \\n    `sre_event` e \\nINNER JOIN \\n    sre_ci_metadata c ON c.ci_name = e.rootcauseentity \\nWHERE \\n    e.project_id = {project_id} \\n    AND apmtype = \'DT\'   \\n    AND severityLevel = \'AVAILABILITY\' \\n    AND eventtype = \'Alert\' \\nGROUP BY \\n    WEEK(FROM_UNIXTIME(startTime/1000))  \\nORDER BY \\n    MAX(FROM_UNIXTIME(startTime/1000)) DESC;\\n","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"e.project_id\\",\\"hostgroup\\":\\"host_groupName\\"}","tableName":"","uniqueIdentifier":""}'WHERE name = 'AvailabilityAlertTrendWeekly_DT' AND organization = 'leo1311';
@@ -337,7 +337,7 @@ SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    DATE_FORMAT
 
 
 
-<changeSet author="Leap" id="3v1-cip-241205-14">
+<changeSet author="Essedum" id="3v1-cip-241205-14">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    DATE_FORMAT(\\n        \'2021-01-01\' + INTERVAL (WEEK(FROM_UNIXTIME(MAX(startTime/1000))) - WEEK(\'2021-01-01\', 1)) * 7 - WEEKDAY(\'2021-01-01\') DAY, \\n        \\"%m/%d/%y\\"\\n    ) AS \'Date\',\\n    WEEK(FROM_UNIXTIME(MAX(startTime/1000))) AS \'Week\',\\n    COUNT(*) AS COUNT\\nFROM \\n    `sre_event` e \\nINNER JOIN \\n    sre_ci_metadata c ON c.ci_name = e.rootcauseentity \\nWHERE \\n    e.project_id = {project_id} \\n    AND eventtype = \'Alert\'  \\n    AND apmtype = \'DT\' \\n    AND severityLevel = \'ERROR\'\\nGROUP BY \\n    WEEK(FROM_UNIXTIME(startTime/1000))  \\nORDER BY \\n    MAX(FROM_UNIXTIME(startTime/1000)) DESC;\\n","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"e.project_id\\",\\"hostgroup\\":\\"host_groupName\\"}","tableName":"","uniqueIdentifier":""}'WHERE name = 'ErrorAlertTrendWeekly_DT' AND organization = 'leo1311';
@@ -348,7 +348,7 @@ SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    DATE_FORMAT
 
 
 
-<changeSet author="Leap" id="3v1-cip-241205-15">
+<changeSet author="Essedum" id="3v1-cip-241205-15">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    DATE_FORMAT(\\n        \'2021-01-01\' + INTERVAL (WEEK(FROM_UNIXTIME(MAX(startTime/1000))) - WEEK(\'2021-01-01\', 1)) * 7 - WEEKDAY(\'2021-01-01\') DAY, \\n        \\"%m/%d/%y\\"\\n    ) AS \'Date\',\\n    WEEK(FROM_UNIXTIME(MAX(startTime/1000))) AS \'Week\',\\n    COUNT(*) AS COUNT \\nFROM \\n    sre_event  \\nWHERE  \\n    project_id = {project_id} \\n    AND eventtype = \'Alert\'   \\n    AND apmtype = \\"DT\\" \\n    AND severityLevel = \'PERFORMANCE\' \\nGROUP BY \\n    WEEK(FROM_UNIXTIME(startTime/1000)) \\nORDER BY \\n    MAX(FROM_UNIXTIME(startTime/1000)) DESC;\\n","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"project_id\\",\\"hostgroup\\":\\"host_groupName\\"}","tableName":"","uniqueIdentifier":""}'WHERE name = 'PerformanceAlertTrendWeekly_DT' AND organization = 'leo1311';
@@ -358,7 +358,7 @@ SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    DATE_FORMAT
 
 
 
-<changeSet author="Leap" id="3v1-cip-241205-16">
+<changeSet author="Essedum" id="3v1-cip-241205-16">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    DATE_FORMAT(\\n        \'2021-01-01\' + INTERVAL (WEEK(FROM_UNIXTIME(MAX(startTime/1000))) - WEEK(\'2021-01-01\', 1)) * 7 - WEEKDAY(\'2021-01-01\') DAY, \\n        \\"%m/%d/%y\\"\\n    ) AS \'Date\', \\n    WEEK(FROM_UNIXTIME(MAX(startTime/1000))) AS \'Week\', \\n    COUNT(*) AS COUNT \\nFROM  \\n    `sre_event` e \\nINNER JOIN \\n    sre_ci_metadata c ON c.ci_name = e.rootcauseentity  \\nWHERE  \\n    e.project_id = {project_id}  \\n    AND eventtype = \'Alert\' \\n    AND apmtype = \\"DT\\" \\n    AND severityLevel = \'RESOURCE_CONTENTION\'  \\nGROUP BY \\n    WEEK(FROM_UNIXTIME(startTime/1000)) \\nORDER BY \\n    MAX(FROM_UNIXTIME(startTime/1000)) DESC;\\n","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"e.project_id\\",\\"hostgroup\\":\\"host_groupName\\"}","tableName":"","uniqueIdentifier":""}'WHERE name = 'ResourceAlertTrendWeekly_DT' AND organization = 'leo1311';
@@ -367,13 +367,13 @@ SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    DATE_FORMAT
 
 
 
-<changeSet author="Leap" id="3v1-cip-20241105-17">
+<changeSet author="Essedum" id="3v1-cip-20241105-17">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT \n    spa.probe_run_app_id AS \"RunID\", \n    spa.run_description AS \"RunDescription\", \n    spa.SUT, \n    CONVERT(VARCHAR, spa.run_start_time, 120) AS \"StartTime\",\n    CONVERT(VARCHAR, spa.run_end_time, 120) AS \"EndTime\",\n    spa.run_result AS \"RunResult\", \n    spa.run_time AS \"RunTime\"\nFROM sre_probe_run_app spa\nINNER JOIN sre_location sl ON spa.location_id = sl.location_id\nINNER JOIN ccl_app ca ON spa.application_id = ca.application_id\nWHERE spa.run_result = 0;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{}","tableName":"","uniqueIdentifier":""}'WHERE name = 'ApplicationTable' AND organization = 'leo1311';
 		</sql> 
 	</changeSet>
 
-<changeSet author="Leap" id="3v1-cip-20241206-01">
+<changeSet author="Essedum" id="3v1-cip-20241206-01">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 update mldataset
 set attributes = '{
@@ -393,19 +393,19 @@ where name='testapplicationgroupwithactiveprobe' AND organization = 'leo1311';
 </sql> 
 </changeSet>
 
-<changeSet  author="Leap"  id="3v00To3v10-cip-001-3">
+<changeSet  author="Essedum"  id="3v00To3v10-cip-001-3">
 		<sql splitStatements="true" stripComments="true">
 			DELETE from mlpipeline WHERE name='LEOLCHTB10964' AND organization='leo1311';
 			DELETE from mlplugindetails WHERE pluginname='SemanticSearchCore-20' AND org='leo1311';
 		</sql>
 	</changeSet>
-	<changeSet  dbms="mssql,mysql,postgresql" author="Leap"  id="3v00To3v10-cip-002-3">
+	<changeSet  dbms="mssql,mysql,postgresql" author="Essedum"  id="3v00To3v10-cip-002-3">
 		<sql splitStatements="true" stripComments="true">
 			DELETE from mlpipeline WHERE name='LEOCDGNR66088' AND organization='leo1311';
 			DELETE from mlpipeline WHERE name ='LEOCDSMR12593' AND organization='leo1311';
 		</sql>
 	</changeSet>
-<changeSet dbms="mysql,postgresql,mssql" author="Leap (generated)" id="3v1-cip-003">
+<changeSet dbms="mysql,postgresql,mssql" author="Essedum (generated)" id="3v1-cip-003">
         <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/310_to_311/acme/cip/mlpipeline.csv" quotchar="&quot;" separator="," tableName="mlpipeline">
             <column header="cid" name="cid" type="NUMERIC"/>
             <column header="created_by" name="created_by" type="STRING"/>
@@ -429,7 +429,7 @@ where name='testapplicationgroupwithactiveprobe' AND organization = 'leo1311';
         </loadData>
     </changeSet>
 
-	<changeSet author="Leap" id="3v1-cip-20241211-001">
+	<changeSet author="Essedum" id="3v1-cip-20241211-001">
 		<sql dbms="mssql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset SET attributes = '{"filter":"","mode":"query","Query":"SELECT count(*) AS ''COUNT'', probe_run_app_id,run_description,SUT,run_start_time,run_end_time,run_result FROM sre_location INNER JOIN sre_probe_run_app ON sre_probe_run_app.location_id=sre_location.location_id INNER JOIN ccl_app ON  sre_probe_run_app.application_id=ccl_app.application_id INNER JOIN ccl_app_grp ON ccl_app_grp.application_grp_id=ccl_app.application_grp_id WHERE location_name IN (location_name) AND application_name IN (application_name) AND (run_date BETWEEN  ''2019-09-01'' AND ''2023-12-30'') and run_result IN (''0'',''1'') AND application_grp_name IN (application_grp_name) group by probe_run_app_id,run_description,SUT,run_start_time,run_end_time,run_result;","Cacheable":"false","isStreaming":"false","defaultValues":"","writeMode":"append","params":"" ,"tableName":"","uniqueIdentifier":""}' 
 		WHERE name = 'ApplicationDetails' AND organization = 'leo1311';
@@ -438,7 +438,7 @@ where name='testapplicationgroupwithactiveprobe' AND organization = 'leo1311';
   </changeSet>
 
 
-	<changeSet author="Leap" id="3v1-cip-241212-01">
+	<changeSet author="Essedum" id="3v1-cip-241212-01">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset 
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT m.ci_Id  AS `Entity ID`,\\n       m.display_name AS `App Name`,\\n       eventId,\\n       displayId AS \'Alert ID\',\\n       title AS \'Description\',\\n       p.status AS \'Status\',\\n       severityLevel AS \'Severity Level\',\\n       DATE_FORMAT(FROM_UNIXTIME(startTime / 1000), \\"%m/%d/%y %H:%i:%s\\") AS \'Raised Time\'\\nFROM sre_event p\\nJOIN sre_ci_metadata m ON m.ci_name = p.rootCauseEntity\\nWHERE apmtype = \\"DT\\"\\n  AND eventtype = \'Alert\'\\n  AND p.project_id = {project_id}\\n  AND startTime BETWEEN UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 1 DAY)) * 1000 AND UNIX_TIMESTAMP(NOW()) * 1000\\n  AND p.status = \'OPEN\'\\n  AND m.ci_type = \'Application\'\\nGROUP BY m.ci_name, eventId, displayId, title, p.status, severityLevel, startTime\\nORDER BY startTime DESC;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"p.project_id\\",\\"hostgroup\\":\\"host_groupName\\"}","tableName":"","uniqueIdentifier":""}' 
@@ -448,25 +448,25 @@ WHERE name = 'AppswithAlerts_DT' AND organization = 'leo1311';
   </changeSet>
   
   
-  <changeSet author="Leap" id="3v1-cip-20241212-2">
+  <changeSet author="Essedum" id="3v1-cip-20241212-2">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
         UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT DATEADD(SECOND,(CAST(substring(startTime, 1, 10) AS bigint)),''1970-01-01'') AS ''Date'', ROUND(metricValue, 2) as metric_value FROM sre_metrics s JOIN sre_ci_metadata m ON m.ci_name = s.ci_name WHERE s.project_id = s.project_id AND m.display_name = m.display_name AND metricType = ''CPU Usage %'' ORDER BY startTime;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{}","tableName":"","uniqueIdentifier":""}'  WHERE name = 'CPUsaturationGraph_DT' and ORGANIZATION = 'leo1311';
         </sql>  
 	</changeSet>
 	
-<changeSet author="Leap" id="3v1-cip-20241212-3">
+<changeSet author="Essedum" id="3v1-cip-20241212-3">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
         UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT DATEADD(SECOND,(CAST(substring(startTime, 1, 10) AS bigint)),''1970-01-01'') AS ''Date'', ROUND(metricValue, 2)as metric_value FROM sre_metrics s JOIN sre_ci_metadata m ON m.ci_name = s.ci_name WHERE s.project_id = s.project_id AND m.display_name = m.display_name AND metricType = ''Memory Usage %'' ORDER BY startTime;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{}","tableName":"","uniqueIdentifier":""}'  WHERE name = 'MemoryUsageGraph_DT' and ORGANIZATION = 'leo1311';
         </sql>  
 	</changeSet>
 	
-<changeSet author="Leap" id="3v1-cip-20241212-4">
+<changeSet author="Essedum" id="3v1-cip-20241212-4">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
         UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT DATEADD(SECOND,(CAST (substring(startTime, 1, 10) AS bigint)),''1970-01-01'') AS ''Date'', ROUND(metricValue, 2) as metric_value FROM sre_metrics s JOIN sre_ci_metadata m ON m.ci_name = s.ci_name WHERE s.project_id = s.project_id AND m.display_name = m.display_name AND metricType = ''Disk Usage %'' ORDER BY startTime;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{}","tableName":"","uniqueIdentifier":""}'  WHERE name = 'DiskUsageGraph_DT' and ORGANIZATION = 'leo1311';
         </sql>  
 	</changeSet>
 
-	<changeSet author="Leap" id="3v1-cip-241213-06">
+	<changeSet author="Essedum" id="3v1-cip-241213-06">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT \\n    MAX(e.eventId) AS \'Event ID\',\\n    c.ci_Id AS `Entity ID`,\\n    c.display_Name AS `Service Name`,\\n    MAX(title) AS \'Description\',\\n    MAX(STATUS) AS \'Status\',\\n    MAX(severityLevel) AS \'Severity Level\',\\n    DATE_FORMAT(FROM_UNIXTIME(MAX(startTime) / 1000), \\"%m/%d/%y %H:%i:%s\\") AS \'Raised Time\'\\nFROM sre_event e\\nJOIN sre_ci_metadata c \\n    ON e.rootCauseEntity = c.ci_name\\nWHERE apmtype = \\"DT\\" \\n    AND e.project_id = {project_id} \\n    AND startTime BETWEEN UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 1 DAY)) * 1000 AND UNIX_TIMESTAMP(NOW()) * 1000 \\n    AND c.ci_id != \'(NULL)\' \\n    AND e.eventType = \'Issue\' \\n    AND e.status = \'OPEN\' \\n    AND c.ci_type = \'Service\'\\nGROUP BY c.ci_name\\nORDER BY MAX(startTime) DESC;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"e.project_id\\",\\"hostgroup\\":\\"host_groupName\\"}","tableName":"","uniqueIdentifier":""}' 
@@ -476,7 +476,7 @@ WHERE name = 'ServiceswithIssues_DT' AND organization = 'leo1311';
     </sql> 
   </changeSet>
   
-  <changeSet author="Leap" id="3v1-cip-241213-07">
+  <changeSet author="Essedum" id="3v1-cip-241213-07">
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 		UPDATE mldataset
 SET attributes = '{"filter":"","mode":"query","Query":"SELECT MAX(e.eventId) AS \'Event ID\', c.ci_Id AS `Entity ID`,MAX(c.display_Name) AS `Service Name`,MAX(title) AS \'Description\',MAX(STATUS) AS \'Status\',MAX(severityLevel) AS \'Severity Level\',DATE_FORMAT(FROM_UNIXTIME(MAX(startTime) / 1000), \\"%m/%d/%y %H:%i:%s\\") AS \'Raised Time\' FROM sre_event e JOIN sre_ci_metadata c ON e.rootCauseEntity = c.ci_name WHERE apmtype = \\"DT\\" AND e.project_id = {project_id} AND startTime BETWEEN UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 1 DAY)) * 1000 AND UNIX_TIMESTAMP(NOW()) * 1000 AND c.ci_id != \'(NULL)\' AND e.eventType = \'Alert\' AND e.status = \'OPEN\' AND c.ci_type = \'Service\' GROUP BY c.ci_name ORDER BY MAX(startTime) DESC;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\\"project_id\\":\\"e.project_id\\",\\"hostgroup\\":\\"host_groupName\\"}","tableName":"","uniqueIdentifier":""}' 
@@ -485,20 +485,20 @@ WHERE name = 'ServiceswithAlerts_DT' AND organization = 'leo1311';
 
     </sql> 
   </changeSet>
-  <changeSet author="Leap" id="3v1-cip-20241223-1">
+  <changeSet author="Essedum" id="3v1-cip-20241223-1">
 		<sql dbms="mysql" splitStatements="true" stripComments="true">
       UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT Round(AVG(metricValue),2) AS "USAGE", DATE_FORMAT((FROM_UNIXTIME(startTime/1000)),"%m/%d/%y %H:%i:%s") AS "DATE" FROM sre_metrics WHERE project_id={project_id} AND apmType="AppD" AND ctype IN ("Node") AND metricType="Process CPU Usage %" AND startTime BETWEEN UNIX_TIMESTAMP(DATE_SUB({endDate}, INTERVAL 6 MONTH))*1000 AND UNIX_TIMESTAMP({endDate})*1000 GROUP BY sre_metrics.startTime,HOUR(FROM_UNIXTIME(startTime/1000)) ORDER BY startTime DESC","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{"endDate":"(select max(FROM_UNIXTIME(startTime/1000)) from sre_metrics WHERE project_id=(SELECT id from usm_project where name = "@projectname"))","project_id":"(SELECT id from usm_project where name = "@projectname")"}","tableName":"","uniqueIdentifier":""}' WHERE name="CPUUsageHost" and organization="leo1311";
     </sql>  
 	</changeSet>
 
-  <changeSet author="Leap" id="3v1-cip-20241223-2">
+  <changeSet author="Essedum" id="3v1-cip-20241223-2">
 		<sql dbms="mysql" splitStatements="true" stripComments="true">
       UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT Round(AVG(metricValue),2) AS "USAGE", DATE_FORMAT((FROM_UNIXTIME(startTime/1000)),"%m/%d/%y %H:%i:%s") AS "DATE" FROM sre_metrics WHERE project_id={project_id} AND apmType="AppD" AND ctype IN ("Node") AND metricType="Used %" AND startTime BETWEEN UNIX_TIMESTAMP(DATE_SUB({endDate}, INTERVAL 6 MONTH))*1000  AND UNIX_TIMESTAMP({endDate})*1000 GROUP BY sre_metrics.startTime,HOUR(FROM_UNIXTIME(startTime/1000)) ORDER BY startTime DESC","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{"endDate":"(SELECT max(FROM_UNIXTIME(startTime/1000)) FROM sre_metrics WHERE project_id=(SELECT id FROM usm_project WHERE name="@projectname"))","project_id":"(SELECT id FROM usm_project WHERE name="@projectname")"}","tableName":"","uniqueIdentifier":""}' WHERE name="MemoryUsageHost" and organization="leo1311";
     </sql>  
 	</changeSet>
 
 
-	 <changeSet author="Leap" id="3v1-cip-20241223-2-12-23-24-1">
+	 <changeSet author="Essedum" id="3v1-cip-20241223-2-12-23-24-1">
 		<sql dbms="mysql" splitStatements="true" stripComments="true">
 
     UPDATE mldataset 
@@ -518,19 +518,19 @@ SET attributes = '{"filter":"","mode":"query","Query":"   SELECT DATE_FORMAT((FR
        </sql>  
 	</changeSet>
 
-  <changeSet author="Leap" id="3v1-cip-20241224-1">
+  <changeSet author="Essedum" id="3v1-cip-20241224-1">
 		<sql dbms="mysql" splitStatements="true" stripComments="true">
       UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT DISTINCT (countApp.Host), countApp.status AS STATUS FROM ((SELECT DISTINCT(c.ci_name) AS `HOST`,c.ci_name,d.color AS STATUS FROM sre_ci_metadata c INNER JOIN (SELECT c.ci_id,c.ci_name AS `status`,c.ci_name, CASE WHEN (SELECT COUNT(*) FROM sre_event WHERE rootCauseEntity = c.ci_name AND startTime BETWEEN UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 2 YEAR))*1000 AND UNIX_TIMESTAMP(NOW())*1000 AND project_id = {project_id} AND apmType="Appd" AND STATUS="OPEN" AND severityLevel="CRITICAL")>0 THEN "red" ELSE "green" END AS COLOR FROM sre_ci_metadata c WHERE c.project_id = {project_id} AND c.ci_type IN ("Service") GROUP BY c.ci_name,ci_id ORDER BY COLOR DESC) AS d ON c.service_type=d.status AND c.project_id = {project_id} AND c.apm_type="Appd" AND c.service_type LIKE "auth-services" ORDER BY STATUS DESC) UNION ALL (SELECT c.ci_name AS `HOST`,c.ci_name, CASE WHEN (SELECT COUNT(*) FROM sre_event WHERE rootCauseEntity = c.ci_name AND startTime BETWEEN UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 2 YEAR))*1000 AND UNIX_TIMESTAMP(NOW())*1000 AND project_id = {project_id} AND apmType="Appd" AND STATUS="OPEN" AND severityLevel="CRITICAL")>0 THEN "red" ELSE "green" END AS STATUS FROM sre_ci_metadata c WHERE c.project_id = {project_id} AND c.apm_type="AppD" AND c.ci_type IN ("Host") AND c.ci_name NOT LIKE ("auth-services%") GROUP BY c.ci_name ORDER BY STATUS DESC)) AS countApp ORDER BY countApp.status DESC","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"project_id\":\"(SELECT id from usm_project where name = "@projectname")\"}","tableName":"","uniqueIdentifier":""}' WHERE name="NodeStatus" and organization="leo1311";
     </sql>  
 	</changeSet>
 
-  <changeSet author="Leap" id="3v1-cip-20241224-2">
+  <changeSet author="Essedum" id="3v1-cip-20241224-2">
 		<sql dbms="mysql" splitStatements="true" stripComments="true">
       UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT COUNT(*) AS \"COUNT\", CONCAT(DATE(FROM_UNIXTIME(startTime/1000)), " ", HOUR(FROM_UNIXTIME(startTime/1000)), ":00") AS \"DATE\", HOUR(FROM_UNIXTIME(startTime/1000)) AS "hourlyValue" FROM sre_event p INNER JOIN sre_ci_metadata c ON c.ci_name = p.rootcauseentity  WHERE p.project_id = {project_id} AND c.project_id = {project_id} AND apmType = \"AppD\"  AND p.severityLevel="CRITICAL" AND c.ci_type IN ("Service","Host") AND startTime BETWEEN UNIX_TIMESTAMP({startDate})*1000  AND  UNIX_TIMESTAMP({endDate})*1000 GROUP BY DATE,hourlyValue,startTime ORDER BY startTime DESC","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"endDate\":\"NOW()\",\"project_id\":\"(SELECT id from usm_project where name = "@projectname")\",\"startDate\":\"DATE_SUB(NOW(), INTERVAL 2 YEAR)\"}","tableName":"","uniqueIdentifier":""}' WHERE name="IssuesHourlyTrend" and organization="leo1311";
     </sql>  
 	</changeSet>
 
-  <changeSet author="Leap" id="3v1-cip-20241224-3">
+  <changeSet author="Essedum" id="3v1-cip-20241224-3">
 		<sql dbms="mysql" splitStatements="true" stripComments="true">
       UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT CONCAT(DATE(FROM_UNIXTIME(startTime/1000)), " ", HOUR(FROM_UNIXTIME(startTime/1000)), ":00") AS \"DATE\", HOUR(FROM_UNIXTIME(startTime/1000)) AS "hourlyValue", COUNT(eventId) AS \"COUNT\"  FROM `sre_event` e INNER JOIN sre_ci_metadata c ON c.ci_name = e.rootCauseEntity WHERE  apmType = \"AppD\" AND e.project_id = {project_id} AND apmType = \"AppD\"  AND startTime BETWEEN UNIX_TIMESTAMP({startDate})*1000  AND  UNIX_TIMESTAMP({endDate})*1000 AND e.severityLevel="WARNING" AND c.ci_type="Host" GROUP BY DATE,startTime,hourlyValue ORDER BY startTime DESC","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"endDate\":\"NOW()\",\"project_id\":\"(SELECT id from usm_project where name = "@projectname")\",\"startDate\":\"DATE_SUB(NOW(),  INTERVAL 2 YEAR)\"}","tableName":"","uniqueIdentifier":""}' WHERE name="AlertTrendHourly" and organization="leo1311";
     </sql>  

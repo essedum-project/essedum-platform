@@ -18,7 +18,7 @@
 		<encoder name="enc"
 			class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
 			<layout
-				class="com.infosys.icets.ai.comm.lib.util.logger.PatternLayoutWithUserContext">
+				class="com.lfn.ai.comm.lib.util.logger.PatternLayoutWithUserContext">
 				<param name="Pattern"
 					value="%d{HH:mm:ss.SSS} %-5level %logger{10} [%user %session] - %msg%n" />
 			</layout>
@@ -37,7 +37,7 @@
 		<encoder name="enc"
 			class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
 			<layout
-				class="com.infosys.icets.ai.comm.lib.util.logger.PatternLayoutWithUserContext">
+				class="com.lfn.ai.comm.lib.util.logger.PatternLayoutWithUserContext">
 				<param name="Pattern"
 					value="%d{HH:mm:ss.SSS} %-5level %logger{10} [%user %session] - %msg%n" />
 			</layout>
@@ -47,7 +47,7 @@
 	<appender name="SIFT"
 		class="ch.qos.logback.classic.sift.SiftingAppender">
 		<discriminator
-			class="com.infosys.icets.ai.comm.lib.util.logger.JobContextDiscriminator">
+			class="com.lfn.ai.comm.lib.util.logger.JobContextDiscriminator">
 			<defaultValue>unknown</defaultValue>
 		</discriminator>
 		<sift>
@@ -65,7 +65,7 @@
 	<appender name="AUDITSIFT"
 		class="ch.qos.logback.classic.sift.SiftingAppender">
 		<discriminator
-			class="com.infosys.icets.ai.comm.lib.util.logger.JobContextDiscriminator">
+			class="com.lfn.ai.comm.lib.util.logger.JobContextDiscriminator">
 			<defaultValue>unknown</defaultValue>
 		</discriminator>
 		<sift>
@@ -96,21 +96,21 @@
 	<logger
 		name="org.hibernate.engine.internal.StatisticalLoggingSessionEventListener"
 		level="OFF" />
-	<logger name="com.infosys" level="INFO" />
-	<logger name="com.infosys.impact.botfactory" level="ERROR" />
+	<logger name="com.lfn" level="INFO" />
+	<logger name="com.lfn.impact.botfactory" level="ERROR" />
 	<logger name="org.springframework" level="ERROR" />
 	<logger
-		name="com.infosys.icets.ai.comm.lib.util.logger.JobLogger"
+		name="com.lfn.ai.comm.lib.util.logger.JobLogger"
 		level="INFO">
 		<appender-ref ref="SIFT" />
 	</logger>
 	<logger
-		name="com.infosys.icets.ai.comm.lib.util.RegularExpressionUtil"
+		name="com.lfn.ai.comm.lib.util.RegularExpressionUtil"
 		level="INFO">
 		<appender-ref ref="SIFT" />
 	</logger>
 	<logger
-		name="com.infosys.icets.ai.comm.lib.util.logger.AuditLogger"
+		name="com.lfn.ai.comm.lib.util.logger.AuditLogger"
 		level="INFO">
 		<appender-ref ref="AUDITSIFT" />
 	</logger>

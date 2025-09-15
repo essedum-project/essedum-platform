@@ -5,9 +5,9 @@ from pyhocon import ConfigFactory
 from pyspark.sql import SparkSession
 from sparkjobserver.api import SparkJob, build_problems, ValidationProblem
 
-from leap import PythonExecuter
+from essedum import PythonExecuter
 import json
-from leap.Utilities import Utilities
+from essedum.Utilities import Utilities
 
 class DummyJob(SparkJob):
     def run_job(self, context, runtime, data):

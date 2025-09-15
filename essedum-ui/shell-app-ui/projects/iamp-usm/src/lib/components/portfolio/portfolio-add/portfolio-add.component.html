@@ -1,0 +1,167 @@
+<div class="lfx-u-pad-t-8">
+  <div class="lfx-l-level2-middle-col">
+
+    <!--header part-->
+    <div class="d-flex justify-content-between align-items-center fixed-header">
+      <div class="align-items-center d-flex" *ngIf="!edit && !view">
+        <h2 class="header-title">Create Portfolio</h2>
+      </div>
+      <div class="align-items-center d-flex" *ngIf="edit && !view">
+        <h2 class="header-title">Edit Portfolio</h2>
+      </div>
+      <div class="align-items-center d-flex" *ngIf="view">
+        <h2 class="header-title">View Portfolio</h2>
+      </div>
+      <div class="d-flex justify-content-end">
+        <div *ngIf="view || edit">
+          <button type="button" class="edit-view-btn" (click)="editViewChanged('edit')" *ngIf="view"  matTooltip="Edit">
+              <mat-icon class="icon-color">edit</mat-icon>
+          </button>
+          <button type="button" class="edit-view-btn" (click)="editViewChanged('view')" *ngIf="edit && !view"  matTooltip="View">
+            <mat-icon class="icon-color">remove_red_eye</mat-icon>
+          </button>
+        </div>
+        <button type="button" class="edit-view-btn" aria-label="Close"  matTooltip="Close" (click)="closePortfolioDialog()">
+           <mat-icon class="icon-color">close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <mat-card>
+      <div class="lfx-u-pad-t-32 lfx-u-pad-r-24 p-20">
+        <!--add, edit, view fields-->
+        <div class="row">
+          <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+            <div>
+              <mat-form-field appearance="fill" style="width: 90%" floatLabel="always">
+                <mat-label class="mat-style-label">Portfolio Name</mat-label>
+                <input (input)="checkNameMaxLength()" (keypress)="deleteSpecialChars($event)" matInput class="ml-4"
+                  [disabled]="view" placeholder="Enter Portfolio Name..."
+                  [(ngModel)]="usmPortfolio.portfolioName" maxlength="255" required />
+                <mat-error class="ml-4" *ngIf="!usmPortfolio.portfolioName">This field is required</mat-error>
+                <mat-hint class="ml-4 hint" *ngIf="!edit">
+                  Note: Alpha numeric characters and _ allowed
+                </mat-hint>
+                <mat-error class="ml-4" *ngIf="showNameLengthErrorMessage">
+                  {{ showNameLengthErrorMessage }}
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="col-lg-12 col-md-12 lfx-u-mar-b-16">
+            <mat-form-field appearance="fill" style="width: 90%" floatLabel="always">
+              <mat-label class="mat-style-label">Portfolio Description</mat-label>
+              <input class="ml-4" matInput [disabled]="view" maxlength="255"
+                placeholder="Enter Portfolio Description..." [(ngModel)]="usmPortfolio.description"
+                (keyup)="checkDescriptionMaxLength()" />
+
+              <mat-hint class="ml-4 hint" *ngIf="!view">
+                Note: Alpha numeric and special characters -_. allowed
+              </mat-hint>
+              <mat-error class="ml-4" *ngIf="showDescLengthErrorMessage">
+                {{ lengthNameErrorMessage }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center mt-4" *ngIf="(edit || view) && projectList">
+        <div class="flex-grow-1">
+          <h2 class="header-sub-title">
+            Projects under "{{usmPortfolio.portfolioName}}" Portfolio
+            <span *ngIf="projectList.length > 0">({{projectList.length}} projects)</span>
+            <span *ngIf="projectList.length === 0">(No projects)</span>
+          </h2>
+        </div>
+        <!-- <div class="d-flex justify-content-end mr-40">
+          <button class="key-filter" (click)="clickActiveProject('active')">
+            <mat-icon class="icon-color">keyboard_arrow_up</mat-icon>
+          </button>
+          <button class="key-filter" (click)="clickActiveProject('inactive')">
+            <mat-icon class="icon-color">keyboard_arrow_down</mat-icon>
+          </button>
+        </div> -->
+
+      </div>
+      <div *ngIf="(edit ) || view" class="projects-section">
+        <div class="aip-container lfx-u-pad-lr-30"></div>
+        <!-- Table Layout  -->
+        <div class="table-card">
+          <div class="table-scroll-container">
+            <table class="styled-table" *ngIf="projectList && projectList.length > 0; else noData">
+              <thead>
+                <tr>
+                  <th *ngFor="let obj of displayColumns">{{ obj }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  *ngFor="let obj of projectList | slice:(pageNumber-1)*pageSize:(pageNumber*pageSize); let i = index; trackBy: trackByMethod">
+                  <td>{{ getRowNumber(i) }}</td>
+                  <td style="color: #0052cc; cursor: pointer">{{ obj.id }}</td>
+                  <td>{{ obj.name }}</td>
+                  <td>{{ obj.displayname || obj.projectdisplayname }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <ng-template #noData>
+              <div class="no-data">No projects associated with this portfolio</div>
+            </ng-template>
+          </div>
+          <!--pagination-->
+          <div class="pagination-container">
+            <div class="paginator-buttons">
+              <div class="pages-details">
+                <!-- Previous page button -->
+                <mat-icon *ngIf="projectList.length > 0" id="prev-page-btn" data-icon-type="prev-button"
+                  class="pagination-arrow" [ngClass]="{
+                      'disabled': pageNumber == 1,
+                      'active': isPrevHovered && pageNumber != 1
+                    }" (mouseenter)="isPrevHovered = true" (mouseleave)="isPrevHovered = false"
+                  (click)="pageNumberInput=null; onPrevPage()">
+                  keyboard_arrow_left
+                </mat-icon>
+
+                <!-- Page numbers -->
+                <div class="page-numbers">
+                  <span *ngFor="let i of pageArr | slice:startIndex:endIndex; let idx = index" class="pg"
+                    (click)="pageNumberInput=null; onChangePage(i+1)"
+                    [ngClass]="{'selected-page': (i + 1) == pageNumber, 'hover': hoverStates[idx]}"
+                    [ngStyle]="getButtonStyle(i+1, idx)" (mouseenter)="hoverStates[idx] = true"
+                    (mouseleave)="hoverStates[idx] = false">
+                    {{i + 1}}
+                  </span>
+                </div>
+
+                <!-- Next page button -->
+                <mat-icon *ngIf="projectList.length > 0" id="next-page-btn" data-icon-type="next-button"
+                  class="pagination-arrow" [ngClass]="{
+                      'disabled': pageNumber == noOfPages,
+                      'active': isNextHovered && pageNumber != noOfPages
+                    }" (mouseenter)="isNextHovered = true" (mouseleave)="isNextHovered = false"
+                  (click)="pageNumberInput=null; onNextPage()">
+                  keyboard_arrow_right
+                </mat-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr />
+      <!--footer part-->
+      <div class="d-flex lfx-u-mar-b-16 ml-24" *ngIf="!view">
+        <button *ngIf="!edit" mat-raised-button [disabled]="!usmPortfolio.portfolioName || usmPortfolio.portfolioName.length >= 255" (click)="onSave()" class="save-btn">
+          Save Portfolio
+        </button>
+        <button *ngIf="edit" mat-raised-button  [disabled]="!usmPortfolio.portfolioName || usmPortfolio.portfolioName.length >= 255" (click)="onSave()" class="save-btn">
+          Update Portfolio
+        </button>
+        <button class="lfx-u-pad-r-16" mat-raised-button [disabled]="false" (click)="clearWave()" class="cancel-btn">
+          clear
+        </button>
+      </div>
+    </mat-card>
+  </div>
+</div>

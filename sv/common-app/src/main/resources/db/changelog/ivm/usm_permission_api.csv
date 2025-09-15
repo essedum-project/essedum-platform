@@ -6,6 +6,6 @@
 "1945","/api/dash-constants/page","ALL",28,"For all Dashboard-Constant Page","true"
 "1946","/api/get-dash-constants?projectId=1","ALL",28,"For all Project","true"
 "1947","/api/get-dash-constants?projectId=2","ALL",28,"For all Project","true"
-"1948","/api/leap/logout","ALL",28,"to logout from leap","true"
-"1949","/api/leap/authorize","ALL",28,"For all Project","true"
+"1948","/api/essedum/logout","ALL",28,"to logout from essedum","true"
+"1949","/api/essedum/authorize","ALL",28,"For all Project","true"
 "1950","/api/registerUser","POST",28,"This is the initial step before user login. So, frontend unable to send project id in request headers","true"

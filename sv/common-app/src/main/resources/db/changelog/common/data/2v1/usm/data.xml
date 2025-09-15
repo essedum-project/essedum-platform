@@ -1,17 +1,17 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-	<changeSet author="Leap" id="2v1-usm-180522">
+	<changeSet author="Essedum" id="2v1-usm-180522">
 		<sql dbms="h2,mysql,mssql,postgresql" splitStatements="true" stripComments="true">
 			UPDATE usm_constant SET item_value = '{"label":"Admin","icon":"user","url":"","children":[{"label":"Monitor","icon":"assets/icons/Component_156_1.svg","url":"./iamp-btf/Cockpit","children":[],"_id":2},{"label":"Bot Execution Audit Trails","icon":"assets/icons/icon_audit.svg","url":"./iamp-btf/entity/bot-execution-audit-trails","children":[],"_id":3},{"label":"Schedule Background Process","icon":"assets/icons/icon_BCMS.svg","url":"./iamp-btf/entity/bot-factory-scheduler","children":[],"_id":4},{"label":"Refresh Jobs","icon":"sync","url":"./iamp-btf/refreshjobs","children":[],"_id":5},{"label":"API","icon":"sync","url":"./iamp-btf/docs","children":[],"_id":6},{"label":"Status Permission","icon":"","url":"./iamp-btf/entity/bot-status-permission","children":[{"label":"Status","icon":"","url":"./iamp-btf/entity/bot-status","children":[],"_id":8},{"label":"Status Permission Mapping","icon":"","url":"./iamp-btf/entity/bot-status-permission","children":[],"_id":9}],"_id":7}]}' WHERE item ='Bot Admin Side' AND item_value LIKE '%Admin%' AND project_name= 'leo1311';
 		</sql>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-usm-310522">
+	<changeSet author="Essedum" id="2v1-usm-310522">
 		<sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">  
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'kg.expandNodeCount','Core','500',a.id FROM usm_project a WHERE name='Core';
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'kg.expandNodeCount','leo1311','500',a.id FROM usm_project a WHERE name='leo1311';
 		</sql> 
 	</changeSet>
-	<changeSet author="Leap" id="2v1-usm-310523">
+	<changeSet author="Essedum" id="2v1-usm-310523">
 		<sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">
 			INSERT INTO usm_role (description, name, permission) values ('Innovation Anchor', 'Innovation Anchor', 0);
 			INSERT INTO usm_user_project_role (portfolio_id,project_id,role_id,user_id) SELECT p.id, pr.id, r.id, '1' FROM usm_portfolio p, usm_project pr, usm_role r WHERE p.portfolio_name='Leo1311' AND pr.name='leo1311' AND r.name='Innovation Anchor';  
@@ -22,37 +22,37 @@
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'Innovation Anchor Side', 'leo1311', '{"label":"Subscriptions","icon":"folder","url":"./sandbox/subscriptions","children":[]}', a.id FROM usm_project a WHERE name='leo1311';
 		</sql> 
 	</changeSet>
-	<changeSet author="Leap" id="2v1-usm-310524">
+	<changeSet author="Essedum" id="2v1-usm-310524">
 		<sql dbms="mysql,h2,postgresql" splitStatements="true" stripComments="true">
 			UPDATE usm_constant SET item_value = '{\"label\":\"CIP Mgmt\",\"icon\":\"tasks\",\"horizontal\":true,\"children\":[{\"label\":\"Groups\",\"icon\":\"files-tasks\",\"url\":\"./aibrain/groupings\",\"children\":[]},{\"label\":\"Core Datasource\",\"icon\":\"clone\",\"url\":\"./adapters/coreDatasources\",\"children\":[]},{\"label\":\"Copy Datasets\",\"icon\":\"clipboard\",\"url\":\"./adapters/copyDatasets\",\"children\":[]},{\"label\":\"Copy Pipelines\",\"icon\":\"files-o\",\"url\":\"./aibrain/copyPipelines\",\"children\":[]},{\"label\":\"Constants\",\"icon\":\"\",\"url\":\"./aibrain/constants\",\"children\":[]},{\"label\":\"Create Specification\",\"icon\":\"\",\"url\":\"./workflows/create/specification\",\"children\":[]}]}' WHERE item_value = '{\"label\":\"CIP Mgmt\",\"icon\":\"tasks\",\"horizontal\":true,\"children\":[{\"label\":\"Groups\",\"icon\":\"files-tasks\",\"url\":\"./aibrain/groupings\",\"children\":[],\"_id\":2},{\"label\":\"Core Datasource\",\"icon\":\"clone\",\"url\":\"./aibrain/coreDatasources\",\"children\":[],\"_id\":3},{\"label\":\"Copy Datasets\",\"icon\":\"clipboard\",\"url\":\"./aibrain/copyDatasets\",\"children\":[],\"_id\":4},{\"label\":\"Copy Pipelines\",\"icon\":\"files-o\",\"url\":\"./aibrain/copyPipelines\",\"children\":[],\"_id\":5},{\"label\":\"Constants\",\"icon\":\"\",\"url\":\"./aibrain/constants\",\"children\":[],\"_id\":6},{\"label\":\"Create Specification\",\"icon\":\"\",\"url\":\"./workflows/create/specification\",\"children\":[],\"_id\":7}]}';
 		</sql>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-usm-310525">
+	<changeSet author="Essedum" id="2v1-usm-310525">
 		<sql dbms="h2,mssql" splitStatements="true" stripComments="true">
 			UPDATE usm_constant SET item_value = '{"label":"CIP Mgmt","icon":"tasks","horizontal":true,"children":[{"label":"Groups","icon":"files-tasks","url":"./aibrain/groupings","children":[]},{"label":"Core Datasource","icon":"clone","url":"./adapters/coreDatasources","children":[]},{"label":"Copy Datasets","icon":"clipboard","url":"./adapters/copyDatasets","children":[]},{"label":"Copy Pipelines","icon":"files-o","url":"./aibrain/copyPipelines","children":[]},{"label":"Constants","icon":"","url":"./aibrain/constants","children":[]},{"label":"Create Specification","icon":"","url":"./workflows/create/specification","children":[]}]}' WHERE item_value = '{"label":"CIP Mgmt","icon":"tasks","horizontal":true,"children":[{"label":"Groups","icon":"files-tasks","url":"./aibrain/groupings","children":[],"_id":2},{"label":"Core Datasource","icon":"clone","url":"./aibrain/coreDatasources","children":[],"_id":3},{"label":"Copy Datasets","icon":"clipboard","url":"./aibrain/copyDatasets","children":[],"_id":4},{"label":"Copy Pipelines","icon":"files-o","url":"./aibrain/copyPipelines","children":[],"_id":5},{"label":"Constants","icon":"","url":"./aibrain/constants","children":[],"_id":6},{"label":"Create Specification","icon":"","url":"./workflows/create/specification","children":[],"_id":7}]}';
 		</sql>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-usm-310526">
+	<changeSet author="Essedum" id="2v1-usm-310526">
 		<sql dbms="h2,mssql,mysql,postgresql" splitStatements="true" stripComments="true">
 			INSERT INTO usm_constant (item,project_name,item_value,project_id)  SELECT 'ItsmDetails','leo1311','Tickets',a.id FROM usm_project a WHERE name='leo1311';
             INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'ItsmCreate','leo1311','CreateTicket',a.id FROM usm_project a WHERE name='leo1311';
 		</sql>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-usm-310527">
+	<changeSet author="Essedum" id="2v1-usm-310527">
 		<sql dbms="h2,mssql,mysql,postgresql" splitStatements="true" stripComments="true">
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'license_notification_role','Core','1,6',a.id FROM usm_project a WHERE name='Core';
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'license_notification_role','leo1311','1,6',a.id FROM usm_project a WHERE name='leo1311';
 		</sql>
 	</changeSet>
 	
-	<changeSet author="Leap" id="2v1-usm-310530">
+	<changeSet author="Essedum" id="2v1-usm-310530">
 		<sql  splitStatements="true" stripComments="true">
 			UPDATE usm_constant SET item_value ='{"label":"Mashups","icon":"ticket","url":"./adapters/mashups"}' WHERE item_value='{"label":"ICM Mgmt","icon":"ticket","url":"./tickets/icmMapping"}' AND project_name= 'Core';
 			</sql>
 	</changeSet> 
 	
 	
-		<changeSet author="Leap" id="2v1-usm-310533">
+		<changeSet author="Essedum" id="2v1-usm-310533">
 		<sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">  		
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CAP.CreateWorkflow','leo1311','xlsx,csv,docx,image/png,zip,xaml,jpg,image/jpeg,pdf,txt,atr',a.id FROM usm_project a WHERE name='leo1311';
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CAP.OnlyExcel','leo1311','xlsx,xls',a.id FROM usm_project a WHERE name='leo1311';
@@ -66,13 +66,13 @@
 		</sql> 
 			
 	</changeSet>
-	<changeSet author="Leap" id="2v1-usm-31050037">
+	<changeSet author="Essedum" id="2v1-usm-31050037">
 		<sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension', 'leo1311', '{"allowedFileExtension":"xlsx,csv,docx,png,jpg,jpeg","allowedFileTypes":"application/xml","allowedDepth":"2"}', a.id FROM usm_project a WHERE name='leo1311';
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension', 'Core', '{"allowedFileExtension":"xlsx,csv,docx,png,jpg,jpeg","allowedFileTypes":"application/xml","allowedDepth":"2"}', a.id FROM usm_project a WHERE name='Core';
 		</sql>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-usm-310534">
+	<changeSet author="Essedum" id="2v1-usm-310534">
         <sql dbms="h2,mssql,mysql,postgresql" splitStatements="true" stripComments="true">
             INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'icm_end_user_portal_manager_inboxColumns','leo1311','[{"name":"business_key_","label":"ID"},{"name":"category","label":"Category"},{"name":"description","label":"Description"},{"name":"created_date_","label":"Created Date"},{"name":"current_assignee_","label":"Assignee"},{"name":"due_date_","label":"SLA Due Date"},{"name":"requested_by","label":"Requested By"}]',a.id FROM usm_project a WHERE name='leo1311';
             INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'icm_end_user_portal_agent_inboxColumns','leo1311','[{"name":"business_key_","label":"ID"},{"name":"category","label":"Category"},{"name":"description","label":"Description"},{"name":"created_date_","label":"Created Date"},{"name":"current_assignee_","label":"Assignee"},{"name":"due_date_","label":"SLA Due Date"}]',a.id FROM usm_project a WHERE name='leo1311';
@@ -89,14 +89,14 @@
         </sql>
     </changeSet>
     
-        <changeSet author="Leap" id="2v1-usm-310535">
+        <changeSet author="Essedum" id="2v1-usm-310535">
         <sql dbms="h2,mssql,mysql,postgresql" splitStatements="true" stripComments="true">	
 	INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.DBS.AddImage','leo1311','{"allowedFileExtension":"png,jpeg,jpg,svg","allowedFileTypes":"image/png,image/jpeg,image/jpg,image/svg+xml","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='leo1311';
 	INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.DBS.AddImage','Core','{"allowedFileExtension":"png,jpeg,jpg,svg","allowedFileTypes":"image/png,image/jpeg,image/jpg,image/svg+xml","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='Core';	
 	</sql>
     </changeSet>
     
-    <changeSet author="Leap" id="2v1-usm-310536">
+    <changeSet author="Essedum" id="2v1-usm-310536">
         <sql dbms="h2,mssql,mysql,postgresql" splitStatements="true" stripComments="true">
        
 	INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.USM.AddImage','leo1311','{"allowedFileExtension":"png,jpeg,jpg","allowedFileTypes":"image/png,image/jpeg,image/jpg","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='leo1311';	 
@@ -108,7 +108,7 @@
     </sql>
     </changeSet>
 	
-	<changeSet author="Leap" id="2v1-usm-310537">
+	<changeSet author="Essedum" id="2v1-usm-310537">
         <sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">       
          INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CCL.UploadDocument','leo1311','{"allowedFileExtension":"png,jpg,jpeg,xlsx,csv","allowedFileTypes":"image/png,image/jpeg,image/jpg,.xlsx,.csv","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='leo1311';
          INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CCL.UploadDocument','Core','{"allowedFileExtension":"png,jpg,jpeg,xlsx,csv","allowedFileTypes":"image/png,image/jpeg,image/jpg,.xlsx,.csv","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='Core';
@@ -119,7 +119,7 @@
         </sql>
      </changeSet>
      
-     <changeSet author="Leap" id="2v1-usm-310538">
+     <changeSet author="Essedum" id="2v1-usm-310538">
         <sql dbms="h2,mssql,mysql,postgresql" splitStatements="true" stripComments="true">    
             INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CFM.UploadSvg','leo1311','{"allowedFileExtension":"svg","allowedFileTypes":"image/svg+xml","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='leo1311';
             INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CFM.UploadSvg','Core','{"allowedFileExtension":"svg","allowedFileTypes":"image/svg+xml","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='Core';    
@@ -134,13 +134,13 @@
         </sql>
     </changeSet>
 
-	<changeSet author="Leap" id="2v1-usm-310539">
+	<changeSet author="Essedum" id="2v1-usm-310539">
         <sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">       
          INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CIP.UploadFile','Core','{"allowedFileExtension":"xlsx,csv","allowedFileTypes":"csv,xlxs","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='Core';
         </sql>
     </changeSet>
 
-	<changeSet author="Leap" id="2v1-usm-310540">
+	<changeSet author="Essedum" id="2v1-usm-310540">
         <sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">       
          INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CIP.EditProject','leo1311','{"allowedFileExtension":"png,jpg,jpeg","allowedFileTypes":"image/png,image/jpeg,image/jpg","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='leo1311';
          INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CIP.EditProject','Core','{"allowedFileExtension":"png,jpg,jpeg","allowedFileTypes":"image/png,image/jpeg,image/jpg","allowedDepth":"0"}',a.id FROM usm_project a WHERE name='Core';
@@ -150,7 +150,7 @@
         </sql>
      </changeSet>
           
-     <changeSet author="Leap" id="2v1-usm-310541">
+     <changeSet author="Essedum" id="2v1-usm-310541">
         <sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">       
          INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'icip.logging.http.enabled','Core','false',a.id FROM usm_project a WHERE name='Core';		
         </sql>

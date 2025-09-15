@@ -1,0 +1,419 @@
+<!-- 
+
+
+<div class="col-md-12 selector-675-1">
+    <div *ngIf="!showCreate" class="selector-675-2">
+      <div class="clearfix selector-675-3">
+        <div class="selector-675-4">
+          <h2 class="ams_h2 h2Mar selector-675-5">Role-Role Mapping list</h2>
+          <div class="ams_toptoolbar selector-675-6">
+            <i class="fa fa-plus-square-o create-icon-color selector-675-7" *ngIf="createFlag" (click)="createView()" aria-hidden="true"></i>
+            <span style="cursor: pointer" *ngIf="createFlag" (click)="createView()" class="selector-675-8">Create Role-Role Mapping</span>
+          </div>
+          
+          <app-aip-filter-roles
+            [filterOptions]="filterOptions"
+            [selectedFilterValues]="selectedFilterValues"
+            (filterSelected)="onFilterSelected($event)"
+            (filterStatusChange)="onFilterStatusChange($event)">
+          </app-aip-filter-roles>
+          
+          <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-675-9 filterStyle" *ngIf="!isFilterExpanded">
+            <h3 class="clearfix selector-675-10">
+              <div class="search-container ams_cusSrch pull-left selector-675-11">
+                <input style="color: black;" #myInput="" type="text" placeholder="Search By Child Role" (keypress)="checkEnterPressed($event, myInput.value)" class="selector-675-12" />
+                <button type="button" (click)="filterItem(myInput.value)" class="selector-675-13">
+                  <i class="searchIcon selector-675-14"></i>
+                </button>
+              </div>
+              <a href="javascript:void(0)" class="paddLeft selector-675-15">Filter</a>
+            </h3>
+            <div class="ams_panelCnt formRow relative selector-675-16 labelsAlign">
+              <div class="row rwMAr selector-675-17">
+              
+                <div class="col-md-6 select-style selector-675-24">
+                  <mat-form-field style="width: 85%" class="selector-675-25">
+                    <label class="formLabel selector-675-26" style="padding-bottom: 2vh;">Child Role</label>
+                    <mat-select [disabled]="view" class="customSelect selector-675-27" [compareWith]="compareObjects" [ngModelOptions]="{ standalone: true }" [(ngModel)]="filterroletorole">
+                      <mat-option value="All" selected="" class="selector-675-28" matTooltip="All">All</mat-option>
+                      <mat-option *ngFor="let item of roletorolearray; trackBy: trackByMethod" [value]="item" class="selector-675-29" [matTooltip]="item.name">
+                        {{ item.name }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="ams_panelFooter selector-675-30" style="text-align: right;">
+                <button type="button" class="genBtn marRght30 selector-675-31" (click)="Search()">Submit</button>
+                <button type="button" class="secBtn selector-675-32" (click)="Clear()">Clear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <div class="selector-675-33">
+          <div class="ams_panelCnt formRow relative selector-675-34">
+            <div style="float: right; cursor: pointer" class="selector-675-35">
+              <i class="fa fa-list-ul fa-lg icon1 selector-675-36" aria-hidden="true" matTooltip="Table View" (click)="showList = true"></i>
+              <i class="fa fa-th-large fa-lg icon1 selector-675-37" aria-hidden="true" matTooltip="Card View" (click)="showList = false"></i>
+            </div>
+            <br class="selector-675-38" />
+            <br class="selector-675-39" />
+        
+            <div class="row selector-675-40" *ngIf="!showList &amp;&amp; roletorolemappinglist.length >= 0">
+      
+              <div class="col-md-6 selector-675-41" *ngFor="
+                  let roletoroleitem of roletorolemappinglist | paginate: { itemsPerPage: 6, currentPage: p };
+                  trackBy: trackByMethod
+                ">
+                <div class="ams_cardCtr ams_cardfooterCtr selector-675-42">
+                  <div class="ams_cardBorder clearfix selector-675-43">
+                    <h4 class="td-ellipsis selector-675-44" [matTooltip]="roletoroleitem.parentRoleId.name" [matTooltipDisabled]="roletoroleitem.parentRoleId.name == null" matTooltipClass="crud-tooltip">
+                      {{ roletoroleitem.parentRoleId.name }}
+                    </h4>
+                    <div class="ams_cardCnt selector-675-45">
+                      <div class="row rwMAr selector-675-46">
+                        <div class="col-md-6 selector-675-47">
+                          <label class="formLabel selector-675-48">ID</label>
+                          <span class="formSpan selector-675-49">{{ roletoroleitem.id }}</span>
+                        </div>
+                        <div class="col-md-6 selector-675-50">
+                          <label class="formLabel selector-675-51">Parent Role</label>
+                          <span class="formSpan selector-675-52" [matTooltip]="roletoroleitem.parentRoleId.name" [matTooltipDisabled]="roletoroleitem.parentRoleId.name == null" matTooltipClass="crud-tooltip">{{ roletoroleitem.parentRoleId.name }}</span>
+                        </div>
+                      </div>
+                      <div class="row rwMAr selector-675-53">
+                        <div class="col-md-6 selector-675-54">
+                          <label class="formLabel selector-675-55">Child Role</label>
+                          <span class="formSpan selector-675-56" [matTooltip]="roletoroleitem.childRoleId.name" [matTooltipDisabled]="roletoroleitem.childRoleId.name == null" matTooltipClass="crud-tooltip">{{ roletoroleitem.childRoleId.name }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="selector-675-60">
+                    <div class="selector-675-61">
+                      <div class="ams_cardfooter text-center selector-675-62">
+                        <i class="fa fa-info-circle fa-lg create-icon-color selector-675-63" aria-hidden="true" matTooltip="View Role-Role Mapping" *ngIf="viewFlag" (click)="view_Usertouser(roletoroleitem)" style="padding-right: 2%"></i>
+                        <i class="fa fa-pencil fa-lg create-icon-color selector-675-64" aria-hidden="true" matTooltip="Edit Role-Role Mapping" *ngIf="editFlag" (click)="edit_Usertouser(roletoroleitem)" style="padding-right: 2%"></i>
+                        <i class="fa fa-trash fa-lg create-icon-color selector-675-65" aria-hidden="true" (click)="showDeleteDialog(roletoroleitem)" *ngIf="deleteFlag" matTooltip="Delete Role-Role Mapping"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-12 selector-675-66" id="noRecordsMsg">
+                <pagination-controls (pageChange)="p = $event" class="selector-675-67"></pagination-controls>
+              </div>
+            </div>
+            <div class="ContentSideSections Implementation selector-675-68" style="padding: 1%" *ngIf="showList &amp;&amp; roletorolemappinglist.length >= 0">
+              <mat-card appearance="outlined" class="selector-675-69">
+                <mat-card-content class="selector-675-70">
+                  <div class="table-responsive selector-675-71">
+                    <table aria-label="" mat-table="" [dataSource]="roletorolelistcopy" class="table table-hover list-table selector-675-72">
+                      <ng-container matColumnDef="id" class="selector-675-73">
+                        <th mat-header-cell="" *matHeaderCellDef="" class="number-col selector-675-74">
+                          <strong class="selector-675-75">Id</strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task" class="number-col selector-675-76">
+                          <div class="td-span td-padding td-ellipsis pull-right  selector-675-77" [matTooltip]="task.id" [matTooltipDisabled]="task.id == null" matTooltipClass="crud-tooltip">
+                            {{ task.id }}
+                          </div>
+                        </td>
+                      </ng-container>
+                      <ng-container matColumnDef="role" class="selector-675-78">
+                        <th mat-header-cell="" *matHeaderCellDef="" class="selector-675-79">
+                          <strong class="selector-675-80">Parent Role</strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task" class="selector-675-81">
+                          <div class="td-span td-padding td-ellipsis pull-left  selector-675-82" [matTooltip]="task.parentRoleId.name" [matTooltipDisabled]="task.parentRoleId.name == null" matTooltipClass="crud-tooltip">
+                            {{ task.parentRoleId.name }}
+                          </div>
+                        </td>
+                      </ng-container>
+                      <ng-container matColumnDef="module" class="selector-675-83">
+                        <th mat-header-cell="" *matHeaderCellDef="" class="selector-675-84">
+                          <strong class="selector-675-85">Child Role</strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task" class="selector-675-86">
+                          <div class="td-span td-padding td-ellipsis pull-left  selector-675-87" [matTooltip]="task.childRoleId.name" [matTooltipDisabled]="task.childRoleId.name == null" matTooltipClass="crud-tooltip">
+                            {{ task.childRoleId.name }}
+                          </div>
+                        </td>
+                      </ng-container>
+  
+                      <ng-container matColumnDef="actions" class="selector-675-93">
+                        <th mat-header-cell="" *matHeaderCellDef="" class="actions-col selector-675-94">
+                          <strong class="selector-675-95"> Actions </strong>
+                        </th>
+                        <td mat-cell="" *matCellDef="let task" class="actions-col selector-675-96" style="padding-top: 1em !important;">
+                          <i class="fa fa-info-circle fa-lg create-icon-color selector-675-97" aria-hidden="true" matTooltip="View Role-Role Mapping" *ngIf="viewFlag" (click)="view_Usertouser(task)" style="padding-right: 2%"></i>
+                          <i class="fa fa-pencil fa-lg create-icon-color selector-675-98" aria-hidden="true" matTooltip="Edit Role-Role Mapping" *ngIf="editFlag" (click)="edit_Usertouser(task)" style="padding-right: 2%"></i>
+                          <i class="fa fa-trash fa-lg create-icon-color selector-675-99" aria-hidden="true" (click)="showDeleteDialog(task)" *ngIf="deleteFlag" matTooltip="Delete Role-Role Mapping"></i>
+                        </td>
+                      </ng-container>
+  
+                      <tr mat-header-row="" *matHeaderRowDef="displayedColumns" class="selector-675-100"></tr>
+                      <tr mat-row="" *matRowDef="let row; columns: displayedColumns" class="selector-675-101"></tr>
+                    </table>
+                    <mat-paginator [pageSize]="6" showFirstLastButtons="" class="selector-675-102"></mat-paginator>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+  
+            <div *ngIf="roletorolemappinglist.length == 0" id="noRecordsMsg" class="selector-675-103">No Records Found</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div *ngIf="showCreate" #RoletoRoleForm="ngForm" class="selector-675-104" ngForm="">
+      <div class="padTop20 selector-675-105">
+        <div>
+          <div class="backIconcrud">
+        <span class="ams_back pull-right linkMar selector-675-106" (click)="listView()">Back to Role-Role Mapping</span>
+        <i class="fa fa-caret-square-o-left create-icon-color pull-right linkMar selector-675-107" (click)="listView()" aria-hidden="true"></i>
+        </div>
+        <div class="selector-675-108">
+          <span class="ams_back pull-right linkMar selector-675-109" style="cursor: pointer" *ngIf="edit &amp;&amp; view &amp;&amp; editFlag" (click)="view = false; buttonFlag = false">Edit Role-Role Mapping</span>
+  
+          <i class="fa fa-pencil-square-o create-icon-color pull-right linkMar selector-675-110" style="cursor: pointer" *ngIf="view &amp;&amp; editFlag" (click)="view = false; buttonFlag = false" aria-hidden="true"></i>
+          <span class="ams-back pull-right linkMar selector-675-111" style="cursor: pointer" *ngIf="edit &amp;&amp; !view &amp;&amp; viewUsertouser" (click)="view = true; buttonFlag = true">View Role-Role Mapping</span>
+          <i class="fa fa-eye create-icon-color pull-right linkMar selector-675-112" style="cursor: pointer" *ngIf="edit &amp;&amp; !view &amp;&amp; viewUsertouser" (click)="view = true; buttonFlag = true" aria-hidden="true"></i>
+        </div>
+        </div>
+        <h4 class="ams_h2 h2Mar crud-header selector-675-113" style="padding-left: 11%" *ngIf="!edit">Create Role-Role Mapping</h4>
+        <h4 class="ams_h2 h2Mar crud-header selector-675-114" [ngStyle]="{ 'padding-left': edit &amp;&amp; !view &amp;&amp; viewUsertouser ? '19%' : '5%' }" *ngIf="edit &amp;&amp; !view">
+          Edit Role-Role Mapping
+        </h4>
+        <h4 class="ams_h2 h2Mar crud-header selector-675-115" style="padding-left: 19%" *ngIf="edit &amp;&amp; view">View Role-Role Mapping</h4>
+        <div class="noPad selector-675-116">
+          <div class="selector-675-117">
+            <div class="row rwMAr selector-675-118">
+              <div style="margin-top: 15px" class="col-md-6 select-style selector-675-124" *ngIf="!edit &amp;&amp; !view">
+                <mat-form-field style="width: 85%" class="selector-675-125">
+                  <label class="formLabel selector-675-126"> Role* </label>
+                  <mat-select multiple="" [disabled]="view" [compareWith]="compareObjects" [ngModelOptions]="{ standalone: true }" [(ngModel)]="roletoroleitem.childRoleId" required="" class="selector-675-127" >
+                    <mat-option *ngFor="let item of roletorolearray; trackBy: trackByMethod" [value]="item" class="selector-675-128" [matTooltip]="item.name">
+                      {{ item.name }} </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div style="margin-top: 15px" class="col-md-6 select-style selector-675-129" *ngIf="edit || view">
+                <mat-form-field style="width: 85%" class="selector-675-130">
+                  <label class="formLabel selector-675-131"> Role* </label>
+                  <mat-select [disabled]="view" [compareWith]="compareObjects" [ngModelOptions]="{ standalone: true }" [(ngModel)]="roletoroleitem.childRoleId" required="" class="selector-675-132" >
+                    <mat-option *ngFor="let item of roletorolearray; trackBy: trackByMethod" [value]="item" class="selector-675-133" [matTooltip]="item.name">
+                      {{ item.name }} </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>           
+            </div>
+          </div>
+        </div>
+        <div id="btnMargin" style="margin-top: 95px" class="selector-675-134">
+          <button *ngIf="!edit &amp;&amp; !buttonFlag" [ngBusy]="{ busy: busy, message: 'Saving Role-Role Mapping...' }" type="button" class="genBtn marRght30 selector-675-135" (click)="onSave()" [disabled]="!RoletoRoleForm.form.valid">
+            Save
+          </button>
+          <button *ngIf="edit &amp;&amp; !buttonFlag" [ngBusy]="{ busy: busy, message: 'Updating Role-Role Mapping...' }" type="button" class="genBtn marRght30 selector-675-136" (click)="onSave()" [disabled]="!RoletoRoleForm.form.valid">
+            Update
+          </button>
+          <button *ngIf="!buttonFlag" type="button" class="secBtn selector-675-137" (click)="clearWave()">Clear</button>
+        </div>
+        <div *ngIf="errorMessage" class="selector-675-138">
+          <h4 class="ams_h2 h2Mar crud-header selector-675-139" *ngIf="errorMessage">Duplicate Mappings</h4>
+          <div class="table-responsive selector-675-140">
+            <table aria-label="" mat-table="" [dataSource]="existingUsertouserlist" class="table table-hover list-table selector-675-141">
+              <ng-container matColumnDef="name" class="selector-675-142">
+                <th mat-header-cell="" *matHeaderCellDef="" class="selector-675-143">
+                  <strong class="selector-675-144"> Parent Role </strong>
+                </th>
+                <td mat-cell="" *matCellDef="let task" class="selector-675-145">{{ task.parentRoleId.name }}</td></ng-container>
+  
+              <ng-container matColumnDef="description" class="selector-675-146">
+                <th mat-header-cell="" *matHeaderCellDef="" class="selector-675-147">
+                  <strong class="selector-675-148"> Child Role</strong>
+                </th>
+                <td mat-cell="" *matCellDef="let task" class="selector-675-149">{{ task.childRoleId.name }}</td>
+              </ng-container>
+              <tr mat-header-row="" *matHeaderRowDef="displayColumns" class="selector-675-154"></tr>
+              <tr mat-row="" *matRowDef="let row; columns: displayColumns" class="selector-675-155"></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+   -->
+
+
+<!-- NEW LAYOUT -->
+   <div>
+  <div class="aip-container lfx-u-pad-lr-30">
+    <!-- Header -->
+           <div *ngIf="!showCreate" >
+
+    <app-aip-header [cardTitle]="'Role-Role Mapping List'" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createFlag"
+      (search)="Search()" (refresh)="Refresh()" (add)="createView()">
+    </app-aip-header>
+    <div>
+      <div class="aip-container lfx-u-pad-lr-30">
+         
+          <app-aip-filter-roles
+                    [componentName]="'role-role'"
+            [filterOptions]="filterOptions"
+            [selectedFilterValues]="selectedFilterValues"
+            (filterSelected)="onFilterSelected($event)"
+            (filterStatusChange)="onFilterStatusChange($event)">
+          </app-aip-filter-roles>
+        <!-- Table Layout  -->
+        <div  class="table-card">
+          <div class="table-scroll-container">
+            <table class="styled-table" *ngIf="roletorolemappinglist.length; else noData">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>ID</th>
+                  <th>Parent Role</th>
+                  <th>Child Role</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let roletoroleitem of pagedRoles; let i = index">
+                  <td>{{page * rowsPerPage + i + 1}}</td>
+                  <td (click)="onView(roletoroleitem)" style="color: #0094ff; cursor: pointer;">{{ roletoroleitem.id }}</td>
+                  <td>{{ roletoroleitem.parentRoleId.name || '-' }}</td>
+                  <td>{{ roletoroleitem.childRoleId.name || '-' }}</td>
+                  <td>
+                    <i class="fa fa-info-circle fa-lg  header-action-icon" aria-hidden="true" 
+                      matTooltip="View" *ngIf="viewFlag" (click)="view_Usertouser(roletoroleitem)"></i>
+                    <i class="fa fa-pencil fa-lg  header-action-icon" aria-hidden="true" 
+                      matTooltip="Edit" *ngIf="editFlag && roletoroleitem.parentRoleId.id != 6 && roletoroleitem.childRoleId.id != 6" 
+                      (click)="edit_Usertouser(roletoroleitem)" style="padding-left: 5px"></i>
+                    <i class="fa fa-trash fa-lg header-action-icon" aria-hidden="true" 
+                      style="padding-left: 5px" matTooltip="Delete" 
+                      *ngIf="deleteFlag && roletoroleitem.parentRoleId.id != 6 && roletoroleitem.childRoleId.id != 6" 
+                      (click)="showDeleteDialog(roletoroleitem)"></i>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <ng-template #noData>
+              <div class="no-data">No data available</div>
+            </ng-template>
+          </div>
+          
+          <!-- Pagination -->
+          <div *ngIf="roletorolemappinglist.length > 0" class="pagination-wrapper d-flex justify-content-end">
+            <ul class="custom-pagination">
+              <li class="custom-pagination-arrow" [class.disabled]="page === 0" (click)="navigatePage('Prev')">
+                <span>&lsaquo;</span>
+              </li>
+
+              <li *ngFor="let p of getPageNumbers()" class="custom-pagination-number" [class.active]="p === page"
+                (click)="changePage(p)">
+                <span>{{ p + 1 }}</span>
+              </li>
+
+              <li class="custom-pagination-arrow" [class.disabled]="page === lastPage" (click)="navigatePage('Next')">
+                <span>&rsaquo;</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        </div>
+        </div>
+        </div>
+        </div>
+        <div *ngIf="showCreate" #RoletoRoleForm="ngForm" class="selector-675-104" ngForm="">
+                <div class="aip-container lfx-u-pad-lr-30">
+
+      <div class="padTop20 selector-675-105">
+        <div>
+ 
+                    <div class="align-items-center d-flex">
+                <span  style="cursor: pointer; margin-right: 10px;">
+                    <mat-icon class="back-icon" (click)="BackToListView()"
+                        [ngStyle]="{'color': isBackHovered ? '#0094ff' : '#0a142f'}" matTooltip="Back to Project List"
+                        matTooltipPosition="above" (mouseenter)="isBackHovered = true"
+                        (mouseleave)="isBackHovered = false">arrow_back</mat-icon>
+                </span>
+                     <h2 class="header-title lfx-u-mar-l-8" style="font-family: 'Roboto', 'Segoe UI', sans-serif;" *ngIf="!edit">Create Role</h2>
+                <h2 class="header-title lfx-u-mar-l-8" style="font-family: 'Roboto', 'Segoe UI', sans-serif;" *ngIf="edit &amp;&amp; !view">Edit Role</h2>
+                <h2 class="header-title lfx-u-mar-l-8" style="font-family: 'Roboto', 'Segoe UI', sans-serif;" *ngIf="edit &amp;&amp; view">View Role</h2>
+            </div>
+
+        </div>
+        <!-- <h4 class="ams_h2 h2Mar crud-header selector-675-113" style="padding-left: 11%" *ngIf="!edit">Create Role-Role Mapping</h4>
+        <h4 class="ams_h2 h2Mar crud-header selector-675-114" [ngStyle]="{ 'padding-left': edit &amp;&amp; !view &amp;&amp; viewUsertouser ? '19%' : '5%' }" *ngIf="edit &amp;&amp; !view">
+          Edit Role-Role Mapping
+        </h4>
+        <h4 class="ams_h2 h2Mar crud-header selector-675-115" style="padding-left: 19%" *ngIf="edit &amp;&amp; view">View Role-Role Mapping</h4> -->
+        
+        <!-- Form Content Card -->
+        <mat-card class="form-card">
+          <mat-card-content>
+        <div class="noPad selector-675-116">
+          <div class="selector-675-117">
+            <div class="row rwMAr selector-675-118">
+              <div style="margin-top: 15px" class="col-md-6 select-style selector-675-124" *ngIf="!edit &amp;&amp; !view">
+                <mat-form-field style="width: 85%" class="selector-675-125">
+                  <label class="formLabel selector-675-126"> Role* </label>
+                  <mat-select multiple="" [disabled]="view" [compareWith]="compareObjects" [ngModelOptions]="{ standalone: true }" [(ngModel)]="roletoroleitem.childRoleId" required="" class="selector-675-127" >
+                    <mat-option *ngFor="let item of roletorolearray; trackBy: trackByMethod" [value]="item" class="selector-675-128" [matTooltip]="item.name">
+                      {{ item.name }} </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div style="margin-top: 15px" class="col-md-6 select-style selector-675-129" *ngIf="edit || view">
+                <mat-form-field style="width: 85%" class="selector-675-130">
+                  <label class="formLabel selector-675-131"> Role* </label>
+                  <mat-select [disabled]="view" [compareWith]="compareObjects" [ngModelOptions]="{ standalone: true }" [(ngModel)]="roletoroleitem.childRoleId" required="" class="selector-675-132" >
+                    <mat-option *ngFor="let item of roletorolearray; trackBy: trackByMethod" [value]="item" class="selector-675-133" [matTooltip]="item.name">
+                      {{ item.name }} </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>           
+            </div>
+          </div>
+        </div>
+          </mat-card-content>
+        </mat-card>
+        
+        <div id="btnMargin" class="dialog-buttons" style="text-align: right;">
+          <button *ngIf="!edit &amp;&amp; !buttonFlag" [ngBusy]="{ busy: busy, message: 'Saving Role-Role Mapping...' }" type="button" mat-raised-button class="save-btn" (click)="onSave()" [disabled]="!RoletoRoleForm.form.valid" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">
+            Save
+          </button>
+          <button *ngIf="edit &amp;&amp; !buttonFlag" [ngBusy]="{ busy: busy, message: 'Updating Role-Role Mapping...' }" type="button" mat-raised-button class="save-btn" (click)="onSave()" [disabled]="!RoletoRoleForm.form.valid" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">
+            Update
+          </button>
+          <button *ngIf="!buttonFlag" type="button" mat-raised-button class="cancel-btn" (click)="clearWave()" style="font-family: 'Roboto', 'Segoe UI', sans-serif;">Clear</button>
+        </div>
+        <div *ngIf="errorMessage" class="selector-675-138">
+          <h4 class="ams_h2 h2Mar crud-header selector-675-139" *ngIf="errorMessage">Duplicate Mappings</h4>
+          <div class="table-responsive selector-675-140">
+            <table aria-label="" mat-table="" [dataSource]="existingUsertouserlist" class="table table-hover list-table selector-675-141">
+              <ng-container matColumnDef="name" class="selector-675-142">
+                <th mat-header-cell="" *matHeaderCellDef="" class="selector-675-143">
+                  <strong class="selector-675-144"> Parent Role </strong>
+                </th>
+                <td mat-cell="" *matCellDef="let task" class="selector-675-145">{{ task.parentRoleId.name }}</td></ng-container>
+  
+              <ng-container matColumnDef="description" class="selector-675-146">
+                <th mat-header-cell="" *matHeaderCellDef="" class="selector-675-147">
+                  <strong class="selector-675-148"> Child Role</strong>
+                </th>
+                <td mat-cell="" *matCellDef="let task" class="selector-675-149">{{ task.childRoleId.name }}</td>
+              </ng-container>
+              <tr mat-header-row="" *matHeaderRowDef="displayColumns" class="selector-675-154"></tr>
+              <tr mat-row="" *matRowDef="let row; columns: displayColumns" class="selector-675-155"></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+   
+  </div>
+  

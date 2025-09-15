@@ -29,7 +29,7 @@
 	<property name="timestamp-type" value="timestamp" dbms="mysql" />
 	<property name="timestamp-type" value="TIMESTAMP" dbms="h2" />
 
-	<changeSet author="Leap (generated)" id="1310v0-bjm-9">
+	<changeSet author="Essedum (generated)" id="1310v0-bjm-9">
 		<validCheckSum>any</validCheckSum>
                 <preConditions onFail="MARK_RAN">
                    <not>
@@ -61,7 +61,7 @@
 			</column>
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1310v0-bjm-10">
+	<changeSet author="Essedum (generated)" id="1310v0-bjm-10">
 		<validCheckSum>any</validCheckSum>
                 <preConditions onFail="MARK_RAN">
                    <not>
@@ -93,7 +93,7 @@
 			</column>
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1310v0-bjm-11">
+	<changeSet author="Essedum (generated)" id="1310v0-bjm-11">
 		<validCheckSum>any</validCheckSum>
                 <preConditions onFail="MARK_RAN">
                    <not>
@@ -135,7 +135,7 @@
 			</column>
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1310v0-bjm-12">
+	<changeSet author="Essedum (generated)" id="1310v0-bjm-12">
 		<validCheckSum>any</validCheckSum>
                 <preConditions onFail="MARK_RAN">
                    <not>
@@ -207,7 +207,7 @@
 			</column>
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1310v0-bjm-13">
+	<changeSet author="Essedum (generated)" id="1310v0-bjm-13">
 		<validCheckSum>any</validCheckSum>
                 <preConditions onFail="MARK_RAN">
                    <not>
@@ -241,7 +241,7 @@
 			</column>
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1310v0-bjm-14" dbms="!postgresql">
+	<changeSet author="Essedum (generated)" id="1310v0-bjm-14" dbms="!postgresql">
 		<validCheckSum>any</validCheckSum>
                 <preConditions onFail="MARK_RAN">
                    <not>
@@ -266,7 +266,7 @@
 		</createTable>
 	</changeSet>
 	<!-- for postgres database -->
-	<changeSet author="Leap (generated)" id="1310v0-bjm-14" dbms="postgresql">
+	<changeSet author="Essedum (generated)" id="1310v0-bjm-14" dbms="postgresql">
 		<validCheckSum>any</validCheckSum>
                 <preConditions onFail="MARK_RAN">
                    <not>
@@ -290,7 +290,7 @@
 			<column name="tag3" type="VARCHAR(45)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1310v0-bjm-15">
+	<changeSet author="Essedum (generated)" id="1310v0-bjm-15">
 		<validCheckSum>any</validCheckSum>
                 <preConditions onFail="MARK_RAN">
                    <not>
@@ -320,7 +320,7 @@
 			<column name="type" type="VARCHAR(255)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1310v0-bjm-16">
+	<changeSet author="Essedum (generated)" id="1310v0-bjm-16">
 		<validCheckSum>any</validCheckSum>
                 <preConditions onFail="MARK_RAN">
                    <not>
@@ -395,7 +395,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap (generated)" id="1310v0-bjm-17">
+	<changeSet author="Essedum (generated)" id="1310v0-bjm-17">
 		<validCheckSum>any</validCheckSum>
                 <preConditions onFail="MARK_RAN">
                    <not>
@@ -436,7 +436,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap (generated)" id="1310v0-bjm-18">
+	<changeSet author="Essedum (generated)" id="1310v0-bjm-18">
 		<validCheckSum>any</validCheckSum>
                 <preConditions onFail="MARK_RAN">
                    <not>

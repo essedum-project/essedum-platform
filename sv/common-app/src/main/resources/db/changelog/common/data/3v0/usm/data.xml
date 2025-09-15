@@ -1,6 +1,6 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-   <!-- <changeSet author="Leap (generated)" id="3v0-usm-100">
+   <!-- <changeSet author="Essedum (generated)" id="3v0-usm-100">
 	<sql dbms="mssql">
 			SET IDENTITY_INSERT usm_portfolio ON;
 		</sql>	
@@ -14,7 +14,7 @@
 			SET IDENTITY_INSERT usm_portfolio OFF;
 		</sql>	
     </changeSet>
-    <changeSet author="Leap (generated)" id="3v0-usm-101">
+    <changeSet author="Essedum (generated)" id="3v0-usm-101">
 	  <sql dbms="mssql">
 			SET IDENTITY_INSERT usm_project ON;
 		</sql>
@@ -40,16 +40,16 @@
 			SET IDENTITY_INSERT usm_project OFF;
 		</sql>
     </changeSet> -->
-    <changeSet author="Leap" id="3v0-usm-102">
+    <changeSet author="Essedum" id="3v0-usm-102">
 		<sql dbms="h2, mysql,mssql, postgresql" splitStatements="true" stripComments="true">
            UPDATE usm_constant SET item_value='{"label":"AI Brain","icon":"assets/icons/digital-ai-brain.svg","children":[{"label":"Connections","icon":"","url":"./aip/connections","children":[],"_id":2},{"label":"Datasets","icon":"","url":"./aip/datasets","children":[],"_id":3},{"label":"Pipelines","icon":"","url":"./aip/pipelines","children":[],"_id":4},{"label":"Chains","icon":"","url":"./aip/chain-list","children":[],"_id":5},{"label":"Models","icon":"","url":"./aip/models","children":[],"_id":6},{"label":"Endpoints","icon":"","url":"./aip/endpoints","children":[],"_id":7},{"label":"Apps","icon":"cube","url":"./aip/app-list","children":[],"_id":8},{"label":"Adapters","icon":"","url":"","children":[{"label":"SpecTemplates","icon":"","url":"./aip/spectemplates","children":[],"_id":10},{"label":"Adapters","icon":"","url":"./aip/adapters/","children":[],"_id":11},{"label":"Instances","icon":"","url":"./aip/instances","children":[],"_id":12}],"_id":9},{"label":"Data Models","icon":"","url":"./adapters/schemas","children":[{"label":"Schemas","icon":"","url":"./aip/schemas","children":[],"_id":14},{"label":"Relationships","icon":"","url":"./aip/relationship","children":[],"_id":15}],"_id":13},{"label":"Job Management","icon":"","url":"","children":[{"label":"Events","icon":"","url":"./aip/events","children":[],"_id":17},{"label":"Grouped Jobs","icon":"","url":"./aip/chains","children":[],"_id":26},{"label":"Schedule","icon":"","url":"./aip/scheduler","children":[],"_id":18},{"label":"Logs","icon":"","url":"./aip/jobs-log","children":[],"_id":19},{ "label": "Remote Job Management", "icon": "", "url": "./aip/remote-console", "children": [], "_id": 27 }],"_id":16}],"horizontal":true}' WHERE item='IT Portfolio Manager Side' AND project_name='leo1311' AND item_value LIKE '%{"label":"AI Brain","icon":"assets/icons/digital-ai-brain.svg"%';         </sql> 	
     </changeSet>
-	<changeSet author="Leap" id="3v0-usm-103">
+	<changeSet author="Essedum" id="3v0-usm-103">
 		<sql dbms="h2, mysql,mssql, postgresql" splitStatements="true" stripComments="true"> 
          UPDATE usm_constant SET item_value='{"label":"Mashups","icon":"ticket","url":"./aibrain/adapters/mashups"}' WHERE item='Admin Side' AND project_name='Core' AND item_value LIKE '%{"label":"Mashups","icon":"ticket","url":"./adapters/mashups"}%';
         </sql> 
 	</changeSet>
-	<changeSet author="Leap" id="3v0-usm-310549">
+	<changeSet author="Essedum" id="3v0-usm-310549">
 		<sql dbms="h2, mysql" splitStatements="true" stripComments="true">  
             INSERT INTO usm_constant VALUES ("1569","Admin Side","Core","{\"label\":\"Menu Configuration\",\"icon\":\"map-signs\",\"url\":\"./iamp-usm/dashconstant/side\"}","1")
 		</sql>
@@ -57,7 +57,7 @@
             INSERT INTO usm_constant VALUES ('1569','Admin Side','Core','{"label":"Menu Configuration","icon":"map-signs","url":"./iamp-usm/dashconstant/side"}','1')
 		</sql>
 	</changeSet>
-	 <changeSet author="Leap (generated)" id="3v0-usm-310549-1">
+	 <changeSet author="Essedum (generated)" id="3v0-usm-310549-1">
         <sql dbms="mssql">
             SET IDENTITY_INSERT usm_constant ON;
         </sql>
@@ -68,109 +68,109 @@
             SET IDENTITY_INSERT usm_constant OFF;		
         </sql>
     </changeSet>
-	<changeSet author="Leap" id="3v0-usm-104">
+	<changeSet author="Essedum" id="3v0-usm-104">
 		<sql dbms="h2, mysql,mssql, postgresql" splitStatements="true" stripComments="true">  
          UPDATE usm_constant SET item_value='{"label":"AI Brain","icon":"assets/icons/digital-ai-brain.svg","children":[{"label":"Connections","icon":"","url":"./aip/connections","children":[],"_id":2},{"label":"Datasets","icon":"","url":"./aip/datasets","children":[],"_id":3},{"label":"Pipelines","icon":"","url":"./aip/pipelines","children":[],"_id":4},{"label":"Chains","icon":"","url":"./aip/chain-list","children":[],"_id":5},{"label":"Models","icon":"","url":"./aip/models","children":[],"_id":6},{"label":"Endpoints","icon":"","url":"./aip/endpoints","children":[],"_id":7},{"label":"Apps","icon":"cube","url":"./aip/app-list","children":[],"_id":8},{"label":"Adapters","icon":"","url":"","children":[{"label":"SpecTemplates","icon":"","url":"./aip/spectemplates","children":[],"_id":10},{"label":"Adapters","icon":"","url":"./aip/adapters/","children":[],"_id":11},{"label":"Instances","icon":"","url":"./aip/instances","children":[],"_id":12}],"_id":9},{"label":"Data Models","icon":"","url":"./adapters/schemas","children":[{"label":"Schemas","icon":"","url":"./aip/schemas","children":[],"_id":14},{"label":"Relationships","icon":"","url":"./aip/relationship","children":[],"_id":15}],"_id":13},{"label":"Job Management","icon":"","url":"","children":[{"label":"Events","icon":"","url":"./aip/events","children":[],"_id":17},{"label":"Grouped Jobs","icon":"","url":"./aip/chains","children":[],"_id":26},{"label":"Schedule","icon":"","url":"./aip/scheduler","children":[],"_id":18},{"label":"Logs","icon":"","url":"./aip/jobs-log","children":[],"_id":19}, { "label": "Remote Job Management", "icon": "", "url": "./aip/remote-console", "children": [], "_id": 27 }],"_id":16}],"horizontal":true}' WHERE item='Project Client Side' AND project_name='leo1311' AND item_value LIKE '%{"label":"AI Brain","icon":"assets/icons/digital-ai-brain.svg"%';		
          </sql>
      </changeSet>
-	<changeSet author="Leap" id="3v0-usm-105">
+	<changeSet author="Essedum" id="3v0-usm-105">
 		<sql dbms="h2, mysql,mssql, postgresql" splitStatements="true" stripComments="true">
          UPDATE usm_constant SET item_value='{"label":"CIP Mgmt","icon":"tasks","horizontal":true,"children":[{"label":"Constants","icon":"clone","url":"./aip/constants","children":[]},{"label":"Core Datasources","icon":"clone","url":"./aip/core-datasources","children":[]},{"label":"Copy Datasets","icon":"clipboard","url":"./aip/copydatasets","children":[]},{"label":"Copy Pipelines","icon":"files-o","url":"./aip/copyPipelines","children":[]},{"label":"Plugins","icon":"","url":"./aip/plugins","children":[],"_id":7},{"label":"Events","icon":"","url":"./aip/events","children":[]},{"label":"Internal Datasets","icon":"","url":"./aip/datasetTemplates","children":[]},{"label":"Internal Pipelines","icon":"","url":"./aip/templates","children":[]},{"label":"Copy CIP Modules","icon":"","url":"./aip/copyCipModules","children":[]},{"label":"Secrets Manager","icon":"","url":"./iamp-usm/secret","children":[]},{"label":"User Profile","icon":"","url":"./iamp-usm/user-profile","children":[]}]}' WHERE item='Admin Side' AND project_name='Core' AND item_value LIKE '{"label":"CIP Mgmt","icon":"tasks","horizontal":true%';          </sql> 
 	</changeSet>
 	
-	<changeSet author="Leap" id="3v0-usm-106">
+	<changeSet author="Essedum" id="3v0-usm-106">
 		<sql dbms="h2, mysql,mssql, postgresql" splitStatements="true" stripComments="true">
            INSERT INTO usm_constant(item,project_name,item_value,project_id) VALUES ('icip.pipelineScript.directory','Core','/app/jobs/scripts/',1);
         </sql> 
 	</changeSet>
-	<changeSet author="Leap" id="3v0-usm-107">
+	<changeSet author="Essedum" id="3v0-usm-107">
     <sql dbms="h2, mysql,mssql, postgresql" splitStatements="true" stripComments="true">
       UPDATE usm_constant SET item_value='{"label":"AIOps","icon":"assets/icons/AI-powered-core.svg","children":[{"label":"Dashboard","icon":"dashcube","url":"./dynamicDashboard/grid/OCC/49","_id":2},{"label":"Ticket Analytics","icon":"ticket","url":"./dynamicDashboard/grid/OCC/2","_id":3},{"label":"Ticket SLA","icon":"tachometer","url":"./dynamicDashboard/grid/OCC/5","_id":4},{"label":"Ticket Clusters","icon":"object-group","url":"./dynamicDashboard/grid/OCC/3","_id":5},{"label":"Fault Predictions","icon":"tachometer","url":"./dynamicDashboard/grid/OCC/216","_id":6},{"label":"Server Anomaly","icon":"exclamation-circle","url":"./dynamicDashboard/grid/OCC/25","_id":7},{"label":"Correlation","icon":"puzzle-piece","url":"./dynamicDashboard/grid/OCC/4","_id":8},{"label":"EASE","icon":"puzzle-piece","url":"./dynamicDashboard/grid/OCC/9","_id":9},{"label":"ITSM","icon":"book","horizontal":true,"children":[{"label":"Incidents","icon":"","url":"./aip/tickets/incident","children":[],"_id":2},{"label":"Change Request","icon":"","url":"./aip/tickets/changerequests","children":[],"_id":3},{"label":"Service Request","icon":"","url":"./aip/tickets/servicerequests","children":[],"_id":4},{"label":"Tasks","icon":"","url":"./aip/tickets/tasks","children":[],"_id":5},{"label":"Upload","icon":"upload","url":"./aip/tickets/uploadTicket","children":[],"_id":6},{"label":"Tickets List","icon":"","url":"./aip/tickets/create-ticket","children":[],"_id":12},{"label":"Problem Management","icon":"book","horizontal":true,"children":[{"label":"SOP","icon":"","url":"./aibrain/tickets/Sops-list","children":[],"_id":8},{"label":"RCA","icon":"","url":"./tickets/Rca-list","children":[],"_id":9},{"label":"Tags","icon":"","url":"./tickets/Clusters-list","children":[],"_id":10}],"_id":7},{"label":"Logs","icon":"","url":"./aip/jobs-log","children":[],"_id":11}]}],"horizontal":true}' WHERE item='IT Portfolio Manager Side' AND project_name='leo1311' AND item_value LIKE '{"label":"AIOps","icon":"assets/icons/AI-powered-core.svg"%'; 
     </sql> 
 	</changeSet>
 	
-	<changeSet author="Leap" id="3v0-usm-108">
+	<changeSet author="Essedum" id="3v0-usm-108">
 	<sql dbms="h2, mysql,mssql, postgresql" splitStatements="true" stripComments="true">
       UPDATE usm_constant SET item_value='{"label":"AIOps","icon":"assets/icons/AI-powered-core.svg","children":[{"label":"Dashboard","icon":"dashcube","url":"./dynamicDashboard/grid/OCC/49","_id":2},{"label":"Ticket Analytics","icon":"ticket","url":"./dynamicDashboard/grid/OCC/2","_id":3},{"label":"Ticket SLA","icon":"tachometer","url":"./dynamicDashboard/grid/OCC/5","_id":4},{"label":"Ticket Clusters","icon":"object-group","url":"./dynamicDashboard/grid/OCC/3","_id":5},{"label":"Fault Predictions","icon":"tachometer","url":"./dynamicDashboard/grid/OCC/216","_id":6},{"label":"Server Anomaly","icon":"exclamation-circle","url":"./dynamicDashboard/grid/OCC/25","_id":7},{"label":"Correlation","icon":"puzzle-piece","url":"./dynamicDashboard/grid/OCC/4","_id":8},{"label":"EASE","icon":"puzzle-piece","url":"./dynamicDashboard/grid/OCC/9","_id":9},{"label":"ITSM","icon":"book","horizontal":true,"children":[{"label":"Incidents","icon":"","url":"./aip/tickets/incident","children":[],"_id":2},{"label":"Change Request","icon":"","url":"./aip/tickets/changerequests","children":[],"_id":3},{"label":"Service Request","icon":"","url":"./aip/tickets/servicerequests","children":[],"_id":4},{"label":"Tasks","icon":"","url":"./aip/tickets/tasks","children":[],"_id":5},{"label":"Upload","icon":"upload","url":"./aibrain/tickets/uploadTicket","children":[],"_id":6},{"label":"Tickets List","icon":"","url":"./aip/tickets/create-ticket","children":[],"_id":12},{"label":"Problem Management","icon":"book","horizontal":true,"children":[{"label":"SOP","icon":"","url":"./aibrain/tickets/Sops-list","children":[],"_id":8},{"label":"RCA","icon":"","url":"./tickets/Rca-list","children":[],"_id":9},{"label":"Tags","icon":"","url":"./tickets/Clusters-list","children":[],"_id":10}],"_id":7},{"label":"Logs","icon":"","url":"./aibrain/jobs/logs","children":[],"_id":11}]}],"horizontal":true}' WHERE item='Project Client Side' AND project_name='leo1311' AND item_value LIKE '{"label":"AIOps","icon":"assets/icons/AI-powered-core.svg"%';       </sql> 
 	</changeSet>
 	
-	<changeSet author="Leap" id="3v0-usm-109">
+	<changeSet author="Essedum" id="3v0-usm-109">
 		<sql dbms="h2, mysql,mssql, postgresql" splitStatements="true" stripComments="true">
 		  DELETE FROM usm_constant WHERE item='Project Client Side' AND project_name='leo1311' AND item_value LIKE '{"label":"ITSM","icon":"book","horizontal":true,"children"%';
           DELETE FROM usm_constant WHERE item='IT Portfolio Manager Side' AND project_name='leo1311' AND item_value LIKE '{"label":"ITSM","icon":"book","horizontal":true,"children"%';
       </sql> 
 	</changeSet>
 
-	<changeSet author="Leap" id="3v0-usm-110">
+	<changeSet author="Essedum" id="3v0-usm-110">
 		<sql dbms="mysql" splitStatements="true" stripComments="true">
 	    insert into usm_constant (item, project_name, item_value, project_id) values('Admin Side','Core','{"label":"Tags","icon":"folder","url":"./aip/taglist"}','1');
 	</sql> 
 	</changeSet>
 
-	<changeSet author="Leap" id="3v0-usm-111">
+	<changeSet author="Essedum" id="3v0-usm-111">
 	<sql dbms="mysql" splitStatements="true" stripComments="true">
 	    UPDATE usm_constant SET item_value='{"label":"AI Brain","icon":"assets/icons/digital-ai-brain.svg","children":[{"label":"Connections","icon":"","url":"./aip/connections","children":[],"_id":2},{"label":"Datasets","icon":"","url":"./aip/datasets","children":[],"_id":3},{"label":"Pipelines","icon":"","url":"./aip/pipelines","children":[],"_id":4},{"label":"Chains","icon":"","url":"./aip/chain-list","children":[],"_id":5},{"label":"Grouped Jobs","icon":"","url":"./aip/chains","children":[],"_id":26},{"label":"Models","icon":"","url":"./aip/models","children":[],"_id":6},{"label":"Endpoints","icon":"","url":"./aip/endpoints","children":[],"_id":7},{"label":"Apps","icon":"cube","url":"./aip/app-list","children":[],"_id":8},{"label":"Adapters","icon":"","url":"","children":[{"label":"SpecTemplates","icon":"","url":"./aip/spectemplates","children":[],"_id":10},{"label":"Adapters","icon":"","url":"./aip/adapters/","children":[],"_id":11},{"label":"Instances","icon":"","url":"./aip/instances","children":[],"_id":12}],"_id":9},{"label":"Data Models","icon":"","url":"./adapters/schemas","children":[{"label":"Schemas","icon":"","url":"./aip/schemas","children":[],"_id":14},{"label":"Relationships","icon":"","url":"./aip/relationship","children":[],"_id":15}],"_id":13},{"label":"Job Management","icon":"","url":"","children":[{"label":"Events","icon":"","url":"./aip/events","children":[],"_id":17},{"label":"Schedule","icon":"","url":"./aip/scheduler","children":[],"_id":18},{"label":"Logs","icon":"","url":"./aip/jobs-log","children":[],"_id":19}],"_id":16},{"label":"Workflows","icon":"","url":"./workflows/create/specification","children":[{"label":"Volume Forecast","icon":"","url":"./workflows/VolumeForecast","children":[],"_id":21},{"label":"EASE","icon":"","url":"./workflows/EASE","children":[],"_id":22},{"label":"Ticket Clustering","icon":"","url":"./workflows/TicketClustering","_id":23},{"label":"Shift Roster","icon":"","url":"./workflows/ShiftRoster","children":[],"_id":24},{"label":"Process Mining","icon":"","url":"./workflows/ProcessMining","children":[],"_id":25}],"_id":20}],"horizontal":true}' WHERE item='IT Portfolio Manager Side' AND project_name='Core' AND item_value LIKE '%{"label":"AI Brain","icon":"ils","children":[{%';		   
 	</sql> 
 	</changeSet>
-<!--	 <changeSet author="Leap" id="3v0-usm-postgresql-102">
+<!--	 <changeSet author="Essedum" id="3v0-usm-postgresql-102">
 		<sql dbms="postgresql" splitStatements="true" stripComments="true">
 		      UPDATE core.usm_constant SET item_value='{"label":"AI Brain","icon":"assets/icons/digital-ai-brain.svg","children":[{"label":"Connections","icon":"","url":"./aip/connections","children":[],"_id":2},{"label":"Datasets","icon":"","url":"./aip/datasets","children":[],"_id":3},{"label":"Pipelines","icon":"","url":"./aip/pipelines","children":[],"_id":4},{"label":"Chains","icon":"","url":"./aip/chain-list","children":[],"_id":5},{"label":"Grouped Jobs","icon":"","url":"./aip/chains","children":[],"_id":26},{"label":"Models","icon":"","url":"./aip/models","children":[],"_id":6},{"label":"Endpoints","icon":"","url":"./aip/endpoints","children":[],"_id":7},{"label":"Apps","icon":"cube","url":"./aip/app-list","children":[],"_id":8},{"label":"Adapters","icon":"","url":"","children":[{"label":"SpecTemplates","icon":"","url":"./aip/spectemplates","children":[],"_id":10},{"label":"Adapters","icon":"","url":"./aip/adapters/","children":[],"_id":11},{"label":"Instances","icon":"","url":"./aip/instances","children":[],"_id":12}],"_id":9},{"label":"Data Models","icon":"","url":"./adapters/schemas","children":[{"label":"Schemas","icon":"","url":"./aip/schemas","children":[],"_id":14},{"label":"Relationships","icon":"","url":"./aibrain/adapters/schemas/relationship","children":[],"_id":15}],"_id":13},{"label":"Job Management","icon":"","url":"","children":[{"label":"Events","icon":"","url":"./aip/events","children":[],"_id":17},{"label":"Schedule","icon":"","url":"./aibrain/jobs/scheduled","children":[],"_id":18},{"label":"Logs","icon":"","url":"./aip/jobs-log","children":[],"_id":19}],"_id":16},{"label":"Workflows","icon":"","url":"./workflows/create/specification","children":[{"label":"Volume Forecast","icon":"","url":"./workflows/VolumeForecast","children":[],"_id":21},{"label":"EASE","icon":"","url":"./workflows/EASE","children":[],"_id":22},{"label":"Ticket Clustering","icon":"","url":"./workflows/TicketClustering","_id":23},{"label":"Shift Roster","icon":"","url":"./workflows/ShiftRoster","children":[],"_id":24},{"label":"Process Mining","icon":"","url":"./workflows/ProcessMining","children":[],"_id":25}],"_id":20}],"horizontal":true}' WHERE item='IT Portfolio Manager Side' AND project_name='leo1311' AND item_value LIKE '%{"label":"AI Brain","icon":"assets/icons/digital-ai-brain.svg"%';	
          </sql> 	
     </changeSet>
-	<changeSet author="Leap" id="3v0-usm-postgresql-103">
+	<changeSet author="Essedum" id="3v0-usm-postgresql-103">
 		<sql dbms="postgresql" splitStatements="true" stripComments="true"> 
          UPDATE core.usm_constant SET item_value='{"label":"Mashups","icon":"ticket","url":"./aibrain/adapters/mashups"}' WHERE item='Admin Side' AND project_name='Core' AND item_value LIKE '%{"label":"Mashups","icon":"ticket","url":"./adapters/mashups"}%';
         </sql> 
 	</changeSet>
-	<changeSet author="Leap" id="3v0-usm-postgresql-104">
+	<changeSet author="Essedum" id="3v0-usm-postgresql-104">
 		<sql dbms="postgresql" splitStatements="true" stripComments="true">  
              UPDATE core.usm_constant SET item_value='{"label":"AI Brain","icon":"assets/icons/digital-ai-brain.svg","children":[{"label":"Connections","icon":"","url":"./aip/connections","children":[],"_id":2},{"label":"Datasets","icon":"","url":"./aip/datasets","children":[],"_id":3},{"label":"Pipelines","icon":"","url":"./aip/pipelines","children":[],"_id":4},{"label":"Chains","icon":"","url":"./aip/chain-list","children":[],"_id":5},{"label":"Grouped Jobs","icon":"","url":"./aip/chains","children":[],"_id":26},{"label":"Models","icon":"","url":"./aip/models","children":[],"_id":6},{"label":"Endpoints","icon":"","url":"./aip/endpoints","children":[],"_id":7},{"label":"Apps","icon":"cube","url":"./aip/app-list","children":[],"_id":8},{"label":"Adapters","icon":"","url":"","children":[{"label":"SpecTemplates","icon":"","url":"./aip/spectemplates","children":[],"_id":10},{"label":"Adapters","icon":"","url":"./aip/adapters/","children":[],"_id":11},{"label":"Instances","icon":"","url":"./aip/instances","children":[],"_id":12}],"_id":9},{"label":"Data Models","icon":"","url":"./adapters/schemas","children":[{"label":"Schemas","icon":"","url":"./aip/schemas","children":[],"_id":14},{"label":"Relationships","icon":"","url":"./aibrain/adapters/schemas/relationship","children":[],"_id":15}],"_id":13},{"label":"Job Management","icon":"","url":"","children":[{"label":"Events","icon":"","url":"./aip/events","children":[],"_id":17},{"label":"Schedule","icon":"","url":"./aibrain/jobs/scheduled","children":[],"_id":18},{"label":"Logs","icon":"","url":"./aip/jobs-log","children":[],"_id":19}],"_id":16},{"label":"Workflows","icon":"","url":"./workflows/create/specification","children":[{"label":"Volume Forecast","icon":"","url":"./workflows/VolumeForecast","children":[],"_id":21},{"label":"EASE","icon":"","url":"./workflows/EASE","children":[],"_id":22},{"label":"Ticket Clustering","icon":"","url":"./workflows/TicketClustering","_id":23},{"label":"Shift Roster","icon":"","url":"./workflows/ShiftRoster","children":[],"_id":24},{"label":"Process Mining","icon":"","url":"./workflows/ProcessMining","children":[],"_id":25}],"_id":20}],"horizontal":true}' WHERE item='Project Client Side' AND project_name='leo1311' AND item_value LIKE '%{"label":"AI Brain","icon":"assets/icons/digital-ai-brain.svg"%';		
          </sql>
      </changeSet>
-	<changeSet author="Leap" id="3v0-usm-postgresql-105">
+	<changeSet author="Essedum" id="3v0-usm-postgresql-105">
 		<sql dbms="postgresql" splitStatements="true" stripComments="true">
               UPDATE core.usm_constant SET item_value='{"label":"CIP Mgmt","icon":"tasks","horizontal":true,"children":[{"label":"Groups","icon":"files-tasks","url":"./aibrain/groupings","children":[]},{"label":"Core Datasource","icon":"clone","url":"./aibrain/adapters/coreDatasources","children":[]},{"label":"Copy Datasets","icon":"clipboard","url":"./aibrain/adapters/copyDatasets","children":[]},{"label":"Copy Pipelines","icon":"files-o","url":"./aibrain/copyPipelines","children":[]},{"label":"Constants","icon":"","url":"./aibrain/constants","children":[]},{"label":"Plugins","icon":"","url":"./aip/plugins","children":[],"_id":7},{"label":"Create Specification","icon":"","url":"./workflows/create/specification","children":[]},{"label":"Events","icon":"","url":"./aip/events","children":[]}]}' WHERE item='Admin Side' AND project_name='Core' AND item_value LIKE '{"label":"CIP Mgmt","icon":"tasks","horizontal":true%'; 
 		</sql> 
 	</changeSet>
 	
-	<changeSet author="Leap" id="3v0-usm-postgresql-106">
+	<changeSet author="Essedum" id="3v0-usm-postgresql-106">
 		<sql dbms="postgresql" splitStatements="true" stripComments="true">
            INSERT INTO core.usm_constant(item,project_name,item_value,project_id) VALUES ('icip.pipelineScript.directory','Core','/app/jobs/scripts/',1);
         </sql> 
 	</changeSet>
-	<changeSet author="Leap" id="3v0-usm-postgresql-107">
+	<changeSet author="Essedum" id="3v0-usm-postgresql-107">
 		<sql dbms="postgresql" splitStatements="true" stripComments="true">
          UPDATE core.usm_constant SET item_value='{"label":"AIOps","icon":"assets/icons/AI-powered-core.svg","children":[{"label":"Dashboard","icon":"dashcube","url":"./dynamicDashboard/grid/OCC/49","_id":2},{"label":"Ticket Analytics","icon":"ticket","url":"./dynamicDashboard/grid/OCC/2","_id":3},{"label":"Ticket SLA","icon":"tachometer","url":"./dynamicDashboard/grid/OCC/5","_id":4},{"label":"Ticket Clusters","icon":"object-group","url":"./dynamicDashboard/grid/OCC/3","_id":5},{"label":"Fault Predictions","icon":"tachometer","url":"./dynamicDashboard/grid/OCC/216","_id":6},{"label":"Server Anomaly","icon":"exclamation-circle","url":"./dynamicDashboard/grid/OCC/25","_id":7},{"label":"Correlation","icon":"puzzle-piece","url":"./dynamicDashboard/grid/OCC/4","_id":8},{"label":"EASE","icon":"puzzle-piece","url":"./dynamicDashboard/grid/OCC/9","_id":9},{"label":"ITSM","icon":"book","horizontal":true,"children":[{"label":"Incidents","icon":"","url":"./aibrain/tickets/alerts","children":[],"_id":2},{"label":"Change Request","icon":"","url":"./aibrain/tickets/changerequests","children":[],"_id":3},{"label":"Service Request","icon":"","url":"./aibrain/tickets/servicerequests","children":[],"_id":4},{"label":"Tasks","icon":"","url":"./aibrain/tickets/tasks","children":[],"_id":5},{"label":"Upload","icon":"upload","url":"./aibrain/tickets/uploadTicket","children":[],"_id":6},{"label":"Problem Management","icon":"book","horizontal":true,"children":[{"label":"SOP","icon":"","url":"./aibrain/tickets/Sops-list","children":[],"_id":8},{"label":"RCA","icon":"","url":"./tickets/Rca-list","children":[],"_id":9},{"label":"Tags","icon":"","url":"./tickets/Clusters-list","children":[],"_id":10}],"_id":7},{"label":"Logs","icon":"","url":"./aibrain/jobs/logs","children":[],"_id":11}]}],"horizontal":true}' WHERE item='IT Portfolio Manager Side' AND project_name='leo1311' AND item_value LIKE '{"label":"AIOps","icon":"assets/icons/AI-powered-core.svg"%'; 
     </sql> 
 	</changeSet>
 	
-	<changeSet author="Leap" id="3v0-usm-postgresql-108">
+	<changeSet author="Essedum" id="3v0-usm-postgresql-108">
 		<sql dbms="postgresql" splitStatements="true" stripComments="true">
          UPDATE core.usm_constant SET item_value='{"label":"AIOps","icon":"assets/icons/AI-powered-core.svg","children":[{"label":"Dashboard","icon":"dashcube","url":"./dynamicDashboard/grid/OCC/49","_id":2},{"label":"Ticket Analytics","icon":"ticket","url":"./dynamicDashboard/grid/OCC/2","_id":3},{"label":"Ticket SLA","icon":"tachometer","url":"./dynamicDashboard/grid/OCC/5","_id":4},{"label":"Ticket Clusters","icon":"object-group","url":"./dynamicDashboard/grid/OCC/3","_id":5},{"label":"Fault Predictions","icon":"tachometer","url":"./dynamicDashboard/grid/OCC/216","_id":6},{"label":"Server Anomaly","icon":"exclamation-circle","url":"./dynamicDashboard/grid/OCC/25","_id":7},{"label":"Correlation","icon":"puzzle-piece","url":"./dynamicDashboard/grid/OCC/4","_id":8},{"label":"ITSM","icon":"book","horizontal":true,"children":[{"label":"Incidents","icon":"","url":"./aibrain/tickets/alerts","children":[],"_id":2},{"label":"Change Request","icon":"","url":"./aibrain/tickets/changerequests","children":[],"_id":3},{"label":"Service Request","icon":"","url":"./aibrain/tickets/servicerequests","children":[],"_id":4},{"label":"Tasks","icon":"","url":"./aibrain/tickets/tasks","children":[],"_id":5},{"label":"Upload","icon":"upload","url":"./aibrain/tickets/uploadTicket","children":[],"_id":6},{"label":"Problem Management","icon":"book","horizontal":true,"children":[{"label":"SOP","icon":"","url":"./aibrain/tickets/Sops-list","children":[],"_id":8},{"label":"RCA","icon":"","url":"./tickets/Rca-list","children":[],"_id":9},{"label":"Tags","icon":"","url":"./tickets/Clusters-list","children":[],"_id":10}],"_id":7},{"label":"Logs","icon":"","url":"./aibrain/jobs/logs","children":[],"_id":11}]}],"horizontal":true}' WHERE item='Project Client Side' AND project_name='leo1311' AND item_value LIKE '{"label":"AIOps","icon":"assets/icons/AI-powered-core.svg"%';   
       </sql> 
 	</changeSet>
 	
-	<changeSet author="Leap" id="3v0-usm-postgresql-109">
+	<changeSet author="Essedum" id="3v0-usm-postgresql-109">
 		<sql dbms="postgresql" splitStatements="true" stripComments="true">
 		  DELETE FROM core.usm_constant WHERE item='Project Client Side' AND project_name='leo1311' AND item_value LIKE '{"label":"ITSM","icon":"book","horizontal":true,"children"%';
           DELETE FROM core.usm_constant WHERE item='IT Portfolio Manager Side' AND project_name='leo1311' AND item_value LIKE '{"label":"ITSM","icon":"book","horizontal":true,"children"%';
       </sql> 
 	</changeSet>
 
-	<changeSet author="Leap" id="3v0-usm-postgresql-110">
+	<changeSet author="Essedum" id="3v0-usm-postgresql-110">
 		<sql dbms="postgresql" splitStatements="true" stripComments="true">
 	    insert into core.usm_constant (item, project_name, item_value, project_id) values('Admin Side','Core','{"label":"Tags","icon":"folder","url":"./aip/edit-delete-tags"}','1');
 	</sql> 
 	</changeSet> -->
 	
-	<changeSet author="Leap" id="3v0-usm-112">
+	<changeSet author="Essedum" id="3v0-usm-112">
 		<sql dbms="h2, mysql,mssql,postgresql" splitStatements="true"
 			stripComments="true">
 			INSERT INTO usm_constant (item,project_name,item_value,project_id) SELECT 'FileUpload.AllowedExtension.CIP.UploadFile','leo1311','{"allowedFileExtension":"xlsx,csv,xml,rels,bin","allowedFileTypes":"csv,xlxs,application/xml,rels","allowedDepth":"1"}',a.id FROM usm_project a WHERE name='leo1311';
 		</sql>
 	</changeSet>
 
-	<changeSet author="Leap" id="3v0-usm-113">
+	<changeSet author="Essedum" id="3v0-usm-113">
 		<sql dbms="h2, mysql,mssql, postgresql" splitStatements="true"
 			stripComments="true">
 			INSERT INTO usm_constant(item,project_name,item_value,project_id) SELECT 'icip.itsm.adapter-instance-name','leo1311','AIOPS-Instance',a.id FROM usm_project a WHERE name='leo1311';
@@ -188,7 +188,7 @@
 		
 		</sql>
 	</changeSet>
-       <changeSet author="Leap" id="3v0-usm-070820241141">
+       <changeSet author="Essedum" id="3v0-usm-070820241141">
 		<sql dbms="h2, mysql, postgresql" splitStatements="true" stripComments="true">  
         DELETE from usm_permission_api where api = '/api/get-dash-constants\\?projectId=.*' and is_whitelisted = '1'
 		</sql> 
@@ -196,7 +196,7 @@
         DELETE from usm_permission_api where api = '/api/get-dash-constants\?projectId=.*' and is_whitelisted = '1'
 		</sql> 
 	</changeSet>
-    <changeSet author="Leap" id="3v0-usm-070820241142">
+    <changeSet author="Essedum" id="3v0-usm-070820241142">
 		<sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">  
         INSERT into usm_permissions (module,permission) values ('dbs','get-dash-constants');	
        </sql> 

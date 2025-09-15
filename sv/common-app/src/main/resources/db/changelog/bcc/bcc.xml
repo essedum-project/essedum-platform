@@ -4,7 +4,7 @@
 	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-	<changeSet author="Leap (generated)" id="1614785155891-2">
+	<changeSet author="Essedum (generated)" id="1614785155891-2">
 	   <validCheckSum>any</validCheckSum>
         <preConditions onFail="MARK_RAN">
                <not>
@@ -24,7 +24,7 @@
 			</column>
 		</createTable>
 	</changeSet>
-		<changeSet author="Leap (generated)" id="1614785155891-4">
+		<changeSet author="Essedum (generated)" id="1614785155891-4">
 	<validCheckSum>any</validCheckSum>
         <preConditions onFail="MARK_RAN">
                <not>
@@ -40,7 +40,7 @@
 			<column name="project_id" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-3">
+	<changeSet author="Essedum (generated)" id="1614785155891-3">
 	 <validCheckSum>any</validCheckSum>
         <preConditions onFail="MARK_RAN">
                <not>
@@ -62,7 +62,7 @@
 			<column name="thershold_mapping" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-5">
+	<changeSet author="Essedum (generated)" id="1614785155891-5">
 	<validCheckSum>any</validCheckSum>
         <preConditions onFail="MARK_RAN">
                <not>
@@ -83,7 +83,7 @@
 			<column name="project_id" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-6">
+	<changeSet author="Essedum (generated)" id="1614785155891-6">
 	<validCheckSum>any</validCheckSum>
         <preConditions onFail="MARK_RAN">
                <not>
@@ -100,7 +100,7 @@
 			<column name="svg_dashboard_id" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-7">
+	<changeSet author="Essedum (generated)" id="1614785155891-7">
 	<validCheckSum>any</validCheckSum>
         <preConditions onFail="MARK_RAN">
                <not>
@@ -116,7 +116,7 @@
 			<column name="svg_id" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-8">
+	<changeSet author="Essedum (generated)" id="1614785155891-8">
 	<validCheckSum>any</validCheckSum>
         <preConditions onFail="MARK_RAN">
                <not>
@@ -153,19 +153,19 @@
 			</column>
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-9">
+	<changeSet author="Essedum (generated)" id="1614785155891-9">
 	 <modifyDataType  
             columnName="element_id_array"  
             newDataType="TEXT"
             tableName="bcc_svg"/>  
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1312v0-bcc-1">
+	<changeSet author="Essedum (generated)" id="1312v0-bcc-1">
 		<addColumn tableName="bcc_svg_elements">
 			<column name="background_color_set" type="BIT(1)" />
 			<column name="background_color" type="VARCHAR(50)" />
 		</addColumn>
 	</changeSet>
-	<changeSet  author="Leap"  id="3v0-bcc-1">
+	<changeSet  author="Essedum"  id="3v0-bcc-1">
 		<sql dbms="postgresql" splitStatements="true" stripComments="true">
 			ALTER TABLE bcc_svg_elements ALTER default_visibility TYPE boolean USING (default_visibility::int::boolean), ALTER runtime_border TYPE boolean USING (runtime_border::int::boolean), ALTER runtime_boxcolor TYPE boolean USING (runtime_boxcolor::int::boolean), ALTER runtime_fill_color TYPE boolean USING (runtime_fill_color::int::boolean), ALTER runtime_font TYPE boolean USING (runtime_font::int::boolean), ALTER runtime_visibility TYPE boolean USING (runtime_visibility::int::boolean), ALTER visibility_true TYPE boolean USING (visibility_true::int::boolean), ALTER background_color_set TYPE boolean USING (background_color_set::int::boolean);
 		</sql>

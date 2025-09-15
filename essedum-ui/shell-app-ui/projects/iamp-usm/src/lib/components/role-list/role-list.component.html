@@ -1,0 +1,338 @@
+<!-- <div class="col-md-12 centerStyle paddingBottom selector-669-1" style="border: none">
+  <div class="selector-669-2">
+    <div class="clearfix selector-669-3">
+      <div class="padTop20 selector-669-4">
+        <h2 class="ams_h2 h2Mar selector-669-5">Role list</h2>
+        <div class="ams_toptoolbar selector-669-6">
+        
+          <i class="fa fa-plus-square-o create-icon-color selector-669-17" (click)="createView()" *ngIf="createFlag" aria-hidden="true"></i>
+          <span style="cursor: pointer" (click)="createView()" *ngIf="createFlag" class="selector-669-18">Create Roles</span>
+        </div>
+        
+        <app-aip-filter
+          [filterOptions]="filterOptions"
+          [selectedFilterValues]="selectedFilterValues"
+          (filterSelected)="onFilterSelected($event)"
+          (filterStatusChange)="onFilterStatusChange($event)">
+        </app-aip-filter>
+        
+        <div class="ams_panelCtr ams_accordionCtr accordionClosed active selector-669-19 filterStyle" *ngIf="!isFilterExpanded">
+          <h3 class="clearfix selector-669-20">
+            <div class="search-container ams_cusSrch pull-left selector-669-21">
+              <input style="color: black;" #myInput="" type="text" placeholder="Search By Role Name" (keypress)="checkEnterPressed($event, myInput.value)" class="selector-669-22" />
+              <button type="button" (click)="filterItem(myInput.value)" class="selector-669-23">
+                <i class="searchIcon selector-669-24"></i>
+              </button>
+            </div>
+            <a href="javascript:void(0)" class="paddLeft selector-669-25">Filter</a>
+          </h3>
+          <div class="ams_panelCnt formRow relative selector-669-26 labelsAlign">
+            <div class="row rwMAr selector-669-27">
+              <div class="col-md-6 clearboth select-style selector-669-28">
+               
+                <mat-form-field style="width: 85%; margin-top:-1vh" class="selector-669-29">
+                  <label class="formLabel selector-669-30">Role</label>
+                  <mat-select [(ngModel)]="searchedRole" [ngModelOptions]="{ standalone: true }" name="role" class="selector-669-31" style="padding-top: 2vh;">
+                    <mat-option selected="" value="All" class="selector-669-32">All</mat-option>
+                    <mat-option *ngFor="let role of rolesFilter; trackBy: trackByMethod" [value]="role.name" class="selector-669-33">
+                      <div  class="td-span td-ellipsis pull-left selector-669-109" matTooltipClass="crud-tooltip" [matTooltip]="role.name">{{role.name}}</div>
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="col-md-6 clearboth selector-669-34">
+                <label class="formLabel selector-669-35">Description</label>
+                <div class="input-group ams_datetime selector-669-36" style="margin-top: 2%">
+                  <input type="text" style="font-size:inherit;" placeholder="Description" [ngModelOptions]="{ standalone: true }" [(ngModel)]="selectedDesc" class="form-control selector-669-37"  />
+                </div>
+              </div>
+            </div>
+            <div class="ams_panelFooter selector-669-38">
+              <button type="button" class="genBtn marRght30 selector-669-39" (click)="Search()">Submit</button>
+              <button type="button" class="secBtn selector-669-40" (click)="clearRole()">Clear</button>
+            </div>
+          </div>
+        </div>
+        <div class="selector-669-41">
+          <div class="ams_panelCnt formRow relative selector-669-42">
+           
+            <div style="float: right; cursor: pointer" class="selector-669-47">
+              <i class="fa fa-list-ul fa-lg icon1 selector-669-48" aria-hidden="true" matTooltip="Table View" (click)="showList = false"></i>
+              <i class="fa fa-th-large fa-lg icon1 selector-669-49" aria-hidden="true" matTooltip="Card View" (click)="showList = true"></i>
+            </div>
+            <br class="selector-669-50" />
+            <br class="selector-669-51" />
+            <div class="row selector-669-52" *ngIf="rolesLength > 0 &amp;&amp; showList">
+              <div class="col-md-6 selector-669-53" *ngFor="let role of roles | paginate: { itemsPerPage: 6, currentPage: p }; trackBy: trackByMethod">
+                <div class="ams_cardCtr ams_cardfooterCtr selector-669-54">
+                  <div class="ams_cardBorder clearfix selector-669-55">
+                    <h4 (click)="viewRole(role)" class="td-ellipsis selector-669-56" style="cursor:pointer" [matTooltip]="role.name" [matTooltipDisabled]="role.name == null" matTooltipClass="crud-tooltip">
+                      {{ role.name }}
+                    </h4>
+                    <div class="ams_cardCnt selector-669-57">
+                      <div class="row rwMAr selector-669-58">
+                        <div class="col-md-6 selector-669-59">
+                          <label class="formLabel selector-669-60" (click)="viewRole(role)" style="cursor:pointer" >Role Id</label>
+                          <span class="formSpan selector-669-61" (click)="viewRole(role)" style="cursor:pointer" [matTooltip]="role.id" [matTooltipDisabled]="role.id == null" matTooltipClass="crud-tooltip">{{ role.id ? role.id : "--" }}</span>
+                        </div>
+                        <div class="col-md-6 selector-669-62">
+                          <label class="formLabel selector-669-63" (click)="viewRole(role)" style="cursor:pointer" >Associated Project</label>
+                          <span class="formSpan selector-669-64" (click)="viewRole(role)" style="cursor:pointer" [matTooltip]="role.projectName" [matTooltipDisabled]="role.projectName == null" matTooltipClass="crud-tooltip">
+                            {{ role.projectName ? role.projectName : "--" }}</span>
+                        </div>
+                      </div>
+                      <div class="row rwMAr selector-669-110">
+                        <div class="col-md-6 selector-669-65">
+                          <label class="formLabel selector-669-66" (click)="viewRole(role)" style="cursor:pointer" >Description</label>
+                          <span class="formSpan selector-669-67" (click)="viewRole(role)" style="cursor:pointer" [matTooltip]="role.description" [matTooltipDisabled]="role.description == null" matTooltipClass="crud-tooltip">{{ role.description ? role.description : "--" }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="selector-669-68">
+                    <div class="selector-669-69">
+                      <div class="ams_cardfooter text-center selector-669-70">
+                        <i class="fa fa-info-circle fa-lg create-icon-color selector-669-71" aria-hidden="true" matTooltip="View Role" *ngIf="viewFlag" (click)="viewRole(role)"></i>
+                        <i class="fa fa-pencil fa-lg create-icon-color selector-669-72" aria-hidden="true" matTooltip="Edit Role" (click)="editRole(role)" style="padding-left: 5px" *ngIf="editFlag"></i>
+                        <i class="fa fa-trash fa-lg create-icon-color selector-669-73" aria-hidden="true" style="padding-left: 5px" matTooltip="Delete Role" (click)="deleteRole(role)" *ngIf="deleteFlag"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="rolesLength > 0 &amp;&amp; showList" class="col-md-12 selector-669-74" id="noRecordsMsg">
+              <pagination-controls (pageChange)="p = $event" class="selector-669-75"></pagination-controls>
+            </div>
+          </div>
+          <mat-card appearance="outlined" class="cardResponsive">
+          <div *ngIf="rolesLength > 0 &amp;&amp; !showList" class="table-responsive selector-669-76">
+            <table aria-label="" mat-table="" [dataSource]="roleList" class="table-hover list-table table selector-669-77" matSort="" matSortActive="scheduled_from" matSortDirection="asc">
+              <ng-container matColumnDef="id" class="selector-669-78">
+                <th mat-header-cell="" *matHeaderCellDef="" class="number-col selector-669-79">
+                  <strong class="selector-669-80"> Role Id </strong>
+                </th>
+                <td mat-cell="" (click)="viewRole(role)" style="cursor:pointer" *matCellDef="let role" class="td-ellipsis number-col selector-669-81">
+                  <div class="td-span td-ellipsis pull-right td-padding selector-669-82" [matTooltip]="role.id" [matTooltipDisabled]="role.id == null" matTooltipClass="crud-tooltip">
+                    {{ role.id ? role.id : "--" }}
+                  </div>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="name" class="selector-669-83">
+                <th mat-header-cell="" *matHeaderCellDef="" class="selector-669-84">
+                  <strong class="selector-669-85"> Role Name </strong>
+                </th>
+                <td mat-cell="" (click)="viewRole(role)" style="cursor:pointer" *matCellDef="let role" class="td-ellipsis selector-669-86">
+                  <div class="td-span td-ellipsis pull-left td-padding selector-669-87" [matTooltip]="role.name" [matTooltipDisabled]="role.name == null" matTooltipClass="crud-tooltip">
+                    {{ role.name ? role.name : "--" }}
+                  </div>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="AssociatedProject" class="selector-669-88">
+                <th mat-header-cell="" *matHeaderCellDef="" class="selector-669-89">
+                  <strong class="selector-669-90"> Associated project </strong>
+                </th>
+                <td mat-cell="" (click)="viewRole(role)" style="cursor:pointer" *matCellDef="let role" class="td-ellipsis selector-669-91">
+                  <div class="td-span td-ellipsis pull-left td-padding selector-669-92" [matTooltip]="role.projectName" [matTooltipDisabled]="role.projectName == null" matTooltipClass="crud-tooltip">
+                    {{ role.projectName ? role.projectName : "--" }}
+                  </div>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="description" class="selector-669-93">
+                <th mat-header-cell="" *matHeaderCellDef="" class="selector-669-94">
+                  <strong class="selector-669-95"> Description </strong>
+                </th>
+                <td mat-cell="" (click)="viewRole(role)" style="cursor:pointer" *matCellDef="let role" class="td-ellipsis selector-669-96">
+                  <div class="td-span td-ellipsis pull-left td-padding selector-669-97" [matTooltip]="role.description" [matTooltipDisabled]="role.description == null" matTooltipClass="crud-tooltip">
+                    {{ role.description ? role.description : "--" }}
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions" class="selector-669-98">
+                <th mat-header-cell="" *matHeaderCellDef="" class="actions-col selector-669-99">
+                  <strong class="selector-669-100"> Actions </strong>
+                </th>
+                <td mat-cell="" *matCellDef="let role" class="actions-col selector-669-101">
+                  <i class="fa fa-info-circle fa-lg create-icon-color selector-669-102" aria-hidden="true" (click)="viewRole(role)" *ngIf="viewFlag" matTooltip="View Role"></i>
+                  <i class="fa fa-pencil fa-lg create-icon-color selector-669-103" aria-hidden="true" (click)="editRole(role)" matTooltip="Edit Role" style="padding-left: 5px" *ngIf="editFlag && checkPerms(role)"></i>
+                  <i class="fa fa-trash fa-lg create-icon-color selector-669-104" aria-hidden="true" style="padding-left: 5px" (click)="deleteRole(role)" matTooltip="Delete Role" *ngIf="deleteFlag && checkPerms(role)"></i>
+                </td>
+              </ng-container>
+              <tr mat-header-row="" *matHeaderRowDef="displayedColumns" class="selector-669-105"></tr>
+              <tr mat-row="" *matRowDef="let row; columns: displayedColumns" class="selector-669-106"></tr>
+            </table>
+            <mat-paginator [pageSize]="6" showFirstLastButtons="" class="selector-669-107"></mat-paginator>
+          </div>
+        </mat-card>
+        </div>
+        <div *ngIf="roles.length == 0" id="noRecordsMsg" class="selector-669-108">No Records Found</div>
+      </div>
+    </div>
+  </div>
+</div> -->
+<!-- //////////////////
+<div >
+    <div class="aip-container lfx-u-pad-lr-30">
+<div class="filter-panel">
+  <div class="filter-panel__header"
+    [ngClass]="{'filter-panel__header--collapsed': !isFilterExpanded, 'filter-panel__header--expanded': isFilterExpanded}"
+    (click)="toggleFilterExpanded()">
+    <div class="filter-panel__icon-container">
+      <mat-icon id="filter-expand-icon" data-icon-type="filter-expand" class="filter-panel__icon"
+        (click)="toggleExpand()" [matTooltip]="isFilterExpanded ? 'Collapse Filters' : 'Expand Filters'"
+        [matTooltipPosition]="TOOLTIP_POSITION">
+        filter_list
+      </mat-icon>
+    </div>
+
+    <div class="filter-panel__title-container">
+      <h3 class="filter-panel__title">
+        Filter by:
+        <span *ngIf="!isFilterExpanded && hasActiveFilters()" class="filter-summary">
+          {{ getActiveFiltersSummary() }}
+        </span>
+      </h3>
+    </div>
+
+    <div class="filter-panel__toggle-container">
+      <mat-icon id="filter-toggle-icon" data-icon-type="filter-toggle" class="filter-panel__toggle-icon"
+        [ngClass]="{'filter-panel__toggle-icon--rotated': isFilterExpanded}"
+        [matTooltip]="isFilterExpanded ? 'Collapse Filters' : 'Expand Filters'" [matTooltipPosition]="TOOLTIP_POSITION">
+        keyboard_arrow_down
+      </mat-icon>
+    </div>
+  </div>
+
+  <div class="filter-panel__content" *ngIf="isFilterExpanded" @slideToggle>
+    <div>
+      <div class="filter-options">
+        <div class="filter-group">
+          <div class="filter-control">
+            <mat-form-field appearance="fill" class="w-100">
+              <label>Role</label>
+              <mat-select [id]="Role"
+                data-select-type="pipeline-type" (selectionChange)="pipelineTypeSelected($event)"
+                aria-labelledby="type-label" placeholder="All">
+                <mat-option *ngIf="selectedAdapterType?.length > 0" value="" (click)="clearAllFilters('Role')">
+                  All
+                </mat-option>
+                <ng-container *ngFor="let option of rolesFilter">
+                  <mat-option *ngIf="!option.selected" [value]="option.label">
+                    {{ option.label }}
+                  </mat-option>
+                </ng-container>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="selected-items" *ngIf="selectedAdapterType?.length > 0">
+            <mat-chip-set [id]="Role"
+              aria-label="Selected types">
+              <mat-chip [id]="Role" data-chip-type="adapter-type"
+                *ngFor="let type of selectedAdapterType; let i = index" removable="true"
+                (removed)="removePipelineType(type)">
+                {{ type }}
+                <mat-icon data-icon-type="chip-remove-adapter-type" matChipRemove>close</mat-icon>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    </div>
+    </div>
+    </div> -->
+
+
+<!-- NEW LAYOUT -->
+<div>
+  <div class="aip-container lfx-u-pad-lr-30">
+    <!-- Header Section -->
+
+    <!-- Header -->
+    <app-aip-header [cardTitle]="'Role List'" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createAuth"
+      (search)="Search($event)" (refresh)="Refresh()" (add)="createView()">
+    </app-aip-header>
+    <div>
+      <div class="aip-container lfx-u-pad-lr-30">
+        <!-- Filter Component -->
+        <app-aip-filter-roles
+          [componentName]="'role-list'"
+          [filterOptions]="filterOptions" 
+          [selectedFilterValues]="selectedFilterValues"
+          (filterSelected)="onFilterSelected($event)"
+          (filterStatusChange)="onFilterStatusChange($event)">
+        </app-aip-filter-roles>
+
+        <!-- Table Layout  -->
+        <div class="table-card">
+          <div class="table-scroll-container">
+
+            <!-- <div class="header">
+    <h2>Role List</h2>
+    <div class="header-actions">
+     <button class="create-role-btn">+ Create Role</button>
+    </div>
+  </div> -->
+            <table class="styled-table" *ngIf="rolesContent.length; else noData">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Role ID</th>
+                  <th>Role Name</th>
+                  <th>Associated Project</th>
+                  <th>Description</th>
+                  <th>Actions</th>
+
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let role of pagedRoles; let i =index">
+                  <td>{{page * rowsPerPage +i+1}}</td>
+                  <td (click)="viewRole(role)" style="color: #0094ff; cursor: pointer;">{{ role.id}}</td>
+                  <td>{{ role.name || '-'}}</td>
+                  <td>{{ role.projectId!==null ? role.projectId: '-'}}</td>
+                  <td>{{ role.description ||'-'}}</td>
+                  <td>
+
+                    <i class="fa fa-info-circle fa-lg selector-669-71 header-action-icon" aria-hidden="true"
+                      matTooltip="View Role" *ngIf="viewFlag" (click)="viewRole(role)"></i>
+                    <i class="fa fa-pencil fa-lg selector-669-72 header-action-icon" aria-hidden="true"
+                      matTooltip="Edit Role" (click)="editRole(role)" style="padding-left: 5px" *ngIf="editFlag"></i>
+                    <i class="fa fa-trash fa-lg selector-669-73 header-action-icon" aria-hidden="true"
+                      style="padding-left: 5px" matTooltip="Delete Role" (click)="deleteRole(role)"
+                      *ngIf="deleteFlag"></i>
+                  </td>
+
+                </tr>
+              </tbody>
+            </table>
+            <ng-template #noData>
+              <div class="no-data">No data available</div>
+            </ng-template>
+          </div>
+          <!-- Pagination -->
+
+          <div class="pagination-wrapper d-flex justify-content-end">
+            <ul class="custom-pagination">
+              <li class="custom-pagination-arrow" [class.disabled]="page === 0" (click)="navigatePage('Prev')">
+                <span>&lsaquo;</span>
+              </li>
+
+              <li *ngFor="let p of getPageNumbers()" class="custom-pagination-number" [class.active]="p === page"
+                (click)="changePage(p)">
+                <span>{{ p + 1 }}</span>
+              </li>
+
+              <li class="custom-pagination-arrow" [class.disabled]="page === lastPage" (click)="navigatePage('Next')">
+                <span>&rsaquo;</span>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>

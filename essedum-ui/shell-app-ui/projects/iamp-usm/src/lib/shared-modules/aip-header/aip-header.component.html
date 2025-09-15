@@ -1,0 +1,122 @@
+<div class="lfx-header">
+    <!-- Title section -->
+    <div class="header-left">
+        <mat-icon *ngIf="backAction" [class.active]="isBackHovered" (click)="onNavigateBack()"
+            [matTooltip]="backMatTooltip" [matTooltipPosition]="TOOLTIP_POSITION" (mouseenter)="isBackHovered = true"
+            (mouseleave)="isBackHovered = false" tabindex="0" role="button"
+            aria-label="Navigate back">arrow_back</mat-icon>
+        <h3>
+            {{ cardTitle}}
+        </h3>
+        <!-- <h3>
+            {{ getPageTitle() }}
+        </h3> -->
+
+        <span *ngIf="action === 'view-details' && cardTitle === 'Implementation'"
+            class="mx-5 lfx-c-badge lfx-c-badge--active float-end">Dynamic</span>
+    </div>
+
+    <!-- Right section -->
+    <div class="header-right">
+        @if (!action){
+        <!-- Action icons section -->
+        <div class="header-actions">
+            <p>Last refreshed on: {{ lastRefreshedTime | date:'medium' }}</p>
+
+            <div class="header-search lfx-panel d-flex" [@searchAnimation]="isSearchVisible ? 'visible' : 'hidden'"
+                [style.display]="isSearchVisible ? 'flex' : 'none'">
+                <!-- Input field -->
+                <input type="text" [placeholder]="searchPlaceholder" class="lfx-panel-input" [(ngModel)]="searchText"
+                    (keyup)="onSearch()" (blur)="onInputBlur()" aria-label="Search input">
+                <mat-icon [ngClass]="{'active': isSearchHovered}" class="lfx-u-mar-r-8"
+                    (mouseenter)="isSearchHovered = true" (mouseleave)="isSearchHovered = false">
+                    search
+                </mat-icon>
+            </div>
+
+            <!-- Search icon with animation -->
+            <div *ngIf="!isSearchVisible && !isAnimating" class="action-button">
+                <mat-icon [ngClass]="{'active': isSearchHovered}" matTooltip="Search"
+                    [matTooltipPosition]="TOOLTIP_POSITION" (mouseenter)="isSearchHovered = true"
+                    (mouseleave)="isSearchHovered = false" (click)="toggleSearch($event)" aria-label="Toggle search">
+                    search
+                </mat-icon>
+            </div>
+
+            <!-- Add button (conditionally shown) -->
+            <div *ngIf="showAddButton" class="action-button">
+                <mat-icon [ngClass]="{'active': isAddHovered}" (click)="onAddClick()" [matTooltip]="addMatTooltip"
+                    [matTooltipPosition]="TOOLTIP_POSITION" (mouseenter)="isAddHovered = true"
+                    (mouseleave)="isAddHovered = false" aria-label="Add new item">
+                    add
+                </mat-icon>
+            </div>
+
+            <!-- Refresh button -->
+            <div class="action-button">
+                <mat-icon [ngClass]="{'active': isRefreshHovered, 'rotate-icon': isRefreshing}"
+                    (click)="onRefreshClick()" matTooltip="Refresh" [matTooltipPosition]="TOOLTIP_POSITION"
+                    (mouseenter)="isRefreshHovered = true" (mouseleave)="isRefreshHovered = false"
+                    aria-label="Refresh data">
+                    autorenew
+                </mat-icon>
+            </div>
+        </div>
+
+        }
+        <!-- Edit/Create mode actions -->
+        @else if (action === 'add-constants') {
+
+
+        <!-- Action icons section -->
+        <div class="header-actions">
+
+
+        </div>
+
+        }
+
+        <!-- Edit/Create mode actions -->
+        @else if (action === 'edit-constants') {
+
+
+        <!-- Action icons section -->
+        <div class="header-actions">
+
+            <!-- Close button -->
+            <div class="action-button">
+                <mat-icon [ngClass]="{'active': isCloseHovered}" (click)="onView()" matTooltip=" View Configuration"
+                    [matTooltipPosition]="TOOLTIP_POSITION" (mouseenter)="isCloseHovered = true"
+                    (mouseleave)="isCloseHovered = false" aria-label="view">
+                    remove_red_eye
+                </mat-icon>
+
+            </div>
+        </div>
+
+        }
+        <!-- View mode actions -->
+        @else if(action === 'view-constants') {
+
+
+
+        <!-- Action icons section -->
+        <div class="header-actions">
+
+            <!-- Edit button -->
+            <div class="action-button">
+                <mat-icon [ngClass]="{'active': isEditHovered}" (click)="onEdit()" matTooltip="Edit Configuration"
+                    [matTooltipPosition]="TOOLTIP_POSITION" (mouseenter)="isEditHovered = true"
+                    (mouseleave)="isEditHovered = false" aria-label="Close">
+                    edit
+                </mat-icon>
+
+
+            </div>
+
+
+        </div>
+
+        }
+    </div>
+</div>

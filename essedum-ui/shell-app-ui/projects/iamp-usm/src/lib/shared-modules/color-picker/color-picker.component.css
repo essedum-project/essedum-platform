@@ -1,0 +1,107 @@
+.color-picker-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 80px;
+}
+
+.color-picker-label {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #424242;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.color-picker-label.required {
+  font-weight: 600;
+}
+
+.required-asterisk {
+  color: #f44336;
+  margin-left: 0.125rem;
+}
+
+.color-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.color-input {
+  width: 60px;
+  height: 40px;
+  border: 2px solid #e0e0e0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  background: none;
+  padding: 0;
+}
+
+.color-input:hover {
+  border-color: #2196f3;
+}
+
+.color-input:focus {
+  outline: none;
+  border-color: #2196f3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+.color-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  border-color: #e0e0e0;
+}
+
+.clear-color-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: #f5f5f5;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #757575;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.clear-color-btn:hover {
+  background: #e0e0e0;
+  color: #424242;
+}
+
+.clear-color-btn:focus {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+.clear-color-btn mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.color-value {
+  font-size: 0.75rem;
+  color: #757575;
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .color-input {
+    width: 50px;
+    height: 35px;
+  }
+  
+  .color-picker-label {
+    font-size: 0.8rem;
+  }
+}

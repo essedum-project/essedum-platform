@@ -1,7 +1,7 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
-		<changeSet author="Leap" id="24-cip-20250211-01">
+		<changeSet author="Essedum" id="24-cip-20250211-01">
     <sql dbms="mysql, postgresql" splitStatements="true" stripComments="true"> 
 		INSERT INTO mldatasource (
     id, connectiondetails, description, dshashcode, name, organization, salt, type, category,
@@ -73,7 +73,7 @@
                 "Endpoint": "",
                 "RequestMethod": "GET",
                 "Headers": "",
-                "LeapParams": [],
+                "EssedumParams": [],
                 "QueryParams": [],
                 "Body": ""
             }
@@ -116,7 +116,7 @@
                 "Endpoint": "",
                 "RequestMethod": "GET",
                 "Headers": "",
-                "LeapParams": [],
+                "EssedumParams": [],
                 "QueryParams": "",
                 "Body": ""
             }
@@ -723,17 +723,17 @@ VALUES (
 	</sql> 
 	
 </changeSet>
-		<changeSet author="Leap" id="24-cip-20250211-02">
+		<changeSet author="Essedum" id="24-cip-20250211-02">
     <sql dbms="mssql" splitStatements="true" stripComments="true"> 
     	SET IDENTITY_INSERT mldatasource ON;
 	ALTER TABLE mldatasource ALTER COLUMN activetime DATETIME2(6);
-		insert into mldatasource (id, connectiondetails, description, dshashcode, name, organization, salt, type, category, activetime, lastmodifiedby, lastmodifieddate, alias, extras, interfacetype, fordataset, foradapter, forruntime, formodel, forpromptprovider) values('6147','{\"password\":\"encLkcb27L/zuAk1JyL/ZRkK+OtD+xHAnPc\",\"userName\":\"leapadm\",\"url\":\"jdbc:mysql://10.67.9.46:3307/telemetrydb\"}','','43cc308507c43465d602b076401eb02932457a977861b740e25d52d67955ddbf','LEOTLMTR19390','leo1311','MXqgjgoT80rHK7Iws+9JVbQDtx1z30l0YwsukVbKWah17uos5iceLGfHIOqKpoxngkuFjtAJRKWZZG/SCbmd6w==','MYSQL','SQL','2025-01-17 08:06:40.391611','admin','2025-01-17 08:06:40','TelemetryDB','{\"apispec\":{},\"apispectemplate\":{}}',NULL,NULL,NULL,NULL,NULL,NULL);
-		insert into mldatasource (id, connectiondetails, description, dshashcode, name, organization, salt, type, category, activetime, lastmodifiedby, lastmodifieddate, alias, extras, interfacetype, fordataset, foradapter, forruntime, formodel, forpromptprovider) values('6327','{\"password\":\"encLkcb27L/zuAk1JyL/ZRkK+OtD+xHAnPc\",\"userName\":\"leapadm\",\"url\":\"jdbc:mysql://10.67.9.46:3307/telemetrydb\"}','','43cc308507c43465d602b076401eb02932457a977861b740e25d52d67955ddbf','LEOTLMTR19390','Pragya_1177353','MXqgjgoT80rHK7Iws+9JVbQDtx1z30l0YwsukVbKWah17uos5iceLGfHIOqKpoxngkuFjtAJRKWZZG/SCbmd6w==','MYSQL','SQL','2025-01-17 08:06:40.391611','admin','2025-01-17 08:06:40','TelemetryDB','{\"apispec\":{},\"apispectemplate\":{}}',NULL,NULL,NULL,NULL,NULL,NULL);
+		insert into mldatasource (id, connectiondetails, description, dshashcode, name, organization, salt, type, category, activetime, lastmodifiedby, lastmodifieddate, alias, extras, interfacetype, fordataset, foradapter, forruntime, formodel, forpromptprovider) values('6147','{\"password\":\"encLkcb27L/zuAk1JyL/ZRkK+OtD+xHAnPc\",\"userName\":\"essedumadm\",\"url\":\"jdbc:mysql://10.67.9.46:3307/telemetrydb\"}','','43cc308507c43465d602b076401eb02932457a977861b740e25d52d67955ddbf','LEOTLMTR19390','leo1311','MXqgjgoT80rHK7Iws+9JVbQDtx1z30l0YwsukVbKWah17uos5iceLGfHIOqKpoxngkuFjtAJRKWZZG/SCbmd6w==','MYSQL','SQL','2025-01-17 08:06:40.391611','admin','2025-01-17 08:06:40','TelemetryDB','{\"apispec\":{},\"apispectemplate\":{}}',NULL,NULL,NULL,NULL,NULL,NULL);
+		insert into mldatasource (id, connectiondetails, description, dshashcode, name, organization, salt, type, category, activetime, lastmodifiedby, lastmodifieddate, alias, extras, interfacetype, fordataset, foradapter, forruntime, formodel, forpromptprovider) values('6327','{\"password\":\"encLkcb27L/zuAk1JyL/ZRkK+OtD+xHAnPc\",\"userName\":\"essedumadm\",\"url\":\"jdbc:mysql://10.67.9.46:3307/telemetrydb\"}','','43cc308507c43465d602b076401eb02932457a977861b740e25d52d67955ddbf','LEOTLMTR19390','Pragya_1177353','MXqgjgoT80rHK7Iws+9JVbQDtx1z30l0YwsukVbKWah17uos5iceLGfHIOqKpoxngkuFjtAJRKWZZG/SCbmd6w==','MYSQL','SQL','2025-01-17 08:06:40.391611','admin','2025-01-17 08:06:40','TelemetryDB','{\"apispec\":{},\"apispectemplate\":{}}',NULL,NULL,NULL,NULL,NULL,NULL);
 		SET IDENTITY_INSERT mldatasource OFF;
 	</sql> 
 </changeSet>
 
-	  <changeSet dbms="mysql,postgresql,mssql" author="Leap (generated)" id="3v2-cip-01">
+	  <changeSet dbms="mysql,postgresql,mssql" author="Essedum (generated)" id="3v2-cip-01">
         <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/312_to_320/acme/cip/mlpipeline.csv" quotchar="&quot;" separator="," tableName="mlpipeline">
             <column header="created_by" name="created_by" type="STRING"/>
             <column header="created_date" name="created_date" type="datetime(6)"/>
@@ -756,7 +756,7 @@ VALUES (
         </loadData>
     </changeSet>
 	   
-    <changeSet dbms="mysql,postgresql, mssql" author="Leap (generated)" id="3v2-cip-02">
+    <changeSet dbms="mysql,postgresql, mssql" author="Essedum (generated)" id="3v2-cip-02">
         <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/312_to_320/acme/cip/mldataset.csv" quotchar="&quot;" separator="," tableName="mldataset">
             <column header="id" name="id" type="NUMERIC"/>
             <column header="attributes" name="attributes" type="STRING"/>
@@ -795,7 +795,7 @@ VALUES (
 			
         </loadData>
     </changeSet>
-	<changeSet author="Leap (generated)" id="3v2-cip-03">
+	<changeSet author="Essedum (generated)" id="3v2-cip-03">
 		<loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/312_to_320/acme/cip/mleventjobmapping.csv" quotchar="&quot;" separator="," tableName="mleventjobmapping">
 			<column header="id" name="id" type="NUMERIC" />
 			<column header="body" name="body" type="STRING" />
@@ -807,7 +807,7 @@ VALUES (
 		</loadData>
 	</changeSet>
 
-	<changeSet author="Leap" id="3v1-cip-20250108-100">
+	<changeSet author="Essedum" id="3v1-cip-20250108-100">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT ci_id  AS Host_ID,ci_name ,display_name AS Host_Name,ci_STATUS AS Status,os_type AS OS_Type,cpu_cores AS CPU_Cores,ip_address AS IP_Address FROM sre_ci_metadata WHERE project_id = {project_id} AND ci_type=''Host'';","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"project_id\":\"project_id\",\"hostgroup\":\"host_groupName\"}","tableName":"","uniqueIdentifier":""}' WHERE name = 'TotalHost_DT' AND organization = 'leo1311';
 		</sql> 
@@ -817,7 +817,7 @@ VALUES (
 
 
 
-	<changeSet author="Leap" id="3v1-cip-20250108-200">
+	<changeSet author="Essedum" id="3v1-cip-20250108-200">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT ci_id AS Host_Id, h.display_name AS Host_Name, displayId AS Issue_ID, eventId AS Problem_ID, title AS Description, p.status AS Status, severityLevel AS Severity_Level, DATEADD(SECOND, startTime / 1000, ''19700101 00:00:00:000'') AS Raised_Time FROM  sre_event p JOIN sre_ci_metadata h ON h.ci_name = p.rootCauseEntity WHERE h.project_id = {project_id} AND p.project_id = {project_id} AND eventType = ''Issue'' AND startTime BETWEEN CAST(DATEDIFF(SECOND, ''19700101 00:00:00'', DATEADD(DAY, -1, GETDATE())) AS BIGINT) * 1000 AND CAST(DATEDIFF(SECOND, ''19700101 00:00:00'', GETDATE()) AS BIGINT) * 1000 AND p.status = ''OPEN'';","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"project_id\":\"p.project_id\",\"hostgroup\":\"host_groupName\"}","tableName":"","uniqueIdentifier":""}' WHERE name = 'HostswithIssues_DT' and organization = 'leo1311';
 		</sql> 
@@ -827,7 +827,7 @@ VALUES (
  
 
 
-	<changeSet author="Leap" id="3v1-cip-20250108-300">
+	<changeSet author="Essedum" id="3v1-cip-20250108-300">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT ci_Id AS Host_ID, display_Name AS Host_Name, e.eventId AS Event_ID, title AS Description, e.status AS Status, severityLevel AS Severity_Level, FORMAT(DATEADD(SECOND, CAST(startTime AS BIGINT) / 1000, ''19700101 00:00:00:000''), ''MM/dd/yy HH:mm:ss'') AS Raised_Time FROM sre_event e JOIN sre_ci_metadata h ON h.ci_name = e.rootCauseEntity WHERE h.project_id = {project_id} AND e.eventType = ''Alert''     AND h.ci_type = ''Host'' AND e.project_id = {project_id}  AND startTime BETWEEN CAST(DATEDIFF(SECOND, ''19700101 00:00:00'', DATEADD(DAY, -1, GETDATE())) AS BIGINT) AND CAST(DATEDIFF(SECOND, ''19700101 00:00:00'', GETDATE()) AS BIGINT) AND e.status = ''OPEN'';","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"project_id\":\"e.project_id\",\"hostgroup\":\"host_groupName\"}","tableName":"","uniqueIdentifier":""}' WHERE name = 'HostswithAlerts_DT' and organization = 'leo1311';
 		</sql> 
@@ -837,7 +837,7 @@ VALUES (
 
 
 
-	<changeSet author="Leap" id="3v1-cip-20250108-400">
+	<changeSet author="Essedum" id="3v1-cip-20250108-400">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT a.ci_Id  AS Application_ID,a.ci_name, a.display_Name AS Application_Name,ci_STATUS AS Status,application_Type AS Application_Type FROM sre_ci_metadata a WHERE a.project_id = {project_id} AND  a.ci_type=''Application'' and a.apm_type = ''DT'' ","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"project_id\":\"project_id\",\"hostgroup\":\"host_groupName\"}","tableName":"","uniqueIdentifier":""}' WHERE name = 'TotalApps_DT' and organization = 'leo1311';
 		</sql> 
@@ -846,7 +846,7 @@ VALUES (
 
 
 
-	<changeSet author="Leap" id="3v1-cip-20250108-500">
+	<changeSet author="Essedum" id="3v1-cip-20250108-500">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT m.ci_Id AS Entity_ID, m.display_name AS App_Name, eventId AS Problem_Id, displayId AS Issue_ID, title AS Description, p.status AS Status, severityLevel AS Severity_Level, FORMAT(DATEADD(SECOND, CAST(startTime AS BIGINT) / 1000, ''19700101 00:00:00:000''), ''MM/dd/yy HH:mm:ss'') AS Raised_Time FROM sre_event p JOIN sre_ci_metadata m ON m.ci_name = p.rootCauseEntity WHERE apmtype = ''DT'' AND eventtype = ''Issue'' AND p.project_id = {project_id} AND startTime BETWEEN CAST(DATEDIFF(SECOND, ''19700101 00:00:00'', DATEADD(DAY, -1, GETDATE())) AS BIGINT) * 1000 AND CAST(DATEDIFF(SECOND, ''19700101 00:00:00'', GETDATE()) AS BIGINT) * 1000 AND p.status = ''OPEN'' AND m.ci_type = ''Application'';\n","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"project_id\":\"p.project_id\",\"hostgroup\":\"host_groupName\"}","tableName":"","uniqueIdentifier":""}' WHERE name = 'AppswithIssues_DT' and organization = 'leo1311';
 		</sql> 
@@ -856,7 +856,7 @@ VALUES (
 
 
 
-	<changeSet author="Leap" id="3v1-cip-20250108-600">
+	<changeSet author="Essedum" id="3v1-cip-20250108-600">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT m.ci_Id AS Entity_ID, m.display_name AS App_Name, eventId, displayId AS Alert_ID, title AS Description, p.status AS Status, severityLevel AS Severity_Level,FORMAT(DATEADD(SECOND, CAST(startTime AS BIGINT) / 1000, ''19700101 00:00:00:000''), ''MM/dd/yy HH:mm:ss'') AS Raised_Time FROM sre_event p JOIN sre_ci_metadata m ON m.ci_name = p.rootCauseEntity WHERE apmtype = ''DT'' AND eventtype = ''Alert'' AND p.project_id = {project_id} AND startTime BETWEEN CAST(DATEDIFF(SECOND, ''19700101 00:00:00'', DATEADD(DAY, -1, GETDATE())) AS BIGINT) * 1000 AND CAST(DATEDIFF(SECOND, ''19700101 00:00:00'', GETDATE()) AS BIGINT) * 1000 AND p.status = ''OPEN'' AND m.ci_type = ''Application'' GROUP BY m.ci_Id, m.display_name, eventId, displayId, title, p.status, severityLevel, startTime;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"project_id\":\"p.project_id\",\"hostgroup\":\"host_groupName\"}","tableName":"","uniqueIdentifier":""}' WHERE name = 'AppswithAlerts_DT' and organization = 'leo1311';
 		</sql> 
@@ -865,7 +865,7 @@ VALUES (
 
 
 
-	<changeSet author="Leap" id="3v1-cip-20250108-700">
+	<changeSet author="Essedum" id="3v1-cip-20250108-700">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT s.ci_Id  AS Service_ID,s.display_Name AS Service_Name,ci_STATUS AS Status,service_Type AS Service_Type, CASE Technology_Type WHEN ''(NULL)'' THEN ''N\\A'' ELSE Technology_Type END AS Technology_Type FROM sre_ci_metadata s  WHERE s.ci_type=''Service'' and s.project_id = {project_id} AND apm_type = ''DT'';","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"project_id\":\"project_id\",\"hostgroup\":\"host_groupName\"}","tableName":"","uniqueIdentifier":""}' WHERE name = 'Totalservices_DT' and organization = 'leo1311';
 		</sql> 
@@ -873,7 +873,7 @@ VALUES (
 
 
 
-	<changeSet author="Leap" id="3v1-cip-20250108-800">
+	<changeSet author="Essedum" id="3v1-cip-20250108-800">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT e.eventId AS Event_ID, c.ci_Id AS Entity_ID, c.display_Name AS Service_Name, title AS Description, e.status AS Status, severityLevel AS Severity_Level, FORMAT(DATEADD(SECOND, CAST(startTime AS BIGINT) / 1000, ''19700101 00:00:00:000''), ''MM/dd/yy HH:mm:ss'') AS Raised_Time FROM sre_event e JOIN sre_ci_metadata c ON e.rootCauseEntity = c.ci_name WHERE apmtype = ''DT'' AND e.project_id = {project_id} AND startTime BETWEEN CAST(DATEDIFF(SECOND, ''19700101 00:00:00'', DATEADD(DAY, -1, GETDATE())) AS BIGINT) * 1000 AND CAST(DATEDIFF(SECOND, ''19700101 00:00:00'', GETDATE()) AS BIGINT) * 1000 AND c.ci_id IS NOT NULL AND e.eventType = ''Issue'' AND e.status = ''OPEN'' AND c.ci_type = ''Service'' GROUP BY c.ci_name, e.eventId, c.ci_Id, c.display_Name, title, e.status, severityLevel, startTime;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"project_id\":\"e.project_id\",\"hostgroup\":\"host_groupName\"}","tableName":"","uniqueIdentifier":""}' WHERE name = 'ServiceswithIssues_DT' and organization = 'leo1311';
 		</sql> 
@@ -882,13 +882,13 @@ VALUES (
 
 
 
-	<changeSet author="Leap" id="3v1-cip-20250108-900">
+	<changeSet author="Essedum" id="3v1-cip-20250108-900">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT e.eventId AS Event_ID,c.ci_Id AS Entity_ID, c.display_Name AS Service_Name, title AS Description, e.status AS Status,severityLevel AS Severity_Level, FORMAT(DATEADD(SECOND, CAST(startTime AS BIGINT) / 1000, ''19700101 00:00:00:000''), ''MM/dd/yy HH:mm:ss'') AS Raised_Time\nFROM sre_event e JOIN sre_ci_metadata c ON e.rootCauseEntity = c.ci_name WHERE apmtype = ''DT'' AND e.project_id = {project_id} AND startTime BETWEEN CAST(DATEDIFF(SECOND, ''19700101 00:00:00'', DATEADD(DAY, -1, GETDATE())) AS BIGINT) * 1000 AND CAST(DATEDIFF(SECOND, ''19700101 00:00:00'', GETDATE()) AS BIGINT) * 1000 AND c.ci_id IS NOT NULL AND e.eventType = ''Alert'' AND e.status = ''OPEN'' AND c.ci_type = ''Service'' GROUP BY c.ci_name, e.eventId, c.ci_Id, c.display_Name, title, e.status, severityLevel, startTime;","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"{\"project_id\":\"e.project_id\",\"hostgroup\":\"host_groupName\"}","tableName":"","uniqueIdentifier":""}' WHERE name = 'ServiceswithAlerts_DT' and organization = 'leo1311';
 		</sql> 
 	</changeSet>
 
-	<changeSet author="Leap" id="3v1-cip-20250108-900-1-16-01">
+	<changeSet author="Essedum" id="3v1-cip-20250108-900-1-16-01">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">
 		UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT coalesce(SUM(counts),0) AS "Total_count"
 FROM (
@@ -908,7 +908,7 @@ FROM (
 	</changeSet>
 
 
-	<changeSet author="Leap" id="24-cip-242025-2-061">
+	<changeSet author="Essedum" id="24-cip-242025-2-061">
 
     <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 
@@ -918,7 +918,7 @@ UPDATE mldataset SET attributes = '{"filter": "", "mode": "query", "Query": "SEL
   
 </changeSet>
 
-<changeSet author="Leap" id="24-cip-14-2-2025-2-061-01-1">
+<changeSet author="Essedum" id="24-cip-14-2-2025-2-061-01-1">
 
     <sql dbms="mssql" splitStatements="true" stripComments="true"> 
 
@@ -929,7 +929,7 @@ UPDATE mldataset SET attributes = '{"filter":"","mode":"query","Query":"SELECT C
 </changeSet>
 
 
-<changeSet author="Leap" id="24-cip-14-2-2025-2-061-01-2">
+<changeSet author="Essedum" id="24-cip-14-2-2025-2-061-01-2">
 
     <sql dbms="mssql" splitStatements="true" stripComments="true"> 
 
@@ -940,7 +940,7 @@ UPDATE mldataset SET attributes = '{"filter":"","mode":"query","Query":"SELECT C
 </changeSet>
 
 
-<changeSet author="Leap" id="24-cip-14-2-2025-2-061-01-3">
+<changeSet author="Essedum" id="24-cip-14-2-2025-2-061-01-3">
 
     <sql dbms="mssql" splitStatements="true" stripComments="true"> 
 
@@ -951,7 +951,7 @@ UPDATE mldataset SET attributes = '{"filter":"","mode":"query","Query":"SELECT C
   
 </changeSet>
 
-<changeSet author="Leap" id="24-cip-14-2-2025-2-061-01-4">
+<changeSet author="Essedum" id="24-cip-14-2-2025-2-061-01-4">
 
     <sql dbms="mssql" splitStatements="true" stripComments="true"> 
 
@@ -962,7 +962,7 @@ UPDATE mldataset SET attributes = '{"filter":"","mode":"query","Query":"SELECT C
 </changeSet>
 
 
-	<changeSet author="Leap" id="24-cip-14-2-2025-2-091-02-20-01">
+	<changeSet author="Essedum" id="24-cip-14-2-2025-2-091-02-20-01">
 
     <sql dbms="mssql" splitStatements="true" stripComments="true"> 
 
@@ -973,7 +973,7 @@ UPDATE mldataset SET attributes = '{"filter":"","mode":"query","Query":"SELECT D
 </changeSet>
 
 
-<changeSet author="Leap" id="24-cip-14-2-2025-2-091-02-30-02">
+<changeSet author="Essedum" id="24-cip-14-2-2025-2-091-02-30-02">
 
     <sql dbms="mssql" splitStatements="true" stripComments="true">
 UPDATE mldataset SET attributes = '{"filter":"","mode":"query","Query":"SELECT application_grp_name AS ''Application_Group_Name'', probe_name AS ''Probe Name'', convert(varchar,run_start_time,8) AS ''Run Start Time'', convert(varchar,run_end_time,8) AS ''Run End Time'', run_time AS ''Run Time'' FROM sre_probe_run_app INNER JOIN ccl_app ON sre_probe_run_app.application_id=ccl_app.application_id INNER JOIN ccl_app_grp ON ccl_app.application_grp_id=ccl_app_grp.application_grp_id INNER JOIN sre_location ON sre_probe_run_app.location_id = sre_location.location_id INNER JOIN sre_probe ON sre_probe_run_app.probe_id = sre_probe.probe_id WHERE run_result=1 AND ccl_app.project_id=ccl_app.project_id AND ccl_app.project_id=(SELECT id FROM usm_project WHERE NAME=''@project_name'')  GROUP BY application_grp_name, probe_name, run_start_time, run_end_time, run_time","Cacheable":false,"isStreaming":"false","defaultValues":"","writeMode":"append","params":"","tableName":"","uniqueIdentifier":""}' WHERE name = 'Testapplicationgroupwithactiveprobe' ;
@@ -984,7 +984,7 @@ UPDATE mldataset SET attributes = '{"filter":"","mode":"query","Query":"SELECT a
 
 
 
-<changeSet author="Leap" id="24-cip-14-2-2025-2-091-02-40-03">
+<changeSet author="Essedum" id="24-cip-14-2-2025-2-091-02-40-03">
 
     <sql dbms="mssql" splitStatements="true" stripComments="true">
 
@@ -997,7 +997,7 @@ UPDATE mldataset SET attributes = '{"filter":"","mode":"query","Query":"SELECT a
 
 
 
-	<changeSet author="Leap" id="24-cip-14-2-2025-2-091-02-50-04">
+	<changeSet author="Essedum" id="24-cip-14-2-2025-2-091-02-50-04">
 
     <sql dbms="mssql" splitStatements="true" stripComments="true">
 
@@ -1010,7 +1010,7 @@ UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT c
 
 
 
-<changeSet author="Leap" id="24-cip-14-2-2025-2-091-02-60-05">
+<changeSet author="Essedum" id="24-cip-14-2-2025-2-091-02-60-05">
 
     <sql dbms="mssql" splitStatements="true" stripComments="true">
 
@@ -1022,7 +1022,7 @@ UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT a
 
 
 
-<changeSet author="Leap" id="24-cip-14-2-2025-2-091-02-70-06">
+<changeSet author="Essedum" id="24-cip-14-2-2025-2-091-02-70-06">
 
     <sql dbms="mssql" splitStatements="true" stripComments="true">
 
@@ -1035,7 +1035,7 @@ UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT s
 
 
 
-	<changeSet author="Leap" id="24-cip-14-2-2025-2-091-02-80-07">
+	<changeSet author="Essedum" id="24-cip-14-2-2025-2-091-02-80-07">
 
     <sql dbms="mssql" splitStatements="true" stripComments="true">
 
@@ -1046,7 +1046,7 @@ UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT D
   
 </changeSet>
 <!--
-<changeSet author="sumanth.kota" id="CAS-2025-02-27-1">
+<changeSet author="essedum" id="CAS-2025-02-27-1">
     <sql dbms="mysql"> 
 		INSERT INTO mldataset (id,attributes, dataset_type, DESCRIPTION, exp_status, NAME, ORGANIZATION, schemajson, TYPE, backing_dataset, dataset_schema, datasource, lastmodifiedby, lastmodifieddate, alias, CONTEXT, is_approval_required, is_permission_managed, is_inbox_required, is_audit_required, is_archival_enabled, archival_config, dashboard, metadata, modeltype, views, taskdetails, tags, interfacetype, adaptername, isadapteractive, indexname, summary, event_details)
 		VALUES(1080,'{"filter":"","mode":"query","Query":"SELECT * FROM cas_execution_status LIMIT 50;","Cacheable":false,"isStreaming":"false","Headers":"","defaultValues":"","QueryParams":"","writeMode":"append","params":"{}","tableName":"cas_execution_status","uniqueIdentifier":""}',NULL,NULL,NULL,'CAS_Execution_Status','leo1311',NULL,'rw',NULL,NULL,'AcmeBTF', 'admin','2025-02-27 14:25:00.230811','CAS Execution',NULL,0,0,0,0,NULL,NULL,NULL,NULL,NULL,'Table View',NULL,'[]',NULL,NULL,NULL,NULL,NULL,NULL);
@@ -1054,7 +1054,7 @@ UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT D
 </changeSet>
 -->
 <!--
-<changeSet author="sumanth.kota" id="CAS-2025-02-27-2">
+<changeSet author="essedum" id="CAS-2025-02-27-2">
     <sql dbms="mssql" splitStatements="true" stripComments="true"> 
     	SET IDENTITY_INSERT mldataset ON;
 		INSERT INTO mldataset (id,attributes, dataset_type, DESCRIPTION, exp_status, NAME, ORGANIZATION, schemajson, TYPE, backing_dataset, dataset_schema, datasource, lastmodifiedby, lastmodifieddate, alias, CONTEXT, is_approval_required, is_permission_managed, is_inbox_required, is_audit_required, is_archival_enabled, archival_config, dashboard, metadata, modeltype, views, taskdetails, tags, interfacetype, adaptername, isadapteractive, indexname, summary, event_details)
@@ -1065,7 +1065,7 @@ UPDATE mldataset set attributes = '{"filter":"","mode":"query","Query":"SELECT D
 -->
 
 
-	<changeSet author="Leap" id="24-cip-14-2-2025-2-091-02-90-08">
+	<changeSet author="Essedum" id="24-cip-14-2-2025-2-091-02-90-08">
 
     <sql dbms="mssql" splitStatements="true" stripComments="true">
 

@@ -1,0 +1,41 @@
+<div class="color-picker-container">
+  <label 
+    [for]="inputId" 
+    class="color-picker-label"
+    [class.required]="required">
+    {{ label }}
+    <span *ngIf="required" class="required-asterisk" aria-label="required">*</span>
+  </label>
+  
+  <div class="color-input-wrapper">
+    <input
+      [id]="inputId"
+      type="color"
+      class="color-input"
+      [value]="color"
+      [name]="name"
+      [required]="required"
+      [disabled]="disabled"
+      (input)="onColorChange($event)"
+      (blur)="onTouched()"
+      [attr.aria-label]="label"
+      [attr.aria-describedby]="hasColor ? inputId + '-value' : null" />
+    
+    <button
+      *ngIf="hasColor && !disabled"
+      type="button"
+      class="clear-color-btn"
+      (click)="clearColor()"
+      [attr.aria-label]="'Clear ' + label"
+      matTooltip="Clear color">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  
+  <small 
+    *ngIf="hasColor" 
+    [id]="inputId + '-value'" 
+    class="color-value">
+    {{ color }}
+  </small>
+</div>

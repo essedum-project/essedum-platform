@@ -1,8 +1,8 @@
 apipermission:
   disable_api_security_validation: false
-LEAP_HOME: /app
+ESSEDUM_HOME: /app
 LOG_PATH: /app/log
-LEAP_ULR: http://localhost:8080/
+ESSEDUM_URL: http://localhost:8080/
 commonAppUrl: "http://localhost:8081/"
  
 telemetry:
@@ -22,12 +22,12 @@ config:
   datasourceurl: jdbc:mysql://mysql:3306
   datasourceuser: root
   datasourcepass: password
-  leapcoredb: core_dbb
-  leapquartzdb: leap2_8000_quartz
+  essedumcoredb: essedum_coredb
+  essedumquartzdb: essedum_quartzdb
   
-  leapbtfdb: leapmaster_btf
-  leapsjsdb: leapmaster_sjs
-  leapsrefdb: leapmaster_ref_data
+  essedumbtfdb: essedum_btf
+  essedumsjsdb: essedum_sjs
+  essedumsrefdb: essedum_ref_data
  
   service-auth:
     access-token: aec127c2-c984-33f6-9a3a-355xd1dof097
@@ -35,37 +35,37 @@ config:
  
 ## Config for H2
 #  driverClassName: org.h2.Driver
-#  leap-db-url: ${config.datasourceurl}/${config.leapcoredb};MODE=MYSQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DATABASE_TO_UPPER=FALSE;IGNORECASE=TRUE;AUTO_SERVER=TRUE
-#  quartz-db-url: ${config.datasourceurl}/${config.leapquartzdb};MODE=MYSQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DATABASE_TO_UPPER=FALSE;IGNORECASE=TRUE;AUTO_SERVER=TRUE
-#  sjs-db-url: ${config.datasourceurl}/${config.leapsjsdb};MODE=MYSQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DATABASE_TO_UPPER=FALSE;IGNORECASE=TRUE;AUTO_SERVER=TRUE
-#  btf-db-url: ${config.datasourceurl}/${config.leapbtfdb};MODE=MYSQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DATABASE_TO_UPPER=FALSE;IGNORECASE=TRUE;AUTO_SERVER=TRUE
-#  leap-db-username: ${config.datasourceuser}
-#  leap-db-password: ${config.datasourcepass}
+#  essedum-db-url: ${config.datasourceurl}/${config.essedumcoredb};MODE=MYSQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DATABASE_TO_UPPER=FALSE;IGNORECASE=TRUE;AUTO_SERVER=TRUE
+#  quartz-db-url: ${config.datasourceurl}/${config.essedumquartzdb};MODE=MYSQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DATABASE_TO_UPPER=FALSE;IGNORECASE=TRUE;AUTO_SERVER=TRUE
+#  sjs-db-url: ${config.datasourceurl}/${config.essedumsjsdb};MODE=MYSQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DATABASE_TO_UPPER=FALSE;IGNORECASE=TRUE;AUTO_SERVER=TRUE
+#  btf-db-url: ${config.datasourceurl}/${config.essedumbtfdb};MODE=MYSQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DATABASE_TO_UPPER=FALSE;IGNORECASE=TRUE;AUTO_SERVER=TRUE
+#  essedum-db-username: ${config.datasourceuser}
+#  essedum-db-password: ${config.datasourcepass}
 #  database-platform: org.hibernate.dialect.H2Dialect
  
 ## Config for MySQL
   driverClassName: com.mysql.cj.jdbc.Driver
-  leap-db-url: ${config.datasourceurl}/${config.leapcoredb}
-  quartz-db-url: ${config.datasourceurl}/${config.leapquartzdb}
-  sjs-db-url: ${config.datasourceurl}/${config.leapsjsdb}
-  btf-db-url: ${config.datasourceurl}/${config.leapbtfdb}?nullCatalogMeansCurrent=true
-  leap-db-username: ${config.datasourceuser}
-  leap-db-password: ${config.datasourcepass}
+  essedum-db-url: ${config.datasourceurl}/${config.essedumcoredb}
+  quartz-db-url: ${config.datasourceurl}/${config.essedumquartzdb}
+  sjs-db-url: ${config.datasourceurl}/${config.essedumsjsdb}
+  btf-db-url: ${config.datasourceurl}/${config.essedumbtfdb}?nullCatalogMeansCurrent=true
+  essedum-db-username: ${config.datasourceuser}
+  essedum-db-password: ${config.datasourcepass}
   database-platform: org.hibernate.dialect.MySQLDialect
  
 ## Config for MSSQL
 #  driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
-#  leap-db-url: ${config.datasourceurl};databaseName=${config.leapcoredb}
-#  quartz-db-url: ${config.datasourceurl};databaseName=${config.leapquartzdb}
-#  sjs-db-url: ${config.datasourceurl};databaseName=${config.leapsjsdb}
-#  btf-db-url: ${config.datasourceurl};databaseName=${config.leapbtfdb}
-#  leap-db-username: ${config.datasourceuser}
-#  leap-db-password: ${config.datasourcepass}
+#  essedum-db-url: ${config.datasourceurl};databaseName=${config.essedumcoredb}
+#  quartz-db-url: ${config.datasourceurl};databaseName=${config.essedumquartzdb}
+#  sjs-db-url: ${config.datasourceurl};databaseName=${config.essedumsjsdb}
+#  btf-db-url: ${config.datasourceurl};databaseName=${config.essedumbtfdb}
+#  essedum-db-username: ${config.datasourceuser}
+#  essedum-db-password: ${config.datasourcepass}
 #  database-platform: org.hibernate.dialect.SQLServer2012Dialect
  
 spring:
   application:
-    name: leap
+    name: essedum
   resources:
     static-locations: ${config.static-locations}
   mvc:
@@ -163,9 +163,9 @@ spring:
   datasource:
        type: com.zaxxer.hikari.HikariDataSource
        driverClassName: ${config.driverClassName}
-       url: ${config.leap-db-url}
-       username: ${config.leap-db-username}
-       password: ${config.leap-db-password}
+       url: ${config.essedum-db-url}
+       username: ${config.essedum-db-username}
+       password: ${config.essedum-db-password}
        maximum-pool-size: 100
        minimumIdle: 3
        idleTimeout: 60000
@@ -192,7 +192,7 @@ schedule:
 server:
 #enable only if context root is required
 #  servlet:
-#    context-path: /leap
+#    context-path: /essedum
   error:
     path: /error
   whitelabel:
@@ -211,7 +211,7 @@ csrf:
 proxy:
   httpProxyConfiguration:
     proxyScheme: http
-    proxyHost: blrproxy.ad.infosys.com
+    proxyHost: blrproxy.ad.lfn.com
     proxyPort: 8080
     proxyUser: null
     proxyPassword: null
@@ -269,8 +269,8 @@ icip:
     platform: mysql
     type: com.zaxxer.hikari.HikariDataSource
   pathPrefix: api/aip
-  pythonpath: C:/SoftwareCenterApplications/Leap-py3/python.exe
-  sparkhome: C:/SoftwareCenterApplications/Leap-py3/Leap-py3/Lib/site-packages/pyspark
+  pythonpath: C:/SoftwareCenterApplications/Essedum-py3/python.exe
+  sparkhome: C:/SoftwareCenterApplications/Essedum-py3/Essedum-py3/Lib/site-packages/pyspark
   Rpath: /usr/R/R-4.2.2/bin/RScript
  
 model:
@@ -293,8 +293,8 @@ quartz:
         driverClassName: ${config.driverClassName}
         url: ${quartz.datasource.jdbcUrl}
         jdbcUrl: ${config.quartz-db-url}
-        username: ${config.leap-db-username}
-        password: ${config.leap-db-password}
+        username: ${config.essedum-db-username}
+        password: ${config.essedum-db-password}
         maximum-pool-size: 8
         minimumIdle: 3
         idleTimeout: 60000
@@ -318,7 +318,7 @@ quartz:
                 batch_versioned_data: true
                 time_zone: UTC
             ddl-auto: none
-            physical_naming_strategy : com.infosys.icets.icip.icipwebeditor.job.config.UpperCaseStrategy
+            physical_naming_strategy : com.lfn.icip.icipwebeditor.job.config.UpperCaseStrategy
             implicit_naming_strategy : org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy      
  
 exp:
@@ -371,7 +371,7 @@ metrics:
 github:
   gitPathStudio : /app/gitRepo/studio/
   gitPathStore : /app/gitRepo/store/
-  username: your.username_infosys
+  username: your_username
   password: your_generated_token
  
 security:
