@@ -1,28 +1,28 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     
-    <changeSet author="Leap (generated)" id="20240809-3v0-usm-1">
+    <changeSet author="Essedum (generated)" id="20240809-3v0-usm-1">
 		<sql dbms="mysql,mssql">
 			UPDATE usm_constant SET item_value='{"label":"AI Brain","icon":"assets/icons/digital-ai-brain.svg","children":[{"label":"Connections","icon":"","url":"./aip/connections","children":[],"_id":2},{"label":"Datasets","icon":"","url":"./aip/datasets","children":[],"_id":3},{"label":"Pipelines","icon":"","url":"./aip/pipelines","children":[],"_id":4},{"label":"Chains","icon":"","url":"./aip/chain-list","children":[],"_id":5},{"label":"Models","icon":"","url":"./aip/models","children":[],"_id":6},{"label":"Endpoints","icon":"","url":"./aip/endpoints","children":[],"_id":7},{"label":"Apps","icon":"cube","url":"./aip/app-list","children":[],"_id":8},{"label":"Adapters","icon":"","url":"","children":[{"label":"SpecTemplates","icon":"","url":"./aip/spectemplates","children":[],"_id":10},{"label":"Adapters","icon":"","url":"./aip/adapters/","children":[],"_id":11},{"label":"Instances","icon":"","url":"./aip/instances","children":[],"_id":12}],"_id":9},{"label":"Data Models","icon":"","url":"./adapters/schemas","children":[{"label":"Schemas","icon":"","url":"./aip/schemas","children":[],"_id":14},{"label":"Relationships","icon":"","url":"./aip/relationship","children":[],"_id":15}],"_id":13},{"label":"Job Management","icon":"","url":"","children":[{"label":"Events","icon":"","url":"./aip/events","children":[],"_id":17},{"label":"Grouped Jobs","icon":"","url":"./aip/chains","children":[],"_id":26},{"label":"Schedule","icon":"","url":"./aip/scheduler","children":[],"_id":18},{"label":"Logs","icon":"","url":"./aip/jobs-log","children":[],"_id":19}],"_id":16}],"horizontal":true}' WHERE item='IT Portfolio Manager Side' AND project_name='leo1311' AND item_value LIKE '%{"label":"AI Brain","icon":"assets/icons/digital-ai-brain.svg"%'; 
 		</sql>
 	</changeSet>
-	<!--<changeSet author="Leap (generated)" id="20240809-3v0-usm-2">
+	<!--<changeSet author="Essedum (generated)" id="20240809-3v0-usm-2">
 		<sql dbms="h2,mssql, mysql, postgresql" splitStatements="true" stripComments="true">
       UPDATE usm_constant SET item_value='{"label":"AIOps","icon":"assets/icons/AI-powered-core.svg","children":[{"label":"Dashboard","icon":"dashcube","url":"./dynamicDashboard/grid/OCC/49","_id":2},{"label":"Ticket Analytics","icon":"ticket","url":"./dynamicDashboard/grid/OCC/2","_id":3},{"label":"Ticket SLA","icon":"tachometer","url":"./dynamicDashboard/grid/OCC/5","_id":4},{"label":"Ticket Clusters","icon":"object-group","url":"","children":[{"label":"Traditional Clusters","icon":"object-group","url":"./dynamicDashboard/grid/OCC/3","children":[],"_id":6},{"label":"GenAI Clusters","icon":"object-group","url":"./dynamicDashboard/grid/OCC/94233","children":[],"_id":7}],"_id":5},{"label":"Fault Predictions","icon":"tachometer","url":"./dynamicDashboard/grid/OCC/216","_id":6},{"label":"Server Anomaly","icon":"exclamation-circle","url":"./dynamicDashboard/grid/OCC/25","_id":7},{"label":"Correlation","icon":"puzzle-piece","url":"./dynamicDashboard/grid/OCC/4","_id":8},{"label":"EASE","icon":"puzzle-piece","url":"./dynamicDashboard/grid/OCC/9","_id":9},{"label":"ITSM","icon":"book","horizontal":true,"children":[{"label":"Incidents","icon":"","url":"./aip/tickets/alerts","children":[],"_id":2},{"label":"Change Request","icon":"","url":"./aip/tickets/changerequests","children":[],"_id":3},{"label":"Service Request","icon":"","url":"./aip/tickets/servicerequests","children":[],"_id":4},{"label":"Tasks","icon":"","url":"./aip/tickets/tasks","children":[],"_id":5},{"label":"Upload","icon":"upload","url":"./aip/tickets/uploadTicket","children":[],"_id":6},{"label":"Tickets List","icon":"","url":"./aip/tickets/create-ticket","children":[],"_id":12},{"label":"Problem Management","icon":"book","horizontal":true,"children":[{"label":"SOP","icon":"","url":"./aibrain/tickets/Sops-list","children":[],"_id":8},{"label":"RCA","icon":"","url":"./tickets/Rca-list","children":[],"_id":9},{"label":"Tags","icon":"","url":"./tickets/Clusters-list","children":[],"_id":10}],"_id":7},{"label":"Logs","icon":"","url":"./aip/jobs-log","children":[],"_id":11}]}],"horizontal":true}' WHERE item='IT Portfolio Manager Side' AND project_name='leo1311' AND item_value LIKE '{"label":"AIOps","icon":"assets/icons/AI-powered-core.svg"%';  
     </sql> 
 	</changeSet>-->
-	<changeSet author="Leap (generated)" id="20240809-3v0-usm-3">
+	<changeSet author="Essedum (generated)" id="20240809-3v0-usm-3">
 		<sql dbms="h2, mysql, postgresql" splitStatements="true" stripComments="true">  
          UPDATE usm_constant SET item_value='{"label":"AI Brain","icon":"assets/icons/digital-ai-brain.svg","children":[{"label":"Connections","icon":"","url":"./aip/connections","children":[],"_id":2},{"label":"Datasets","icon":"","url":"./aip/datasets","children":[],"_id":3},{"label":"Pipelines","icon":"","url":"./aip/pipelines","children":[],"_id":4},{"label":"Chains","icon":"","url":"./aip/chain-list","children":[],"_id":5},{"label":"Models","icon":"","url":"./aip/models","children":[],"_id":6},{"label":"Endpoints","icon":"","url":"./aip/endpoints","children":[],"_id":7},{"label":"Apps","icon":"cube","url":"./aip/app-list","children":[],"_id":8},{"label":"Adapters","icon":"","url":"","children":[{"label":"SpecTemplates","icon":"","url":"./aip/spectemplates","children":[],"_id":10},{"label":"Adapters","icon":"","url":"./aip/adapters/","children":[],"_id":11},{"label":"Instances","icon":"","url":"./aip/instances","children":[],"_id":12}],"_id":9},{"label":"Data Models","icon":"","url":"./adapters/schemas","children":[{"label":"Schemas","icon":"","url":"./aip/schemas","children":[],"_id":14},{"label":"Relationships","icon":"","url":"./aip/relationship","children":[],"_id":15}],"_id":13},{"label":"Job Management","icon":"","url":"","children":[{"label":"Events","icon":"","url":"./aip/events","children":[],"_id":17},{"label":"Grouped Jobs","icon":"","url":"./aip/chains","children":[],"_id":26},{"label":"Schedule","icon":"","url":"./aip/scheduler","children":[],"_id":18},{"label":"Logs","icon":"","url":"./aip/jobs-log","children":[],"_id":19}],"_id":16}],"horizontal":true}' WHERE item='Project Client Side' AND project_name='leo1311' AND item_value LIKE '%{"label":"AI Brain","icon":"assets/icons/digital-ai-brain.svg"%';		
          </sql>
      </changeSet>
-	 <changeSet author="Leap" id="20240809-3v0-usm-4">
+	 <changeSet author="Essedum" id="20240809-3v0-usm-4">
 		<sql dbms="h2, mysql, postgresql" splitStatements="true" stripComments="true">
 			UPDATE usm_constant SET item_value='{"label":"AIOps","icon":"assets/icons/AI-powered-core.svg","children":[{"label":"Dashboard","icon":"dashcube","url":"./dynamicDashboard/grid/OCC/49","_id":2},{"label":"Ticket Analytics","icon":"ticket","url":"./dynamicDashboard/grid/OCC/2","_id":3},{"label":"Ticket SLA","icon":"tachometer","url":"./dynamicDashboard/grid/OCC/5","_id":4},{"label":"Ticket Clusters","icon":"object-group","url":"./dynamicDashboard/grid/OCC/3","_id":5},{"label":"Fault Predictions","icon":"tachometer","url":"./dynamicDashboard/grid/OCC/216","_id":6},{"label":"Server Anomaly","icon":"exclamation-circle","url":"./dynamicDashboard/grid/OCC/25","_id":7},{"label":"Correlation","icon":"puzzle-piece","url":"./dynamicDashboard/grid/OCC/4","_id":8},{"label":"EASE","icon":"puzzle-piece","url":"./dynamicDashboard/grid/OCC/9","_id":9},{"label":"ITSM","icon":"book","horizontal":true,"children":[{"label":"Incidents","icon":"","url":"./aip/tickets/alerts","children":[],"_id":2},{"label":"Change Request","icon":"","url":"./aip/tickets/changerequests","children":[],"_id":3},{"label":"Service Request","icon":"","url":"./aip/tickets/servicerequests","children":[],"_id":4},{"label":"Tasks","icon":"","url":"./aip/tickets/tasks","children":[],"_id":5},{"label":"Upload","icon":"upload","url":"./aibrain/tickets/uploadTicket","children":[],"_id":6},{"label":"Tickets List","icon":"","url":"./aip/tickets/create-ticket","children":[],"_id":12},{"label":"Problem Management","icon":"book","horizontal":true,"children":[{"label":"SOP","icon":"","url":"./aibrain/tickets/Sops-list","children":[],"_id":8},{"label":"RCA","icon":"","url":"./tickets/Rca-list","children":[],"_id":9},{"label":"Tags","icon":"","url":"./tickets/Clusters-list","children":[],"_id":10}],"_id":7},{"label":"Logs","icon":"","url":"./aibrain/jobs/logs","children":[],"_id":11}]}],"horizontal":true}' WHERE item='Project Client Side' AND project_name='leo1311' AND item_value LIKE '{"label":"AIOps","icon":"assets/icons/AI-powered-core.svg"%';       
 		</sql> 
 	</changeSet>
 	
-	<!-- <changeSet author="Leap" id="20240810-3v0-usm-2">		
+	<!-- <changeSet author="Essedum" id="20240810-3v0-usm-2">		
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_role WHERE name='Project Admin';
@@ -33,7 +33,7 @@
 				(NULL,'Project Admin','Project Admin',b'1',NULL,NULL,NULL,NULL);
 		</sql>
 	</changeSet>
-    <changeSet author="Leap" id="20240813-3v0-usm-2">		
+    <changeSet author="Essedum" id="20240813-3v0-usm-2">		
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_role WHERE name='Project Admin';
@@ -44,7 +44,7 @@
 				(NULL,'Project Admin','Project Admin',NULL,NULL,NULL,NULL,NULL);
 		</sql>
 	</changeSet>
-	<changeSet author="Leap" id="20240810-3v0-usm-3">		
+	<changeSet author="Essedum" id="20240810-3v0-usm-3">		
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_role WHERE name='Project Client';
@@ -55,7 +55,7 @@
 				(NULL,'Project Client','Project Client',b'1',NULL,NULL,NULL,NULL);
 		</sql>
 	</changeSet>
-    <changeSet author="Leap" id="20240813-3v0-usm-3">		
+    <changeSet author="Essedum" id="20240813-3v0-usm-3">		
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_role WHERE name='Project Client';
@@ -66,7 +66,7 @@
 				(NULL,'Project Client','Project Client',NULL,NULL,NULL,NULL,NULL);
 		</sql>
 	</changeSet>
-	<changeSet author="Leap" id="20240810-3v0-usm-4">		
+	<changeSet author="Essedum" id="20240810-3v0-usm-4">		
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_role WHERE name='Portfolio Admin';
@@ -77,7 +77,7 @@
 				(NULL,'Portfolio Admin','Portfolio Admin',b'1',NULL,NULL,NULL,NULL);
 		</sql>
 	</changeSet>
-    <changeSet author="Leap" id="20240813-3v0-usm-4">		
+    <changeSet author="Essedum" id="20240813-3v0-usm-4">		
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_role WHERE name='Portfolio Admin';
@@ -88,7 +88,7 @@
 				(NULL,'Portfolio Admin','Portfolio Admin',NULL,NULL,NULL,NULL,NULL);
 		</sql>
 	</changeSet>
-	<changeSet author="Leap" id="20240810-3v0-usm-5">		
+	<changeSet author="Essedum" id="20240810-3v0-usm-5">		
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_role WHERE name='Portfolio Client';
@@ -99,7 +99,7 @@
 				(NULL,'Portfolio Client','Portfolio Client',b'1',NULL,NULL,NULL,NULL);
 		</sql>
 	</changeSet>
-    <changeSet author="Leap" id="20240813-3v0-usm-5">		
+    <changeSet author="Essedum" id="20240813-3v0-usm-5">		
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_role WHERE name='Portfolio Client';
@@ -110,7 +110,7 @@
 				(NULL,'Portfolio Client','Portfolio Client',NULL,NULL,NULL,NULL,NULL);
 		</sql>
 	</changeSet>
-	<changeSet author="Leap" id="20240810-3v0-usm-6">		
+	<changeSet author="Essedum" id="20240810-3v0-usm-6">		
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_role WHERE name='Portfolio Manager';
@@ -121,7 +121,7 @@
 				(NULL,'Portfolio Manager','Portfolio Manager',b'1',NULL,NULL,NULL,NULL);
 		</sql>
 	</changeSet>
-    <changeSet author="Leap" id="20240813-3v0-usm-6">		
+    <changeSet author="Essedum" id="20240813-3v0-usm-6">		
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_role WHERE name='Portfolio Manager';
@@ -132,7 +132,7 @@
 				(NULL,'Portfolio Manager','Portfolio Manager',NULL,NULL,NULL,NULL,NULL);
 		</sql>
 	</changeSet>
-	<changeSet author="Leap" id="20240810-3v0-usm-7">		
+	<changeSet author="Essedum" id="20240810-3v0-usm-7">		
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_role WHERE name='Core Project Admin';
@@ -143,7 +143,7 @@
 				(NULL,'Core Project Admin','Core Project Admin',b'1',NULL,NULL,NULL,NULL);
 		</sql>
 	</changeSet>
-    <changeSet author="Leap" id="20240813-3v0-usm-7">		
+    <changeSet author="Essedum" id="20240813-3v0-usm-7">		
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_role WHERE name='Core Project Admin';
@@ -154,7 +154,7 @@
 				(NULL,'Core Project Admin','Core Project Admin',NULL,NULL,NULL,NULL,NULL);
 		</sql>
 	</changeSet>
-	<changeSet author="Leap" id="20240810-3v0-usm-8">		
+	<changeSet author="Essedum" id="20240810-3v0-usm-8">		
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_role WHERE name='Core Portfolio Admin';
@@ -165,7 +165,7 @@
 				(NULL,'Core Portfolio Admin','Core Portfolio Admin',b'1',NULL,NULL,NULL,NULL);
 		</sql>
 	</changeSet>
-    <changeSet author="Leap" id="20240813-3v0-usm-8">		
+    <changeSet author="Essedum" id="20240813-3v0-usm-8">		
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_role WHERE name='Core Portfolio Admin';
@@ -176,7 +176,7 @@
 				(NULL,'Core Portfolio Admin','Core Portfolio Admin',NULL,NULL,NULL,NULL,NULL);
 		</sql>
 	</changeSet> -->
-	<changeSet dbms="mysql" author="Leap (generated)" id="20240809-3v0-usm-5">
+	<changeSet dbms="mysql" author="Essedum (generated)" id="20240809-3v0-usm-5">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Core Portfolio Admin' LIMIT 1)
@@ -187,7 +187,7 @@
 			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Core Portfolio Admin' LIMIT 1), 1, NULL)
 		</sql>
 	</changeSet>
-	<changeSet dbms="mssql" author="Leap (generated)" id="20240809-3v0-usm-6">
+	<changeSet dbms="mssql" author="Essedum (generated)" id="20240809-3v0-usm-6">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Core Portfolio Admin' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY)
@@ -198,7 +198,7 @@
 			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Core Portfolio Admin' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY), 1, NULL)
 		</sql>
 	</changeSet>
-	<changeSet dbms="mysql" author="Leap (generated)" id="20240809-3v0-usm-7">
+	<changeSet dbms="mysql" author="Essedum (generated)" id="20240809-3v0-usm-7">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Core Project Admin' LIMIT 1)
@@ -209,7 +209,7 @@
 			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Core Project Admin' LIMIT 1), 1, NULL)
 		</sql>		
 	</changeSet>
-	<changeSet dbms="mssql" author="Leap (generated)" id="20240809-3v0-usm-8">
+	<changeSet dbms="mssql" author="Essedum (generated)" id="20240809-3v0-usm-8">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Core Project Admin' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY)
@@ -220,7 +220,7 @@
 			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Core Project Admin' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY), 1, NULL)
 		</sql>
 	</changeSet>
-	<changeSet dbms="mysql" author="Leap (generated)" id="20240809-3v0-usm-9">
+	<changeSet dbms="mysql" author="Essedum (generated)" id="20240809-3v0-usm-9">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Portfolio Manager' LIMIT 1)
@@ -231,7 +231,7 @@
 			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Portfolio Manager' LIMIT 1), 1, NULL)
 		</sql>		
 	</changeSet>
-	<changeSet dbms="mssql" author="Leap (generated)" id="20240809-3v0-usm-10">
+	<changeSet dbms="mssql" author="Essedum (generated)" id="20240809-3v0-usm-10">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Portfolio Manager' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY)
@@ -242,7 +242,7 @@
 			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Portfolio Manager' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY), 1, NULL)
 		</sql>
 	</changeSet>
-	<changeSet dbms="mysql" author="Leap (generated)" id="20240809-3v0-usm-11">
+	<changeSet dbms="mysql" author="Essedum (generated)" id="20240809-3v0-usm-11">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Portfolio Client' LIMIT 1)
@@ -253,7 +253,7 @@
 			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Portfolio Client' LIMIT 1), 1, NULL)
 		</sql>
 	</changeSet>
-	<changeSet dbms="mssql" author="Leap (generated)" id="20240809-3v0-usm-12">
+	<changeSet dbms="mssql" author="Essedum (generated)" id="20240809-3v0-usm-12">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Portfolio Client' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY)
@@ -264,7 +264,7 @@
 			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Portfolio Client' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY), 1, NULL)
 		</sql>
 	</changeSet>
-	<changeSet dbms="mysql" author="Leap (generated)" id="20240809-3v0-usm-13">
+	<changeSet dbms="mysql" author="Essedum (generated)" id="20240809-3v0-usm-13">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Portfolio Admin' LIMIT 1)
@@ -275,7 +275,7 @@
 			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Portfolio Admin' LIMIT 1), 1, NULL)
 		</sql>
 	</changeSet>
-	<changeSet dbms="mssql" author="Leap (generated)" id="20240809-3v0-usm-14">
+	<changeSet dbms="mssql" author="Essedum (generated)" id="20240809-3v0-usm-14">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Portfolio Admin' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY)
@@ -286,7 +286,7 @@
 			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Portfolio Admin' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY), 1, NULL)
 		</sql>
 	</changeSet>
-	<changeSet dbms="mysql" author="Leap (generated)" id="20240809-3v0-usm-15">
+	<changeSet dbms="mysql" author="Essedum (generated)" id="20240809-3v0-usm-15">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Project Client' LIMIT 1)
@@ -297,7 +297,7 @@
 			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Project Client' LIMIT 1), 1, NULL)
 		</sql>
 	</changeSet>
-	<changeSet dbms="mssql" author="Leap (generated)" id="20240809-3v0-usm-16">
+	<changeSet dbms="mssql" author="Essedum (generated)" id="20240809-3v0-usm-16">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Project Client' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY)
@@ -308,7 +308,7 @@
 			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Project Client' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY), 1, NULL)
 		</sql>
 	</changeSet>
-	<changeSet dbms="mysql" author="Leap (generated)" id="20240809-3v0-usm-17">
+	<changeSet dbms="mysql" author="Essedum (generated)" id="20240809-3v0-usm-17">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Project Admin' LIMIT 1)
@@ -319,7 +319,7 @@
 			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Project Admin' LIMIT 1), 1, NULL)
 		</sql>
 	</changeSet>
-	<changeSet dbms="mssql" author="Leap (generated)" id="20240809-3v0-usm-18">
+	<changeSet dbms="mssql" author="Essedum (generated)" id="20240809-3v0-usm-18">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
 				SELECT COUNT(*) FROM usm_user_project_role WHERE role_id=(SELECT id FROM usm_role WHERE NAME = 'Project Admin' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY)
@@ -330,13 +330,13 @@
 			VALUES(2, 2, (SELECT id FROM usm_role WHERE NAME = 'Project Admin' ORDER BY id OFFSET 0 ROWS FETCH FIRST 1 ROWS ONLY), 1, NULL)
 		</sql>
 	</changeSet>
-	<!--<changeSet author="Leap" id="20240809-3v0-usm-21">
+	<!--<changeSet author="Essedum" id="20240809-3v0-usm-21">
 		<sql dbms="mssql" splitStatements="true" stripComments="true">  
 			update usm_constant set item_value = '{"label":"Event Management","icon":"sitemap","children":[{"label":"Workflow","url":"./iamp-eda","icon":"bars","_id":2},{"label":"Event","url":"./iamp-eda/event-type","icon":"folder","_id":3}],"horizontal":true}' where item IN ('IT Portfolio Manager Side',  'Project Client Side') AND item_value LIKE '%Event Management%' AND project_name='leo1311'
 			update usm_constant set item_value = '{"label":"Value Management","icon":"icon_certificate","url":"./ivm/home/ams","children":[{"label":"Maturity Assessment","icon":"icon_certificate","url":"./ivm/selectQuestionnaire","children":[],"_id":2},{"label":"Detailed Report","icon":"icon_certificate","url":"./ivm/home/ams/report","children":[],"_id":3},{"label":"Industry Benchmark","icon":"icon_certificate","url":"./ivm/home/ams/report/dynamicDashboard","children":[],"_id":4},{"label":"Metric Planner","icon":"icon_certificate","url":"./ivm/home/ams/metricplanner","children":[],"_id":5},{"label":"Initiative Intelligence","icon":"icon_certificate","url":"./ivm/home/ams/initiativeIntelligence","children":[],"_id":6},{"label":"Initiative Planner","icon":"icon_certificate","url":"./ivm/home/ams/initiativePlanner","children":[],"_id":7},{"label":"Track Initiative","icon":"icon_certificate","url":"./ivm/home/ams/trackInitiative","children":[],"_id":8}]}' where item IN ('IT Portfolio Manager Side',  'Project Client Side') AND item_value LIKE '%Value Management%' AND project_name='leo1311'
          </sql> 
 	</changeSet>
-	<changeSet author="Leap" id="20240809-3v0-usm-22">
+	<changeSet author="Essedum" id="20240809-3v0-usm-22">
 		<sql dbms="h2, mysql, postgresql" splitStatements="true" stripComments="true">  
 			INSERT INTO usm_constant(item,project_name,item_value,project_id) VALUES ('Project Client Side','leo1311','{\"label\":\"Gamification\",\"icon\":\"gamepad\",\"url\":\"\",\"children\":[{\"label\":\"Dashboard\",\"icon\":\"th-large\",\"url\":\"./iamp-iegp/dashboard/\",\"children\":[],\"_id\":2},{\"label\":\"Demo\",\"icon\":\"\",\"url\":\"./iamp-iegp/amsdemo\",\"children\":[{\"label\":\"AMS Demo\",\"icon\":\"\",\"url\":\"./iamp-iegp/amsdemo\",\"children\":[],\"_id\":4},{\"label\":\"Game Scenario\",\"icon\":\"\",\"url\":\"./iamp-iegp/gamedemo\",\"children\":[],\"_id\":5},{\"label\":\"NFL Game\",\"icon\":\"\",\"url\":\"./iamp-iegp/nflgame\",\"children\":[],\"_id\":6}],\"_id\":3}]}','2');		 
 			INSERT INTO usm_constant(item,project_name,item_value,project_id) VALUES ('IT Portfolio Manager Side','leo1311','{\"label\":\"Gamification\",\"icon\":\"gamepad\",\"url\":\"\",\"children\":[{\"label\":\"Dashboard\",\"icon\":\"th-large\",\"url\":\"./iamp-iegp/dashboard/\",\"children\":[],\"_id\":2},{\"label\":\"Demo\",\"icon\":\"\",\"url\":\"./iamp-iegp/amsdemo\",\"children\":[{\"label\":\"AMS Demo\",\"icon\":\"\",\"url\":\"./iamp-iegp/amsdemo\",\"children\":[],\"_id\":4},{\"label\":\"Game Scenario\",\"icon\":\"\",\"url\":\"./iamp-iegp/gamedemo\",\"children\":[],\"_id\":5},{\"label\":\"NFL Game\",\"icon\":\"\",\"url\":\"./iamp-iegp/nflgame\",\"children\":[],\"_id\":6}],\"_id\":3}]}','2');
@@ -346,7 +346,7 @@
 			INSERT INTO usm_constant(item,project_name,item_value,project_id) VALUES ('IT Portfolio Manager Side','leo1311','{"label":"Gamification","icon":"gamepad","url":"","children":[{"label":"Dashboard","icon":"th-large","url":"./iamp-iegp/dashboard/","children":[],"_id":2},{"label":"Demo","icon":"","url":"./iamp-iegp/amsdemo","children":[{"label":"AMS Demo","icon":"","url":"./iamp-iegp/amsdemo","children":[],"_id":4},{"label":"Game Scenario","icon":"","url":"./iamp-iegp/gamedemo","children":[],"_id":5},{"label":"NFL Game","icon":"","url":"./iamp-iegp/nflgame","children":[],"_id":6}],"_id":3}]}','2');
 		</sql> 
 	</changeSet>
-	<changeSet author="Leap" id="3v0-usm-20240820-1">
+	<changeSet author="Essedum" id="3v0-usm-20240820-1">
 		<sql dbms="mysql" splitStatements="true" stripComments="true">  
 			UPDATE usm_constant SET item_value='{\"label\":\"Control Tower\",\"icon\":\"assets/icons/signal_icon.svg\",\"children\":[{\"label\":\"Business Control Tower\",\"icon\":\"tachometer\",\"url\":\"\",\"children\":[{\"label\":\"Business Control Tower\",\"icon\":\"\",\"url\":\"./cc/OCC/52\",\"children\":[],\"_id\":3},{\"label\":\"Order Management Disruption Dashboard\",\"icon\":\"\",\"url\":\"./dynamicDashboard/grid/OCC/42480\",\"children\":[],\"_id\":4},{\"label\":\"Full Stack Observability\",\"icon\":\"\",\"url\":\"./dynamicDashboard/grid/OCC/42478\",\"children\":[],\"_id\":5}],\"_id\":2},{\"label\":\"Process Mining\",\"icon\":\"address-card\",\"horizontal\":true,\"children\":[{\"label\":\"Claims\",\"icon\":\"book\",\"url\":\"./dynamicDashboard/grid/OCC/54\",\"children\":[],\"_id\":7},{\"label\":\"Accounts Payable\",\"icon\":\"id-card\",\"url\":\"./dynamicDashboard/grid/OCC/94055\",\"children\":[],\"_id\":8},{\"label\":\"Online Order Processing\",\"icon\":\"folder\",\"url\":\"./dynamicDashboard/grid/OCC/6\",\"children\":[],\"_id\":9}],\"_id\":6},{\"label\":\"App Control Tower\",\"icon\":\"tachometer\",\"horizontal\":true,\"children\":[{\"label\":\"Availability Dashboard\",\"icon\":\"\",\"url\":\"./dynamicDashboard/grid/OCC/84\",\"children\":[],\"_id\":11},{\"label\":\"Batch Monitor Dashboard\",\"icon\":\"\",\"url\":\"./dynamicDashboard/grid/OCC/45\",\"children\":[],\"_id\":12}],\"_id\":10},{\"label\":\"Bot Control Tower\",\"icon\":\"tachometer\",\"horizontal\":true,\"children\":[{\"label\":\"Automation Dashboard\",\"icon\":\"\",\"url\":\"./dynamicDashboard/grid/OCC/57\",\"children\":[],\"_id\":14},{\"label\":\"Incident Dashboard\",\"icon\":\"\",\"url\":\"./iamp-cap/inputdetails\",\"children\":[],\"_id\":15}],\"_id\":13},{\"label\":\"Events Tower\",\"icon\":\"tachometer\",\"url\":\"./dynamicDashboard/grid/OCC/42473\",\"children\":[],\"_id\":16}],\"horizontal\":true}' 
 			WHERE item='IT Portfolio Manager Side' AND project_name='leo1311' AND item_value LIKE '%Control Tower%';
@@ -372,7 +372,7 @@
 			WHERE item='IT Portfolio Manager Land'; 
 		</sql> 
 	</changeSet>-->
-	<changeSet author="Leap" id="3v0-usm-20240821-1">
+	<changeSet author="Essedum" id="3v0-usm-20240821-1">
 		<sql dbms="mysql,mssql" splitStatements="true" stripComments="true"> 
 			INSERT INTO usm_role_permissions(permission, ROLE) VALUES
 			(7, (SELECT id FROM usm_role WHERE NAME='Project Admin')),
@@ -381,7 +381,7 @@
 			(10, (SELECT id FROM usm_role WHERE NAME='Project Admin'));
 		</sql> 
 	</changeSet>
-	<changeSet author="Leap" id="3v0-usm-240910-1">
+	<changeSet author="Essedum" id="3v0-usm-240910-1">
 	  <validCheckSum>any</validCheckSum>
 		<sql> 
 			UPDATE usm_constant SET item_value='./dynamicDashboard/grid/OCC/52' WHERE item ='BCC Admin Land' AND project_name='leo1311';

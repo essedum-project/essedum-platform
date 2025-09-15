@@ -1,0 +1,5 @@
+vertexmlops/
+**/__pycache__/
+__pycache__/
+logfile.log
+poc-icets-mlservices-16306-ea675cf09c2b.json

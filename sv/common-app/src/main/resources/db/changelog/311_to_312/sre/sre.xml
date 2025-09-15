@@ -1,7 +1,7 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
-	<changeSet author="Leap" id="1683222364377-17-12-25-1">
+	<changeSet author="Essedum" id="1683222364377-17-12-25-1">
 		<preConditions onFail="MARK_RAN">
 				<indexExists tableName="ccl_app" indexName="FKg877ut7tqtc807h9x2y2kva2y" />
 		</preConditions>
@@ -10,7 +10,7 @@
 		</sql>
 		</changeSet>
 		
-	<changeSet author="Leap" id="1683222364377-17-12-25-2">
+	<changeSet author="Essedum" id="1683222364377-17-12-25-2">
 		<sql dbms="h2, mysql" splitStatements="true" stripComments="true">
 			ALTER TABLE ccl_app ADD CONSTRAINT FKg877ut7tqtc807h9x2y2kva2y1 FOREIGN KEY (application_grp_id)
 			REFERENCES ccl_app_grp (application_grp_id)
@@ -25,7 +25,7 @@
 		</sql>
 	</changeSet>
 	
-	<changeSet author="Leap" id="1683222364377-17-12-25-3">
+	<changeSet author="Essedum" id="1683222364377-17-12-25-3">
 		<preConditions onFail="MARK_RAN">
 				<indexExists tableName="sre_probe_location" indexName="FK7x3krs0idilud7dqmlun4rxhh" />
 		</preConditions>
@@ -34,7 +34,7 @@
 		</sql>
 	</changeSet>
 	
-	<changeSet author="Leap" id="1683222364377-17-12-25-4">
+	<changeSet author="Essedum" id="1683222364377-17-12-25-4">
 		<sql dbms="h2, mysql" splitStatements="true" stripComments="true">
 			ALTER TABLE sre_probe_location ADD CONSTRAINT FK7x3krs0idilud7dqmlun4rxhh1 FOREIGN KEY (location_id)
 			REFERENCES sre_location (location_id)
@@ -49,7 +49,7 @@
 		</sql>
 	</changeSet>
 
-	<changeSet author="Leap" id="1683222364377-20-12-25-1">
+	<changeSet author="Essedum" id="1683222364377-20-12-25-1">
 		<preConditions onFail="MARK_RAN">
 				<indexExists tableName="sre_probe_location" indexName="FKe8nmjxa4813h5gyvhhged7lpq" />
 		</preConditions>
@@ -59,7 +59,7 @@
 	</changeSet>
 
 
-	<changeSet author="Leap" id="1683222364377-20-12-25-2">
+	<changeSet author="Essedum" id="1683222364377-20-12-25-2">
 		<sql dbms="h2, mysql" splitStatements="true" stripComments="true">
 			ALTER TABLE sre_probe_location ADD CONSTRAINT `FKe8nmjxa4813h5gyvhhged7lpq` FOREIGN KEY (probe_id)
 			REFERENCES sre_probe (probe_id)
@@ -70,7 +70,7 @@
 
 
 
-	<changeSet author="Leap" id="1683222364377-20-12-25-1-12-23-1">
+	<changeSet author="Essedum" id="1683222364377-20-12-25-1-12-23-1">
 		<preConditions onFail="MARK_RAN">
 				<indexExists tableName="sre_probe_location" indexName="FKe8nmjxa4813h5gyvhhged7lpq" />
 		</preConditions>
@@ -79,7 +79,7 @@
 		</sql>
 	</changeSet>
 
-	<changeSet author="Leap" id="1683222364377-20-12-25-2-12-23-2">
+	<changeSet author="Essedum" id="1683222364377-20-12-25-2-12-23-2">
 		<sql dbms="h2, mysql" splitStatements="true" stripComments="true">
 			ALTER TABLE sre_probe ADD CONSTRAINT `FK8j6cd3npnrkpt5ilhhwnbdbql` FOREIGN KEY (application_id)
 			REFERENCES ccl_app (application_id)
@@ -90,7 +90,7 @@
 
 
 
-	<changeSet author="Leap" id="1683222364377-17-12-25-3-1">
+	<changeSet author="Essedum" id="1683222364377-17-12-25-3-1">
 		<sql dbms="mssql, postgresql" splitStatements="true" stripComments="true">
 		INSERT INTO sre_probe_run_app (is_aborted, is_available, workflow_id, run_id, execution_id, probe_loc_run_id, mapping_id, error_data, 
 run_date, run_date_est, run_description, run_end_time, run_result, run_start_time, run_time, sut, application_id, location_id, probe_id)
@@ -99,7 +99,7 @@ VALUES (0, 1, NULL, NULL, NULL, NULL, NULL, NULL, '2023-07-28', '2023-07-28', 'I
 	</changeSet>
 
 
-	<changeSet author="Leap" id="1683222364377-17-12-25-4-2">
+	<changeSet author="Essedum" id="1683222364377-17-12-25-4-2">
 		<sql dbms="mssql, postgresql" splitStatements="true" stripComments="true">
 	INSERT INTO sre_probe_run_app (is_aborted, is_available, workflow_id, run_id, execution_id, probe_loc_run_id, mapping_id, error_data, 
 run_date, run_date_est, run_description, run_end_time, run_result, run_start_time, run_time, sut, application_id, location_id, probe_id)
@@ -107,7 +107,7 @@ VALUES (0, 1, NULL, NULL, NULL, NULL, NULL, NULL, '2023-07-28', '2023-07-28', 'I
 				</sql>
 				</changeSet>
 
-				<changeSet author="Leap" id="1683222364377-17-12-25-5-3">
+				<changeSet author="Essedum" id="1683222364377-17-12-25-5-3">
 		<sql dbms="mssql, postgresql" splitStatements="true" stripComments="true">
 	INSERT INTO sre_app_availability (application_id, availability_date, location_id, probe_id, application_grp_id, application_grp_name, application_name, last_updated, location_name, perc_availability, probe_name, success_runs, total_runs) VALUES (24, '2021-05-08', 1, 1, 1, 'Reader Performance', 'Internal Reader 1.0', '2021-05-28 09:51:01.000', 'USA', 100, 'probe-1', 1, 1)
  

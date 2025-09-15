@@ -2,14 +2,14 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.infosys.icets.icip</groupId>
+	<groupId>com.lfn.icip</groupId>
 	<artifactId>icip-lib-iai</artifactId>
 	<packaging>jar</packaging>
 	<name>icip-lib-iai</name>
 	<url>http://maven.apache.org</url>
 	<parent>
-		<groupId>com.infosys.icets.ai</groupId>
-		<artifactId>aip</artifactId>
+		<groupId>com.lfn.ai</groupId>
+		<artifactId>essedum</artifactId>
 		<version>3.3-SNAPSHOT</version>
 	</parent>
 	<properties>
@@ -18,11 +18,7 @@
 	</properties>
 	<dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.azure</groupId>
-                <artifactId>azure-core</artifactId>
-                <version>1.50.0</version>
-            </dependency>
+            
         </dependencies>
     </dependencyManagement>
 	<dependencies>
@@ -33,10 +29,90 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					 <groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<!-- Exclude conflicting Spring versions -->
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-context</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-beans</artifactId>
+				</exclusion>
+				<!-- Exclude conflicting Jackson versions -->
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-annotations</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>	
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-to-slf4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+				<!-- Exclude conflicting Spring versions -->
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-context</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-beans</artifactId>
+				</exclusion>
+				<!-- Exclude conflicting Jackson versions -->
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-annotations</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -48,14 +124,22 @@
 		</dependency>
 
 		<dependency>
-			<groupId>commons-fileupload</groupId>
-			<artifactId>commons-fileupload</artifactId>
-			<version>1.5</version>
-		</dependency>
-		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
-			<version>1.12.261</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-annotations</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 
@@ -66,6 +150,38 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<!-- Exclude conflicting Spring versions -->
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-context</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-beans</artifactId>
+				</exclusion>
+				<!-- Exclude conflicting Jackson versions -->
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-annotations</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>	
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -75,7 +191,12 @@
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-ui</artifactId>
-<version>1.6.6</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>	 
 		</dependency>
 
 		<dependency>
@@ -89,27 +210,27 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.ai</groupId>
+			<groupId>com.lfn.ai</groupId>
 			<artifactId>comm-lib-util</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-adp</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-jobs</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-search</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-evt</artifactId>
 			<scope>provided</scope>
 		</dependency>
@@ -120,16 +241,54 @@
 		<dependency>
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!--https://mvnrepository.com/artifact/jakarta.interceptor/jakarta.interceptor-api-->
-		<dependency>
-			<groupId>jakarta.interceptor</groupId>
-			<artifactId>jakarta.interceptor-api</artifactId>
-			<version>2.1.0</version>
-		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-quartz</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.zaxxer</groupId>
+					<artifactId>HikariCP-java7</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<!-- Exclude conflicting Spring versions -->
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-context</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-beans</artifactId>
+				</exclusion>
+				<!-- Exclude conflicting Jackson versions -->
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-annotations</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.yaml</groupId>
@@ -161,37 +320,49 @@
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>okhttp</artifactId>
-			<version>4.9.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.python</groupId>
 			<artifactId>jython-standalone</artifactId>
-			<version>2.7.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jgit</groupId>
 			<artifactId>org.eclipse.jgit</artifactId>
-			<version>6.8.0.202311291450-r</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!--<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 		</dependency>-->
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-mock</artifactId>
-			<version>2.0.4</version>
-		</dependency>
+		
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-core</artifactId>
-            <version>1.50.0</version>
+            <exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-annotations</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>	
         </dependency>
-        <dependency>
-			<groupId>com.azure</groupId>
-			<artifactId>azure-ai-textanalytics</artifactId>
-			<version>5.5.0</version>
-		</dependency>
+
 		<!-- <dependency>
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>okhttp</artifactId>
@@ -199,42 +370,95 @@
         <dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-codec-http2</artifactId>
-			<version> 4.1.111.Final</version>
+
 		</dependency>
-		<dependency>
-	            <groupId>com.azure</groupId>
-	            <artifactId>azure-core-http-netty</artifactId>
-	            <version>1.9.0</version>
-	    </dependency>
+
 	    <dependency>
 	        <groupId>io.netty</groupId>
 	        <artifactId>netty-all</artifactId>
-	        <version>4.1.115.Final</version>
 	    </dependency>
-        <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>bedrock</artifactId>
-            <version>2.20.162</version>
-        </dependency>
-        <dependency>
+
+		<dependency>
+		    <groupId>commons-fileupload</groupId>
+		    <artifactId>commons-fileupload</artifactId>
+		</dependency>
+		
+		<dependency>
+		    <groupId>jakarta.interceptor</groupId>
+		    <artifactId>jakarta.interceptor-api</artifactId>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-mock</artifactId>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.azure</groupId>
+		    <artifactId>azure-ai-textanalytics</artifactId>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.azure</groupId>
+		    <artifactId>azure-core-http-netty</artifactId>
+		    <exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-annotations</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
+		<dependency>
+		    <groupId>software.amazon.awssdk</groupId>
+		    <artifactId>bedrock</artifactId>
+		    <exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
+		<dependency>
 		    <groupId>dev.langchain4j</groupId>
 		    <artifactId>langchain4j-bedrock</artifactId>
-		    <version>0.33.0</version>
+		    <exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-        <dependency>
+		
+		<dependency>
 		    <groupId>dev.langchain4j</groupId>
 		    <artifactId>langchain4j-azure-open-ai</artifactId>
-		    <version>0.33.0</version>
 		</dependency>
+		
 		<dependency>
-			<groupId>dev.langchain4j</groupId>
-			<artifactId>langchain4j-vertex-ai-gemini</artifactId>
-			<version>0.35.0</version>
+		    <groupId>dev.langchain4j</groupId>
+		    <artifactId>langchain4j-vertex-ai-gemini</artifactId>
 		</dependency>
+		
 		<dependency>
-    		<groupId>com.google.cloud</groupId>
-    		<artifactId>google-cloud-vertexai</artifactId>
-    		<version>1.12.0</version>
+		    <groupId>com.google.cloud</groupId>
+		    <artifactId>google-cloud-vertexai</artifactId>
 		</dependency>
+
+		<dependency>
+		    <groupId>com.squareup.okio</groupId>
+		    <artifactId>okio</artifactId>
+		</dependency>
+
+       
 	</dependencies>
 </project>

@@ -1,0 +1,395 @@
+apipermission:
+  disable_api_security_validation: false
+ESSEDUM_HOME: /app
+LOG_PATH: /app/log
+ESSEDUM_URL: http://localhost:8080/
+commonAppUrl: "http://localhost:8081/"
+ 
+telemetry:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcurl: jdbc:mysql://mysql:3306/telemetrydb
+    username: root
+    password: password
+ 
+config:
+  active-profiles: mysql,oauth2,btf,dbconstants,vault
+  #active-profiles: mysql,oauth2,btf,dbconstants
+  #static-locations: file:/D:/common-app/
+  static-locations: file:/C:/Users/mohan.peta/Documents/AIP_2024_March28/common-app-mar-14/
+  
+  datasourceurl: jdbc:mysql://mysql:3306
+  datasourceuser: root
+  datasourcepass: password
+  essedumcoredb: essedum_coredb
+  essedumquartzdb: essedum_quartzdb
+  
+  essedumbtfdb: essedum_btf
+  essedumsjsdb: essedum_sjs
+  essedumsrefdb: essedum_ref_data
+ 
+  service-auth:
+    access-token: aec127c2-c984-33f6-9a3a-355xd1dof097
+    proxy-user: admin
+ 
+## Config for H2
+#  driverClassName: org.h2.Driver
+#  essedum-db-url: ${config.datasourceurl}/${config.essedumcoredb};MODE=MYSQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DATABASE_TO_UPPER=FALSE;IGNORECASE=TRUE;AUTO_SERVER=TRUE
+#  quartz-db-url: ${config.datasourceurl}/${config.essedumquartzdb};MODE=MYSQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DATABASE_TO_UPPER=FALSE;IGNORECASE=TRUE;AUTO_SERVER=TRUE
+#  sjs-db-url: ${config.datasourceurl}/${config.essedumsjsdb};MODE=MYSQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DATABASE_TO_UPPER=FALSE;IGNORECASE=TRUE;AUTO_SERVER=TRUE
+#  btf-db-url: ${config.datasourceurl}/${config.essedumbtfdb};MODE=MYSQL;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DATABASE_TO_UPPER=FALSE;IGNORECASE=TRUE;AUTO_SERVER=TRUE
+#  essedum-db-username: ${config.datasourceuser}
+#  essedum-db-password: ${config.datasourcepass}
+#  database-platform: org.hibernate.dialect.H2Dialect
+ 
+## Config for MySQL
+  driverClassName: com.mysql.cj.jdbc.Driver
+  essedum-db-url: ${config.datasourceurl}/${config.essedumcoredb}
+  quartz-db-url: ${config.datasourceurl}/${config.essedumquartzdb}
+  sjs-db-url: ${config.datasourceurl}/${config.essedumsjsdb}
+  btf-db-url: ${config.datasourceurl}/${config.essedumbtfdb}?nullCatalogMeansCurrent=true
+  essedum-db-username: ${config.datasourceuser}
+  essedum-db-password: ${config.datasourcepass}
+  database-platform: org.hibernate.dialect.MySQLDialect
+ 
+## Config for MSSQL
+#  driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#  essedum-db-url: ${config.datasourceurl};databaseName=${config.essedumcoredb}
+#  quartz-db-url: ${config.datasourceurl};databaseName=${config.essedumquartzdb}
+#  sjs-db-url: ${config.datasourceurl};databaseName=${config.essedumsjsdb}
+#  btf-db-url: ${config.datasourceurl};databaseName=${config.essedumbtfdb}
+#  essedum-db-username: ${config.datasourceuser}
+#  essedum-db-password: ${config.datasourcepass}
+#  database-platform: org.hibernate.dialect.SQLServer2012Dialect
+ 
+spring:
+  application:
+    name: essedum
+  resources:
+    static-locations: ${config.static-locations}
+  mvc:
+    favicon:
+      enabled: false  
+  web:
+    resources:
+      static-locations: ${config.static-locations}
+  liquibase:
+    enabled: true
+    contexts: test,fresh,qa,2v13to300,acme,300to310,300to310-acme,acme_2v13to300,311to312
+ 
+    change-log: "classpath:db/changelog/master.xml"
+  rabbitmq:
+    host: rabbitmq-server
+    port: 5673
+    username: rabbitmq-user
+    password:
+  kafka:
+    consumer:
+      bootstrap-servers: cvrictlptm22:9092
+      group-id: emfEventConsumer
+      auto-offset-reset: latest
+      enable.auto.commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+    producer:
+      bootstrap-servers: cvrictlptm22:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+    topic:
+      name: emf-events-dev   
+  quartz:
+        job-store-type: jdbc
+        enabled: true
+        properties:
+            org.quartz.threadPool.threadCount: 5
+            org.quartz.jobStore.class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+            org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            org.quartz.jobStore.isClustered: true
+            org.quartz.jobStore.clusterCheckinInterval: 5000
+            org.quartz.scheduler.instanceId: AUTO
+#            org.quartz.jobStore.selectWithLockSQL: SELECT * FROM {0}LOCKS UPDLOCK WHERE LOCK_NAME = ?  # for MSSQL  
+  cloud:
+    stream:
+      defaultBinder: kafka
+      kafka:
+        bootstrap-servers: cvrictlptm22:9092
+        binder:
+          brokers:
+           - cvrictlptm22:9092
+    vault:
+      enabled: false
+  devtools:
+   add-properties: false  
+  main:
+    allow-bean-definition-overriding: true  
+  cache:
+    jcache:
+      config: classpath:ehcache.xml    
+  cors:
+    allowedOriginPatterns: "*"
+    allowedHeaders: "*"
+    allowedMethods: "*"
+ 
+  jackson:
+    serialization.write_dates_as_timestamps: false
+    serialization.fail-on-empty-beans: false
+  jpa:
+        open-in-view: false
+        database-platform: org.hibernate.dialect.MySQLDialect
+        generate-ddl: false
+        database: MYSQL
+        show-sql: false
+        properties:
+            hibernate.id.new_generator_mappings: true
+            hibernate.cache.use_second_level_cache: false
+            hibernate.cache.use_query_cache: false
+            hibernate.region.factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory            
+            hibernate.generate_statistics: true
+            hibernate.jdbc.batch_size: 500
+            hibernate.order_inserts: true
+            hibernate.order_updates: true
+            hibernate.jdbc.batch_versioned_data: true
+            hibernate.jdbc.time_zone: UTC
+            hibernate:
+                ddl-auto: none
+                physical_naming_strategy : org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+                implicit_naming_strategy : org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
+            hibernate.enable_lazy_load_no_trans: true
+  messages:
+    basename: i18n/messages
+  thymeleaf:
+    mode: XHTML   
+  datasource:
+       type: com.zaxxer.hikari.HikariDataSource
+       driverClassName: ${config.driverClassName}
+       url: ${config.essedum-db-url}
+       username: ${config.essedum-db-username}
+       password: ${config.essedum-db-password}
+       maximum-pool-size: 100
+       minimumIdle: 3
+       idleTimeout: 60000
+       hikari:
+            data-source-properties:
+                cachePrepStmts: true
+                prepStmtCacheSize: 250
+                prepStmtCacheSqlLimit: 2048
+                useServerPrepStmts: true   
+ 
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        trace: false
+        web-allow-others: false
+ 
+schedule:
+#give value in milliseconds
+  refreshPermissionApiRate: 10000
+  refreshCofigurationPropertiesRate: 10000
+ 
+server:
+#enable only if context root is required
+#  servlet:
+#    context-path: /essedum
+  error:
+    path: /error
+  whitelabel:
+    enabled: false
+  port: 8081
+  max-http-header-size: 48000   
+  session:
+    cookie:
+      http-only: true
+  compression.enabled: true
+  compression.mime-types: application/json,application/xml,text/html,text/xml,text/plain,application/javascript,text/css,image/svg+xml
+csrf:
+  ignore:
+    urls: /engine-rest/**,/api/batch/client/**,/api/webhook/**,/api/authenticate,/api/sre-availability-cal/**,/actuator/**,/api/saveBpmn/**,/api/deployBpmn/**,/app/**,/api/adapter_workflow/**,/api/automation/**,/api/pipelinemodels/**,/api/incidents/**,/api/event/trigger/**,/api/datasets/upload/**,/api/file/**,/api/copyblueprint/**,/api/datasets/saveChunks/**,/api/registerUser,/api/userss/resetPassword,/api/email/**,/api/usm-notificationss,/api/exp/**,/api/users/experiments/**,/api/datasets/search/**,/api/interactiveWorkflow/**,/api/RPAExternalTask/**,/ws/**,/api/workflow/**,/api/inbox/**,/api/datasets/attachmentupload/**,/api/dashboard-configurations/create-template/**,/api/modelservice/**,/api/service/**,/api/adapters/**,/api/mltopics/**,/api/mldatasettopics/**,/api/license/**
+ 
+proxy:
+  httpProxyConfiguration:
+    proxyScheme: http
+    proxyHost: blrproxy.ad.lfn.com
+    proxyPort: 8080
+    proxyUser: null
+    proxyPassword: null
+  proxyUrl: ${proxy.httpProxyConfiguration.proxyHost}:${proxy.httpProxyConfiguration.proxyPort}
+                          
+jwt:
+  base64-secret: ZjY0MDRhOTNlZDdlNDM0ODdlOTQ3MWNjODQwYmRhNWIyYTg5YTBjMzJlYmQ2Y2M4OTc5MGFlZjQ5ZjRkNTk0YTMyN2MyOGIzMWRjM2Y5OTgxNGMyZjk1OThiMTM0NGZhMDkzYjk3ODY2NGViZjVkZWI4YWYxN2YzOWY5YzMzMjk=
+  token-validity-in-seconds: 86400
+  token-validity-in-seconds-for-remember-me: 2592000    
+ 
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+    
+endpoints:
+  jmx:
+    enabled: false    
+    
+management:
+  security:
+    roles: ADMIN
+  context-path: /management
+  health:
+    mail:
+      enabled: false
+  endpoints:
+    jmx:
+      exposure:
+        exclude=*
+    web:
+      exposure:
+         include: refresh,metrics,prometheus
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+       prometheus:
+         enabled: true         
+icip:
+  dsurl: ${config.datasourceurl}
+  dsuser: ${config.datasourceuser}
+  dspass: ${config.datasourcepass}
+  datasource:
+    driverClassName: ${spring.datasource.driverClassName}
+    jdbcUrl: ${spring.datasource.url}
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    maximum-pool-size: 300
+    minimumIdle: 3
+    idleTimeout: 60000
+    platform: mysql
+    type: com.zaxxer.hikari.HikariDataSource
+  pathPrefix: api/aip
+  pythonpath: C:/SoftwareCenterApplications/Essedum-py3/python.exe
+  sparkhome: C:/SoftwareCenterApplications/Essedum-py3/Essedum-py3/Lib/site-packages/pyspark
+  Rpath: /usr/R/R-4.2.2/bin/RScript
+ 
+model:
+    datasource:
+        type: com.zaxxer.hikari.HikariDataSource
+        platform: mysql
+        driverClassName: ${spring.datasource.driverClassName}
+        jdbcUrl: ${spring.datasource.url}
+        username: ${spring.datasource.username}
+        password: ${spring.datasource.password}
+        maximum-pool-size: 8
+        minimumIdle: 3
+        idleTimeout: 60000
+quartz:
+    liquibase:
+        enabled: true
+        change-log: "classpath:db/changelog/quartz.xml"
+    datasource:
+        type: com.zaxxer.hikari.HikariDataSource
+        driverClassName: ${config.driverClassName}
+        url: ${quartz.datasource.jdbcUrl}
+        jdbcUrl: ${config.quartz-db-url}
+        username: ${config.essedum-db-username}
+        password: ${config.essedum-db-password}
+        maximum-pool-size: 8
+        minimumIdle: 3
+        idleTimeout: 60000
+    jpa:
+        database-platform: org.hibernate.dialect.MySQLDialect
+        database: MYSQL
+        show-sql: false
+        properties:
+          hibernate:
+            enable_lazy_load_no_trans: true
+            id.new_generator_mappings: true
+            cache:
+                use_second_level_cache: false
+                use_query_cache: false
+            region.factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory
+            generate_statistics: true
+            jdbc.batch_size: 500
+            order_inserts: true
+            order_updates: true
+            jdbc:
+                batch_versioned_data: true
+                time_zone: UTC
+            ddl-auto: none
+            physical_naming_strategy : com.lfn.icip.icipwebeditor.job.config.UpperCaseStrategy
+            implicit_naming_strategy : org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy      
+ 
+exp:
+    datasource:
+        platform: mysql
+        type: com.zaxxer.hikari.HikariDataSource        
+        driverClassName: ${spring.datasource.driverClassName}
+        jdbcUrl:  ${spring.datasource.url}
+        username: ${spring.datasource.username}
+        password: ${spring.datasource.password}
+        maximum-pool-size: 8
+        minimumIdle: 3
+        idleTimeout: 60000
+    pathPrefix: api/exp
+    
+sjs:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driverClassName: ${spring.datasource.driverClassName}
+    jdbcUrl:  ${spring.datasource.url}
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    maximum-pool-size: 200
+    minimumIdle: 3
+    idleTimeout: 60000
+ 
+mailserver:
+  accesstoken: bg9126c2-c913-iof6-9r5x-90ecf001h00a
+ 
+fileserver:
+  local:
+    accesstoken: aec127c2-c984-33f6-9a3a-355xd1dof097
+  minio:
+    secret-key: qmzm4b7n85s5r2p54xkz6gbx79ljsmw4fmvqnf2h28s4g4sggltbns
+    access-key: admin
+    url: https://play.min.io-https://s3.amazonaws.com
+  azure:
+    connection:
+eda:
+  event:
+    retryLimit: 3
+# only required for metrics collector job
+metrics:
+  datasource:
+    url:
+    username:
+    password:
+    tablename:
+ 
+github:
+  gitPathStudio : /app/gitRepo/studio/
+  gitPathStore : /app/gitRepo/store/
+  username: your_username
+  password: your_generated_token
+ 
+security:
+  silentRefreshTimeoutFactor: 0.85
+  
+translate-api:
+  url:
+  version:
+  key:
+ 
+endpoint:
+  dbs: "/api"
+  bcc: "/api"
+  cfm: "/api"
+  ccl: "/api"  
+port_automation_app_url: http://localhost:5000
+ 
+jobexecutor:
+  org: leo1311
+  enabled: true
+  runtimeList: azure, ams

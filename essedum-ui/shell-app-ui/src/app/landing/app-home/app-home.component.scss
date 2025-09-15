@@ -15,23 +15,22 @@ mat-mdc-button-toggle{
     background-color: var(--base-color)!important;
     color: white !important;
 }
-.le-u-text-neutral-80{
-    color:#737373;
-  }
 
-::ng-deep  .le-c-card.mat-mdc-card:hover .le-u-header-xl {
+
+::ng-deep  .le-c-card.mat-mdc-card:hover .lfx-u-header-xl {
     color:var(--base-color);
 }
 
-.le-u-header-xl{
+.lfx-u-header-xl{
 	font-size: 18px !important;
 }
 
-.le-u-text-neutral-80{
+.lfx-u-text-neutral-80{
     font-size: 14px !important;
+    color:#737373 !important;
 }
 
-.le-u-header-xxl{
+.lfx-u-header-xxl{
     font-size: 24px !important;
 }
 
@@ -44,3 +43,13 @@ hr {
     color: black !important;
     border-top: 1px solid !important;
 }
+
+
+  .lfx-u-text-primary-80 {
+    color: #0052cc;
+  }
+
+.lfx-c-card__container-left {
+    float: left;
+    width: 80%;
+  }

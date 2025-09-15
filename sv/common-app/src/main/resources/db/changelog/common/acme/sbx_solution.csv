@@ -1,8 +1,8 @@
 "id","created_date","demo_links","description","name","projectid","submitted_by","teamid","final_score"
 "1","2021-05-20","[{
-						\"name\": \"Clustering LDA\",\"link\": \"Leap/ACMCLSTR21224\",\"type\": \"Pipeline\"},{
+						\"name\": \"Clustering LDA\",\"link\": \"Essedum/ACMCLSTR21224\",\"type\": \"Pipeline\"},{
 						\"name\": \"Ticket Analytics Dashboard\",\"link\": \"OCC/2\",\"type\": \"Dashboard\"},{
-						\"name\": \"Clustering Soundex\",\"link\": \"Leap/ACMCLSTR99942\",\"type\": \"Pipeline\"
+						\"name\": \"Clustering Soundex\",\"link\": \"Essedum/ACMCLSTR99942\",\"type\": \"Pipeline\"
 }]","The solution uses the interactive LEAP ticket dashboard that tracks ticketing information. This gives information about Total Tickets, Critical, High, Medium, Low Priority Tickets, Average duration for different types of tickets raised. It also gives information about Incidents by Top Clusters. 
 
 - About Latent Dirichlet Allocation (LDA)

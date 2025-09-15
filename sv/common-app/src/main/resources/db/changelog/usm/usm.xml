@@ -3,7 +3,7 @@
 	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-	<!-- <changeSet author="Leap (generated)" id="1614785155891-145">
+	<!-- <changeSet author="Essedum (generated)" id="1614785155891-145">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -19,7 +19,7 @@
 			<column name="role_id" type="INT" />
 		</createTable>
 	</changeSet> -->
-	<changeSet author="Leap (generated)" id="1614785155891-146">
+	<changeSet author="Essedum (generated)" id="1614785155891-146">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -35,7 +35,7 @@
 			<column name="value" type="VARCHAR(100)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-147">
+	<changeSet author="Essedum (generated)" id="1614785155891-147">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -49,7 +49,7 @@
 			<column name="name" type="VARCHAR(255)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-148">
+	<changeSet author="Essedum (generated)" id="1614785155891-148">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -68,7 +68,7 @@
 			<column name="organisation" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-149">
+	<changeSet author="Essedum (generated)" id="1614785155891-149">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -87,7 +87,7 @@
 			<column name="user_id" type="VARCHAR(120)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-150">
+	<changeSet author="Essedum (generated)" id="1614785155891-150">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -114,7 +114,7 @@
 			<column name="context" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-151">
+	<changeSet author="Essedum (generated)" id="1614785155891-151">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -133,7 +133,7 @@
 			</column>
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-152">
+	<changeSet author="Essedum (generated)" id="1614785155891-152">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -149,7 +149,7 @@
 			<column name="portfolio_name" type="VARCHAR(255)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-153">
+	<changeSet author="Essedum (generated)" id="1614785155891-153">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -181,7 +181,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap (generated)" id="1614785155891-154">
+	<changeSet author="Essedum (generated)" id="1614785155891-154">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -204,7 +204,7 @@
 			<column name="project_admin_id" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-155">
+	<changeSet author="Essedum (generated)" id="1614785155891-155">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -219,7 +219,7 @@
 			<column name="role" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-156">
+	<changeSet author="Essedum (generated)" id="1614785155891-156">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -239,7 +239,7 @@
 			<column name="organisation" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-157">
+	<changeSet author="Essedum (generated)" id="1614785155891-157">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -264,7 +264,7 @@
 			</column>
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-158">
+	<changeSet author="Essedum (generated)" id="1614785155891-158">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -280,7 +280,7 @@
 			<column name="user_cg" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-159">
+	<changeSet author="Essedum (generated)" id="1614785155891-159">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -325,7 +325,7 @@
 			<column name="context" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-20">
+	<changeSet author="Essedum (generated)" id="1614785155891-20">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -342,11 +342,11 @@
 			<column name="project_id" type="INT" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1614785155891-778">
+	<changeSet author="Essedum (generated)" id="1614785155891-778">
 		<modifyDataType columnName="description" newDataType="varchar(255)" tableName="usm_role" />
 	</changeSet>
 	<!-- 1.3.12 changes -->
-	<changeSet author="Leap (generated)" id="1312v0-1001">
+	<changeSet author="Essedum (generated)" id="1312v0-1001">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -372,7 +372,7 @@
 		</createTable>
 	</changeSet>
 	<!-- 1.3.12 changes -->
-	<changeSet author="Leap (generated)" id="1312v0-1003">
+	<changeSet author="Essedum (generated)" id="1312v0-1003">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -438,7 +438,7 @@
 		</createTable>
 	</changeSet>
 	<!-- 1.3.12 changes -->
-	<changeSet author="Leap (generated)" id="1312v0-1004">
+	<changeSet author="Essedum (generated)" id="1312v0-1004">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -475,7 +475,7 @@
 		</createTable>
 	</changeSet>
 	<!-- 1.3.12 changes -->
-	<changeSet author="Leap (generated)" id="1312v0-1005">
+	<changeSet author="Essedum (generated)" id="1312v0-1005">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -507,13 +507,13 @@
 		</createTable>
 	</changeSet>
 	<!-- 1.3.12 changes -->
-	<changeSet author="Leap" id="1312v0-1013">
+	<changeSet author="Essedum" id="1312v0-1013">
 		<addColumn tableName="usm_project">
 			<column name="project_autologin" type="BIT(1)" />
 			<column name="autologin_role" type="INT" />
 		</addColumn>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1312v0-1014">
+	<changeSet author="Essedum (generated)" id="1312v0-1014">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -538,7 +538,7 @@
 			</column>
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1312v0-1015">
+	<changeSet author="Essedum (generated)" id="1312v0-1015">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -557,7 +557,7 @@
 			</column>
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1312v0-1016">
+	<changeSet author="Essedum (generated)" id="1312v0-1016">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -576,7 +576,7 @@
 			</column>
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap" id="1312v0-1017">
+	<changeSet author="Essedum" id="1312v0-1017">
 		<addColumn tableName="usm_users">
 			<column name="country" type="VARCHAR(100)" />
 			<column name="timezone" type="VARCHAR(100)" />
@@ -588,12 +588,12 @@
 	<!-- 2.0 changes -->
 
 	<!-- 2.1 changes -->
-	<changeSet author="Leap" id="2v1-usm-1">
+	<changeSet author="Essedum" id="2v1-usm-1">
 		<addColumn tableName="usm_user_project_role">
 			<column name="time_stamp" type="datetime(6)" />
 		</addColumn>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-usm-2">
+	<changeSet author="Essedum" id="2v1-usm-2">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -615,12 +615,12 @@
 			<column name="comments" type="VARCHAR(100)" />
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap" id="2v1-usm-3">
+	<changeSet author="Essedum" id="2v1-usm-3">
 		<addColumn tableName="usm_notifications">
 			<column name="role_id" type="INT" />
 		</addColumn>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="2v1-usm-4">
+	<changeSet author="Essedum (generated)" id="2v1-usm-4">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -642,7 +642,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap" id="2v1-usm-5">
+	<changeSet author="Essedum" id="2v1-usm-5">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -661,14 +661,14 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="Leap" id="2v2-1">
+	<changeSet author="Essedum" id="2v2-1">
 		<addColumn tableName="usm_permissions">
 			<column name="module_id" type="VARCHAR(255)" />
 			<column name="resources" type="VARCHAR(255)" />
 		</addColumn>
 	</changeSet>
 
-	<changeSet author="Leap" id="2v2-2">
+	<changeSet author="Essedum" id="2v2-2">
 		<addColumn tableName="usm_module">
 			<column name="display_name" type="VARCHAR(255)" />
 			<column name="descriptions" type="VARCHAR(900)" />
@@ -679,12 +679,12 @@
 		</addColumn>
 	</changeSet>
 
-	<!-- <changeSet author="Leap (generated)" id="2v2-3">
+	<!-- <changeSet author="Essedum (generated)" id="2v2-3">
 		<sql dbms="h2, mysql,mssql" splitStatements="true" stripComments="true">
 			DROP TABLE IF EXISTS usm_api_permissions;		
 		</sql>
 	</changeSet> -->
-	<changeSet author="Leap" id="2v2-7">
+	<changeSet author="Essedum" id="2v2-7">
 		<preConditions onFail="MARK_RAN">
 			<columnExists tableName="usm_permissions" columnName="resources" />
 		</preConditions>
@@ -692,7 +692,7 @@
 			<column name="resources"/>
 		</dropColumn>
 	</changeSet>
-	<changeSet author="Leap" id="2v2-8">
+	<changeSet author="Essedum" id="2v2-8">
 		<preConditions onFail="MARK_RAN">
 			<columnExists tableName="usm_permissions" columnName="module_id" />
 		</preConditions>
@@ -700,7 +700,7 @@
 			<column name="module_id"/>
 		</dropColumn>
 	</changeSet>
-	<changeSet author="Leap" id="2v2-9">
+	<changeSet author="Essedum" id="2v2-9">
 		<preConditions onFail="MARK_RAN">
 			<columnExists tableName="usm_module" columnName="display_name" />
 		</preConditions>
@@ -708,7 +708,7 @@
 			<column name="display_name"/>
 		</dropColumn>
 	</changeSet>
-	<changeSet author="Leap" id="2v2-10">
+	<changeSet author="Essedum" id="2v2-10">
 		<preConditions onFail="MARK_RAN">
 			<columnExists tableName="usm_module" columnName="descriptions" />
 		</preConditions>
@@ -716,7 +716,7 @@
 			<column name="descriptions"/>
 		</dropColumn>
 	</changeSet>
-	<changeSet author="Leap" id="2v2-11">
+	<changeSet author="Essedum" id="2v2-11">
 		<preConditions onFail="MARK_RAN">
 			<columnExists tableName="usm_module" columnName="users_count" />
 		</preConditions>
@@ -724,7 +724,7 @@
 			<column name="users_count"/>
 		</dropColumn>
 	</changeSet>
-	<changeSet author="Leap" id="2v2-12">
+	<changeSet author="Essedum" id="2v2-12">
 		<preConditions onFail="MARK_RAN">
 			<columnExists tableName="usm_module" columnName="module_type" />
 		</preConditions>
@@ -732,7 +732,7 @@
 			<column name="module_type"/>
 		</dropColumn>
 	</changeSet>
-	<changeSet author="Leap" id="2v2-13">
+	<changeSet author="Essedum" id="2v2-13">
 		<preConditions onFail="MARK_RAN">
 			<columnExists tableName="usm_module" columnName="url" />
 		</preConditions>
@@ -740,7 +740,7 @@
 			<column name="url"/>
 		</dropColumn>
 	</changeSet>
-	<changeSet author="Leap" id="2v2-14">
+	<changeSet author="Essedum" id="2v2-14">
 		<preConditions onFail="MARK_RAN">
 			<columnExists tableName="usm_module" columnName="group" />
 		</preConditions>
@@ -748,7 +748,7 @@
 			<column name="group"/>
 		</dropColumn>
 	</changeSet>
-	<changeSet author="Leap" id="3v0-usm-1">
+	<changeSet author="Essedum" id="3v0-usm-1">
 		<sql dbms="postgresql" splitStatements="true" stripComments="true">
 			ALTER TABLE usm_module_organisation ALTER subscription_status TYPE bool USING (subscription_status::int::bool);
 		</sql>
@@ -792,7 +792,7 @@
 			ALTER TABLE usm_permission_api ALTER is_whitelisted TYPE bool USING (is_whitelisted::int::bool);
 		</sql> -->
 	</changeSet>
-	<changeSet author="Leap" id="3v0-usm-2">
+	<changeSet author="Essedum" id="3v0-usm-2">
 		<addColumn tableName="usm_notifications">
 			<column name="action_link" type="VARCHAR(255)" />
 			<column name="raised_by" type="VARCHAR(255)" />
@@ -801,7 +801,7 @@
 			<column name="entity_id" type="INT" />
 		</addColumn>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="3v0-usm-3">
+	<changeSet author="Essedum (generated)" id="3v0-usm-3">
 		<validCheckSum>any</validCheckSum>
 		<preConditions onFail="MARK_RAN">
 			<not>
@@ -820,7 +820,7 @@
 		</createTable>
 	</changeSet>
 
-	<!-- <changeSet author="Leap (generated)" id="3v0-usm-4">
+	<!-- <changeSet author="Essedum (generated)" id="3v0-usm-4">
 		<addUniqueConstraint columnNames="key_, project_id" constraintName="UK2g9h4pvhmhcxts8m2rxu566l83vo" tableName="usm_secrets" />
 	</changeSet> -->
 </databaseChangeLog>	

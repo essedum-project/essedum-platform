@@ -1,0 +1,52 @@
+# Stage 1: Build with Maven
+FROM eclipse-temurin:21-jdk AS builder
+
+# Install Maven 3.6.3
+ENV MAVEN_VERSION=3.6.3
+ENV MAVEN_HOME=/opt/maven
+ENV PATH=$MAVEN_HOME/bin:$PATH
+
+RUN apt-get update && \
+    apt-get install -y curl unzip && \
+    curl -fsSL https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.zip -o maven.zip && \
+    unzip maven.zip -d /opt && \
+    mv /opt/apache-maven-${MAVEN_VERSION} $MAVEN_HOME && \
+    rm maven.zip && \
+    apt-get clean
+
+WORKDIR /sv
+
+COPY . .
+
+RUN mvn clean install -Dmaven.test.skip=true -Dlicense.skip=true -Dscope.skip=true
+
+RUN mkdir /app
+RUN mkdir /app/conf
+RUN mkdir /app/lib
+RUN mkdir /app/log
+RUN cp /sv/common-app/src/main/resources/*.yml /app/conf
+RUN cp /sv/common-app/src/main/resources/*.xml /app/conf
+RUN rm /app/conf/application-mysql-oauth2.yml
+RUN cp -r /sv/app/lib /app
+RUN cp /sv/common-app/target/common-app-3.3-SNAPSHOT.jar /app
+
+# Use an official OpenJDK 21 base image
+FROM openjdk:21-jdk-slim
+
+USER root
+# Install Nginx
+RUN apt-get update && apt-get install -y nginx && apt-get clean
+
+COPY nginx_backend.conf /etc/nginx/nginx.conf
+
+# Set the Java path
+ENV JAVA_HOME=/usr/local/openjdk-21
+ENV PATH="$JAVA_HOME/bin:$PATH"
+
+COPY --from=builder /app /app/
+WORKDIR /app
+ENV LEAP_HOME=/app
+
+CMD ["/bin/bash", "-c", "service nginx start && java -Dspring.config.location=/app/conf/ -Dencryption.key=leap$123## -Dencryption.salt=NB9+lv0guQXYrZYbTmcS20Vd5FxW1h75b8CaI8r+nnPvYrIIHfYu05JVQf9qtJNCS0Vznh692VhUW9HeCPd2IA== -DLOG_PATH=/app/log -Dlogging.level.com.springframework.security=DEBUG -Dlogging.level.com.lfn.ai.comm.lib.util.logger=ERROR -Dspring.profiles.active=mysql,dbjwt,btf,dbconstants,vault -Dorg.slf4j.simpleLogger.defaultLogLevel=info -Dlogback.configurationFile=/app/conf/logback-spring.xml -Dorg.slf4j.LoggerFactory=ch.qos.logback.classic.util.ContextSelectorStaticBinder -cp common-app-3.3-SNAPSHOT.jar:lib/*:conf/* com.lfn.Common"]
+
+EXPOSE 8082

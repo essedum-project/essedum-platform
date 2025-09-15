@@ -2,53 +2,37 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.infosys.icets.icip</groupId>
+	<groupId>com.lfn.icip</groupId>
 	<artifactId>icip-lib-adp</artifactId>
 	<packaging>jar</packaging>
 	<name>icip-lib-adp</name>
 	<url>http://maven.apache.org</url>
 	<parent>
-		<groupId>com.infosys.icets.ai</groupId>
-		<artifactId>aip</artifactId>
+		<groupId>com.lfn.ai</groupId>
+		<artifactId>essedum</artifactId>
 		<version>3.3-SNAPSHOT</version>
 	</parent>
-	<properties>
-		
+	<properties>	
 		<main.basedir>${project.parent.basedir}</main.basedir>
-		<aws-java-sdk-core>1.11.1000</aws-java-sdk-core>
-		<google-auth-library>1.3.0</google-auth-library>
 	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 	  	 	<artifactId>lucene-core</artifactId>
-			<version>8.9.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-queryparser</artifactId>
-			<version>8.10.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-analyzers-common</artifactId>
-			<version>8.9.0</version>
 		</dependency>
 	        <dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-ui</artifactId>
-			<version>1.6.6</version>
-		</dependency>
-		<dependency>
-           <groupId>org.apache.groovy</groupId>
-           <artifactId>groovy-all</artifactId>
-           <version>4.0.0</version>
-           <type>pom</type>
-        </dependency>
-		<dependency>
-			<groupId>com.google.auth</groupId>
-			<artifactId>google-auth-library-oauth2-http</artifactId>
-			<version>1.24.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>	 
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -58,27 +42,108 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-to-slf4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+				<!-- Exclude conflicting Spring versions -->
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-context</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-beans</artifactId>
+				</exclusion>
+				<!-- Exclude conflicting Jackson versions -->
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-annotations</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!--
 		https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
-			<version>3.2.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<!-- Exclude conflicting Spring versions -->
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-context</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-beans</artifactId>
+				</exclusion>
+				<!-- Exclude conflicting Jackson versions -->
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-annotations</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>	
 		</dependency>
 		<!--
 		https://mvnrepository.com/artifact/org.springframework.data/spring-data-jpa -->
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-jpa</artifactId>
-			<version>3.2.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>	 
 		</dependency>
 		<!--
 		https://mvnrepository.com/artifact/org.springframework.data/spring-data-commons -->
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-commons</artifactId>
-			<version>3.2.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>	 
 		</dependency>
 		<!--
 		https://mvnrepository.com/artifact/org.springframework.security/spring-security-config -->
@@ -93,12 +158,10 @@
 		<dependency>
 			<groupId>net.minidev</groupId>
 			<artifactId>json-smart</artifactId>
-            <version>2.4.9</version>
 		</dependency>
 		<dependency>
     		<groupId>org.springframework</groupId>
     		<artifactId>spring-core</artifactId>
-    		<version>6.0.0</version> 
 		</dependency>
 		<dependency>
 			<groupId>org.liquibase</groupId>
@@ -111,6 +174,12 @@
 		<dependency>
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>	
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -118,16 +187,16 @@
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
+					<artifactId>log4j-api</artifactId>
 				</exclusion>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
+					<artifactId>slf4j-lolog4j-apilog4j-apilog4j-apig4j12</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.ai</groupId>
+			<groupId>com.lfn.ai</groupId>
 			<artifactId>comm-lib-util</artifactId>
 		</dependency>
 		<dependency>
@@ -143,23 +212,23 @@
 			<artifactId>modelmapper</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-jobs</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-fsvr</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-evt</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-search</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.ai</groupId>
+			<groupId>com.lfn.ai</groupId>
 			<artifactId>comm-secrets-app</artifactId>
 		</dependency>
 		<dependency>
@@ -173,10 +242,52 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-quartz</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.zaxxer</groupId>
+					<artifactId>HikariCP-java7</artifactId>
+				</exclusion>
+				<!-- Exclude conflicting Spring versions -->
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-context</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-beans</artifactId>
+				</exclusion>
+				<!-- Exclude conflicting Jackson versions -->
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-annotations</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>	
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -193,6 +304,10 @@
 				<exclusion>
 					<groupId>org.apache.commons</groupId>
 					<artifactId>commons-compress</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-api</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -219,7 +334,6 @@
 		<dependency>
 		  <groupId>org.apache.commons</groupId>
 		  <artifactId>commons-compress</artifactId>
-		  <version>1.26.1</version>
 		</dependency>
 		<!-- Test dependencies -->
 		<dependency>
@@ -240,20 +354,42 @@
 		<dependency>
 			<groupId>org.ehcache</groupId>
 			<artifactId>ehcache</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>	 
 		</dependency>
 		<dependency>
 			<groupId>javax.cache</groupId>
 			<artifactId>cache-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.python</groupId>
-			<artifactId>jython-standalone</artifactId>
-			<version>2.7.4</version>
+		    <groupId>org.python</groupId>
+		    <artifactId>jython-standalone</artifactId>
 		</dependency>
+		
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpmime</artifactId>
-			<version>4.5.14</version>
+		    <groupId>org.apache.httpcomponents</groupId>
+		    <artifactId>httpmime</artifactId>
 		</dependency>
+		
+		<dependency>
+		    <groupId>org.apache.groovy</groupId>
+		    <artifactId>groovy-all</artifactId>
+		    <type>pom</type>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.google.auth</groupId>
+		    <artifactId>google-auth-library-oauth2-http</artifactId>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.apache.lucene</groupId>
+		    <artifactId>lucene-analyzers-common</artifactId>
+		</dependency>
+
 	</dependencies>
 </project>

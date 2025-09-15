@@ -443,7 +443,7 @@
                   <li style="cursor: pointer" class="breadcrumb-item"
                     *ngFor="let bccbreadcrumb of bccbreadcrumbs; let i = index">
                     <span style="color: var(--breadcrumbtext-color)" (click)="bccbreadcrumbroute(bccbreadcrumb, i)">
-                      {{ bccbreadcrumb }}
+                      {{ bccbreadcrumb }} 
                     </span>
                   </li>
                 </ol>
@@ -658,11 +658,11 @@
                 </mat-form-field>
               </div>
             </div>
-            <button *ngIf="profileCheck && demouserFlag && logout_status" mat-menu-item=""
+            <!-- <button *ngIf="profileCheck && demouserFlag && logout_status" mat-menu-item=""
               [style.height]="detailsPopupHeight" (click)="resetPassword()" class="selector-3-109">
               <i class="fa fa-key selector-3-110" aria-hidden="true"></i>
               <span class="selector-3-111">&nbsp;Reset Password</span>
-            </button>
+            </button> -->
 
             <div class="button-container" style="display: flex">
               <button id="home-btn-logout" mat-menu-item="" (click)="logout()" class="selector-3-112"

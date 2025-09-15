@@ -11,7 +11,7 @@ import { Services } from '../../services/service';
 import { TagsService } from '../../services/tags.service';
 import { HttpParams } from '@angular/common/http';
 import { TagEventDTO } from '../../DTO/tagEventDTO.model';
-import { AdapterServices } from '../../adapter/adapter-service';
+import { AdapterServices } from '../services/adapter-service';
 import { DatasetServices } from '../../dataset/dataset-service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SemanticService } from '../../services/semantic.services';
@@ -40,6 +40,7 @@ enum ServiceType {
   DG_APP = 'dgApp',
   INSTANCES = 'instances',
   WORKER_TOOLS = 'worker-tools',
+  MODEL='model'
 }
 
 // Enum for filter types
@@ -60,6 +61,7 @@ enum FilterType {
   DATASET_KNOWLEDGE = 'datasetKnowledge',
   DATASET_TAG = 'datasetTag',
   CONNECTION_TYPE = 'connectiontype',
+  DATASOURCE='Datasource'
 }
 
 @Component({
@@ -85,6 +87,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
   @Input() preselectedtag: number[] = [];
   @Input() selectedAdpImplCombinedLists: any;
   @Input() selectedConnectionTypeList: any;
+  @Input() selectedModelDataSourceList:any;
   @Input() selectedDatasetTypeList: any;
   @Input() selectedPipelineTypeList: any;
   @Input() selectedToolsTypeList: any;
@@ -134,6 +137,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
   selectedDatasetTopicType: string[] = [];
   selectedAppType: string[] = [];
   selectedTagsType: any[] = [];
+  selectedModelDatasource: string[] = [];
 
   // Filter lists
   adapterTypes: any[] = [];
@@ -185,6 +189,7 @@ export class AipFilterComponent implements OnInit, OnChanges {
   selectedMlAppType: string[] = [];
   selectedMlIncType: string[] = [];
   appsTypeList = [];
+  modelDataSourceList: FilterItem[] = [];
 
   constructor(
     private service: Services,
@@ -200,12 +205,18 @@ export class AipFilterComponent implements OnInit, OnChanges {
     this.loadPreselectedFilters();
     this.loadQueryParams();
     this.initializeSelectedLists();
-    this.initializeServiceBasedFilters();
+    this.initializeServiceBasedFilters();  
+    this.initializeModelDatasourceList();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.tagrefresh?.currentValue) {
       this.handleTagRefreshChange();
+    }
+    
+    // Handle changes to selectedModelDataSourceList
+    if (changes.selectedModelDataSourceList?.currentValue) {
+      this.initializeModelDatasourceList();
     }
   }
 
@@ -349,6 +360,10 @@ export class AipFilterComponent implements OnInit, OnChanges {
         break;
       case ServiceType.WORKER_TOOLS:
         this.getToolsTypes();
+        break;
+      case ServiceType.MODEL:
+        this.getTags();
+        this.initializeModelDatasourceList();
         break;
       default:
         this.getTags();
@@ -1448,6 +1463,27 @@ export class AipFilterComponent implements OnInit, OnChanges {
   }
 
   /**
+   * Initializes model datasource list from input
+   */
+  private initializeModelDatasourceList(): void {
+    if (this.selectedModelDataSourceList?.dataSourceList && Array.isArray(this.selectedModelDataSourceList.dataSourceList)) {
+      this.modelDataSourceList = this.selectedModelDataSourceList.dataSourceList.map(item => ({
+        category: item.category || 'Datasource',
+        label: item.label,
+        value: item.value,
+        selected: item.selected || false
+      }));
+      
+      // Initialize selected datasources from the list
+      this.selectedModelDatasource = this.modelDataSourceList
+        .filter(item => item.selected)
+        .map(item => item.value);
+        
+      console.log('Model datasource list initialized:', this.modelDataSourceList);
+    }
+  }
+
+  /**
    * Resets all filter arrays
    */
   private resetAllFilters(): void {
@@ -1490,6 +1526,10 @@ export class AipFilterComponent implements OnInit, OnChanges {
     this.instanceImplementationList = [];
     this.selectedMlInstancesAdapterType = [];
     this.selectedMlInstancesConnectionType = [];
+
+    // Reset model datasource filters
+    this.selectedModelDatasource = [];
+    this.modelDataSourceList.forEach(item => item.selected = false);
   }
 
   /**
@@ -1768,7 +1808,8 @@ export class AipFilterComponent implements OnInit, OnChanges {
       this.selectedMlSpecTemplateCapabilityType,
       this.selectedMlInstancesAdapterType,
       this.selectedMlInstancesConnectionType,
-      this.selectedDatasetTopicType
+      this.selectedDatasetTopicType,
+      this.selectedModelDatasource
     );
   }
 
@@ -1790,6 +1831,15 @@ export class AipFilterComponent implements OnInit, OnChanges {
    * Checks if there are active filters
    */
   hasActiveFilters(): boolean {
+    if (this.servicev1 === ServiceType.MODEL) {
+      return (
+        this.selectedModelDatasource?.length > 0 ||
+        this.selectedTagList?.length > 0 ||
+        this.selectedAdapterInstance?.length > 0
+      );
+    }
+
+    // Add conditions for other service types
     if (this.servicev1 === ServiceType.ADAPTERS) {
       return (
         this.selectedMlAdapterCategoryType?.length > 0 ||
@@ -1798,7 +1848,6 @@ export class AipFilterComponent implements OnInit, OnChanges {
       );
     }
 
-    // Add conditions for other service types
     if (this.servicev1 === ServiceType.INSTANCES) {
       return (
         this.selectedMlInstancesAdapterType?.length > 0 ||
@@ -1815,7 +1864,8 @@ export class AipFilterComponent implements OnInit, OnChanges {
       this.selectedAdapterType?.length > 0 ||
       this.selectedAdapterInstance?.length > 0 ||
       this.selectedTagList?.length > 0 ||
-      this.selectedDatasetTopicType?.length > 0
+      this.selectedDatasetTopicType?.length > 0 ||
+      this.selectedModelDatasource?.length > 0
     );
   }
 
@@ -1823,25 +1873,105 @@ export class AipFilterComponent implements OnInit, OnChanges {
    * Gets active filters summary
    */
   getActiveFiltersSummary(): string {
-    if (this.servicev1 !== ServiceType.ADAPTERS) {
-      return '';
+    const activeFilters: string[] = [];
+
+    switch (this.servicev1) {
+      case ServiceType.ADAPTERS:
+        if (this.selectedMlAdapterCategoryType?.length > 0) {
+          activeFilters.push('Category');
+        }
+        if (this.selectedMlAdapterSpecType?.length > 0) {
+          activeFilters.push('Spec');
+        }
+        if (this.selectedMlAdapterConnectionType?.length > 0) {
+          activeFilters.push('Connection');
+        }
+        break;
+      case ServiceType.CONNECTIONS:
+        if (this.selectedAdapterType?.length > 0) {
+          activeFilters.push('Type');
+        }
+        if (this.selectedAdapterInstance?.length > 0) {
+          activeFilters.push('Instance');
+        }
+        break;
+      case ServiceType.PIPELINE:
+      case ServiceType.CHAIN:
+        if (this.selectedAdapterType?.length > 0) {
+          activeFilters.push('Type');
+        }
+        if (this.selectedAdapterInstance?.length > 0) {
+          activeFilters.push('Instance');
+        }
+        break;
+      case ServiceType.APPS:
+        if (this.selectedAdapterType?.length > 0) {
+          activeFilters.push('Type');
+        }
+        if (this.selectedAdapterInstance?.length > 0) {
+          activeFilters.push('Instance');
+        }
+        break;
+      case ServiceType.MODEL:
+        if (this.selectedModelDatasource?.length > 0) {
+          activeFilters.push('Datasource');
+        }
+        if (this.selectedTagList?.length > 0) {
+          activeFilters.push('Tag');
+        }
+        if (this.selectedAdapterInstance?.length > 0) {
+          activeFilters.push('Instance');
+        }
+        break;
+      case ServiceType.DATASETS:
+        if (this.selectedAdapterType?.length > 0) {
+          activeFilters.push('Type');
+        }
+        if (this.selectedTagList?.length > 0) {
+          activeFilters.push('Tag');
+        }
+        if (this.selectedDatasetTopicType?.length > 0) {
+          activeFilters.push('Topic');
+        }
+        break;
+      case ServiceType.SPECS:
+        if (this.selectedMlSpecTemplateCapabilityType?.length > 0) {
+          activeFilters.push('Capability');
+        }
+        break;
+      case ServiceType.INSTANCES:
+        if (this.selectedMlInstancesAdapterType?.length > 0) {
+          activeFilters.push('Adapter');
+        }
+        if (this.selectedMlInstancesConnectionType?.length > 0) {
+          activeFilters.push('Connection');
+        }
+        break;
+      case ServiceType.WORKER_TOOLS:
+        if (this.selectedAdapterType?.length > 0) {
+          activeFilters.push('Type');
+        }
+        break;
+      default:
+        if (this.selectedAdapterType?.length > 0) {
+          activeFilters.push('Type');
+        }
+        if (this.selectedAdapterInstance?.length > 0) {
+          activeFilters.push('Instance');
+        }
+        if (this.selectedTagList?.length > 0) {
+          activeFilters.push('Tag');
+        }
+        if (this.selectedDatasetTopicType?.length > 0) {
+          activeFilters.push('Topic');
+        }
+        if (this.selectedModelDatasource?.length > 0) {
+          activeFilters.push('Datasource');
+        }
+        break;
     }
 
-    const activeFilters = [];
-
-    if (this.selectedMlAdapterCategoryType?.length > 0) {
-      activeFilters.push('Category');
-    }
-
-    if (this.selectedMlAdapterSpecType?.length > 0) {
-      activeFilters.push('Spec');
-    }
-
-    if (this.selectedMlAdapterConnectionType?.length > 0) {
-      activeFilters.push('Connection');
-    }
-
-    return activeFilters.join(' | ');
+    return activeFilters.length > 0 ? activeFilters.join(' | ') : '';
   }
 
   /**
@@ -1902,5 +2032,56 @@ export class AipFilterComponent implements OnInit, OnChanges {
       this.tagSelected.emit(this.geteventtagsdto());
     }
     this.updateFilterStatus();
+  }
+
+
+   /**
+   * Handles selection of model datasource filter
+   */
+  modelDatasourceSelected(value: any): void {
+    console.log('Model datasource selected:', value);
+    // Toggle the selected state for the clicked datasource
+    this.modelDataSourceList.forEach((element) => {
+      if (element.value === value.value) {
+        element.selected = !element.selected;
+      }
+    });
+    // Update the selectedModelDatasource array
+    this.selectedModelDatasource = this.modelDataSourceList
+      .filter(item => item.selected)
+      .map(item => item.value);
+
+    this.emitSelectionChanges();
+    this.updateFilterStatus();
+    this.toggleFilterExpanded();
+  }
+  /**
+   * Removes model datasource filterelDatasource:', this.selectedModelDatasource);
+   */
+  /**
+   * Removes a model datasource filter
+   */
+  removeModelDatasourceFilter(type: string): void {
+    const index = this.selectedModelDatasource.indexOf(type);
+    if (index !== -1) {
+      this.selectedModelDatasource.splice(index, 1);
+      // Update the UI selection state
+      this.modelDataSourceList.forEach((element) => {
+        if (element.value === type) {
+          element.selected = false;
+        }
+      });
+      // Emit the updated selection
+      this.tagSelected.emit(this.geteventtagsdto());
+    }
+    this.updateFilterStatus();
+  }
+
+  /**
+   * Gets the label for a datasource value (for chip display)
+   */
+  getDatasourceLabel(value: string): string {
+    const datasource = this.modelDataSourceList.find(item => item.value === value);
+    return datasource ? datasource.label : value;
   }
 }

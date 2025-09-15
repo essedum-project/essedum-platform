@@ -1,0 +1,531 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+/* Form Card Styling - Only for Edit Mode */
+.form-card {
+  margin: 20px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.form-card .mat-card-content {
+  padding: 24px !important;
+}
+
+:host ::ng-deep body,
+:host ::ng-deep html {
+  font-family: "Roboto", sans-serif !important;
+}
+
+body {
+  font-family: 'Roboto', sans-serif !important;
+}
+
+/* Dialog container styling */
+::ng-deep .custom-dialog-container {
+  max-width: none !important;
+}
+
+::ng-deep .custom-dialog-container .mat-dialog-container {
+  padding: 0 !important;
+  overflow-x: hidden !important;
+  max-height: 90vh !important; /* Increased from 80vh to 90vh */
+  overflow-y: auto !important;
+  display: block !important;
+}
+
+::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+  width: auto !important;
+  min-width: 550px !important;
+  max-width: 600px !important;
+  max-height: 90vh !important; /* Increased from 80vh to 90vh */
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+::ng-deep .mat-mdc-dialog-content {
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  max-height: calc(90vh - 130px) !important; /* Increased max-height */
+  overflow-y: scroll !important; /* Force scrollbar to always appear */
+  overflow-x: hidden !important;
+  padding-bottom: 24px !important; /* Added padding at the bottom */
+}
+
+/* No scrollbar for edit project screen */
+::ng-deep .no-scroll-content {
+  overflow-y: hidden !important;
+  overflow-x: hidden !important;
+  max-height: none !important;
+}
+
+/* Ensure scrollbar is always visible - using light gray color */
+::ng-deep .mat-mdc-dialog-content::-webkit-scrollbar {
+  width: 10px !important; /* Wider scrollbar for better visibility */
+  background-color: #f1f1f1 !important;
+  display: block !important;
+}
+
+::ng-deep .mat-mdc-dialog-content::-webkit-scrollbar-track {
+  background: #f1f1f1 !important;
+  border-radius: 4px !important;
+}
+
+::ng-deep .mat-mdc-dialog-content::-webkit-scrollbar-thumb {
+  background: #c0c0c0 !important; /* Light gray color for scrollbar */
+  border-radius: 4px !important;
+  min-height: 40px !important; /* Ensure thumb is visible */
+}
+
+::ng-deep .mat-mdc-dialog-content::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0 !important; /* Darker gray on hover */
+}
+
+  .lfx-u-pad-t-8 {
+    padding-top: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+  }
+
+   .lfx-l-level2-middle-col {
+    vertical-align: top;
+    height: 100%;
+    padding: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+  }
+
+   .base-color {
+    color: #0094ff !important;
+  }
+
+  .secondary-color {
+    color: #0a142f !important;
+  }
+
+  .lfx-u-pad-t-32 {
+    padding-top: 32px !important;
+  }
+
+  .lfx-u-pad-r-16 {
+    padding-right: 16px !important;
+  }
+
+  .lfx-u-mar-r-16 {
+    margin-right: 16px !important;
+  }
+  .lfx-u-pad-lr-16 {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  .lfx-u-mar-t-16 {
+    margin-top: 16px !important;
+  }
+  
+  /* Styling for mat-tab-group */
+  :host ::ng-deep .mat-tab-group {
+    margin-top: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+  }
+  
+  :host ::ng-deep .mat-tab-header {
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  :host ::ng-deep .mat-tab-label {
+    font-weight: 500;
+    min-width: 160px;
+    opacity: 1;
+    color: rgba(0, 0, 0, 0.6);
+  }
+  
+  :host ::ng-deep .mat-tab-label-active {
+    color: #0094ff;
+    opacity: 1;
+  }
+  
+  :host ::ng-deep .mat-tab-body-content {
+    padding: 16px;
+  }
+  
+  :host ::ng-deep .selector-668-46 {
+    margin-top: 24px;
+    padding: 0 16px;
+  }
+
+/* Card and content styling */
+:host ::ng-deep .mat-mdc-card {
+  box-shadow: none;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 16px !important;
+  min-height: 500px !important; /* Add minimum height to ensure scrolling */
+  padding-bottom: 32px !important; /* Extra padding at the bottom */
+}
+
+/* Force scrollable content */
+::ng-deep mat-dialog-content {
+  display: block !important;
+  min-height: 500px !important;
+  overflow-y: scroll !important;
+  padding-bottom: 60px !important; /* Extra space at the bottom */
+}  /* Row and column layout */
+  .row {
+    width: 100% !important;
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .col-md-6 {
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+    padding-right: 10px !important;
+    padding-left: 10px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Form field styling */
+  :host ::ng-deep mat-form-field {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  :host ::ng-deep .mat-mdc-form-field-infix {
+    width: 100% !important;
+  }
+
+  /* File input container */
+  .file-input-container {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    width: 100% !important;
+  }
+
+  .file-input-wrapper {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+    width: 100% !important;
+  }
+
+  .file-name {
+    margin-left: 10px;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .logo-preview {
+    max-width: 150px;
+    max-height: 150px;
+    margin-top: 10px;
+  }
+
+  /* Checkbox styling */
+  .checkbox-field {
+    margin-top: 10px;
+    width: 100% !important;
+  }
+
+  .label-checkbox-container {
+    display: flex;
+    align-items: flex-start;
+    width: 100% !important;
+  }
+
+  .label-checkbox-container mat-label {
+    margin-right: 10px;
+    min-width: 120px;
+  }
+
+  .checkbox-field mat-label {
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  .checkbox-container {
+    display: flex;
+    flex-direction: column;
+    width: 100% !important;
+  }
+
+  /* Theme input */
+  .theme-input-container {
+    margin-top: 10px;
+    width: 100% !important;
+  }
+
+  .theme-input-container input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Note text */
+  .note-text {
+    font-style: italic !important;
+    display: block !important;
+    width: 100% !important;
+  }
+
+  mat-checkbox {
+    margin-top: 2px;
+  }
+
+  /* Dialog buttons */
+  .dialog-buttons {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px 24px 24px;
+    box-sizing: border-box;
+    width: 100% !important;
+    margin-top: 16px !important; /* Extra margin at the top */
+  }
+
+  .dialog-buttons button {
+    margin-left: 8px;
+  }
+
+  /* Content padding */
+  .p-20 {
+    padding: 20px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+.base-color {
+  color: #0052cc !important;
+}
+
+.save-btn {
+  color: #ffffff !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+      no-repeat,
+    #0052cc padding-box !important;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+    no-repeat padding-box !important;
+}
+
+::ng-deep .cancel-btn {
+  color: #002966 !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: #dadada 0% 0% no-repeat padding-box;
+  opacity: 1;
+}
+
+/* Form field appearance */
+::ng-deep .mat-mdc-input-element {
+  background-color: #f7f7f7ed !important;
+  border-bottom: 0px solid rgba(0, 0, 0, 0.42) !important;
+}
+
+::ng-deep .mdc-text-field {
+  border-bottom: 0px solid rgba(0, 0, 0, 0.42) !important;
+}
+
+::ng-deep .mdc-text-field {
+  all: unset;
+}
+
+/* Row margin bottom */
+  .rwMAr {
+    margin-bottom: 20px !important;
+    width: 100% !important;
+  }
+  
+  /* Add extra space for the last row */
+  .rwMAr:last-child {
+    margin-bottom: 40px !important;
+  }/* Error styling */
+.error {
+  color: #999;
+  font-size: 12px;
+  display: block;
+  margin-top: 5px;
+  width: 100% !important;
+}
+
+::ng-deep .mat-mdc-input-element {
+  background-color: #f7f7f7ed !important;
+  border-bottom: 0px solid rgba(0, 0, 0, 0.42) !important;
+}
+
+::ng-deep .mdc-text-field {
+  border-bottom: 0px solid rgba(0, 0, 0, 0.42) !important;
+}
+
+::ng-deep .mdc-text-field {
+  all: unset;
+  /* or use display: none; if you want to hide it completely */
+  /* display: none; */
+}
+
+.header-title {
+  text-align: left;
+  font: normal normal 600 18px/24px "Roboto", sans-serif !important;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  margin-left: 16px !important;
+}
+
+.lfx-u-mar-lr-24{
+    margin-right: 24px !important;
+    margin-left: 24px !important;
+}
+
+.ml-24{
+    margin-left: 24px !important;
+}
+
+:host ::ng-deep .mat-mdc-card {
+  box-shadow: none;
+}
+
+::ng-deep .mdc-line-ripple::before{
+    border-bottom-style: none;     
+}
+
+::ng-deep .mdc-line-ripple::after{
+    border-bottom-style: none;     
+}
+
+.btn-close{
+  width: 28px !important;
+  height: 28px !important;
+  color: #737373 !important;
+  opacity: 1;
+  border: none !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  border-radius: 50% !important;
+  transition: background-color 0.2s !important;
+}
+
+.btn-close:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+.btn-close::before,
+.btn-close::after {
+  content: '' !important;
+  position: absolute !important;
+  width: 16px !important;
+  height: 2px !important;
+  background-color: #737373 !important;
+  top: 50% !important;
+  left: 50% !important;
+}
+
+.btn-close::before {
+  transform: translate(-50%, -50%) rotate(45deg) !important;
+}
+
+.btn-close::after {
+  transform: translate(-50%, -50%) rotate(-45deg) !important;
+}
+
+/* Dialog header */
+.d-flex.justify-content-between.align-items-center {
+  padding: 16px 24px !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+  background-color: #fafafa !important;
+}
+
+::ng-deep .mat-mdc-form-field-error-wrapper{
+    padding: 0px !important;
+}
+
+.ml-4{
+    margin-left: 4px !important;
+}
+
+.mat-style-label {
+  text-align: left;
+  font: normal normal normal 12px/18px "Roboto" sans-serif !important;
+  letter-spacing: 0px;
+  color: #555555;
+  opacity: 1;
+  text-transform: capitalize;
+}
+
+::ng-deep .mat-mdc-form-field input.mat-mdc-input-element {
+  text-align: left;
+  font: normal normal normal 16px/24px "Roboto" sans-serif !important;
+  letter-spacing: 0px;
+  color: #000000 !important;
+  opacity: 1;
+  margin-left: 4px !important;
+}
+
+::ng-deep .mat-mdc-form-field input.mat-mdc-input-element::placeholder {
+  color: #737373 !important;
+  text-align: left;
+  font: normal normal normal 16px/24px "Roboto" sans-serif !important;
+  letter-spacing: 0px;
+  text-transform: capitalize;
+  opacity: 1;
+}
+
+
+.text-transform{
+ text-transform: capitalize !important;
+}
+
+.lfx-l-level2-middle-col {
+    display: block;
+}
+
+
+.shell-showpass {
+  position: absolute;
+  top: 0;
+  right: 9.7rem;
+  z-index: 4;
+}
+
+ .aip-cursor {
+    cursor: pointer;
+  }
+
+/* Back icon styling */
+.back-icon {
+  font-size: 24px;
+  cursor: pointer;
+  margin-right: 10px;
+  vertical-align: middle;
+}

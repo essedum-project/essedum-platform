@@ -1,16 +1,29 @@
-
-.kk{
-    font-size: 15px;
+.kk {
+  font-size: 15px;
 }
 
-.fs{
-    font-size: 16px !important;
-    font-weight: 600 !important;
-    color: #0094ff;
+.fs {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #0094ff;
 }
 
-th{
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    color: #0094ff;
+th {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #0094ff;
+}
+
+.cancel-btn {
+  display: inline-flex;
+  align-items: center;
+  width: 40px;
+  justify-content: center;
+}
+
+.cancel-div {
+  width: 100px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }

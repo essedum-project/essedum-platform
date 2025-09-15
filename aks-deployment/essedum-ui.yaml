@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: essedum-ui
-        image: 10.200.111.174:5000/essedum_ui:latest 
+        image: 10.200.111.174:5000/essedum_app_frontend:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8082

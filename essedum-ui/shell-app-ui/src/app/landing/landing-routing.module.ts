@@ -19,6 +19,10 @@ export const routes: Routes = [
       {
         path: "feature1/:name", component: AppNavigationComponent
       },
+        {
+        path: "iamp-usm",
+        loadChildren: () => import('../../../projects/iamp-usm/src/public-api').then(m => m.IampUsmModule),
+      },
     ]
   },
 

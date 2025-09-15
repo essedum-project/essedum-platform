@@ -40,8 +40,8 @@ quartz:
         driverClassName: ${config.driverClassName}
         jdbcUrl: ${config.datasourceurl}?currentSchema=quartz
         url: ${config.datasourceurl}?currentSchema=quartz1
-        username: ${config.leap-db-username}
-        password: ${config.leap-db-password}
+        username: ${config.essedum-db-username}
+        password: ${config.essedum-db-password}
         maximum-pool-size: 8
         minimumIdle: 3
         idleTimeout: 60000
@@ -66,7 +66,7 @@ quartz:
                 batch_versioned_data: true
                 time_zone: UTC
             ddl-auto: none
-            physical_naming_strategy : com.infosys.icets.icip.icipwebeditor.job.config.UpperCaseStrategy
+            physical_naming_strategy : com.lfn.icip.icipwebeditor.job.config.UpperCaseStrategy
             implicit_naming_strategy : org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy      
 
 mailserver:

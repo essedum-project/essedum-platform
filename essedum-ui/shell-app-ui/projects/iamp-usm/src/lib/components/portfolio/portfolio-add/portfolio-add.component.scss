@@ -1,0 +1,528 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+:host ::ng-deep body,
+:host ::ng-deep html {
+  font-family: "Roboto", sans-serif !important;
+}
+
+body {
+  font-family: 'Roboto', sans-serif !important;
+}
+
+  .lfx-u-pad-t-8 {
+    padding-top: 8px !important;
+  }
+
+   .lfx-l-level2-middle-col {
+    vertical-align: top;
+    height: 100%;
+    padding: 12px !important;
+  }
+
+   .base-color {
+    color: #0094ff !important;
+  }
+
+  .secondary-color {
+    color: #0a142f !important;
+  }
+
+  .lfx-u-pad-t-8 {
+    padding-top: 8px !important;
+  }
+
+  .lfx-u-pad-t-32 {
+    padding-top: 32px !important;
+  }
+
+  .lfx-u-pad-r-16 {
+    padding-right: 16px !important;
+  }
+
+  .lfx-u-mar-r-16 {
+    margin-right: 16px !important;
+  }
+  .lfx-u-pad-lr-16 {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  .lfx-u-mar-t-16 {
+    margin-top: 16px !important;
+  }
+
+  .lfx-u-mar-lr-16 {
+    margin-left: 16px !important;
+    margin-right: 16px !important;
+  }
+
+  .lfx-u-mar-t-30 {
+    margin-top: 30px !important;
+  }
+
+  .lfx-u-pad-l-32 {
+    padding-left: 32px !important;
+  }
+
+  .lfx-u-mar-b-32 {
+    margin-bottom: 32px !important;
+  }
+
+  .lfx-u-pad-r-8 {
+    padding-right: 8px !important;
+  }
+
+  .lfx-l-level1-wrapper .DSA_contentRightCol {
+    padding: 30px 20px;
+    min-height: 500px;
+  }
+  .lfx-l-level1-wrapper .lfx-l-whiteBG {
+    background: #ffffff;
+  }
+
+  .lfx-u-pad-t-8 {
+    padding-top: 8px !important;
+  }
+
+  .lfx-u-pad-t-32 {
+    padding-top: 32px !important;
+  }
+
+  .lfx-u-pad-r-16 {
+    padding-right: 16px !important;
+  }
+
+  .lfx-u-mar-r-16 {
+    margin-right: 16px !important;
+  }
+
+    .lfx-u-pad-lr-24 {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+
+  .w-100{
+    width: 100%;
+  }
+
+  .lfx-u-mar-b-16 {
+    margin-bottom: 16px !important;
+  }
+
+   .lfx-u-pad-r-16 {
+    padding-right: 16px !important;
+  }
+
+  .lfx-u-mar-r-16 {
+    margin-right: 16px !important;
+  }
+
+  .p-20{
+    padding: 20px !important;
+  }
+
+.base-color {
+  color: #0052cc !important;
+}
+
+::ng-deep .save-btn {
+  color: #ffffff !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+      no-repeat,
+    #0052cc padding-box !important;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+    no-repeat padding-box !important;
+}
+
+::ng-deep .cancel-btn {
+  color: #002966 !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: #dadada 0% 0% no-repeat padding-box;
+  opacity: 1;
+}
+
+::ng-deep .mat-mdc-input-element {
+  background-color: #f7f7f7ed !important;
+  border-bottom: 0px solid rgba(0, 0, 0, 0.42) !important;
+}
+
+::ng-deep .mdc-text-field {
+  border-bottom: 0px solid rgba(0, 0, 0, 0.42) !important;
+}
+
+::ng-deep .mdc-text-field {
+  all: unset;
+  /* or use display: none; if you want to hide it completely */
+  /* display: none; */
+}
+
+.header-title {
+  text-align: left;
+  font: normal normal 600 18px/24px "Roboto", sans-serif !important;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  margin-left: 16px !important;
+}
+
+.header-sub-title {
+  text-align: left;
+  font: normal normal 500 14px/18px "Roboto", sans-serif !important;
+  letter-spacing: 0px;
+  color: #000000;
+  opacity: 1;
+  margin-left: 16px !important;
+}
+
+.lfx-u-mar-lr-24{
+    margin-right: 24px !important;
+    margin-left: 24px !important;
+}
+
+.ml-24{
+    margin-left: 24px !important;
+}
+
+:host ::ng-deep .mat-mdc-card {
+  box-shadow: none;
+}
+
+::ng-deep .mdc-line-ripple::before{
+    border-bottom-style: none;     
+}
+
+::ng-deep .mdc-line-ripple::after{
+    border-bottom-style: none;     
+}
+
+.btn-close{
+width: 20px !important;
+height: 20px !important;
+color: #737373 0% 0% no-repeat padding-box !important;
+opacity: 1;
+border: none !important;
+}
+
+::ng-deep .mat-mdc-form-field-error-wrapper{
+    padding: 0px !important;
+}
+
+.ml-4{
+    margin-left: 4px !important;
+}
+
+.mat-style-label {
+  text-align: left;
+  font: normal normal normal 12px/18px "Roboto" sans-serif !important;
+  letter-spacing: 0px;
+  color: #555555;
+  opacity: 1;
+  text-transform: capitalize;
+}
+
+::ng-deep .mat-mdc-form-field input.mat-mdc-input-element {
+  text-align: left;
+  font: normal normal normal 16px/24px "Roboto" sans-serif !important;
+  letter-spacing: 0px;
+  color: #000000 !important;
+  opacity: 1;
+  margin-left: 4px !important;
+}
+
+::ng-deep .mat-mdc-form-field input.mat-mdc-input-element::placeholder {
+  color: #737373 !important;
+  text-align: left;
+  font: normal normal normal 16px/24px "Roboto" sans-serif !important;
+  letter-spacing: 0px;
+  text-transform: capitalize;
+  opacity: 1;
+}
+
+
+.text-transform{
+ text-transform: capitalize !important;
+}
+
+.lfx-l-level2-middle-col {
+    display: block;
+}
+
+
+.shell-showpass {
+  position: absolute;
+  top: 0;
+  right: 9.7rem;
+  z-index: 4;
+}
+
+ .aip-cursor {
+    cursor: pointer;
+  }
+
+
+  
+
+/* Table Styling */
+.projects-section {
+  max-height: 400px;
+  margin-top: 16px;
+
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 0 16px 0 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  overflow: visible; 
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-scroll-container {
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; 
+  min-width: 600px; 
+}
+
+.styled-table th {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  white-space: normal;
+  word-break: break-word;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.styled-table td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  white-space: normal;
+  word-break: break-word;
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+
+.styled-table th:nth-child(1),
+.styled-table td:nth-child(1) {
+  width: 60px;
+  max-width: 60px;
+}
+
+.styled-table th:nth-child(2),
+.styled-table td:nth-child(2) {
+  width:90px; 
+  max-width: 90px;
+}
+
+.styled-table th:nth-child(3),
+.styled-table td:nth-child(3),
+.styled-table th:nth-child(4),
+.styled-table td:nth-child(4) {
+  width: auto; 
+  min-width: 150px;
+}
+
+.styled-table thead {
+  background-color: #f4f4f4;
+}
+
+.styled-table tr:hover {
+  background-color: #f9f9f9;
+
+}
+
+.styled-table tr.selected {
+  background-color: #e6f4ff;
+}
+
+::ng-deep .mat-mdc-form-field-error-wrapper{
+    padding: 0px !important;
+}
+
+::ng-deep .mat-mdc-form-field-hint-wrapper,
+::ng-deep .mat-mdc-form-field-error-wrapper {
+    padding: 0px !important;
+}
+
+::ng-deep .mat-mdc-form-field-hint-wrapper .mat-mdc-form-field-error-wrapper{
+    padding: 0px !important;
+}
+
+
+.pagination-container {
+  margin: 0.2rem 0;
+  display: flex;
+  justify-content: flex-end;
+
+  .paginator-buttons {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+  }
+
+  .pages-details {
+    display: flex;
+  }
+
+  .pagination-arrow {
+    cursor: pointer;
+    color: #737373;
+
+    &.disabled {
+      color: #cccccc;
+      cursor: unset;
+    }
+
+    &.active {
+      color: #0094ff;
+    }
+  }
+
+  .page-numbers {
+    display: flex;
+
+    .pg {
+      margin: 4px;
+      width: 24px !important;
+      height: 24px !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      font-size: 1.4rem;
+      font-weight: 400;
+      font-family: "Roboto", "Segoe UI", sans-serif !important;
+      font-style: normal;
+      box-shadow: 0px 2px 4px #00000029;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+
+      &.selected-page {
+        background-color: #0052cc;
+        color: white;
+      }
+
+      &.hover:not(.selected-page) {
+        background-color: #f0f0f0;
+      }
+    }
+  }
+}
+
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.paginator-buttons {
+  display: flex;
+  align-items: center;
+}
+
+.pages-details {
+  display: flex;
+  align-items: center;
+}
+
+.pagination-arrow {
+  cursor: pointer;
+  
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  
+  &.active {
+    color: #0052cc;
+  }
+}
+
+.page-numbers {
+  display: flex; 
+}
+
+.pg {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  
+  &.selected-page {
+    background-color: #0052cc !important; // Add !important
+    color: white !important;
+  }
+  
+  &.hover:not(.selected-page) {
+    background-color: #e8e8e8;
+  }
+}
+
+
+.fixed-header{
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #fff;
+  padding: 6px;
+  
+}
+
+.edit-view-btn{
+  border: none;
+  background: white;
+}
+
+.key-filter{
+  border: none;
+  background: white;
+  // color:#0052cc;
+  font-size: 22px;
+}
+
+.mr-40{
+  margin-right:40px !important;
+}
+
+.icon-color{
+  color: #737373 !important;  
+}
+
+.icon-color:hover{
+  color:#0052cc !important;
+}
+
+.hint{
+font-size: 8px !important;
+}

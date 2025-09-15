@@ -1,7 +1,7 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
-	<!--<changeSet author="bivek.das (generated)"
+	<!--<changeSet author="essedum (generated)"
 		id="1683222364377-2-11">
 		
 		<loadData commentLineStartsWith="#" encoding="UTF-8"
@@ -13,7 +13,7 @@
 		
 	</changeSet>
 
-	<changeSet author="Leap" id="1683222364377-2-12">
+	<changeSet author="Essedum" id="1683222364377-2-12">
 	<sql dbms="h2, mysql,mssql,postgresql" splitStatements="true" stripComments="true">  
 	UPDATE ivm_master_initiative SET target_level = 'L2' WHERE target_level = 'bser'
 	</sql> 

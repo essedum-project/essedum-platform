@@ -2,7 +2,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
 
-<changeSet author="Leap" id="3v0-sre-10252024-1">
+<changeSet author="Essedum" id="3v0-sre-10252024-1">
                 <sql dbms="mysql" splitStatements="true" stripComments="true"> 
 update mldataset set attributes ='{"filter":"","mode":"query","Query":"SELECT sre_app_availability.application_name  AS  ''APPLICATION NAME'',  sre_app_availability.application_grp_name AS ''APPLICATION GROUP NAME'',  sre_app_availability.probe_name AS ''PROBE NAME'' , sre_app_availability.location_name AS ''LOCATION NAME'',   sre_app_availability.perc_availability AS ''PERCENTAGE AVAILABILITY'' FROM sre_app_availability   INNER JOIN ccl_app ON  ccl_app.application_id=sre_app_availability.application_id  WHERE ccl_app.project_id=({projectId}) AND   sre_app_availability.application_name IN ({application_name})","Cacheable":"false","isStreaming":"false","defaultValues":"","writeMode":"append","params":"{''projectId'':''ccl_app.project_id'',''application_name'':''sre_app_availability.application_name''}","tableName":"","uniqueIdentifier":""}' where alias = 'allapplicationsperc' and organization = 'leo1311';
 

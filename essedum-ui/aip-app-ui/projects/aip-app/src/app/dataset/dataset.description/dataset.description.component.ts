@@ -5,7 +5,7 @@ import { Location } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../../confirm-delete-dialog.component/confirm-delete-dialog.component';
 import { DatasetServices } from '../dataset-service';
-import { AdapterServices } from '../../adapter/adapter-service';
+import { AdapterServices } from '../../sharedModule/services/adapter-service';
 import { Stomp } from '@stomp/stompjs';
 import * as SockJS from 'sockjs-client';
 import { OptionsDTO } from '../../DTO/OptionsDTO';

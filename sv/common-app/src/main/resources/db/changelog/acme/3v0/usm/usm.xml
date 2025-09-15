@@ -1,6 +1,6 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="Leap" id="3v0-usm-311029">
+    <changeSet author="Essedum" id="3v0-usm-311029">
 		<sql dbms="h2, mysql,mssql, postgresql" splitStatements="true" stripComments="true">  
          
 		   INSERT INTO usm_constant (item, project_name, item_value, project_id) VALUES ('showInactivityPopup', 'leo1311', 'true', 2);
@@ -15,7 +15,7 @@
 	    </sql> 
 	</changeSet>
 	
-	<changeSet author="Leap (generated)" id="3v0-usm-311028">
+	<changeSet author="Essedum (generated)" id="3v0-usm-311028">
         <loadData commentLineStartsWith="#" encoding="UTF-8" file="db/changelog/acme/3v0/usm/usmSecrets.csv" quotchar="&quot;" separator="," tableName="usm_secrets">
 			<column header="key_" name="key_" type="STRING" />
 			<column header="value_" name="value_" type="STRING" />
@@ -23,17 +23,17 @@
 			<column header="salt_" name="salt_" type="STRING" />
 		</loadData>
     </changeSet>
-	<changeSet author="Leap" id="3v0-usm-310543">
+	<changeSet author="Essedum" id="3v0-usm-310543">
 		<sql dbms="h2, mysql,mssql, postgresql" splitStatements="true" stripComments="true">  
 			UPDATE usm_constant SET item_value='{"label":"Cognitive Automation","icon":"assets/icons/Cognitive.svg","children":[{"label":"Dashboard","icon":"desktop","horizontal":true,"children":[{"label":"Automation Dashboard","icon":"","url":"./dynamicDashboard/grid/OCC/14","children":[],"_id":3},{"label":"Workload Dashboard","icon":"","url":"./dynamicDashboard/grid/OCC/2","children":[],"_id":4},{"label":"Telemetry Dashboard","icon":"","url":"./dynamicDashboard/grid/OCC/17","children":[],"_id":5}],"url":"a","_id":2},{"label":"Discover","icon":"book","horizontal":true,"children":[{"label":"Process Mining","icon":"","url":"./dynamicDashboard/grid/OCC/72","children":[],"_id":7},{"label":"Workload Analytics","icon":"","url":"./dynamicDashboard/grid/OCC/2","children":[],"_id":8},{"label":"Correlation","icon":"","url":"./dynamicDashboard/grid/OCC/4","children":[],"_id":9}],"url":"a","_id":6},{"label":"Digitize","icon":"laptop","horizontal":true,"children":[{"label":"Process Model Store","icon":"","url":"./iamp-btf/SOP","children":[],"_id":11},{"label":"App Model Store","icon":"","url":"./iamp-btf/app-model","children":[],"_id":12}],"url":"a","_id":10},{"label":"Automate","icon":"list","horizontal":true,"children":[{"label":"Incident Dashboard","icon":"","url":"./iamp-cap/inputdetails","children":[],"_id":14},{"label":"Monitor Bots","icon":"","url":"./iamp-cap/viewstatistics","children":[],"_id":15},{"label":"My Workspace","icon":"","url":"./iamp-btf/entity/automation-work-flow","children":[],"_id":16},{"label":"Bot Store","icon":"","url":"./iamp-btf/entity/bot","children":[],"_id":17},{"label":"Build a Bot","icon":"","url":"./iamp-btf/entity/automation-work-flow/BPMNnew","children":[],"_id":18},{"label":"Test a Bot","icon":"","url":"./iamp-btf/Testing","children":[],"_id":19}],"url":"a","_id":13},{"label":"Cognitive Insights","icon":"cog","horizontal":true,"children":[{"label":"Datasources","icon":"","url":"./adapters/datasources","children":[],"_id":21},{"label":"Data Market Place","icon":"","url":"./adapters/datasets","children":[],"_id":22},{"label":"Analytics Pipelines","icon":"","url":"./aibrain/pipelines","children":[],"_id":23},{"label":"Model Market Place","icon":"","url":"./aibrain/models","children":[],"_id":24},{"label":"Schemas","icon":"","url":"./adapters/schemas","children":[],"_id":25},{"label":"Events","icon":"","url":"./aibrain/events","children":[],"_id":26},{"label":"Jobs","icon":"","url":"./aibrain/jobs","children":[],"_id":27},{"label":"IIA","icon":"","url":"./dynamicDashboard/grid/OCC/31345","children":[],"_id":28},{"label":"Cognitive Services","icon":"","url":"./dynamicDashboard/grid/OCC/31346","children":[],"_id":29}],"url":"a","_id":20},{"label":"Experience","icon":"file","horizontal":true,"children":[{"label":"Chat Bot","icon":"","url":"./dynamicDashboard/grid/OCC/31360","children":[],"_id":31},{"label":"ChatBot Studio","icon":"","url":"./dynamicDashboard/grid/OCC/31361","children":[],"_id":32}],"url":"a","_id":30},{"label":"Innovate","icon":"id-card","horizontal":true,"children":[{"label":"Experiment","icon":"","url":"./sandbox","children":[],"_id":34}],"url":"../iamp-usm/role","_id":33},{"label":"Manage","icon":"files-o","horizontal":true,"children":[{"label":"Configuration Dashboard","icon":"","url":"./iamp-btf/entity/config-screen","children":[],"_id":36},{"label":"Configuration Entry","icon":"","url":"./iamp-btf/entity/configuration-entry","children":[],"_id":37},{"label":"Key Words","icon":"","url":"./iamp-btf/entity/key-words","children":[],"_id":38},{"label":"Schedule","icon":"","url":"./iamp-btf/entity/schedule","children":[],"_id":39},{"label":"Server","icon":"","url":"./iamp-btf/entity/server","children":[],"_id":40},{"label":"Technology","icon":"","url":"./iamp-btf/entity/technology","children":[],"_id":41},{"label":"Workflow Params","icon":"","url":"./iamp-btf/entity/workflow-params","children":[],"_id":42}],"url":"a","_id":35}],"horizontal":true}' WHERE item LIKE '%IT Portfolio%' AND item_value LIKE '%Cognitive%' AND project_name='leo1311';
 		</sql> 
 	</changeSet>
-	<changeSet author="Leap" id="3v0-usm-310547">
+	<changeSet author="Essedum" id="3v0-usm-310547">
 		<sql dbms="h2, mysql,mssql, postgresql" splitStatements="true" stripComments="true">  
 			UPDATE usm_constant SET item_value='{"label":"Experience","icon":"assets/icons/Experience.svg","url":"","children":[{"label":"Chat Bot","icon":"assets/icons/Chatbot.svg","url":"./dynamicDashboard/grid/OCC/31360","children":[],"_id":6},{"label":"Chat Bot Studio","icon":"assets/icons/ChatbotStudio.svg","url":"./dynamicDashboard/grid/OCC/31361","children":[],"_id":7}]}' WHERE item LIKE '%Bot%' AND item_value LIKE '%Experience%' AND project_name='leo1311';
 		</sql> 
 	</changeSet>
-	<changeSet id="3v0-usm-310571" author="Leap">
+	<changeSet id="3v0-usm-310571" author="Essedum">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
                 SELECT COUNT(*) FROM usm_constant WHERE item_value ='{"label":"Gamification","icon":"gamepad","url":"","children":[{"label":"Dashboard","icon":"th-large","url":"./iamp-iegp/dashboard/","children":[],"_id":2},{"label":"Demo","icon":"","url":"./iamp-iegp/amsdemo","children":[{"label":"AMS Demo","icon":"","url":"./iamp-iegp/amsdemo","children":[],"_id":4},{"label":"Game Scenario","icon":"","url":"./iamp-iegp/gamedemo","children":[],"_id":5},{\"label\":\"NFL Game\",\"icon\":\"\",\"url\":\"./iamp-iegp/nflgame\",\"children\":[],\"_id\":6}],"_id":3}]}' AND item = 'Project Client Side';
@@ -44,7 +44,7 @@
 		</sql>
 	</changeSet>
  
-   <!-- <changeSet id="3v0-usm-310572" author="Leap">
+   <!-- <changeSet id="3v0-usm-310572" author="Essedum">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="0">
                 SELECT COUNT(*) FROM usm_constant WHERE item_value ='{"label":"Gamification","icon":"gamepad","url":"","children":[{"label":"Dashboard","icon":"th-large","url":"./iamp-iegp/dashboard/","children":[],"_id":2},{"label":"Demo","icon":"","url":"./iamp-iegp/amsdemo","children":[{"label":"AMS Demo","icon":"","url":"./iamp-iegp/amsdemo","children":[],"_id":4},{"label":"Game Scenario","icon":"","url":"./iamp-iegp/gamedemo","children":[],"_id":5},{\"label\":\"NFL Game\",\"icon\":\"\",\"url\":\"./iamp-iegp/nflgame\",\"children\":[],\"_id\":6}],"_id":3}]}' AND item = 'IT Portfolio Manager Side';

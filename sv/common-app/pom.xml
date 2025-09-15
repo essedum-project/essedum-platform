@@ -4,12 +4,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.infosys.icets.ai</groupId>
-		<artifactId>aip</artifactId>
+		<groupId>com.lfn.ai</groupId>
+		<artifactId>essedum</artifactId>
 		<version>3.3-SNAPSHOT</version>
 	</parent>
 
-	<groupId>com.infosys</groupId>
+	<groupId>com.lfn</groupId>
 	<artifactId>common-app</artifactId>
 	<packaging>jar</packaging>
 	<name>common-app</name>
@@ -25,6 +25,33 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.logging.log4j</groupId>
+					<artifactId>log4j-api</artifactId>
+				</exclusion>
+				<!-- Exclude conflicting Spring versions -->
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-context</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-beans</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework.security</groupId>
+					<artifactId>spring-security-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework.security</groupId>
+					<artifactId>spring-security-crypto</artifactId>
+				</exclusion>
+			</exclusions>	
 		</dependency>
 		<dependency>
 			<groupId>org.liquibase</groupId>
@@ -41,106 +68,110 @@
             <version>1.14.0</version>
         </dependency>
 		<dependency>
-			<groupId>com.infosys.icets.ai</groupId>
+			<groupId>com.lfn.ai</groupId>
 			<artifactId>comm-lib-util</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys</groupId>
+			<groupId>com.lfn.icip.plugins</groupId>
+			<artifactId>icip-adp-azure</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.lfn</groupId>
 			<artifactId>iamp-lib-usm</artifactId>
 		</dependency>
 		<!--		<dependency>-->
-		<!--			<groupId>com.infosys</groupId>-->
+		<!--			<groupId>com.lfn</groupId>-->
 		<!--			<artifactId>iamp-lib-dbs</artifactId>-->
 		<!--		</dependency>-->
 		<!--<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-fsvr</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-adp</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip.plugins</groupId>
+			<groupId>com.lfn.icip.plugins</groupId>
 			<artifactId>icip-adp-mysql</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-jobs</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-evt</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-mod</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-mlops</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-iai</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-adp</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-jobs</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip.plugins</groupId>
+			<groupId>com.lfn.icip.plugins</groupId>
 			<artifactId>icip-adp-rest</artifactId> 
 		</dependency>-->
 		
 		
 		
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-mlops</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-iai</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip</groupId>
+			<groupId>com.lfn.icip</groupId>
 			<artifactId>icip-lib-adp</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip.plugins</groupId>
+			<groupId>com.lfn.icip.plugins</groupId>
 			<artifactId>icip-adp-rest</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip.plugins</groupId>
+			<groupId>com.lfn.icip.plugins</groupId>
 			<artifactId>icip-adp-remote</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip.plugins</groupId>
+			<groupId>com.lfn.icip.plugins</groupId>
 			<artifactId>icip-adp-s3</artifactId>
 		</dependency>
 				<dependency>
-			<groupId>com.infosys.icets.icip.plugins</groupId>
+			<groupId>com.lfn.icip.plugins</groupId>
 			<artifactId>icip-adp-aicloud</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip.plugins</groupId>
+			<groupId>com.lfn.icip.plugins</groupId>
 			<artifactId>icip-adp-aws-sagemaker</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip.plugins</groupId>
+			<groupId>com.lfn.icip.plugins</groupId>
 			<artifactId>icip-adp-mysql</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.infosys.icets.icip.plugins</groupId>
+			<groupId>com.lfn.icip.plugins</groupId>
 			<artifactId>icip-adp-postgresql</artifactId>
 		</dependency>
 			
@@ -148,12 +179,24 @@
 		<dependency>
 			<groupId>org.ehcache</groupId>
 			<artifactId>ehcache</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-ui</artifactId>
 
 			<version>1.6.6</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>	 
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -195,7 +238,7 @@
 			<version>3.1.1</version>
 		</dependency>
 		<!--<dependency>
-			<groupId>com.infosys.icets.icip.plugins</groupId>
+			<groupId>com.lfn.icip.plugins</groupId>
 			<artifactId>icip-adp-postgresql</artifactId>
 			<version>${project.version}</version>
 		</dependency>-->
@@ -245,12 +288,28 @@
     		<groupId>org.springframework.boot</groupId>
     		<artifactId>spring-boot-starter-logging</artifactId>
 		</dependency>
+		<!-- Add explicit SLF4J and Logback dependencies to resolve logging conflicts -->
+		<dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-api</artifactId>
+		    <version>2.0.9</version>
+		</dependency>
+		<dependency>
+		    <groupId>ch.qos.logback</groupId>
+		    <artifactId>logback-classic</artifactId>
+		    <version>1.5.12</version>
+		</dependency>
+		<dependency>
+		    <groupId>ch.qos.logback</groupId>
+		    <artifactId>logback-core</artifactId>
+		    <version>1.5.12</version>
+		</dependency>
 		<!--<dependency>
-			<groupId>com.infosys</groupId>
+			<groupId>com.lfn</groupId>
 			<artifactId>iamp-lib-eda</artifactId>
 		</dependency>
         <dependency>
-			<groupId>com.infosys</groupId>
+			<groupId>com.lfn</groupId>
 			<artifactId>iamp-lib-ied</artifactId>
 		</dependency>-->
 		<!-- Test dependencies -->
@@ -278,16 +337,18 @@
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-data</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-quartz</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.zaxxer</groupId>
+					<artifactId>HikariCP-java7</artifactId>
+				</exclusion>
+			</exclusions>	
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -301,6 +362,38 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>com.vaadin.external.google</groupId>
+					<artifactId>android-json</artifactId>
+				</exclusion>
+				<!-- Exclude Maven build artifacts -->
+				<exclusion>
+					<groupId>org.apache.maven</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.maven.surefire</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.codehaus.plexus</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+				<!-- Exclude conflicting Jackson versions -->
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-annotations</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!--
@@ -317,12 +410,12 @@
 			<version>6.0.0</version>
 			<scope>provided</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>jakarta.xml.bind</groupId>
 			<artifactId>jakarta.xml.bind-api</artifactId>
 			<version>3.0.0</version>
 		</dependency>
+		
 
 
 	</dependencies>

@@ -13,7 +13,7 @@
 	<property name="timestamp-type" value="timestamp" dbms="mysql" />
 	<property name="timestamp-type" value="TIMESTAMP" dbms="h2" />
 
-	<changeSet author="Leap (generated)" id="1312v0-grh-1">
+	<changeSet author="Essedum (generated)" id="1312v0-grh-1">
                 <validCheckSum>any</validCheckSum>
                 <preConditions onFail="MARK_RAN">
                    <not>
@@ -54,7 +54,7 @@
 			</column>
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1312v0-grh-2">
+	<changeSet author="Essedum (generated)" id="1312v0-grh-2">
                 <validCheckSum>any</validCheckSum>
                 <preConditions onFail="MARK_RAN">
                    <not>
@@ -102,7 +102,7 @@
 			</column>
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1312v0-grh-3">
+	<changeSet author="Essedum (generated)" id="1312v0-grh-3">
                 <validCheckSum>any</validCheckSum>
                 <preConditions onFail="MARK_RAN">
                    <not>
@@ -138,7 +138,7 @@
 			</column>
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1312v0-grh-4">
+	<changeSet author="Essedum (generated)" id="1312v0-grh-4">
                 <validCheckSum>any</validCheckSum>
                 <preConditions onFail="MARK_RAN">
                    <not>
@@ -190,7 +190,7 @@
 			</column>
 		</createTable>
 	</changeSet>
-	<changeSet author="Leap (generated)" id="1312v0-grh-5">
+	<changeSet author="Essedum (generated)" id="1312v0-grh-5">
                 <validCheckSum>any</validCheckSum>
                 <preConditions onFail="MARK_RAN">
                    <not>

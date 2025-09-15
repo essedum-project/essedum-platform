@@ -6,7 +6,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
-	<!--changeSet author="Leap (generated)" id="3v0-wflw-10">
+	<!--changeSet author="Essedum (generated)" id="3v0-wflw-10">
 		<createIndex indexName="nodId refrence"
 			tableName="entity_hierarchy_config">
 			<column name="parent_id" />
@@ -27,11 +27,11 @@
 			referencedTableName="entity_hierarchy_config" />
 	</changeSet>-->
 
-	<changeSet author="Leap (generated)" id="3v0-wflw-11" context="2v13to300" >
+	<changeSet author="Essedum (generated)" id="3v0-wflw-11" context="2v13to300" >
 		<addUniqueConstraint columnNames="entity_code"
 			constraintName="entity_code" tableName="entity_hierarchy_details" />
 	</changeSet>
-    <changeSet author="Leap (generated)" id="3v0-wflw-12" context="fresh">
+    <changeSet author="Essedum (generated)" id="3v0-wflw-12" context="fresh">
         <dropUniqueConstraint constraintName="UK_USM_EMAILS_MAILID" tableName="usm_emails"/>
     </changeSet>
 

@@ -1,0 +1,205 @@
+/* Form Card Styling */
+.form-card {
+  margin: 20px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+   overflow: hidden;
+  max-width: 100%;
+}
+
+.form-card .mat-card-content {
+  padding: 24px !important;
+}
+
+/* Table Styling */
+.table-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.table-scroll-container {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  min-width: 800px;
+}
+
+.styled-table th {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  white-space: normal;
+  word-break: break-word;
+  max-width: 200px;
+  font-family:"Roboto", "Segoe UI", sans-serif !important;
+  font-size: 16px;
+  font-weight: 600;
+}
+.save-btn {
+  color: #ffffff !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+      no-repeat,
+    #0052cc padding-box !important;
+  background: transparent linear-gradient(90deg, #0052cc 0%, #0094ff 100%) 0% 0%
+    no-repeat padding-box !important;
+}
+
+::ng-deep .cancel-btn {
+  color: #002966 !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 12px !important;
+  line-height: 2;
+  font-weight: 400;
+  letter-spacing: 0px;
+  font-family: "Roboto", sans-serif !important;
+  border-radius: 16px;
+  background: #dadada 0% 0% no-repeat padding-box;
+  opacity: 1;
+}
+.styled-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  white-space: normal;
+  word-break: break-word;
+  max-width: 200px;
+  font-family:"Roboto", "Segoe UI", sans-serif !important;
+  font-size: 15px;
+  font-weight: 350;
+}
+
+.styled-table thead {
+  background-color: #f4f4f4;
+}
+
+.styled-table tr:hover {
+  background-color: #f9f9f9;
+
+}
+
+.styled-table tr.selected {
+  background-color: #e6f4ff;
+}
+.header-action-icon {
+  font-size: 16px;
+  height: 16px;
+  color: #002966;
+  cursor: pointer;
+  gap: 2rem;
+}
+
+.header-action-icon:hover {
+  color: #0094ff;
+}
+/* Pagination */
+.custom-pagination {
+  list-style: none;
+  display: flex;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+}
+
+/* Number Buttons */
+.custom-pagination-number {
+  margin: 4px;
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  font-size: 1.4rem;
+  font-weight: 400;
+  font-family:"Roboto", "Segoe UI", sans-serif !important;
+  font-style: normal;
+  box-shadow: 0px 2px 4px #00000029;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.custom-pagination-number:hover {
+  background-color: #f2f2f2;
+}
+
+.custom-pagination-number.active {
+  background-color: #0052cc;
+  color: white;
+}
+
+.custom-pagination-number.disabled {
+  background-color: #f0f0f0;
+}
+
+.custom-pagination-arrow {
+  margin: 4px;
+  padding: 0;
+  width: auto !important;
+  height: 24px !important;
+  background: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: #737373;
+  cursor: pointer;
+  font-family:"Roboto", "Segoe UI", sans-serif !important;
+
+}
+
+.custom-pagination-arrow:hover {
+  color: #0052cc;
+}
+
+.custom-pagination-arrow.disabled {
+  color: #cccccc;
+  cursor: default;
+}
+
+.pagination-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 10px;
+  margin-top: 16px;
+  background-color: white;
+}
+
+.no-data {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px;
+  font-size: 16px;
+  color: #666;
+  font-family:"Roboto", "Segoe UI", sans-serif !important;
+}
+/* Back icon styling */
+.back-icon {
+  font-size: 24px;
+  cursor: pointer;
+  margin-right: 10px;
+  vertical-align: middle;
+}

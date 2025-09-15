@@ -2,7 +2,7 @@ stages:
 - name: Build
   steps:
   - runScriptConfig:
-      image: infyartifactory.ad.infosys.com/docker-local/leap/builder-java:139-1
+      image: infyartifactory.ad.infosys.com/docker-local/essedum/builder-java:139-1
       shellScript: |-
         export MAVEN_CLI_OPTS="-s .m2/settings.xml --batch-mode"
         mvn clean $MAVEN_CLI_OPTS deploy -DskipTests=true
