@@ -174,7 +174,11 @@ Once the platform is up and running, you can access the frontend in your browser
 - **Build Pipelines**: Design and execute ML pipelines for training, inference, and deployment.
 - **Interact with Apps**: Use Streamlit and Gradio applications to interact with your deployed models.
 
-## 5. Change Log
+## 5. Getting Started
+
+For a step-by-step guide on how to use the Essedum platform to create AI applications, please see our [User Guide](USER_GUIDE.md).
+
+## 6. Change Log
 
 - **v1.0.0**: Initial version of the Essedum platform.
 
