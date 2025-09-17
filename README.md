@@ -24,11 +24,39 @@ Nginx is used as a reverse proxy to serve the frontend application and route API
 
 The Python Job Executor is a separate service responsible for executing Python-based jobs, such as data processing and machine learning tasks. It listens for job requests from the backend and executes them in a controlled environment. The code for this component is in the `py-job-executer/` directory. For more details, see the [Python Job Executor documentation](py-job-executer/README.md).
 
-## 3. Installation
+## 3. Supported Integrations
+
+### Data Containers
+- **Currently Supported & Tested:**
+  - MinIO
+  - Azure Storage Containers
+- **Planned / Pending Validation:**
+  - AWS S3
+  - Google Cloud Storage (GCS)
+
+### Execution Containers
+- **Currently Supported:**
+  - GCP Vertex AI
+- **Planned / Pending Validation:**
+  - AWS SageMaker
+  - Azure AI Studio
+
+### Libraries and Utilities
+- **Machine Learning Libraries:**
+  - scikit-learn (classification and regression)
+- **Vector Database:**
+  - Qdrant (via vector DB library)
+- **LLM Integration:**
+  - Langchain, Azure OpenAI SDK (for LLM calls)
+- **Embedded Web UI for AI applications:**
+  - Streamlit
+  - Gradio
+
+## 4. Installation
 
 There are two ways to install and run the Essedum platform: a manual developer setup or a containerized setup using Docker.
 
-### 3.1. Developer Setup
+### 4.1. Developer Setup
 
 This setup is ideal for developers who want to work on the source code and contribute to the platform.
 
@@ -83,11 +111,11 @@ This setup is ideal for developers who want to work on the source code and contr
      python app.py
      ```
 
-### 3.2. Containerized Setup
+### 4.2. Containerized Setup
 
 This section describes two ways to deploy the Essedum platform in a containerized environment: using Docker Compose for a simple, local setup, or using Kubernetes for a more robust, scalable deployment.
 
-#### 3.2.1. Docker Compose Setup
+#### 4.2.1. Docker Compose Setup
 
 This setup is recommended for users who want to quickly deploy and run the Essedum platform on a local machine.
 
@@ -124,7 +152,7 @@ This setup is recommended for users who want to quickly deploy and run the Essed
    docker-compose down
    ```
 
-#### 3.2.2. Kubernetes Setup
+#### 4.2.2. Kubernetes Setup
 
 This setup is ideal for deploying the Essedum platform to a production-like environment.
 
@@ -165,7 +193,7 @@ This setup is ideal for deploying the Essedum platform to a production-like envi
      kubectl apply -f aks-deployment/
      ```
 
-## 4. Usage
+## 5. Usage
 
 Once the platform is up and running, you can access the frontend in your browser. The application allows you to:
 
@@ -174,14 +202,15 @@ Once the platform is up and running, you can access the frontend in your browser
 - **Build Pipelines**: Design and execute ML pipelines for training, inference, and deployment.
 - **Interact with Apps**: Use Streamlit and Gradio applications to interact with your deployed models.
 
-## 5. Getting Started
+## 6. Getting Started
+
 
 For a step-by-step guide on how to use the Essedum platform to create AI applications, please see our [User Guide](USER_GUIDE.md).
 
-## 6. Change Log
+## 7. Change Log
 
-- **v1.0.0**: Initial version of the Essedum platform.
+See the [CHANGELOG.md](CHANGELOG.md) file for details.
 
-## 6. License
+## 8. License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

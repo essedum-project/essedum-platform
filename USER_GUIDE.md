@@ -52,4 +52,5 @@ This framework can also be used to build Retrieval-Augmented Generation (RAG) ap
 
 ### RAG Application with UI
 
-[![RAG Application with UI](https.youtube.com/vi/q3H1N9WACwA/0.jpg)](https.youtube.com/watch?v=q3H1N9WACwA)
+[![RAG Application with UI](https://img.youtube.com/vi/q3H1N9WACwA/0.jpg)](https://www.youtube.com/watch?v=q3H1N9WACwA)
+
