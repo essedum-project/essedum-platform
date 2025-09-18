@@ -991,7 +991,9 @@ export class LandingComponent implements OnInit, AfterViewInit {
     sessionStorage.removeItem("selectedIndex");
     sessionStorage.removeItem("sidebarbreadcrumb");
     sessionStorage.removeItem("highlightedLabel");
-    sessionStorage.setItem("selectionChange", "portfolio");
+    
+    // Set portfolio change flag with timestamp to ensure it's recognized as a new change
+    sessionStorage.setItem("selectionChange", "portfolio-" + new Date().getTime());
     this.portfolioflag = 1;
     try {
       this.tempdata = JSON.stringify(data);
@@ -1091,6 +1093,8 @@ export class LandingComponent implements OnInit, AfterViewInit {
     event.preventDefault();
     this.highlightedLabel = label;
     sessionStorage.setItem("highlightedLabel", this.highlightedLabel);
+    // Set flag to indicate user is actively navigating to a route
+    sessionStorage.setItem("navigatingToRoute", "true");
     if (this.element !== undefined) {
       this.element.style.backgroundColor = "white";
     }
@@ -1176,14 +1180,36 @@ export class LandingComponent implements OnInit, AfterViewInit {
       () => {
         let nav = this.route.snapshot["_routerState"].url.toString();
         let navUrl = nav.slice(0, nav.indexOf("pfolio"));
-        if (nav.toString().indexOf("pfolio") != -1)
+
+
+        // Check if user is admin and direct to portfoliolist
+        if (this.selectedrole.name === "admin" || this.selectedrole.name === "Admin") {
+          this.router
+            .navigate(["../"], { relativeTo: this.route })
+            .then(() => this.router.navigate(["landing/iamp-usm/portfoliolist"]));
+        } else if (nav.toString().indexOf("pfolio") != -1) {
           this.router
             .navigate(["../"], { relativeTo: this.route })
             .then(() => this.router.navigateByUrl(navUrl));
-        else
-          this.router
-            .navigate(["../"], { relativeTo: this.route })
-            .then(() => this.router.navigate(["landing"]));
+        } else {
+          // Check if role is not admin and not IT portfolio manager
+          if (this.selectedrole.name.toLowerCase() !== "admin" &&
+              this.selectedrole.name.toLowerCase() !== "it portfolio manager") {
+            if(this.sidebarMenu && this.sidebarMenu.length > 0 && this.sidebarMenu[0].url && 
+               this.sidebarMenu[0].url.includes('./') && this.sidebarMenu[0].url.length > 2){
+                let filterUrl = this.sidebarMenu[0].url.replace('./', '');
+                this.router.navigate(["/landing/" + filterUrl]);            
+            } else {
+                this.router
+                  .navigate(["../"], { relativeTo: this.route })
+                  .then(() => this.router.navigate(["landing"]));
+            }
+         } else {
+            this.router
+              .navigate(["../"], { relativeTo: this.route })
+              .then(() => this.router.navigate(["landing"]));
+          }
+        }
       }
     );
   }
@@ -1227,7 +1253,9 @@ export class LandingComponent implements OnInit, AfterViewInit {
     sessionStorage.removeItem("selectedIndex");
     sessionStorage.removeItem("highlightedLabel");
     sessionStorage.removeItem("sidebarSectionIndexrole");
-    sessionStorage.setItem("selectionChange", "project");
+    
+    // Set project change flag with timestamp to ensure it's recognized as a new change
+    sessionStorage.setItem("selectionChange", "project-" + new Date().getTime());
     this.valuechangeprojectflg = 1;
     this.selectedproject = new Object(event);
     let events;
@@ -2069,6 +2097,38 @@ export class LandingComponent implements OnInit, AfterViewInit {
             });
           }
           this.sidebarMenu = sidebarMenutemp;
+          
+          // Only perform auto-navigation when all conditions are met
+          const currentUrl = this.router.url;
+          const isChangingSelection = sessionStorage.getItem("selectionChange") === "portfolio" || 
+                                    sessionStorage.getItem("selectionChange") === "project";
+          const isAdmin = this.role21.toLowerCase() === "admin" || 
+                        this.role21.toLowerCase() === "it portfolio manager";
+          const isAtMainLanding = currentUrl === "/landing" || currentUrl === "/landing/";
+          
+          // Only navigate if we're at the main landing page, not changing portfolios/projects, and not an admin
+          if (isAtMainLanding && !isChangingSelection && !isAdmin) {
+            console.log("Auto-navigating for regular user role");
+            // Set flag to indicate navigation is in progress to prevent interference
+            sessionStorage.setItem("navigatingInProgress", "true");
+            if(this.sidebarMenu && this.sidebarMenu.length > 0 && this.sidebarMenu[0].url && 
+               this.sidebarMenu[0].url.includes('./') && this.sidebarMenu[0].url.length > 2) {
+                let filterUrl = this.sidebarMenu[0].url.replace('./', '');
+                this.router.navigate(["/landing/" + filterUrl]).then(() => {
+                  // Clear the flag after navigation is complete
+                  setTimeout(() => sessionStorage.removeItem("navigatingInProgress"), 500);
+                });            
+            } else {
+                this.router
+                  .navigate(["../"], { relativeTo: this.route })
+                  .then(() => {
+                    this.router.navigate(["landing"]).then(() => {
+                      // Clear the flag after navigation is complete
+                      setTimeout(() => sessionStorage.removeItem("navigatingInProgress"), 500);
+                    });
+                  });
+            }
+          }
         }
         if (!(SideConfigurationsmappings && SideConfigurationsmappings.length))
           datafromcurrentproject = false;
@@ -2081,6 +2141,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
               }
             }
           });
+       
           if (sidebarMenutemp.length > 0) this.sidebarMenu = sidebarMenutemp;
           if (!(sidebarMenutemp && sidebarMenutemp.length))
             datafromcoreproject = false;
@@ -2166,6 +2227,28 @@ export class LandingComponent implements OnInit, AfterViewInit {
             });
           }
         }
+
+// Add this code around line 2218, after all sidebar menu processing
+// Check if user is admin and portfolio is Core
+const isAdmin = this.role21.toLowerCase() === "admin";
+const isCorePortfolio = JSON.parse(sessionStorage.getItem("portfoliodata") || "{}").portfolioName === "Core";
+const currentUrl = this.router.url;
+const isAtMainLanding = currentUrl === "/landing" || currentUrl === "/landing/";
+const isNavigatingToSpecificRoute = sessionStorage.getItem("navigatingToRoute");
+
+// Only navigate to portfoliolist if admin is on landing page and not actively navigating elsewhere
+if (isAdmin && isAtMainLanding && !isNavigatingToSpecificRoute) {
+  console.log("Auto-navigating admin to portfoliolist");
+  // Set flag to indicate navigation is in progress to prevent interference
+  sessionStorage.setItem("navigatingInProgress", "true");
+  this.router.navigate(["/landing/iamp-usm/portfoliolist"]).then(() => {
+    // Clear the flag after navigation is complete
+    setTimeout(() => {
+      sessionStorage.removeItem("navigatingInProgress");
+    }, 500);
+  });
+}
+
         for (let i = 0; i < this.sidebarMenu.length; i++) {
           if (this.sidebarMenu[i].children) {
             this.sidebarMenu[i].children.forEach((child: any) => {
@@ -2184,15 +2267,15 @@ export class LandingComponent implements OnInit, AfterViewInit {
               }
             });
           }
-        }
+        }    
         this.location = window.location.pathname;
         for (let i = 0; i < this.sidebarMenu.length; i++) {
-          if (this.sidebarMenu[i].children) {
+        if (this.sidebarMenu[i].children) {
             this.sidebarMenu[i].children.forEach((child: any) => {
               if (this.location != "") {
                 if (child.url) {
                   let temp = child.url.split("/").length;
-                  let temp1 = this.location.split("/").length;
+                  let temp1 = this.location.split("/").length;              
                   if (
                     child.url.split("/")[temp - 1] ==
                     this.location.split("/")[temp1 - 1]
@@ -2203,7 +2286,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
               }
             });
           }
-        }
+        }     
       },
       () => {},
       () => {
@@ -2214,8 +2297,18 @@ export class LandingComponent implements OnInit, AfterViewInit {
           this.sidebarSectionIndex = Number(
             sessionStorage.getItem("sidebarSectionIndex")
           );
+        
+        // Add a small delay before removing the navigation flag to ensure any pending
+        // navigations have completed
+        setTimeout(() => {
+          // Only remove if not set by another action
+          if (sessionStorage.getItem("navigatingToRoute") && 
+              !sessionStorage.getItem("navigatingInProgress")) {
+            sessionStorage.removeItem("navigatingToRoute");
+          }
+        }, 1000);
       }
-    );
+    ); 
   }
   getIdDataObject(secondLevelObj: any) {
     let resObj: any = {};
@@ -2446,9 +2539,14 @@ export class LandingComponent implements OnInit, AfterViewInit {
         if (this.tabs[0]["stateUrl"]) {
           // console.log("inside second level if")
           //sbx workbench route
+          // Set flag to indicate user is actively navigating to a route
+          sessionStorage.setItem("navigatingToRoute", "true");
           this.router.navigate([this.tabs[0].url], {
             relativeTo: this.route,
             queryParams: { stateUrl: this.tabs[0]["stateUrl"] },
+          }).then(() => {
+            // Clear the flag after navigation is complete (with a short delay to ensure processing)
+            setTimeout(() => sessionStorage.removeItem("navigatingToRoute"), 500);
           });
           if (this.tabs[0] && this.tabs[0].label)
             sessionStorage.setItem(
@@ -2460,10 +2558,15 @@ export class LandingComponent implements OnInit, AfterViewInit {
           let parentdata = this.getParentOfChild(this.tabs[0]);
           this.displayBreadCrumb(parentdata);
           // console.log(this.route)
+          // Set flag to indicate user is actively navigating to a route
+          sessionStorage.setItem("navigatingToRoute", "true");
           this.router.navigate([this.getURLofChild(this.tabs[0])], {
             relativeTo: this.route,
             onSameUrlNavigation: "reload",
             skipLocationChange: false,
+          }).then(() => {
+            // Clear the flag after navigation is complete (with a short delay to ensure processing)
+            setTimeout(() => sessionStorage.removeItem("navigatingToRoute"), 500);
           });
           if (this.tabs[0] && this.tabs[0].label) {
             // console.log("inside second level else")
@@ -2489,8 +2592,13 @@ export class LandingComponent implements OnInit, AfterViewInit {
     let clickedIndex = $event.index;
     this.selectedIndex = clickedIndex;
     sessionStorage.setItem("selectedIndex", this.selectedIndex.toString());
+    // Set flag to indicate user is actively navigating to a route
+    sessionStorage.setItem("navigatingToRoute", "true");
     this.router.navigate([this.tabs[clickedIndex].url], {
       relativeTo: this.route,
+    }).then(() => {
+      // Clear the flag after navigation is complete (with a short delay to ensure processing)
+      setTimeout(() => sessionStorage.removeItem("navigatingToRoute"), 500);
     });
   }
 

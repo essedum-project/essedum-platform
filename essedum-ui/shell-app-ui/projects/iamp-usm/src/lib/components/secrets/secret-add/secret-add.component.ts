@@ -29,6 +29,7 @@ export class SecretAddComponent implements OnInit {
   showCreate: boolean = false;
   hidePassword: boolean = true;
   clearLabel = "Clear";
+  isSubmitting: boolean = false;
 
   @Output() secretModelClosed = new EventEmitter<void>();
 
@@ -75,6 +76,11 @@ export class SecretAddComponent implements OnInit {
   }
 
   onCreate() {
+    if (this.isSubmitting) {
+      return;
+    }
+    this.isSubmitting = true;
+
     this.secretsService.createKey(this.key, this.passcode).subscribe(
       (res) => {
         this.messageService.messageNotification(`Successfully created`);
@@ -83,9 +89,11 @@ export class SecretAddComponent implements OnInit {
         } else {
           this.secretModelClosed.emit();
         }
+        this.isSubmitting = false;
       },
       (err) => {
         this.messageService.messageNotification(`error  ${err} `, "error");
+        this.isSubmitting = false;
       }
     );
   }
