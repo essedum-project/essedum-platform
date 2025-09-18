@@ -20,7 +20,7 @@ The backend services are responsible for:
 The `sv` directory is organized into several modules, including:
 -   `common-app`: The main application module that bootstraps the Spring Boot application.
 -   `comm-lib-*`: Shared libraries for common functionalities like secrets management and utilities.
--   `icip-lib-*`: Libraries related to the core ICIP (Infosys Cognitive Insight Platform) functionalities.
+-   `icip-lib-*`: Libraries related to the core ICIP (Essedum Cognitive Insight Platform) functionalities.
 -   `icip-adp-*`: Adapter modules for connecting to different data sources and services.
 
 ## Building the Backend
