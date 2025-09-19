@@ -45,16 +45,7 @@
 			UPDATE usm_role SET name  = 'IT Portfolio Manager', description = 'IT Portfolio Manager' WHERE name = 'IT Portfolio Manager' AND project_id IS NULL;
 		</sql>
 	</changeSet>
-	<changeSet author="Essedum - MA" id="3v1-usm-241024-1-1">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-				SELECT COUNT(*) FROM usm_role WHERE NAME ='IT Portfolio Manager' and project_id IS NULL;
-            </sqlCheck>
-        </preConditions>
-        <sql>
-            UPDATE usm_role SET  NAME ='IT Portfolio Manager' WHERE  NAME ='Portfolio Manager' and project_id IS NULL;
-        </sql>
-    </changeSet>
+
 	<changeSet author="Essedum" id="3v1-usm-240926-3">
 		<sql dbms="mysql" splitStatements="true" stripComments="false">
 			INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'prompt-create');

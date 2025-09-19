@@ -597,7 +597,6 @@ cip,workflows-specs
 cip,workflows-update
 cip,workflows-updatespec
 cip,your-discussion-ByuseridAndOrgidAndsortid
-common,validateFile
 dbs,account-create
 dbs,account-delete
 dbs,account-edit
