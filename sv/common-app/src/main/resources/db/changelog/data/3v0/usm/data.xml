@@ -21,12 +21,7 @@
 			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
 			referencedColumnNames="id" referencedTableName="usm_portfolio" />
 	</changeSet>
-	<changeSet author="Essedum" id="3v0-usm-240712-1">
-		<insert tableName="usm_permissions">
-			<column name="module" value="tad" />
-			<column name="permission" value="adapter-view" />
-		</insert>
-	</changeSet>
+
 	<!--<changeSet author="Essedum" id="3v0-usm-240712-2">
 		<insert tableName="usm_permissions">
 			<column name="module" value="bot" />
