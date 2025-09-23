@@ -129,7 +129,7 @@
 			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
 			referencedColumnNames="id" referencedTableName="usm_role" />
 	</changeSet>
-<!-- 	<changeSet author="Essedum (generated)" id="1614785155891-425">
+ 	<changeSet author="Essedum (generated)" id="1614785155891-425">
 		<addForeignKeyConstraint
 			baseColumnNames="context" baseTableName="dbs_dashboard_configuration"
 			constraintName="FK2po7kwxb95n674txpfpru00mj" deferrable="false"
@@ -142,7 +142,7 @@
 			constraintName="FK3f2lat36nxuchopeskevt3tyy" deferrable="false"
 			initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
 			referencedColumnNames="id" referencedTableName="usm_core_context" />
-	</changeSet>-->
+	</changeSet>
 	<changeSet author="Essedum (generated)" id="1614785155891-430">
 		<addForeignKeyConstraint
 			baseColumnNames="organisation"
