@@ -5,6 +5,12 @@
         <sql splitStatements="true" stripComments="true">  
             INSERT INTO usm_constant (item, project_name, item_value, project_id) VALUES ('DisableTabs', 'Core', 'Dashboard Management', 1);
             </sql>   
+    </changeSet>    
+    
+     <changeSet author="Essedum" dbms="mssql,mysql" id="3v1-usm-20241211-1-dev">   
+        <sql splitStatements="true" stripComments="true">  
+            INSERT INTO usm_constant (item, project_name, item_value, project_id) VALUES ('Developer SideConfigurations', 'Core', '[{"label":"Models","altText":"","icon":"cubes","url":"./aip/models","children":[]},{"label":"Connections","altText":"","icon":"link","url":"./aip/connections","children":[]},{"label":"Pipelines","altText":null,"icon":"map-signs","url":"./aip/pipelines","children":[]},{"label":"Apps","altText":null,"icon":"th","url":"./aip/app-list","children":[]},{"label":"Adapters","icon":"wrench","children":[{"label":"Specs","altText":null,"icon":"","url":"./aip/specs","children":[],"_id":2},{"label":"Implementations","altText":null,"icon":"","url":"./aip/implementations","children":[],"_id":3},{"label":"Instances","altText":"","icon":"","url":"./aip/instances","children":[],"_id":4}],"horizontal":true}]', 1);
+            </sql>   
     </changeSet>
     
     <changeSet author="Essedum" dbms="mssql,mysql" id="3v1-usm-20241211-2">   
