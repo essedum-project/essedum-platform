@@ -385,6 +385,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
   bgColorType: number = 1;
   filterData: any;
   mfeRouteTitle: any;
+  isSidebarLoading = false;
 
   constructor(
     private router: Router,
@@ -989,8 +990,9 @@ export class LandingComponent implements OnInit, AfterViewInit {
     sessionStorage.removeItem("viewtabs");
     sessionStorage.removeItem("tabs");
     sessionStorage.removeItem("selectedIndex");
-    sessionStorage.removeItem("sidebarbreadcrumb");
+    sessionStorage.removeItem("sidebarbreadcrumb");    
     sessionStorage.removeItem("highlightedLabel");
+    sessionStorage.removeItem("sidebarConfig");
     
     // Set portfolio change flag with timestamp to ensure it's recognized as a new change
     sessionStorage.setItem("selectionChange", "portfolio-" + new Date().getTime());
@@ -1007,6 +1009,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
     } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
+    sessionStorage.removeItem("sidebarConfig");
   }
 
   fetchCredentials(): boolean {
@@ -1152,6 +1155,9 @@ export class LandingComponent implements OnInit, AfterViewInit {
     sessionStorage.removeItem("UserDetails");
     sessionStorage.removeItem("tabs");
     sessionStorage.removeItem("selectedIndex");
+    
+    // Set flag to indicate role has been changed - this will be used to trigger appropriate navigation
+    sessionStorage.setItem("roleChanged", "true");
     let events;
     try {
       events = JSON.stringify(event);
@@ -1806,6 +1812,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
   }
 
   newsidebar() {
+   this.isSidebarLoading = true;
     // this.removeFilters();
     this.apisService.getDashConsts().subscribe(
       (response) => {
@@ -2062,6 +2069,9 @@ export class LandingComponent implements OnInit, AfterViewInit {
         let SideConfigurationsmappings = response.filter(
           (item) => item.keys == rolename + " SideConfigurations"
         );
+
+         
+
         if (sidebarMenutemp.length > 0) this.sidebarMenu = sidebarMenutemp;
         else if (SideConfigurationsmappings.length > 0) {
           SideConfigurationsmappings = SideConfigurationsmappings.filter(
@@ -2106,12 +2116,29 @@ export class LandingComponent implements OnInit, AfterViewInit {
                         this.role21.toLowerCase() === "it portfolio manager";
           const isAtMainLanding = currentUrl === "/landing" || currentUrl === "/landing/";
           
+        
+        
+       
+          
           // Only navigate if we're at the main landing page, not changing portfolios/projects, and not an admin
           if (isAtMainLanding && !isChangingSelection && !isAdmin) {
             console.log("Auto-navigating for regular user role");
             // Set flag to indicate navigation is in progress to prevent interference
             sessionStorage.setItem("navigatingInProgress", "true");
-            if(this.sidebarMenu && this.sidebarMenu.length > 0 && this.sidebarMenu[0].url && 
+            
+            // Special case for Dashboard and Configuration menu
+            if(this.sidebarMenu.length===2 && this.sidebarMenu[0].label.toLowerCase()==="dashboard"
+             && this.sidebarMenu[1].label.toLowerCase()==="configuration"){
+                console.log("Menu has only Dashboard and Configuration, navigating to landing only");
+                this.router.navigate(["/landing"]).then(() => {
+                  // Clear the flag after navigation is complete
+                  setTimeout(() => sessionStorage.removeItem("navigatingInProgress"), 500);
+                });
+                // Don't proceed with other navigation logic
+                return;               
+            }
+            // Regular navigation logic
+             else if(this.sidebarMenu && this.sidebarMenu.length > 0 && this.sidebarMenu[0].url && 
                this.sidebarMenu[0].url.includes('./') && this.sidebarMenu[0].url.length > 2) {
                 let filterUrl = this.sidebarMenu[0].url.replace('./', '');
                 this.router.navigate(["/landing/" + filterUrl]).then(() => {
@@ -2137,6 +2164,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
             if (item.keys == rolename + " Side") {
               if (item.value) {
                 fetchdefaultmappings = false;
+               // this.isSidebarLoading = false;
                 sidebarMenutemp.push(JSON.parse(item.value));
               }
             }
@@ -2249,6 +2277,48 @@ if (isAdmin && isAtMainLanding && !isNavigatingToSpecificRoute) {
   });
 }
 
+// CONDITIONAL NAVIGATION: Only execute if role has been changed and we're not already navigating
+// This handles both role changes within portfolio and across portfolios
+const roleChanged = sessionStorage.getItem("roleChanged") === "true";
+const portfolioChanged = sessionStorage.getItem("selectionChange") && 
+                        sessionStorage.getItem("selectionChange").includes("portfolio-");
+const projectChanged = sessionStorage.getItem("selectionChange") && 
+                      sessionStorage.getItem("selectionChange").includes("project-");
+const navigationInProgress = sessionStorage.getItem("navigatingInProgress") === "true";
+
+// Check if we need to navigate based on role, portfolio, or project change
+if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress && !isAdmin) {
+  console.log("Navigation triggered by role/portfolio/project change");
+  
+  // Special case for Dashboard and Configuration menu
+  if(this.sidebarMenu && this.sidebarMenu.length === 2 && 
+     this.sidebarMenu[0].label && this.sidebarMenu[0].label.toLowerCase() === "dashboard" && 
+     this.sidebarMenu[1].label && this.sidebarMenu[1].label.toLowerCase() === "configuration") {
+    console.log("Dashboard+Configuration menu detected, navigating to landing only");
+    sessionStorage.setItem("navigatingInProgress", "true");
+    this.router.navigate(["/landing"]).then(() => {
+      setTimeout(() => sessionStorage.removeItem("navigatingInProgress"), 500);
+      // Clear the change flags to prevent multiple navigations
+      sessionStorage.removeItem("roleChanged");
+      sessionStorage.removeItem("selectionChange");
+    });
+  }
+  // Regular navigation to first menu item if available
+  else if(this.sidebarMenu && this.sidebarMenu.length > 0 && this.sidebarMenu[0].url && 
+     this.sidebarMenu[0].url.includes('./') && this.sidebarMenu[0].url.length > 2) {
+    console.log("Navigating to first menu item");
+    sessionStorage.setItem("navigatingInProgress", "true");
+    let filterUrl = this.sidebarMenu[0].url.replace('./', '');
+    this.router.navigate(["/landing/" + filterUrl]).then(() => {
+      setTimeout(() => sessionStorage.removeItem("navigatingInProgress"), 500);
+      // Clear the change flags to prevent multiple navigations
+      sessionStorage.removeItem("roleChanged");
+      sessionStorage.removeItem("selectionChange");
+    });            
+  }
+}
+
+
         for (let i = 0; i < this.sidebarMenu.length; i++) {
           if (this.sidebarMenu[i].children) {
             this.sidebarMenu[i].children.forEach((child: any) => {
@@ -2288,7 +2358,10 @@ if (isAdmin && isAtMainLanding && !isNavigatingToSpecificRoute) {
           }
         }     
       },
-      () => {},
+      (error) => {
+        console.error('Error loading sidebar:', error);
+        this.isSidebarLoading = false;
+      },
       () => {
         if (
           JSON.parse(sessionStorage.getItem("role") || "").name ==
@@ -2307,8 +2380,12 @@ if (isAdmin && isAtMainLanding && !isNavigatingToSpecificRoute) {
             sessionStorage.removeItem("navigatingToRoute");
           }
         }, 1000);
+        
+        // Reset sidebar loading flag now that everything is complete
+        this.isSidebarLoading = false;
       }
     ); 
+      
   }
   getIdDataObject(secondLevelObj: any) {
     let resObj: any = {};
@@ -2592,10 +2669,20 @@ if (isAdmin && isAtMainLanding && !isNavigatingToSpecificRoute) {
     let clickedIndex = $event.index;
     this.selectedIndex = clickedIndex;
     sessionStorage.setItem("selectedIndex", this.selectedIndex.toString());
+    
+    // Prevent navigation if sidebar is still loading
+    if (this.isSidebarLoading) {
+      console.log('Navigation deferred while sidebar is loading');
+      return;
+    }
+    
     // Set flag to indicate user is actively navigating to a route
     sessionStorage.setItem("navigatingToRoute", "true");
+    
+    // Use skipLocationChange to avoid browser history changes that cause refreshes
     this.router.navigate([this.tabs[clickedIndex].url], {
       relativeTo: this.route,
+      skipLocationChange: false
     }).then(() => {
       // Clear the flag after navigation is complete (with a short delay to ensure processing)
       setTimeout(() => sessionStorage.removeItem("navigatingToRoute"), 500);
