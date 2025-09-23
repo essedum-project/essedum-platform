@@ -44,6 +44,15 @@
 		<sql>
 			UPDATE usm_role SET name  = 'IT Portfolio Manager', description = 'IT Portfolio Manager' WHERE name = 'IT Portfolio Manager' AND project_id IS NULL;
 		</sql>
+		<sql>
+			UPDATE usm_role SET name  = 'Developer', description = 'Developer' WHERE name = 'Developer' AND project_id IS NULL;
+		</sql>
+	</changeSet>
+	
+		<changeSet author="Essedum" id="3v1-usm-240926-2-dev">	
+		<sql>
+			UPDATE usm_role SET name  = 'Developer', description = 'Developer' WHERE name = 'Developer' AND project_id IS NULL;
+		</sql>
 	</changeSet>
 
 	<changeSet author="Essedum" id="3v1-usm-240926-3">
@@ -51,24 +60,34 @@
 			INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'prompt-create');
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/aip/prompt/save.*', 'POST', 0, 'prompt-create', id FROM usm_permissions WHERE module = 'cip'  AND permission ='prompt-create' limit 1;
 		    INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'prompt-create' AND  p.module='cip' AND r.project_id IS NULL;
+		    INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'prompt-create' AND  p.module='cip' AND r.project_id IS NULL;
+		    
 		    INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'prompt-edit');
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/aip/prompt/update.*', 'POST', 0, 'prompt-edit', id FROM usm_permissions WHERE module = 'cip'  AND permission ='prompt-edit' limit 1;
 		    INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'prompt-edit' AND  p.module='cip' AND r.project_id IS NULL;
-			
+			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'prompt-edit' AND  p.module='cip' AND r.project_id IS NULL;
 		    INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'prompt-deleteById');
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/aip/prompt/delete.*', 'DELETE', 0, 'prompt-deleteById', id FROM usm_permissions WHERE module = 'cip'  AND permission ='prompt-deleteById' limit 1;
 		    INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'prompt-deleteById' AND  p.module='cip' AND r.project_id IS NULL;
+			
+			 INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'prompt-deleteById' AND  p.module='cip' AND r.project_id IS NULL;
 			
 			INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'Fileserver-uploadTempFileFromData');
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/aip/fileserver/uploadTempFileFromData', 'POST', 0, 'Fileserver-uploadTempFileFromData', id FROM usm_permissions WHERE module = 'cip'  AND permission ='Fileserver-uploadTempFileFromData' limit 1;
 		    INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'Fileserver-uploadTempFileFromData' AND  p.module='cip' AND r.project_id IS NULL;
 		    
+		     INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'Fileserver-uploadTempFileFromData' AND  p.module='cip' AND r.project_id IS NULL;
+		    
 		    INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'v1-Event-Trigger-generateScript');
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/aip/service/v1/event/trigger/generateScript_DragNDropLite.*', 'POST', 0, 'v1-Event-Trigger-generateScript', id FROM usm_permissions WHERE module = 'cip'  AND permission ='v1-Event-Trigger-generateScript' limit 1;
-			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'v1-Event-Trigger-generateScript' AND  p.module='cip' AND r.project_id IS NULL;
-			
+			 INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'Fileserver-uploadTempFileFromData' AND  p.module='cip' AND r.project_id IS NULL;
+		     INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'Fileserver-uploadTempFileFromData' AND  p.module='cip' AND r.project_id IS NULL;
+		    
+		    
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/aip/service/v1/streamingServices/update', 'PUT', 0, 'cip-post-api-streamingServices-update', id FROM usm_permissions WHERE module = 'cip'  AND permission ='StreamingServices-update' limit 1;
 			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'StreamingServices-update' AND  p.module='cip' AND r.project_id IS NULL;
+		 INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'Fileserver-uploadTempFileFromData' AND  p.module='cip' AND r.project_id IS NULL;
+		    
 			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Project Client' AND p.permission = 'StreamingServices-update' AND  p.module='cip' AND r.project_id IS NULL;
 			
 		    
@@ -76,15 +95,23 @@
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/aip/chain/editNameAndDesc/[0-9].*/[A-Za-z0-9- _]*.*', 'POST', 1, 'chain-editNameAndDesc-ByID', id FROM usm_permissions WHERE module = 'cip'  AND permission ='chain-editNameAndDesc-ByID' limit 1;
 			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'chain-editNameAndDesc-ByID' AND  p.module='cip' AND r.project_id IS NULL;
 			
+			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'chain-editNameAndDesc-ByID' AND  p.module='cip' AND r.project_id IS NULL;
+			
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/aip/service/v1/streamingServices/add', 'POST', 1, 'cip-post-api-streamingServices-add', id FROM usm_permissions WHERE module = 'cip'  AND permission ='streamingServices-add' limit 1;
 			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'streamingServices-add' AND  p.module='cip' AND r.project_id IS NULL;
+			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'streamingServices-add' AND  p.module='cip' AND r.project_id IS NULL;
+			
 			
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/aip/chainjob/update/[A-Za-z0-9- _.]*/[A-Za-z0-9- _.]*/[A-Za-z0-9- _]*/[A-Za-z0-9- _]*.*', 'POST', 1, 'cip-get-api-chainjob', id FROM usm_permissions WHERE module = 'cip'  AND permission ='chainjob-update' limit 1;
 			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'chainjob-update' AND  p.module='cip' AND r.project_id IS NULL;
+			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'chainjob-update' AND  p.module='cip' AND r.project_id IS NULL;
+			
 			
 			INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'copyBlueprint');
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/copyDatasets/.*', 'POST', 1, 'copy blueprint', id FROM usm_permissions WHERE module = 'cip'  AND permission ='copyBlueprint' limit 1;
 			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'copyBlueprint' AND  p.module='cip' AND r.project_id IS NULL;
+			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'copyBlueprint' AND  p.module='cip' AND r.project_id IS NULL;
+			
 			
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/aip/service/v1/models/register.*', 'POST', 0, 'register model', id FROM usm_permissions WHERE module = 'cip'  AND permission ='model-create' limit 1;
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/aip/service/v1/models/updateModel.*', 'POST', 0, 'edit model', id FROM usm_permissions WHERE module = 'cip'  AND permission ='model-edit' limit 1;
@@ -100,40 +127,56 @@
 			INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'prompt-create');
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT TOP 1 '/api/aip/prompt/save.*', 'POST', 0, 'prompt-create', id FROM usm_permissions WHERE module = 'cip'  AND permission ='prompt-create';
 		    INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'prompt-create' AND  p.module='cip' AND r.project_id IS NULL;
+		     INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'prompt-create' AND  p.module='cip' AND r.project_id IS NULL;
+		    
 		    INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'prompt-edit');
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT TOP 1 '/api/aip/prompt/update.*', 'POST', 0, 'prompt-edit', id FROM usm_permissions WHERE module = 'cip'  AND permission ='prompt-edit';
 		    INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'prompt-edit' AND  p.module='cip' AND r.project_id IS NULL;
+			 INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'prompt-edit' AND  p.module='cip' AND r.project_id IS NULL;
 			
 		    INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'prompt-deleteById');
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT TOP 1 '/api/aip/prompt/delete.*', 'DELETE', 0, 'prompt-deleteById', id FROM usm_permissions WHERE module = 'cip'  AND permission ='prompt-deleteById';
 		    INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'prompt-deleteById' AND  p.module='cip' AND r.project_id IS NULL;
+			 INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'prompt-deleteById' AND  p.module='cip' AND r.project_id IS NULL;
 			
 			INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'Fileserver-uploadTempFileFromData');
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT TOP 1 '/api/aip/fileserver/uploadTempFileFromData', 'POST', 0, 'Fileserver-uploadTempFileFromData', id FROM usm_permissions WHERE module = 'cip'  AND permission ='Fileserver-uploadTempFileFromData';
 		    INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'Fileserver-uploadTempFileFromData' AND  p.module='cip' AND r.project_id IS NULL;
+		      INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'Fileserver-uploadTempFileFromData' AND  p.module='cip' AND r.project_id IS NULL;
 		    
 		    INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'v1-Event-Trigger-generateScript');
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT TOP 1 '/api/aip/service/v1/event/trigger/generateScript_DragNDropLite.*', 'POST', 0, 'v1-Event-Trigger-generateScript', id FROM usm_permissions WHERE module = 'cip'  AND permission ='v1-Event-Trigger-generateScript';
 			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'v1-Event-Trigger-generateScript' AND  p.module='cip' AND r.project_id IS NULL;
+			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'v1-Event-Trigger-generateScript' AND  p.module='cip' AND r.project_id IS NULL;
+			
 			
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT TOP 1 '/api/aip/service/v1/streamingServices/update', 'PUT', 0, 'cip-post-api-streamingServices-update', id FROM usm_permissions WHERE module = 'cip'  AND permission ='StreamingServices-update';
 			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'StreamingServices-update' AND  p.module='cip' AND r.project_id IS NULL;
+			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'StreamingServices-update' AND  p.module='cip' AND r.project_id IS NULL;
+	
 			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Project Client' AND p.permission = 'StreamingServices-update' AND  p.module='cip' AND r.project_id IS NULL;
 			
 		    
 			INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'chain-editNameAndDesc-ByID');
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT TOP 1 '/api/aip/chain/editNameAndDesc/[0-9].*/[A-Za-z0-9- _]*.*', 'POST', 1, 'chain-editNameAndDesc-ByID', id FROM usm_permissions WHERE module = 'cip'  AND permission ='chain-editNameAndDesc-ByID';
 			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'chain-editNameAndDesc-ByID' AND  p.module='cip' AND r.project_id IS NULL;
+			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'chain-editNameAndDesc-ByID' AND  p.module='cip' AND r.project_id IS NULL;
+			
 			
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT TOP 1 '/api/aip/service/v1/streamingServices/add', 'POST', 1, 'cip-post-api-streamingServices-add', id FROM usm_permissions WHERE module = 'cip'  AND permission ='streamingServices-add';
 			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'streamingServices-add' AND  p.module='cip' AND r.project_id IS NULL;
+			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'streamingServices-add' AND  p.module='cip' AND r.project_id IS NULL;
 			
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT TOP 1 '/api/aip/chainjob/update/[A-Za-z0-9- _.]*/[A-Za-z0-9- _.]*/[A-Za-z0-9- _]*/[A-Za-z0-9- _]*.*', 'POST', 1, 'cip-get-api-chainjob', id FROM usm_permissions WHERE module = 'cip'  AND permission ='chainjob-update';
 			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'chainjob-update' AND  p.module='cip' AND r.project_id IS NULL;
+			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'chainjob-update' AND  p.module='cip' AND r.project_id IS NULL;
+			
 			
 			INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'copyBlueprint');
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT TOP 1 '/api/copyDatasets/.*', 'POST', 1, 'copy blueprint', id FROM usm_permissions WHERE module = 'cip'  AND permission ='copyBlueprint';
 			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'copyBlueprint' AND  p.module='cip' AND r.project_id IS NULL;
+			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'copyBlueprint' AND  p.module='cip' AND r.project_id IS NULL;
+			
 			
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT TOP 1 '/api/aip/service/v1/models/register.*', 'POST', 0, 'register model', id FROM usm_permissions WHERE module = 'cip'  AND permission ='model-create';
 			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT TOP 1 '/api/aip/service/v1/models/updateModel.*', 'POST', 0, 'edit model', id FROM usm_permissions WHERE module = 'cip'  AND permission ='model-edit';
@@ -228,7 +271,15 @@
 		 UPDATE usm_constant SET item_value='{"label":"AI Brain","icon":"assets/icons/digital-ai-brain.svg","children":[{"label":"Datasources","icon":"","url":"./adapters/datasources","children":[],"_id":2},{"label":"Data Market Place","icon":"","url":"./adapters/datasets","children":[],"_id":3},{"label":"Analytics Pipelines","icon":"","url":"./aibrain/pipelines","children":[],"_id":4},{"label":"Workflows","icon":"","url":"./workflows/create/specification","children":[{"label":"Volume Forecast","icon":"","url":"./workflows/VolumeForecast","children":[],"_id":6},{"label":"EASE","icon":"","url":"./workflows/EASE","children":[],"_id":7},{"label":"Ticket Clustering","icon":"","url":"./workflows/TicketClustering","_id":8},{"label":"Shift Roster","icon":"","url":"./workflows/ShiftRoster","children":[],"_id":9},{"label":"Process Mining","icon":"","url":"./workflows/ProcessMining","children":[],"_id":10},{"label":"PMA Workflow","icon":"","url":"./workflows/NewPMAWorkflow","children":[],"_id":11}],"_id":5},{"label":"Model Market Place","icon":"","url":"./aibrain/models","children":[],"_id":12},{"label":"Endpoints","icon":"","url":"./aibrain/endpoints","children":[],"_id":13},{"label":"Agents","icon":"","url":"./aibrain/agents","children":[],"_id":14},{"label":"Data Models","icon":"","url":"./adapters/schemas","children":[{"label":"Schemas","icon":"","url":"./adapters/schemas","children":[],"_id":16},{"label":"Relationships","icon":"","url":"./adapters/schemas/relationship","children":[],"_id":17}],"_id":15},{"label":"Events","icon":"","url":"./aibrain/events","children":[],"_id":18},{"label":"Chains","icon":"","url":"./aibrain/jobs/chain","children":[],"_id":19},{"label":"Schedule","icon":"","url":"./aibrain/jobs/scheduled","children":[],"_id":20},{"label":"Logs","icon":"","url":"./aibrain/jobs/logs","children":[],"_id":21}],"horizontal":true}' 
 WHERE project_name='Core' AND item_value LIKE '%AI Brain%' AND item='IT Portfolio Manager Side'
            </sql> 
+          
 	</changeSet>
+	 
+	 	<changeSet author="Essedum" id="3v1-usm-20241023-2-dev">
+           		<sql dbms="mysql,mssql" splitStatements="true" stripComments="true">  
+		 UPDATE usm_constant SET item_value='{"label":"AI Brain","icon":"assets/icons/digital-ai-brain.svg","children":[{"label":"Datasources","icon":"","url":"./adapters/datasources","children":[],"_id":2},{"label":"Data Market Place","icon":"","url":"./adapters/datasets","children":[],"_id":3},{"label":"Analytics Pipelines","icon":"","url":"./aibrain/pipelines","children":[],"_id":4},{"label":"Workflows","icon":"","url":"./workflows/create/specification","children":[{"label":"Volume Forecast","icon":"","url":"./workflows/VolumeForecast","children":[],"_id":6},{"label":"EASE","icon":"","url":"./workflows/EASE","children":[],"_id":7},{"label":"Ticket Clustering","icon":"","url":"./workflows/TicketClustering","_id":8},{"label":"Shift Roster","icon":"","url":"./workflows/ShiftRoster","children":[],"_id":9},{"label":"Process Mining","icon":"","url":"./workflows/ProcessMining","children":[],"_id":10},{"label":"PMA Workflow","icon":"","url":"./workflows/NewPMAWorkflow","children":[],"_id":11}],"_id":5},{"label":"Model Market Place","icon":"","url":"./aibrain/models","children":[],"_id":12},{"label":"Endpoints","icon":"","url":"./aibrain/endpoints","children":[],"_id":13},{"label":"Agents","icon":"","url":"./aibrain/agents","children":[],"_id":14},{"label":"Data Models","icon":"","url":"./adapters/schemas","children":[{"label":"Schemas","icon":"","url":"./adapters/schemas","children":[],"_id":16},{"label":"Relationships","icon":"","url":"./adapters/schemas/relationship","children":[],"_id":17}],"_id":15},{"label":"Events","icon":"","url":"./aibrain/events","children":[],"_id":18},{"label":"Chains","icon":"","url":"./aibrain/jobs/chain","children":[],"_id":19},{"label":"Schedule","icon":"","url":"./aibrain/jobs/scheduled","children":[],"_id":20},{"label":"Logs","icon":"","url":"./aibrain/jobs/logs","children":[],"_id":21}],"horizontal":true}' 
+WHERE project_name='Core' AND item_value LIKE '%AI Brain%' AND item='Developer Side'
+           </sql> 
+           	</changeSet>
 	<changeSet author="Essedum" id="3v1-usm-20241023-3">
 		<sql dbms="mysql,mssql" splitStatements="true" stripComments="true">  
 		 UPDATE usm_constant SET item_value='{"label":"AI Brain","icon":"ils","children":[{"label":"Datasources","icon":"database","url":"./adapters/datasources","children":[],"_id":2},{"label":"Analytics Pipelines","icon":"wpexplorer","url":"./aibrain/pipelines","children":[],"_id":3},{"label":"Agents","icon":"gg","url":"./aibrain/agents","children":[],"_id":4},{"label":"Data Marketplace","icon":"table","url":"./adapters/datasets","children":[],"_id":5},{"label":"Model Marketplace","icon":"superpowers","url":"./aibrain/models","children":[],"_id":6},{"label":"Schemas","icon":"puzzle-piece","url":"./adapters/schemas","children":[],"_id":7},{"label":"Data Models","icon":"","url":"./adapters/schemas","children":[{"label":"Schemas","icon":"","url":"./adapters/schemas","children":[],"_id":13},{"label":"Relationships","icon":"","url":"./adapters/schemas/relationship","children":[],"_id":14}],"_id":12},{"label":"Events","icon":"calendar","url":"./aibrain/events","children":[],"_id":8},{"label":"Chain Jobs","icon":"link","url":"./aibrain/jobs/chain","children":[],"_id":9},{"label":"Scheduled Jobs","icon":"clock-o","url":"./aibrain/jobs/scheduled","children":[],"_id":10},{"label":"Logs","icon":"file-text-o","url":"./aibrain/jobs/logs","children":[],"_id":11}]}' 

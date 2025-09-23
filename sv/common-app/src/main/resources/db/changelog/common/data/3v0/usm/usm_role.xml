@@ -253,4 +253,36 @@
 	</changeSet>
 
 
+<changeSet author="Essedum (generated)" id="3v0-usm-20241104-24-dev">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_role WHERE id=15 OR name ='Developer';
+            </sqlCheck>                
+        </preConditions>
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role ON;
+		</sql>
+        <sql >
+            INSERT INTO usm_role(id, project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (15, NULL, 'Developer', 'Developer', 0, NULL,NULL)
+        </sql>		
+		<sql dbms="mssql">
+			SET IDENTITY_INSERT usm_role OFF;
+		</sql>
+	</changeSet>
+	<changeSet author="Essedum (generated)" id="3v0-usm-20241104-25-dev">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM usm_role WHERE id=15 AND name !='Developer';
+            </sqlCheck>                
+        </preConditions>
+
+        <sql >
+            INSERT INTO usm_role(project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
+            VALUES (NULL, 'Developer', 'Developer', 0, NULL,NULL)
+        </sql>		
+	
+	</changeSet>
+
+
 </databaseChangeLog>

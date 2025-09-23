@@ -186,6 +186,8 @@
 			INSERT INTO usm_role_permissions (permission, ROLE ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Project Admin' AND p.permission = 'Datasets-searchData' AND  p.module='cip' AND r.project_id IS NULL;
 			INSERT INTO usm_role_permissions (permission, ROLE ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Project Client' AND p.permission = 'Datasets-searchData' AND  p.module='cip' AND r.project_id IS NULL;
 		
+		INSERT INTO usm_role_permissions (permission, ROLE ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'Datasets-searchData' AND  p.module='cip' AND r.project_id IS NULL;
+		
 		</sql>
 	</changeSet>
        <changeSet author="Essedum" id="3v0-usm-070820241141">
