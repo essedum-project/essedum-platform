@@ -146,6 +146,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
   screenWidth: number;
   offsetX = 0;
   offsetY = 0;
+  essedum_title:string="ESSEDUM";
 
   @HostListener("window:resize", ["$event"])
   onResize(event) {
