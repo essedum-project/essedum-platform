@@ -1,38 +1,6 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     
-    
-    <changeSet author="Essedum (generated)" id="312to320-3v1-usm-1">
-<preConditions onFail="MARK_RAN">
-<sqlCheck expectedResult="0">
-				SELECT COUNT(*) FROM usm_permissions WHERE  module='grh' AND permission='update-rule';
-</sqlCheck>				
-</preConditions>
-<sql dbms="mysql,mssql">
-			INSERT INTO usm_permissions (module,permission) VALUES('grh','update-rule')
-</sql>
-</changeSet>
-<changeSet author="Essedum (generated)" id="312to320-3v1-usm-2">
-<preConditions onFail="MARK_RAN">
-<sqlCheck expectedResult="0">
-				SELECT COUNT(*) FROM usm_permission_api WHERE  api='/api/grh/v3/rule/update/' AND type='put' and permission_id=(select id FROM usm_permissions WHERE  module='grh' AND permission='update-rule');
-</sqlCheck>				
-</preConditions>
-<sql dbms="mysql,mssql">
-			INSERT INTO usm_permission_api (api, TYPE, is_whitelisted, DESCRIPTION,permission_id) SELECT '/api/grh/v3/rule/update/', 'PUT', 0, 'Update Knowledge graph', id FROM usm_permissions WHERE module = 'grh'  AND permission ='update-rule';
-</sql>
-</changeSet>
-
-<changeSet dbms="mysql,mssql" author="Essedum (generated)" id="312to320-3v1-usm-6">
-<preConditions onFail="MARK_RAN">
-<sqlCheck expectedResult="1">
-				SELECT count(*) FROM usm_role WHERE NAME = 'IT Portfolio Manager' and project_id IS NULL;
-</sqlCheck>				
-</preConditions>
-<sql dbms="mysql,mssql">
-			INSERT INTO usm_role_permissions (permission, ROLE ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'update-rule' AND  p.module='grh' AND r.project_id IS NULL;
-</sql>
-</changeSet>
 
 <!--changeSet author="Essedum (generated)" id="312to320-3v1-usm-7">
 	<sql dbms="mssql,mysql" splitStatements="true" stripComments="true">

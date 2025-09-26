@@ -146,6 +146,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
   screenWidth: number;
   offsetX = 0;
   offsetY = 0;
+  essedum_title:string="ESSEDUM";
 
   @HostListener("window:resize", ["$event"])
   onResize(event) {
@@ -385,6 +386,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
   bgColorType: number = 1;
   filterData: any;
   mfeRouteTitle: any;
+  isSidebarLoading = false;
 
   constructor(
     private router: Router,
@@ -989,9 +991,12 @@ export class LandingComponent implements OnInit, AfterViewInit {
     sessionStorage.removeItem("viewtabs");
     sessionStorage.removeItem("tabs");
     sessionStorage.removeItem("selectedIndex");
-    sessionStorage.removeItem("sidebarbreadcrumb");
+    sessionStorage.removeItem("sidebarbreadcrumb");    
     sessionStorage.removeItem("highlightedLabel");
-    sessionStorage.setItem("selectionChange", "portfolio");
+    sessionStorage.removeItem("sidebarConfig");
+    
+    // Set portfolio change flag with timestamp to ensure it's recognized as a new change
+    sessionStorage.setItem("selectionChange", "portfolio-" + new Date().getTime());
     this.portfolioflag = 1;
     try {
       this.tempdata = JSON.stringify(data);
@@ -1005,6 +1010,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
     } catch (e: any) {
       console.error("JSON.stringify error - ", e.message);
     }
+    sessionStorage.removeItem("sidebarConfig");
   }
 
   fetchCredentials(): boolean {
@@ -1091,6 +1097,8 @@ export class LandingComponent implements OnInit, AfterViewInit {
     event.preventDefault();
     this.highlightedLabel = label;
     sessionStorage.setItem("highlightedLabel", this.highlightedLabel);
+    // Set flag to indicate user is actively navigating to a route
+    sessionStorage.setItem("navigatingToRoute", "true");
     if (this.element !== undefined) {
       this.element.style.backgroundColor = "white";
     }
@@ -1148,6 +1156,9 @@ export class LandingComponent implements OnInit, AfterViewInit {
     sessionStorage.removeItem("UserDetails");
     sessionStorage.removeItem("tabs");
     sessionStorage.removeItem("selectedIndex");
+    
+    // Set flag to indicate role has been changed - this will be used to trigger appropriate navigation
+    sessionStorage.setItem("roleChanged", "true");
     let events;
     try {
       events = JSON.stringify(event);
@@ -1176,14 +1187,36 @@ export class LandingComponent implements OnInit, AfterViewInit {
       () => {
         let nav = this.route.snapshot["_routerState"].url.toString();
         let navUrl = nav.slice(0, nav.indexOf("pfolio"));
-        if (nav.toString().indexOf("pfolio") != -1)
+
+
+        // Check if user is admin and direct to portfoliolist
+        if (this.selectedrole.name === "admin" || this.selectedrole.name === "Admin") {
+          this.router
+            .navigate(["../"], { relativeTo: this.route })
+            .then(() => this.router.navigate(["landing/iamp-usm/portfoliolist"]));
+        } else if (nav.toString().indexOf("pfolio") != -1) {
           this.router
             .navigate(["../"], { relativeTo: this.route })
             .then(() => this.router.navigateByUrl(navUrl));
-        else
-          this.router
-            .navigate(["../"], { relativeTo: this.route })
-            .then(() => this.router.navigate(["landing"]));
+        } else {
+          // Check if role is not admin and not IT portfolio manager
+          if (this.selectedrole.name.toLowerCase() !== "admin" &&
+              this.selectedrole.name.toLowerCase() !== "it portfolio manager") {
+            if(this.sidebarMenu && this.sidebarMenu.length > 0 && this.sidebarMenu[0].url && 
+               this.sidebarMenu[0].url.includes('./') && this.sidebarMenu[0].url.length > 2){
+                let filterUrl = this.sidebarMenu[0].url.replace('./', '');
+                this.router.navigate(["/landing/" + filterUrl]);            
+            } else {
+                this.router
+                  .navigate(["../"], { relativeTo: this.route })
+                  .then(() => this.router.navigate(["landing"]));
+            }
+         } else {
+            this.router
+              .navigate(["../"], { relativeTo: this.route })
+              .then(() => this.router.navigate(["landing"]));
+          }
+        }
       }
     );
   }
@@ -1227,7 +1260,9 @@ export class LandingComponent implements OnInit, AfterViewInit {
     sessionStorage.removeItem("selectedIndex");
     sessionStorage.removeItem("highlightedLabel");
     sessionStorage.removeItem("sidebarSectionIndexrole");
-    sessionStorage.setItem("selectionChange", "project");
+    
+    // Set project change flag with timestamp to ensure it's recognized as a new change
+    sessionStorage.setItem("selectionChange", "project-" + new Date().getTime());
     this.valuechangeprojectflg = 1;
     this.selectedproject = new Object(event);
     let events;
@@ -1778,6 +1813,7 @@ export class LandingComponent implements OnInit, AfterViewInit {
   }
 
   newsidebar() {
+   this.isSidebarLoading = true;
     // this.removeFilters();
     this.apisService.getDashConsts().subscribe(
       (response) => {
@@ -2034,6 +2070,9 @@ export class LandingComponent implements OnInit, AfterViewInit {
         let SideConfigurationsmappings = response.filter(
           (item) => item.keys == rolename + " SideConfigurations"
         );
+
+         
+
         if (sidebarMenutemp.length > 0) this.sidebarMenu = sidebarMenutemp;
         else if (SideConfigurationsmappings.length > 0) {
           SideConfigurationsmappings = SideConfigurationsmappings.filter(
@@ -2069,6 +2108,55 @@ export class LandingComponent implements OnInit, AfterViewInit {
             });
           }
           this.sidebarMenu = sidebarMenutemp;
+          
+          // Only perform auto-navigation when all conditions are met
+          const currentUrl = this.router.url;
+          const isChangingSelection = sessionStorage.getItem("selectionChange") === "portfolio" || 
+                                    sessionStorage.getItem("selectionChange") === "project";
+          const isAdmin = this.role21.toLowerCase() === "admin" || 
+                        this.role21.toLowerCase() === "it portfolio manager";
+          const isAtMainLanding = currentUrl === "/landing" || currentUrl === "/landing/";
+          
+        
+        
+       
+          
+          // Only navigate if we're at the main landing page, not changing portfolios/projects, and not an admin
+          if (isAtMainLanding && !isChangingSelection && !isAdmin) {
+            console.log("Auto-navigating for regular user role");
+            // Set flag to indicate navigation is in progress to prevent interference
+            sessionStorage.setItem("navigatingInProgress", "true");
+            
+            // Special case for Dashboard and Configuration menu
+            if(this.sidebarMenu.length===2 && this.sidebarMenu[0].label.toLowerCase()==="dashboard"
+             && this.sidebarMenu[1].label.toLowerCase()==="configuration"){
+                console.log("Menu has only Dashboard and Configuration, navigating to landing only");
+                this.router.navigate(["/landing"]).then(() => {
+                  // Clear the flag after navigation is complete
+                  setTimeout(() => sessionStorage.removeItem("navigatingInProgress"), 500);
+                });
+                // Don't proceed with other navigation logic
+                return;               
+            }
+            // Regular navigation logic
+             else if(this.sidebarMenu && this.sidebarMenu.length > 0 && this.sidebarMenu[0].url && 
+               this.sidebarMenu[0].url.includes('./') && this.sidebarMenu[0].url.length > 2) {
+                let filterUrl = this.sidebarMenu[0].url.replace('./', '');
+                this.router.navigate(["/landing/" + filterUrl]).then(() => {
+                  // Clear the flag after navigation is complete
+                  setTimeout(() => sessionStorage.removeItem("navigatingInProgress"), 500);
+                });            
+            } else {
+                this.router
+                  .navigate(["../"], { relativeTo: this.route })
+                  .then(() => {
+                    this.router.navigate(["landing"]).then(() => {
+                      // Clear the flag after navigation is complete
+                      setTimeout(() => sessionStorage.removeItem("navigatingInProgress"), 500);
+                    });
+                  });
+            }
+          }
         }
         if (!(SideConfigurationsmappings && SideConfigurationsmappings.length))
           datafromcurrentproject = false;
@@ -2077,10 +2165,12 @@ export class LandingComponent implements OnInit, AfterViewInit {
             if (item.keys == rolename + " Side") {
               if (item.value) {
                 fetchdefaultmappings = false;
+               // this.isSidebarLoading = false;
                 sidebarMenutemp.push(JSON.parse(item.value));
               }
             }
           });
+       
           if (sidebarMenutemp.length > 0) this.sidebarMenu = sidebarMenutemp;
           if (!(sidebarMenutemp && sidebarMenutemp.length))
             datafromcoreproject = false;
@@ -2166,6 +2256,70 @@ export class LandingComponent implements OnInit, AfterViewInit {
             });
           }
         }
+
+// Add this code around line 2218, after all sidebar menu processing
+// Check if user is admin and portfolio is Core
+const isAdmin = this.role21.toLowerCase() === "admin";
+const isCorePortfolio = JSON.parse(sessionStorage.getItem("portfoliodata") || "{}").portfolioName === "Core";
+const currentUrl = this.router.url;
+const isAtMainLanding = currentUrl === "/landing" || currentUrl === "/landing/";
+const isNavigatingToSpecificRoute = sessionStorage.getItem("navigatingToRoute");
+
+// Only navigate to portfoliolist if admin is on landing page and not actively navigating elsewhere
+if (isAdmin && isAtMainLanding && !isNavigatingToSpecificRoute) {
+  console.log("Auto-navigating admin to portfoliolist");
+  // Set flag to indicate navigation is in progress to prevent interference
+  sessionStorage.setItem("navigatingInProgress", "true");
+  this.router.navigate(["/landing/iamp-usm/portfoliolist"]).then(() => {
+    // Clear the flag after navigation is complete
+    setTimeout(() => {
+      sessionStorage.removeItem("navigatingInProgress");
+    }, 500);
+  });
+}
+
+// CONDITIONAL NAVIGATION: Only execute if role has been changed and we're not already navigating
+// This handles both role changes within portfolio and across portfolios
+const roleChanged = sessionStorage.getItem("roleChanged") === "true";
+const portfolioChanged = sessionStorage.getItem("selectionChange") && 
+                        sessionStorage.getItem("selectionChange").includes("portfolio-");
+const projectChanged = sessionStorage.getItem("selectionChange") && 
+                      sessionStorage.getItem("selectionChange").includes("project-");
+const navigationInProgress = sessionStorage.getItem("navigatingInProgress") === "true";
+
+// Check if we need to navigate based on role, portfolio, or project change
+if ((roleChanged || portfolioChanged || projectChanged) && !navigationInProgress && !isAdmin) {
+  console.log("Navigation triggered by role/portfolio/project change");
+  
+  // Special case for Dashboard and Configuration menu
+  if(this.sidebarMenu && this.sidebarMenu.length === 2 && 
+     this.sidebarMenu[0].label && this.sidebarMenu[0].label.toLowerCase() === "dashboard" && 
+     this.sidebarMenu[1].label && this.sidebarMenu[1].label.toLowerCase() === "configuration") {
+    console.log("Dashboard+Configuration menu detected, navigating to landing only");
+    sessionStorage.setItem("navigatingInProgress", "true");
+    this.router.navigate(["/landing"]).then(() => {
+      setTimeout(() => sessionStorage.removeItem("navigatingInProgress"), 500);
+      // Clear the change flags to prevent multiple navigations
+      sessionStorage.removeItem("roleChanged");
+      sessionStorage.removeItem("selectionChange");
+    });
+  }
+  // Regular navigation to first menu item if available
+  else if(this.sidebarMenu && this.sidebarMenu.length > 0 && this.sidebarMenu[0].url && 
+     this.sidebarMenu[0].url.includes('./') && this.sidebarMenu[0].url.length > 2) {
+    console.log("Navigating to first menu item");
+    sessionStorage.setItem("navigatingInProgress", "true");
+    let filterUrl = this.sidebarMenu[0].url.replace('./', '');
+    this.router.navigate(["/landing/" + filterUrl]).then(() => {
+      setTimeout(() => sessionStorage.removeItem("navigatingInProgress"), 500);
+      // Clear the change flags to prevent multiple navigations
+      sessionStorage.removeItem("roleChanged");
+      sessionStorage.removeItem("selectionChange");
+    });            
+  }
+}
+
+
         for (let i = 0; i < this.sidebarMenu.length; i++) {
           if (this.sidebarMenu[i].children) {
             this.sidebarMenu[i].children.forEach((child: any) => {
@@ -2184,15 +2338,15 @@ export class LandingComponent implements OnInit, AfterViewInit {
               }
             });
           }
-        }
+        }    
         this.location = window.location.pathname;
         for (let i = 0; i < this.sidebarMenu.length; i++) {
-          if (this.sidebarMenu[i].children) {
+        if (this.sidebarMenu[i].children) {
             this.sidebarMenu[i].children.forEach((child: any) => {
               if (this.location != "") {
                 if (child.url) {
                   let temp = child.url.split("/").length;
-                  let temp1 = this.location.split("/").length;
+                  let temp1 = this.location.split("/").length;              
                   if (
                     child.url.split("/")[temp - 1] ==
                     this.location.split("/")[temp1 - 1]
@@ -2203,9 +2357,12 @@ export class LandingComponent implements OnInit, AfterViewInit {
               }
             });
           }
-        }
+        }     
       },
-      () => {},
+      (error) => {
+        console.error('Error loading sidebar:', error);
+        this.isSidebarLoading = false;
+      },
       () => {
         if (
           JSON.parse(sessionStorage.getItem("role") || "").name ==
@@ -2214,8 +2371,22 @@ export class LandingComponent implements OnInit, AfterViewInit {
           this.sidebarSectionIndex = Number(
             sessionStorage.getItem("sidebarSectionIndex")
           );
+        
+        // Add a small delay before removing the navigation flag to ensure any pending
+        // navigations have completed
+        setTimeout(() => {
+          // Only remove if not set by another action
+          if (sessionStorage.getItem("navigatingToRoute") && 
+              !sessionStorage.getItem("navigatingInProgress")) {
+            sessionStorage.removeItem("navigatingToRoute");
+          }
+        }, 1000);
+        
+        // Reset sidebar loading flag now that everything is complete
+        this.isSidebarLoading = false;
       }
-    );
+    ); 
+      
   }
   getIdDataObject(secondLevelObj: any) {
     let resObj: any = {};
@@ -2446,9 +2617,14 @@ export class LandingComponent implements OnInit, AfterViewInit {
         if (this.tabs[0]["stateUrl"]) {
           // console.log("inside second level if")
           //sbx workbench route
+          // Set flag to indicate user is actively navigating to a route
+          sessionStorage.setItem("navigatingToRoute", "true");
           this.router.navigate([this.tabs[0].url], {
             relativeTo: this.route,
             queryParams: { stateUrl: this.tabs[0]["stateUrl"] },
+          }).then(() => {
+            // Clear the flag after navigation is complete (with a short delay to ensure processing)
+            setTimeout(() => sessionStorage.removeItem("navigatingToRoute"), 500);
           });
           if (this.tabs[0] && this.tabs[0].label)
             sessionStorage.setItem(
@@ -2460,10 +2636,15 @@ export class LandingComponent implements OnInit, AfterViewInit {
           let parentdata = this.getParentOfChild(this.tabs[0]);
           this.displayBreadCrumb(parentdata);
           // console.log(this.route)
+          // Set flag to indicate user is actively navigating to a route
+          sessionStorage.setItem("navigatingToRoute", "true");
           this.router.navigate([this.getURLofChild(this.tabs[0])], {
             relativeTo: this.route,
             onSameUrlNavigation: "reload",
             skipLocationChange: false,
+          }).then(() => {
+            // Clear the flag after navigation is complete (with a short delay to ensure processing)
+            setTimeout(() => sessionStorage.removeItem("navigatingToRoute"), 500);
           });
           if (this.tabs[0] && this.tabs[0].label) {
             // console.log("inside second level else")
@@ -2489,8 +2670,23 @@ export class LandingComponent implements OnInit, AfterViewInit {
     let clickedIndex = $event.index;
     this.selectedIndex = clickedIndex;
     sessionStorage.setItem("selectedIndex", this.selectedIndex.toString());
+    
+    // Prevent navigation if sidebar is still loading
+    if (this.isSidebarLoading) {
+      console.log('Navigation deferred while sidebar is loading');
+      return;
+    }
+    
+    // Set flag to indicate user is actively navigating to a route
+    sessionStorage.setItem("navigatingToRoute", "true");
+    
+    // Use skipLocationChange to avoid browser history changes that cause refreshes
     this.router.navigate([this.tabs[clickedIndex].url], {
       relativeTo: this.route,
+      skipLocationChange: false
+    }).then(() => {
+      // Clear the flag after navigation is complete (with a short delay to ensure processing)
+      setTimeout(() => sessionStorage.removeItem("navigatingToRoute"), 500);
     });
   }
 

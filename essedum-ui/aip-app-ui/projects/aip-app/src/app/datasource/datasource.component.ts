@@ -228,14 +228,13 @@ export class DatasourceComponent implements OnInit, OnChanges {
     }
   }
   Authentications() {
-    this.service.getPermission('cip').subscribe((cipAuthority) => {
-      // datasource-create permission
-      if (cipAuthority.includes('datasource-create')) this.createAuth = true;
-      // datasource-edit/update permission
-      if (cipAuthority.includes('datasource-edit')) this.editAuth = true;
-      // datasource-delete permission
-      if (cipAuthority.includes('datasource-delete')) this.deleteAuth = true;
-    });
+    this.service.getPermission('cip').subscribe((cipAuthority) => 
+      {
+        const authorityArr = JSON.parse(cipAuthority);
+        this.createAuth = authorityArr.some(item => item.permission === "datasource-create");
+        this.editAuth = authorityArr.some(item => item.permission === "datasource-edit");
+        this.deleteAuth = authorityArr.some(item => item.permission === "datasource-delete");
+      });
   }
 
   changedToogle(event: any) {

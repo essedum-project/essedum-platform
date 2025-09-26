@@ -23,72 +23,30 @@
 	</changeSet>
 	<changeSet author="Essedum (generated)" id="3v0-usm-20241104-10">
         <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM usm_role WHERE id=128 OR name ='Core Portfolio Admin';
-            </sqlCheck>                
+                      
         </preConditions>
 		<sql dbms="mssql">
 			SET IDENTITY_INSERT usm_role ON;
 		</sql>
-        <sql >
-            INSERT INTO usm_role(id, project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
-            VALUES (128, NULL, 'Core Portfolio Admin', 'Core Portfolio Admin', 0, NULL,NULL)
-        </sql>		
+  	
 		<sql dbms="mssql">
 			SET IDENTITY_INSERT usm_role OFF;
 		</sql>
 	</changeSet>
 	<changeSet author="Essedum (generated)" id="3v0-usm-20241104-11">
         <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="1">
-                SELECT COUNT(*) FROM usm_role WHERE id=128 AND name !='Core Portfolio Admin' ;
-            </sqlCheck>                
+                
         </preConditions>
 		<!-- <sql dbms="mssql">
 			SET IDENTITY_INSERT usm_role ON;
 		</sql> -->
-        <sql >
-            INSERT INTO usm_role(project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
-            VALUES (NULL, 'Core Portfolio Admin', 'Core Portfolio Admin', 0, NULL,NULL)
-        </sql>		
+  	
 		<!-- <sql dbms="mssql">
 			SET IDENTITY_INSERT usm_role OFF;
 		</sql> -->
 	</changeSet>
-	<changeSet author="Essedum (generated)" id="3v0-usm-20241104-12">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM usm_role WHERE id=127 OR name ='Core Project Admin';
-            </sqlCheck>                
-        </preConditions>
-		<sql dbms="mssql">
-			SET IDENTITY_INSERT usm_role ON;
-		</sql>
-        <sql >
-            INSERT INTO usm_role(id, project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
-            VALUES (127, NULL, 'Core Project Admin', 'Core Project Admin', 0, NULL,NULL)
-        </sql>		
-		<sql dbms="mssql">
-			SET IDENTITY_INSERT usm_role OFF;
-		</sql>
-	</changeSet>
-	<changeSet author="Essedum (generated)" id="3v0-usm-20241104-13">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="1">
-                SELECT COUNT(*) FROM usm_role WHERE id=127 AND name !='Core Project Admin';
-            </sqlCheck>                
-        </preConditions>
-		<!-- <sql dbms="mssql">
-			SET IDENTITY_INSERT usm_role ON;
-		</sql> -->
-        <sql >
-            INSERT INTO usm_role(project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
-            VALUES (NULL, 'Core Project Admin', 'Core Project Admin', 0, NULL,NULL)
-        </sql>		
-		<!-- <sql dbms="mssql">
-			SET IDENTITY_INSERT usm_role OFF;
-		</sql> -->
-	</changeSet>
+
+
 	<changeSet author="Essedum (generated)" id="3v0-usm-20241104-14">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
@@ -293,10 +251,12 @@
 			SET IDENTITY_INSERT usm_role OFF;
 		</sql> -->
 	</changeSet>
-	<changeSet author="Essedum (generated)" id="3v0-usm-20241104-26">
+
+
+<changeSet author="Essedum (generated)" id="3v0-usm-20241104-24-dev">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM usm_role WHERE id=126 OR name ='Portfolio Manager';
+                SELECT COUNT(*) FROM usm_role WHERE id=15 OR name ='Developer';
             </sqlCheck>                
         </preConditions>
 		<sql dbms="mssql">
@@ -304,27 +264,25 @@
 		</sql>
         <sql >
             INSERT INTO usm_role(id, project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
-            VALUES (126, NULL, 'Portfolio Manager', 'Portfolio Manager', 0, NULL,NULL)
+            VALUES (15, NULL, 'Developer', 'Developer', 0, NULL,NULL)
         </sql>		
 		<sql dbms="mssql">
 			SET IDENTITY_INSERT usm_role OFF;
 		</sql>
 	</changeSet>
-	<changeSet author="Essedum (generated)" id="3v0-usm-20241104-27">
+	<changeSet author="Essedum (generated)" id="3v0-usm-20241104-25-dev">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">
-                SELECT COUNT(*) FROM usm_role WHERE id=126 AND name !='Portfolio Manager';
+                SELECT COUNT(*) FROM usm_role WHERE id=15 AND name !='Developer';
             </sqlCheck>                
         </preConditions>
-		<!-- <sql dbms="mssql">
-			SET IDENTITY_INSERT usm_role ON;
-		</sql> -->
+
         <sql >
             INSERT INTO usm_role(project_id, DESCRIPTION, NAME, permission, project_admin, role_admin)
-            VALUES (NULL, 'Portfolio Manager', 'Portfolio Manager', 0, NULL,NULL)
+            VALUES (NULL, 'Developer', 'Developer', 0, NULL,NULL)
         </sql>		
-		<!-- <sql dbms="mssql">
-			SET IDENTITY_INSERT usm_role OFF;
-		</sql> -->
+	
 	</changeSet>
+
+
 </databaseChangeLog>
