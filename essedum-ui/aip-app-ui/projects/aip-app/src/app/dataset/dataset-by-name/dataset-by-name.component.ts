@@ -260,9 +260,10 @@ export class DatasetByNameComponent {
   authentications() {
     this.service.getPermission("cip").subscribe(
       (cipAuthority) => {
-        if (cipAuthority.includes("dataset-create")) this.createAuth = true;
-        if (cipAuthority.includes("dataset-edit")) this.editAuth = true;
-        if (cipAuthority.includes("dataset-delete")) this.deleteAuth = true;
+        const authorityArr = JSON.parse(cipAuthority);
+        this.createAuth = authorityArr.some(item => item.permission === "dataset-create");
+        this.editAuth = authorityArr.some(item => item.permission === "dataset-edit");
+        this.deleteAuth = authorityArr.some(item => item.permission === "dataset-delete");
       }
     );
   }

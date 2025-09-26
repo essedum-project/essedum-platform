@@ -3,8 +3,11 @@
     <mat-drawer #drawerLeft="" class="example-sidenav selector-3-3" [ngStyle]="{
         'background-color': bgColorType == 2 ? '#8626C3' : 'var(--header-color)'
       }" mode="side" style="padding: 0; width: 14%">
-      <app-sidebar *ngIf="navhide && selectedrole.name == currentrole" [alerts]="totalTicket"
+      <app-sidebar *ngIf="!isSidebarLoading && navhide && selectedrole.name == currentrole" [alerts]="totalTicket"
         class="selector-3-4"></app-sidebar>
+      <div *ngIf="isSidebarLoading" class="sidebar-loading-indicator">
+        <mat-spinner diameter="30"></mat-spinner>
+      </div>
     </mat-drawer>
     <div class="parent-div selector-3-5">
       <!--main header starts-->
@@ -26,17 +29,21 @@
             <img id="clientimage" *ngIf="!isimg" src="assets/img/essedum_icon_small.png"
               class="selector-3-8 essedum-logo responsive-logo-img" alt="ESSEDUM Logo"
               style="margin-left: 8px;" />
-            <span class="responsive-title" style="margin-left: 8px;">ESSEDUM</span>
+            <span class="responsive-title" style="margin-left: 8px;">{{essedum_title}}</span>
 
           </div>
         </div>
         <!--header ends -->
         
         <div class="example-container selector-3-19" *ngIf="sidebar && selectedrole.name != currentrole">
+          <div *ngIf="isSidebarLoading" class="sidebar-loading-indicator" style="display:flex; justify-content:center; padding:20px;">
+            <mat-spinner diameter="30"></mat-spinner>
+          </div>
           <mat-sidenav-container class="example-sidenav-container selector-3-20" autosize="">
             <mat-sidenav *ngIf="
+                !isSidebarLoading && (
                 (showSidebarMenu && !isExpanded) ||
-                (iconsidebarrole == selectedrole.name && showSidebarMenu)
+                (iconsidebarrole == selectedrole.name && showSidebarMenu))
               " #sidenav="" class="width parentsidenav selector-3-21" mode="side" opened="true"
               style="overflow-x: hidden; height: 100% ;width: 62px;" [ngClass]="{
                 enableSidebarShadow: enableSidebarShadow == true,
