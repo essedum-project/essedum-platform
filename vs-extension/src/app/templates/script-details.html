@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script Details - {{SCRIPT_NAME}}</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            padding: 20px;
+            margin: 0;
+            color: var(--vscode-foreground);
+            background-color: var(--vscode-editor-background);
+        }
+        
+        .back-button {
+            background: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .back-button:hover {
+            background: var(--vscode-button-hoverBackground);
+        }
+        
+        .script-header {
+            margin-bottom: 20px;
+        }
+        
+        .script-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0 0 10px 0;
+            color: var(--vscode-foreground);
+        }
+        
+        .script-meta {
+            color: var(--vscode-descriptionForeground);
+            font-size: 14px;
+        }
+        
+        .script-content {
+            background: var(--vscode-editor-background);
+            border: 1px solid var(--vscode-panel-border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .content-header {
+            background: var(--vscode-editorGroupHeader-tabsBackground);
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--vscode-panel-border);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .content-body {
+            padding: 0;
+        }
+        
+        pre {
+            margin: 0;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            background: var(--vscode-editor-background);
+            color: var(--vscode-editor-foreground);
+        }
+        
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--vscode-descriptionForeground);
+        }
+        
+        .error {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--vscode-errorForeground);
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="goBack()">← Back to Pipelines</button>
+    
+    <div class="script-header">
+        <h1 class="script-title">{{SCRIPT_NAME}}</h1>
+        <div class="script-meta">Pipeline Script Details</div>
+    </div>
+    
+    <div id="loadingState" class="loading">
+        Loading script content...
+    </div>
+    
+    <div id="errorState" class="error" style="display: none;">
+        Failed to load script content.
+    </div>
+    
+    <div id="contentContainer" style="display: none;">
+        {{SCRIPT_CONTENT}}
+    </div>
+
+    <script>
+        const vscode = acquireVsCodeApi();
+        
+        function goBack() {
+            vscode.postMessage({
+                command: 'goBack'
+            });
+        }
+        
+        // Handle messages from extension
+        window.addEventListener('message', event => {
+            const message = event.data;
+            
+            switch (message.command) {
+                case 'showScript':
+                    showScriptContent(message.script);
+                    break;
+                case 'showError':
+                    showError(message.error);
+                    break;
+            }
+        });
+        
+        function showScriptContent(script) {
+            const loadingState = document.getElementById('loadingState');
+            const errorState = document.getElementById('errorState');
+            const contentContainer = document.getElementById('contentContainer');
+            
+            loadingState.style.display = 'none';
+            errorState.style.display = 'none';
+            contentContainer.style.display = 'block';
+            
+            if (script && script.files && script.files.length > 0) {
+                let contentHtml = '';
+                
+                script.files.forEach(file => {
+                    contentHtml += `
+                        <div class="script-content">
+                            <div class="content-header">
+                                ${file.fileName} (${file.extension})
+                            </div>
+                            <div class="content-body">
+                                <pre><code>${escapeHtml(file.content)}</code></pre>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                contentContainer.innerHTML = contentHtml;
+            }
+        }
+        
+        function showError(error) {
+            const loadingState = document.getElementById('loadingState');
+            const errorState = document.getElementById('errorState');
+            const contentContainer = document.getElementById('contentContainer');
+            
+            loadingState.style.display = 'none';
+            errorState.style.display = 'block';
+            contentContainer.style.display = 'none';
+            
+            errorState.textContent = error || 'Failed to load script content.';
+        }
+        
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+        
+        // Request initial load
+        vscode.postMessage({
+            command: 'loadScript'
+        });
+    </script>
+</body>
+</html>
