@@ -1,0 +1,946 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Mlflow",
+    "version": "2.0-oas3"
+  },
+  "servers": [
+    {
+      "url": "https://api.example.com"
+    }
+  ],
+  "security": [
+    {
+      "servicenow_auth": []
+    }
+    ] ,
+  "tags": [
+    {
+      "name": "Table API",
+      "description": "Allows you to perform create, read, update and delete (CRUD) operations on existing tables",
+      "externalDocs": {
+        "description": "Find out more about table api",
+        "url": ""
+      }
+    }
+  ],
+  "paths": {  
+	"/dataset/fetchalldataset/": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "POST /dataset/fetchalldataset/",
+        "operationId": "Fetch_Dataset_API",
+        "requestBody": {
+          "description": "request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"platform": {
+						"type": "string"
+					}
+				}
+              },
+              "example": {
+                "userId": "admin@infosys.com",
+                "platform": "mlflow"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully"
+            },
+          "401": {
+            "description": "Unauthorized - The request has not been applied because it lacks valid authentication credentials for the target resource."
+          },
+          "403": {
+            "description": "Forbidden - The server understood the request, but is refusing to fulfill it."
+          }
+        },
+        "security": [
+          {
+            "servicenow_auth": []
+          }
+        ]
+      }
+    },
+	
+	"/training/list_experiments/": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "POST /training/list_experiments/",
+        "operationId": "Fetch_Experiments_API",
+        "requestBody": {
+          "description": "request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"platform": {
+						"type": "string"
+					}
+				}
+              },
+              "example": {
+                "userId": "admin@infosys.com",
+                "platform": "mlflow"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully"
+            },
+          "401": {
+            "description": "Unauthorized - The request has not been applied because it lacks valid authentication credentials for the target resource."
+          },
+          "403": {
+            "description": "Forbidden - The server understood the request, but is refusing to fulfill it."
+          }
+        },
+        "security": [
+          {
+            "servicenow_auth": []
+          }
+        ]
+      }
+    },
+	
+	"/training/get_training_experiments/": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "POST /training/get_training_experiments/",
+        "operationId": "Experiment_Training_API",
+        "requestBody": {
+          "description": "request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"platform": {
+						"type": "string"
+					},
+					"experiment_name": {
+						"type": "string"
+					}
+				}
+              },
+              "example": {
+                "userId": "admin@infosys.com",
+                "platform": "mlflow",
+				"experiment_name": "mlflow_tabular12"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully"
+            },
+          "401": {
+            "description": "Unauthorized - The request has not been applied because it lacks valid authentication credentials for the target resource."
+          },
+          "403": {
+            "description": "Forbidden - The server understood the request, but is refusing to fulfill it."
+          }
+        },
+        "security": [
+          {
+            "servicenow_auth": []
+          }
+        ]
+      }
+    },
+	
+	"/training/automl_training/": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "POST /training/automl_training/",
+        "operationId": "AutoMl_Training_API",
+        "requestBody": {
+          "description": "request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"platform": {
+						"type": "string"
+					},
+					"domain": {
+						"type": "string"
+					},
+					"experiment_name": {
+						"type": "string"
+					},
+					"train_dataset": {
+						"type": "string"
+					},
+					"val_dataset": {
+						"type": "string"
+					},
+					"label": {
+						"type": "string"
+					},
+					"model_name": {
+						"type": "string"
+					},
+					"time_limit": {
+						"type": "number"
+					}
+				}
+              },
+              "example": {
+                "userId": "admin@infosys.com",
+                "platform": "mlflow",
+				"domain": "tabular",
+				"experiment_name": "",
+				"train_dataset" : "",
+				"val_dataset" : "",
+				"label" : "",
+				"model_name" : "",
+				"time_limit" : 60
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully"
+            },
+          "401": {
+            "description": "Unauthorized - The request has not been applied because it lacks valid authentication credentials for the target resource."
+          },
+          "403": {
+            "description": "Forbidden - The server understood the request, but is refusing to fulfill it."
+          }
+        },
+        "security": [
+          {
+            "servicenow_auth": []
+          }
+        ]
+      }
+    },
+	
+	"/training/get_training_details/": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "POST /training/get_training_details/",
+        "operationId": "Get_Training_Details_API",
+        "requestBody": {
+          "description": "request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"platform": {
+						"type": "string"
+					},
+					"run_id": {
+						"type": "string"
+					}
+				}
+              },
+              "example": {
+                "userId": "admin@infosys.com",
+                "platform": "mlflow",
+				"run_id": "3263d6c400624afd99c78ae8bd0501d6"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully"
+            },
+          "401": {
+            "description": "Unauthorized - The request has not been applied because it lacks valid authentication credentials for the target resource."
+          },
+          "403": {
+            "description": "Forbidden - The server understood the request, but is refusing to fulfill it."
+          }
+        },
+        "security": [
+          {
+            "servicenow_auth": []
+          }
+        ]
+      }
+    },
+	
+	"/training/delete_training/": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "POST /training/delete_training/",
+        "operationId": "Delete_Training_API",
+        "requestBody": {
+          "description": "request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"platform": {
+						"type": "string"
+					},
+					"run_id": {
+						"type": "string"
+					}
+				}
+              },
+              "example": {
+                "userId": "admin@infosys.com",
+                "platform": "mlflow",
+				"run_id": ""
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully"
+            },
+          "401": {
+            "description": "Unauthorized - The request has not been applied because it lacks valid authentication credentials for the target resource."
+          },
+          "403": {
+            "description": "Forbidden - The server understood the request, but is refusing to fulfill it."
+          }
+        },
+        "security": [
+          {
+            "servicenow_auth": []
+          }
+        ]
+      }
+    },
+	
+	"/model/list_models/": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "POST /model/list_models/",
+        "operationId": "Fetch_Models_API",
+        "requestBody": {
+          "description": "request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"platform": {
+						"type": "string"
+					}
+				}
+              },
+              "example": {
+                "userId": "admin@infosys.com",
+                "platform": "mlflow"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully"
+            },
+          "401": {
+            "description": "Unauthorized - The request has not been applied because it lacks valid authentication credentials for the target resource."
+          },
+          "403": {
+            "description": "Forbidden - The server understood the request, but is refusing to fulfill it."
+          }
+        },
+        "security": [
+          {
+            "servicenow_auth": []
+          }
+        ]
+      }
+    },
+	
+	"/model/create_model/": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "POST /model/create_model/",
+        "operationId": "Create_Model_API",
+        "requestBody": {
+          "description": "request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"platform": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"run_id": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					}
+				}
+              },
+              "example": {
+                "userId": "admin@infosys.com",
+                "platform": "mlflow",
+				"name": "",
+				"run_id": "",
+				"description": ""
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully"
+            },
+          "401": {
+            "description": "Unauthorized - The request has not been applied because it lacks valid authentication credentials for the target resource."
+          },
+          "403": {
+            "description": "Forbidden - The server understood the request, but is refusing to fulfill it."
+          }
+        },
+        "security": [
+          {
+            "servicenow_auth": []
+          }
+        ]
+      }
+    },
+	
+	"/model/get_model_details/": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "POST /model/get_model_details/",
+        "operationId": "Fetch_Models_Details_API",
+        "requestBody": {
+          "description": "request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"platform": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				}
+              },
+              "example": {
+                "userId": "admin@infosys.com",
+                "platform": "mlflow",
+				"name": ""
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully"
+            },
+          "401": {
+            "description": "Unauthorized - The request has not been applied because it lacks valid authentication credentials for the target resource."
+          },
+          "403": {
+            "description": "Forbidden - The server understood the request, but is refusing to fulfill it."
+          }
+        },
+        "security": [
+          {
+            "servicenow_auth": []
+          }
+        ]
+      }
+    },
+	
+	"/model/delete_model/": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "POST /model/delete_model/",
+        "operationId": "Delete_Model_API",
+        "requestBody": {
+          "description": "request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"platform": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				}
+              },
+              "example": {
+                "userId": "admin@infosys.com",
+                "platform": "mlflow",
+				"name": ""
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully"
+            },
+          "401": {
+            "description": "Unauthorized - The request has not been applied because it lacks valid authentication credentials for the target resource."
+          },
+          "403": {
+            "description": "Forbidden - The server understood the request, but is refusing to fulfill it."
+          }
+        },
+        "security": [
+          {
+            "servicenow_auth": []
+          }
+        ]
+      }
+    },
+	
+	"/endpoints/list_endpoints/": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "POST /endpoints/list_endpoints/",
+        "operationId": "Fetch_Endpoints_API",
+        "requestBody": {
+          "description": "request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"platform": {
+						"type": "string"
+					}
+				}
+              },
+              "example": {
+                "userId": "admin@infosys.com",
+                "platform": "mlflow"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully"
+            },
+          "401": {
+            "description": "Unauthorized - The request has not been applied because it lacks valid authentication credentials for the target resource."
+          },
+          "403": {
+            "description": "Forbidden - The server understood the request, but is refusing to fulfill it."
+          }
+        },
+        "security": [
+          {
+            "servicenow_auth": []
+          }
+        ]
+      }
+    },
+	
+	"/endpoints/create_endpoint/": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "POST /endpoints/create_endpoint/",
+        "operationId": "Create_Endpoints_API",
+        "requestBody": {
+          "description": "request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"platform": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"model_name": {
+						"type": "string"
+					},
+					"version": {
+						"type": "string"
+					}
+				}
+              },
+              "example": {
+                "userId": "admin@infosys.com",
+                "platform": "mlflow",
+				"name": "",
+				"model_name": "",
+				"version": ""
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully"
+            },
+          "401": {
+            "description": "Unauthorized - The request has not been applied because it lacks valid authentication credentials for the target resource."
+          },
+          "403": {
+            "description": "Forbidden - The server understood the request, but is refusing to fulfill it."
+          }
+        },
+        "security": [
+          {
+            "servicenow_auth": []
+          }
+        ]
+      }
+    },
+	
+	"/endpoints/get_endpoint_details/": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "POST /endpoints/get_endpoint_details/",
+        "operationId": "Fetch_Endpoint_Details_API",
+        "requestBody": {
+          "description": "request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"platform": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				}
+              },
+              "example": {
+                "userId": "admin@infosys.com",
+                "platform": "mlflow",
+				"name": ""
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully"
+            },
+          "401": {
+            "description": "Unauthorized - The request has not been applied because it lacks valid authentication credentials for the target resource."
+          },
+          "403": {
+            "description": "Forbidden - The server understood the request, but is refusing to fulfill it."
+          }
+        },
+        "security": [
+          {
+            "servicenow_auth": []
+          }
+        ]
+      }
+    },
+	
+	"/endpoints/predict/": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "POST /endpoints/predict/",
+        "operationId": "Endpoint_Predict_API",
+        "requestBody": {
+          "description": "request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"platform": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"instances": {
+						"type": "string"
+					}
+				}
+              },
+              "example": {
+                "userId": "admin@infosys.com",
+                "platform": "mlflow",
+				"name": "",
+				"instances": ""
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully"
+            },
+          "401": {
+            "description": "Unauthorized - The request has not been applied because it lacks valid authentication credentials for the target resource."
+          },
+          "403": {
+            "description": "Forbidden - The server understood the request, but is refusing to fulfill it."
+          }
+        },
+        "security": [
+          {
+            "servicenow_auth": []
+          }
+        ]
+      }
+    },
+	
+	"/endpoints/batchpredict/": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "POST /endpoints/batchpredict/",
+        "operationId": "Endpoint_Batch_Predict_API",
+        "requestBody": {
+          "description": "request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"platform": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"batch_data": {
+						"type": "string",
+						"format": "binary"
+					}
+				}
+              },
+              "example": {
+                "userId": "admin@infosys.com",
+                "platform": "mlflow",
+				"name": "",
+				"batch_data" : ""
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully"
+            },
+          "401": {
+            "description": "Unauthorized - The request has not been applied because it lacks valid authentication credentials for the target resource."
+          },
+          "403": {
+            "description": "Forbidden - The server understood the request, but is refusing to fulfill it."
+          }
+        },
+        "security": [
+          {
+            "servicenow_auth": []
+          }
+        ]
+      }
+    },
+	
+	"/endpoints/delete_endpoint/": {
+      "post": {
+        "tags": [
+          "table"
+        ],
+        "summary": "POST /endpoints/delete_endpoint/",
+        "operationId": "Delete_Endpoint_API",
+        "requestBody": {
+          "description": "request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+				"properties": {
+					"userId": {
+						"type": "string"
+					},
+					"platform": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				}
+              },
+              "example": {
+                "userId": "admin@infosys.com",
+                "platform": "mlflow",
+				"name": ""
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully"
+            },
+          "401": {
+            "description": "Unauthorized - The request has not been applied because it lacks valid authentication credentials for the target resource."
+          },
+          "403": {
+            "description": "Forbidden - The server understood the request, but is refusing to fulfill it."
+          }
+        },
+        "security": [
+          {
+            "servicenow_auth": []
+          }
+        ]
+      }
+    }
+	
+  },
+  "components": {
+    "schemas": {
+      "Table": {
+        "type": "object",
+        "properties": {
+          "approval": {
+            "type": "string"
+          },
+          "short_description": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "servicenow_auth": {
+        "type": "https",
+        "scheme": "basic"
+      }
+    }
+  }     
+}

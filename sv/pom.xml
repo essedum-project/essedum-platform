@@ -104,6 +104,7 @@
 		<com.lfn.icip.plugins.icip-adp-s3.version>${project.version}</com.lfn.icip.plugins.icip-adp-s3.version>
 		<com.lfn.icip.plugins.icip-adp-aicloud.version>${project.version}</com.lfn.icip.plugins.icip-adp-aicloud.version>
 		<com.lfn.icip.plugins.icip-adp-aws-sagemaker.version>${project.version}</com.lfn.icip.plugins.icip-adp-aws-sagemaker.version>
+		<com.lfn.icip.plugins.icip-adp-gcp-vertex.version>${project.version}</com.lfn.icip.plugins.icip-adp-gcp-vertex.version>
 		<com.lfn.icip.plugins.icip-adp-mysql.version>${project.version}</com.lfn.icip.plugins.icip-adp-mysql.version>
 		<com.lfn.icip.plugins.icip-adp-postgresql.version>${project.version}</com.lfn.icip.plugins.icip-adp-postgresql.version>
 		<junit.version>4.13.2</junit.version>
@@ -196,6 +197,7 @@
 		<module>icip-adp-azure</module>
 		
 		<module>common-app</module>
+        <module>icip-adp-gcp-vertex</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
@@ -669,6 +671,11 @@
 				<groupId>com.lfn.icip.plugins</groupId>
 				<artifactId>icip-adp-azure</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.lfn.icip.plugins</groupId>
+				<artifactId>icip-adp-gcp-vertex</artifactId>
+				<version>${com.lfn.icip.plugins.icip-adp-gcp-vertex.version}</version>
 			</dependency>
 			<dependency>
                 <groupId>junit</groupId>
