@@ -26,10 +26,53 @@
         "title": "Check Authentication Status"
       },
       {
+        "command": "essedum.openJobLogs",
+        "title": "Open Job Logs Viewer",
+        "icon": "$(list-flat)"
+      },
+      {
+        "command": "essedum.openInternalJobLogs",
+        "title": "Open Internal Job Logs",
+        "icon": "$(list-tree)"
+      },
+      {
+        "command": "essedum.showJobLogsInTerminal",
+        "title": "Show Job Logs in Terminal",
+        "icon": "$(terminal)"
+      },
+      {
         "command": "essedum.debugUpload",
         "title": "Debug Upload Endpoints"
       }
     ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "essedum.openJobLogs",
+          "when": "true"
+        },
+        {
+          "command": "essedum.openInternalJobLogs", 
+          "when": "true"
+        },
+        {
+          "command": "essedum.showJobLogsInTerminal",
+          "when": "true"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "essedum.openJobLogs",
+          "when": "view == essedum-sidebar",
+          "group": "navigation@1"
+        },
+        {
+          "command": "essedum.showJobLogsInTerminal",
+          "when": "view == essedum-sidebar", 
+          "group": "navigation@2"
+        }
+      ]
+    },
     "viewsContainers": {
       "activitybar": [
         {

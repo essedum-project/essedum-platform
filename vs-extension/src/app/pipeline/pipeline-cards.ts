@@ -5,6 +5,7 @@ import * as https from 'https';
 import * as path from 'path';
 import * as fs from 'fs';
 import { EssedumFileSystemProvider } from '../../providers/essedum-file-provider';
+import { JobLogsViewer } from './job-logs-viewer';
 
 export interface PipelineCard {
     type: string;
@@ -2114,9 +2115,22 @@ print("Pipeline ${pipelineName} execution completed")
         const card = this.cards.find(c => c.id === cardId);
         if (!card) return;
 
-        // Open logs in a new webview or redirect to logs view
-        vscode.window.showInformationMessage(`Opening logs for pipeline: ${card.alias}`);
-        // You can implement log viewer here
+        try {
+            // Create and show the job logs viewer with table interface similar to Angular
+            const jobLogsViewer = new JobLogsViewer(
+                this._context,
+                this._token,
+                card.name, // Pipeline name
+                undefined   // Not an internal job
+            );
+            
+            await jobLogsViewer.showJobLogsViewer();
+            vscode.window.showInformationMessage(`Job logs opened for pipeline: ${card.alias}`);
+            
+        } catch (error: any) {
+            console.error('Error opening job logs viewer:', error);
+            vscode.window.showErrorMessage(`Failed to open job logs: ${error.message}`);
+        }
     }
 
     /**

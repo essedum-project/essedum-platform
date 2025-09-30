@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { PipelineCardsProvider } from './app/pipeline/pipeline-cards';
 import { KeycloakAuthService, KeycloakConfig } from './auth/keycloak-auth';
 import { EssedumFileSystemProvider } from './providers/essedum-file-provider';
+import { JobLogsViewer } from './app/pipeline/job-logs-viewer';
 
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
@@ -209,6 +210,178 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 				
 				throw error; // Re-throw so the pipeline provider can handle it
+			}
+		})
+	);
+	
+	// Register command to open job logs viewer for a specific pipeline
+	context.subscriptions.push(
+		vscode.commands.registerCommand('essedum.openJobLogs', async (pipelineName?: string) => {
+			try {
+				const accessToken = await authService.getAccessToken();
+				
+				if (!pipelineName) {
+					// If no pipeline name provided, ask user to enter one
+					pipelineName = await vscode.window.showInputBox({
+						prompt: 'Enter pipeline name to view job logs',
+						placeHolder: 'e.g., LEORGNGS24627'
+					});
+					
+					if (!pipelineName) {
+						return; // User cancelled
+					}
+				}
+				
+				const jobLogsViewer = new JobLogsViewer(
+					context,
+					accessToken,
+					pipelineName,
+					undefined // Not an internal job
+				);
+				
+				await jobLogsViewer.showJobLogsViewer();
+				
+			} catch (error: any) {
+				console.error('Error opening job logs:', error);
+				vscode.window.showErrorMessage(`Failed to open job logs: ${error.message}`);
+			}
+		})
+	);
+	
+	// Register command to open internal job logs viewer
+	context.subscriptions.push(
+		vscode.commands.registerCommand('essedum.openInternalJobLogs', async (internalJobName?: string) => {
+			try {
+				const accessToken = await authService.getAccessToken();
+				
+				if (!internalJobName) {
+					// If no internal job name provided, ask user to enter one
+					internalJobName = await vscode.window.showInputBox({
+						prompt: 'Enter internal job name to view logs',
+						placeHolder: 'e.g., internal_job_name'
+					});
+					
+					if (!internalJobName) {
+						return; // User cancelled
+					}
+				}
+				
+				const jobLogsViewer = new JobLogsViewer(
+					context,
+					accessToken,
+					undefined, // Not a pipeline name
+					internalJobName // Internal job
+				);
+				
+				await jobLogsViewer.showJobLogsViewer();
+				
+			} catch (error: any) {
+				console.error('Error opening internal job logs:', error);
+				vscode.window.showErrorMessage(`Failed to open internal job logs: ${error.message}`);
+			}
+		})
+	);
+	
+	// Register command to open job logs in output channel/terminal
+	context.subscriptions.push(
+		vscode.commands.registerCommand('essedum.showJobLogsInTerminal', async (jobId?: string) => {
+			try {
+				const accessToken = await authService.getAccessToken();
+				
+				if (!jobId) {
+					jobId = await vscode.window.showInputBox({
+						prompt: 'Enter job ID to view logs in terminal',
+						placeHolder: 'e.g., job_12345'
+					});
+					
+					if (!jobId) {
+						return; // User cancelled
+					}
+				}
+				
+				// Create or get existing output channel
+				const outputChannel = vscode.window.createOutputChannel(`Essedum Job Logs - ${jobId}`);
+				outputChannel.show(true);
+				
+				// Clear previous content
+				outputChannel.clear();
+				outputChannel.appendLine(`=== Job Logs for ${jobId} ===`);
+				outputChannel.appendLine(`Timestamp: ${new Date().toISOString()}`);
+				outputChannel.appendLine('');
+				
+				// Fetch and display logs
+				const axios = require('axios');
+				const https = require('https');
+				
+				const httpsAgent = new https.Agent({
+					rejectUnauthorized: false
+				});
+				
+				const headers = {
+					'Accept': 'application/json, text/plain, */*',
+					'Authorization': `Bearer ${accessToken}`,
+					'Content-Type': 'application/json',
+					'Project': '2',
+					'ProjectName': 'leo1311',
+					'X-Requested-With': 'Leap',
+				};
+				
+				try {
+					// Try fetching as Spark job first
+					const sparkResponse = await axios.get(`/api/aip/service/v1/jobs/spark/${jobId}/logs?line=0&size=1000&background=false`, {
+						baseURL: 'http://localhost:8087',
+						headers,
+						httpsAgent,
+						timeout: 15000
+					});
+					
+					if (sparkResponse.data) {
+						const jobData = typeof sparkResponse.data === 'string' ? JSON.parse(sparkResponse.data) : sparkResponse.data;
+						
+						outputChannel.appendLine('=== Spark Job Logs ===');
+						if (jobData.log) {
+							outputChannel.appendLine(jobData.log);
+						} else {
+							// Display all job data
+							Object.entries(jobData).forEach(([key, value]) => {
+								outputChannel.appendLine(`${key}: ${value}`);
+							});
+						}
+					}
+				} catch (sparkError: any) {
+					// Try as internal job
+					try {
+						const internalResponse = await axios.get(`/api/aip/service/v1/jobs/internal/${jobId}/logs?line=0&size=1000`, {
+							baseURL: 'http://localhost:8087',
+							headers,
+							httpsAgent,
+							timeout: 15000
+						});
+						
+						if (internalResponse.data) {
+							const jobData = typeof internalResponse.data === 'string' ? JSON.parse(internalResponse.data) : internalResponse.data;
+							
+							outputChannel.appendLine('=== Internal Job Logs ===');
+							if (jobData.log) {
+								outputChannel.appendLine(jobData.log);
+							} else {
+								// Display all job data
+								Object.entries(jobData).forEach(([key, value]) => {
+									outputChannel.appendLine(`${key}: ${value}`);
+								});
+							}
+						}
+					} catch (internalError: any) {
+						outputChannel.appendLine(`Error fetching logs: ${sparkError.message}`);
+						outputChannel.appendLine(`Also tried internal job, error: ${internalError.message}`);
+					}
+				}
+				
+				vscode.window.showInformationMessage(`Job logs for ${jobId} opened in output channel`);
+				
+			} catch (error: any) {
+				console.error('Error showing job logs in terminal:', error);
+				vscode.window.showErrorMessage(`Failed to show job logs in terminal: ${error.message}`);
 			}
 		})
 	);
