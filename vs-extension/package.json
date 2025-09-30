@@ -80,6 +80,13 @@
           "title": "Essedum AI Platform",
           "icon": "media/essedum-icon.svg"
         }
+      ],
+      "panel": [
+        {
+          "id": "essedum-panel",
+          "title": "Essedum Job Logs",
+          "icon": "$(list-flat)"
+        }
       ]
     },
     "views": {
@@ -87,7 +94,17 @@
         {
           "id": "essedum-sidebar",
           "name": "Essedum AI Platform",
-          "type": "webview"
+          "type": "webview",
+          "icon": "$(home)"
+        }
+      ],
+      "essedum-panel": [
+        {
+          "id": "essedum-job-logs",
+          "name": "Job Logs",
+          "type": "webview",
+          "when": "essedum.jobLogsVisible",
+          "icon": "$(list-flat)"
         }
       ]
     },

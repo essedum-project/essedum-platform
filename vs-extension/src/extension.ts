@@ -4,6 +4,7 @@ import { PipelineCardsProvider } from './app/pipeline/pipeline-cards';
 import { KeycloakAuthService, KeycloakConfig } from './auth/keycloak-auth';
 import { EssedumFileSystemProvider } from './providers/essedum-file-provider';
 import { JobLogsViewer } from './app/pipeline/job-logs-viewer';
+import { JobLogsPanelProvider } from './app/pipeline/job-logs-panel-provider';
 
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
@@ -57,6 +58,20 @@ export function activate(context: vscode.ExtensionContext) {
 			)
 		);
 	});
+
+	// Register the job logs panel provider
+	const jobLogsPanelProvider = new JobLogsPanelProvider(context.extensionUri, context);
+	context.subscriptions.push(
+		vscode.window.registerWebviewViewProvider(
+			'essedum-job-logs',
+			jobLogsPanelProvider,
+			{
+				webviewOptions: {
+					retainContextWhenHidden: true
+				}
+			}
+		)
+	);
 
 	// Register commands
 	context.subscriptions.push(
@@ -232,14 +247,8 @@ export function activate(context: vscode.ExtensionContext) {
 					}
 				}
 				
-				const jobLogsViewer = new JobLogsViewer(
-					context,
-					accessToken,
-					pipelineName,
-					undefined // Not an internal job
-				);
-				
-				await jobLogsViewer.showJobLogsViewer();
+				// Use the panel provider to show job logs at the bottom
+				jobLogsPanelProvider.showJobLogs(accessToken, pipelineName, undefined);
 				
 			} catch (error: any) {
 				console.error('Error opening job logs:', error);
@@ -266,14 +275,8 @@ export function activate(context: vscode.ExtensionContext) {
 					}
 				}
 				
-				const jobLogsViewer = new JobLogsViewer(
-					context,
-					accessToken,
-					undefined, // Not a pipeline name
-					internalJobName // Internal job
-				);
-				
-				await jobLogsViewer.showJobLogsViewer();
+				// Use the panel provider to show internal job logs at the bottom
+				jobLogsPanelProvider.showJobLogs(accessToken, undefined, internalJobName);
 				
 			} catch (error: any) {
 				console.error('Error opening internal job logs:', error);

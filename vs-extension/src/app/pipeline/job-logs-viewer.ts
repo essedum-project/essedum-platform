@@ -58,7 +58,7 @@ export class JobLogsViewer {
             const jobLogsPanel = vscode.window.createWebviewPanel(
                 'jobLogs',
                 `Job Logs: ${this._pipelineName || this._internalJob || 'Jobs'}`,
-                { viewColumn: vscode.ViewColumn.Two, preserveFocus: false },
+                { viewColumn: vscode.ViewColumn.Active, preserveFocus: false },
                 {
                     enableScripts: true,
                     localResourceRoots: [this._extensionUri],
@@ -366,7 +366,7 @@ export class JobLogsViewer {
         const logPanel = vscode.window.createWebviewPanel(
             'jobLogDetails',
             `Job Log Details: ${jobId}`,
-            vscode.ViewColumn.Three,
+            vscode.ViewColumn.Active,
             {
                 enableScripts: true,
                 localResourceRoots: [this._extensionUri],
@@ -414,7 +414,7 @@ export class JobLogsViewer {
             const artifactsPanel = vscode.window.createWebviewPanel(
                 'outputArtifacts',
                 `Output Artifacts: ${jobId}`,
-                vscode.ViewColumn.Three,
+                vscode.ViewColumn.Active,
                 {
                     enableScripts: true,
                     localResourceRoots: [this._extensionUri],
@@ -1145,5 +1145,41 @@ export class JobLogsViewer {
             </div>
         </body>
         </html>`;
+    }
+
+    /**
+     * Handle messages from the panel webview
+     */
+    public async handlePanelMessage(message: any, webviewView: vscode.WebviewView): Promise<void> {
+        // Convert WebviewView to WebviewPanel-like interface for compatibility
+        const panelLike = {
+            webview: webviewView.webview
+        } as vscode.WebviewPanel;
+
+        // Reuse existing message handling logic
+        await this.handleWebviewMessage(message, panelLike);
+    }
+
+    /**
+     * Set webview content for the panel view
+     */
+    public setWebviewContent(webviewView: vscode.WebviewView): void {
+        webviewView.webview.html = this.getJobLogsHtml();
+        
+        // Initialize jobs if we have panel-like interface
+        const panelLike = {
+            webview: webviewView.webview
+        } as vscode.WebviewPanel;
+
+        this.initializeJobs(panelLike);
+    }
+
+    /**
+     * Show job logs in panel (alternative to showJobLogsViewer)
+     */
+    public async showJobLogsInPanel(): Promise<void> {
+        // This method will be called by the panel provider
+        // The actual implementation is handled by the panel provider
+        // which calls setWebviewContent
     }
 }
