@@ -35,6 +35,7 @@ export interface HttpParams {
     isCached: string;
     adapter_instance: string;
     interfacetype: string;
+    cloud_provider: string;
     type?: string;
     query?: string;
     tags?: string;
@@ -69,10 +70,15 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     private _view?: vscode.WebviewView;
     private _extensionUri: vscode.Uri;
     private _token: string = '';
+    private _isAuthenticated: boolean = false;
+    private _authService?: any; // Will be injected from extension
 
     // Configuration
     private pageNumber: number = 1;
-    private pageSize: number = 8;
+    private pageSize: number = 4;
+    private totalCount: number = 0;
+    private totalPages: number = 0;
+    private allCards: PipelineCard[] = []; // Store all cards for client-side pagination
     private organization: string = 'leo1311';
     private filter: string = '';
     private selectedAdapterType: string[] = [];
@@ -82,13 +88,23 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     private filteredCards: PipelineCard[] = [];
     private users: string[] = [];
 
-    constructor(private readonly _context: vscode.ExtensionContext, token: string) {
+    constructor(private readonly _context: vscode.ExtensionContext, token: string, authService?: any) {
         this._extensionUri = _context.extensionUri;
-        this._token = token || 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJVU0VSX1JPTEUiLCJleHAiOjE3NTc3NTMwMTB9.kwMhfD0g6_1lQQj3h4RAXHy6DwD7ZNRh7kpZ5WZVmkf3f7xZfsk-GO5MyF5vNHxUepjcOnILfFf-IfotmUPycg';
+        this.updateToken(token);
+        this._authService = authService;
     }
 
     public updateToken(token: string) {
         this._token = token;
+        this._isAuthenticated = !!token && token.trim().length > 0;
+        console.log('Token updated, authenticated:', this._isAuthenticated);
+    }
+
+    /**
+     * Set the authentication service reference
+     */
+    public setAuthService(authService: any) {
+        this._authService = authService;
     }
 
     public resolveWebviewView(
@@ -122,6 +138,21 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                     case 'refresh':
                         await this.getCards();
                         break;
+                    case 'goToPage':
+                        this.goToPage(message.page);
+                        break;
+                    case 'nextPage':
+                        this.nextPage();
+                        break;
+                    case 'previousPage':
+                        this.previousPage();
+                        break;
+                    case 'firstPage':
+                        this.goToFirstPage();
+                        break;
+                    case 'lastPage':
+                        this.goToLastPage();
+                        break;
                     case 'runScript':
                         await this.runPipelineScript(message.cardId, message.runType);
                         break;
@@ -134,42 +165,383 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                     case 'viewLogs':
                         await this.viewPipelineLogs(message.cardId);
                         break;
+                    case 'logout':
+                        await this.handleLogout();
+                        break;
+                    case 'triggerLogin':
+                        // Trigger fresh Keycloak authentication
+                        try {
+                            console.log('triggerLogin command received, forcing fresh Keycloak authentication...');
+                            
+                            // Show authentication progress in webview
+                            if (this._view) {
+                                this._view.webview.postMessage({
+                                    command: 'authenticationProgress',
+                                    message: '🔄 Clearing existing tokens and starting fresh authentication...'
+                                });
+                            }
+                            
+                            // Force fresh authentication through the auth service
+                            if (this._authService) {
+                                console.log('Using auth service for fresh authentication');
+                                const tokens = await this._authService.forceAuthentication();
+                                console.log('Fresh authentication successful, updating token');
+                                this.updateToken(tokens.access_token);
+                            } else {
+                                console.log('No auth service available, using command execution');
+                                // Fallback to command execution if auth service not available
+                                await vscode.commands.executeCommand('essedum.login');
+                            }
+                            
+                            // Show success feedback
+                            if (this._view) {
+                                this._view.webview.postMessage({
+                                    command: 'authenticationSuccess',
+                                    message: 'Authentication successful!'
+                                });
+                            }
+                            
+                            // After successful login, return to main pipeline view
+                            await this.returnToMainView();
+                            
+                            vscode.window.showInformationMessage('Successfully authenticated with Keycloak! Pipeline view loaded.');
+                            
+                        } catch (error: any) {
+                            console.error('Error executing fresh authentication:', error);
+                            
+                            // Show error state in webview
+                            if (this._view) {
+                                this._view.webview.postMessage({
+                                    command: 'authenticationError',
+                                    message: error.message || 'Fresh authentication failed'
+                                });
+                            }
+                            
+                            vscode.window.showErrorMessage(
+                                `Fresh authentication failed: ${error.message || 'Unknown error'}. Please try using Command Palette (Ctrl+Shift+P) and search for "Essedum: Login".`
+                            );
+                        }
+                        break;
                 }
             },
             undefined,
             this._context.subscriptions
         );
+    }
 
-        // Load cards on initialization
-        this.getCards();
+    /**
+     * Load initial content based on authentication state
+     */
+    private async loadInitialContent(): Promise<void> {
+        if (this._isAuthenticated) {
+            // Load main pipeline interface
+            if (this._view) {
+                this._view.webview.html = this._getHtmlForWebview(this._view.webview);
+                // Load cards after a brief delay to ensure webview is ready
+                setTimeout(() => this.getCards(), 100);
+            }
+        } else {
+            // Show authentication required page
+            this.showAuthenticationRequired();
+        }
+    }
+
+    /**
+     * Show authentication required page
+     */
+    private showAuthenticationRequired(): void {
+        if (this._view) {
+            this._view.webview.html = this.getAuthenticationRequiredHtml();
+        }
+    }
+
+    /**
+     * Get HTML for authentication required state
+     */
+    private getAuthenticationRequiredHtml(): string {
+        return `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Authentication Required</title>
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                    padding: 40px 20px;
+                    color: var(--vscode-foreground);
+                    background-color: var(--vscode-editor-background);
+                    text-align: center;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 300px;
+                }
+                .auth-container {
+                    max-width: 400px;
+                    margin: 0 auto;
+                }
+                .auth-icon {
+                    font-size: 48px;
+                    margin-bottom: 20px;
+                    color: var(--vscode-charts-blue);
+                }
+                .auth-title {
+                    font-size: 24px;
+                    font-weight: 600;
+                    margin-bottom: 16px;
+                    color: var(--vscode-editor-foreground);
+                }
+                .auth-message {
+                    margin-bottom: 24px;
+                    color: var(--vscode-descriptionForeground);
+                    line-height: 1.5;
+                }
+                .auth-button {
+                    background-color: var(--vscode-button-background);
+                    color: var(--vscode-button-foreground);
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: 500;
+                    margin: 8px;
+                    transition: background-color 0.2s;
+                }
+                .auth-button:hover {
+                    background-color: var(--vscode-button-hoverBackground);
+                }
+                .auth-button:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                }
+                .auth-steps {
+                    text-align: left;
+                    margin: 20px 0;
+                    padding: 16px;
+                    background-color: var(--vscode-editor-inactiveSelectionBackground);
+                    border-radius: 6px;
+                    border-left: 4px solid var(--vscode-charts-blue);
+                }
+                .auth-steps ol {
+                    margin: 0;
+                    padding-left: 20px;
+                }
+                .auth-steps li {
+                    margin-bottom: 8px;
+                    color: var(--vscode-editor-foreground);
+                }
+                .error-message {
+                    color: var(--vscode-errorForeground);
+                    background-color: var(--vscode-inputValidation-errorBackground);
+                    border: 1px solid var(--vscode-inputValidation-errorBorder);
+                    padding: 12px;
+                    border-radius: 4px;
+                    margin-top: 16px;
+                    display: none;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="auth-container">
+                <div class="auth-icon">🔐</div>
+                <h1 class="auth-title">Authentication Required</h1>
+                <p class="auth-message">
+                    You need to authenticate with Keycloak to access the Essedum AI Platform pipelines.
+                </p>
+                
+                <div class="auth-steps">
+                    <strong>How to authenticate:</strong>
+                    <ol>
+                        <li>Click the "Login with Keycloak" button below</li>
+                        <li>Your browser will open to the Keycloak login page</li>
+                        <li>Enter your credentials and approve the access</li>
+                        <li>Return to VS Code to see your pipelines</li>
+                    </ol>
+                </div>
+
+                <button class="auth-button" onclick="startAuthentication()" id="loginBtn">
+                    🚀 Login with Keycloak
+                </button>
+                
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+            
+            <script>
+                const vscode = acquireVsCodeApi();
+                
+                function startAuthentication() {
+                    const loginBtn = document.getElementById('loginBtn');
+                    const errorMessage = document.getElementById('errorMessage');
+                    
+                    try {
+                        // Hide any previous errors
+                        errorMessage.style.display = 'none';
+                        
+                        // Update button state
+                        loginBtn.textContent = '🔄 Authenticating...';
+                        loginBtn.disabled = true;
+                        
+                        console.log('Starting authentication flow...');
+                        
+                        // Trigger the login command
+                        vscode.postMessage({ 
+                            command: 'triggerLogin',
+                            timestamp: new Date().toISOString()
+                        });
+                        
+                    } catch (error) {
+                        console.error('Error starting authentication:', error);
+                        showError('Failed to start authentication. Please try using the Command Palette.');
+                        resetButton();
+                    }
+                }
+                
+                function showError(message) {
+                    const errorMessage = document.getElementById('errorMessage');
+                    errorMessage.textContent = message;
+                    errorMessage.style.display = 'block';
+                }
+                
+                function resetButton() {
+                    const loginBtn = document.getElementById('loginBtn');
+                    loginBtn.textContent = '🚀 Login with Keycloak';
+                    loginBtn.disabled = false;
+                }
+                
+                // Listen for messages from the extension
+                window.addEventListener('message', event => {
+                    const message = event.data;
+                    
+                    switch (message.command) {
+                        case 'authenticationProgress':
+                            const loginBtn = document.getElementById('loginBtn');
+                            loginBtn.textContent = message.message || '🔄 Authenticating...';
+                            break;
+                        case 'authenticationError':
+                            showError(message.message || 'Authentication failed');
+                            resetButton();
+                            break;
+                        case 'authenticationSuccess':
+                            const successBtn = document.getElementById('loginBtn');
+                            successBtn.textContent = '✅ Authentication Successful';
+                            successBtn.style.backgroundColor = 'var(--vscode-charts-green)';
+                            break;
+                    }
+                });
+                
+                // Check if VS Code API is available
+                if (typeof acquireVsCodeApi === 'undefined') {
+                    console.error('VS Code API not available');
+                    showError('VS Code API not available. Please try reloading the extension.');
+                }
+            </script>
+        </body>
+        </html>`;
     }
 
     private async getCards(): Promise<void> {
+        // Check authentication before proceeding
+        if (!this._isAuthenticated) {
+            console.log('Not authenticated, showing authentication required page');
+            this.showAuthenticationRequired();
+            return;
+        }
+
         this.loading = true;
         this.updateWebview();
 
         const params = this.buildHttpParams();
 
         try {
-            const response = await this.getPipelinesCards(params);
-            const data: PipelineCard[] = [];
-
-            if (response && response.length) {
-                response.forEach((element: any) => {
-                    data.push({
-                        type: element.type || 'Unknown',
-                        alias: element.alias || 'No Alias',
-                        createdDate: element.createdDate || element.created_date || new Date().toISOString(),
-                        created_by: element.created_by || element.createdBy || 'Unknown',
-                        id: element.id || element._id || Math.random().toString(36),
-                        ...element
-                    });
-                    this.users.push(element.alias);
-                });
+            // For first page, get total count to calculate proper pagination
+            if (this.pageNumber === 1) {
+                // Fetch total count first
+                this.totalCount = await this.getPipelinesCount(params);
+                this.totalPages = Math.ceil(this.totalCount / this.pageSize);
+                
+                // If total count is small (like <= 20), fetch all and do client-side pagination
+                if (this.totalCount <= 20) {
+                    console.log('Small dataset detected, using client-side pagination');
+                    
+                    // Fetch all cards with a larger page size to get all data for client-side pagination
+                    const allParams = { ...params, size: this.totalCount.toString(), page: '1' };
+                    const response = await this.getPipelinesCards(allParams);
+                    
+                    if (response && response.length) {
+                        this.allCards = response.map((element: any) => ({
+                            type: element.type || 'Unknown',
+                            alias: element.alias || 'No Alias',
+                            createdDate: element.createdDate || element.created_date || new Date().toISOString(),
+                            created_by: element.created_by || element.createdBy || 'Unknown',
+                            id: element.id || element._id || Math.random().toString(36),
+                            ...element
+                        }));
+                    }
+                    
+                    // Update total count and pages based on actual data
+                    this.totalCount = this.allCards.length;
+                    this.totalPages = Math.ceil(this.totalCount / this.pageSize);
+                    
+                    // For testing: ensure we always have at least 2 pages if we have more than 3 cards
+                    if (this.totalCount > this.pageSize) {
+                        console.log('Multiple pages detected - pagination will be shown');
+                    }
+                    
+                    console.log(`Client-side pagination: ${this.totalCount} total cards, ${this.totalPages} pages`);
+                } else {
+                    // Use server-side pagination for larger datasets
+                    console.log('Large dataset detected, using server-side pagination');
+                    const response = await this.getPipelinesCards(params);
+                    
+                    if (response && response.length) {
+                        this.allCards = response.map((element: any) => ({
+                            type: element.type || 'Unknown',
+                            alias: element.alias || 'No Alias',
+                            createdDate: element.createdDate || element.created_date || new Date().toISOString(),
+                            created_by: element.created_by || element.createdBy || 'Unknown',
+                            id: element.id || element._id || Math.random().toString(36),
+                            ...element
+                        }));
+                    }
+                }
             }
-            console.log('API Response:', data);
-            this.cards = data;
-            this.filteredCards = data;
+            
+            // Calculate which cards to show for current page
+            const startIndex = (this.pageNumber - 1) * this.pageSize;
+            const endIndex = startIndex + this.pageSize;
+            
+            if (this.totalCount <= 3) {
+                // Client-side pagination
+                this.filteredCards = this.allCards.slice(startIndex, endIndex);
+            } else {
+                // Server-side pagination - fetch the specific page
+                if (this.pageNumber > 1) {
+                    const response = await this.getPipelinesCards(params);
+                    
+                    if (response && response.length) {
+                        this.allCards = response.map((element: any) => ({
+                            type: element.type || 'Unknown',
+                            alias: element.alias || 'No Alias',
+                            createdDate: element.createdDate || element.created_date || new Date().toISOString(),
+                            created_by: element.created_by || element.createdBy || 'Unknown',
+                            id: element.id || element._id || Math.random().toString(36),
+                            ...element
+                        }));
+                    }
+                }
+                
+                // Limit to page size even for server-side pagination
+                this.filteredCards = this.allCards.slice(0, this.pageSize);
+            }
+            
+            this.cards = this.allCards; // Keep all cards for reference
+            
+            console.log(`Page ${this.pageNumber}: Showing ${this.filteredCards.length} of ${this.totalCount} total cards`);
+            console.log(`Total pages: ${this.totalPages}`);
+            
             this.loading = false;
 
             this.updateQueryParam(
@@ -180,8 +552,52 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
 
             this.updateWebview();
         } catch (error: any) {
+            console.error('Error fetching cards:', error);
             this.loading = false;
-            vscode.window.showErrorMessage(`Failed to load pipeline cards: ${error.message}`);
+            
+            // Handle authentication errors specifically
+            if (error.response && error.response.status === 403) {
+                console.error('Authentication failed (403) - token may be invalid or expired');
+                this._isAuthenticated = false; // Mark as not authenticated
+                
+                vscode.window.showErrorMessage(
+                    'Authentication failed. Your token may be invalid or expired. Please login again.',
+                    'Login Again'
+                ).then(selection => {
+                    if (selection === 'Login Again') {
+                        // Force fresh authentication
+                        vscode.commands.executeCommand('essedum.login');
+                    }
+                });
+                
+                // Show authentication required page
+                this.showAuthenticationRequired();
+                return;
+            } else if (error.response && error.response.status === 401) {
+                console.error('Unauthorized (401) - authentication required');
+                this._isAuthenticated = false; // Mark as not authenticated
+                
+                vscode.window.showErrorMessage(
+                    'Unauthorized access. Please authenticate with Keycloak.',
+                    'Login'
+                ).then(selection => {
+                    if (selection === 'Login') {
+                        vscode.commands.executeCommand('essedum.login');
+                    }
+                });
+                
+                // Show authentication required page
+                this.showAuthenticationRequired();
+                return;
+            }
+            
+            // Handle other errors
+            let errorMessage = 'Failed to fetch pipeline data';
+            if (error.message) {
+                errorMessage = error.message;
+            }
+            
+            vscode.window.showErrorMessage(`Error loading pipelines: ${errorMessage}`);
             this.updateWebview();
         }
     }
@@ -191,10 +607,13 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
             page: this.pageNumber.toString(),
             size: this.pageSize.toString(),
             project: this.organization,
-            isCached: 'true',
+            isCached: 'true',  // Enable caching for better performance
             adapter_instance: 'internal',
-            interfacetype: 'pipeline'
+            interfacetype: 'pipeline',
+            cloud_provider: 'internal'
         };
+
+        console.log(`Building HTTP params - Page: ${this.pageNumber}, Size: ${this.pageSize}`);
 
         if (this.selectedAdapterType.length >= 1) {
             params.type = this.selectedAdapterType.toString();
@@ -211,6 +630,62 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         return params;
     }
 
+    private async getPipelinesCount(params: HttpParams): Promise<number> {
+        try {
+            // Convert params to URLSearchParams for axios
+            const urlParams = new URLSearchParams();
+            Object.entries(params).forEach(([key, value]) => {
+                if (value !== undefined) {
+                    urlParams.append(key, value);
+                }
+            });
+
+            console.log('Making count API request with params:', urlParams.toString());
+
+            // Create HTTPS agent to bypass SSL certificate issues
+            const httpsAgent = new https.Agent({
+                rejectUnauthorized: false
+            });
+
+            const response = await axios.get('/api/aip/service/v1/pipelines/count', {
+                baseURL: 'http://localhost:8087',
+                params: urlParams,
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Authorization': `Bearer ${this._token}`,
+                    'Connection': 'keep-alive',
+                    'Content-Type': 'application/json',
+                    'Project': '2',
+                    'ProjectName': 'leo1311',
+                    'X-Requested-With': 'Leap',
+                    'charset': 'utf-8',
+                    'roleId': '1',
+                    'roleName': 'IT Portfolio Manager',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36'
+                },
+                httpsAgent: httpsAgent,
+                timeout: 30000
+            });
+
+            console.log('Count API Response:', response.data);
+            return response.data || 0;
+
+        } catch (error: any) {
+            console.error('Error fetching pipelines count:', error);
+            if (error.response) {
+                console.error('Response data:', error.response.data);
+                console.error('Response status:', error.response.status);
+                console.error('Response headers:', error.response.headers);
+            } else if (error.request) {
+                console.error('Request made but no response received:', error.request);
+            } else {
+                console.error('Error setting up request:', error.message);
+            }
+            throw new Error(`Failed to fetch pipelines count: ${error.message}`);
+        }
+    }
+
     private async getPipelinesCards(params: HttpParams): Promise<any> {
         try {
             // Convert params to URLSearchParams for axios
@@ -223,6 +698,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
 
             console.log('Making API request with params:', urlParams.toString());
             console.log('Using token:', this._token ? 'Token present' : 'No token');
+            console.log('Page size in URL params:', urlParams.get('size'));
 
             // Create HTTPS agent to bypass SSL certificate issues
             const httpsAgent = new https.Agent({
@@ -730,12 +1206,61 @@ if __name__ == "__main__":
         console.log(`Query params updated: page=${pageNumber}, filter=${filter}, type=${adapterType}`);
     }
 
+    public goToPage(page: number): void {
+        if (page < 1 || page > this.totalPages) {
+            return;
+        }
+        this.pageNumber = page;
+        this.getCards();
+    }
+
+    public nextPage(): void {
+        if (this.pageNumber < this.totalPages) {
+            this.pageNumber++;
+            this.getCards();
+        }
+    }
+
+    public previousPage(): void {
+        if (this.pageNumber > 1) {
+            this.pageNumber--;
+            this.getCards();
+        }
+    }
+
+    public goToFirstPage(): void {
+        this.pageNumber = 1;
+        this.getCards();
+    }
+
+    public goToLastPage(): void {
+        this.pageNumber = this.totalPages;
+        this.getCards();
+    }
+
     private updateWebview(): void {
         if (this._view) {
+            // Ensure we always have correct pagination info
+            const actualTotalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+            
+            console.log('Updating webview with:', {
+                cards: this.filteredCards.length,
+                currentPage: this.pageNumber,
+                totalPages: actualTotalPages,
+                totalCount: this.totalCount,
+                pageSize: this.pageSize
+            });
+
             this._view.webview.postMessage({
                 command: 'updateCards',
                 cards: this.filteredCards,
-                loading: this.loading
+                loading: this.loading,
+                pagination: {
+                    currentPage: this.pageNumber,
+                    totalPages: actualTotalPages,
+                    totalCount: this.totalCount,
+                    pageSize: this.pageSize
+                }
             });
         }
     }
@@ -1103,7 +1628,7 @@ if __name__ == "__main__":
                     'Sec-Fetch-Site': 'same-origin'
                 };
 
-                progress.report({ increment: 20, message: 'Starting pipeline execution...' });
+                progress.report({ increment: 3, message: 'Starting pipeline execution...' });
 
                 // Parse runType to extract type and dsName (format: "type-dsAlias")
                 const runTypeParts = runType.split('-');
@@ -1213,6 +1738,154 @@ if __name__ == "__main__":
         // Open logs in a new webview or redirect to logs view
         vscode.window.showInformationMessage(`Opening logs for pipeline: ${card.alias}`);
         // You can implement log viewer here
+    }
+
+    /**
+     * Return to main pipeline view after successful login
+     */
+    private async returnToMainView(): Promise<void> {
+        try {
+            console.log('Returning to main pipeline view...');
+            
+            // Ensure we have a valid token before proceeding
+            if (!this._isAuthenticated) {
+                console.log('Warning: returnToMainView called but not authenticated');
+                return;
+            }
+            
+            // Reset the view state
+            this.pageNumber = 1;
+            this.filter = '';
+            this.selectedAdapterType = [];
+            this.selectedTag = [];
+            
+            // Update the webview to show the main HTML template
+            if (this._view) {
+                this._view.webview.html = this._getHtmlForWebview(this._view.webview);
+                
+                // Wait a moment for the webview to load, then get cards
+                setTimeout(async () => {
+                    await this.getCards();
+                }, 500);
+            }
+            
+        } catch (error: any) {
+            console.error('Error returning to main view:', error);
+            vscode.window.showErrorMessage(`Failed to load main view: ${error.message}`);
+        }
+    }
+
+    /**
+     * Handle logout functionality
+     */
+    private async handleLogout(): Promise<void> {
+        try {
+            // Clear the token
+            this._token = '';
+            
+            // Clear any stored authentication data
+            await this._context.globalState.update('keycloak_tokens', undefined);
+            
+            // Show logout message
+            vscode.window.showInformationMessage('Logged out successfully. You will need to authenticate again to access pipelines.');
+            
+            // You could also trigger a command to restart the extension or switch to login view
+            // For now, just clear the current view
+            if (this._view) {
+                this._view.webview.html = this.getLogoutHtml();
+            }
+            
+        } catch (error: any) {
+            console.error('Error during logout:', error);
+            vscode.window.showErrorMessage(`Logout failed: ${error.message}`);
+        }
+    }
+
+    /**
+     * Get HTML for logout state
+     */
+    private getLogoutHtml(): string {
+        return `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Logged Out</title>
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                    padding: 40px;
+                    color: var(--vscode-foreground);
+                    background-color: var(--vscode-editor-background);
+                    text-align: center;
+                }
+                .logout-message {
+                    margin-bottom: 20px;
+                    color: var(--vscode-descriptionForeground);
+                }
+                .login-button {
+                    background-color: #007acc;
+                    color: #ffffff;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: 500;
+                }
+                .login-button:hover {
+                    background-color: #005a9e;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="logout-message">
+                <h2>Logged Out</h2>
+                <p>You have been logged out successfully.</p>
+                <p><strong>To access pipelines, you need to authenticate with Keycloak.</strong></p>
+                <p>Click the button below to start fresh authentication.</p>
+            </div>
+            <button class="login-button" onclick="loginAgain()" id="loginBtn">🔐 Login with Keycloak</button>
+            
+            <script>
+                const vscode = acquireVsCodeApi();
+                
+                function loginAgain() {
+                    try {
+                        console.log('Login button clicked, starting fresh Keycloak authentication...');
+                        
+                        const button = document.getElementById('loginBtn');
+                        button.textContent = '🔄 Starting fresh authentication...';
+                        button.disabled = true;
+                        
+                        // Trigger fresh authentication
+                        vscode.postMessage({ 
+                            command: 'triggerLogin',
+                            timestamp: new Date().toISOString(),
+                            forceRefresh: true
+                        });
+                        
+                    } catch (error) {
+                        console.error('Error in loginAgain function:', error);
+                        alert('Error triggering login. Please try using Command Palette: Ctrl+Shift+P -> "Essedum: Login"');
+                        
+                        // Reset button
+                        const button = document.getElementById('loginBtn');
+                        button.textContent = '🔐 Login with Keycloak';
+                        button.disabled = false;
+                    }
+                }
+                
+                // Test if vscode API is available
+                if (typeof acquireVsCodeApi === 'undefined') {
+                    console.error('VS Code API not available');
+                    document.getElementById('loginBtn').textContent = 'VS Code API Error - Use Command Palette';
+                } else {
+                    console.log('VS Code API is available');
+                }
+            </script>
+        </body>
+        </html>`;
     }
 
     /**

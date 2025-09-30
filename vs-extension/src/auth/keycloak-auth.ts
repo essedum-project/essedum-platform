@@ -286,6 +286,31 @@ export class KeycloakAuthService {
     }
 
     /**
+     * Force fresh authentication by clearing existing tokens and performing new auth
+     */
+    public async forceAuthentication(): Promise<TokenResponse> {
+        console.log('Forcing fresh authentication - clearing existing tokens');
+        
+        // Clear any existing tokens first
+        await this.clearStoredTokens();
+        
+        // Reset the auth promise to ensure fresh authentication
+        this.authPromise = undefined;
+        
+        // Check if device flow is supported
+        const supportsDeviceFlow = await this.isDeviceFlowSupported();
+        
+        if (supportsDeviceFlow) {
+            console.log('Using device flow for fresh authentication');
+            return await this.performDeviceFlow();
+        } else {
+            console.log('Device flow not supported, using manual authentication');
+            vscode.window.showWarningMessage('Device flow not supported by this Keycloak server. Using manual authentication.');
+            return await this.performManualTokenAuth();
+        }
+    }
+
+    /**
      * Perform OAuth 2.0 authentication flow
      */
     public async authenticate(): Promise<TokenResponse> {
@@ -324,6 +349,7 @@ export class KeycloakAuthService {
     private async performDeviceFlow(): Promise<TokenResponse> {
         try {
             // Step 1: Get device code
+            vscode.window.showInformationMessage('Starting authentication with Keycloak...');
             const deviceResponse = await this.initiateDeviceFlow();
             
             // Step 2: Show user code and open verification URL
@@ -333,45 +359,86 @@ export class KeycloakAuthService {
             // Copy user code to clipboard for convenience
             await vscode.env.clipboard.writeText(userCode);
             
-            // Show user code and instructions
-            const choice = await vscode.window.showInformationMessage(
-                `To authenticate, visit: ${deviceResponse.verification_uri}\n\nEnter this code: ${userCode}\n\n(Code copied to clipboard)`,
-                { modal: true },
-                'Open Browser',
-                'I\'ve completed authentication'
-            );
-            
-            if (choice === 'Open Browser') {
-                await vscode.env.openExternal(vscode.Uri.parse(verificationUri));
-            }
-            
-            if (choice !== 'Open Browser' && choice !== 'I\'ve completed authentication') {
-                throw new Error('Authentication cancelled');
-            }
+            // Show progress notification
+            const authProgress = vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: 'Keycloak Authentication',
+                cancellable: true
+            }, async (progress, token) => {
+                progress.report({ 
+                    increment: 0, 
+                    message: `Code: ${userCode} (copied to clipboard)` 
+                });
+                
+                // Show user code and instructions
+                const choice = await vscode.window.showInformationMessage(
+                    `Authentication Code: ${userCode}\n\nThis code has been copied to your clipboard.\n\nPlease visit: ${deviceResponse.verification_uri}`,
+                    { modal: true },
+                    'Open Browser & Continue',
+                    'I\'ve completed authentication'
+                );
+                
+                if (choice === 'Open Browser & Continue') {
+                    await vscode.env.openExternal(vscode.Uri.parse(verificationUri));
+                }
+                
+                if (!choice || token.isCancellationRequested) {
+                    throw new Error('Authentication cancelled by user');
+                }
 
-            // Step 3: Poll for tokens
-            vscode.window.showInformationMessage('Waiting for authentication completion...');
+                progress.report({ 
+                    increment: 30, 
+                    message: 'Waiting for authentication completion...' 
+                });
+                
+                // Step 3: Poll for tokens
+                const tokens = await this.pollForToken(
+                    deviceResponse.device_code,
+                    deviceResponse.interval,
+                    deviceResponse.expires_in
+                );
+                
+                progress.report({ 
+                    increment: 100, 
+                    message: 'Authentication successful!' 
+                });
+                
+                return tokens;
+            });
             
-            const tokens = await this.pollForToken(
-                deviceResponse.device_code,
-                deviceResponse.interval,
-                deviceResponse.expires_in
-            );
+            return await authProgress;
             
-            return tokens;
         } catch (error: any) {
             console.error('Device flow authentication error:', error);
             
             // Provide more specific error messages
-            if (error.message.includes('certificate')) {
-                throw new Error(`SSL Certificate Error: ${error.message}\n\nThis usually happens with self-signed certificates. Please ensure your Keycloak server has a valid SSL certificate or contact your administrator.`);
+            if (error.message.includes('cancelled')) {
+                throw new Error('Authentication was cancelled');
+            } else if (error.message.includes('certificate')) {
+                const continueAnyway = await vscode.window.showErrorMessage(
+                    `SSL Certificate Error: ${error.message}\n\nThis usually happens with self-signed certificates.`,
+                    'Continue Anyway',
+                    'Cancel'
+                );
+                
+                if (continueAnyway === 'Continue Anyway') {
+                    // Retry with certificate warnings disabled
+                    vscode.window.showWarningMessage('Continuing with SSL certificate verification disabled.');
+                    throw new Error('Please retry authentication. SSL verification has been adjusted.');
+                } else {
+                    throw new Error('Authentication cancelled due to SSL certificate issues');
+                }
             } else if (error.message.includes('ECONNREFUSED')) {
-                throw new Error(`Connection Error: Cannot connect to Keycloak server at ${this.config.issuerUri}. Please check the server URL and ensure it's accessible.`);
+                throw new Error(`Connection Error: Cannot connect to Keycloak server at ${this.config.issuerUri}.\n\nPlease check:\n1. Server URL is correct\n2. Server is running and accessible\n3. Network connectivity`);
             } else if (error.message.includes('ENOTFOUND')) {
-                throw new Error(`DNS Error: Cannot resolve hostname for ${this.config.issuerUri}. Please check the server URL.`);
+                throw new Error(`DNS Error: Cannot resolve hostname for ${this.config.issuerUri}.\n\nPlease check the server URL in your configuration.`);
+            } else if (error.message.includes('expired')) {
+                throw new Error('Authentication session expired. Please try again.');
+            } else if (error.message.includes('denied')) {
+                throw new Error('Access denied. Please check your permissions or try again.');
             }
             
-            throw new Error(`Device flow authentication failed: ${error.message}`);
+            throw new Error(`Authentication failed: ${error.message}`);
         }
     }
 
@@ -398,5 +465,48 @@ export class KeycloakAuthService {
         // If no valid tokens, perform authentication
         const newTokens = await this.authenticate();
         return newTokens.access_token;
+    }
+
+    /**
+     * Validate if current token is still valid
+     */
+    public async isTokenValid(): Promise<boolean> {
+        try {
+            const tokens = await this.getStoredTokens();
+            return tokens !== null && !!tokens.access_token && tokens.access_token.length > 0;
+        } catch (error) {
+            console.error('Error validating token:', error);
+            return false;
+        }
+    }
+
+    /**
+     * Get authentication status
+     */
+    public async getAuthenticationStatus(): Promise<{
+        isAuthenticated: boolean;
+        tokenExpiry?: Date;
+        needsRefresh?: boolean;
+    }> {
+        try {
+            const tokenData = await this.context.secrets.get(KeycloakAuthService.TOKEN_KEY);
+            if (!tokenData) {
+                return { isAuthenticated: false };
+            }
+
+            const tokens = JSON.parse(tokenData);
+            const now = Date.now();
+            const expirationTime = tokens.timestamp + (tokens.expires_in * 1000);
+            const refreshTime = tokens.timestamp + (tokens.expires_in * 1000) - 300000; // 5 minutes before expiry
+
+            return {
+                isAuthenticated: now < expirationTime,
+                tokenExpiry: new Date(expirationTime),
+                needsRefresh: now > refreshTime && now < expirationTime
+            };
+        } catch (error) {
+            console.error('Error getting authentication status:', error);
+            return { isAuthenticated: false };
+        }
     }
 }

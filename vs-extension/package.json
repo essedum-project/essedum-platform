@@ -20,6 +20,10 @@
       {
         "command": "essedum.login",
         "title": "Login to Essedum"
+      },
+      {
+        "command": "essedum.checkAuth",
+        "title": "Check Authentication Status"
       }
     ],
     "viewsContainers": {

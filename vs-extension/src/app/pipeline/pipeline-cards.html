@@ -10,7 +10,10 @@
     <div class="container">
         <div class="header">
             <h2>Pipelines</h2>
-            <button class="btn btn-secondary" id="refreshBtn">Refresh</button>
+            <div class="header-buttons">
+                <button class="btn btn-primary" id="refreshBtn">Refresh</button>
+                <button class="btn btn-secondary" id="logoutBtn">Logout</button>
+            </div>
         </div>
         
         <div class="search-container">
@@ -25,6 +28,21 @@
 
         <div id="cardsContainer" class="cards-container">
             <!-- Pipeline cards will be dynamically populated here -->
+        </div>
+
+        <div id="paginationContainer" class="pagination-container" style="display: none;">
+            <div class="pagination-info">
+                <span id="paginationInfo">Page 1 of 1 (0 items)</span>
+            </div>
+            <div class="pagination-controls">
+                <button class="btn btn-pagination" id="firstPageBtn" title="First Page">⏮</button>
+                <button class="btn btn-pagination" id="prevPageBtn" title="Previous Page">◀</button>
+                <span class="pagination-pages" id="paginationPages">
+                    <!-- Page numbers will be dynamically generated -->
+                </span>
+                <button class="btn btn-pagination" id="nextPageBtn" title="Next Page">▶</button>
+                <button class="btn btn-pagination" id="lastPageBtn" title="Last Page">⏭</button>
+            </div>
         </div>
 
         <div id="emptyState" class="empty-state" style="display: none;">

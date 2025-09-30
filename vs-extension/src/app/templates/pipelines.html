@@ -81,6 +81,61 @@
             max-height: 85vh;
             overflow-y: auto;
         }
+        .pagination-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+            padding: 16px;
+            border-top: 1px solid var(--vscode-panel-border);
+        }
+        .pagination-info {
+            text-align: center;
+            color: var(--vscode-descriptionForeground);
+            font-size: 14px;
+        }
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-pagination {
+            min-width: 36px;
+            height: 36px;
+            padding: 8px;
+            border: 1px solid var(--vscode-button-border, var(--vscode-contrastBorder));
+            border-radius: 4px;
+            background-color: var(--vscode-button-secondaryBackground);
+            color: var(--vscode-button-secondaryForeground);
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-pagination:hover:not(:disabled) {
+            background-color: var(--vscode-button-secondaryHoverBackground);
+        }
+        .btn-pagination:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .page-number {
+            min-width: 36px;
+            height: 36px;
+            padding: 8px;
+            border: 1px solid var(--vscode-button-border, var(--vscode-contrastBorder));
+            border-radius: 4px;
+            background-color: var(--vscode-button-secondaryBackground);
+            color: var(--vscode-button-secondaryForeground);
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .page-number:hover {
+            background-color: var(--vscode-button-secondaryHoverBackground);
+        }
+        .page-number.active {
+            background-color: var(--vscode-button-background);
+            color: var(--vscode-button-foreground);
+        }
     </style>
 </head>
 <body>
@@ -94,6 +149,21 @@
     
     <div class="pipelines-container">
         {{PIPELINES_CONTENT}}
+    </div>
+    
+    <div id="paginationContainer" class="pagination-container" style="display: none;">
+        <div class="pagination-info">
+            <span id="paginationInfo">Page 1 of 1 (0 items)</span>
+        </div>
+        <div class="pagination-controls">
+            <button class="btn-pagination" id="firstPageBtn" title="First Page">⏮</button>
+            <button class="btn-pagination" id="prevPageBtn" title="Previous Page">◀</button>
+            <span class="pagination-pages" id="paginationPages">
+                <!-- Page numbers will be dynamically generated -->
+            </span>
+            <button class="btn-pagination" id="nextPageBtn" title="Next Page">▶</button>
+            <button class="btn-pagination" id="lastPageBtn" title="Last Page">⏭</button>
+        </div>
     </div>
     
     <script>

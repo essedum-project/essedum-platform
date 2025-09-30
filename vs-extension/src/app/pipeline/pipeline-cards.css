@@ -5,11 +5,19 @@ body {
     color: var(--vscode-foreground);
     background-color: var(--vscode-editor-background);
     margin: 0;
+    font-size: 12px;
+    line-height: 1.3;
+    overflow: hidden;
+    height: 100vh;
 }
 
 .container {
     max-width: 100%;
     margin: 0 auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 /* Header Styles */
@@ -20,6 +28,7 @@ body {
     margin-bottom: 20px;
     border-bottom: 1px solid var(--vscode-panel-border);
     padding-bottom: 16px;
+    flex-shrink: 0;
 }
 
 .header h2 {
@@ -29,21 +38,32 @@ body {
     font-weight: 600;
 }
 
+.header-buttons {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
 /* Search Container */
 .search-container {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 6px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+    align-items: center;
 }
 
 .search-input {
     flex: 1;
-    padding: 10px 12px;
+    padding: 8px 12px;
     border: 1px solid var(--vscode-input-border);
-    border-radius: 6px;
+    border-radius: 4px;
     background-color: var(--vscode-input-background);
     color: var(--vscode-input-foreground);
-    font-size: 14px;
+    font-size: 12px;
+    height: 32px;
+    box-sizing: border-box;
 }
 
 .search-input:focus {
@@ -56,12 +76,17 @@ body {
     background-color: var(--vscode-button-background);
     color: var(--vscode-button-foreground);
     border: none;
-    padding: 10px 16px;
-    border-radius: 6px;
+    padding: 6px 12px;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 500;
     transition: background-color 0.2s ease;
+    height: 32px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn:hover {
@@ -73,31 +98,38 @@ body {
     cursor: not-allowed;
 }
 
+.btn-primary {
+    background-color: #007acc;
+    color: #ffffff;
+    border: 1px solid transparent;
+}
+
+.btn-primary:hover {
+    background-color: #005a9e;
+}
+
 .btn-secondary {
-    background-color: var(--vscode-button-secondaryBackground);
-    color: var(--vscode-button-secondaryForeground);
+    background-color: var(--vscode-button-secondaryBackground, #f3f3f3);
+    color: var(--vscode-button-secondaryForeground, #333333);
+    border: 1px solid var(--vscode-panel-border, #cccccc);
 }
 
 .btn-secondary:hover {
-    background-color: var(--vscode-button-secondaryHoverBackground);
-}
-
-.btn-primary {
-    background-color: var(--vscode-button-background);
-    color: var(--vscode-button-foreground);
+    background-color: var(--vscode-button-secondaryHoverBackground, #e6e6e6);
+    border-color: var(--vscode-panel-border, #b3b3b3);
 }
 
 /* Loading State */
 .loading {
     text-align: center;
-    padding: 60px 20px;
+    padding: 20px 8px;
     color: var(--vscode-descriptionForeground);
 }
 
 .spinner {
     display: inline-block;
-    width: 24px;
-    height: 24px;
+    width: 16px;
+    height: 16px;
     border: 3px solid var(--vscode-progressBar-background);
     border-radius: 50%;
     border-top-color: var(--vscode-button-background);
@@ -111,10 +143,14 @@ body {
 
 /* Cards Container */
 .cards-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
-    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 2px;
+    min-height: 0;
 }
 
 /* Pipeline Card */
@@ -122,134 +158,156 @@ body {
     background-color: var(--vscode-editor-background);
     border: 1px solid var(--vscode-panel-border);
     border-radius: 8px;
-    padding: 0;
+    padding: 16px;
+    margin-bottom: 12px;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.pipeline-card:last-child {
+    margin-bottom: 0;
 }
 
 .pipeline-card:hover {
     border-color: var(--vscode-focusBorder);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 
-/* Card Header */
-.card-header {
+/* Pipeline Header */
+.pipeline-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px;
-    background-color: var(--vscode-list-headerBackground);
-    border-bottom: 1px solid var(--vscode-panel-border);
+    margin-bottom: 6px;
+}
+
+.pipeline-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--vscode-editor-foreground);
+    line-height: 1.2;
+    flex: 1;
+    margin-right: 6px;
 }
 
 .pipeline-type-badge {
-    background-color: var(--vscode-badge-background);
-    color: var(--vscode-badge-foreground);
-    padding: 6px 12px;
-    border-radius: 16px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.created-by-avatar {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    background-color: var(--vscode-button-background);
-    color: var(--vscode-button-foreground);
-    border-radius: 50%;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: help;
-    border: 2px solid var(--vscode-panel-border);
-}
-
-/* Card Body */
-.card-body {
-    padding: 16px;
-}
-
-.pipeline-alias {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--vscode-editor-foreground);
-    margin-bottom: 16px;
-    line-height: 1.3;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    background-color: var(--vscode-badge-background, #6c757d);
+    color: var(--vscode-badge-foreground, #ffffff);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 500;
     white-space: nowrap;
+    flex-shrink: 0;
+    border: 1px solid var(--vscode-panel-border, transparent);
+}
+
+/* Pipeline Info */
+.pipeline-info {
+    margin-bottom: 8px;
 }
 
 .pipeline-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    margin: 3px 0;
+    font-size: 11px;
+    color: var(--vscode-descriptionForeground);
+    line-height: 1.3;
 }
 
-.meta-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 14px;
+.pipeline-meta:first-child {
+    margin-top: 0;
 }
 
-.meta-label {
+.pipeline-meta:last-child {
+    margin-bottom: 0;
+}
+
+.pipeline-meta strong {
     color: var(--vscode-descriptionForeground);
     font-weight: 500;
-    min-width: 60px;
 }
 
-.meta-value {
-    color: var(--vscode-editor-foreground);
-    text-align: right;
-    font-weight: 400;
-}
-
-/* Card Footer */
-.card-footer {
-    padding: 16px;
-    background-color: var(--vscode-editor-background);
-    border-top: 1px solid var(--vscode-panel-border);
-}
-
-.card-footer .btn {
+/* View Details Button */
+.view-details-btn {
     width: 100%;
-    padding: 12px;
+    padding: 6px 12px;
+    background-color: #007acc;
+    color: #ffffff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 11px;
     font-weight: 500;
+    transition: background-color 0.2s ease;
+    text-align: center;
+}
+
+.view-details-btn:hover {
+    background-color: #005a9e;
+}
+
+.view-details-btn:active {
+    background-color: #004578;
 }
 
 /* Empty State */
 .empty-state {
     text-align: center;
-    padding: 60px 20px;
+    padding: 20px 8px;
     color: var(--vscode-descriptionForeground);
 }
 
 .empty-state p {
     margin: 0;
-    font-size: 16px;
+    font-size: 12px;
 }
 
 /* Responsive Design */
 @media (max-width: 600px) {
+    body {
+        padding: 4px;
+    }
+    
     .cards-container {
         grid-template-columns: 1fr;
     }
     
     .header {
-        flex-direction: column;
-        gap: 16px;
-        align-items: stretch;
+        flex-direction: row;
+        gap: 4px;
+        align-items: center;
+        margin-bottom: 4px;
+        padding-bottom: 4px;
+        justify-content: space-between;
+    }
+    
+    .header h2 {
+        font-size: 14px;
+        flex: 1;
+        margin-right: 4px;
+    }
+    
+    .header-buttons {
+        gap: 3px;
+        flex-shrink: 0;
     }
     
     .search-container {
-        flex-direction: column;
+        flex-direction: row;
+        margin-bottom: 4px;
+        gap: 4px;
+        align-items: center;
+    }
+    
+    .search-input {
+        padding: 4px 6px;
+        font-size: 10px;
+    }
+    
+    .btn {
+        padding: 4px 6px;
+        font-size: 10px;
     }
 }
 
@@ -265,19 +323,286 @@ body {
 }
 
 /* Custom Scrollbar */
-body::-webkit-scrollbar {
-    width: 8px;
+.cards-container::-webkit-scrollbar {
+    width: 4px;
 }
 
-body::-webkit-scrollbar-track {
+.cards-container::-webkit-scrollbar-track {
     background: var(--vscode-scrollbarSlider-background);
 }
 
-body::-webkit-scrollbar-thumb {
+.cards-container::-webkit-scrollbar-thumb {
     background: var(--vscode-scrollbarSlider-activeBackground);
-    border-radius: 4px;
+    border-radius: 2px;
 }
 
-body::-webkit-scrollbar-thumb:hover {
+.cards-container::-webkit-scrollbar-thumb:hover {
     background: var(--vscode-scrollbarSlider-hoverBackground);
+}
+
+body::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
+
+/* Pagination Styles */
+.pagination-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    padding: 6px;
+    border-top: 1px solid var(--vscode-panel-border);
+    background-color: var(--vscode-editor-background);
+    flex-shrink: 0;
+}
+
+.pagination-info {
+    text-align: center;
+    color: var(--vscode-descriptionForeground);
+    font-size: 10px;
+    margin: 0;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.btn-pagination {
+    min-width: 24px;
+    height: 24px;
+    padding: 4px;
+    border: 1px solid var(--vscode-button-border, var(--vscode-contrastBorder));
+    border-radius: 3px;
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    cursor: pointer;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-pagination:hover:not(:disabled) {
+    background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+.btn-pagination:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--vscode-button-secondaryBackground);
+}
+
+.pagination-pages {
+    display: flex;
+    gap: 4px;
+    margin: 0 8px;
+}
+
+.page-number {
+    min-width: 24px;
+    height: 24px;
+    padding: 4px;
+    border: 1px solid var(--vscode-button-border, var(--vscode-contrastBorder));
+    border-radius: 3px;
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    cursor: pointer;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.page-number:hover {
+    background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+.page-number.active {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border-color: var(--vscode-button-background);
+}
+
+.page-ellipsis {
+    padding: 4px 2px;
+    color: var(--vscode-descriptionForeground);
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 600px) {
+    .pagination-container {
+        padding: 6px;
+        margin-bottom: 6px;
+    }
+    
+    .pagination-controls {
+        gap: 2px;
+    }
+    
+    .btn-pagination,
+    .page-number {
+        min-width: 20px;
+        height: 20px;
+        font-size: 9px;
+    }
+    
+    /* Pipeline cards on small screens */
+    .pipeline-card {
+        padding: 12px;
+        margin-bottom: 8px;
+        border-radius: 6px;
+    }
+    
+    .pipeline-card:last-child {
+        margin-bottom: 0;
+    }
+    
+    .cards-container {
+        gap: 8px;
+    }
+    
+    .pipeline-header {
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        justify-content: space-between;
+    }
+    
+    .pipeline-title {
+        margin-right: 0;
+        margin-bottom: 0;
+        flex: 1;
+    }
+    
+    .pipeline-type-badge {
+        flex-shrink: 0;
+    }
+}
+
+/* Extra small screens - less than 50% width */
+@media (max-width: 300px) {
+    body {
+        padding: 2px;
+        font-size: 10px;
+    }
+    
+    .container {
+        height: 100%;
+    }
+    
+    .header {
+        margin-bottom: 2px;
+        padding-bottom: 2px;
+        flex-direction: row;
+        gap: 2px;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .header h2 {
+        font-size: 12px;
+        flex: 1;
+        margin-right: 2px;
+    }
+    
+    .header-buttons {
+        gap: 1px;
+        flex-shrink: 0;
+    }
+    
+    .search-container {
+        margin-bottom: 2px;
+        gap: 2px;
+        align-items: center;
+    }
+    
+    .search-input {
+        padding: 2px 4px;
+        font-size: 9px;
+        height: 20px;
+    }
+    
+    .btn {
+        padding: 2px 3px;
+        font-size: 8px;
+        min-width: 20px;
+        height: 20px;
+    }
+    
+    .pipeline-card {
+        padding: 10px;
+        margin-bottom: 6px;
+        border-radius: 6px;
+    }
+    
+    .pipeline-card:last-child {
+        margin-bottom: 0;
+    }
+    
+    .cards-container {
+        gap: 6px;
+    }
+    
+    .pipeline-header {
+        flex-direction: row;
+        align-items: center;
+        gap: 4px;
+        justify-content: space-between;
+    }
+    
+    .pipeline-title {
+        font-size: 11px;
+        flex: 1;
+        margin-right: 4px;
+        margin-bottom: 0;
+    }
+    
+    .pipeline-type-badge {
+        flex-shrink: 0;
+        font-size: 8px;
+        padding: 1px 4px;
+    }
+    
+    .pipeline-meta {
+        font-size: 9px;
+    }
+    
+    .view-details-btn {
+        padding: 4px 8px;
+        font-size: 9px;
+    }
+    
+    .pagination-container {
+        padding: 2px;
+        margin-top: 2px;
+        margin-bottom: 4px;
+        gap: 2px;
+    }
+    
+    .pagination-info {
+        font-size: 8px;
+    }
+    
+    .btn-pagination,
+    .page-number {
+        min-width: 16px;
+        height: 16px;
+        font-size: 8px;
+        padding: 2px;
+    }
+    
+    .pagination-controls {
+        gap: 1px;
+    }
 }
