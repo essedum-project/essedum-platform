@@ -4,6 +4,7 @@ import axios from 'axios';
 import * as https from 'https';
 import * as path from 'path';
 import * as fs from 'fs';
+import { EssedumFileSystemProvider } from '../../providers/essedum-file-provider';
 
 export interface PipelineCard {
     type: string;
@@ -72,7 +73,8 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     private _token: string = '';
     private _isAuthenticated: boolean = false;
     private _authService?: any; // Will be injected from extension
-    private _fileProvider?: any; // File provider for upload operations
+    private _fileProvider?: EssedumFileSystemProvider; // File provider for upload operations
+    private _currentPipelineName?: string; // Track current pipeline for file system operations
 
     // Configuration
     private pageNumber: number = 1;
@@ -89,7 +91,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     private filteredCards: PipelineCard[] = [];
     private users: string[] = [];
 
-    constructor(private readonly _context: vscode.ExtensionContext, token: string, authService?: any, fileProvider?: any) {
+    constructor(private readonly _context: vscode.ExtensionContext, token: string, authService?: any, fileProvider?: EssedumFileSystemProvider) {
         this._extensionUri = _context.extensionUri;
         this.updateToken(token);
         this._authService = authService;
@@ -100,6 +102,11 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         this._token = token;
         this._isAuthenticated = !!token && token.trim().length > 0;
         console.log('Token updated, authenticated:', this._isAuthenticated);
+        
+        // Update token in file provider as well
+        if (this._fileProvider) {
+            this._fileProvider.updateToken(token);
+        }
     }
 
     /**
@@ -758,6 +765,9 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
             return;
         }
 
+        // Track current pipeline for file system operations
+        this._currentPipelineName = card.alias || card.name;
+
         // Show loading message
         vscode.window.withProgress({
             location: vscode.ProgressLocation.Notification,
@@ -1372,21 +1382,72 @@ if __name__ == "__main__":
 
     private async openScriptInEditor(scriptFile: ScriptFile): Promise<void> {
         try {
-            // Create a new untitled document with the script content
-            const doc = await vscode.workspace.openTextDocument({
-                content: scriptFile.content,
-                language: scriptFile.language
-            });
-
-            // Show the document in the main editor (column one)
-            await vscode.window.showTextDocument(doc, {
-                viewColumn: vscode.ViewColumn.One,
-                preserveFocus: false
-            });
-
+            // If we have the file system provider, use Essedum scheme
+            if (this._fileProvider && this._currentPipelineName) {
+                await this.openScriptAsEssedumFile(scriptFile);
+            } else {
+                // Fallback to untitled document
+                await this.openScriptAsUntitledDocument(scriptFile);
+            }
         } catch (error: any) {
+            console.error('Failed to open script:', error);
             vscode.window.showErrorMessage(`Failed to open script: ${error.message}`);
+            
+            // Try fallback method
+            try {
+                await this.openScriptAsUntitledDocument(scriptFile);
+            } catch (fallbackError: any) {
+                vscode.window.showErrorMessage(`Failed to open script with fallback: ${fallbackError.message}`);
+            }
         }
+    }
+
+    /**
+     * Open script as an Essedum file that can only be saved to the server
+     */
+    private async openScriptAsEssedumFile(scriptFile: ScriptFile): Promise<void> {
+        if (!this._fileProvider || !this._currentPipelineName) {
+            throw new Error('File provider or pipeline name not available');
+        }
+
+        // Register the file with the file system provider
+        const uri = this._fileProvider.registerFile(
+            scriptFile.fileName,
+            scriptFile.content,
+            this._currentPipelineName,
+            this.organization
+        );
+
+        // Open the document using the Essedum scheme
+        const doc = await vscode.workspace.openTextDocument(uri);
+        
+        await vscode.window.showTextDocument(doc, {
+            viewColumn: vscode.ViewColumn.One,
+            preserveFocus: false
+        });
+
+        // Show a message indicating this is an Essedum file
+        vscode.window.showInformationMessage(
+            `📝 Opened ${scriptFile.fileName} as Essedum file. Changes will be saved to the server.`,
+            'Got it!'
+        );
+    }
+
+    /**
+     * Fallback method to open script as untitled document
+     */
+    private async openScriptAsUntitledDocument(scriptFile: ScriptFile): Promise<void> {
+        // Create a new untitled document with the script content
+        const doc = await vscode.workspace.openTextDocument({
+            content: scriptFile.content,
+            language: scriptFile.language
+        });
+
+        // Show the document in the main editor (column one)
+        await vscode.window.showTextDocument(doc, {
+            viewColumn: vscode.ViewColumn.One,
+            preserveFocus: false
+        });
     }
 
     private getScriptActionsHtml(card: PipelineCard, scripts: PipelineScript): string {
