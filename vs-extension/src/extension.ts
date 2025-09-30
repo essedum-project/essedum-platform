@@ -2,6 +2,7 @@
 import * as vscode from 'vscode';
 import { PipelineCardsProvider } from './app/pipeline/pipeline-cards';
 import { KeycloakAuthService, KeycloakConfig } from './auth/keycloak-auth';
+import { EssedumFileSystemProvider } from './providers/essedum-file-provider';
 
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
@@ -17,6 +18,17 @@ export function activate(context: vscode.ExtensionContext) {
 	// Create authentication service
 	const authService = new KeycloakAuthService(keycloakConfig, context);
 	
+	// Create Essedum file system provider
+	const essedumFileProvider = new EssedumFileSystemProvider('');
+	
+	// Register the Essedum file system provider
+	context.subscriptions.push(
+		vscode.workspace.registerFileSystemProvider('essedum', essedumFileProvider, { 
+			isCaseSensitive: true,
+			isReadonly: false  // Allow editing - files saved only during pipeline execution
+		})
+	);
+	
 	// Create pipeline cards provider (this will handle all pipeline logic)
 	let pipelineCardsProvider: PipelineCardsProvider;
 	
@@ -24,12 +36,13 @@ export function activate(context: vscode.ExtensionContext) {
 	const initializePipelineProvider = async () => {
 		try {
 			const accessToken = await authService.getAccessToken();
-			pipelineCardsProvider = new PipelineCardsProvider(context, accessToken, authService);
+			pipelineCardsProvider = new PipelineCardsProvider(context, accessToken, authService, essedumFileProvider);
+			essedumFileProvider.updateToken(accessToken);
 			return pipelineCardsProvider;
 		} catch (error) {
 			console.error('Failed to initialize pipeline provider:', error);
 			// Create provider with empty token, it will be updated when user logs in
-			pipelineCardsProvider = new PipelineCardsProvider(context, '', authService);
+			pipelineCardsProvider = new PipelineCardsProvider(context, '', authService, essedumFileProvider);
 			return pipelineCardsProvider;
 		}
 	};
@@ -82,6 +95,31 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 	
+	// Register command to run pipeline (can be called from file provider)
+	context.subscriptions.push(
+		vscode.commands.registerCommand('essedum.runPipeline', async (pipelineName?: string) => {
+			if (pipelineCardsProvider) {
+				// If pipeline name provided, try to find and run it
+				if (pipelineName) {
+					// This would need to be implemented in the pipeline provider
+					vscode.window.showInformationMessage(
+						`To run pipeline "${pipelineName}", use the Run Pipeline button in the script viewer.`,
+						'Open Pipelines'
+					).then(selection => {
+						if (selection === 'Open Pipelines') {
+							vscode.commands.executeCommand('workbench.view.extension.essedum-explorer');
+						}
+					});
+				} else {
+					// Open the pipelines view
+					vscode.commands.executeCommand('workbench.view.extension.essedum-explorer');
+				}
+			} else {
+				vscode.window.showErrorMessage('Please login first to run pipelines.');
+			}
+		})
+	);
+	
 	context.subscriptions.push(
 		vscode.commands.registerCommand('essedum.login', async () => {
 			try {
@@ -119,9 +157,11 @@ export function activate(context: vscode.ExtensionContext) {
 				// Update the pipeline provider with new token
 				if (pipelineCardsProvider) {
 					pipelineCardsProvider.updateToken(accessToken);
+					essedumFileProvider.updateToken(accessToken);
 				} else {
 					// Re-initialize the provider if it doesn't exist
-					pipelineCardsProvider = new PipelineCardsProvider(context, accessToken, authService);
+					pipelineCardsProvider = new PipelineCardsProvider(context, accessToken, authService, essedumFileProvider);
+					essedumFileProvider.updateToken(accessToken);
 					context.subscriptions.push(
 						vscode.window.registerWebviewViewProvider(
 							'essedum-sidebar',
@@ -169,6 +209,74 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 				
 				throw error; // Re-throw so the pipeline provider can handle it
+			}
+		})
+	);
+	
+	// Register debug command to test upload endpoints
+	context.subscriptions.push(
+		vscode.commands.registerCommand('essedum.debugUpload', async () => {
+			try {
+				const accessToken = await authService.getAccessToken();
+				
+				// Test a simple API endpoint first
+				const axios = require('axios');
+				const https = require('https');
+				
+				const httpsAgent = new https.Agent({
+					rejectUnauthorized: false
+				});
+				
+				const headers = {
+					'Accept': 'application/json, text/plain, */*',
+					'Authorization': `Bearer ${accessToken}`,
+					'Project': '2',
+					'ProjectName': 'leo1311',
+					'X-Requested-With': 'Leap',
+					'User-Agent': 'axios/1.11.0'
+				};
+				
+				// Test endpoints
+				const testEndpoints = [
+					'/api/aip/file/write/LEORGNGS24627/leo1311',
+					'/api/aip/file/upload/LEORGNGS24627/leo1311',
+					'/file/pipeline/native/upload/LEORGNGS24627/leo1311',
+					'/api/aip/service/v1/files/upload/LEORGNGS24627/leo1311'
+				];
+				
+				const results: string[] = [];
+				
+				for (const endpoint of testEndpoints) {
+					try {
+						// Create a simple FormData for testing
+						const FormData = require('form-data');
+						const formData = new FormData();
+						formData.append('scriptFile', 'print("test")', 'test.py');
+						formData.append('filetype', 'Python3');
+						formData.append('pipelineName', 'LEORGNGS24627');
+						formData.append('organization', 'leo1311');
+						
+						const response = await axios.post(endpoint, formData, {
+							baseURL: 'http://localhost:8087',
+							headers: { ...headers, ...formData.getHeaders() },
+							httpsAgent: httpsAgent,
+							timeout: 10000
+						});
+						
+						results.push(`✅ ${endpoint}: ${response.status} - ${response.statusText}`);
+					} catch (error: any) {
+						const status = error.response?.status || 'NO_RESPONSE';
+						const statusText = error.response?.statusText || error.message;
+						results.push(`❌ ${endpoint}: ${status} - ${statusText}`);
+					}
+				}
+				
+				// Show results
+				const message = `Upload Endpoint Test Results:\n\n${results.join('\n')}`;
+				vscode.window.showInformationMessage(message, { modal: true });
+				
+			} catch (error: any) {
+				vscode.window.showErrorMessage(`Debug test failed: ${error.message}`);
 			}
 		})
 	);

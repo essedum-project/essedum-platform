@@ -72,6 +72,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     private _token: string = '';
     private _isAuthenticated: boolean = false;
     private _authService?: any; // Will be injected from extension
+    private _fileProvider?: any; // File provider for upload operations
 
     // Configuration
     private pageNumber: number = 1;
@@ -88,10 +89,11 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     private filteredCards: PipelineCard[] = [];
     private users: string[] = [];
 
-    constructor(private readonly _context: vscode.ExtensionContext, token: string, authService?: any) {
+    constructor(private readonly _context: vscode.ExtensionContext, token: string, authService?: any, fileProvider?: any) {
         this._extensionUri = _context.extensionUri;
         this.updateToken(token);
         this._authService = authService;
+        this._fileProvider = fileProvider;
     }
 
     public updateToken(token: string) {
@@ -1593,6 +1595,309 @@ if __name__ == "__main__":
         </html>`;
     }
 
+    // Get streaming service by name
+    private async getStreamingServicesByName(name: string, org?: string): Promise<any> {
+        const organization = org || this.organization;
+        const httpsAgent = new https.Agent({
+            rejectUnauthorized: false
+        });
+
+        const headers = {
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Authorization': `Bearer ${this._token}`,
+            'Content-Type': 'application/json',
+            'Project': '2',
+            'ProjectName': organization,
+            'X-Requested-With': 'Leap',
+            'roleId': '1',
+            'roleName': 'IT Portfolio Manager',
+            'Referer': 'http://localhost:8087/',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin'
+        };
+
+        try {
+            const response = await axios.get(`/api/aip/service/v1/streamingServices/${name}/${organization}`, {
+                baseURL: 'http://localhost:8087',
+                headers: headers,
+                httpsAgent: httpsAgent,
+                timeout: 30000
+            });
+
+            console.log('Streaming service retrieved:', response.data);
+            return response.data;
+        } catch (error: any) {
+            console.error('Failed to get streaming service:', error);
+            throw error;
+        }
+    }
+
+    // Angular-pattern helper methods for pipeline execution
+    private async savePipelineJson(pipelineName: string, jsonContent: any): Promise<void> {
+        if (!this._fileProvider) {
+            throw new Error('File provider not available');
+        }
+
+        const httpsAgent = new https.Agent({
+            rejectUnauthorized: false
+        });
+
+        const headers = {
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Authorization': `Bearer ${this._token}`,
+            'Content-Type': 'multipart/form-data',
+            'Project': '2',
+            'ProjectName': this.organization,
+            'X-Requested-With': 'Leap',
+            'roleId': '1',
+            'roleName': 'IT Portfolio Manager',
+            'Referer': 'http://localhost:8087/',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin',
+            'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"'
+        };
+
+        const formData = new FormData();
+        const jsonBlob = new Blob([JSON.stringify(jsonContent, null, 2)], { type: 'application/json' });
+        formData.append('scriptFile', jsonBlob, `${pipelineName}.json`);
+        formData.append('filetype', 'json');
+        formData.append('pipelineName', pipelineName);
+        formData.append('organization', this.organization);
+
+        const response = await axios.post(`/api/aip/file/create/${pipelineName}/${this.organization}/json?file=${pipelineName}.json`, formData, {
+            baseURL: 'http://localhost:8087',
+            headers: headers,
+            httpsAgent: httpsAgent,
+            timeout: 30000
+        });
+
+        console.log('JSON file saved successfully:', response.data);
+    }
+
+    private async generatePipelineScript(pipelineName: string): Promise<string> {
+        const httpsAgent = new https.Agent({
+            rejectUnauthorized: false
+        });
+
+        const headers = {
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Authorization': `Bearer ${this._token}`,
+            'Content-Type': 'application/json',
+            'Project': '2',
+            'ProjectName': this.organization,
+            'X-Requested-With': 'Leap',
+            'roleId': '1',
+            'roleName': 'IT Portfolio Manager',
+            'Referer': 'http://localhost:8087/',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin'
+        };
+
+        // This method would generate the script - implementation depends on your script generation logic
+        // For now, return a simple script template
+        const generatedScript = `# Generated script for ${pipelineName}
+# Organization: ${this.organization}
+# Generated at: ${new Date().toISOString()}
+
+print("Pipeline ${pipelineName} execution started")
+# Add your pipeline logic here
+print("Pipeline ${pipelineName} execution completed")
+`;
+
+        console.log('Script generated for pipeline:', pipelineName);
+        return generatedScript;
+    }
+
+    private async triggerPipelineExecution(pipelineName: string, runtime: string = 'Local'): Promise<any> {
+        const httpsAgent = new https.Agent({
+            rejectUnauthorized: false
+        });
+
+        const headers = {
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Authorization': `Bearer ${this._token}`,
+            'Content-Type': 'application/json',
+            'Project': '2',
+            'ProjectName': this.organization,
+            'X-Requested-With': 'Leap',
+            'roleId': '1',
+            'roleName': 'IT Portfolio Manager',
+            'Referer': 'http://localhost:8087/',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin',
+            'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"'
+        };
+
+        const requestBody = {
+            pipelineName: pipelineName,
+            organization: this.organization,
+            runtime: runtime
+        };
+
+        const response = await axios.post(`/api/aip/service/v1/pipeline/run-pipeline/NativeScript/${pipelineName}/${this.organization}/${runtime}`, requestBody, {
+            baseURL: 'http://localhost:8087',
+            headers: headers,
+            httpsAgent: httpsAgent,
+            timeout: 60000
+        });
+
+        console.log('Pipeline execution triggered:', response.data);
+        return response.data;
+    }
+
+    private async updateStreamingService(streamItem: any): Promise<void> {
+        const httpsAgent = new https.Agent({
+            rejectUnauthorized: false
+        });
+
+        const headers = {
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Authorization': `Bearer ${this._token}`,
+            'Connection': 'keep-alive',
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Origin': 'http://localhost:8087',
+            'Project': '2',
+            'ProjectName': this.organization,
+            'Referer': 'http://localhost:8087/',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+            'X-Requested-With': 'Leap',
+            'roleId': '1',
+            'roleName': 'IT Portfolio Manager',
+            'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"'
+        };
+
+        // Build the exact payload structure from the curl command
+        const requestBody = {
+            cid: streamItem.cid || 22,
+            alias: streamItem.alias || streamItem.name,
+            name: streamItem.name,
+            description: streamItem.description || '',
+            job_id: streamItem.job_id || null,
+            json_content: streamItem.json_content || JSON.stringify({
+                elements: [{
+                    attributes: {
+                        filetype: 'Python3',
+                        files: [`${streamItem.name}_${this.organization}.py`],
+                        arguments: [{
+                            name: 'dataset',
+                            value: 'LEOTST_P68920',
+                            type: 'Dataset',
+                            alias: 'LEOTST_P68920',
+                            index: '1'
+                        }],
+                        dataset: [],
+                        usedSecrets: []
+                    }
+                }],
+                environment: [],
+                default_runtime: {
+                    dsAlias: 'Sample-Remote',
+                    dsName: 'LEOMN-RM22869',
+                    type: 'REMOTE'
+                }
+            }),
+            type: streamItem.type || 'NativeScript',
+            organization: this.organization,
+            created_date: streamItem.created_date || new Date().toISOString(),
+            created_by: streamItem.created_by || 'demouser',
+            tags: streamItem.tags || null,
+            version: streamItem.version || 1,
+            interfacetype: streamItem.interfacetype || 'pipeline',
+            is_template: streamItem.is_template || false,
+            is_app: streamItem.is_app || false
+        };
+
+        const response = await axios.put('/api/aip/service/v1/streamingServices/update', requestBody, {
+            baseURL: 'http://localhost:8087',
+            headers: headers,
+            httpsAgent: httpsAgent,
+            timeout: 30000
+        });
+
+        console.log('Streaming service updated:', response.data);
+    }
+
+    // Angular pattern runPipeline method - matches Angular implementation exactly
+    private async runPipeline(
+        alias: string,
+        cname: string,
+        pipelineType: string,
+        isLocal: string = 'true',
+        datasource: string = '',
+        params: string = '{}',
+        workerlogId: string = ''
+    ): Promise<any> {
+        const org = this.organization;
+        const offset = new Date().getTimezoneOffset();
+        
+        const httpsAgent = new https.Agent({
+            rejectUnauthorized: false
+        });
+
+        const headers = {
+            'Accept': 'text/plain, */*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Authorization': `Bearer ${this._token}`,
+            'Project': '2',
+            'ProjectName': this.organization,
+            'X-Requested-With': 'Leap',
+            'roleId': '1',
+            'roleName': 'IT Portfolio Manager',
+            'Referer': 'http://localhost:8087/',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin',
+            'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"'
+        };
+
+        // Build URL matching Angular pattern: /service/v1/pipeline/run-pipeline/{pipelineType}/{cname}/{org}/{isLocal}?offset={offset}
+        const url = `/api/aip/service/v1/pipeline/run-pipeline/${pipelineType}/${cname}/${org}/${isLocal}?offset=${offset}`;
+        
+        // Build query parameters
+        const queryParams = new URLSearchParams();
+        queryParams.append('param', params);
+        queryParams.append('alias', alias);
+        if (datasource) {
+            queryParams.append('datasource', datasource);
+        }
+        if (workerlogId) {
+            queryParams.append('workerlogId', workerlogId);
+        }
+
+        const fullUrl = `${url}&${queryParams.toString()}`;
+
+        const response = await axios.get(fullUrl, {
+            baseURL: 'http://localhost:8087',
+            headers: headers,
+            httpsAgent: httpsAgent,
+            timeout: 60000,
+            responseType: 'text'
+        });
+
+        console.log('Pipeline execution result:', response.data);
+        return response.data;
+    }
+
     private async runPipelineScript(cardId: string, runType: string): Promise<void> {
         const card = this.cards.find(c => c.id === cardId);
         if (!card) {
@@ -1600,71 +1905,82 @@ if __name__ == "__main__":
             return;
         }
 
+        const pipelineName = card.alias || card.name;
+        
         try {
-            vscode.window.withProgress({
+            await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
-                title: `Running pipeline ${card.alias}...`,
+                title: `Running pipeline ${pipelineName}...`,
                 cancellable: false
             }, async (progress) => {
-                const httpsAgent = new https.Agent({
-                    rejectUnauthorized: false
-                });
-
-                const headers = {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Authorization': `Bearer ${this._token}`,
-                    'Connection': 'keep-alive',
-                    'Content-Type': 'application/json',
-                    'Project': '2',
-                    'ProjectName': this.organization,
-                    'X-Requested-With': 'Leap',
-                    'charset': 'utf-8',
-                    'roleId': '1',
-                    'roleName': 'IT Portfolio Manager',
-                    'Referer': 'http://localhost:8087/',
-                    'Sec-Fetch-Dest': 'empty',
-                    'Sec-Fetch-Mode': 'cors',
-                    'Sec-Fetch-Site': 'same-origin'
-                };
-
-                progress.report({ increment: 3, message: 'Starting pipeline execution...' });
-
-                // Parse runType to extract type and dsName (format: "type-dsAlias")
+                
+                // Parse runType to extract runtime info (format: "type-dsAlias")
                 const runTypeParts = runType.split('-');
                 const runtimeType = runTypeParts[0] || 'Local';
                 const dsName = runTypeParts[1] || '';
 
-                // Use the correct API endpoint format based on Angular code
-                const response = await axios.post('/api/aip/service/v1/jobs/run-pipeline', {
-                    alias: card.alias || card.name,
-                    name: card.alias || card.name,
-                    type: 'DragAndDrop', // or 'Script' based on your pipeline type
-                    runtimeType: runtimeType,
+                // Get streaming service data
+                progress.report({ increment: 10, message: 'Getting streaming service data...' });
+                const streamItem = await this.getStreamingServicesByName(card.name, this.organization);
+
+                // Step 1: Save Pipeline JSON (Angular saveJson() pattern)
+                progress.report({ increment: 25, message: 'Saving pipeline configuration...' });
+                const pipelineConfig = {
+                    name: pipelineName,
+                    alias: card.alias,
+                    organization: this.organization,
+                    runtime: runtimeType,
                     dsName: dsName,
-                    scriptType: 'generated'
-                }, {
-                    baseURL: 'http://localhost:8087',
-                    headers: headers,
-                    httpsAgent: httpsAgent,
-                    timeout: 60000
-                });
+                    scriptType: 'generated',
+                    createdAt: new Date().toISOString(),
+                    metadata: card
+                };
+                
+                await this.savePipelineJson(pipelineName, pipelineConfig);
 
-                progress.report({ increment: 100, message: 'Pipeline started!' });
+                // Step 2: Generate Pipeline Script (Angular generateScript() pattern)
+                progress.report({ increment: 45, message: 'Generating pipeline script...' });
+                const generatedScript = await this.generatePipelineScript(pipelineName);
+                console.log('Generated script length:', generatedScript.length);
 
-                const jobId = response.data.jobId || response.data.id;
+                // Step 3: Trigger Pipeline Execution (Angular triggerEvent() pattern)
+                progress.report({ increment: 75, message: 'Triggering pipeline execution...' });
+                // Angular pattern: this.service.runPipeline(streamItem.alias || streamItem.name, streamItem.name, passType, selectedRunType.type, selectedRunType.dsName, "generated")
+                const pipelineAlias = streamItem.alias || streamItem.name;
+                const pipelineNameForExecution = streamItem.name;
+                const passType = 'Script'; // Pipeline type
+                const selectedRunType = { type: runtimeType === 'Local' ? 'true' : 'false', dsName: dsName };
+                
+                const executionResult = await this.runPipeline(
+                    pipelineAlias,                    // alias
+                    pipelineNameForExecution,         // cname
+                    passType,                         // pipelineType
+                    selectedRunType.type,             // isLocal
+                    selectedRunType.dsName,           // datasource
+                    'generated',                      // params
+                    ''                                // workerlogId
+                );
+
+                // Step 4: Update Streaming Service (Angular updateStreamingService() pattern)
+                progress.report({ increment: 90, message: 'Updating streaming service...' });
+                await this.updateStreamingService(streamItem);
+
+                progress.report({ increment: 100, message: 'Pipeline started successfully!' });
+
+                // Handle execution result
+                const jobId = executionResult.jobId || executionResult.id;
                 if (jobId) {
                     // Create job status object
                     const jobStatus: JobStatus = {
                         jobId: jobId,
-                        correlationId: response.data.correlationId,
-                        streamingService: card.alias || card.name,
+                        correlationId: executionResult.correlationId,
+                        streamingService: pipelineName,
                         jobStatus: 'RUNNING',
                         type: runtimeType,
                         runtime: dsName,
                         submittedBy: 'Current User',
                         submittedOn: new Date().toISOString(),
-                        pipelineName: card.alias || card.name,
+                        pipelineName: pipelineName,
                         organization: this.organization,
                         logs: ''
                     };
@@ -1696,6 +2012,8 @@ if __name__ == "__main__":
                 }
             } else if (error.request) {
                 errorMessage = 'Network error - could not reach the server';
+            } else {
+                errorMessage = `Request setup error: ${error.message}`;
             }
 
             vscode.window.showErrorMessage(`${errorMessage}: ${error.message}`);

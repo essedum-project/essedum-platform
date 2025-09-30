@@ -24,6 +24,10 @@
       {
         "command": "essedum.checkAuth",
         "title": "Check Authentication Status"
+      },
+      {
+        "command": "essedum.debugUpload",
+        "title": "Debug Upload Endpoints"
       }
     ],
     "viewsContainers": {
