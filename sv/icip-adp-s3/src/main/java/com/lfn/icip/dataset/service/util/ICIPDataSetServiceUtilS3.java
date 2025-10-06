@@ -155,7 +155,11 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
             String uploadFile = attributes.optString(UPLOAD_FILE_KEY);
             String url = connectionDetails.optString("url");
             if (uploadFile != null && !uploadFile.isBlank()) {
-                upload(dataset, uploadFile);
+                if (url.contains("aws")) {
+                    uploadFileToS3(dataset, uploadFile, buildS3Client(dataset));
+                } else {
+                    upload(dataset, uploadFile);
+                }
             }
 
             if (url.contains("blob")) {
@@ -250,13 +254,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
      */
     private boolean connectAWS(ICIPDataset dataset) {
         try {
-            JSONObject connectionDetails = new JSONObject(dataset.getDatasource().getConnectionDetails());
-            String accessKey = connectionDetails.optString(ACCESS_KEY);
-            String secretKey = connectionDetails.optString(SECRET_KEY);
-            String region = connectionDetails.optString(REGION_KEY);
-
-            String sessionToken = connectionDetails.optString(SESSION_TOKEN, "IQoJb3JpZ2luX2VjEPb//////////wEaCXVzLWVhc3QtMSJIMEYCIQD57GfR4hIZtF2VgHbaga8g4Yg5BK0dfLrQzgR/pL1UxQIhAIevdUGPRO0zriZpB9BfUvEBpipEJrx3ddSVAXShochKKp0DCI///////////wEQABoMMTAyNTg2OTk4MTU4Igw4MbprJq3OWtC10roq8QKeVLHLoYPCG+GP5BxNvydHGjuvcFpNlb9r1XItsaqL+XhM3cGCTN/NUCNKjTyCWINLjhBpmflNfBrsy+stlrmo7gPNvm1308yJ9q3jHLsvM5E3SpdKk9xYGF84KNwlDJQkuG+fiFl6pnGOqKNXA4LPnEU5t2EzXqssvJfDBHjck5+1h/L0E7cEzYu+R2udTLnvxOiH8o7lE3iX5cPygr9gd6EhqqWspVnSnlpOSpXXs9Vx9Rp4cf/0BGdxMsXoZque5O+BWCYX/jnWYsVFnr0qC9yb+V/QL5kGqPPfK5nUWz4EJSDXjFVEe+aLWqNNdHYv6Wt1orFe49qRWpHFGSlx2Buo0FNlM+2E3+tOcTaX4jC1eQ3krFwCU2Hkw/Bc8TB7OlFxsb9dGCufQbCsWVOKMhZ0Q8sfqPE97dhP6X32vbQ4az3JWS0I3jCJkSR0Dxlz0qhl2kB/uzg5WyMKpT72iQ5MaF0fgTvM2RzzXsSuSVEwyJGPxwY6pQGGKg7lpiBatm5sSJ9j00RVMONc5R+Hb54Iu+LiXYYVo00RRHa3TnyV5JfK4pS++ltKdQE8ti+ivytOnGxlhTHuqDguHmqSbkADoLiy/TVfXGKD+qp3ALfoshV4p9YQI/oYPuLDkGoLUVhgLJqUy9gtlXRvBc96XW7TbJCM9qmL+UepdSXIYPb3EFRp9+nhyjwXCP/I+r67MQla43lE2aion1Sx4Zo="); // optional
-            S3Client s3Client = buildS3Client(accessKey, secretKey, sessionToken, region);
+            S3Client s3Client = buildS3Client(dataset);
 
             logger.info("Attempting to list S3 buckets to verify connection...");
             ListBucketsResponse bucketsResponse = s3Client.listBuckets();
@@ -610,7 +608,14 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 
     }
 
-    private S3Client buildS3Client(String accessKey, String secretKey, String sessionToken, String region) {
+    private S3Client buildS3Client(ICIPDataset dataset) {
+        JSONObject connectionDetails = new JSONObject(dataset.getDatasource().getConnectionDetails());
+        String accessKey = connectionDetails.optString(ACCESS_KEY);
+        String secretKey = connectionDetails.optString(SECRET_KEY);
+        String region = connectionDetails.optString(REGION_KEY);
+
+        String sessionToken = connectionDetails.optString(SESSION_TOKEN, "IQoJb3JpZ2luX2VjEPb//////////wEaCXVzLWVhc3QtMSJIMEYCIQD57GfR4hIZtF2VgHbaga8g4Yg5BK0dfLrQzgR/pL1UxQIhAIevdUGPRO0zriZpB9BfUvEBpipEJrx3ddSVAXShochKKp0DCI///////////wEQABoMMTAyNTg2OTk4MTU4Igw4MbprJq3OWtC10roq8QKeVLHLoYPCG+GP5BxNvydHGjuvcFpNlb9r1XItsaqL+XhM3cGCTN/NUCNKjTyCWINLjhBpmflNfBrsy+stlrmo7gPNvm1308yJ9q3jHLsvM5E3SpdKk9xYGF84KNwlDJQkuG+fiFl6pnGOqKNXA4LPnEU5t2EzXqssvJfDBHjck5+1h/L0E7cEzYu+R2udTLnvxOiH8o7lE3iX5cPygr9gd6EhqqWspVnSnlpOSpXXs9Vx9Rp4cf/0BGdxMsXoZque5O+BWCYX/jnWYsVFnr0qC9yb+V/QL5kGqPPfK5nUWz4EJSDXjFVEe+aLWqNNdHYv6Wt1orFe49qRWpHFGSlx2Buo0FNlM+2E3+tOcTaX4jC1eQ3krFwCU2Hkw/Bc8TB7OlFxsb9dGCufQbCsWVOKMhZ0Q8sfqPE97dhP6X32vbQ4az3JWS0I3jCJkSR0Dxlz0qhl2kB/uzg5WyMKpT72iQ5MaF0fgTvM2RzzXsSuSVEwyJGPxwY6pQGGKg7lpiBatm5sSJ9j00RVMONc5R+Hb54Iu+LiXYYVo00RRHa3TnyV5JfK4pS++ltKdQE8ti+ivytOnGxlhTHuqDguHmqSbkADoLiy/TVfXGKD+qp3ALfoshV4p9YQI/oYPuLDkGoLUVhgLJqUy9gtlXRvBc96XW7TbJCM9qmL+UepdSXIYPb3EFRp9+nhyjwXCP/I+r67MQla43lE2aion1Sx4Zo="); // optional
+
         AwsSessionCredentials sessionCredentials = AwsSessionCredentials.create(accessKey, secretKey, sessionToken);
 
         ApacheHttpClient apacheHttpClient = (ApacheHttpClient) ApacheHttpClient.builder()

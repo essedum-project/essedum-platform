@@ -69,8 +69,6 @@ import com.azure.core.http.HttpClient;
 import com.azure.core.http.okhttp.OkHttpAsyncHttpClientBuilder;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.lfn.ai.comm.lib.util.annotation.EssedumProperty;
 import com.lfn.ai.comm.lib.util.exceptions.EssedumException;
 import com.lfn.icip.dataset.model.ICIPDatasource;
@@ -79,6 +77,12 @@ import io.minio.MinioClient;
 import io.minio.Result;
 import io.minio.messages.Item;
 import okhttp3.OkHttpClient;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
+
 @Component("s3source")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
@@ -88,53 +92,92 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
 	@EssedumProperty("icip.certificateCheck")
 	private String certificateCheck;
 
-	/**
-	 * Test connection.
-	 *
-	 * @param datasource the datasource
-	 * @return true, if successful
-	 * @throws UnknownHostException
-	 */
-	@Override
-	public boolean testConnection(ICIPDatasource datasource) {
-		JSONObject connectionDetails = new JSONObject(datasource.getConnectionDetails());
-		String accessKey = connectionDetails.optString("accessKey");
-		String secretKey = connectionDetails.optString("secretKey");
-		String region = connectionDetails.optString("Region");
-		String url = connectionDetails.optString("url");
-		try {
-			TrustManager[] trustAllCerts = getTrustAllCerts();
-			SSLContext sslContext = getSslContext(trustAllCerts);
-			if (sslContext != null) {
-				OkHttpClient customHttpClient = new OkHttpClient.Builder()
-						.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0])
-						.hostnameVerifier((hostname, session) -> true).build();
-				if (url.contains("blob")) {
-					String connectStr = String.format(
-							"DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s;EndpointSuffix=core.windows.net",
-							accessKey, secretKey);
-					HttpClient httpClient = new OkHttpAsyncHttpClientBuilder(customHttpClient).build();
-					BlobServiceClient client = new BlobServiceClientBuilder().httpClient(httpClient)
-							.connectionString(connectStr).buildClient();
-					client.listBlobContainers();
-					return true;
-				} else {
-					// Build the MinioClient with the provided connection details
-					MinioClient minioClient = MinioClient.builder().endpoint(url).credentials(accessKey, secretKey)
-							.httpClient(customHttpClient).build();
+    /**
+     * Test connection.
+     *
+     * @param datasource the datasource
+     * @return true, if successful
+     * @throws UnknownHostException
+     */
+    @Override
+    public boolean testConnection(ICIPDatasource datasource) {
+        JSONObject connectionDetails = new JSONObject(datasource.getConnectionDetails());
+        String accessKey = connectionDetails.optString("accessKey");
+        String secretKey = connectionDetails.optString("secretKey");
+        String region = connectionDetails.optString("Region");
+        String url = connectionDetails.optString("url");
 
-					minioClient.listBuckets();
-					return true;
-				}
-			} else {
-				// Handle the case where sslContext is null
-				throw new EssedumException("SSLContext could not be initialized");
-			}
-		} catch (Exception ex) {
-			logger.error("Connection test failed: " + ex.getMessage(), ex);
-		}
-		return false;
-	}
+        logger.info("Testing connection for datasource with URL: {}", url);
+        logger.debug("Extracted credentials - AccessKey: {}, Region: {}", accessKey, region);
+
+        try {
+            TrustManager[] trustAllCerts = getTrustAllCerts();
+            SSLContext sslContext = getSslContext(trustAllCerts);
+
+            if (sslContext == null) {
+                logger.error("SSLContext initialization failed");
+                throw new EssedumException("SSLContext could not be initialized");
+            }
+
+            logger.debug("SSLContext initialized successfully");
+
+            OkHttpClient customHttpClient = new OkHttpClient.Builder()
+                    .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0])
+                    .hostnameVerifier((hostname, session) -> true)
+                    .build();
+
+            if (url.contains("blob")) {
+                logger.info("Detected Azure Blob Storage connection");
+                String connectStr = String.format(
+                        "DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s;EndpointSuffix=core.windows.net",
+                        accessKey, secretKey);
+
+                HttpClient httpClient = new OkHttpAsyncHttpClientBuilder(customHttpClient).build();
+                BlobServiceClient client = new BlobServiceClientBuilder()
+                        .httpClient(httpClient)
+                        .connectionString(connectStr)
+                        .buildClient();
+
+                client.listBlobContainers();
+                logger.info("Azure Blob Storage connection successful");
+                return true;
+
+            } else if (url.contains("aws")) {
+                logger.info("Detected AWS S3 connection");
+                // Create credentials
+                AwsBasicCredentials awsCreds = AwsBasicCredentials.create(accessKey, secretKey);
+
+                // Create S3 client
+                S3Client s3Client = S3Client.builder()
+                        .region(Region.of(region))
+                        .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
+                        .build();
+
+                // Test connection by listing buckets
+                ListBucketsResponse bucketsResponse = s3Client.listBuckets(software.amazon.awssdk.services.s3.model.ListBucketsRequest.builder().build());
+                logger.info("AWS S3 connection successful");
+                return true;
+
+            } else {
+                logger.info("Detected MinIO connection");
+                MinioClient minioClient = MinioClient.builder()
+                        .endpoint(url)
+                        .credentials(accessKey, secretKey)
+                        .httpClient(customHttpClient)
+                        .build();
+
+                minioClient.listBuckets();
+                logger.info("MinIO connection successful");
+                return true;
+            }
+
+        } catch (Exception ex) {
+            logger.error("Connection test failed: {}", ex.getMessage(), ex);
+        }
+
+        logger.warn("Connection test returned false");
+        return false;
+    }
 /*
 	@Override
 	public boolean testConnection(ICIPDatasource datasource) {
@@ -720,7 +763,5 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
 		}
 		return count;
 	}
-	
 
-	
 }
