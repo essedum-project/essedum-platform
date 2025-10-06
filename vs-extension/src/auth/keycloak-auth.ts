@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import axios from 'axios';
 import * as https from 'https';
+import { createHTTPSAgent } from '../core/constants/api-config';
 
 export interface TokenResponse {
     access_token: string;

@@ -5,10 +5,15 @@ import { KeycloakAuthService, KeycloakConfig } from './auth/keycloak-auth';
 import { EssedumFileSystemProvider } from './providers/essedum-file-provider';
 import { JobLogsViewer } from './app/pipeline/job-logs-viewer';
 import { JobLogsPanelProvider } from './app/pipeline/job-logs-panel-provider';
+import { initializeSSLBypass, setupAxiosDefaults, BASE_URL } from './core/constants/api-config';
 
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Essedum AI Platform extension is now active!');
+
+	// CRITICAL: Initialize SSL bypass before any HTTPS requests
+	initializeSSLBypass();
+	setupAxiosDefaults();
 
 	// Create Keycloak configuration (updated to match working login URL)
 	const keycloakConfig: KeycloakConfig = {
@@ -19,21 +24,21 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Create authentication service
 	const authService = new KeycloakAuthService(keycloakConfig, context);
-	
+
 	// Create Essedum file system provider
 	const essedumFileProvider = new EssedumFileSystemProvider('');
-	
+
 	// Register the Essedum file system provider
 	context.subscriptions.push(
-		vscode.workspace.registerFileSystemProvider('essedum', essedumFileProvider, { 
+		vscode.workspace.registerFileSystemProvider('essedum', essedumFileProvider, {
 			isCaseSensitive: true,
 			isReadonly: false  // Allow editing - files saved only during pipeline execution
 		})
 	);
-	
+
 	// Create pipeline cards provider (this will handle all pipeline logic)
 	let pipelineCardsProvider: PipelineCardsProvider;
-	
+
 	// Initialize pipeline provider with authentication
 	const initializePipelineProvider = async () => {
 		try {
@@ -86,31 +91,31 @@ export function activate(context: vscode.ExtensionContext) {
 			try {
 				const authStatus = await authService.getAuthenticationStatus();
 				const isValid = await authService.isTokenValid();
-				
+
 				let message = `Authentication Status:\n`;
 				message += `• Authenticated: ${authStatus.isAuthenticated ? '✅' : '❌'}\n`;
 				message += `• Token Valid: ${isValid ? '✅' : '❌'}\n`;
-				
+
 				if (authStatus.tokenExpiry) {
 					message += `• Token Expires: ${authStatus.tokenExpiry.toLocaleString()}\n`;
 				}
-				
+
 				if (authStatus.needsRefresh) {
 					message += `• Needs Refresh: ⚠️ Yes\n`;
 				}
-				
+
 				vscode.window.showInformationMessage(message, 'OK', 'Login').then(selection => {
 					if (selection === 'Login') {
 						vscode.commands.executeCommand('essedum.login');
 					}
 				});
-				
+
 			} catch (error: any) {
 				vscode.window.showErrorMessage(`Failed to check authentication status: ${error.message}`);
 			}
 		})
 	);
-	
+
 	// Register command to run pipeline (can be called from file provider)
 	context.subscriptions.push(
 		vscode.commands.registerCommand('essedum.runPipeline', async (pipelineName?: string) => {
@@ -135,15 +140,15 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		})
 	);
-	
+
 	context.subscriptions.push(
 		vscode.commands.registerCommand('essedum.login', async () => {
 			try {
 				console.log('Starting Keycloak authentication...');
-				
+
 				// Always force fresh authentication to ensure valid tokens
 				console.log('Clearing any existing tokens and forcing fresh authentication...');
-				
+
 				// Show progress during authentication
 				const authResult = await vscode.window.withProgress({
 					location: vscode.ProgressLocation.Notification,
@@ -151,25 +156,25 @@ export function activate(context: vscode.ExtensionContext) {
 					cancellable: true
 				}, async (progress, token) => {
 					progress.report({ increment: 0, message: 'Clearing existing tokens...' });
-					
+
 					// Check for cancellation
 					if (token.isCancellationRequested) {
 						throw new Error('Authentication cancelled by user');
 					}
-					
+
 					progress.report({ increment: 20, message: 'Starting fresh authentication...' });
-					
+
 					// Force fresh authentication (this will clear tokens and re-authenticate)
 					const newTokens = await authService.forceAuthentication();
-					
+
 					progress.report({ increment: 80, message: 'Authentication successful, updating services...' });
-					
+
 					return newTokens;
 				});
-				
+
 				const accessToken = authResult.access_token;
 				console.log('Fresh authentication successful, token length:', accessToken ? accessToken.length : 0);
-				
+
 				// Update the pipeline provider with new token
 				if (pipelineCardsProvider) {
 					pipelineCardsProvider.updateToken(accessToken);
@@ -185,10 +190,10 @@ export function activate(context: vscode.ExtensionContext) {
 						)
 					);
 				}
-				
+
 				// Open the sidebar to show the updated view
 				await vscode.commands.executeCommand('workbench.view.extension.essedum-explorer');
-				
+
 				console.log('Login flow completed successfully');
 				vscode.window.showInformationMessage(
 					`Successfully authenticated with Keycloak! Welcome to Essedum AI Platform.`,
@@ -198,10 +203,10 @@ export function activate(context: vscode.ExtensionContext) {
 						vscode.commands.executeCommand('workbench.view.extension.essedum-explorer');
 					}
 				});
-				
+
 			} catch (error: any) {
 				console.error('Authentication failed:', error);
-				
+
 				// Provide user-friendly error messages
 				let userMessage = 'Authentication failed';
 				if (error.message.includes('cancelled')) {
@@ -215,7 +220,7 @@ export function activate(context: vscode.ExtensionContext) {
 				} else {
 					userMessage = `Authentication failed: ${error.message}`;
 				}
-				
+
 				vscode.window.showErrorMessage(userMessage, 'Retry', 'Help').then(selection => {
 					if (selection === 'Retry') {
 						vscode.commands.executeCommand('essedum.login');
@@ -223,103 +228,103 @@ export function activate(context: vscode.ExtensionContext) {
 						vscode.env.openExternal(vscode.Uri.parse('https://docs.keycloak.org/'));
 					}
 				});
-				
+
 				throw error; // Re-throw so the pipeline provider can handle it
 			}
 		})
 	);
-	
+
 	// Register command to open job logs viewer for a specific pipeline
 	context.subscriptions.push(
 		vscode.commands.registerCommand('essedum.openJobLogs', async (pipelineName?: string) => {
 			try {
 				const accessToken = await authService.getAccessToken();
-				
+
 				if (!pipelineName) {
 					// If no pipeline name provided, ask user to enter one
 					pipelineName = await vscode.window.showInputBox({
 						prompt: 'Enter pipeline name to view job logs',
 						placeHolder: 'e.g., LEORGNGS24627'
 					});
-					
+
 					if (!pipelineName) {
 						return; // User cancelled
 					}
 				}
-				
+
 				// Use the panel provider to show job logs at the bottom
 				jobLogsPanelProvider.showJobLogs(accessToken, pipelineName, undefined);
-				
+
 			} catch (error: any) {
 				console.error('Error opening job logs:', error);
 				vscode.window.showErrorMessage(`Failed to open job logs: ${error.message}`);
 			}
 		})
 	);
-	
+
 	// Register command to open internal job logs viewer
 	context.subscriptions.push(
 		vscode.commands.registerCommand('essedum.openInternalJobLogs', async (internalJobName?: string) => {
 			try {
 				const accessToken = await authService.getAccessToken();
-				
+
 				if (!internalJobName) {
 					// If no internal job name provided, ask user to enter one
 					internalJobName = await vscode.window.showInputBox({
 						prompt: 'Enter internal job name to view logs',
 						placeHolder: 'e.g., internal_job_name'
 					});
-					
+
 					if (!internalJobName) {
 						return; // User cancelled
 					}
 				}
-				
+
 				// Use the panel provider to show internal job logs at the bottom
 				jobLogsPanelProvider.showJobLogs(accessToken, undefined, internalJobName);
-				
+
 			} catch (error: any) {
 				console.error('Error opening internal job logs:', error);
 				vscode.window.showErrorMessage(`Failed to open internal job logs: ${error.message}`);
 			}
 		})
 	);
-	
+
 	// Register command to open job logs in output channel/terminal
 	context.subscriptions.push(
 		vscode.commands.registerCommand('essedum.showJobLogsInTerminal', async (jobId?: string) => {
 			try {
 				const accessToken = await authService.getAccessToken();
-				
+
 				if (!jobId) {
 					jobId = await vscode.window.showInputBox({
 						prompt: 'Enter job ID to view logs in terminal',
 						placeHolder: 'e.g., job_12345'
 					});
-					
+
 					if (!jobId) {
 						return; // User cancelled
 					}
 				}
-				
+
 				// Create or get existing output channel
 				const outputChannel = vscode.window.createOutputChannel(`Essedum Job Logs - ${jobId}`);
 				outputChannel.show(true);
-				
+
 				// Clear previous content
 				outputChannel.clear();
 				outputChannel.appendLine(`=== Job Logs for ${jobId} ===`);
 				outputChannel.appendLine(`Timestamp: ${new Date().toISOString()}`);
 				outputChannel.appendLine('');
-				
+
 				// Fetch and display logs
 				const axios = require('axios');
 				const https = require('https');
-				
+
 				const httpsAgent = new https.Agent({
 					rejectUnauthorized: false
 				});
-				
+
 				const headers = {
 					'Accept': 'application/json, text/plain, */*',
 					'Authorization': `Bearer ${accessToken}`,
@@ -328,19 +333,19 @@ export function activate(context: vscode.ExtensionContext) {
 					'ProjectName': 'leo1311',
 					'X-Requested-With': 'Leap',
 				};
-				
+
 				try {
 					// Try fetching as Spark job first
 					const sparkResponse = await axios.get(`/api/aip/service/v1/jobs/spark/${jobId}/logs?line=0&size=1000&background=false`, {
-						baseURL: 'http://localhost:8087',
+						baseURL: BASE_URL,
 						headers,
 						httpsAgent,
 						timeout: 15000
 					});
-					
+
 					if (sparkResponse.data) {
 						const jobData = typeof sparkResponse.data === 'string' ? JSON.parse(sparkResponse.data) : sparkResponse.data;
-						
+
 						outputChannel.appendLine('=== Spark Job Logs ===');
 						if (jobData.log) {
 							outputChannel.appendLine(jobData.log);
@@ -355,15 +360,15 @@ export function activate(context: vscode.ExtensionContext) {
 					// Try as internal job
 					try {
 						const internalResponse = await axios.get(`/api/aip/service/v1/jobs/internal/${jobId}/logs?line=0&size=1000`, {
-							baseURL: 'http://localhost:8087',
+							baseURL: BASE_URL,
 							headers,
 							httpsAgent,
 							timeout: 15000
 						});
-						
+
 						if (internalResponse.data) {
 							const jobData = typeof internalResponse.data === 'string' ? JSON.parse(internalResponse.data) : internalResponse.data;
-							
+
 							outputChannel.appendLine('=== Internal Job Logs ===');
 							if (jobData.log) {
 								outputChannel.appendLine(jobData.log);
@@ -379,30 +384,30 @@ export function activate(context: vscode.ExtensionContext) {
 						outputChannel.appendLine(`Also tried internal job, error: ${internalError.message}`);
 					}
 				}
-				
+
 				vscode.window.showInformationMessage(`Job logs for ${jobId} opened in output channel`);
-				
+
 			} catch (error: any) {
 				console.error('Error showing job logs in terminal:', error);
 				vscode.window.showErrorMessage(`Failed to show job logs in terminal: ${error.message}`);
 			}
 		})
 	);
-	
+
 	// Register debug command to test upload endpoints
 	context.subscriptions.push(
 		vscode.commands.registerCommand('essedum.debugUpload', async () => {
 			try {
 				const accessToken = await authService.getAccessToken();
-				
+
 				// Test a simple API endpoint first
 				const axios = require('axios');
 				const https = require('https');
-				
+
 				const httpsAgent = new https.Agent({
 					rejectUnauthorized: false
 				});
-				
+
 				const headers = {
 					'Accept': 'application/json, text/plain, */*',
 					'Authorization': `Bearer ${accessToken}`,
@@ -411,7 +416,7 @@ export function activate(context: vscode.ExtensionContext) {
 					'X-Requested-With': 'Leap',
 					'User-Agent': 'axios/1.11.0'
 				};
-				
+
 				// Test endpoints
 				const testEndpoints = [
 					'/api/aip/file/write/LEORGNGS24627/leo1311',
@@ -419,9 +424,9 @@ export function activate(context: vscode.ExtensionContext) {
 					'/file/pipeline/native/upload/LEORGNGS24627/leo1311',
 					'/api/aip/service/v1/files/upload/LEORGNGS24627/leo1311'
 				];
-				
+
 				const results: string[] = [];
-				
+
 				for (const endpoint of testEndpoints) {
 					try {
 						// Create a simple FormData for testing
@@ -431,14 +436,14 @@ export function activate(context: vscode.ExtensionContext) {
 						formData.append('filetype', 'Python3');
 						formData.append('pipelineName', 'LEORGNGS24627');
 						formData.append('organization', 'leo1311');
-						
+
 						const response = await axios.post(endpoint, formData, {
-							baseURL: 'http://localhost:8087',
+							baseURL: BASE_URL,
 							headers: { ...headers, ...formData.getHeaders() },
 							httpsAgent: httpsAgent,
 							timeout: 10000
 						});
-						
+
 						results.push(`✅ ${endpoint}: ${response.status} - ${response.statusText}`);
 					} catch (error: any) {
 						const status = error.response?.status || 'NO_RESPONSE';
@@ -446,11 +451,11 @@ export function activate(context: vscode.ExtensionContext) {
 						results.push(`❌ ${endpoint}: ${status} - ${statusText}`);
 					}
 				}
-				
+
 				// Show results
 				const message = `Upload Endpoint Test Results:\n\n${results.join('\n')}`;
 				vscode.window.showInformationMessage(message, { modal: true });
-				
+
 			} catch (error: any) {
 				vscode.window.showErrorMessage(`Debug test failed: ${error.message}`);
 			}
@@ -459,4 +464,4 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }

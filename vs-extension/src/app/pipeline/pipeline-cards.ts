@@ -6,6 +6,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { EssedumFileSystemProvider } from '../../providers/essedum-file-provider';
 import { JobLogsViewer } from './job-logs-viewer';
+import { API_ENDPOINTS, createSecureAxiosConfig, createHTTPSAgent, BASE_URL, initializeSSLBypass } from '../../core/constants/api-config';
 
 export interface PipelineCard {
     type: string;
@@ -103,7 +104,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         this._token = token;
         this._isAuthenticated = !!token && token.trim().length > 0;
         console.log('Token updated, authenticated:', this._isAuthenticated);
-        
+
         // Update token in file provider as well
         if (this._fileProvider) {
             this._fileProvider.updateToken(token);
@@ -182,7 +183,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                         // Trigger fresh Keycloak authentication
                         try {
                             console.log('triggerLogin command received, forcing fresh Keycloak authentication...');
-                            
+
                             // Show authentication progress in webview
                             if (this._view) {
                                 this._view.webview.postMessage({
@@ -190,7 +191,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                                     message: '🔄 Clearing existing tokens and starting fresh authentication...'
                                 });
                             }
-                            
+
                             // Force fresh authentication through the auth service
                             if (this._authService) {
                                 console.log('Using auth service for fresh authentication');
@@ -202,7 +203,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                                 // Fallback to command execution if auth service not available
                                 await vscode.commands.executeCommand('essedum.login');
                             }
-                            
+
                             // Show success feedback
                             if (this._view) {
                                 this._view.webview.postMessage({
@@ -210,15 +211,15 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                                     message: 'Authentication successful!'
                                 });
                             }
-                            
+
                             // After successful login, return to main pipeline view
                             await this.returnToMainView();
-                            
+
                             vscode.window.showInformationMessage('Successfully authenticated with Keycloak! Pipeline view loaded.');
-                            
+
                         } catch (error: any) {
                             console.error('Error executing fresh authentication:', error);
-                            
+
                             // Show error state in webview
                             if (this._view) {
                                 this._view.webview.postMessage({
@@ -226,7 +227,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                                     message: error.message || 'Fresh authentication failed'
                                 });
                             }
-                            
+
                             vscode.window.showErrorMessage(
                                 `Fresh authentication failed: ${error.message || 'Unknown error'}. Please try using Command Palette (Ctrl+Shift+P) and search for "Essedum: Login".`
                             );
@@ -471,15 +472,15 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                 // Fetch total count first
                 this.totalCount = await this.getPipelinesCount(params);
                 this.totalPages = Math.ceil(this.totalCount / this.pageSize);
-                
+
                 // If total count is small (like <= 20), fetch all and do client-side pagination
                 if (this.totalCount <= 20) {
                     console.log('Small dataset detected, using client-side pagination');
-                    
+
                     // Fetch all cards with a larger page size to get all data for client-side pagination
                     const allParams = { ...params, size: this.totalCount.toString(), page: '1' };
                     const response = await this.getPipelinesCards(allParams);
-                    
+
                     if (response && response.length) {
                         this.allCards = response.map((element: any) => ({
                             type: element.type || 'Unknown',
@@ -490,22 +491,22 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                             ...element
                         }));
                     }
-                    
+
                     // Update total count and pages based on actual data
                     this.totalCount = this.allCards.length;
                     this.totalPages = Math.ceil(this.totalCount / this.pageSize);
-                    
+
                     // For testing: ensure we always have at least 2 pages if we have more than 3 cards
                     if (this.totalCount > this.pageSize) {
                         console.log('Multiple pages detected - pagination will be shown');
                     }
-                    
+
                     console.log(`Client-side pagination: ${this.totalCount} total cards, ${this.totalPages} pages`);
                 } else {
                     // Use server-side pagination for larger datasets
                     console.log('Large dataset detected, using server-side pagination');
                     const response = await this.getPipelinesCards(params);
-                    
+
                     if (response && response.length) {
                         this.allCards = response.map((element: any) => ({
                             type: element.type || 'Unknown',
@@ -518,11 +519,11 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                     }
                 }
             }
-            
+
             // Calculate which cards to show for current page
             const startIndex = (this.pageNumber - 1) * this.pageSize;
             const endIndex = startIndex + this.pageSize;
-            
+
             if (this.totalCount <= 3) {
                 // Client-side pagination
                 this.filteredCards = this.allCards.slice(startIndex, endIndex);
@@ -530,7 +531,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                 // Server-side pagination - fetch the specific page
                 if (this.pageNumber > 1) {
                     const response = await this.getPipelinesCards(params);
-                    
+
                     if (response && response.length) {
                         this.allCards = response.map((element: any) => ({
                             type: element.type || 'Unknown',
@@ -542,16 +543,16 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                         }));
                     }
                 }
-                
+
                 // Limit to page size even for server-side pagination
                 this.filteredCards = this.allCards.slice(0, this.pageSize);
             }
-            
+
             this.cards = this.allCards; // Keep all cards for reference
-            
+
             console.log(`Page ${this.pageNumber}: Showing ${this.filteredCards.length} of ${this.totalCount} total cards`);
             console.log(`Total pages: ${this.totalPages}`);
-            
+
             this.loading = false;
 
             this.updateQueryParam(
@@ -564,12 +565,12 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         } catch (error: any) {
             console.error('Error fetching cards:', error);
             this.loading = false;
-            
+
             // Handle authentication errors specifically
             if (error.response && error.response.status === 403) {
                 console.error('Authentication failed (403) - token may be invalid or expired');
                 this._isAuthenticated = false; // Mark as not authenticated
-                
+
                 vscode.window.showErrorMessage(
                     'Authentication failed. Your token may be invalid or expired. Please login again.',
                     'Login Again'
@@ -579,14 +580,14 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                         vscode.commands.executeCommand('essedum.login');
                     }
                 });
-                
+
                 // Show authentication required page
                 this.showAuthenticationRequired();
                 return;
             } else if (error.response && error.response.status === 401) {
                 console.error('Unauthorized (401) - authentication required');
                 this._isAuthenticated = false; // Mark as not authenticated
-                
+
                 vscode.window.showErrorMessage(
                     'Unauthorized access. Please authenticate with Keycloak.',
                     'Login'
@@ -595,18 +596,18 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                         vscode.commands.executeCommand('essedum.login');
                     }
                 });
-                
+
                 // Show authentication required page
                 this.showAuthenticationRequired();
                 return;
             }
-            
+
             // Handle other errors
             let errorMessage = 'Failed to fetch pipeline data';
             if (error.message) {
                 errorMessage = error.message;
             }
-            
+
             vscode.window.showErrorMessage(`Error loading pipelines: ${errorMessage}`);
             this.updateWebview();
         }
@@ -641,122 +642,110 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     }
 
     private async getPipelinesCount(params: HttpParams): Promise<number> {
-        try {
-            // Convert params to URLSearchParams for axios
-            const urlParams = new URLSearchParams();
-            Object.entries(params).forEach(([key, value]) => {
-                if (value !== undefined) {
-                    urlParams.append(key, value);
+       try {
+                console.log('Attempting fallback request...');
+                process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+
+                const https = require('https');
+                const axiosConfig = {
+                    httpsAgent: new https.Agent({
+                        rejectUnauthorized: false
+                    }),
+                    timeout: 10000,
+                    params: {
+                        ...params,
+                        project: this.organization
+                    },
+                    headers: {
+                        'accept': 'application/json, text/plain, */*',
+                        'accept-language': 'en-US,en;q=0.9',
+                        'content-type': 'application/json',
+                        'priority': 'u=1, i',
+                        'project': '2',
+                        'projectname': 'leo1311',
+                        'referer': 'https://essedum.az.ad.idemo-ppc.com/',
+                        'roleid': '1',
+                        'rolename': 'IT Portfolio Manager',
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
+                        'x-requested-with': 'Leap',
+                        ...(this._token ? { 'authorization': `Bearer ${this._token}` } : {})
+                    }
+                };
+
+                const response = await axios.get(API_ENDPOINTS.PIPELINES_COUNT, axiosConfig);
+                console.log('Fallback response:', response.data);
+                return response.data || 0;
+
+            } catch (fallbackError: any) {
+                console.error('Fallback request also failed:', fallbackError);
+                if (fallbackError.response) {
+                    console.error('Response data:', fallbackError.response.data);
+                    console.error('Response status:', fallbackError.response.status);
+                    console.error('Response headers:', fallbackError.response.headers);
+                } else if (fallbackError.request) {
+                    console.error('Request made but no response received:', fallbackError.request);
+                } else {
+                    console.error('Error setting up request:', fallbackError.message);
                 }
-            });
-
-            console.log('Making count API request with params:', urlParams.toString());
-
-            // Create HTTPS agent to bypass SSL certificate issues
-            const httpsAgent = new https.Agent({
-                rejectUnauthorized: false
-            });
-
-            const response = await axios.get('/api/aip/service/v1/pipelines/count', {
-                baseURL: 'http://localhost:8087',
-                params: urlParams,
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Authorization': `Bearer ${this._token}`,
-                    'Connection': 'keep-alive',
-                    'Content-Type': 'application/json',
-                    'Project': '2',
-                    'ProjectName': 'leo1311',
-                    'X-Requested-With': 'Leap',
-                    'charset': 'utf-8',
-                    'roleId': '1',
-                    'roleName': 'IT Portfolio Manager',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36'
-                },
-                httpsAgent: httpsAgent,
-                timeout: 30000
-            });
-
-            console.log('Count API Response:', response.data);
-            return response.data || 0;
-
-        } catch (error: any) {
-            console.error('Error fetching pipelines count:', error);
-            if (error.response) {
-                console.error('Response data:', error.response.data);
-                console.error('Response status:', error.response.status);
-                console.error('Response headers:', error.response.headers);
-            } else if (error.request) {
-                console.error('Request made but no response received:', error.request);
-            } else {
-                console.error('Error setting up request:', error.message);
+                throw new Error(`Failed to fetch pipelines count: ${fallbackError.message || fallbackError}`);
             }
-            throw new Error(`Failed to fetch pipelines count: ${error.message}`);
-        }
     }
 
     private async getPipelinesCards(params: HttpParams): Promise<any> {
         try {
-            // Convert params to URLSearchParams for axios
-            const urlParams = new URLSearchParams();
-            Object.entries(params).forEach(([key, value]) => {
-                if (value !== undefined) {
-                    urlParams.append(key, value);
+                console.log('Attempting fallback request for pipelines list...');
+                process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+
+                const https = require('https');
+                const axiosConfig = {
+                    httpsAgent: new https.Agent({
+                        rejectUnauthorized: false
+                    }),
+                    timeout: 10000,
+                    params: {
+                        ...params,
+                        project: this.organization
+                    },
+                    headers: {
+                        'accept': 'application/json, text/plain, */*',
+                        'accept-language': 'en-US,en;q=0.9',
+                        'content-type': 'application/json',
+                        'priority': 'u=1, i',
+                        'project': '2',
+                        'projectname': 'leo1311',
+                        'referer': 'https://essedum.az.ad.idemo-ppc.com/',
+                        'roleid': '1',
+                        'rolename': 'IT Portfolio Manager',
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
+                        'x-requested-with': 'Leap',
+                        ...(this._token ? { 'authorization': `Bearer ${this._token}` } : {})
+                    }
+                };
+
+                const response = await axios.get(API_ENDPOINTS.PIPELINES_LIST, axiosConfig);
+                console.log('Fallback pipelines list success');
+                return response.data;
+
+            } catch (fallbackError: any) {
+                console.error('Fallback pipelines list also failed:', fallbackError);
+
+                // Provide more detailed error information
+                let errorMessage = 'Failed to fetch pipeline data';
+
+                if (fallbackError.code === 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY') {
+                    errorMessage = 'SSL Certificate error - unable to verify server certificate';
+                } else if (fallbackError.code === 'ENOTFOUND') {
+                    errorMessage = 'Network error - unable to reach the server';
+                } else if (fallbackError.response) {
+                    errorMessage = `Server error: ${fallbackError.response.status} - ${fallbackError.response.statusText}`;
+                } else if (fallbackError.request) {
+                    errorMessage = 'Network timeout or connection refused';
+                } else {
+                    errorMessage = `Request setup error: ${fallbackError.message}`;
                 }
-            });
 
-            console.log('Making API request with params:', urlParams.toString());
-            console.log('Using token:', this._token ? 'Token present' : 'No token');
-            console.log('Page size in URL params:', urlParams.get('size'));
-
-            // Create HTTPS agent to bypass SSL certificate issues
-            const httpsAgent = new https.Agent({
-                rejectUnauthorized: false
-            });
-
-            const response = await axios.get('/api/aip/service/v1/pipelines/training/list', {
-                baseURL: 'http://localhost:8087',
-                params: urlParams,
-                headers: {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Authorization': `Bearer ${this._token}`,
-                    'Connection': 'keep-alive',
-                    'Content-Type': 'application/json',
-                    'Project': '2',
-                    'ProjectName': 'leo1311',
-                    'X-Requested-With': 'Leap',
-                    'charset': 'utf-8',
-                    'roleId': '1',
-                    'roleName': 'IT Portfolio Manager',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36'
-                },
-                httpsAgent: httpsAgent,
-                timeout: 30000
-            });
-
-            return response.data;
-        } catch (error: any) {
-            console.error('API call failed:', error);
-
-            // Provide more detailed error information
-            let errorMessage = 'Failed to fetch pipeline data';
-
-            if (error.code === 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY') {
-                errorMessage = 'SSL Certificate error - unable to verify server certificate';
-            } else if (error.code === 'ENOTFOUND') {
-                errorMessage = 'Network error - unable to reach the server';
-            } else if (error.response) {
-                errorMessage = `Server error: ${error.response.status} - ${error.response.statusText}`;
-            } else if (error.request) {
-                errorMessage = 'Network timeout or connection refused';
-            } else {
-                errorMessage = `Request setup error: ${error.message}`;
+                throw new Error(errorMessage);
             }
-
-            throw new Error(errorMessage);
-        }
     }
 
     private async viewScriptDetails(cardId: string): Promise<void> {
@@ -852,32 +841,8 @@ if __name__ == "__main__":
         console.log(`Fetching scripts for pipeline: ${pipelineName}`);
 
         try {
-            // Create HTTPS agent to bypass SSL certificate issues
-            const httpsAgent = new https.Agent({
-                rejectUnauthorized: false
-            });
-
-            const headers = {
-                'Accept': 'application/json, text/plain, */*',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Authorization': `Bearer ${this._token}`,
-                'Connection': 'keep-alive',
-                'Content-Type': 'application/json',
-                'Project': '2',
-                'ProjectName': this.organization,
-                'Referer': 'http://localhost:8087/',
-                'Sec-Fetch-Dest': 'empty',
-                'Sec-Fetch-Mode': 'cors',
-                'Sec-Fetch-Site': 'same-origin',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
-                'X-Requested-With': 'Leap',
-                'charset': 'utf-8',
-                'roleId': '1',
-                'roleName': 'IT Portfolio Manager',
-                'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
-                'sec-ch-ua-mobile': '?0',
-                'sec-ch-ua-platform': '"Windows"'
-            };
+            // Use centralized HTTPS agent for SSL bypass
+            const httpsAgent = createHTTPSAgent();
 
             let files: ScriptFile[] = [];
             let streamingService: any = null;
@@ -886,10 +851,8 @@ if __name__ == "__main__":
             // Step 1: Get streaming service by name (following Angular getStreamingServicesByName pattern)
             try {
                 console.log('Fetching streaming service details...');
-                const streamingServiceResponse = await axios.get(`/api/aip/service/v1/streamingServices/${pipelineName}/${this.organization}`, {
-                    baseURL: 'http://localhost:8087',
-                    headers: headers,
-                    httpsAgent: httpsAgent,
+                const streamingServiceResponse = await axios.get(`${API_ENDPOINTS.STREAMING_SERVICES}/${pipelineName}/${this.organization}`, {
+                    ...createSecureAxiosConfig(this._token),
                     timeout: 30000
                 });
 
@@ -905,11 +868,9 @@ if __name__ == "__main__":
                     urlParams.append('name', pipelineName);
                     urlParams.append('org', this.organization);
 
-                    const pipelineResponse = await axios.get('/api/aip/service/v1/pipelines/byname', {
-                        baseURL: 'http://localhost:8087',
-                        headers: headers,
+                    const pipelineResponse = await axios.get(API_ENDPOINTS.PIPELINES_BY_NAME, {
+                        ...createSecureAxiosConfig(this._token),
                         params: urlParams,
-                        httpsAgent: httpsAgent,
                         timeout: 30000
                     });
 
@@ -955,14 +916,12 @@ if __name__ == "__main__":
                         console.log(`Reading file from JSON list: ${fileName}`);
 
                         // Use the exact API pattern from Angular readNativeFile method
-                        const response = await axios.get(`/api/aip/file/read/${pipelineName}/${this.organization}`, {
-                            baseURL: 'http://localhost:8087',
-                            headers: headers,
+                        const response = await axios.get(`${API_ENDPOINTS.FILE_READ}/${pipelineName}/${this.organization}`, {
+                            ...createSecureAxiosConfig(this._token),
                             params: {
                                 file: fileName
                             },
                             responseType: 'arraybuffer', // Match Angular responseType
-                            httpsAgent: httpsAgent,
                             timeout: 30000
                         });
 
@@ -1011,14 +970,12 @@ if __name__ == "__main__":
                         console.log(`Attempting to read file: ${fileName}`);
 
                         // Use the exact API pattern from Angular readNativeFile method
-                        const response = await axios.get(`/api/aip/file/read/${pipelineName}/${this.organization}`, {
-                            baseURL: 'http://localhost:8087',
-                            headers: headers,
+                        const response = await axios.get(`${API_ENDPOINTS.FILE_READ}/${pipelineName}/${this.organization}`, {
+                            ...createSecureAxiosConfig(this._token),
                             params: {
                                 file: fileName
                             },
                             responseType: 'arraybuffer', // Match Angular responseType
-                            httpsAgent: httpsAgent,
                             timeout: 30000
                         });
 
@@ -1095,10 +1052,8 @@ if __name__ == "__main__":
                 console.log('Fetching run types...');
 
                 // Try the job run types endpoint (from Angular code reference)
-                runTypesResponse = await axios.get(`/api/aip/service/v1/jobs/runtime/types/${this.organization}`, {
-                    baseURL: 'http://localhost:8087',
-                    headers: headers,
-                    httpsAgent: httpsAgent,
+                runTypesResponse = await axios.get(`${API_ENDPOINTS.JOB_RUNTIME_TYPES}/${this.organization}`, {
+                    ...createSecureAxiosConfig(this._token),
                     timeout: 30000
                 });
                 console.log('Run types response:', runTypesResponse.data);
@@ -1107,10 +1062,8 @@ if __name__ == "__main__":
 
                 try {
                     // Try alternative endpoint
-                    runTypesResponse = await axios.get('/api/aip/service/v1/datasources/runtime', {
-                        baseURL: 'http://localhost:8087',
-                        headers: headers,
-                        httpsAgent: httpsAgent,
+                    runTypesResponse = await axios.get(API_ENDPOINTS.DATASOURCES_RUNTIME, {
+                        ...createSecureAxiosConfig(this._token),
                         timeout: 30000
                     });
                     console.log('Alternative run types response:', runTypesResponse.data);
@@ -1144,7 +1097,7 @@ if __name__ == "__main__":
             if (error.code === 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY') {
                 errorMessage = 'SSL Certificate error - unable to verify server certificate';
             } else if (error.code === 'ENOTFOUND') {
-                errorMessage = 'Network error - unable to reach the server at localhost:8087';
+                errorMessage = 'Network error - unable to reach the server at ${BASE_URL}';
             } else if (error.response) {
                 errorMessage = `Server error: ${error.response.status} - ${error.response.statusText}`;
                 console.error('Response data:', error.response.data);
@@ -1172,7 +1125,7 @@ def main():
     Error: ${errorMessage}
     
     To resolve:
-    1. Ensure the backend server is running on localhost:8087
+    1. Ensure the backend server is running on ${BASE_URL}
     2. Check that the pipeline has generated scripts
     3. Verify your authentication token is valid
     """
@@ -1255,7 +1208,7 @@ if __name__ == "__main__":
         if (this._view) {
             // Ensure we always have correct pagination info
             const actualTotalPages = Math.max(1, Math.ceil(this.totalCount / this.pageSize));
-            
+
             console.log('Updating webview with:', {
                 cards: this.filteredCards.length,
                 currentPage: this.pageNumber,
@@ -1393,7 +1346,7 @@ if __name__ == "__main__":
         } catch (error: any) {
             console.error('Failed to open script:', error);
             vscode.window.showErrorMessage(`Failed to open script: ${error.message}`);
-            
+
             // Try fallback method
             try {
                 await this.openScriptAsUntitledDocument(scriptFile);
@@ -1421,7 +1374,7 @@ if __name__ == "__main__":
 
         // Open the document using the Essedum scheme
         const doc = await vscode.workspace.openTextDocument(uri);
-        
+
         await vscode.window.showTextDocument(doc, {
             viewColumn: vscode.ViewColumn.One,
             preserveFocus: false
@@ -1674,7 +1627,7 @@ if __name__ == "__main__":
             'X-Requested-With': 'Leap',
             'roleId': '1',
             'roleName': 'IT Portfolio Manager',
-            'Referer': 'http://localhost:8087/',
+            'Referer': BASE_URL,
             'Sec-Fetch-Dest': 'empty',
             'Sec-Fetch-Mode': 'cors',
             'Sec-Fetch-Site': 'same-origin'
@@ -1682,7 +1635,7 @@ if __name__ == "__main__":
 
         try {
             const response = await axios.get(`/api/aip/service/v1/streamingServices/${name}/${organization}`, {
-                baseURL: 'http://localhost:8087',
+                baseURL: BASE_URL,
                 headers: headers,
                 httpsAgent: httpsAgent,
                 timeout: 30000
@@ -1716,7 +1669,7 @@ if __name__ == "__main__":
             'X-Requested-With': 'Leap',
             'roleId': '1',
             'roleName': 'IT Portfolio Manager',
-            'Referer': 'http://localhost:8087/',
+            'Referer': BASE_URL,
             'Sec-Fetch-Dest': 'empty',
             'Sec-Fetch-Mode': 'cors',
             'Sec-Fetch-Site': 'same-origin',
@@ -1733,7 +1686,7 @@ if __name__ == "__main__":
         formData.append('organization', this.organization);
 
         const response = await axios.post(`/api/aip/file/create/${pipelineName}/${this.organization}/json?file=${pipelineName}.json`, formData, {
-            baseURL: 'http://localhost:8087',
+            baseURL: BASE_URL,
             headers: headers,
             httpsAgent: httpsAgent,
             timeout: 30000
@@ -1757,7 +1710,7 @@ if __name__ == "__main__":
             'X-Requested-With': 'Leap',
             'roleId': '1',
             'roleName': 'IT Portfolio Manager',
-            'Referer': 'http://localhost:8087/',
+            'Referer': BASE_URL,
             'Sec-Fetch-Dest': 'empty',
             'Sec-Fetch-Mode': 'cors',
             'Sec-Fetch-Site': 'same-origin'
@@ -1793,7 +1746,7 @@ print("Pipeline ${pipelineName} execution completed")
             'X-Requested-With': 'Leap',
             'roleId': '1',
             'roleName': 'IT Portfolio Manager',
-            'Referer': 'http://localhost:8087/',
+            'Referer': BASE_URL,
             'Sec-Fetch-Dest': 'empty',
             'Sec-Fetch-Mode': 'cors',
             'Sec-Fetch-Site': 'same-origin',
@@ -1809,7 +1762,7 @@ print("Pipeline ${pipelineName} execution completed")
         };
 
         const response = await axios.post(`/api/aip/service/v1/pipeline/run-pipeline/NativeScript/${pipelineName}/${this.organization}/${runtime}`, requestBody, {
-            baseURL: 'http://localhost:8087',
+            baseURL: BASE_URL,
             headers: headers,
             httpsAgent: httpsAgent,
             timeout: 60000
@@ -1830,10 +1783,10 @@ print("Pipeline ${pipelineName} execution completed")
             'Authorization': `Bearer ${this._token}`,
             'Connection': 'keep-alive',
             'Content-Type': 'application/json; charset=UTF-8',
-            'Origin': 'http://localhost:8087',
+            'Origin': BASE_URL,
             'Project': '2',
             'ProjectName': this.organization,
-            'Referer': 'http://localhost:8087/',
+            'Referer': BASE_URL,
             'Sec-Fetch-Dest': 'empty',
             'Sec-Fetch-Mode': 'cors',
             'Sec-Fetch-Site': 'same-origin',
@@ -1888,7 +1841,7 @@ print("Pipeline ${pipelineName} execution completed")
         };
 
         const response = await axios.put('/api/aip/service/v1/streamingServices/update', requestBody, {
-            baseURL: 'http://localhost:8087',
+            baseURL: BASE_URL,
             headers: headers,
             httpsAgent: httpsAgent,
             timeout: 30000
@@ -1909,7 +1862,7 @@ print("Pipeline ${pipelineName} execution completed")
     ): Promise<any> {
         const org = this.organization;
         const offset = new Date().getTimezoneOffset();
-        
+
         const httpsAgent = new https.Agent({
             rejectUnauthorized: false
         });
@@ -1923,7 +1876,7 @@ print("Pipeline ${pipelineName} execution completed")
             'X-Requested-With': 'Leap',
             'roleId': '1',
             'roleName': 'IT Portfolio Manager',
-            'Referer': 'http://localhost:8087/',
+            'Referer': BASE_URL,
             'Sec-Fetch-Dest': 'empty',
             'Sec-Fetch-Mode': 'cors',
             'Sec-Fetch-Site': 'same-origin',
@@ -1934,7 +1887,7 @@ print("Pipeline ${pipelineName} execution completed")
 
         // Build URL matching Angular pattern: /service/v1/pipeline/run-pipeline/{pipelineType}/{cname}/{org}/{isLocal}?offset={offset}
         const url = `/api/aip/service/v1/pipeline/run-pipeline/${pipelineType}/${cname}/${org}/${isLocal}?offset=${offset}`;
-        
+
         // Build query parameters
         const queryParams = new URLSearchParams();
         queryParams.append('param', params);
@@ -1949,7 +1902,7 @@ print("Pipeline ${pipelineName} execution completed")
         const fullUrl = `${url}&${queryParams.toString()}`;
 
         const response = await axios.get(fullUrl, {
-            baseURL: 'http://localhost:8087',
+            baseURL: BASE_URL,
             headers: headers,
             httpsAgent: httpsAgent,
             timeout: 60000,
@@ -1968,14 +1921,14 @@ print("Pipeline ${pipelineName} execution completed")
         }
 
         const pipelineName = card.alias || card.name;
-        
+
         try {
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
                 title: `Running pipeline ${pipelineName}...`,
                 cancellable: false
             }, async (progress) => {
-                
+
                 // Parse runType to extract runtime info (format: "type-dsAlias")
                 const runTypeParts = runType.split('-');
                 const runtimeType = runTypeParts[0] || 'Local';
@@ -1997,7 +1950,7 @@ print("Pipeline ${pipelineName} execution completed")
                     createdAt: new Date().toISOString(),
                     metadata: card
                 };
-                
+
                 await this.savePipelineJson(pipelineName, pipelineConfig);
 
                 // Step 2: Generate Pipeline Script (Angular generateScript() pattern)
@@ -2012,7 +1965,7 @@ print("Pipeline ${pipelineName} execution completed")
                 const pipelineNameForExecution = streamItem.name;
                 const passType = 'Script'; // Pipeline type
                 const selectedRunType = { type: runtimeType === 'Local' ? 'true' : 'false', dsName: dsName };
-                
+
                 const executionResult = await this.runPipeline(
                     pipelineAlias,                    // alias
                     pipelineNameForExecution,         // cname
@@ -2049,7 +2002,7 @@ print("Pipeline ${pipelineName} execution completed")
 
                     // Show job status viewer
                     await this.showJobStatusViewer(jobStatus, card);
-                    
+
                     vscode.window.showInformationMessage(
                         `Pipeline started successfully! Job ID: ${jobId}`,
                         'View Status'
@@ -2123,10 +2076,10 @@ print("Pipeline ${pipelineName} execution completed")
                 card.name, // Pipeline name
                 undefined   // Not an internal job
             );
-            
+
             await jobLogsViewer.showJobLogsViewer();
             vscode.window.showInformationMessage(`Job logs opened for pipeline: ${card.alias}`);
-            
+
         } catch (error: any) {
             console.error('Error opening job logs viewer:', error);
             vscode.window.showErrorMessage(`Failed to open job logs: ${error.message}`);
@@ -2139,29 +2092,29 @@ print("Pipeline ${pipelineName} execution completed")
     private async returnToMainView(): Promise<void> {
         try {
             console.log('Returning to main pipeline view...');
-            
+
             // Ensure we have a valid token before proceeding
             if (!this._isAuthenticated) {
                 console.log('Warning: returnToMainView called but not authenticated');
                 return;
             }
-            
+
             // Reset the view state
             this.pageNumber = 1;
             this.filter = '';
             this.selectedAdapterType = [];
             this.selectedTag = [];
-            
+
             // Update the webview to show the main HTML template
             if (this._view) {
                 this._view.webview.html = this._getHtmlForWebview(this._view.webview);
-                
+
                 // Wait a moment for the webview to load, then get cards
                 setTimeout(async () => {
                     await this.getCards();
                 }, 500);
             }
-            
+
         } catch (error: any) {
             console.error('Error returning to main view:', error);
             vscode.window.showErrorMessage(`Failed to load main view: ${error.message}`);
@@ -2175,19 +2128,19 @@ print("Pipeline ${pipelineName} execution completed")
         try {
             // Clear the token
             this._token = '';
-            
+
             // Clear any stored authentication data
             await this._context.globalState.update('keycloak_tokens', undefined);
-            
+
             // Show logout message
             vscode.window.showInformationMessage('Logged out successfully. You will need to authenticate again to access pipelines.');
-            
+
             // You could also trigger a command to restart the extension or switch to login view
             // For now, just clear the current view
             if (this._view) {
                 this._view.webview.html = this.getLogoutHtml();
             }
-            
+
         } catch (error: any) {
             console.error('Error during logout:', error);
             vscode.window.showErrorMessage(`Logout failed: ${error.message}`);
@@ -2379,7 +2332,7 @@ print("Pipeline ${pipelineName} execution completed")
 
             // Fetch job status using the pattern from Angular code
             const response = await axios.get(`/api/aip/service/v1/jobs/status/${jobId}`, {
-                baseURL: 'http://localhost:8087',
+                baseURL: BASE_URL,
                 headers: headers,
                 httpsAgent: httpsAgent,
                 timeout: 10000
@@ -2419,10 +2372,10 @@ print("Pipeline ${pipelineName} execution completed")
         try {
             // Construct the URL to open logs in browser
             const logsUrl = `http://localhost:8087/pipeline/logs?jobId=${jobId}&org=${this.organization}`;
-            
+
             // Open in VS Code's simple browser
             await vscode.commands.executeCommand('simpleBrowser.show', logsUrl);
-            
+
             vscode.window.showInformationMessage('Job logs opened in browser');
         } catch (error: any) {
             console.error('Failed to open logs in browser:', error);
@@ -2808,7 +2761,7 @@ print("Pipeline ${pipelineName} execution completed")
                         name: pipelineName,
                         organization: this.organization
                     }, {
-                        baseURL: 'http://localhost:8087',
+                        baseURL: BASE_URL,
                         headers: headers,
                         httpsAgent: httpsAgent,
                         timeout: 30000
@@ -2826,7 +2779,7 @@ print("Pipeline ${pipelineName} execution completed")
                     pipelineName: pipelineName,
                     organization: this.organization
                 }, {
-                    baseURL: 'http://localhost:8087',
+                    baseURL: BASE_URL,
                     headers: headers,
                     httpsAgent: httpsAgent,
                     timeout: 60000
@@ -2844,7 +2797,7 @@ print("Pipeline ${pipelineName} execution completed")
                         await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
 
                         const statusResponse = await axios.get(`/api/aip/service/v1/events/status/${eventId}`, {
-                            baseURL: 'http://localhost:8087',
+                            baseURL: BASE_URL,
                             headers: headers,
                             httpsAgent: httpsAgent,
                             timeout: 10000
@@ -2939,7 +2892,7 @@ print("Pipeline ${pipelineName} execution completed")
                 `/file/pipeline/native/upload/${pipelineName}/${organization}`,
                 formData,
                 {
-                    baseURL: 'http://localhost:8087',
+                    baseURL: BASE_URL,
                     headers: headers,
                     httpsAgent: httpsAgent,
                     timeout: 30000
@@ -2996,7 +2949,7 @@ print("Pipeline ${pipelineName} execution completed")
             const response = await axios.get(
                 `/api/aip/file/pipeline/native/download/${pipelineName}/${organization}/${fileName}`,
                 {
-                    baseURL: 'http://localhost:8087',
+                    baseURL:BASE_URL,
                     headers: headers,
                     responseType: 'arraybuffer', // For binary file downloads
                     httpsAgent: httpsAgent,

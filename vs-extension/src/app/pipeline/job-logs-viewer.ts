@@ -4,6 +4,8 @@
 import * as vscode from 'vscode';
 import axios from 'axios';
 import * as https from 'https';
+import { BASE_URL } from '../../core/constants/api-config';
+
 
 export interface JobData {
     id: string;
@@ -449,7 +451,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/internal/${jobName}/count`, {
-            baseURL: 'http://localhost:8087',
+            baseURL: BASE_URL,
             headers,
             httpsAgent,
             timeout: 10000
@@ -463,7 +465,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/streamingLen/${serviceName}/${this._organization}`, {
-            baseURL: 'http://localhost:8087',
+            baseURL: BASE_URL,
             headers,
             httpsAgent,
             timeout: 10000
@@ -477,7 +479,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/jobs/${jobName}/${this._organization}?page=${page}&size=${size}`, {
-            baseURL: 'http://localhost:8087',
+            baseURL: BASE_URL,
             headers,
             httpsAgent,
             timeout: 10000
@@ -491,7 +493,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/internal2/${internalJob}?page=${page}&size=${size}`, {
-            baseURL: 'http://localhost:8087',
+            baseURL: BASE_URL,
             headers,
             httpsAgent,
             timeout: 10000
@@ -505,7 +507,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/internal/${jobId}/logs?line=${lineNumber}&size=${size}&status=${status}`, {
-            baseURL: 'http://localhost:8087',
+            baseURL: BASE_URL,
             headers,
             httpsAgent,
             timeout: 10000
@@ -519,7 +521,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.get(`/api/aip/service/v1/jobs/spark/${jobId}/logs?line=${lineNumber}&runtime=${runtime}&size=${size}&status=${status}&background=${isBackground}`, {
-            baseURL: 'http://localhost:8087',
+            baseURL: BASE_URL,
             headers,
             httpsAgent,
             timeout: 10000
@@ -533,7 +535,7 @@ export class JobLogsViewer {
         const headers = this.getHeaders();
 
         const response = await axios.post(`/api/aip/service/v1/jobs/${jobId}/stop`, {}, {
-            baseURL: 'http://localhost:8087',
+            baseURL: BASE_URL,
             headers,
             httpsAgent,
             timeout: 10000
@@ -546,8 +548,8 @@ export class JobLogsViewer {
         const httpsAgent = new https.Agent({ rejectUnauthorized: false });
         const headers = this.getHeaders();
 
-        const response = await axios.get(`/api/aip/service/v1/jobs/${jobId}/artifacts`, {
-            baseURL: 'http://localhost:8087',
+        const response = await axios.get(`/api/aip/service/v1/jobs/outputArtifacts/${jobId}`, {
+            baseURL: BASE_URL,
             headers,
             httpsAgent,
             timeout: 10000

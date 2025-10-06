@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as https from 'https';
+import { BASE_URL } from '../core/constants/api-config';
 
 const axios = require('axios');
 
@@ -255,7 +256,7 @@ export class EssedumFileSystemProvider implements vscode.FileSystemProvider {
             uploadEndpoint,
             formData,
             {
-                baseURL: 'http://localhost:8087',
+                baseURL: BASE_URL,
                 headers: headers,
                 httpsAgent: httpsAgent,
                 timeout: 30000
