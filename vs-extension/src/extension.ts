@@ -10,11 +10,11 @@ import { JobLogsPanelProvider } from './app/pipeline/job-logs-panel-provider';
 export function activate(context: vscode.ExtensionContext) {
 	console.log('Essedum AI Platform extension is now active!');
 
-	// Create Keycloak configuration
+	// Create Keycloak configuration (updated to match working login URL)
 	const keycloakConfig: KeycloakConfig = {
 		issuerUri: 'https://aiplatform.az.ad.idemo-ppc.com:8443/realms/ESSEDUM',
 		clientId: 'essedum-45',
-		scope: 'openid email profile'
+		scope: 'openid email'  // Match the working scope
 	};
 
 	// Create authentication service

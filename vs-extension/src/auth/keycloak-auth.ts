@@ -253,17 +253,54 @@ export class KeycloakAuthService {
     }
 
     /**
-     * Fallback to manual token input if device flow is not supported
+     * Enhanced manual authentication with working redirect URI
      */
     private async performManualTokenAuth(): Promise<TokenResponse> {
-        // Open Keycloak in browser for manual authentication
-        const loginUrl = `${this.config.issuerUri}/protocol/openid-connect/auth?client_id=${this.config.clientId}&response_type=code&scope=${this.config.scope}&redirect_uri=urn:ietf:wg:oauth:2.0:oob`;
+        // Use the working redirect URI from the application configuration
+        const workingRedirectUri = 'https://essedum.az.ad.idemo-ppc.com/index.html';
+        
+        // Build the authentication URL without PKCE (client doesn't support it)
+        const authParams = new URLSearchParams({
+            response_type: 'code',
+            client_id: this.config.clientId,
+            redirect_uri: workingRedirectUri,
+            scope: this.config.scope
+            // No PKCE parameters - client doesn't support them
+        });
+        
+        const loginUrl = `${this.config.issuerUri}/protocol/openid-connect/auth?${authParams.toString()}`;
+        
+        // Show detailed instructions to the user
+        const choice = await vscode.window.showInformationMessage(
+            'Manual Authentication Required',
+            {
+                detail: `Opening the Keycloak login page with the exact same configuration as your working web application.
+
+Steps:
+1. Click "Open Browser" to go to the login page
+2. Complete the login process normally
+3. You'll be redirected to the application page: ${workingRedirectUri}
+4. Open browser developer tools (F12)
+5. Go to Application > Local Storage or Session Storage
+6. Find and copy the access token
+7. Paste it in the next dialog
+
+This URL uses the same parameters as your working application (no PKCE).`,
+                modal: true
+            },
+            'Open Browser',
+            'Cancel'
+        );
+        
+        if (choice !== 'Open Browser') {
+            throw new Error('Authentication cancelled by user');
+        }
         
         await vscode.env.openExternal(vscode.Uri.parse(loginUrl));
         
         // Ask user to manually copy the token
         const result = await vscode.window.showInputBox({
-            prompt: 'After logging in, please paste the access token here',
+            prompt: 'After logging in, copy the access token from browser storage and paste it here (F12 > Application > Local Storage)',
             placeHolder: 'Paste your access token...',
             password: true,
             ignoreFocusOut: true
@@ -273,7 +310,7 @@ export class KeycloakAuthService {
             throw new Error('Authentication cancelled');
         }
         
-        // Create a mock token response (you might need to adjust this based on your needs)
+        // Create a token response from manually entered token
         const tokens: TokenResponse = {
             access_token: result.trim(),
             refresh_token: '', // Will be empty in manual mode
@@ -297,17 +334,10 @@ export class KeycloakAuthService {
         // Reset the auth promise to ensure fresh authentication
         this.authPromise = undefined;
         
-        // Check if device flow is supported
-        const supportsDeviceFlow = await this.isDeviceFlowSupported();
-        
-        if (supportsDeviceFlow) {
-            console.log('Using device flow for fresh authentication');
-            return await this.performDeviceFlow();
-        } else {
-            console.log('Device flow not supported, using manual authentication');
-            vscode.window.showWarningMessage('Device flow not supported by this Keycloak server. Using manual authentication.');
-            return await this.performManualTokenAuth();
-        }
+        // Skip device flow check since we know it's disabled for this client
+        console.log('Using manual authentication with working redirect URI');
+        vscode.window.showInformationMessage('Opening browser for authentication using the same configuration as the web application.');
+        return await this.performManualTokenAuth();
     }
 
     /**
@@ -325,16 +355,9 @@ export class KeycloakAuthService {
             return this.authPromise;
         }
 
-        // Check if device flow is supported
-        const supportsDeviceFlow = await this.isDeviceFlowSupported();
-        
-        if (supportsDeviceFlow) {
-            this.authPromise = this.performDeviceFlow();
-        } else {
-            console.log('Device flow not supported, falling back to manual authentication');
-            vscode.window.showWarningMessage('Device flow not supported by this Keycloak server. Using manual authentication.');
-            this.authPromise = this.performManualTokenAuth();
-        }
+        // Skip device flow check since we know it's disabled for this client
+        console.log('Using manual authentication with working redirect URI');
+        this.authPromise = this.performManualTokenAuth();
         
         try {
             const tokens = await this.authPromise;
