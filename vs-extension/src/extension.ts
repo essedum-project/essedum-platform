@@ -2,7 +2,6 @@
 import * as vscode from 'vscode';
 import { PipelineCardsProvider } from './app/pipeline/pipeline-cards';
 import { KeycloakAuthService, KeycloakConfig } from './auth/keycloak-auth';
-import { ImprovedKeycloakAuthService } from './auth/improved-keycloak-auth';
 import { EssedumFileSystemProvider } from './providers/essedum-file-provider';
 import { JobLogsPanelProvider } from './app/pipeline/job-logs-panel-provider';
 import { initializeSSLBypass, setupAxiosDefaults, BASE_URL } from './core/constants/api-config';
@@ -23,7 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
 	};
 
 	// Create improved authentication service with automatic OAuth flow
-	const authService = new ImprovedKeycloakAuthService(keycloakConfig, context);
+	const authService = new KeycloakAuthService(keycloakConfig, context);
 
 	// Create Essedum file system provider
 	const essedumFileProvider = new EssedumFileSystemProvider('');

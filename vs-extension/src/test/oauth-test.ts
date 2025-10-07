@@ -4,7 +4,7 @@
  */
 
 import * as vscode from 'vscode';
-import { ImprovedKeycloakAuthService, KeycloakConfig } from '../auth/improved-keycloak-auth';
+import { KeycloakAuthService, KeycloakConfig } from '../auth/keycloak-auth';
 import { OAuthAuthServer } from '../auth/oauth-auth-server';
 
 export async function testOAuthFlow(): Promise<void> {
@@ -35,7 +35,7 @@ export async function testOAuthFlow(): Promise<void> {
         } as any;
         
         // Create the authentication service
-        const authService = new ImprovedKeycloakAuthService(testConfig, mockContext);
+        const authService = new KeycloakAuthService(testConfig, mockContext);
         
         console.log('✅ Authentication service created successfully');
         
