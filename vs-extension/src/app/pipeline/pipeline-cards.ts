@@ -4,6 +4,7 @@ import axios from 'axios';
 import * as https from 'https';
 import * as path from 'path';
 import * as fs from 'fs';
+import FormData from 'form-data';
 import { EssedumFileSystemProvider } from '../../providers/essedum-file-provider';
 import { JobLogsViewer } from './job-logs-viewer';
 import { API_ENDPOINTS, createSecureAxiosConfig, createHTTPSAgent, BASE_URL, initializeSSLBypass } from '../../core/constants/api-config';
@@ -87,6 +88,9 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     private organization: string = 'leo1311';
     private filter: string = '';
     private selectedAdapterType: string[] = [];
+    private editingScripts?: Map<string, any>; // Track editing sessions
+    private script: string[] = []; // Track script lines for editing
+    private scriptContent: string = ''; // Store current script content
     private selectedTag: string[] = [];
     private loading: boolean = false;
     private cards: PipelineCard[] = [];
@@ -181,6 +185,12 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                         break;
                     case 'generateScripts':
                         await this.generatePipelineScripts(message.cardId);
+                        break;
+                    case 'editScript':
+                        await this.editScript(message.cardId, message.fileName, message.currentContent);
+                        break;
+                    case 'saveScript':
+                        await this.saveScript(message.cardId, message.fileName, message.content);
                         break;
                     case 'logout':
                         await this.handleLogout();
@@ -1568,6 +1578,7 @@ if __name__ == "__main__":
                 <div class="section-title">Actions</div>
                 <div class="actions-grid">
                     <button class="btn btn-primary" onclick="runScript()">Run Pipeline</button>
+                    <button class="btn btn-secondary" onclick="editScript()">Edit Script</button>
                     <button class="btn btn-secondary" onclick="copyScript()">Copy Script</button>
                     <button class="btn btn-secondary" onclick="refreshScripts()">Refresh Scripts</button>
                     <button class="btn btn-secondary" onclick="viewLogs()">View Logs</button>
@@ -1597,6 +1608,16 @@ if __name__ == "__main__":
                     vscode.postMessage({
                         command: 'copyScript',
                         fileName: 'current_script' // You can enhance this to track current file
+                    });
+                }
+
+                function editScript() {
+                    // For now, we'll use a simplified approach where we get the generated script
+                    // In the future, this could be enhanced to work with specific script files
+                    vscode.postMessage({
+                        command: 'editScript',
+                        fileName: 'generated_script.py',
+                        currentContent: 'Generated script content will be loaded...'
                     });
                 }
 
@@ -1798,10 +1819,50 @@ if __name__ == "__main__":
         try {
             console.log('Generating script for:', streamItem.name);
             
-            // Step 1: Save JSON (Angular saveJson pattern)
+            // Step 1: Create/upload script file FIRST (matching browser behavior)
+            // Use edited script content if available, otherwise generate fresh content
+            console.log('🔧 Preparing script content for pipeline:', streamItem.name);
+            console.log('🔍 DEBUG: Script state check:');
+            console.log('🔍   this.scriptContent exists?', !!this.scriptContent);
+            console.log('🔍   this.scriptContent length:', this.scriptContent ? this.scriptContent.length : 'undefined');
+            console.log('🔍   this.script exists?', !!this.script);
+            console.log('🔍   this.script length:', this.script ? this.script.length : 'undefined');
+            
+            if (this.scriptContent && this.scriptContent.length > 0) {
+                console.log('🔍   scriptContent preview (first 200 chars):', this.scriptContent.substring(0, 200) + '...');
+            }
+            if (this.script && this.script.length > 0) {
+                console.log('🔍   script[0] preview:', this.script[0].substring(0, 100) + '...');
+            }
+            
+            let scriptContent: string;
+            
+            if (this.scriptContent && this.scriptContent.length > 0) {
+                // User has saved script content - use it
+                scriptContent = this.scriptContent;
+                console.log('� ✅ Using saved script content from editor');
+                console.log('� Saved script preview (first 200 chars):', scriptContent.substring(0, 200) + '...');
+            } else if (this.script && this.script.length > 0) {
+                // User has edited the script and it's still in memory - use it
+                scriptContent = this.script.join('\n');
+                console.log('📝 ✅ Using current this.script content from active editing session');
+                console.log('📊 Current script preview (first 200 chars):', scriptContent.substring(0, 200) + '...');
+            } else {
+                // No edited content - generate fresh script
+                console.log('� Generating fresh script content for pipeline:', streamItem.name);
+                scriptContent = await this.generatePipelineScript(streamItem.name);
+                console.log('📊 Generated script preview (first 200 chars):', scriptContent.substring(0, 200) + '...');
+            }
+            
+            const fileName = `${streamItem.name}_${this.organization}.py`;
+            console.log('📤 Creating script file FIRST:', fileName);
+            await this.createScriptFile(streamItem.name, scriptContent, fileName);
+            
+            // Step 2: Save JSON (Angular saveJson pattern)
+            console.log('💾 Saving JSON for streaming service...');
             await this.saveJson(streamItem, true);
             
-            // Step 2: Check for connection nodes and update datasources if needed
+            // Step 3: Check for connection nodes and update datasources if needed
             let jsonContent = streamItem.json_content;
             if (typeof jsonContent === 'string') {
                 jsonContent = JSON.parse(jsonContent);
@@ -1842,13 +1903,36 @@ if __name__ == "__main__":
                 }
             }
             
-            // Step 3: Save pipeline JSON and trigger execution
-            const saveJsonResponse = await this.savePipelineJSON(streamItem.name, streamItem.json_content);
+            // Step 4: Execute pipeline directly (matching browser behavior)
+            console.log('🚀 Executing pipeline:', streamItem.name);
             
-            // Step 4: Trigger pipeline execution
-            // const executionResult = await this.triggerEvent(saveJsonResponse.path || '', streamItem, selectedRunType);
+            // Extract parameters from selectedRunType
+            const isLocal = selectedRunType.type === 'Local' ? 'true' : 'false';
+            const runtime = selectedRunType.type === 'Local' ? 'Local' : 'REMOTE';
+            const datasource = selectedRunType.dsName || selectedRunType.dsAlias || '';
+            const alias = streamItem.alias || streamItem.name;
             
-            return saveJsonResponse;
+            console.log('🎯 Pipeline execution parameters:', {
+                alias: alias,
+                name: streamItem.name,
+                type: streamItem.type || 'NativeScript',
+                isLocal: isLocal,
+                runtime: runtime,
+                datasource: datasource
+            });
+            
+            const executionResult = await this.runPipeline(
+                alias,
+                streamItem.name,
+                streamItem.type || 'NativeScript',
+                isLocal === 'true' ? 'Local' : 'REMOTE',
+                datasource,
+                '{}',
+                'undefined'
+            );
+            
+            console.log('✅ Pipeline execution completed:', executionResult);
+            return executionResult;
             
         } catch (error: any) {
             console.error('Error in generateScript:', error);
@@ -1963,36 +2047,334 @@ if __name__ == "__main__":
     }
 
     private async generatePipelineScript(pipelineName: string): Promise<string> {
-        const httpsAgent = new https.Agent({
-            rejectUnauthorized: false
-        });
+        // Generate the exact Python script content from your curl example
+        const generatedScript = `import os
+import json
+import requests
+import shutil
+import boto3
+import stat
+import sys
+import logging as logger
 
-        const headers = {
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Authorization': `Bearer ${this._token}`,
-            'Content-Type': 'application/json',
-            'Project': '2',
-            'ProjectName': this.organization,
-            'X-Requested-With': 'Leap',
-            'roleId': '1',
-            'roleName': 'IT Portfolio Manager',
-            'Referer': BASE_URL,
-            'Sec-Fetch-Dest': 'empty',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Site': 'same-origin'
-        };
+logger.basicConfig(level=logger.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%y/%m/%d %H:%M:%S')
+ 
+arguments = sys.argv
+argsDict = {}
+for arg in arguments:
+    try:
+        argsDict[arg.split(':')[0]] = (':').join(arg.split(':')[1:])
+    except IndexError as e:
+        logger.error(f"Invalid argument format: {arg}. Error: {str(e)}")
+        continue
 
-        // This method would generate the script - implementation depends on your script generation logic
-        // For now, return a simple script template
-        const generatedScript = `# Generated script for ${pipelineName}
-# Organization: ${this.organization}
-# Generated at: ${new Date().toISOString()}
+dataset_details = json.loads(argsDict.get("dataset"))
 
-print("Pipeline ${pipelineName} execution started")
-# Add your pipeline logic here
-print("Pipeline ${pipelineName} execution completed")
-`;
+def parse_nested_json(obj):
+    print();
+    if isinstance(obj, str):
+        try:
+            parsed = json.loads(obj)
+            return parse_nested_json(parsed)
+        except (json.JSONDecodeError, TypeError):
+            return obj
+    elif isinstance(obj, dict):
+        return {k: parse_nested_json(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [parse_nested_json(elem) for elem in obj]
+    else:
+        return obj
+        
+
+parsed_data_details = parse_nested_json(dataset_details)
+
+
+
+datasetid_param = parsed_data_details.get("name")
+org_param = parsed_data_details.get("organization")
+
+
+def s3_download_data(end_point_url,access_key,secret_key,bucket, obj_key, local_path):
+
+    \"""
+
+    Download a folder from S3 to a local path.
+
+    \"""
+
+    session = boto3.session.Session()
+
+    s3c = session.client(
+
+        aws_access_key_id=access_key,
+
+        aws_secret_access_key=secret_key,
+
+        endpoint_url=end_point_url,
+
+        service_name="s3",
+
+        use_ssl=False,
+
+    )    
+
+    resource = boto3.resource(
+
+        aws_access_key_id=access_key,
+
+        aws_secret_access_key=secret_key,
+
+        endpoint_url=end_point_url,
+
+        service_name="s3",
+
+        use_ssl=False,
+        )
+    # List all objects in the folder
+
+    response = s3c.list_objects_v2(Bucket=bucket, Prefix=obj_key)
+
+    objects = response.get('Contents', [])
+
+    for obj in objects:
+
+        key = obj['Key']
+        # if key == "icets-sv":
+        print("Downloading file: ", key)
+        file_path = os.path.join(local_path, key)
+        try:
+            if not os.path.exists(os.path.dirname(file_path)):
+                os.makedirs(os.path.dirname(file_path))
+            if not obj.get('Key').endswith('/'):
+                resource.meta.client.download_file(bucket, obj.get('Key'), file_path)
+                print(f"Downloaded {key} to {file_path}")
+        except PermissionError as e:
+            print(f"PermissionError: {e} - Skipping {key}")    
+    return file_path    
+            
+def DatasetExtractor():    #python-script Data
+
+    #get dataset configurations 
+
+    #  = getdatasetconfig(dataset_id=datasetid_param, organization=org_param)   
+
+    dataset_type = parsed_data_details['datasource']['type']  
+
+    print("dataset_type",dataset_type)
+
+    if dataset_type == 'S3':
+
+        connection_dict = parsed_data_details['datasource']['connectionDetails']
+
+        print("Fetched Connection Details")
+
+        s3_access_key = connection_dict['accessKey']
+
+        s3_secret_key = connection_dict['secretKey']
+
+        s3_end_point_url = connection_dict['url'] 
+
+        attribute = parsed_data_details['attributes']
+
+        bucket = attribute['bucket']               
+        path = attribute['path']   
+
+        obj_key = attribute['object']  
+
+        key = f'{path}/{obj_key}'
+
+        local_path = "/home/useradmin/py-job-executer/tmp/sample_linear"
+
+        def on_rm_error(func, path, exc_info):
+
+            if not os.access(path, os.W_OK):
+
+                os.chmod(path, stat.S_IWUSR)
+
+                func(path)
+
+            else:
+
+                raise
+
+        if os.path.exists(local_path):
+
+            shutil.rmtree(local_path, onerror=on_rm_error)
+
+        if not os.path.exists(local_path):
+
+            os.makedirs(local_path)
+
+        os.listdir(local_path)
+        
+        file_path = s3_download_data(end_point_url = s3_end_point_url, access_key = s3_access_key, secret_key=s3_secret_key, bucket = bucket, obj_key = key, local_path = local_path)
+        return file_path
+    else:
+        print("Type not supported...")
+    return local_path
+    
+    
+
+saved_path = DatasetExtractor()
+print(saved_path)
+
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+import joblib
+from pathlib import Path
+
+
+
+full_path = Path(saved_path)
+parent_path = full_path.parent
+
+# Read data from CSV file
+data = pd.read_csv(saved_path)
+X = data[['YearsExperience']]  # Replace with your feature columns
+y = data['Salary']  # Replace with your target column
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create and train the model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Save the model to a file
+joblib.dump(model, os.path.join(parent_path, "salary_linear_regression_model.pkl"))
+
+print("Model saved to 'salary_linear_regression_model.pkl'")
+
+
+import boto3
+
+import uuid
+
+import os
+
+from botocore.client import Config
+
+from pathlib import Path
+
+import requests
+
+import json
+ 
+ 
+ 
+
+ 
+def upload_model(bucket_name, model_name, folder_name):
+
+    \"""
+
+    model_name: name of the model that saved.
+
+    folder_name: Name of the folder to be created inside bucket.
+
+    Returns:
+
+    Uploaded path of the model to s3.
+
+    \"""
+
+    datasource_details = parsed_data_details.get("datasource")
+
+    connection_details = datasource_details.get('connectionDetails')
+
+
+    access_key = connection_details['accessKey']
+
+    secret_key = connection_details['secretKey']
+
+    region = connection_details['Region']
+
+    endpoint_url = connection_details['url']
+
+    current_file_path = os.path.join(parent_path, "salary_linear_regression_model.pkl")
+
+    unique_id = str(uuid.uuid4())
+ 
+    _, file_extension = os.path.splitext(model_name)
+ 
+    new_model_file_name = f"{os.path.splitext(model_name)[0]}_{unique_id}{file_extension}"
+ 
+    s3_key = f"{folder_name.rstrip('/')}/{new_model_file_name}"
+ 
+    s3 = boto3.client('s3',
+
+                      endpoint_url = endpoint_url,
+
+                      region_name = region,
+
+                      aws_access_key_id = access_key,
+
+                      aws_secret_access_key = secret_key,
+
+                      config = Config(signature_version = "s3v4")
+
+                      )
+
+    try:
+
+        with open(current_file_path, 'rb') as script_file:
+
+            s3.upload_fileobj(script_file, bucket_name, s3_key)
+
+        model_headers = {'access-token': 'aec127c2-c984-33f6-9a3a-355xd1dof097', 'project': '2', 'Content-Type': 'application/json'}
+
+        payload = {
+
+                        "Model Name": model_name,
+
+                        "Version": "1",
+
+                        "Container ImageUri": folder_name,
+
+                        "Storage Type": "s3",
+
+                        "Storage Uri": s3_key
+
+                    }
+
+        model_card = "https://essedum.az.ad.idemo-ppc.com/api/aip/service/v1/models/register?project=leo1311&isCached=true&adapter_instance=local"
+
+        try:
+
+            model_response = requests.post(url = model_card, headers=model_headers, json=payload, verify=False)
+
+        except Exception as e:
+
+            print("Got Exception when registering model.", {e})
+ 
+        print(f"Script uploaded to minio://aipmodels/{s3_key}")
+ 
+        file = Path(model_name)
+
+        if file.exists():
+
+            file.unlink()
+
+            print("deleted in local")
+
+    except Exception as e:
+
+        print(f"Failed to upload and Got an exception:{e}")
+ 
+    return s3_key
+ 
+ 
+uploaded_path = upload_model('aipmodels','salary_linear_regression_model', "models/linear")
+
+print(f"The model got uploaded {uploaded_path} here")
+
+
+
+
+
+ `;
 
         console.log('Script generated for pipeline:', pipelineName);
         return generatedScript;
@@ -2180,16 +2562,449 @@ print("Pipeline ${pipelineName} execution completed")
         }
     }
 
+    // Handle script content changes - save to scriptContent property
+    private onScriptChange(scriptLines: string[]): void {
+        console.log('📝 🔄 onScriptChange called with', scriptLines.length, 'lines');
+        console.log('📝 First 3 lines preview:');
+        scriptLines.slice(0, 3).forEach((line, index) => {
+            console.log(`  ${index + 1}: ${line.substring(0, 80)}${line.length > 80 ? '...' : ''}`);
+        });
+        
+        this.script = scriptLines;
+        this.scriptContent = scriptLines.join('\n');
+        
+        console.log('📝 ✅ onScriptChange completed:');
+        console.log('📝   this.script.length:', this.script.length);
+        console.log('📝   this.scriptContent.length:', this.scriptContent.length);
+        console.log('�   scriptContent preview (first 200 chars):', this.scriptContent.substring(0, 200) + '...');
+        
+        // Log specific changes that indicate user editing
+        if (this.script.length > 0) {
+            const hasCustomChanges = this.script.some(line => 
+                line.includes('Parsing nested JSON...') || 
+                line.includes('print("') ||
+                line.includes('# Custom') ||
+                line.includes('Starting the script')
+            );
+            if (hasCustomChanges) {
+                console.log('✅ onScriptChange: Detected user customizations in script content');
+            } else {
+                console.log('⚠️ onScriptChange: No user customizations detected');
+            }
+        }
+    }
+
+    // Edit script functionality - opens script content in VS Code editor with auto-save
+    private async editScript(cardId: string, fileName: string, currentContent: string): Promise<void> {
+        try {
+            console.log('🔧 Opening script for editing with auto-save:', fileName);
+            
+            // Find the pipeline by cardId
+            const pipeline = this.allCards.find((card: PipelineCard) => card.id === cardId);
+            if (!pipeline) {
+                throw new Error('Pipeline not found');
+            }
+            
+            // Generate fresh script content for editing
+            let scriptContent: string;
+            if (currentContent && currentContent !== 'Generated script content will be loaded...') {
+                scriptContent = currentContent;
+            } else {
+                console.log('🔄 Generating fresh script content for editing...');
+                scriptContent = await this.generatePipelineScript(pipeline.name);
+            }
+            
+            // Split content into lines for editing (similar to Angular pattern)
+            const scriptLines = scriptContent.split('\n');
+            this.onScriptChange(scriptLines);
+            
+            // Create a new untitled document with the script content
+            const document = await vscode.workspace.openTextDocument({
+                content: scriptContent,
+                language: 'python'
+            });
+            
+            // Open the document in VS Code editor
+            const editor = await vscode.window.showTextDocument(document);
+            
+            // Set up auto-save functionality - listen for document changes
+            const changeDisposable = vscode.workspace.onDidChangeTextDocument(async (event) => {
+                if (event.document === document) {
+                    console.log('📝 Script content changed, triggering onScriptChange...');
+                    
+                    // Get updated content and split into lines (Angular pattern)
+                    const updatedContent = event.document.getText();
+                    const updatedLines = updatedContent.split('\n');
+                    
+                    // Call onScriptChange like Angular code editor
+                    this.onScriptChange(updatedLines);
+                    
+                    console.log('✅ Script state updated with', this.script.length, 'lines');
+                }
+            });
+            
+            // Set up save listener - automatically upload when user saves
+            const saveDisposable = vscode.workspace.onDidSaveTextDocument(async (savedDocument) => {
+                if (savedDocument === document) {
+                    console.log('💾 📥 SAVE EVENT TRIGGERED - Document saved, auto-uploading script changes...');
+                    console.log('📄 Saved document URI:', savedDocument.uri.toString());
+                    console.log('📄 Target document URI:', document.uri.toString());
+                    console.log('📄 URIs match:', savedDocument.uri.toString() === document.uri.toString());
+                    
+                    try {
+                        // Get the saved content and update scriptContent
+                        const savedContent = savedDocument.getText();
+                        const savedLines = savedContent.split('\n');
+                        
+                        console.log('📝 Saved content length:', savedContent.length);
+                        console.log('📝 Saved lines count:', savedLines.length);
+                        console.log('📝 First 200 chars of saved content:', savedContent.substring(0, 200) + '...');
+                        
+                        // Update script state - this will set this.scriptContent
+                        this.onScriptChange(savedLines);
+                        
+                        console.log('📊 After onScriptChange:');
+                        console.log('📊   this.scriptContent length:', this.scriptContent.length);
+                        console.log('📊   this.script length:', this.script.length);
+                        console.log('📊   scriptContent preview:', this.scriptContent.substring(0, 200) + '...');
+                        
+                        // Generate filename with timestamp
+                        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                        const scriptFileName = `${pipeline.name}_${this.organization}.py`;
+                        
+                        console.log('📤 About to upload file:', scriptFileName);
+                        
+                        // Auto-upload using Angular pattern
+                        await this.createNativeFileWithFormData(pipeline.name, scriptFileName);
+                        
+                        // Show success message
+                        vscode.window.showInformationMessage(
+                            `✅ Script changes auto-uploaded successfully to ${scriptFileName}!`
+                        );
+                        
+                        // Update stream item and save (following Angular pattern)
+                        await this.updateStreamItemAfterFileUpload(pipeline, scriptFileName);
+                        
+                    } catch (error: any) {
+                        console.error('❌ Auto-upload failed:', error);
+                        vscode.window.showErrorMessage(`Auto-upload failed: ${error.message}`);
+                    }
+                } else {
+                    console.log('📄 ⚠️ Save event for different document, ignoring...');
+                    console.log('📄 Saved document URI:', savedDocument.uri.toString());
+                    console.log('📄 Target document URI:', document.uri.toString());
+                }
+            });
+            
+            // Clean up listeners when document is closed
+            const closeDisposable = vscode.workspace.onDidCloseTextDocument((closedDocument) => {
+                if (closedDocument === document) {
+                    console.log('📄 Script editor closed, cleaning up listeners');
+                    changeDisposable.dispose();
+                    saveDisposable.dispose();
+                    closeDisposable.dispose();
+                }
+            });
+            
+            // Show initial instructions
+            vscode.window.showInformationMessage(
+                `📝 Script editor opened for "${pipeline.name}". Changes will be auto-uploaded when you save (Ctrl+S).`
+            );
+            
+        } catch (error: any) {
+            console.error('❌ Failed to open script for editing:', error);
+            vscode.window.showErrorMessage(`Failed to open script for editing: ${error.message}`);
+        }
+    }
+
+    // Update stream item after file upload (following Angular pattern)
+    private async updateStreamItemAfterFileUpload(pipeline: PipelineCard, fileName: string): Promise<void> {
+        try {
+            console.log('🔄 Updating stream item after file upload (Angular pattern)...');
+            
+            // Simulate Angular pattern: update data.files[0], arguments, etc.
+            const streamItem = {
+                name: pipeline.name,
+                organization: this.organization,
+                json_content: JSON.stringify({
+                    elements: [{ 
+                        attributes: {
+                            files: [fileName],
+                            filetype: 'Python3',
+                            arguments: {},
+                            usedSecrets: []
+                        }
+                    }],
+                    environment: [],
+                    default_runtime: 'REMOTE'
+                })
+            };
+            
+            console.log('📊 Stream item to update:', streamItem);
+            
+            // Call the update streaming service API
+            await this.updateStreamingService(streamItem);
+            
+            console.log('✅ Stream item updated successfully');
+            
+        } catch (error: any) {
+            console.error('❌ Failed to update stream item:', error);
+            throw error;
+        }
+    }
+
+    // Save script functionality - uploads modified script content (Angular pattern)
+    private async saveScript(cardId: string, fileName: string, content: string): Promise<void> {
+        try {
+            console.log('💾 Saving script:', fileName);
+            
+            // Find the pipeline by cardId
+            const pipeline = this.allCards.find((card: PipelineCard) => card.id === cardId);
+            if (!pipeline) {
+                throw new Error('Pipeline not found');
+            }
+            
+            // Update script content from editor (similar to Angular onScriptChange)
+            const scriptLines = content.split('\n');
+            this.onScriptChange(scriptLines);
+            
+            // Create FormData following Angular pattern
+            await this.createNativeFileWithFormData(pipeline.name, fileName);
+            
+            vscode.window.showInformationMessage(`Script ${fileName} uploaded successfully!`);
+            
+            // Refresh the pipeline details to show updated content
+            await this.viewScriptDetails(cardId);
+            
+        } catch (error: any) {
+            console.error('❌ Failed to save script:', error);
+            vscode.window.showErrorMessage(`Failed to save script: ${error.message}`);
+        }
+    }
+
+    /**
+     * Create native file with FormData (Angular pattern implementation)
+     * Follows the exact pattern from Angular: script.join('\n') -> Blob -> FormData
+     */
+    private async createNativeFileWithFormData(pipelineName: string, fileName: string): Promise<any> {
+        try {
+            console.log('🚀 Starting createNativeFileWithFormData (Angular pattern)...');
+            console.log('📁 Pipeline Name:', pipelineName);
+            console.log('📄 File Name:', fileName);
+            console.log('📝 this.script lines count:', this.script.length);
+            console.log('📝 this.scriptContent length:', this.scriptContent.length);
+
+            // Check if script content exists - prefer scriptContent over script lines
+            let scriptToUpload: string;
+            if (this.scriptContent && this.scriptContent.length > 0) {
+                scriptToUpload = this.scriptContent;
+                console.log('✅ Using this.scriptContent (preferred)');
+            } else if (this.script && this.script.length > 0) {
+                scriptToUpload = this.script.join('\n');
+                console.log('⚠️ Falling back to this.script.join()');
+            } else {
+                throw new Error('No script content available. Please ensure script is loaded first.');
+            }
+
+            // Debug: Print script content details
+            console.log('📊 Script content to upload (first 500 chars):');
+            console.log(scriptToUpload.substring(0, 500));
+            console.log('📏 Total script length:', scriptToUpload.length);
+            console.log('📝 Number of lines in scriptToUpload:', scriptToUpload.split('\n').length);
+
+            // Script list to file (exact Angular pattern)
+            const formData = new FormData();
+            
+            // Create the form data exactly like the working curl command
+            formData.append('scriptFile', Buffer.from(scriptToUpload, 'utf8'), {
+                filename: 'blob',
+                contentType: 'text/plain'
+            });
+            
+            console.log('✅ FormData created successfully');
+
+            const httpsAgent = new https.Agent({
+                rejectUnauthorized: false
+            });
+
+            // Headers matching the exact working curl command
+            const headers = {
+                'accept': 'application/json, text/plain, */*',
+                'accept-language': 'en-US,en;q=0.9',
+                'authorization': `Bearer ${this._token}`,
+                'origin': 'https://essedum.az.ad.idemo-ppc.com',
+                'priority': 'u=1, i',
+                'project': '2',
+                'projectname': this.organization,
+                'referer': 'https://essedum.az.ad.idemo-ppc.com/',
+                'roleid': '1',
+                'rolename': 'IT Portfolio Manager',
+                'sec-ch-ua': '"Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"',
+                'sec-fetch-dest': 'empty',
+                'sec-fetch-mode': 'cors',
+                'sec-fetch-site': 'same-origin',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
+                'x-requested-with': 'Leap',
+                // Don't manually set content-type, let FormData handle it
+                ...formData.getHeaders()
+            };
+
+            const url = `https://essedum.az.ad.idemo-ppc.com/api/aip/file/create/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
+
+            console.log('🌐 API URL:', url);
+            console.log('🔑 Authorization token length:', this._token?.length || 0);
+            console.log('📋 Request headers:');
+            Object.keys(headers).forEach(key => {
+                if (key !== 'authorization') {
+                    console.log(`  ${key}: ${(headers as any)[key]}`);
+                } else {
+                    console.log(`  ${key}: Bearer [REDACTED_${this._token?.length || 0}_CHARS]`);
+                }
+            });
+
+            console.log('📤 Sending POST request to upload script...');
+            const response = await axios.post(url, formData, {
+                headers: headers,
+                httpsAgent: httpsAgent,
+                timeout: 30000,
+                maxBodyLength: Infinity,
+                maxContentLength: Infinity
+            });
+
+            console.log('✅ Native file created successfully (Angular pattern)!');
+            console.log('📊 Response Status:', response.status);
+            console.log('📋 Response Data:', response.data);
+            console.log('📈 Response Headers:', response.headers);
+            return response.data;
+
+        } catch (error: any) {
+            console.error('❌ Failed to create native file:', error);
+            
+            let errorMessage = 'Failed to create native file';
+            if (error.response) {
+                console.error('📋 Native file creation error details:', {
+                    status: error.response.status,
+                    statusText: error.response.statusText,
+                    data: error.response.data,
+                    headers: error.response.headers
+                });
+                errorMessage = `Server error: ${error.response.status} - ${error.response.statusText}`;
+                if (error.response.data) {
+                    errorMessage += ` - ${JSON.stringify(error.response.data)}`;
+                }
+            } else if (error.request) {
+                console.error('🌐 Request error:', error.request);
+                errorMessage = 'Network error - could not reach the server';
+            } else {
+                console.error('⚙️ Setup error:', error.message);
+                errorMessage = `Request setup error: ${error.message}`;
+            }
+            
+            throw new Error(errorMessage);
+        }
+    }
+
+    /**
+     * Upload/create script file to server - missing API from browser calls
+     * API: /api/aip/file/create/{pipelineName}/{org}/Python3
+     */
+    private async createScriptFile(pipelineName: string, scriptContent: string, fileName: string): Promise<any> {
+        try {
+            console.log('🚀 Starting createScriptFile API call...');
+            console.log('📁 Pipeline Name:', pipelineName);
+            console.log('📄 File Name:', fileName);
+            console.log('📏 Script Content Length:', scriptContent.length);
+
+            const httpsAgent = new https.Agent({
+                rejectUnauthorized: false
+            });
+
+            // Create FormData for multipart/form-data request
+            const form = new FormData();
+            
+            // Add the script file as blob (matching browser behavior)
+            form.append('scriptFile', Buffer.from(scriptContent, 'utf8'), {
+                filename: 'blob',
+                contentType: 'text/plain'
+            });
+
+            const headers = {
+                'accept': 'application/json, text/plain, */*',
+                'accept-language': 'en-US,en;q=0.9',
+                'authorization': `Bearer ${this._token}`,
+                'origin': 'https://essedum.az.ad.idemo-ppc.com',
+                'priority': 'u=1, i',
+                'project': '2',
+                'projectname': this.organization,
+                'referer': 'https://essedum.az.ad.idemo-ppc.com/',
+                'roleid': '1',
+                'rolename': 'IT Portfolio Manager',
+                'sec-ch-ua': '"Microsoft Edge";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"',
+                'sec-fetch-dest': 'empty',
+                'sec-fetch-mode': 'cors',
+                'sec-fetch-site': 'same-origin',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
+                'x-requested-with': 'Leap',
+                ...form.getHeaders()
+            };
+
+            const url = `https://essedum.az.ad.idemo-ppc.com/api/aip/file/create/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
+
+            console.log('🌐 API URL:', url);
+            console.log('📋 Headers:', JSON.stringify(headers, null, 2));
+            console.log('📄 Script content being uploaded (length):', scriptContent.length);
+            console.log('📊 Script preview (first 300 chars):', scriptContent.substring(0, 300) + '...');
+            const response = await axios.post(url, form, {
+                headers: headers,
+                httpsAgent: httpsAgent,
+                timeout: 30000
+            });
+
+            console.log('✅ Script file created successfully!');
+            console.log('📊 Response Status:', response.status);
+            console.log('📋 Response Data:', response.data);
+            return response.data;
+
+        } catch (error: any) {
+            console.error('❌ Failed to create script file:', error);
+            
+            let errorMessage = 'Failed to create script file';
+            if (error.response) {
+                console.error('📋 File creation error details:', {
+                    status: error.response.status,
+                    statusText: error.response.statusText,
+                    data: error.response.data
+                });
+                errorMessage = `Server error: ${error.response.status} - ${error.response.statusText}`;
+            } else if (error.request) {
+                console.error('🌐 Request error:', error.request);
+                errorMessage = 'Network error - could not reach the server';
+            } else {
+                console.error('⚙️ Setup error:', error.message);
+                errorMessage = `Request setup error: ${error.message}`;
+            }
+            
+            throw new Error(errorMessage);
+        }
+    }
+
     // Angular pattern runPipeline method - matches Angular implementation exactly
     private async runPipeline(
         alias: string,
         cname: string,
         pipelineType: string,
-        isLocal: string = 'true',
+        isLocal: string = 'REMOTE',
         datasource: string = '',
         params: string = '{}',
-        workerlogId: string = ''
+        workerlogId: string = 'undefined'
     ): Promise<any> {
+        console.log('🔥 Starting runPipeline API call...');
+        console.log('📋 Parameters:', { alias, cname, pipelineType, isLocal, datasource, params, workerlogId });
+
         const org = this.organization;
         const offset = new Date().getTimezoneOffset();
 
@@ -2197,50 +3012,76 @@ print("Pipeline ${pipelineName} execution completed")
             rejectUnauthorized: false
         });
 
+        // Headers matching your exact curl request
         const headers = {
-            'Accept': 'text/plain, */*',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Authorization': `Bearer ${this._token}`,
-            'Project': '2',
-            'ProjectName': this.organization,
-            'X-Requested-With': 'Leap',
-            'roleId': '1',
-            'roleName': 'IT Portfolio Manager',
-            'Referer': BASE_URL,
-            'Sec-Fetch-Dest': 'empty',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Site': 'same-origin',
-            'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-US,en;q=0.9',
+            'authorization': `Bearer ${this._token}`,
+            'content-type': 'application/json',
+            'priority': 'u=1, i',
+            'project': '2',
+            'projectname': org,
+            'referer': 'https://essedum.az.ad.idemo-ppc.com/',
+            'roleid': '1',
+            'rolename': 'IT Portfolio Manager',
+            'sec-ch-ua': '"Microsoft Edge";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
             'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Windows"'
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
+            'x-requested-with': 'Leap'
         };
 
-        // Build URL matching Angular pattern: /service/v1/pipeline/run-pipeline/{pipelineType}/{cname}/{org}/{isLocal}?offset={offset}
-        const url = `/api/aip/service/v1/pipeline/run-pipeline/${pipelineType}/${cname}/${org}/${isLocal}?offset=${offset}`;
-
-        // Build query parameters
+        // Build URL exactly matching your curl: run-pipeline/{pipelineType}/{cname}/{org}/{isLocal}
+        const baseUrl = `https://essedum.az.ad.idemo-ppc.com/api/aip/service/v1/pipeline/run-pipeline/${pipelineType}/${cname}/${org}/${isLocal}`;
+        
+        // Build query parameters exactly matching your curl
         const queryParams = new URLSearchParams();
+        queryParams.append('offset', offset.toString());
         queryParams.append('param', params);
         queryParams.append('alias', alias);
-        if (datasource) {
+        if (datasource && datasource !== '') {
             queryParams.append('datasource', datasource);
         }
-        if (workerlogId) {
+        if (workerlogId && workerlogId !== 'undefined') {
             queryParams.append('workerlogId', workerlogId);
+        } else {
+            queryParams.append('workerlogId', 'undefined');
         }
 
-        const fullUrl = `${url}&${queryParams.toString()}`;
+        const fullUrl = `${baseUrl}?${queryParams.toString()}`;
 
-        const response = await axios.get(fullUrl, {
-            baseURL: BASE_URL,
-            headers: headers,
-            httpsAgent: httpsAgent,
-            timeout: 60000,
-            responseType: 'text'
-        });
+        console.log('🌐 Full API URL:', fullUrl);
+        console.log('📋 Request Headers:', JSON.stringify(headers, null, 2));
 
-        console.log('Pipeline execution result:', response.data);
-        return response.data;
+        try {
+            const response = await axios.get(fullUrl, {
+                headers: headers,
+                httpsAgent: httpsAgent,
+                timeout: 60000,
+                responseType: 'text'
+            });
+
+            console.log('✅ Pipeline execution successful!');
+            console.log('📊 Response Status:', response.status);
+            console.log('📋 Response Data:', response.data);
+            return response.data;
+
+        } catch (error: any) {
+            console.error('❌ Pipeline execution failed:', error);
+            
+            if (error.response) {
+                console.error('📋 Error Response:', {
+                    status: error.response.status,
+                    statusText: error.response.statusText,
+                    data: error.response.data
+                });
+            }
+            
+            throw error;
+        }
     }
 
     /**
@@ -2254,6 +3095,16 @@ print("Pipeline ${pipelineName} execution completed")
         }
 
         const pipelineName = card.alias || card.name;
+
+        console.log('🚀 runPipelineScript called for:', pipelineName);
+        console.log('🔍 runPipelineScript: DEBUG - Checking script state at start...');
+        console.log('🔍 runPipelineScript: this.script exists?', !!this.script);
+        console.log('🔍 runPipelineScript: this.script length:', this.script ? this.script.length : 'undefined');
+        console.log('🔍 runPipelineScript: this.scriptContent length:', this.scriptContent ? this.scriptContent.length : 'undefined');
+        
+        if (this.script && this.script.length > 0) {
+            console.log('🔍 runPipelineScript: First line of this.script:', this.script[0].substring(0, 100));
+        }
 
         try {
             await vscode.window.withProgress({

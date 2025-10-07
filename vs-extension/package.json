@@ -52,7 +52,7 @@
           "when": "true"
         },
         {
-          "command": "essedum.openInternalJobLogs", 
+          "command": "essedum.openInternalJobLogs",
           "when": "true"
         },
         {
@@ -68,7 +68,7 @@
         },
         {
           "command": "essedum.showJobLogsInTerminal",
-          "when": "view == essedum-sidebar", 
+          "when": "view == essedum-sidebar",
           "group": "navigation@2"
         }
       ]
@@ -117,7 +117,7 @@
           "description": "Allow self-signed SSL certificates for Keycloak authentication (recommended for development environments)"
         },
         "essedum.auth.showCertificateWarnings": {
-          "type": "boolean", 
+          "type": "boolean",
           "default": true,
           "description": "Show warnings when accepting self-signed certificates"
         }
@@ -137,6 +137,7 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
+    "@types/form-data": "^2.2.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
     "@types/vscode": "^1.103.0",
@@ -153,6 +154,7 @@
   "dependencies": {
     "axios": "^1.6.7",
     "crypto-js": "^4.2.0",
+    "form-data": "^4.0.4",
     "node-fetch": "^2.7.0"
   }
 }
