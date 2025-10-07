@@ -22,6 +22,10 @@
         "title": "Login to Essedum"
       },
       {
+        "command": "essedum.logout",
+        "title": "Logout from Essedum"
+      },
+      {
         "command": "essedum.checkAuth",
         "title": "Check Authentication Status"
       },
@@ -120,6 +124,18 @@
           "type": "boolean",
           "default": true,
           "description": "Show warnings when accepting self-signed certificates"
+        },
+        "essedum.auth.oauthPort": {
+          "type": "number",
+          "default": 8085,
+          "description": "Port number for the OAuth callback server (must match Keycloak client configuration)",
+          "minimum": 1024,
+          "maximum": 65535
+        },
+        "essedum.auth.autoLogin": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically attempt login when the extension starts"
         }
       }
     }

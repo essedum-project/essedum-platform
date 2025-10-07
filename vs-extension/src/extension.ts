@@ -2,6 +2,7 @@
 import * as vscode from 'vscode';
 import { PipelineCardsProvider } from './app/pipeline/pipeline-cards';
 import { KeycloakAuthService, KeycloakConfig } from './auth/keycloak-auth';
+import { ImprovedKeycloakAuthService } from './auth/improved-keycloak-auth';
 import { EssedumFileSystemProvider } from './providers/essedum-file-provider';
 import { JobLogsPanelProvider } from './app/pipeline/job-logs-panel-provider';
 import { initializeSSLBypass, setupAxiosDefaults, BASE_URL } from './core/constants/api-config';
@@ -18,11 +19,11 @@ export function activate(context: vscode.ExtensionContext) {
 	const keycloakConfig: KeycloakConfig = {
 		issuerUri: 'https://aiplatform.az.ad.idemo-ppc.com:8443/realms/ESSEDUM',
 		clientId: 'essedum-45',
-		scope: 'openid email'  // Match the working scope
+		scope: 'email'  // Match the working scope from your URL
 	};
 
-	// Create authentication service
-	const authService = new KeycloakAuthService(keycloakConfig, context);
+	// Create improved authentication service with automatic OAuth flow
+	const authService = new ImprovedKeycloakAuthService(keycloakConfig, context);
 
 	// Create Essedum file system provider
 	const essedumFileProvider = new EssedumFileSystemProvider('');
@@ -115,6 +116,25 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
+	// Add logout command
+	context.subscriptions.push(
+		vscode.commands.registerCommand('essedum.logout', async () => {
+			try {
+				await authService.logout();
+				
+				// Clear pipeline provider token
+				if (pipelineCardsProvider) {
+					pipelineCardsProvider.updateToken('');
+					essedumFileProvider.updateToken('');
+				}
+				
+				vscode.window.showInformationMessage('Successfully logged out from Essedum AI Platform.');
+			} catch (error: any) {
+				vscode.window.showErrorMessage(`Logout failed: ${error.message}`);
+			}
+		})
+	);
+
 	// Register command to run pipeline (can be called from file provider)
 	context.subscriptions.push(
 		vscode.commands.registerCommand('essedum.runPipeline', async (pipelineName?: string) => {
@@ -161,9 +181,9 @@ export function activate(context: vscode.ExtensionContext) {
 						throw new Error('Authentication cancelled by user');
 					}
 
-					progress.report({ increment: 20, message: 'Starting fresh authentication...' });
+					progress.report({ increment: 20, message: 'Starting automatic OAuth authentication...' });
 
-					// Force fresh authentication (this will clear tokens and re-authenticate)
+					// Force fresh authentication using the improved OAuth flow
 					const newTokens = await authService.forceAuthentication();
 
 					progress.report({ increment: 80, message: 'Authentication successful, updating services...' });
@@ -463,4 +483,15 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() { }
+export async function deactivate() {
+	console.log('Essedum AI Platform extension is being deactivated');
+	
+	// Clean up auth service resources if available
+	try {
+		// Note: authService is not accessible in this scope, but VS Code will handle cleanup
+		// The improved auth service will clean up automatically when the extension context is disposed
+		console.log('Extension deactivation completed');
+	} catch (error) {
+		console.error('Error during extension deactivation:', error);
+	}
+}
