@@ -34,6 +34,7 @@ export const API_ENDPOINTS = {
     
     // Streaming services
     STREAMING_SERVICES: `${API_BASE_URL}/streamingServices`,
+    STREAMING_SERVICES_UPDATE: `${BASE_URL}/api/aip/service/v1/streamingServices/update`,
     
     // Job and runtime endpoints
     JOB_RUNTIME_TYPES: `${API_BASE_URL}/jobs/runtime/types`,

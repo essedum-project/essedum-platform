@@ -176,6 +176,12 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                     case 'viewLogs':
                         await this.viewPipelineLogs(message.cardId);
                         break;
+                    case 'openScript':
+                        await this.openScriptFromDetails(message.cardId, message.fileIndex);
+                        break;
+                    case 'generateScripts':
+                        await this.generatePipelineScripts(message.cardId);
+                        break;
                     case 'logout':
                         await this.handleLogout();
                         break;
@@ -775,8 +781,8 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                 if (scripts && scripts.files && scripts.files.length > 0) {
                     progress.report({ increment: 80, message: 'Creating script viewer...' });
 
-                    // Create and show script viewer
-                    await this.createScriptViewer(card, scripts);
+                    // Send pipeline details to webview
+                    await this.sendPipelineDetailsToWebview(card, scripts);
 
                     progress.report({ increment: 100, message: 'Complete!' });
 
@@ -798,7 +804,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                         setTimeout(() => this.viewScriptDetails(cardId), 2000);
                     } else if (selection === 'View Template Only') {
                         // Show the script viewer with mock data
-                        await this.createScriptViewer(card, scripts);
+                        await this.sendPipelineDetailsToWebview(card, scripts);
                     }
                 }
             } catch (error: any) {
@@ -832,7 +838,7 @@ if __name__ == "__main__":
                     runTypes: [{ type: 'Local', dsAlias: '', dsName: 'Local Runtime', dsCapability: '' }]
                 };
 
-                await this.createScriptViewer(card, mockScripts);
+                await this.sendPipelineDetailsToWebview(card, mockScripts);
             }
         });
     }
@@ -1650,49 +1656,310 @@ if __name__ == "__main__":
     }
 
     // Angular-pattern helper methods for pipeline execution
-    private async savePipelineJson(pipelineName: string, jsonContent: any): Promise<void> {
-        if (!this._fileProvider) {
-            throw new Error('File provider not available');
-        }
-
+    private async savePipelineJSON(name: string, jsonContent: string): Promise<any> {
         const httpsAgent = new https.Agent({
             rejectUnauthorized: false
         });
 
         const headers = {
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Authorization': `Bearer ${this._token}`,
-            'Content-Type': 'multipart/form-data',
-            'Project': '2',
-            'ProjectName': this.organization,
-            'X-Requested-With': 'Leap',
-            'roleId': '1',
-            'roleName': 'IT Portfolio Manager',
-            'Referer': BASE_URL,
-            'Sec-Fetch-Dest': 'empty',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Site': 'same-origin',
-            'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Windows"'
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-US,en;q=0.9',
+            'authorization': `Bearer ${this._token}`,
+            'content-type': 'application/json; charset=UTF-8',
+            'connection': 'keep-alive',
+            'origin': 'https://essedum.az.ad.idemo-ppc.com',
+            'project': '2',
+            'projectname': this.organization,
+            'referer': 'https://essedum.az.ad.idemo-ppc.com/',
+            'roleid': '1',
+            'rolename': 'IT Portfolio Manager',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
+            'x-requested-with': 'Leap'
         };
 
-        const formData = new FormData();
-        const jsonBlob = new Blob([JSON.stringify(jsonContent, null, 2)], { type: 'application/json' });
-        formData.append('scriptFile', jsonBlob, `${pipelineName}.json`);
-        formData.append('filetype', 'json');
-        formData.append('pipelineName', pipelineName);
-        formData.append('organization', this.organization);
+        try {
+            // Angular pattern: /streamingServices/saveJson/{name}/{org}
+            const response = await axios.post(
+                `https://essedum.az.ad.idemo-ppc.com/api/aip/service/v1/streamingServices/saveJson/${name}/${this.organization}`,
+                jsonContent,
+                {
+                    headers: headers,
+                    httpsAgent: httpsAgent,
+                    timeout: 30000
+                }
+            );
 
-        const response = await axios.post(`/api/aip/file/create/${pipelineName}/${this.organization}/json?file=${pipelineName}.json`, formData, {
-            baseURL: BASE_URL,
-            headers: headers,
-            httpsAgent: httpsAgent,
-            timeout: 30000
+            console.log('Pipeline JSON saved successfully:', response.data);
+            return response.data;
+        } catch (error: any) {
+            console.error('Failed to save pipeline JSON:', error);
+            throw new Error(`Failed to save pipeline JSON: ${error.message}`);
+        }
+    }
+
+    private async getDatasourceByName(name: string, org?: string): Promise<any> {
+        const organization = org || this.organization;
+        const httpsAgent = new https.Agent({
+            rejectUnauthorized: false
         });
 
-        console.log('JSON file saved successfully:', response.data);
+        const headers = {
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-US,en;q=0.9',
+            'authorization': `Bearer ${this._token}`,
+            'content-type': 'application/json; charset=UTF-8',
+            'project': '2',
+            'projectname': organization,
+            'referer': 'https://essedum.az.ad.idemo-ppc.com/',
+            'roleid': '1',
+            'rolename': 'IT Portfolio Manager',
+            'x-requested-with': 'Leap'
+        };
+
+        try {
+            // Angular pattern: /service/v1/fetchDatasource with name and org params
+            const response = await axios.get(
+                'https://essedum.az.ad.idemo-ppc.com/api/aip/service/v1/fetchDatasource',
+                {
+                    params: {
+                        name: name,
+                        org: organization
+                    },
+                    headers: headers,
+                    httpsAgent: httpsAgent,
+                    timeout: 30000
+                }
+            );
+
+            console.log('Datasource fetched:', response.data);
+            return response.data;
+        } catch (error: any) {
+            console.error('Failed to get datasource by name:', error);
+            throw error;
+        }
+    }
+
+    private async saveJson(streamItem: any, run: boolean = false): Promise<void> {
+        try {
+            console.log('Saving JSON for stream item:', streamItem.name);
+            
+            // Parse and clean up JSON content similar to Angular
+            let jsonContent = streamItem.json_content;
+            if (typeof jsonContent === 'string') {
+                try {
+                    jsonContent = JSON.parse(jsonContent);
+                } catch (parseError) {
+                    console.warn('Failed to parse json_content, using as-is');
+                }
+            }
+            
+            // Clean up elements (remove context and connattributes like Angular)
+            if (jsonContent && jsonContent.elements) {
+                jsonContent.elements.forEach((element: any) => {
+                    delete element.context;
+                    delete element.connattributes;
+                    
+                    // Clean up script arrays
+                    if (element.attributes && element.attributes.script) {
+                        const script = [];
+                        for (let i = 0; i < element.attributes.script.length; i++) {
+                            if (element.attributes.script[i] && element.attributes.script[i].length > 0) {
+                                script.push(element.attributes.script[i]);
+                            }
+                        }
+                        element.attributes.script = script;
+                    }
+                });
+            }
+            
+            // Update the stream item with cleaned JSON
+            streamItem.json_content = JSON.stringify(jsonContent);
+            streamItem.organization = this.organization;
+            
+            // Update the streaming service
+            await this.updateStreamingService(streamItem);
+            
+            if (run) {
+                console.log('JSON saved successfully for pipeline run');
+            }
+            
+        } catch (error: any) {
+            console.error('Error in saveJson:', error);
+            if (run) {
+                throw new Error(`Canvas not updated due to error: ${error.message}`);
+            }
+        }
+    }
+
+    private async generateScript(streamItem: any, selectedRunType: any): Promise<any> {
+        try {
+            console.log('Generating script for:', streamItem.name);
+            
+            // Step 1: Save JSON (Angular saveJson pattern)
+            await this.saveJson(streamItem, true);
+            
+            // Step 2: Check for connection nodes and update datasources if needed
+            let jsonContent = streamItem.json_content;
+            if (typeof jsonContent === 'string') {
+                jsonContent = JSON.parse(jsonContent);
+            }
+            
+            let connNodeExist = false;
+            let connNodeIndex = -1;
+            
+            if (jsonContent.elements) {
+                jsonContent.elements.forEach((element: any, index: number) => {
+                    if (element.name === 'Connection') {
+                        connNodeExist = true;
+                        connNodeIndex = index;
+                    }
+                });
+            }
+            
+            if (connNodeExist && connNodeIndex >= 0) {
+                // Handle connection node datasource update
+                const connectionElement = jsonContent.elements[connNodeIndex];
+                if (connectionElement.attributes && connectionElement.attributes.connections) {
+                    try {
+                        const datasource = await this.getDatasourceByName(
+                            connectionElement.attributes.connections.name,
+                            connectionElement.attributes.connections.organization || this.organization
+                        );
+                        
+                        if (datasource && datasource.length > 0) {
+                            connectionElement.attributes.connections = datasource[0];
+                            streamItem.json_content = JSON.stringify(jsonContent);
+                            
+                            // Update streaming service with new connection data
+                            await this.updateStreamingService(streamItem);
+                        }
+                    } catch (error) {
+                        console.warn('Could not update datasource connection:', error);
+                    }
+                }
+            }
+            
+            // Step 3: Save pipeline JSON and trigger execution
+            const saveJsonResponse = await this.savePipelineJSON(streamItem.name, streamItem.json_content);
+            
+            // Step 4: Trigger pipeline execution
+            // const executionResult = await this.triggerEvent(saveJsonResponse.path || '', streamItem, selectedRunType);
+            
+            return saveJsonResponse;
+            
+        } catch (error: any) {
+            console.error('Error in generateScript:', error);
+            throw error;
+        }
+    }
+
+    private async triggerEvent(path: string, streamItem: any, selectedRunType: any): Promise<any> {
+        try {
+            console.log('Triggering pipeline event with path:', path);
+            
+            // Step 1: Trigger script generation event (Angular pattern)
+            const httpsAgent = new https.Agent({
+                rejectUnauthorized: false
+            });
+
+            const headers = {
+                'Accept': 'application/json, text/plain, */*',
+                'Authorization': `Bearer ${this._token}`,
+                'Content-Type': 'application/json',
+                'Project': '2',
+                'ProjectName': this.organization,
+                'X-Requested-With': 'Leap',
+            };
+
+            const body = {
+                pipelineName: streamItem.name,
+                scriptPath: Array.isArray(path) ? path[0] : path
+            };
+
+            console.log('Triggering generateScript event with body:', body);
+
+            // Angular triggerPostEvent pattern: generateScript_{type}
+            const eventType = `generateScript_${streamItem.type}`;
+            const eventResponse = await axios.post(`/api/aip/service/v1/events/trigger/${eventType}`, body, {
+                baseURL: BASE_URL,
+                headers: headers,
+                httpsAgent: httpsAgent,
+                timeout: 60000
+            });
+
+            const eventId = eventResponse.data.eventId || eventResponse.data.id || eventResponse.data;
+            console.log('Script generation event triggered with ID:', eventId);
+
+            // Step 2: Wait for script generation to complete (Angular getEventStatus pattern)
+            let attempts = 0;
+            const maxAttempts = 30;
+
+            while (attempts < maxAttempts) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                try {
+                    const statusResponse = await axios.get(`/api/aip/service/v1/events/status/${eventId}`, {
+                        baseURL: BASE_URL,
+                        headers: headers,
+                        httpsAgent: httpsAgent,
+                        timeout: 10000
+                    });
+
+                    const status = statusResponse.data.status || statusResponse.data;
+                    console.log(`Script generation status: ${status} (attempt ${attempts + 1}/${maxAttempts})`);
+
+                    if (status === 'COMPLETED') {
+                        console.log('Script generation completed successfully');
+                        break;
+                    } else if (status === 'ERROR') {
+                        throw new Error('Script generation failed on server');
+                    }
+                } catch (statusError) {
+                    console.warn('Status check failed, continuing...', statusError);
+                }
+
+                attempts++;
+            }
+
+            if (attempts >= maxAttempts) {
+                console.warn('Script generation taking longer than expected, proceeding with pipeline run...');
+            }
+
+            // Step 3: Run pipeline (Angular runPipeline pattern)
+            const pipelineAlias = streamItem.alias || streamItem.name;
+            const pipelineName = streamItem.name;
+            const passType = streamItem.type === 'Binary' || streamItem.type === 'NativeScript' ? streamItem.type : 'DragAndDrop';
+            const isLocal = selectedRunType.type === 'Local' ? 'true' : 'false';
+            const datasource = selectedRunType.dsName || '';
+            const params = 'generated';
+
+            console.log('Running pipeline with params:', {
+                alias: pipelineAlias,
+                name: pipelineName,
+                type: passType,
+                isLocal: isLocal,
+                datasource: datasource,
+                params: params
+            });
+
+            const executionResult = await this.runPipeline(
+                pipelineAlias,
+                pipelineName,
+                passType,
+                isLocal,
+                datasource,
+                params,
+                ''
+            );
+
+            return executionResult;
+        } catch (error: any) {
+            console.error('Error in triggerEvent:', error);
+            throw error;
+        }
     }
 
     private async generatePipelineScript(pipelineName: string): Promise<string> {
@@ -1773,81 +2040,144 @@ print("Pipeline ${pipelineName} execution completed")
     }
 
     private async updateStreamingService(streamItem: any): Promise<void> {
-        const httpsAgent = new https.Agent({
-            rejectUnauthorized: false
-        });
+        try {
+            console.log('Updating streaming service:', streamItem.name);
+            
+            // Create HTTPS agent with SSL bypass
+            const httpsAgent = new https.Agent({
+                rejectUnauthorized: false,
+                requestCert: false
+            });
 
-        const headers = {
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Authorization': `Bearer ${this._token}`,
-            'Connection': 'keep-alive',
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Origin': BASE_URL,
-            'Project': '2',
-            'ProjectName': this.organization,
-            'Referer': BASE_URL,
-            'Sec-Fetch-Dest': 'empty',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Site': 'same-origin',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
-            'X-Requested-With': 'Leap',
-            'roleId': '1',
-            'roleName': 'IT Portfolio Manager',
-            'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Windows"'
-        };
+            // Headers matching the working API call exactly
+            const headers = {
+                'accept': 'application/json, text/plain, */*',
+                'accept-language': 'en-US,en;q=0.9',
+                'authorization': `Bearer ${this._token}`,
+                'content-type': 'application/json; charset=UTF-8',
+                'connection': 'keep-alive',
+                'origin': 'https://essedum.az.ad.idemo-ppc.com',
+                'priority': 'u=1, i',
+                'project': '2',
+                'projectname': this.organization,
+                'referer': 'https://essedum.az.ad.idemo-ppc.com/',
+                'roleid': '1',
+                'rolename': 'IT Portfolio Manager',
+                'sec-ch-ua': '"Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"',
+                'sec-fetch-dest': 'empty',
+                'sec-fetch-mode': 'cors',
+                'sec-fetch-site': 'same-origin',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
+                'x-requested-with': 'Leap'
+            };
 
-        // Build the exact payload structure from the curl command
-        const requestBody = {
-            cid: streamItem.cid || 22,
-            alias: streamItem.alias || streamItem.name,
-            name: streamItem.name,
-            description: streamItem.description || '',
-            job_id: streamItem.job_id || null,
-            json_content: streamItem.json_content || JSON.stringify({
-                elements: [{
-                    attributes: {
-                        filetype: 'Python3',
-                        files: [`${streamItem.name}_${this.organization}.py`],
-                        arguments: [{
-                            name: 'dataset',
-                            value: 'LEOTST_P68920',
-                            type: 'Dataset',
-                            alias: 'LEOTST_P68920',
-                            index: '1'
+            // Build the exact payload structure from the working curl command
+            let jsonContent = streamItem.json_content;
+            if (typeof jsonContent === 'string') {
+                try {
+                    jsonContent = JSON.parse(jsonContent);
+                } catch (parseError) {
+                    console.warn('Failed to parse existing json_content, using default');
+                    jsonContent = {
+                        elements: [{
+                            attributes: {
+                                filetype: 'Python3',
+                                files: [`${streamItem.name}_${this.organization}.py`],
+                                arguments: [{
+                                    name: 'dataset',
+                                    value: `${streamItem.name}_DATASET`,
+                                    type: 'Dataset',
+                                    alias: `${streamItem.name}_DATASET`,
+                                    index: '1'
+                                }],
+                                dataset: [],
+                                usedSecrets: []
+                            }
                         }],
-                        dataset: [],
-                        usedSecrets: []
-                    }
-                }],
-                environment: [],
-                default_runtime: {
-                    dsAlias: 'Sample-Remote',
-                    dsName: 'LEOMN-RM22869',
-                    type: 'REMOTE'
+                        environment: [],
+                        default_runtime: {
+                            dsAlias: 'Sample-Remote-Test',
+                            dsName: `${streamItem.name}_RUNTIME`,
+                            type: 'REMOTE'
+                        }
+                    };
                 }
-            }),
-            type: streamItem.type || 'NativeScript',
-            organization: this.organization,
-            created_date: streamItem.created_date || new Date().toISOString(),
-            created_by: streamItem.created_by || 'demouser',
-            tags: streamItem.tags || null,
-            version: streamItem.version || 1,
-            interfacetype: streamItem.interfacetype || 'pipeline',
-            is_template: streamItem.is_template || false,
-            is_app: streamItem.is_app || false
-        };
+            }
 
-        const response = await axios.put('/api/aip/service/v1/streamingServices/update', requestBody, {
-            baseURL: BASE_URL,
-            headers: headers,
-            httpsAgent: httpsAgent,
-            timeout: 30000
-        });
+            // Ensure json_content is properly stringified for the API
+            const requestBody = {
+                cid: streamItem.cid || streamItem.id || 21,
+                alias: streamItem.alias || streamItem.name,
+                name: streamItem.name,
+                description: streamItem.description || '',
+                job_id: streamItem.job_id || null,
+                json_content: typeof jsonContent === 'string' ? jsonContent : JSON.stringify(jsonContent),
+                type: streamItem.type || 'NativeScript',
+                organization: this.organization,
+                created_date: streamItem.created_date || streamItem.createdDate || new Date().toISOString(),
+                created_by: streamItem.created_by || streamItem.createdBy || 'demouser',
+                tags: streamItem.tags || null,
+                version: typeof streamItem.version === 'number' ? streamItem.version : (streamItem.version || 2),
+                interfacetype: streamItem.interfacetype || 'pipeline',
+                is_template: streamItem.is_template || false,
+                is_app: streamItem.is_app || false
+            };
 
-        console.log('Streaming service updated:', response.data);
+            console.log('Request payload:', JSON.stringify(requestBody, null, 2));
+
+            // Make the API call with absolute URL
+            const response = await axios.put(
+                'https://essedum.az.ad.idemo-ppc.com/api/aip/service/v1/streamingServices/update',
+                requestBody,
+                {
+                    headers: headers,
+                    httpsAgent: httpsAgent,
+                    timeout: 30000,
+                    validateStatus: function (status) {
+                        return status >= 200 && status < 300; // Accept only 2xx status codes
+                    }
+                }
+            );
+
+            console.log('Streaming service update response:', {
+                status: response.status,
+                statusText: response.statusText,
+                data: response.data,
+                headers: response.headers
+            });
+
+            return response.data;
+
+        } catch (error: any) {
+            console.error('Failed to update streaming service - Full error:', error);
+            
+            // Provide detailed error information
+            let errorMessage = 'Failed to update streaming service';
+            
+            if (error.response) {
+                console.error('Response error details:', {
+                    status: error.response.status,
+                    statusText: error.response.statusText,
+                    data: error.response.data,
+                    headers: error.response.headers
+                });
+                
+                errorMessage = `Server error: ${error.response.status} - ${error.response.statusText}`;
+                if (error.response.data && error.response.data.message) {
+                    errorMessage += ` - ${error.response.data.message}`;
+                }
+            } else if (error.request) {
+                console.error('Request error:', error.request);
+                errorMessage = 'Network timeout or connection refused';
+            } else {
+                console.error('Setup error:', error.message);
+                errorMessage = `Request setup error: ${error.message}`;
+            }
+            
+            throw new Error(errorMessage);
+        }
     }
 
     // Angular pattern runPipeline method - matches Angular implementation exactly
@@ -1913,6 +2243,9 @@ print("Pipeline ${pipelineName} execution completed")
         return response.data;
     }
 
+    /**
+     * Angular-style runScript workflow: runScript -> generateScript -> saveJson -> savePipelineJSON -> triggerEvent -> runPipeline
+     */
     private async runPipelineScript(cardId: string, runType: string): Promise<void> {
         const card = this.cards.find(c => c.id === cardId);
         if (!card) {
@@ -1929,96 +2262,73 @@ print("Pipeline ${pipelineName} execution completed")
                 cancellable: false
             }, async (progress) => {
 
-                // Parse runType to extract runtime info (format: "type-dsAlias")
-                const runTypeParts = runType.split('-');
-                const runtimeType = runTypeParts[0] || 'Local';
-                const dsName = runTypeParts[1] || '';
-
-                // Get streaming service data
-                progress.report({ increment: 10, message: 'Getting streaming service data...' });
-                const streamItem = await this.getStreamingServicesByName(card.name, this.organization);
-
-                // Step 1: Save Pipeline JSON (Angular saveJson() pattern)
-                progress.report({ increment: 25, message: 'Saving pipeline configuration...' });
-                const pipelineConfig = {
-                    name: pipelineName,
-                    alias: card.alias,
-                    organization: this.organization,
-                    runtime: runtimeType,
-                    dsName: dsName,
-                    scriptType: 'generated',
-                    createdAt: new Date().toISOString(),
-                    metadata: card
+                // Parse runType to extract runtime info (Angular pattern)
+                let selectedRunType = {
+                    type: 'Local',
+                    dsName: '',
+                    dsAlias: ''
                 };
+                
+                if (typeof runType === 'string') {
+                    const runTypeParts = runType.split('-');
+                    selectedRunType.type = runTypeParts[0] || 'Local';
+                    selectedRunType.dsAlias = runTypeParts[1] || '';
+                    selectedRunType.dsName = runTypeParts[1] || '';
+                } else if (typeof runType === 'object' && runType) {
+                    selectedRunType.type = (runType as any).type || 'Local';
+                    selectedRunType.dsAlias = (runType as any).dsAlias || '';
+                    selectedRunType.dsName = (runType as any).dsName || '';
+                }
 
-                await this.savePipelineJson(pipelineName, pipelineConfig);
+                // Step 1: Get streaming service data (Angular getStreamingServicesByName pattern)
+                progress.report({ increment: 20, message: 'Getting streaming service data...' });
+                const streamItem = await this.getStreamingServicesByName(card.name, this.organization);
+                
+                if (!streamItem) {
+                    throw new Error('Could not find streaming service for pipeline');
+                }
 
-                // Step 2: Generate Pipeline Script (Angular generateScript() pattern)
-                progress.report({ increment: 45, message: 'Generating pipeline script...' });
-                const generatedScript = await this.generatePipelineScript(pipelineName);
-                console.log('Generated script length:', generatedScript.length);
-
-                // Step 3: Trigger Pipeline Execution (Angular triggerEvent() pattern)
-                progress.report({ increment: 75, message: 'Triggering pipeline execution...' });
-                // Angular pattern: this.service.runPipeline(streamItem.alias || streamItem.name, streamItem.name, passType, selectedRunType.type, selectedRunType.dsName, "generated")
-                const pipelineAlias = streamItem.alias || streamItem.name;
-                const pipelineNameForExecution = streamItem.name;
-                const passType = 'Script'; // Pipeline type
-                const selectedRunType = { type: runtimeType === 'Local' ? 'true' : 'false', dsName: dsName };
-
-                const executionResult = await this.runPipeline(
-                    pipelineAlias,                    // alias
-                    pipelineNameForExecution,         // cname
-                    passType,                         // pipelineType
-                    selectedRunType.type,             // isLocal
-                    selectedRunType.dsName,           // datasource
-                    'generated',                      // params
-                    ''                                // workerlogId
-                );
-
-                // Step 4: Update Streaming Service (Angular updateStreamingService() pattern)
-                progress.report({ increment: 90, message: 'Updating streaming service...' });
-                await this.updateStreamingService(streamItem);
+                // Step 2: Follow Angular runScript -> generateScript workflow
+                progress.report({ increment: 60, message: 'Executing Angular workflow...' });
+                const executionResult = await this.generateScript(streamItem, selectedRunType);
 
                 progress.report({ increment: 100, message: 'Pipeline started successfully!' });
 
                 // Handle execution result
-                const jobId = executionResult.jobId || executionResult.id;
-                if (jobId) {
-                    // Create job status object
-                    const jobStatus: JobStatus = {
-                        jobId: jobId,
-                        correlationId: executionResult.correlationId,
-                        streamingService: pipelineName,
-                        jobStatus: 'RUNNING',
-                        type: runtimeType,
-                        runtime: dsName,
-                        submittedBy: 'Current User',
-                        submittedOn: new Date().toISOString(),
-                        pipelineName: pipelineName,
-                        organization: this.organization,
-                        logs: ''
-                    };
-
-                    // Show job status viewer
-                    await this.showJobStatusViewer(jobStatus, card);
-
-                    vscode.window.showInformationMessage(
-                        `Pipeline started successfully! Job ID: ${jobId}`,
-                        'View Status'
-                    ).then(selection => {
-                        if (selection === 'View Status') {
-                            this.showJobStatusViewer(jobStatus, card);
+                if (executionResult) {
+                    let jobId = null;
+                    
+                    if (typeof executionResult === 'string') {
+                        const jobIdMatch = executionResult.match(/job[_\s]*id[:\s]*([\w-]+)/i);
+                        if (jobIdMatch) {
+                            jobId = jobIdMatch[1];
                         }
-                    });
+                    } else if (typeof executionResult === 'object') {
+                        jobId = executionResult.jobId || executionResult.id || executionResult.job_id;
+                    }
+                    
+                    if (jobId) {
+                        const result = await vscode.window.showInformationMessage(
+                            `Pipeline "${pipelineName}" started successfully! Job ID: ${jobId}`,
+                            'View Logs',
+                            'OK'
+                        );
+                        
+                        if (result === 'View Logs') {
+                            await this.viewPipelineLogs(cardId);
+                        }
+                    } else {
+                        vscode.window.showInformationMessage(
+                            `Pipeline "${pipelineName}" started successfully!`
+                        );
+                    }
                 } else {
-                    vscode.window.showInformationMessage('Pipeline started successfully!');
+                    vscode.window.showInformationMessage(`Pipeline "${pipelineName}" started successfully!`);
                 }
             });
 
         } catch (error: any) {
             console.error('Pipeline run error:', error);
-
             let errorMessage = 'Failed to run pipeline';
             if (error.response) {
                 errorMessage = `Server error: ${error.response.status} - ${error.response.statusText}`;
@@ -2030,14 +2340,15 @@ print("Pipeline ${pipelineName} execution completed")
             } else {
                 errorMessage = `Request setup error: ${error.message}`;
             }
-
             vscode.window.showErrorMessage(`${errorMessage}: ${error.message}`);
         }
     }
 
     private async copyScriptToClipboard(cardId: string, fileName: string): Promise<void> {
         const card = this.cards.find(c => c.id === cardId);
-        if (!card) return;
+        if (!card) {
+            return;
+        }
 
         try {
             const scripts = await this.fetchPipelineScripts(card.alias || card.name);
@@ -2054,7 +2365,9 @@ print("Pipeline ${pipelineName} execution completed")
 
     private async refreshScripts(cardId: string): Promise<void> {
         const card = this.cards.find(c => c.id === cardId);
-        if (!card) return;
+        if (!card) {
+            return;
+        }
 
         try {
             await this.viewScriptDetails(cardId);
@@ -2066,7 +2379,9 @@ print("Pipeline ${pipelineName} execution completed")
 
     private async viewPipelineLogs(cardId: string): Promise<void> {
         const card = this.cards.find(c => c.id === cardId);
-        if (!card) return;
+        if (!card) {
+            return;
+        }
 
         try {
             // Create and show the job logs viewer with table interface similar to Angular
@@ -2973,6 +3288,48 @@ print("Pipeline ${pipelineName} execution completed")
             }
 
             throw new Error(`${errorMessage}: ${error.message}`);
+        }
+    }
+
+    private async sendPipelineDetailsToWebview(card: PipelineCard, scripts: PipelineScript): Promise<void> {
+        if (!this._view) {
+            vscode.window.showErrorMessage('Pipeline view not available');
+            return;
+        }
+
+        // Prepare run types data
+        const runTypes = scripts.runTypes || [{
+            type: 'Local',
+            dsAlias: '',
+            dsName: 'Local Runtime',
+            dsCapability: ''
+        }];
+
+        // Send pipeline details to webview
+        this._view.webview.postMessage({
+            command: 'showPipelineDetails',
+            pipeline: card,
+            scripts: scripts,
+            runTypes: runTypes
+        });
+    }
+
+    private async openScriptFromDetails(cardId: string, fileIndex: number): Promise<void> {
+        const card = this.cards.find(c => c.id === cardId);
+        if (!card) {
+            vscode.window.showErrorMessage('Pipeline not found');
+            return;
+        }
+
+        try {
+            const scripts = await this.fetchPipelineScripts(card.name);
+            if (scripts && scripts.files && scripts.files[fileIndex]) {
+                await this.openScriptInEditor(scripts.files[fileIndex]);
+            } else {
+                vscode.window.showErrorMessage('Script file not found');
+            }
+        } catch (error: any) {
+            vscode.window.showErrorMessage(`Failed to open script: ${error.message}`);
         }
     }
 }
