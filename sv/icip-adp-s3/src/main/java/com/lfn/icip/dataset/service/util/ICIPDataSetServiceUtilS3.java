@@ -67,6 +67,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.http.TlsTrustManagersProvider;
 import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.regions.Region;
@@ -74,6 +75,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import javax.imageio.ImageIO;
 import javax.net.ssl.SSLContext;
@@ -84,6 +86,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -97,6 +101,8 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component("s3ds")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -397,6 +403,98 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
         }
     }
 
+    public String downloadFile(ICIPDataset dataset) {
+        try {
+            JSONObject attr = new JSONObject(dataset.getAttributes());
+            String bucket       = attr.optString("bucket");
+            String remotePrefix = attr.optString("path");
+            String objectName   = attr.optString("object");
+
+            String downloadTo = attr.optString("downloadPath",
+                    attr.optString("localFilePath", ""));
+
+            String objectKey = Stream.of(remotePrefix, objectName)
+                    .filter(s -> s != null && !s.isBlank())
+                    .map(s -> s.replaceAll("^/+", "").replaceAll("/+$", ""))
+                    .collect(Collectors.joining("/"));
+
+            Path destination;
+            if (!downloadTo.isEmpty()) {
+                Path p = Paths.get(downloadTo);
+                if (Files.exists(p) && Files.isDirectory(p)) {
+                    destination = p.resolve(Paths.get(objectName).getFileName().toString());
+                } else {
+                    destination = p;
+                    if (destination.getParent() != null) {
+                        Files.createDirectories(destination.getParent());
+                    }
+                }
+            } else {
+                destination = Paths.get(System.getProperty("java.io.tmpdir"))
+                        .resolve(Paths.get(objectName).getFileName().toString());
+                Files.createDirectories(destination.getParent());
+            }
+
+            // If file exists, create a new copy with incremented suffix
+            destination = resolveUniqueFileName(destination);
+
+            try (S3Client s3 = buildS3Client(dataset)) {
+                logger.info("Downloading from s3://{}/{} to '{}'", bucket, objectKey, destination.toAbsolutePath());
+
+                software.amazon.awssdk.services.s3.model.GetObjectRequest get =  software.amazon.awssdk.services.s3.model.GetObjectRequest.builder()
+                        .bucket(bucket)
+                        .key(objectKey)
+                        .build();
+
+                s3.getObject(get, ResponseTransformer.toFile(destination));
+
+                logger.info("File downloaded successfully to '{}'", destination.toAbsolutePath());
+                return destination.toAbsolutePath().toString();
+            }
+
+        } catch (S3Exception e) {
+            logger.error("S3 error while downloading: {} (code: {})",
+                    e.awsErrorDetails().errorMessage(),
+                    e.awsErrorDetails().errorCode(), e);
+            return null;
+        } catch (Exception e) {
+            logger.error("Failed to download file from S3: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
+     * If file exists, append _copy1, _copy2, etc. until unique name is found.
+     */
+    private Path resolveUniqueFileName(Path original) {
+        if (!Files.exists(original)) {
+            return original;
+        }
+
+        String fileName = original.getFileName().toString();
+        String baseName;
+        String extension = "";
+
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex > 0) {
+            baseName = fileName.substring(0, dotIndex);
+            extension = fileName.substring(dotIndex);
+        } else {
+            baseName = fileName;
+        }
+
+        int counter = 1;
+        Path parent = original.getParent();
+        Path newPath;
+        do {
+            String newFileName = baseName + "_copy" + counter + extension;
+            newPath = parent.resolve(newFileName);
+            counter++;
+        } while (Files.exists(newPath));
+
+        return newPath;
+    }
+
     private JSONArray fetchFileFromAzure(ICIPDataset dataset, String blobName, int limit, int page)
             throws CsvValidationException, EssedumException, Exception {
         JSONObject attr = new JSONObject(dataset.getAttributes());
@@ -614,7 +712,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
         String secretKey = connectionDetails.optString(SECRET_KEY);
         String region = connectionDetails.optString(REGION_KEY);
 
-        String sessionToken = connectionDetails.optString(SESSION_TOKEN, "IQoJb3JpZ2luX2VjEPb//////////wEaCXVzLWVhc3QtMSJIMEYCIQD57GfR4hIZtF2VgHbaga8g4Yg5BK0dfLrQzgR/pL1UxQIhAIevdUGPRO0zriZpB9BfUvEBpipEJrx3ddSVAXShochKKp0DCI///////////wEQABoMMTAyNTg2OTk4MTU4Igw4MbprJq3OWtC10roq8QKeVLHLoYPCG+GP5BxNvydHGjuvcFpNlb9r1XItsaqL+XhM3cGCTN/NUCNKjTyCWINLjhBpmflNfBrsy+stlrmo7gPNvm1308yJ9q3jHLsvM5E3SpdKk9xYGF84KNwlDJQkuG+fiFl6pnGOqKNXA4LPnEU5t2EzXqssvJfDBHjck5+1h/L0E7cEzYu+R2udTLnvxOiH8o7lE3iX5cPygr9gd6EhqqWspVnSnlpOSpXXs9Vx9Rp4cf/0BGdxMsXoZque5O+BWCYX/jnWYsVFnr0qC9yb+V/QL5kGqPPfK5nUWz4EJSDXjFVEe+aLWqNNdHYv6Wt1orFe49qRWpHFGSlx2Buo0FNlM+2E3+tOcTaX4jC1eQ3krFwCU2Hkw/Bc8TB7OlFxsb9dGCufQbCsWVOKMhZ0Q8sfqPE97dhP6X32vbQ4az3JWS0I3jCJkSR0Dxlz0qhl2kB/uzg5WyMKpT72iQ5MaF0fgTvM2RzzXsSuSVEwyJGPxwY6pQGGKg7lpiBatm5sSJ9j00RVMONc5R+Hb54Iu+LiXYYVo00RRHa3TnyV5JfK4pS++ltKdQE8ti+ivytOnGxlhTHuqDguHmqSbkADoLiy/TVfXGKD+qp3ALfoshV4p9YQI/oYPuLDkGoLUVhgLJqUy9gtlXRvBc96XW7TbJCM9qmL+UepdSXIYPb3EFRp9+nhyjwXCP/I+r67MQla43lE2aion1Sx4Zo="); // optional
+        String sessionToken = connectionDetails.optString(SESSION_TOKEN, "IQoJb3JpZ2luX2VjEA0aCXVzLWVhc3QtMSJGMEQCIHYhZ8N0HMTtJ7KH0TNKw/Wq2+886Jy2DOGqnHObQr1WAiBk6KqPtc/qmQX674w6x/rywawwRpap7LqWGldabik84CqdAwim//////////8BEAAaDDEwMjU4Njk5ODE1OCIMQFLdE7GMOmBKD+6UKvECjs7OF60Y1ybQ+jxDJD/ShkUpfu9oOkk994Z7Jq9dakFbMyGaz6oUzDKoFuiPLqmFfSzYDqN78b0wD2dZLURKoO15+cZDCMuH8a1BEDcFtiNzBfJ669neOlIxXP6tY5pcoK7KPy0Z+vom1ZzfaXK1WgCaDgt2+lBGANKEuzg6a0O+4QM9seS/agV+TSmZhBpZFf5O1OtKkkbLNsMRl8Q9rivkTV0QPnDqDSFYrfFtPU06X+4cMQiTs9WMNyJ2doxNAjTc+KgGXjVWCrJXWidqUACYcDHXaG7xTNznLcC6TV2S9hp+eI6FO5FqlpkZt72ZTZ2u2NJHOhTf8rdraXQ85oWbW8yb0CeC3PbHR3+TdpRgtJZt6NR22IvHLhLDBg82AxktQ1rgLDrrDI1DtNcjnPnhnlhO6BMwoTIIleVD2mTyLE18Q3yZoHSYtk+DDAKx8zLRTRyzxX4pk3Lxu+RskjAPI2nIIQ/uL0ZBeyGFC9RXMOWXlMcGOqcBVwMt/JuS22TxF24hLWvbNzu5Cf75lgWRkdsHgGe6ZGWwhFXiVRXsp0RR+bqfNXyXRghGLmRxsK5vS4Co+lUJjnNp3Ow0/JelJRRUAFTpfeBht7dXciEzm1AxlG8YfHb2l+6xWyFlNnbloKfbQo0fpcD0uWPpFL6E3yqmYWzulC+AAOjjSLPf1K6fDFaYUkfrwnGGC53rr2CHtbOTwsoddfzt3GB7kx4="); // optional
 
         AwsSessionCredentials sessionCredentials = AwsSessionCredentials.create(accessKey, secretKey, sessionToken);
 
@@ -805,7 +903,7 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
             logger.error(UPLOAD_DATASOURCE_URL_ERROR + e1.getMessage());
         }
 
-        if (!(connectionDetails.optString("url").contains("blob"))) {
+        if (!(connectionDetails.optString("url").contains("blob") || (connectionDetails.optString("url").contains("aws")))) {
             BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
             TrustManager[] trustAllCerts = getTrustAllCerts();
             SSLContext sslContext = getSslContext(trustAllCerts);
@@ -1051,7 +1149,200 @@ public class ICIPDataSetServiceUtilS3 extends ICIPDataSetServiceUtil {
 
             logger.info("preparing dataset");
             return records;
-        } else {
+        } else if (connectionDetails.optString("url").contains("aws")) {
+            try {
+                logger.info("Starting file download process for dataset: {}", dataset.getName());
+
+                String downloadedFilePath = downloadFile(dataset);
+                if (downloadedFilePath == null) {
+                    logger.error("Download failed: downloadFile() returned null");
+                    throw new IOException("Failed to download file from S3");
+                }
+
+                logger.info("File downloaded successfully at path: {}", downloadedFilePath);
+
+                // Determine file extension
+                String extension = "";
+                int dotIndex = objectKey.lastIndexOf('.');
+                if (dotIndex > 0 && dotIndex < objectKey.length() - 1) {
+                    extension = objectKey.substring(dotIndex + 1).toLowerCase();
+                }
+                logger.debug("Detected file extension: {}", extension);
+
+                byteArray = Files.readAllBytes(Paths.get(downloadedFilePath));
+                logger.info("Read {} bytes from downloaded file", byteArray.length);
+
+                switch (extension) {
+                    case "csv":
+                        char csvSeparator = attributes.optString(CSV_SEPARATOR_KEY).isEmpty() ? ','
+                                : attributes.optString(CSV_SEPARATOR_KEY).charAt(0);
+                        getCsvData(limit, records, byteArray, csvSeparator, page);
+                        break;
+
+                    case "txt":
+                        logger.info("OBJECTKEY in txt: " + objectKey);
+                        if (objectKey.contains("/FAQ/")) {
+                            logger.info("OBJECTKEY in if block: " + objectKey);
+                            try (Reader targetReader = new InputStreamReader(new ByteArrayInputStream(byteArray));
+                                 BufferedReader reader = new BufferedReader(targetReader, 2048)) {
+                                String line;
+                                StringBuilder textBuilder = new StringBuilder(4096);
+                                while ((line = reader.readLine()) != null) {
+                                    textBuilder.append(line);
+                                }
+                                String[] qa = textBuilder.toString().split("Q\\. ");
+                                List<Map<String, String>> keyVal = new ArrayList<>();
+                                for (String i : qa) {
+                                    String[] values = i.split("A\\.");
+                                    if (values.length == 2) {
+                                        String ques = values[0];
+                                        String ans = values[1];
+                                        Map<String, String> keyValue = new LinkedHashMap<>();
+                                        keyValue.put(ques.trim(), ans.trim());
+                                        records.put(keyValue);
+                                    }
+                                }
+                            }
+
+                        } else {
+                            logger.info("OBJECTKEY in else block: " + objectKey);
+                            try (Reader targetReader = new InputStreamReader(new ByteArrayInputStream(byteArray));
+                                 BufferedReader reader = new BufferedReader(targetReader, 2048)) {
+                                String line;
+                                StringBuilder textBuilder = new StringBuilder(4096);
+                                while ((line = reader.readLine()) != null) {
+                                    textBuilder.append(line + '\n');
+                                }
+                                records.put(textBuilder.toString());
+                            }
+                        }
+
+                        break;
+                    case "code":
+
+                        if (objectKey.contains("/FAQ/")) {
+                            try (Reader targetReader = new InputStreamReader(new ByteArrayInputStream(byteArray));
+                                 BufferedReader reader = new BufferedReader(targetReader, 2048)) {
+                                String line;
+                                StringBuilder textBuilder = new StringBuilder(4096);
+                                while ((line = reader.readLine()) != null) {
+                                    textBuilder.append(line);
+                                }
+                                String[] qa = textBuilder.toString().split("Q\\. ");
+                                List<Map<String, String>> keyVal = new ArrayList<>();
+                                for (String i : qa) {
+                                    String[] values = i.split("A\\.");
+                                    if (values.length == 2) {
+                                        String ques = values[0];
+                                        String ans = values[1];
+                                        Map<String, String> keyValue = new LinkedHashMap<>();
+                                        keyValue.put(ques.trim(), ans.trim());
+                                        records.put(keyValue);
+                                    }
+                                }
+                            }
+
+                        } else {
+                            try (Reader targetReader = new InputStreamReader(new ByteArrayInputStream(byteArray));
+                                 BufferedReader reader = new BufferedReader(targetReader, 2048)) {
+                                String line;
+                                StringBuilder textBuilder = new StringBuilder(4096);
+                                while ((line = reader.readLine()) != null) {
+                                    textBuilder.append(line + '\n');
+                                }
+                                records.put(textBuilder.toString());
+                            }
+                        }
+
+                        break;
+
+                    case "png":
+                    case "jpeg":
+                    case "jpg":
+                        BufferedImage jpgimage = null;
+                        String outputFormat = "jpg";
+                        if ("png".equals(extension)) {
+                            outputFormat = "png";
+                        } else if ("jpeg".equals(extension)) {
+                            outputFormat = "jpeg";
+                        }
+                        try {
+                            jpgimage = ImageIO.read(new ByteArrayInputStream(byteArray));
+                        } catch (IOException e) {
+                            logger.error("Error reading image: " + e.getMessage(), e);
+                        }
+                        if (jpgimage != null) {
+                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                            ImageIO.write(jpgimage, outputFormat, outputStream);
+                            String base64Image = Base64.getEncoder().encodeToString(outputStream.toByteArray());
+                            records.put(base64Image);
+                        } else {
+                            logger.error("Image data is null or couldn't be read");
+                        }
+                        break;
+
+                    case "pdf":
+                        try (PDDocument pdfDocument = Loader.loadPDF(byteArray)) {
+
+                            ByteArrayOutputStream pdfOutputStream = new ByteArrayOutputStream();
+                            pdfDocument.setAllSecurityToBeRemoved(true);
+                            pdfDocument.save(pdfOutputStream);
+                            String base64Pdf = Base64.getEncoder().encodeToString(pdfOutputStream.toByteArray());
+                            records.put(base64Pdf);
+
+                        } catch (IOException pdfException) {
+                            logger.error("Error while processing PDF:" + pdfException.getMessage(), pdfException);
+                        }
+                        break;
+
+                    case "jsonl":
+                    case "json":
+
+                        try (Reader targetReaderJson = new InputStreamReader(new ByteArrayInputStream(byteArray));
+                             BufferedReader reader = new BufferedReader(targetReaderJson, 2048)) {
+                            String line;
+                            StringBuilder textBuilder = new StringBuilder(4096);
+                            while ((line = reader.readLine()) != null) {
+                                textBuilder.append(line);
+                            }
+                            String res = textBuilder.toString();
+                            if (res.startsWith("{"))
+                                records.put(new JSONObject(res));
+                            else if (res.startsWith("["))
+                                records = new JSONArray(res);
+                        }
+                        break;
+
+                    case "pkl":
+                    case "joblib":
+                    case "h5":
+                    case "pt":
+                    case "pth":
+                    case "ckpt":
+                    case "model":
+                        // Handle model files - return as base64 encoded data
+                        String base64Model = Base64.getEncoder().encodeToString(byteArray);
+                        JSONObject modelData = new JSONObject();
+                        modelData.put("data", base64Model);
+                        modelData.put("fileName", objectKey.substring(objectKey.lastIndexOf("/") + 1));
+                        modelData.put("fileType", extension);
+                        modelData.put("contentType", getContentTypeForModelFile(extension));
+                        records.put(modelData);
+                        break;
+
+                    default:
+                        throw new UnsupportedMediaTypeStatusException(
+                                String.format(UNSUPPORTED_TYPE_MESSAGE, attributes.optString(OBJECT_KEY)));
+                }
+
+                logger.info("File processing completed successfully");
+                return records;
+
+            } catch (IOException | CsvValidationException | JSONException e) {
+                logger.error("Error occurred during file processing: {}", e.getMessage(), e);
+                return null;
+            }
+        }else {
             try {
                 JSONArray records1 = new JSONArray();
                 if (attributes.optString(OBJECT_KEY).equals("")) {
