@@ -464,8 +464,8 @@ export class AipSwaggerCustomComponent implements OnInit {
     this.ngOnInit();
   }
 
-  onServerUrlChange(selectedServer: string) {
-    this.serverUrl = selectedServer;
+  onServerUrlChange(selectedServer: any) {    
+    this.serverUrl = selectedServer.value;
   }
 
   handleFileInput(files: any) {
