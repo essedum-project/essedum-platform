@@ -23,7 +23,8 @@
       },
       {
         "command": "essedum.logout",
-        "title": "Logout from Essedum"
+        "title": "Logout from Essedum",
+        "icon": "$(sign-out)"
       },
       {
         "command": "essedum.checkAuth",
@@ -66,14 +67,9 @@
       ],
       "view/title": [
         {
-          "command": "essedum.openJobLogs",
-          "when": "view == essedum-sidebar",
+          "command": "essedum.logout",
+          "when": "view == essedum-sidebar && essedum.isAuthenticated",
           "group": "navigation@1"
-        },
-        {
-          "command": "essedum.showJobLogsInTerminal",
-          "when": "view == essedum-sidebar",
-          "group": "navigation@2"
         }
       ]
     },

@@ -259,7 +259,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     /**
      * Load initial content based on authentication state
      */
-    private async loadInitialContent(): Promise<void> {
+    public async loadInitialContent(): Promise<void> {
         if (this._isAuthenticated) {
             // Load main pipeline interface
             if (this._view) {
@@ -418,6 +418,7 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                             command: 'triggerLogin',
                             timestamp: new Date().toISOString()
                         });
+                       
                         
                     } catch (error) {
                         console.error('Error starting authentication:', error);
@@ -658,110 +659,110 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     }
 
     private async getPipelinesCount(params: HttpParams): Promise<number> {
-       try {
-                console.log('Attempting fallback request...');
-                process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+        try {
+            console.log('Attempting fallback request...');
+            process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
-                const https = require('https');
-                const axiosConfig = {
-                    httpsAgent: new https.Agent({
-                        rejectUnauthorized: false
-                    }),
-                    timeout: 10000,
-                    params: {
-                        ...params,
-                        project: this.organization
-                    },
-                    headers: {
-                        'accept': 'application/json, text/plain, */*',
-                        'accept-language': 'en-US,en;q=0.9',
-                        'content-type': 'application/json',
-                        'priority': 'u=1, i',
-                        'project': '2',
-                        'projectname': 'leo1311',
-                        'referer': 'https://essedum.az.ad.idemo-ppc.com/',
-                        'roleid': '1',
-                        'rolename': 'IT Portfolio Manager',
-                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
-                        'x-requested-with': 'Leap',
-                        ...(this._token ? { 'authorization': `Bearer ${this._token}` } : {})
-                    }
-                };
-
-                const response = await axios.get(API_ENDPOINTS.PIPELINES_COUNT, axiosConfig);
-                console.log('Fallback response:', response.data);
-                return response.data || 0;
-
-            } catch (fallbackError: any) {
-                console.error('Fallback request also failed:', fallbackError);
-                if (fallbackError.response) {
-                    console.error('Response data:', fallbackError.response.data);
-                    console.error('Response status:', fallbackError.response.status);
-                    console.error('Response headers:', fallbackError.response.headers);
-                } else if (fallbackError.request) {
-                    console.error('Request made but no response received:', fallbackError.request);
-                } else {
-                    console.error('Error setting up request:', fallbackError.message);
+            const https = require('https');
+            const axiosConfig = {
+                httpsAgent: new https.Agent({
+                    rejectUnauthorized: false
+                }),
+                timeout: 10000,
+                params: {
+                    ...params,
+                    project: this.organization
+                },
+                headers: {
+                    'accept': 'application/json, text/plain, */*',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'content-type': 'application/json',
+                    'priority': 'u=1, i',
+                    'project': '2',
+                    'projectname': 'leo1311',
+                    'referer': 'https://essedum.az.ad.idemo-ppc.com/',
+                    'roleid': '1',
+                    'rolename': 'IT Portfolio Manager',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
+                    'x-requested-with': 'Leap',
+                    ...(this._token ? { 'authorization': `Bearer ${this._token}` } : {})
                 }
-                throw new Error(`Failed to fetch pipelines count: ${fallbackError.message || fallbackError}`);
+            };
+
+            const response = await axios.get(API_ENDPOINTS.PIPELINES_COUNT, axiosConfig);
+            console.log('Fallback response:', response.data);
+            return response.data || 0;
+
+        } catch (fallbackError: any) {
+            console.error('Fallback request also failed:', fallbackError);
+            if (fallbackError.response) {
+                console.error('Response data:', fallbackError.response.data);
+                console.error('Response status:', fallbackError.response.status);
+                console.error('Response headers:', fallbackError.response.headers);
+            } else if (fallbackError.request) {
+                console.error('Request made but no response received:', fallbackError.request);
+            } else {
+                console.error('Error setting up request:', fallbackError.message);
             }
+            throw new Error(`Failed to fetch pipelines count: ${fallbackError.message || fallbackError}`);
+        }
     }
 
     private async getPipelinesCards(params: HttpParams): Promise<any> {
         try {
-                console.log('Attempting fallback request for pipelines list...');
-                process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+            console.log('Attempting fallback request for pipelines list...');
+            process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
-                const https = require('https');
-                const axiosConfig = {
-                    httpsAgent: new https.Agent({
-                        rejectUnauthorized: false
-                    }),
-                    timeout: 10000,
-                    params: {
-                        ...params,
-                        project: this.organization
-                    },
-                    headers: {
-                        'accept': 'application/json, text/plain, */*',
-                        'accept-language': 'en-US,en;q=0.9',
-                        'content-type': 'application/json',
-                        'priority': 'u=1, i',
-                        'project': '2',
-                        'projectname': 'leo1311',
-                        'referer': 'https://essedum.az.ad.idemo-ppc.com/',
-                        'roleid': '1',
-                        'rolename': 'IT Portfolio Manager',
-                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
-                        'x-requested-with': 'Leap',
-                        ...(this._token ? { 'authorization': `Bearer ${this._token}` } : {})
-                    }
-                };
-
-                const response = await axios.get(API_ENDPOINTS.PIPELINES_LIST, axiosConfig);
-                console.log('Fallback pipelines list success');
-                return response.data;
-
-            } catch (fallbackError: any) {
-                console.error('Fallback pipelines list also failed:', fallbackError);
-
-                // Provide more detailed error information
-                let errorMessage = 'Failed to fetch pipeline data';
-
-                if (fallbackError.code === 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY') {
-                    errorMessage = 'SSL Certificate error - unable to verify server certificate';
-                } else if (fallbackError.code === 'ENOTFOUND') {
-                    errorMessage = 'Network error - unable to reach the server';
-                } else if (fallbackError.response) {
-                    errorMessage = `Server error: ${fallbackError.response.status} - ${fallbackError.response.statusText}`;
-                } else if (fallbackError.request) {
-                    errorMessage = 'Network timeout or connection refused';
-                } else {
-                    errorMessage = `Request setup error: ${fallbackError.message}`;
+            const https = require('https');
+            const axiosConfig = {
+                httpsAgent: new https.Agent({
+                    rejectUnauthorized: false
+                }),
+                timeout: 10000,
+                params: {
+                    ...params,
+                    project: this.organization
+                },
+                headers: {
+                    'accept': 'application/json, text/plain, */*',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'content-type': 'application/json',
+                    'priority': 'u=1, i',
+                    'project': '2',
+                    'projectname': 'leo1311',
+                    'referer': 'https://essedum.az.ad.idemo-ppc.com/',
+                    'roleid': '1',
+                    'rolename': 'IT Portfolio Manager',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
+                    'x-requested-with': 'Leap',
+                    ...(this._token ? { 'authorization': `Bearer ${this._token}` } : {})
                 }
+            };
 
-                throw new Error(errorMessage);
+            const response = await axios.get(API_ENDPOINTS.PIPELINES_LIST, axiosConfig);
+            console.log('Fallback pipelines list success');
+            return response.data;
+
+        } catch (fallbackError: any) {
+            console.error('Fallback pipelines list also failed:', fallbackError);
+
+            // Provide more detailed error information
+            let errorMessage = 'Failed to fetch pipeline data';
+
+            if (fallbackError.code === 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY') {
+                errorMessage = 'SSL Certificate error - unable to verify server certificate';
+            } else if (fallbackError.code === 'ENOTFOUND') {
+                errorMessage = 'Network error - unable to reach the server';
+            } else if (fallbackError.response) {
+                errorMessage = `Server error: ${fallbackError.response.status} - ${fallbackError.response.statusText}`;
+            } else if (fallbackError.request) {
+                errorMessage = 'Network timeout or connection refused';
+            } else {
+                errorMessage = `Request setup error: ${fallbackError.message}`;
             }
+
+            throw new Error(errorMessage);
+        }
     }
 
     private async viewScriptDetails(cardId: string): Promise<void> {
@@ -1766,7 +1767,7 @@ if __name__ == "__main__":
     private async saveJson(streamItem: any, run: boolean = false): Promise<void> {
         try {
             console.log('Saving JSON for stream item:', streamItem.name);
-            
+
             // Parse and clean up JSON content similar to Angular
             let jsonContent = streamItem.json_content;
             if (typeof jsonContent === 'string') {
@@ -1776,13 +1777,13 @@ if __name__ == "__main__":
                     console.warn('Failed to parse json_content, using as-is');
                 }
             }
-            
+
             // Clean up elements (remove context and connattributes like Angular)
             if (jsonContent && jsonContent.elements) {
                 jsonContent.elements.forEach((element: any) => {
                     delete element.context;
                     delete element.connattributes;
-                    
+
                     // Clean up script arrays
                     if (element.attributes && element.attributes.script) {
                         const script = [];
@@ -1795,18 +1796,18 @@ if __name__ == "__main__":
                     }
                 });
             }
-            
+
             // Update the stream item with cleaned JSON
             streamItem.json_content = JSON.stringify(jsonContent);
             streamItem.organization = this.organization;
-            
+
             // Update the streaming service
             await this.updateStreamingService(streamItem);
-            
+
             if (run) {
                 console.log('JSON saved successfully for pipeline run');
             }
-            
+
         } catch (error: any) {
             console.error('Error in saveJson:', error);
             if (run) {
@@ -1818,7 +1819,7 @@ if __name__ == "__main__":
     private async generateScript(streamItem: any, selectedRunType: any): Promise<any> {
         try {
             console.log('Generating script for:', streamItem.name);
-            
+
             // Step 1: Create/upload script file FIRST (matching browser behavior)
             // Use edited script content if available, otherwise generate fresh content
             console.log('🔧 Preparing script content for pipeline:', streamItem.name);
@@ -1827,16 +1828,16 @@ if __name__ == "__main__":
             console.log('🔍   this.scriptContent length:', this.scriptContent ? this.scriptContent.length : 'undefined');
             console.log('🔍   this.script exists?', !!this.script);
             console.log('🔍   this.script length:', this.script ? this.script.length : 'undefined');
-            
+
             if (this.scriptContent && this.scriptContent.length > 0) {
                 console.log('🔍   scriptContent preview (first 200 chars):', this.scriptContent.substring(0, 200) + '...');
             }
             if (this.script && this.script.length > 0) {
                 console.log('🔍   script[0] preview:', this.script[0].substring(0, 100) + '...');
             }
-            
+
             let scriptContent: string;
-            
+
             if (this.scriptContent && this.scriptContent.length > 0) {
                 // User has saved script content - use it
                 scriptContent = this.scriptContent;
@@ -1853,24 +1854,24 @@ if __name__ == "__main__":
                 scriptContent = await this.generatePipelineScript(streamItem.name);
                 console.log('📊 Generated script preview (first 200 chars):', scriptContent.substring(0, 200) + '...');
             }
-            
+
             const fileName = `${streamItem.name}_${this.organization}.py`;
             console.log('📤 Creating script file FIRST:', fileName);
             await this.createScriptFile(streamItem.name, scriptContent, fileName);
-            
+
             // Step 2: Save JSON (Angular saveJson pattern)
             console.log('💾 Saving JSON for streaming service...');
             await this.saveJson(streamItem, true);
-            
+
             // Step 3: Check for connection nodes and update datasources if needed
             let jsonContent = streamItem.json_content;
             if (typeof jsonContent === 'string') {
                 jsonContent = JSON.parse(jsonContent);
             }
-            
+
             let connNodeExist = false;
             let connNodeIndex = -1;
-            
+
             if (jsonContent.elements) {
                 jsonContent.elements.forEach((element: any, index: number) => {
                     if (element.name === 'Connection') {
@@ -1879,7 +1880,7 @@ if __name__ == "__main__":
                     }
                 });
             }
-            
+
             if (connNodeExist && connNodeIndex >= 0) {
                 // Handle connection node datasource update
                 const connectionElement = jsonContent.elements[connNodeIndex];
@@ -1889,11 +1890,11 @@ if __name__ == "__main__":
                             connectionElement.attributes.connections.name,
                             connectionElement.attributes.connections.organization || this.organization
                         );
-                        
+
                         if (datasource && datasource.length > 0) {
                             connectionElement.attributes.connections = datasource[0];
                             streamItem.json_content = JSON.stringify(jsonContent);
-                            
+
                             // Update streaming service with new connection data
                             await this.updateStreamingService(streamItem);
                         }
@@ -1902,16 +1903,16 @@ if __name__ == "__main__":
                     }
                 }
             }
-            
+
             // Step 4: Execute pipeline directly (matching browser behavior)
             console.log('🚀 Executing pipeline:', streamItem.name);
-            
+
             // Extract parameters from selectedRunType
             const isLocal = selectedRunType.type === 'Local' ? 'true' : 'false';
             const runtime = selectedRunType.type === 'Local' ? 'Local' : 'REMOTE';
             const datasource = selectedRunType.dsName || selectedRunType.dsAlias || '';
             const alias = streamItem.alias || streamItem.name;
-            
+
             console.log('🎯 Pipeline execution parameters:', {
                 alias: alias,
                 name: streamItem.name,
@@ -1920,7 +1921,7 @@ if __name__ == "__main__":
                 runtime: runtime,
                 datasource: datasource
             });
-            
+
             const executionResult = await this.runPipeline(
                 alias,
                 streamItem.name,
@@ -1930,10 +1931,10 @@ if __name__ == "__main__":
                 '{}',
                 'undefined'
             );
-            
+
             console.log('✅ Pipeline execution completed:', executionResult);
             return executionResult;
-            
+
         } catch (error: any) {
             console.error('Error in generateScript:', error);
             throw error;
@@ -1943,7 +1944,7 @@ if __name__ == "__main__":
     private async triggerEvent(path: string, streamItem: any, selectedRunType: any): Promise<any> {
         try {
             console.log('Triggering pipeline event with path:', path);
-            
+
             // Step 1: Trigger script generation event (Angular pattern)
             const httpsAgent = new https.Agent({
                 rejectUnauthorized: false
@@ -2424,7 +2425,7 @@ print(f"The model got uploaded {uploaded_path} here")
     private async updateStreamingService(streamItem: any): Promise<void> {
         try {
             console.log('Updating streaming service:', streamItem.name);
-            
+
             // Create HTTPS agent with SSL bypass
             const httpsAgent = new https.Agent({
                 rejectUnauthorized: false,
@@ -2534,10 +2535,10 @@ print(f"The model got uploaded {uploaded_path} here")
 
         } catch (error: any) {
             console.error('Failed to update streaming service - Full error:', error);
-            
+
             // Provide detailed error information
             let errorMessage = 'Failed to update streaming service';
-            
+
             if (error.response) {
                 console.error('Response error details:', {
                     status: error.response.status,
@@ -2545,7 +2546,7 @@ print(f"The model got uploaded {uploaded_path} here")
                     data: error.response.data,
                     headers: error.response.headers
                 });
-                
+
                 errorMessage = `Server error: ${error.response.status} - ${error.response.statusText}`;
                 if (error.response.data && error.response.data.message) {
                     errorMessage += ` - ${error.response.data.message}`;
@@ -2557,7 +2558,7 @@ print(f"The model got uploaded {uploaded_path} here")
                 console.error('Setup error:', error.message);
                 errorMessage = `Request setup error: ${error.message}`;
             }
-            
+
             throw new Error(errorMessage);
         }
     }
@@ -2569,19 +2570,19 @@ print(f"The model got uploaded {uploaded_path} here")
         scriptLines.slice(0, 3).forEach((line, index) => {
             console.log(`  ${index + 1}: ${line.substring(0, 80)}${line.length > 80 ? '...' : ''}`);
         });
-        
+
         this.script = scriptLines;
         this.scriptContent = scriptLines.join('\n');
-        
+
         console.log('📝 ✅ onScriptChange completed:');
         console.log('📝   this.script.length:', this.script.length);
         console.log('📝   this.scriptContent.length:', this.scriptContent.length);
         console.log('�   scriptContent preview (first 200 chars):', this.scriptContent.substring(0, 200) + '...');
-        
+
         // Log specific changes that indicate user editing
         if (this.script.length > 0) {
-            const hasCustomChanges = this.script.some(line => 
-                line.includes('Parsing nested JSON...') || 
+            const hasCustomChanges = this.script.some(line =>
+                line.includes('Parsing nested JSON...') ||
                 line.includes('print("') ||
                 line.includes('# Custom') ||
                 line.includes('Starting the script')
@@ -2598,13 +2599,13 @@ print(f"The model got uploaded {uploaded_path} here")
     private async editScript(cardId: string, fileName: string, currentContent: string): Promise<void> {
         try {
             console.log('🔧 Opening script for editing with auto-save:', fileName);
-            
+
             // Find the pipeline by cardId
             const pipeline = this.allCards.find((card: PipelineCard) => card.id === cardId);
             if (!pipeline) {
                 throw new Error('Pipeline not found');
             }
-            
+
             // Generate fresh script content for editing
             let scriptContent: string;
             if (currentContent && currentContent !== 'Generated script content will be loaded...') {
@@ -2613,36 +2614,36 @@ print(f"The model got uploaded {uploaded_path} here")
                 console.log('🔄 Generating fresh script content for editing...');
                 scriptContent = await this.generatePipelineScript(pipeline.name);
             }
-            
+
             // Split content into lines for editing (similar to Angular pattern)
             const scriptLines = scriptContent.split('\n');
             this.onScriptChange(scriptLines);
-            
+
             // Create a new untitled document with the script content
             const document = await vscode.workspace.openTextDocument({
                 content: scriptContent,
                 language: 'python'
             });
-            
+
             // Open the document in VS Code editor
             const editor = await vscode.window.showTextDocument(document);
-            
+
             // Set up auto-save functionality - listen for document changes
             const changeDisposable = vscode.workspace.onDidChangeTextDocument(async (event) => {
                 if (event.document === document) {
                     console.log('📝 Script content changed, triggering onScriptChange...');
-                    
+
                     // Get updated content and split into lines (Angular pattern)
                     const updatedContent = event.document.getText();
                     const updatedLines = updatedContent.split('\n');
-                    
+
                     // Call onScriptChange like Angular code editor
                     this.onScriptChange(updatedLines);
-                    
+
                     console.log('✅ Script state updated with', this.script.length, 'lines');
                 }
             });
-            
+
             // Set up save listener - automatically upload when user saves
             const saveDisposable = vscode.workspace.onDidSaveTextDocument(async (savedDocument) => {
                 if (savedDocument === document) {
@@ -2650,41 +2651,41 @@ print(f"The model got uploaded {uploaded_path} here")
                     console.log('📄 Saved document URI:', savedDocument.uri.toString());
                     console.log('📄 Target document URI:', document.uri.toString());
                     console.log('📄 URIs match:', savedDocument.uri.toString() === document.uri.toString());
-                    
+
                     try {
                         // Get the saved content and update scriptContent
                         const savedContent = savedDocument.getText();
                         const savedLines = savedContent.split('\n');
-                        
+
                         console.log('📝 Saved content length:', savedContent.length);
                         console.log('📝 Saved lines count:', savedLines.length);
                         console.log('📝 First 200 chars of saved content:', savedContent.substring(0, 200) + '...');
-                        
+
                         // Update script state - this will set this.scriptContent
                         this.onScriptChange(savedLines);
-                        
+
                         console.log('📊 After onScriptChange:');
                         console.log('📊   this.scriptContent length:', this.scriptContent.length);
                         console.log('📊   this.script length:', this.script.length);
                         console.log('📊   scriptContent preview:', this.scriptContent.substring(0, 200) + '...');
-                        
+
                         // Generate filename with timestamp
                         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
                         const scriptFileName = `${pipeline.name}_${this.organization}.py`;
-                        
+
                         console.log('📤 About to upload file:', scriptFileName);
-                        
+
                         // Auto-upload using Angular pattern
                         await this.createNativeFileWithFormData(pipeline.name, scriptFileName);
-                        
+
                         // Show success message
                         vscode.window.showInformationMessage(
                             `✅ Script changes auto-uploaded successfully to ${scriptFileName}!`
                         );
-                        
+
                         // Update stream item and save (following Angular pattern)
                         await this.updateStreamItemAfterFileUpload(pipeline, scriptFileName);
-                        
+
                     } catch (error: any) {
                         console.error('❌ Auto-upload failed:', error);
                         vscode.window.showErrorMessage(`Auto-upload failed: ${error.message}`);
@@ -2695,7 +2696,7 @@ print(f"The model got uploaded {uploaded_path} here")
                     console.log('📄 Target document URI:', document.uri.toString());
                 }
             });
-            
+
             // Clean up listeners when document is closed
             const closeDisposable = vscode.workspace.onDidCloseTextDocument((closedDocument) => {
                 if (closedDocument === document) {
@@ -2705,12 +2706,12 @@ print(f"The model got uploaded {uploaded_path} here")
                     closeDisposable.dispose();
                 }
             });
-            
+
             // Show initial instructions
             vscode.window.showInformationMessage(
                 `📝 Script editor opened for "${pipeline.name}". Changes will be auto-uploaded when you save (Ctrl+S).`
             );
-            
+
         } catch (error: any) {
             console.error('❌ Failed to open script for editing:', error);
             vscode.window.showErrorMessage(`Failed to open script for editing: ${error.message}`);
@@ -2721,13 +2722,13 @@ print(f"The model got uploaded {uploaded_path} here")
     private async updateStreamItemAfterFileUpload(pipeline: PipelineCard, fileName: string): Promise<void> {
         try {
             console.log('🔄 Updating stream item after file upload (Angular pattern)...');
-            
+
             // Simulate Angular pattern: update data.files[0], arguments, etc.
             const streamItem = {
                 name: pipeline.name,
                 organization: this.organization,
                 json_content: JSON.stringify({
-                    elements: [{ 
+                    elements: [{
                         attributes: {
                             files: [fileName],
                             filetype: 'Python3',
@@ -2739,14 +2740,14 @@ print(f"The model got uploaded {uploaded_path} here")
                     default_runtime: 'REMOTE'
                 })
             };
-            
+
             console.log('📊 Stream item to update:', streamItem);
-            
+
             // Call the update streaming service API
             await this.updateStreamingService(streamItem);
-            
+
             console.log('✅ Stream item updated successfully');
-            
+
         } catch (error: any) {
             console.error('❌ Failed to update stream item:', error);
             throw error;
@@ -2757,25 +2758,25 @@ print(f"The model got uploaded {uploaded_path} here")
     private async saveScript(cardId: string, fileName: string, content: string): Promise<void> {
         try {
             console.log('💾 Saving script:', fileName);
-            
+
             // Find the pipeline by cardId
             const pipeline = this.allCards.find((card: PipelineCard) => card.id === cardId);
             if (!pipeline) {
                 throw new Error('Pipeline not found');
             }
-            
+
             // Update script content from editor (similar to Angular onScriptChange)
             const scriptLines = content.split('\n');
             this.onScriptChange(scriptLines);
-            
+
             // Create FormData following Angular pattern
             await this.createNativeFileWithFormData(pipeline.name, fileName);
-            
+
             vscode.window.showInformationMessage(`Script ${fileName} uploaded successfully!`);
-            
+
             // Refresh the pipeline details to show updated content
             await this.viewScriptDetails(cardId);
-            
+
         } catch (error: any) {
             console.error('❌ Failed to save script:', error);
             vscode.window.showErrorMessage(`Failed to save script: ${error.message}`);
@@ -2814,13 +2815,13 @@ print(f"The model got uploaded {uploaded_path} here")
 
             // Script list to file (exact Angular pattern)
             const formData = new FormData();
-            
+
             // Create the form data exactly like the working curl command
             formData.append('scriptFile', Buffer.from(scriptToUpload, 'utf8'), {
                 filename: 'blob',
                 contentType: 'text/plain'
             });
-            
+
             console.log('✅ FormData created successfully');
 
             const httpsAgent = new https.Agent({
@@ -2881,7 +2882,7 @@ print(f"The model got uploaded {uploaded_path} here")
 
         } catch (error: any) {
             console.error('❌ Failed to create native file:', error);
-            
+
             let errorMessage = 'Failed to create native file';
             if (error.response) {
                 console.error('📋 Native file creation error details:', {
@@ -2901,7 +2902,7 @@ print(f"The model got uploaded {uploaded_path} here")
                 console.error('⚙️ Setup error:', error.message);
                 errorMessage = `Request setup error: ${error.message}`;
             }
-            
+
             throw new Error(errorMessage);
         }
     }
@@ -2923,7 +2924,7 @@ print(f"The model got uploaded {uploaded_path} here")
 
             // Create FormData for multipart/form-data request
             const form = new FormData();
-            
+
             // Add the script file as blob (matching browser behavior)
             form.append('scriptFile', Buffer.from(scriptContent, 'utf8'), {
                 filename: 'blob',
@@ -2971,7 +2972,7 @@ print(f"The model got uploaded {uploaded_path} here")
 
         } catch (error: any) {
             console.error('❌ Failed to create script file:', error);
-            
+
             let errorMessage = 'Failed to create script file';
             if (error.response) {
                 console.error('📋 File creation error details:', {
@@ -2987,7 +2988,7 @@ print(f"The model got uploaded {uploaded_path} here")
                 console.error('⚙️ Setup error:', error.message);
                 errorMessage = `Request setup error: ${error.message}`;
             }
-            
+
             throw new Error(errorMessage);
         }
     }
@@ -3036,7 +3037,7 @@ print(f"The model got uploaded {uploaded_path} here")
 
         // Build URL exactly matching your curl: run-pipeline/{pipelineType}/{cname}/{org}/{isLocal}
         const baseUrl = `https://essedum.az.ad.idemo-ppc.com/api/aip/service/v1/pipeline/run-pipeline/${pipelineType}/${cname}/${org}/${isLocal}`;
-        
+
         // Build query parameters exactly matching your curl
         const queryParams = new URLSearchParams();
         queryParams.append('offset', offset.toString());
@@ -3071,7 +3072,7 @@ print(f"The model got uploaded {uploaded_path} here")
 
         } catch (error: any) {
             console.error('❌ Pipeline execution failed:', error);
-            
+
             if (error.response) {
                 console.error('📋 Error Response:', {
                     status: error.response.status,
@@ -3079,7 +3080,7 @@ print(f"The model got uploaded {uploaded_path} here")
                     data: error.response.data
                 });
             }
-            
+
             throw error;
         }
     }
@@ -3101,7 +3102,7 @@ print(f"The model got uploaded {uploaded_path} here")
         console.log('🔍 runPipelineScript: this.script exists?', !!this.script);
         console.log('🔍 runPipelineScript: this.script length:', this.script ? this.script.length : 'undefined');
         console.log('🔍 runPipelineScript: this.scriptContent length:', this.scriptContent ? this.scriptContent.length : 'undefined');
-        
+
         if (this.script && this.script.length > 0) {
             console.log('🔍 runPipelineScript: First line of this.script:', this.script[0].substring(0, 100));
         }
@@ -3119,7 +3120,7 @@ print(f"The model got uploaded {uploaded_path} here")
                     dsName: '',
                     dsAlias: ''
                 };
-                
+
                 if (typeof runType === 'string') {
                     const runTypeParts = runType.split('-');
                     selectedRunType.type = runTypeParts[0] || 'Local';
@@ -3134,7 +3135,7 @@ print(f"The model got uploaded {uploaded_path} here")
                 // Step 1: Get streaming service data (Angular getStreamingServicesByName pattern)
                 progress.report({ increment: 20, message: 'Getting streaming service data...' });
                 const streamItem = await this.getStreamingServicesByName(card.name, this.organization);
-                
+
                 if (!streamItem) {
                     throw new Error('Could not find streaming service for pipeline');
                 }
@@ -3148,7 +3149,7 @@ print(f"The model got uploaded {uploaded_path} here")
                 // Handle execution result
                 if (executionResult) {
                     let jobId = null;
-                    
+
                     if (typeof executionResult === 'string') {
                         const jobIdMatch = executionResult.match(/job[_\s]*id[:\s]*([\w-]+)/i);
                         if (jobIdMatch) {
@@ -3157,14 +3158,14 @@ print(f"The model got uploaded {uploaded_path} here")
                     } else if (typeof executionResult === 'object') {
                         jobId = executionResult.jobId || executionResult.id || executionResult.job_id;
                     }
-                    
+
                     if (jobId) {
                         const result = await vscode.window.showInformationMessage(
                             `Pipeline "${pipelineName}" started successfully! Job ID: ${jobId}`,
                             'View Logs',
                             'OK'
                         );
-                        
+
                         if (result === 'View Logs') {
                             await this.viewPipelineLogs(cardId);
                         }
@@ -3288,32 +3289,6 @@ print(f"The model got uploaded {uploaded_path} here")
     }
 
     /**
-     * Handle logout functionality
-     */
-    private async handleLogout(): Promise<void> {
-        try {
-            // Clear the token
-            this._token = '';
-
-            // Clear any stored authentication data
-            await this._context.globalState.update('keycloak_tokens', undefined);
-
-            // Show logout message
-            vscode.window.showInformationMessage('Logged out successfully. You will need to authenticate again to access pipelines.');
-
-            // You could also trigger a command to restart the extension or switch to login view
-            // For now, just clear the current view
-            if (this._view) {
-                this._view.webview.html = this.getLogoutHtml();
-            }
-
-        } catch (error: any) {
-            console.error('Error during logout:', error);
-            vscode.window.showErrorMessage(`Logout failed: ${error.message}`);
-        }
-    }
-
-    /**
      * Get HTML for logout state
      */
     private getLogoutHtml(): string {
@@ -3399,6 +3374,8 @@ print(f"The model got uploaded {uploaded_path} here")
         </body>
         </html>`;
     }
+
+
 
     /**
      * Show job status viewer based on Angular JobDataViewerComponent
@@ -4115,7 +4092,7 @@ print(f"The model got uploaded {uploaded_path} here")
             const response = await axios.get(
                 `/api/aip/file/pipeline/native/download/${pipelineName}/${organization}/${fileName}`,
                 {
-                    baseURL:BASE_URL,
+                    baseURL: BASE_URL,
                     headers: headers,
                     responseType: 'arraybuffer', // For binary file downloads
                     httpsAgent: httpsAgent,
@@ -4181,6 +4158,46 @@ print(f"The model got uploaded {uploaded_path} here")
             }
         } catch (error: any) {
             vscode.window.showErrorMessage(`Failed to open script: ${error.message}`);
+        }
+    }
+
+    /**
+     * Handle logout functionality - clears tokens and shows logout page
+     */
+    private async handleLogout(): Promise<void> {
+        try {
+            console.log('Starting logout process...');
+
+            // Clear stored tokens and authentication state
+            if (this._authService) {
+                await this._authService.logout();
+                console.log('Auth service logout completed');
+            }
+
+            // Execute the logout command to clear tokens from SecretStorage
+            await vscode.commands.executeCommand('essedum.logout');
+            console.log('Logout command executed');
+
+            // Update the webview to show logout page
+            if (this._view) {
+                this._view.webview.html = this.getLogoutHtml();
+                console.log('Logout HTML displayed');
+            }
+
+            // Clear internal state
+            this._token = '';
+            this.cards = [];
+
+            vscode.window.showInformationMessage('Logged out successfully');
+
+        } catch (error: any) {
+            console.error('Error during logout:', error);
+            vscode.window.showErrorMessage(`Logout failed: ${error.message}`);
+
+            // Still try to show logout page even if there was an error
+            if (this._view) {
+                this._view.webview.html = this.getLogoutHtml();
+            }
         }
     }
 }

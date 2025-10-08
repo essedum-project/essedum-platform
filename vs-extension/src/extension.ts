@@ -24,6 +24,18 @@ export function activate(context: vscode.ExtensionContext) {
 	// Create improved authentication service with automatic OAuth flow
 	const authService = new KeycloakAuthService(keycloakConfig, context);
 
+	// Function to update authentication context for UI visibility
+	const updateAuthenticationContext = async () => {
+		try {
+			const isAuthenticated = await authService.isTokenValid();
+			await vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', isAuthenticated);
+			console.log(`Authentication context updated: ${isAuthenticated}`);
+		} catch (error) {
+			console.error('Failed to update authentication context:', error);
+			await vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', false);
+		}
+	};
+
 	// Create Essedum file system provider
 	const essedumFileProvider = new EssedumFileSystemProvider('');
 
@@ -44,11 +56,15 @@ export function activate(context: vscode.ExtensionContext) {
 			const accessToken = await authService.getAccessToken();
 			pipelineCardsProvider = new PipelineCardsProvider(context, accessToken, authService, essedumFileProvider);
 			essedumFileProvider.updateToken(accessToken);
+			// Update authentication context after successful initialization
+			await updateAuthenticationContext();
 			return pipelineCardsProvider;
 		} catch (error) {
 			console.error('Failed to initialize pipeline provider:', error);
 			// Create provider with empty token, it will be updated when user logs in
 			pipelineCardsProvider = new PipelineCardsProvider(context, '', authService, essedumFileProvider);
+			// Set authentication context to false since initialization failed
+			await vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', false);
 			return pipelineCardsProvider;
 		}
 	};
@@ -61,6 +77,9 @@ export function activate(context: vscode.ExtensionContext) {
 				provider
 			)
 		);
+
+		// Initial authentication context check
+		updateAuthenticationContext();
 	});
 
 	// Register the job logs panel provider
@@ -115,18 +134,24 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-	// Add logout command
 	context.subscriptions.push(
 		vscode.commands.registerCommand('essedum.logout', async () => {
 			try {
-				await authService.logout();
-				
+				// Clear stored tokens without browser redirect (same as refresh button logout)
+				await authService.clearStoredTokens();
+
 				// Clear pipeline provider token
 				if (pipelineCardsProvider) {
 					pipelineCardsProvider.updateToken('');
 					essedumFileProvider.updateToken('');
 				}
-				
+
+				// Update authentication context to hide logout button
+				await vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', false);
+
+				if (pipelineCardsProvider) {
+					pipelineCardsProvider.loadInitialContent();
+				}
 				vscode.window.showInformationMessage('Successfully logged out from Essedum AI Platform.');
 			} catch (error: any) {
 				vscode.window.showErrorMessage(`Logout failed: ${error.message}`);
@@ -208,6 +233,9 @@ export function activate(context: vscode.ExtensionContext) {
 						)
 					);
 				}
+
+				// Update authentication context to show logout button
+				await updateAuthenticationContext();
 
 				// Open the sidebar to show the updated view
 				await vscode.commands.executeCommand('workbench.view.extension.essedum-explorer');
@@ -484,7 +512,7 @@ export function activate(context: vscode.ExtensionContext) {
 // This method is called when your extension is deactivated
 export async function deactivate() {
 	console.log('Essedum AI Platform extension is being deactivated');
-	
+
 	// Clean up auth service resources if available
 	try {
 		// Note: authService is not accessible in this scope, but VS Code will handle cleanup

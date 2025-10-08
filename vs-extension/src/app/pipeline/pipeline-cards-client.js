@@ -16,7 +16,6 @@ class PipelineCardsClient {
         this.searchInput = document.getElementById('searchInput');
         this.searchBtn = document.getElementById('searchBtn');
         this.refreshBtn = document.getElementById('refreshBtn');
-        this.logoutBtn = document.getElementById('logoutBtn');
         this.loadingState = document.getElementById('loadingState');
         this.cardsContainer = document.getElementById('cardsContainer');
         this.emptyState = document.getElementById('emptyState');
@@ -68,13 +67,6 @@ class PipelineCardsClient {
             });
         });
 
-        // Logout functionality
-        this.logoutBtn?.addEventListener('click', () => {
-            this.vscode.postMessage({
-                command: 'logout'
-            });
-        });
-        
         // Back button functionality
         this.backBtn?.addEventListener('click', () => {
             this.showListView();
