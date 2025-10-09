@@ -78,6 +78,7 @@ import io.minio.Result;
 import io.minio.messages.Item;
 import okhttp3.OkHttpClient;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -107,7 +108,7 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
         String secretKey = connectionDetails.optString("secretKey");
         String region = connectionDetails.optString("Region");
         String url = connectionDetails.optString("url");
-
+        String sessionToken = connectionDetails.optString("sessionToken");
         logger.info("Testing connection for datasource with URL: {}", url);
         logger.debug("Extracted credentials - AccessKey: {}, Region: {}", accessKey, region);
 
@@ -145,15 +146,23 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
 
             } else if (url.contains("aws")) {
                 logger.info("Detected AWS S3 connection");
-                // Create credentials
-                String sessionToken = connectionDetails.optString("sessionToken", "IQoJb3JpZ2luX2VjEA0aCXVzLWVhc3QtMSJGMEQCIHYhZ8N0HMTtJ7KH0TNKw/Wq2+886Jy2DOGqnHObQr1WAiBk6KqPtc/qmQX674w6x/rywawwRpap7LqWGldabik84CqdAwim//////////8BEAAaDDEwMjU4Njk5ODE1OCIMQFLdE7GMOmBKD+6UKvECjs7OF60Y1ybQ+jxDJD/ShkUpfu9oOkk994Z7Jq9dakFbMyGaz6oUzDKoFuiPLqmFfSzYDqN78b0wD2dZLURKoO15+cZDCMuH8a1BEDcFtiNzBfJ669neOlIxXP6tY5pcoK7KPy0Z+vom1ZzfaXK1WgCaDgt2+lBGANKEuzg6a0O+4QM9seS/agV+TSmZhBpZFf5O1OtKkkbLNsMRl8Q9rivkTV0QPnDqDSFYrfFtPU06X+4cMQiTs9WMNyJ2doxNAjTc+KgGXjVWCrJXWidqUACYcDHXaG7xTNznLcC6TV2S9hp+eI6FO5FqlpkZt72ZTZ2u2NJHOhTf8rdraXQ85oWbW8yb0CeC3PbHR3+TdpRgtJZt6NR22IvHLhLDBg82AxktQ1rgLDrrDI1DtNcjnPnhnlhO6BMwoTIIleVD2mTyLE18Q3yZoHSYtk+DDAKx8zLRTRyzxX4pk3Lxu+RskjAPI2nIIQ/uL0ZBeyGFC9RXMOWXlMcGOqcBVwMt/JuS22TxF24hLWvbNzu5Cf75lgWRkdsHgGe6ZGWwhFXiVRXsp0RR+bqfNXyXRghGLmRxsK5vS4Co+lUJjnNp3Ow0/JelJRRUAFTpfeBht7dXciEzm1AxlG8YfHb2l+6xWyFlNnbloKfbQo0fpcD0uWPpFL6E3yqmYWzulC+AAOjjSLPf1K6fDFaYUkfrwnGGC53rr2CHtbOTwsoddfzt3GB7kx4="); // optional
 
-                AwsSessionCredentials sessionCredentials = AwsSessionCredentials.create(accessKey, secretKey, sessionToken);
+                AwsCredentialsProvider credentialsProvider;
+
+                if (sessionToken != null && !sessionToken.isEmpty()) {
+                    // Use temporary session credentials
+                    AwsSessionCredentials sessionCredentials = AwsSessionCredentials.create(accessKey, secretKey, sessionToken);
+                    credentialsProvider = StaticCredentialsProvider.create(sessionCredentials);
+                } else {
+                    // Use basic credentials
+                    AwsBasicCredentials basicCredentials = AwsBasicCredentials.create(accessKey, secretKey);
+                    credentialsProvider = StaticCredentialsProvider.create(basicCredentials);
+                }
 
                 // Create S3 client
                 S3Client s3Client = S3Client.builder()
                         .region(Region.of(region))
-                        .credentialsProvider(StaticCredentialsProvider.create(sessionCredentials))
+                        .credentialsProvider(credentialsProvider)
                         .build();
 
                 // Test connection by listing buckets
@@ -222,6 +231,7 @@ public class ICIPDataSourceServiceUtilS3 extends ICIPDataSourceServiceUtil {
 			JSONObject attributes = ds.getJSONObject(ICIPDataSourceServiceUtil.ATTRIBUTES);
 			attributes.put("accessKey", "");
 			attributes.put("secretKey", "");
+            attributes.put("sessionToken", "");
 			attributes.put("url", "");
 			attributes.put("Region", "");
 			attributes.put("StorageContainerName", "");
