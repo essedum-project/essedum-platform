@@ -7,8 +7,9 @@ import * as fs from 'fs';
 import FormData from 'form-data';
 import { EssedumFileSystemProvider } from '../../providers/essedum-file-provider';
 import { JobLogsViewer } from './job-logs-viewer';
-import { API_ENDPOINTS, createSecureAxiosConfig, createHTTPSAgent, BASE_URL, initializeSSLBypass } from '../../core/constants/api-config';
-import { HttpParams, JobStatus, PipelineCard, PipelineScript, ScriptFile } from '../../core/interfaces/pipeline.interfaces';
+import { API_ENDPOINTS, createSecureAxiosConfig, createHTTPSAgent, BASE_URL, initializeSSLBypass } from '../../constants/api-config';
+import { HttpParams, JobStatus, PipelineCard, PipelineScript, ScriptFile } from '../../interfaces/pipeline.interfaces';
+import { PipelineService } from '../../services/pipeline.service';
 
 export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     private _view?: vscode.WebviewView;
@@ -36,12 +37,14 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     private cards: PipelineCard[] = [];
     private filteredCards: PipelineCard[] = [];
     private users: string[] = [];
+    private _pipelineService: PipelineService;
 
-    constructor(private readonly _context: vscode.ExtensionContext, token: string, authService?: any, fileProvider?: EssedumFileSystemProvider) {
+    constructor(private readonly _context: vscode.ExtensionContext, token: string, authService?: any, fileProvider?: EssedumFileSystemProvider, pipelineService?: PipelineService) {
         this._extensionUri = _context.extensionUri;
         this.updateToken(token);
         this._authService = authService;
         this._fileProvider = fileProvider;
+        this._pipelineService = pipelineService || new PipelineService(token, 'leo1311'); // Create default if not provided
     }
 
     public updateToken(token: string) {
@@ -600,38 +603,40 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
 
     private async getPipelinesCount(params: HttpParams): Promise<number> {
         try {
-            console.log('Attempting fallback request...');
-            process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+            return await this._pipelineService.getPipelinesCount(params);
 
-            const https = require('https');
-            const axiosConfig = {
-                httpsAgent: new https.Agent({
-                    rejectUnauthorized: false
-                }),
-                timeout: 10000,
-                params: {
-                    ...params,
-                    project: this.organization
-                },
-                headers: {
-                    'accept': 'application/json, text/plain, */*',
-                    'accept-language': 'en-US,en;q=0.9',
-                    'content-type': 'application/json',
-                    'priority': 'u=1, i',
-                    'project': '2',
-                    'projectname': 'leo1311',
-                    'referer': 'https://essedum.az.ad.idemo-ppc.com/',
-                    'roleid': '1',
-                    'rolename': 'IT Portfolio Manager',
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
-                    'x-requested-with': 'Leap',
-                    ...(this._token ? { 'authorization': `Bearer ${this._token}` } : {})
-                }
-            };
+            // console.log('Attempting fallback request...');
+            // process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
-            const response = await axios.get(API_ENDPOINTS.PIPELINES_COUNT, axiosConfig);
-            console.log('Fallback response:', response.data);
-            return response.data || 0;
+            // const https = require('https');
+            // const axiosConfig = {
+            //     httpsAgent: new https.Agent({
+            //         rejectUnauthorized: false
+            //     }),
+            //     timeout: 10000,
+            //     params: {
+            //         ...params,
+            //         project: this.organization
+            //     },
+            //     headers: {
+            //         'accept': 'application/json, text/plain, */*',
+            //         'accept-language': 'en-US,en;q=0.9',
+            //         'content-type': 'application/json',
+            //         'priority': 'u=1, i',
+            //         'project': '2',
+            //         'projectname': 'leo1311',
+            //         'referer': 'https://essedum.az.ad.idemo-ppc.com/',
+            //         'roleid': '1',
+            //         'rolename': 'IT Portfolio Manager',
+            //         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
+            //         'x-requested-with': 'Leap',
+            //         ...(this._token ? { 'authorization': `Bearer ${this._token}` } : {})
+            //     }
+            // };
+
+            // const response = await axios.get(API_ENDPOINTS.PIPELINES_COUNT, axiosConfig);
+            // console.log('Fallback response:', response.data);
+            // return response.data || 0;
 
         } catch (fallbackError: any) {
             console.error('Fallback request also failed:', fallbackError);

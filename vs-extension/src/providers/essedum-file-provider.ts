@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as https from 'https';
-import { BASE_URL } from '../core/constants/api-config';
+import { BASE_URL } from '../constants/api-config';
 
 const axios = require('axios');
 

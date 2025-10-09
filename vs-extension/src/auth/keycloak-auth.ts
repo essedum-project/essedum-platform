@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import axios from 'axios';
 import * as https from 'https';
 import { OAuthAuthServer, PKCEChallenge } from './oauth-auth-server';
-import { createHTTPSAgent, initializeSSLBypass } from '../core/constants/api-config';
+import { createHTTPSAgent, initializeSSLBypass } from '../constants/api-config';
 
 export interface TokenResponse {
     access_token: string;

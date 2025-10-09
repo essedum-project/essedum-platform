@@ -4,7 +4,7 @@
 import * as vscode from 'vscode';
 import axios from 'axios';
 import * as https from 'https';
-import { BASE_URL } from '../../core/constants/api-config';
+import { BASE_URL } from '../../constants/api-config';
 
 
 export interface JobData {

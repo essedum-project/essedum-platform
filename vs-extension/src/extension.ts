@@ -4,7 +4,8 @@ import { PipelineCardsProvider } from './app/pipeline/pipeline-cards';
 import { KeycloakAuthService, KeycloakConfig } from './auth/keycloak-auth';
 import { EssedumFileSystemProvider } from './providers/essedum-file-provider';
 import { JobLogsPanelProvider } from './app/pipeline/job-logs-panel-provider';
-import { initializeSSLBypass, setupAxiosDefaults, BASE_URL } from './core/constants/api-config';
+import { initializeSSLBypass, setupAxiosDefaults, BASE_URL } from './constants/api-config';
+import { PipelineService } from './services/pipeline.service';
 
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
@@ -49,12 +50,16 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Create pipeline cards provider (this will handle all pipeline logic)
 	let pipelineCardsProvider: PipelineCardsProvider;
+	let pipelineService: PipelineService;
 
 	// Initialize pipeline provider with authentication
 	const initializePipelineProvider = async () => {
 		try {
 			const accessToken = await authService.getAccessToken();
-			pipelineCardsProvider = new PipelineCardsProvider(context, accessToken, authService, essedumFileProvider);
+			// Create pipeline service first
+			pipelineService = new PipelineService(accessToken, 'leo1311'); // Pass token and organization
+			// Create pipeline cards provider with service dependency
+			pipelineCardsProvider = new PipelineCardsProvider(context, accessToken, authService, essedumFileProvider, pipelineService);
 			essedumFileProvider.updateToken(accessToken);
 			// Update authentication context after successful initialization
 			await updateAuthenticationContext();
@@ -62,7 +67,9 @@ export function activate(context: vscode.ExtensionContext) {
 		} catch (error) {
 			console.error('Failed to initialize pipeline provider:', error);
 			// Create provider with empty token, it will be updated when user logs in
-			pipelineCardsProvider = new PipelineCardsProvider(context, '', authService, essedumFileProvider);
+			// Create empty pipeline service for fallback
+			pipelineService = new PipelineService('', 'leo1311');
+			pipelineCardsProvider = new PipelineCardsProvider(context, '', authService, essedumFileProvider, pipelineService);
 			// Set authentication context to false since initialization failed
 			await vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', false);
 			return pipelineCardsProvider;
@@ -222,9 +229,15 @@ export function activate(context: vscode.ExtensionContext) {
 				if (pipelineCardsProvider) {
 					pipelineCardsProvider.updateToken(accessToken);
 					essedumFileProvider.updateToken(accessToken);
+					// Update pipeline service token as well
+					if (pipelineService) {
+						pipelineService.updateToken(accessToken);
+					}
 				} else {
 					// Re-initialize the provider if it doesn't exist
-					pipelineCardsProvider = new PipelineCardsProvider(context, accessToken, authService, essedumFileProvider);
+					// Create pipeline service first
+					pipelineService = new PipelineService(accessToken, 'leo1311');
+					pipelineCardsProvider = new PipelineCardsProvider(context, accessToken, authService, essedumFileProvider, pipelineService);
 					essedumFileProvider.updateToken(accessToken);
 					context.subscriptions.push(
 						vscode.window.registerWebviewViewProvider(
