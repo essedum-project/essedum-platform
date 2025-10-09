@@ -1337,15 +1337,89 @@ if __name__ == "__main__":
             preserveFocus: false
         });
 
-        // Show a message indicating this is an Essedum file
+        // Find the pipeline for auto-save functionality
+        const pipeline = this.allCards.find((card: PipelineCard) => 
+            this._currentPipelineName === card.name || this._currentPipelineName === card.alias);
+
+        if (pipeline) {
+            console.log('🔧 Setting up auto-save for Essedum file:', scriptFile.fileName);
+
+            // Update script state initially
+            const scriptLines = scriptFile.content.split('\n');
+            this.onScriptChange(scriptLines);
+
+            // Set up auto-save functionality - listen for document changes
+            const changeDisposable = vscode.workspace.onDidChangeTextDocument(async (event) => {
+                if (event.document === doc) {
+                    console.log('📝 Essedum file content changed, triggering onScriptChange...');
+
+                    // Get updated content and split into lines (Angular pattern)
+                    const updatedContent = event.document.getText();
+                    const updatedLines = updatedContent.split('\n');
+
+                    // Call onScriptChange like Angular code editor
+                    this.onScriptChange(updatedLines);
+
+                    console.log('✅ Script state updated with', this.script.length, 'lines');
+                }
+            });
+
+            // Set up save listener - automatically upload when user saves
+            const saveDisposable = vscode.workspace.onDidSaveTextDocument(async (savedDocument) => {
+                if (savedDocument === doc) {
+                    console.log('💾 📥 ESSEDUM FILE SAVE EVENT - Auto-uploading script changes...');
+
+                    try {
+                        // Get the saved content and update scriptContent
+                        const savedContent = savedDocument.getText();
+                        const savedLines = savedContent.split('\n');
+
+                        console.log('📝 Saved Essedum file content length:', savedContent.length);
+                        console.log('📝 Saved lines count:', savedLines.length);
+
+                        // Update script state - this will set this.scriptContent
+                        this.onScriptChange(savedLines);
+
+                        console.log('📤 Auto-uploading Essedum file:', scriptFile.fileName);
+
+                        // Auto-upload using Angular pattern
+                        await this.createNativeFileWithFormData(pipeline.name, scriptFile.fileName);
+
+                        // Show success message
+                        vscode.window.showInformationMessage(
+                            `✅ Essedum file changes auto-uploaded successfully to ${scriptFile.fileName}!`
+                        );
+
+                        // Update stream item and save (following Angular pattern)
+                        await this.updateStreamItemAfterFileUpload(pipeline, scriptFile.fileName);
+
+                    } catch (error: any) {
+                        console.error('❌ Essedum file auto-upload failed:', error);
+                        vscode.window.showErrorMessage(`Auto-upload failed: ${error.message}`);
+                    }
+                }
+            });
+
+            // Clean up listeners when document is closed
+            const closeDisposable = vscode.workspace.onDidCloseTextDocument((closedDocument) => {
+                if (closedDocument === doc) {
+                    console.log('📄 Essedum file editor closed, cleaning up listeners');
+                    changeDisposable.dispose();
+                    saveDisposable.dispose();
+                    closeDisposable.dispose();
+                }
+            });
+        }
+
+        // Show a message indicating this is an Essedum file with auto-save
         vscode.window.showInformationMessage(
-            `📝 Opened ${scriptFile.fileName} as Essedum file. Changes will be saved to the server.`,
+            `📝 Opened ${scriptFile.fileName} as Essedum file with auto-save. Changes will be uploaded when you save (Ctrl+S).`,
             'Got it!'
         );
     }
 
     /**
-     * Fallback method to open script as untitled document
+     * Fallback method to open script as untitled document with auto-save functionality
      */
     private async openScriptAsUntitledDocument(scriptFile: ScriptFile): Promise<void> {
         // Create a new untitled document with the script content
@@ -1359,6 +1433,88 @@ if __name__ == "__main__":
             viewColumn: vscode.ViewColumn.One,
             preserveFocus: false
         });
+
+        // Find the pipeline for auto-save functionality
+        const pipeline = this.allCards.find((card: PipelineCard) => 
+            this._currentPipelineName === card.name || this._currentPipelineName === card.alias);
+
+        if (pipeline) {
+            console.log('🔧 Setting up auto-save for script:', scriptFile.fileName);
+
+            // Update script state initially
+            const scriptLines = scriptFile.content.split('\n');
+            this.onScriptChange(scriptLines);
+
+            // Set up auto-save functionality - listen for document changes
+            const changeDisposable = vscode.workspace.onDidChangeTextDocument(async (event) => {
+                if (event.document === doc) {
+                    console.log('📝 Script content changed, triggering onScriptChange...');
+
+                    // Get updated content and split into lines (Angular pattern)
+                    const updatedContent = event.document.getText();
+                    const updatedLines = updatedContent.split('\n');
+
+                    // Call onScriptChange like Angular code editor
+                    this.onScriptChange(updatedLines);
+
+                    console.log('✅ Script state updated with', this.script.length, 'lines');
+                }
+            });
+
+            // Set up save listener - automatically upload when user saves
+            const saveDisposable = vscode.workspace.onDidSaveTextDocument(async (savedDocument) => {
+                if (savedDocument === doc) {
+                    console.log('💾 📥 SAVE EVENT TRIGGERED - Auto-uploading script changes...');
+
+                    try {
+                        // Get the saved content and update scriptContent
+                        const savedContent = savedDocument.getText();
+                        const savedLines = savedContent.split('\n');
+
+                        console.log('📝 Saved content length:', savedContent.length);
+                        console.log('📝 Saved lines count:', savedLines.length);
+
+                        // Update script state - this will set this.scriptContent
+                        this.onScriptChange(savedLines);
+
+                        // Use the original filename or generate one
+                        const scriptFileName = scriptFile.fileName || `${pipeline.name}_${this.organization}.py`;
+
+                        console.log('📤 About to upload file:', scriptFileName);
+
+                        // Auto-upload using Angular pattern
+                        await this.createNativeFileWithFormData(pipeline.name, scriptFileName);
+
+                        // Show success message
+                        vscode.window.showInformationMessage(
+                            `✅ Script changes auto-uploaded successfully to ${scriptFileName}!`
+                        );
+
+                        // Update stream item and save (following Angular pattern)
+                        await this.updateStreamItemAfterFileUpload(pipeline, scriptFileName);
+
+                    } catch (error: any) {
+                        console.error('❌ Auto-upload failed:', error);
+                        vscode.window.showErrorMessage(`Auto-upload failed: ${error.message}`);
+                    }
+                }
+            });
+
+            // Clean up listeners when document is closed
+            const closeDisposable = vscode.workspace.onDidCloseTextDocument((closedDocument) => {
+                if (closedDocument === doc) {
+                    console.log('📄 Script editor closed, cleaning up listeners');
+                    changeDisposable.dispose();
+                    saveDisposable.dispose();
+                    closeDisposable.dispose();
+                }
+            });
+
+            // Show initial instructions
+            vscode.window.showInformationMessage(
+                `📝 Script "${scriptFile.fileName}" opened with auto-save. Changes will be uploaded when you save (Ctrl+S).`
+            );
+        }
     }
 
     private getScriptActionsHtml(card: PipelineCard, scripts: PipelineScript): string {
@@ -4090,6 +4246,10 @@ print(f"The model got uploaded {uploaded_path} here")
         }
 
         try {
+            // Set current pipeline name for auto-save functionality
+            this._currentPipelineName = card.name;
+            console.log('🔧 Set current pipeline for auto-save:', this._currentPipelineName);
+
             const scripts = await this.fetchPipelineScripts(card.name);
             console.log('Fetched Scripts:', scripts);
             if (scripts && scripts.files && scripts.files[fileIndex]) {
