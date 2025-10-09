@@ -32,9 +32,13 @@ export class JobLogsPanelProvider implements vscode.WebviewViewProvider {
         // Handle messages from the webview
         webviewView.webview.onDidReceiveMessage(
             message => {
+                console.log('Panel provider received message:', message);
                 if (this._jobLogsViewer) {
+                    console.log('Forwarding message to job logs viewer');
                     // Forward messages to the job logs viewer
                     this._jobLogsViewer.handlePanelMessage(message, webviewView);
+                } else {
+                    console.log('No job logs viewer instance available');
                 }
             },
             undefined,
@@ -43,6 +47,8 @@ export class JobLogsPanelProvider implements vscode.WebviewViewProvider {
     }
 
     public showJobLogs(token: string, pipelineName?: string, internalJob?: string): void {
+        console.log('showJobLogs called with:', { token: token ? 'present' : 'missing', pipelineName, internalJob });
+        
         // Set the context to make the view visible
         vscode.commands.executeCommand('setContext', 'essedum.jobLogsVisible', true);
         
@@ -52,10 +58,15 @@ export class JobLogsPanelProvider implements vscode.WebviewViewProvider {
 
         // Create or update the job logs viewer
         this._jobLogsViewer = new JobLogsViewer(this._context, token, pipelineName, internalJob);
+        console.log('Job logs viewer created');
         
         if (this._view) {
+            console.log('Setting webview content');
             // Update the webview content with job logs
             this._jobLogsViewer.setWebviewContent(this._view);
+            console.log('Webview content set');
+        } else {
+            console.log('No webview available yet');
         }
     }
 

@@ -507,6 +507,70 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		})
 	);
+
+	// Register command to test session data extraction
+	context.subscriptions.push(
+		vscode.commands.registerCommand('essedum.testSessionData', async () => {
+			try {
+				console.log('Testing session data extraction...');
+				
+				// Get session data
+				const sessionData = await authService.getSessionData();
+				const userInfo = await authService.getUserInfo();
+				const accessToken = await authService.getAccessToken();
+
+				let message = `🔍 Session Data Test Results:\n\n`;
+				message += `🔐 Token Available: ${accessToken ? '✅ Yes' : '❌ No'}\n`;
+				message += `🔐 Token Length: ${accessToken ? accessToken.length : 0}\n\n`;
+				
+				if (sessionData) {
+					message += `📊 Extracted Session Data:\n`;
+					message += `• Project ID: ${sessionData.projectId}\n`;
+					message += `• Project Name: ${sessionData.projectName}\n`;
+					message += `• Role ID: ${sessionData.roleId}\n`;
+					message += `• Role Name: ${sessionData.roleName}\n`;
+					message += `• Organization: ${sessionData.organization || 'N/A'}\n`;
+					message += `• User ID: ${sessionData.userId || 'N/A'}\n`;
+					message += `• Email: ${sessionData.email || 'N/A'}\n`;
+					message += `• Username: ${sessionData.username || 'N/A'}\n\n`;
+				} else {
+					message += `❌ No session data available\n\n`;
+				}
+
+				if (userInfo) {
+					message += `👤 Raw User Info (first 10 properties):\n`;
+					const entries = Object.entries(userInfo).slice(0, 10);
+					entries.forEach(([key, value]) => {
+						const valueStr = typeof value === 'object' ? JSON.stringify(value) : String(value);
+						const truncatedValue = valueStr.length > 50 ? valueStr.substring(0, 50) + '...' : valueStr;
+						message += `• ${key}: ${truncatedValue}\n`;
+					});
+					
+					if (Object.keys(userInfo).length > 10) {
+						message += `• ... and ${Object.keys(userInfo).length - 10} more properties\n`;
+					}
+				} else {
+					message += `❌ No user info available`;
+				}
+
+				// Show in a modal dialog
+				vscode.window.showInformationMessage(message, { modal: true }, 'Copy to Clipboard').then(selection => {
+					if (selection === 'Copy to Clipboard') {
+						vscode.env.clipboard.writeText(message);
+						vscode.window.showInformationMessage('Session data copied to clipboard!');
+					}
+				});
+
+				// Also log to console for debugging
+				console.log('Session Data:', sessionData);
+				console.log('User Info:', userInfo);
+
+			} catch (error: any) {
+				console.error('Session data test failed:', error);
+				vscode.window.showErrorMessage(`Session data test failed: ${error.message}`);
+			}
+		})
+	);
 }
 
 // This method is called when your extension is deactivated

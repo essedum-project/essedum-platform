@@ -126,22 +126,31 @@ export class JobLogsViewer {
      * Handle messages from webview
      */
     private async handleWebviewMessage(message: any, panel: vscode.WebviewPanel): Promise<void> {
+        console.log('Received webview message:', message);
+        
         switch (message.command) {
             case 'refresh':
+                console.log('Handling refresh command');
                 await this.onRefresh(panel);
                 break;
             case 'getJobs':
+                console.log('Handling getJobs command:', message.choice);
                 await this.getJobs(message.choice, panel);
                 break;
             case 'showConsole':
+                console.log('Handling showConsole command for jobId:', message.jobId);
                 await this.showConsole(message.jobId, message.runtime, message.status, message.job, panel);
                 break;
             case 'stopJob':
+                console.log('Handling stopJob command for jobId:', message.jobId);
                 await this.stopJob(message.jobId, panel);
                 break;
             case 'showOutputArtifact':
+                console.log('Handling showOutputArtifact command for jobId:', message.jobId);
                 await this.showOutputArtifact(message.jobId);
                 break;
+            default:
+                console.log('Unknown command received:', message.command);
         }
     }
 
@@ -261,14 +270,137 @@ export class JobLogsViewer {
      */
     private async showConsole(jobId: string, runtime: string, status: string, job: any, panel: vscode.WebviewPanel): Promise<void> {
         try {
-            if (this._internalJob) {
-                await this.fetchInternalJobLogs(jobId, status, panel);
-            } else {
-                await this.fetchSparkJobLogs(jobId, runtime, status, panel);
-            }
+            // Use the new console API to fetch job logs
+            await this.fetchConsoleJobLogs(jobId, status, panel);
         } catch (error: any) {
             console.error('Error showing console:', error);
             vscode.window.showErrorMessage(`Failed to show logs: ${error.message}`);
+            
+            // Fallback to original methods if console API fails
+            try {
+                if (this._internalJob) {
+                    await this.fetchInternalJobLogs(jobId, status, panel);
+                } else {
+                    await this.fetchSparkJobLogs(jobId, runtime, status, panel);
+                }
+            } catch (fallbackError: any) {
+                console.error('Fallback method also failed:', fallbackError);
+                vscode.window.showErrorMessage(`All log retrieval methods failed: ${fallbackError.message}`);
+            }
+        }
+    }
+
+    /**
+     * Fetch console job logs using the new console API
+     */
+    private async fetchConsoleJobLogs(jobId: string, status: string, panel: vscode.WebviewPanel): Promise<void> {
+        try {
+            const response = await this.fetchConsoleJob(jobId, 0, 0, status, false);
+            if (response) {
+                this.currentJob = response;
+                await this.processJobData(jobId, 'console', status, panel);
+                
+                // Start polling if job is running
+                if (this.currentJob.status === 'STARTED' || this.currentJob.status === 'RUNNING') {
+                    this.startConsoleJobPolling(jobId, status);
+                }
+
+                // Display the console logs in a new webview
+                await this.displayConsoleLogs(jobId, response);
+            }
+        } catch (error: any) {
+            console.error('Error fetching console job logs:', error);
+            throw error; // Re-throw to trigger fallback
+        }
+    }
+
+    /**
+     * Start polling for console job logs
+     */
+    private startConsoleJobPolling(jobId: string, status: string): void {
+        if (this.timeInterval) {
+            clearInterval(this.timeInterval);
+        }
+
+        this.timeInterval = setInterval(async () => {
+            try {
+                await this.fetchConsoleJob(jobId, 0, 0, status, false);
+
+                if (this.currentJob.status !== 'STARTED' && this.currentJob.status !== 'RUNNING') {
+                    if (this.timeInterval) {
+                        clearInterval(this.timeInterval);
+                        this.timeInterval = undefined;
+                    }
+                }
+            } catch (error) {
+                console.error('Error polling console job status:', error);
+                if (this.timeInterval) {
+                    clearInterval(this.timeInterval);
+                    this.timeInterval = undefined;
+                }
+            }
+        }, 10000); // Poll every 10 seconds
+    }
+
+    /**
+     * Display console logs in a new webview window
+     */
+    private async displayConsoleLogs(jobId: string, logData: any): Promise<void> {
+        const consolePanel = vscode.window.createWebviewPanel(
+            'consoleLogs',
+            `Console Logs: ${jobId}`,
+            vscode.ViewColumn.Active,
+            {
+                enableScripts: true,
+                localResourceRoots: [this._extensionUri],
+                retainContextWhenHidden: true
+            }
+        );
+
+        consolePanel.webview.html = this.getConsoleLogsHtml(jobId, logData);
+
+        // Handle messages from the console logs webview
+        consolePanel.webview.onDidReceiveMessage(
+            async (message) => {
+                if (message.command === 'refreshConsoleLogs') {
+                    try {
+                        const refreshedData = await this.fetchConsoleJob(jobId, 0, 0, 'ERROR', false);
+                        consolePanel.webview.html = this.getConsoleLogsHtml(jobId, refreshedData);
+                    } catch (error: any) {
+                        vscode.window.showErrorMessage(`Failed to refresh console logs: ${error.message}`);
+                    }
+                } else if (message.command === 'downloadLogs') {
+                    await this.downloadConsoleLogs(jobId, logData);
+                }
+            },
+            undefined,
+            this._context.subscriptions
+        );
+    }
+
+    /**
+     * Download console logs to a file
+     */
+    private async downloadConsoleLogs(jobId: string, logData: any): Promise<void> {
+        try {
+            const logContent = typeof logData === 'string' ? logData : JSON.stringify(logData, null, 2);
+            const fileName = `console-logs-${jobId}-${new Date().getTime()}.txt`;
+            
+            const uri = await vscode.window.showSaveDialog({
+                defaultUri: vscode.Uri.file(fileName),
+                filters: {
+                    'Text files': ['txt'],
+                    'JSON files': ['json'],
+                    'All files': ['*']
+                }
+            });
+
+            if (uri) {
+                await vscode.workspace.fs.writeFile(uri, Buffer.from(logContent, 'utf8'));
+                vscode.window.showInformationMessage(`Console logs saved to ${uri.fsPath}`);
+            }
+        } catch (error: any) {
+            vscode.window.showErrorMessage(`Failed to download logs: ${error.message}`);
         }
     }
 
@@ -395,14 +527,42 @@ export class JobLogsViewer {
      * Stop a job (equivalent to stopJob)
      */
     private async stopJob(jobId: string, panel: vscode.WebviewPanel): Promise<void> {
+        console.log('stopJob called with jobId:', jobId);
+        
+        // Show confirmation dialog using VS Code's native dialog
+        const confirmResult = await vscode.window.showWarningMessage(
+            `Are you sure you want to stop job ${jobId}?`,
+            { modal: true },
+            'Yes, Stop Job'
+        );
+        
+        if (confirmResult !== 'Yes, Stop Job') {
+            console.log('User cancelled stop job operation');
+            return;
+        }
+        
+        vscode.window.showInformationMessage(`Attempting to stop job: ${jobId}`);
+        
         try {
+            console.log('Calling stopPipeline API...');
             const response = await this.stopPipeline(jobId);
+            console.log('stopPipeline API response:', response);
+            
             vscode.window.showInformationMessage('Stop Event Triggered!');
             console.log(response, 'stopjob response');
+            
+            console.log('Refreshing job list...');
             await this.onRefresh(panel);
+            console.log('Job list refreshed successfully');
         } catch (error: any) {
             console.error('Error stopping job:', error);
-            vscode.window.showErrorMessage('Error stopping job!');
+            console.error('Error details:', {
+                message: error.message,
+                status: error.response?.status,
+                statusText: error.response?.statusText,
+                data: error.response?.data
+            });
+            vscode.window.showErrorMessage(`Error stopping job: ${error.message || 'Unknown error'}`);
         }
     }
 
@@ -435,6 +595,9 @@ export class JobLogsViewer {
      * Update jobs in webview
      */
     private updateJobsInWebview(panel: vscode.WebviewPanel): void {
+        console.log('updateJobsInWebview called with jobs:', this.jobList.length);
+        console.log('Sample job data:', this.jobList[0]);
+        
         panel.webview.postMessage({
             command: 'updateJobs',
             jobs: this.jobList,
@@ -442,6 +605,8 @@ export class JobLogsViewer {
             currentPage: this.page,
             lastPage: this.lastPage
         });
+        
+        console.log('Posted updateJobs message to webview');
     }
 
     // API Methods (equivalent to Angular service calls)
@@ -530,11 +695,14 @@ export class JobLogsViewer {
         return JSON.parse(response.data);
     }
 
-    private async stopPipeline(jobId: string): Promise<any> {
+    /**
+     * Fetch console logs for a job using the console API endpoint
+     */
+    private async fetchConsoleJob(jobId: string, offset: number = 0, lineno: number = 0, status: string = 'ERROR', readconsole: boolean = false): Promise<any> {
         const httpsAgent = new https.Agent({ rejectUnauthorized: false });
-        const headers = this.getHeaders();
+        const headers = this.getConsoleHeaders();
 
-        const response = await axios.post(`/api/aip/service/v1/jobs/${jobId}/stop`, {}, {
+        const response = await axios.get(`/api/aip/jobs/console/${jobId}?offset=${offset}&org=${this._organization}&lineno=${lineno}&status=${status}&readconsole=${readconsole}`, {
             baseURL: BASE_URL,
             headers,
             httpsAgent,
@@ -542,6 +710,37 @@ export class JobLogsViewer {
         });
 
         return response.data;
+    }
+
+    private async stopPipeline(jobId: string): Promise<any> {
+        console.log('stopPipeline called with jobId:', jobId);
+        console.log('BASE_URL:', BASE_URL);
+        console.log('Organization:', this._organization);
+        
+        const httpsAgent = new https.Agent({ rejectUnauthorized: false });
+        const headers = this.getHeaders();
+        console.log('Request headers:', headers);
+        
+        const url = `/api/aip/service/v1/jobs/stopJob/${jobId}`;
+        console.log('Making GET request to:', `${BASE_URL}${url}`);
+
+        try {
+            const response = await axios.get(url, {
+                baseURL: BASE_URL,
+                headers,
+                httpsAgent,
+                timeout: 10000
+            });
+            
+            console.log('stopPipeline API response status:', response.status);
+            console.log('stopPipeline API response data:', response.data);
+            return response.data;
+        } catch (error: any) {
+            console.error('stopPipeline API error:', error);
+            console.error('Error response:', error.response?.data);
+            console.error('Error status:', error.response?.status);
+            throw error;
+        }
     }
 
     private async fetchOutputArtifacts(jobId: string): Promise<any> {
@@ -566,6 +765,29 @@ export class JobLogsViewer {
             'Project': '2',
             'ProjectName': this._organization,
             'X-Requested-With': 'Leap',
+        };
+    }
+
+    private getConsoleHeaders() {
+        return {
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-US,en;q=0.9',
+            'authorization': `Bearer ${this._token}`,
+            'content-type': 'application/json',
+            'priority': 'u=1, i',
+            'project': '2',
+            'projectname': this._organization,
+            'referer': 'https://essedum.az.ad.idemo-ppc.com/',
+            'roleid': '1',
+            'rolename': 'IT Portfolio Manager',
+            'sec-ch-ua': '"Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
+            'x-requested-with': 'Leap'
         };
     }
 
@@ -762,7 +984,9 @@ export class JobLogsViewer {
                 let lastPage = 0;
                 
                 function refresh() {
+                    console.log('Refresh function called');
                     vscode.postMessage({ command: 'refresh' });
+                    console.log('Refresh message sent');
                     showLoading();
                 }
                 
@@ -771,6 +995,7 @@ export class JobLogsViewer {
                 }
                 
                 function showConsole(jobId, runtime, status, job) {
+                    console.log('showConsole function called with:', { jobId, runtime, status, job });
                     vscode.postMessage({ 
                         command: 'showConsole', 
                         jobId: jobId, 
@@ -778,12 +1003,15 @@ export class JobLogsViewer {
                         status: status, 
                         job: job 
                     });
+                    console.log('showConsole message sent');
                 }
                 
                 function stopJob(jobId) {
-                    if (confirm('Are you sure you want to stop this job?')) {
-                        vscode.postMessage({ command: 'stopJob', jobId: jobId });
-                    }
+                    console.log('stopJob function called with jobId:', jobId);
+                    // Send message directly without confirmation - VS Code will handle confirmation
+                    console.log('Sending stopJob message to VS Code');
+                    vscode.postMessage({ command: 'stopJob', jobId: jobId });
+                    console.log('Message sent to VS Code');
                 }
                 
                 function showOutputArtifact(jobId) {
@@ -835,13 +1063,18 @@ export class JobLogsViewer {
                 }
                 
                 function renderJobs(jobs) {
+                    console.log('renderJobs called with', jobs.length, 'jobs');
                     const tbody = document.getElementById('jobsTableBody');
                     tbody.innerHTML = '';
                     
-                    jobs.forEach(job => {
+                    jobs.forEach((job, index) => {
+                        console.log('Rendering job', index, ':', job);
                         const row = document.createElement('tr');
                         
                         const triggerType = job.jobmetadata && job.jobmetadata.tag === 'EVENT' ? 'Event triggered' : 'User triggered';
+                        
+                        const showStopButton = job.jobStatus === 'RUNNING' && job.jobmetadata !== 'CHAIN';
+                        console.log('Job', job.jobId, 'status:', job.jobStatus, 'show stop button:', showStopButton);
                         
                         row.innerHTML = \`
                             <td class="job-id">\${job.id || job.jobId}</td>
@@ -910,7 +1143,7 @@ export class JobLogsViewer {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Job Log Details - ${jobId}</title>
+            <title>Job Log Details</title>
             <style>
                 body {
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -1080,7 +1313,7 @@ export class JobLogsViewer {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Output Artifacts - ${jobId}</title>
+            <title>Output Artifacts</title>
             <style>
                 body {
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -1128,7 +1361,7 @@ export class JobLogsViewer {
         </head>
         <body>
             <div class="header">
-                <h2>Output Artifacts for Job: ${jobId}</h2>
+                <h2>Output Artifacts for Job</h2>
             </div>
             
             <div class="artifacts-container">
@@ -1183,5 +1416,192 @@ export class JobLogsViewer {
         // This method will be called by the panel provider
         // The actual implementation is handled by the panel provider
         // which calls setWebviewContent
+    }
+
+    /**
+     * Generate HTML for console logs viewer
+     */
+    private getConsoleLogsHtml(jobId: string, logData: any): string {
+        const logContent = typeof logData === 'string' ? logData : JSON.stringify(logData, null, 2);
+        
+        return `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Console Logs - ${jobId}</title>
+            <style>
+                body {
+                    font-family: var(--vscode-font-family);
+                    font-size: var(--vscode-font-size);
+                    line-height: 1.6;
+                    padding: 16px;
+                    color: var(--vscode-foreground);
+                    background-color: var(--vscode-editor-background);
+                    margin: 0;
+                }
+                
+                .header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 20px;
+                    padding-bottom: 16px;
+                    border-bottom: 1px solid var(--vscode-panel-border);
+                }
+                
+                .header h2 {
+                    margin: 0;
+                    color: var(--vscode-symbolIcon-keywordForeground);
+                }
+                
+                .header-actions {
+                    display: flex;
+                    gap: 12px;
+                }
+                
+                .action-btn {
+                    background-color: var(--vscode-button-background);
+                    color: var(--vscode-button-foreground);
+                    border: none;
+                    padding: 8px 16px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 14px;
+                }
+                
+                .action-btn:hover {
+                    background-color: var(--vscode-button-hoverBackground);
+                }
+                
+                .job-info {
+                    background-color: var(--vscode-editor-inactiveSelectionBackground);
+                    border-radius: 6px;
+                    padding: 16px;
+                    margin-bottom: 20px;
+                    border-left: 4px solid var(--vscode-button-background);
+                }
+                
+                .job-info h3 {
+                    margin: 0 0 12px 0;
+                    color: var(--vscode-symbolIcon-keywordForeground);
+                }
+                
+                .logs-container {
+                    background-color: var(--vscode-editor-background);
+                    border: 1px solid var(--vscode-panel-border);
+                    border-radius: 8px;
+                    padding: 16px;
+                    max-height: 70vh;
+                    overflow-y: auto;
+                }
+                
+                .log-content {
+                    font-family: var(--vscode-editor-font-family, 'Courier New', monospace);
+                    font-size: var(--vscode-editor-font-size, 14px);
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                    line-height: 1.5;
+                    color: var(--vscode-editor-foreground);
+                    background-color: var(--vscode-editor-background);
+                    padding: 16px;
+                    border-radius: 4px;
+                    border: 1px solid var(--vscode-input-border);
+                }
+                
+                .empty-logs {
+                    text-align: center;
+                    color: var(--vscode-descriptionForeground);
+                    font-style: italic;
+                    padding: 40px;
+                }
+                
+                .loading {
+                    display: none;
+                    text-align: center;
+                    padding: 20px;
+                    color: var(--vscode-descriptionForeground);
+                }
+                
+                .error-message {
+                    background-color: var(--vscode-inputValidation-errorBackground);
+                    color: var(--vscode-inputValidation-errorForeground);
+                    border: 1px solid var(--vscode-inputValidation-errorBorder);
+                    border-radius: 4px;
+                    padding: 12px;
+                    margin: 16px 0;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h2>Console Logs</h2>
+                <div class="header-actions">
+                    <button class="action-btn" onclick="refreshLogs()" title="Refresh Logs">
+                        🔄 Refresh
+                    </button>
+                    <button class="action-btn" onclick="downloadLogs()" title="Download Logs">
+                        💾 Download
+                    </button>
+                </div>
+            </div>
+            
+            <div class="job-info">
+                <h3>Job ID: ${jobId}</h3>
+                <p>Console logs retrieved from the ESSEDUM platform</p>
+            </div>
+            
+            <div class="logs-container">
+                <div class="loading" id="loading">
+                    Loading logs...
+                </div>
+                ${logContent ? `
+                    <div class="log-content" id="logContent">${this.escapeHtml(logContent)}</div>
+                ` : `
+                    <div class="empty-logs">
+                        No console logs available for this job.
+                    </div>
+                `}
+            </div>
+            
+            <script>
+                const vscode = acquireVsCodeApi();
+                
+                function refreshLogs() {
+                    document.getElementById('loading').style.display = 'block';
+                    vscode.postMessage({
+                        command: 'refreshConsoleLogs'
+                    });
+                }
+                
+                function downloadLogs() {
+                    vscode.postMessage({
+                        command: 'downloadLogs'
+                    });
+                }
+                
+                // Auto-scroll to bottom of logs
+                window.addEventListener('load', function() {
+                    const logsContainer = document.querySelector('.logs-container');
+                    if (logsContainer) {
+                        logsContainer.scrollTop = logsContainer.scrollHeight;
+                    }
+                });
+            </script>
+        </body>
+        </html>`;
+    }
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    private escapeHtml(text: string): string {
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#x27;')
+            .replace(/\//g, '&#x2F;');
     }
 }
