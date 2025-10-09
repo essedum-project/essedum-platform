@@ -138,7 +138,9 @@ body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Cards Container */
@@ -155,13 +157,21 @@ body {
 
 /* Pipeline Card */
 .pipeline-card {
-    background-color: var(--vscode-editor-background);
+    padding: 24px;
+    min-height: 50px;
+    box-shadow: 0px 2px 4px #00000029;
+    border: 0.5px solid #0000001f;
+    border-radius: 16px;
+    display: block;
+    background: #ffffff;
+    color: #000000;
+    /* background-color: var(--vscode-editor-background);
     border: 1px solid var(--vscode-panel-border);
     border-radius: 8px;
     padding: 16px;
     margin-bottom: 12px;
     transition: all 0.2s ease;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); */
 }
 
 .pipeline-card:last-child {
@@ -228,14 +238,91 @@ body {
     font-weight: 500;
 }
 
+.lfx-u-header-sm {
+    font-size: 1rem;
+    /* line-height: 11px; */
+    font-weight: 600;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
+    font-style: normal;
+}
+
+.lfx-u-text-primary-80 {
+    color: #0094ff;
+}
+
+.lfx-u-header-xl {
+    font-size: 1.2rem;
+    font-weight: 600;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
+    font-style: normal;
+}
+
+.lfx-u-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+}
+
+.lfx-u-body-sm {
+  font-size: 0.8rem;
+  font-weight: 400;
+  /* line-height: 16px; */
+  font-family: "Roboto", "Segoe UI", sans-serif !important;
+  font-style: normal;
+}
+
+.lfx-u-text-neutral-80 {
+  color: #737373;
+}
+
+.aip-cursor {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.aip-hover-detail {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 8px;
+  z-index: 10;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.aip-cursor:hover .aip-hover-detail {
+  display: block;
+}
+
+.lfx-c-avatar {
+    background: #d1ecff;
+    color: #0094ff;
+    border-radius: 50%;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 500;
+    font-family: "Roboto", "Segoe UI", sans-serif !important;
+    font-style: normal;
+    float: left;
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 14px;
+    padding-top: 2px;
+  }
+
 /* View Details Button */
 .view-details-btn {
-    width: 100%;
+    /* width: 100%; */
     padding: 6px 12px;
     background-color: #007acc;
     color: #ffffff;
     border: none;
-    border-radius: 3px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 11px;
     font-weight: 500;
@@ -268,11 +355,11 @@ body {
     body {
         padding: 4px;
     }
-    
+
     .cards-container {
         grid-template-columns: 1fr;
     }
-    
+
     .header {
         flex-direction: row;
         gap: 4px;
@@ -281,30 +368,30 @@ body {
         padding-bottom: 4px;
         justify-content: space-between;
     }
-    
+
     .header h2 {
         font-size: 14px;
         flex: 1;
         margin-right: 4px;
     }
-    
+
     .header-buttons {
         gap: 3px;
         flex-shrink: 0;
     }
-    
+
     .search-container {
         flex-direction: row;
         margin-bottom: 4px;
         gap: 4px;
         align-items: center;
     }
-    
+
     .search-input {
         padding: 4px 6px;
         font-size: 10px;
     }
-    
+
     .btn {
         padding: 4px 6px;
         font-size: 10px;
@@ -316,7 +403,7 @@ body {
     .pipeline-card {
         box-shadow: 0 2px 4px rgba(255, 255, 255, 0.05);
     }
-    
+
     .pipeline-card:hover {
         box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
     }
@@ -445,46 +532,46 @@ body::-webkit-scrollbar {
         padding: 6px;
         margin-bottom: 6px;
     }
-    
+
     .pagination-controls {
         gap: 2px;
     }
-    
+
     .btn-pagination,
     .page-number {
         min-width: 20px;
         height: 20px;
         font-size: 9px;
     }
-    
+
     /* Pipeline cards on small screens */
     .pipeline-card {
         padding: 12px;
         margin-bottom: 8px;
         border-radius: 6px;
     }
-    
+
     .pipeline-card:last-child {
         margin-bottom: 0;
     }
-    
+
     .cards-container {
         gap: 8px;
     }
-    
+
     .pipeline-header {
         flex-direction: row;
         align-items: center;
         gap: 6px;
         justify-content: space-between;
     }
-    
+
     .pipeline-title {
         margin-right: 0;
         margin-bottom: 0;
         flex: 1;
     }
-    
+
     .pipeline-type-badge {
         flex-shrink: 0;
     }
@@ -496,11 +583,11 @@ body::-webkit-scrollbar {
         padding: 2px;
         font-size: 10px;
     }
-    
+
     .container {
         height: 100%;
     }
-    
+
     .header {
         margin-bottom: 2px;
         padding-bottom: 2px;
@@ -509,91 +596,91 @@ body::-webkit-scrollbar {
         align-items: center;
         justify-content: space-between;
     }
-    
+
     .header h2 {
         font-size: 12px;
         flex: 1;
         margin-right: 2px;
     }
-    
+
     .header-buttons {
         gap: 1px;
         flex-shrink: 0;
     }
-    
+
     .search-container {
         margin-bottom: 2px;
         gap: 2px;
         align-items: center;
     }
-    
+
     .search-input {
         padding: 2px 4px;
         font-size: 9px;
         height: 20px;
     }
-    
+
     .btn {
         padding: 2px 3px;
         font-size: 8px;
         min-width: 20px;
         height: 20px;
     }
-    
+
     .pipeline-card {
         padding: 10px;
         margin-bottom: 6px;
         border-radius: 6px;
     }
-    
+
     .pipeline-card:last-child {
         margin-bottom: 0;
     }
-    
+
     .cards-container {
         gap: 6px;
     }
-    
+
     .pipeline-header {
         flex-direction: row;
         align-items: center;
         gap: 4px;
         justify-content: space-between;
     }
-    
+
     .pipeline-title {
         font-size: 11px;
         flex: 1;
         margin-right: 4px;
         margin-bottom: 0;
     }
-    
+
     .pipeline-type-badge {
         flex-shrink: 0;
         font-size: 8px;
         padding: 1px 4px;
     }
-    
+
     .pipeline-meta {
         font-size: 9px;
     }
-    
+
     .view-details-btn {
         padding: 4px 8px;
         font-size: 9px;
     }
-    
+
     .pagination-container {
         padding: 2px;
         margin-top: 2px;
         margin-bottom: 4px;
         gap: 2px;
     }
-    
+
     .pagination-info {
         font-size: 8px;
     }
-    
+
     .btn-pagination,
     .page-number {
         min-width: 16px;
@@ -601,7 +688,7 @@ body::-webkit-scrollbar {
         font-size: 8px;
         padding: 2px;
     }
-    
+
     .pagination-controls {
         gap: 1px;
     }
@@ -800,26 +887,26 @@ body::-webkit-scrollbar {
         align-items: flex-start;
         gap: 8px;
     }
-    
+
     .pipeline-details-info {
         grid-template-columns: 1fr;
     }
-    
+
     .script-item {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
     }
-    
+
     .script-actions {
         align-self: stretch;
         justify-content: flex-end;
     }
-    
+
     .action-buttons {
         flex-direction: column;
     }
-    
+
     .action-buttons .btn {
         width: 100%;
     }

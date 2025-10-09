@@ -7,7 +7,7 @@ class PipelineCardsClient {
         this.initializeElements();
         this.attachEventListeners();
         this.requestInitialLoad();
-        
+
         // Make available globally for onclick handlers
         window.pipelineClient = this;
     }
@@ -26,7 +26,7 @@ class PipelineCardsClient {
         this.prevPageBtn = document.getElementById('prevPageBtn');
         this.nextPageBtn = document.getElementById('nextPageBtn');
         this.lastPageBtn = document.getElementById('lastPageBtn');
-        
+
         // Details view elements
         this.detailsView = document.getElementById('detailsView');
         this.backBtn = document.getElementById('backBtn');
@@ -37,7 +37,7 @@ class PipelineCardsClient {
         this.runPipelineBtn = document.getElementById('runPipelineBtn');
         this.viewLogsBtn = document.getElementById('viewLogsBtn');
         this.refreshScriptsBtn = document.getElementById('refreshScriptsBtn');
-        
+
         // Track current view state
         this.currentView = 'list'; // 'list' or 'details'
         this.currentPipelineId = null;
@@ -92,7 +92,7 @@ class PipelineCardsClient {
         // Listen for messages from extension
         window.addEventListener('message', event => {
             const message = event.data;
-            
+
             switch (message.command) {
                 case 'updateCards':
                     this.updateCardsDisplay(message.cards, message.loading, message.pagination);
@@ -115,30 +115,30 @@ class PipelineCardsClient {
         if (this.loadingState) {
             this.loadingState.style.display = loading ? 'block' : 'none';
         }
-        
+
         if (loading) {
-            if (this.cardsContainer) this.cardsContainer.style.display = 'none';
-            if (this.emptyState) this.emptyState.style.display = 'none';
-            if (this.paginationContainer) this.paginationContainer.style.display = 'none';
+            if (this.cardsContainer) { this.cardsContainer.style.display = 'none'; }
+            if (this.emptyState) { this.emptyState.style.display = 'none'; }
+            if (this.paginationContainer) { this.paginationContainer.style.display = 'none'; }
             return;
         }
 
         // Show/hide empty state
         if (!cards || cards.length === 0) {
-            if (this.cardsContainer) this.cardsContainer.style.display = 'none';
-            if (this.emptyState) this.emptyState.style.display = 'block';
-            if (this.paginationContainer) this.paginationContainer.style.display = 'none';
+            if (this.cardsContainer) { this.cardsContainer.style.display = 'none'; }
+            if (this.emptyState) { this.emptyState.style.display = 'block'; }
+            if (this.paginationContainer) { this.paginationContainer.style.display = 'none'; }
             return;
         }
 
         // Show cards
-        if (this.cardsContainer) this.cardsContainer.style.display = 'block';
-        if (this.emptyState) this.emptyState.style.display = 'none';
-        
+        if (this.cardsContainer) { this.cardsContainer.style.display = 'block'; }
+        if (this.emptyState) { this.emptyState.style.display = 'none'; }
+
         // Render pipeline cards
         if (this.cardsContainer) {
             this.cardsContainer.innerHTML = cards.map(pipeline => this.createCardHTML(pipeline)).join('');
-            
+
             // Add event listeners to view details buttons
             document.querySelectorAll('.view-details-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
@@ -157,19 +157,54 @@ class PipelineCardsClient {
 
     createCardHTML(pipeline) {
         const createdDate = new Date(pipeline.createdDate).toLocaleDateString();
-        
+
+        // Format date as "Tuesday, October 7, 2025"
+        function formatFullDate(dateStr) {
+            if (!dateStr) { return 'Unknown'; }
+            const date = new Date(dateStr);
+            return date.toLocaleDateString(undefined, {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function toTitleCase(str) {
+            return str.replace(/\w\S*/g, (txt) => {
+                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            });
+        }
+
         return `
             <div class="pipeline-card">
-                <div class="pipeline-header">
-                    <h3 class="pipeline-title">${pipeline.alias || pipeline.name || 'Unnamed Pipeline'}</h3>
-                    <span class="pipeline-type-badge">${pipeline.type || 'Unknown'}</span>
-                </div>
-                <div class="pipeline-info">
-                    <p class="pipeline-meta"><strong>Created:</strong> ${pipeline.createdDate ? new Date(pipeline.createdDate).toLocaleDateString() : 'Unknown'}</p>
-                    <p class="pipeline-meta"><strong>Created by:</strong> ${pipeline.created_by || 'Unknown'}</p>
-                </div>
-                <button class="view-details-btn" data-pipeline-id="${pipeline.id}">View Details</button>
+            
+            <div class="pipeline-header">
+                <div class="lfx-u-header-xl lfx-u-ellipsis">${toTitleCase(pipeline.alias)}</div>
+                <div class="lfx-u-header-sm lfx-u-text-primary-80">
+                ${pipeline.type.toUpperCase()}
             </div>
+            </div>
+         <div class="lfx-u-body-sm lfx-u-text-neutral-80 lfx-u-ellipsis">${formatFullDate(pipeline.createdDate)}</div>
+            <button class="view-details-btn" data-pipeline-id="${pipeline.id}">View Details</button>
+
+            
+<!-- Created by avatar -->
+
+<!-- Avatar with hover detail -->
+<div class="aip-cursor">
+  <div class="lfx-c-avatar lfx-c-avatar--sm aip-hover-avatar" style="--avatar-bg-color: #ffffff;">
+    ${pipeline.target?.created_by?.charAt(0).toUpperCase() || 'N'}
+  </div>
+  <div class="aip-hover-detail">
+    <div class="lfx-u-header-md lfx-u-mar-8">
+      ${pipeline.target?.created_by || 'Name Not Available'}
+    </div>
+  </div>
+  </div>
+
+            </div>
+            
         `;
     }
 
@@ -211,7 +246,7 @@ class PipelineCardsClient {
     }
 
     updatePageNumbers(pagination) {
-        if (!this.paginationPages) return;
+        if (!this.paginationPages) { return; }
 
         const { currentPage, totalPages } = pagination;
         const maxVisiblePages = 5;
@@ -222,7 +257,7 @@ class PipelineCardsClient {
             endPage = totalPages;
         } else {
             const halfVisible = Math.floor(maxVisiblePages / 2);
-            
+
             if (currentPage <= halfVisible) {
                 startPage = 1;
                 endPage = maxVisiblePages;
@@ -277,38 +312,38 @@ class PipelineCardsClient {
         this.currentView = 'details';
         this.currentPipelineId = pipeline.id;
         this.currentPipelineData = { pipeline, scripts, runTypes };
-        
+
         // Hide list view elements
         this.hideListView();
-        
+
         // Show details view
         if (this.detailsView) {
             this.detailsView.style.display = 'flex';
         }
-        
+
         // Update details content
         this.updateDetailsContent(pipeline, scripts, runTypes);
     }
-    
+
     showListView() {
         this.currentView = 'list';
         this.currentPipelineId = null;
         this.currentPipelineData = null;
-        
+
         // Hide details view
         if (this.detailsView) {
             this.detailsView.style.display = 'none';
         }
-        
+
         // Show list view elements
         this.showListViewElements();
-        
+
         // Request refresh of cards list
         this.vscode.postMessage({
             command: 'loadCards'
         });
     }
-    
+
     hideListView() {
         if (this.cardsContainer) {
             this.cardsContainer.style.display = 'none';
@@ -322,62 +357,62 @@ class PipelineCardsClient {
         if (this.loadingState) {
             this.loadingState.style.display = 'none';
         }
-        
+
         // Hide search container and header buttons when in details view
         const searchContainer = document.querySelector('.search-container');
         if (searchContainer) {
             searchContainer.style.display = 'none';
         }
-        
+
         const headerButtons = document.querySelector('.header-buttons');
         if (headerButtons) {
             headerButtons.style.display = 'none';
         }
     }
-    
+
     showListViewElements() {
         // Show appropriate elements based on current state
         // This will be called when returning from details view
         if (this.cardsContainer && this.cardsContainer.innerHTML.trim()) {
             this.cardsContainer.style.display = 'block';
         }
-        
+
         // Show search container and header buttons when returning to list view
         const searchContainer = document.querySelector('.search-container');
         if (searchContainer) {
             searchContainer.style.display = 'flex';
         }
-        
+
         const headerButtons = document.querySelector('.header-buttons');
         if (headerButtons) {
             headerButtons.style.display = 'flex';
         }
     }
-    
+
     updateDetailsContent(pipeline, scripts, runTypes) {
         // Update title
         if (this.detailsTitle) {
             this.detailsTitle.textContent = `Pipeline: ${pipeline.alias || pipeline.name || 'Unnamed Pipeline'}`;
         }
-        
+
         // Update pipeline info
         this.updatePipelineInfo(pipeline);
-        
+
         // Update scripts
         this.updateScriptsContent(scripts);
-        
+
         // Update run types
         this.updateRunTypesContent(runTypes);
-        
+
         // Setup action buttons
         this.setupActionButtons(pipeline);
     }
-    
+
     updatePipelineInfo(pipeline) {
-        if (!this.pipelineInfo) return;
-        
+        if (!this.pipelineInfo) { return; }
+
         const createdDate = pipeline.createdDate ? new Date(pipeline.createdDate).toLocaleDateString() : 'Unknown';
-        
+
         this.pipelineInfo.innerHTML = `
             <div class="detail-item">
                 <div class="detail-label">Pipeline Name</div>
@@ -401,10 +436,11 @@ class PipelineCardsClient {
             </div>
         `;
     }
-    
+
     updateScriptsContent(scripts) {
-        if (!this.scriptsContainer) return;
-        
+
+        if (!this.scriptsContainer) { return; }
+
         if (!scripts || !scripts.files || scripts.files.length === 0) {
             this.scriptsContainer.innerHTML = `
                 <div class="empty-scripts">
@@ -414,11 +450,11 @@ class PipelineCardsClient {
             `;
             return;
         }
-        
+
         const scriptsHtml = scripts.files.map((file, index) => `
             <div class="script-item">
                 <div class="script-info">
-                    <div class="script-name">${file.fileName}</div>
+                    <div class="script-name">${file.fileName}</div>                    
                     <div class="script-type">${file.language} (${file.extension})</div>
                 </div>
                 <div class="script-actions">
@@ -431,13 +467,13 @@ class PipelineCardsClient {
                 </div>
             </div>
         `).join('');
-        
+
         this.scriptsContainer.innerHTML = scriptsHtml;
     }
-    
+
     updateRunTypesContent(runTypes) {
-        if (!this.runTypesContainer) return;
-        
+        if (!this.runTypesContainer) { return; }
+
         if (!runTypes || runTypes.length === 0) {
             this.runTypesContainer.innerHTML = `
                 <div class="empty-scripts">
@@ -446,13 +482,13 @@ class PipelineCardsClient {
             `;
             return;
         }
-        
+
         const runTypeOptions = runTypes.map((runType, index) => `
             <option value="${index}" ${index === 0 ? 'selected' : ''}>
-                ${runType.type || 'Unknown Type'} - ${ runType.dsAlias || 'Default'}
+                ${runType.type || 'Unknown Type'} - ${runType.dsAlias || 'Default'}
             </option>
         `).join('');
-        
+
         this.runTypesContainer.innerHTML = `
             <div class="form-group">
                 <label for="runTypeSelect" class="form-label">Select Run Type:</label>
@@ -461,11 +497,11 @@ class PipelineCardsClient {
                 </select>
             </div>
         `;
-        
+
         // Store selected run type (default to first one)
         this.selectedRunType = runTypes[0] || null;
     }
-    
+
     setupActionButtons(pipeline) {
         // Run Pipeline button
         if (this.runPipelineBtn) {
@@ -484,7 +520,7 @@ class PipelineCardsClient {
                 }
             };
         }
-        
+
         // View Logs button
         if (this.viewLogsBtn) {
             this.viewLogsBtn.onclick = () => {
@@ -494,7 +530,7 @@ class PipelineCardsClient {
                 });
             };
         }
-        
+
         // Refresh Scripts button
         if (this.refreshScriptsBtn) {
             this.refreshScriptsBtn.onclick = () => {
@@ -505,7 +541,7 @@ class PipelineCardsClient {
             };
         }
     }
-    
+
     // Helper methods for script actions
     openScript(fileIndex) {
         if (this.currentPipelineData && this.currentPipelineData.scripts && this.currentPipelineData.scripts.files) {
@@ -520,7 +556,7 @@ class PipelineCardsClient {
             }
         }
     }
-    
+
     copyScript(fileName) {
         this.vscode.postMessage({
             command: 'copyScript',
@@ -528,7 +564,7 @@ class PipelineCardsClient {
             fileName: fileName
         });
     }
-    
+
     selectRunType(index) {
         if (this.currentPipelineData && this.currentPipelineData.runTypes) {
             const selectedIndex = parseInt(index);
@@ -539,7 +575,7 @@ class PipelineCardsClient {
             }
         }
     }
-    
+
     generateScripts() {
         if (this.currentPipelineId) {
             this.vscode.postMessage({

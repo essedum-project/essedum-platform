@@ -8,67 +8,7 @@ import FormData from 'form-data';
 import { EssedumFileSystemProvider } from '../../providers/essedum-file-provider';
 import { JobLogsViewer } from './job-logs-viewer';
 import { API_ENDPOINTS, createSecureAxiosConfig, createHTTPSAgent, BASE_URL, initializeSSLBypass } from '../../core/constants/api-config';
-
-export interface PipelineCard {
-    type: string;
-    alias: string;
-    createdDate: string;
-    created_by: string;
-    id?: string;
-    [key: string]: any;
-}
-
-export interface ScriptFile {
-    fileName: string;
-    content: string;
-    extension: string;
-    language: string;
-}
-
-export interface PipelineScript {
-    pipelineName: string;
-    files: ScriptFile[];
-    runTypes: any[];
-    selectedRunType?: any;
-}
-
-export interface HttpParams {
-    page: string;
-    size: string;
-    project: string;
-    isCached: string;
-    adapter_instance: string;
-    interfacetype: string;
-    cloud_provider: string;
-    type?: string;
-    query?: string;
-    tags?: string;
-}
-
-export interface JobStatus {
-    jobId: string;
-    correlationId?: string;
-    streamingService?: string;
-    jobStatus: string;
-    version?: string;
-    type?: string;
-    runtime?: string;
-    finishTime?: string;
-    submittedBy?: string;
-    submittedOn?: string;
-    pipelineName: string;
-    organization: string;
-    logs?: string;
-    hashParams?: string;
-}
-
-export interface JobLogResponse {
-    log: string;
-    jobStatus: string;
-    hashparams?: string;
-    jobmetadata?: string;
-    organization?: string;
-}
+import { HttpParams, JobStatus, PipelineCard, PipelineScript, ScriptFile } from '../../core/interfaces/pipeline.interfaces';
 
 export class PipelineCardsProvider implements vscode.WebviewViewProvider {
     private _view?: vscode.WebviewView;
@@ -4151,6 +4091,7 @@ print(f"The model got uploaded {uploaded_path} here")
 
         try {
             const scripts = await this.fetchPipelineScripts(card.name);
+            console.log('Fetched Scripts:', scripts);
             if (scripts && scripts.files && scripts.files[fileIndex]) {
                 await this.openScriptInEditor(scripts.files[fileIndex]);
             } else {
