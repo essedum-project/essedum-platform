@@ -1,12 +1,12 @@
 /* Pipeline Cards Styles */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: var(--vscode-font-family), 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     padding: 16px;
     color: var(--vscode-foreground);
     background-color: var(--vscode-editor-background);
     margin: 0;
-    font-size: 12px;
-    line-height: 1.3;
+    font-size: 13px;
+    line-height: 1.4;
     overflow: hidden;
     height: 100vh;
 }
@@ -34,13 +34,14 @@ body {
 .header h2 {
     margin: 0;
     color: var(--vscode-editor-foreground);
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 600;
+    font-family: var(--vscode-font-family);
 }
 
 .header-buttons {
     display: flex;
-    gap: 6px;
+    gap: 8px;
     align-items: center;
     flex-shrink: 0;
 }
@@ -48,8 +49,8 @@ body {
 /* Search Container */
 .search-container {
     display: flex;
-    gap: 6px;
-    margin-bottom: 8px;
+    gap: 8px;
+    margin-bottom: 16px;
     flex-shrink: 0;
     align-items: center;
 }
@@ -58,82 +59,98 @@ body {
     flex: 1;
     padding: 8px 12px;
     border: 1px solid var(--vscode-input-border);
-    border-radius: 4px;
+    border-radius: 2px;
     background-color: var(--vscode-input-background);
     color: var(--vscode-input-foreground);
-    font-size: 12px;
-    height: 32px;
+    font-size: 13px;
+    font-family: var(--vscode-font-family);
+    height: 28px;
     box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.search-input::placeholder {
+    color: var(--vscode-input-placeholderForeground);
 }
 
 .search-input:focus {
     outline: none;
     border-color: var(--vscode-focusBorder);
+    box-shadow: 0 0 0 1px var(--vscode-focusBorder);
 }
 
 /* Button Styles */
 .btn {
     background-color: var(--vscode-button-background);
     color: var(--vscode-button-foreground);
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
+    border: 1px solid transparent;
+    padding: 6px 14px;
+    border-radius: 2px;
     cursor: pointer;
-    font-size: 12px;
-    font-weight: 500;
-    transition: background-color 0.2s ease;
-    height: 32px;
+    font-size: 13px;
+    font-weight: 400;
+    font-family: var(--vscode-font-family);
+    transition: all 0.2s ease;
+    height: 28px;
     box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
+    outline: none;
 }
 
 .btn:hover {
     background-color: var(--vscode-button-hoverBackground);
 }
 
+.btn:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: 2px;
+}
+
 .btn:disabled {
-    opacity: 0.6;
+    opacity: 0.4;
     cursor: not-allowed;
 }
 
 .btn-primary {
-    background-color: #007acc;
-    color: #ffffff;
-    border: 1px solid transparent;
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
 }
 
 .btn-primary:hover {
-    background-color: #005a9e;
+    background-color: var(--vscode-button-hoverBackground);
 }
 
 .btn-secondary {
-    background-color: var(--vscode-button-secondaryBackground, #f3f3f3);
-    color: var(--vscode-button-secondaryForeground, #333333);
-    border: 1px solid var(--vscode-panel-border, #cccccc);
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    border-color: var(--vscode-button-border);
 }
 
 .btn-secondary:hover {
-    background-color: var(--vscode-button-secondaryHoverBackground, #e6e6e6);
-    border-color: var(--vscode-panel-border, #b3b3b3);
+    background-color: var(--vscode-button-secondaryHoverBackground);
 }
 
 /* Loading State */
 .loading {
-    text-align: center;
-    padding: 20px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
     color: var(--vscode-descriptionForeground);
+    font-size: 13px;
 }
 
 .spinner {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    border: 3px solid var(--vscode-progressBar-background);
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--vscode-progressBar-background);
     border-radius: 50%;
     border-top-color: var(--vscode-button-background);
-    animation: spin 1s ease-in-out infinite;
+    animation: spin 1s linear infinite;
     margin-bottom: 16px;
 }
 
@@ -151,203 +168,204 @@ body {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-right: 2px;
+    padding-right: 4px;
     min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
 }
 
 /* Pipeline Card */
 .pipeline-card {
-    padding: 24px;
-    min-height: 50px;
-    box-shadow: 0px 2px 4px #00000029;
-    border: 0.5px solid #0000001f;
-    border-radius: 16px;
-    display: block;
-    background: #ffffff;
-    color: #000000;
-    /* background-color: var(--vscode-editor-background);
+    background-color: var(--vscode-editor-background);
     border: 1px solid var(--vscode-panel-border);
-    border-radius: 8px;
+    border-radius: 16px;
     padding: 16px;
-    margin-bottom: 12px;
     transition: all 0.2s ease;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); */
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    outline: none;
+    margin-top: 12px;
+}
+
+.pipeline-card:hover {
+    border-color: var(--vscode-focusBorder);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.pipeline-card:focus {
+    border-color: var(--vscode-focusBorder);
+    outline: 2px solid var(--vscode-focusBorder);
+    outline-offset: 1px;
 }
 
 .pipeline-card:last-child {
     margin-bottom: 0;
 }
 
-.pipeline-card:hover {
-    border-color: var(--vscode-focusBorder);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-}
-
-/* Pipeline Header */
-.pipeline-header {
+/* Pipeline Card Header */
+.pipeline-card-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
+    align-items: flex-start;
+    margin-bottom: 2px;
+}
+
+.pipeline-title-section {
+    flex: 1;
+    min-width: 0;
 }
 
 .pipeline-title {
-    margin: 0;
-    font-size: 13px;
+    margin: 0 0 2px 0;
+    font-size: 16px;
     font-weight: 600;
     color: var(--vscode-editor-foreground);
-    line-height: 1.2;
-    flex: 1;
-    margin-right: 6px;
-}
-
-.pipeline-type-badge {
-    background-color: var(--vscode-badge-background, #6c757d);
-    color: var(--vscode-badge-foreground, #ffffff);
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 10px;
-    font-weight: 500;
-    white-space: nowrap;
-    flex-shrink: 0;
-    border: 1px solid var(--vscode-panel-border, transparent);
-}
-
-/* Pipeline Info */
-.pipeline-info {
-    margin-bottom: 8px;
-}
-
-.pipeline-meta {
-    margin: 3px 0;
-    font-size: 11px;
-    color: var(--vscode-descriptionForeground);
     line-height: 1.3;
-}
-
-.pipeline-meta:first-child {
-    margin-top: 0;
-}
-
-.pipeline-meta:last-child {
-    margin-bottom: 0;
-}
-
-.pipeline-meta strong {
-    color: var(--vscode-descriptionForeground);
-    font-weight: 500;
-}
-
-.lfx-u-header-sm {
-    font-size: 1rem;
-    /* line-height: 11px; */
-    font-weight: 600;
-    font-family: "Roboto", "Segoe UI", sans-serif !important;
-    font-style: normal;
-}
-
-.lfx-u-text-primary-80 {
-    color: #0094ff;
-}
-
-.lfx-u-header-xl {
-    font-size: 1.2rem;
-    font-weight: 600;
-    font-family: "Roboto", "Segoe UI", sans-serif !important;
-    font-style: normal;
-}
-
-.lfx-u-ellipsis {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    display: block;
 }
 
-.lfx-u-body-sm {
-  font-size: 0.8rem;
-  font-weight: 400;
-  /* line-height: 16px; */
-  font-family: "Roboto", "Segoe UI", sans-serif !important;
-  font-style: normal;
-}
-
-.lfx-u-text-neutral-80 {
-  color: #737373;
-}
-
-.aip-cursor {
-  position: relative;
-  display: inline-block;
-  cursor: pointer;
-}
-
-.aip-hover-detail {
-  display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background: #fff;
-  border: 1px solid #ccc;
-  padding: 8px;
-  z-index: 10;
-  white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.aip-cursor:hover .aip-hover-detail {
-  display: block;
-}
-
-.lfx-c-avatar {
-    background: #d1ecff;
-    color: #0094ff;
-    border-radius: 50%;
-    text-align: center;
-    vertical-align: middle;
+.pipeline-type-badge {
+    background-color: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 10px;
     font-weight: 500;
-    font-family: "Roboto", "Segoe UI", sans-serif !important;
-    font-style: normal;
-    float: left;
-    width: 24px !important;
-    height: 24px !important;
-    font-size: 14px;
-    padding-top: 2px;
-  }
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
 
-/* View Details Button */
-.view-details-btn {
-    /* width: 100%; */
-    padding: 6px 12px;
-    background-color: #007acc;
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
+.pipeline-avatar-section {
+    flex-shrink: 0;
+    margin-left: 12px;
+}
+
+.pipeline-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pipeline-avatar:hover {
+    background-color: var(--vscode-button-hoverBackground);
+    transform: scale(1.05);
+}
+
+/* Pipeline Card Body */
+.pipeline-card-body {
+    margin-bottom:4px;
+}
+
+.pipeline-metadata {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.metadata-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.metadata-label {
+    color: var(--vscode-descriptionForeground);
+    font-weight: 500;
+    min-width: 60px;
+}
+
+.metadata-value {
+    color: var(--vscode-editor-foreground);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+}
+
+/* Pipeline Card Actions */
+.pipeline-card-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.pipeline-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
     font-size: 11px;
     font-weight: 500;
-    transition: background-color 0.2s ease;
-    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
 }
 
-.view-details-btn:hover {
-    background-color: #005a9e;
+.pipeline-action-btn:hover {
+    background-color: var(--vscode-button-hoverBackground);
+    transform: translateY(-1px);
 }
 
-.view-details-btn:active {
-    background-color: #004578;
+.pipeline-action-btn:active {
+    transform: translateY(0);
 }
+
+.pipeline-action-btn.primary {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+}
+
+.action-icon {
+    font-size: 12px;
+    line-height: 1;
+}
+
+.action-text {
+    font-size: 11px;
+}
+
+/* Legacy badge styles - removing duplicate definition above */
 
 /* Empty State */
 .empty-state {
-    text-align: center;
-    padding: 20px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
     color: var(--vscode-descriptionForeground);
+    text-align: center;
 }
 
 .empty-state p {
-    margin: 0;
-    font-size: 12px;
+    margin: 0 0 16px 0;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.empty-state .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
 }
 
 /* Responsive Design */
@@ -547,33 +565,46 @@ body::-webkit-scrollbar {
     /* Pipeline cards on small screens */
     .pipeline-card {
         padding: 12px;
-        margin-bottom: 8px;
-        border-radius: 6px;
+        border-radius: 4px;
     }
 
-    .pipeline-card:last-child {
-        margin-bottom: 0;
-    }
-
-    .cards-container {
-        gap: 8px;
-    }
-
-    .pipeline-header {
+    .pipeline-card-header {
         flex-direction: row;
-        align-items: center;
-        gap: 6px;
-        justify-content: space-between;
+        align-items: flex-start;
+        /* gap: 8px; */
+    }
+
+    .pipeline-title-section {
+        width: 100%;
     }
 
     .pipeline-title {
-        margin-right: 0;
-        margin-bottom: 0;
-        flex: 1;
+        font-size: 13px;
+        margin-bottom: 4px;
     }
 
-    .pipeline-type-badge {
-        flex-shrink: 0;
+    .pipeline-avatar-section {
+        margin-left: 0;
+        align-self: flex-end;
+    }
+
+    .pipeline-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+
+    .metadata-item {
+        font-size: 11px;
+    }
+
+    .metadata-label {
+        min-width: 50px;
+    }
+
+    .pipeline-action-btn {
+        padding: 5px 10px;
+        font-size: 10px;
     }
 }
 
@@ -628,46 +659,49 @@ body::-webkit-scrollbar {
     }
 
     .pipeline-card {
-        padding: 10px;
-        margin-bottom: 6px;
-        border-radius: 6px;
+        padding: 8px;
+        border-radius: 4px;
     }
 
-    .pipeline-card:last-child {
-        margin-bottom: 0;
-    }
-
-    .cards-container {
+    .pipeline-card-header {
+        flex-direction: column;
+        align-items: flex-start;
         gap: 6px;
-    }
-
-    .pipeline-header {
-        flex-direction: row;
-        align-items: center;
-        gap: 4px;
-        justify-content: space-between;
+        margin-bottom: 8px;
     }
 
     .pipeline-title {
         font-size: 11px;
-        flex: 1;
-        margin-right: 4px;
-        margin-bottom: 0;
+        margin-bottom: 2px;
     }
 
     .pipeline-type-badge {
-        flex-shrink: 0;
         font-size: 8px;
         padding: 1px 4px;
     }
 
-    .pipeline-meta {
+    .pipeline-avatar {
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
+    }
+
+    .metadata-item {
+        font-size: 9px;
+        gap: 4px;
+    }
+
+    .metadata-label {
+        min-width: 40px;
+    }
+
+    .pipeline-action-btn {
+        padding: 3px 6px;
         font-size: 9px;
     }
 
-    .view-details-btn {
-        padding: 4px 8px;
-        font-size: 9px;
+    .action-icon {
+        font-size: 10px;
     }
 
     .pagination-container {

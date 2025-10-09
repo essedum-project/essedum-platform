@@ -140,13 +140,29 @@ class PipelineCardsClient {
             this.cardsContainer.innerHTML = cards.map(pipeline => this.createCardHTML(pipeline)).join('');
 
             // Add event listeners to view details buttons
-            document.querySelectorAll('.view-details-btn').forEach(btn => {
+            document.querySelectorAll('.pipeline-action-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const pipelineId = e.target.dataset.pipelineId;
-                    this.vscode.postMessage({
-                        command: 'viewDetails',
-                        cardId: pipelineId
-                    });
+                    const button = e.target.closest('.pipeline-action-btn');
+                    const pipelineId = button?.dataset.pipelineId;
+                    if (pipelineId) {
+                        this.vscode.postMessage({
+                            command: 'viewDetails',
+                            cardId: pipelineId
+                        });
+                    }
+                });
+            });
+
+            // Add keyboard navigation for cards
+            document.querySelectorAll('.pipeline-card').forEach(card => {
+                card.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const button = card.querySelector('.pipeline-action-btn');
+                        if (button) {
+                            button.click();
+                        }
+                    }
                 });
             });
         }
@@ -177,34 +193,29 @@ class PipelineCardsClient {
         }
 
         return `
-            <div class="pipeline-card">
-            
-            <div class="pipeline-header">
-                <div class="lfx-u-header-xl lfx-u-ellipsis">${toTitleCase(pipeline.alias)}</div>
-                <div class="lfx-u-header-sm lfx-u-text-primary-80">
-                ${pipeline.type.toUpperCase()}
+            <div class="pipeline-card" tabindex="0" role="article" aria-label="Pipeline: ${toTitleCase(pipeline.alias)}">
+                <div class="pipeline-card-header">                   
+                        <div class="pipeline-title">${toTitleCase(pipeline.alias)}</div>
+                         <span class="pipeline-type-badge">${pipeline.type.toUpperCase()}</span>
+                </div>
+                
+                <div class="pipeline-card-body">                                              
+                            <span class="metadata-value">${formatFullDate(pipeline.createdDate)}</span>                       
+                </div>
+                
+                <div class="pipeline-card-actions">
+                <button class="pipeline-action-btn primary" data-pipeline-id="${pipeline.id}" aria-label="View details for ${toTitleCase(pipeline.alias)}">
+                        <span class="action-icon">👁</span>
+                        <span class="action-text">View Details</span>
+                    </button>
+                <div class="pipeline-avatar-section">
+                        <div class="pipeline-avatar" title="${pipeline.target?.created_by || 'Unknown User'}">
+                            ${pipeline.target?.created_by?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                    </div>
+                    
+                </div>
             </div>
-            </div>
-         <div class="lfx-u-body-sm lfx-u-text-neutral-80 lfx-u-ellipsis">${formatFullDate(pipeline.createdDate)}</div>
-            <button class="view-details-btn" data-pipeline-id="${pipeline.id}">View Details</button>
-
-            
-<!-- Created by avatar -->
-
-<!-- Avatar with hover detail -->
-<div class="aip-cursor">
-  <div class="lfx-c-avatar lfx-c-avatar--sm aip-hover-avatar" style="--avatar-bg-color: #ffffff;">
-    ${pipeline.target?.created_by?.charAt(0).toUpperCase() || 'N'}
-  </div>
-  <div class="aip-hover-detail">
-    <div class="lfx-u-header-md lfx-u-mar-8">
-      ${pipeline.target?.created_by || 'Name Not Available'}
-    </div>
-  </div>
-  </div>
-
-            </div>
-            
         `;
     }
 
