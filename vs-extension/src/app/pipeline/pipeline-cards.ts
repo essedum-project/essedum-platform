@@ -1495,7 +1495,7 @@ if __name__ == "__main__":
                     </div>
                     <div class="info-item">
                         <span class="info-label">Created By:</span>
-                        <span class="info-value">${card.created_by}</span>
+                        <span class="info-value">${card.target?.created_by}</span>
                     </div>
                 </div>
             </div>

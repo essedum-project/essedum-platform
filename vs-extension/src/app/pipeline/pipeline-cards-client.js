@@ -195,7 +195,7 @@ class PipelineCardsClient {
         return `
             <div class="pipeline-card" tabindex="0" role="article" aria-label="Pipeline: ${toTitleCase(pipeline.alias)}">
                 <div class="pipeline-card-header">                   
-                        <div class="pipeline-title">${toTitleCase(pipeline.alias)}</div>
+                        <span class="pipeline-title">${toTitleCase(pipeline.alias)}</span>
                          <span class="pipeline-type-badge">${pipeline.type.toUpperCase()}</span>
                 </div>
                 
@@ -439,7 +439,7 @@ class PipelineCardsClient {
             </div>
             <div class="detail-item">
                 <div class="detail-label">Created By</div>
-                <div class="detail-value">${pipeline.created_by || 'Unknown'}</div>
+                <div class="detail-value">${pipeline.target?.created_by || 'Unknown'}</div>
             </div>
             <div class="detail-item">
                 <div class="detail-label">Pipeline ID</div>

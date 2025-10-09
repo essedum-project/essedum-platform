@@ -209,13 +209,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 2px;
+    /* margin-bottom: 2px; */
 }
 
-.pipeline-title-section {
-    flex: 1;
-    min-width: 0;
-}
 
 .pipeline-title {
     margin: 0 0 2px 0;
@@ -574,14 +570,8 @@ body::-webkit-scrollbar {
         /* gap: 8px; */
     }
 
-    .pipeline-title-section {
-        width: 100%;
-    }
 
-    .pipeline-title {
-        font-size: 13px;
-        margin-bottom: 4px;
-    }
+   
 
     .pipeline-avatar-section {
         margin-left: 0;
@@ -668,11 +658,6 @@ body::-webkit-scrollbar {
         align-items: flex-start;
         gap: 6px;
         margin-bottom: 8px;
-    }
-
-    .pipeline-title {
-        font-size: 11px;
-        margin-bottom: 2px;
     }
 
     .pipeline-type-badge {
