@@ -1,5 +1,5 @@
 <div class="aip-container lfx-l-level2-middle-ctr lfx-u-pad-lr-24">
-    <app-aip-header [cardTitle]="CARD_TITLE" [cardName]="card? card.name: ''" [action]="'view-details'"
+    <app-aip-header [cardTitle]="CARD_TITLE" [cardName]="card? card.name: ''" [tagCategory]="card? card.category: ''" [action]="'view-details'"
         [backAction]="true" [closeAction]="false" [showRelatedInstances]="showRelatedInstances"
         (navigateBack)="toggler()" (edit)="openModal(editModal)" (delete)="deleteAdapter(card?.name)"
         (zoom)="listToggle()">
