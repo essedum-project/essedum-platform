@@ -1,19 +1,22 @@
 # Essedum AI Platform Extension for VS Code
 
-This extension integrates VS Code with the Essedum AI Platform, allowing you to authenticate with Keycloak and run your scripts directly on Essedum's pipelines.
+This extension integrates VS Code with the Essedum AI Platform, providing seamless authentication and pipeline execution capabilities with enhanced OAuth 2.0 security.
 
-## Features
+## ✨ Features
 
-- Authenticate with Essedum AI Platform using Keycloak authentication
-- Submit scripts directly from VS Code to run on Essedum pipelines
-- View execution results in the sidebar
-- Modern VS Code-themed UI with loading indicators and error handling
+- **🔐 Automatic OAuth 2.0 Authentication**: Secure, one-click authentication with PKCE support - no more manual token copying!
+- **🚀 Pipeline Execution**: Submit and run scripts directly from VS Code on Essedum pipelines
+- **📊 Real-time Monitoring**: View execution results, logs, and status in an integrated sidebar
+- **🎨 Modern UI**: Clean, VS Code-themed interface with loading indicators and comprehensive error handling
+- **🔄 Automatic Token Refresh**: Seamless token management with automatic renewal
+- **⚙️ Configurable Settings**: Customizable OAuth server port and authentication options
 
 ## Requirements
 
 - Visual Studio Code version 1.103.0 or higher
 - Active Essedum AI Platform account
 - Network access to the Essedum AI Platform server (https://aiplatform.az.ad.idemo-ppc.com:8443)
+- Available port 8085 (configurable) for OAuth callback server
 
 ## Installation
 
@@ -21,44 +24,197 @@ This extension integrates VS Code with the Essedum AI Platform, allowing you to 
 2. Reload VS Code
 3. The Essedum icon will appear in the Activity Bar
 
-## Usage
+## 🚀 Quick Start
 
-### Authentication
+### First-Time Authentication
 
-1. Click on the Essedum icon in the Activity Bar to open the sidebar
-2. Enter your Essedum username and password in the login form
-3. Click "Login" to authenticate with the Keycloak server
-4. Once authenticated, you'll see the "Run Current Script" button in the sidebar
+1. **Open Extension**: Click the Essedum icon in the Activity Bar
+2. **Login**: Use Command Palette (`Ctrl+Shift+P`) and run "Login to Essedum"
+3. **Browser Authentication**: Your browser will open to the Keycloak login page
+4. **Complete Login**: Enter your credentials in the browser
+5. **Automatic Redirect**: You'll be redirected back to VS Code automatically
+6. **Ready to Use**: Start using Essedum pipelines immediately!
 
 ### Running Scripts
 
-1. Open a script file in the editor
-2. Make sure you're authenticated with Essedum
-3. Click the "Run Current Script" button in the sidebar
-4. View the execution status and results in the sidebar
+1. Open any script file in the VS Code editor
+2. Ensure you're authenticated (automatic on first use)
+3. Click "Run Current Script" in the Essedum sidebar
+4. Monitor execution progress and view results in real-time
 
-## Security
+## 🔧 Configuration
 
-This extension securely communicates with the Essedum Keycloak server for authentication. Your credentials are never stored locally and are only used for the authentication request.
+Access settings via `File > Preferences > Settings` and search for "Essedum":
 
-## Known Issues
+```json
+{
+    "essedum.auth.oauthPort": 8085,
+    "essedum.auth.autoLogin": true,
+    "essedum.auth.allowSelfSignedCertificates": true,
+    "essedum.auth.showCertificateWarnings": true
+}
+```
 
-- May encounter certificate validation issues with self-signed certificates
+### Setting Descriptions
 
-## Release Notes
+- **`oauthPort`**: Port for OAuth callback server (default: 8085)
+- **`autoLogin`**: Automatically login when extension starts (default: true)  
+- **`allowSelfSignedCertificates`**: Accept self-signed SSL certificates (default: true)
+- **`showCertificateWarnings`**: Show certificate-related warnings (default: true)
+
+## 🛡️ Security Features
+
+### OAuth 2.0 with PKCE
+- **Secure Authorization**: Uses industry-standard OAuth 2.0 Authorization Code flow
+- **PKCE Protection**: Implements Proof Key for Code Exchange (RFC 7636) for enhanced security
+- **State Validation**: CSRF protection through state parameter validation
+- **Secure Storage**: Tokens stored using VS Code's encrypted SecretStorage API
+
+### Certificate Handling
+- Configurable SSL certificate validation for development environments
+- Self-signed certificate support with user consent
+- Production-ready certificate validation options
+
+## 📝 Available Commands
+
+Access these commands via the Command Palette (`Ctrl+Shift+P`):
+
+- **`Login to Essedum`**: Start the automatic OAuth authentication flow
+- **`Logout from Essedum`**: Clear authentication and logout
+- **`Check Authentication Status`**: View current token status and expiry information
+- **`Open Essedum Panel`**: Open the main Essedum sidebar panel
+- **`Debug Upload Endpoints`**: Test API connectivity and authentication
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+#### Port Already in Use
+```
+Error: Port 8085 is already in use
+```
+**Solution**: Change the OAuth port in settings or close applications using port 8085.
+
+#### Authentication Timeout
+```
+Authentication timed out. Please try again.
+```
+**Solution**: Complete the browser login within 5 minutes, or restart the authentication process.
+
+#### SSL Certificate Errors
+```
+Certificate error: UNABLE_TO_GET_ISSUER_CERT_LOCALLY
+```
+**Solution**: Enable `allowSelfSignedCertificates` in settings and click "Continue" when prompted.
+
+### Debug Steps
+
+1. Run `Check Authentication Status` command to see current state
+2. Check VS Code Output panel for detailed error messages
+3. Ensure port 8085 is available
+4. Verify network connectivity to the Keycloak server
+
+## 🆕 What's New in OAuth 2.0 Authentication
+
+### Upgraded from Manual Token Entry
+- **Before**: Users had to manually copy tokens from browser developer tools
+- **After**: Fully automated OAuth flow with browser redirect
+
+### Enhanced Security
+- **PKCE Implementation**: Protection against authorization code interception
+- **State Parameter**: CSRF attack prevention
+- **Automatic Token Refresh**: Seamless token renewal without user intervention
+
+### Improved User Experience
+- **One-Click Login**: Single command starts the entire authentication process
+- **Visual Progress**: Real-time feedback during authentication steps
+- **Auto-Close Browser**: Browser window closes automatically after successful authentication
+
+## 🏗️ Keycloak Configuration
+
+For system administrators, ensure your Keycloak client is configured with:
+
+```yaml
+Client ID: essedum-45
+Client Type: Public
+Valid Redirect URIs: 
+  - http://localhost:8085/callback
+Web Origins: 
+  - http://localhost:8085
+Authorization Code Flow: Enabled
+PKCE Code Challenge Method: S256
+```
+
+## 📋 Known Issues
+
+- **Port Conflicts**: OAuth callback server requires an available port (default: 8085)
+- **Certificate Warnings**: Self-signed certificates require user confirmation
+- **Browser Pop-up Blockers**: May prevent automatic browser opening
+
+## 📈 Release Notes
+
+### 0.0.2 (Latest)
+- ✅ **New**: Automatic OAuth 2.0 Authentication with PKCE
+- ✅ **New**: Configurable OAuth callback server port
+- ✅ **New**: Automatic token refresh mechanism
+- ✅ **New**: Enhanced security with state parameter validation
+- ✅ **New**: Logout command and improved authentication status
+- ✅ **Improved**: User experience with progress indicators
+- ✅ **Improved**: Error handling and troubleshooting
 
 ### 0.0.1
-
-Initial release of the Essedum AI Platform extension with Keycloak authentication and script submission functionality.
+Initial release with manual Keycloak authentication and basic script submission functionality.
 
 ---
 
-## Development
+## 🛠️ Development
 
 ### Building the Extension
 
 1. Clone the repository
-2. Run `npm install` to install dependencies
+```bash
+git clone <repository-url>
+cd vs-extension
+```
+
+2. Install dependencies
+```bash
+npm install
+```
+
+3. Compile and watch for changes
+```bash
+npm run watch
+```
+
+4. Open in VS Code and press `F5` to launch Extension Development Host
+
+### Testing
+
+Run tests with:
+```bash
+npm test
+```
+
+### Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Submit a pull request
+
+## 📧 Support
+
+For technical support or feature requests:
+- Check the [OAuth Authentication Guide](./OAUTH_AUTHENTICATION_GUIDE.md)
+- Review troubleshooting steps above
+- Contact your system administrator
+- Submit an issue in the project repository
+
+---
+
+**Happy coding with Essedum AI Platform! 🚀**
 3. Run `npm run compile` to build the extension
 4. Press F5 to launch the extension in a new VS Code window
 

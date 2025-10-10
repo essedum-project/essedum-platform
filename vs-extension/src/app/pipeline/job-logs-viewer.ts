@@ -1,6 +1,4 @@
 // Job Logs Viewer - VS Code Extension implementation
-// Based on Angular JobsComponent pattern
-
 import * as vscode from 'vscode';
 import axios from 'axios';
 import * as https from 'https';
@@ -609,7 +607,7 @@ export class JobLogsViewer {
         console.log('Posted updateJobs message to webview');
     }
 
-    // API Methods (equivalent to Angular service calls)
+    // API Methods (
 
     private async fetchInternalJobLenByName(jobName: string): Promise<number> {
         const httpsAgent = new https.Agent({ rejectUnauthorized: false });
