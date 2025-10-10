@@ -12,7 +12,6 @@ import { ShowOutputArtifactsComponent } from '../pipeline.description/show-outpu
 export class JobsComponent implements OnInit {
   @Input() internalJob;
   @Input() cname;
-  @Input() agenttaskname;
   @Output() status = new EventEmitter();
   page = 0;
   row = 4;

@@ -1,5 +1,5 @@
 {
-  "name": "Essedum",
+  "name": "essedum",
   "displayName": "Essedum AI Platform",
   "description": "VS Code extension for Essedum AI Platform with Keycloak authentication and pipeline execution",
   "version": "0.0.1",
@@ -20,14 +20,72 @@
       {
         "command": "essedum.login",
         "title": "Login to Essedum"
+      },
+      {
+        "command": "essedum.logout",
+        "title": "Logout from Essedum",
+        "icon": "$(sign-out)"
+      },
+      {
+        "command": "essedum.checkAuth",
+        "title": "Check Authentication Status"
+      },
+      {
+        "command": "essedum.openJobLogs",
+        "title": "Open Job Logs Viewer",
+        "icon": "$(list-flat)"
+      },
+      {
+        "command": "essedum.openInternalJobLogs",
+        "title": "Open Internal Job Logs",
+        "icon": "$(list-tree)"
+      },
+      {
+        "command": "essedum.showJobLogsInTerminal",
+        "title": "Show Job Logs in Terminal",
+        "icon": "$(terminal)"
+      },
+      {
+        "command": "essedum.debugUpload",
+        "title": "Debug Upload Endpoints"
       }
     ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "essedum.openJobLogs",
+          "when": "true"
+        },
+        {
+          "command": "essedum.openInternalJobLogs",
+          "when": "true"
+        },
+        {
+          "command": "essedum.showJobLogsInTerminal",
+          "when": "true"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "essedum.logout",
+          "when": "view == essedum-sidebar && essedum.isAuthenticated",
+          "group": "navigation@1"
+        }
+      ]
+    },
     "viewsContainers": {
       "activitybar": [
         {
           "id": "essedum-explorer",
           "title": "Essedum AI Platform",
           "icon": "media/essedum-icon.svg"
+        }
+      ],
+      "panel": [
+        {
+          "id": "essedum-panel",
+          "title": "Essedum Job Logs",
+          "icon": "$(list-flat)"
         }
       ]
     },
@@ -36,7 +94,17 @@
         {
           "id": "essedum-sidebar",
           "name": "Essedum AI Platform",
-          "type": "webview"
+          "type": "webview",
+          "icon": "$(home)"
+        }
+      ],
+      "essedum-panel": [
+        {
+          "id": "essedum-job-logs",
+          "name": "Job Logs",
+          "type": "webview",
+          "when": "essedum.jobLogsVisible",
+          "icon": "$(list-flat)"
         }
       ]
     },
@@ -49,9 +117,21 @@
           "description": "Allow self-signed SSL certificates for Keycloak authentication (recommended for development environments)"
         },
         "essedum.auth.showCertificateWarnings": {
-          "type": "boolean", 
+          "type": "boolean",
           "default": true,
           "description": "Show warnings when accepting self-signed certificates"
+        },
+        "essedum.auth.oauthPort": {
+          "type": "number",
+          "default": 8085,
+          "description": "Port number for the OAuth callback server (must match Keycloak client configuration)",
+          "minimum": 1024,
+          "maximum": 65535
+        },
+        "essedum.auth.autoLogin": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically attempt login when the extension starts"
         }
       }
     }
@@ -69,6 +149,7 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
+    "@types/form-data": "^2.2.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
     "@types/vscode": "^1.103.0",
@@ -85,6 +166,7 @@
   "dependencies": {
     "axios": "^1.6.7",
     "crypto-js": "^4.2.0",
+    "form-data": "^4.0.4",
     "node-fetch": "^2.7.0"
   }
 }
