@@ -231,7 +231,7 @@ export class PipelineService {
   async getDatasourceByName(name: string, org?: string): Promise<any> {
     const organization = org || this.organization;
 
-    return axios.get('https://essedum.az.ad.idemo-ppc.com/api/aip/service/v1/fetchDatasource', {
+    return axios.get(API_ENDPOINTS.FETCH_DATASOURCE, {
       params: {
         name,
         org: organization
@@ -340,7 +340,7 @@ export class PipelineService {
    */
   async updateStreamingService(requestBody: any): Promise<any> {
     return axios.put(
-      'https://essedum.az.ad.idemo-ppc.com/api/aip/service/v1/streamingServices/update',
+      API_ENDPOINTS.STREAMING_SERVICES_UPDATE,
       requestBody,
       {
         headers: {
@@ -369,7 +369,7 @@ export class PipelineService {
    * Upload a script file to the pipeline
    */
   async uploadScriptFile(pipelineName: string, fileName: string, formData: any): Promise<any> {
-    const url = `https://essedum.az.ad.idemo-ppc.com/api/aip/file/create/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
+    const url = `${API_ENDPOINTS.FILE_CREATE}/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
 
     return axios.post(url, formData, {
       headers: {
@@ -399,7 +399,7 @@ export class PipelineService {
    * Upload script content to the pipeline
    */
   async uploadScriptContent(pipelineName: string, fileName: string, form: any): Promise<any> {
-    const url = `https://essedum.az.ad.idemo-ppc.com/api/aip/file/create/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
+    const url = `${API_ENDPOINTS.FILE_CREATE}/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
 
     return axios.post(url, form, {
       headers: {
@@ -444,7 +444,7 @@ export class PipelineService {
     if (datasource) { queryParams.append('datasource', datasource); }
     queryParams.append('workerlogId', workerlogId || 'undefined');
 
-    const url = `https://essedum.az.ad.idemo-ppc.com/api/aip/service/v1/pipeline/run-pipeline/${pipelineType}/${cname}/${org}/${isLocal}?${queryParams.toString()}`;
+    const url = `${API_ENDPOINTS.PIPELINE_RUN}/${pipelineType}/${cname}/${this.organization}/${isLocal}?${queryParams.toString()}`;
 
     return axios.get(url, {
       headers: {
@@ -505,121 +505,121 @@ export class PipelineService {
     });
   }
 
-/**
- * Update a streaming service with the given payload
- */
- async updateStreamingServices(streamItemPayload: any): Promise<any> {
-  return axios.put(
-    'https://essedum.az.ad.idemo-ppc.com/api/aip/service/v1/streamingServices/update',
-    streamItemPayload,
-    {
-      headers: {
-        'accept': 'application/json, text/plain, */*',
-        'accept-language': 'en-US,en;q=0.9',
-        'authorization': `Bearer ${this._token}`,
-        'content-type': 'application/json; charset=UTF-8',
-        'connection': 'keep-alive',
-        'origin': BASE_URL,
-        'priority': 'u=1, i',
-        'project': '2',
-        'projectname': this.organization,
-        'referer': BASE_URL,
-        'roleid': '1',
-        'rolename': 'IT Portfolio Manager',
-        'sec-ch-ua': '"Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
-        'x-requested-with': 'Leap'
-      },
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: false,
-        requestCert: false
-      }),
-      timeout: 30000,
-      validateStatus: (status) => status >= 200 && status < 300
-    }
-  );
-}
+  /**
+   * Update a streaming service with the given payload
+   */
+  async updateStreamingServices(streamItemPayload: any): Promise<any> {
+    return axios.put(
+      API_ENDPOINTS.STREAMING_SERVICES_UPDATE,
+      streamItemPayload,
+      {
+        headers: {
+          'accept': 'application/json, text/plain, */*',
+          'accept-language': 'en-US,en;q=0.9',
+          'authorization': `Bearer ${this._token}`,
+          'content-type': 'application/json; charset=UTF-8',
+          'connection': 'keep-alive',
+          'origin': BASE_URL,
+          'priority': 'u=1, i',
+          'project': '2',
+          'projectname': this.organization,
+          'referer': BASE_URL,
+          'roleid': '1',
+          'rolename': 'IT Portfolio Manager',
+          'sec-ch-ua': '"Google Chrome";v="141", "Not?A_Brand";v="8", "Chromium";v="141"',
+          'sec-ch-ua-mobile': '?0',
+          'sec-ch-ua-platform': '"Windows"',
+          'sec-fetch-dest': 'empty',
+          'sec-fetch-mode': 'cors',
+          'sec-fetch-site': 'same-origin',
+          'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
+          'x-requested-with': 'Leap'
+        },
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false,
+          requestCert: false
+        }),
+        timeout: 30000,
+        validateStatus: (status) => status >= 200 && status < 300
+      }
+    );
+  }
 
 
-/**
- * Save pipeline JSON before script generation
- */
- async savePipelineJson(pipelineName: string): Promise<any> {
-  return axios.post(
-    '/api/aip/service/v1/pipelines/save-json',
-    {
-      name: pipelineName,
-      organization: this.organization
-    },
-    {
-      baseURL: BASE_URL,
-      headers: {
-        'Accept': 'application/json, text/plain, */*',
-        'Authorization': `Bearer ${this._token}`,
-        'Content-Type': 'application/json',
-        'Project': '2',
-        'ProjectName': this.organization,
-        'X-Requested-With': 'Leap'
+  /**
+   * Save pipeline JSON before script generation
+   */
+  async savePipelineJson(pipelineName: string): Promise<any> {
+    return axios.post(
+      '/api/aip/service/v1/pipelines/save-json',
+      {
+        name: pipelineName,
+        organization: this.organization
       },
-      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-      timeout: 30000
-    }
-  );
-}
+      {
+        baseURL: BASE_URL,
+        headers: {
+          'Accept': 'application/json, text/plain, */*',
+          'Authorization': `Bearer ${this._token}`,
+          'Content-Type': 'application/json',
+          'Project': '2',
+          'ProjectName': this.organization,
+          'X-Requested-With': 'Leap'
+        },
+        httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+        timeout: 30000
+      }
+    );
+  }
 
-/**
- * Trigger script generation event for a pipeline
- */
-async triggerScriptGenerationEvents(pipelineName: string): Promise<any> {
-  return axios.post(
-    '/api/aip/service/v1/events/trigger',
-    {
-      eventType: 'generateScript_Pipeline',
-      pipelineName,
-      organization: this.organization
-    },
-    {
-      baseURL: BASE_URL,
-      headers: {
-        'Accept': 'application/json, text/plain, */*',
-        'Authorization': `Bearer ${this._token}`,
-        'Content-Type': 'application/json',
-        'Project': '2',
-        'ProjectName': this.organization,
-        'X-Requested-With': 'Leap'
+  /**
+   * Trigger script generation event for a pipeline
+   */
+  async triggerScriptGenerationEvents(pipelineName: string): Promise<any> {
+    return axios.post(
+      '/api/aip/service/v1/events/trigger',
+      {
+        eventType: 'generateScript_Pipeline',
+        pipelineName,
+        organization: this.organization
       },
-      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-      timeout: 60000
-    }
-  );
-}
+      {
+        baseURL: BASE_URL,
+        headers: {
+          'Accept': 'application/json, text/plain, */*',
+          'Authorization': `Bearer ${this._token}`,
+          'Content-Type': 'application/json',
+          'Project': '2',
+          'ProjectName': this.organization,
+          'X-Requested-With': 'Leap'
+        },
+        httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+        timeout: 60000
+      }
+    );
+  }
 
-/**
- * Check the status of a script generation event
- */
- async getScriptGenerationStatus(eventId: string): Promise<any> {
-  return axios.get(
-    `/api/aip/service/v1/events/status/${eventId}`,
-    {
-      baseURL: BASE_URL,
-      headers: {
-        'Accept': 'application/json, text/plain, */*',
-        'Authorization': `Bearer ${this._token}`,
-        'Content-Type': 'application/json',
-        'Project': '2',
-        'ProjectName': this.organization,
-        'X-Requested-With': 'Leap'
-      },
-      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-      timeout: 10000
-    }
-  );
-}
+  /**
+   * Check the status of a script generation event
+   */
+  async getScriptGenerationStatus(eventId: string): Promise<any> {
+    return axios.get(
+      `/api/aip/service/v1/events/status/${eventId}`,
+      {
+        baseURL: BASE_URL,
+        headers: {
+          'Accept': 'application/json, text/plain, */*',
+          'Authorization': `Bearer ${this._token}`,
+          'Content-Type': 'application/json',
+          'Project': '2',
+          'ProjectName': this.organization,
+          'X-Requested-With': 'Leap'
+        },
+        httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+        timeout: 10000
+      }
+    );
+  }
 
 }
 

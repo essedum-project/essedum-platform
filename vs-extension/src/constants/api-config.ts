@@ -25,12 +25,30 @@ export const API_BASE_PATH = '/api/aip/service/v1';
 // Full API Base URL
 export const API_BASE_URL = `${BASE_URL}${API_BASE_PATH}`;
 
+// Configuration Constants
+export const SERVICE_CONFIG = {
+    DEFAULT_TIMEOUT: 30000,
+    UPLOAD_TIMEOUT: 60000,
+    DEFAULT_PROJECT_ID: '2',
+    DEFAULT_ROLE_ID: '1',
+    DEFAULT_ROLE_NAME: 'IT Portfolio Manager',
+    USER_AGENT: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0',
+    REQUEST_WITH: 'Leap',
+    ACCEPT_HEADER: 'application/json, text/plain, */*',
+    ACCEPT_LANGUAGE: 'en-US,en;q=0.9',
+    CONTENT_TYPE_JSON: 'application/json',
+    CONTENT_TYPE_MULTIPART: 'multipart/form-data',
+    CONTENT_TYPE_JSON_UTF8: 'application/json; charset=UTF-8'
+};
+
 // API Endpoints
 export const API_ENDPOINTS = {
     // Pipeline endpoints
     PIPELINES_COUNT: `${API_BASE_URL}/pipelines/count`,
     PIPELINES_LIST: `${API_BASE_URL}/pipelines/training/list`,
     PIPELINES_BY_NAME: `${API_BASE_URL}/pipelines/byname`,
+    PIPELINES_SAVE_JSON: `${API_BASE_URL}/pipelines/save-json`,
+    PIPELINE_RUN: `${API_BASE_URL}/pipeline/run-pipeline`,
     
     // Streaming services
     STREAMING_SERVICES: `${API_BASE_URL}/streamingServices`,
@@ -42,7 +60,15 @@ export const API_ENDPOINTS = {
     
     // File operations
     FILE_READ: `${BASE_URL}/api/aip/file/read`,
+    FILE_CREATE: `${BASE_URL}/api/aip/file/create`,
     FILE_UPLOAD: `${BASE_URL}/api/aip/file/upload`,
+    
+    // Event endpoints
+    EVENTS_TRIGGER: `${API_BASE_URL}/events/trigger`,
+    EVENTS_STATUS: `${API_BASE_URL}/events/status`,
+    
+    // Datasource endpoints
+    FETCH_DATASOURCE: `${API_BASE_URL}/fetchDatasource`,
     
     // Authentication
     AUTH_BASE: `${BASE_URL}/realms/essedum/protocol/openid-connect`

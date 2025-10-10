@@ -1,5 +1,5 @@
 {
-  "name": "Essedum",
+  "name": "essedum",
   "displayName": "Essedum AI Platform",
   "description": "VS Code extension for Essedum AI Platform with Keycloak authentication and pipeline execution",
   "version": "0.0.1",
