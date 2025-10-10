@@ -1920,7 +1920,7 @@ print(f"The model got uploaded {uploaded_path} here")
             console.log('Request payload:', JSON.stringify(requestBody, null, 2));
 
             // Make the API call with absolute URL
-            const response = await this._pipelineService.updateStreamingServices(requestBody);
+            const response = await this._pipelineService.updateStreamingService(requestBody);
 
             console.log('Streaming service update response:', {
                 status: response.status,
@@ -2261,7 +2261,7 @@ print(f"The model got uploaded {uploaded_path} here")
             });
 
             console.log('📤 Sending POST request to upload script...');
-            const response = await this._pipelineService.uploadScriptFile(pipelineName, fileName, formData);
+            const response = await this._pipelineService.uploadScript(pipelineName, fileName, formData);
 
             console.log('✅ Native file created successfully !');
             console.log('📊 Response Status:', response.status);
@@ -2348,7 +2348,7 @@ print(f"The model got uploaded {uploaded_path} here")
             console.log('📋 Headers:', JSON.stringify(headers, null, 2));
             console.log('📄 Script content being uploaded (length):', scriptContent.length);
             console.log('📊 Script preview (first 300 chars):', scriptContent.substring(0, 300) + '...');
-            const response = await this._pipelineService.uploadScriptContent(pipelineName, fileName, form);
+            const response = await this._pipelineService.uploadScript(pipelineName, fileName, form);
 
             console.log('✅ Script file created successfully!');
             console.log('📊 Response Status:', response.status);
@@ -2762,19 +2762,7 @@ print(f"The model got uploaded {uploaded_path} here")
                 title: `Generating scripts for ${pipelineName}...`,
                 cancellable: false
             }, async (progress) => {
-                const httpsAgent = new https.Agent({
-                    rejectUnauthorized: false
-                });
-
-                const headers = {
-                    'Accept': 'application/json, text/plain, */*',
-                    'Authorization': `Bearer ${this._token}`,
-                    'Content-Type': 'application/json',
-                    'Project': '2',
-                    'ProjectName': this.organization,
-                    'X-Requested-With': 'Leap',
-                };
-
+            
                 progress.report({ increment: 10, message: 'Initiating script generation...' });
 
                 // First, save the pipeline JSON 
@@ -2788,7 +2776,7 @@ print(f"The model got uploaded {uploaded_path} here")
                 }
 
                 // Trigger script generation using event-based approach 
-                const triggerResponse = await this._pipelineService.triggerScriptGenerationEvents(pipelineName);
+                const triggerResponse = await this._pipelineService.triggerScriptEvent('generateScript_Pipeline',pipelineName);
 
 
                 const eventId = triggerResponse.data.eventId || triggerResponse.data.id;
@@ -2802,7 +2790,7 @@ print(f"The model got uploaded {uploaded_path} here")
                     try {
                         await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
 
-                        const statusResponse = await this._pipelineService.getScriptGenerationStatus(eventId);
+                        const statusResponse = await this._pipelineService.getEventStatus(eventId);
 
                         if (statusResponse.data === 'COMPLETED' || statusResponse.data.status === 'COMPLETED') {
                             progress.report({ increment: 100, message: 'Scripts generated successfully!' });
