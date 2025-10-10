@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { PipelineCardsProvider } from './app/pipeline/pipeline-cards';
 import { KeycloakAuthService, KeycloakConfig } from './auth/keycloak-auth';
 import { EssedumFileSystemProvider } from './providers/essedum-file-provider';
-import { JobLogsPanelProvider } from './app/pipeline/job-logs-panel-provider';
+// import { JobLogsPanelProvider } from './app/pipeline/job-logs-panel-provider';
 import { initializeSSLBypass, setupAxiosDefaults, BASE_URL } from './constants/api-config';
 import { PipelineService } from './services/pipeline.service';
 
@@ -88,20 +88,6 @@ export function activate(context: vscode.ExtensionContext) {
 		// Initial authentication context check
 		updateAuthenticationContext();
 	});
-
-	// Register the job logs panel provider
-	const jobLogsPanelProvider = new JobLogsPanelProvider(context.extensionUri, context);
-	context.subscriptions.push(
-		vscode.window.registerWebviewViewProvider(
-			'essedum-job-logs',
-			jobLogsPanelProvider,
-			{
-				webviewOptions: {
-					retainContextWhenHidden: true
-				}
-			}
-		)
-	);
 
 	// Register commands
 	context.subscriptions.push(
@@ -311,9 +297,6 @@ export function activate(context: vscode.ExtensionContext) {
 					}
 				}
 
-				// Use the panel provider to show job logs at the bottom
-				jobLogsPanelProvider.showJobLogs(accessToken, pipelineName, undefined);
-
 			} catch (error: any) {
 				console.error('Error opening job logs:', error);
 				vscode.window.showErrorMessage(`Failed to open job logs: ${error.message}`);
@@ -339,8 +322,6 @@ export function activate(context: vscode.ExtensionContext) {
 					}
 				}
 
-				// Use the panel provider to show internal job logs at the bottom
-				jobLogsPanelProvider.showJobLogs(accessToken, undefined, internalJobName);
 
 			} catch (error: any) {
 				console.error('Error opening internal job logs:', error);
