@@ -176,10 +176,7 @@ public class ICIPDataSourceServiceUtilGCPVertex extends ICIPDataSourceServiceUti
 			formats.put("client_x509_cert_url-dp", "Client x509 Cert URL");
 			formats.put("regionName", "input");
 			formats.put("regionName-dp", "Region Name");
-			
-			
-			
-		 
+
 			ds.put(ICIPDataSourceServiceUtil.ATTRIBUTES, attributes);
 			ds.put("formats", formats);
 		} catch (JSONException e) {
