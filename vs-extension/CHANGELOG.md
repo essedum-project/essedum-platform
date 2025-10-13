@@ -1,9 +1,12 @@
 # Change Log
 
-All notable changes to the "Essedum" extension will be documented in this file.
+All notable changes to the "Essedum AI Platform" extension will be documented in this file.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## Support and Feedback
 
-## [Unreleased]
+For technical support, feature requests, or bug reports:
+- Check the troubleshooting section in the README
+- Contact your system administrator
+- Submit issues through the appropriate channels
 
-- Initial release
+**Thank you for using the Essedum AI Platform extension! 🚀**
