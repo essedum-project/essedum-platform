@@ -3,7 +3,6 @@ import * as vscode from 'vscode';
 import { PipelineCardsProvider } from './app/pipeline/pipeline-cards';
 import { KeycloakAuthService, KeycloakConfig } from './auth/keycloak-auth';
 import { EssedumFileSystemProvider } from './providers/essedum-file-provider';
-// import { JobLogsPanelProvider } from './app/pipeline/job-logs-panel-provider';
 import { initializeSSLBypass, setupAxiosDefaults, BASE_URL } from './constants/api-config';
 import { PipelineService } from './services/pipeline.service';
 

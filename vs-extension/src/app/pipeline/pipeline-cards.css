@@ -212,6 +212,13 @@ body {
     /* margin-bottom: 2px; */
 }
 
+.pipeline-card-header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2px;
+}
+
 
 .pipeline-title {
     margin: 0 0 2px 0;
@@ -263,7 +270,7 @@ body {
 
 /* Pipeline Card Body */
 .pipeline-card-body {
-    margin-bottom:4px;
+    margin-bottom: 4px;
 }
 
 .pipeline-metadata {
@@ -571,7 +578,7 @@ body::-webkit-scrollbar {
     }
 
 
-   
+
 
     .pipeline-avatar-section {
         margin-left: 0;
@@ -724,11 +731,33 @@ body::-webkit-scrollbar {
 .details-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
+    /* gap: 12px; */
+    margin-bottom: 8px;
+    /* padding-bottom: 16px; */
     border-bottom: 1px solid var(--vscode-panel-border);
     flex-shrink: 0;
+}
+
+.btn-icon {
+    background-color: var(--vscode-button-hoverBackground);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--vscode-button-foreground);
+}
+
+.btn-icon:hover {
+    background-color: var(--vscode-button-hoverBackground);
+    border-radius: 4px;
+}
+
+.back-icon {
+    font-size: 16px;
+    line-height: 1;
 }
 
 .btn-back {
@@ -764,14 +793,14 @@ body::-webkit-scrollbar {
 .details-info {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 8px;
 }
 
 .info-section {
     background-color: var(--vscode-editor-background);
     border: 1px solid var(--vscode-panel-border);
     border-radius: 4px;
-    padding: 16px;
+    padding: 8px;
 }
 
 .info-section h4 {
@@ -783,13 +812,21 @@ body::-webkit-scrollbar {
     padding-bottom: 8px;
 }
 
-.pipeline-details-info {
+/* .pipeline-details-info {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 12px;
+} */
+
+
+.pipeline-details-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10px, 1fr));
+    gap: 8px;
 }
 
-.detail-item {
+
+/* .detail-item {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -807,7 +844,32 @@ body::-webkit-scrollbar {
     font-size: 11px;
     color: var(--vscode-editor-foreground);
     word-break: break-word;
+} */
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 0;
+    font-size: 11px;
 }
+
+.detail-label {
+    font-size: 9px;
+    color: var(--vscode-descriptionForeground);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    line-height: 1.2;
+}
+
+.detail-value {
+    font-size: 10px;
+    color: var(--vscode-editor-foreground);
+    word-break: break-word;
+    line-height: 1.3;
+}
+
 
 .scripts-container {
     display: flex;
@@ -883,14 +945,58 @@ body::-webkit-scrollbar {
 }
 
 .actions-section {
-    margin-top: 8px;
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 4px;
+    padding: 8px;
 }
 
-.action-buttons {
+.actions-section h4 {
+    margin: 0 0 12px 0;
+    color: var(--vscode-editor-foreground);
+    font-size: 13px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--vscode-panel-border);
+    padding-bottom: 8px;
+}
+
+/* .action-buttons {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+} */
+
+
+.action-buttons {
+    display: flex;
+    /* flex-direction: column; */
+    gap: 8px;
+    /* flex-wrap: nowrap; */
+    /* Prevent wrapping */
+    overflow-x: auto;
+    /* Optional: allows horizontal scroll if space is tight */
+    padding: 4px 0;
+
+    /* max-width: 100%; */
+    overflow-x: auto;
+    /* Optional: allows scroll if buttons overflow */
+
 }
+
+
+.btne {
+    font-size: 11px;
+    padding: 4px 8px;
+    white-space: nowrap;
+}
+
+
+.btn {
+    display: inline-flex;
+    width: auto;
+}
+
+
 
 .empty-scripts {
     text-align: center;
@@ -933,12 +1039,12 @@ body::-webkit-scrollbar {
 
 /* Form Elements */
 .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 8px;
 }
 
 .form-label {
     display: block;
-    margin-bottom: 6px;
+    margin-bottom: 3px;
     font-weight: 500;
     color: var(--vscode-editor-foreground);
     font-size: 12px;

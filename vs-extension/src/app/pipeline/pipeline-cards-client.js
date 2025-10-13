@@ -425,26 +425,17 @@ class PipelineCardsClient {
         const createdDate = pipeline.createdDate ? new Date(pipeline.createdDate).toLocaleDateString() : 'Unknown';
 
         this.pipelineInfo.innerHTML = `
-            <div class="detail-item">
-                <div class="detail-label">Pipeline Name</div>
-                <div class="detail-value">${pipeline.alias || pipeline.name || 'Unnamed Pipeline'}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Type</div>
-                <div class="detail-value">${pipeline.type || 'Unknown'}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Created Date</div>
-                <div class="detail-value">${createdDate}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Created By</div>
-                <div class="detail-value">${pipeline.target?.created_by || 'Unknown'}</div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">Pipeline ID</div>
-                <div class="detail-value">${pipeline.id || 'N/A'}</div>
-            </div>
+        <div>
+         <div class="pipeline-card-header-info">                   
+                        <span class="pipeline-title">${pipeline.alias}</span>
+                         <span class="pipeline-type-badge">${pipeline.type.toUpperCase()}</span>
+                </div>
+
+                <div class="pipeline-card-body">                                              
+                           <div class="metadata-item"><strong>Created Date: </strong> <span class="metadata-value">${pipeline.createdDate}</span></div>
+                           <div class="metadata-item"><strong>Created By: </strong> <span class="metadata-value">${pipeline.target?.created_by || 'Unknown'}</span></div>
+                </div>
+        </div>            
         `;
     }
 

@@ -8,7 +8,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import * as https from "https";
 import { HttpParams } from "../interfaces/pipeline.interfaces";
-import { API_ENDPOINTS, BASE_URL, createSecureAxiosConfig } from "../constants/api-config";
+import { API_ENDPOINTS, BASE_URL, createSecureAxiosConfig, HTTPS_AGENT, createHTTPSAgent } from "../constants/api-config";
 
 export class PipelineService {
   private _token: string;
@@ -17,10 +17,20 @@ export class PipelineService {
   constructor(token: string = "", organization: string = "your-org-name") {
     this._token = token;
     this.organization = organization;
+    // Ensure SSL bypass is active when service is created
+    this.ensureSSLBypass();
   }
 
   updateToken(token: string): void {
     this._token = token;
+  }
+
+  /**
+   * Ensure SSL bypass is active for all requests
+   */
+  private ensureSSLBypass(): void {
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+    console.log('PipelineService: SSL bypass ensured');
   }
 
   private buildHeaders(overrides: Record<string, string> = {}): Record<string, string> {
@@ -43,8 +53,11 @@ export class PipelineService {
   }
 
   private buildAxiosConfig(params?: HttpParams, overrides: Partial<AxiosRequestConfig> = {}): AxiosRequestConfig {
+    // Ensure SSL bypass is active for this request
+    this.ensureSSLBypass();
+    
     return {
-      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+      httpsAgent: HTTPS_AGENT, // Use the comprehensive HTTPS agent from api-config
       timeout: 30000,
       headers: this.buildHeaders(),
       ...(params ? { params: { ...params, project: this.organization } } : {}),
@@ -53,9 +66,34 @@ export class PipelineService {
   }
 
   async getPipelinesCount(params: HttpParams): Promise<number> {
+    console.log('PipelineService: Getting pipelines count...');
+    console.log('SSL bypass status:', process.env['NODE_TLS_REJECT_UNAUTHORIZED']);
+    console.log('API endpoint:', API_ENDPOINTS.PIPELINES_COUNT);
+    console.log('Request params:', params);
+    console.log('Token present:', !!this._token);
+    
     const config = this.buildAxiosConfig(params);
-    const response = await axios.get(API_ENDPOINTS.PIPELINES_COUNT, config);
-    return response.data ?? 0;
+    console.log('Request config:', {
+      url: API_ENDPOINTS.PIPELINES_COUNT,
+      hasHttpsAgent: !!config.httpsAgent,
+      timeout: config.timeout,
+      headers: Object.keys(config.headers || {})
+    });
+    
+    try {
+      const response = await axios.get(API_ENDPOINTS.PIPELINES_COUNT, config);
+      console.log('Pipelines count request successful:', response.status);
+      return response.data ?? 0;
+    } catch (error: any) {
+      console.error('Pipelines count request failed:', error.message);
+      console.error('Error code:', error.code);
+      console.error('Error details:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
+      });
+      throw error;
+    }
   }
 
   async getPipelinesCards(params: HttpParams): Promise<any> {
@@ -112,11 +150,15 @@ export class PipelineService {
 
   async uploadScript(pipelineName: string, fileName: string, formData: any): Promise<any> {
     const url = `${API_ENDPOINTS.FILE_CREATE}/${pipelineName}/${this.organization}/Python3?file=${fileName}`;
+    
+    // Force SSL bypass
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+    
     return axios.post(url, formData, {
       headers: {
         ...this.buildHeaders({ "Content-Type": "multipart/form-data" }),
       },
-      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+      httpsAgent: HTTPS_AGENT, // Use comprehensive HTTPS agent
       timeout: 30000,
       maxBodyLength: Infinity,
       maxContentLength: Infinity,
@@ -133,20 +175,28 @@ export class PipelineService {
 
   async getDatasourceByName(name: string, org?: string): Promise<any> {
     const organization = org || this.organization;
+    
+    // Force SSL bypass
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+    
     return axios.get(API_ENDPOINTS.FETCH_DATASOURCE, {
       params: { name, org: organization },
       headers: this.buildHeaders(),
-      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+      httpsAgent: HTTPS_AGENT, // Use comprehensive HTTPS agent
       timeout: 30000,
     });
   }
 
   async runNativeScriptPipeline(pipelineName: string, runtime: string, requestBody: any): Promise<any> {
     const url = `/api/aip/service/v1/pipeline/run-pipeline/NativeScript/${pipelineName}/${this.organization}/${runtime}`;
+    
+    // Force SSL bypass
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+    
     return axios.post(url, requestBody, {
       baseURL: BASE_URL,
       headers: this.buildHeaders(),
-      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+      httpsAgent: HTTPS_AGENT, // Use comprehensive HTTPS agent
       timeout: 60000,
     });
   }
@@ -160,6 +210,9 @@ export class PipelineService {
     params: string = "{}",
     workerlogId: string = "undefined"
   ): Promise<any> {
+    // Force SSL bypass
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+    
     const offset = new Date().getTimezoneOffset();
     const queryParams = new URLSearchParams({
       offset: offset.toString(),
@@ -172,38 +225,47 @@ export class PipelineService {
     const url = `${API_ENDPOINTS.PIPELINE_RUN}/${pipelineType}/${cname}/${this.organization}/${isLocal}?${queryParams.toString()}`;
     return axios.get(url, {
       headers: this.buildHeaders(),
-      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+      httpsAgent: HTTPS_AGENT, // Use comprehensive HTTPS agent
       timeout: 60000,
       responseType: "text",
     });
   }
 
   async triggerScriptEvent(eventType: string, payload: any): Promise<any> {
+    // Force SSL bypass
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+    
     return axios.post(`/api/aip/service/v1/events/trigger/${eventType}`, payload, {
       baseURL: BASE_URL,
       headers: this.buildHeaders(),
-      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+      httpsAgent: HTTPS_AGENT, // Use comprehensive HTTPS agent
       timeout: 60000,
     });
   }
 
   async getEventStatus(eventId: string): Promise<any> {
+    // Force SSL bypass
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+    
     return axios.get(`/api/aip/service/v1/events/status/${eventId}`, {
       baseURL: BASE_URL,
       headers: this.buildHeaders(),
-      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+      httpsAgent: HTTPS_AGENT, // Use comprehensive HTTPS agent
       timeout: 10000,
     });
   }
 
   async savePipelineJson(pipelineName: string): Promise<any> {
+    // Force SSL bypass
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+    
     return axios.post(
       "/api/aip/service/v1/pipelines/save-json",
       { name: pipelineName, organization: this.organization },
       {
         baseURL: BASE_URL,
         headers: this.buildHeaders(),
-        httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+        httpsAgent: HTTPS_AGENT, // Use comprehensive HTTPS agent
         timeout: 30000,
       }
     );

@@ -48,6 +48,14 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
         this._isAuthenticated = !!token && token.trim().length > 0;
         console.log('Token updated, authenticated:', this._isAuthenticated);
 
+        // Update the authentication context when token changes
+        vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', this._isAuthenticated);
+
+        // Update token in pipeline service
+        if (this._pipelineService) {
+            this._pipelineService.updateToken(token);
+        }
+
         // Update token in file provider as well
         if (this._fileProvider) {
             this._fileProvider.updateToken(token);
@@ -415,6 +423,32 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
             console.log('Not authenticated, showing authentication required page');
             this.showAuthenticationRequired();
             return;
+        }
+
+        // Check if token is still valid before making API calls
+        if (this._authService) {
+            try {
+                const isValidToken = await this._authService.isTokenValid();
+                if (!isValidToken) {
+                    console.log('Token is invalid or expired, checking authentication status...');
+                    const authStatus = await this._authService.getAuthenticationStatus();
+                    
+                    if (!authStatus.isAuthenticated) {
+                        console.log('Token expired, showing authentication required page');
+                        this._isAuthenticated = false;
+                        this.showAuthenticationRequired();
+                        return;
+                    }
+                    
+                    // If we reach here, the token was refreshed automatically
+                    const newToken = await this._authService.getAccessToken();
+                    this.updateToken(newToken);
+                    console.log('Token refreshed successfully, proceeding with API calls');
+                }
+            } catch (error) {
+                console.error('Error checking token validity:', error);
+                // If token check fails, try to proceed and let API calls handle the error
+            }
         }
 
         this.loading = true;
@@ -2645,6 +2679,10 @@ print(f"The model got uploaded {uploaded_path} here")
                 console.log('Warning: returnToMainView called but not authenticated');
                 return;
             }
+
+            // Update authentication context to ensure logout button appears
+            await vscode.commands.executeCommand('setContext', 'essedum.isAuthenticated', true);
+            console.log('Authentication context updated to true');
 
             // Reset the view state
             this.pageNumber = 1;
