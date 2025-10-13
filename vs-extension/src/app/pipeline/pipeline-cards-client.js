@@ -459,13 +459,14 @@ class PipelineCardsClient {
                     <div class="script-name">${file.fileName}</div>                    
                     <div class="script-type">${file.language} (${file.extension})</div>
                 </div>
-                <div class="script-actions">
-                    <button class="btn btn-small btn-primary" onclick="window.pipelineClient.openScript(${index})">
-                        Open
-                    </button>
-                    <button class="btn btn-small btn-secondary" onclick="window.pipelineClient.copyScript('${file.fileName}')">
-                        Copy
-                    </button>
+                <div class="script-actions">                    
+                <button class="btn btn-small btn-primary" onclick="window.pipelineClient.openScript(${index})" title="Open ${file.fileName}">
+                    📂 Open
+                </button>                  
+                <button class="btn btn-small btn-secondary" onclick="window.pipelineClient.copyScript('${file.fileName}')" title="Copy ${file.fileName}">
+                    📋 Copy
+                </button>
+
                 </div>
             </div>
         `).join('');
