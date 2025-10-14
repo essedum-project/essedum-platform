@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Essedum Pipeline Cards</title>
     <link rel="stylesheet" type="text/css" href="{{CSS_URI}}">
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -14,7 +16,7 @@
                 <button class="btn btn-primary" id="refreshBtn">Refresh</button>
             </div>
         </div>
-        
+
         <div class="search-container">
             <input type="text" id="searchInput" class="search-input" placeholder="Search pipelines...">
             <button class="btn" id="searchBtn">Search</button>
@@ -51,13 +53,18 @@
         <!-- Pipeline Details View -->
         <div id="detailsView" class="details-view" style="display: none;">
             <div class="details-header">
-                <button class="btn btn-back" id="backBtn">
-                    <span class="back-icon">‹</span>
-                    Back to Pipelines
+
+                <button class="btn-icon" id="backBtn" title="Back to Pipelines">
+                    <svg class="back-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path
+                            d="M15 8a.5.5 0 0 1-.5.5H3.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L3.707 7.5H14.5a.5.5 0 0 1 .5.5z" />
+                    </svg>
                 </button>
+
                 <h3 id="detailsTitle">Pipeline Details</h3>
             </div>
-            
+
             <div class="details-content">
                 <div class="details-info">
                     <div class="info-section">
@@ -66,27 +73,29 @@
                             <!-- Pipeline info will be populated here -->
                         </div>
                     </div>
-                    
+
                     <div class="info-section">
                         <h4>Available Scripts</h4>
                         <div id="scriptsContainer" class="scripts-container">
                             <!-- Scripts will be populated here -->
                         </div>
                     </div>
-                    
+
                     <div class="info-section">
                         <h4>Run Types</h4>
                         <div id="runTypesContainer" class="run-types-container">
                             <!-- Run types will be populated here -->
                         </div>
                     </div>
-                    
+
                     <div class="actions-section">
                         <h4>Actions</h4>
                         <div class="action-buttons">
-                            <button class="btn btn-primary" id="runPipelineBtn">Run Pipeline</button>
-                            <button class="btn btn-secondary" id="viewLogsBtn">View Logs</button>
-                            <button class="btn btn-secondary" id="refreshScriptsBtn">Refresh Scripts</button>
+
+                            <button class="btn-icon" id="runPipelineBtn" title="Run Pipeline">▶</button>
+                            <button class="btn-icon" id="viewLogsBtn" title="View Logs">📄</button>
+                            <button class="btn-icon" id="refreshScriptsBtn" title="Refresh Scripts">🔄</button>
+
                         </div>
                     </div>
                 </div>
@@ -96,4 +105,5 @@
 
     <script src="{{JS_URI}}"></script>
 </body>
+
 </html>

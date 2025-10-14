@@ -35,12 +35,12 @@ export class OAuthAuthServer {
         const codeVerifier = crypto
             .randomBytes(32)
             .toString('base64url');
-        
+
         const codeChallenge = crypto
             .createHash('sha256')
             .update(codeVerifier)
             .digest('base64url');
-        
+
         return {
             codeVerifier,
             codeChallenge
@@ -61,15 +61,15 @@ export class OAuthAuthServer {
         return new Promise((resolve, reject) => {
             this.server = http.createServer((req, res) => {
                 const parsedUrl = url.parse(req.url || '', true);
-                
+
                 if (parsedUrl.pathname === '/callback') {
                     const { code, state, error, error_description } = parsedUrl.query;
-                    
+
                     // Set CORS headers
                     res.setHeader('Access-Control-Allow-Origin', '*');
                     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
                     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-                    
+
                     if (error) {
                         const errorMsg = `OAuth Error: ${error}${error_description ? ` - ${error_description}` : ''}`;
                         res.writeHead(400, { 'Content-Type': 'text/html' });
@@ -86,37 +86,84 @@ export class OAuthAuthServer {
                                 </body>
                             </html>
                         `);
-                        
+
                         if (this.authReject) {
                             this.authReject(new Error(errorMsg));
                         }
                         return;
                     }
-                    
+
                     if (code && state) {
                         res.writeHead(200, { 'Content-Type': 'text/html' });
-                        res.end(`
-                            <html>
-                                <head><title>Authentication Successful</title></head>
-                                <body style="font-family: Arial, sans-serif; text-align: center; margin-top: 50px;">
-                                    <h1 style="color: #4caf50;">✓ Authentication Successful</h1>
-                                    <p>You have successfully logged in to Essedum AI Platform.</p>
-                                    <p>You can now close this window and return to VS Code.</p>
-                                    <script>
-                                        // Auto-close window after 3 seconds
-                                        setTimeout(() => {
-                                            try {
-                                                window.close();
-                                            } catch (e) {
-                                                // Fallback if window.close() is blocked
-                                                document.body.innerHTML = '<h2>Please close this window manually</h2>';
-                                            }
-                                        }, 3000);
-                                    </script>
-                                </body>
+                        res.end(`                            
+                            <html lang="en">
+                            <head>
+                               <meta charset="UTF-8" />
+                               <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                               <title>Authentication Successful</title>
+                               <style>
+                                 body {
+                                   margin: 0;
+                                   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                                   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                                   color: #fff;
+                                   display: flex;
+                                   justify-content: center;
+                                   align-items: center;
+                                   height: 100vh;
+                                   text-align: center;
+                               }
+
+                                .container {
+                                  background: rgba(255, 255, 255, 0.1);
+                                  padding: 40px;
+                                  border-radius: 12px;
+                                  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+                                  max-width: 500px;
+                                }
+
+                                .icon {
+                                  font-size: 60px;
+                                  margin-bottom: 20px;
+                                }
+
+                                 h1 {
+                                   font-size: 32px;
+                                   margin-bottom: 10px;
+                                   }
+
+                                 p {
+                                    font-size: 18px;
+                                    margin-bottom: 30px;
+                                   }
+
+                                .button {
+                                    background-color: #ffffff;
+                                    color: #0078d7;
+                                    padding: 12px 24px;
+                                    border: none;
+                                    border-radius: 8px;
+                                    font-size: 16px;
+                                    cursor: pointer;
+                                    transition: background-color 0.3s ease;
+                                   }
+
+                                .button:hover {
+                                   background-color: #e0e0e0;
+                                }
+                                </style>
+                              </head>
+                            <body>
+                                <div class="container">
+                                <div class="icon">🔐</div>
+                                <h1>Authentication Successful!</h1>
+                                <p>You’ve been securely signed in.</p>
+                                <p>You can now close this window and return to VS Code.</p>    
+                                </div>
+                              </body>
                             </html>
                         `);
-                        
+
                         if (this.authResolve) {
                             this.authResolve({
                                 code: code as string,
@@ -138,7 +185,7 @@ export class OAuthAuthServer {
                                 </body>
                             </html>
                         `);
-                        
+
                         if (this.authReject) {
                             this.authReject(new Error('Missing authorization code or state parameter'));
                         }
@@ -200,7 +247,7 @@ export class OAuthAuthServer {
 
         // Force SSL bypass for development environment
         process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-        
+
         // Start the local server
         await this.startServer();
 

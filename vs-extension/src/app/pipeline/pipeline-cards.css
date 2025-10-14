@@ -212,6 +212,13 @@ body {
     /* margin-bottom: 2px; */
 }
 
+.pipeline-card-header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2px;
+}
+
 
 .pipeline-title {
     margin: 0 0 2px 0;
@@ -263,7 +270,7 @@ body {
 
 /* Pipeline Card Body */
 .pipeline-card-body {
-    margin-bottom:4px;
+    margin-bottom: 4px;
 }
 
 .pipeline-metadata {
@@ -571,7 +578,7 @@ body::-webkit-scrollbar {
     }
 
 
-   
+
 
     .pipeline-avatar-section {
         margin-left: 0;
@@ -724,11 +731,31 @@ body::-webkit-scrollbar {
 .details-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
+    margin-bottom: 8px;
     border-bottom: 1px solid var(--vscode-panel-border);
-    flex-shrink: 0;
+    /* flex-shrink: 0; */
+}
+
+.btn-icon {
+    background-color: var(--vscode-button-hoverBackground);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--vscode-button-foreground);
+}
+
+.btn-icon:hover {
+    background-color: var(--vscode-button-hoverBackground);
+    border-radius: 4px;
+}
+
+.back-icon {
+    font-size: 16px;
+    line-height: 1;
 }
 
 .btn-back {
@@ -764,14 +791,14 @@ body::-webkit-scrollbar {
 .details-info {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 8px;
 }
 
 .info-section {
     background-color: var(--vscode-editor-background);
     border: 1px solid var(--vscode-panel-border);
     border-radius: 4px;
-    padding: 16px;
+    padding: 8px;
 }
 
 .info-section h4 {
@@ -785,29 +812,34 @@ body::-webkit-scrollbar {
 
 .pipeline-details-info {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(10px, 1fr));
+    gap: 8px;
 }
 
 .detail-item {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
+    padding: 4px 0;
+    font-size: 11px;
 }
 
 .detail-label {
-    font-size: 10px;
+    font-size: 9px;
     color: var(--vscode-descriptionForeground);
-    font-weight: 500;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
+    line-height: 1.2;
 }
 
 .detail-value {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--vscode-editor-foreground);
     word-break: break-word;
+    line-height: 1.3;
 }
+
 
 .scripts-container {
     display: flex;
@@ -815,7 +847,7 @@ body::-webkit-scrollbar {
     gap: 8px;
 }
 
-.script-item {
+/* .script-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -823,9 +855,9 @@ body::-webkit-scrollbar {
     background-color: var(--vscode-list-inactiveSelectionBackground);
     border-radius: 3px;
     border: 1px solid var(--vscode-panel-border);
-}
+} */
 
-.script-info {
+/* .script-info {
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -835,9 +867,9 @@ body::-webkit-scrollbar {
     font-size: 11px;
     font-weight: 500;
     color: var(--vscode-editor-foreground);
-}
+} */
 
-.script-type {
+/* .script-type {
     font-size: 9px;
     color: var(--vscode-descriptionForeground);
 }
@@ -852,8 +884,43 @@ body::-webkit-scrollbar {
     font-size: 9px;
     min-height: unset;
     line-height: 1.2;
+} */
+
+
+.script-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    /* border-bottom: 1px solid #ccc; */
+    flex-wrap: wrap;
 }
 
+.script-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.script-meta {
+    font-size: 0.85em;
+    color: #666;
+    display: flex;
+    gap: 12px;
+}
+
+.script-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.btn-small {
+    padding: 4px 8px;
+    font-size: 0.85em;
+
+}
 .run-types-container {
     display: flex;
     flex-wrap: wrap;
@@ -883,14 +950,43 @@ body::-webkit-scrollbar {
 }
 
 .actions-section {
-    margin-top: 8px;
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 4px;
+    padding: 8px;
+}
+
+.actions-section h4 {
+    margin: 0 0 12px 0;
+    color: var(--vscode-editor-foreground);
+    font-size: 13px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--vscode-panel-border);
+    padding-bottom: 8px;
 }
 
 .action-buttons {
     display: flex;
-    flex-wrap: wrap;
     gap: 8px;
+    overflow-x: auto;
+    padding: 4px 0;
+    overflow-x: auto;
 }
+
+
+.btne {
+    font-size: 11px;
+    padding: 4px 8px;
+    white-space: nowrap;
+}
+
+
+.btn {
+    display: inline-flex;
+    width: auto;
+}
+
+
 
 .empty-scripts {
     text-align: center;
@@ -904,7 +1000,7 @@ body::-webkit-scrollbar {
     .details-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 8px;
+        /* gap: 8px; */
     }
 
     .pipeline-details-info {
@@ -921,24 +1017,32 @@ body::-webkit-scrollbar {
         align-self: stretch;
         justify-content: flex-end;
     }
-
+   
     .action-buttons {
-        flex-direction: column;
+        flex-direction: row;
+        /* Keep buttons in one line */
+        flex-wrap: wrap;
+        /* Allow wrapping if needed */
+        justify-content: flex-start;
     }
 
-    .action-buttons .btn {
-        width: 100%;
+    .action-buttons .btn-icon {
+        width: auto;
+        /* Prevent full width */
+        flex: 0 0 auto;
+        /* Prevent stretching */
     }
+
 }
 
 /* Form Elements */
 .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 8px;
 }
 
 .form-label {
     display: block;
-    margin-bottom: 6px;
+    margin-bottom: 3px;
     font-weight: 500;
     color: var(--vscode-editor-foreground);
     font-size: 12px;
