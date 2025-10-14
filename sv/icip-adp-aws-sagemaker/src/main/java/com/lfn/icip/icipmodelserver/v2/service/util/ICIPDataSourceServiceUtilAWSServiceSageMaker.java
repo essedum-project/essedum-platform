@@ -27,6 +27,8 @@ import java.util.regex.Pattern;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -67,7 +69,9 @@ import com.lfn.icip.dataset.util.ICIPRestPluginUtils;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sagemaker.SageMakerClient;
 
@@ -91,9 +95,10 @@ public class ICIPDataSourceServiceUtilAWSServiceSageMaker extends ICIPDataSource
 	public boolean testConnection(ICIPDatasource datasource) {
 		JSONObject connectionDetails = new JSONObject(datasource.getConnectionDetails());
 		JSONObject authDetails = connectionDetails.optJSONObject("AuthDetails");
-		String accessKey = authDetails.optString("accesskey");
-		String secretKey = authDetails.optString("secretkey");
-		String regionName = authDetails.optString("region");
+		String accessKey = connectionDetails.optString("accessKey");
+		String secretKey = connectionDetails.optString("secretKey");
+		String regionName = connectionDetails.optString("region");
+        String sessionToken = connectionDetails.optString("sessionToken");
 		String executionEnvironment = connectionDetails.optString("executionEnvironment");
 		if (ICIPPluginConstants.REMOTE.equalsIgnoreCase(executionEnvironment)) {
 			logger.info("Connection Test, executionEnvironment:{}", executionEnvironment);
@@ -113,16 +118,47 @@ public class ICIPDataSourceServiceUtilAWSServiceSageMaker extends ICIPDataSource
 		try {
 
 			Region region = Region.of(regionName);
-			AwsCredentialsProvider credentialsProvider = StaticCredentialsProvider
-					.create(AwsBasicCredentials.create(accessKey, secretKey));
-			SageMakerClient sageMakerClient = SageMakerClient.builder().region(region)
-					.credentialsProvider(credentialsProvider).build();
-			logger.info("connection Successful");
-			return true;
-		} catch (SdkClientException e) {
-			logger.error("unable to connect SageMaker" + e.getMessage());
-			return false;
-		} catch (Exception e) {
+
+            AwsCredentialsProvider credentialsProvider;
+
+            if (sessionToken != null && !sessionToken.isEmpty()) {
+                // Use temporary session credentials
+                AwsSessionCredentials sessionCredentials = AwsSessionCredentials.create(accessKey, secretKey, sessionToken);
+                credentialsProvider = StaticCredentialsProvider.create(sessionCredentials);
+            } else {
+                // Use basic credentials
+                AwsBasicCredentials basicCredentials = AwsBasicCredentials.create(accessKey, secretKey);
+                credentialsProvider = StaticCredentialsProvider.create(basicCredentials);
+            }
+
+
+            // Disable SSL certificate validation
+            TrustManager[] trustAllCerts = new TrustManager[]{
+                    new X509TrustManager() {
+                        public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+                    }
+            };
+
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+
+            ApacheHttpClient apacheHttpClient = (ApacheHttpClient) ApacheHttpClient.builder()
+                    .tlsTrustManagersProvider(() -> trustAllCerts)
+                    .build();
+
+            SageMakerClient sageMakerClient = SageMakerClient.builder()
+                    .region(region)
+                    .credentialsProvider(credentialsProvider)
+                    .httpClient(apacheHttpClient)
+                    .build();
+
+            logger.info("Connection Successful");
+            logger.info("SageMaker EndPoints : {} ", sageMakerClient.listEndpoints());
+            return true;
+
+        } catch (Exception e) {
 			logger.error("unable to connect SageMaker" + e.getMessage());
 			return false;
 		}
@@ -173,6 +209,8 @@ public class ICIPDataSourceServiceUtilAWSServiceSageMaker extends ICIPDataSource
 			formats.put("secretKey-dp", "Secret Key");
 			formats.put("region", "input");
 			formats.put("region-dp", "Region");
+            formats.put("sessionToken", "input");
+            formats.put("sessionToken-dp", "Session Token");
 //			formats.put("imageUri", "input");
 //			formats.put("imageUri-dp", "imageUri");
 			formats.put("roleArn", "input");
@@ -198,7 +236,7 @@ public class ICIPDataSourceServiceUtilAWSServiceSageMaker extends ICIPDataSource
 		String userName = authDetailsObj.optString("username").trim();
 		String password = authDetailsObj.optString("password");
 		String testDataset = new JSONObject(connectionDetails.optString("testDataset")).optString("attributes");
-		String method = "POST";
+		String method = "GET";
 		String headers = new JSONObject(testDataset).optString("Headers");
 		JSONArray headersArray = new JSONArray();
 		Boolean isContentTypePresent = false;
