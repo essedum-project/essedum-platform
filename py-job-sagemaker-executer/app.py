@@ -569,7 +569,7 @@ def projects_endpoints_list_list():
             logger.info(f"Connections details is empty. {str(connections)}")
             result = "Please check if connection details are present in DB."
             return jsonify(result), 400
-        result, status_code = aws.projects_endpoints_list_list(adapter_instance, project, isCached, isInstance, connections, isOnline)
+        result, status_code = aws.projects_endpoints_list_lists(adapter_instance, project, isCached, isInstance, connections)
         logger.info(f"Response from mlops/<>.py is: {str(result)} !!!")
         return jsonify(result), status_code
     except Exception as err:
