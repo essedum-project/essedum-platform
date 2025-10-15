@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import FormData from 'form-data';
 import { EssedumFileSystemProvider } from '../../providers/essedum-file-provider';
-import { JobLogsViewer } from './job-logs-viewer';
+import { JobLogsViewer } from '../job-logs/job-logs-viewer';
 import { HttpParams, PipelineCard, PipelineScript, ScriptFile } from '../../interfaces/pipeline.interfaces';
 import { PipelineService } from '../../services/pipeline.service';
 
