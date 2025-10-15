@@ -736,6 +736,18 @@ body::-webkit-scrollbar {
     /* flex-shrink: 0; */
 }
 
+
+.details-title {
+    color: var(--vscode-editor-foreground);
+    font-size: 18px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1; /* Pushes title to take remaining space */
+}
+
+
 .btn-icon {
     background-color: var(--vscode-button-hoverBackground);
     border: none;

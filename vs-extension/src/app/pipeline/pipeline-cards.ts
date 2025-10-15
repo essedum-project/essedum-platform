@@ -432,14 +432,14 @@ export class PipelineCardsProvider implements vscode.WebviewViewProvider {
                 if (!isValidToken) {
                     console.log('Token is invalid or expired, checking authentication status...');
                     const authStatus = await this._authService.getAuthenticationStatus();
-                    
+
                     if (!authStatus.isAuthenticated) {
                         console.log('Token expired, showing authentication required page');
                         this._isAuthenticated = false;
                         this.showAuthenticationRequired();
                         return;
                     }
-                    
+
                     // If we reach here, the token was refreshed automatically
                     const newToken = await this._authService.getAccessToken();
                     this.updateToken(newToken);
@@ -2256,7 +2256,7 @@ print(f"The model got uploaded {uploaded_path} here")
 
             console.log('✅ FormData created successfully');
 
-         
+
             // Headers matching the exact working curl command
             const headers = {
                 'accept': 'application/json, text/plain, */*',
@@ -2341,9 +2341,7 @@ print(f"The model got uploaded {uploaded_path} here")
             console.log('📄 File Name:', fileName);
             console.log('📏 Script Content Length:', scriptContent.length);
 
-            const httpsAgent = new https.Agent({
-                rejectUnauthorized: false
-            });
+
 
             // Create FormData for multipart/form-data request
             const form = new FormData();
@@ -2617,18 +2615,18 @@ print(f"The model got uploaded {uploaded_path} here")
         }
 
         try {
-            const scripts = await this.fetchPipelineScripts(card.alias || card.name);
-            const scriptFile = scripts.files.find(f => f.fileName === fileName);
+            const scripts = await this._pipelineService.readPipelineFile(card.name, fileName);
+            const textDecoder = new TextDecoder('utf-8');
+            const scriptFile = textDecoder.decode(scripts.data);
 
             if (scriptFile) {
-                await vscode.env.clipboard.writeText(scriptFile.content);
+                await vscode.env.clipboard.writeText(scriptFile);
                 vscode.window.showInformationMessage('Script copied to clipboard!');
             }
         } catch (error: any) {
             vscode.window.showErrorMessage(`Failed to copy script: ${error.message}`);
         }
     }
-
     private async refreshScripts(cardId: string): Promise<void> {
         const card = this.cards.find(c => c.id === cardId);
         if (!card) {
@@ -2800,7 +2798,7 @@ print(f"The model got uploaded {uploaded_path} here")
                 title: `Generating scripts for ${pipelineName}...`,
                 cancellable: false
             }, async (progress) => {
-            
+
                 progress.report({ increment: 10, message: 'Initiating script generation...' });
 
                 // First, save the pipeline JSON 
@@ -2814,7 +2812,7 @@ print(f"The model got uploaded {uploaded_path} here")
                 }
 
                 // Trigger script generation using event-based approach 
-                const triggerResponse = await this._pipelineService.triggerScriptEvent('generateScript_Pipeline',pipelineName);
+                const triggerResponse = await this._pipelineService.triggerScriptEvent('generateScript_Pipeline', pipelineName);
 
 
                 const eventId = triggerResponse.data.eventId || triggerResponse.data.id;

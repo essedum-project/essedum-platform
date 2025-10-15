@@ -369,6 +369,11 @@ class PipelineCardsClient {
             this.loadingState.style.display = 'none';
         }
 
+        const header = document.querySelector('.header');
+        if (header) {
+            header.style.display = 'none';
+        }
+
         // Hide search container and header buttons when in details view
         const searchContainer = document.querySelector('.search-container');
         if (searchContainer) {
@@ -388,6 +393,10 @@ class PipelineCardsClient {
             this.cardsContainer.style.display = 'block';
         }
 
+        const header = document.querySelector('.header');
+        if (header) {
+            header.style.display = 'flex';
+        }
         // Show search container and header buttons when returning to list view
         const searchContainer = document.querySelector('.search-container');
         if (searchContainer) {
