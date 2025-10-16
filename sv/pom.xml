@@ -22,7 +22,7 @@
 		<json.version>20231013</json.version>
 		<sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
 		<jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
-		<liquibase.version>4.3.5</liquibase.version>
+		<liquibase.version>4.8.0</liquibase.version>
 		<openpojo.version>0.8.13</openpojo.version>
 		<maven-plugin.version>3.2.0</maven-plugin.version>
 		<modelmapper.version>2.3.0</modelmapper.version>
