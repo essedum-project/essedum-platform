@@ -4,7 +4,7 @@ services:
   leap-app-backend-service:
     build:
       context: ../sv
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile_dbjwt
     ports:
       - "${BACKEND_PORT:-8082}:8082"
     env_file:
