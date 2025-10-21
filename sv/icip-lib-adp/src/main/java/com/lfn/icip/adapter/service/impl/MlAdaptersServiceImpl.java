@@ -116,16 +116,30 @@ public class MlAdaptersServiceImpl implements MlAdaptersService {
 		this.mlAdaptersRepository = mlAdaptersRepository;
 	}
 
-	@Override
-	public MlAdapters save(MlAdapters mlAdapters) {
-		mlAdapters.setCreatedon(Timestamp.from(Instant.now()));
-		mlAdapters.setCreatedby(ICIPUtils.getUser(claim));
-		mlAdapters.setLastmodifiedon(mlAdapters.getCreatedon());
-		mlAdapters.setIsactive(ICIPPluginConstants.ACTIVE);
-		return mlAdaptersRepository.save(mlAdapters);
-	}
+   /* @Override
+    public MlAdapters save(MlAdapters mlAdapters) {
+        MlSpecTemplates mlSpecTemplates = mlSpecTemplatesRepository.getMlSpecTemplateByDomainnameAndOrganization(mlAdapters.getSpectemplatedomainname(), mlAdapters.getOrganization()).stream().findFirst().orElse(null);
 
-	@Override
+        mlAdapters.setCreatedon(Timestamp.from(Instant.now()));
+        mlAdapters.setCreatedby(ICIPUtils.getUser(claim));
+        mlAdapters.setLastmodifiedon(mlAdapters.getCreatedon());
+        mlAdapters.setIsactive(ICIPPluginConstants.ACTIVE);
+        if (mlAdapters.getApispec() == null) {
+            mlAdapters.setApispec(mlSpecTemplates.getApispectemplate());
+        }
+        return mlAdaptersRepository.save(mlAdapters);
+    }*/
+
+    @Override
+    public MlAdapters save(MlAdapters mlAdapters) {
+        mlAdapters.setCreatedon(Timestamp.from(Instant.now()));
+        mlAdapters.setCreatedby(ICIPUtils.getUser(claim));
+        mlAdapters.setLastmodifiedon(mlAdapters.getCreatedon());
+        mlAdapters.setIsactive(ICIPPluginConstants.ACTIVE);
+        return mlAdaptersRepository.save(mlAdapters);
+    }
+
+    @Override
 	public MlAdapters updateMlAdapter(MlAdapters mlAdapters) {
 		MlAdapters mlAdaptersFromDB = this.getMlAdapteByNameAndOrganization(mlAdapters.getName(),
 				mlAdapters.getOrganization());

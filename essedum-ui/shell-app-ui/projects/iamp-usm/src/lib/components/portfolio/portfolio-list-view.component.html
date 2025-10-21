@@ -1,7 +1,7 @@
 <div class="mt-10">
   <div class="aip-container lfx-u-pad-lr-30">
     <!-- Header Section -->
-    <app-aip-header [cardTitle]="title" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="true"
+    <app-aip-header [cardTitle]="title" [lastRefreshedTime]="lastRefreshedTime" [showAddButton]="createFlag"
       (search)="filterItem($event)" (refresh)="ngOnInit()" (add)="createPortfolioKey()">
     </app-aip-header>
     <!-- Filter Section --> 
@@ -25,7 +25,7 @@
             <tbody>
               <tr *ngFor="let obj of usmPortfolios; let i =index">
                 <td>{{getRowNumber(i)}}</td>
-                <td style="color: #0052cc; cursor: pointer;">{{ obj.id}}</td>
+                <td style="color: #0052cc; cursor: pointer;" (click)="view_UsmPortfolio(obj)">{{ obj.id}}</td>
                 <td>{{ obj.portfolioName}}</td>
                 <td>{{obj.description}}</td>
                 <td>

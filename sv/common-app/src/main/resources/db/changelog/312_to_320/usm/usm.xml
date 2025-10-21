@@ -5,6 +5,12 @@
         <sql splitStatements="true" stripComments="true">  
             INSERT INTO usm_constant (item, project_name, item_value, project_id) VALUES ('DisableTabs', 'Core', 'Dashboard Management', 1);
             </sql>   
+    </changeSet>    
+    
+     <changeSet author="Essedum" dbms="mssql,mysql" id="3v1-usm-20241211-1-dev">   
+        <sql splitStatements="true" stripComments="true">  
+            INSERT INTO usm_constant (item, project_name, item_value, project_id) VALUES ('Developer SideConfigurations', 'Core', '[{"label":"Models","altText":"","icon":"cubes","url":"./aip/models","children":[]},{"label":"Connections","altText":"","icon":"link","url":"./aip/connections","children":[]},{"label":"Pipelines","altText":null,"icon":"map-signs","url":"./aip/pipelines","children":[]},{"label":"Apps","altText":null,"icon":"th","url":"./aip/app-list","children":[]},{"label":"Adapters","icon":"wrench","children":[{"label":"Specs","altText":null,"icon":"","url":"./aip/specs","children":[],"_id":2},{"label":"Implementations","altText":null,"icon":"","url":"./aip/implementations","children":[],"_id":3},{"label":"Instances","altText":"","icon":"","url":"./aip/instances","children":[],"_id":4}],"horizontal":true}]', 1);
+            </sql>   
     </changeSet>
     
     <changeSet author="Essedum" dbms="mssql,mysql" id="3v1-usm-20241211-2">   
@@ -24,6 +30,14 @@
 			INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'create-tool');
 			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='IT Portfolio Manager' AND p.permission = 'create-tool' AND  p.module='cip' AND r.project_id IS NULL;
 		</sql>   
+		
+		    <sql splitStatements="true" stripComments="true">
+			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'ai-worker-prepare' AND  p.module='cip' AND r.project_id IS NULL;
+			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'create-workerConfig' AND  p.module='cip' AND r.project_id IS NULL;
+			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'execute-worker' AND  p.module='cip' AND r.project_id IS NULL;
+			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'create-tool' AND  p.module='cip' AND r.project_id IS NULL;
+			INSERT INTO usm_role_permissions (permission, role ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'create-tool' AND  p.module='cip' AND r.project_id IS NULL;
+		</sql> 
 	</changeSet>
     
 
@@ -57,6 +71,17 @@
         </preConditions>
         <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
             DELETE FROM usm_constant WHERE item_value LIKE '%Gamification%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'IT Portfolio Manager Side';    
+        </sql>
+    </changeSet>
+    
+        <changeSet id="3v1-usm-20250128-4-dev" author="Essedum">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT CASE WHEN COUNT(*) > 1 THEN 1 ELSE 0 END FROM usm_constant WHERE item_value LIKE '%Gamification%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'Developer Side';
+            </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+            DELETE FROM usm_constant WHERE item_value LIKE '%Gamification%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'Developer Side';    
         </sql>
     </changeSet>
  
@@ -123,6 +148,7 @@
             insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Datasets","icon":"database","children":[{"label":"Datasets","icon":"","url":"./aip/datasets","children":[],"_id":3},{"label":"Schemas","altText":"","icon":"","url":"./aip/schemas","children":[],"_id":4}],"horizontal":true}','2',NULL);
         </sql>
     </changeSet>
+         
     <changeSet id="3v2-usm-20252402-3" author="Essedum">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
@@ -133,6 +159,16 @@
             insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Models","altText":null,"icon":"cubes","url":"./aip/models","children":[]}','2',NULL);
         </sql>
     </changeSet>
+      <changeSet id="3v2-usm-20252402-3-dev" author="Essedum">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_constant WHERE item_value LIKE '%Models%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'Developer Side';
+            </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+            insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('Developer Side','leo1311','{"label":"Models","altText":null,"icon":"cubes","url":"./aip/models","children":[]}','2',NULL);
+        </sql>
+    </changeSet>
     <changeSet id="3v2-usm-20252402-3-1" author="Essedum">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
@@ -141,6 +177,16 @@
         </preConditions>
         <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
             insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Connections","altText":null,"icon":"link","url":"./aip/connections","children":[]}','2',NULL);
+        </sql>
+    </changeSet>
+        <changeSet id="3v2-usm-20252402-3-1-dev" author="Essedum">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_constant WHERE item_value LIKE '%Connections%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'Developer Side';
+            </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+            insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('Developer Side','leo1311','{"label":"Connections","altText":null,"icon":"link","url":"./aip/connections","children":[]}','2',NULL);
         </sql>
     </changeSet>
     
@@ -155,6 +201,17 @@
         </sql>
     </changeSet>
     
+        <changeSet id="3v2-usm-20252402-4-dev" author="Essedum">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_constant WHERE item_value LIKE '%Adapters%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'Developer Side';
+            </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+            insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('Developer Side','leo1311','{"label":"Adapters","icon":"wrench","children":[{"label":"Specs","altText":null,"icon":"","url":"./aip/specs","children":[],"_id":2},{"label":"Implementations","altText":null,"icon":"","url":"./aip/implementations","children":[],"_id":3},{"label":"Instances","altText":"","icon":"","url":"./aip/instances","children":[],"_id":4}],"horizontal":true}','2',NULL);
+        </sql>
+    </changeSet>
+    
         <changeSet id="3v2-usm-20252402-5" author="Essedum">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
@@ -163,6 +220,17 @@
         </preConditions>
         <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
             insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Pipelines","altText":null,"icon":"map-signs","url":"./aip/pipelines","children":[]}','2',NULL);
+        </sql>
+    </changeSet>
+    
+        <changeSet id="3v2-usm-20252402-5-dev" author="Essedum">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_constant WHERE item_value LIKE '%Pipelines%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'Developer Side';
+            </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+            insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('Developer Side','leo1311','{"label":"Pipelines","altText":null,"icon":"map-signs","url":"./aip/pipelines","children":[]}','2',NULL);
         </sql>
     </changeSet>
     
@@ -175,6 +243,28 @@
         <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
             insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('IT Portfolio Manager Side','leo1311','{"label":"Apps","altText":null,"icon":"th","url":"./aip/app-list","children":[]}','2',NULL);
         </sql>
+    </changeSet>
+    
+         <changeSet id="3v2-usm-20252402-6-dev" author="Essedum">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM usm_constant WHERE item_value LIKE '%Apps%' AND project_id=(SELECT id FROM usm_project WHERE name='leo1311') AND item = 'Developer Side';
+            </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+            insert into usm_constant (item, project_name, item_value, project_id, portfolio_id) values('Developer Side','leo1311','{"label":"Apps","altText":null,"icon":"th","url":"./aip/app-list","children":[]}','2',NULL);
+        </sql>
+    </changeSet>
+    
+      <changeSet id="3v2-usm-2025-oct-7" author="Essedum">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="3">
+              SELECT count(*) FROM usm_permissions where permission in ('secrets-delete','secrets-create','secrets-update');
+              </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+         UPDATE usm_permission_api SET api = REGEXP_REPLACE(api, '^/api/aip/secrets/', '/api/secrets/') WHERE permission_id IN (SELECT id FROM usm_permissions WHERE permission IN ('secrets-create', 'secrets-delete', 'secrets-update') ) AND api LIKE '/api/aip/secrets/%'; 
+           </sql>
     </changeSet>
 
 </databaseChangeLog>

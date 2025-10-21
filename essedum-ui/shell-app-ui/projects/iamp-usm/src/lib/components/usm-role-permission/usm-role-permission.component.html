@@ -24,7 +24,7 @@
             <tbody>
               <tr *ngFor="let obj of usmRolePermissionss; let i =index">
                 <td>{{getRowNumber(i)}}</td>
-                <td style="color: #0052cc; cursor: pointer;">{{ obj.id}}</td>
+                <td style="color: #0052cc; cursor: pointer;" (click)="view_UsmRolePermissions(obj)">{{ obj.id}}</td>
                 <td>{{ obj.role?.name || 'No role name available' }}</td>
                 <td>
                   {{ (obj.permission && obj.permission.length > 0) ? (obj.permission[0].module) : 'No module available'

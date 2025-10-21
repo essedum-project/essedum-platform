@@ -34,7 +34,8 @@
 		<mssql-jdbc.version>9.2.0.jre11</mssql-jdbc.version>
 		<json-path.version>2.9.0</json-path.version>
 		<log4j2.version>2.17.1</log4j2.version>
-		<tika.version>3.0.0-BETA2</tika.version>
+		<log4j.version>2.17.1</log4j.version>
+		<tika.version>3.2.2</tika.version>
 		<spring-security.version>6.4.3</spring-security.version>
 		<spring.cloud.version>4.1.3</spring.cloud.version>
 	    <org.projectlombok.lombok.version>1.18.30</org.projectlombok.lombok.version>
@@ -58,7 +59,7 @@
 		<org.springframework.boot.spring-boot-starter.version>3.4.0</org.springframework.boot.spring-boot-starter.version>
 		<org.springframework.boot.spring-boot-dependencies.version>${spring-boot-dependencies.version}</org.springframework.boot.spring-boot-dependencies.version>
 		<commons-io.commons-io.version>2.17.0</commons-io.commons-io.version><com.google.code.gson.gson.version>2.11.0</com.google.code.gson.gson.version>
-		<org.liquibase.liquibase-core.version>${liquibase.version}</org.liquibase.liquibase-core.version><org.ehcache.ehcache.version>${ehcache.version}</org.ehcache.ehcache.version>
+		<org.liquibase.liquibase-core.version>4.3.5</org.liquibase.liquibase-core.version><org.ehcache.ehcache.version>${ehcache.version}</org.ehcache.ehcache.version>
 		<org.springdoc.springdoc-openapi-ui.version>${springdoc-openapi-ui}</org.springdoc.springdoc-openapi-ui.version>
 		<joda-time.joda-time.version>2.10.6</joda-time.joda-time.version>
 		<org.modelmapper.modelmapper.version>${modelmapper.version}</org.modelmapper.modelmapper.version>
@@ -85,7 +86,7 @@
 		<org.mockito.mockito-all.version>2.0.2-beta</org.mockito.mockito-all.version>
 		<org.springframework.spring-webmvc.version>6.1.14</org.springframework.spring-webmvc.version>
 		<org.springframework.spring-web.version>6.1.14</org.springframework.spring-web.version>
-		<org.apache.tomcat.embed.tomcat-embed-core.version>10.1.34</org.apache.tomcat.embed.tomcat-embed-core.version>
+		<org.apache.tomcat.embed.tomcat-embed-core.version>10.1.40</org.apache.tomcat.embed.tomcat-embed-core.version>
 		<com.lfn.ai.comm-lib-util.version>${project.version}</com.lfn.ai.comm-lib-util.version>
 		<com.lfn.iamp-lib-usm.version>${project.version}</com.lfn.iamp-lib-usm.version>
 		<com.lfn.icip.icip-lib-evt.version>${project.version}</com.lfn.icip.icip-lib-evt.version>
@@ -104,6 +105,7 @@
 		<com.lfn.icip.plugins.icip-adp-s3.version>${project.version}</com.lfn.icip.plugins.icip-adp-s3.version>
 		<com.lfn.icip.plugins.icip-adp-aicloud.version>${project.version}</com.lfn.icip.plugins.icip-adp-aicloud.version>
 		<com.lfn.icip.plugins.icip-adp-aws-sagemaker.version>${project.version}</com.lfn.icip.plugins.icip-adp-aws-sagemaker.version>
+		<com.lfn.icip.plugins.icip-adp-gcp-vertex.version>${project.version}</com.lfn.icip.plugins.icip-adp-gcp-vertex.version>
 		<com.lfn.icip.plugins.icip-adp-mysql.version>${project.version}</com.lfn.icip.plugins.icip-adp-mysql.version>
 		<com.lfn.icip.plugins.icip-adp-postgresql.version>${project.version}</com.lfn.icip.plugins.icip-adp-postgresql.version>
 		<junit.version>4.13.2</junit.version>
@@ -135,7 +137,8 @@
 	    <okio.version>3.9.1</okio.version>	   
 	    <aws.sdk.version>2.20.23</aws.sdk.version>
 	    <aws.sdk.cloudwatchlogs.version>2.20.24</aws.sdk.cloudwatchlogs.version>
-	    <aws.sdk.s3.version>2.17.0</aws.sdk.s3.version>
+	    <aws.sdk.s3.version>2.20.23</aws.sdk.s3.version>
+        <aws.sdk.utils.version>2.35.6</aws.sdk.utils.version>
 	    <aws.java.sdk.sagemaker.version>1.12.158</aws.java.sdk.sagemaker.version>
 	    <aws.java.sdk.s3.version>1.11.923</aws.java.sdk.s3.version>	    
 	    <lucene.version>8.11.1</lucene.version>
@@ -196,6 +199,7 @@
 		<module>icip-adp-azure</module>
 		
 		<module>common-app</module>
+        <module>icip-adp-gcp-vertex</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
@@ -669,6 +673,11 @@
 				<groupId>com.lfn.icip.plugins</groupId>
 				<artifactId>icip-adp-azure</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.lfn.icip.plugins</groupId>
+				<artifactId>icip-adp-gcp-vertex</artifactId>
+				<version>${com.lfn.icip.plugins.icip-adp-gcp-vertex.version}</version>
 			</dependency>
 			<dependency>
                 <groupId>junit</groupId>

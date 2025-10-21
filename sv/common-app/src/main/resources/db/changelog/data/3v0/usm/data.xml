@@ -21,18 +21,13 @@
 			initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
 			referencedColumnNames="id" referencedTableName="usm_portfolio" />
 	</changeSet>
-	<changeSet author="Essedum" id="3v0-usm-240712-1">
-		<insert tableName="usm_permissions">
-			<column name="module" value="tad" />
-			<column name="permission" value="adapter-view" />
-		</insert>
-	</changeSet>
-	<changeSet author="Essedum" id="3v0-usm-240712-2">
+
+	<!--<changeSet author="Essedum" id="3v0-usm-240712-2">
 		<insert tableName="usm_permissions">
 			<column name="module" value="bot" />
 			<column name="permission" value="vault-view" />
 		</insert>
-	</changeSet>
+	</changeSet>-->
 	<changeSet dbms="!mssql" author="Essedum" id="3v0-usm-240711-1" runInTransaction="true">
         <comment>to be udpated</comment>
         <sqlFile relativeToChangelogFile="true" splitStatements="true" stripComments="true"

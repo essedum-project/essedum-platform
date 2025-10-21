@@ -23,6 +23,17 @@
             WHERE item ='application.uiconfig.essedumAppYear';
         </sql>
     </changeSet>
+    
+          <changeSet id="3v2-usm-2025-oct-7" author="Essedum">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="3">
+              SELECT count(*) FROM usm_permissions where permission in ('secrets-delete','secrets-create','secrets-update');
+              </sqlCheck>
+        </preConditions>
+        <sql dbms="h2, mysql, mssql, postgresql" splitStatements="true" stripComments="true">
+         UPDATE usm_permission_api SET api = REGEXP_REPLACE(api, '^/api/aip/secrets/', '/api/secrets/') WHERE permission_id IN (SELECT id FROM usm_permissions WHERE permission IN ('secrets-create', 'secrets-delete', 'secrets-update') ) AND api LIKE '/api/aip/secrets/%'; 
+           </sql>
+    </changeSet>
 
 	
 		<changeSet author="Essedum (generated)" id="3v1-usm-20241212-1">

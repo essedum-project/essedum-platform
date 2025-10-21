@@ -62,7 +62,7 @@ export class AipHeaderComponent {
   @Input() backAction: boolean = false;
   @Input() closeAction: boolean = false;
   @Input() showRelatedInstances: boolean = false;
-
+  @Input() tagCategory:string='';
   @Output() navigateBack = new EventEmitter<void>();
   @Output() search = new EventEmitter<string>();
   @Output() refresh = new EventEmitter<void>();

@@ -47,14 +47,14 @@
                         <span class="lfx-u-servers">
                             Servers                           
                         </span>
-                        <mat-form-field appearance="fill" class="wd-350 custom-alias-field" subscriptSizing="dynamic">
-                            <mat-select data-select-type="server-url" [(value)]="serverUrl"
-                                (selectionChange)="selectChange($event)" (openChange)="onServerUrlChange($event)">
+                        <mat-form-field appearance="fill" class="wd-350 custom-alias-field" subscriptSizing="dynamic">                  
+                             <mat-select data-select-type="server-url" [(value)]="serverUrl"
+                                (selectionChange)="onServerUrlChange($event)">
                                 <mat-option *ngFor="let option of serverUrls" [value]="option.value">
                                     {{ option.value }}
                                 </mat-option>
                             </mat-select>
-                        </mat-form-field>
+                        </mat-form-field>                        
                     </div>
 
                     <mat-accordion class="example-headers-align" multi>

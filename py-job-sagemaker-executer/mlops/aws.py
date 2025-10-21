@@ -34,13 +34,29 @@ logger.addHandler(file_handler)
 
 def projects_datasets_list_list(adapter_instance, project, isCached, isInstance, connections):
     try:
-        access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            s3_client = boto3.client('s3',aws_access_key_id=connections.get("accessKey"),
-                                aws_secret_access_key=connections.get("secretKey"),
-                                region_name=connections.get("region")
-                                )
-            response = s3_client.list_objects(Bucket = os.environ.get('bucket_name'), Prefix = 'aws_sagemaker', MaxKeys = 4)
+        access_key = connections.get("accessKey",None)
+        secret_key = connections.get("secretKey",None)
+        region = connections.get("region",None)
+        session_token = connections.get("sessionToken",None)  # or "aws_session_token" if that's your key
+        if access_key and secret_key and region:
+            if session_token:
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region,
+                    aws_session_token=session_token
+                )
+            else:
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+                           
+            # response = s3_client.list_objects(Bucket = "s3-ppcaws2441999-essedum-s3-bucket", Prefix = 'aws_sagemaker', MaxKeys = 4)
+            response = s3_client.list_objects(Bucket =  connections.get('bucketName', None), MaxKeys = 4)
 
             dataset_dict_info = []
             for obj in response.get('Contents', []):
@@ -79,14 +95,30 @@ def projects_datasets_list_list(adapter_instance, project, isCached, isInstance,
 
 def projects_datasets_get(adapter_instance, project, isCached, isInstance, connections, dataset_id):
     try:
-        access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            s3_client = boto3.client('s3',aws_access_key_id=connections.get("accessKey"),
-                        aws_secret_access_key=connections.get("secretKey"),
-                        region_name=connections.get("region")
-                        )
+        access_key = connections.get("accessKey",None)
+        secret_key = connections.get("secretKey",None)
+        region = connections.get("region",None)
+        session_token = connections.get("sessionToken",None)
+        if access_key and secret_key and region:
+            if session_token:
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region,
+                    aws_session_token=session_token
+                )
+            else:
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+        
+        
             logger.info("Dataset get is in progress")
-            response = s3_client.head_object(Bucket = os.environ.get('bucket_name'),Key = dataset_id)
+            response = s3_client.head_object(Bucket =  connections.get('bucketName', None),Key = dataset_id)
             logger.info("Dataset Details")
             dataset_info = {
                 'sourceID' : dataset_id,
@@ -119,15 +151,29 @@ def projects_datasets_get(adapter_instance, project, isCached, isInstance, conne
     #logging.info("s3 Dataset Get Response: %s", str(my_bucket))
 
 
-
+import uuid
 def projects_datasets_create(adapter_instance, project, isCached, isInstance, connections, request_body):
     try:
-        access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            s3_client = boto3.client('s3',aws_access_key_id=connections.get("accessKey"),
-                           aws_secret_access_key=connections.get("secretKey"),
-                           region_name=connections.get("region")
-                           )
+        access_key = connections.get("accessKey",None)
+        secret_key = connections.get("secretKey",None)
+        region = connections.get("region",None)
+        session_token = connections.get("sessionToken",None)
+        if access_key and secret_key and region:
+            if session_token:
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region,
+                    aws_session_token=session_token
+                )
+            else:
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
             logger.info("**************")
             logger.info(request_body)
             data = pd.read_csv(request_body.get("local_dataset_path"))
@@ -135,6 +181,11 @@ def projects_datasets_create(adapter_instance, project, isCached, isInstance, co
             bucket = request_body.get("Bucket")
             response = s3_client.put_object(Body = data.to_csv(index = False), Bucket = bucket, Key = s3_key)
             
+
+
+
+            short_uuid = str(uuid.uuid4()).replace('-', '')[:10]
+
             dataset_info = {
                 'sourceID' : s3_key,
                 'container' : response.get('Amazon Resource Name'),
@@ -149,7 +200,7 @@ def projects_datasets_create(adapter_instance, project, isCached, isInstance, co
                 #"createdBy": "admin",
                 'name': s3_key,
                 #"modifiedBy": "",
-                'id' : response.get(''),
+                'id' : short_uuid,
                 'sourcename' : s3_key,
                 'status': 'Registered',
                 #"likes": 0,
@@ -162,17 +213,35 @@ def projects_datasets_create(adapter_instance, project, isCached, isInstance, co
             pass
     except Exception as err:
         print(err)
-    return ""
+    return "",500
     #logging.info("s3 Dataset Create Response: %s", str(response))
 
 
 
 def projects_datasets_delete(adapter_instance, project, isCached, isInstance, connections,dataset_id):
     try:
-        access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            s3_client = boto3.client('s3', aws_access_key_id = connections.get("accessKey"), aws_secret_access_key = connections.get("secretKey"), region_name = connections.get("region"))
-            response = s3_client.delete_object(Bucket = os.environ.get('bucket_name'),Key = dataset_id)
+        access_key = connections.get("accessKey",None)
+        secret_key = connections.get("secretKey",None)
+        region = connections.get("region",None)
+        session_token = connections.get("sessionToken",None)
+
+        if access_key and secret_key and region:
+            if session_token:
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region,
+                    aws_session_token=session_token
+                )
+            else:
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+            response = s3_client.delete_object(Bucket =  connections.get('bucketName', None),Key = dataset_id)
             logger.info("Dataset deleted successfully")
             return {"message": f"Dataset {dataset_id} deleted successfully."}, 200
               
@@ -181,7 +250,7 @@ def projects_datasets_delete(adapter_instance, project, isCached, isInstance, co
             return {"error": "You got an error Kindly check the credentials"}
     except Exception as err:
         logger.info(f"Error in deletion of dataset: {str(err)}")
-        return {"error": str(err)}
+        return {"error": str(err)},500
     
     #logging.info("s3 Dataset Delete Response: %s", str(response))
 
@@ -190,13 +259,25 @@ def projects_datasets_delete(adapter_instance, project, isCached, isInstance, co
 def projects_models_list(adapter_instance, project, isCached, isInstance, connections):
     res = 'Internal Server Error'
     try:
-        access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            session = boto3.Session(aws_access_key_id=connections.get("accessKey"),
-                                aws_secret_access_key=connections.get("secretKey"),
-                                region_name=connections.get("region")
-                                )
-            client = session.client("sagemaker")
+        access_key = connections.get("accessKey",None)
+        secret_key = connections.get("secretKey",None)
+        region = connections.get("region",None)
+        session_token = connections.get("sessionToken",None)
+        if access_key and secret_key and region:
+            if session_token:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region,
+                    aws_session_token=session_token
+                )
+            else:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+            client = session.client("sagemaker",region_name='us-east-1', verify=False)
             response = {}
             res = {'Models': []}
             while True:
@@ -266,11 +347,27 @@ def projects_models_list(adapter_instance, project, isCached, isInstance, connec
 
 def projects_models_get(adapter_instance, project, isCached, isInstance, connections, model_id):
     try:
-        access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            session = boto3.Session(aws_access_key_id=connections.get("accessKey"),
-                                aws_secret_access_key=connections.get("secretKey"),
-                                region_name=connections.get("region"))
+        access_key = connections.get("accessKey",None)
+        secret_key = connections.get("secretKey",None)
+        region = connections.get("region",None)
+        session_token = connections.get("sessionToken",None)
+        if access_key and secret_key and region:
+            if session_token:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region,
+                    aws_session_token=session_token
+                )
+            else:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+
+        
+       
             client = session.client("sagemaker")
             response = client.describe_model(ModelName = model_id)
             # for type
@@ -316,12 +413,27 @@ def projects_models_get(adapter_instance, project, isCached, isInstance, connect
 def projects_models_register_create(adapter_instance, project, isCached, isInstance, connections,request_body):
     result = ""
     try:
-        access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            session = boto3.Session(aws_access_key_id=connections.get("accessKey"),
-                                aws_secret_access_key=connections.get("secretKey"),
-                                region_name=connections.get("region"))
-            client = session.client("sagemaker")
+        access_key = connections.get("accessKey",None)
+        secret_key = connections.get("secretKey",None)
+        region = connections.get("region",None)
+        session_token = connections.get("sessionToken",None)
+        import boto3
+
+        if access_key and secret_key and region:
+            if session_token:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    aws_session_token=session_token,
+                    region_name=region
+                )
+            else:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+            client = session.client("sagemaker",region_name="us-east-1",verify=False)
             execution_role_arn = request_body.get("ExecutionRoleArn", "")
             container = request_body.get("Containers", "")
             model_name = request_body.get("ModelName", "")
@@ -365,7 +477,7 @@ def projects_models_register_create(adapter_instance, project, isCached, isInsta
         result = str(err)
         exc_trace = traceback.format_exc()
         logger.info(f"error is : {str(exc_trace)}")
-    return result
+    return result,500
 
 
 
@@ -373,12 +485,29 @@ def projects_models_register_create(adapter_instance, project, isCached, isInsta
 def projects_models_delete(adapter_instance, project, isCached, isInstance, connections, model_id):
     logger.info("Enter delete model function")
     try:
-        access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            session = boto3.Session(aws_access_key_id=connections.get("accessKey"),
-                                aws_secret_access_key=connections.get("secretKey"),
-                                region_name=connections.get("region"))
-            client = session.client("sagemaker")
+        access_key = connections.get("accessKey",None)
+        secret_key = connections.get("secretKey",None)
+        region = connections.get("region",None)
+        session_token = connections.get("sessionToken",None)
+        import boto3
+
+        if access_key and secret_key and region:
+            if session_token:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    aws_session_token=session_token,
+                    region_name=region
+                )
+            else:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+
+            s3_client = session.client("s3", verify=False)
+            client = session.client("sagemaker",region_name="us-east-1",verify=False)
             logger.info("Model deletion inprogress...")
             response = client.delete_model(ModelName = model_id)
             logger.info("Model deleted successfully")
@@ -389,19 +518,32 @@ def projects_models_delete(adapter_instance, project, isCached, isInstance, conn
             return {"error": "You got an error Kindly check the credentials"}
     except Exception as err:
         logger.info(f"Error in deletion of model: {str(err)}")
-        return {"error": str(err)}
+        return {"error": str(err)},500
     
 
 
-def projects_endpoints_list_list(adapter_instance, project, isCached, isInstance, connections):
+def projects_endpoints_list_lists(adapter_instance, project, isCached, isInstance, connections):
     res = "internal server error"
     try:
-        access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            session = boto3.Session(aws_access_key_id=connections.get("accessKey"),
-                                aws_secret_access_key=connections.get("secretKey"),
-                                region_name=connections.get("region"))
-            client = session.client("sagemaker")
+        access_key = connections.get("accessKey",None)
+        secret_key = connections.get("secretKey",None)
+        region = connections.get("region",None)
+        session_token = connections.get("sessionToken",None)
+        if access_key and secret_key and region:
+            if session_token:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region,
+                    aws_session_token=session_token
+                )
+            else:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+            client = session.client("sagemaker", region_name='us-east-1', verify=False)
             response = {}
             res = {'Endpoints': []}
             while True:
@@ -454,24 +596,40 @@ def projects_endpoints_list_list(adapter_instance, project, isCached, isInstance
                 }
                 endpoint_info['rawPayload'] = json.dumps(endpoint_info, default = str)
                 Endpoint_info_dict.append(endpoint_info)
+            print("endpoint dict",Endpoint_info_dict)
             return Endpoint_info_dict, 200
         else:
-            res = "Accesskey is None"
+            pass
     except Exception as err:
         exc_trace = traceback.format_exc()
         logger.info(f"error in aws.py: {str(exc_trace)}")
         res = str(err)
-    return res
+    return res,500
 
 
 
 def projects_endpoints_get(adapter_instance, project, isCached, isInstance, connections, endpoint_id):
     try:
-        access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            session = boto3.Session(aws_access_key_id=connections.get("accessKey"),
-                                aws_secret_access_key=connections.get("secretKey"),
-                                region_name=connections.get("region"))
+        access_key = connections.get("accessKey",None)
+        secret_key = connections.get("secretKey",None)
+        region = connections.get("region",None)
+        session_token = connections.get("sessionToken",None)
+
+        if access_key and secret_key and region:
+            if session_token:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region,
+                    aws_session_token=session_token
+                )
+            else:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+
             client = session.client("sagemaker")
             response = client.describe_endpoint(EndpointName = endpoint_id)
             endpoint_id = response['EndpointName']
@@ -516,11 +674,26 @@ def projects_endpoints_get(adapter_instance, project, isCached, isInstance, conn
 
 def projects_endpoints_create(adapter_instance, project, isCached, isInstance, connections, request_body):
     try:
-        access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            session = boto3.Session(aws_access_key_id=connections.get("accessKey"),
-                                aws_secret_access_key=connections.get("secretKey"),
-                                region_name=connections.get("region"))
+        access_key = connections.get("accessKey",None)
+        secret_key = connections.get("secretKey",None)
+        region = connections.get("region",None)
+        session_token = connections.get("sessionToken",None)
+
+        if access_key and secret_key and region:
+            if session_token:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region,
+                    aws_session_token=session_token
+                )
+            else:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+
             client = session.client("sagemaker")
 
             execution_role_arn = request_body.get("ExecutionRoleArn", "")
@@ -574,7 +747,7 @@ def projects_endpoints_create(adapter_instance, project, isCached, isInstance, c
             pass
     except Exception as err:
         print(err)
-    return ""
+    return "",500
     #logging.info("SageMaker Endpoint Create Response: %s", response)
 
 
@@ -582,11 +755,25 @@ def projects_endpoints_create(adapter_instance, project, isCached, isInstance, c
 def projects_endpoints_delete(adapter_instance, project, isCached, isInstance, connections, endpoint_id):
     logger.info("Enter delete endpoint function")
     try:
-        access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            session = boto3.Session(aws_access_key_id=connections.get("accessKey"),
-                                aws_secret_access_key=connections.get("secretKey"),
-                                region_name=connections.get("region"))
+        access_key = connections.get("accessKey",None)
+        secret_key = connections.get("secretKey",None)
+        region = connections.get("region",None)
+        session_token = connections.get("sessionToken",None)
+
+        if access_key and secret_key and region:
+            if session_token:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region,
+                    aws_session_token=session_token
+                )
+            else:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
             client = session.client("sagemaker")
             logger.info("Endpoint deletion inprogress...")
             response = client.delete_endpoint(EndpointName = endpoint_id)
@@ -598,7 +785,7 @@ def projects_endpoints_delete(adapter_instance, project, isCached, isInstance, c
             return {"error": "You got an error Kindly check the credentials"}
     except Exception as err:
         logger.info(f"Error in deletion of endpoint: {str(err)}")
-        return {"error": str(err)}
+        return {"error": str(err)},500
     
     #logging.info("SageMaker Endpoint Delete Response: %s", response)
 
@@ -606,11 +793,26 @@ def projects_endpoints_delete(adapter_instance, project, isCached, isInstance, c
 
 def projects_endpoints_deploy_model_create(adapter_instance, project, isCached, isInstance, connections, endpoint_id, request_body):
     try:
-        access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            sagemaker = boto3.client("sagemaker",aws_access_key_id=connections.get("accessKey"),
-                                    aws_secret_access_key=connections.get("secretKey"),
-                                    region_name=connections.get("region"))
+        access_key = connections.get("accessKey",None)
+        secret_key = connections.get("secretKey",None)
+        region = connections.get("region",None)
+        session_token = connections.get("sessionToken",None)
+
+        if access_key and secret_key and region:
+            if session_token:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region,
+                    aws_session_token=session_token
+                )
+            else:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+            sagemaker = session.client("sagemaker")
             execution_role_arn = request_body.get("ExecutionRoleArn", "")
             primary_container = request_body.get("PrimaryContainer", "")
             model_name = request_body.get("ModelName", "")
@@ -653,18 +855,28 @@ def projects_endpoints_deploy_model_create(adapter_instance, project, isCached, 
             pass
     except Exception as err:
         print(err)
-    return ""
+    return "",500
 
 
 
 def projects_endpoints_infer_create(adapter_instance, project, isCached, isInstance, connections, endpoint_id, request_body):
     try:
         access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            sagemaker_runtime = boto3.client(service_name='sagemaker-runtime', region_name=connections.get("region"),
-                aws_access_key_id=connections.get("accessKey"),
-                aws_secret_access_key=connections.get("secretKey"))
-            
+        secret_key = connections.get("secretKey", None)
+        region = connections.get("region", None)
+        session_token = connections.get("sessionToken", None)
+
+        if access_key and secret_key and region:
+            if session_token:
+                sagemaker_runtime = boto3.client(service_name='sagemaker-runtime', region_name=connections.get("region"),
+                    aws_access_key_id=connections.get("accessKey"),
+                    aws_secret_access_key=connections.get("secretKey"),
+                    aws_session_token=session_token)
+            else:
+                sagemaker_runtime = boto3.client(service_name='sagemaker-runtime', region_name=connections.get("region"),
+                    aws_access_key_id=connections.get("accessKey"),
+                    aws_secret_access_key=connections.get("secretKey"))
+
             logger.info("#########")
             logger.info(request_body)
             request_body = request_body['S3Uri']
@@ -676,9 +888,24 @@ def projects_endpoints_infer_create(adapter_instance, project, isCached, isInsta
             bucket = o.netloc.split('.')[0]
             key =o.path.lstrip('/')
 
-            s3_client = boto3.client(service_name='s3', region_name=connections.get("region"),
-                aws_access_key_id=connections.get("accessKey"),
-                aws_secret_access_key=connections.get("secretKey"))
+            if access_key and secret_key and region:
+                if session_token:
+                    s3_client = boto3.client(
+                        's3',
+                        aws_access_key_id=access_key,
+                        aws_secret_access_key=secret_key,
+                        region_name=region,
+                        aws_session_token=session_token
+                    )
+                else:
+                    s3_client = boto3.client(
+                        's3',
+                        aws_access_key_id=access_key,
+                        aws_secret_access_key=secret_key,
+                        region_name=region
+                    )
+
+            
             result = s3_client.list_objects(Bucket = bucket, Prefix=key)
             extension = key.split('.')[-1]
             for o in result.get('Contents'):
@@ -720,18 +947,33 @@ def projects_endpoints_infer_create(adapter_instance, project, isCached, isInsta
             pass
     except Exception as err:
         print(err)
-    return ""
+    return "",500
 
 
 
 def training_istlist(adapter_instance, project, isCached, isInstance, connections):
     try:
         access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            session = boto3.Session(
-                aws_access_key_id=connections.get("accessKey"),
-                aws_secret_access_key = connections.get("secretKey"), region_name = connections.get("region"))
-            client = session.client("sagemaker")
+        secret_key = connections.get("secretKey", None)
+        region = connections.get("region", None)
+        session_token = connections.get("sessionToken", None)
+
+        if access_key and secret_key and region:
+            if session_token:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region,
+                    aws_session_token=session_token
+                )
+            else:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+
+            client = session.client("sagemaker",region_name="us-east-1",verify=False)
             response = client.list_training_jobs(MaxResults=10)
             training_job_info = []
             for obj in response.get('TrainingJobSummaries', []):
@@ -763,7 +1005,7 @@ def training_istlist(adapter_instance, project, isCached, isInstance, connection
             pass
     except Exception as err:
         print(err)
-    return ""
+    return "",500
     #logging.info("SageMaker List pipeline Response: %s", response)
 
 
@@ -771,11 +1013,22 @@ def training_istlist(adapter_instance, project, isCached, isInstance, connection
 def training_train_create(adapter_instance, project, isCached, isInstance, connections, request_body):
     try:
         access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            sagemaker_session = sagemaker.Session(boto_session = boto3.Session(aws_access_key_id=connections.get("accessKey"),
-                            aws_secret_access_key=connections.get("secretKey"),
-                            region_name=connections.get("region")
-                            ))
+        secret_key = connections.get("secretKey", None)
+        region = connections.get("region", None)
+        session_token = connections.get("sessionToken", None)
+
+        if access_key and secret_key and region:
+            if session_token:
+                sagemaker_session = sagemaker.Session(boto_session = boto3.Session(aws_access_key_id=connections.get("accessKey"),
+                                aws_secret_access_key=connections.get("secretKey"),
+                                region_name=connections.get("region"),
+                                aws_session_token=session_token
+                                ))
+            else:
+                sagemaker_session = sagemaker.Session(boto_session = boto3.Session(aws_access_key_id=connections.get("accessKey"),
+                                aws_secret_access_key=connections.get("secretKey"),
+                                region_name=connections.get("region")
+                                ))
 
             role = request_body.get("RoleArn", "")
             logger.info(role)
@@ -832,7 +1085,7 @@ def training_train_create(adapter_instance, project, isCached, isInstance, conne
             return {"error": "You got an error Kindly check the credentials"}
     except Exception as err:
         logger.info(f"Error in Training Job: {str(err)}")
-        return {"error": str(err)}
+        return {"error": str(err)},500
     #logging.info("SageMaker Create Pipeline Response: %s", response)
 
 
@@ -840,12 +1093,29 @@ def training_train_create(adapter_instance, project, isCached, isInstance, conne
 def training_get_list(adapter_instance, project, isCached, isInstance, connections, training_job_id):
     try:
         access_key = connections.get("accessKey", None)
+        secret_key = connections.get("secretKey", None)
+        region = connections.get("region", None)
+        session_token = connections.get("sessionToken", None)
         print(training_job_id)
-        if access_key is not None:
-            session = boto3.Session(aws_access_key_id=connections.get("accessKey"),
-                                aws_secret_access_key=connections.get("secretKey"),
-                                region_name=connections.get("region"))
-            client = session.client("sagemaker")
+        import boto3
+
+        if access_key and secret_key and region:
+            if session_token:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    aws_session_token=session_token,
+                    region_name=region
+                )
+            else:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+
+            s3_client = session.client("s3", verify=False)
+            client = session.client("sagemaker", verify=False)
 
             response = client.describe_training_job(TrainingJobName = training_job_id)
 
@@ -877,7 +1147,7 @@ def training_get_list(adapter_instance, project, isCached, isInstance, connectio
             return {"error": "You got an error Kindly check the credentials"}
     except Exception as err:
         logger.info(f"Error in deletion of endpoint: {str(err)}")
-        return {"error": str(err)}          
+        return {"error": str(err)},500          
     #logging.info("SageMaker Get Pipeline Response: %s", response)
 
 
@@ -885,10 +1155,25 @@ def training_get_list(adapter_instance, project, isCached, isInstance, connectio
 def training_delete(adapter_instance, project, isCached, isInstance, connections,training_job_id):
     try:
         access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            session = boto3.Session(aws_access_key_id=connections.get("accessKey"),
-                                aws_secret_access_key=connections.get("secretKey"),
-                                region_name=connections.get("region"))
+        secret_key = connections.get("secretKey", None)
+        region = connections.get("region", None)
+        session_token = connections.get("sessionToken", None)
+
+        if access_key and secret_key and region:
+            if session_token:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region,
+                    aws_session_token=session_token
+                )
+            else:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+
             client = session.client("sagemaker")
             response = client.delete_pipeline(PipelineName = training_job_id)
             # for type
@@ -925,22 +1210,39 @@ def training_delete(adapter_instance, project, isCached, isInstance, connections
             pass
     except Exception as err:
         print(err)
-    return ""
+    return "",500
     #logging.info("SageMaker Delete Pipeline Response: %s", response)
 
 
 
-def projects_inferencePipelines_list_list(adapter_instance, project, isCached, isInstance, connections,request_body):
+def projects_inferencePipelines_list_list(adapter_instance, project, isCached, isInstance, connections):
     try:
         access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            s3_client = boto3.client('s3',aws_access_key_id=connections.get("accessKey"),
-                                aws_secret_access_key=connections.get("secretKey"),
-                                region_name=connections.get("region")
-                                )
-            bucket_name = request_body.get('Bucket', '')
-            key = request_body.get('Key', '')
-            response = s3_client.list_objects(Bucket = bucket_name, Key = key, MaxKeys = 3)
+        secret_key = connections.get("secretKey", None)
+        region = connections.get("region", None)
+        session_token = connections.get("sessionToken", None)
+        if access_key and secret_key and region:
+            if session_token:
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region,
+                    aws_session_token=session_token
+                )
+            else:
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+
+        
+                                
+            bucket_name = "sagemaker-us-east-1-102586998158"
+            key = "ASIARPYVJLWHKKUTVGTP"
+            response = s3_client.list_objects(Bucket = bucket_name, MaxKeys = 3)
             arn = f'arn:aws:s3:::{bucket_name}/{key}'
 
             dataset_dict_info = []
@@ -969,26 +1271,38 @@ def projects_inferencePipelines_list_list(adapter_instance, project, isCached, i
                 }
                 dataset_info['rawPayload'] = json.dumps(dataset_info, default = str)
                 dataset_dict_info.append(dataset_info)
-            return dataset_dict_info
+            return dataset_dict_info,200
         else:
             pass
     except Exception as err:
         print(err)
-    return ""
+    return "",500
     #logging.info("SageMaker List Inference Pipeline Response: %s", response)
 
 
 
 def projects_inferencePipelines_get(adapter_instance, project, isCached, isInstance, connections, inference_job_id):
     try:
-        access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            s3_client = boto3.client('s3',aws_access_key_id=connections.get("accessKey"),
-                        aws_secret_access_key=connections.get("secretKey"),
-                        region_name=connections.get("region")
-                        )
+        access_key = connections.get("accessKey",None)
+        secret_key = connections.get("secretKey",None)
+        region = connections.get("region",None)
+        session_token = connections.get("sessionToken",None)
+
+        if access_key is not None and secret_key is not None and region is not None:
+            if session_token is not None:
+                s3_client = boto3.client('s3',aws_access_key_id=access_key,
+                                          aws_secret_access_key=secret_key,
+                                          region_name=region,
+                                          aws_session_token=session_token
+                                          )
+            else:
+                s3_client = boto3.client('s3',aws_access_key_id=access_key,
+                                          aws_secret_access_key=secret_key,
+                                          region_name=region
+                                          )
+
             logger.info("Dataset get is in progress")
-            response = s3_client.head_object(Bucket = os.environ.get('bucket_name'),Key = inference_job_id)
+            response = s3_client.head_object(Bucket =  connections.get('bucketName', None),Key = inference_job_id)
             logger.info("Dataset Details")
 
             dataset_info = {
@@ -1022,15 +1336,32 @@ def projects_inferencePipelines_get(adapter_instance, project, isCached, isInsta
     #logging.info("SageMaker Describe Inference Pipeline Response: %s", response)
 
 
-
 def projects_inferencePipelines_create(adapter_instance, project, isCached, isInstance, connections, request_body):
     try:
         access_key = connections.get("accessKey", None)
-        if access_key is not None:
-            session = boto3.Session(aws_access_key_id=connections.get("accessKey"),
-                                    aws_secret_access_key=connections.get("secretKey"),
-                                    region_name=connections.get("region"))
-            client = session.client("sagemaker")
+        secret_key = connections.get("secretKey", None)
+        region = connections.get("region", None)
+        session_token = connections.get("sessionToken", None)
+        
+
+        if access_key and secret_key and region:
+            if session_token:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    aws_session_token=session_token,
+                    region_name=region
+                )
+            else:
+                session = boto3.Session(
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region
+                )
+
+            s3_client = session.client("s3", verify=False)
+            
+            client = session.client("sagemaker",verify=False)
 
             transform_job_name = request_body.get("TransformJobName", "")
             model_name = request_body.get("ModelName", "")
@@ -1075,13 +1406,12 @@ def projects_inferencePipelines_create(adapter_instance, project, isCached, isIn
                 'deployment': ''
             }
             pipeline_info['rawPayload'] = json.dumps(pipeline_info, default = str)
-            return pipeline_info 
+            return pipeline_info, 200
         else:
             pass
     except Exception as err:
         print(err)
-    return ""
-    #logging.info("SageMaker Create Inference Pipeline Response: %s", response)
+    return "",500
 
 
 def cloudconnect(accessKey, secretKey, region):

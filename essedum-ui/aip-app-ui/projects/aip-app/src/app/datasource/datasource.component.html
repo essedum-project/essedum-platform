@@ -13,23 +13,23 @@
           </app-aip-header>
 
           <!-- Filter Section -->
-          <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="servicev1"  [selectedConnectionTypeList]="{ 
+          <app-aip-filter [tagrefresh]="tagrefresh" [servicev1]="servicev1" [selectedConnectionTypeList]="{ 
                             selectedAdapterType: selectedAdapterType
                           }" (tagSelected)="tagSelectedEvent($event)"
             (filterStatusChange)="onFilterStatusChange($event)"></app-aip-filter>
         </div>
 
         <!-- Cards container -->
-        <div class="lfx-c-card__action-ul aip-card-container">
+        <div class="lfx-c-card__action-ul aip-card-container lfx-u-pad-b-40">
           <div class="col-md-8 col-lg-6 col-xl-5 aip-card-wrapper"
             *ngFor="let card of filteredCards | slice: (pageNumber-1) * pageSize : (pageNumber-1) * pageSize + pageSize">
             <div class="card-wrapper h-100">
-              <app-aip-card [servicev1]="servicev1"  [card]="card" [editAuth]="editAuth" [deployAuth]="deployAuth"
+              <app-aip-card [servicev1]="servicev1" [card]="card" [editAuth]="editAuth" [deployAuth]="deployAuth"
                 [deleteAuth]="deleteAuth" (viewDetails)="viewConnection(card.name)" (edit)="editConnection(card.name)"
                 (delete)="deleteConnection(card.name)" (viewDatasets)="navigateTo(card.type)">
-                   <ng-template #lgContent1 let-modal>
-                                        <app-datasource-config> </app-datasource-config>
-                                    </ng-template>
+                <ng-template #lgContent1 let-modal>
+                  <app-datasource-config> </app-datasource-config>
+                </ng-template>
               </app-aip-card>
             </div>
           </div>
@@ -39,9 +39,9 @@
         <app-aip-empty-state *ngIf="!filteredCards || filteredCards.length==0"></app-aip-empty-state>
 
         <!-- Pagination -->
-        <app-aip-pagination *ngIf="filteredCards && filteredCards.length>0" [pageNumber]="pageNumber" [noOfPages]="noOfPages" [pageArr]="pageArr"
-          [startIndex]="startIndex" [endIndex]="endIndex" [hoverStates]="hoverStates" (prevPage)="prevPage()"
-          (nextPage)="nextPage()" (changePage)="changePage($event)">
+        <app-aip-pagination *ngIf="filteredCards && filteredCards.length>0" [pageNumber]="pageNumber"
+          [noOfPages]="noOfPages" [pageArr]="pageArr" [startIndex]="startIndex" [endIndex]="endIndex"
+          [hoverStates]="hoverStates" (prevPage)="prevPage()" (nextPage)="nextPage()" (changePage)="changePage($event)">
         </app-aip-pagination>
 
       </div>
@@ -50,8 +50,8 @@
 
   <!-- Detail view template -->
   <ng-template #detailView>
-    <app-datasource-description [card]="selectedCard" (newItemEvent)="changedToogle($event)"
-            [cardToggled]="cardToggled" [datasourceAlias]="selectedCard.alias"></app-datasource-description>
+    <app-datasource-description [card]="selectedCard" (newItemEvent)="changedToogle($event)" [cardToggled]="cardToggled"
+      [datasourceAlias]="selectedCard.alias"></app-datasource-description>
 
   </ng-template>
 </div>

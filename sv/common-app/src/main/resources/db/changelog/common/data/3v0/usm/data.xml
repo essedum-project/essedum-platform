@@ -49,14 +49,6 @@
          UPDATE usm_constant SET item_value='{"label":"Mashups","icon":"ticket","url":"./aibrain/adapters/mashups"}' WHERE item='Admin Side' AND project_name='Core' AND item_value LIKE '%{"label":"Mashups","icon":"ticket","url":"./adapters/mashups"}%';
         </sql> 
 	</changeSet>
-	<changeSet author="Essedum" id="3v0-usm-310549">
-		<sql dbms="h2, mysql" splitStatements="true" stripComments="true">  
-            INSERT INTO usm_constant VALUES ("1569","Admin Side","Core","{\"label\":\"Menu Configuration\",\"icon\":\"map-signs\",\"url\":\"./iamp-usm/dashconstant/side\"}","1")
-		</sql>
-        <sql dbms="postgresql" splitStatements="true" stripComments="true">  
-            INSERT INTO usm_constant VALUES ('1569','Admin Side','Core','{"label":"Menu Configuration","icon":"map-signs","url":"./iamp-usm/dashconstant/side"}','1')
-		</sql>
-	</changeSet>
 	 <changeSet author="Essedum (generated)" id="3v0-usm-310549-1">
         <sql dbms="mssql">
             SET IDENTITY_INSERT usm_constant ON;
@@ -99,12 +91,6 @@
 		  DELETE FROM usm_constant WHERE item='Project Client Side' AND project_name='leo1311' AND item_value LIKE '{"label":"ITSM","icon":"book","horizontal":true,"children"%';
           DELETE FROM usm_constant WHERE item='IT Portfolio Manager Side' AND project_name='leo1311' AND item_value LIKE '{"label":"ITSM","icon":"book","horizontal":true,"children"%';
       </sql> 
-	</changeSet>
-
-	<changeSet author="Essedum" id="3v0-usm-110">
-		<sql dbms="mysql" splitStatements="true" stripComments="true">
-	    insert into usm_constant (item, project_name, item_value, project_id) values('Admin Side','Core','{"label":"Tags","icon":"folder","url":"./aip/taglist"}','1');
-	</sql> 
 	</changeSet>
 
 	<changeSet author="Essedum" id="3v0-usm-111">
@@ -185,6 +171,8 @@
 			
 			INSERT INTO usm_role_permissions (permission, ROLE ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Project Admin' AND p.permission = 'Datasets-searchData' AND  p.module='cip' AND r.project_id IS NULL;
 			INSERT INTO usm_role_permissions (permission, ROLE ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Project Client' AND p.permission = 'Datasets-searchData' AND  p.module='cip' AND r.project_id IS NULL;
+		
+		INSERT INTO usm_role_permissions (permission, ROLE ) SELECT MAX(p.id) pp, MAX(r.id) rr FROM usm_permissions p , usm_role r  WHERE r.name='Developer' AND p.permission = 'Datasets-searchData' AND  p.module='cip' AND r.project_id IS NULL;
 		
 		</sql>
 	</changeSet>

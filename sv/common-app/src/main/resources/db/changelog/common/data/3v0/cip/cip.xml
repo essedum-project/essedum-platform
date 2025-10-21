@@ -540,6 +540,12 @@ UPDATE usm_constant SET item_value='{\"label\":\"AI Brain\",\"icon\":\"assets/ic
       INSERT INTO usm_role_permissions (permission,role) VALUES ((SELECT id FROM usm_permissions WHERE permission='pipeline-create'), (SELECT id FROM usm_role WHERE name='IT Portfolio Manager'));
       INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'pipeline-delete');
       INSERT INTO usm_role_permissions (permission,role) VALUES ((SELECT id FROM usm_permissions WHERE permission='pipeline-delete'), (SELECT id FROM usm_role WHERE name='IT Portfolio Manager'));
+   
+
+      INSERT INTO usm_role_permissions (permission,role) VALUES ((SELECT id FROM usm_permissions WHERE permission='pipeline-create'), (SELECT id FROM usm_role WHERE name='Developer'));
+     
+      INSERT INTO usm_role_permissions (permission,role) VALUES ((SELECT id FROM usm_permissions WHERE permission='pipeline-delete'), (SELECT id FROM usm_role WHERE name='Developer'));
+  
    </sql>	
   </changeSet>
   <changeSet author="Essedum" id="3v0-cip-120-mssql">
@@ -552,6 +558,10 @@ UPDATE usm_constant SET item_value='{\"label\":\"AI Brain\",\"icon\":\"assets/ic
       INSERT INTO usm_role_permissions (permission,role) VALUES ((SELECT id FROM usm_permissions WHERE permission='pipeline-create'), (SELECT id FROM usm_role WHERE name='IT Portfolio Manager'));
       INSERT INTO usm_permissions (module, permission) VALUES ('cip', 'pipeline-delete');
       INSERT INTO usm_role_permissions (permission,role) VALUES ((SELECT id FROM usm_permissions WHERE permission='pipeline-delete'), (SELECT id FROM usm_role WHERE name='IT Portfolio Manager'));
+       INSERT INTO usm_role_permissions (permission,role) VALUES ((SELECT id FROM usm_permissions WHERE permission='pipeline-create'), (SELECT id FROM usm_role WHERE name='Developer'));
+
+      INSERT INTO usm_role_permissions (permission,role) VALUES ((SELECT id FROM usm_permissions WHERE permission='pipeline-delete'), (SELECT id FROM usm_role WHERE name='Developer'));
+   
    </sql>	
    </changeSet>
 
