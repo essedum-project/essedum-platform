@@ -391,12 +391,6 @@
 		<dependency>
 		    <groupId>org.springframework</groupId>
 		    <artifactId>spring-mock</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		
 		<dependency>
@@ -464,10 +458,7 @@
 		    <groupId>com.squareup.okio</groupId>
 		    <artifactId>okio</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.liquibase</groupId>
-			<artifactId>liquibase-core</artifactId>
-		</dependency>
 
+       
 	</dependencies>
 </project>
