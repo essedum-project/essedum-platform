@@ -165,8 +165,7 @@ public class ICIPAdaptersController {
 			else
 				params.put(ICIPPluginConstants.INSTANCE, ICIPPluginConstants.FALSE_STRING);
 			params.put(ICIPPluginConstants.IS_CACHED, ICIPPluginConstants.FALSE_STRING);
-            MlAdapters mlAdapter = mlAdaptersService.getMlAdapteByNameAndOrganization(adaptername, org);
-			params.put(ICIPPluginConstants.ADAPTER_INSTANCE, mlAdapter.getConnectionid());
+			params.put(ICIPPluginConstants.ADAPTER_INSTANCE, adaptername);
 			params.put(ICIPPluginConstants.PROJECT, org);
 			ICIPDataset datasetForRemote = new ICIPDataset();
 			datasetForRemote.setOrganization(org);
