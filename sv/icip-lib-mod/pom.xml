@@ -130,5 +130,10 @@
 			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+			<version>4.3.5</version>
+        </dependency>
+    </dependencies>
 </project>
