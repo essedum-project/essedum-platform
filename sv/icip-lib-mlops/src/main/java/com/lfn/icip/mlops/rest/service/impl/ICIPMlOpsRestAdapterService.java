@@ -53,61 +53,97 @@ public class ICIPMlOpsRestAdapterService {
 	/** The essedum url. */
 	@Value("${ESSEDUM_URL}")
 	private String referer;
-	
+
 	/** The icip pathPrefix. */
 	@Value("${icip.pathPrefix}")
 	private String icipPathPrefix;
-	
+
 	@Autowired
 	private ICIPDatasetPluginsService pluginService;
-	
+
 	@Autowired
 	private IICIPMLFederatedModelService fedModelService;
-	
+
 	@Autowired
 	private IICIPDatasourceService datasourceService;
-	
+
 	@Autowired
 	private ICIPMLFederatedModelsRepository fedModelRepo;
 
 	/** The Constant logger. */
 	private static final Logger logger = LoggerFactory.getLogger(ICIPMlOpsRestAdapterService.class);
 
-	public String callGetMethod(String adaptername, String methodname, String org, Map<String, String> headers,
-			Map<String, String> params) throws ClientProtocolException, IOException, URISyntaxException,
-			NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-		String host = getHostFromHeader(headers);
-		if (host == null || host.isEmpty()) {
-			/* Taking LEAP URL Path as host if referer is not present in the headers */
-			host = referer;
-			logger.info("referer generated:{}", host);
-		} else {
-			logger.info("referer taken from headers:{}", host);
-		}
-		SSLContextBuilder builder = new SSLContextBuilder();
-		builder.loadTrustMaterial(null, new TrustStrategy() {
-			@Override
-			public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-				return true;
-			}
-		});
-		SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
-		CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
-		HttpGet httpGet = new HttpGet(
-				host + icipPathPrefix + "/adapters/" + adaptername + "/" + methodname + "/" + org);
-		for (Map.Entry<String, String> header : headers.entrySet()) {
-			httpGet.addHeader(header.getKey(), header.getValue());
-		}
-		List<NameValuePair> nvpList = new ArrayList<>(params.size());
-		for (Map.Entry<String, String> param : params.entrySet()) {
-			nvpList.add(new BasicNameValuePair(param.getKey(), param.getValue()));
-		}
-		URI paramsUri = new URIBuilder(httpGet.getURI()).addParameters(nvpList).build();
-		httpGet.setURI(paramsUri);
-		return EntityUtils.toString(httpClient.execute(httpGet).getEntity());
-	}
+    // Java
+    public String callGetMethod(String adaptername, String methodname, String org,
+                                Map<String, String> headers,
+                                Map<String, String> params)
+            throws ClientProtocolException, IOException, URISyntaxException,
+            NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 
-	public String callPostMethod(String adaptername, String methodname, String org, Map<String, String> headers,
+        long startTs = System.currentTimeMillis();
+        logger.info("callGetMethod start adapter={} method={} org={} headerCount={} paramCount={}",
+                adaptername, methodname, org,
+                headers != null ? headers.size() : 0,
+                params != null ? params.size() : 0);
+
+        String host = getHostFromHeader(headers);
+        logger.info("Host : {}", host);
+
+        if (host == null || host.isEmpty()) {
+            host = referer;
+            logger.info("Using referer fallback host={}", host);
+        } else {
+            logger.debug("Host from headers host={}", host);
+        }
+
+        SSLContextBuilder builder = new SSLContextBuilder();
+        builder.loadTrustMaterial(null, (X509Certificate[] chain, String authType) -> true);
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
+        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+
+        HttpGet httpGet = new HttpGet(host + icipPathPrefix + "/adapters/" +
+                adaptername + "/" + methodname + "/" + org);
+
+        if (headers != null) {
+            headers.forEach((k, v) -> {
+                httpGet.addHeader(k, v);
+                logger.info("Added header {}={}", k, v);
+            });
+        }
+
+        if (!host.contains("localhost")) {
+            httpGet.addHeader("access-token", "aec127c2-c984-33f6-9a3a-355xd1dof097");
+            logger.info("Remote host detected: {}. Added mandatory access-token header.", host);
+        }
+
+        List<NameValuePair> nvpList = new ArrayList<>(params != null ? params.size() : 0);
+        if (params != null) {
+            params.forEach((k, v) -> {
+                nvpList.add(new BasicNameValuePair(k, v));
+                logger.info("Added param {}={}", k, v);
+            });
+        }
+
+        URI paramsUri = new URIBuilder(httpGet.getURI()).addParameters(nvpList).build();
+        httpGet.setURI(paramsUri);
+        logger.info("Final GET URI={}", paramsUri);
+
+        try (var response = httpClient.execute(httpGet)) {
+            int status = response.getStatusLine().getStatusCode();
+            String body = EntityUtils.toString(response.getEntity());
+            long elapsed = System.currentTimeMillis() - startTs;
+            logger.info("callGetMethod success status={} elapsedMs={}", status, elapsed);
+            logger.info("Response body (truncated to 500 chars): {}",
+                    body.length() > 500 ? body.substring(0, 500) + "..." : body);
+            return body;
+        } catch (IOException e) {
+            long elapsed = System.currentTimeMillis() - startTs;
+            logger.error("callGetMethod failure elapsedMs={} error={}", elapsed, e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    public String callPostMethod(String adaptername, String methodname, String org, Map<String, String> headers,
 			Map<String, String> params, String body) throws ClientProtocolException, IOException, URISyntaxException,
 			NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 		String host = getHostFromHeader(headers);
