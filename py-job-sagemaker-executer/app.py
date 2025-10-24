@@ -43,9 +43,9 @@ submitted_futures = {}
 pause_event = Event()
 
 # os.environ['NO_PROXY'] = 'api.sagemaker.us-east-1.amazonaws'
-os.environ['NO_PROXY'] = 'aiplatform.ad.infosys.com'
-os.environ['http_proxy'] = 'http://blrproxy.ad.infosys.com:80'
-os.environ['https_proxy'] = 'http://blrproxy.ad.infosys.com:80'
+# os.environ['NO_PROXY'] = 'aiplatform.ad.infosys.com'
+# os.environ['http_proxy'] = 'http://blrproxy.ad.infosys.com:80'
+# os.environ['https_proxy'] = 'http://blrproxy.ad.infosys.com:80'
 
 @app.before_request
 def create_database():
