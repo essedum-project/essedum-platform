@@ -56,7 +56,7 @@ def projects_datasets_list_list(adapter_instance, project, isCached, isInstance,
                 )
                            
             # response = s3_client.list_objects(Bucket = "s3-ppcaws2441999-essedum-s3-bucket", Prefix = 'aws_sagemaker', MaxKeys = 4)
-            response = s3_client.list_objects(Bucket = os.environ.get('bucket_name'), MaxKeys = 4)
+            response = s3_client.list_objects(Bucket =  connections.get('bucketName', None), MaxKeys = 4)
 
             dataset_dict_info = []
             for obj in response.get('Contents', []):
@@ -118,7 +118,7 @@ def projects_datasets_get(adapter_instance, project, isCached, isInstance, conne
         
         
             logger.info("Dataset get is in progress")
-            response = s3_client.head_object(Bucket = os.environ.get('bucket_name'),Key = dataset_id)
+            response = s3_client.head_object(Bucket =  connections.get('bucketName', None),Key = dataset_id)
             logger.info("Dataset Details")
             dataset_info = {
                 'sourceID' : dataset_id,
@@ -241,7 +241,7 @@ def projects_datasets_delete(adapter_instance, project, isCached, isInstance, co
                     aws_secret_access_key=secret_key,
                     region_name=region
                 )
-            response = s3_client.delete_object(Bucket = os.environ.get('bucket_name'),Key = dataset_id)
+            response = s3_client.delete_object(Bucket =  connections.get('bucketName', None),Key = dataset_id)
             logger.info("Dataset deleted successfully")
             return {"message": f"Dataset {dataset_id} deleted successfully."}, 200
               
@@ -1302,7 +1302,7 @@ def projects_inferencePipelines_get(adapter_instance, project, isCached, isInsta
                                           )
 
             logger.info("Dataset get is in progress")
-            response = s3_client.head_object(Bucket = os.environ.get('bucket_name'),Key = inference_job_id)
+            response = s3_client.head_object(Bucket =  connections.get('bucketName', None),Key = inference_job_id)
             logger.info("Dataset Details")
 
             dataset_info = {

@@ -107,7 +107,7 @@ def get_connection_details_with_token(referer, adapter_instance, project, isInst
 
 		logger.info(f"The headers are: {str(headers)}")
 
-		response = requests.request("GET", url, headers=headers, data=payload,verify=False)
+		response = requests.request("GET", url, headers=headers, data=payload,verify=False,proxies={})
 		response = json.loads(response.text)
 
 		logger.info(f"The response from url: {str(url)} is: {str(response)}")
