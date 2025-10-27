@@ -102,12 +102,15 @@ def get_connection_details_with_token(referer, adapter_instance, project, isInst
 
 		payload = {}
 		headers = {
-		'access-token': DB_CONNECTIONS[referer].get('TOKEN', '')
+		'access-token': DB_CONNECTIONS[referer].get('TOKEN', ''),
+		'project':'2'
 		}
 
 		logger.info(f"The headers are: {str(headers)}")
 
-		response = requests.request("GET", url, headers=headers, data=payload,verify=False,proxies={})
+		response = requests.request("GET", url, headers=headers, data=payload,verify=True,proxies={})
+		logger.info(f"The response are: {str(response.text)}")
+
 		response = json.loads(response.text)
 
 		logger.info(f"The response from url: {str(url)} is: {str(response)}")
